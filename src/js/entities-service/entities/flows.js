@@ -3,16 +3,8 @@ import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
 
 const TYPE = 'flows';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (!relationship || key === 'owner') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   messages: {
@@ -125,14 +117,12 @@ const _Model = BaseModel.extend({
 
     return this.save(attrs, { relationships }, { wait: true });
   },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
 const Collection = BaseCollection.extend({
   url: '/api/flows',
   model: Model,
-  parseRelationship: _parseRelationship,
   save(attrs) {
     const saves = this.invoke('saveAll', attrs);
 

@@ -22,14 +22,10 @@ export default {
   },
   // Override to handle specific relationships
   parseRelationship(relationship) {
-    if (!relationship) return relationship;
-
-    if (!isArray(relationship)) {
-      return relationship.id;
-    }
+    if (!relationship || !isArray(relationship)) return relationship;
 
     return map(relationship, item => {
-      const itemRelationship = { id: item.id };
+      const itemRelationship = { id: item.id, type: item.type };
 
       if (item.meta) {
         each(item.meta, (value, key) => {

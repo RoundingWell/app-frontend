@@ -6,18 +6,9 @@ import dayjs from 'dayjs';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
-
 import { ACTION_OUTREACH, ACTION_SHARING } from 'js/static';
 
 const TYPE = 'patient-actions';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (!relationship || key === 'owner') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   messages: {
@@ -262,14 +253,12 @@ const _Model = BaseModel.extend({
 
     this.set({ _files: newFilesRelationship });
   },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
 const Collection = BaseCollection.extend({
   url: '/api/actions',
   model: Model,
-  parseRelationship: _parseRelationship,
   save(attrs) {
     const saves = this.invoke('saveAll', attrs);
 

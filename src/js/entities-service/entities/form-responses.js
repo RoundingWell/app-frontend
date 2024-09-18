@@ -4,18 +4,10 @@ import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
 import { alphaSort } from 'js/utils/sorting';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
 
 import { FORM_RESPONSE_STATUS } from 'js/static';
 
 const TYPE = 'form-responses';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (key === 'editor') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   type: TYPE,
@@ -57,14 +49,12 @@ const _Model = BaseModel.extend({
 
     return editor.get('name') || `${ editor.get('first_name') } ${ editor.get('last_name') }`;
   },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
 const Collection = BaseCollection.extend({
   url: '/api/form-responses',
   model: Model,
-  parseRelationship: _parseRelationship,
   comparator(responseA, responseB) {
     return alphaSort('desc', responseA.get('updated_at'), responseB.get('updated_at'));
   },

@@ -3,7 +3,6 @@ import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
 
 import trim from 'js/utils/formatting/trim';
 import collectionOf from 'js/utils/formatting/collection-of';
@@ -12,13 +11,6 @@ import collectionOf from 'js/utils/formatting/collection-of';
 import { STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-flows';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (!relationship || key === 'owner') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   urlRoot() {
@@ -92,14 +84,12 @@ const _Model = BaseModel.extend({
 
     return !!visibleToTeamsList.find(team => team.id === currentUserTeam.id);
   },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
 const Collection = BaseCollection.extend({
   url: '/api/program-flows',
   model: Model,
-  parseRelationship: _parseRelationship,
   filterAddable() {
     const clone = this.clone();
 
