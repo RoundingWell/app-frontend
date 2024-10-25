@@ -43,16 +43,6 @@ export default SubRouterApp.extend({
 
     this.startRoute(currentRoute);
   },
-  _getClinician(clinicianId) {
-    if (!clinicianId) {
-      return Radio.request('entities', 'clinicians:model', {
-        enabled: true,
-        disabled_at: null,
-      });
-    }
-
-    return this.clinicians.get(clinicianId);
-  },
   showSearchView() {
     const searchComponent = this.showChildView('search', new SearchComponent({
       state: {
@@ -68,7 +58,7 @@ export default SubRouterApp.extend({
     });
   },
   showClinicianSidebar(clinicianId) {
-    const clinician = this._getClinician(clinicianId);
+    const clinician = this.clinicians.get(clinicianId);
 
     if (!clinician) {
       Radio.request('alert', 'show:error', notFound);
@@ -83,8 +73,14 @@ export default SubRouterApp.extend({
   onClickAddClinician() {
     this.showAddModal();
   },
+  _getNewClinician() {
+    return Radio.request('entities', 'clinicians:model', {
+      enabled: true,
+      disabled_at: null,
+    });
+  },
   showAddModal() {
-    const clinician = this._getClinician();
+    const clinician = this._getNewClinician();
     const clinicianClone = clinician.clone();
     const clinicianModal = Radio.request('modal', 'show', getClinicianModal({
       clinician: clinicianClone,
