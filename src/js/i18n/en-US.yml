@@ -13,8 +13,6 @@ careOptsFrontend:
           email: clinician@organization.com
           headingText: Add Clinician
           name: Clinician First Last Name
-    cliniciansAllApp:
-      notFound: The Clinician you requested does not exist.
     cliniciansAllViews:
       emptyView: No Clinicians
       emptyFindInListView:
@@ -30,6 +28,7 @@ careOptsFrontend:
         lastActiveHeader: Last Sign In
         title: Clinicians
         workspacesHeader: Workspaces
+      notFound: The Clinician you requested does not exist.
     shared:
       clinicianViews:
         stateComponent:

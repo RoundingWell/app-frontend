@@ -3,11 +3,9 @@ import Radio from 'backbone.radio';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
-import intl from 'js/i18n';
-
 import SearchComponent from 'js/views/shared/components/list-search';
 
-import { ListView, LayoutView } from 'js/views/clinicians/clinicians-all_views';
+import { ListView, LayoutView, notFound } from 'js/views/clinicians/clinicians-all_views';
 import { getClinicianModal } from 'js/views/clinicians/clinician-modal/clinician-modal_views';
 
 export default SubRouterApp.extend({
@@ -73,7 +71,7 @@ export default SubRouterApp.extend({
     const clinician = this._getClinician(clinicianId);
 
     if (!clinician) {
-      Radio.request('alert', 'show:error', intl.clinicians.cliniciansAllApp.notFound);
+      Radio.request('alert', 'show:error', notFound);
       Radio.trigger('event-router', 'clinicians:all');
       return;
     }

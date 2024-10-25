@@ -3,6 +3,8 @@ import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
 import { View, CollectionView, Behavior } from 'marionette';
 
+import intl from 'js/i18n';
+
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
 import PreloadRegion from 'js/regions/preload_region';
@@ -12,6 +14,8 @@ import 'scss/modules/list-pages.scss';
 import 'scss/modules/table-list.scss';
 
 import './clinicians.scss';
+
+const notFound = intl.clinicians.cliniciansAllViews.notFound;
 
 const RowBehavior = Behavior.extend({
   modelEvents: {
@@ -214,4 +218,5 @@ const ListView = CollectionView.extend({
 export {
   LayoutView,
   ListView,
+  notFound,
 };
