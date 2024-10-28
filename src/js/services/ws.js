@@ -32,7 +32,6 @@ export default App.extend({
     this.ws.addEventListener('open', this.onOpen.bind(this, data));
     this.ws.addEventListener('close', this.onClose.bind(this));
     this.ws.addEventListener('message', this.onMessage.bind(this));
-    this.ws.addEventListener('error', this.onError.bind(this));
   },
 
   _subscribe() {
@@ -110,11 +109,6 @@ export default App.extend({
     }
 
     channel.trigger('message', data);
-  },
-
-  onError(event) {
-    // eslint-disable-next-line no-console
-    console.error(event);
   },
 
   subscribe(resources) {
