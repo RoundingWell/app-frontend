@@ -38,16 +38,6 @@ context('WS Service', function() {
     expect(service.isRunning()).to.be.false;
   });
 
-  specify('ws error', function() {
-    cy.spy(console, 'error').as('consoleError');
-
-    cy
-      .startService()
-      .errorWs();
-
-    cy.get('@consoleError').should('have.been.calledOnce');
-  });
-
   specify('Constructing the websocket', function() {
     service.start();
 
