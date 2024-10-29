@@ -27,6 +27,9 @@ const _Model = BaseModel.extend({
     StateChanged({ state, attributes = {} }) {
       this.set({ _state: state.id, ...attributes });
     },
+    ActionDueChanged({ due_date, due_time, attributes = {} }) {
+      this.set({ due_date, due_time, ...attributes });
+    },
   },
   urlRoot() {
     if (this.isNew()) {

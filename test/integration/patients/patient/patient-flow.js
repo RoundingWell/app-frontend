@@ -1,7 +1,8 @@
 import _ from 'underscore';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
-import { testDateAdd, testDateSubtract } from 'helpers/test-date';
+import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
+import formatDate from 'helpers/format-date';
 import { getErrors, getRelationship, mergeJsonApi } from 'helpers/json-api';
 
 import { getFlow } from 'support/api/flows';
@@ -2181,6 +2182,8 @@ context('patient flow page', function() {
     const testSocketAction = getAction({
       attributes: {
         name: 'Action Test',
+        due_date: testDate(),
+        due_time: '06:00:00',
       },
       relationships: {
         flow: getRelationship(testSocketFlow),
@@ -2251,6 +2254,26 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__progress')
       .should('have.value', 0);
+
+    cy.sendWs({
+      category: 'ActionDueChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        due_date: testDateAdd(1),
+        due_time: '07:00:00',
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item')
+      .should($action => {
+        expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
+        expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
+      });
 
     cy.sendWs({
       category: 'StateChanged',
