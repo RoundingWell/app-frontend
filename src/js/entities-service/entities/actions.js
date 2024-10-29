@@ -30,6 +30,9 @@ const _Model = BaseModel.extend({
     ActionDueChanged({ due_date, due_time, attributes = {} }) {
       this.set({ due_date, due_time, ...attributes });
     },
+    ActionDurationChanged({ duration, attributes = {} }) {
+      this.set({ duration, ...attributes });
+    },
   },
   urlRoot() {
     if (this.isNew()) {

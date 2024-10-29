@@ -104,30 +104,67 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
+    const testFlowAction = getAction({
+      attributes: {
+        name: 'Test Action',
+        duration: 10,
+      },
+      relationships: {
+        flow: getRelationship(testFlow),
+        state: getRelationship(stateTodo),
+        owner: getRelationship(teamNurse),
+      },
+    });
+
     cy
       .routesForPatientAction()
       .routeFlow(fx => {
-        fx.data = testFlow;
+        fx.data = mergeJsonApi(testFlow, {
+          relationships: {
+            state: getRelationship(stateTodo),
+          },
+        });
 
         return fx;
       })
-      .routeFlowActions()
+      .routeFlowActions(fx => {
+        fx.data = [testFlowAction];
+
+        return fx;
+      })
       .routeAction(fx => {
-        fx.data = testAction;
+        fx.data = testFlowAction;
 
         return fx;
       })
       .routePatientByFlow()
       .routeActionActivity()
-      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .visit(`/flow/${ testFlow.id }/action/${ testFlowAction.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
+      .wait('@routeFlowActions')
+      .wait('@routeAction');
 
     cy
       .get('.sidebar')
       .find('[data-action-region] .action-sidebar__name')
       .should('contain', 'Test Action');
+
+    cy.sendWs({
+      category: 'ActionDurationChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        duration: 20,
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-duration-region]')
+      .should('contain', '20 mins');
   });
 
   specify('done patient flow action sidebar', function() {
@@ -2204,6 +2241,11 @@ context('patient flow page', function() {
         fx.data = [
           testSocketAction,
         ];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testSocketAction;
 
         return fx;
       })
