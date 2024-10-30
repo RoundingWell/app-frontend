@@ -33,6 +33,9 @@ const _Model = BaseModel.extend({
     ActionDurationChanged({ duration, attributes = {} }) {
       this.set({ duration, ...attributes });
     },
+    NameChanged({ name, attributes = {} }) {
+      this.set({ name, ...attributes });
+    },
   },
   urlRoot() {
     if (this.isNew()) {

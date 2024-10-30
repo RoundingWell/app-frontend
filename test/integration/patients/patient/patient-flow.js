@@ -2244,11 +2244,6 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routeAction(fx => {
-        fx.data = testSocketAction;
-
-        return fx;
-      })
       .routeActionActivity()
       .visit(`/flow/${ testSocketFlow.id }`)
       .wait('@routeFlow')
@@ -2260,6 +2255,58 @@ context('patient flow page', function() {
         getRelationship(testSocketFlow).data,
         getRelationship(testSocketAction).data,
       ]);
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: 'flows',
+        id: testSocketFlow.id,
+      },
+      payload: {
+        name: 'New Flow Name',
+      },
+    });
+
+    cy
+      .get('[data-header-region]')
+      .find('.patient-flow__name')
+      .contains('New Flow Name');
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        name: 'New Action Name',
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .patient__action-name')
+      .contains('New Action Name');
+
+    cy.sendWs({
+      category: 'ActionDueChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        due_date: testDateAdd(1),
+        due_time: '07:00:00',
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item')
+      .should($action => {
+        expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
+        expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
+      });
 
     cy
       .get('.patient-flow__progress')
@@ -2296,26 +2343,6 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__progress')
       .should('have.value', 0);
-
-    cy.sendWs({
-      category: 'ActionDueChanged',
-      resource: {
-        type: 'patient-actions',
-        id: testSocketAction.id,
-      },
-      payload: {
-        due_date: testDateAdd(1),
-        due_time: '07:00:00',
-      },
-    });
-
-    cy
-      .get('.patient-flow__list')
-      .find('.table-list__item')
-      .should($action => {
-        expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
-        expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
-      });
 
     cy.sendWs({
       category: 'StateChanged',

@@ -22,6 +22,9 @@ const _Model = BaseModel.extend({
     StateChanged({ state, attributes = {} }) {
       this.set({ _state: state.id, ...attributes });
     },
+    NameChanged({ name, attributes = {} }) {
+      this.set({ name, ...attributes });
+    },
   },
   urlRoot() {
     if (this.isNew()) return `/api/patients/${ this.get('_patient') }/relationships/flows`;
