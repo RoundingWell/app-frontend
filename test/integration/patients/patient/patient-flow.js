@@ -143,12 +143,31 @@ context('patient flow page', function() {
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
-      .wait('@routeAction');
+      .wait('@routeAction')
+      .wait('@routeActionActivity')
+      .wait('@routeActionComments')
+      .wait('@routeActionFiles');
 
     cy
       .get('.sidebar')
       .find('[data-action-region] .action-sidebar__name')
       .should('contain', 'Test Action');
+
+    cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        details: 'New action details',
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-details-region] .js-input')
+      .should('have.value', 'New action details');
 
     cy.sendWs({
       category: 'ActionDurationChanged',

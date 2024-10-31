@@ -130,11 +130,15 @@ const ActionView = View.extend({
     duration: '[data-duration-region]',
   },
   modelEvents: {
+    'change:details': 'onChangeDetails',
     'change:_state': 'onChangeActionState',
     'change:_owner': 'onChangeOwner',
     'change:due_date': 'onChangeDue',
     'change:due_time': 'onChangeDue',
     'change:duration': 'onChangeDuration',
+  },
+  onChangeDetails() {
+    this.showEditForm();
   },
   onChangeActionState() {
     const isDone = this.model.isDone();
