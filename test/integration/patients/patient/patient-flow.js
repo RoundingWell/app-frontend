@@ -1,7 +1,8 @@
 import _ from 'underscore';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
-import { testDateAdd, testDateSubtract } from 'helpers/test-date';
+import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
+import formatDate from 'helpers/format-date';
 import { getErrors, getRelationship, mergeJsonApi } from 'helpers/json-api';
 
 import { getFlow } from 'support/api/flows';
@@ -103,30 +104,67 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
+    const testFlowAction = getAction({
+      attributes: {
+        name: 'Test Action',
+        duration: 10,
+      },
+      relationships: {
+        flow: getRelationship(testFlow),
+        state: getRelationship(stateTodo),
+        owner: getRelationship(teamNurse),
+      },
+    });
+
     cy
       .routesForPatientAction()
       .routeFlow(fx => {
-        fx.data = testFlow;
+        fx.data = mergeJsonApi(testFlow, {
+          relationships: {
+            state: getRelationship(stateTodo),
+          },
+        });
 
         return fx;
       })
-      .routeFlowActions()
+      .routeFlowActions(fx => {
+        fx.data = [testFlowAction];
+
+        return fx;
+      })
       .routeAction(fx => {
-        fx.data = testAction;
+        fx.data = testFlowAction;
 
         return fx;
       })
       .routePatientByFlow()
       .routeActionActivity()
-      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .visit(`/flow/${ testFlow.id }/action/${ testFlowAction.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
+      .wait('@routeFlowActions')
+      .wait('@routeAction');
 
     cy
       .get('.sidebar')
       .find('[data-action-region] .action-sidebar__name')
       .should('contain', 'Test Action');
+
+    cy.sendWs({
+      category: 'ActionDurationChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        duration: 20,
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-duration-region]')
+      .should('contain', '20 mins');
   });
 
   specify('done patient flow action sidebar', function() {
@@ -2181,6 +2219,8 @@ context('patient flow page', function() {
     const testSocketAction = getAction({
       attributes: {
         name: 'Action Test',
+        due_date: testDate(),
+        due_time: '06:00:00',
       },
       relationships: {
         flow: getRelationship(testSocketFlow),
@@ -2215,6 +2255,58 @@ context('patient flow page', function() {
         getRelationship(testSocketFlow).data,
         getRelationship(testSocketAction).data,
       ]);
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: 'flows',
+        id: testSocketFlow.id,
+      },
+      payload: {
+        name: 'New Flow Name',
+      },
+    });
+
+    cy
+      .get('[data-header-region]')
+      .find('.patient-flow__name')
+      .contains('New Flow Name');
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        name: 'New Action Name',
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .patient__action-name')
+      .contains('New Action Name');
+
+    cy.sendWs({
+      category: 'ActionDueChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        due_date: testDateAdd(1),
+        due_time: '07:00:00',
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item')
+      .should($action => {
+        expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
+        expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
+      });
 
     cy
       .get('.patient-flow__progress')
