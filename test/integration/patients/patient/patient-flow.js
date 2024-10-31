@@ -2273,6 +2273,22 @@ context('patient flow page', function() {
       .contains('New Flow Name');
 
     cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: 'flows',
+        id: testSocketFlow.id,
+      },
+      payload: {
+        details: 'New flow details',
+      },
+    });
+
+    cy
+      .get('[data-header-region]')
+      .find('.patient-flow__details')
+      .contains('New flow details');
+
+    cy.sendWs({
       category: 'NameChanged',
       resource: {
         type: 'patient-actions',
