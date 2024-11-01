@@ -138,6 +138,8 @@ const ActionView = View.extend({
     'change:duration': 'onChangeDuration',
   },
   onChangeDetails() {
+    if (this.isEditingDetails) return;
+
     this.showEditForm();
   },
   onChangeActionState() {
@@ -177,22 +179,30 @@ const ActionView = View.extend({
     this.showDueTime();
     this.showDuration();
   },
-  showSave() {
-    this.showChildView('save', new SaveView({ model: this.clonedAction }));
-  },
   onSave() {
-    this.getRegion('save').empty();
+    this.stopEditingDetails();
   },
   onCancel() {
     this.showEditForm();
   },
   showEditForm() {
     this.cloneAction();
-    this.listenTo(this.clonedAction, 'change:details', this.showSave);
 
-    this.getRegion('save').empty();
+    this.listenTo(this.clonedAction, 'change:details', this.startEditingDetails);
+
+    this.stopEditingDetails();
 
     this.showDetails();
+  },
+  startEditingDetails() {
+    this.isEditingDetails = true;
+
+    this.showChildView('save', new SaveView({ model: this.clonedAction }));
+  },
+  stopEditingDetails() {
+    this.isEditingDetails = false;
+
+    this.getRegion('save').empty();
   },
   showDetails() {
     this.showChildView('details', new DetailsView({ model: this.clonedAction }));
