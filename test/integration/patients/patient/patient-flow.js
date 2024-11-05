@@ -143,12 +143,59 @@ context('patient flow page', function() {
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
-      .wait('@routeAction');
+      .wait('@routeAction')
+      .wait('@routeActionActivity')
+      .wait('@routeActionComments')
+      .wait('@routeActionFiles');
 
     cy
       .get('.sidebar')
       .find('[data-action-region] .action-sidebar__name')
       .should('contain', 'Test Action');
+
+    cy
+      .get('.sidebar')
+      .find('[data-details-region] .js-input')
+      .clear()
+      .type('User manually added details.');
+
+    cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        details: 'New websocket details.',
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-details-region] .js-input')
+      .should('have.value', 'User manually added details.');
+
+    cy
+      .get('.sidebar')
+      .find('[data-save-region]')
+      .contains('Cancel')
+      .click();
+
+    cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        details: 'New websocket details.',
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-details-region] .js-input')
+      .should('have.value', 'New websocket details.');
 
     cy.sendWs({
       category: 'ActionDurationChanged',
@@ -2271,6 +2318,22 @@ context('patient flow page', function() {
       .get('[data-header-region]')
       .find('.patient-flow__name')
       .contains('New Flow Name');
+
+    cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: 'flows',
+        id: testSocketFlow.id,
+      },
+      payload: {
+        details: 'New flow details',
+      },
+    });
+
+    cy
+      .get('[data-header-region]')
+      .find('.patient-flow__details')
+      .contains('New flow details');
 
     cy.sendWs({
       category: 'NameChanged',
