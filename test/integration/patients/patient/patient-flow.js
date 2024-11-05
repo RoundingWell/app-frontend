@@ -153,6 +153,22 @@ context('patient flow page', function() {
       .find('[data-action-region] .action-sidebar__name')
       .should('contain', 'Test Action');
 
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        name: 'New Websocket Name',
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-action-region] .action-sidebar__name')
+      .should('contain', 'New Websocket Name');
+
     cy
       .get('.sidebar')
       .find('[data-details-region] .js-input')

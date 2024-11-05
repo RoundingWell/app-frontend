@@ -16,6 +16,10 @@ import ActionDetailsTemplate from './action-details.hbs';
 
 import './action-sidebar.scss';
 
+const NameView = View.extend({
+  template: hbs`<div class="action-sidebar__name">{{ name }}</div>`,
+});
+
 const SaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
   template: hbs`
@@ -106,7 +110,7 @@ const ActionView = View.extend({
     'cancel': 'cancel',
   },
   template: hbs`
-    <div class="action-sidebar__name">{{ name }}</div>
+    <div data-name-region></div>
     <div class="u-margin--t-8" data-details-region></div>
     <div data-save-region></div>
     <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.actionView.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
@@ -130,12 +134,16 @@ const ActionView = View.extend({
     duration: '[data-duration-region]',
   },
   modelEvents: {
+    'change:name': 'onChangeName',
     'change:details': 'onChangeDetails',
     'change:_state': 'onChangeActionState',
     'change:_owner': 'onChangeOwner',
     'change:due_date': 'onChangeDue',
     'change:due_time': 'onChangeDue',
     'change:duration': 'onChangeDuration',
+  },
+  onChangeName() {
+    this.showName();
   },
   onChangeDetails() {
     if (this.isEditingDetails) return;
@@ -172,6 +180,7 @@ const ActionView = View.extend({
     this.clonedAction = this.model.clone();
   },
   onRender() {
+    this.showName();
     this.showEditForm();
     this.showState();
     this.showOwner();
@@ -184,6 +193,9 @@ const ActionView = View.extend({
   },
   onCancel() {
     this.showEditForm();
+  },
+  showName() {
+    this.showChildView('name', new NameView({ model: this.model }));
   },
   showEditForm() {
     this.cloneAction();
