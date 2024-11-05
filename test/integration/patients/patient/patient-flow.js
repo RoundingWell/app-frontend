@@ -15,6 +15,7 @@ import { testForm } from 'support/api/forms';
 import { stateInProgress, stateDone, stateTodo } from 'support/api/states';
 import { teamCoordinator, teamNurse, teamOther } from 'support/api/teams';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
+import { getComment } from 'support/api/comments';
 
 const tomorrow = testDateAdd(1);
 
@@ -116,6 +117,13 @@ context('patient flow page', function() {
       },
     });
 
+    const testSocketComment = getComment({
+      attributes: {
+        message: 'New websocket comment.',
+        created_at: testTs(),
+      },
+    });
+
     cy
       .routesForPatientAction()
       .routeFlow(fx => {
@@ -134,6 +142,11 @@ context('patient flow page', function() {
       })
       .routeAction(fx => {
         fx.data = testFlowAction;
+
+        return fx;
+      })
+      .routeComment(fx => {
+        fx.data = testSocketComment;
 
         return fx;
       })
@@ -228,6 +241,33 @@ context('patient flow page', function() {
       .get('.sidebar')
       .find('[data-duration-region]')
       .should('contain', '20 mins');
+
+    cy.sendWs({
+      category: 'CommentAdded',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        comment: {
+          type: 'comments',
+          id: testSocketComment.id,
+        },
+        attributes: {
+          message: 'New websocket comment.',
+        },
+      },
+    });
+
+    cy
+      .wait('@routeComment');
+
+    cy
+      .get('.sidebar')
+      .find('[data-activity-region]')
+      .find('.comment__item')
+      .last()
+      .should('contain', 'New websocket comment.');
   });
 
   specify('done patient flow action sidebar', function() {

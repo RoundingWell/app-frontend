@@ -1,3 +1,4 @@
+import { invoke } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
@@ -72,12 +73,27 @@ export default App.extend({
     this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
     this.attachments = attachments;
 
+    this.subscribe();
+
     this.showActivity();
     this.showNewCommentForm();
     this.showAttachments();
+
+    this.listenTo(this.action, {
+      'message': this.onActionMessage,
+    });
   },
   viewEvents: {
     'close': 'stop',
+  },
+  subscribe() {
+    Radio.request('ws', 'subscribe', invoke([this.action], 'getResource'));
+  },
+  onActionMessage({ category, payload }) {
+    if (category !== 'CommentAdded') return;
+
+    const fetchComment = Radio.request('entities', 'fetch:comments:model', payload.comment.id);
+    fetchComment.then(model => this.activityCollection.add(model));
   },
   showAction() {
     if (!this.getState('canEdit')) {

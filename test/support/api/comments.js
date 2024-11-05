@@ -24,6 +24,16 @@ export function getComments({ attributes, relationships, meta } = {}, { sample =
   return _.times(sample, () => getComment({ attributes, relationships, meta }));
 }
 
+Cypress.Commands.add('routeComment', (mutator = _.identity) => {
+  const data = getComment();
+
+  cy
+    .intercept('GET', '/api/comments/*', {
+      body: mutator({ data, included: [] }),
+    })
+    .as('routeComment');
+});
+
 Cypress.Commands.add('routeActionComments', (mutator = _.identity) => {
   const data = getComments();
 
