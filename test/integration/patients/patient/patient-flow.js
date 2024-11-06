@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import { v4 as uuid } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -104,6 +105,8 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
+    const testCreatedAt = testTs();
+
     const testFlowAction = getAction({
       attributes: {
         name: 'Test Action',
@@ -116,8 +119,20 @@ context('patient flow page', function() {
       },
     });
 
+    const testClinician = getClinician({
+      id: '22222',
+      attributes: {
+        name: 'Test Clinician',
+      },
+    });
+
     cy
       .routesForPatientAction()
+      .routeWorkspaceClinicians(fx => {
+        fx.data[1] = testClinician;
+
+        return fx;
+      })
       .routeFlow(fx => {
         fx.data = mergeJsonApi(testFlow, {
           relationships: {
@@ -228,6 +243,38 @@ context('patient flow page', function() {
       .get('.sidebar')
       .find('[data-duration-region]')
       .should('contain', '20 mins');
+
+    cy.sendWs({
+      category: 'CommentAdded',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        comment: {
+          type: 'comments',
+          id: uuid(),
+        },
+        attributes: {
+          message: 'New websocket comment.',
+          created_at: testCreatedAt,
+          edited_at: null,
+        },
+        relationships: {
+          _clinician: testClinician.id,
+        },
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-activity-region]')
+      .find('.comment__item')
+      .last()
+      .should('contain', formatDate(testCreatedAt, 'AT_TIME'))
+      .should('contain', 'Test Clinician')
+      .should('contain', 'New websocket comment.')
+      .should('not.contain', '(Edited)');
   });
 
   specify('done patient flow action sidebar', function() {

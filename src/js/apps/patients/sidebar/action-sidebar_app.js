@@ -41,7 +41,9 @@ export default App.extend({
 
     const flow = this.action.getFlow();
     if (flow) this.listenTo(flow, 'change:_state', this.setAccess);
+
     this.listenTo(action, 'change:_owner', this.onChangeOwner);
+    this.listenTo(action, 'message', this.onWebsocketMessage);
 
     this.showMenu();
     this.showAction();
@@ -62,6 +64,21 @@ export default App.extend({
       Radio.request('entities', 'fetch:comments:collection:byAction', this.action.id),
       Radio.request('entities', 'fetch:files:collection:byAction', this.action.id),
     ];
+  },
+  onWebsocketMessage({ category, payload }) {
+    if (category !== 'CommentAdded') return;
+
+    const { comment, relationships, attributes } = payload;
+
+    const model = Radio.request('entities', 'comments:model', {
+      id: comment.id,
+      message: attributes.message,
+      created_at: attributes.created_at,
+      edited_at: attributes.edited_at,
+      _clinician: relationships._clinician,
+    });
+
+    this.activityCollection.add(model);
   },
   onChangeOwner() {
     this.setAccess();
