@@ -58,7 +58,7 @@ function getSharingOpts(sharing) {
 }
 
 const FormSharingView = View.extend({
-  className: 'sidebar__dialog',
+  className: 'sidebar__dialog u-margin--t-24',
   triggers: {
     'click .js-share': 'click:share',
     'click .js-cancel': 'click:cancelShare',
@@ -102,13 +102,12 @@ const FormLayoutView = View.extend({
       {{#if hasForm}}<h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarFormsViews.formLayoutView.formLabel }}</h4>{{/if}}
       <div class="flex-grow" data-form-region></div>
     </div>
-    <div class="flex{{#if hasSharing}} u-margin--t-24{{/if}}">
+    <div class="flex">
       <div class="flex-grow" data-form-sharing-region></div>
     </div>
   `,
   templateContext() {
     return {
-      hasSharing: this.model.hasSharing(),
       hasForm: !!this.model.getForm(),
     };
   },

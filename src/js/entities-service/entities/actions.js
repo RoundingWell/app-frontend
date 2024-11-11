@@ -39,6 +39,9 @@ const _Model = BaseModel.extend({
     DetailsChanged({ details, attributes = {} }) {
       this.set({ details, ...attributes });
     },
+    SharingUpdated({ attributes }) {
+      this.set(attributes);
+    },
   },
   urlRoot() {
     if (this.isNew()) {
