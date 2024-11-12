@@ -179,7 +179,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        name: 'New Websocket Name',
+        attributes: {
+          name: 'New Websocket Name',
+        },
       },
     });
 
@@ -201,7 +203,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        details: 'New websocket details.',
+        attributes: {
+          details: 'New websocket details.',
+        },
       },
     });
 
@@ -223,7 +227,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        details: 'New websocket details.',
+        attributes: {
+          details: 'New websocket details.',
+        },
       },
     });
 
@@ -239,7 +245,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        duration: 20,
+        attributes: {
+          duration: 20,
+        },
       },
     });
 
@@ -2393,7 +2401,9 @@ context('patient flow page', function() {
         id: testSocketFlow.id,
       },
       payload: {
-        name: 'New Flow Name',
+        attributes: {
+          name: 'New Flow Name',
+        },
       },
     });
 
@@ -2409,7 +2419,9 @@ context('patient flow page', function() {
         id: testSocketFlow.id,
       },
       payload: {
-        details: 'New flow details',
+        attributes: {
+          details: 'New flow details',
+        },
       },
     });
 
@@ -2425,7 +2437,9 @@ context('patient flow page', function() {
         id: testSocketAction.id,
       },
       payload: {
-        name: 'New Action Name',
+        attributes: {
+          name: 'New Action Name',
+        },
       },
     });
 
@@ -2441,8 +2455,10 @@ context('patient flow page', function() {
         id: testSocketAction.id,
       },
       payload: {
-        due_date: testDateAdd(1),
-        due_time: '07:00:00',
+        attributes: {
+          due_date: testDateAdd(1),
+          due_time: '07:00:00',
+        },
       },
     });
 
