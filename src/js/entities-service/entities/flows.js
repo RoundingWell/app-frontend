@@ -22,11 +22,11 @@ const _Model = BaseModel.extend({
     StateChanged({ state, attributes = {} }) {
       this.set({ _state: state.id, ...attributes });
     },
-    NameChanged({ name, attributes = {} }) {
-      this.set({ name, ...attributes });
+    NameChanged({ attributes }) {
+      this.set(attributes);
     },
-    DetailsChanged({ details, attributes = {} }) {
-      this.set({ details, ...attributes });
+    DetailsChanged({ attributes }) {
+      this.set(attributes);
     },
   },
   urlRoot() {

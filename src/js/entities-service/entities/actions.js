@@ -27,17 +27,20 @@ const _Model = BaseModel.extend({
     StateChanged({ state, attributes = {} }) {
       this.set({ _state: state.id, ...attributes });
     },
-    ActionDueChanged({ due_date, due_time, attributes = {} }) {
-      this.set({ due_date, due_time, ...attributes });
+    ActionDueChanged({ attributes }) {
+      this.set(attributes);
     },
-    ActionDurationChanged({ duration, attributes = {} }) {
-      this.set({ duration, ...attributes });
+    ActionDurationChanged({ attributes }) {
+      this.set(attributes);
     },
-    NameChanged({ name, attributes = {} }) {
-      this.set({ name, ...attributes });
+    NameChanged({ attributes }) {
+      this.set(attributes);
     },
-    DetailsChanged({ details, attributes = {} }) {
-      this.set({ details, ...attributes });
+    DetailsChanged({ attributes }) {
+      this.set(attributes);
+    },
+    SharingUpdated({ attributes }) {
+      this.set(attributes);
     },
   },
   urlRoot() {

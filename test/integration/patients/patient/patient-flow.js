@@ -15,6 +15,7 @@ import { testForm } from 'support/api/forms';
 import { stateInProgress, stateDone, stateTodo } from 'support/api/states';
 import { teamCoordinator, teamNurse, teamOther } from 'support/api/teams';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
+import { workspaceOne } from 'support/api/workspaces';
 
 const tomorrow = testDateAdd(1);
 
@@ -104,15 +105,29 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
     const testFlowAction = getAction({
       attributes: {
         name: 'Test Action',
         duration: 10,
+        outreach: 'disabled',
+        sharing: 'disabled',
       },
       relationships: {
         flow: getRelationship(testFlow),
         state: getRelationship(stateTodo),
         owner: getRelationship(teamNurse),
+        form: getRelationship(testForm),
+        patient: getRelationship(testPatient),
       },
     });
 
@@ -137,7 +152,11 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routePatientByFlow()
+      .routePatientByFlow(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
       .routeActionActivity()
       .visit(`/flow/${ testFlow.id }/action/${ testFlowAction.id }`)
       .wait('@routeFlow')
@@ -160,7 +179,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        name: 'New Websocket Name',
+        attributes: {
+          name: 'New Websocket Name',
+        },
       },
     });
 
@@ -182,7 +203,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        details: 'New websocket details.',
+        attributes: {
+          details: 'New websocket details.',
+        },
       },
     });
 
@@ -204,7 +227,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        details: 'New websocket details.',
+        attributes: {
+          details: 'New websocket details.',
+        },
       },
     });
 
@@ -220,7 +245,9 @@ context('patient flow page', function() {
         id: testFlowAction.id,
       },
       payload: {
-        duration: 20,
+        attributes: {
+          duration: 20,
+        },
       },
     });
 
@@ -228,6 +255,51 @@ context('patient flow page', function() {
       .get('.sidebar')
       .find('[data-duration-region]')
       .should('contain', '20 mins');
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .should('be.empty');
+
+    cy.sendWs({
+      category: 'SharingUpdated',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        attributes: {
+          sharing: 'enabled',
+          outreach: 'patient',
+        },
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .find('.action-sidebar__sharing-state')
+      .should('contain', 'Waiting for Response');
+
+    cy.sendWs({
+      category: 'SharingUpdated',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        attributes: {
+          sharing: 'responded',
+          outreach: 'patient',
+        },
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .find('.action-sidebar__sharing-state')
+      .should('contain', 'Response Saved');
   });
 
   specify('done patient flow action sidebar', function() {
@@ -2284,11 +2356,14 @@ context('patient flow page', function() {
         name: 'Action Test',
         due_date: testDate(),
         due_time: '06:00:00',
+        outreach: 'disabled',
+        sharing: 'disabled',
       },
       relationships: {
         flow: getRelationship(testSocketFlow),
         state: getRelationship(stateTodo),
         owner: getRelationship(teamOther),
+        form: getRelationship(testForm),
       },
     });
 
@@ -2326,7 +2401,9 @@ context('patient flow page', function() {
         id: testSocketFlow.id,
       },
       payload: {
-        name: 'New Flow Name',
+        attributes: {
+          name: 'New Flow Name',
+        },
       },
     });
 
@@ -2342,7 +2419,9 @@ context('patient flow page', function() {
         id: testSocketFlow.id,
       },
       payload: {
-        details: 'New flow details',
+        attributes: {
+          details: 'New flow details',
+        },
       },
     });
 
@@ -2358,7 +2437,9 @@ context('patient flow page', function() {
         id: testSocketAction.id,
       },
       payload: {
-        name: 'New Action Name',
+        attributes: {
+          name: 'New Action Name',
+        },
       },
     });
 
@@ -2374,8 +2455,10 @@ context('patient flow page', function() {
         id: testSocketAction.id,
       },
       payload: {
-        due_date: testDateAdd(1),
-        due_time: '07:00:00',
+        attributes: {
+          due_date: testDateAdd(1),
+          due_time: '07:00:00',
+        },
       },
     });
 
@@ -2386,6 +2469,30 @@ context('patient flow page', function() {
         expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
         expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
       });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .patient__action-icon')
+      .find('.fa-file-lines');
+
+    cy.sendWs({
+      category: 'SharingUpdated',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          sharing: 'pending',
+          outreach: 'patient',
+        },
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .patient__action-icon')
+      .find('.fa-share-from-square');
 
     cy
       .get('.patient-flow__progress')
