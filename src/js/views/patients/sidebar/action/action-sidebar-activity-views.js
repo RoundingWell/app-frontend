@@ -264,6 +264,9 @@ const TimestampsView = View.extend({
       createdAt: this.getOption('createdEvent').get('date'),
     };
   },
+  modelEvents: {
+    'change:updated_at': 'render',
+  },
 });
 
 export {

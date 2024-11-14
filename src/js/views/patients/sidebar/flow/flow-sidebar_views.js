@@ -76,6 +76,7 @@ const LayoutView = View.extend({
   modelEvents: {
     'change:_state': 'showOwner',
     'change:_owner': 'showFlow',
+    'change:updated_at': 'showTimestamps',
   },
   onAttach() {
     animSidebar(this.el);
