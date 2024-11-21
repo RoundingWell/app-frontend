@@ -45,9 +45,11 @@ export default App.extend({
     this.initRouter(ProgramsMainApp);
     this.initFormsApp(FormsApp);
 
-    // Handles the route after the async app-frame start
-    defer(() => {
+    new Promise(resolve => {
+      _TEST_ ? resolve() : defer(resolve);
+    }).then(() => {
       Backbone.history.loadUrl();
+
       if (!some(this.routers, router => router.isRunning())) {
         Radio.trigger('event-router', 'notFound');
       }

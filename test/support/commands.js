@@ -95,15 +95,7 @@ Cypress.Commands.add('visitOnClock', (url, options = {}) => {
 
   cy.clock(dayjs(options.now || dayjs()).valueOf(), options.functionNames);
 
-  /* eslint-disable-next-line cypress/no-assigning-return-values */
-  const ctx = cy.visit(url, options);
-
-  // NOTE: this is a hack to fix the clock around defer around Backbone.history.loadUrl
-  cy
-    .wait(200)
-    .tick(1);
-
-  return ctx;
+  return cy.visit(url, options);
 });
 
 Cypress.Commands.add('navigate', (url, workspace = 'one') => {
