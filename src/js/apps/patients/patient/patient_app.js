@@ -45,8 +45,8 @@ export default SubRouterApp.extend({
     ];
   },
 
+  /* istanbul ignore next: error handling */
   onFail({ currentRoute: { eventArgs: [patientId] } }, { response = {}, responseData = {} }) {
-    /* istanbul ignore else: other error scenarios handled elsewhere */
     if (response.status === 410) {
       if (!some(responseData.errors, error => {
         return get(error, ['source', 'parameter']) === 'actionId';
@@ -80,6 +80,7 @@ export default SubRouterApp.extend({
 
   onStop() {
     delete this._list;
+    delete this.action;
   },
 
   startList(list) {

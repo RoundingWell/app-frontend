@@ -337,6 +337,35 @@ context('clinician sidebar', function() {
       .should('contain', 'Admin');
   });
 
+  specify('incomplete clinician', function() {
+    const incompleteClinician = getClinician({
+      id: uuid(),
+      attributes: {
+        name: 'Test Clinician',
+        email: 'test.clinician@roundingwell.com',
+        last_active_at: null,
+      },
+      relationships: {
+        team: getRelationship(),
+        workspaces: getRelationship(),
+        role: getRelationship(roleEmployee),
+      },
+    });
+
+    cy
+      .routeClinicians(fx => {
+        fx.data = [incompleteClinician];
+
+        return fx;
+      })
+      .visit(`/clinicians/${ incompleteClinician.id }`)
+      .wait('@routeClinicians');
+
+    cy
+      .get('.sidebar')
+      .find('.sidebar__info');
+  });
+
   specify('never active clinician', function() {
     const inactiveClinician = getClinician({
       id: uuid(),

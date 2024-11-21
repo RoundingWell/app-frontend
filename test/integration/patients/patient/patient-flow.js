@@ -1559,6 +1559,14 @@ context('patient flow page', function() {
       .find('.js-select')
       .click();
 
+    cy
+      .get('@firstRow')
+      .should('not.have.class', 'is-selected');
+
+    cy
+      .get('@firstRow')
+      .find('.js-select')
+      .click();
 
     cy
       .routeAction(fx => {
@@ -1593,7 +1601,7 @@ context('patient flow page', function() {
 
     cy
       .get('@firstRow')
-      .should('not.have.class', 'is-selected');
+      .should('have.class', 'is-selected');
 
     cy
       .get('[data-header-region]')
@@ -1623,6 +1631,10 @@ context('patient flow page', function() {
       .next()
       .find('.js-bulk-edit')
       .should('not.exist');
+
+    cy
+      .get('@firstRow')
+      .should('not.have.class', 'is-selected');
 
     cy
       .get('[data-header-region]')

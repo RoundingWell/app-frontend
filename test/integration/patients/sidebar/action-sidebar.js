@@ -669,6 +669,15 @@ context('action sidebar', function() {
       .should('contain', 'Due Time cleared')
       .should('contain', 'Form shared with Test Patient. Waiting for response.')
       .should('contain', 'Form sharing (Nurse) cancelled');
+
+    cy
+      .get('.sidebar')
+      .find('.js-close')
+      .click();
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
   });
 
   specify('action attachments', function() {

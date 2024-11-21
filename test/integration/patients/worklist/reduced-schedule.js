@@ -157,6 +157,26 @@ context('reduced schedule page', function() {
       .get('@scheduleList')
       .find('.schedule-list__list-row')
       .first()
+      .find('.js-patient-sidebar-button')
+      .click()
+      .wait('@routePatient');
+  
+    cy
+      .get('.worklist-patient-sidebar')
+      .should('contain', 'First Last');
+  
+    cy
+      .get('.worklist-patient-sidebar .js-close')
+      .click();
+  
+    cy
+      .get('.worklist-patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('@scheduleList')
+      .find('.schedule-list__list-row')
+      .first()
       .find('.schedule-list__day-list-row')
       .should('have.class', 'is-reduced')
       .click();

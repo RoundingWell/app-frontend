@@ -283,7 +283,7 @@ export default App.extend({
 
     this.listenTo(sidebarApp, 'close', () => {
       sidebarApp.stop();
-      if (this.getState('isExpanded')) return;
+
       this.setState('isActionSidebar', false);
     });
   },

@@ -9,7 +9,7 @@ import 'scss/domain/patient-sidebar.scss';
 import './patient-sidebar.scss';
 
 const sidebarOptions = {
-  className: 'worklist-patient-sidebar flex',
+  className: 'worklist-patient-sidebar flex-region',
 };
 
 const SidebarWidgetsView = WidgetCollectionView.extend({

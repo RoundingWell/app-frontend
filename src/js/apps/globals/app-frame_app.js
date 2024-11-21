@@ -46,6 +46,7 @@ export default App.extend({
     this.initFormsApp(FormsApp);
 
     new Promise(resolve => {
+      /* istanbul ignore next: Branch only for testing */
       _TEST_ ? resolve() : defer(resolve);
     }).then(() => {
       Backbone.history.loadUrl();

@@ -77,6 +77,7 @@ context('schedule page', function() {
         },
       },
       {
+        id: '3',
         attributes: {
           name: 'Second Action',
           details: null,
@@ -86,10 +87,12 @@ context('schedule page', function() {
         relationships: {
           patient: getRelationship(testPatient1),
           form: getRelationship(),
+          flow: getRelationship(testFlow),
           state: getRelationship(stateInProgress),
         },
       },
       {
+        id: '4',
         attributes: {
           name: 'Third Action',
           due_date: testDate(),
@@ -98,8 +101,7 @@ context('schedule page', function() {
         relationships: {
           patient: getRelationship(testPatient1),
           form: getRelationship(),
-          flow: getRelationship(testFlow),
-          state: getRelationship(stateInProgress),
+          state: getRelationship(stateDone),
         },
       },
     ];
@@ -215,7 +217,13 @@ context('schedule page', function() {
       .find('tr')
       .eq(2)
       .should('contain', '2:00 PM')
-      .should('contain', 'Third Action');
+      .should('contain', 'Third Action')
+      .click();
+
+    cy
+      .url()
+      .should('contain', 'patient/archive/1/action/4')
+      .go('back');
 
     cy
       .get('@actionList')
