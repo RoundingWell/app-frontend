@@ -3,9 +3,9 @@ import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import intl from 'js/i18n';
+import 'scss/modules/sidebar.scss';
 
-import { animSidebar } from 'js/anim';
+import intl from 'js/i18n';
 
 import PreloadRegion from 'js/regions/preload_region';
 
@@ -19,6 +19,7 @@ import FlowSidebarTemplate from './flow-sidebar.hbs';
 import './flow-sidebar.scss';
 
 const i18n = intl.patients.sidebar.flow.flowSidebarViews;
+const headingText = i18n.headingText;
 
 const TimestampsView = View.extend({
   className: 'sidebar__footer flex',
@@ -35,6 +36,25 @@ const MenuView = View.extend({
   triggers: {
     'click': 'click',
   },
+  onClick() {
+    const menuOptions = new Backbone.Collection([
+      {
+        onSelect: bind(this.triggerMethod, this, 'delete'),
+      },
+    ]);
+
+    const optionlist = new Optionlist({
+      ui: this.$el,
+      uiView: this,
+      headingText: i18n.layoutView.headingText,
+      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.sidebar.flow.flowSidebarViews.layoutView.delete }}</span>`,
+      lists: [{ collection: menuOptions }],
+      align: 'right',
+      popWidth: 248,
+    });
+
+    optionlist.show();
+  },
 });
 
 const PermissionView = View.extend({
@@ -47,15 +67,9 @@ const PermissionView = View.extend({
   `,
 });
 
-const LayoutView = View.extend({
-  childViewTriggers: {
-    'save': 'save',
-    'cancel': 'cancel',
-  },
-  className: 'sidebar flex-region',
+const SidebarView = View.extend({
   template: FlowSidebarTemplate,
   regions: {
-    menu: '[data-menu-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     permission: '[data-permission-region]',
@@ -64,9 +78,6 @@ const LayoutView = View.extend({
       regionClass: PreloadRegion,
     },
     timestamps: '[data-timestamps-region]',
-  },
-  triggers: {
-    'click .js-close': 'close',
   },
   templateContext() {
     return {
@@ -78,55 +89,19 @@ const LayoutView = View.extend({
     'change:_owner': 'showFlow',
     'change:updated_at': 'showTimestamps',
   },
-  onAttach() {
-    animSidebar(this.el);
-  },
   onRender() {
     this.showFlow();
-    this.showTimestamps();
+    this.getRegion('activity').startPreloader();
   },
   showFlow() {
     this.canEdit = this.model.canEdit();
-    this.canDelete = this.model.canDelete();
 
     this.showActions();
-    this.showMenu();
   },
   showActions() {
     this.showState();
     this.showOwner();
     this.showPermission();
-  },
-  showMenu() {
-    if (!this.canDelete) {
-      this.getRegion('menu').empty();
-      return;
-    }
-
-    const menuView = new MenuView();
-
-    this.listenTo(menuView, 'click', this.onClickMenu);
-
-    this.showChildView('menu', menuView);
-  },
-  onClickMenu(view) {
-    const menuOptions = new Backbone.Collection([
-      {
-        onSelect: bind(this.triggerMethod, this, 'delete'),
-      },
-    ]);
-
-    const optionlist = new Optionlist({
-      ui: view.$el,
-      uiView: this,
-      headingText: i18n.layoutView.headingText,
-      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.sidebar.flow.flowSidebarViews.layoutView.delete }}</span>`,
-      lists: [{ collection: menuOptions }],
-      align: 'right',
-      popWidth: 248,
-    });
-
-    optionlist.show();
   },
   showState() {
     if (!this.canEdit) {
@@ -167,9 +142,6 @@ const LayoutView = View.extend({
 
     this.showChildView('owner', ownerComponent);
   },
-  showTimestamps() {
-    this.showChildView('timestamps', new TimestampsView({ model: this.model }));
-  },
   showPermission() {
     if (this.canEdit) {
       this.getRegion('permission').empty();
@@ -186,5 +158,8 @@ function getDeleteModal(opts) {
 
 export {
   getDeleteModal,
-  LayoutView,
+  SidebarView,
+  TimestampsView,
+  headingText,
+  MenuView,
 };

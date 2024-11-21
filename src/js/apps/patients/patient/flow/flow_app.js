@@ -10,6 +10,7 @@ import StateModel from './flow_state';
 
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import FlowSiderbarApp from 'js/apps/patients/sidebar/flow-sidebar_app';
 import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 
 
@@ -24,9 +25,12 @@ export default SubRouterApp.extend({
     actionSidebar: ActionSiderbarApp,
     patient: PatientSidebarApp,
     bulkEditActions: BulkEditActionsApp,
+    flowSidebar: FlowSiderbarApp,
   },
   eventRoutes: {
+    'flow': 'hideSidebar',
     'flow:action': 'showActionSidebar',
+    'flow:details': 'showFlowDetails',
   },
   stateEvents: {
     'change:actionsSelected': 'onChangeSelected',
@@ -89,6 +93,7 @@ export default SubRouterApp.extend({
     this.startRoute(currentRoute);
   },
   hideSidebar() {
+    this.stopChildApp('flowSidebar');
     this.stopChildApp('actionSidebar');
   },
   subscribe() {
@@ -304,6 +309,16 @@ export default SubRouterApp.extend({
   },
 
   onEditFlow() {
-    Radio.request('sidebar', 'start', 'flow', { flow: this.flow });
+    Radio.trigger('event-router', 'flow:details', this.flow.id);
+  },
+
+  showFlowDetails() {
+    const sidebarApp = this.getChildApp('flowSidebar');
+
+    Radio.request('sidebar', 'start', sidebarApp, { flow: this.flow });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      Radio.trigger('event-router', 'flow', this.flow.id);
+    });
   },
 });

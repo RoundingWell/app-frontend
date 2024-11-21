@@ -47,6 +47,10 @@ export default RouterApp.extend({
       action: 'showFlow',
       route: 'flow/:id',
     },
+    'flow:details': {
+      action: 'showFlow',
+      route: 'flow/:id/details',
+    },
     'flow:action': {
       action: 'showFlow',
       route: 'flow/:id/action/:id',

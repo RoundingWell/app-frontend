@@ -179,6 +179,8 @@ const ActionItemView = View.extend({
     Radio.trigger('event-router', 'flow:action', this.model.get('_flow'), this.model.id);
   },
   onEditing(isEditing) {
+    this.isEditing = isEditing;
+
     const isSelected = this.state.isSelected(this.model);
 
     if (isSelected) return;
@@ -202,9 +204,7 @@ const ActionItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    const isBeingEdited = this.state.isBeingEdited(this.model);
-
-    if (isBeingEdited) return;
+    if (this.isEditing) return;
 
     this.$el.toggleClass('is-selected', isSelected);
   },

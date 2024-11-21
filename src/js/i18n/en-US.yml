@@ -588,7 +588,6 @@ careOptsFrontend:
             teamAssigned: '<strong>Owner</strong> changed to { to_team }'
         flowSidebarTemplate:
           activityHeadingText: Activity Log
-          headingText: Flow
           noDetails: No details
           ownerLabel: Owner
           stateLabel: State
@@ -597,6 +596,7 @@ careOptsFrontend:
             bodyText: Are you sure you want to delete this flow? All actions on this flow will also be deleted. This cannot be undone.
             headingText: Confirm Delete
             submitText: Delete Flow
+          headingText: Flow
           layoutView:
             delete: Delete Flow
             headingText: Flow Menu
