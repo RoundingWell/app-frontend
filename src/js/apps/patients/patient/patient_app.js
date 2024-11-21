@@ -41,12 +41,25 @@ export default SubRouterApp.extend({
     return Radio.request('entities', 'fetch:patients:model', patientId);
   },
 
-  onFail(options, { response }) {
+  onFail({ currentRoute: { eventArgs: [patientId] } }, { response = {}, responseData = {} }) {
     /* istanbul ignore else: other error scenarios handled elsewhere */
     if (response.status === 410) {
-      Radio.trigger('event-router', 'notFound');
+      if (!some(responseData.errors, error => {
+        return get(error, ['source', 'parameter']) === 'actionId';
+      })) {
+        Radio.trigger('event-router', 'notFound');
+        this.stop();
+        return;
+      }
+
+      Radio.request('alert', 'show:error', intl.actionNotFound);
       this.stop();
+      Radio.trigger('event-router', 'patient:dashboard', patientId);
+      return;
     }
+
+    /* eslint-disable no-console */
+    console.error(arguments);
   },
 
   onStart({ currentRoute }, patient) {

@@ -1428,11 +1428,11 @@ context('action sidebar', function() {
     cy
       .routesForPatientDashboard()
       .intercept('GET', '/api/actions/1*', {
-        statusCode: 404,
+        statusCode: 410,
         body: {
           errors: [{
             id: '1',
-            status: '404',
+            status: '410',
             title: 'Not Found',
             detail: 'Cannot find action',
             source: { parameter: 'actionId' },

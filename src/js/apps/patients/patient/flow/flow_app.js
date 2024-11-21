@@ -44,9 +44,16 @@ export default SubRouterApp.extend({
       Radio.request('entities', 'fetch:patients:model:byFlow', flowId),
     ];
   },
-  onFail() {
-    Radio.trigger('event-router', 'notFound');
-    this.stop();
+  onFail(options, { response = {} }) {
+    /* istanbul ignore else: other error scenarios handled elsewhere */
+    if (response.status === 410) {
+      Radio.trigger('event-router', 'notFound');
+      this.stop();
+      return;
+    }
+    
+    /* eslint-disable no-console */
+    console.error(arguments);
   },
   onStart({ currentRoute }, flow, actions, patient) {
     this.flow = flow;
