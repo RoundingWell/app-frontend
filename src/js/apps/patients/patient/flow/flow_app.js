@@ -8,9 +8,10 @@ import SubRouterApp from 'js/base/subrouterapp';
 
 import StateModel from './flow_state';
 
-import ActionApp from 'js/apps/patients/patient/action/action_app';
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
+
 
 import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView } from 'js/views/patients/patient/flow/flow_views';
 import { BulkEditButtonView, BulkEditActionsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
@@ -20,7 +21,7 @@ export default SubRouterApp.extend({
   StateModel,
   routerAppName: 'FlowApp',
   childApps: {
-    action: ActionApp,
+    actionSidebar: ActionSiderbarApp,
     patient: PatientSidebarApp,
     bulkEditActions: BulkEditActionsApp,
   },
@@ -86,6 +87,9 @@ export default SubRouterApp.extend({
     });
 
     this.startRoute(currentRoute);
+  },
+  hideSidebar() {
+    this.stopChildApp('actionSidebar');
   },
   subscribe() {
     Radio.request('ws', 'subscribe', invoke([this.flow, ...this.actions.models], 'getResource'));
@@ -286,19 +290,17 @@ export default SubRouterApp.extend({
   },
 
   showActionSidebar(flowId, actionId) {
-    const actionApp = this.getChildApp('action');
+    const sidebarApp = this.getChildApp('actionSidebar');
 
-    this.listenToOnce(actionApp, {
-      'start'(options, action) {
-        this.setState('actionBeingEdited', action.id);
-        action.trigger('editing', true);
-      },
-      'stop'() {
-        this.setState('actionBeingEdited', null);
-      },
+    sidebarApp.stop();
+
+    const action = Radio.request('entities', 'actions:model', actionId);
+
+    Radio.request('sidebar', 'start', sidebarApp, { action });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      Radio.trigger('event-router', 'flow', flowId);
     });
-
-    this.startChildApp('action', { actionId });
   },
 
   onEditFlow() {

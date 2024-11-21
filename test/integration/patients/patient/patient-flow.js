@@ -149,11 +149,6 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routeAction(fx => {
-        fx.data = testFlowAction;
-
-        return fx;
-      })
       .routePatientByFlow(fx => {
         fx.data = testPatient;
 
@@ -164,7 +159,6 @@ context('patient flow page', function() {
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
-      .wait('@routeAction')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
       .wait('@routeActionFiles');
@@ -319,9 +313,13 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routeFlowActions()
       .routeAction(fx => {
         fx.data = testAction;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [testAction];
 
         return fx;
       })
@@ -785,13 +783,6 @@ context('patient flow page', function() {
       .as('routePostAction');
 
     cy
-      .routeAction(fx => {
-        fx.data = conditionalAction;
-
-        return fx;
-      });
-
-    cy
       .get('.patient-flow__actions')
       .contains('Add')
       .click();
@@ -825,7 +816,6 @@ context('patient flow page', function() {
       });
 
     cy
-      .wait('@routeAction')
       .url()
       .should('contain', `flow/${ testFlow.id }/action/${ conditionalAction.id }`);
 
@@ -1524,6 +1514,7 @@ context('patient flow page', function() {
           },
           relationships: {
             state: getRelationship(stateInProgress),
+            actions: getRelationship(testFlowActions),
           },
         });
 
@@ -1568,14 +1559,6 @@ context('patient flow page', function() {
       .find('.js-select')
       .click();
 
-    cy
-      .get('@firstRow')
-      .should('not.have.class', 'is-selected');
-
-    cy
-      .get('@firstRow')
-      .find('.js-select')
-      .click();
 
     cy
       .routeAction(fx => {
@@ -1604,13 +1587,13 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('[data-sidebar-region]')
+      .get('[data-app-sidebar-region]')
       .find('.js-close')
       .click();
 
     cy
       .get('@firstRow')
-      .should('have.class', 'is-selected');
+      .should('not.have.class', 'is-selected');
 
     cy
       .get('[data-header-region]')
@@ -1640,10 +1623,6 @@ context('patient flow page', function() {
       .next()
       .find('.js-bulk-edit')
       .should('not.exist');
-
-    cy
-      .get('@firstRow')
-      .should('not.have.class', 'is-selected');
 
     cy
       .get('[data-header-region]')
@@ -2030,7 +2009,8 @@ context('patient flow page', function() {
       .visitOnClock(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
+      .wait('@routeFlowActions')
+      .wait('@routeWorkspacePatient');
 
     cy
       .tick(60) // tick past debounce

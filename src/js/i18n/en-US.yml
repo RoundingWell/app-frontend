@@ -244,8 +244,6 @@ careOptsFrontend:
           patient: Patient
   patients:
     patient:
-      actionApp:
-        notFound: The Action you requested does not exist.
       archive:
         archiveViews:
           archiveBtn: Archive
@@ -263,6 +261,7 @@ careOptsFrontend:
         contextBackBtn: Back to List
         emptyView: No Actions
       patientViews:
+        actionNotFound: The Action you requested does not exist.
         contextBackBtn: Back to List
       sidebar:
         sidebarApp:
@@ -450,12 +449,6 @@ careOptsFrontend:
       action:
         actionDetailsTemplate:
           placeholder: Add Details
-        actionSidebarTemplate:
-          headingText: |
-            {outreach, select,
-              disabled {Action}
-              other {Outreach Action}
-            }
         actionSidebarActionViews:
           actionView:
             dueDayLabel: Due
@@ -489,6 +482,12 @@ careOptsFrontend:
           formLayoutView:
             formLabel: Form
         actionSidebarViews:
+          headingView:
+            headingText: |
+              {outreach, select,
+                disabled {Action}
+                other {Outreach Action}
+              }
           menuView:
             menuOptions:
               delete: Delete Action

@@ -7,14 +7,27 @@ import 'scss/modules/sidebar.scss';
 
 import intl from 'js/i18n';
 
-import { animSidebar } from 'js/anim';
-
 import PreloadRegion from 'js/regions/preload_region';
 
 import Optionlist from 'js/components/optionlist';
-import ActionSidebarTemplate from './action-sidebar.hbs';
 
 import './action-sidebar.scss';
+
+const HeadingView = View.extend({
+  template: hbs`{{formatMessage (intlGet "patients.sidebar.action.actionSidebarViews.headingView.headingText") outreach=outreach}}`,
+});
+
+const FooterView = View.extend({
+  className: 'flex-grow',
+  template: hbs`
+    <div class="u-margin--t-16" data-comment-region></div>
+    <div data-timestamps-region></div>
+  `,
+  regions: {
+    timestamps: '[data-timestamps-region]',
+    comment: '[data-comment-region]',
+  },
+});
 
 const MenuView = View.extend({
   tagName: 'button',
@@ -44,11 +57,15 @@ const MenuView = View.extend({
   },
 });
 
-const LayoutView = View.extend({
-  className: 'sidebar flex-region',
-  template: ActionSidebarTemplate,
+const SidebarView = View.extend({
+  className: 'flex-grow',
+  template: hbs`
+    <div data-action-region></div>
+    <div data-form-region></div>
+    <div data-attachments-region></div>
+    <div class="action-sidebar__activity" data-activity-region></div>
+  `,
   regions: {
-    menu: '[data-menu-region]',
     action: '[data-action-region]',
     form: {
       el: '[data-form-region]',
@@ -59,18 +76,12 @@ const LayoutView = View.extend({
       regionClass: PreloadRegion,
     },
     attachments: '[data-attachments-region]',
-    timestamps: '[data-timestamps-region]',
-    comment: '[data-comment-region]',
-  },
-  triggers: {
-    'click .js-close': 'close',
-  },
-  onAttach() {
-    animSidebar(this.el);
   },
 });
 
 export {
-  LayoutView,
+  SidebarView,
+  HeadingView,
   MenuView,
+  FooterView,
 };

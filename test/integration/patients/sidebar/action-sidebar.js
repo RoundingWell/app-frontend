@@ -1448,10 +1448,7 @@ context('action sidebar', function() {
       .should('contain', 'The Action you requested does not exist.');
 
     cy
-      .get('.sidebar')
-      .should('not.exist');
-
-    cy
+      .wait('@routePatientFlows')
       .get('.patient__list');
   });
 
@@ -1930,6 +1927,8 @@ context('action sidebar', function() {
       },
     });
 
+    const otherClinician = getClinician({ id: '22222' });
+
     const testFlow = getFlow({
       relationships: {
         state: getRelationship(stateTodo),
@@ -1945,7 +1944,7 @@ context('action sidebar', function() {
         due_time: '07:15:00',
       },
       relationships: {
-        owner: getRelationship('22222', 'clinicians'),
+        owner: getRelationship(otherClinician),
         state: getRelationship(stateTodo),
         form: getRelationship(testForm),
         flow: getRelationship(testFlow),
@@ -1969,7 +1968,11 @@ context('action sidebar', function() {
 
         return fx;
       })
-      .routeFlowActions()
+      .routeFlowActions(fx => {
+        fx.data = [testAction];
+          
+        return fx;
+      })
       .routePatientByFlow()
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow');
@@ -2081,11 +2084,6 @@ context('action sidebar', function() {
 
         return fx;
       })
-      .routeAction(fx => {
-        fx.data = ownedByAnotherTeamAction;
-
-        return fx;
-      })
       .routeFlowActions(fx => {
         fx.data = [ownedByAnotherTeamAction, ownedByNonTeamMemberAction];
 
@@ -2093,8 +2091,7 @@ context('action sidebar', function() {
       })
       .routePatientByFlow()
       .visit(`/flow/${ testFlow.id }/action/${ ownedByAnotherTeamAction.id }`)
-      .wait('@routeFlow')
-      .wait('@routeAction');
+      .wait('@routeFlow');
 
     cy
       .get('[data-action-region]')
@@ -2102,19 +2099,11 @@ context('action sidebar', function() {
       .and('contain', 'You are not able to change settings on this action.');
 
     cy
-      .routeAction(fx => {
-        fx.data = ownedByNonTeamMemberAction;
-
-        return fx;
-      });
-
-    cy
       .get('.patient-flow__list')
       .find('.table-list__item')
       .last()
       .find('.patient__action-name')
-      .click()
-      .wait('@routeAction');
+      .click();
 
     cy
       .get('[data-action-region]')

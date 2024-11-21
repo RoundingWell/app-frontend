@@ -1,14 +1,14 @@
-import { partial } from 'underscore';
+import { partial, some, get } from 'underscore';
 import Radio from 'backbone.radio';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
 import DashboardApp from 'js/apps/patients/patient/dashboard/dashboard_app';
 import ArchiveApp from 'js/apps/patients/patient/archive/archive_app';
-import ActionApp from 'js/apps/patients/patient/action/action_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 
-import { LayoutView } from 'js/views/patients/patient/patient_views';
+import { LayoutView, intl } from 'js/views/patients/patient/patient_views';
 
 export default SubRouterApp.extend({
   eventRoutes() {
@@ -23,7 +23,7 @@ export default SubRouterApp.extend({
   childApps: {
     dashboard: DashboardApp,
     archive: ArchiveApp,
-    action: ActionApp,
+    actionSidebar: ActionSiderbarApp,
     patient: PatientSidebarApp,
   },
 
@@ -38,8 +38,11 @@ export default SubRouterApp.extend({
     this.getRegion().startPreloader();
   },
 
-  beforeStart({ patientId }) {
-    return Radio.request('entities', 'fetch:patients:model', patientId);
+  beforeStart({ currentRoute: { eventArgs: [patientId, actionId] } }) {
+    return [
+      Radio.request('entities', 'fetch:patients:model', patientId),
+      actionId && Radio.request('entities', 'fetch:actions:model', actionId),
+    ];
   },
 
   onFail({ currentRoute: { eventArgs: [patientId] } }, { response = {}, responseData = {} }) {
@@ -75,39 +78,38 @@ export default SubRouterApp.extend({
     this.showView();
   },
 
-  startPatientAction(patientId, actionId) {
-    const actionApp = this.getChildApp('action');
-
-    this.listenToOnce(actionApp, {
-      'start'(options, action) {
-        this.editActionList(action);
-      },
-      'fail'() {
-        this.startCurrent('dashboard');
-      },
-    });
-
-    this.startChildApp('action', { actionId, patientId });
+  onStop() {
+    delete this._list;
   },
 
-  startActionList(action) {
-    if (action.isDone()) return this.startCurrent('archive');
+  startList(list) {
+    if (this._list === list) return;
 
-    return this.startCurrent('dashboard');
-  },
+    this._list = list;
 
-  // Triggers event on started action list for marking the edited action
-  editActionList(action) {
-    const currentActionList = this.getCurrent() || this.startActionList(action);
+    this.startCurrent(list);
 
-    if (!currentActionList.isRunning()) {
-      this.listenToOnce(currentActionList, 'start', () => {
-        action.trigger('editing', true);
+    if (this.action) {
+      this.listenToOnce(this.getChildApp(list), 'start', () => {
+        this.action.trigger('editing', true);
       });
-      return;
     }
+  },
 
-    action.trigger('editing', true);
+  startPatientAction(list, patientId, actionId) {
+    this.action = Radio.request('entities', 'actions:model', actionId);
+
+    this.startList(list);
+
+    const sidebarApp = this.getChildApp('actionSidebar');
+
+    sidebarApp.stop();
+
+    Radio.request('sidebar', 'start', sidebarApp, { action: this.action });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      Radio.trigger('event-router', `patient:${ list }`, patientId);
+    });
   },
 
   showSidebar() {
