@@ -3523,7 +3523,7 @@ context('worklist page', function() {
       .click();
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.app-frame__sidebar .worklist-patient-sidebar')
       .as('patientSidebar')
       .find('.worklist-patient-sidebar__patient-name')
       .should('contain', 'Test Patient')
@@ -3544,13 +3544,12 @@ context('worklist page', function() {
 
     cy
       .get('@firstRow')
-      .find('.worklist-list__patient-sidebar-icon .js-patient-sidebar-button')
+      .find('.js-patient-sidebar-button')
       .click();
 
     cy
       .get('@patientSidebar')
-      .find('.worklist-patient-sidebar__patient-info .button--link')
-      .should('contain', 'View Patient Dashboard')
+      .contains('View Patient Dashboard')
       .click()
       .wait('@routePrograms');
 
@@ -3568,7 +3567,7 @@ context('worklist page', function() {
 
     cy
       .get('@firstRow')
-      .find('.worklist-list__patient-sidebar-icon .js-patient-sidebar-button')
+      .find('.js-patient-sidebar-button')
       .click();
 
     cy
@@ -3583,7 +3582,7 @@ context('worklist page', function() {
 
     cy
       .get('@patientSidebar')
-      .find('.worklist-patient-sidebar__close-icon button')
+      .find('.js-close')
       .click();
 
     cy
@@ -3599,7 +3598,7 @@ context('worklist page', function() {
     cy
       .get('.app-frame__content')
       .find('.table-list__item')
-      .find('.worklist-list__patient-sidebar-icon .js-patient-sidebar-button')
+      .find('.js-patient-sidebar-button')
       .click();
 
     cy

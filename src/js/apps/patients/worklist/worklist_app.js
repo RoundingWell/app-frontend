@@ -9,6 +9,7 @@ import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
 import BulkEditFlowsApp from 'js/apps/patients/sidebar/bulk-edit-flows_app';
+import PatientSidebarApp from 'js/apps/patients/sidebar/patient-sidebar_app';
 
 import DateFilterComponent from 'js/views/patients/shared/components/date-filter';
 import SearchComponent from 'js/views/shared/components/list-search';
@@ -18,6 +19,7 @@ import { getSortOptions } from './worklist_sort';
 
 import { ListView, SelectAllView, LayoutView, ListTitleView, TableHeaderView, SortDroplist, TypeToggleView, AllFiltersButtonView } from 'js/views/patients/worklist/worklist_views';
 import { BulkEditButtonView, BulkEditFlowsSuccessTemplate, BulkEditActionsSuccessTemplate, BulkDeleteFlowsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
+import { sidebarOptions } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
 
 const FiltersApp = App.extend({
   StateModel: FiltersStateModel,
@@ -32,6 +34,7 @@ export default App.extend({
     },
     bulkEditActions: BulkEditActionsApp,
     bulkEditFlows: BulkEditFlowsApp,
+    patientSidebar: PatientSidebarApp,
   },
   stateEvents: {
     'change:listType change:clinicianId change:teamId change:noOwner': 'restart',
@@ -168,8 +171,12 @@ export default App.extend({
         this.editableCollection.reset(this._getListEditable(collectionView));
       },
       'click:patientSidebarButton'({ model }) {
-        const sidebar = Radio.request('sidebar', 'start', 'patient', { patient: model.getPatient() });
-        collectionView.on('destroy', () => sidebar.stop());
+        const patient = model.getPatient();
+        const patientSidebar = this.getChildApp('patientSidebar');
+
+        patientSidebar.stop();
+
+        Radio.request('sidebar', 'start', patientSidebar, { patient }, sidebarOptions);
       },
     });
 

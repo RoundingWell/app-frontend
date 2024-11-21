@@ -8,6 +8,7 @@ import StateModel from './schedule_state';
 import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
+import PatientSidebarApp from 'js/apps/patients/sidebar/patient-sidebar_app';
 
 import DateFilterComponent from 'js/views/patients/shared/components/date-filter';
 import SearchComponent from 'js/views/shared/components/list-search';
@@ -16,6 +17,7 @@ import { CountView } from 'js/views/patients/shared/list_views';
 
 import { LayoutView, ScheduleTitleView, TableHeaderView, SelectAllView, ScheduleListView, AllFiltersButtonView } from 'js/views/patients/schedule/schedule_views';
 import { BulkEditButtonView, BulkEditActionsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
+import { sidebarOptions } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
 
 const FiltersApp = App.extend({
   StateModel: FiltersStateModel,
@@ -29,6 +31,7 @@ export default App.extend({
       restartWithParent: false,
     },
     bulkEditActions: BulkEditActionsApp,
+    patientSidebar: PatientSidebarApp,
   },
   stateEvents: {
     'change:clinicianId change:dateFilters change:customFilters change:states change:flowStates': 'restart',
@@ -136,6 +139,14 @@ export default App.extend({
       },
       'change:canEdit'() {
         this.editableCollection.reset(this._getListEditable(scheduleListView));
+      },
+      'click:patientSidebarButton'({ model }) {
+        const patient = model.getPatient();
+        const patientSidebar = this.getChildApp('patientSidebar');
+
+        patientSidebar.stop();
+
+        Radio.request('sidebar', 'start', patientSidebar, { patient }, sidebarOptions);
       },
     });
 

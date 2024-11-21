@@ -226,7 +226,7 @@ context('schedule page', function() {
       .wait('@routeWorkspacePatient');
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.app-frame__sidebar .worklist-patient-sidebar')
       .find('.worklist-patient-sidebar__patient-name')
       .should('contain', 'Test Patient');
 

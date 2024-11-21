@@ -2,9 +2,13 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
+import i18n from 'js/i18n';
+
 import PreloadRegion from 'js/regions/preload_region';
 
 import './patient.scss';
+
+export const intl = i18n.patients.patient.patientViews;
 
 const ContextTrailView = View.extend({
   className: 'patient__context-trail',
