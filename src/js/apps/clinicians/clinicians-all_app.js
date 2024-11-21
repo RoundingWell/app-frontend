@@ -3,6 +3,7 @@ import Radio from 'backbone.radio';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
+import ClinicianSidebarApp from './sidebar/clinician-sidebar_app';
 import SearchComponent from 'js/views/shared/components/list-search';
 
 import { ListView, LayoutView, notFound } from 'js/views/clinicians/clinicians-all_views';
@@ -12,6 +13,10 @@ export default SubRouterApp.extend({
   routerAppName: 'CliniciansApp',
   eventRoutes: {
     'clinician': 'showClinicianSidebar',
+    'clinicians:all': 'hideCliniciansSidebar',
+  },
+  childApps: {
+    sidebar: ClinicianSidebarApp,
   },
   viewEvents: {
     'click:addClinician': 'onClickAddClinician',
@@ -66,9 +71,16 @@ export default SubRouterApp.extend({
       return;
     }
 
-    Radio.request('sidebar', 'start', 'clinician', { clinician });
+    const sidebarApp = this.getChildApp('sidebar');
 
-    clinician.trigger('editing', true);
+    Radio.request('sidebar', 'start', sidebarApp, { clinician });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      Radio.trigger('event-router', 'clinicians:all');
+    });
+  },
+  hideCliniciansSidebar() {
+    this.stopChildApp('sidebar');
   },
   onClickAddClinician() {
     this.showAddModal();

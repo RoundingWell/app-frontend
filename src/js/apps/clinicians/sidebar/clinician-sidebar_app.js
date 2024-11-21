@@ -2,30 +2,32 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { SidebarView } from 'js/views/clinicians/sidebar/clinician-sidebar_views';
+import { SidebarView, headingText } from 'js/views/clinicians/sidebar/clinician-sidebar_views';
 
 export default App.extend({
   onBeforeStart({ clinician }) {
     this.clinician = clinician;
+    this.clinician.trigger('editing', true);
 
-    this.showView(new SidebarView({ clinician }));
+    this.showChildView('heading', headingText);
+    this.showContent();
   },
-  viewEvents: {
-    'save': 'onSave',
-    'close': 'stop',
+  onStop() {
+    this.clinician.trigger('editing', false);    
+  },
+  showContent() {
+    const sidebarView = new SidebarView({ model: this.clinician });
+
+    this.listenTo(sidebarView, 'save', this.onSave);
+
+    this.showChildView('content', sidebarView);
   },
   onSave({ model }) {
     this.clinician.save(model.attributes).then(() => {
       Radio.trigger('event-router', 'clinician', this.clinician.id);
     }, ({ responseData }) => {
       const errors = this.clinician.parseErrors(responseData);
-      this.getView().showErrors(errors);
+      this.getChildView('content').showErrors(errors);
     });
-  },
-  onStop() {
-    this.clinician.trigger('editing', false);
-
-    Radio.request('sidebar', 'close');
-    Radio.trigger('event-router', 'clinicians:all');
   },
 });
