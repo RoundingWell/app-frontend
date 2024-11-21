@@ -13,9 +13,10 @@ import { LayoutView } from 'js/views/patients/patient/patient_views';
 export default SubRouterApp.extend({
   eventRoutes() {
     return {
-      'patient:dashboard': partial(this.startCurrent, 'dashboard'),
-      'patient:archive': partial(this.startCurrent, 'archive'),
-      'patient:action': this.startPatientAction,
+      'patient:dashboard': partial(this.startList, 'dashboard'),
+      'patient:archive': partial(this.startList, 'archive'),
+      'patient:action': partial(this.startPatientAction, 'dashboard'),
+      'patient:action:archive': partial(this.startPatientAction, 'archive'),
     };
   },
 

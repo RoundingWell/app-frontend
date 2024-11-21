@@ -73,6 +73,11 @@ const ActionItemView = View.extend({
       return;
     }
 
+    if (this.model.isDone()) {
+      Radio.trigger('event-router', 'patient:action:archive', this.model.get('_patient'), this.model.id);
+      return;
+    }
+
     Radio.trigger('event-router', 'patient:action', this.model.get('_patient'), this.model.id);
   },
   onClickPatient() {
