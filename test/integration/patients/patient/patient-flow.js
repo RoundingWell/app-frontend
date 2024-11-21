@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import dayjs from 'dayjs';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -121,6 +122,7 @@ context('patient flow page', function() {
         duration: 10,
         outreach: 'disabled',
         sharing: 'disabled',
+        updated_at: testTsSubtract(1),
       },
       relationships: {
         flow: getRelationship(testFlow),
@@ -189,6 +191,13 @@ context('patient flow page', function() {
       .get('.sidebar')
       .find('[data-action-region] .action-sidebar__name')
       .should('contain', 'New Websocket Name');
+
+    cy
+      .get('.sidebar')
+      .find('.sidebar__footer')
+      .contains('Updated')
+      .next()
+      .should('contain', formatDate(dayjs.utc().format(), 'AT_TIME'));
 
     cy
       .get('.sidebar')
@@ -2344,6 +2353,7 @@ context('patient flow page', function() {
     const testSocketFlow = getFlow({
       attributes: {
         name: 'Flow Test',
+        updated_at: testTsSubtract(1),
       },
       relationships: {
         state: getRelationship(stateInProgress),
@@ -2358,6 +2368,7 @@ context('patient flow page', function() {
         due_time: '06:00:00',
         outreach: 'disabled',
         sharing: 'disabled',
+        updated_at: testTsSubtract(1),
       },
       relationships: {
         flow: getRelationship(testSocketFlow),
@@ -2383,6 +2394,7 @@ context('patient flow page', function() {
         return fx;
       })
       .routeActionActivity()
+      .routeFlowActivity()
       .visit(`/flow/${ testSocketFlow.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
@@ -2393,6 +2405,10 @@ context('patient flow page', function() {
         getRelationship(testSocketFlow).data,
         getRelationship(testSocketAction).data,
       ]);
+
+    cy
+      .get('[data-header-region]')
+      .click('top');
 
     cy.sendWs({
       category: 'NameChanged',
@@ -2411,6 +2427,18 @@ context('patient flow page', function() {
       .get('[data-header-region]')
       .find('.patient-flow__name')
       .contains('New Flow Name');
+
+    cy
+      .get('.app-frame__sidebar')
+      .find('.sidebar__footer')
+      .contains('Updated')
+      .next()
+      .should('contain', formatDate(dayjs.utc().format(), 'AT_TIME'));
+
+    cy
+      .get('.app-frame__sidebar')
+      .find('.js-close')
+      .click();
 
     cy.sendWs({
       category: 'DetailsChanged',
@@ -2447,6 +2475,11 @@ context('patient flow page', function() {
       .get('.patient-flow__list')
       .find('.table-list__item .patient__action-name')
       .contains('New Action Name');
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .patient__action-ts')
+      .should('contain', formatDate(dayjs.utc().format(), 'TIME_OR_DAY'));
 
     cy.sendWs({
       category: 'ActionDueChanged',

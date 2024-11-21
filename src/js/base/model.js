@@ -1,5 +1,6 @@
 import { extend, isEmpty, isFunction, pick, reduce, result } from 'underscore';
 import Backbone from 'backbone';
+import dayjs from 'dayjs';
 import JsonApiMixin from './jsonapi-mixin';
 
 export default Backbone.Model.extend(extend({
@@ -84,6 +85,8 @@ export default Backbone.Model.extend(extend({
     return isFunction(messages[category]) ? messages[category] : this[messages[category]];
   },
   handleMessage({ category, payload }) {
+    payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
+
     const handler = this._getMessageHandler(category);
     if (handler) handler.call(this, payload);
 
