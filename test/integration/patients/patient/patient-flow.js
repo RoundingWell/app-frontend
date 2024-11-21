@@ -2375,7 +2375,7 @@ context('patient flow page', function() {
       })
       .routeActionActivity()
       .routeFlowActivity()
-      .visit(`/flow/${ testSocketFlow.id }`)
+      .visitOnClock(`/flow/${ testSocketFlow.id }`, { now: testTs() })
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
@@ -2388,7 +2388,8 @@ context('patient flow page', function() {
 
     cy
       .get('[data-header-region]')
-      .click('top');
+      .click('top')
+      .tick(300);
 
     cy.sendWs({
       category: 'NameChanged',
@@ -2413,7 +2414,7 @@ context('patient flow page', function() {
       .find('.sidebar__footer')
       .contains('Updated')
       .next()
-      .should('contain', formatDate(dayjs.utc().format(), 'AT_TIME'));
+      .should('contain', formatDate(testTs(), 'AT_TIME'));
 
     cy
       .get('.app-frame__sidebar')
@@ -2459,7 +2460,7 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__list')
       .find('.table-list__item .patient__action-ts')
-      .should('contain', formatDate(dayjs.utc().format(), 'TIME_OR_DAY'));
+      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
     cy.sendWs({
       category: 'ActionDueChanged',
