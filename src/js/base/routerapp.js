@@ -81,7 +81,7 @@ export default App.extend({
     this.triggerMethod('before:appRoute', event, ...args);
 
     Radio.request('nav', 'select', this.routerAppName, event, args);
-    Radio.request('sidebar', 'close');
+    Radio.request('sidebar', 'stop');
 
     this.setLatestList(event, args);
 
