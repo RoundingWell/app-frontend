@@ -9,6 +9,7 @@ import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
 import BulkEditFlowsApp from 'js/apps/patients/sidebar/bulk-edit-flows_app';
+import FiltersSidebarApp from 'js/apps/patients/sidebar/filters-sidebar_app';
 import PatientSidebarApp from 'js/apps/patients/sidebar/patient-sidebar_app';
 
 import DateFilterComponent from 'js/views/patients/shared/components/date-filter';
@@ -34,6 +35,10 @@ export default App.extend({
     },
     bulkEditActions: BulkEditActionsApp,
     bulkEditFlows: BulkEditFlowsApp,
+    filtersSidebar: {
+      AppClass: FiltersSidebarApp,
+      restartWithParent: false,
+    },
     patientSidebar: PatientSidebarApp,
   },
   stateEvents: {
@@ -188,19 +193,25 @@ export default App.extend({
       return models;
     }, []);
   },
-  showFiltersButtonView() {
+  getFiltersState() {
     const filtersApp = this.getChildApp('filters');
-    const filtersState = filtersApp.getState();
-
+    return filtersApp.getState();
+  },
+  showFiltersButtonView() {
     const filtersButtonView = new AllFiltersButtonView({
-      model: filtersState,
+      model: this.getFiltersState(),
     });
 
-    this.listenTo(filtersButtonView, 'click', () => {
-      Radio.request('sidebar', 'start', 'filters', { filtersState });
-    });
+    this.listenTo(filtersButtonView, 'click', this.showFiltersSidebar);
 
     this.showChildView('filters', filtersButtonView);
+  },
+  showFiltersSidebar() {
+    const filtersState = this.getFiltersState();
+
+    const sidebarApp = this.getChildApp('filtersSidebar');
+    
+    Radio.request('sidebar', 'start', sidebarApp, { filtersState });
   },
   toggleBulkSelect() {
     this.selected = this.getState().getSelected(this.editableCollection);

@@ -5,6 +5,7 @@ import App from 'js/base/app';
 import StateModel from './reduced_schedule_state';
 import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
+import FiltersSidebarApp from 'js/apps/patients/sidebar/filters-sidebar_app';
 import PatientSidebarApp from 'js/apps/patients/sidebar/patient-sidebar_app';
 
 import SearchComponent from 'js/views/shared/components/list-search';
@@ -23,6 +24,10 @@ export default App.extend({
   childApps: {
     filters: {
       AppClass: FiltersApp,
+      restartWithParent: false,
+    },
+    filtersSidebar: {
+      AppClass: FiltersSidebarApp,
       restartWithParent: false,
     },
     patientSidebar: PatientSidebarApp,
@@ -126,19 +131,25 @@ export default App.extend({
 
     this.showChildView('list', scheduleListView);
   },
-  showFiltersButtonView() {
+  getFiltersState() {
     const filtersApp = this.getChildApp('filters');
-    const filtersState = filtersApp.getState();
-
+    return filtersApp.getState();
+  },
+  showFiltersButtonView() {
     const filtersButtonView = new AllFiltersButtonView({
-      model: filtersState,
+      model: this.getFiltersState(),
     });
 
-    this.listenTo(filtersButtonView, 'click', () => {
-      Radio.request('sidebar', 'start', 'filters', { filtersState });
-    });
+    this.listenTo(filtersButtonView, 'click', this.showFiltersSidebar);
 
     this.showChildView('filters', filtersButtonView);
+  },
+  showFiltersSidebar() {
+    const filtersState = this.getFiltersState();
+
+    const sidebarApp = this.getChildApp('filtersSidebar');
+
+    Radio.request('sidebar', 'start', sidebarApp, { filtersState });
   },
   showCountView() {
     const countView = new CountView({

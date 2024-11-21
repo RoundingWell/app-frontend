@@ -1,20 +1,5 @@
 .filters-sidebar__clear-filters {
   color: color(blue);
-  font-weight: 600;
   margin-right: 16px;
-
-  &[disabled] {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-}
-
-.filters-sidebar__close {
-  line-height: normal;
-
-  .icon {
-    line-height: normal;
-    vertical-align: -4px;
-    width: 1em;
-  }
+  padding: 0;
 }

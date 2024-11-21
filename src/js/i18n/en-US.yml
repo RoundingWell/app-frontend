@@ -565,8 +565,9 @@ careOptsFrontend:
             defaultText: All
           flowStatesFiltersView:
             headingText: Show Actions from Flows with Flow States
-          headerView:
+          headingView:
             allFiltersLabel: All Filters
+          menuView:
             clearFilters: Clear Filters
           statesFiltersView:
             headingText: State
