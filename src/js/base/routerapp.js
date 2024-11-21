@@ -129,7 +129,7 @@ export default App.extend({
   },
 
   startRoute(appName, options) {
-    if (this.isCurrent(appName, options)) {
+    if (this.isCurrent(appName, options) && this.getCurrent().isRunning()) {
       return this.getCurrent().startRoute(this.getCurrentRoute());
     }
     return this.startCurrent(appName, options);
