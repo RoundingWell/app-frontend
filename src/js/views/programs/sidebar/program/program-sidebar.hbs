@@ -1,26 +1,13 @@
-<div class="flex-grow">
-  <div class="flex">
-    <div class="flex-grow">
-      <h3 class="sidebar__heading">{{ @intl.programs.sidebar.program.programSidebarTemplate.headingText }}</h3>
-    </div>
-    <div>
-      <button class="button--icon js-close">{{fas "xmark"}}</button>
-    </div>
+<div data-name-region></div>
+<div class="u-margin--t-8" data-details-region></div>
+<div data-save-region></div>
+{{#unless isNew}}
+  <div class="flex u-margin--t-16">
+    <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.program.programSidebarTemplate.publishedLabel }}</h4>
+    <div class="flex-grow" data-published-region></div>
   </div>
-  <div class="u-margin--t-16">
-    <div data-name-region></div>
-    <div class="u-margin--t-8" data-details-region></div>
-    <div data-save-region></div>
-    {{#unless isNew}}
-      <div class="flex u-margin--t-16">
-        <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.program.programSidebarTemplate.publishedLabel }}</h4>
-        <div class="flex-grow" data-published-region></div>
-      </div>
-      <div class="flex u-margin--t-8">
-        <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.program.programSidebarTemplate.archivedLabel }}</h4>
-        <div class="flex-grow" data-archived-region></div>
-      </div>
-    {{/unless}}
+  <div class="flex u-margin--t-8">
+    <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.program.programSidebarTemplate.archivedLabel }}</h4>
+    <div class="flex-grow" data-archived-region></div>
   </div>
-</div>
-<div data-timestamps-region></div>
+{{/unless}}

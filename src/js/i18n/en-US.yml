@@ -824,6 +824,9 @@ careOptsFrontend:
           headingView:
             headingText: Program Action
             headingOutreachText: Program Outreach Action
+          menuView:
+            delete: Delete Program Action
+            headingText: Program Action Menu  
           saveView:
             cancelBtn: Cancel
             saveBtn: Save
@@ -834,10 +837,6 @@ careOptsFrontend:
             attachmentsHeadingText: Attachments
             disableButtonText: Disable Uploads
             enableButtonText: Enable Attachment Uploads
-        layoutView:
-          menuOptions:
-            delete: Delete Program Action
-            headingText: Program Action Menu
       flow:
         flowDetailsTemplate:
           placeholder: Add Details
@@ -846,7 +845,6 @@ careOptsFrontend:
         flowSidebarTemplate:
           archivedLabel: Archived
           behaviorLabel: Behavior
-          headingText: Program Flow
           ownerLabel: Owner
           publishedLabel: Published
           tagsLabel: Tags
@@ -857,16 +855,16 @@ careOptsFrontend:
             submitText: Delete Flow
           disabledSaveView:
             saveBtn: Save
+          headingText: Program Flow
+          menuView:
+            delete: Delete Program Flow
+            headingText: Program Flow Menu
           saveView:
             cancelBtn: Cancel
             saveBtn: Save
           timestampsView:
             createdAt: Added
             updatedAt: Updated
-        layoutView:
-          menuOptions:
-            delete: Delete Program Flow
-            headingText: Program Flow Menu
       program:
         programDetailsTemplate:
           placeholder: Add Details
@@ -874,11 +872,11 @@ careOptsFrontend:
           placeholder: New Program
         programSidebarTemplate:
           archivedLabel: Archived
-          headingText: Program
           publishedLabel: Published
         programsSidebarViews:
           disabledSaveView:
             saveBtn: Save
+          headingText: Program
           saveView:
             cancelBtn: Cancel
             saveBtn: Save

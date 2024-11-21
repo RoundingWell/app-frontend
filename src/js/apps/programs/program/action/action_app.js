@@ -6,7 +6,12 @@ import { ACTION_OUTREACH, PROGRAM_BEHAVIORS } from 'js/static';
 
 import App from 'js/base/app';
 
+import ActionSidebarApp from 'js/apps/programs/sidebar/action-sidebar_app';
+
 export default App.extend({
+  childApps: {
+    actionSidebar: ActionSidebarApp,
+  },
   beforeStart({ actionId, programId, flowId }) {
     if (!actionId) {
       return Radio.request('entities', 'programActions:model', {
@@ -28,8 +33,9 @@ export default App.extend({
     this.stop();
   },
   onStart(options, action) {
-    const sidebar = Radio.request('sidebar', 'start', 'programAction', { action });
+    const actionSidebar = this.getChildApp('actionSidebar');
+    Radio.request('sidebar', 'start', actionSidebar, { action });
 
-    this.listenTo(sidebar, 'stop', this.stop);
+    this.listenTo(actionSidebar, 'stop', this.stop);
   },
 });

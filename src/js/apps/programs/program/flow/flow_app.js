@@ -4,6 +4,9 @@ import SubRouterApp from 'js/base/subrouterapp';
 
 import ActionApp from 'js/apps/programs/program/action/action_app';
 
+import ProgramSidebarApp from 'js/apps/programs/sidebar/program-sidebar_app';
+import FlowSidebarApp from 'js/apps/programs/sidebar/flow-sidebar_app';
+
 import { LayoutView, ContextTrailView, HeaderView, AddActionView, ListView } from 'js/views/programs/program/flow/flow_views';
 import { SidebarView } from 'js/views/programs/program/sidebar/sidebar-views';
 
@@ -11,6 +14,8 @@ export default SubRouterApp.extend({
   routerAppName: 'ProgramFlowApp',
   childApps: {
     action: ActionApp,
+    programSidebar: ProgramSidebarApp,
+    flowSidebar: FlowSidebarApp,
   },
   eventRoutes: {
     'programFlow:action': 'showActionSidebar',
@@ -122,10 +127,12 @@ export default SubRouterApp.extend({
   },
 
   onEditProgram() {
-    Radio.request('sidebar', 'start', 'program', { program: this.program });
+    const programSidebar = this.getChildApp('programSidebar');
+    Radio.request('sidebar', 'start', programSidebar, { program: this.program });
   },
 
   onEditFlow() {
-    Radio.request('sidebar', 'start', 'programFlow', { flow: this.flow });
+    const flowSidebar = this.getChildApp('flowSidebar');
+    Radio.request('sidebar', 'start', flowSidebar, { flow: this.flow });
   },
 });

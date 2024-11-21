@@ -2,33 +2,47 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { LayoutView } from 'js/views/programs/sidebar/program/programs-sidebar_views';
+import { SidebarView, TimestampsView, headingText } from 'js/views/programs/sidebar/program/programs-sidebar_views';
 
 export default App.extend({
   onBeforeStart({ program }) {
     this.program = program;
 
-    this.showView(new LayoutView({
+    this.showHeading();
+
+    const contentView = new SidebarView({
       program: this.program,
-    }));
-  },
-  viewEvents: {
-    'save': 'onSave',
-    'close': 'stop',
+    });
+
+    this.listenTo(contentView, {
+      'save': this.onSave,
+      'close': this.stop,
+    });
+
+    this.showChildView('content', contentView);
+    this.showTimestamps();
   },
   onSave({ model }) {
     const isNew = this.program.isNew();
     this.program.save(model.pick('name', 'details'))
       .then(() => {
-        if (isNew) Radio.request('sidebar', 'close');
+        if (isNew) Radio.request('sidebar', 'stop');
       }, ({ responseData }) => {
         const errors = this.program.parseErrors(responseData);
-        this.getView().showErrors(errors);
+        this.getChildView('content').showErrors(errors);
       });
+  },
+  onClose() {
+    this.stop();
   },
   onStop() {
     if (this.program && this.program.isNew()) this.program.destroy();
-
-    Radio.request('sidebar', 'close');
+  },
+  showHeading() {
+    this.showChildView('heading', headingText);
+  },
+  showTimestamps() {
+    if (this.program.isNew()) return;
+    this.showChildView('footer', new TimestampsView({ model: this.program }));
   },
 });

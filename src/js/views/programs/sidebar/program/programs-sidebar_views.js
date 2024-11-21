@@ -6,11 +6,10 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/textarea-flex.scss';
 import 'scss/modules/sidebar.scss';
 
+import intl from 'js/i18n';
 import keyCodes from 'js/utils/formatting/key-codes';
 import removeNewline from 'js/utils/formatting/remove-newline';
 import trim from 'js/utils/formatting/trim';
-
-import { animSidebar } from 'js/anim';
 
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
 
@@ -21,6 +20,10 @@ import ProgramSidebarTemplate from './program-sidebar.hbs';
 import './programs-sidebar.scss';
 
 const { ENTER_KEY } = keyCodes;
+
+const i18n = intl.programs.sidebar.program.programsSidebarViews;
+
+export const headingText = i18n.headingText;
 
 const DisabledSaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
@@ -114,13 +117,13 @@ const TimestampsView = View.extend({
   `,
 });
 
-const LayoutView = View.extend({
+const SidebarView = View.extend({
   childViewTriggers: {
     'save': 'save',
     'cancel': 'cancel',
     'toggle': 'toggle',
   },
-  className: 'sidebar flex-region',
+  className: 'flex-grow',
   template: ProgramSidebarTemplate,
   regions: {
     name: '[data-name-region]',
@@ -128,10 +131,6 @@ const LayoutView = View.extend({
     published: '[data-published-region]',
     archived: '[data-archived-region]',
     save: '[data-save-region]',
-    timestamps: '[data-timestamps-region]',
-  },
-  triggers: {
-    'click .js-close': 'close',
   },
   templateContext() {
     return {
@@ -149,14 +148,10 @@ const LayoutView = View.extend({
       });
     }
   },
-  onAttach() {
-    animSidebar(this.el);
-  },
   onRender() {
     this.showForm();
     this.showPublished();
     this.showArchived();
-    this.showTimestamps();
   },
   showForm() {
     this.stopListening(this.model);
@@ -212,10 +207,6 @@ const LayoutView = View.extend({
 
     this.showChildView('archived', toggleView);
   },
-  showTimestamps() {
-    if (this.program.isNew()) return;
-    this.showChildView('timestamps', new TimestampsView({ model: this.program }));
-  },
   showDisabledSave() {
     this.showChildView('save', new DisabledSaveView());
   },
@@ -238,5 +229,6 @@ const LayoutView = View.extend({
 });
 
 export {
-  LayoutView,
+  SidebarView,
+  TimestampsView,
 };
