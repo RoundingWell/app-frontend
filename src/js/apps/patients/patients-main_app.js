@@ -39,9 +39,17 @@ export default RouterApp.extend({
       action: 'showPatient',
       route: 'patient/:id/action/:id',
     },
+    'patient:action:archive': {
+      action: 'showPatient',
+      route: 'patient/archive/:id/action/:id',
+    },
     'flow': {
       action: 'showFlow',
       route: 'flow/:id',
+    },
+    'flow:details': {
+      action: 'showFlow',
+      route: 'flow/:id/details',
     },
     'flow:action': {
       action: 'showFlow',

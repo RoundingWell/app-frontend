@@ -1,32 +1,41 @@
+import { extend } from 'underscore';
 import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { LayoutView, HeaderView, CustomFiltersView, StatesFiltersView, FlowStatesFiltersView } from 'js/views/patients/sidebar/filters/filters-sidebar_views';
+import { SidebarMixin } from 'js/services/sidebar';
 
-export default App.extend({
+import { LayoutView, HeadingView, MenuView, CustomFiltersView, StatesFiltersView, FlowStatesFiltersView } from 'js/views/patients/sidebar/filters/filters-sidebar_views';
+
+export default App.extend(extend({
   onStart({ filtersState }) {
     this.filtersState = filtersState;
 
-    this.setView(new LayoutView());
-
-    this.showHeaderView();
+    this.showHeadingView();
+    this.showMenu();
+    this.showChildView('content', new LayoutView());
     this.showCustomFiltersView();
     this.showStatesFiltersView();
     this.showFlowStatesFiltersView();
 
     this.listenTo(filtersState, 'change:listType', this.showFlowStatesFiltersView);
-
-    this.showView();
   },
-  viewEvents: {
-    'close': 'stop',
-    'click:clearFilters': 'onClearFilters',
+  onClose() {
+    this.stop();
   },
-  showHeaderView() {
-    const headerView = new HeaderView({ model: this.filtersState });
+  showHeadingView() {
+    const headerView = new HeadingView({ model: this.filtersState });
 
-    this.showChildView('header', headerView);
+    this.showChildView('heading', headerView);
+  },
+  showMenu() {
+    const menuView = new MenuView({ model: this.filtersState });
+
+    this.listenTo(menuView, 'click:clear', () => {
+      this.filtersState.setDefaultFilterStates();
+    });
+    
+    this.showChildView('menu', menuView);
   },
   showCustomFiltersView() {
     const collection = Radio.request('workspace', 'directories');
@@ -46,12 +55,12 @@ export default App.extend({
       state: this.filtersState,
     });
 
-    this.showChildView('customFilters', customFiltersView);
+    this.showContentView('customFilters', customFiltersView);
   },
   showFlowStatesFiltersView() {
     // Filters actions by their flow's state
     if (this.filtersState.isFlowType()) {
-      this.getRegion('flowStatesFilters').empty();
+      this.getChildView('content').getRegion('flowStatesFilters').empty();
       return;
     }
 
@@ -63,7 +72,7 @@ export default App.extend({
       model: this.filtersState,
     });
 
-    this.showChildView('flowStatesFilters', flowStatesFiltersView);
+    this.showContentView('flowStatesFilters', flowStatesFiltersView);
   },
   showStatesFiltersView() {
     const statesFiltersView = new StatesFiltersView({
@@ -71,12 +80,6 @@ export default App.extend({
       model: this.filtersState,
     });
 
-    this.showChildView('statesFilters', statesFiltersView);
+    this.showContentView('statesFilters', statesFiltersView);
   },
-  onClearFilters() {
-    this.filtersState.setDefaultFilterStates();
-  },
-  onStop() {
-    Radio.request('sidebar', 'close');
-  },
-});
+}, SidebarMixin));

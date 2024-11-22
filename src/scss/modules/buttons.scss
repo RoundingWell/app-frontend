@@ -228,6 +228,7 @@
 
   border-color: transparent;
   color: $black-60;
+  line-height: normal;
 
   &:hover,
   &:focus {
@@ -262,7 +263,6 @@
 
 .button--icon {
   color: $black-60;
-  line-height: 1;
   transition: color 0.15s linear;
 
   &:hover,

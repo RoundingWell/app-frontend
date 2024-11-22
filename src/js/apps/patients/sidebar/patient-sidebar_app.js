@@ -1,34 +1,46 @@
+import { extend } from 'underscore';
 import Radio from 'backbone.radio';
+
+import { SidebarMixin } from 'js/services/sidebar';
 
 import App from 'js/base/app';
 
-import { LayoutView, SidebarWidgetsView } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
+import { LayoutView, HeadingView, SidebarWidgetsView } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
 
-export default App.extend({
+export default App.extend(extend({
   onBeforeStart({ patient }) {
-    this.showView(new LayoutView({ model: patient }));
-
+    this.patient = patient;
     this.widgets = Radio.request('widgets', 'sidebarWidgets');
 
-    this.getRegion('widgets').startPreloader();
+    this.showChildView('heading', new HeadingView());
+
+    this.showContent();
   },
-  beforeStart({ patient }) {
-    const patientModel = Radio.request('entities', 'fetch:patients:model', patient.id);
-    const workspacePatient = Radio.request('entities', 'fetch:workspacePatients:byPatient', patient.id);
-    const values = this.widgets.invoke('fetchValues', patient.id);
+  beforeStart() {
+    const patientModel = Radio.request('entities', 'fetch:patients:model', this.patient.id);
+    const workspacePatient = Radio.request('entities', 'fetch:workspacePatients:byPatient', this.patient.id);
+    const values = this.widgets.invoke('fetchValues', this.patient.id);
 
     return [patientModel, workspacePatient, ...values];
   },
-  onStart({ patient }) {
-    this.showChildView('widgets', new SidebarWidgetsView({
-      model: patient,
+  onStart() {
+    this.showContentView('widgets', new SidebarWidgetsView({
+      model: this.patient,
       collection: this.widgets,
     }));
   },
-  viewEvents: {
-    'close': 'stop',
+  onClose() {
+    this.stop();
   },
-  onStop() {
-    Radio.request('sidebar', 'close');
+  showContent() {
+    const layoutView = new LayoutView({ model: this.patient });
+
+    layoutView.getRegion('widgets').startPreloader();
+
+    this.listenTo(layoutView, 'click:patient', () => {
+      Radio.trigger('event-router', 'patient:dashboard', this.patient.id);
+    });
+
+    this.showChildView('content', layoutView);
   },
-});
+}, SidebarMixin));

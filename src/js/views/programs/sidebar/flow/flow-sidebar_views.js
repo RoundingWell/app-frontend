@@ -15,8 +15,6 @@ import keyCodes from 'js/utils/formatting/key-codes';
 import removeNewline from 'js/utils/formatting/remove-newline';
 import trim from 'js/utils/formatting/trim';
 
-import { animSidebar } from 'js/anim';
-
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
 import Optionlist from 'js/components/optionlist';
 
@@ -30,6 +28,8 @@ import FlowDetailsTemplate from './flow-details.hbs';
 import './flow-sidebar.scss';
 
 const i18n = intl.programs.sidebar.flow.flowSidebarViews;
+
+export const headingText = i18n.headingText;
 
 const { ENTER_KEY } = keyCodes;
 
@@ -125,12 +125,40 @@ const TimestampsView = View.extend({
   `,
 });
 
-const LayoutView = View.extend({
+const MenuView = View.extend({
+  tagName: 'button',
+  className: 'button--icon js-menu',
+  template: hbs`{{far "ellipsis"}}`,
+  triggers: {
+    'click': 'click',
+  },
+  onClick() {
+    const menuOptions = new Backbone.Collection([
+      {
+        onSelect: bind(this.triggerMethod, this, 'delete'),
+      },
+    ]);
+
+    const optionlist = new Optionlist({
+      ui: this.$el,
+      uiView: this,
+      headingText: intl.programs.sidebar.flow.flowSidebarViews.menuView.headingText,
+      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.programs.sidebar.flow.flowSidebarViews.menuView.delete }}</span>`,
+      lists: [{ collection: menuOptions }],
+      align: 'right',
+      popWidth: 248,
+    });
+
+    optionlist.show();
+  },
+});
+
+const SidebarView = View.extend({
   childViewTriggers: {
     'save': 'save',
     'cancel': 'cancel',
   },
-  className: 'sidebar flex-region',
+  className: 'flex-grow',
   template: FlowSidebarTemplate,
   regions: {
     name: '[data-name-region]',
@@ -141,33 +169,6 @@ const LayoutView = View.extend({
     owner: '[data-owner-region]',
     tags: '[data-tags-region]',
     save: '[data-save-region]',
-    timestamps: '[data-timestamps-region]',
-  },
-  triggers: {
-    'click .js-close': 'close',
-    'click @ui.menu': 'click:menu',
-  },
-  ui: {
-    menu: '.js-menu',
-  },
-  onClickMenu() {
-    const menuOptions = new Backbone.Collection([
-      {
-        onSelect: bind(this.triggerMethod, this, 'delete'),
-      },
-    ]);
-
-    const optionlist = new Optionlist({
-      ui: this.ui.menu,
-      uiView: this,
-      headingText: intl.programs.sidebar.flow.layoutView.menuOptions.headingText,
-      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.programs.sidebar.flow.layoutView.menuOptions.delete }}</span>`,
-      lists: [{ collection: menuOptions }],
-      align: 'right',
-      popWidth: 248,
-    });
-
-    optionlist.show();
   },
   templateContext() {
     const isNew = this.model.isNew();
@@ -192,12 +193,8 @@ const LayoutView = View.extend({
   onChangeOwner() {
     this.showOwner();
   },
-  onAttach() {
-    animSidebar(this.el);
-  },
   onRender() {
     this.showFlow();
-    this.showTimestamps();
   },
   showFlow() {
     this.showForm();
@@ -296,10 +293,6 @@ const LayoutView = View.extend({
 
     this.showChildView('tags', tagsComponent);
   },
-  showTimestamps() {
-    if (this.flow.isNew()) return;
-    this.showChildView('timestamps', new TimestampsView({ model: this.flow }));
-  },
   showSave() {
     if (!this.model.isValid()) return this.showDisabledSave();
 
@@ -326,6 +319,8 @@ function getDeleteModal(opts) {
 }
 
 export {
+  MenuView,
+  TimestampsView,
   getDeleteModal,
-  LayoutView,
+  SidebarView,
 };

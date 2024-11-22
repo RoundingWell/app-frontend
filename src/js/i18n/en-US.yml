@@ -13,8 +13,6 @@ careOptsFrontend:
           email: clinician@organization.com
           headingText: Add Clinician
           name: Clinician First Last Name
-    cliniciansAllApp:
-      notFound: The Clinician you requested does not exist.
     cliniciansAllViews:
       emptyView: No Clinicians
       emptyFindInListView:
@@ -30,6 +28,7 @@ careOptsFrontend:
         lastActiveHeader: Last Sign In
         title: Clinicians
         workspacesHeader: Workspaces
+      notFound: The Clinician you requested does not exist.
     shared:
       clinicianViews:
         stateComponent:
@@ -57,6 +56,7 @@ careOptsFrontend:
           saveBtn: Save
         emailView:
           placeholder: clinician@organization.com
+        headingText: Clinician
         infoView:
           workspaceTeamInfo: Team & Workspaces must be assigned in order for this clinician to have access to members.
         nameView:
@@ -244,8 +244,6 @@ careOptsFrontend:
           patient: Patient
   patients:
     patient:
-      actionApp:
-        notFound: The Action you requested does not exist.
       archive:
         archiveViews:
           archiveBtn: Archive
@@ -263,6 +261,7 @@ careOptsFrontend:
         contextBackBtn: Back to List
         emptyView: No Actions
       patientViews:
+        actionNotFound: The Action you requested does not exist.
         contextBackBtn: Back to List
       sidebar:
         sidebarApp:
@@ -450,12 +449,6 @@ careOptsFrontend:
       action:
         actionDetailsTemplate:
           placeholder: Add Details
-        actionSidebarTemplate:
-          headingText: |
-            {outreach, select,
-              disabled {Action}
-              other {Outreach Action}
-            }
         actionSidebarActionViews:
           actionView:
             dueDayLabel: Due
@@ -489,6 +482,12 @@ careOptsFrontend:
           formLayoutView:
             formLabel: Form
         actionSidebarViews:
+          headingView:
+            headingText: |
+              {outreach, select,
+                disabled {Action}
+                other {Outreach Action}
+              }
           menuView:
             menuOptions:
               delete: Delete Action
@@ -565,8 +564,9 @@ careOptsFrontend:
             defaultText: All
           flowStatesFiltersView:
             headingText: Show Actions from Flows with Flow States
-          headerView:
+          headingView:
             allFiltersLabel: All Filters
+          menuView:
             clearFilters: Clear Filters
           statesFiltersView:
             headingText: State
@@ -588,7 +588,6 @@ careOptsFrontend:
             teamAssigned: '<strong>Owner</strong> changed to { to_team }'
         flowSidebarTemplate:
           activityHeadingText: Activity Log
-          headingText: Flow
           noDetails: No details
           ownerLabel: Owner
           stateLabel: State
@@ -597,6 +596,7 @@ careOptsFrontend:
             bodyText: Are you sure you want to delete this flow? All actions on this flow will also be deleted. This cannot be undone.
             headingText: Confirm Delete
             submitText: Delete Flow
+          headingText: Flow
           layoutView:
             delete: Delete Flow
             headingText: Flow Menu
@@ -824,6 +824,9 @@ careOptsFrontend:
           headingView:
             headingText: Program Action
             headingOutreachText: Program Outreach Action
+          menuView:
+            delete: Delete Program Action
+            headingText: Program Action Menu  
           saveView:
             cancelBtn: Cancel
             saveBtn: Save
@@ -834,10 +837,6 @@ careOptsFrontend:
             attachmentsHeadingText: Attachments
             disableButtonText: Disable Uploads
             enableButtonText: Enable Attachment Uploads
-        layoutView:
-          menuOptions:
-            delete: Delete Program Action
-            headingText: Program Action Menu
       flow:
         flowDetailsTemplate:
           placeholder: Add Details
@@ -846,7 +845,6 @@ careOptsFrontend:
         flowSidebarTemplate:
           archivedLabel: Archived
           behaviorLabel: Behavior
-          headingText: Program Flow
           ownerLabel: Owner
           publishedLabel: Published
           tagsLabel: Tags
@@ -857,16 +855,16 @@ careOptsFrontend:
             submitText: Delete Flow
           disabledSaveView:
             saveBtn: Save
+          headingText: Program Flow
+          menuView:
+            delete: Delete Program Flow
+            headingText: Program Flow Menu
           saveView:
             cancelBtn: Cancel
             saveBtn: Save
           timestampsView:
             createdAt: Added
             updatedAt: Updated
-        layoutView:
-          menuOptions:
-            delete: Delete Program Flow
-            headingText: Program Flow Menu
       program:
         programDetailsTemplate:
           placeholder: Add Details
@@ -874,11 +872,11 @@ careOptsFrontend:
           placeholder: New Program
         programSidebarTemplate:
           archivedLabel: Archived
-          headingText: Program
           publishedLabel: Published
         programsSidebarViews:
           disabledSaveView:
             saveBtn: Save
+          headingText: Program
           saveView:
             cancelBtn: Cancel
             saveBtn: Save

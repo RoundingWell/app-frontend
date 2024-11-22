@@ -6,13 +6,15 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
 import 'scss/modules/sidebar.scss';
 
-import { animSidebar } from 'js/anim';
+import intl from 'js/i18n';
 
 import { WorkspacesComponent, TeamComponent, RoleComponent, StateComponent } from 'js/views/clinicians/shared/clinicians_views';
 
 import ClinicianSidebarTemplate from './clinician-sidebar.hbs';
 
 import './clinician-sidebar.scss';
+
+const headingText = intl.clinicians.sidebar.clinicianSidebarViews.headingText;
 
 const NameView = View.extend({
   className: 'pos--relative',
@@ -113,17 +115,12 @@ const WorklistView = View.extend({
     'click .js-button': 'click:button',
   },
   onClickButton() {
-    Radio.request('sidebar', 'close');
     Radio.trigger('event-router', 'worklist', 'owned-by', this.clinician.id);
   },
 });
 
 const SidebarView = View.extend({
-  className: 'sidebar flex-region',
   template: ClinicianSidebarTemplate,
-  triggers: {
-    'click .js-close': 'close',
-  },
   childViewTriggers: {
     'save': 'save',
     'cancel': 'cancel',
@@ -139,17 +136,10 @@ const SidebarView = View.extend({
     state: '[data-state-region]',
     worklist: '[data-worklist-region]',
   },
-  initialize({ clinician }) {
-    this.clinician = clinician;
-
-    this.listenTo(this.clinician, {
-      'change:enabled': this.onChangeEnabled,
-      'change:_team': this.showInfo,
-      'change:_workspaces': this.showInfo,
-    });
-  },
-  onAttach() {
-    animSidebar(this.el);
+  modelEvents: {
+    'change:enabled': 'onChangeEnabled',
+    'change:_team': 'showInfo',
+    'change:_workspaces': 'showInfo',
   },
   onChangeEnabled() {
     this.showState();
@@ -170,7 +160,7 @@ const SidebarView = View.extend({
   cloneClinician() {
     // NOTE: creates a new clone from the truth for cancelable editing
     if (this.clonedClinician) this.stopListening(this.clonedClinician);
-    this.clonedClinician = this.clinician.clone();
+    this.clonedClinician = this.model.clone();
   },
   showName(error) {
     this.showChildView('name', new NameView({
@@ -185,43 +175,43 @@ const SidebarView = View.extend({
     }));
   },
   showState() {
-    const isActive = this.clinician.isActive();
-    const selectedId = this.clinician.get('enabled') ? 'enabled' : 'disabled';
+    const isActive = this.model.isActive();
+    const selectedId = this.model.get('enabled') ? 'enabled' : 'disabled';
 
     const stateComponent = new StateComponent({ isActive, selectedId });
 
     this.listenTo(stateComponent, 'change:selected', selected => {
-      this.clinician.save({ enabled: selected.id !== 'disabled' });
+      this.model.save({ enabled: selected.id !== 'disabled' });
     });
 
     this.showChildView('state', stateComponent);
   },
   showRole() {
-    const isDisabled = !this.clinician.get('enabled');
-    const roleComponent = new RoleComponent({ role: this.clinician.getRole(), state: { isDisabled } });
+    const isDisabled = !this.model.get('enabled');
+    const roleComponent = new RoleComponent({ role: this.model.getRole(), state: { isDisabled } });
 
     this.listenTo(roleComponent, 'change:role', role => {
-      this.clinician.saveRole(role);
+      this.model.saveRole(role);
     });
 
     this.showChildView('role', roleComponent);
   },
   showTeam() {
-    const isDisabled = !this.clinician.get('enabled');
-    const teamComponent = new TeamComponent({ team: this.clinician.get('_team'), state: { isDisabled } });
+    const isDisabled = !this.model.get('enabled');
+    const teamComponent = new TeamComponent({ team: this.model.get('_team'), state: { isDisabled } });
 
     this.listenTo(teamComponent, 'change:team', team => {
-      this.clinician.saveTeam(team);
+      this.model.saveTeam(team);
     });
 
     this.showChildView('team', teamComponent);
   },
   showWorkspaces() {
     const workspacesManager = this.showChildView('workspaces', new WorkspacesComponent({
-      member: this.clinician,
+      member: this.model,
       workspaces: Radio.request('bootstrap', 'workspaces'),
       droplistOptions: {
-        isDisabled: !this.clinician.get('enabled'),
+        isDisabled: !this.model.get('enabled'),
       },
     }));
 
@@ -255,7 +245,7 @@ const SidebarView = View.extend({
     this.showEmail();
   },
   showInfo() {
-    if (!this.clinician.hasTeam() || this.clinician.getWorkspaces().length === 0) {
+    if (!this.model.hasTeam() || this.model.getWorkspaces().length === 0) {
       this.showChildView('info', new InfoView());
       return;
     }
@@ -266,7 +256,7 @@ const SidebarView = View.extend({
     const currentWorkspace = Radio.request('workspace', 'current');
 
     this.showChildView('worklist', new WorklistView({
-      clinician: this.clinician,
+      clinician: this.model,
       workspace: currentWorkspace,
     }));
   },
@@ -285,4 +275,5 @@ const SidebarView = View.extend({
 
 export {
   SidebarView,
+  headingText,
 };

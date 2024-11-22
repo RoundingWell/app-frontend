@@ -1,64 +1,49 @@
-import { extend } from 'underscore';
-
 import App from 'js/base/app';
 
-import ActionSidebarApp from 'js/apps/patients/sidebar/action-sidebar_app';
-import FlowSidebarApp from 'js/apps/patients/sidebar/flow-sidebar_app';
-import ProgramSidebarApp from 'js/apps/programs/sidebar/program-sidebar_app';
-import ProgramFlowSidebarApp from 'js/apps/programs/sidebar/flow-sidebar_app';
-import ProgramActionSidebarApp from 'js/apps/programs/sidebar/action-sidebar_app';
-import ClinicianSidebarApp from 'js/apps/clinicians/sidebar/clinician-sidebar_app';
-import PatientSidebarApp from 'js/apps/patients/sidebar/patient-sidebar_app';
-import FiltersSidebarApp from 'js/apps/patients/sidebar/filters-sidebar_app';
+import { LayoutView } from 'js/views/globals/sidebar/sidebar_views';
+
+export const SidebarMixin = {
+  showContentView(name, view, options) {
+    const contentView = this.getView().getChildView('content');
+    const region = contentView.getRegion(name);
+    region.show(view, options);
+    return view;
+  },
+  showFooterView(name, view, options) {
+    const footerView = this.getView().getChildView('footer');
+    const region = footerView.getRegion(name);
+    region.show(view, options);
+    return view;
+  },
+};
 
 export default App.extend({
   channelName: 'sidebar',
 
   radioRequests: {
-    'close': 'closeSidebar',
+    'stop': 'stopSidebarApp',
     'start': 'startSidebarApp',
   },
 
-  childApps: {
-    action: ActionSidebarApp,
-    flow: FlowSidebarApp,
-    program: ProgramSidebarApp,
-    programFlow: ProgramFlowSidebarApp,
-    programAction: ProgramActionSidebarApp,
-    clinician: ClinicianSidebarApp,
-    patient: PatientSidebarApp,
-    filters: FiltersSidebarApp,
-  },
-
-  startSidebarApp(appName, appOptions) {
-    /* istanbul ignore if */
-    if (this.isStarting) return;
-
-    this.isStarting = true;
-
+  startSidebarApp(app, appOptions, viewOptions) {
     this.stopSidebarApp();
 
-    const sidebarOpts = extend({
-      region: this.getRegion(),
-    }, appOptions);
+    this.currentApp = app;
 
-    this.currentApp = this.startChildApp(appName, sidebarOpts);
+    app.setRegion(this.getRegion());
+    app.showView(new LayoutView(viewOptions));
 
-    this.isStarting = false;
+    app.start(appOptions);
 
-    this.getChannel().trigger('show', this.currentApp);
+    this.listenTo(app.getView(), 'close', () => {
+      app.triggerMethod('close', app);
+    });
+
+    this.listenTo(app, 'stop', () => {
+      this.getRegion().empty();
+    });
 
     return this.currentApp;
-  },
-
-  closeSidebar() {
-    const currentApp = this.currentApp;
-
-    this.stopSidebarApp();
-
-    this.getRegion().empty();
-
-    this.getChannel().trigger('close', currentApp);
   },
 
   stopSidebarApp() {

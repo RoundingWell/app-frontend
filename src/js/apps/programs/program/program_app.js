@@ -7,6 +7,8 @@ import { PROGRAM_BEHAVIORS } from 'js/static';
 
 import WorkflowsApp from 'js/apps/programs/program/workflows/workflows_app';
 import ActionApp from 'js/apps/programs/program/action/action_app';
+import ProgramSidebarApp from 'js/apps/programs/sidebar/program-sidebar_app';
+import FlowSidebarApp from 'js/apps/programs/sidebar/flow-sidebar_app';
 
 import { LayoutView } from 'js/views/programs/program/program_views';
 import { SidebarView } from 'js/views/programs/program/sidebar/sidebar-views';
@@ -24,6 +26,8 @@ export default SubRouterApp.extend({
   childApps: {
     workflows: WorkflowsApp,
     action: ActionApp,
+    programSidebar: ProgramSidebarApp,
+    flowSidebar: FlowSidebarApp,
   },
 
   currentAppOptions() {
@@ -47,12 +51,6 @@ export default SubRouterApp.extend({
     this.setView(new LayoutView({ model: program }));
 
     this.showSidebar();
-
-    // Show/Empty program sidebar based on app sidebar
-    this.listenTo(Radio.channel('sidebar'), {
-      'show': this.emptySidebar,
-      'close': this.showSidebar,
-    });
 
     this.startRoute(currentRoute);
 
@@ -97,7 +95,9 @@ export default SubRouterApp.extend({
       behavior: PROGRAM_BEHAVIORS.STANDARD,
     });
 
-    Radio.request('sidebar', 'start', 'programFlow', { flow });
+    const flowSidebar = this.getChildApp('flowSidebar');
+
+    Radio.request('sidebar', 'start', flowSidebar, { flow });
 
     this.editList(flow);
   },
@@ -112,11 +112,8 @@ export default SubRouterApp.extend({
     this.showChildView('sidebar', sidebarView);
   },
 
-  emptySidebar() {
-    this.getRegion('sidebar').empty();
-  },
-
   onEdit() {
-    Radio.request('sidebar', 'start', 'program', { program: this.program });
+    const programSidebar = this.getChildApp('programSidebar');
+    Radio.request('sidebar', 'start', programSidebar, { program: this.program });
   },
 });

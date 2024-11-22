@@ -1,39 +1,26 @@
-<div class="flex-grow">
-  <div class="flex">
-    <div class="flex-grow">
-      <h3 class="sidebar__heading">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.headingText }}</h3>
-    </div>
-    <div>
-      <button class="button--icon u-margin--r-8 js-menu">{{far "ellipsis"}}</button>
-      <button class="button--icon js-close">{{fas "xmark"}}</button>
-    </div>
-  </div>
-  <div class="u-margin--t-16">
-    <div data-name-region></div>
-    <div class="u-margin--t-8" data-details-region></div>
-    <div data-save-region></div>
-    <div class="flex u-margin--t-16">
-      <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.publishedLabel }}</h4>
-      <div class="flex-grow" data-published-region></div>
-    </div>
-    <div class="flex u-margin--t-8">
-      <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.archivedLabel }}</h4>
-      <div class="flex-grow" data-archived-region></div>
-    </div>
-    <div class="flex u-margin--t-8">
-      <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.behaviorLabel }}</h4>
-      <div class="flex-grow" data-behavior-region></div>
-    </div>
-    <div class="flex u-margin--t-8">
-      <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.ownerLabel }}</h4>
-      <div class="flex-grow" data-owner-region></div>
-    </div>
-    {{#if canTag}}
-    <div class="sidebar__section">
-      <div><h3 class="sidebar__section-label">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.tagsLabel }}</h3></div>
-      <div data-tags-region></div>
-    </div>
-    {{/if}}
-  </div>
+<div data-name-region></div>
+<div class="u-margin--t-8" data-details-region></div>
+<div data-save-region></div>
+<div class="flex u-margin--t-16">
+  <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.publishedLabel }}</h4>
+  <div class="flex-grow" data-published-region></div>
 </div>
-<div data-timestamps-region></div>
+<div class="flex u-margin--t-8">
+  <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.archivedLabel }}</h4>
+  <div class="flex-grow" data-archived-region></div>
+</div>
+<div class="flex u-margin--t-8">
+  <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.behaviorLabel }}</h4>
+  <div class="flex-grow" data-behavior-region></div>
+</div>
+<div class="flex u-margin--t-8">
+  <h4 class="sidebar__label u-margin--t-8">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.ownerLabel }}</h4>
+  <div class="flex-grow" data-owner-region></div>
+</div>
+{{#if canTag}}
+<div class="sidebar__section">
+  <div><h3 class="sidebar__section-label">{{ @intl.programs.sidebar.flow.flowSidebarTemplate.tagsLabel }}</h3></div>
+  <div data-tags-region></div>
+</div>
+{{/if}}
+

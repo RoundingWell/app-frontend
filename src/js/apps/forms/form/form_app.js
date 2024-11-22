@@ -8,6 +8,7 @@ import intl from 'js/i18n';
 import { FORM_RESPONSE_STATUS } from 'js/static';
 
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 import WidgetsHeaderApp from 'js/apps/forms/widgets/widgets_header_app';
 
 import FormsService from 'js/services/forms';
@@ -38,6 +39,7 @@ export default App.extend({
       regionName: 'widgets',
       getOptions: ['patient', 'form'],
     },
+    actionSidebar: ActionSiderbarApp,
   },
   initFormState() {
     const storedState = store.get(`form-state_${ this.currentUser.id }`);
@@ -259,7 +261,7 @@ export default App.extend({
     const isExpanded = this.getState('isExpanded');
 
     if (!isActionSidebar || isExpanded) {
-      Radio.request('sidebar', 'close');
+      this.stopChildApp('actionSidebar');
     }
 
     if (isExpanded) {
@@ -275,10 +277,13 @@ export default App.extend({
     this.startChildApp('patient');
   },
   showActionSidebar() {
-    const sidebarApp = Radio.request('sidebar', 'start', 'action', { action: this.action, isShowingForm: true });
+    const sidebarApp = this.getChildApp('actionSidebar');
 
-    this.listenTo(sidebarApp, 'stop', () => {
-      if (this.getState('isExpanded')) return;
+    Radio.request('sidebar', 'start', sidebarApp, { action: this.action, isShowingForm: true });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      sidebarApp.stop();
+
       this.setState('isActionSidebar', false);
     });
   },

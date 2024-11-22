@@ -5,11 +5,15 @@ import App from 'js/base/app';
 import StateModel from './reduced_schedule_state';
 import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
+import FiltersSidebarApp from 'js/apps/patients/sidebar/filters-sidebar_app';
+import PatientSidebarApp from 'js/apps/patients/sidebar/patient-sidebar_app';
+
 import SearchComponent from 'js/views/shared/components/list-search';
 
 import { CountView } from 'js/views/patients/shared/list_views';
 
 import { LayoutView, ScheduleTitleView, TableHeaderView, ScheduleListView, AllFiltersButtonView } from 'js/views/patients/schedule/schedule_views';
+import { sidebarOptions } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
 
 const FiltersApp = App.extend({
   StateModel: FiltersStateModel,
@@ -22,6 +26,11 @@ export default App.extend({
       AppClass: FiltersApp,
       restartWithParent: false,
     },
+    filtersSidebar: {
+      AppClass: FiltersSidebarApp,
+      restartWithParent: false,
+    },
+    patientSidebar: PatientSidebarApp,
   },
   stateEvents: {
     'change:customFilters change:states change:flowStates': 'restart',
@@ -106,25 +115,41 @@ export default App.extend({
       state: this.getState(),
     });
 
-    this.listenTo(scheduleListView, 'filtered', filtered => {
-      this.filteredCollection.reset(filtered);
+    this.listenTo(scheduleListView, {
+      'filtered'(filtered) {
+        this.filteredCollection.reset(filtered);
+      },
+      'click:patientSidebarButton'({ model }) {
+        const patient = model.getPatient();
+        const patientSidebar = this.getChildApp('patientSidebar');
+
+        patientSidebar.stop();
+
+        Radio.request('sidebar', 'start', patientSidebar, { patient }, sidebarOptions);
+      },
     });
 
     this.showChildView('list', scheduleListView);
   },
-  showFiltersButtonView() {
+  getFiltersState() {
     const filtersApp = this.getChildApp('filters');
-    const filtersState = filtersApp.getState();
-
+    return filtersApp.getState();
+  },
+  showFiltersButtonView() {
     const filtersButtonView = new AllFiltersButtonView({
-      model: filtersState,
+      model: this.getFiltersState(),
     });
 
-    this.listenTo(filtersButtonView, 'click', () => {
-      Radio.request('sidebar', 'start', 'filters', { filtersState });
-    });
+    this.listenTo(filtersButtonView, 'click', this.showFiltersSidebar);
 
     this.showChildView('filters', filtersButtonView);
+  },
+  showFiltersSidebar() {
+    const filtersState = this.getFiltersState();
+
+    const sidebarApp = this.getChildApp('filtersSidebar');
+
+    Radio.request('sidebar', 'start', sidebarApp, { filtersState });
   },
   showCountView() {
     const countView = new CountView({

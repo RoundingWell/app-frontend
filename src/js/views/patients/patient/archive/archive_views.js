@@ -93,7 +93,7 @@ const ActionItemView = View.extend({
     'click .js-no-click': 'prevent-row-click',
   },
   onClick() {
-    Radio.trigger('event-router', 'patient:action', this.model.get('_patient'), this.model.id);
+    Radio.trigger('event-router', 'patient:action:archive', this.model.get('_patient'), this.model.id);
   },
   onRender() {
     this.canEdit = this.model.canEdit();

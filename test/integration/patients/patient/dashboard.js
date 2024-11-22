@@ -58,6 +58,7 @@ context('patient dashboard page', function() {
       },
       relationships: {
         owner: getRelationship(teamCoordinator),
+        patient: getRelationship(testPatient),
         state: getRelationship(stateTodo),
         form: getRelationship(testForm),
         files: getRelationship([{ id: '1' }], 'files'),
@@ -71,6 +72,7 @@ context('patient dashboard page', function() {
       },
       relationships: {
         state: getRelationship(stateInProgress),
+        patient: getRelationship(testPatient),
         owner: getRelationship(teamCoordinator),
       },
     });
@@ -96,6 +98,7 @@ context('patient dashboard page', function() {
             },
             relationships: {
               state: getRelationship(stateInProgress),
+              patient: getRelationship(testPatient),
             },
           }),
           getAction({
@@ -106,6 +109,7 @@ context('patient dashboard page', function() {
             },
             relationships: {
               state: getRelationship(stateInProgress),
+              patient: getRelationship(testPatient),
             },
           }),
           getAction({
@@ -115,6 +119,7 @@ context('patient dashboard page', function() {
             },
             relationships: {
               state: getRelationship(stateDone),
+              patient: getRelationship(testPatient),
             },
           }),
         ];
@@ -130,6 +135,7 @@ context('patient dashboard page', function() {
             },
             relationships: {
               state: getRelationship(stateInProgress),
+              patient: getRelationship(testPatient),
             },
           }),
           testFlow,
@@ -140,6 +146,7 @@ context('patient dashboard page', function() {
             },
             relationships: {
               state: getRelationship(stateDone),
+              patient: getRelationship(testPatient),
             },
           }),
         ];
@@ -775,20 +782,6 @@ context('patient dashboard page', function() {
     createActionPostRoute('test-1');
 
     cy
-      .routeAction(fx => {
-        fx.data.id = 'test-1';
-
-        // In this case let the cache work for testing routing only
-        fx.data.attributes = {};
-      });
-
-    cy
-      .intercept('GET', '/api/actions/test-1*', {
-        body: {},
-      })
-      .as('routeTestAction1');
-
-    cy
       .get('.picklist')
       .contains('One of One')
       .click();
@@ -808,7 +801,6 @@ context('patient dashboard page', function() {
       });
 
     cy
-      .wait('@routeTestAction1')
       .url()
       .should('contain', `patient/${ testPatient.id }/action/test-1`);
 
@@ -835,26 +827,11 @@ context('patient dashboard page', function() {
     createActionPostRoute('test-2');
 
     cy
-      .routeAction(fx => {
-        fx.data.id = 'test-2';
-
-        // In this case let the cache work for testing routing only
-        fx.data.attributes = {};
-      });
-
-    cy
-      .intercept('GET', '/api/actions/test-2*', {
-        body: {},
-      })
-      .as('routeTestAction2');
-
-    cy
       .get('.picklist')
       .contains('One of Two')
       .click();
 
     cy
-      .wait('@routeTestAction2')
       .wait('@routePostAction')
       .its('request.body')
       .should(({ data }) => {
@@ -895,26 +872,11 @@ context('patient dashboard page', function() {
     createActionPostRoute('test-3');
 
     cy
-      .routeAction(fx => {
-        fx.data.id = 'test-3';
-
-        // In this case let the cache work for testing routing only
-        fx.data.attributes = {};
-      });
-
-    cy
-      .intercept('GET', '/api/actions/test-3*', {
-        body: {},
-      })
-      .as('routeTestAction3');
-
-    cy
       .get('.picklist')
       .contains('Two of Two')
       .click();
 
     cy
-      .wait('@routeTestAction3')
       .wait('@routePostAction')
       .its('request.body')
       .should(({ data }) => {

@@ -1911,6 +1911,7 @@ context('Patient Action Form', function() {
       });
 
     cy
+      .wait(200)
       .tick(5100)
       .url()
       .should('contain', `/flow/${ testFlow.id }`);
@@ -1983,6 +1984,7 @@ context('Patient Action Form', function() {
       .wait('@routePostResponse');
 
     cy
+      .wait(200)
       .tick(5100)
       .url()
       .should('contain', `/patient/dashboard/${ testPatient.id }`);

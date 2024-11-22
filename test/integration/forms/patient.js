@@ -781,6 +781,7 @@ context('Patient Form', function() {
       });
 
     cy
+      .wait(200)
       .tick(5100)
       .url()
       .should('contain', `/patient/dashboard/${ testPatient.id }`);

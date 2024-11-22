@@ -1,8 +1,4 @@
-import { getRelationship } from 'helpers/json-api';
-
 import { getPatient } from 'support/api/patients';
-import { getAction } from 'support/api/actions';
-import { stateDone } from 'support/api/states';
 
 context('patient page', function() {
   const testPatient = getPatient({
@@ -84,36 +80,5 @@ context('patient page', function() {
       .get('.patient__layout')
       .find('.patient__tab--selected')
       .contains('Dashboard');
-  });
-
-  specify('action routing', function() {
-    const testAction = getAction({
-      relationships: {
-        state: getRelationship(stateDone),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        return fx;
-      })
-      .routeFlow()
-      .routePatientByFlow()
-      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
-      .wait('@routePatient')
-      .wait('@routeAction');
-
-    cy
-      .get('.patient__layout')
-      .find('.patient__tab--selected')
-      .contains('Archive');
   });
 });

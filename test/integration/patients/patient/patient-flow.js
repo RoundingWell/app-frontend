@@ -149,11 +149,6 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routeAction(fx => {
-        fx.data = testFlowAction;
-
-        return fx;
-      })
       .routePatientByFlow(fx => {
         fx.data = testPatient;
 
@@ -164,7 +159,6 @@ context('patient flow page', function() {
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
-      .wait('@routeAction')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
       .wait('@routeActionFiles');
@@ -319,9 +313,13 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routeFlowActions()
       .routeAction(fx => {
         fx.data = testAction;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [testAction];
 
         return fx;
       })
@@ -785,13 +783,6 @@ context('patient flow page', function() {
       .as('routePostAction');
 
     cy
-      .routeAction(fx => {
-        fx.data = conditionalAction;
-
-        return fx;
-      });
-
-    cy
       .get('.patient-flow__actions')
       .contains('Add')
       .click();
@@ -825,7 +816,6 @@ context('patient flow page', function() {
       });
 
     cy
-      .wait('@routeAction')
       .url()
       .should('contain', `flow/${ testFlow.id }/action/${ conditionalAction.id }`);
 
@@ -1524,6 +1514,7 @@ context('patient flow page', function() {
           },
           relationships: {
             state: getRelationship(stateInProgress),
+            actions: getRelationship(testFlowActions),
           },
         });
 
@@ -1604,7 +1595,7 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('[data-sidebar-region]')
+      .get('[data-app-sidebar-region]')
       .find('.js-close')
       .click();
 
@@ -2030,7 +2021,8 @@ context('patient flow page', function() {
       .visitOnClock(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
+      .wait('@routeFlowActions')
+      .wait('@routeWorkspacePatient');
 
     cy
       .tick(60) // tick past debounce
@@ -2395,7 +2387,7 @@ context('patient flow page', function() {
       })
       .routeActionActivity()
       .routeFlowActivity()
-      .visit(`/flow/${ testSocketFlow.id }`)
+      .visitOnClock(`/flow/${ testSocketFlow.id }`, { now: testTs() })
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
@@ -2408,7 +2400,8 @@ context('patient flow page', function() {
 
     cy
       .get('[data-header-region]')
-      .click('top');
+      .click('top')
+      .tick(300);
 
     cy.sendWs({
       category: 'NameChanged',
@@ -2433,7 +2426,7 @@ context('patient flow page', function() {
       .find('.sidebar__footer')
       .contains('Updated')
       .next()
-      .should('contain', formatDate(dayjs.utc().format(), 'AT_TIME'));
+      .should('contain', formatDate(testTs(), 'AT_TIME'));
 
     cy
       .get('.app-frame__sidebar')
@@ -2479,7 +2472,7 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__list')
       .find('.table-list__item .patient__action-ts')
-      .should('contain', formatDate(dayjs.utc().format(), 'TIME_OR_DAY'));
+      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
     cy.sendWs({
       category: 'ActionDueChanged',

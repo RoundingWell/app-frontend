@@ -1,23 +1,11 @@
-<div class="flex-grow">
-  <div class="flex">
-    <div class="flex-grow">
-      <h3 class="sidebar__heading">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.headingText }}</h3>
-    </div>
-    <div>
-      <span class="u-margin--r-8" data-menu-region></span>
-      <button class="button--icon js-close">{{fas "xmark"}}</button>
-    </div>
-  </div>
-  <div class="u-margin--t-16">
-    <div class="patient-flow-sidebar__name">{{ name }}</div>
-    <div class="sidebar__details">{{ details }}{{#unless details}}<span class="sidebar--no-results">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.noDetails }}</span>{{/unless}}</div>
-    <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
-    <div data-permission-region></div>
-  </div>
-  <div class="u-margin--t-24">
-    <h3 class="sidebar__heading">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.activityHeadingText }}</h3>
-    <div class="u-margin--t-8 sidebar__activity" data-activity-region></div>
-  </div>
+<div>
+  <div class="patient-flow-sidebar__name">{{ name }}</div>
+  <div class="sidebar__details">{{ details }}{{#unless details}}<span class="sidebar--no-results">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.noDetails }}</span>{{/unless}}</div>
+  <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
+  <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
+  <div data-permission-region></div>
 </div>
-<div data-timestamps-region></div>
+<div class="u-margin--t-24">
+  <h3 class="sidebar__heading">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.activityHeadingText }}</h3>
+  <div class="u-margin--t-8 sidebar__activity" data-activity-region></div>
+</div>

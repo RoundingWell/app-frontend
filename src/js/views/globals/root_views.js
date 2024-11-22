@@ -27,7 +27,7 @@ const AppView = View.extend({
   template: hbs`
     <div class="app-frame__nav js-nav" data-nav-region></div>
     <div class="app-frame__content flex-region" data-content-region></div>
-    <div class="app-frame__sidebar" data-sidebar-region></div>
+    <div class="app-frame__sidebar" data-app-sidebar-region></div>
   `,
   ui: {
     nav: '.js-nav',
@@ -38,7 +38,7 @@ const AppView = View.extend({
       el: '[data-content-region]',
       regionClass: PreloadRegion,
     },
-    sidebar: '[data-sidebar-region]',
+    sidebar: '[data-app-sidebar-region]',
   },
   toggleNav(shouldShow) {
     this.ui.nav.toggleClass('is-hidden', !shouldShow);

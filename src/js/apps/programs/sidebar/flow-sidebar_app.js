@@ -2,25 +2,52 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { LayoutView, getDeleteModal } from 'js/views/programs/sidebar/flow/flow-sidebar_views';
+import {
+  SidebarView,
+  headingText,
+  MenuView,
+  TimestampsView,
+  getDeleteModal,
+} from 'js/views/programs/sidebar/flow/flow-sidebar_views';
 
 export default App.extend({
-  beforeStart() {
-    return Radio.request('entities', 'fetch:tags:collection');
-  },
-  onStart({ flow }, tags) {
+  onBeforeStart({ flow }) {
     this.flow = flow;
     this.flow.trigger('editing', true);
 
-    this.showView(new LayoutView({
+    this.showHeading();
+    this.showMenu();
+    this.showTimestamps();
+  },
+  beforeStart() {
+    return Radio.request('entities', 'fetch:tags:collection');
+  },
+  onStart(options, tags) {
+    const contentView = new SidebarView({
       flow: this.flow,
       tags,
-    }));
+    });
+
+    this.listenTo(contentView, {
+      'save': this.onSave,
+      'close': this.stop,
+    });
+
+    this.showChildView('content', contentView);
   },
-  viewEvents: {
-    'save': 'onSave',
-    'close': 'stop',
-    'delete': 'onDelete',
+  showHeading() {
+    this.showChildView('heading', headingText);
+  },
+  showMenu() {
+    const menuView = new MenuView();
+
+    this.listenTo(menuView, 'delete', this.onDelete);
+
+    this.showChildView('menu', menuView);
+  },
+  showTimestamps() {
+    if (this.flow.isNew()) return;
+    this.showChildView('footer', new TimestampsView({ model: this.flow }));
   },
   onSave({ model }) {
     if (model.isNew()) {
@@ -47,9 +74,11 @@ export default App.extend({
       },
     }));
   },
+  onClose() {
+    this.stop();
+  },
   onStop() {
     if (this.flow && this.flow.isNew()) this.flow.destroy();
     this.flow.trigger('editing', false);
-    Radio.request('sidebar', 'close');
   },
 });

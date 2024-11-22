@@ -269,11 +269,6 @@ const DayItemView = View.extend({
 
     this.showChildView('check', checkComponent);
   },
-  onClickPatientSidebarButton() {
-    const patient = this.model.getPatient();
-    const sidebar = Radio.request('sidebar', 'start', 'patient', { patient });
-    this.on('destroy', () => sidebar.stop());
-  },
   onClickPatient() {
     Radio.trigger('event-router', 'patient:dashboard', this.model.get('_patient'));
   },
@@ -285,6 +280,11 @@ const DayItemView = View.extend({
 
     if (this.flow) {
       Radio.trigger('event-router', 'flow:action', this.flow.id, this.model.id);
+      return;
+    }
+
+    if (this.model.isDone()) {
+      Radio.trigger('event-router', 'patient:action:archive', this.model.get('_patient'), this.model.id);
       return;
     }
 
@@ -341,6 +341,7 @@ const DayListView = CollectionView.extend({
   childViewTriggers: {
     'render': 'listItem:render',
     'change:canEdit': 'change:canEdit',
+    'click:patientSidebarButton': 'click:patientSidebarButton',
     'select': 'select',
   },
   onSelect(selectedView, isShiftKeyPressed) {
@@ -399,6 +400,7 @@ const ScheduleListView = CollectionView.extend({
   childViewTriggers: {
     'select:list:item': 'select',
     'change:canEdit': 'listItem:canEdit',
+    'click:patientSidebarButton': 'click:patientSidebarButton',
   },
   childViewEvents: {
     'render:children': 'onChildFilter',

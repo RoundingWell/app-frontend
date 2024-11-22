@@ -25,14 +25,16 @@ context('patient archive page', function() {
   specify('action, flow and events list', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
+    const testPatient = getPatient({
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
     cy
       .routesForPatientAction()
       .routePatient(fx => {
-        fx.data = getPatient({
-          relationships: {
-            workspaces: getRelationship(workspaceOne),
-          },
-        });
+        fx.data = testPatient;
 
         return fx;
       })
@@ -50,6 +52,7 @@ context('patient archive page', function() {
             },
             relationships: {
               owner: getRelationship(currentClinican),
+              patient: getRelationship(testPatient),
               state: getRelationship(stateDone),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
@@ -62,6 +65,7 @@ context('patient archive page', function() {
             },
             relationships: {
               state: getRelationship(stateInProgress),
+              patient: getRelationship(testPatient),
             },
           }),
           getAction({
@@ -74,6 +78,7 @@ context('patient archive page', function() {
             },
             relationships: {
               state: getRelationship(stateDone),
+              patient: getRelationship(testPatient),
             },
           }),
         ];
@@ -89,6 +94,7 @@ context('patient archive page', function() {
             },
             relationships: {
               state: getRelationship(stateDone),
+              patient: getRelationship(testPatient),
             },
           }),
           getFlow({
@@ -99,6 +105,7 @@ context('patient archive page', function() {
             },
             relationships: {
               state: getRelationship(stateDone),
+              patient: getRelationship(testPatient),
             },
           }),
           getFlow({
@@ -108,6 +115,7 @@ context('patient archive page', function() {
             },
             relationships: {
               state: getRelationship(stateInProgress),
+              patient: getRelationship(testPatient),
             },
           }),
         ];
@@ -120,6 +128,7 @@ context('patient archive page', function() {
           relationships: {
             state: getRelationship(stateDone),
             form: getRelationship(testForm),
+            patient: getRelationship(testPatient),
           },
         });
 
@@ -129,7 +138,7 @@ context('patient archive page', function() {
       .routeFormDefinition()
       .routeLatestFormResponse()
       .routeFormActionFields()
-      .visitOnClock('/patient/archive/1', { now: testTime, functionNames: ['Date'] })
+      .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testTime, functionNames: ['Date'] })
       .wait('@routePatient')
       .wait('@routePatientFlows');
 

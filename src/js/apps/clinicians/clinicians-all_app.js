@@ -3,17 +3,20 @@ import Radio from 'backbone.radio';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
-import intl from 'js/i18n';
-
+import ClinicianSidebarApp from './sidebar/clinician-sidebar_app';
 import SearchComponent from 'js/views/shared/components/list-search';
 
-import { ListView, LayoutView } from 'js/views/clinicians/clinicians-all_views';
+import { ListView, LayoutView, notFound } from 'js/views/clinicians/clinicians-all_views';
 import { getClinicianModal } from 'js/views/clinicians/clinician-modal/clinician-modal_views';
 
 export default SubRouterApp.extend({
   routerAppName: 'CliniciansApp',
   eventRoutes: {
     'clinician': 'showClinicianSidebar',
+    'clinicians:all': 'hideCliniciansSidebar',
+  },
+  childApps: {
+    sidebar: ClinicianSidebarApp,
   },
   viewEvents: {
     'click:addClinician': 'onClickAddClinician',
@@ -45,16 +48,6 @@ export default SubRouterApp.extend({
 
     this.startRoute(currentRoute);
   },
-  _getClinician(clinicianId) {
-    if (!clinicianId) {
-      return Radio.request('entities', 'clinicians:model', {
-        enabled: true,
-        disabled_at: null,
-      });
-    }
-
-    return this.clinicians.get(clinicianId);
-  },
   showSearchView() {
     const searchComponent = this.showChildView('search', new SearchComponent({
       state: {
@@ -70,23 +63,36 @@ export default SubRouterApp.extend({
     });
   },
   showClinicianSidebar(clinicianId) {
-    const clinician = this._getClinician(clinicianId);
+    const clinician = this.clinicians.get(clinicianId);
 
     if (!clinician) {
-      Radio.request('alert', 'show:error', intl.clinicians.cliniciansAllApp.notFound);
+      Radio.request('alert', 'show:error', notFound);
       Radio.trigger('event-router', 'clinicians:all');
       return;
     }
 
-    Radio.request('sidebar', 'start', 'clinician', { clinician });
+    const sidebarApp = this.getChildApp('sidebar');
 
-    clinician.trigger('editing', true);
+    Radio.request('sidebar', 'start', sidebarApp, { clinician });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      Radio.trigger('event-router', 'clinicians:all');
+    });
+  },
+  hideCliniciansSidebar() {
+    this.stopChildApp('sidebar');
   },
   onClickAddClinician() {
     this.showAddModal();
   },
+  _getNewClinician() {
+    return Radio.request('entities', 'clinicians:model', {
+      enabled: true,
+      disabled_at: null,
+    });
+  },
   showAddModal() {
-    const clinician = this._getClinician();
+    const clinician = this._getNewClinician();
     const clinicianClone = clinician.clone();
     const clinicianModal = Radio.request('modal', 'show', getClinicianModal({
       clinician: clinicianClone,

@@ -81,7 +81,7 @@ export default App.extend({
     this.triggerMethod('before:appRoute', event, ...args);
 
     Radio.request('nav', 'select', this.routerAppName, event, args);
-    Radio.request('sidebar', 'close');
+    Radio.request('sidebar', 'stop');
 
     this.setLatestList(event, args);
 
@@ -129,7 +129,7 @@ export default App.extend({
   },
 
   startRoute(appName, options) {
-    if (this.isCurrent(appName, options)) {
+    if (this.isCurrent(appName, options) && this.getCurrent().isRunning()) {
       return this.getCurrent().startRoute(this.getCurrentRoute());
     }
     return this.startCurrent(appName, options);

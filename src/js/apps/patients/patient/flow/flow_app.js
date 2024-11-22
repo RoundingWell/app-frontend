@@ -8,9 +8,11 @@ import SubRouterApp from 'js/base/subrouterapp';
 
 import StateModel from './flow_state';
 
-import ActionApp from 'js/apps/patients/patient/action/action_app';
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import FlowSiderbarApp from 'js/apps/patients/sidebar/flow-sidebar_app';
+import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
+
 
 import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView } from 'js/views/patients/patient/flow/flow_views';
 import { BulkEditButtonView, BulkEditActionsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
@@ -20,12 +22,15 @@ export default SubRouterApp.extend({
   StateModel,
   routerAppName: 'FlowApp',
   childApps: {
-    action: ActionApp,
+    actionSidebar: ActionSiderbarApp,
     patient: PatientSidebarApp,
     bulkEditActions: BulkEditActionsApp,
+    flowSidebar: FlowSiderbarApp,
   },
   eventRoutes: {
+    'flow': 'hideSidebar',
     'flow:action': 'showActionSidebar',
+    'flow:details': 'showFlowDetails',
   },
   stateEvents: {
     'change:actionsSelected': 'onChangeSelected',
@@ -44,9 +49,16 @@ export default SubRouterApp.extend({
       Radio.request('entities', 'fetch:patients:model:byFlow', flowId),
     ];
   },
-  onFail() {
-    Radio.trigger('event-router', 'notFound');
-    this.stop();
+  onFail(options, { response = {} }) {
+    /* istanbul ignore else: other error scenarios handled elsewhere */
+    if (response.status === 410) {
+      Radio.trigger('event-router', 'notFound');
+      this.stop();
+      return;
+    }
+    
+    /* eslint-disable no-console */
+    console.error(arguments);
   },
   onStart({ currentRoute }, flow, actions, patient) {
     this.flow = flow;
@@ -79,6 +91,10 @@ export default SubRouterApp.extend({
     });
 
     this.startRoute(currentRoute);
+  },
+  hideSidebar() {
+    this.stopChildApp('flowSidebar');
+    this.stopChildApp('actionSidebar');
   },
   subscribe() {
     Radio.request('ws', 'subscribe', invoke([this.flow, ...this.actions.models], 'getResource'));
@@ -279,22 +295,30 @@ export default SubRouterApp.extend({
   },
 
   showActionSidebar(flowId, actionId) {
-    const actionApp = this.getChildApp('action');
+    const sidebarApp = this.getChildApp('actionSidebar');
 
-    this.listenToOnce(actionApp, {
-      'start'(options, action) {
-        this.setState('actionBeingEdited', action.id);
-        action.trigger('editing', true);
-      },
-      'stop'() {
-        this.setState('actionBeingEdited', null);
-      },
+    sidebarApp.stop();
+
+    const action = Radio.request('entities', 'actions:model', actionId);
+
+    Radio.request('sidebar', 'start', sidebarApp, { action });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      Radio.trigger('event-router', 'flow', flowId);
     });
-
-    this.startChildApp('action', { actionId });
   },
 
   onEditFlow() {
-    Radio.request('sidebar', 'start', 'flow', { flow: this.flow });
+    Radio.trigger('event-router', 'flow:details', this.flow.id);
+  },
+
+  showFlowDetails() {
+    const sidebarApp = this.getChildApp('flowSidebar');
+
+    Radio.request('sidebar', 'start', sidebarApp, { flow: this.flow });
+
+    this.listenTo(sidebarApp, 'close', () => {
+      Radio.trigger('event-router', 'flow', this.flow.id);
+    });
   },
 });

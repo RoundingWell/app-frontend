@@ -4,8 +4,6 @@ import hbs from 'handlebars-inline-precompile';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/sidebar.scss';
 
-import { animSidebar } from 'js/anim';
-
 import Droplist from 'js/components/droplist';
 import { CheckComponent } from 'js/views/patients/shared/actions_views';
 
@@ -174,59 +172,48 @@ const FlowStatesFiltersView = CollectionView.extend({
   },
 });
 
-const HeaderView = View.extend({
+const HeadingView = View.extend({
   modelEvents: {
     'change:filtersCount': 'render',
   },
   template: hbs`
-    <div class="flex flex-align-center">
-      <div class="flex-grow">
-        <h3 class="sidebar__heading">
-          <span class="u-margin--r-8">{{far "sliders"}}</span>{{ @intl.patients.sidebar.filters.filtersSidebarViews.headerView.allFiltersLabel }}
-          {{#if filtersCount}}<span>({{filtersCount}})</span>{{/if}}
-        </h3>
-      </div>
-      <div class="flex flex-align-center">
-        <button class="filters-sidebar__clear-filters js-clear-filters" {{#unless filtersCount}}disabled{{/unless}}>
-          {{ @intl.patients.sidebar.filters.filtersSidebarViews.headerView.clearFilters }}
-        </button>
-        <button class="filters-sidebar__close button--icon js-close">{{fas "xmark"}}</button>
-      </div>
-    </div>
+    <span class="u-margin--r-8">{{far "sliders"}}</span>{{ @intl.patients.sidebar.filters.filtersSidebarViews.headingView.allFiltersLabel }}
+    {{#if filtersCount}}<span>({{filtersCount}})</span>{{/if}}
+  `,
+});
+
+const MenuView = View.extend({
+  modelEvents: {
+    'change:filtersCount': 'render',
+  },
+  triggers: {
+    'click .js-clear-filters': 'click:clear',
+  },
+  template: hbs`
+    <button class="button--text filters-sidebar__clear-filters js-clear-filters" {{#unless filtersCount}}disabled{{/unless}}>
+    {{ @intl.patients.sidebar.filters.filtersSidebarViews.menuView.clearFilters }}
+    </button>
   `,
 });
 
 const LayoutView = View.extend({
-  className: 'sidebar flex-region',
+  className: 'flex-grow',
   template: hbs`
-    <div class="flex-grow">
-      <div data-header-region></div>
-      <div data-custom-filters-region></div>
-      <div data-states-filters-region></div>
-      <div data-flow-states-filters-region></div>
-    </div>
+    <div data-custom-filters-region></div>
+    <div data-states-filters-region></div>
+    <div data-flow-states-filters-region></div>
   `,
   regions: {
-    header: {
-      el: '[data-header-region]',
-      replaceElement: true,
-    },
     customFilters: '[data-custom-filters-region]',
     statesFilters: '[data-states-filters-region]',
     flowStatesFilters: '[data-flow-states-filters-region]',
-  },
-  triggers: {
-    'click .js-close': 'close',
-    'click .js-clear-filters': 'click:clearFilters',
-  },
-  onAttach() {
-    animSidebar(this.el);
   },
 });
 
 export {
   LayoutView,
-  HeaderView,
+  HeadingView,
+  MenuView,
   CustomFiltersView,
   StatesFiltersView,
   FlowStatesFiltersView,

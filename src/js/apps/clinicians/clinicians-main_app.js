@@ -19,10 +19,6 @@ export default RouterApp.extend({
       action: 'showCliniciansAll',
       route: 'clinicians/:id',
     },
-    'clinician:new': {
-      action: 'showCliniciansAll',
-      route: 'clinicians/new',
-    },
   },
 
   showCliniciansAll() {
