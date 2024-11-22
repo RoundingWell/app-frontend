@@ -60,6 +60,11 @@ const MenuView = View.extend({
   },
 });
 
+const NameView = View.extend({
+  className: 'patient-flow-sidebar__name',
+  template: hbs`{{ name }}`,
+});
+
 const PermissionView = View.extend({
   className: 'flex u-margin--t-8',
   template: hbs`
@@ -73,6 +78,7 @@ const PermissionView = View.extend({
 const SidebarView = View.extend({
   template: FlowSidebarTemplate,
   regions: {
+    name: '[data-name-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     permission: '[data-permission-region]',
@@ -88,6 +94,7 @@ const SidebarView = View.extend({
     };
   },
   modelEvents: {
+    'change:name': 'showName',
     'change:_state': 'showOwner',
     'change:_owner': 'showFlow',
   },
@@ -98,12 +105,17 @@ const SidebarView = View.extend({
   showFlow() {
     this.canEdit = this.model.canEdit();
 
+    this.showName();
     this.showActions();
   },
   showActions() {
     this.showState();
     this.showOwner();
     this.showPermission();
+  },
+  showName() {
+    const nameView = new NameView({ model: this.model });
+    this.showChildView('name', nameView);
   },
   showState() {
     if (!this.canEdit) {

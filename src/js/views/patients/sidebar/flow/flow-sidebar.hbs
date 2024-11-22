@@ -1,5 +1,5 @@
 <div>
-  <div class="patient-flow-sidebar__name">{{ name }}</div>
+  <div data-name-region></div>
   <div class="sidebar__details">{{ details }}{{#unless details}}<span class="sidebar--no-results">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.noDetails }}</span>{{/unless}}</div>
   <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
   <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>

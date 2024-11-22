@@ -2423,6 +2423,12 @@ context('patient flow page', function() {
 
     cy
       .get('.app-frame__sidebar')
+      .as('flowSidebar')
+      .find('[data-name-region]')
+      .should('contain', 'New Flow Name');
+
+    cy
+      .get('.app-frame__sidebar')
       .find('.sidebar__footer')
       .contains('Updated')
       .next()
