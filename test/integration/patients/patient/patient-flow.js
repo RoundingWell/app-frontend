@@ -2457,11 +2457,6 @@ context('patient flow page', function() {
       .find('[data-details-region]')
       .should('contain', 'New flow details');
 
-    cy
-      .get('.app-frame__sidebar')
-      .find('.js-close')
-      .click();
-
     cy.sendWs({
       category: 'NameChanged',
       resource: {
@@ -2615,5 +2610,10 @@ context('patient flow page', function() {
     cy
       .get('[data-header-region]')
       .find('[data-state-region] .fa-circle-check');
+
+    cy
+      .get('@flowSidebar')
+      .find('[data-state-region]')
+      .should('contain', 'Done');
   });
 });

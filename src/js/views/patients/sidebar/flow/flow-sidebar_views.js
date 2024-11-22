@@ -107,7 +107,7 @@ const SidebarView = View.extend({
   modelEvents: {
     'change:name': 'showName',
     'change:details': 'showDetails',
-    'change:_state': 'showOwner',
+    'change:_state': 'showFlow',
     'change:_owner': 'showFlow',
   },
   onRender() {
