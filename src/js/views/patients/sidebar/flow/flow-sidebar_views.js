@@ -65,6 +65,16 @@ const NameView = View.extend({
   template: hbs`{{ name }}`,
 });
 
+const DetailsView = View.extend({
+  className: 'sidebar__details',
+  template: hbs`
+    {{ details }}
+    {{#unless details}}
+      <span class="sidebar--no-results">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.noDetails }}</span>
+    {{/unless}}
+  `,
+});
+
 const PermissionView = View.extend({
   className: 'flex u-margin--t-8',
   template: hbs`
@@ -79,6 +89,7 @@ const SidebarView = View.extend({
   template: FlowSidebarTemplate,
   regions: {
     name: '[data-name-region]',
+    details: '[data-details-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     permission: '[data-permission-region]',
@@ -95,6 +106,7 @@ const SidebarView = View.extend({
   },
   modelEvents: {
     'change:name': 'showName',
+    'change:details': 'showDetails',
     'change:_state': 'showOwner',
     'change:_owner': 'showFlow',
   },
@@ -106,6 +118,7 @@ const SidebarView = View.extend({
     this.canEdit = this.model.canEdit();
 
     this.showName();
+    this.showDetails();
     this.showActions();
   },
   showActions() {
@@ -116,6 +129,10 @@ const SidebarView = View.extend({
   showName() {
     const nameView = new NameView({ model: this.model });
     this.showChildView('name', nameView);
+  },
+  showDetails() {
+    const detailsView = new DetailsView({ model: this.model });
+    this.showChildView('details', detailsView);
   },
   showState() {
     if (!this.canEdit) {

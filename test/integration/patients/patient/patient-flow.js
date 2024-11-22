@@ -2434,11 +2434,6 @@ context('patient flow page', function() {
       .next()
       .should('contain', formatDate(testTs(), 'AT_TIME'));
 
-    cy
-      .get('.app-frame__sidebar')
-      .find('.js-close')
-      .click();
-
     cy.sendWs({
       category: 'DetailsChanged',
       resource: {
@@ -2456,6 +2451,16 @@ context('patient flow page', function() {
       .get('[data-header-region]')
       .find('.patient-flow__details')
       .contains('New flow details');
+
+    cy
+      .get('@flowSidebar')
+      .find('[data-details-region]')
+      .should('contain', 'New flow details');
+
+    cy
+      .get('.app-frame__sidebar')
+      .find('.js-close')
+      .click();
 
     cy.sendWs({
       category: 'NameChanged',
