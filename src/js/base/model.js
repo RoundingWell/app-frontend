@@ -5,6 +5,12 @@ import JsonApiMixin from './jsonapi-mixin';
 
 export default Backbone.Model.extend(extend({
   destroy(options) {
+    if (options && options.isDeleted) {
+      this.stopListening();
+      this.trigger('destroy', this, this.collection, options);
+      return;
+    }
+
     if (this.isNew()) {
       Backbone.Model.prototype.destroy.call(this, options);
       return Promise.resolve(options);

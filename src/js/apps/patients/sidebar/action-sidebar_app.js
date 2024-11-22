@@ -43,7 +43,11 @@ export default App.extend(extend({
     this.action.trigger('editing', true);
     const flow = this.action.getFlow();
     if (flow) this.listenTo(flow, 'change:_state', this.setAccess);
-    this.listenTo(action, 'change:_owner', this.onChangeOwner);
+
+    this.listenTo(action, {
+      'change:_owner': this.onChangeOwner,
+      'destroy': this.stop,
+    });
 
     this.showChildView('heading', new HeadingView({ model: this.action }));
     this.showContent();
