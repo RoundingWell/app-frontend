@@ -2559,6 +2559,16 @@ context('patient flow page', function() {
     });
 
     cy
+      .get('[data-header-region]')
+      .find('[data-owner-region]')
+      .should('contain', 'CO');
+
+    cy
+      .get('@flowSidebar')
+      .find('[data-owner-region]')
+      .should('contain', 'Coordinator');
+
+    cy
       .get('.patient-flow__progress')
       .should('have.value', 0);
 
@@ -2601,11 +2611,6 @@ context('patient flow page', function() {
         expect($action.find('.fa-circle-check')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('CO');
       });
-
-    cy
-      .get('[data-header-region]')
-      .find('[data-owner-region]')
-      .contains('CO');
 
     cy
       .get('[data-header-region]')
