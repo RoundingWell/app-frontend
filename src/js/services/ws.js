@@ -12,7 +12,7 @@ export default App.extend({
   radioRequests: {
     'send': 'send',
     'subscribe': 'subscribe',
-    'subscribe:persist': 'subscribePersist',
+    'add': 'add',
     'unsubscribe': 'unsubscribe',
   },
 
@@ -111,17 +111,33 @@ export default App.extend({
     channel.trigger('message', data);
   },
 
-  subscribe(resources) {
+  subscribe(resources, { shouldPersist } = {}) {
+    resources = isArray(resources) ? resources : [resources];
+
+    if (shouldPersist) {
+      each(resources, ({ id, type }) => {
+        this.persistent[id] = { id, type };
+      });
+
+      this.resources.reset(resources);
+      this._subscribe();
+      return;
+    }
+
     this.resources.reset(resources);
     this.resources.add(values(this.persistent));
     this._subscribe();
   },
 
-  subscribePersist(resources) {
+  add(resources, { shouldPersist } = {}) {
     resources = isArray(resources) ? resources : [resources];
-    each(resources, ({ id, type }) => {
-      this.persistent[id] = { id, type };
-    });
+
+    if (shouldPersist) {
+      each(resources, ({ id, type }) => {
+        this.persistent[id] = { id, type };
+      });
+    }
+
     this.resources.add(resources);
     this._subscribe();
   },
