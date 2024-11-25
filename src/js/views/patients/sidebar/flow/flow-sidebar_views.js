@@ -107,21 +107,18 @@ const SidebarView = View.extend({
   modelEvents: {
     'change:name': 'showName',
     'change:details': 'showDetails',
-    'change:_state': 'showFlow',
-    'change:_owner': 'showFlow',
+    'change:_state': 'showActions',
+    'change:_owner': 'showActions',
   },
   onRender() {
-    this.showFlow();
-    this.getRegion('activity').startPreloader();
-  },
-  showFlow() {
-    this.canEdit = this.model.canEdit();
-
     this.showName();
     this.showDetails();
     this.showActions();
+    this.getRegion('activity').startPreloader();
   },
   showActions() {
+    this.canEdit = this.model.canEdit();
+
     this.showState();
     this.showOwner();
     this.showPermission();
