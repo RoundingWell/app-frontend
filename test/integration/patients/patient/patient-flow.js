@@ -303,6 +303,19 @@ context('patient flow page', function() {
       .find('[data-form-sharing-region]')
       .find('.action-sidebar__sharing-state')
       .should('contain', 'Response Saved');
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
   });
 
   specify('done patient flow action sidebar', function() {
@@ -2620,5 +2633,18 @@ context('patient flow page', function() {
       .get('@flowSidebar')
       .find('[data-state-region]')
       .should('contain', 'Done');
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.patient-flow__empty-list')
+      .contains('No Actions');
   });
 });
