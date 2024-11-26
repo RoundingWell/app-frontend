@@ -2423,15 +2423,16 @@ context('patient flow page', function() {
 
     cy
       .get('.app-frame__sidebar')
+      .as('flowSidebar')
+      .find('[data-name-region]')
+      .should('contain', 'New Flow Name');
+
+    cy
+      .get('.app-frame__sidebar')
       .find('.sidebar__footer')
       .contains('Updated')
       .next()
       .should('contain', formatDate(testTs(), 'AT_TIME'));
-
-    cy
-      .get('.app-frame__sidebar')
-      .find('.js-close')
-      .click();
 
     cy.sendWs({
       category: 'DetailsChanged',
@@ -2450,6 +2451,11 @@ context('patient flow page', function() {
       .get('[data-header-region]')
       .find('.patient-flow__details')
       .contains('New flow details');
+
+    cy
+      .get('@flowSidebar')
+      .find('[data-details-region]')
+      .should('contain', 'New flow details');
 
     cy.sendWs({
       category: 'NameChanged',
@@ -2553,6 +2559,16 @@ context('patient flow page', function() {
     });
 
     cy
+      .get('[data-header-region]')
+      .find('[data-owner-region]')
+      .should('contain', 'CO');
+
+    cy
+      .get('@flowSidebar')
+      .find('[data-owner-region]')
+      .should('contain', 'Coordinator');
+
+    cy
       .get('.patient-flow__progress')
       .should('have.value', 0);
 
@@ -2598,11 +2614,11 @@ context('patient flow page', function() {
 
     cy
       .get('[data-header-region]')
-      .find('[data-owner-region]')
-      .contains('CO');
+      .find('[data-state-region] .fa-circle-check');
 
     cy
-      .get('[data-header-region]')
-      .find('[data-state-region] .fa-circle-check');
+      .get('@flowSidebar')
+      .find('[data-state-region]')
+      .should('contain', 'Done');
   });
 });

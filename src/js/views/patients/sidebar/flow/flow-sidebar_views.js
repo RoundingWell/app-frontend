@@ -60,6 +60,21 @@ const MenuView = View.extend({
   },
 });
 
+const NameView = View.extend({
+  className: 'patient-flow-sidebar__name',
+  template: hbs`{{ name }}`,
+});
+
+const DetailsView = View.extend({
+  className: 'sidebar__details',
+  template: hbs`
+    {{ details }}
+    {{#unless details}}
+      <span class="sidebar--no-results">{{ @intl.patients.sidebar.flow.flowSidebarTemplate.noDetails }}</span>
+    {{/unless}}
+  `,
+});
+
 const PermissionView = View.extend({
   className: 'flex u-margin--t-8',
   template: hbs`
@@ -73,6 +88,8 @@ const PermissionView = View.extend({
 const SidebarView = View.extend({
   template: FlowSidebarTemplate,
   regions: {
+    name: '[data-name-region]',
+    details: '[data-details-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     permission: '[data-permission-region]',
@@ -88,22 +105,31 @@ const SidebarView = View.extend({
     };
   },
   modelEvents: {
-    'change:_state': 'showOwner',
-    'change:_owner': 'showFlow',
+    'change:name': 'showName',
+    'change:details': 'showDetails',
+    'change:_state': 'showActions',
+    'change:_owner': 'showActions',
   },
   onRender() {
-    this.showFlow();
+    this.showName();
+    this.showDetails();
+    this.showActions();
     this.getRegion('activity').startPreloader();
   },
-  showFlow() {
+  showActions() {
     this.canEdit = this.model.canEdit();
 
-    this.showActions();
-  },
-  showActions() {
     this.showState();
     this.showOwner();
     this.showPermission();
+  },
+  showName() {
+    const nameView = new NameView({ model: this.model });
+    this.showChildView('name', nameView);
+  },
+  showDetails() {
+    const detailsView = new DetailsView({ model: this.model });
+    this.showChildView('details', detailsView);
   },
   showState() {
     if (!this.canEdit) {
