@@ -152,7 +152,7 @@ context('WS Service', function() {
 
     cy
       .interceptWs('Subscribe', () => {
-        channel.request('subscribe:persist', notifications[1]);
+        channel.request('add', notifications[1], { shouldPersist: true });
       })
       .should('deep.equal', { clientKey, resources: [notifications[0], notifications[1]] });
 
@@ -164,20 +164,26 @@ context('WS Service', function() {
 
     cy
       .interceptWs('Subscribe', () => {
-        channel.request('subscribe:persist', [notifications[3]]);
+        channel.request('unsubscribe', notifications[1]);
       })
-      .should('deep.equal', { clientKey, resources: [notifications[2], notifications[1], notifications[3]] });
+      .should('deep.equal', { clientKey, resources: [notifications[2]] });
 
     cy
       .interceptWs('Subscribe', () => {
-        channel.request('unsubscribe', notifications[1]);
+        channel.request('subscribe', [notifications[3]], { shouldPersist: true });
       })
-      .should('deep.equal', { clientKey, resources: [notifications[2], notifications[3]] });
+      .should('deep.equal', { clientKey, resources: [notifications[3]] });
+    
+    cy
+      .interceptWs('Subscribe', () => {
+        channel.request('add', [notifications[0], notifications[1]]);
+      })
+      .should('deep.equal', { clientKey, resources: [notifications[3], notifications[0], notifications[1]] });
 
     cy
       .interceptWs('Subscribe', () => {
         channel.request('unsubscribe', [notifications[3]]);
       })
-      .should('deep.equal', { clientKey, resources: [notifications[2]] });
+      .should('deep.equal', { clientKey, resources: [notifications[0], notifications[1]] });
   });
 });
