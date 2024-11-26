@@ -2645,10 +2645,48 @@ context('worklist page', function() {
       .should('contain', 'Due Time Least Recent');
 
     cy
+      .get('.worklist-list__filter-sort')
+      .click()
+      .get('.picklist')
+      .contains('Action: A - Z')
+      .click();
+
+    cy
       .get('.app-frame__content')
       .find('.table-list__item')
       .first()
-      .contains('Due Date Most Recent')
+      .should('contain', 'Created Least Recent');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .last()
+      .should('contain', 'Updated Most Recent');
+
+    cy
+      .get('.worklist-list__filter-sort')
+      .click()
+      .get('.picklist')
+      .contains('Action: Z - A')
+      .click();
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .first()
+      .should('contain', 'Updated Most Recent');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .last()
+      .should('contain', 'Created Least Recent');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .first()
+      .contains('Updated Most Recent')
       .click()
       .wait('@routeAction');
 
@@ -2662,11 +2700,11 @@ context('worklist page', function() {
       .get('.app-frame__content')
       .find('.table-list__item')
       .first()
-      .contains('Due Date Most Recent');
+      .contains('Updated Most Recent');
 
     cy
       .get('.worklist-list__filter-sort')
-      .contains('Due: Later - Sooner');
+      .contains('Action: Z - A');
   });
 
   specify('action sorting - patient', function() {
