@@ -681,6 +681,9 @@ careOptsFrontend:
             }
         noOwnerToggleView:
           noOwner: No Owner
+        sortActionOptions:
+          asc: 'Action: A - Z'
+          desc: 'Action: Z - A'
         sortCreatedOptions:
           asc: 'Added: Oldest - Newest'
           desc: 'Added: Newest - Oldest'
@@ -826,7 +829,7 @@ careOptsFrontend:
             headingOutreachText: Program Outreach Action
           menuView:
             delete: Delete Program Action
-            headingText: Program Action Menu  
+            headingText: Program Action Menu
           saveView:
             cancelBtn: Cancel
             saveBtn: Save

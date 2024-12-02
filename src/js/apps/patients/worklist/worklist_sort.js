@@ -62,6 +62,10 @@ const patientNameComparator = function(a, b) {
   return alphaSort(this.get('direction'), a.model.getPatient().getSortName(), b.model.getPatient().getSortName());
 };
 
+const actionNameComparator = function(a, b) {
+  return alphaSort(this.get('direction'), a.model.get('name'), b.model.get('name'));
+};
+
 const updatedAtComparator = function(a, b) {
   return alphaSort(this.get('direction'), a.model.get('updated_at'), b.model.get('updated_at'));
 };
@@ -81,6 +85,19 @@ const defaultSortOptions = [
     id: 'sortPatientDesc',
     text: i18n.sortPatientOptions.desc,
     comparator: patientNameComparator,
+  },
+  {
+    id: 'sortActionNameAsc',
+    text: i18n.sortActionOptions.asc,
+    entities: ['actions'],
+    direction: 'asc',
+    comparator: actionNameComparator,
+  },
+  {
+    id: 'sortActionNameDesc',
+    text: i18n.sortActionOptions.desc,
+    entities: ['actions'],
+    comparator: actionNameComparator,
   },
   {
     id: 'sortDueAsc',
