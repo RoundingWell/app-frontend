@@ -1,8 +1,9 @@
-import { bind, invoke } from 'underscore';
+import { bind, invoke, get } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import intl, { renderTemplate } from 'js/i18n';
+import handleErrors from 'js/utils/handle-errors';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
@@ -49,20 +50,20 @@ export default SubRouterApp.extend({
       Radio.request('entities', 'fetch:patients:model:byFlow', flowId),
     ];
   },
-  onFail(options, { response = {} }) {
-    /* istanbul ignore else: other error scenarios handled elsewhere */
-    if (response.status === 410) {
+  /* istanbul ignore next: error handling */
+  onFail(options, error) {
+    if (get(error, ['response', 'status']) === 410) {
       Radio.trigger('event-router', 'notFound');
       this.stop();
       return;
     }
-    
-    /* eslint-disable no-console */
-    console.error(arguments);
+
+    handleErrors(error);
   },
   onStart({ currentRoute }, flow, actions, patient) {
     this.flow = flow;
     this.actions = actions;
+    this.currentRoute = currentRoute;
     this.editableCollection = actions.clone();
     this.patient = patient;
     this.addOpts = this.getAddOpts(this.flow.getProgramFlow());
@@ -209,7 +210,7 @@ export default SubRouterApp.extend({
           .catch(() => {
             Radio.request('alert', 'show:error', intl.patients.worklist.worklistApp.bulkEditFailure);
             this.getState().clearSelected();
-            this.restart();
+            this.restart({ flowId: this.flow.id, currentRoute: this.currentRoute });
           });
       },
       'delete'() {

@@ -1,6 +1,8 @@
 import { partial, some, get } from 'underscore';
 import Radio from 'backbone.radio';
 
+import handleErrors from 'js/utils/handle-errors';
+
 import SubRouterApp from 'js/base/subrouterapp';
 
 import DashboardApp from 'js/apps/patients/patient/dashboard/dashboard_app';
@@ -46,10 +48,10 @@ export default SubRouterApp.extend({
   },
 
   /* istanbul ignore next: error handling */
-  onFail({ currentRoute: { eventArgs: [patientId] } }, { response = {}, responseData = {} }) {
-    if (response.status === 410) {
-      if (!some(responseData.errors, error => {
-        return get(error, ['source', 'parameter']) === 'actionId';
+  onFail({ currentRoute: { eventArgs: [patientId] } }, error) {
+    if (get(error, ['response', 'status']) === 410) {
+      if (!some(error.responseData.errors, err => {
+        return get(err, ['source', 'parameter']) === 'actionId';
       })) {
         Radio.trigger('event-router', 'notFound');
         this.stop();
@@ -62,8 +64,7 @@ export default SubRouterApp.extend({
       return;
     }
 
-    /* eslint-disable no-console */
-    console.error(arguments);
+    handleErrors(error);
   },
 
   onStart({ currentRoute }, patient) {

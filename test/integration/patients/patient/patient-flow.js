@@ -1475,6 +1475,8 @@ context('patient flow page', function() {
   });
 
   specify('bulk edit actions', function() {
+    const testPatient = getPatient();
+
     const testFlowActions = [
       getAction({
         attributes: {
@@ -1484,6 +1486,7 @@ context('patient flow page', function() {
           sequence: 1,
         },
         relationships: {
+          patient: getRelationship(testPatient),
           flow: getRelationship(testFlow),
           state: getRelationship(stateTodo),
           owner: getRelationship(teamNurse),
@@ -1498,6 +1501,7 @@ context('patient flow page', function() {
           sequence: 3,
         },
         relationships: {
+          patient: getRelationship(testPatient),
           flow: getRelationship(testFlow),
           state: getRelationship(stateTodo),
           owner: getRelationship(teamOther),
@@ -1511,6 +1515,7 @@ context('patient flow page', function() {
           sequence: 3,
         },
         relationships: {
+          patient: getRelationship(testPatient),
           flow: getRelationship(testFlow),
           state: getRelationship(stateInProgress),
           owner: getRelationship(teamOther),
@@ -1526,6 +1531,7 @@ context('patient flow page', function() {
             updated_at: testTs(),
           },
           relationships: {
+            patient: getRelationship(testPatient),
             state: getRelationship(stateInProgress),
             actions: getRelationship(testFlowActions),
           },
@@ -1533,7 +1539,11 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routePatientByFlow()
+      .routePatientByFlow(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
       .routeFlowActions(fx => {
         fx.data = testFlowActions;
 
@@ -1971,7 +1981,7 @@ context('patient flow page', function() {
 
     cy
       .intercept('PATCH', '/api/actions/*', {
-        statusCode: 404,
+        statusCode: 400,
         body: {},
       })
       .as('failedPatchAction');
@@ -2005,6 +2015,16 @@ context('patient flow page', function() {
     cy
       .get('.alert-box')
       .should('contain', 'Something went wrong. Please try again.');
+      
+    cy
+      .wait('@routeFlow')
+      .wait('@routePatientByFlow')
+      .wait('@routeFlowActions');
+    
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .should('have.length', 3);
   });
 
   specify('click+shift multiselect', function() {
