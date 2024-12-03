@@ -47,6 +47,7 @@ export default App.extend(extend({
     this.listenTo(action, {
       'change:_owner': this.onChangeOwner,
       'destroy': this.stop,
+      'add:comment': this.onCommentAdded,
     });
 
     this.showChildView('heading', new HeadingView({ model: this.action }));
@@ -72,6 +73,9 @@ export default App.extend(extend({
     this.setAccess();
     /* istanbul ignore else : Covers edge case when owner changes prior to beforeStart */
     if (this.isRunning()) this.showAttachments();
+  },
+  onCommentAdded(model) {
+    this.activityCollection.add(model);
   },
   onStart(options, activity, comments, attachments) {
     this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);

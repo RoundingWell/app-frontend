@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
+import { v4 as uuid } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -133,8 +134,20 @@ context('patient flow page', function() {
       },
     });
 
+    const testClinician = getClinician({
+      id: '22222',
+      attributes: {
+        name: 'Test Clinician',
+      },
+    });
+
     cy
       .routesForPatientAction()
+      .routeWorkspaceClinicians(fx => {
+        fx.data[1] = testClinician;
+
+        return fx;
+      })
       .routeFlow(fx => {
         fx.data = mergeJsonApi(testFlow, {
           relationships: {
@@ -303,6 +316,33 @@ context('patient flow page', function() {
       .find('[data-form-sharing-region]')
       .find('.action-sidebar__sharing-state')
       .should('contain', 'Response Saved');
+
+    cy.sendWs({
+      category: 'CommentAdded',
+      author: testClinician.id,
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        comment: {
+          type: 'comments',
+          id: uuid(),
+        },
+        attributes: {
+          message: 'New websocket comment.',
+        },
+      },
+    });
+
+    cy
+      .get('.sidebar')
+      .find('[data-activity-region]')
+      .find('.comment__item')
+      .last()
+      .should('contain', formatDate(testTs(), 'AT_TIME'))
+      .should('contain', 'Test Clinician')
+      .should('contain', 'New websocket comment.');
 
     cy.sendWs({
       category: 'ResourceDeleted',
@@ -2015,12 +2055,12 @@ context('patient flow page', function() {
     cy
       .get('.alert-box')
       .should('contain', 'Something went wrong. Please try again.');
-      
+
     cy
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
-    
+
     cy
       .get('.app-frame__content')
       .find('.table-list__item')
