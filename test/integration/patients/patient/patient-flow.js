@@ -107,6 +107,8 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
+    const testCommentId = uuid();
+
     const testPatient = getPatient({
       attributes: {
         first_name: 'Test',
@@ -134,20 +136,8 @@ context('patient flow page', function() {
       },
     });
 
-    const testClinician = getClinician({
-      id: '22222',
-      attributes: {
-        name: 'Test Clinician',
-      },
-    });
-
     cy
       .routesForPatientAction()
-      .routeWorkspaceClinicians(fx => {
-        fx.data[1] = testClinician;
-
-        return fx;
-      })
       .routeFlow(fx => {
         fx.data = mergeJsonApi(testFlow, {
           relationships: {
@@ -319,7 +309,7 @@ context('patient flow page', function() {
 
     cy.sendWs({
       category: 'CommentAdded',
-      author: testClinician.id,
+      author: getCurrentClinician(),
       resource: {
         type: 'patient-actions',
         id: testFlowAction.id,
@@ -327,7 +317,7 @@ context('patient flow page', function() {
       payload: {
         comment: {
           type: 'comments',
-          id: uuid(),
+          id: testCommentId,
         },
         attributes: {
           message: 'New websocket comment.',
@@ -340,9 +330,51 @@ context('patient flow page', function() {
       .find('[data-activity-region]')
       .find('.comment__item')
       .last()
+      .as('socketComment')
       .should('contain', formatDate(testTs(), 'AT_TIME'))
-      .should('contain', 'Test Clinician')
+      .should('contain', 'Clinician McTester')
       .should('contain', 'New websocket comment.');
+
+    cy
+      .get('@socketComment')
+      .find('.js-edit')
+      .click();
+
+    cy.sendWs({
+      category: 'CommentEdited',
+      resource: {
+        type: 'comments',
+        id: testCommentId,
+      },
+      payload: {
+        attributes: {
+          message: 'Edited websocket comment v1.',
+        },
+      },
+    });
+
+    cy
+      .get('@socketComment')
+      .should('contain', 'Edited websocket comment v1.')
+      .should('contain', '(Edited)');
+
+    cy.sendWs({
+      category: 'CommentEdited',
+      resource: {
+        type: 'comments',
+        id: testCommentId,
+      },
+      payload: {
+        attributes: {
+          message: 'Edited websocket comment v2.',
+        },
+      },
+    });
+
+    cy
+      .get('@socketComment')
+      .should('contain', 'Edited websocket comment v2.')
+      .should('contain', '(Edited)');
 
     cy.sendWs({
       category: 'ResourceDeleted',
