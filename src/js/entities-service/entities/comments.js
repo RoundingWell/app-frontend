@@ -14,6 +14,9 @@ const _Model = BaseModel.extend({
     CommentEdited({ attributes }) {
       this.set({ edited_at: dayjs.utc().format(), ...attributes });
     },
+    CommentRemoved() {
+      this.destroy({ isDeleted: true });
+    },
   },
   urlRoot() {
     if (this.isNew()) return `/api/actions/${ this.get('_action') }/relationships/comments`;

@@ -326,8 +326,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.sidebar')
-      .find('[data-activity-region]')
+      .get('[data-activity-region]')
       .find('.comment__item')
       .last()
       .as('socketComment')
@@ -375,6 +374,20 @@ context('patient flow page', function() {
       .get('@socketComment')
       .should('contain', 'Edited websocket comment v2.')
       .should('contain', '(Edited)');
+
+    cy.sendWs({
+      category: 'CommentRemoved',
+      resource: {
+        type: 'comments',
+        id: testCommentId,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .should('have.length', 3);
 
     cy.sendWs({
       category: 'ResourceDeleted',
