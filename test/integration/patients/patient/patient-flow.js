@@ -353,6 +353,7 @@ context('patient flow page', function() {
     const testListAction = mergeJsonApi(testAction, {
       attributes: {
         name: 'Third In List',
+        details: null,
         due_date: testDateAdd(1),
         created_at: testTsSubtract(3),
         sequence: 3,
@@ -384,6 +385,7 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               name: 'First In List',
+              details: 'Action details content.',
               due_date: testDateSubtract(1),
               created_at: testTsSubtract(1),
               sequence: 1,
@@ -402,6 +404,7 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               name: 'Second In List',
+              details: null,
               due_date: testDateAdd(2),
               created_at: testTsSubtract(2),
               sequence: 2,
@@ -432,6 +435,24 @@ context('patient flow page', function() {
       .as('actionsList')
       .find('.table-list__item')
       .should('have.length', 3);
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item')
+      .first()
+      .find('[data-details-region]')
+      .trigger('pointerover');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Action details content.');
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item')
+      .eq(1)
+      .find('[data-details-region]')
+      .should('be.empty');
 
     cy
       .get('@actionsList')
@@ -2015,12 +2036,12 @@ context('patient flow page', function() {
     cy
       .get('.alert-box')
       .should('contain', 'Something went wrong. Please try again.');
-      
+
     cy
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
-    
+
     cy
       .get('.app-frame__content')
       .find('.table-list__item')

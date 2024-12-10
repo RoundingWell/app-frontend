@@ -23,6 +23,13 @@
   }
 }
 
+.table-list__display-icon {
+  color: #999;
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+}
+
 .table-list.is-dragging {
   .table-list__item {
     background: $white;
