@@ -10,7 +10,7 @@ import 'scss/modules/table-list.scss';
 import { alphaSort } from 'js/utils/sorting';
 import PreloadRegion from 'js/regions/preload_region';
 
-import { StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton } from 'js/views/patients/shared/actions_views';
+import { StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/views/patients/shared/read-only_views';
 
 import ActionItemTemplate from './action-item.hbs';
@@ -75,6 +75,7 @@ const ActionItemView = View.extend({
   },
   behaviors: [RowBehavior, DoneBehavior],
   regions: {
+    details: '[data-details-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     dueDate: '[data-due-date-region]',
@@ -98,11 +99,17 @@ const ActionItemView = View.extend({
   onRender() {
     this.canEdit = this.model.canEdit();
 
+    this.showDetailsTooltip();
     this.showState();
     this.showOwner();
     this.showDueDay();
     this.showDueTime();
     this.showForm();
+  },
+  showDetailsTooltip() {
+    if (!this.model.get('details')) return;
+
+    this.showChildView('details', new DetailsTooltip({ model: this.model }));
   },
   showState() {
     if (!this.canEdit) {
