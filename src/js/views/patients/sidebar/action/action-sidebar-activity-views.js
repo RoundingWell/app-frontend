@@ -121,6 +121,9 @@ const CommentView = View.extend({
   regions: {
     comment: '[data-comment-activity-region]',
   },
+  modelEvents: {
+    'change:message': 'render',
+  },
   template: hbs`
     <div data-comment-activity-region>
       <div class="comment__item">

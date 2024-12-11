@@ -1,5 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
+import { v4 as uuid } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -106,6 +107,8 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
+    const testCommentId = uuid();
+
     const testPatient = getPatient({
       attributes: {
         first_name: 'Test',
@@ -303,6 +306,88 @@ context('patient flow page', function() {
       .find('[data-form-sharing-region]')
       .find('.action-sidebar__sharing-state')
       .should('contain', 'Response Saved');
+
+    cy.sendWs({
+      category: 'CommentAdded',
+      author: getCurrentClinician(),
+      resource: {
+        type: 'patient-actions',
+        id: testFlowAction.id,
+      },
+      payload: {
+        comment: {
+          type: 'comments',
+          id: testCommentId,
+        },
+        attributes: {
+          message: 'New websocket comment.',
+        },
+      },
+    });
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .last()
+      .as('socketComment')
+      .should('contain', formatDate(testTs(), 'AT_TIME'))
+      .should('contain', 'Clinician McTester')
+      .should('contain', 'New websocket comment.');
+
+    cy
+      .get('@socketComment')
+      .find('.js-edit')
+      .click();
+
+    cy.sendWs({
+      category: 'CommentEdited',
+      resource: {
+        type: 'comments',
+        id: testCommentId,
+      },
+      payload: {
+        attributes: {
+          message: 'Edited websocket comment v1.',
+        },
+      },
+    });
+
+    cy
+      .get('@socketComment')
+      .should('contain', 'Edited websocket comment v1.')
+      .should('contain', '(Edited)');
+
+    cy.sendWs({
+      category: 'CommentEdited',
+      resource: {
+        type: 'comments',
+        id: testCommentId,
+      },
+      payload: {
+        attributes: {
+          message: 'Edited websocket comment v2.',
+        },
+      },
+    });
+
+    cy
+      .get('@socketComment')
+      .should('contain', 'Edited websocket comment v2.')
+      .should('contain', '(Edited)');
+
+    cy.sendWs({
+      category: 'CommentRemoved',
+      resource: {
+        type: 'comments',
+        id: testCommentId,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .should('have.length', 3);
 
     cy.sendWs({
       category: 'ResourceDeleted',
@@ -2015,12 +2100,12 @@ context('patient flow page', function() {
     cy
       .get('.alert-box')
       .should('contain', 'Something went wrong. Please try again.');
-      
+
     cy
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
-    
+
     cy
       .get('.app-frame__content')
       .find('.table-list__item')

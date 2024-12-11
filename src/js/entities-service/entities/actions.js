@@ -42,6 +42,17 @@ const _Model = BaseModel.extend({
     SharingUpdated({ attributes }) {
       this.set(attributes);
     },
+    CommentAdded({ author, comment, attributes }) {
+      const commentModel = Radio.request('entities', 'comments:model', {
+        id: comment.id,
+        message: attributes.message,
+        created_at: dayjs.utc().format(),
+        edited_at: null,
+        _clinician: author,
+      });
+
+      this.trigger('add:comment', commentModel);
+    },
     ResourceDeleted() {
       this.destroy({ isDeleted: true });
     },

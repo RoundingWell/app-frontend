@@ -90,12 +90,13 @@ export default Backbone.Model.extend(extend({
 
     return isFunction(messages[category]) ? messages[category] : this[messages[category]];
   },
-  handleMessage({ category, payload }) {
+  handleMessage({ category, author, payload }) {
     payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
+    payload.author = author;
 
     const handler = this._getMessageHandler(category);
     if (handler) handler.call(this, payload);
 
-    this.trigger('message', { category, payload });
+    this.trigger('message', { category, author, payload });
   },
 }, JsonApiMixin));
