@@ -2410,6 +2410,7 @@ context('patient flow page', function() {
     const testSocketAction = getAction({
       attributes: {
         name: 'Action Test',
+        details: null,
         due_date: testDate(),
         due_time: '06:00:00',
         outreach: 'disabled',
@@ -2533,6 +2534,29 @@ context('patient flow page', function() {
       .get('.patient-flow__list')
       .find('.table-list__item .patient__action-ts')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item [data-details-region]')
+      .should('be.empty');
+
+    cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          details: 'New action details',
+        },
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item [data-details-region]')
+      .should('not.be.empty');
 
     cy.sendWs({
       category: 'ActionDueChanged',
