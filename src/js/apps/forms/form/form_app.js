@@ -5,7 +5,6 @@ import store from 'store';
 import App from 'js/base/app';
 
 import intl from 'js/i18n';
-import { FORM_RESPONSE_STATUS } from 'js/static';
 
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
 import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
@@ -66,11 +65,7 @@ export default App.extend({
       Radio.request('entities', 'fetch:forms:byAction', this.patientActionId),
       Radio.request('entities', 'fetch:actions:withResponses', this.patientActionId),
       Radio.request('entities', 'fetch:patients:model:byAction', this.patientActionId),
-      Radio.request('entities', 'fetch:formResponses:latest', {
-        action: this.patientActionId,
-        status: FORM_RESPONSE_STATUS.ANY,
-        editor: this.currentUser.id,
-      }),
+      Radio.request('entities', 'fetch:formResponses:byMe', { actionId: this.patientActionId }),
     ];
   },
   onFail() {

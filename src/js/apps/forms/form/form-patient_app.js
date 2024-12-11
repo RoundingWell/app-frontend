@@ -4,8 +4,6 @@ import store from 'store';
 
 import App from 'js/base/app';
 
-import { FORM_RESPONSE_STATUS } from 'js/static';
-
 import FormsService from 'js/services/forms';
 
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
@@ -51,12 +49,7 @@ export default App.extend({
     return [
       Radio.request('entities', 'fetch:patients:model', patientId),
       Radio.request('entities', 'fetch:forms:model', formId),
-      Radio.request('entities', 'fetch:formResponses:latest', {
-        patient: patientId,
-        form: formId,
-        status: FORM_RESPONSE_STATUS.ANY,
-        editor: this.currentUser.id,
-      }),
+      Radio.request('entities', 'fetch:formResponses:byMe', { patientId, formId }),
     ];
   },
   onBeforeStop() {

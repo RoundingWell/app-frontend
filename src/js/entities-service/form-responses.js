@@ -9,6 +9,7 @@ const Entity = BaseEntity.extend({
     'formResponses:collection': 'getCollection',
     'fetch:formResponses:model': 'fetchFormResponse',
     'fetch:formResponses:latest': 'fetchLatestResponse',
+    'fetch:formResponses:byMe': 'fetchByMe',
   },
   fetchFormResponse(id, options) {
     if (!id) return new Model();
@@ -21,6 +22,14 @@ const Entity = BaseEntity.extend({
       filters.filter[key] = value;
       return filters;
     }, { filter: {} });
+  fetchOrEmpty(url, data) {
+    return this.fetchBy(url, { data }).then(response => response || new Model());
+  },
+  fetchByMe({ actionId, patientId, formId }) {
+    const filter = actionId ? { action: actionId } : { patient: patientId, form: formId };
+
+    return this.fetchOrEmpty('/api/clinicians/me/form-responses/latest', { filter });
+  },
 
     return this.fetchBy('/api/form-responses/latest', { data })
       .then(response => {

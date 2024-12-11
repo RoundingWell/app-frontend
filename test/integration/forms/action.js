@@ -107,6 +107,11 @@ context('Patient Action Form', function() {
       .routeFormActionFields()
       .routeActionActivity()
       .routePatientByAction()
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
@@ -806,6 +811,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .routeActionActivity()
       .routePatientByAction()
       .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
@@ -943,6 +953,11 @@ context('Patient Action Form', function() {
         fx.data = testFormResponses[0];
 
         return fx;
+      })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponses[0],
+        };
       })
       .routeActionActivity()
       .routePatientByAction(fx => {
@@ -1302,6 +1317,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
@@ -1443,6 +1463,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .visit('/worklist/owned-by')
       .wait('@routeActions');
 
@@ -1577,6 +1602,7 @@ context('Patient Action Form', function() {
       })
       .routeFormDefinition()
       .routeFormResponse()
+      .routeLatestFormResponse()
       .routeFormActionFields()
       .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
       .wait('@routeAction')
@@ -2249,6 +2275,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .routeFormDefinition()
       .routeFormActionFields()
       .routeActionActivity()
@@ -2824,22 +2855,29 @@ context('Patient Action Form', function() {
       .find('textarea[name="data[familyHistory]"]')
       .should('contain', 'Form draft work done in another tab.');
 
+    const submission = getFormResponse({
+      id: testFormResponseId,
+      attributes: {
+        status: FORM_RESPONSE_STATUS.SUBMITTED,
+        updated_at: testTs(),
+        response: {
+          data: {
+            familyHistory: 'Form work submitted in another tab.',
+          },
+        },
+      },
+    });
+
     cy
       .routeFormResponse(fx => {
-        fx.data = getFormResponse({
-          id: testFormResponseId,
-          attributes: {
-            status: FORM_RESPONSE_STATUS.SUBMITTED,
-            updated_at: testTs(),
-            response: {
-              data: {
-                familyHistory: 'Form work submitted in another tab.',
-              },
-            },
-          },
-        });
+        fx.data = submission;
 
         return fx;
+      })
+      .routeLatestFormResponse(() => {
+        return {
+          data: submission,
+        };
       });
 
     cy

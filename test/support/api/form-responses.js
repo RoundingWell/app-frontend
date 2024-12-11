@@ -54,11 +54,10 @@ Cypress.Commands.add('routeLatestFormSubmission', (mutator = _.identity) => {
 });
 
 Cypress.Commands.add('routeLatestFormResponse', (mutator = _.identity) => {
-  const urlRegex = /^\/api\/form-responses\/latest\?(?=.*filter\[status\]=draft).*$/;
   const body = mutator();
 
   cy
-    .intercept('GET', urlRegex, {
+    .intercept('GET', '/api/clinicians/me/form-responses/latest*', {
       statusCode: body ? 200 : 204,
       body,
     })
