@@ -570,9 +570,8 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[patient]=${ testPatient.id }`)
-      .should('contain', `filter[form]=${ testForm.id }`)
-      .should('contain', `filter[flow]=${ testFlow.id }`);
+      .should('contain', `filter[forms]=${ testForm.id }`)
+      .should('contain', `filter[flows]=${ testFlow.id }`);
 
     cy
       .iframe()
@@ -661,9 +660,8 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[patient]=${ testPatient.id }`)
-      .should('contain', `filter[form]=${ testForm.id }`)
-      .should('not.contain', 'filter[flow]');
+      .should('contain', `filter[forms]=${ testForm.id }`)
+      .should('not.contain', 'filter[flows]');
 
     cy
       .iframe()
@@ -755,11 +753,10 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[patient]=${ testPatient.id }`)
-      .should('contain', 'filter[action.tags]=foo-tag')
-      .should('not.contain', 'filter[created]')
-      .should('not.contain', 'filter[flow]')
-      .should('not.contain', 'filter[form]');
+      .should('contain', 'filter[action_tags]=foo-tag')
+      .should('not.contain', 'filter[submitted_at]')
+      .should('not.contain', 'filter[flows]')
+      .should('not.contain', 'filter[forms]');
 
     cy
       .iframe()
@@ -2764,7 +2761,7 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[submitted]=<=${ createdAt }`);
+      .should('contain', `filter[submitted_at]=<=${ createdAt }`);
   });
 
   specify('refresh stale form', function() {

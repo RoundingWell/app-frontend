@@ -10,6 +10,7 @@ const Entity = BaseEntity.extend({
     'fetch:formResponses:model': 'fetchFormResponse',
     'fetch:formResponses:latest': 'fetchLatestResponse',
     'fetch:formResponses:byMe': 'fetchByMe',
+    'fetch:formResponses:byPatient': 'fetchSubmittedByPatient',
   },
   fetchFormResponse(id, options) {
     if (!id) return new Model();
@@ -30,6 +31,14 @@ const Entity = BaseEntity.extend({
 
     return this.fetchOrEmpty('/api/clinicians/me/form-responses/latest', { filter });
   },
+  fetchSubmittedByPatient({ patientId, actionId, flowId, formId, actionTags, submittedAt }) {
+    const filter = {
+      ...(actionId && { actions: actionId }),
+      ...(flowId && { flows: flowId }),
+      ...(formId && { forms: formId }),
+      ...(actionTags && { action_tags: actionTags }),
+      ...(submittedAt && { submitted_at: submittedAt }),
+    };
 
     return this.fetchBy('/api/form-responses/latest', { data })
       .then(response => {

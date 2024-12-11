@@ -204,10 +204,9 @@ context('Formservice', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[action.tags]=foo-tag')
-      .should('contain', `filter[flow]=${ testFlow.id }`)
-      .should('contain', `filter[patient]=${ testPatient.id }`)
-      .should('contain', `filter[submitted]=<=${ createdAt }`);
+      .should('contain', 'filter[action_tags]=foo-tag')
+      .should('contain', `filter[flows]=${ testFlow.id }`)
+      .should('contain', `filter[submitted_at]=<=${ createdAt }`);
   });
 
   specify('action formservice iframe makes correct api requests', function() {
@@ -240,7 +239,7 @@ context('Formservice', function() {
       .as('routeAction');
 
     cy
-      .intercept('GET', '/api/form-responses/latest?filter[status]=submitted', {
+      .intercept('GET', '/api/patients/**/form-responses/submitted*', {
         statusCode: 204,
       })
       .as('routeLatestFormSubmission');

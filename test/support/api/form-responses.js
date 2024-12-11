@@ -44,10 +44,8 @@ Cypress.Commands.add('routeFormResponse', (mutator = _.identity) => {
 Cypress.Commands.add('routeLatestFormSubmission', (mutator = _.identity) => {
   const data = getFormResponse();
 
-  const urlRegex = /^\/api\/form-responses\/latest\?(?=.*filter\[status\]=submitted).*$/;
-
   cy
-    .intercept('GET', urlRegex, {
+    .intercept('GET', '/api/patients/**/form-responses/submitted*', {
       body: mutator({ data, included: [] }),
     })
     .as('routeLatestFormSubmission');
