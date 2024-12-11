@@ -6,7 +6,6 @@ const ACTION_OUTREACH = {
 const FORM_RESPONSE_STATUS = {
   DRAFT: 'draft',
   SUBMITTED: 'submitted',
-  ANY: 'draft,submitted',
 };
 
 const ACTION_SHARING = {

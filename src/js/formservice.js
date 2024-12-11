@@ -7,8 +7,6 @@ import App from 'js/base/app';
 
 import 'js/entities-service';
 
-import { FORM_RESPONSE_STATUS } from 'js/static';
-
 const ActionFormApp = App.extend({
   beforeStart({ actionId }) {
     return [
@@ -21,7 +19,7 @@ const ActionFormApp = App.extend({
   onStart(opts, form, definition, data, action) {
     const filter = this._getPrefillFilters(form, action);
 
-    return Promise.resolve(Radio.request('entities', 'fetch:formResponses:latest', filter))
+    return Promise.resolve(Radio.request('entities', 'fetch:formResponses:byPatient', filter))
       .then(response => {
         parent.postMessage({ message: 'form:pdf', args: {
           definition,
@@ -34,27 +32,16 @@ const ActionFormApp = App.extend({
       });
   },
   _getPrefillFilters(form, action) {
-    const opts = {
-      status: FORM_RESPONSE_STATUS.SUBMITTED,
-      flow: action.get('_flow'),
-      patient: action.get('_patient'),
-    };
-
     const isReport = form.isReport();
+    const actionTags = form.getPrefillActionTag();
 
-    if (isReport) opts.submitted = `<=${ action.get('created_at') }`;
-
-    const prefillActionTag = form.getPrefillActionTag();
-
-    if (prefillActionTag) {
-      opts['action.tags'] = prefillActionTag;
-
-      return opts;
-    }
-
-    opts.action = action.id;
-
-    return opts;
+    return {
+      flowId: action.get('_flow'),
+      patientId: action.get('_patient'),
+      submittedAt: isReport && `<=${ action.get('created_at') }`,
+      actionId: !actionTags && action.id,
+      actionTags,
+    };
   },
 });
 

@@ -44,21 +44,18 @@ Cypress.Commands.add('routeFormResponse', (mutator = _.identity) => {
 Cypress.Commands.add('routeLatestFormSubmission', (mutator = _.identity) => {
   const data = getFormResponse();
 
-  const urlRegex = /^\/api\/form-responses\/latest\?(?=.*filter\[status\]=submitted).*$/;
-
   cy
-    .intercept('GET', urlRegex, {
+    .intercept('GET', '/api/patients/**/form-responses/submitted*', {
       body: mutator({ data, included: [] }),
     })
     .as('routeLatestFormSubmission');
 });
 
 Cypress.Commands.add('routeLatestFormResponse', (mutator = _.identity) => {
-  const urlRegex = /^\/api\/form-responses\/latest\?(?=.*filter\[status\]=draft).*$/;
   const body = mutator();
 
   cy
-    .intercept('GET', urlRegex, {
+    .intercept('GET', '/api/clinicians/me/form-responses/latest*', {
       statusCode: body ? 200 : 204,
       body,
     })

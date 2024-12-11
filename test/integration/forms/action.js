@@ -107,6 +107,11 @@ context('Patient Action Form', function() {
       .routeFormActionFields()
       .routeActionActivity()
       .routePatientByAction()
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
@@ -565,9 +570,8 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[patient]=${ testPatient.id }`)
-      .should('contain', `filter[form]=${ testForm.id }`)
-      .should('contain', `filter[flow]=${ testFlow.id }`);
+      .should('contain', `filter[forms]=${ testForm.id }`)
+      .should('contain', `filter[flows]=${ testFlow.id }`);
 
     cy
       .iframe()
@@ -656,9 +660,8 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[patient]=${ testPatient.id }`)
-      .should('contain', `filter[form]=${ testForm.id }`)
-      .should('not.contain', 'filter[flow]');
+      .should('contain', `filter[forms]=${ testForm.id }`)
+      .should('not.contain', 'filter[flows]');
 
     cy
       .iframe()
@@ -750,11 +753,10 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[patient]=${ testPatient.id }`)
-      .should('contain', 'filter[action.tags]=foo-tag')
-      .should('not.contain', 'filter[created]')
-      .should('not.contain', 'filter[flow]')
-      .should('not.contain', 'filter[form]');
+      .should('contain', 'filter[action_tags]=foo-tag')
+      .should('not.contain', 'filter[submitted_at]')
+      .should('not.contain', 'filter[flows]')
+      .should('not.contain', 'filter[forms]');
 
     cy
       .iframe()
@@ -805,6 +807,11 @@ context('Patient Action Form', function() {
         fx.data = testFormResponse;
 
         return fx;
+      })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
       })
       .routeActionActivity()
       .routePatientByAction()
@@ -943,6 +950,11 @@ context('Patient Action Form', function() {
         fx.data = testFormResponses[0];
 
         return fx;
+      })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponses[0],
+        };
       })
       .routeActionActivity()
       .routePatientByAction(fx => {
@@ -1302,6 +1314,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
@@ -1443,6 +1460,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .visit('/worklist/owned-by')
       .wait('@routeActions');
 
@@ -1577,6 +1599,7 @@ context('Patient Action Form', function() {
       })
       .routeFormDefinition()
       .routeFormResponse()
+      .routeLatestFormResponse()
       .routeFormActionFields()
       .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
       .wait('@routeAction')
@@ -2249,6 +2272,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeLatestFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
+      })
       .routeFormDefinition()
       .routeFormActionFields()
       .routeActionActivity()
@@ -2733,7 +2761,7 @@ context('Patient Action Form', function() {
       .wait('@routeLatestFormSubmission')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[submitted]=<=${ createdAt }`);
+      .should('contain', `filter[submitted_at]=<=${ createdAt }`);
   });
 
   specify('refresh stale form', function() {
@@ -2824,22 +2852,29 @@ context('Patient Action Form', function() {
       .find('textarea[name="data[familyHistory]"]')
       .should('contain', 'Form draft work done in another tab.');
 
+    const submission = getFormResponse({
+      id: testFormResponseId,
+      attributes: {
+        status: FORM_RESPONSE_STATUS.SUBMITTED,
+        updated_at: testTs(),
+        response: {
+          data: {
+            familyHistory: 'Form work submitted in another tab.',
+          },
+        },
+      },
+    });
+
     cy
       .routeFormResponse(fx => {
-        fx.data = getFormResponse({
-          id: testFormResponseId,
-          attributes: {
-            status: FORM_RESPONSE_STATUS.SUBMITTED,
-            updated_at: testTs(),
-            response: {
-              data: {
-                familyHistory: 'Form work submitted in another tab.',
-              },
-            },
-          },
-        });
+        fx.data = submission;
 
         return fx;
+      })
+      .routeLatestFormResponse(() => {
+        return {
+          data: submission,
+        };
       });
 
     cy

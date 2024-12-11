@@ -201,40 +201,22 @@ export default App.extend({
       });
     });
   },
-  _getPrefillFilters({ flowId, patientId }, form) {
-    const opts = {
-      status: FORM_RESPONSE_STATUS.SUBMITTED,
-      flow: flowId,
-      patient: patientId,
-    };
+  _getPrefillFilters(form, action, flowId) {
+    const patientId = action.get('_patient');
+    const actionTags = form.getPrefillActionTag();
+    const formId = !actionTags && form.getPrefillFormId();
+    const submittedAt = form.isReport() && `<=${ action.get('created_at') }`;
 
-    const isReport = form.isReport();
-
-    if (isReport) opts.submitted = `<=${ this.action.get('created_at') }`;
-
-    const prefillActionTag = form.getPrefillActionTag();
-
-    if (prefillActionTag) {
-      opts['action.tags'] = prefillActionTag;
-
-      return opts;
-    }
-
-    opts.form = form.getPrefillFormId();
-
-    return opts;
+    return { patientId, flowId, formId, actionTags, submittedAt };
   },
   fetchLatestFormSubmission(flowId) {
     const isReadOnly = this.isReadOnly();
-    const actionId = get(this.action, 'id');
-    const patientId = this.patient.id;
-
-    const filter = this._getPrefillFilters({ flowId, patientId }, this.form);
+    const filter = this._getPrefillFilters(this.form, this.action, flowId);
 
     return Promise.all([
       Radio.request('entities', 'fetch:forms:definition', this.form.id),
-      Radio.request('entities', 'fetch:forms:data', actionId, patientId, this.form.id),
-      Radio.request('entities', 'fetch:formResponses:latest', filter),
+      Radio.request('entities', 'fetch:forms:data', this.action.id, this.patient.id, this.form.id),
+      Radio.request('entities', 'fetch:formResponses:byPatient', filter),
     ]).then(([definition, data, response]) => {
       this.channelRequest('send', 'fetch:form:data', {
         definition,
