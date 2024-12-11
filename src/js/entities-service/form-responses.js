@@ -1,4 +1,3 @@
-import { reduce } from 'underscore';
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model, Collection } from './entities/form-responses';
 
@@ -8,7 +7,6 @@ const Entity = BaseEntity.extend({
     'formResponses:model': 'getModel',
     'formResponses:collection': 'getCollection',
     'fetch:formResponses:model': 'fetchFormResponse',
-    'fetch:formResponses:latest': 'fetchLatestResponse',
     'fetch:formResponses:byMe': 'fetchByMe',
     'fetch:formResponses:byPatient': 'fetchSubmittedByPatient',
   },
@@ -17,12 +15,6 @@ const Entity = BaseEntity.extend({
 
     return this.fetchModel(id, options);
   },
-  fetchLatestResponse(filter) {
-    const data = reduce(filter, (filters, value, key) => {
-      if (!value) return filters;
-      filters.filter[key] = value;
-      return filters;
-    }, { filter: {} });
   fetchOrEmpty(url, data) {
     return this.fetchBy(url, { data }).then(response => response || new Model());
   },
@@ -40,11 +32,7 @@ const Entity = BaseEntity.extend({
       ...(submittedAt && { submitted_at: submittedAt }),
     };
 
-    return this.fetchBy('/api/form-responses/latest', { data })
-      .then(response => {
-        if (!response) return new Model();
-        return response;
-      });
+    return this.fetchOrEmpty(`/api/patients/${ patientId }/form-responses/submitted`, { filter });
   },
 });
 
