@@ -74,9 +74,6 @@ const DoneBehavior = Behavior.extend({
 const ActionItemView = View.extend({
   className: 'table-list__item',
   tagName: 'tr',
-  modelEvents: {
-    'change:_owner': 'render',
-  },
   behaviors: [RowBehavior, DoneBehavior],
   regions: {
     details: '[data-details-region]',
