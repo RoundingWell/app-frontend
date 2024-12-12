@@ -44,7 +44,7 @@ context('patient archive page', function() {
             id: '1',
             attributes: {
               name: 'First In List',
-              details: null,
+              details: 'Action details content.',
               duration: 0,
               due_date: null,
               due_time: null,
@@ -71,6 +71,7 @@ context('patient archive page', function() {
           getAction({
             attributes: {
               name: 'Third In List',
+              details: null,
               updated_at: testTsSubtract(2),
               outreach: 'patient',
               due_time: '09:00:00',
@@ -179,6 +180,24 @@ context('patient archive page', function() {
       .should('contain', 'Third In List')
       .next()
       .should('contain', 'Last In List');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item')
+      .first()
+      .find('[data-details-region]')
+      .trigger('pointerover');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Action details content.');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item')
+      .eq(2)
+      .find('[data-details-region]')
+      .should('be.empty');
 
     cy
       .get('.patient__list')

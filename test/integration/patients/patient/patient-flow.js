@@ -438,6 +438,7 @@ context('patient flow page', function() {
     const testListAction = mergeJsonApi(testAction, {
       attributes: {
         name: 'Third In List',
+        details: null,
         due_date: testDateAdd(1),
         created_at: testTsSubtract(3),
         sequence: 3,
@@ -469,6 +470,7 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               name: 'First In List',
+              details: 'Action details content.',
               due_date: testDateSubtract(1),
               created_at: testTsSubtract(1),
               sequence: 1,
@@ -487,6 +489,7 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               name: 'Second In List',
+              details: null,
               due_date: testDateAdd(2),
               created_at: testTsSubtract(2),
               sequence: 2,
@@ -517,6 +520,24 @@ context('patient flow page', function() {
       .as('actionsList')
       .find('.table-list__item')
       .should('have.length', 3);
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item')
+      .first()
+      .find('[data-details-region]')
+      .trigger('pointerover');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Action details content.');
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item')
+      .eq(1)
+      .find('[data-details-region]')
+      .should('be.empty');
 
     cy
       .get('@actionsList')
@@ -2474,6 +2495,7 @@ context('patient flow page', function() {
     const testSocketAction = getAction({
       attributes: {
         name: 'Action Test',
+        details: null,
         due_date: testDate(),
         due_time: '06:00:00',
         outreach: 'disabled',
@@ -2597,6 +2619,29 @@ context('patient flow page', function() {
       .get('.patient-flow__list')
       .find('.table-list__item .patient__action-ts')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item [data-details-region]')
+      .should('be.empty');
+
+    cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          details: 'New action details',
+        },
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item [data-details-region]')
+      .should('not.be.empty');
 
     cy.sendWs({
       category: 'ActionDueChanged',

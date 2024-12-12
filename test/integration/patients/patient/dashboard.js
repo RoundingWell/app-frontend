@@ -50,7 +50,7 @@ context('patient dashboard page', function() {
     const testAction = getAction({
       attributes: {
         name: 'First In List',
-        details: null,
+        details: 'Action details content.',
         duration: 0,
         due_date: null,
         due_time: null,
@@ -94,6 +94,7 @@ context('patient dashboard page', function() {
           getAction({
             attributes: {
               name: 'Third In List',
+              details: null,
               updated_at: testTsSubtract(2),
             },
             relationships: {
@@ -200,6 +201,24 @@ context('patient dashboard page', function() {
       .should('contain', 'Outreach')
       .next()
       .should('contain', 'Last In List');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item')
+      .first()
+      .find('[data-details-region]')
+      .trigger('pointerover');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Action details content.');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item')
+      .eq(2)
+      .find('[data-details-region]')
+      .should('be.empty');
 
     cy
       .get('.patient__list')

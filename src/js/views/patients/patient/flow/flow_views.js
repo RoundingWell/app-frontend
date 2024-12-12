@@ -8,7 +8,7 @@ import 'scss/modules/table-list.scss';
 
 import PreloadRegion from 'js/regions/preload_region';
 
-import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton } from 'js/views/patients/shared/actions_views';
+import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/views/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/views/patients/shared/read-only_views';
 
@@ -165,6 +165,7 @@ const ActionItemView = View.extend({
   tagName: 'tr',
   regions: {
     check: '[data-check-region]',
+    details: '[data-details-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     dueDate: '[data-due-date-region]',
@@ -192,6 +193,7 @@ const ActionItemView = View.extend({
     this.canEdit = !this.flow.isDone() && this.model.canEdit();
 
     this.showCheck();
+    this.showDetailsTooltip();
     this.showState();
     this.showOwner();
     this.showDueDate();
@@ -223,6 +225,11 @@ const ActionItemView = View.extend({
     });
 
     this.showChildView('check', checkComponent);
+  },
+  showDetailsTooltip() {
+    if (!this.model.get('details')) return;
+
+    this.showChildView('details', new DetailsTooltip({ model: this.model }));
   },
   showState() {
     if (!this.canEdit) {
