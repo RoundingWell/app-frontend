@@ -1,11 +1,9 @@
-import { extend, delay } from 'underscore';
+import { extend } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
 import { View, Region } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/modals.scss';
-
-import './loading/loading_modal.scss';
 
 import intl from 'js/i18n';
 
@@ -16,7 +14,6 @@ import PreloadRegion from 'js/regions/preload_region';
 import IframeFormBehavior from 'js/behaviors/iframe-form';
 
 import ModalTemplate from './modal.hbs';
-import LoadingModalTemplate from './loading/loading_modal.hbs';
 
 const i18n = intl.globals.modal.modalViews;
 
@@ -103,21 +100,9 @@ const IframeFormView = View.extend({
   template: hbs`<iframe src="/formapp/"></iframe>`,
 });
 
-
-const LoadingModalView = View.extend({
-  className: 'pos--absolute',
-  template: LoadingModalTemplate,
-  onAttach() {
-    delay(() => {
-      this.destroy();
-    }, 5000);
-  },
-});
-
 export {
   ModalView,
   SidebarModalView,
   SmallModalView,
   IframeFormView,
-  LoadingModalView,
 };

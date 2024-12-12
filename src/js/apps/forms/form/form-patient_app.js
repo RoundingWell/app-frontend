@@ -86,7 +86,6 @@ export default App.extend({
     if (!this.isReadOnly) this.bindEvents(formService, this.serviceEvents);
   },
   serviceEvents: {
-    'submit': 'onFormServiceSubmit',
     'success': 'onFormServiceSuccess',
     'error': 'onFormServiceError',
     'ready': 'onFormServiceReady',
@@ -97,17 +96,10 @@ export default App.extend({
 
     return (saveButtonType === 'saveAndGoBack' && !this.isSubmitHidden);
   },
-  onFormServiceSubmit() {
-    if (!this.shouldSaveAndGoBack()) return;
-
-    this.loadingModal = Radio.request('modal', 'show:loading');
-  },
   onFormServiceSuccess(response) {
     if (this.shouldSaveAndGoBack()) {
-      this.listenTo(this.loadingModal, 'destroy', () => {
-        Radio.request('history', 'go:back', () => {
-          Radio.trigger('event-router', 'patient:dashboard', this.patient.id);
-        });
+      Radio.request('history', 'go:back', () => {
+        Radio.trigger('event-router', 'patient:dashboard', this.patient.id);
       });
 
       return;
@@ -118,8 +110,6 @@ export default App.extend({
     this.showFormActions();
   },
   onFormServiceError() {
-    if (this.loadingModal) this.loadingModal.destroy();
-
     this.showFormSave();
   },
   onFormServiceReady() {

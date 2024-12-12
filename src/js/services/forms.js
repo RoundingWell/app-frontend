@@ -318,8 +318,6 @@ export default App.extend({
 
     const formResponse = Radio.request('entities', 'formResponses:model', data);
 
-    this.trigger('submit');
-
     return formResponse.saveAll()
       .then(() => {
         // Cancel any draft updates or stale form refreshes that may have been queued while the form was submitting
