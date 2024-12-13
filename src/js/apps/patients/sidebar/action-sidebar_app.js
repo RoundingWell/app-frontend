@@ -48,6 +48,7 @@ export default App.extend(extend({
       'change:_owner': this.onChangeOwner,
       'destroy': this.stop,
       'add:comment': this.onCommentAdded,
+      'add:attachment': this.onAttachmentAdded,
     });
 
     this.showChildView('heading', new HeadingView({ model: this.action }));
@@ -76,6 +77,9 @@ export default App.extend(extend({
   },
   onCommentAdded(model) {
     this.activityCollection.add(model);
+  },
+  onAttachmentAdded(model) {
+    this.attachments.add(model);
   },
   onStart(options, activity, comments, attachments) {
     this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);

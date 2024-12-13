@@ -53,6 +53,19 @@ const _Model = BaseModel.extend({
 
       this.trigger('add:comment', commentModel);
     },
+    AttachmentAdded({ file, attributes }) {
+      const attachmentModel = Radio.request('entities', 'files:model', {
+        id: file.id,
+        path: attributes.path,
+        created_at: dayjs.utc().format(),
+        _action: this.id,
+        _patient: this.getPatient().id,
+        _view: attributes.view,
+        _download: attributes.download,
+      });
+
+      this.trigger('add:attachment', attachmentModel);
+    },
     ResourceDeleted() {
       this.destroy({ isDeleted: true });
     },
