@@ -1902,18 +1902,6 @@ context('Patient Action Form', function() {
       .click();
 
     cy
-      .get('.fill-window--dark.is-shown')
-      .should('contain', 'Submitting your work...');
-
-    cy
-      .get('.app-frame__content')
-      .click('left', { force: true });
-
-    cy
-      .get('.fill-window--dark.is-shown')
-      .should('exist');
-
-    cy
       .get('.form__controls')
       .find('.js-save-button')
       .should('be.disabled');
@@ -1935,7 +1923,6 @@ context('Patient Action Form', function() {
 
     cy
       .wait(200)
-      .tick(5100)
       .url()
       .should('contain', `/flow/${ testFlow.id }`);
   });
@@ -2008,7 +1995,6 @@ context('Patient Action Form', function() {
 
     cy
       .wait(200)
-      .tick(5100)
       .url()
       .should('contain', `/patient/dashboard/${ testPatient.id }`);
   });

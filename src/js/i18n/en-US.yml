@@ -186,9 +186,6 @@ careOptsFrontend:
         notFoundInfo: This page doesn't exist.
         notFoundMessage: Something went wrong.
     modal:
-      loading:
-        loadingModal:
-          headerText: Submitting your work...
       modalViews:
         modalView:
           cancelText: Cancel

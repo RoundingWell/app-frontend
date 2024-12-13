@@ -3,7 +3,7 @@ import App from 'js/base/app';
 
 import FormsService from 'js/services/forms';
 
-import { ModalView, SidebarModalView, SmallModalView, IframeFormView, LoadingModalView } from 'js/views/globals/modal/modal_views';
+import { ModalView, SidebarModalView, SmallModalView, IframeFormView } from 'js/views/globals/modal/modal_views';
 
 export default App.extend({
   channelName: 'modal',
@@ -13,13 +13,11 @@ export default App.extend({
     'show:custom': 'showCustom',
     'show:sidebar': 'showSidebar',
     'show:form': 'showForm',
-    'show:loading': 'showLoading',
   },
-  initialize({ modalRegion, modalSmallRegion, modalSidebarRegion, modalLoadingRegion }) {
+  initialize({ modalRegion, modalSmallRegion, modalSidebarRegion }) {
     this.modalRegion = modalRegion;
     this.modalSmallRegion = modalSmallRegion;
     this.modalSidebarRegion = modalSidebarRegion;
-    this.modalLoadingRegion = modalLoadingRegion;
   },
   showModal(options) {
     const ConfirmModal = ModalView.extend(options);
@@ -78,13 +76,6 @@ export default App.extend({
         modal.disableSubmit(false);
       },
     });
-
-    return modal;
-  },
-  showLoading(options) {
-    const modal = new LoadingModalView(options);
-
-    this.modalLoadingRegion.show(modal);
 
     return modal;
   },
