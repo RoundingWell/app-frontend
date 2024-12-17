@@ -693,8 +693,9 @@ context('patient flow page', function() {
 
     cy
       .get('.alert-box')
-      .should('contain', 'Insufficient permissions to delete action');
-
+      .should('contain', 'Insufficient permissions to delete action')
+      .find('.js-dismiss')
+      .click();
 
     cy
       .intercept('DELETE', `/api/actions/${ testListAction.id }`, {
@@ -719,6 +720,16 @@ context('patient flow page', function() {
       .get('@actionsList')
       .find('.table-list__item')
       .should('have.length', 2);
+
+    cy
+      .url()
+      .should('not.contain', '/action/');
+
+    cy.go('back');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'The Action you requested does not exist');
   });
 
   specify('add action', function() {

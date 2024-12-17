@@ -46,7 +46,7 @@ export default App.extend(extend({
 
     this.listenTo(action, {
       'change:_owner': this.onChangeOwner,
-      'destroy': this.stop,
+      'destroy': this.onDestroy,
       'add:comment': this.onCommentAdded,
     });
 
@@ -125,12 +125,12 @@ export default App.extend(extend({
   },
   onDelete() {
     this.action.destroy({ wait: true })
-      .then(() => {
-        this.stop();
-      })
       .catch(({ responseData }) => {
         Radio.request('alert', 'show:apiError', responseData);
       });
+  },
+  onDestroy() {
+    this.triggerMethod('close', this);
   },
   showForm() {
     if (!this.action.getForm() && !this.action.hasSharing()) return;

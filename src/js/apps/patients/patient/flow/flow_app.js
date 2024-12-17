@@ -2,7 +2,7 @@ import { bind, invoke, get } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
-import intl, { renderTemplate } from 'js/i18n';
+import { renderTemplate } from 'js/i18n';
 import handleErrors from 'js/utils/handle-errors';
 
 import SubRouterApp from 'js/base/subrouterapp';
@@ -15,9 +15,9 @@ import FlowSiderbarApp from 'js/apps/patients/sidebar/flow-sidebar_app';
 import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 
 
-import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView } from 'js/views/patients/patient/flow/flow_views';
+import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView, i18n } from 'js/views/patients/patient/flow/flow_views';
 import { BulkEditButtonView, BulkEditActionsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
-import { AddButtonView, i18n } from 'js/views/patients/shared/add-workflow/add-workflow_views';
+import { AddButtonView } from 'js/views/patients/shared/add-workflow/add-workflow_views';
 
 export default SubRouterApp.extend({
   StateModel,
@@ -208,7 +208,7 @@ export default SubRouterApp.extend({
             this.getState().clearSelected();
           })
           .catch(() => {
-            Radio.request('alert', 'show:error', intl.patients.worklist.worklistApp.bulkEditFailure);
+            Radio.request('alert', 'show:error', i18n.bulkEditFailure);
             this.getState().clearSelected();
             this.restart({ flowId: this.flow.id, currentRoute: this.currentRoute });
           });
@@ -301,6 +301,11 @@ export default SubRouterApp.extend({
     sidebarApp.stop();
 
     const action = Radio.request('entities', 'actions:model', actionId);
+
+    if (!action.isCached()) {
+      Radio.request('alert', 'show:error', i18n.actionNotFound);
+      return;
+    }
 
     Radio.request('sidebar', 'start', sidebarApp, { action });
 

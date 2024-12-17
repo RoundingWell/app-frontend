@@ -678,6 +678,37 @@ context('action sidebar', function() {
     cy
       .get('.sidebar')
       .should('not.exist');
+
+    cy.go('back');
+
+    cy
+      .intercept('DELETE', `/api/actions/${ testAction.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteFlowAction');
+
+    cy
+      .get('.sidebar')
+      .find('.js-menu')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Delete Action')
+      .click()
+      .wait('@routeDeleteFlowAction');
+
+    cy
+      .url()
+      .should('not.contain', '/action/');
+
+    cy.go('back');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'The Action you requested does not exist');
   });
 
   specify('action attachments', function() {
@@ -1979,7 +2010,7 @@ context('action sidebar', function() {
       })
       .routeFlowActions(fx => {
         fx.data = [testAction];
-          
+
         return fx;
       })
       .routePatientByFlow()
