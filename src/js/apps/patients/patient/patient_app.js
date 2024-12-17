@@ -58,7 +58,7 @@ export default SubRouterApp.extend({
         return;
       }
 
-      Radio.request('alert', 'show:error', intl.actionNotFound);
+      this.showActionNotFound();
       this.stop();
       Radio.trigger('event-router', 'patient:dashboard', patientId);
       return;
@@ -84,6 +84,10 @@ export default SubRouterApp.extend({
     delete this.action;
   },
 
+  showActionNotFound() {
+    Radio.request('alert', 'show:error', intl.actionNotFound);
+  },
+
   startList(list) {
     if (this._list === list) return;
 
@@ -106,6 +110,11 @@ export default SubRouterApp.extend({
     const sidebarApp = this.getChildApp('actionSidebar');
 
     sidebarApp.stop();
+
+    if (!this.action.isCached()) {
+      this.showActionNotFound();
+      return;
+    }
 
     Radio.request('sidebar', 'start', sidebarApp, { action: this.action });
 

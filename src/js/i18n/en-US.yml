@@ -255,6 +255,9 @@ careOptsFrontend:
           newAction: New Action
           actionLoading: Loading...
       flowViews:
+        actionNotFound: The Action you requested does not exist.
+        addActionHeadingText: Add Action
+        bulkEditFailure: Something went wrong. Please try again.
         contextBackBtn: Back to List
         emptyView: No Actions
       patientViews:

@@ -6,6 +6,7 @@ import { View, CollectionView } from 'marionette';
 import 'scss/modules/progress-bar.scss';
 import 'scss/modules/table-list.scss';
 
+import intl from 'js/i18n';
 import PreloadRegion from 'js/regions/preload_region';
 
 import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
@@ -17,6 +18,8 @@ import ActionItemTemplate from './action-item.hbs';
 
 import '../patient.scss';
 import './patient-flow.scss';
+
+export const i18n = intl.patients.patient.flowViews;
 
 const ContextTrailView = View.extend({
   initialize() {
