@@ -64,6 +64,9 @@ const _Model = BaseModel.extend({
         _download: attributes.download,
       });
 
+      const newFilesRelationship = [...this.get('_files'), { id: file.id, type: 'files' }];
+      this.set({ _files: newFilesRelationship });
+
       this.trigger('add:attachment', attachmentModel);
     },
     ResourceDeleted() {

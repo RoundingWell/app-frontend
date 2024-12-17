@@ -108,6 +108,7 @@ context('patient flow page', function() {
 
   specify('patient flow action sidebar', function() {
     const testCommentId = uuid();
+    const testOtherFileId = uuid();
 
     const testPatient = getPatient({
       attributes: {
@@ -141,6 +142,7 @@ context('patient flow page', function() {
         'form': getRelationship(testForm),
         'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
+        'files': getRelationship([{ id: testOtherFileId }], 'files'),
       },
     });
 
@@ -169,6 +171,23 @@ context('patient flow page', function() {
       })
       .routePatientByFlow(fx => {
         fx.data = testPatient;
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [
+          {
+            id: testOtherFileId,
+            attributes: {
+              path: `patients/${ testPatient.id }/Other_file.pdf`,
+              created_at: testTsSubtract(1),
+            },
+            meta: {
+              view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/Other_File.pdf`,
+              download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/Other_File.pdf`,
+            },
+          },
+        ];
 
         return fx;
       })
@@ -417,7 +436,7 @@ context('patient flow page', function() {
         },
         file: {
           type: 'files',
-          id: '70294032-539b-4dc0-93df-9e4ff2eee8c1',
+          id: uuid(),
         },
         attributes: {
           path: `patients/${ testPatient.id }/HRA.pdf`,
@@ -431,7 +450,7 @@ context('patient flow page', function() {
       .get('[data-attachments-files-region]')
       .children()
       .as('attachmentItems')
-      .should('have.length', 1)
+      .should('have.length', 2)
       .first()
       .contains('HRA.pdf');
 
@@ -2829,6 +2848,30 @@ context('patient flow page', function() {
       .get('@flowSidebar')
       .find('[data-state-region]')
       .should('contain', 'Done');
+
+    cy.sendWs({
+      category: 'AttachmentAdded',
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        file: {
+          type: 'files',
+          id: uuid(),
+        },
+        attributes: {
+          path: 'patients/1/HRA.pdf',
+          view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
+          download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+        },
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .fa-paperclip')
+      .should('exist');
 
     cy.sendWs({
       category: 'ResourceDeleted',
