@@ -330,7 +330,7 @@ context('patient flow page', function() {
       .find('.comment__item')
       .last()
       .as('socketComment')
-      .should('contain', formatDate(testTs(), 'AT_TIME'))
+      .should('contain', formatDate(dayjs.utc().format(), 'AT_TIME'))
       .should('contain', 'Clinician McTester')
       .should('contain', 'New websocket comment.');
 

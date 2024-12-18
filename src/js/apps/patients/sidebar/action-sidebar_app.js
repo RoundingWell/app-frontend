@@ -61,6 +61,8 @@ export default App.extend(extend({
     if (flow) this.stopListening(flow);
     this.stopListening(this.action);
     this.action.trigger('editing', false);
+
+    this.removeSubscriptions();
   },
   beforeStart() {
     return [
@@ -76,14 +78,20 @@ export default App.extend(extend({
   },
   onCommentAdded(model) {
     this.activityCollection.add(model);
+    this.comments.add(model);
+
+    Radio.request('ws', 'add', model);
   },
   onStart(options, activity, comments, attachments) {
     this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
+    this.comments = comments;
     this.attachments = attachments;
 
     this.showActivity();
     this.showNewCommentForm();
     this.showAttachments();
+
+    this.addSubscriptions();
   },
   showContent() {
     const sidebarView = new SidebarView({ model: this.action });
@@ -185,7 +193,12 @@ export default App.extend(extend({
   },
   onPostNewComment({ model }) {
     model.set({ created_at: dayjs.utc().format() }).save();
+
     this.activityCollection.add(model);
+    this.comments.add(model);
+
+    Radio.request('ws', 'add', model);
+
     this.showNewCommentForm();
   },
   onCancelNewComment() {
@@ -224,5 +237,13 @@ export default App.extend(extend({
   onRemoveAttachment(model) {
     model.destroy();
   },
+  addSubscriptions() {
+    Radio.request('ws', 'add', this.comments);
+  },
+  removeSubscriptions() {
+    // for when sidebar is closed before comments api request is finished
+    if (!this.comments) return;
 
+    Radio.request('ws', 'unsubscribe', this.comments);
+  },
 }, SidebarMixin));
