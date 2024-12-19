@@ -238,12 +238,12 @@ export default App.extend(extend({
     model.destroy();
   },
   addSubscriptions() {
-    Radio.request('ws', 'add', this.comments);
+    Radio.request('ws', 'add', this.comments.models);
   },
   removeSubscriptions() {
     // for when sidebar is closed before comments api request is finished
     if (!this.comments) return;
 
-    Radio.request('ws', 'unsubscribe', this.comments);
+    Radio.request('ws', 'unsubscribe', this.comments.models);
   },
 }, SidebarMixin));
