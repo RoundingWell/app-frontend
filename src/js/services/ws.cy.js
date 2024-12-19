@@ -1,3 +1,4 @@
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import WSService from './ws';
@@ -146,7 +147,9 @@ context('WS Service', function() {
     cy
       .startService()
       .interceptWs('Subscribe', () => {
-        channel.request('subscribe', notifications[0]);
+        const TestModel = Backbone.Model.extend({ type: 'bar' });
+
+        channel.request('subscribe', new TestModel({ id: 'foo', foo: true }));
       })
       .should('deep.equal', { clientKey, resources: [notifications[0]] });
 
@@ -173,7 +176,7 @@ context('WS Service', function() {
         channel.request('subscribe', [notifications[3]], { shouldPersist: true });
       })
       .should('deep.equal', { clientKey, resources: [notifications[3]] });
-    
+
     cy
       .interceptWs('Subscribe', () => {
         channel.request('add', [notifications[0], notifications[1]]);

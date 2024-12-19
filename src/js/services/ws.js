@@ -1,4 +1,4 @@
-import { each, values, isArray } from 'underscore';
+import { each, map, values, isArray } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import Store from 'backbone.store';
@@ -111,8 +111,14 @@ export default App.extend({
     channel.trigger('message', data);
   },
 
-  subscribe(resources, { shouldPersist } = {}) {
+  _getResources(resources) {
     resources = isArray(resources) ? resources : [resources];
+
+    return map(resources, ({ id, type }) => ({ id, type }));
+  },
+
+  subscribe(resources, { shouldPersist } = {}) {
+    resources = this._getResources(resources);
 
     if (shouldPersist) {
       each(resources, ({ id, type }) => {
@@ -130,7 +136,7 @@ export default App.extend({
   },
 
   add(resources, { shouldPersist } = {}) {
-    resources = isArray(resources) ? resources : [resources];
+    resources = this._getResources(resources);
 
     if (shouldPersist) {
       each(resources, ({ id, type }) => {
@@ -143,7 +149,8 @@ export default App.extend({
   },
 
   unsubscribe(resources) {
-    resources = isArray(resources) ? resources : [resources];
+    resources = this._getResources(resources);
+
     each(resources, ({ id }) => {
       delete this.persistent[id];
     });
