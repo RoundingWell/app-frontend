@@ -160,15 +160,15 @@ context('reduced schedule page', function() {
       .find('.js-patient-sidebar-button')
       .click()
       .wait('@routePatient');
-  
+
     cy
       .get('.worklist-patient-sidebar')
       .should('contain', 'First Last');
-  
+
     cy
       .get('.worklist-patient-sidebar .js-close')
       .click();
-  
+
     cy
       .get('.worklist-patient-sidebar')
       .should('not.exist');
