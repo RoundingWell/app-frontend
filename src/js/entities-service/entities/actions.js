@@ -250,6 +250,14 @@ const _Model = BaseModel.extend({
 
     return !!size(programAction.get('allowed_uploads'));
   },
+  removeAttachment(resource) {
+    const files = this.get('_files');
+    const newFilesRelationship = files.filter(file => {
+      return file.id !== resource.id;
+    });
+
+    this.set({ _files: newFilesRelationship });
+  },
   parseRelationship: _parseRelationship,
 });
 

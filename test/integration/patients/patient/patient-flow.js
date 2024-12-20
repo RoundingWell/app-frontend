@@ -506,6 +506,25 @@ context('patient flow page', function() {
       .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA_v2.pdf`);
 
     cy.sendWs({
+      category: 'FileRemoved',
+      resource: {
+        type: 'files',
+        id: testFileId,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('[data-attachments-files-region]')
+      .children()
+      .should('have.length', 1);
+
+    cy
+      .get('@attachmentItems')
+      .contains('HRA_v2.pdf')
+      .should('not.exist');
+
+    cy.sendWs({
       category: 'ResourceDeleted',
       resource: {
         type: 'patient-actions',
@@ -2608,6 +2627,8 @@ context('patient flow page', function() {
   });
 
   specify('socket notifications', function() {
+    const testSocketFileId = uuid();
+
     const testSocketFlow = getFlow({
       attributes: {
         name: 'Flow Test',
@@ -2924,7 +2945,7 @@ context('patient flow page', function() {
         },
         file: {
           type: 'files',
-          id: uuid(),
+          id: testSocketFileId,
         },
         attributes: {
           path: 'patients/1/HRA.pdf',
@@ -2941,6 +2962,20 @@ context('patient flow page', function() {
       .get('.patient-flow__list')
       .find('.table-list__item .fa-paperclip')
       .should('exist');
+
+    cy.sendWs({
+      category: 'FileRemoved',
+      resource: {
+        type: 'files',
+        id: testSocketFileId,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .fa-paperclip')
+      .should('not.exist');
 
     cy.sendWs({
       category: 'ResourceDeleted',

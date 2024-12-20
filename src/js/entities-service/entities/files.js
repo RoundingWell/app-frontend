@@ -1,3 +1,4 @@
+import Radio from 'backbone.radio';
 import { get, first } from 'underscore';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
@@ -24,6 +25,12 @@ const _Model = BaseModel.extend({
         _view: attributes.urls.view,
         _download: attributes.urls.download,
       });
+    },
+    FileRemoved({ resource }) {
+      const action = Radio.request('entities', 'actions:model', this.get('_action'));
+      action.removeAttachment(resource);
+
+      this.destroy({ isDeleted: true });
     },
   },
   urlRoot() {

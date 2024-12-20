@@ -244,6 +244,8 @@ export default App.extend(extend({
   },
   onRemoveAttachment(model) {
     model.destroy();
+
+    Radio.request('ws', 'unsubscribe', model);
   },
   addSubscriptions() {
     Radio.request('ws', 'add', [...this.comments.models, ...this.attachments.models]);
