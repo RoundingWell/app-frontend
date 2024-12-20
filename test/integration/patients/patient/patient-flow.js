@@ -108,6 +108,7 @@ context('patient flow page', function() {
 
   specify('patient flow action sidebar', function() {
     const testCommentId = uuid();
+    const testFileId = uuid();
     const testOtherFileId = uuid();
 
     const testPatient = getPatient({
@@ -436,7 +437,7 @@ context('patient flow page', function() {
         },
         file: {
           type: 'files',
-          id: uuid(),
+          id: testFileId,
         },
         attributes: {
           path: `patients/${ testPatient.id }/HRA.pdf`,
@@ -453,9 +454,56 @@ context('patient flow page', function() {
       .get('[data-attachments-files-region]')
       .children()
       .as('attachmentItems')
-      .should('have.length', 2)
+      .should('have.length', 2);
+
+    cy
+      .get('@attachmentItems')
       .first()
-      .contains('HRA.pdf');
+      .as('attachmentItem')
+      .contains('HRA.pdf')
+      .should('have.attr', 'href')
+      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA.pdf`);
+
+    cy
+      .get('@attachmentItem')
+      .contains('Download')
+      .should('have.attr', 'href')
+      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA.pdf`);
+
+    cy.sendWs({
+      category: 'FileReplaced',
+      resource: {
+        type: 'files',
+        id: testFileId,
+      },
+      payload: {
+        attributes: {
+          path: `patients/${ testPatient.id }/HRA_v2.pdf`,
+          bucket: 'bucket_name',
+          urls: {
+            view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA_v2.pdf`,
+            download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA_v2.pdf`,
+          },
+        },
+      },
+    });
+
+    cy
+      .get('[data-attachments-files-region]')
+      .children()
+      .should('have.length', 2);
+
+    cy
+      .get('@attachmentItem')
+      .contains('HRA_v2.pdf')
+      .should('have.attr', 'href')
+      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA_v2.pdf`);
+
+    cy
+      .get('@attachmentItem')
+      .contains('Download')
+      .should('have.attr', 'href')
+      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA_v2.pdf`);
 
     cy.sendWs({
       category: 'ResourceDeleted',

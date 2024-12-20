@@ -17,6 +17,15 @@ const _Model = BaseModel.extend({
     _progress: 0,
   },
   type: TYPE,
+  messages: {
+    FileReplaced({ attributes }) {
+      this.set({
+        path: attributes.path,
+        _view: attributes.urls.view,
+        _download: attributes.urls.download,
+      });
+    },
+  },
   urlRoot() {
     if (this.isNew()) {
       const actionId = this.get('_action');
