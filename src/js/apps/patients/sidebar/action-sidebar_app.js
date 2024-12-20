@@ -48,6 +48,7 @@ export default App.extend(extend({
       'change:_owner': this.onChangeOwner,
       'destroy': this.onDestroy,
       'add:comment': this.onCommentAdded,
+      'add:attachment': this.onAttachmentAdded,
     });
 
     this.showChildView('heading', new HeadingView({ model: this.action }));
@@ -79,6 +80,11 @@ export default App.extend(extend({
   onCommentAdded(model) {
     this.activityCollection.add(model);
     this.comments.add(model);
+
+    Radio.request('ws', 'add', model);
+  },
+  onAttachmentAdded(model) {
+    this.attachments.add(model);
 
     Radio.request('ws', 'add', model);
   },
@@ -230,6 +236,8 @@ export default App.extend(extend({
     });
     attachment.upload(file);
 
+    Radio.request('ws', 'add', file);
+
     this.listenTo(attachment, 'upload:failed', () => {
       Radio.request('alert', 'show:error', intl.patients.sidebar.actionSidebarApp.uploadError);
     });
@@ -238,12 +246,12 @@ export default App.extend(extend({
     model.destroy();
   },
   addSubscriptions() {
-    Radio.request('ws', 'add', this.comments.models);
+    Radio.request('ws', 'add', [...this.comments.models, ...this.attachments.models]);
   },
   removeSubscriptions() {
     // for when sidebar is closed before comments api request is finished
-    if (!this.comments) return;
+    if (!this.comments || !this.attachments) return;
 
-    Radio.request('ws', 'unsubscribe', this.comments.models);
+    Radio.request('ws', 'unsubscribe', [...this.comments.models, ...this.attachments.models]);
   },
 }, SidebarMixin));
