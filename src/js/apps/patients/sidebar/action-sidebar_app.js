@@ -251,8 +251,8 @@ export default App.extend(extend({
     Radio.request('ws', 'add', [...this.comments.models, ...this.attachments.models]);
   },
   removeSubscriptions() {
-    // for when sidebar is closed before comments api request is finished
-    if (!this.comments || !this.attachments) return;
+    // for when the sidebar is closed prior to beforeStart being able to finish
+    if (!this.isRunning()) return;
 
     Radio.request('ws', 'unsubscribe', [...this.comments.models, ...this.attachments.models]);
   },
