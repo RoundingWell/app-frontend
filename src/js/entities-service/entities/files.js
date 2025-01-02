@@ -28,7 +28,7 @@ const _Model = BaseModel.extend({
     },
     FileRemoved({ resource }) {
       const action = Radio.request('entities', 'actions:model', this.get('_action'));
-      action.removeAttachment(resource);
+      action.removeFile(resource);
 
       this.destroy({ isDeleted: true });
     },
@@ -66,6 +66,9 @@ const _Model = BaseModel.extend({
     this.createUpload(file.name)
       .then(() => this.putFile(file))
       .then(() => this.fetchFile())
+      .then(uploadedFile => {
+        this.trigger('upload:success', uploadedFile);
+      })
       .catch(() => {
         this.trigger('upload:failed');
         this.destroy();

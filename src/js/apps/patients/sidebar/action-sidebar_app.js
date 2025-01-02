@@ -236,14 +236,20 @@ export default App.extend(extend({
     });
     attachment.upload(file);
 
-    Radio.request('ws', 'add', attachment);
-
-    this.listenTo(attachment, 'upload:failed', () => {
-      Radio.request('alert', 'show:error', intl.patients.sidebar.actionSidebarApp.uploadError);
+    this.listenTo(attachment, {
+      'upload:success': uploadedAttachment => {
+        this.action.addFile(uploadedAttachment);
+        Radio.request('ws', 'add', uploadedAttachment);
+      },
+      'upload:failed': () => {
+        Radio.request('alert', 'show:error', intl.patients.sidebar.actionSidebarApp.uploadError);
+      },
     });
   },
   onRemoveAttachment(model) {
     model.destroy();
+
+    this.action.removeFile(model);
 
     Radio.request('ws', 'unsubscribe', model);
   },
