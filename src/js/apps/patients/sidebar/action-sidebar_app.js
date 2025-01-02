@@ -236,7 +236,7 @@ export default App.extend(extend({
     });
     attachment.upload(file);
 
-    Radio.request('ws', 'add', file);
+    Radio.request('ws', 'add', attachment);
 
     this.listenTo(attachment, 'upload:failed', () => {
       Radio.request('alert', 'show:error', intl.patients.sidebar.actionSidebarApp.uploadError);
