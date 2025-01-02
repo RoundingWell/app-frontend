@@ -51,7 +51,7 @@ const _Model = BaseModel.extend({
         _clinician: author,
       });
 
-      this.trigger('add:comment', commentModel);
+      this.trigger('ws:add:comment', commentModel);
     },
     AttachmentAdded({ file, attributes }) {
       const attachmentModel = Radio.request('entities', 'files:model', {
@@ -67,7 +67,7 @@ const _Model = BaseModel.extend({
       const newFilesRelationship = [...this.get('_files'), { id: file.id, type: 'files' }];
       this.set({ _files: newFilesRelationship });
 
-      this.trigger('add:attachment', attachmentModel);
+      this.trigger('ws:add:attachment', attachmentModel);
     },
     ResourceDeleted() {
       this.destroy({ isDeleted: true });

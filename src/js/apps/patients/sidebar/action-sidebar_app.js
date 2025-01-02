@@ -47,8 +47,8 @@ export default App.extend(extend({
     this.listenTo(action, {
       'change:_owner': this.onChangeOwner,
       'destroy': this.onDestroy,
-      'add:comment': this.onCommentAdded,
-      'add:attachment': this.onAttachmentAdded,
+      'ws:add:comment': this.onWsAddComment,
+      'ws:add:attachment': this.onWsAddAttachment,
     });
 
     this.showChildView('heading', new HeadingView({ model: this.action }));
@@ -77,13 +77,13 @@ export default App.extend(extend({
     /* istanbul ignore else : Covers edge case when owner changes prior to beforeStart */
     if (this.isRunning()) this.showAttachments();
   },
-  onCommentAdded(model) {
+  onWsAddComment(model) {
     this.activityCollection.add(model);
     this.comments.add(model);
 
     Radio.request('ws', 'add', model);
   },
-  onAttachmentAdded(model) {
+  onWsAddAttachment(model) {
     this.attachments.add(model);
 
     Radio.request('ws', 'add', model);
