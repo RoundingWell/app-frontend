@@ -51,7 +51,23 @@ const _Model = BaseModel.extend({
         _clinician: author,
       });
 
-      this.trigger('add:comment', commentModel);
+      this.trigger('ws:add:comment', commentModel);
+    },
+    AttachmentAdded({ file, attributes }) {
+      const attachmentModel = Radio.request('entities', 'files:model', {
+        id: file.id,
+        path: attributes.path,
+        created_at: dayjs.utc().format(),
+        _action: this.id,
+        _patient: this.getPatient().id,
+        _view: attributes.urls.view,
+        _download: attributes.urls.download,
+      });
+
+      const newFilesRelationship = [...this.get('_files'), { id: file.id, type: 'files' }];
+      this.set({ _files: newFilesRelationship });
+
+      this.trigger('ws:add:attachment', attachmentModel);
     },
     ResourceDeleted() {
       this.destroy({ isDeleted: true });
@@ -233,6 +249,14 @@ const _Model = BaseModel.extend({
     const programAction = Radio.request('entities', 'programActions:model', this.get('_program_action'));
 
     return !!size(programAction.get('allowed_uploads'));
+  },
+  removeAttachment(resource) {
+    const files = this.get('_files');
+    const newFilesRelationship = files.filter(file => {
+      return file.id !== resource.id;
+    });
+
+    this.set({ _files: newFilesRelationship });
   },
   parseRelationship: _parseRelationship,
 });

@@ -47,7 +47,8 @@ export default App.extend(extend({
     this.listenTo(action, {
       'change:_owner': this.onChangeOwner,
       'destroy': this.onDestroy,
-      'add:comment': this.onCommentAdded,
+      'ws:add:comment': this.onWsAddComment,
+      'ws:add:attachment': this.onWsAddAttachment,
     });
 
     this.showChildView('heading', new HeadingView({ model: this.action }));
@@ -76,9 +77,14 @@ export default App.extend(extend({
     /* istanbul ignore else : Covers edge case when owner changes prior to beforeStart */
     if (this.isRunning()) this.showAttachments();
   },
-  onCommentAdded(model) {
+  onWsAddComment(model) {
     this.activityCollection.add(model);
     this.comments.add(model);
+
+    Radio.request('ws', 'add', model);
+  },
+  onWsAddAttachment(model) {
+    this.attachments.add(model);
 
     Radio.request('ws', 'add', model);
   },
@@ -230,20 +236,24 @@ export default App.extend(extend({
     });
     attachment.upload(file);
 
+    Radio.request('ws', 'add', attachment);
+
     this.listenTo(attachment, 'upload:failed', () => {
       Radio.request('alert', 'show:error', intl.patients.sidebar.actionSidebarApp.uploadError);
     });
   },
   onRemoveAttachment(model) {
     model.destroy();
+
+    Radio.request('ws', 'unsubscribe', model);
   },
   addSubscriptions() {
-    Radio.request('ws', 'add', this.comments.models);
+    Radio.request('ws', 'add', [...this.comments.models, ...this.attachments.models]);
   },
   removeSubscriptions() {
-    // for when sidebar is closed before comments api request is finished
-    if (!this.comments) return;
+    // for when the sidebar is closed prior to beforeStart being able to finish
+    if (!this.isRunning()) return;
 
-    Radio.request('ws', 'unsubscribe', this.comments.models);
+    Radio.request('ws', 'unsubscribe', [...this.comments.models, ...this.attachments.models]);
   },
 }, SidebarMixin));

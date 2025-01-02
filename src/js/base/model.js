@@ -5,6 +5,7 @@ import JsonApiMixin from './jsonapi-mixin';
 
 export default Backbone.Model.extend(extend({
   destroy(options) {
+    // isDeleted means the model is already deleted from the db
     if (options && options.isDeleted) {
       this.stopListening();
       this.trigger('destroy', this, this.collection, options);
@@ -90,8 +91,9 @@ export default Backbone.Model.extend(extend({
 
     return isFunction(messages[category]) ? messages[category] : this[messages[category]];
   },
-  handleMessage({ category, author, payload }) {
+  handleMessage({ category, resource, author, payload }) {
     payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
+    payload.resource = resource;
     payload.author = author;
 
     const handler = this._getMessageHandler(category);
