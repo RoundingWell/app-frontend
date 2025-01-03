@@ -93,6 +93,7 @@ export default App.extend({
 
   onClose() {
     this.stopHeartbeat();
+    if (this.resources.length) this._subscribe();
   },
 
   onMessage(event) {

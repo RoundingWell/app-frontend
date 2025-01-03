@@ -7,8 +7,13 @@ let service;
 const clientKey = 'clientKey';
 
 Cypress.Commands.add('startService', () => {
+  const startSpy = cy.spy().as('startService');
+
+  service.on('start', startSpy);
+
+  // Return a promise that resolves when the service starts
   return new Cypress.Promise(resolve => {
-    service.on('start', resolve);
+    service.once('start', resolve);
     service.start();
   });
 });
@@ -80,16 +85,26 @@ context('WS Service', function() {
   specify('Restarting a closed socket', function() {
     const channel = Radio.channel('ws');
 
-    const closedTest = { name: 'SendTest', data: 'CLOSED' };
+    const closedTest = { id: 'foo', type: 'bar' };
+    const addTest = { id: 'foo2', type: 'bar2' };
+
+    const notification = {
+      state: {},
+      data: {
+        name: 'Subscribe',
+        data: {
+          clientKey: 'clientKey',
+          resources: [closedTest],
+        },
+      },
+    };
 
     cy
       .startService()
       .then(() => {
-        cy.stub(service, 'start').as('start');
-
         return new Cypress.Promise(resolve => {
           service.ws.addEventListener('close', () => {
-            channel.request('send', closedTest);
+            channel.request('subscribe', closedTest);
             resolve();
           });
           service.ws.close();
@@ -97,9 +112,25 @@ context('WS Service', function() {
       });
 
     cy
-      .get('@start')
-      .should('have.been.calledOnce')
-      .and('have.been.calledWith', { state: {}, data: closedTest });
+      .get('@startService')
+      .should('be.calledTwice')
+      .then(spy => {
+        const secondCall = spy.getCall(1);
+        expect(secondCall.args[0]).to.deep.equal(notification);
+      })
+      .then(() => {
+        channel.request('add', addTest);
+        service.ws.close();
+      });
+
+    cy
+      .get('@startService')
+      .should('be.calledThrice')
+      .then(spy => {
+        const thirdCall = spy.getCall(2);
+        notification.data.data.resources.push(addTest);
+        expect(thirdCall.args[0]).to.deep.equal(notification);
+      });
   });
 
   specify('Message handling', function() {
