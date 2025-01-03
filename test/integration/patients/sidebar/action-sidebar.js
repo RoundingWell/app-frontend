@@ -968,6 +968,161 @@ context('action sidebar', function() {
       });
   });
 
+  specify('action attachments - show/hide icon in action list items', function() {
+    const testPatient = getPatient();
+
+    const testProgramAction = getProgramAction({
+      attributes: {
+        allowed_uploads: ['pdf'],
+      },
+    });
+
+    const testAction = getAction({
+      relationships: {
+        'files': getRelationship([], 'files'),
+        'patient': getRelationship(testPatient),
+        'program-action': getRelationship(testProgramAction),
+        'state': getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeSettings(fx => {
+        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [testAction];
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        fx.included.push(testProgramAction);
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows')
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-paperclip')
+      .should('not.exist');
+
+
+    const putFileURL = '/api/actions/**/relationships/files?urls=upload';
+
+    let fileId;
+
+    cy
+      .intercept('PUT', putFileURL, req => {
+        expect(req.body.data.attributes.path).to.include('test.pdf');
+        fileId = req.body.data.id;
+        req.reply({
+          statusCode: 201,
+          body: {
+            data: {
+              id: fileId,
+              attributes: {
+                path: req.body.data.attributes.path,
+                created_at: testTs(),
+              },
+              meta: {
+                upload: '/upload-test',
+              },
+            },
+          },
+        });
+      }).as('routePutFile');
+
+    cy
+      .intercept('PUT', '/upload-test', req => {
+        req.reply({
+          statusCode: 200,
+          throttleKbps: 10,
+        });
+      }).as('routeUploadFile');
+
+    cy
+      .intercept('GET', '/api/files/*', req => {
+        req.reply({
+          statusCode: 200,
+          body: {
+            data: {
+              id: fileId,
+              attributes: {
+                path: '/dir/test.pdf',
+                created_at: testTs(),
+              },
+              meta: {
+                download: '/download-test',
+                view: '/view-test',
+              },
+            },
+          },
+        });
+      }).as('routeGetFile');
+
+    cy
+      .intercept('DELETE', '/api/files/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteFile');
+
+    cy
+      .get('#upload-attachment')
+      .selectFile({
+        contents: Cypress.Buffer.from('test'),
+        fileName: 'test.pdf',
+      }, { force: true });
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-paperclip')
+      .should('exist');
+
+    cy
+      .get('.sidebar')
+      .find('[data-attachments-files-region]')
+      .first()
+      .contains('Remove')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeDeleteFile');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-paperclip')
+      .should('not.exist');
+  });
+
   specify('action attachments - uploads not allowed on program action', function() {
     const testProgramAction = getProgramAction({
       attributes: {

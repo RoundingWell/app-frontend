@@ -64,8 +64,7 @@ const _Model = BaseModel.extend({
         _download: attributes.urls.download,
       });
 
-      const newFilesRelationship = [...this.get('_files'), { id: file.id, type: 'files' }];
-      this.set({ _files: newFilesRelationship });
+      this.addFile(attachmentModel);
 
       this.trigger('ws:add:attachment', attachmentModel);
     },
@@ -250,7 +249,12 @@ const _Model = BaseModel.extend({
 
     return !!size(programAction.get('allowed_uploads'));
   },
-  removeAttachment(resource) {
+  addFile(resource) {
+    const newFilesRelationship = [...this.get('_files'), { id: resource.id, type: 'files' }];
+
+    this.set({ _files: newFilesRelationship });
+  },
+  removeFile(resource) {
     const files = this.get('_files');
     const newFilesRelationship = files.filter(file => {
       return file.id !== resource.id;
