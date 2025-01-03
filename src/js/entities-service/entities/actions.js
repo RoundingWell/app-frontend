@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import { contains, extend, keys, reduce, size } from 'underscore';
+import { contains, extend, keys, reduce, size, union } from 'underscore';
 import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import dayjs from 'dayjs';
@@ -250,7 +250,7 @@ const _Model = BaseModel.extend({
     return !!size(programAction.get('allowed_uploads'));
   },
   addFile(resource) {
-    const newFilesRelationship = [...this.get('_files'), { id: resource.id, type: 'files' }];
+    const newFilesRelationship = union(this.get('_files'), [{ id: resource.id, type: 'files' }]);
 
     this.set({ _files: newFilesRelationship });
   },
