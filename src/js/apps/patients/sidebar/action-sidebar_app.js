@@ -198,12 +198,14 @@ export default App.extend(extend({
     });
   },
   onPostNewComment({ model }) {
-    model.set({ created_at: dayjs.utc().format() }).save();
+    model.set({ created_at: dayjs.utc().format() });
+
+    model.save().then(() => {
+      Radio.request('ws', 'add', model);
+    });
 
     this.activityCollection.add(model);
     this.comments.add(model);
-
-    Radio.request('ws', 'add', model);
 
     this.showNewCommentForm();
   },
