@@ -100,8 +100,8 @@ context('reduced schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[clinician]=${ currentClinician.id }`)
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[clinicians]=${ currentClinician.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .url()
@@ -558,7 +558,7 @@ context('reduced schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .intercept('GET', '/api/actions?*', {
@@ -584,7 +584,7 @@ context('reduced schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateInProgress.id }`);
 
     cy
       .routeActions();
@@ -598,6 +598,6 @@ context('reduced schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
   });
 });

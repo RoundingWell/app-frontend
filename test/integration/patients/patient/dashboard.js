@@ -166,7 +166,7 @@ context('patient dashboard page', function() {
       .wait('@routePatientActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[states]=22222,33333');
 
     // Filters out done id 55555
     cy

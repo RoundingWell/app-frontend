@@ -13,7 +13,7 @@ export default App.extend({
   beforeStart({ patient }) {
     const currentWorkspace = Radio.request('workspace', 'current');
     const states = currentWorkspace.getStates();
-    const filter = { state: states.groupByDone().done.getFilterIds() };
+    const filter = { states: states.groupByDone().done.getFilterIds() };
 
     return [
       Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId: patient.id, filter }),

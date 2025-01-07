@@ -462,8 +462,8 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=11111')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[clinicians]=11111')
+      .should('contain', 'filter[states]=22222,33333');
 
     cy
       .get('[data-owner-filter-region]')
@@ -491,7 +491,7 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=test-id');
+      .should('contain', 'filter[clinicians]=test-id');
 
     cy
       .get('[data-date-filter-region]')
@@ -1850,7 +1850,7 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[states]=22222,33333');
 
     cy
       .intercept('GET', '/api/actions?*', {
@@ -1876,7 +1876,7 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=33333');
+      .should('contain', 'filter[states]=33333');
 
     cy
       .routeActions();
@@ -1890,6 +1890,6 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[states]=22222,33333');
   });
 });

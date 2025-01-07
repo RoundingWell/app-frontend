@@ -152,11 +152,11 @@ const StateModel = Backbone.Model.extend({
   getEntityStatesFilter() {
     const state = this.get('states').join() || NIL_UUID;
 
-    if (this.isFlowType()) return { state };
+    if (this.isFlowType()) return { states: state };
 
     return {
-      state,
-      'flow.state': this.get('flowStates').join() || NIL_UUID,
+      states: state,
+      flow_states: this.get('flowStates').join() || NIL_UUID,
     };
   },
   isOwnerTeam() {
@@ -179,12 +179,12 @@ const StateModel = Backbone.Model.extend({
       const noOwner = this.get('noOwner');
       const canFilterClinicians = this.currentClinician.can('app:worklist:clinician_filter');
 
-      if (noOwner || !canFilterClinicians) return { team, clinician: NIL_UUID };
+      if (noOwner || !canFilterClinicians) return { teams: team, clinicians: NIL_UUID };
 
-      return { team };
+      return { teams: team };
     }
 
-    return { clinician };
+    return { clinicians: clinician };
   },
   getEntityCustomFilter() {
     const filtersState = this.get('customFilters');
