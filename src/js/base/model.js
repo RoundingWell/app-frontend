@@ -55,12 +55,6 @@ export default Backbone.Model.extend(extend({
       return key !== 'id' && /^[^_]/.test(key);
     });
   },
-  getResource() {
-    return {
-      id: this.id,
-      type: this.type,
-    };
-  },
   toJSONApi(attributes = this.attributes) {
     return {
       id: this.id,
