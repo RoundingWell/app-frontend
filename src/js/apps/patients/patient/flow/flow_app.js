@@ -1,4 +1,4 @@
-import { bind, invoke, get } from 'underscore';
+import { bind, get } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
@@ -98,7 +98,7 @@ export default SubRouterApp.extend({
     this.stopChildApp('actionSidebar');
   },
   subscribe() {
-    Radio.request('ws', 'subscribe', invoke([this.flow, ...this.actions.models], 'getResource'));
+    Radio.request('ws', 'subscribe', [this.flow, ...this.actions.models]);
   },
   _setFlowProgress() {
     const complete = this.actions.filter(action => action.isDone()).length;
