@@ -147,7 +147,7 @@ context('patient archive page', function() {
       .wait('@routePatientActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=55555,66666,77777');
+      .should('contain', 'filter[states]=55555,66666,77777');
 
     // Filters only done id 55555
     cy

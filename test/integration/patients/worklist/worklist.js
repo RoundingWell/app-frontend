@@ -329,7 +329,7 @@ context('worklist page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[updated_at]=${ dayjs(testDate()).startOf('day').subtract(30, 'days').format() }`)
-      .should('contain', 'filter[state]=55555,66666,77777');
+      .should('contain', 'filter[states]=55555,66666,77777');
 
     cy
       .intercept('PATCH', '/api/flows/*', {
@@ -1094,8 +1094,8 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=11111')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[clinicians]=11111')
+      .should('contain', 'filter[states]=22222,33333');
 
     cy
       .get('[data-owner-filter-region]')
@@ -1129,8 +1129,8 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=test-clinician')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[clinicians]=test-clinician')
+      .should('contain', 'filter[states]=22222,33333');
 
     cy
       .get('.list-page__title')
@@ -1152,8 +1152,8 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=11111')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[clinicians]=11111')
+      .should('contain', 'filter[states]=22222,33333');
 
     cy
       .get('.list-page__title')
@@ -1180,7 +1180,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=test-clinician');
+      .should('contain', 'filter[clinicians]=test-clinician');
   });
 
   specify('owner filtering', function() {
@@ -1248,7 +1248,7 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[team]=${ teamCoordinator.id }`);
+      .should('contain', `filter[teams]=${ teamCoordinator.id }`);
 
     cy
       .get('[data-owner-filter-region]')
@@ -1265,7 +1265,7 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=1');
+      .should('contain', 'filter[clinicians]=1');
 
     cy
       .get('[data-owner-toggle-region]')
@@ -1299,8 +1299,8 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[clinician]=${ NIL_UUID }`)
-      .should('contain', 'filter[team]=22222');
+      .should('contain', `filter[clinicians]=${ NIL_UUID }`)
+      .should('contain', 'filter[teams]=22222');
 
     cy
       .get('[data-owner-toggle-region]')
@@ -1312,8 +1312,8 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('not.contain', `filter[clinician]=${ NIL_UUID }`)
-      .should('contain', 'filter[team]=22222');
+      .should('not.contain', `filter[clinicians]=${ NIL_UUID }`)
+      .should('contain', 'filter[teams]=22222');
   });
 
   // TODO: Move to component tests
@@ -1959,7 +1959,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[clinician]=${ NIL_UUID }`);
+      .should('contain', `filter[clinicians]=${ NIL_UUID }`);
 
     cy
       .get('[data-owner-filter-region]')
@@ -4162,7 +4162,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[states]=22222,33333');
 
     cy
       .intercept('GET', '/api/actions?*', {
@@ -4188,7 +4188,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=33333');
+      .should('contain', 'filter[states]=33333');
 
     cy
       .routeActions();
@@ -4202,6 +4202,6 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[state]=22222,33333');
+      .should('contain', 'filter[states]=22222,33333');
   });
 });

@@ -95,8 +95,8 @@ context('filter sidebar', function() {
       .itsUrl()
       .its('search')
       .should('contain', 'filter[@insurance]=Medicare')
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[flow.state]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('.worklist-list__toggle')
@@ -293,8 +293,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[state]=${ stateTodo.id }`);
+      .should('contain', `filter[states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[states]=${ stateTodo.id }`);
 
     cy
       .get('@filtersSidebar')
@@ -318,8 +318,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[flow.state]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[flow.state]=${ stateTodo.id }`);
+      .should('contain', `filter[flow_states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[flow_states]=${ stateTodo.id }`);
 
     cy
       .get('.list-page__filters')
@@ -358,7 +358,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ NIL_UUID }`);
+      .should('contain', `filter[states]=${ NIL_UUID }`);
 
     cy
       .get('.list-page__filters')
@@ -397,7 +397,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[flow.state]=${ NIL_UUID }`);
+      .should('contain', `filter[flow_states]=${ NIL_UUID }`);
 
     cy
       .get('.list-page__filters')
@@ -436,7 +436,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateInProgress.id }`);
 
     cy
       .get('.list-page__filters')
@@ -473,8 +473,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[flow.state]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('.list-page__filters')
@@ -568,7 +568,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateDone.id },${ stateUnableToComplete.id }`);
+      .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id }`);
 
     cy
       .get('.list-page__filters')
@@ -611,7 +611,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateUnableToComplete.id }`);
+      .should('contain', `filter[states]=${ stateUnableToComplete.id }`);
 
     cy
       .get('.list-page__filters')
@@ -648,7 +648,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateDone.id },${ stateUnableToComplete.id }`);
+      .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id }`);
 
     cy
       .get('.list-page__filters')
@@ -730,10 +730,10 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinician]=11111')
+      .should('contain', 'filter[clinicians]=11111')
       .should('contain', 'filter[@insurance]=Medicare')
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[flow.state]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('.list-page__filters')
@@ -894,8 +894,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[state]=${ stateTodo.id }`);
+      .should('contain', `filter[states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[states]=${ stateTodo.id }`);
 
     cy
       .get('.list-page__filters')
@@ -922,8 +922,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[flow.state]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[flow.state]=${ stateTodo.id }`);
+      .should('contain', `filter[flow_states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[flow_states]=${ stateTodo.id }`);
 
     cy
       .get('.list-page__filters')
@@ -950,7 +950,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ NIL_UUID }`);
+      .should('contain', `filter[states]=${ NIL_UUID }`);
 
     cy
       .get('.list-page__filters')
@@ -977,7 +977,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[flow.state]=${ NIL_UUID }`);
+      .should('contain', `filter[flow_states]=${ NIL_UUID }`);
 
     cy
       .get('.list-page__filters')
@@ -1025,8 +1025,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[flow.state]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`)
       .should('not.contain', 'filter[@insurance]');
 
     cy
@@ -1155,10 +1155,10 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[clinician]=${ currentClinician.id }`)
+      .should('contain', `filter[clinicians]=${ currentClinician.id }`)
       .should('contain', 'filter[@insurance]=Medicare')
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[flow.state]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('.list-page__filters')
@@ -1320,8 +1320,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[state]=${ stateTodo.id }`);
+      .should('contain', `filter[states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[states]=${ stateTodo.id }`);
 
     cy
       .get('.list-page__filters')
@@ -1348,8 +1348,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[flow.state]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[flow.state]=${ stateTodo.id }`);
+      .should('contain', `filter[flow_states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[flow_states]=${ stateTodo.id }`);
 
     cy
       .get('.list-page__filters')
@@ -1376,7 +1376,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ NIL_UUID }`);
+      .should('contain', `filter[states]=${ NIL_UUID }`);
 
     cy
       .get('.list-page__filters')
@@ -1403,7 +1403,7 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[flow.state]=${ NIL_UUID }`);
+      .should('contain', `filter[flow_states]=${ NIL_UUID }`);
 
     cy
       .get('.list-page__filters')
@@ -1451,8 +1451,8 @@ context('filter sidebar', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[state]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[flow.state]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`)
       .should('not.contain', 'filter[@insurance]');
 
     cy

@@ -50,8 +50,8 @@ export default Backbone.Model.extend({
   },
   getEntityStatesFilter() {
     return {
-      'state': this.get('states').join() || NIL_UUID,
-      'flow.state': this.get('flowStates').join() || NIL_UUID,
+      states: this.get('states').join() || NIL_UUID,
+      flow_states: this.get('flowStates').join() || NIL_UUID,
     };
   },
   getOwner() {
@@ -67,7 +67,7 @@ export default Backbone.Model.extend({
   },
   getEntityFilter() {
     const filters = {
-      clinician: this.currentClinician.id,
+      clinicians: this.currentClinician.id,
     };
 
     extend(filters, this.getEntityStatesFilter());
