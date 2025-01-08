@@ -2678,18 +2678,21 @@ context('patient flow page', function() {
       .visitOnClock(`/flow/${ testSocketFlow.id }`, { now: testTs() })
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
-      .wait('@routeFlowActions')
-      .interceptWs('Subscribe')
-      .its('resources')
-      .should('deep.equal', [
-        getRelationship(testSocketFlow).data,
-        getRelationship(testSocketAction).data,
-      ]);
+      .wait('@routeFlowActions');
 
     cy
       .get('[data-header-region]')
       .click('top')
       .tick(300);
+
+    cy
+      .get('@wsHandleMessage')
+      .then(stub => {
+        expect(stub.getCall(0).args[0].data.resources).to.deep.equal([
+          getRelationship(testSocketFlow).data,
+          getRelationship(testSocketAction).data,
+        ]);
+      });
 
     cy.sendWs({
       category: 'NameChanged',
