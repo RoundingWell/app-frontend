@@ -36,11 +36,13 @@ export default App.extend({
 
   _subscribe() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
+    const currentWorkspace = Radio.request('workspace', 'current');
 
     this.send({
       name: 'Subscribe',
       data: {
         clientKey: currentUser.clientKey,
+        workspace: currentWorkspace.id,
         resources: this.resources.toJSON(),
       },
     });
