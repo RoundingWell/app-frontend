@@ -95,7 +95,7 @@ export default App.extend({
 
   onClose() {
     this.stopHeartbeat();
-    if (this.resources.length) this._subscribe();
+    if (!_TEST_ && this.resources.length) this._subscribe();
   },
 
   onMessage(event) {

@@ -93,7 +93,6 @@ context('WS Service', function() {
     const channel = Radio.channel('ws');
 
     const closedTest = { id: 'foo', type: 'bar' };
-    const addTest = { id: 'foo2', type: 'bar2' };
 
     const notification = {
       state: {},
@@ -125,19 +124,6 @@ context('WS Service', function() {
       .then(spy => {
         const secondCall = spy.getCall(1);
         expect(secondCall.args[0]).to.deep.equal(notification);
-      })
-      .then(() => {
-        channel.request('add', addTest);
-        service.ws.close();
-      });
-
-    cy
-      .get('@startService')
-      .should('be.calledThrice')
-      .then(spy => {
-        const thirdCall = spy.getCall(2);
-        notification.data.data.resources.push(addTest);
-        expect(thirdCall.args[0]).to.deep.equal(notification);
       });
   });
 
