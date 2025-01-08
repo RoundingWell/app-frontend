@@ -74,7 +74,7 @@ export default App.extend({
   },
 
   onOpen(data) {
-    this.sendData(data);
+    if (data) this.sendData(data);
     this.startHeartbeat();
   },
 
