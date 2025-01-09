@@ -32,7 +32,6 @@ const css = {
     scss: {
       additionalData: `
         @use 'sass:math';
-        @use 'sass:color';
         @import 'src/scss/provider-variables.scss';
       `,
     },
