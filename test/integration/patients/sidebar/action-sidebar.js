@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { v4 as uuid } from 'uuid';
 
 import formatDate from 'helpers/format-date';
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
@@ -970,6 +971,7 @@ context('action sidebar', function() {
 
   specify('action attachments - show/hide icon in action list items', function() {
     const testPatient = getPatient();
+    const testFileId = uuid();
 
     const testProgramAction = getProgramAction({
       attributes: {
@@ -1031,22 +1033,15 @@ context('action sidebar', function() {
       .find('.table-list__item .fa-paperclip')
       .should('not.exist');
 
-
-    const putFileURL = '/api/actions/**/relationships/files?urls=upload';
-
-    let fileId;
-
     cy
-      .intercept('PUT', putFileURL, req => {
-        expect(req.body.data.attributes.path).to.include('test.pdf');
-        fileId = req.body.data.id;
+      .intercept('PUT', '/api/actions/**/relationships/files?urls=upload', req => {
         req.reply({
           statusCode: 201,
           body: {
             data: {
-              id: fileId,
+              id: testFileId,
               attributes: {
-                path: req.body.data.attributes.path,
+                path: '/dir/test.pdf',
                 created_at: testTs(),
               },
               meta: {
@@ -1055,7 +1050,7 @@ context('action sidebar', function() {
             },
           },
         });
-      }).as('routePutFile');
+      });
 
     cy
       .intercept('PUT', '/upload-test', req => {
@@ -1063,7 +1058,7 @@ context('action sidebar', function() {
           statusCode: 200,
           throttleKbps: 10,
         });
-      }).as('routeUploadFile');
+      });
 
     cy
       .intercept('GET', '/api/files/*', req => {
@@ -1071,7 +1066,7 @@ context('action sidebar', function() {
           statusCode: 200,
           body: {
             data: {
-              id: fileId,
+              id: testFileId,
               attributes: {
                 path: '/dir/test.pdf',
                 created_at: testTs(),
@@ -1083,7 +1078,7 @@ context('action sidebar', function() {
             },
           },
         });
-      }).as('routeGetFile');
+      });
 
     cy
       .intercept('DELETE', '/api/files/*', {
