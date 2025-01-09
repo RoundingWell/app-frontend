@@ -1119,7 +1119,10 @@ context('patient flow page', function() {
       },
     });
 
-    cy.wait('@routeAction');
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', otherAction.id);
 
     cy
       .get('[data-content-region]')
