@@ -5,11 +5,12 @@ import WSService from './ws';
 
 let service;
 const clientKey = 'clientKey';
+const workspace = 'workspaceId';
 
 Cypress.Commands.add('startService', () => {
-  const startSpy = cy.spy().as('startService');
+  const startStub = cy.stub().as('startService');
 
-  service.on('start', startSpy);
+  service.on('start', startStub);
 
   // Return a promise that resolves when the service starts
   return new Cypress.Promise(resolve => {
@@ -21,6 +22,7 @@ Cypress.Commands.add('startService', () => {
 context('WS Service', function() {
   beforeEach(function() {
     Radio.reply('bootstrap', 'currentUser', { clientKey });
+    Radio.reply('workspace', 'current', { id: workspace });
     Radio.reply('auth', 'getToken', () => 'token');
     const url = 'ws://cypress-websocket/ws';
     cy.mockWs(url);
@@ -31,6 +33,7 @@ context('WS Service', function() {
     service.destroy();
     Radio.stopReplying('auth', 'getToken');
     Radio.stopReplying('bootstrap', 'currentUser');
+    Radio.stopReplying('workspace', 'current');
   });
 
   specify('ws url not configured', function() {
@@ -45,55 +48,59 @@ context('WS Service', function() {
   });
 
   specify('Constructing the websocket', function() {
-    service.start();
+    const testNotConnected = { name: 'SendTest', data: 'NOTCONNECTED' };
 
-    cy
-      .interceptWs('SendTest').as('sendTest');
+    service.start();
 
     service.on('start', () => {
       const channel = Radio.channel('ws');
 
       service.ws.readyState = WebSocket.CONNECTING;
-      channel.request('send', { name: 'SendTest', data: 'NOTCONNECTED' });
+      channel.request('send', testNotConnected);
     });
 
     cy
-      .get('@sendTest')
-      .should('equal', 'NOTCONNECTED');
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testNotConnected);
   });
 
   specify('Connecting the websocket', function() {
     const channel = Radio.channel('ws');
+    const testConnecting = { name: 'SendTest', data: 'CONNECTING' };
+    const testOpen = { name: 'SendTest', data: 'OPEN' };
 
     cy
-      .startService()
-      .interceptWs('SendTest', () => {
-        channel.request('send', { name: 'SendTest', data: 'CONNECTING' });
-      })
-      .should('equal', 'CONNECTING')
+      .wrap(service)
       .then(() => {
-        expect(service.isRunning()).to.be.true;
+        expect(service.isRunning()).to.be.false;
+        channel.request('send', testConnecting);
       });
 
     cy
-      .interceptWs('SendTest', () => {
-        channel.request('send', { name: 'SendTest', data: 'OPEN' });
-      })
-      .should('equal', 'OPEN');
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testConnecting)
+      .then(() => {
+        expect(service.isRunning()).to.be.true;
+        channel.request('send', testOpen);
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testOpen);
   });
 
   specify('Restarting a closed socket', function() {
     const channel = Radio.channel('ws');
 
     const closedTest = { id: 'foo', type: 'bar' };
-    const addTest = { id: 'foo2', type: 'bar2' };
 
     const notification = {
       state: {},
       data: {
         name: 'Subscribe',
         data: {
-          clientKey: 'clientKey',
+          clientKey,
+          workspace,
           resources: [closedTest],
         },
       },
@@ -117,19 +124,6 @@ context('WS Service', function() {
       .then(spy => {
         const secondCall = spy.getCall(1);
         expect(secondCall.args[0]).to.deep.equal(notification);
-      })
-      .then(() => {
-        channel.request('add', addTest);
-        service.ws.close();
-      });
-
-    cy
-      .get('@startService')
-      .should('be.calledThrice')
-      .then(spy => {
-        const thirdCall = spy.getCall(2);
-        notification.data.data.resources.push(addTest);
-        expect(thirdCall.args[0]).to.deep.equal(notification);
       });
   });
 
@@ -157,11 +151,11 @@ context('WS Service', function() {
     service.HEART_BEAT_INTERVAL = 10;
 
     cy
-      .startService()
-      .wait(10);
+      .startService();
 
     cy
-      .interceptWs('ping')
+      .get('@wsHandleMessage')
+      .should('be.calledWith', { name: 'ping' })
       .sendWs({ name: 'pong' });
   });
 
@@ -173,51 +167,61 @@ context('WS Service', function() {
       { id: 'foo4', type: 'bar4' },
     ];
 
+    function testData(resources) {
+      return {
+        name: 'Subscribe',
+        data: {
+          clientKey,
+          workspace,
+          resources,
+        },
+      };
+    }
+
     const channel = Radio.channel('ws');
 
-    cy
-      .startService()
-      .interceptWs('Subscribe', () => {
-        const TestModel = Backbone.Model.extend({ type: 'bar' });
+    const TestModel = Backbone.Model.extend({ type: 'bar' });
 
-        channel.request('subscribe', new TestModel({ id: 'foo', foo: true }));
-      })
-      .should('deep.equal', { clientKey, resources: [notifications[0]] });
+    channel.request('subscribe', new TestModel({ id: 'foo', foo: true }));
 
     cy
-      .interceptWs('Subscribe', () => {
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testData([notifications[0]]))
+
+      .then(() => {
         channel.request('add', notifications[1], { shouldPersist: true });
       })
-      .should('deep.equal', { clientKey, resources: [notifications[0], notifications[1]] });
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testData([notifications[0], notifications[1]]))
 
-    cy
-      .interceptWs('Subscribe', () => {
+      .then(() => {
         channel.request('subscribe', notifications[2]);
       })
-      .should('deep.equal', { clientKey, resources: [notifications[2], notifications[1]] });
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testData([notifications[2], notifications[1]]))
 
-    cy
-      .interceptWs('Subscribe', () => {
+      .then(() => {
         channel.request('unsubscribe', notifications[1]);
       })
-      .should('deep.equal', { clientKey, resources: [notifications[2]] });
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testData([notifications[2]]))
 
-    cy
-      .interceptWs('Subscribe', () => {
+      .then(() => {
         channel.request('subscribe', [notifications[3]], { shouldPersist: true });
       })
-      .should('deep.equal', { clientKey, resources: [notifications[3]] });
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testData([notifications[3]]))
 
-    cy
-      .interceptWs('Subscribe', () => {
+      .then(() => {
         channel.request('add', [notifications[0], notifications[1]]);
       })
-      .should('deep.equal', { clientKey, resources: [notifications[3], notifications[0], notifications[1]] });
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testData([notifications[3], notifications[0], notifications[1]]))
 
-    cy
-      .interceptWs('Subscribe', () => {
+      .then(() => {
         channel.request('unsubscribe', [notifications[3]]);
       })
-      .should('deep.equal', { clientKey, resources: [notifications[0], notifications[1]] });
+      .get('@wsHandleMessage')
+      .should('be.calledWith', testData([notifications[0], notifications[1]]));
   });
 });

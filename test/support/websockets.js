@@ -4,20 +4,7 @@ import { Server, WebSocket as MockedWebSocket } from 'mock-socket';
 let socketReady;
 let mockServer;
 
-const sendMessage = (socket, message) => {
-  socket.send(JSON.stringify(message));
-};
-
-const messageHandlers = {};
-
-const handleMessages = message => {
-  const { name, data } = JSON.parse(message);
-  if (messageHandlers[name]) {
-    messageHandlers[name](data);
-  }
-};
-
-const getServer = (url, connectionResponseData) => {
+const getServer = (url, messageHandler) => {
   return new Cypress.Promise(resolve => {
     if (mockServer) {
       mockServer.close();
@@ -26,12 +13,8 @@ const getServer = (url, connectionResponseData) => {
     mockServer = new Server(url, { mock: true });
 
     mockServer.on('connection', socket => {
-      if (connectionResponseData) {
-        sendMessage(socket, connectionResponseData);
-      }
-
-      socket.on('message', function(message) {
-        if (message) handleMessages(message);
+      socket.on('message', message => {
+        messageHandler(JSON.parse(message));
       });
     });
 
@@ -39,14 +22,16 @@ const getServer = (url, connectionResponseData) => {
   });
 };
 
-Cypress.Commands.add('mockWs', (url, { connectionResponseMessage } = {}) => {
+Cypress.Commands.add('mockWs', url => {
   cy.log('ws: Mocking WebSocket');
 
   cy.on('window:before:load', win => {
     win.WebSocket = MockedWebSocket;
   });
 
-  socketReady = getServer(url, connectionResponseMessage);
+  const messageHandler = cy.stub().as('wsHandleMessage');
+
+  socketReady = getServer(url, messageHandler);
 
   cy.on('test:after:run', () => {
     cy.log('ws: Stopping Mock Server');
@@ -66,14 +51,5 @@ Cypress.Commands.add('errorWs', () => {
   cy.wrap(socketReady).then(() => {
     cy.log('ws: Sending error');
     mockServer.simulate('error');
-  });
-});
-
-Cypress.Commands.add('interceptWs', (name, callback) => {
-  cy.wrap(socketReady).then(() => {
-    return new Cypress.Promise(resolve => {
-      messageHandlers[name] = resolve;
-      if (callback) callback();
-    });
   });
 });

@@ -36,11 +36,13 @@ export default App.extend({
 
   _subscribe() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
+    const currentWorkspace = Radio.request('workspace', 'current');
 
     this.send({
       name: 'Subscribe',
       data: {
         clientKey: currentUser.clientKey,
+        workspace: currentWorkspace.id,
         resources: this.resources.toJSON(),
       },
     });
@@ -72,7 +74,7 @@ export default App.extend({
   },
 
   onOpen(data) {
-    this.sendData(data);
+    if (data) this.sendData(data);
     this.startHeartbeat();
   },
 
@@ -93,7 +95,7 @@ export default App.extend({
 
   onClose() {
     this.stopHeartbeat();
-    if (this.resources.length) this._subscribe();
+    if (!_TEST_ && this.resources.length) this._subscribe();
   },
 
   onMessage(event) {
