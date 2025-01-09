@@ -6,8 +6,10 @@
 //   Main Colors
 // -------------------------------------
 
+@use 'sass:map';
+
 @function color($color, $tone: 'base') {
-  @return map-get(map-get($colors, $color), $tone);
+  @return map.get(map.get($colors, $color), $tone);
 }
 
 $colors: (
