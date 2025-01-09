@@ -26,9 +26,9 @@ const _Model = BaseModel.extend({
         _download: attributes.urls.download,
       });
     },
-    FileRemoved({ resource }) {
+    FileRemoved() {
       const action = Radio.request('entities', 'actions:model', this.get('_action'));
-      action.removeFile(resource);
+      action.removeFile(this);
 
       this.destroy({ isDeleted: true });
     },

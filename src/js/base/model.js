@@ -87,12 +87,10 @@ export default Backbone.Model.extend(extend({
   },
   handleMessage({ category, resource, author, payload }) {
     payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
-    payload.resource = resource;
-    payload.author = author;
 
     const handler = this._getMessageHandler(category);
-    if (handler) handler.call(this, payload);
+    if (handler) handler.call(this, payload, { category, resource, author });
 
-    this.trigger('message', { category, author, payload });
+    this.trigger('message', { category, resource, author, payload });
   },
 }, JsonApiMixin));
