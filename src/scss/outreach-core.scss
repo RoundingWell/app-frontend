@@ -1,12 +1,12 @@
 // Core Styles
 // These are the core styles shared between mobile and desktop
-@import 'core/reset';
-@import 'core/flex';
-@import 'core/fonts';
-@import 'core/icon';
-@import 'core/layout';
-@import 'core/overrides';
-@import 'core/scrollbar';
-@import 'core/space';
-@import 'core/text';
-@import 'core/typography';
+@forward 'core/reset';
+@forward 'core/flex';
+@forward 'core/fonts';
+@forward 'core/icon';
+@forward 'core/layout';
+@forward 'core/overrides';
+@forward 'core/scrollbar';
+@forward 'core/space';
+@forward 'core/text';
+@forward 'core/typography';
