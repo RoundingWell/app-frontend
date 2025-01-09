@@ -31,7 +31,6 @@ const css = {
   preprocessorOptions: {
     scss: {
       additionalData: `
-        @use 'sass:math';
         @import 'src/scss/provider-variables.scss';
       `,
     },
