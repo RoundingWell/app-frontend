@@ -126,9 +126,10 @@ export default App.extend({
   },
   beforeStart() {
     const listType = this.getState().getType();
+    this.filters = this.getState().getEntityFilter();
 
     const data = {
-      filter: this.getState().getEntityFilter(),
+      filter: this.filters,
       include: this.sortOptions.getInclude(),
     };
 
@@ -143,6 +144,8 @@ export default App.extend({
     this.filteredCollection = collection.clone();
     this.editableCollection = collection.clone();
 
+    this.subscribe();
+
     this.listenTo(this.filteredCollection, 'reset', this.showCountView);
     this.showCountView();
 
@@ -150,6 +153,20 @@ export default App.extend({
     this.toggleBulkSelect();
 
     this.showList();
+  },
+  subscribe() {
+    const channel = Radio.channel('ws');
+    const filterKey = this.getState().getType();
+
+    channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
+
+    this.listenTo(channel, 'message', (message, model) => {
+      if (this.collection.get(model)) return;
+
+      model.fetch().then(() => {
+        this.collection.add(model);
+      });
+    });
   },
   // NOTE: Shows views dependent on getState().getType()
   showTypeViews() {
@@ -210,7 +227,7 @@ export default App.extend({
     const filtersState = this.getFiltersState();
 
     const sidebarApp = this.getChildApp('filtersSidebar');
-    
+
     Radio.request('sidebar', 'start', sidebarApp, { filtersState });
   },
   toggleBulkSelect() {
