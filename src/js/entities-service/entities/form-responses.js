@@ -39,10 +39,7 @@ const _Model = BaseModel.extend({
   },
   getEditor() {
     // editor can be a clinician or patient
-    const editor = this.get('_editor');
-    const Editor = Store.get(editor.type);
-
-    return new Editor({ id: editor.id });
+    return this.getRelationship('_editor');
   },
   getEditorName() {
     const editor = this.getEditor();

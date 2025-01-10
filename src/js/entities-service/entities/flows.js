@@ -31,9 +31,7 @@ const _Model = BaseModel.extend({
     return Radio.request('entities', 'patients:model', this.get('_patient'));
   },
   getOwner() {
-    const owner = this.get('_owner');
-    const Owner = Store.get(owner.type);
-    return new Owner({ id: owner.id });
+    return this.getRelationship('_owner');
   },
   getAuthor() {
     return Radio.request('entities', 'clinicians:model', this.get('_author'));

@@ -89,9 +89,7 @@ const _Model = BaseModel.extend({
     return Radio.request('entities', 'patients:model', this.get('_patient'));
   },
   getOwner() {
-    const owner = this.get('_owner');
-    const Owner = Store.get(owner.type);
-    return new Owner({ id: owner.id });
+    return this.getRelationship('_owner');
   },
   isSameTeamAsUser() {
     const currentUser = Radio.request('bootstrap', 'currentUser');

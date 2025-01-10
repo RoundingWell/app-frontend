@@ -3,7 +3,13 @@ import Backbone from 'backbone';
 import dayjs from 'dayjs';
 import JsonApiMixin from './jsonapi-mixin';
 
+import { getStore } from './entity-service';
+
 export default Backbone.Model.extend(extend({
+  getRelationship(key) {
+    const relationship = this.get(key);
+    return getStore(relationship);
+  },
   destroy(options) {
     // isDeleted means the model is already deleted from the db
     if (options && options.isDeleted) {
