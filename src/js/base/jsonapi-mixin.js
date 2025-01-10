@@ -1,13 +1,12 @@
 import { each, isArray, isNull, isObject, isUndefined, map, pick } from 'underscore';
 import dayjs from 'dayjs';
-import Store from 'backbone.store';
-
 import underscored from 'js/utils/formatting/underscored';
+
+import { getStore } from './entity-service';
 
 export function cacheIncluded(included) {
   each(included, data => {
-    const Model = Store.get(data.type);
-    const model = new Model({ id: data.id });
+    const model = getStore(data);
     model.set(model.parseModel(data));
   });
 }
