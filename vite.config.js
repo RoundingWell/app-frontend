@@ -30,6 +30,8 @@ const resolve = {
 const css = {
   preprocessorOptions: {
     scss: {
+      // remove this when we switch sass to use modern js api
+      api: 'legacy',
       additionalData: `
         @use 'src/scss/provider-variables.scss' as *;
       `,
