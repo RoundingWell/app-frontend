@@ -8,6 +8,7 @@ import { getStore } from './entity-service';
 export default Backbone.Model.extend(extend({
   getRelationship(key) {
     const relationship = this.get(key);
+    if (!relationship) return;
     return getStore(relationship);
   },
   destroy(options) {
