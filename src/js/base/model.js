@@ -11,6 +11,12 @@ export default Backbone.Model.extend(extend({
     if (!relationship) return;
     return getStore(relationship);
   },
+  getResource() {
+    return {
+      id: this.id,
+      type: this.type,
+    };
+  },
   destroy(options) {
     // isDeleted means the model is already deleted from the db
     if (options && options.isDeleted) {
