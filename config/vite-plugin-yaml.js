@@ -21,6 +21,8 @@ export default function() {
           return null;
         }
       }
+
+      return null;
     },
   };
 }
