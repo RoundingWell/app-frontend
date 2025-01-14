@@ -11,7 +11,7 @@ import handlebars from './config/vite-plugin-handlebars-loader.js';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import stylelint from 'vite-plugin-stylelint';
 import { VitePWA } from 'vite-plugin-pwa';
-import yaml from '@modyfi/vite-plugin-yaml';
+import yaml from './config/vite-plugin-yaml.js';
 
 import getFaIconSymbols from './config/fontawesome.js';
 
@@ -30,6 +30,8 @@ const resolve = {
 const css = {
   preprocessorOptions: {
     scss: {
+      // remove this when we switch sass to use modern js api
+      api: 'legacy',
       additionalData: `
         @use 'sass:math';
         @use 'sass:color';
