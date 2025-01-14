@@ -7,17 +7,20 @@ export default function() {
     name: 'vite-plugin-yaml',
     async transform(code, id) {
       if (yamlExtension.test(id)) {
-        const yamlData = load(code, {
-          filename: id,
-        });
+        try {
+          const yamlData = load(code, {
+            filename: id,
+          });
 
-        return {
-          code: `const data = ${ JSON.stringify(yamlData) };\nexport default data;`,
-          map: { mappings: '' },
-        };
+          return {
+            code: `const data = ${ JSON.stringify(yamlData) };\nexport default data;`,
+            map: { mappings: '' },
+          };
+        } catch (exception) {
+          console.error(`${ id } errored during yaml processing: `, exception);
+          return null;
+        }
       }
-
-      return null;
     },
   };
 }
