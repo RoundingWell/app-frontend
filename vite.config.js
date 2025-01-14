@@ -34,7 +34,6 @@ const css = {
       api: 'legacy',
       additionalData: `
         @use 'sass:math';
-        @use 'sass:color';
         @import 'src/scss/provider-variables.scss';
       `,
     },
