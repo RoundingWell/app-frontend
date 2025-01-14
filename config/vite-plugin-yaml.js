@@ -1,5 +1,4 @@
 import { load } from 'js-yaml';
-import toSource from 'tosource';
 
 const yamlExtension = /\.ya?ml$/;
 
@@ -13,7 +12,7 @@ export default function() {
         });
 
         return {
-          code: `const data = ${ toSource(yamlData) };\nexport default data;`,
+          code: `const data = ${ JSON.stringify(yamlData) };\nexport default data;`,
           map: { mappings: '' },
         };
       }
