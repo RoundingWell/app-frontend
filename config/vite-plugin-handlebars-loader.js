@@ -17,7 +17,7 @@ export default function viteHbsPlugin(hbsOptions = {}) {
           hbsCode = await fs.promises.readFile(id, 'utf8');
         } catch (exception) {
           console.warn(`${ id } couldn't be loaded by ${ VITE_PLUGIN_NAME }: `, exception);
-          return;
+          return null;
         }
         try {
           const compiledHbs = Handlebars.precompile(hbsCode, hbsOptions);
@@ -27,8 +27,11 @@ export default function viteHbsPlugin(hbsOptions = {}) {
           `;
         } catch (exception) {
           console.error(`${ id } errored during Handlebars compiling: `, exception);
+          return null;
         }
       }
+
+      return null;
     },
   };
 }
