@@ -1,3 +1,5 @@
+@use '../provider-variables' as *;
+
 body {
   background-color: $white;
   overflow-x: hidden;

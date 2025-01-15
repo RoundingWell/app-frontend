@@ -1,6 +1,8 @@
 // Text alignment
 // -----------------------------------------------------------
 
+@use '../provider-variables' as *;
+
 .u-text-align--center { text-align: center !important; }
 .u-text-align--left { text-align: left !important; }
 .u-text-align--right { text-align: right !important; }
