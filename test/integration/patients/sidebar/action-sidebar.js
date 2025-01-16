@@ -810,6 +810,11 @@ context('action sidebar', function() {
 
     cy
       .get('@attachmentDownload')
+      .should('have.attr', 'target')
+      .and('contain', '_blank');
+
+    cy
+      .get('@attachmentDownload')
       .should('have.attr', 'download');
 
     cy

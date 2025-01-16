@@ -26,10 +26,10 @@ const AttachmentView = View.extend({
   downloadTemplate: hbs`
     <a class="action-sidebar__attachment-filename" target="_blank" href="{{_view}}">{{filename}}</a>
     <div class="flex">
-      <a class="action-sidebar__attachment-action flex-grow" href="{{_download}}" download>
+      <a class="action-sidebar__attachment-action flex-grow" target="_blank" href="{{_download}}" download>
         {{far "download"}} <span>{{ @intl.patients.sidebar.action.actionSidebarAttachmentsViews.attachmentView.downloadText }}</span>
       </a>
-     {{#if canRemoveAttachments}}
+      {{#if canRemoveAttachments}}
         <a class="action-sidebar__attachment-action js-remove">
           {{far "trash-can"}} <span>{{ @intl.patients.sidebar.action.actionSidebarAttachmentsViews.attachmentView.removeText }}</span>
         </a>
