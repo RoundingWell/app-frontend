@@ -29,6 +29,7 @@ context('program action sidebar', function() {
         fx.data = getProgramActions({
           relationships: {
             'program': getRelationship(testProgram),
+            'program-flow': getRelationship(),
           },
         });
 

@@ -3459,11 +3459,21 @@ context('worklist page', function() {
 
   specify('patient sidebar', function() {
     const testPatient = getPatient({
-      id: '1',
       attributes: {
         first_name: 'Test',
         last_name: 'Patient',
         sex: 'u',
+      },
+    });
+
+    const testFlow = getFlow({
+      attributes: {
+        name: 'Test Flow Item',
+      },
+      relationships: {
+        owner: getRelationship(teamCoordinator),
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
       },
     });
 
@@ -3476,17 +3486,7 @@ context('worklist page', function() {
       })
       .routeFlows(fx => {
         fx.data = [
-          getFlow({
-            id: '1',
-            attributes: {
-              name: 'Test Flow Item',
-            },
-            relationships: {
-              owner: getRelationship(teamCoordinator),
-              state: getRelationship(stateTodo),
-              patient: getRelationship(testPatient),
-            },
-          }),
+          testFlow,
         ];
 
         fx.included.push(testPatient);
@@ -3496,17 +3496,17 @@ context('worklist page', function() {
       .routeActions(fx => {
         fx.data = [
           getAction({
-            id: '1',
             relationships: {
               owner: getRelationship(teamCoordinator),
               state: getRelationship(stateTodo),
               patient: getRelationship(testPatient),
-              flow: getRelationship('1', 'flows'),
+              flow: getRelationship(testFlow),
             },
           }),
         ];
 
         fx.included.push(testPatient);
+        fx.included.push(testFlow);
 
         return fx;
       })
@@ -3573,7 +3573,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/dashboard/1');
+      .should('contain', `patient/dashboard/${ testPatient.id }`);
 
     cy
       .get('.patient-sidebar')
@@ -3596,7 +3596,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/dashboard/1');
+      .should('contain', `patient/dashboard/${ testPatient.id }`);
 
     cy
       .get('.patient-sidebar')

@@ -5,6 +5,7 @@ import { getAction } from 'support/api/actions';
 import { getForm } from 'support/api/forms';
 import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
+import { getFormResponse } from 'support/api/form-responses';
 
 context('Formservice', function() {
   specify('display form with a response', function() {
@@ -213,7 +214,7 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/actions/1/form', {
         statusCode: 200,
-        body: { data: {} },
+        body: { data: getForm() },
       })
       .as('routeFormModelByAction');
 
@@ -227,20 +228,21 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/actions/1/form/fields', {
         statusCode: 200,
-        body: { data: {} },
+        body: { data: [] },
       })
       .as('routeActionFormFields');
 
     cy
       .intercept('GET', '/api/actions/1*', {
         statusCode: 200,
-        body: { data: {} },
+        body: { data: getAction() },
       })
       .as('routeAction');
 
     cy
       .intercept('GET', '/api/patients/**/form-responses/submitted*', {
-        statusCode: 204,
+        statusCode: 200,
+        body: { data: getFormResponse() },
       })
       .as('routeLatestFormSubmission');
 

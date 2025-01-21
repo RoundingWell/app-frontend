@@ -11,7 +11,7 @@ import StateComponent from './state_component';
 const states = new States({ data: getStates() }, { parse: true });
 const workspaces = new Workspaces({ data: getWorkspaces() }, { parse: true });
 
-workspaces.at(1).set('_states', [{ id: stateInProgress.id }]);
+workspaces.at(1).set('_states', [{ id: stateInProgress.id, type: 'states' }]);
 
 context('State Component', function() {
   specify('Display', function() {
