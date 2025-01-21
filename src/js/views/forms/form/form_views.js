@@ -35,7 +35,7 @@ const ContextTrailView = View.extend({
   },
   onClickBack() {
     Radio.request('history', 'go:back', () => {
-      if (this.action.get('_flow')) {
+      if (this.action.getFlow()) {
         this.routeToFlow();
         return;
       }
@@ -47,7 +47,7 @@ const ContextTrailView = View.extend({
     this.routeToPatient();
   },
   routeToFlow() {
-    Radio.trigger('event-router', 'flow', this.action.get('_flow'));
+    Radio.trigger('event-router', 'flow', this.action.getFlow().id);
   },
   routeToPatient() {
     Radio.trigger('event-router', 'patient:dashboard', this.patient.id);

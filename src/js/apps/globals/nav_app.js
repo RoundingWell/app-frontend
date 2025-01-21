@@ -394,7 +394,7 @@ export default RouterApp.extend({
 
     if (workspaces.length === 1) {
       return Radio.request('entities', 'patients:model', {
-        _workspaces: [{ id: workspaces.first().id }],
+        _workspaces: [workspaces.first().getResource()],
       });
     }
 

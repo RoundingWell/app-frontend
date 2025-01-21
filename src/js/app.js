@@ -143,7 +143,7 @@ const Application = App.extend({
   },
 
   onStart(options, currentUser, { default: AppFrameApp }) {
-    if (!currentUser.hasTeam() || !currentUser.get('enabled')) {
+    if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
       this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       return;
     }

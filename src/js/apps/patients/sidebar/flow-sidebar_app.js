@@ -58,7 +58,7 @@ export default App.extend(extend({
       onSubmit: () => {
         this.flow.destroy({ wait: true })
           .then(() => {
-            Radio.trigger('event-router', 'patient:dashboard', this.flow.get('_patient'));
+            Radio.trigger('event-router', 'patient:dashboard', this.flow.getPatient().id);
           })
           .catch(({ responseData }) => {
             Radio.request('alert', 'show:apiError', responseData);

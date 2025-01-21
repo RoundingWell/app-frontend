@@ -57,10 +57,7 @@ export default SubRouterApp.extend({
 
   maintainFlowActions() {
     this.listenTo(this.actions, 'change:id destroy', () => {
-      const programActions = this.actions.map(({ id }) => {
-        return { id };
-      });
-      this.flow.set('_program_actions', programActions);
+      this.flow.setActions(this.actions);
     });
   },
 

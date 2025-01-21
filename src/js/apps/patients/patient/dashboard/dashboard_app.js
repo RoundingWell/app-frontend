@@ -55,7 +55,7 @@ export default App.extend({
   },
 
   onAddProgramAction(programAction) {
-    const action = programAction.getAction({ patientId: this.patient.id });
+    const action = programAction.createAction({ patient: this.patient });
     action.saveAll().then(() => {
       this.collection.unshift(action);
 
@@ -64,7 +64,7 @@ export default App.extend({
   },
 
   onAddProgramFlow(programFlow) {
-    const flow = programFlow.getFlow(this.patient.id);
+    const flow = programFlow.createFlow(this.patient);
 
     flow.saveAll().then(() => {
       Radio.trigger('event-router', 'flow', flow.id);

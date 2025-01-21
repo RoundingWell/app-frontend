@@ -61,7 +61,7 @@ const FlowItemView = View.extend({
     Radio.trigger('event-router', 'flow', this.model.id);
   },
   onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.get('_patient'));
+    Radio.trigger('event-router', 'patient:dashboard', this.model.getPatient().id);
   },
   onRender() {
     const canEdit = this.canEdit;
@@ -103,7 +103,7 @@ const FlowItemView = View.extend({
     }
 
     const stateComponent = new FlowStateComponent({
-      stateId: this.model.get('_state'),
+      stateId: this.model.getState().id,
       isCompact: true,
     });
 

@@ -148,10 +148,10 @@ const ActionItemView = View.extend({
   },
   onClick() {
     if (this.model.isNew()) {
-      Radio.trigger('event-router', 'programFlow:action:new', this.model.get('_program_flow'));
+      Radio.trigger('event-router', 'programFlow:action:new', this.model.getProgramFlow().id);
       return;
     }
-    Radio.trigger('event-router', 'programFlow:action', this.model.get('_program_flow'), this.model.id);
+    Radio.trigger('event-router', 'programFlow:action', this.model.getProgramFlow().id, this.model.id);
   },
   onClickForm() {
     const form = this.model.getForm();
@@ -191,7 +191,7 @@ const ActionItemView = View.extend({
   },
   showOwner() {
     const isDisabled = this.model.isNew();
-    const isFromFlow = !!this.model.get('_program_flow');
+    const isFromFlow = !!this.model.getProgramFlow();
     const ownerComponent = new OwnerComponent({ owner: this.model.getOwner(), isFromFlow, isCompact: true, state: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {

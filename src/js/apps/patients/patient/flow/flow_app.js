@@ -258,7 +258,7 @@ export default SubRouterApp.extend({
   },
 
   onAddProgramAction(programAction) {
-    const action = programAction.getAction({ flowId: this.flow.id });
+    const action = programAction.createAction({ flow: this.flow });
     action.saveAll().then(() => {
       this._addAction(action);
 

@@ -8,12 +8,12 @@ import { ACTION_OUTREACH } from 'js/static';
 import { SidebarMixin } from 'js/services/sidebar';
 
 import {
-  SidebarView, 
-  MenuView, 
-  HeadingView, 
-  TimestampsView, 
-  FormSharingButtonView, 
-  FormSharingView, 
+  SidebarView,
+  MenuView,
+  HeadingView,
+  TimestampsView,
+  FormSharingButtonView,
+  FormSharingView,
   UploadsEnabledView,
 } from 'js/views/programs/sidebar/action/action-sidebar_views';
 
@@ -121,14 +121,14 @@ export default App.extend(extend({
     if (model.isNew()) {
       this.action.saveAll(model.attributes)
         .then(() => {
-          const flowId = this.action.get('_program_flow');
+          const programFlow = this.action.getProgramFlow();
 
-          if (flowId) {
-            Radio.trigger('event-router', 'programFlow:action', flowId, this.action.id);
+          if (programFlow) {
+            Radio.trigger('event-router', 'programFlow:action', programFlow.id, this.action.id);
             return;
           }
 
-          Radio.trigger('event-router', 'program:action', this.action.get('_program'), this.action.id);
+          Radio.trigger('event-router', 'program:action', this.action.getProgram().id, this.action.id);
         });
       return;
     }

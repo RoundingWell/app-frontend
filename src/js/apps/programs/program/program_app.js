@@ -88,7 +88,7 @@ export default SubRouterApp.extend({
 
   startFlowSidebar(programId) {
     const flow = Radio.request('entities', 'programFlows:model', {
-      _program: programId,
+      _program: { id: programId, type: 'programs' },
       _owner: null,
       published_at: null,
       archived_at: null,

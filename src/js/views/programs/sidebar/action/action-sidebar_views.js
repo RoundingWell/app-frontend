@@ -330,7 +330,7 @@ const SidebarView = View.extend({
   },
   showBehavior() {
     const isDisabled = this.action.isNew();
-    const isFromFlow = !!this.action.get('_program_flow');
+    const isFromFlow = !!this.action.getProgramFlow();
     const behaviorComponent = new BehaviorComponent({
       isConditionalAvailable: isFromFlow,
       behavior: this.action.get('behavior'),
@@ -345,7 +345,7 @@ const SidebarView = View.extend({
   },
   showOwner() {
     const isDisabled = this.action.isNew();
-    const isFromFlow = !!this.action.get('_program_flow');
+    const isFromFlow = !!this.action.getProgramFlow();
     const ownerComponent = new OwnerComponent({ owner: this.action.getOwner(), isFromFlow, state: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {

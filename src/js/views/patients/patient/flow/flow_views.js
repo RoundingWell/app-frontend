@@ -90,7 +90,7 @@ const HeaderView = View.extend({
 
     const stateComponent = new FlowStateComponent({
       flow: this.model,
-      stateId: this.model.get('_state'),
+      stateId: this.model.getState().id,
       isCompact: true,
     });
 
@@ -180,7 +180,7 @@ const ActionItemView = View.extend({
     'click .js-no-click': 'prevent-row-click',
   },
   onClick() {
-    Radio.trigger('event-router', 'flow:action', this.model.get('_flow'), this.model.id);
+    Radio.trigger('event-router', 'flow:action', this.model.getFlow().id, this.model.id);
   },
   onEditing(isEditing) {
     this.isEditing = isEditing;
@@ -241,7 +241,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    this.stateComponent = new StateComponent({ stateId: this.model.get('_state'), isCompact: true });
+    this.stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
 
     this.listenTo(this.stateComponent, 'change:state', state => {
       this.model.saveState(state);

@@ -74,14 +74,14 @@ const ActionItemView = View.extend({
     }
 
     if (this.model.isDone()) {
-      Radio.trigger('event-router', 'patient:action:archive', this.model.get('_patient'), this.model.id);
+      Radio.trigger('event-router', 'patient:action:archive', this.model.getPatient().id, this.model.id);
       return;
     }
 
-    Radio.trigger('event-router', 'patient:action', this.model.get('_patient'), this.model.id);
+    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
   onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.get('_patient'));
+    Radio.trigger('event-router', 'patient:dashboard', this.model.getPatient().id);
   },
   onRender() {
     this.showForm();
@@ -126,7 +126,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    this.stateComponent = new StateComponent({ stateId: this.model.get('_state'), isCompact: true });
+    this.stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
 
     this.listenTo(this.stateComponent, 'change:state', state => {
       this.model.saveState(state);
