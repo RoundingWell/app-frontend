@@ -1,4 +1,4 @@
-import { each, isArray, isNull, isObject, isUndefined, map, pick } from 'underscore';
+import { each, isArray, isNull, isUndefined, map, pick } from 'underscore';
 import dayjs from 'dayjs';
 import underscored from 'js/utils/formatting/underscored';
 
@@ -54,7 +54,7 @@ export default {
 
     return this.parseRelationships(modelData, data.relationships);
   },
-  toRelation(entity, entityType) {
+  toRelation(entity) {
     if (isUndefined(entity)) return;
 
     if (isNull(entity)) return { data: null };
@@ -69,22 +69,12 @@ export default {
 
     if (isArray(entity)) {
       return {
-        data: map(entity, item => {
-          const id = item.id ? item.id : item;
-          return { id, type: entityType };
+        data: map(entity, ({ id, type }) => {
+          return { id, type };
         }),
       };
     }
 
-    if (isObject(entity)) {
-      return { data: pick(entity, 'id', 'type') };
-    }
-
-    return {
-      data: {
-        id: entity,
-        type: entityType,
-      },
-    };
+    return { data: pick(entity, 'id', 'type') };
   },
 };
