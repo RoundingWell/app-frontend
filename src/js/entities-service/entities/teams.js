@@ -9,9 +9,22 @@ const _Model = BaseModel.extend({
   type: TYPE,
   urlRoot: '/api/teams',
   getAssignableClinicians() {
-    const clinicians = Radio.request('entities', 'clinicians:collection', this.get('_clinicians'));
+    const clinicians = this.getClinicians();
 
     return clinicians.filterAssignable();
+  },
+  getClinicians() {
+    return Radio.request('entities', 'clinicians:collection', this.get('_clinicians'));
+  },
+  addClinician(clinician) {
+    const clinicians = this.getClinicians();
+    clinicians.add(clinician);
+    this.set('_clinicians', clinicians.getResources());
+  },
+  removeClinician(clinician) {
+    const clinicians = this.getClinicians();
+    clinicians.remove(clinician);
+    this.set('_clinicians', clinicians.getResources());
   },
 });
 

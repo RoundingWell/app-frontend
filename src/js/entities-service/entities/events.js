@@ -9,32 +9,29 @@ const _Model = BaseModel.extend({
   type: TYPE,
 
   getClinician() {
-    return Radio.request('entities', 'clinicians:model', this.get('_clinician'));
+    return this.getRelationship('_clinician');
   },
   getRecipient() {
-    if (!this.get('_recipient')) return;
-    return Radio.request('entities', 'patients:model', this.get('_recipient'));
+    return this.getRelationship('_recipient');
   },
   getEditor() {
     if (!this.get('_editor')) {
       return Radio.request('entities', 'clinicians:model', { name: 'RoundingWell' });
     }
 
-    return Radio.request('entities', 'clinicians:model', this.get('_editor'));
+    return this.getRelationship('_editor');
   },
   getTeam() {
-    return Radio.request('entities', 'teams:model', this.get('_team'));
+    return this.getRelationship('_team');
   },
   getState() {
-    return Radio.request('entities', 'states:model', this.get('_state'));
+    return this.getRelationship('_state');
   },
   getProgram() {
-    if (!this.get('_program')) return;
-    return Radio.request('entities', 'programs:model', this.get('_program'));
+    return this.getRelationship('_program');
   },
   getForm() {
-    if (!this.get('_form')) return;
-    return Radio.request('entities', 'forms:model', this.get('_form'));
+    return this.getRelationship('_form');
   },
 });
 

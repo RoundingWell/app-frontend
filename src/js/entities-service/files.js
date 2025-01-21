@@ -5,6 +5,7 @@ const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
   radioRequests: {
     'files:model': 'getModel',
+    'files:collection': 'getCollection',
     'fetch:files:collection:byAction': 'fetchFilesByAction',
   },
   fetchFilesByAction(actionId) {

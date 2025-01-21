@@ -1,4 +1,3 @@
-import Radio from 'backbone.radio';
 import { get, first } from 'underscore';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
@@ -27,7 +26,8 @@ const _Model = BaseModel.extend({
       });
     },
     FileRemoved() {
-      const action = Radio.request('entities', 'actions:model', this.get('_action'));
+      const action = this.getAction();
+
       action.removeFile(this);
 
       this.destroy({ isDeleted: true });
@@ -35,11 +35,17 @@ const _Model = BaseModel.extend({
   },
   urlRoot() {
     if (this.isNew()) {
-      const actionId = this.get('_action');
+      const action = this.getAction();
 
-      return `/api/actions/${ actionId }/relationships/files?urls=upload`;
+      return `/api/actions/${ action.id }/relationships/files?urls=upload`;
     }
     return '/api/files';
+  },
+  getAction() {
+    return this.getRelationship('_action');
+  },
+  getPatient() {
+    return this.getRelationship('_patient');
   },
   fetchFile() {
     return this.fetch({
@@ -47,7 +53,8 @@ const _Model = BaseModel.extend({
     });
   },
   createUpload(fileName) {
-    const path = `patient/${ this.get('_patient') }/${ fileName }`;
+    const patient = this.getPatient();
+    const path = `patient/${ patient.id }/${ fileName }`;
     const promise = this.save({ path, _progress: 0 }, {}, { type: 'PUT' });
 
     return promise.catch((/* istanbul ignore next */{ responseData } = {}) => {
