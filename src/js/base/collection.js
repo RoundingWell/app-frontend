@@ -4,6 +4,9 @@ import Backbone from 'backbone';
 import JsonApiMixin from './jsonapi-mixin';
 
 export default Backbone.Collection.extend(extend({
+  getResources() {
+    return this.invoke('getResource');
+  },
   fetch(options = {}) {
     const fetcher = Backbone.Collection.prototype.fetch.call(this, options);
 
