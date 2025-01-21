@@ -51,19 +51,25 @@ const ActivityView = View.extend({
 
     return Templates[type];
   },
+  _getModelName(model) {
+    return model ? model.get('name') : null;
+  },
   templateContext() {
     const editor = this.model.getEditor();
+    const editorTeam = editor && editor.getTeam();
     const clinician = this.model.getClinician();
     const program = this.model.getProgram();
+    const team = this.model.getTeam();
+    const state = this.model.getState();
     const sourceI18n = `patients.sidebar.flow.activityViews.${ this.model.get('source') }`;
 
     return {
-      name: editor.get('name'),
-      team: editor.getTeam().get('name'),
-      program: (program) ? program.get('name') : null,
-      to_clinician: clinician.get('name'),
-      to_team: this.model.getTeam().get('name'),
-      to_state: this.model.getState().get('name'),
+      name: this._getModelName(editor),
+      team: this._getModelName(editorTeam),
+      to_clinician: this._getModelName(clinician),
+      to_team: this._getModelName(team),
+      to_state: this._getModelName(state),
+      program: this._getModelName(program),
       getI18nSource(key) {
         return `${ sourceI18n }.${ key }`;
       },
