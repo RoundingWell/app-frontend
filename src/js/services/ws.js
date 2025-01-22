@@ -94,6 +94,7 @@ export default App.extend({
 
   onClose() {
     this.stopHeartbeat();
+    /* istanbul ignore next: resubscribing in tests causes test leaking */
     if (!_TEST_ && this.resources.length) this._subscribe();
   },
 
