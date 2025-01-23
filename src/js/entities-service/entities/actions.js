@@ -247,7 +247,12 @@ const _Model = BaseModel.extend({
 
     return this.save(attrs, { relationships }, { wait: true });
   },
+  addComment(comment) {
+    const comments = this.getComments();
+    comments.add(comment);
 
+    this.set({ _comments: comments.getResources() });
+  },
   addFile(file) {
     const files = this.getFiles();
     files.add(file);

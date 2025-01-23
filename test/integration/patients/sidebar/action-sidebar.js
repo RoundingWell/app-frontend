@@ -1515,6 +1515,107 @@ context('action sidebar', function() {
       .should('contain', 'more comment');
   });
 
+  specify('action comments - show/hide icon in action list items', function() {
+    const testPatient = getPatient();
+    const testAction = getAction({
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+        comments: getRelationship([], 'comments'),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [testAction];
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeActionComments(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows')
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('not.exist');
+
+    cy
+      .get('.sidebar')
+      .find('[data-comment-region]')
+      .as('commentRegion')
+      .find('.js-input')
+      .type('Test comment');
+
+    cy
+      .intercept('POST', '/api/actions/*/relationships/comments', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePostComment');
+
+    cy
+      .get('@commentRegion')
+      .find('.js-post')
+      .click()
+      .wait('@routePostComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .get('.sidebar')
+      .find('[data-comment-region]')
+      .as('commentRegion')
+      .find('.js-input')
+      .type('Another test comment');
+
+    cy
+      .get('@commentRegion')
+      .find('.js-post')
+      .click()
+      .wait('@routePostComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '2');
+  });
+
   specify('display action from program action', function() {
     const testProgram = getProgram({
       attributes: {

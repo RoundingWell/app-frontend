@@ -201,6 +201,7 @@ export default App.extend(extend({
     model.set({ created_at: dayjs.utc().format() });
 
     model.save().then(() => {
+      this.action.addComment(model);
       Radio.request('ws', 'add', model);
     });
 
