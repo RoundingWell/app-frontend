@@ -5,6 +5,7 @@ const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
   radioRequests: {
     'comments:model': 'getModel',
+    'comments:collection': 'getCollection',
     'fetch:comments:collection:byAction': 'fetchCommentsByAction',
   },
   fetchCommentsByAction(actionId) {

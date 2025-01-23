@@ -47,6 +47,7 @@ const ActionItemView = View.extend({
       owner: this.model.getOwner().get('name'),
       icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
       hasAttachments: this.model.hasAttachments(),
+      commentCount: this.model.commentCount(),
     };
   },
   initialize({ state }) {

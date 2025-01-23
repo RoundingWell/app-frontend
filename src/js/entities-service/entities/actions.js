@@ -81,6 +81,9 @@ const _Model = BaseModel.extend({
   getFormResponses() {
     return Radio.request('entities', 'formResponses:collection', this.get('_form_responses'));
   },
+  getComments() {
+    return Radio.request('entities', 'comments:collection', this.get('_comments'));
+  },
   getFiles() {
     return Radio.request('entities', 'files:collection', this.get('_files'));
   },
@@ -148,6 +151,9 @@ const _Model = BaseModel.extend({
   },
   hasSharing() {
     return this.get('sharing') !== ACTION_SHARING.DISABLED;
+  },
+  commentCount() {
+    return this.getComments().length;
   },
   hasAttachments() {
     return !!this.getFiles().length;

@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
-import { NIL as NIL_UUID } from 'uuid';
+import { v4 as uuid, NIL as NIL_UUID } from 'uuid';
 
 import { ACTION_OUTREACH } from 'js/static';
 
@@ -389,6 +389,7 @@ context('worklist page', function() {
           files: getRelationship([{ id: '1' }], 'files'),
           owner: getRelationship(teamCoordinator),
           patient: getRelationship(testPatient1),
+          comments: getRelationship([{ id: uuid() }], 'comments'),
         },
       }),
       getAction({
@@ -758,6 +759,18 @@ context('worklist page', function() {
     cy
       .get('@secondRow')
       .find('.fa-paperclip')
+      .should('not.exist');
+
+    cy
+      .get('@firstRow')
+      .find('.fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .get('@secondRow')
+      .find('.fa-comment')
       .should('not.exist');
 
     cy
