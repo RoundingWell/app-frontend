@@ -400,7 +400,20 @@ context('program flow sidebar', function() {
     cy
       .get('@flowHeader')
       .find('[data-owner-region]')
-      .contains('NUR');
+      .contains('NUR')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-clear')
+      .click();
+
+    cy
+      .wait('@routePatchFlow')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data.relationships.owner.data).to.be.null;
+      });
 
     cy
       .get('.sidebar__footer')

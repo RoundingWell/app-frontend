@@ -273,8 +273,8 @@ export default App.extend({
     });
   },
   useLatestDraft(responseData) {
-    if (this.form) responseData._form = this.form.getResource();
-    if (this.patient) responseData._patient = this.patient.getResource();
+    responseData._form = this.form.getResource();
+    responseData._patient = this.patient.getResource();
     if (this.action) responseData._action = this.action.getResource();
 
     if (!this.latestResponse || this.latestResponse.get('status') !== FORM_RESPONSE_STATUS.DRAFT) return responseData;
