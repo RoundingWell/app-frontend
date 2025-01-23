@@ -11,8 +11,8 @@ const _Model = BaseModel.extend({
     const opts = { type: 'PUT' };
 
     const relationships = {
-      'workspace': this.toRelation(this.get('_workspace'), 'workspaces'),
-      'patient': this.toRelation(this.get('_patient'), 'patients'),
+      'workspace': this.toRelation(this.get('_workspace')),
+      'patient': this.toRelation(this.get('_patient')),
     };
 
     this.save(attrs, { relationships }, opts);

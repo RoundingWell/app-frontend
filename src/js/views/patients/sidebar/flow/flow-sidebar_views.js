@@ -140,7 +140,7 @@ const SidebarView = View.extend({
 
     const stateComponent = new FlowStateComponent({
       flow: this.model,
-      stateId: this.model.get('_state'),
+      stateId: this.model.getState().id,
     });
 
     this.listenTo(stateComponent, 'change:state', state => {

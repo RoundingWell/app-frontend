@@ -1,4 +1,4 @@
-import { first, last, reject, size, union, extend, includes } from 'underscore';
+import { first, last, extend, includes } from 'underscore';
 import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
@@ -30,10 +30,10 @@ const _Model = BaseModel.extend({
   },
   onChangeTeam() {
     const previousTeam = Radio.request('entities', 'teams:model', this.previous('_team'));
-    previousTeam.set('_clinicians', reject(previousTeam.get('_clinicians'), { id: this.id }));
+    const team = this.getTeam();
 
-    const team = Radio.request('entities', 'teams:model', this.get('_team'));
-    team.set('_clinicians', union(team.get('_clinicians'), [{ id: this.id }]));
+    previousTeam && previousTeam.removeClinician(this);
+    team && team.addClinician(this);
   },
   getWorkspaces() {
     return Radio.request('entities', 'workspaces:collection', this.get('_workspaces'));
@@ -41,23 +41,29 @@ const _Model = BaseModel.extend({
   addWorkspace(workspace) {
     const workspaces = this.getWorkspaces();
     workspaces.add(workspace);
-    this.set('_workspaces', this.toRelation(workspaces, 'workspaces').data);
+    this.set('_workspaces', workspaces.getResources());
   },
   removeWorkspace(workspace) {
     const workspaces = this.getWorkspaces();
     workspaces.remove(workspace);
-    this.set('_workspaces', this.toRelation(workspaces, 'workspaces').data);
+    this.set('_workspaces', workspaces.getResources());
+  },
+  setTeam(team) {
+    this.set('_team', team.getResource());
   },
   getTeam() {
-    return Radio.request('entities', 'teams:model', this.get('_team'));
+    return this.getRelationship('_team');
   },
   hasTeam() {
-    const team = this.get('_team');
+    const team = this.getTeam();
 
-    return team && team !== NIL_UUID;
+    return team && team.id !== NIL_UUID;
+  },
+  setRole(role) {
+    this.set('_role', role.getResource());
   },
   getRole() {
-    return Radio.request('entities', 'roles:model', this.get('_role'));
+    return this.getRelationship('_role');
   },
   can(prop) {
     const role = this.getRole();
@@ -65,14 +71,14 @@ const _Model = BaseModel.extend({
     return includes(permissions, prop);
   },
   saveRole(role) {
-    return this.save({ _role: role.id }, {
+    return this.save({ _role: role.getResource() }, {
       relationships: {
         role: this.toRelation(role),
       },
     });
   },
   saveTeam(team) {
-    return this.save({ _team: team.id }, {
+    return this.save({ _team: team.getResource() }, {
       relationships: {
         team: this.toRelation(team),
       },
@@ -82,9 +88,9 @@ const _Model = BaseModel.extend({
     attrs = extend({}, this.attributes, attrs);
 
     const relationships = {
-      'workspaces': this.toRelation(attrs._workspaces, 'workspaces'),
-      'team': this.toRelation(attrs._team, 'teams'),
-      'role': this.toRelation(attrs._role, 'roles'),
+      'workspaces': this.toRelation(attrs._workspaces),
+      'team': this.toRelation(attrs._team),
+      'role': this.toRelation(attrs._role),
     };
 
     return this.save(attrs, { relationships }, { wait: true });
@@ -101,10 +107,13 @@ const _Model = BaseModel.extend({
   },
   isActive() {
     const hasTeam = this.hasTeam();
-    const hasWorkspaces = !!size(this.get('_workspaces'));
+    const hasWorkspaces = !!this.getWorkspaces().length;
     const lastActive = this.get('last_active_at');
 
     return hasTeam && hasWorkspaces && lastActive;
+  },
+  isEnabled() {
+    return this.get('enabled');
   },
 });
 
@@ -117,7 +126,7 @@ const Collection = BaseCollection.extend({
     const clone = this.clone();
 
     const assignable = this.filter(clinician => {
-      return clinician.isActive() && clinician.get('enabled') && clinician.can('work:own');
+      return clinician.isActive() && clinician.isEnabled() && clinician.can('work:own');
     });
 
     clone.reset(assignable);

@@ -75,11 +75,11 @@ const ActionItemView = View.extend({
   },
   onClick() {
     if (this.model.isNew()) {
-      Radio.trigger('event-router', 'program:action:new', this.model.get('_program'));
+      Radio.trigger('event-router', 'program:action:new', this.model.getProgram().id);
       return;
     }
 
-    Radio.trigger('event-router', 'program:action', this.model.get('_program'), this.model.id);
+    Radio.trigger('event-router', 'program:action', this.model.getProgram().id, this.model.id);
   },
   onClickForm() {
     const form = this.model.getForm();
@@ -92,7 +92,7 @@ const ActionItemView = View.extend({
   },
   showBehavior() {
     const isDisabled = this.model.isNew();
-    const isFromFlow = !!this.model.get('_program_flow');
+    const isFromFlow = !!this.model.getProgramFlow();
     const behaviorComponent = new BehaviorComponent({
       isConditionalAvailable: isFromFlow,
       behavior: this.model.get('behavior'),
@@ -108,7 +108,7 @@ const ActionItemView = View.extend({
   },
   showOwner() {
     const isDisabled = this.model.isNew();
-    const isFromFlow = !!this.model.get('_program_flow');
+    const isFromFlow = !!this.model.getProgramFlow();
     const ownerComponent = new OwnerComponent({ owner: this.model.getOwner(), isFromFlow, isCompact: true, state: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
@@ -148,7 +148,7 @@ const FlowItemView = View.extend({
   },
   onClick() {
     if (this.model.isNew()) {
-      Radio.trigger('event-router', 'programFlow:new', this.model.get('_program'));
+      Radio.trigger('event-router', 'programFlow:new', this.model.getProgram().id);
       return;
     }
 

@@ -12,14 +12,14 @@ const StateModel = Backbone.Model.extend({
     this.initBulkOwner(collection, initModel);
   },
   initBulkState(collection, initModel) {
-    const stateId = initModel.getState().id;
+    const state = initModel.getState().getResource();
     const stateMulti = collection.some(item => {
-      return item.getState().id !== stateId;
+      return item.getState().id !== state.id;
     });
 
     this.set({
       stateMulti,
-      stateId: stateMulti ? null : stateId,
+      state: stateMulti ? null : state,
     });
   },
   initBulkOwner(collection, initModel) {
@@ -38,7 +38,7 @@ const StateModel = Backbone.Model.extend({
     });
   },
   setState(state) {
-    return this.set({ stateId: state.id, stateMulti: false, stateChanged: true });
+    return this.set({ state: state.getResource(), stateMulti: false, stateChanged: true });
   },
   setOwner(owner) {
     return this.set({ owner, ownerMulti: false, ownerChanged: true });
@@ -51,14 +51,14 @@ const StateModel = Backbone.Model.extend({
   getData() {
     const {
       stateChanged,
-      stateId,
+      state,
       ownerChanged,
       owner,
     } = this.attributes;
 
     const saveData = {};
 
-    if (stateChanged) saveData._state = stateId;
+    if (stateChanged) saveData._state = pick(state, 'id', 'type');
     if (ownerChanged) saveData._owner = pick(owner, 'id', 'type');
 
     return saveData;

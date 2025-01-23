@@ -3,16 +3,8 @@ import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
 
 const TYPE = 'flows';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (!relationship || key === 'owner') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   messages: {
@@ -20,7 +12,7 @@ const _Model = BaseModel.extend({
       this.set({ _owner: owner, ...attributes });
     },
     StateChanged({ state, attributes }) {
-      this.set({ _state: state.id, ...attributes });
+      this.set({ _state: state, ...attributes });
     },
     NameChanged({ attributes }) {
       this.set(attributes);
@@ -30,30 +22,31 @@ const _Model = BaseModel.extend({
     },
   },
   urlRoot() {
-    if (this.isNew()) return `/api/patients/${ this.get('_patient') }/relationships/flows`;
+    if (this.isNew()) {
+      const patient = this.getPatient();
+      return `/api/patients/${ patient.id }/relationships/flows`;
+    }
 
     return '/api/flows';
   },
   type: TYPE,
   getPatient() {
-    return Radio.request('entities', 'patients:model', this.get('_patient'));
+    return this.getRelationship('_patient');
   },
   getOwner() {
-    const owner = this.get('_owner');
-    const Owner = Store.get(owner.type);
-    return new Owner({ id: owner.id });
+    return this.getRelationship('_owner');
   },
   getAuthor() {
-    return Radio.request('entities', 'clinicians:model', this.get('_author'));
+    return this.getRelationship('_author');
   },
   getState() {
-    return Radio.request('entities', 'states:model', this.get('_state'));
+    return this.getRelationship('_state');
   },
   getProgramFlow() {
-    return Radio.request('entities', 'programFlows:model', this.get('_program_flow'));
+    return this.getRelationship('_program_flow');
   },
   getProgram() {
-    return Radio.request('entities', 'programs:model', this.get('_program'));
+    return this.getRelationship('_program');
   },
   isDone() {
     const state = this.getState();
@@ -95,14 +88,14 @@ const _Model = BaseModel.extend({
     return false;
   },
   saveState(state) {
-    return this.save({ _state: state.id }, {
+    return this.save({ _state: state.getResource() }, {
       relationships: {
         state: this.toRelation(state),
       },
     });
   },
   saveOwner(owner) {
-    return this.save({ _owner: owner }, {
+    return this.save({ _owner: owner.getResource() }, {
       relationships: {
         owner: this.toRelation(owner),
       },
@@ -118,21 +111,19 @@ const _Model = BaseModel.extend({
     if (this.isNew()) attrs = extend({}, this.attributes, attrs);
 
     const relationships = {
-      'state': this.toRelation(attrs._state, 'states'),
+      'state': this.toRelation(attrs._state),
       'owner': this.toRelation(attrs._owner),
-      'program-flow': this.toRelation(attrs._program_flow, 'program-flows'),
+      'program-flow': this.toRelation(attrs._program_flow),
     };
 
     return this.save(attrs, { relationships }, { wait: true });
   },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
 const Collection = BaseCollection.extend({
   url: '/api/flows',
   model: Model,
-  parseRelationship: _parseRelationship,
   save(attrs) {
     const saves = this.invoke('saveAll', attrs);
 

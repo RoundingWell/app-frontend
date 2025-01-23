@@ -1,7 +1,6 @@
 import { each, map, values, isArray } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
-import Store from 'backbone.store';
 
 import App from 'js/base/app';
 
@@ -95,10 +94,13 @@ export default App.extend({
 
   onClose() {
     this.stopHeartbeat();
+    /* istanbul ignore next: resubscribing in tests causes test leaking */
     if (!_TEST_ && this.resources.length) this._subscribe();
   },
 
   onMessage(event) {
+    let model;
+
     const channel = this.getChannel();
 
     const data = JSON.parse(event.data);
@@ -106,12 +108,11 @@ export default App.extend({
     if (data.name === 'pong') return;
 
     if (data.resource) {
-      const Resource = Store.get(data.resource.type);
-      const resource = new Resource({ id: data.resource.id });
-      resource.handleMessage(data);
+      model = Radio.request('entities', 'get:store', data.resource);
+      model.handleMessage(data);
     }
 
-    channel.trigger('message', data);
+    channel.trigger('message', data, model);
   },
 
   _getResources(resources) {

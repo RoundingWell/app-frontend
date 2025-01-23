@@ -2485,7 +2485,7 @@ context('Patient Action Form', function() {
         patient: getRelationship(testPatient),
         owner: getRelationship(testCurrentClinician),
         state: getRelationship(stateInProgress),
-        form: getRelationship(testForm.id),
+        form: getRelationship(testForm),
       },
     });
 

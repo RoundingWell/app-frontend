@@ -131,8 +131,9 @@ export default App.extend({
   onFormServiceSuccess(response) {
     if (this.shouldSaveAndGoBack()) {
       Radio.request('history', 'go:back', () => {
-        if (this.action.get('_flow')) {
-          Radio.trigger('event-router', 'flow', this.action.get('_flow'));
+        const flow = this.action.getFlow();
+        if (flow) {
+          Radio.trigger('event-router', 'flow', flow.id);
           return;
         }
 

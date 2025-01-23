@@ -29,6 +29,7 @@ context('program action sidebar', function() {
         fx.data = getProgramActions({
           relationships: {
             'program': getRelationship(testProgram),
+            'program-flow': getRelationship(),
           },
         });
 
@@ -621,7 +622,20 @@ context('program action sidebar', function() {
     cy
       .get('.sidebar')
       .find('[data-owner-region]')
-      .contains('Nurse');
+      .contains('Nurse')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-clear')
+      .click();
+
+    cy
+      .wait('@routePatchAction')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data.relationships.owner.data).to.be.null;
+      });
 
     cy
       .get('.sidebar')

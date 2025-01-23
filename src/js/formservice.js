@@ -1,5 +1,6 @@
 import 'js/base/setup';
 
+import { get } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
@@ -36,8 +37,8 @@ const ActionFormApp = App.extend({
     const actionTags = form.getPrefillActionTag();
 
     return {
-      flowId: action.get('_flow'),
-      patientId: action.get('_patient'),
+      flowId: get(action.getFlow(), 'id'),
+      patientId: action.getPatient().id,
       submittedAt: isReport && `<=${ action.get('created_at') }`,
       actionId: !actionTags && action.id,
       actionTags,

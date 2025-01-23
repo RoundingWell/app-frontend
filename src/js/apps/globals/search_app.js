@@ -14,7 +14,7 @@ export default App.extend({
 
     this.listenTo(patientSearchModal, {
       'search:select'(result) {
-        Radio.trigger('event-router', 'patient:dashboard', result.get('_patient'));
+        Radio.trigger('event-router', 'patient:dashboard', result.get('_patient').id);
         patientSearchModal.destroy();
       },
       'click:addPatient'() {

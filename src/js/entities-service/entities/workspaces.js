@@ -1,4 +1,3 @@
-import { reject, union, pick } from 'underscore';
 import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
@@ -15,48 +14,46 @@ const _Model = BaseModel.extend({
   getForms() {
     return Radio.request('entities', 'forms:collection', this.get('_forms'));
   },
+  getClinicians() {
+    return Radio.request('entities', 'clinicians:collection', this.get('_clinicians'));
+  },
   getAssignableClinicians() {
-    const clinicians = Radio.request('entities', 'clinicians:collection', this.get('_clinicians'));
+    const clinicians = this.getClinicians();
 
     return clinicians.filterAssignable();
   },
   updateClinicians(clinicians) {
-    this.set('_clinicians', clinicians.map(m => pick(m, 'id', 'type')));
+    this.set('_clinicians', clinicians.getResources());
   },
   addClinician(clinician) {
     const url = `/api/workspaces/${ this.id }/relationships/clinicians`;
-    const workspaces = clinician.get('_workspaces');
+    clinician.addWorkspace(this);
 
-    clinician.set({ _workspaces: union(workspaces, [{ id: this.id }]) });
+    const clinicians = this.getClinicians();
+    clinicians.add(clinician);
 
-    this.set({ _clinicians: union(this.get('_clinicians'), [{ id: clinician.id }]) });
+    this.updateClinicians(clinicians);
 
     return this.sync('create', this, {
       url,
       data: JSON.stringify({
-        data: [{
-          id: clinician.id,
-          type: clinician.type,
-        }],
+        data: [clinician.getResource()],
       }),
     });
   },
   removeClinician(clinician) {
     const url = `/api/workspaces/${ this.id }/relationships/clinicians`;
+    clinician.removeWorkspace(this);
 
-    clinician.set({ _workspaces: reject(clinician.get('_workspaces'), { id: this.id }) });
+    const clinicians = this.getClinicians();
+    clinicians.remove(clinician);
 
-    this.set({
-      _clinicians: reject(this.get('_clinicians'), { id: clinician.id }),
-    });
+    this.updateClinicians(clinicians);
 
     return this.sync('delete', this, {
       url,
       data: JSON.stringify({
-        data: [{
-          id: clinician.id,
-          type: clinician.type,
-        }],
+        data: [clinician.getResource()],
       }),
     });
   },

@@ -344,7 +344,7 @@ context('patient flow page', function() {
 
     cy.sendWs({
       category: 'CommentAdded',
-      author: getCurrentClinician(),
+      author: getCurrentClinician().id,
       resource: {
         type: 'patient-actions',
         id: testFlowAction.id,

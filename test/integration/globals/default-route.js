@@ -5,7 +5,7 @@ import { getErrors, getRelationship } from 'helpers/json-api';
 import { getCurrentClinician } from 'support/api/clinicians';
 import { roleReducedEmployee } from 'support/api/roles';
 
-context('patient page', function() {
+context('default routes', function() {
   specify('default route', function() {
     cy
       .routesForDefault()

@@ -187,8 +187,8 @@ export default App.extend(extend({
 
     const newCommentFormView = this.showFooterView('comment', new CommentFormView({
       model: Radio.request('entities', 'comments:model', {
-        _action: this.action.id,
-        _clinician: clinician.id,
+        _action: this.action.getResource(),
+        _clinician: clinician.getResource(),
       }),
     }));
 
@@ -232,8 +232,8 @@ export default App.extend(extend({
   },
   onAddAttachment(file) {
     const attachment = this.attachments.add({
-      _action: this.action.id,
-      _patient: this.action.getPatient().id,
+      _action: this.action.getResource(),
+      _patient: this.action.getPatient().getResource(),
       created_at: dayjs.utc().format(),
     });
     attachment.upload(file);

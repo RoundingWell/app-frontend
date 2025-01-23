@@ -3,7 +3,6 @@ import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
 
 import trim from 'js/utils/formatting/trim';
 import collectionOf from 'js/utils/formatting/collection-of';
@@ -12,23 +11,22 @@ import collectionOf from 'js/utils/formatting/collection-of';
 import { STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-flows';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (!relationship || key === 'owner') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   urlRoot() {
-    if (this.isNew()) return `/api/programs/${ this.get('_program') }/relationships/flows`;
+    if (this.isNew()) {
+      const program = this.getProgram();
+      return `/api/programs/${ program.id }/relationships/flows`;
+    }
 
     return '/api/program-flows';
   },
   type: TYPE,
   validate({ name }) {
     if (!trim(name)) return 'Flow name required';
+  },
+  getProgram() {
+    return this.getRelationship('_program');
   },
   getTags() {
     return Radio.request('entities', 'tags:collection', collectionOf(this.get('tags'), 'text'));
@@ -44,38 +42,40 @@ const _Model = BaseModel.extend({
     return this.save({ tags: tags.map('text') });
   },
   getOwner() {
-    const owner = this.get('_owner');
-    if (!owner) return;
-    return Radio.request('entities', 'teams:model', owner.id);
+    return this.getRelationship('_owner');
   },
-  getFlow(patientId) {
+  createFlow(patient) {
     const currentWorkspace = Radio.request('workspace', 'current');
     const states = currentWorkspace.getStates();
 
     const defaultInitialState = first(states.filter({ status: STATE_STATUS.QUEUED }));
 
     const flow = Radio.request('entities', 'flows:model', {
-      _patient: patientId,
-      _program_flow: this.get('id'),
-      _state: defaultInitialState.id,
+      _patient: patient.getResource(),
+      _program_flow: this.getResource(),
+      _state: defaultInitialState.getResource(),
     });
 
     return flow;
   },
   saveOwner(owner) {
-    owner = this.toRelation(owner);
-    return this.save({ _owner: owner.data }, {
-      relationships: { owner },
+    return this.save({ _owner: owner ? owner.getResource() : null }, {
+      relationships: {
+        owner: this.toRelation(owner),
+      },
     });
   },
   saveAll(attrs) {
     attrs = extend({}, this.attributes, attrs);
 
     const relationships = {
-      owner: this.toRelation(attrs._owner, 'teams'),
+      owner: this.toRelation(attrs._owner),
     };
 
     return this.save(attrs, { relationships }, { wait: true });
+  },
+  setActions(actions) {
+    this.set('_program_actions', actions.getResources());
   },
   getActions() {
     return Radio.request('entities', 'programActions:collection', this.get('_program_actions'), { flowId: this.id });
@@ -92,14 +92,12 @@ const _Model = BaseModel.extend({
 
     return !!visibleToTeamsList.find(team => team.id === currentUserTeam.id);
   },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
 const Collection = BaseCollection.extend({
   url: '/api/program-flows',
   model: Model,
-  parseRelationship: _parseRelationship,
   filterAddable() {
     const clone = this.clone();
 

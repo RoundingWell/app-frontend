@@ -220,7 +220,7 @@ const ActionView = View.extend({
     this.showChildView('details', new DetailsView({ model: this.clonedAction }));
   },
   showState() {
-    const stateComponent = new StateComponent({ stateId: this.model.get('_state') });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);

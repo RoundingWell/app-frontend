@@ -1,8 +1,17 @@
 import { isObject } from 'underscore';
 import Backbone from 'backbone';
+import Radio from 'backbone.radio';
+import Store from 'backbone.store';
 import { MnObject } from 'marionette';
 import { cacheIncluded } from './jsonapi-mixin';
 import fetcher from 'js/base/fetch';
+
+export function getStore(resource) {
+  const Model = Store.get(resource.type);
+  return new Model({ id: resource.id });
+}
+
+Radio.reply('entities', 'get:store', getStore);
 
 export default MnObject.extend({
   channelName: 'entities',

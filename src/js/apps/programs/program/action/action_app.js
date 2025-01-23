@@ -15,8 +15,8 @@ export default App.extend({
   beforeStart({ actionId, programId, flowId }) {
     if (!actionId) {
       return Radio.request('entities', 'programActions:model', {
-        _program: programId,
-        _program_flow: flowId,
+        _program: { id: programId, type: 'programs' },
+        _program_flow: flowId ? { id: flowId, type: 'program-flows' } : null,
         _owner: null,
         days_until_due: null,
         behavior: PROGRAM_BEHAVIORS.STANDARD,

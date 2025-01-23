@@ -11,6 +11,8 @@ import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { getProgram } from 'support/api/programs';
+import { getProgramAction } from 'support/api/program-actions';
+import { getProgramFlow } from 'support/api/program-flows';
 import { teamCoordinator, teamNurse, teamOther } from 'support/api/teams';
 import { stateTodo, stateInProgress, stateDone } from 'support/api/states';
 import { testForm } from 'support/api/forms';
@@ -22,26 +24,31 @@ import { ACTION_OUTREACH } from 'js/static';
 context('patient dashboard page', function() {
   const testPatient = getPatient();
 
-  function createActionPostRoute(id) {
+  function createActionPostRoute(name) {
+    const actionData = getAction({
+      attributes: {
+        name,
+        updated_at: testTs(),
+        outreach: 'disabled',
+        sharing: 'disabled',
+        due_time: null,
+      },
+      relationships: {
+        author: getRelationship(getCurrentClinician()),
+        state: getRelationship(stateTodo),
+      },
+    });
+
     cy
       .intercept('POST', `/api/patients/${ testPatient.id }/relationships/actions*`, {
         statusCode: 201,
         body: {
-          data: {
-            id,
-            attributes: {
-              updated_at: testTs(),
-              outreach: 'disabled',
-              sharing: 'disabled',
-              due_time: null,
-            },
-            relationships: {
-              author: getRelationship(getCurrentClinician()),
-            },
-          },
+          data: actionData,
         },
       })
       .as('routePostAction');
+
+    return actionData.id;
   }
 
   specify('action and flow list', function() {
@@ -456,7 +463,7 @@ context('patient dashboard page', function() {
     const testProgramIds = _.times(5, () => uuid());
 
     const testProgramActions = [
-      getAction({
+      getProgramAction({
         attributes: {
           name: 'One of One',
           behavior: 'standard',
@@ -471,7 +478,7 @@ context('patient dashboard page', function() {
           teams: getRelationship([teamNurse]),
         },
       }),
-      getAction({
+      getProgramAction({
         attributes: {
           name: 'One of Two',
           behavior: 'standard',
@@ -485,7 +492,7 @@ context('patient dashboard page', function() {
           owner: getRelationship(null),
         },
       }),
-      getAction({
+      getProgramAction({
         attributes: {
           name: 'Two of Two',
           behavior: 'standard',
@@ -494,7 +501,7 @@ context('patient dashboard page', function() {
           days_until_due: null,
         },
       }),
-      getAction({
+      getProgramAction({
         attributes: {
           name: 'Should not show - unpublished',
           behavior: 'standard',
@@ -503,7 +510,7 @@ context('patient dashboard page', function() {
           days_until_due: null,
         },
       }),
-      getAction({
+      getProgramAction({
         attributes: {
           name: 'Should not show - archived',
           behavior: 'standard',
@@ -512,7 +519,7 @@ context('patient dashboard page', function() {
           days_until_due: null,
         },
       }),
-      getAction({
+      getProgramAction({
         attributes: {
           name: 'Should not show - automated behavior',
           behavior: 'automated',
@@ -521,7 +528,7 @@ context('patient dashboard page', function() {
           days_until_due: null,
         },
       }),
-      getAction({
+      getProgramAction({
         attributes: {
           name: 'Should not show - not visible to current user team',
           behavior: 'standard',
@@ -537,7 +544,7 @@ context('patient dashboard page', function() {
     ];
 
     const testProgramFlows = [
-      getFlow({
+      getProgramFlow({
         attributes: {
           name: '1 Flow',
           behavior: 'standard',
@@ -551,7 +558,7 @@ context('patient dashboard page', function() {
           teams: getRelationship([teamNurse]),
         },
       }),
-      getFlow({
+      getProgramFlow({
         attributes: {
           name: '2 Flow',
           behavior: 'standard',
@@ -562,7 +569,7 @@ context('patient dashboard page', function() {
           program: getRelationship(testProgramIds[1], 'programs'),
         },
       }),
-      getFlow({
+      getProgramFlow({
         attributes: {
           name: '3 Flow',
           behavior: 'standard',
@@ -573,7 +580,7 @@ context('patient dashboard page', function() {
           program: getRelationship(testProgramIds[1], 'programs'),
         },
       }),
-      getFlow({
+      getProgramFlow({
         attributes: {
           name: 'Should not show - unpublished',
           behavior: 'standard',
@@ -584,7 +591,7 @@ context('patient dashboard page', function() {
           program: getRelationship(testProgramIds[1], 'programs'),
         },
       }),
-      getFlow({
+      getProgramFlow({
         attributes: {
           name: 'Should not show - archived',
           behavior: 'standard',
@@ -595,7 +602,7 @@ context('patient dashboard page', function() {
           program: getRelationship(testProgramIds[1], 'programs'),
         },
       }),
-      getFlow({
+      getProgramFlow({
         attributes: {
           name: 'Should not show - automated behavior',
           behavior: 'automated',
@@ -606,7 +613,7 @@ context('patient dashboard page', function() {
           program: getRelationship(testProgramIds[1], 'programs'),
         },
       }),
-      getFlow({
+      getProgramFlow({
         attributes: {
           name: 'Should not show - not visible to current user team',
           behavior: 'standard',
@@ -798,7 +805,7 @@ context('patient dashboard page', function() {
       .get('.picklist')
       .should('not.contain', 'Should not show');
 
-    createActionPostRoute('test-1');
+    const testOne = createActionPostRoute('One of One');
 
     cy
       .get('.picklist')
@@ -821,7 +828,7 @@ context('patient dashboard page', function() {
 
     cy
       .url()
-      .should('contain', `patient/${ testPatient.id }/action/test-1`);
+      .should('contain', `patient/${ testPatient.id }/action/${ testOne }`);
 
     cy
       .get('.patient__list')
@@ -843,7 +850,7 @@ context('patient dashboard page', function() {
       .contains('Add')
       .click();
 
-    createActionPostRoute('test-2');
+    const testTwo = createActionPostRoute('One of Two');
 
     cy
       .get('.picklist')
@@ -866,7 +873,7 @@ context('patient dashboard page', function() {
 
     cy
       .url()
-      .should('contain', `patient/${ testPatient.id }/action/test-2`);
+      .should('contain', `patient/${ testPatient.id }/action/${ testTwo }`);
 
     cy
       .get('.patient__list')
@@ -888,7 +895,7 @@ context('patient dashboard page', function() {
       .contains('Add')
       .click();
 
-    createActionPostRoute('test-3');
+    const testThree = createActionPostRoute('Two of Two');
 
     cy
       .get('.picklist')
@@ -905,7 +912,7 @@ context('patient dashboard page', function() {
 
     cy
       .url()
-      .should('contain', `patient/${ testPatient.id }/action/test-3`);
+      .should('contain', `patient/${ testPatient.id }/action/${ testThree }`);
 
     cy
       .get('.patient__list')
@@ -917,14 +924,15 @@ context('patient dashboard page', function() {
       .find('.action-sidebar__name')
       .should('contain', 'Two of Two');
 
+    const testFlow = getFlow({
+      attributes: { updated_at: testTs() },
+    });
+
     cy
       .intercept('POST', `/api/patients/${ testPatient.id }/relationships/flows*`, {
         statusCode: 201,
         body: {
-          data: {
-            id: '1',
-            attributes: { updated_at: testTs() },
-          },
+          data: testFlow,
         },
       })
       .as('routePostFlow');
@@ -954,7 +962,7 @@ context('patient dashboard page', function() {
 
     cy
       .url()
-      .should('contain', 'flow/1');
+      .should('contain', `flow/${ testFlow.id }`);
 
     cy
       .get('.patient-flow__header')

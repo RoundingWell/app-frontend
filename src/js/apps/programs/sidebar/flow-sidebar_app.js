@@ -64,7 +64,7 @@ export default App.extend({
       onSubmit: () => {
         this.flow.destroy({ wait: true })
           .then(() => {
-            Radio.trigger('event-router', 'program:details', this.flow.get('_program'));
+            Radio.trigger('event-router', 'program:details', this.flow.getProgram().id);
           })
           .catch(({ responseData }) => {
             Radio.request('alert', 'show:apiError', responseData);

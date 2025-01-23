@@ -107,19 +107,19 @@ const ClinicianModal = View.extend({
     });
 
     this.listenTo(roleComponent, 'change:role', role => {
-      this.model.set('_role', role.id);
+      this.model.setRole(role);
     });
 
     this.showChildView('role', roleComponent);
   },
   showTeam() {
     const teamComponent = new TeamComponent({
-      team: this.model.get('_team'),
+      team: this.model.getTeam(),
       className: 'modal__form-component',
     });
 
     this.listenTo(teamComponent, 'change:team', team => {
-      this.model.set('_team', team.id);
+      this.model.setTeam(team);
     });
 
     this.showChildView('team', teamComponent);

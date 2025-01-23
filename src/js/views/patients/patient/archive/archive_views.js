@@ -91,7 +91,7 @@ const ActionItemView = View.extend({
     'click .js-no-click': 'prevent-row-click',
   },
   onClick() {
-    Radio.trigger('event-router', 'patient:action:archive', this.model.get('_patient'), this.model.id);
+    Radio.trigger('event-router', 'patient:action:archive', this.model.getPatient().id, this.model.id);
   },
   onRender() {
     this.canEdit = this.model.canEdit();
@@ -115,7 +115,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    const stateComponent = new StateComponent({ stateId: this.model.get('_state'), isCompact: true });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -211,7 +211,7 @@ const FlowItemView = View.extend({
       return;
     }
 
-    const stateComponent = new StateComponent({ stateId: this.model.get('_state'), isCompact: true });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);

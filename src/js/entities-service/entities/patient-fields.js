@@ -9,7 +9,11 @@ const TYPE = 'patient-fields';
 const _Model = BaseModel.extend({
   type: TYPE,
   url() {
-    return `/api/patients/${ this.get('_patient') }/fields/${ this.get('name') }`;
+    const patient = this.getPatient();
+    return `/api/patients/${ patient.id }/fields/${ this.get('name') }`;
+  },
+  getPatient() {
+    return this.getRelationship('_patient');
   },
   isNew() {
     // NOTE: This will treat the PATCH like a PUT
@@ -26,7 +30,7 @@ const _Model = BaseModel.extend({
     }
 
     const relationships = {
-      'patient': this.toRelation(attrs._patient, 'patients'),
+      'patient': this.toRelation(attrs._patient),
     };
 
     return this.save(attrs, { relationships }, { wait: true });

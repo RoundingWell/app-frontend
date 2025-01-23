@@ -1,23 +1,14 @@
 import Backbone from 'backbone';
-import { contains, extend, keys, reduce, size, union } from 'underscore';
+import { contains, extend, keys, reduce, size } from 'underscore';
 import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import dayjs from 'dayjs';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
-
 import { ACTION_OUTREACH, ACTION_SHARING } from 'js/static';
 
 const TYPE = 'patient-actions';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (!relationship || key === 'owner') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   messages: {
@@ -25,7 +16,7 @@ const _Model = BaseModel.extend({
       this.set({ _owner: owner, ...attributes });
     },
     StateChanged({ state, attributes }) {
-      this.set({ _state: state.id, ...attributes });
+      this.set({ _state: state, ...attributes });
     },
     ActionDueChanged({ attributes }) {
       this.set(attributes);
@@ -48,7 +39,7 @@ const _Model = BaseModel.extend({
         message: attributes.message,
         created_at: dayjs.utc().format(),
         edited_at: null,
-        _clinician: author,
+        _clinician: { id: author, type: 'clinicians' },
       });
 
       this.trigger('ws:add:comment', commentModel);
@@ -58,8 +49,8 @@ const _Model = BaseModel.extend({
         id: file.id,
         path: attributes.path,
         created_at: dayjs.utc().format(),
-        _action: this.id,
-        _patient: this.getPatient().id,
+        _action: this.getResource(),
+        _patient: this.getPatient().getResource(),
         _view: attributes.urls.view,
         _download: attributes.urls.download,
       });
@@ -74,33 +65,48 @@ const _Model = BaseModel.extend({
   },
   urlRoot() {
     if (this.isNew()) {
-      const flow = this.get('_flow');
+      const flow = this.getFlow();
+      const patient = this.getPatient();
       return flow ?
-        `/api/flows/${ flow }/relationships/actions` :
-        `/api/patients/${ this.get('_patient') }/relationships/actions`;
+        `/api/flows/${ flow.id }/relationships/actions` :
+        `/api/patients/${ patient.id }/relationships/actions`;
     }
 
     return '/api/actions';
   },
   type: TYPE,
-  hasTag(tagName) {
-    return contains(this.get('tags'), tagName);
-  },
   getForm() {
-    const formId = this.get('_form');
-    if (!formId) return;
-    return Radio.request('entities', 'forms:model', formId);
+    return this.getRelationship('_form');
   },
   getFormResponses() {
     return Radio.request('entities', 'formResponses:collection', this.get('_form_responses'));
   },
+  getFiles() {
+    return Radio.request('entities', 'files:collection', this.get('_files'));
+  },
   getPatient() {
-    return Radio.request('entities', 'patients:model', this.get('_patient'));
+    return this.getRelationship('_patient');
   },
   getOwner() {
-    const owner = this.get('_owner');
-    const Owner = Store.get(owner.type);
-    return new Owner({ id: owner.id });
+    return this.getRelationship('_owner');
+  },
+  getAuthor() {
+    return this.getRelationship('_author');
+  },
+  getFlow() {
+    return this.getRelationship('_flow');
+  },
+  getState() {
+    return this.getRelationship('_state');
+  },
+  getProgram() {
+    return this.getRelationship('_program');
+  },
+  getProgramAction() {
+    return this.getRelationship('_program_action');
+  },
+  getPreviousState() {
+    return Radio.request('entities', 'states:model', this.previous('_state'));
   },
   isSameTeamAsUser() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -110,23 +116,6 @@ const _Model = BaseModel.extend({
     const ownersTeam = owner.type === 'teams' ? owner : owner.getTeam();
 
     return currentUsersTeam === ownersTeam;
-  },
-  getAuthor() {
-    return Radio.request('entities', 'clinicians:model', this.get('_author'));
-  },
-  getFlow() {
-    if (!this.get('_flow')) return;
-
-    return Radio.request('entities', 'flows:model', this.get('_flow'));
-  },
-  getState() {
-    return Radio.request('entities', 'states:model', this.get('_state'));
-  },
-  getProgram() {
-    return Radio.request('entities', 'programs:model', this.get('_program'));
-  },
-  getPreviousState() {
-    return Radio.request('entities', 'states:model', this.previous('_state'));
   },
   isLocked() {
     return !!this.get('locked_at');
@@ -151,11 +140,24 @@ const _Model = BaseModel.extend({
 
     return dueDateTime.isBefore(dayjs(), 'day') || dueDateTime.isBefore(dayjs(), 'minute');
   },
+  hasTag(tagName) {
+    return contains(this.get('tags'), tagName);
+  },
   hasOutreach() {
     return this.get('outreach') !== ACTION_OUTREACH.DISABLED;
   },
   hasSharing() {
     return this.get('sharing') !== ACTION_SHARING.DISABLED;
+  },
+  hasAttachments() {
+    return !!this.getFiles().length;
+  },
+  hasAllowedUploads() {
+    if (!this.canEdit()) return false;
+
+    const programAction = this.getProgramAction();
+
+    return !!size(programAction.get('allowed_uploads'));
   },
   canEdit() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -206,7 +208,7 @@ const _Model = BaseModel.extend({
     return this.save({ due_time: time });
   },
   saveState(state) {
-    const saveOpts = { _state: state.id };
+    const saveOpts = { _state: state.getResource() };
     const sharing = this.get('sharing');
 
     if (state.isDone() && ![ACTION_SHARING.DISABLED, ACTION_SHARING.RESPONDED].includes(sharing)) {
@@ -220,7 +222,7 @@ const _Model = BaseModel.extend({
     });
   },
   saveOwner(owner) {
-    return this.save({ _owner: owner }, {
+    return this.save({ _owner: owner.getResource() }, {
       relationships: {
         owner: this.toRelation(owner),
       },
@@ -230,46 +232,34 @@ const _Model = BaseModel.extend({
     if (this.isNew()) attrs = extend({}, this.attributes, attrs);
 
     const relationships = {
-      'flow': this.toRelation(attrs._flow, 'flows'),
-      'form': this.toRelation(attrs._form, 'forms'),
+      'flow': this.toRelation(attrs._flow),
+      'form': this.toRelation(attrs._form),
       'owner': this.toRelation(attrs._owner),
-      'state': this.toRelation(attrs._state, 'states'),
-      'program-action': this.toRelation(attrs._program_action, 'program-actions'),
+      'state': this.toRelation(attrs._state),
+      'program-action': this.toRelation(attrs._program_action),
     };
 
     return this.save(attrs, { relationships }, { wait: true });
   },
-  hasAttachments() {
-    return !!size(this.get('_files'));
-  },
-  hasAllowedUploads() {
-    if (!this.canEdit()) return false;
 
-    const programAction = Radio.request('entities', 'programActions:model', this.get('_program_action'));
+  addFile(file) {
+    const files = this.getFiles();
+    files.add(file);
 
-    return !!size(programAction.get('allowed_uploads'));
+    this.set({ _files: files.getResources() });
   },
-  addFile(resource) {
-    const newFilesRelationship = union(this.get('_files'), [{ id: resource.id, type: 'files' }]);
+  removeFile(file) {
+    const files = this.getFiles();
+    files.remove(file);
 
-    this.set({ _files: newFilesRelationship });
+    this.set({ _files: files.getResources() });
   },
-  removeFile(resource) {
-    const files = this.get('_files');
-    const newFilesRelationship = files.filter(file => {
-      return file.id !== resource.id;
-    });
-
-    this.set({ _files: newFilesRelationship });
-  },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
 const Collection = BaseCollection.extend({
   url: '/api/actions',
   model: Model,
-  parseRelationship: _parseRelationship,
   save(attrs) {
     const saves = this.invoke('saveAll', attrs);
 

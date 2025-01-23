@@ -3,7 +3,6 @@ import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import JsonApiMixin from 'js/base/jsonapi-mixin';
 
 import trim from 'js/utils/formatting/trim';
 import collectionOf from 'js/utils/formatting/collection-of';
@@ -11,13 +10,6 @@ import collectionOf from 'js/utils/formatting/collection-of';
 import { ACTION_OUTREACH, STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-actions';
-const { parseRelationship } = JsonApiMixin;
-
-const _parseRelationship = function(relationship, key) {
-  if (!relationship || key === 'owner') return relationship;
-
-  return parseRelationship(relationship, key);
-};
 
 const _Model = BaseModel.extend({
   urlRoot: '/api/program-actions',
@@ -38,24 +30,33 @@ const _Model = BaseModel.extend({
     tags.remove(tag);
     return this.save({ tags: tags.map('text') });
   },
-  getAction({ patientId, flowId }) {
+  getProgramFlow() {
+    return this.getRelationship('_program_flow');
+  },
+  getProgram() {
+    return this.getRelationship('_program');
+  },
+  createAction({ patient, flow }) {
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const currentWorkspace = Radio.request('workspace', 'current');
     const states = currentWorkspace.getStates();
 
     const defaultInitialState = first(states.filter({ status: STATE_STATUS.QUEUED }));
 
-    return Radio.request('entities', 'actions:model', {
+    const attrs = {
       name: this.get('name'),
-      _flow: flowId,
-      _patient: patientId,
-      _state: defaultInitialState.id,
+      _state: defaultInitialState.getResource(),
       _owner: this.get('_owner') || {
         id: currentUser.id,
         type: 'clinicians',
       },
-      _program_action: this.id,
-    });
+      _program_action: this.getResource(),
+    };
+
+    if (patient) attrs._patient = patient.getResource();
+    if (flow) attrs._flow = flow.getResource();
+
+    return Radio.request('entities', 'actions:model', attrs);
   },
   enableAttachmentUploads() {
     this.save({ allowed_uploads: ['pdf'] });
@@ -64,20 +65,17 @@ const _Model = BaseModel.extend({
     this.save({ allowed_uploads: [] });
   },
   getOwner() {
-    const owner = this.get('_owner');
-    if (!owner) return;
-    return Radio.request('entities', 'teams:model', owner.id);
+    return this.getRelationship('_owner');
   },
   saveOwner(owner) {
-    owner = this.toRelation(owner);
-    return this.save({ _owner: owner.data }, {
-      relationships: { owner },
+    return this.save({ _owner: owner ? owner.getResource() : null }, {
+      relationships: {
+        owner: this.toRelation(owner),
+      },
     });
   },
   getForm() {
-    const formId = this.get('_form');
-    if (!formId) return;
-    return Radio.request('entities', 'forms:model', formId);
+    return this.getRelationship('_form');
   },
   hasOutreach() {
     return this.get('outreach') !== ACTION_OUTREACH.DISABLED;
@@ -104,15 +102,14 @@ const _Model = BaseModel.extend({
     attrs = extend({}, this.attributes, attrs);
 
     const relationships = {
-      'owner': this.toRelation(attrs._owner, 'teams'),
-      'form': this.toRelation(attrs._form, 'forms'),
-      'program-flow': this.toRelation(attrs._program_flow, 'program-flows'),
-      'program': this.toRelation(attrs._program, 'programs'),
+      'owner': this.toRelation(attrs._owner),
+      'form': this.toRelation(attrs._form),
+      'program-flow': this.toRelation(attrs._program_flow),
+      'program': this.toRelation(attrs._program),
     };
 
     return this.save(attrs, { relationships }, { wait: true });
   },
-  parseRelationship: _parseRelationship,
 });
 
 const Model = Store(_Model, TYPE);
@@ -126,7 +123,6 @@ const Collection = BaseCollection.extend({
     return '/api/program-actions';
   },
   model: Model,
-  parseRelationship: _parseRelationship,
   updateSequences() {
     const data = this.map((flowAction, sequence) => {
       flowAction.set({ sequence });

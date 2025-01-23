@@ -270,7 +270,7 @@ const DayItemView = View.extend({
     this.showChildView('check', checkComponent);
   },
   onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.get('_patient'));
+    Radio.trigger('event-router', 'patient:dashboard', this.model.getPatient().id);
   },
   onClickForm() {
     Radio.trigger('event-router', 'form:patientAction', this.model.id, this.model.getForm().id);
@@ -284,11 +284,11 @@ const DayItemView = View.extend({
     }
 
     if (this.model.isDone()) {
-      Radio.trigger('event-router', 'patient:action:archive', this.model.get('_patient'), this.model.id);
+      Radio.trigger('event-router', 'patient:action:archive', this.model.getPatient().id, this.model.id);
       return;
     }
 
-    Radio.trigger('event-router', 'patient:action', this.model.get('_patient'), this.model.id);
+    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
   showDetailsTooltip() {
     if (!this.model.get('details')) return;

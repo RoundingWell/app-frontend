@@ -176,7 +176,7 @@ const SidebarView = View.extend({
   },
   showState() {
     const isActive = this.model.isActive();
-    const selectedId = this.model.get('enabled') ? 'enabled' : 'disabled';
+    const selectedId = this.model.isEnabled() ? 'enabled' : 'disabled';
 
     const stateComponent = new StateComponent({ isActive, selectedId });
 
@@ -187,7 +187,7 @@ const SidebarView = View.extend({
     this.showChildView('state', stateComponent);
   },
   showRole() {
-    const isDisabled = !this.model.get('enabled');
+    const isDisabled = !this.model.isEnabled();
     const roleComponent = new RoleComponent({ role: this.model.getRole(), state: { isDisabled } });
 
     this.listenTo(roleComponent, 'change:role', role => {
@@ -197,8 +197,8 @@ const SidebarView = View.extend({
     this.showChildView('role', roleComponent);
   },
   showTeam() {
-    const isDisabled = !this.model.get('enabled');
-    const teamComponent = new TeamComponent({ team: this.model.get('_team'), state: { isDisabled } });
+    const isDisabled = !this.model.isEnabled();
+    const teamComponent = new TeamComponent({ team: this.model.getTeam(), state: { isDisabled } });
 
     this.listenTo(teamComponent, 'change:team', team => {
       this.model.saveTeam(team);
@@ -211,7 +211,7 @@ const SidebarView = View.extend({
       member: this.model,
       workspaces: Radio.request('bootstrap', 'workspaces'),
       droplistOptions: {
-        isDisabled: !this.model.get('enabled'),
+        isDisabled: !this.model.isEnabled(),
       },
     }));
 

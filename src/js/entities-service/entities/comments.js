@@ -1,4 +1,3 @@
-import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
@@ -19,7 +18,7 @@ const _Model = BaseModel.extend({
     },
   },
   urlRoot() {
-    if (this.isNew()) return `/api/actions/${ this.get('_action') }/relationships/comments`;
+    if (this.isNew()) return `/api/actions/${ this.getAction().id }/relationships/comments`;
 
     return '/api/comments';
   },
@@ -27,7 +26,10 @@ const _Model = BaseModel.extend({
     if (!trim(message)) return 'Comment message required.';
   },
   getClinician() {
-    return Radio.request('entities', 'clinicians:model', this.get('_clinician'));
+    return this.getRelationship('_clinician');
+  },
+  getAction() {
+    return this.getRelationship('_action');
   },
 });
 

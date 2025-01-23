@@ -132,7 +132,7 @@ export default App.extend({
   fetchField({ fieldName, requestId }) {
     const field = Radio.request('entities', 'patientFields:model', {
       name: fieldName,
-      _patient: this.patient.id,
+      _patient: this.patient.getResource(),
     });
 
     return field.fetch()
@@ -147,7 +147,7 @@ export default App.extend({
     const field = Radio.request('entities', 'patientFields:model', {
       name: fieldName,
       value,
-      _patient: this.patient.id,
+      _patient: this.patient.getResource(),
     });
 
     return field.saveAll()
@@ -201,17 +201,18 @@ export default App.extend({
       });
     });
   },
-  _getPrefillFilters(form, action, flowId) {
-    const patientId = action.get('_patient');
+  _getPrefillFilters(form, action, flow) {
+    const flowId = flow && flow.id;
+    const patientId = action.getPatient().id;
     const actionTags = form.getPrefillActionTag();
     const formId = !actionTags && form.getPrefillFormId();
     const submittedAt = form.isReport() && `<=${ action.get('created_at') }`;
 
     return { patientId, flowId, formId, actionTags, submittedAt };
   },
-  fetchLatestFormSubmission(flowId) {
+  fetchLatestFormSubmission(flow) {
     const isReadOnly = this.isReadOnly();
-    const filter = this._getPrefillFilters(this.form, this.action, flowId);
+    const filter = this._getPrefillFilters(this.form, this.action, flow);
 
     return Promise.all([
       Radio.request('entities', 'fetch:forms:definition', this.form.id),
@@ -240,7 +241,7 @@ export default App.extend({
 
     if (!firstResponse && this.action) {
       if (this.action.hasTag('prefill-latest-response')) return this.fetchLatestFormSubmission();
-      if (this.action.hasTag('prefill-flow-response')) return this.fetchLatestFormSubmission(this.action.get('_flow'));
+      if (this.action.hasTag('prefill-flow-response')) return this.fetchLatestFormSubmission(this.action.getFlow());
     }
 
     return Promise.all([
@@ -272,6 +273,10 @@ export default App.extend({
     });
   },
   useLatestDraft(responseData) {
+    responseData._form = this.form.getResource();
+    responseData._patient = this.patient.getResource();
+    if (this.action) responseData._action = this.action.getResource();
+
     if (!this.latestResponse || this.latestResponse.get('status') !== FORM_RESPONSE_STATUS.DRAFT) return responseData;
 
     return {
@@ -283,9 +288,6 @@ export default App.extend({
     const data = this.useLatestDraft({
       response: { data: this._draft },
       status: FORM_RESPONSE_STATUS.DRAFT,
-      _form: this.form,
-      _patient: this.patient,
-      _action: this.action,
     });
 
     const formResponse = Radio.request('entities', 'formResponses:model', data);
@@ -311,9 +313,6 @@ export default App.extend({
     const data = this.useLatestDraft({
       response,
       status: FORM_RESPONSE_STATUS.SUBMITTED,
-      _form: this.form,
-      _patient: this.patient,
-      _action: this.action,
     });
 
     const formResponse = Radio.request('entities', 'formResponses:model', data);
