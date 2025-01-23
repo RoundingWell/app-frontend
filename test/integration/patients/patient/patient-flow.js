@@ -618,6 +618,7 @@ context('patient flow page', function() {
               owner: getRelationship(teamNurse),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
+              comments: getRelationship([{ id: uuid() }], 'comments'),
             },
           }),
           testListAction,
@@ -684,6 +685,8 @@ context('patient flow page', function() {
         expect($action.find('[data-due-date-region] .is-overdue')).to.exist;
         expect($action.find('[data-form-region]')).not.to.be.empty;
         expect($action.find('.fa-paperclip')).to.exist;
+        expect($action.find('.fa-comment')).to.exist;
+        expect($action.find('.fa-comment').next()).to.contain('1');
       });
 
     cy
@@ -695,6 +698,7 @@ context('patient flow page', function() {
         expect($action.find('.fa-circle-dot')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('.fa-paperclip')).to.not.exist;
+        expect($action.find('.fa-comment')).to.not.exist;
       });
 
     cy
