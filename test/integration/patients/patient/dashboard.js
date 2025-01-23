@@ -69,6 +69,7 @@ context('patient dashboard page', function() {
         state: getRelationship(stateTodo),
         form: getRelationship(testForm),
         files: getRelationship([{ id: '1' }], 'files'),
+        comments: getRelationship([{ id: uuid() }], 'comments'),
       },
     });
 
@@ -408,12 +409,20 @@ context('patient dashboard page', function() {
 
     cy
       .get('.table-list__item')
-      .first()
-      .next()
-      .next()
+      .eq(2)
       .find('[data-form-region]')
-      .should('be.empty')
+      .should('be.empty');
+
+    cy
+      .get('.table-list__item')
+      .eq(2)
       .find('.fa-paperclip')
+      .should('not.exist');
+
+    cy
+      .get('.table-list__item')
+      .eq(2)
+      .find('.fa-comment')
       .should('not.exist');
 
     // dirty hack to make sure the form button isn't offscreen
@@ -433,6 +442,14 @@ context('patient dashboard page', function() {
       .first()
       .find('.fa-paperclip')
       .should('exist');
+
+    cy
+      .get('.table-list__item')
+      .first()
+      .find('.fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
 
     cy
       .routeFormByAction()
