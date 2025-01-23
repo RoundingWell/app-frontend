@@ -42,6 +42,8 @@ const _Model = BaseModel.extend({
         _clinician: { id: author, type: 'clinicians' },
       });
 
+      this.addComment(commentModel);
+
       this.trigger('ws:add:comment', commentModel);
     },
     AttachmentAdded({ file, attributes }) {

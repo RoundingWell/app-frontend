@@ -2635,6 +2635,7 @@ context('patient flow page', function() {
 
   specify('socket notifications', function() {
     const testSocketFileId = uuid();
+    const testCommentId = uuid();
 
     const testSocketFlow = getFlow({
       attributes: {
@@ -2662,6 +2663,8 @@ context('patient flow page', function() {
         state: getRelationship(stateTodo),
         owner: getRelationship(teamOther),
         form: getRelationship(testForm),
+        files: getRelationship([], 'files'),
+        comments: getRelationship([], 'comments'),
       },
     });
 
@@ -2986,6 +2989,31 @@ context('patient flow page', function() {
       .get('.patient-flow__list')
       .find('.table-list__item .fa-paperclip')
       .should('not.exist');
+
+    cy.sendWs({
+      category: 'CommentAdded',
+      author: getCurrentClinician().id,
+      resource: {
+        type: 'patient-actions',
+        id: testSocketAction.id,
+      },
+      payload: {
+        comment: {
+          type: 'comments',
+          id: testCommentId,
+        },
+        attributes: {
+          message: 'New websocket comment.',
+        },
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
 
     cy.sendWs({
       category: 'ResourceDeleted',
