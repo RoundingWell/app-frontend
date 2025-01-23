@@ -253,6 +253,12 @@ const _Model = BaseModel.extend({
 
     this.set({ _comments: comments.getResources() });
   },
+  removeComment(comment) {
+    const comments = this.getComments();
+    comments.remove(comment);
+
+    this.set({ _comments: comments.getResources() });
+  },
   addFile(file) {
     const files = this.getFiles();
     files.add(file);

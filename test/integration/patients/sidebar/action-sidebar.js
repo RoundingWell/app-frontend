@@ -1517,11 +1517,35 @@ context('action sidebar', function() {
 
   specify('action comments - show/hide icon in action list items', function() {
     const testPatient = getPatient();
+
+    const testComments = [
+      getComment({
+        attributes: {
+          edited_at: null,
+          created_at: testTsSubtract(1),
+          message: 'Test comment to be deleted.',
+        },
+        relationships: {
+          clinician: getRelationship(getCurrentClinician()),
+        },
+      }),
+      getComment({
+        attributes: {
+          edited_at: null,
+          created_at: testTsSubtract(2),
+          message: 'Another test comment to be deleted.',
+        },
+        relationships: {
+          clinician: getRelationship(getCurrentClinician()),
+        },
+      }),
+    ];
+
     const testAction = getAction({
       relationships: {
         patient: getRelationship(testPatient),
         state: getRelationship(stateTodo),
-        comments: getRelationship([], 'comments'),
+        comments: getRelationship(testComments),
       },
     });
 
@@ -1553,7 +1577,7 @@ context('action sidebar', function() {
         return fx;
       })
       .routeActionComments(fx => {
-        fx.data = [];
+        fx.data = testComments;
 
         return fx;
       })
@@ -1564,6 +1588,61 @@ context('action sidebar', function() {
       .wait('@routeActionFiles');
 
     cy
+      .intercept('DELETE', '/api/comments/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteComment');
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .first()
+      .find('.js-edit')
+      .click();
+
+    cy
+      .get('[data-activity-region]')
+      .find('.js-delete')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeDeleteComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .first()
+      .find('.js-edit')
+      .click();
+
+    cy
+      .get('[data-activity-region]')
+      .find('.js-delete')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeDeleteComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('not.exist');
+
+    cy
       .get('.patient__list')
       .find('.table-list__item .fa-comment')
       .should('not.exist');
@@ -1571,7 +1650,7 @@ context('action sidebar', function() {
     cy
       .get('.sidebar')
       .find('[data-comment-region]')
-      .as('commentRegion')
+      .as('postCommentRegion')
       .find('.js-input')
       .type('Test comment');
 
@@ -1583,7 +1662,7 @@ context('action sidebar', function() {
       .as('routePostComment');
 
     cy
-      .get('@commentRegion')
+      .get('@postCommentRegion')
       .find('.js-post')
       .click()
       .wait('@routePostComment');
@@ -1596,14 +1675,12 @@ context('action sidebar', function() {
       .should('contain', '1');
 
     cy
-      .get('.sidebar')
-      .find('[data-comment-region]')
-      .as('commentRegion')
+      .get('@postCommentRegion')
       .find('.js-input')
       .type('Another test comment');
 
     cy
-      .get('@commentRegion')
+      .get('@postCommentRegion')
       .find('.js-post')
       .click()
       .wait('@routePostComment');

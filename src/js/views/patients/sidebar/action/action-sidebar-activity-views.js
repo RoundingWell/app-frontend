@@ -173,6 +173,7 @@ const CommentView = View.extend({
     this.render();
   },
   onDeleteComment() {
+    this.triggerMethod('remove:comment', this.model);
     this.model.destroy();
   },
 });
@@ -247,6 +248,9 @@ const ActivitiesView = CollectionView.extend({
   childViewContainer: '[data-activities-region]',
   childView(model) {
     return (model.type === 'events') ? ActivityView : CommentView;
+  },
+  childViewTriggers: {
+    'remove:comment': 'remove:comment',
   },
   viewFilter({ model }) {
     if (model.get('event_type') === 'ActionCreated' && model.get('source') === 'system') return false;
