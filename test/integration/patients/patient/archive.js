@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { v4 as uuid } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
@@ -56,6 +57,7 @@ context('patient archive page', function() {
               state: getRelationship(stateDone),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
+              comments: getRelationship([{ id: uuid() }], 'files'),
             },
           }),
           getAction({
@@ -224,6 +226,13 @@ context('patient archive page', function() {
 
     cy
       .get('.patient__list')
+      .find('.table-list__item')
+      .eq(2)
+      .find('.fa-comment')
+      .should('not.exist');
+
+    cy
+      .get('.patient__list')
       .should('contain', 'Second In List')
       .find('.patient__flow-icon');
 
@@ -371,6 +380,14 @@ context('patient archive page', function() {
       .first()
       .find('.fa-paperclip')
       .should('exist');
+
+    cy
+      .get('.table-list__item')
+      .first()
+      .find('.fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
 
     cy
       .get('.table-list__item')
