@@ -14,6 +14,10 @@ const _Model = BaseModel.extend({
       this.set({ edited_at: dayjs.utc().format(), ...attributes });
     },
     CommentRemoved() {
+      const action = this.getAction();
+
+      action.removeComment(this);
+
       this.destroy({ isDeleted: true });
     },
   },

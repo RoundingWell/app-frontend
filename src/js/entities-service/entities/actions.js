@@ -40,6 +40,7 @@ const _Model = BaseModel.extend({
         created_at: dayjs.utc().format(),
         edited_at: null,
         _clinician: { id: author, type: 'clinicians' },
+        _action: this.getResource(),
       });
 
       this.addComment(commentModel);

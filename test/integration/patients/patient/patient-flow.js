@@ -3016,6 +3016,20 @@ context('patient flow page', function() {
       .should('contain', '1');
 
     cy.sendWs({
+      category: 'CommentRemoved',
+      resource: {
+        type: 'comments',
+        id: testCommentId,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .fa-comment')
+      .should('not.exist');
+
+    cy.sendWs({
       category: 'ResourceDeleted',
       resource: {
         type: 'patient-actions',
