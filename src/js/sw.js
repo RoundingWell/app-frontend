@@ -80,17 +80,4 @@ if (self.location.hostname !== 'localhost') {
       ],
     }),
   );
-
-  const bgSyncPlugin = new BackgroundSyncPlugin('form-responses', {
-    maxRetentionTime: 24 * 60, // Retry for max of 24 Hours (specified in minutes)
-  });
-
-  // Retries POST requests to /api/form-responses when offline
-  registerRoute(
-    /\/api\/form-responses/,
-    new NetworkOnly({
-      plugins: [bgSyncPlugin],
-    }),
-    'POST',
-  );
 }
