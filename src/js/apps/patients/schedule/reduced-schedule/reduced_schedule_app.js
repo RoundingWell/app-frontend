@@ -98,7 +98,8 @@ export default App.extend({
   },
   beforeStart() {
     const filter = this.getState().getEntityFilter();
-    return Radio.request('entities', 'fetch:actions:collection', { data: { filter } });
+    const fields = { flows: ['name', 'state'] };
+    return Radio.request('entities', 'fetch:actions:collection', { data: { filter, fields } });
   },
   onStart(options, collection) {
     this.collection = collection;

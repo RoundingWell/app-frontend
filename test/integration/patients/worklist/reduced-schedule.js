@@ -101,7 +101,8 @@ context('reduced schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[clinicians]=${ currentClinician.id }`)
-      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', 'fields[flows]=name,state');
 
     cy
       .url()
