@@ -1,5 +1,4 @@
 import { clientsClaim } from 'workbox-core';
-import { BackgroundSyncPlugin } from 'workbox-background-sync';
 import { registerRoute, Route } from 'workbox-routing';
 import { NetworkOnly, NetworkFirst, CacheFirst } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
