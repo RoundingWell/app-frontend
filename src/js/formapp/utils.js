@@ -2,6 +2,9 @@
 import { extend, reduce, values } from 'underscore';
 import { addError } from 'js/datadog';
 
+// Mostly disables formio translations
+Formio.Components.components.htmlelement.prototype.t = txt => txt;
+
 // Note: Allows for setting the submission at form instantiation
 // https://github.com/formio/formio.js/pull/4580
 const webformInit = Formio.Displays.displays.webform.prototype.init;
