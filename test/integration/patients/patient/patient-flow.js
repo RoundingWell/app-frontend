@@ -108,9 +108,9 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
-    const testCommentId = uuid();
     const testFileId = uuid();
     const testOtherFileId = uuid();
+    const testComment = getComment();
 
     const testPatient = getPatient({
       attributes: {
@@ -352,8 +352,8 @@ context('patient flow page', function() {
       },
       payload: {
         comment: {
-          type: 'comments',
-          id: testCommentId,
+          type: testComment.type,
+          id: testComment.id,
         },
         attributes: {
           message: 'New websocket comment.',
@@ -378,8 +378,8 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'CommentEdited',
       resource: {
-        type: 'comments',
-        id: testCommentId,
+        type: testComment.type,
+        id: testComment.id,
       },
       payload: {
         attributes: {
@@ -396,8 +396,8 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'CommentEdited',
       resource: {
-        type: 'comments',
-        id: testCommentId,
+        type: testComment.type,
+        id: testComment.id,
       },
       payload: {
         attributes: {
@@ -414,8 +414,8 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'CommentRemoved',
       resource: {
-        type: 'comments',
-        id: testCommentId,
+        type: testComment.type,
+        id: testComment.id,
       },
       payload: {},
     });
@@ -2636,7 +2636,7 @@ context('patient flow page', function() {
 
   specify('socket notifications', function() {
     const testSocketFileId = uuid();
-    const testCommentId = uuid();
+    const testComment = getComment();
 
     const testSocketFlow = getFlow({
       attributes: {
@@ -3000,8 +3000,8 @@ context('patient flow page', function() {
       },
       payload: {
         comment: {
-          type: 'comments',
-          id: testCommentId,
+          type: testComment.type,
+          id: testComment.id,
         },
         attributes: {
           message: 'New websocket comment.',
@@ -3019,8 +3019,8 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'CommentRemoved',
       resource: {
-        type: 'comments',
-        id: testCommentId,
+        type: testComment.type,
+        id: testComment.id,
       },
       payload: {},
     });
