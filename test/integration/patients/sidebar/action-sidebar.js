@@ -1575,15 +1575,13 @@ context('action sidebar', function() {
       .intercept('POST', '/api/actions/*/relationships/comments', {
         statusCode: 201,
         body: {
-          data: {
-            type: 'comments',
-            id: uuid(),
+          data: getComment({
             attributes: {
               message: 'Test comment',
               edited_at: null,
               created_at: testTs(),
             },
-          },
+          }),
         },
       })
       .as('routePostComment');
@@ -1610,15 +1608,13 @@ context('action sidebar', function() {
       .intercept('POST', '/api/actions/*/relationships/comments', {
         statusCode: 201,
         body: {
-          data: {
-            type: 'comments',
-            id: uuid(),
+          data: getComment({
             attributes: {
               message: 'Another test comment',
               edited_at: null,
               created_at: testTs(),
             },
-          },
+          }),
         },
       })
       .as('routePostComment');
