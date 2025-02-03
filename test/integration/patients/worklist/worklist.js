@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
-import { v4 as uuid, NIL as NIL_UUID } from 'uuid';
+import { NIL as NIL_UUID } from 'uuid';
 
 import { ACTION_OUTREACH } from 'js/static';
 
@@ -20,6 +20,7 @@ import { roleAdmin, roleEmployee, roleNoFilterEmployee, roleTeamEmployee } from 
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
+import { getComment } from 'support/api/comments';
 
 const testPatient1 = getPatient({
   id: '1',
@@ -389,7 +390,7 @@ context('worklist page', function() {
           files: getRelationship([{ id: '1' }], 'files'),
           owner: getRelationship(teamCoordinator),
           patient: getRelationship(testPatient1),
-          comments: getRelationship([{ id: uuid() }], 'comments'),
+          comments: getRelationship(getComment()),
         },
       }),
       getAction({

@@ -1522,7 +1522,7 @@ context('action sidebar', function() {
       relationships: {
         patient: getRelationship(testPatient),
         state: getRelationship(stateTodo),
-        comments: getRelationship([], 'comments'),
+        comments: getRelationship([]),
       },
     });
 

@@ -18,6 +18,7 @@ import { stateInProgress, stateDone, stateTodo } from 'support/api/states';
 import { teamCoordinator, teamNurse, teamOther } from 'support/api/teams';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { workspaceOne } from 'support/api/workspaces';
+import { getComment } from 'support/api/comments';
 
 const tomorrow = testDateAdd(1);
 
@@ -618,7 +619,7 @@ context('patient flow page', function() {
               owner: getRelationship(teamNurse),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
-              comments: getRelationship([{ id: uuid() }], 'comments'),
+              comments: getRelationship(getComment()),
             },
           }),
           testListAction,
@@ -2663,8 +2664,8 @@ context('patient flow page', function() {
         state: getRelationship(stateTodo),
         owner: getRelationship(teamOther),
         form: getRelationship(testForm),
-        files: getRelationship([], 'files'),
-        comments: getRelationship([], 'comments'),
+        files: getRelationship([]),
+        comments: getRelationship([]),
       },
     });
 

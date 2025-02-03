@@ -18,6 +18,7 @@ import { stateTodo, stateInProgress, stateDone } from 'support/api/states';
 import { testForm } from 'support/api/forms';
 import { workspaceOne } from 'support/api/workspaces';
 import { roleEmployee, roleAdmin, roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
+import { getComment } from 'support/api/comments';
 
 import { ACTION_OUTREACH } from 'js/static';
 
@@ -69,7 +70,7 @@ context('patient dashboard page', function() {
         state: getRelationship(stateTodo),
         form: getRelationship(testForm),
         files: getRelationship([{ id: '1' }], 'files'),
-        comments: getRelationship([{ id: uuid() }], 'comments'),
+        comments: getRelationship(getComment()),
       },
     });
 

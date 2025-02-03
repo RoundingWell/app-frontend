@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { v4 as uuid } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
@@ -14,6 +13,7 @@ import { stateDone, stateInProgress, stateTodo } from 'support/api/states';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
+import { getComment } from 'support/api/comments';
 
 context('patient archive page', function() {
   const currentClinican = getCurrentClinician({
@@ -57,7 +57,7 @@ context('patient archive page', function() {
               state: getRelationship(stateDone),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
-              comments: getRelationship([{ id: uuid() }], 'files'),
+              comments: getRelationship(getComment()),
             },
           }),
           getAction({
