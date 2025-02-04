@@ -57,7 +57,7 @@ context('patient archive page', function() {
               state: getRelationship(stateDone),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
-              comments: getRelationship(getComment()),
+              comments: getRelationship([getComment()]),
             },
           }),
           getAction({

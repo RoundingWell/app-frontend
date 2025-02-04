@@ -390,7 +390,7 @@ context('worklist page', function() {
           files: getRelationship([{ id: '1' }], 'files'),
           owner: getRelationship(teamCoordinator),
           patient: getRelationship(testPatient1),
-          comments: getRelationship(getComment()),
+          comments: getRelationship([getComment()]),
         },
       }),
       getAction({

@@ -619,7 +619,7 @@ context('patient flow page', function() {
               owner: getRelationship(teamNurse),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
-              comments: getRelationship(getComment()),
+              comments: getRelationship([getComment()]),
             },
           }),
           testListAction,
