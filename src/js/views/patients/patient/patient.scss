@@ -140,14 +140,21 @@
 }
 
 .patient__list-meta {
-  width: 510px;
+  width: 562px;
 }
 
-.patient__action-attachment {
-  color: #999;
+.patient__action-display-icon {
+  color: $black-60;
   display: inline-block;
-  margin-left: 8px;
   vertical-align: middle;
+  width: 16px;
+}
+
+.patient__action-display-icon-text {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 2px;
+  vertical-align: top;
 }
 
 .patient__flow-icon .icon {

@@ -40,7 +40,10 @@ const _Model = BaseModel.extend({
         created_at: dayjs.utc().format(),
         edited_at: null,
         _clinician: { id: author, type: 'clinicians' },
+        _action: this.getResource(),
       });
+
+      this.addComment(commentModel);
 
       this.trigger('ws:add:comment', commentModel);
     },
@@ -80,6 +83,9 @@ const _Model = BaseModel.extend({
   },
   getFormResponses() {
     return Radio.request('entities', 'formResponses:collection', this.get('_form_responses'));
+  },
+  getComments() {
+    return Radio.request('entities', 'comments:collection', this.get('_comments'));
   },
   getFiles() {
     return Radio.request('entities', 'files:collection', this.get('_files'));
@@ -148,6 +154,9 @@ const _Model = BaseModel.extend({
   },
   hasSharing() {
     return this.get('sharing') !== ACTION_SHARING.DISABLED;
+  },
+  commentCount() {
+    return this.getComments().length;
   },
   hasAttachments() {
     return !!this.getFiles().length;
@@ -241,7 +250,18 @@ const _Model = BaseModel.extend({
 
     return this.save(attrs, { relationships }, { wait: true });
   },
+  addComment(comment) {
+    const comments = this.getComments();
+    comments.add(comment);
 
+    this.set({ _comments: comments.getResources() });
+  },
+  removeComment(comment) {
+    const comments = this.getComments();
+    comments.remove(comment);
+
+    this.set({ _comments: comments.getResources() });
+  },
   addFile(file) {
     const files = this.getFiles();
     files.add(file);

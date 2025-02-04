@@ -20,6 +20,7 @@ import { roleAdmin, roleEmployee, roleNoFilterEmployee, roleTeamEmployee } from 
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
+import { getComment } from 'support/api/comments';
 
 const testPatient1 = getPatient({
   id: '1',
@@ -389,6 +390,7 @@ context('worklist page', function() {
           files: getRelationship([{ id: '1' }], 'files'),
           owner: getRelationship(teamCoordinator),
           patient: getRelationship(testPatient1),
+          comments: getRelationship([getComment()]),
         },
       }),
       getAction({
@@ -758,6 +760,18 @@ context('worklist page', function() {
     cy
       .get('@secondRow')
       .find('.fa-paperclip')
+      .should('not.exist');
+
+    cy
+      .get('@firstRow')
+      .find('.fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .get('@secondRow')
+      .find('.fa-comment')
       .should('not.exist');
 
     cy

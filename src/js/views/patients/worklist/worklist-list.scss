@@ -24,10 +24,17 @@
 }
 
 .worklist-list__display-icon {
-  color: #999;
+  color: $black-60;
   display: inline-block;
   vertical-align: middle;
   width: 16px;
+}
+
+.worklist-list__display-icon-text {
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 2px;
+  vertical-align: top;
 }
 
 .work-list__item:hover {
@@ -73,22 +80,22 @@
 
 .worklist-list__item-name,
 .worklist-list__name-header {
-  width: 22%;
+  width: 17%;
 }
 
 .worklist-list__meta {
   text-overflow: inherit;
-  width: 43%;
+  width: 48%;
 }
 
 .worklist-list__action-meta-header {
   padding-left: 40px;
-  width: 43%;
+  width: 48%;
 }
 
 .worklist-list__flow-meta-header {
   padding-left: 20px;
-  width: 43%;
+  width: 48%;
 }
 
 .worklist-list__count {

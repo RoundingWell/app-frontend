@@ -174,12 +174,17 @@ export default App.extend(extend({
     this.action.save({ sharing: ACTION_SHARING.PENDING });
   },
   showActivity() {
-    this.showContentView('activity', new ActivitiesView({
+    const activitiesView = new ActivitiesView({
       collection: this.activityCollection,
       model: this.action,
-    }));
+    });
     const createdEvent = this.activityCollection.find({ event_type: 'ActionCreated' });
 
+    this.listenTo(activitiesView, {
+      'remove:comment': this.onRemoveComment,
+    });
+
+    this.showContentView('activity', activitiesView);
     this.showFooterView('timestamps', new TimestampsView({ model: this.action, createdEvent }));
   },
   showNewCommentForm() {
@@ -201,6 +206,7 @@ export default App.extend(extend({
     model.set({ created_at: dayjs.utc().format() });
 
     model.save().then(() => {
+      this.action.addComment(model);
       Radio.request('ws', 'add', model);
     });
 
@@ -211,6 +217,11 @@ export default App.extend(extend({
   },
   onCancelNewComment() {
     this.showNewCommentForm();
+  },
+  onRemoveComment(model) {
+    this.action.removeComment(model);
+
+    Radio.request('ws', 'unsubscribe', model);
   },
   showAttachments() {
     const canUploadAttachments = !!Radio.request('settings', 'get', 'upload_attachments') && this.action.hasAllowedUploads();

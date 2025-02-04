@@ -18,6 +18,7 @@ import { stateInProgress, stateDone, stateTodo } from 'support/api/states';
 import { teamCoordinator, teamNurse, teamOther } from 'support/api/teams';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { workspaceOne } from 'support/api/workspaces';
+import { getComment } from 'support/api/comments';
 
 const tomorrow = testDateAdd(1);
 
@@ -107,9 +108,9 @@ context('patient flow page', function() {
   });
 
   specify('patient flow action sidebar', function() {
-    const testCommentId = uuid();
     const testFileId = uuid();
     const testOtherFileId = uuid();
+    const testComment = getComment();
 
     const testPatient = getPatient({
       attributes: {
@@ -209,7 +210,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'NameChanged',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
@@ -240,7 +241,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'DetailsChanged',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
@@ -264,7 +265,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'DetailsChanged',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
@@ -282,7 +283,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'ActionDurationChanged',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
@@ -305,7 +306,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'SharingUpdated',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
@@ -325,7 +326,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'SharingUpdated',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
@@ -346,13 +347,13 @@ context('patient flow page', function() {
       category: 'CommentAdded',
       author: getCurrentClinician().id,
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
         comment: {
-          type: 'comments',
-          id: testCommentId,
+          type: testComment.type,
+          id: testComment.id,
         },
         attributes: {
           message: 'New websocket comment.',
@@ -377,8 +378,8 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'CommentEdited',
       resource: {
-        type: 'comments',
-        id: testCommentId,
+        type: testComment.type,
+        id: testComment.id,
       },
       payload: {
         attributes: {
@@ -395,8 +396,8 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'CommentEdited',
       resource: {
-        type: 'comments',
-        id: testCommentId,
+        type: testComment.type,
+        id: testComment.id,
       },
       payload: {
         attributes: {
@@ -413,8 +414,8 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'CommentRemoved',
       resource: {
-        type: 'comments',
-        id: testCommentId,
+        type: testComment.type,
+        id: testComment.id,
       },
       payload: {},
     });
@@ -427,7 +428,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'AttachmentAdded',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {
@@ -527,7 +528,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'ResourceDeleted',
       resource: {
-        type: 'patient-actions',
+        type: testFlowAction.type,
         id: testFlowAction.id,
       },
       payload: {},
@@ -618,6 +619,7 @@ context('patient flow page', function() {
               owner: getRelationship(teamNurse),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
+              comments: getRelationship([getComment()]),
             },
           }),
           testListAction,
@@ -684,6 +686,8 @@ context('patient flow page', function() {
         expect($action.find('[data-due-date-region] .is-overdue')).to.exist;
         expect($action.find('[data-form-region]')).not.to.be.empty;
         expect($action.find('.fa-paperclip')).to.exist;
+        expect($action.find('.fa-comment')).to.exist;
+        expect($action.find('.fa-comment').next()).to.contain('1');
       });
 
     cy
@@ -695,6 +699,7 @@ context('patient flow page', function() {
         expect($action.find('.fa-circle-dot')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('.fa-paperclip')).to.not.exist;
+        expect($action.find('.fa-comment')).to.not.exist;
       });
 
     cy
@@ -1108,12 +1113,12 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'ResourceCreated',
       resource: {
-        type: 'flows',
+        type: testFlow.type,
         id: testFlow.id,
       },
       payload: {
         resource: {
-          type: 'patient-actions',
+          type: otherAction.type,
           id: otherAction.id,
         },
       },
@@ -2631,6 +2636,9 @@ context('patient flow page', function() {
 
   specify('socket notifications', function() {
     const testSocketFileId = uuid();
+    const testComment = getComment();
+
+    const testClinician = getClinician({ id: uuid() });
 
     const testSocketFlow = getFlow({
       attributes: {
@@ -2658,6 +2666,8 @@ context('patient flow page', function() {
         state: getRelationship(stateTodo),
         owner: getRelationship(teamOther),
         form: getRelationship(testForm),
+        files: getRelationship([]),
+        comments: getRelationship([]),
       },
     });
 
@@ -2700,7 +2710,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'NameChanged',
       resource: {
-        type: 'flows',
+        type: testSocketFlow.type,
         id: testSocketFlow.id,
       },
       payload: {
@@ -2731,7 +2741,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'DetailsChanged',
       resource: {
-        type: 'flows',
+        type: testSocketFlow.type,
         id: testSocketFlow.id,
       },
       payload: {
@@ -2754,7 +2764,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'NameChanged',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {
@@ -2782,7 +2792,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'DetailsChanged',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {
@@ -2800,7 +2810,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'ActionDueChanged',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {
@@ -2827,7 +2837,7 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'SharingUpdated',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {
@@ -2850,12 +2860,12 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'OwnerChanged',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {
         owner: {
-          type: 'teams',
+          type: teamCoordinator.type,
           id: teamCoordinator.id,
         },
       },
@@ -2864,12 +2874,12 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'OwnerChanged',
       resource: {
-        type: 'flows',
+        type: testSocketFlow.type,
         id: testSocketFlow.id,
       },
       payload: {
         owner: {
-          type: 'teams',
+          type: teamCoordinator.type,
           id: teamCoordinator.id,
         },
       },
@@ -2892,12 +2902,12 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'StateChanged',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {
         state: {
-          type: 'states',
+          type: stateDone.type,
           id: stateDone.id,
         },
       },
@@ -2910,12 +2920,12 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'StateChanged',
       resource: {
-        type: 'flows',
+        type: testSocketFlow.type,
         id: testSocketFlow.id,
       },
       payload: {
         state: {
-          type: 'states',
+          type: stateDone.type,
           id: stateDone.id,
         },
       },
@@ -2941,13 +2951,13 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'AttachmentAdded',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {
         clinician: {
-          type: 'clinicians',
-          id: uuid(),
+          type: testClinician.type,
+          id: testClinician.id,
         },
         file: {
           type: 'files',
@@ -2984,9 +2994,48 @@ context('patient flow page', function() {
       .should('not.exist');
 
     cy.sendWs({
+      category: 'CommentAdded',
+      author: getCurrentClinician().id,
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        comment: {
+          type: testComment.type,
+          id: testComment.id,
+        },
+        attributes: {
+          message: 'New websocket comment.',
+        },
+      },
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy.sendWs({
+      category: 'CommentRemoved',
+      resource: {
+        type: testComment.type,
+        id: testComment.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.table-list__item .fa-comment')
+      .should('not.exist');
+
+    cy.sendWs({
       category: 'ResourceDeleted',
       resource: {
-        type: 'patient-actions',
+        type: testSocketAction.type,
         id: testSocketAction.id,
       },
       payload: {},

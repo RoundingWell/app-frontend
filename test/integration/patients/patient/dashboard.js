@@ -18,6 +18,7 @@ import { stateTodo, stateInProgress, stateDone } from 'support/api/states';
 import { testForm } from 'support/api/forms';
 import { workspaceOne } from 'support/api/workspaces';
 import { roleEmployee, roleAdmin, roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
+import { getComment } from 'support/api/comments';
 
 import { ACTION_OUTREACH } from 'js/static';
 
@@ -69,6 +70,7 @@ context('patient dashboard page', function() {
         state: getRelationship(stateTodo),
         form: getRelationship(testForm),
         files: getRelationship([{ id: '1' }], 'files'),
+        comments: getRelationship([getComment()]),
       },
     });
 
@@ -408,12 +410,20 @@ context('patient dashboard page', function() {
 
     cy
       .get('.table-list__item')
-      .first()
-      .next()
-      .next()
+      .eq(2)
       .find('[data-form-region]')
-      .should('be.empty')
+      .should('be.empty');
+
+    cy
+      .get('.table-list__item')
+      .eq(2)
       .find('.fa-paperclip')
+      .should('not.exist');
+
+    cy
+      .get('.table-list__item')
+      .eq(2)
+      .find('.fa-comment')
       .should('not.exist');
 
     // dirty hack to make sure the form button isn't offscreen
@@ -433,6 +443,14 @@ context('patient dashboard page', function() {
       .first()
       .find('.fa-paperclip')
       .should('exist');
+
+    cy
+      .get('.table-list__item')
+      .first()
+      .find('.fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
 
     cy
       .routeFormByAction()

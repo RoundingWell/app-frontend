@@ -13,6 +13,7 @@ import { stateDone, stateInProgress, stateTodo } from 'support/api/states';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
+import { getComment } from 'support/api/comments';
 
 context('patient archive page', function() {
   const currentClinican = getCurrentClinician({
@@ -56,6 +57,7 @@ context('patient archive page', function() {
               state: getRelationship(stateDone),
               form: getRelationship(testForm),
               files: getRelationship([{ id: '1' }], 'files'),
+              comments: getRelationship([getComment()]),
             },
           }),
           getAction({
@@ -224,6 +226,13 @@ context('patient archive page', function() {
 
     cy
       .get('.patient__list')
+      .find('.table-list__item')
+      .eq(2)
+      .find('.fa-comment')
+      .should('not.exist');
+
+    cy
+      .get('.patient__list')
       .should('contain', 'Second In List')
       .find('.patient__flow-icon');
 
@@ -371,6 +380,14 @@ context('patient archive page', function() {
       .first()
       .find('.fa-paperclip')
       .should('exist');
+
+    cy
+      .get('.table-list__item')
+      .first()
+      .find('.fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
 
     cy
       .get('.table-list__item')

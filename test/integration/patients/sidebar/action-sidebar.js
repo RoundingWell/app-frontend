@@ -1515,6 +1515,179 @@ context('action sidebar', function() {
       .should('contain', 'more comment');
   });
 
+  specify('action comments - show/hide icon in action list items', function() {
+    const testPatient = getPatient();
+
+    const testAction = getAction({
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+        comments: getRelationship([]),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [testAction];
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeActionComments(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows')
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('.sidebar')
+      .find('[data-comment-region]')
+      .as('postCommentRegion')
+      .find('.js-input')
+      .type('Test comment');
+
+    cy
+      .intercept('POST', '/api/actions/*/relationships/comments', {
+        statusCode: 201,
+        body: {
+          data: getComment({
+            attributes: {
+              message: 'Test comment',
+              edited_at: null,
+              created_at: testTs(),
+            },
+          }),
+        },
+      })
+      .as('routePostComment');
+
+    cy
+      .get('@postCommentRegion')
+      .find('.js-post')
+      .click()
+      .wait('@routePostComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .get('@postCommentRegion')
+      .find('.js-input')
+      .type('Another test comment');
+
+    cy
+      .intercept('POST', '/api/actions/*/relationships/comments', {
+        statusCode: 201,
+        body: {
+          data: getComment({
+            attributes: {
+              message: 'Another test comment',
+              edited_at: null,
+              created_at: testTs(),
+            },
+          }),
+        },
+      })
+      .as('routePostComment');
+
+    cy
+      .get('@postCommentRegion')
+      .find('.js-post')
+      .click()
+      .wait('@routePostComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '2');
+
+    cy
+      .intercept('DELETE', '/api/comments/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteComment');
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .first()
+      .find('.js-edit')
+      .click();
+
+    cy
+      .get('[data-activity-region]')
+      .find('.js-delete')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeDeleteComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .first()
+      .find('.js-edit')
+      .click();
+
+    cy
+      .get('[data-activity-region]')
+      .find('.js-delete')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeDeleteComment');
+
+    cy
+      .get('.patient__list')
+      .find('.table-list__item .fa-comment')
+      .should('not.exist');
+  });
+
   specify('display action from program action', function() {
     const testProgram = getProgram({
       attributes: {

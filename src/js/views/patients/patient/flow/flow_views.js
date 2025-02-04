@@ -163,6 +163,7 @@ const ActionItemView = View.extend({
       hasForm: this.model.getForm(),
       icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
       hasAttachments: this.model.hasAttachments(),
+      commentCount: this.model.commentCount(),
     };
   },
   tagName: 'tr',
