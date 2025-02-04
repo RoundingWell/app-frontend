@@ -2,7 +2,7 @@
   "app": {
     "disableLoginPrompt": true,
     "env": "develop",
-    "stackId": "localhost",
+    "stack": "localhost",
     "name": "Salvation Clinic"
   },
   "auth0": {

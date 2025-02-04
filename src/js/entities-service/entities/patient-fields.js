@@ -22,16 +22,15 @@ const _Model = BaseModel.extend({
   },
   saveAll(attrs) {
     attrs = extend({}, this.attributes, attrs);
+    const patient = this.toRelation(attrs._patient);
 
     // NOTE: sets the id instead of attrs.id due to how backbone's save works
     /* istanbul ignore next: Currently not saving new fields, but would be important if we do */
     if (!attrs.id) {
-      this.set({ id: uuid(`resource:field:${ attrs.name.toLowerCase() }`, attrs._patient) });
+      this.set({ id: uuid(`resource:field:${ attrs.name.toLowerCase() }`, patient.id) });
     }
 
-    const relationships = {
-      'patient': this.toRelation(attrs._patient),
-    };
+    const relationships = { patient };
 
     return this.save(attrs, { relationships }, { wait: true });
   },
