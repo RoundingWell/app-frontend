@@ -7,7 +7,7 @@ import { datadogConfig as config, versions, appConfig } from './config';
 let ddInitialized = false;
 
 function getEnv() {
-  return `${ appConfig.env }.${ appConfig.stackId }`;
+  return `${ appConfig.env }.${ appConfig.stack }`;
 }
 
 function isPdfPrinter() {
