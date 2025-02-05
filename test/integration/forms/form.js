@@ -301,6 +301,10 @@ context('Noncontext Form', function() {
         body: { data: getTestPatientField('bar', ['one', 'two']) },
       })
       .as('routePatchPatientFieldFoo')
+      .intercept('PATCH', `/api/patients/${ testPatient.id }/fields/bazinga`, {
+        body: { data: getTestPatientField('bazinga', ['one', 'two']) },
+      })
+      .as('routePatchPatientFieldBazinga')
       .intercept('PATCH', `/api/patients/${ testPatient.id }/fields/bar`, {
         statusCode: 400,
         body: { errors },
@@ -359,6 +363,19 @@ context('Noncontext Form', function() {
                 updateField('bar', ['one', 'two'])
                   .catch(value => {
                     data.opts = ['error1', 'error2'];
+                  });
+              `,
+            },
+            {
+              label: 'Test Create Field',
+              action: 'custom',
+              key: 'test5',
+              type: 'button',
+              input: true,
+              custom: `
+                updateField('bazinga', ['one', 'two'])
+                  .then(value => {
+                    data.opts = value;
                   });
               `,
             },
@@ -473,6 +490,16 @@ context('Noncontext Form', function() {
       .wait('@routePatchPatientFieldBar')
       .its('request.body.data.id')
       .should('equal', uuid('resource:field:bar', testPatient.id))
+      .wait(100);
+
+    cy
+      .iframe()
+      .find('button')
+      .contains('Test Create Field')
+      .click()
+      .wait('@routePatchPatientFieldBazinga')
+      .its('request.body.data.id')
+      .should('equal', uuid('resource:field:bazinga', testPatient.id))
       .wait(100);
 
     cy
