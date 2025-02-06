@@ -33,8 +33,16 @@ context('Outreach', function() {
       .type('Patient');
 
     cy
-      .get('.js-birth-date')
-      .type('1990-10-01');
+      .get('.js-dob-month')
+      .select('10');
+
+    cy
+      .get('.js-dob-day')
+      .select('10');
+
+    cy
+      .get('.js-dob-year')
+      .select('1990');
 
     cy
       .get('.js-submit')
@@ -74,6 +82,22 @@ context('Outreach', function() {
       .should('not.be.disabled');
 
     cy
+      .get('.js-dob-month')
+      .select('Month');
+
+    cy
+      .get('.js-submit')
+      .should('be.disabled');
+
+    cy
+      .get('.js-dob-month')
+      .select('10');
+
+    cy
+      .get('.js-submit')
+      .should('not.be.disabled');
+
+    cy
       .get('.js-submit')
       .click()
       .should('be.disabled');
@@ -85,7 +109,7 @@ context('Outreach', function() {
         expect(data.type).to.equal('patients');
         expect(data.attributes.first_name).to.equal('Test');
         expect(data.attributes.last_name).to.equal('Patient');
-        expect(data.attributes.birth_date).to.equal('1990-10-01');
+        expect(data.attributes.birth_date).to.equal('1990-10-10');
         expect(data.attributes.phone).to.equal('+18887771234');
       });
 
@@ -116,8 +140,16 @@ context('Outreach', function() {
       .type('Patient');
 
     cy
-      .get('.js-birth-date')
-      .type('1990-10-01');
+      .get('.js-dob-month')
+      .select('10');
+
+    cy
+      .get('.js-dob-day')
+      .select('10');
+
+    cy
+      .get('.js-dob-year')
+      .select('1990');
 
     cy
       .get('.js-phone')

@@ -1,3 +1,4 @@
+import { range } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 import parsePhoneNumber from 'libphonenumber-js/min';
@@ -33,12 +34,30 @@ const OptInView = View.extend({
     </div>
     <div class="opt-in__field">
       <label class="opt-in__field-label">Your date of birth</label>
-      <input
-        type="date"
-        class="input-primary opt-in__field-input js-birth-date"
-        placeholder="Enter your date of birth"
-        value="{{ birth_date }}"
-      />
+      <div class="opt-in__field-select u-margin--r-4">
+        <select name="dob-month" class="u-margin--r-8 js-dob-month ">
+          <option value="">Month</option>
+          {{#each dobMonthRange}}
+            <option value={{this}}>{{this}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="opt-in__field-select u-margin--r-4">
+        <select name="dob-day" class="u-margin--r-8 js-dob-day">
+          <option value="">Day</option>
+          {{#each dobDayRange}}
+            <option value={{this}}>{{this}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="opt-in__field-select">
+        <select name="dob-year" class="u-margin--r-8 js-dob-year">
+          <option value="Year">Year</option>
+          {{#each dobYearRange}}
+            <option value={{this}}>{{this}}</option>
+          {{/each}}
+        </select>
+      </div>
     </div>
     <h3 class="opt-in__heading-text u-margin--t-32 u-margin--b-16">How may we share health resources with you?</h3>
     <div class="opt-in__field">
@@ -53,20 +72,35 @@ const OptInView = View.extend({
     <p class="opt-in__disclaimer">By clicking Submit you agree to receive SMS text message notifications. You may opt out at any time.</p>
     <button class="opt-in__submit button--green w-100 js-submit" disabled>Submit</button>
   `,
+  templateContext() {
+    const dobMonthRange = range(1, 13);
+    const dobDayRange = range(1, 32);
+    const dobYearRange = range(1900, 2015).reverse();
+
+    return {
+      dobMonthRange,
+      dobDayRange,
+      dobYearRange,
+    };
+  },
   modelEvents: {
     'change': 'setSubmitButtonState',
   },
   ui: {
     firstName: '.js-first-name',
     lastName: '.js-last-name',
-    birthDate: '.js-birth-date',
+    dobMonth: '.js-dob-month',
+    dobDay: '.js-dob-day',
+    dobYear: '.js-dob-year',
     phone: '.js-phone',
     submit: '.js-submit',
   },
   triggers: {
     'input @ui.firstName': 'change:firstName',
     'input @ui.lastName': 'change:lastName',
-    'input @ui.birthDate': 'change:birthDate',
+    'input @ui.dobMonth': 'change:dobInput',
+    'input @ui.dobDay': 'change:dobInput',
+    'input @ui.dobYear': 'change:dobInput',
     'input @ui.phone': 'change:phone',
     'click @ui.submit': 'click:submit',
   },
@@ -79,8 +113,17 @@ const OptInView = View.extend({
   onChangeLastName() {
     this.model.set({ last_name: trim(this.ui.lastName.val()) });
   },
-  onChangeBirthDate() {
-    this.model.set({ birth_date: trim(this.ui.birthDate.val()) });
+  onChangeDobInput() {
+    const dobMonth = this.ui.dobMonth.val();
+    const dobDay = this.ui.dobDay.val();
+    const dobYear = this.ui.dobYear.val();
+
+    if (!dobMonth || !dobDay || !dobYear) {
+      this.model.set({ birth_date: '' });
+      return;
+    }
+
+    this.model.set({ birth_date: `${ dobYear }-${ dobMonth }-${ dobDay }` });
   },
   onChangePhone() {
     const phone = parsePhoneNumber(this.ui.phone.val(), 'US');
