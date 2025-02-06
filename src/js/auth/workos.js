@@ -116,7 +116,7 @@ async function auth(success) {
 
   if (pathName === PATH_LOGOUT) {
     token = null;
-    authkit.signOut();
+    authkit.signOut({ returnTo: location.origin });
     return;
   }
 

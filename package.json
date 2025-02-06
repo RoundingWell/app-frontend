@@ -224,7 +224,7 @@
     "@fortawesome/pro-solid-svg-icons": "^6.1.0",
     "@fortawesome/pro-thin-svg-icons": "^6.4.0",
     "@kinde-oss/kinde-auth-pkce-js": "^4.2.0",
-    "@workos-inc/authkit-js": "^0.7.1",
+    "@workos-inc/authkit-js": "^0.9.0",
     "animejs": "^3.2.1",
     "backbone": "^1.4.0",
     "backbone.eventrouter": "^1.0.1",
