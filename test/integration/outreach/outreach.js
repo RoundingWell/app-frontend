@@ -104,6 +104,38 @@ context('Outreach', function() {
       .should('not.be.disabled');
 
     cy
+      .get('.js-dob-day')
+      .select('Day');
+
+    cy
+      .get('.js-submit')
+      .should('be.disabled');
+
+    cy
+      .get('.js-dob-day')
+      .select('5');
+
+    cy
+      .get('.js-submit')
+      .should('not.be.disabled');
+
+    cy
+      .get('.js-dob-year')
+      .select('Year');
+
+    cy
+      .get('.js-submit')
+      .should('be.disabled');
+
+    cy
+      .get('.js-dob-year')
+      .select('1908');
+
+    cy
+      .get('.js-submit')
+      .should('not.be.disabled');
+
+    cy
       .get('.js-submit')
       .click()
       .should('be.disabled');
