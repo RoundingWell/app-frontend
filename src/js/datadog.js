@@ -24,7 +24,7 @@ function initLogs({ isForm }) {
     forwardErrorsToLogs: true,
     version: versions.frontend,
     useSecureSessionCookie: true,
-    useCrossSiteSessionCookie: true,
+    usePartitionedCrossSiteSessionCookie: true,
     beforeSend(log) {
       // Remove uncaught rejected 401 & 500 responses
       if (String(log.message).includes('Uncaught "[Response]"')) return false;
@@ -45,7 +45,7 @@ function initRum({ isForm }) {
     service: isForm ? 'care-ops-forms' : 'care-ops-frontend',
     version: versions.frontend,
     useSecureSessionCookie: true,
-    useCrossSiteSessionCookie: true,
+    usePartitionedCrossSiteSessionCookie: true,
     allowedTracingUrls: [window.origin],
     trackLongTasks: true,
     trackResources: true,

@@ -336,7 +336,7 @@ context('Noncontext Form', function() {
               custom: `
                 getField('bar')
                   .catch(value => {
-                    data.opts = ['error'];
+                    data.opts = 'Test Get Error';
                   });
               `,
             },
@@ -362,7 +362,7 @@ context('Noncontext Form', function() {
               custom: `
                 updateField('bar', ['one', 'two'])
                   .catch(value => {
-                    data.opts = ['error1', 'error2'];
+                    data.opts = 'Test Update Error';
                   });
               `,
             },
@@ -380,18 +380,14 @@ context('Noncontext Form', function() {
               `,
             },
             {
-              label: 'Select Foo',
-              widget: 'choicesjs',
-              tableView: true,
-              dataSrc: 'custom',
-              data: {
-                custom: 'values = data.opts',
-              },
-              template: '<span>{{ item }}</span>',
-              refreshOn: 'data',
-              key: 'select',
-              type: 'select',
-              input: true,
+              label: 'HTML',
+              tag: 'div',
+              content: '<span class="qa-results">{{ data.opts }}</span>',
+              refreshOnChange: true,
+              key: 'html6',
+              type: 'htmlelement',
+              input: false,
+              tableView: false,
             },
           ],
         };
@@ -421,17 +417,8 @@ context('Noncontext Form', function() {
 
     cy
       .iframe()
-      .find('.formio-component-select .dropdown')
-      .click();
-
-    cy
-      .iframe()
-      .find('.choices__list--dropdown.is-active')
-      .find('.choices__item--selectable')
-      .should('contain', '1')
-      .should('contain', '2')
-      .first()
-      .click();
+      .find('.qa-results')
+      .should('contain', '1,2');
 
     cy
       .iframe()
@@ -443,16 +430,8 @@ context('Noncontext Form', function() {
 
     cy
       .iframe()
-      .find('.formio-component-select .dropdown')
-      .click();
-
-    cy
-      .iframe()
-      .find('.choices__list--dropdown.is-active')
-      .find('.choices__item--selectable')
-      .should('contain', 'error')
-      .first()
-      .click();
+      .find('.qa-results')
+      .should('contain', 'Test Get Error');
 
     cy
       .iframe()
@@ -470,17 +449,8 @@ context('Noncontext Form', function() {
 
     cy
       .iframe()
-      .find('.formio-component-select .dropdown')
-      .click();
-
-    cy
-      .iframe()
-      .find('.choices__list--dropdown.is-active')
-      .find('.choices__item--selectable')
-      .should('contain', 'one')
-      .should('contain', 'two')
-      .first()
-      .click();
+      .find('.qa-results')
+      .should('contain', 'one,two');
 
     cy
       .iframe()
@@ -494,6 +464,11 @@ context('Noncontext Form', function() {
 
     cy
       .iframe()
+      .find('.qa-results')
+      .should('contain', 'Test Update Error');
+
+    cy
+      .iframe()
       .find('button')
       .contains('Test Create Field')
       .click()
@@ -504,16 +479,8 @@ context('Noncontext Form', function() {
 
     cy
       .iframe()
-      .find('.formio-component-select .dropdown')
-      .click();
-
-    cy
-      .iframe()
-      .find('.choices__list--dropdown.is-active')
-      .find('.choices__item--selectable')
-      .should('contain', 'error')
-      .first()
-      .click();
+      .find('.qa-results')
+      .should('contain', 'one,two');
   });
 
   specify('getIcd', function() {
@@ -592,18 +559,14 @@ context('Noncontext Form', function() {
               `,
             },
             {
-              label: 'Select Icd Code',
-              widget: 'choicesjs',
-              tableView: true,
-              dataSrc: 'custom',
-              data: {
-                custom: 'values = data.opts',
-              },
-              template: '<span>{{ item }}</span>',
-              refreshOn: 'data',
-              key: 'select',
-              type: 'select',
-              input: true,
+              label: 'HTML',
+              tag: 'div',
+              content: '<span class="qa-results">{{ data.opts }}</span>',
+              refreshOnChange: true,
+              key: 'html6',
+              type: 'htmlelement',
+              input: false,
+              tableView: false,
             },
           ],
         };
@@ -631,14 +594,7 @@ context('Noncontext Form', function() {
 
     cy
       .iframe()
-      .find('.formio-component-select .dropdown')
-      .click();
-
-    cy
-      .iframe()
-      .find('.choices__list--dropdown.is-active')
-      .find('.choices__item--selectable')
-      .first()
+      .find('.qa-results')
       .should('contain', 'Typhoid infection');
 
     cy
@@ -660,14 +616,7 @@ context('Noncontext Form', function() {
 
     cy
       .iframe()
-      .find('.formio-component-select .dropdown')
-      .click();
-
-    cy
-      .iframe()
-      .find('.choices__list--dropdown.is-active')
-      .find('.choices__item--selectable')
-      .first()
+      .find('.qa-results')
       .should('contain', 'Error');
   });
 
