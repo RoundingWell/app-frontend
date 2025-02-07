@@ -34,11 +34,11 @@ context('Outreach', function() {
 
     cy
       .get('.js-dob-month')
-      .select('10');
+      .select('5');
 
     cy
       .get('.js-dob-day')
-      .select('10');
+      .select('5');
 
     cy
       .get('.js-dob-year')
@@ -91,7 +91,7 @@ context('Outreach', function() {
 
     cy
       .get('.js-dob-month')
-      .select('10');
+      .select('5');
 
     cy
       .get('.js-submit')
@@ -109,7 +109,7 @@ context('Outreach', function() {
         expect(data.type).to.equal('patients');
         expect(data.attributes.first_name).to.equal('Test');
         expect(data.attributes.last_name).to.equal('Patient');
-        expect(data.attributes.birth_date).to.equal('1990-10-10');
+        expect(data.attributes.birth_date).to.equal('1990-05-05');
         expect(data.attributes.phone).to.equal('+18887771234');
       });
 

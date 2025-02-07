@@ -1,4 +1,5 @@
 import { range } from 'underscore';
+import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 import parsePhoneNumber from 'libphonenumber-js/min';
@@ -52,7 +53,7 @@ const OptInView = View.extend({
       </div>
       <div class="opt-in__field-select">
         <select name="dob-year" class="u-margin--r-8 js-dob-year">
-          <option value="Year">Year</option>
+          <option value="">Year</option>
           {{#each dobYearRange}}
             <option value={{this}}>{{this}}</option>
           {{/each}}
@@ -114,16 +115,18 @@ const OptInView = View.extend({
     this.model.set({ last_name: trim(this.ui.lastName.val()) });
   },
   onChangeDobInput() {
-    const dobMonth = this.ui.dobMonth.val();
-    const dobDay = this.ui.dobDay.val();
-    const dobYear = this.ui.dobYear.val();
+    const month = this.ui.dobMonth.val();
+    const day = this.ui.dobDay.val();
+    const year = this.ui.dobYear.val();
 
-    if (!dobMonth || !dobDay || !dobYear) {
+    if (!month || !day || !year) {
       this.model.set({ birth_date: '' });
       return;
     }
 
-    this.model.set({ birth_date: `${ dobYear }-${ dobMonth }-${ dobDay }` });
+    this.model.set({
+      birth_date: dayjs(`${ year }-${ month }-${ day }`).format('YYYY-MM-DD'),
+    });
   },
   onChangePhone() {
     const phone = parsePhoneNumber(this.ui.phone.val(), 'US');
