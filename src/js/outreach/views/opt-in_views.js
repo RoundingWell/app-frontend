@@ -76,7 +76,7 @@ const OptInView = View.extend({
   templateContext() {
     const dobMonthRange = range(1, 13);
     const dobDayRange = range(1, 32);
-    const dobYearRange = range(1900, 2015).reverse();
+    const dobYearRange = range(1908, dayjs().add(1, 'year').year()).reverse();
 
     return {
       dobMonthRange,

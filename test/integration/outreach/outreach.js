@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 import { getErrors, getRelationship } from 'helpers/json-api';
 
 import { getFormFields } from 'support/api/form-fields';
@@ -42,7 +44,11 @@ context('Outreach', function() {
 
     cy
       .get('.js-dob-year')
-      .select('1990');
+      .select(dayjs().format('YYYY'));
+
+    cy
+      .get('.js-dob-year')
+      .select('1908');
 
     cy
       .get('.js-submit')
@@ -109,7 +115,7 @@ context('Outreach', function() {
         expect(data.type).to.equal('patients');
         expect(data.attributes.first_name).to.equal('Test');
         expect(data.attributes.last_name).to.equal('Patient');
-        expect(data.attributes.birth_date).to.equal('1990-05-05');
+        expect(data.attributes.birth_date).to.equal('1908-05-05');
         expect(data.attributes.phone).to.equal('+18887771234');
       });
 
