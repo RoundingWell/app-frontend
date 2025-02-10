@@ -157,6 +157,7 @@ export default App.extend({
   subscribe() {
     const channel = Radio.channel('ws');
     const filterKey = this.getState().getType();
+    const flowStates = this.getState('flowStates');
 
     channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
 
@@ -164,6 +165,9 @@ export default App.extend({
       if (this.collection.get(model)) return;
 
       model.fetch().then(() => {
+        // notifications do not fully filter our action flow_states
+        if (filterKey === 'actions' && !flowStates.includes(model.getFlow().getState().id)) return;
+
         this.collection.add(model);
       });
     });
