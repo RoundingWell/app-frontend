@@ -103,6 +103,9 @@ export default App.extend({
   },
 
   onMessage(event) {
+    /* istanbul ignore next: Can't test this bref functionality in node websockets */
+    if (!event.data) return;
+
     let model;
 
     const channel = this.getChannel();
