@@ -22,9 +22,13 @@
 }
 
 .opt-in__field-select {
-  border: 1px solid #E6E6E6;
+  border: 1px solid $black-90;
   border-radius: 4px;
   display: inline-block;
+
+  &:has(:focus-visible) {
+    outline: 1px solid color(blue);
+  }
 }
 
 .opt-in__field-select select {
@@ -35,8 +39,8 @@
   font-weight: 500;
   padding: 12px 20px 12px 12px;
 
-  &:focus {
-    outline: none;
+  &:focus-visible {
+    outline: 0;
   }
 }
 
