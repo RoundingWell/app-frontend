@@ -21,29 +21,6 @@
   width: 100%;
 }
 
-.opt-in__field-select {
-  border: 1px solid $black-90;
-  border-radius: 4px;
-  display: inline-block;
-
-  &:has(:focus-visible) {
-    outline: 1px solid color(blue);
-  }
-}
-
-.opt-in__field-select select {
-  border: none;
-  border-radius: 4px;
-  color: $black-40;
-  font-size: 16px;
-  font-weight: 500;
-  padding: 12px 20px 12px 12px;
-
-  &:focus-visible {
-    outline: 0;
-  }
-}
-
 .opt-in__disclaimer {
   font-size: 14px;
   margin-top: 32px;

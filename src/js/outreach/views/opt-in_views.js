@@ -6,6 +6,7 @@ import parsePhoneNumber from 'libphonenumber-js/min';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
+import 'scss/modules/select.scss';
 
 import './opt-in.scss';
 
@@ -35,24 +36,24 @@ const OptInView = View.extend({
     </div>
     <div class="opt-in__field">
       <label class="opt-in__field-label">Your date of birth</label>
-      <div class="opt-in__field-select u-margin--r-4">
-        <select name="dob-month" class="u-margin--r-8 js-dob-month ">
+      <div class="select-wrapper u-margin--r-4">
+        <select name="dob-month" class="select u-margin--r-8 js-dob-month ">
           <option value="">Month</option>
           {{#each dobMonthRange}}
             <option value={{this}}>{{this}}</option>
           {{/each}}
         </select>
       </div>
-      <div class="opt-in__field-select u-margin--r-4">
-        <select name="dob-day" class="u-margin--r-8 js-dob-day">
+      <div class="select-wrapper u-margin--r-4">
+        <select name="dob-day" class="select u-margin--r-8 js-dob-day">
           <option value="">Day</option>
           {{#each dobDayRange}}
             <option value={{this}}>{{this}}</option>
           {{/each}}
         </select>
       </div>
-      <div class="opt-in__field-select">
-        <select name="dob-year" class="u-margin--r-8 js-dob-year">
+      <div class="select-wrapper">
+        <select name="dob-year" class="select u-margin--r-8 js-dob-year">
           <option value="">Year</option>
           {{#each dobYearRange}}
             <option value={{this}}>{{this}}</option>
