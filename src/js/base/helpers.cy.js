@@ -124,4 +124,41 @@ context('Handlebars helpers', function() {
       .find('.test-default-html')
       .should('contain', 'No Phone Available');
   });
+
+  specify('isValue', function() {
+    const IsValueView = View.extend({
+      template: hbs`
+        {{#if (isValue 'string' 'string')}}
+          <div class="test-true-value">Should show</div>
+        {{/if}}
+        {{#if (isValue 'not-equal-string' 'string')}}
+          <div class="test-false-value">Should not show</div>
+        {{/if}}
+        {{#if (isValue null 'string')}}
+          <div class="test-null-value">Should not show</div>
+        {{/if}}
+      `,
+    });
+
+    cy
+      .mount(() => {
+        return new IsValueView();
+      })
+      .as('root');
+
+    cy
+      .get('@root')
+      .find('.test-true-value')
+      .should('exist');
+
+    cy
+      .get('@root')
+      .find('.test-false-value')
+      .should('not.exist');
+
+    cy
+      .get('@root')
+      .find('.test-null-value')
+      .should('not.exist');
+  });
 });

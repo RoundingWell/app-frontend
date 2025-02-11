@@ -34,6 +34,9 @@ const helpers = {
 
     return new Handlebars.SafeString(formattedPhone);
   },
+  isValue(data, value) {
+    return data === value;
+  },
 };
 
 Handlebars.registerHelper(helpers);
