@@ -8,5 +8,9 @@
   .form-widgets__section {
     margin-bottom: 8px;
     padding: 0 8px;
+
+    &:empty {
+      display: none;
+    }
   }
 }

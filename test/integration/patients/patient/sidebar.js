@@ -82,6 +82,8 @@ context('patient sidebar', function() {
                 'patientSSNIdentifier',
                 'hbsWidget',
                 'hbsEmptyWidget',
+                'hbsNoRegionWidget',
+                'hbsEmptyTemplateWidget',
               ],
             },
           },
@@ -175,6 +177,24 @@ context('patient sidebar', function() {
             },
             values: {
               emptyField: '@patient.emptyField',
+            },
+          }),
+          addWidget({
+            slug: 'hbsNoRegionWidget',
+            category: 'widget',
+            definition: {
+              template: 'Content that will not appear because the region is missing',
+              // Missing <div data-content-region> on purpose
+              wrapperTemplate: '<div class="no-region-wrapper">No region defined</div>',
+            },
+          }),
+          addWidget({
+            slug: 'hbsEmptyTemplateWidget',
+            category: 'widget',
+            definition: {
+              template: 'Should be display:none',
+              // Missing <div data-content-region> on purpose
+              wrapperTemplate: '{{#if foo}}not foo{{/if}}',
             },
           }),
         ]);
@@ -279,6 +299,14 @@ context('patient sidebar', function() {
       .next()
       .find('.widgets-value')
       .hasBeforeContent('–');
+
+    cy
+      .get('@patientSidebar')
+      .find('.no-region-wrapper')
+      .should('contain', 'No region defined')
+      .parent()
+      .next('.patient-sidebar__section')
+      .should('have.css', 'display', 'none');
 
     cy
       .get('@patientSidebar')

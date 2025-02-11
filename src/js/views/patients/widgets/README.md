@@ -70,6 +70,47 @@ The `values` of the widget inform the backend as to what data to provide to the 
 }
 ```
 
+---
+
+## Customizing the Wrapper Template
+
+By default, all widgets will use the following template to "wrap" the contents from a widget:
+
+```hbs
+{{~#if definition.display_name}}<div class="widgets__heading">{{ definition.display_name }}</div>{{/if~}}
+<div class="widgets__item" data-content-region></div>
+```
+
+You can override this in `definition.wrapperTemplate` as long as you **include** a `<div data-content-region>` element. This region is where the widget’s main content (from `template`) will render.
+
+Below is an example of a more advanced wrapper template:
+
+```json
+{
+  "id": "<uuid>",
+  "type": "widgets",
+  "attributes": {
+    "category": "widget",
+    "slug": "template",
+    "name": "Custom Wrapper Example",
+    "definition": {
+      "template": "<div>{{ someValue }}</div>",
+      "display_name": "My Custom Wrapper",
+      "wrapperTemplate": "{{#if someValue}}{{#if definition.display_name}}<h2>{{ definition.display_name }}</h2>{{/if}}<div data-content-region></div></div>{{else}}If no content this widget should be display:none{{/if}}"
+    },
+    "values": {
+      "someValue": "@patient.someValue"
+    }
+  }
+}
+```
+
+#### Notes on Custom Wrapper Usage
+
+- **`<div data-content-region>`**: This is required. If you remove or rename it, the widget's main content will not render. However, any remaining wrapper HTML will still appear.
+- **Conditional Rendering**: The above example shows how you might conditionally display content based on the existence of `someValue`. If `someValue` is not set or returned from the backend, the template will render different HTML.
+- **Hiding the widget** if the template renders "" it should apply `display:none`
+
 ## Hardcoded Widgets
 
 * dob

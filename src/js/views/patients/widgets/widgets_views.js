@@ -10,15 +10,28 @@ const WidgetView = View.extend({
   className() {
     return this.getOption('itemClassName');
   },
+  getTemplate() {
+    return this.contentWidget.getOption('wrapperTemplate') || this.template;
+  },
   template: hbs`{{#if definition.display_name}}<div class="widgets__heading">{{ definition.display_name }}</div>{{/if}}<div class="widgets__item" data-content-region></div>`,
-  regions: {
+  ui: {
     content: '[data-content-region]',
   },
-  onRender() {
+  initialize() {
     const widget = this.getOption('widget');
     const patient = this.getOption('patient');
-
-    this.showChildView('content', buildWidget(widget, patient, this.model));
+    this.contentWidget = buildWidget(widget, patient, this.model);
+  },
+  serializeData() {
+    return {
+      ...this.model.attributes,
+      ...this.contentWidget.values,
+    };
+  },
+  onRender() {
+    if (this.ui.content.length === 0) return;
+    this.addRegion('content', { el: this.ui.content });
+    this.showChildView('content', this.contentWidget);
   },
 });
 
