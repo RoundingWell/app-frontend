@@ -100,9 +100,9 @@ const OptInView = View.extend({
   triggers: {
     'input @ui.firstName': 'change:firstName',
     'input @ui.lastName': 'change:lastName',
-    'input @ui.dobMonth': 'change:dobInput',
-    'input @ui.dobDay': 'change:dobInput',
-    'input @ui.dobYear': 'change:dobInput',
+    'change @ui.dobMonth': 'change:dobInput',
+    'change @ui.dobDay': 'change:dobInput',
+    'change @ui.dobYear': 'change:dobInput',
     'input @ui.phone': 'change:phone',
     'click @ui.submit': 'click:submit',
   },
