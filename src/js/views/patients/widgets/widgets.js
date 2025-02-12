@@ -1,4 +1,4 @@
-import { extend, isFunction, find } from 'underscore';
+import { extend, isFunction, find, get } from 'underscore';
 import Radio from 'backbone.radio';
 import { View } from 'marionette';
 import dayjs from 'dayjs';
@@ -9,11 +9,23 @@ import Handlebars from 'handlebars/dist/cjs/handlebars';
 
 import './widgets.scss';
 
+function getWrapperTemplate(definition) {
+  const template = get(definition, 'wrapperTemplate');
+
+  if (!template) return;
+
+  return { wrapperTemplate: Handlebars.compile(template) };
+}
+
 // NOTE: widget is a view or view definition
 export function buildWidget(widget, patient, widgetModel, options) {
-  if (isFunction(widget)) return new widget(extend({ model: patient, slug: widgetModel.get('slug') }, options, widgetModel.get('definition')));
+  const definition = widgetModel.get('definition');
 
-  return new View(extend({ model: patient }, options, widgetModel.get('definition'), widget));
+  const wrapperTemplate = getWrapperTemplate(definition);
+
+  if (isFunction(widget)) return new widget(extend({ model: patient, slug: widgetModel.get('slug') }, options, definition, wrapperTemplate));
+
+  return new View(extend({ model: patient }, options, definition, wrapperTemplate, widget));
 }
 
 // NOTE: These widgets are documented in ./README.md

@@ -4,6 +4,10 @@
   max-width: 256px;
   overflow: hidden;
 
+  &:empty {
+    display: none;
+  }
+
   &:last-of-type {
     padding-bottom: 32px;
   }
