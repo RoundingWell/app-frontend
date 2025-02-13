@@ -243,7 +243,7 @@ export default App.extend(extend({
   },
   onAddAttachment(file) {
     const attachment = this.attachments.add({
-      _action: this.action.getResource(),
+      _actions: [this.action.getResource()],
       _patient: this.action.getPatient().getResource(),
       created_at: dayjs.utc().format(),
     });
