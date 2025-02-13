@@ -123,6 +123,11 @@ context('action sidebar', function() {
             value: null,
           }),
           getActivity({
+            event_type: 'ActionFileAttached',
+            source: 'api',
+            value: 'user-created-file.pdf',
+          }),
+          getActivity({
             event_type: 'ActionNameUpdated',
             source: 'api',
             previous: 'New Action',
@@ -232,6 +237,11 @@ context('action sidebar', function() {
             source: 'system',
             previous: 0,
             value: null,
+          }),
+          getActivity({
+            event_type: 'ActionFileAttached',
+            source: 'system',
+            value: 'system-created-file.pdf',
           }),
           getActivity({
             event_type: 'ActionNameUpdated',
@@ -643,6 +653,7 @@ context('action sidebar', function() {
       .should('contain', 'Clinician McTester (Nurse) cleared the due date')
       .should('contain', 'Clinician McTester (Nurse) updated the duration to 10')
       .should('contain', 'Clinician McTester (Nurse) cleared duration')
+      .should('contain', 'Clinician McTester (Nurse) added the attachment user-created-file.pdf')
       .should('contain', 'Clinician McTester (Nurse) updated the name of this action from New Action to New Action Name Updated')
       .should('contain', 'Clinician McTester (Nurse) changed the owner to Other')
       .should('contain', 'Clinician McTester (Nurse) changed the state to Done')
@@ -660,6 +671,7 @@ context('action sidebar', function() {
       .should('contain', 'Due Date cleared')
       .should('contain', 'Duration updated to 10')
       .should('contain', 'Duration cleared')
+      .should('contain', 'Attachment system-created-file.pdf added')
       .should('contain', 'Action name updated from New Action to New Action Name Updated')
       .should('contain', 'Owner changed to Other')
       .should('contain', 'State changed to Done')

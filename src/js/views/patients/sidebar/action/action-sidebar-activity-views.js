@@ -66,6 +66,11 @@ const DurationUpdatedTemplate = hbs`
   <div>{{formatDateTime date "AT_TIME"}}</div>
 `;
 
+const FileAttachedTemplate = hbs`
+  {{formatHTMLMessage (intlGet (getI18nSource "fileAttached")) name = name team = team filename = value}}
+  <div>{{formatDateTime date "AT_TIME"}}</div>
+`;
+
 const FormUpdatedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "formUpdated")) name = name team = team form = form}}
   <div>{{formatDateTime date "AT_TIME"}}</div>
@@ -189,6 +194,7 @@ const ActivityView = View.extend({
       ActionDueDateUpdated: DueDateUpdatedTemplate,
       ActionDueTimeUpdated: DueTimeUpdatedTemplate,
       ActionDurationUpdated: DurationUpdatedTemplate,
+      ActionFileAttached: FileAttachedTemplate,
       ActionFormUpdated: FormUpdatedTemplate,
       ActionFormResponded: FormRespondedTemplate,
       ActionNameUpdated: NameUpdatedTemplate,
