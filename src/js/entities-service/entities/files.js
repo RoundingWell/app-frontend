@@ -1,5 +1,6 @@
 import { get, first } from 'underscore';
 import Store from 'backbone.store';
+import Radio from 'backbone.radio';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
@@ -26,23 +27,23 @@ const _Model = BaseModel.extend({
       });
     },
     FileRemoved() {
-      const action = this.getAction();
+      const actions = this.getActions();
 
-      action.removeFile(this);
+      actions.invoke('removeFile', this);
 
       this.destroy({ isDeleted: true });
     },
   },
   urlRoot() {
     if (this.isNew()) {
-      const action = this.getAction();
+      const action = this.getActions().at(0);
 
       return `/api/actions/${ action.id }/relationships/files?urls=upload`;
     }
     return '/api/files';
   },
-  getAction() {
-    return this.getRelationship('_action');
+  getActions() {
+    return Radio.request('entities', 'actions:collection', this.get('_actions'));
   },
   getPatient() {
     return this.getRelationship('_patient');
