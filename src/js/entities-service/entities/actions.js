@@ -8,6 +8,8 @@ import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 import { ACTION_OUTREACH, ACTION_SHARING } from 'js/static';
 
+import { addError } from 'js/datadog';
+
 const TYPE = 'patient-actions';
 
 const _Model = BaseModel.extend({
@@ -132,6 +134,12 @@ const _Model = BaseModel.extend({
   },
   isFlowDone() {
     const flow = this.getFlow();
+
+    if (flow && !flow.isCached()) {
+      addError(`Missing flow ${ flow.id } for action ${ this.id }`);
+      return true;
+    }
+
     return flow && flow.isDone();
   },
   isOverdue() {
