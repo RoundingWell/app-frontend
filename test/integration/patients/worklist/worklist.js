@@ -850,12 +850,18 @@ context('worklist page', function() {
 
   specify('actions on a done-flow list', function() {
     const testFlow = getFlow({
-      id: '1',
       attributes: {
         name: 'Test Flow',
       },
       relationships: {
         state: getRelationship(stateDone),
+      },
+    });
+
+    const missingFlow = getFlow();
+    const actionMissingFlow = getAction({
+      relationships: {
+        flow: getRelationship(missingFlow),
       },
     });
 
@@ -868,11 +874,18 @@ context('worklist page', function() {
           },
         });
 
+        // Add flow relationship without including it
+        fx.data.push(actionMissingFlow);
+
         fx.included.push(testFlow);
 
         return fx;
       })
       .visit('/worklist/owned-by');
+
+    cy.window().then(win => {
+      cy.stub(win.console, 'error').as('consoleError');
+    });
 
     cy
       .wait('@routeActions')
@@ -884,6 +897,10 @@ context('worklist page', function() {
       .get('.worklist-list__meta')
       .find('button')
       .should('not.exist');
+
+    cy
+      .get('@consoleError')
+      .should('be.calledWith', `Missing flow ${ missingFlow.id } for action ${ actionMissingFlow.id }`);
   });
 
   specify('maximum list count reached', function() {
