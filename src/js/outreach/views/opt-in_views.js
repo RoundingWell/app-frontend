@@ -36,30 +36,24 @@ const OptInView = View.extend({
     </div>
     <div class="opt-in__field">
       <label class="opt-in__field-label">Your date of birth</label>
-      <div class="select-wrapper u-margin--r-4">
-        <select name="dob-month" class="select u-margin--r-8 js-dob-month ">
-          <option value="">Month</option>
-          {{#each dobMonthRange}}
-            <option value={{this}}>{{this}}</option>
-          {{/each}}
-        </select>
-      </div>
-      <div class="select-wrapper u-margin--r-4">
-        <select name="dob-day" class="select u-margin--r-8 js-dob-day">
-          <option value="">Day</option>
-          {{#each dobDayRange}}
-            <option value={{this}}>{{this}}</option>
-          {{/each}}
-        </select>
-      </div>
-      <div class="select-wrapper">
-        <select name="dob-year" class="select u-margin--r-8 js-dob-year">
-          <option value="">Year</option>
-          {{#each dobYearRange}}
-            <option value={{this}}>{{this}}</option>
-          {{/each}}
-        </select>
-      </div>
+      <select name="dob-month" class="select u-margin--r-4 js-dob-month">
+        <option value="">Month</option>
+        {{#each dobMonthRange}}
+          <option value={{this}}>{{this}}</option>
+        {{/each}}
+      </select>
+      <select name="dob-day" class="select u-margin--r-4 js-dob-day">
+        <option value="">Day</option>
+        {{#each dobDayRange}}
+          <option value={{this}}>{{this}}</option>
+        {{/each}}
+      </select>
+      <select name="dob-year" class="select u-margin--r-4 js-dob-year">
+        <option value="">Year</option>
+        {{#each dobYearRange}}
+          <option value={{this}}>{{this}}</option>
+        {{/each}}
+      </select>
     </div>
     <h3 class="opt-in__heading-text u-margin--t-32 u-margin--b-16">How may we share health resources with you?</h3>
     <div class="opt-in__field">
