@@ -162,7 +162,7 @@ export default App.extend({
     channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
 
     this.listenTo(channel, 'message', (message, model) => {
-      if (this.collection.get(model)) return;
+      if (this.collection.get(model) || model.isFetching()) return;
 
       model.fetch().then(() => {
         // notifications do not fully filter our action flow_states

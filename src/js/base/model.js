@@ -36,12 +36,19 @@ export default Backbone.Model.extend(extend({
     // Model fetches default to aborting.
     const fetcher = Backbone.Model.prototype.fetch.call(this, extend({ abort: true }, options));
 
+    this._isFetching = true;
+
     // Resolve with entity if successful
     return fetcher.then(response => {
+      this._isFetching = false;
+
       if (!response || response.ok) return this;
 
       return response;
     });
+  },
+  isFetching() {
+    return this._isFetching;
   },
   parse(response) {
     /* istanbul ignore if */
