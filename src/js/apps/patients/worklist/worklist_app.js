@@ -161,7 +161,12 @@ export default App.extend({
 
     channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
 
-    this.listenTo(channel, 'message', (message, model) => {
+    this.listenTo(channel, 'message', ({ category, resource, payload }) => {
+      if (!category) return;
+
+      const modelResource = category === 'ResourceCreated' ? payload.resource : resource;
+      const model = Radio.request('entities', 'get:store', modelResource);
+
       if (this.collection.get(model) || model.isFetching()) return;
 
       model.fetch().then(() => {
@@ -169,6 +174,8 @@ export default App.extend({
         if (filterKey === 'actions' && !flowStates.includes(model.getFlow().getState().id)) return;
 
         this.collection.add(model);
+
+        channel.request('add', model);
       });
     });
   },
