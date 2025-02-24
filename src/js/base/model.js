@@ -1,4 +1,4 @@
-import { extend, isEmpty, isFunction, pick, reduce, result } from 'underscore';
+import { each, extend, isEmpty, isFunction, pick, reduce, result } from 'underscore';
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
 import JsonApiMixin from './jsonapi-mixin';
@@ -41,6 +41,8 @@ export default Backbone.Model.extend(extend({
     // Resolve with entity if successful
     return fetcher.then(response => {
       this._isFetching = false;
+
+      each(this._notifications, this._handleMessage, this);
 
       if (!response || response.ok) return this;
 
@@ -105,12 +107,30 @@ export default Backbone.Model.extend(extend({
 
     return isFunction(messages[category]) ? messages[category] : this[messages[category]];
   },
-  handleMessage({ category, resource, author, payload }) {
-    payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
+  queueMessage(data) {
+    const category = data.category;
 
+    if (!this._notifications) {
+      this._notifications = { [category]: data };
+      return;
+    }
+
+    this._notifications[category] = data;
+  },
+  _handleMessage({ category, resource, author, payload }) {
     const handler = this._getMessageHandler(category);
     if (handler) handler.call(this, payload, { category, resource, author });
 
     this.trigger('message', { category, resource, author, payload });
+  },
+  handleMessage({ category, resource, author, payload }) {
+    payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
+
+    if (this.isFetching()) {
+      this.queueMessage({ category, resource, author, payload });
+      return;
+    }
+
+    this._handleMessage({ category, resource, author, payload });
   },
 }, JsonApiMixin));
