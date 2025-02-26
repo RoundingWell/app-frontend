@@ -112,7 +112,7 @@ export default App.extend({
 
     const data = JSON.parse(event.data);
 
-    if (data.name === 'pong') return;
+    if (!data.category || data.name === 'pong') return;
 
     if (data.resource) {
       model = Radio.request('entities', 'get:store', data.resource);
