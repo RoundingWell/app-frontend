@@ -154,6 +154,16 @@ export default App.extend({
 
     this.showList();
   },
+  _getWsFetchOptions(filterKey) {
+    if (filterKey === 'flows') return {};
+
+    return {
+      data: {
+        fields: { flows: ['name', 'state'] },
+        include: ['program-action.program', 'flow.program-flow.program'].join(),
+      },
+    };
+  },
   subscribe() {
     const channel = Radio.channel('ws');
     const filterKey = this.getState().getType();
@@ -167,7 +177,9 @@ export default App.extend({
 
       if (this.collection.get(model) || model.isFetching()) return;
 
-      model.fetch().then(() => {
+      const options = this._getWsFetchOptions(filterKey);
+
+      model.fetch(options).then(() => {
         // notifications do not fully filter our action flow_states
         if (filterKey === 'actions' && !flowStates.includes(model.getFlow().getState().id)) return;
 
