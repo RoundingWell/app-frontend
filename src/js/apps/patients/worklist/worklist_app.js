@@ -154,20 +154,9 @@ export default App.extend({
 
     this.showList();
   },
-  _getWsFetchOptions(filterKey) {
-    if (filterKey === 'flows') return {};
-
-    return {
-      data: {
-        fields: { flows: ['name', 'state'] },
-        include: ['program-action.program', 'flow.program-flow.program'].join(),
-      },
-    };
-  },
   subscribe() {
     const channel = Radio.channel('ws');
     const filterKey = this.getState().getType();
-    const flowStates = this.getState('flowStates');
 
     channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
 
@@ -177,16 +166,37 @@ export default App.extend({
 
       if (this.collection.get(model) || model.isFetching()) return;
 
-      const options = this._getWsFetchOptions(filterKey);
+      if (filterKey === 'flows') {
+        this._fetchFlow(model);
 
-      model.fetch(options).then(() => {
-        // notifications do not fully filter our action flow_states
-        if (filterKey === 'actions' && !flowStates.includes(model.getFlow().getState().id)) return;
+        return;
+      }
 
-        this.collection.add(model);
+      this._fetchAction(model);
 
-        channel.request('add', model);
-      });
+      return;
+    });
+  },
+  _fetchFlow(model) {
+    const fetchFlow = Radio.request('entities', 'fetch:flows:model', model.id);
+
+    fetchFlow.then(() => {
+      this.collection.add(model);
+
+      Radio.request('ws', 'add', model);
+    });
+  },
+  _fetchAction(model) {
+    const flowStates = this.getState('flowStates');
+
+    const fetchAction = Radio.request('entities', 'fetch:actions:model', model.id);
+
+    fetchAction.then(() => {
+      if (!flowStates.includes(model.getFlow().getState().id)) return;
+
+      this.collection.add(model);
+
+      Radio.request('ws', 'add', model);
     });
   },
   // NOTE: Shows views dependent on getState().getType()

@@ -17,7 +17,12 @@ const Entity = BaseEntity.extend({
       'program-action.program',
       'flow.program-flow.program',
     ].join();
-    return this.fetchModel(id, { data: { include } });
+
+    const fields = {
+      flows: ['name', 'state'],
+    };
+
+    return this.fetchModel(id, { data: { include, fields } });
   },
   fetchActionWithResponses(id) {
     const data = {
