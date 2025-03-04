@@ -126,9 +126,10 @@ export default App.extend({
   },
   beforeStart() {
     const listType = this.getState().getType();
+    this.filters = this.getState().getEntityFilter();
 
     const data = {
-      filter: this.getState().getEntityFilter(),
+      filter: this.filters,
       include: this.sortOptions.getInclude(),
     };
 
@@ -143,6 +144,8 @@ export default App.extend({
     this.filteredCollection = collection.clone();
     this.editableCollection = collection.clone();
 
+    this.subscribe();
+
     this.listenTo(this.filteredCollection, 'reset', this.showCountView);
     this.showCountView();
 
@@ -150,6 +153,51 @@ export default App.extend({
     this.toggleBulkSelect();
 
     this.showList();
+  },
+  subscribe() {
+    const channel = Radio.channel('ws');
+    const filterKey = this.getState().getType();
+
+    channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
+
+    this.listenTo(channel, 'message', ({ category, resource, payload }) => {
+      const modelResource = category === 'ResourceCreated' ? payload.resource : resource;
+      const model = Radio.request('entities', 'get:store', modelResource);
+
+      if (this.collection.get(model) || model.isFetching()) return;
+
+      if (filterKey === 'flows') {
+        this._fetchFlow(model);
+
+        return;
+      }
+
+      this._fetchAction(model);
+
+      return;
+    });
+  },
+  _fetchFlow(model) {
+    const fetchFlow = Radio.request('entities', 'fetch:flows:model', model.id);
+
+    fetchFlow.then(() => {
+      this.collection.add(model);
+
+      Radio.request('ws', 'add', model);
+    });
+  },
+  _fetchAction(model) {
+    const flowStates = this.getState('flowStates');
+
+    const fetchAction = Radio.request('entities', 'fetch:actions:model', model.id);
+
+    fetchAction.then(() => {
+      if (!flowStates.includes(model.getFlow().getState().id)) return;
+
+      this.collection.add(model);
+
+      Radio.request('ws', 'add', model);
+    });
   },
   // NOTE: Shows views dependent on getState().getType()
   showTypeViews() {
@@ -210,7 +258,7 @@ export default App.extend({
     const filtersState = this.getFiltersState();
 
     const sidebarApp = this.getChildApp('filtersSidebar');
-    
+
     Radio.request('sidebar', 'start', sidebarApp, { filtersState });
   },
   toggleBulkSelect() {

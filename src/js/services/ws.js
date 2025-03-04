@@ -37,13 +37,17 @@ export default App.extend({
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const currentWorkspace = Radio.request('workspace', 'current');
 
+    const data = {
+      clientKey: currentUser.clientKey,
+      workspace: currentWorkspace.id,
+      resources: this.resources.toJSON(),
+    };
+
+    if (this.filters) data.filters = this.filters;
+
     this.send({
       name: 'Subscribe',
-      data: {
-        clientKey: currentUser.clientKey,
-        workspace: currentWorkspace.id,
-        resources: this.resources.toJSON(),
-      },
+      data,
     });
   },
 
@@ -99,13 +103,16 @@ export default App.extend({
   },
 
   onMessage(event) {
+    /* istanbul ignore next: Can't test this bref functionality in node websockets */
+    if (!event.data) return;
+
     let model;
 
     const channel = this.getChannel();
 
     const data = JSON.parse(event.data);
 
-    if (data.name === 'pong') return;
+    if (!data.category || data.name === 'pong') return;
 
     if (data.resource) {
       model = Radio.request('entities', 'get:store', data.resource);
@@ -121,8 +128,10 @@ export default App.extend({
     return map(resources, ({ id, type }) => ({ id, type }));
   },
 
-  subscribe(resources, { shouldPersist } = {}) {
+  // TODO: We likely want to support a more reboust way of maintaining filters
+  subscribe(resources, { shouldPersist, filters } = {}) {
     resources = this._getResources(resources);
+    this.filters = filters;
 
     if (shouldPersist) {
       each(resources, ({ id, type }) => {
