@@ -39,15 +39,21 @@ export default Backbone.Model.extend(extend({
     this._isFetching = true;
 
     // Resolve with entity if successful
-    return fetcher.then(response => {
-      this._isFetching = false;
+    return fetcher
+      .then(response => {
+        this._isFetching = false;
 
-      each(this._notifications, this._handleMessage, this);
+        each(this._notifications, this._handleMessage, this);
 
-      if (!response || response.ok) return this;
+        if (!response || response.ok) return this;
 
-      return response;
-    });
+        return response;
+      })
+      .catch(error => {
+        this._isFetching = false;
+
+        throw error;
+      });
   },
   isFetching() {
     return this._isFetching;
