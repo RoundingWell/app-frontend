@@ -200,7 +200,7 @@ const FlowItemView = View.extend({
   modelEvents: {
     'change:_owner': 'render',
   },
-  behaviors: [RowBehavior],
+  behaviors: [RowBehavior, DoneBehavior],
   regions: {
     owner: '[data-owner-region]',
   },

@@ -24,8 +24,9 @@ export default App.extend({
 
   beforeStart({ patient }) {
     const currentWorkspace = Radio.request('workspace', 'current');
-    const states = currentWorkspace.getStates();
-    const filter = { states: states.groupByDone().notDone.getFilterIds() };
+    this.states = currentWorkspace.getStates();
+
+    const filter = { states: this.states.groupByDone().notDone.getFilterIds() };
 
     return [
       Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId: patient.id, filter }),
@@ -36,9 +37,34 @@ export default App.extend({
   onStart(options, actions, flows) {
     this.collection = new Backbone.Collection([...actions.models, ...flows.models]);
 
+    this.subscribe();
+
     this.showChildView('content', new ListView({ collection: this.collection }));
 
     this.startAddWorkflow();
+  },
+  subscribe() {
+    const channel = Radio.channel('ws');
+
+    const filter = {
+      states: this.states.groupByDone().notDone.getFilterIds(),
+      patient: this.patient.id,
+    };
+
+    channel.request('subscribe', this.collection.models, {
+      filters: { actions: filter, flows: filter },
+    });
+
+    this.listenTo(channel, 'message', (data, model) => {
+      if (this.collection.get(model) || model.isFetching()) return;
+
+      model.fetch().then(() => {
+        if (model.type === 'patient-actions' && model.getFlow()) return;
+
+        this.collection.add(model);
+        Radio.request('ws', 'add', model);
+      });
+    });
   },
   startAddWorkflow() {
     if (!this.currentUser.can('work:own')) return;
