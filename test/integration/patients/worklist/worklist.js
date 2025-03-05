@@ -460,15 +460,10 @@ context('worklist page', function() {
     cy.sendWs({
       category: 'ResourceCreated',
       resource: {
-        type: testPatient1.type,
-        id: testPatient1.id,
+        type: testNewSocketFlow.type,
+        id: testNewSocketFlow.id,
       },
-      payload: {
-        resource: {
-          type: testNewSocketFlow.type,
-          id: testNewSocketFlow.id,
-        },
-      },
+      payload: {},
     });
 
     // a notification that is sent for a resource we are currently fetching
@@ -1444,15 +1439,10 @@ context('worklist page', function() {
     cy.sendWs({
       category: 'ResourceCreated',
       resource: {
-        type: testFlow.type,
-        id: testFlow.id,
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
       },
-      payload: {
-        resource: {
-          type: testNewSocketAction.type,
-          id: testNewSocketAction.id,
-        },
-      },
+      payload: {},
     });
 
     // a notification that is sent for a resource we are currently fetching
