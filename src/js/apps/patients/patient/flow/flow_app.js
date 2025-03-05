@@ -88,7 +88,6 @@ export default SubRouterApp.extend({
 
     this.listenTo(this.flow, {
       'change:_owner': this.onFlowChangeOwner,
-      'message': this.onFlowMessage,
     });
 
     this.startRoute(currentRoute);
@@ -98,7 +97,16 @@ export default SubRouterApp.extend({
     this.stopChildApp('actionSidebar');
   },
   subscribe() {
-    Radio.request('ws', 'subscribe', [this.flow, ...this.actions.models]);
+    const channel = Radio.channel('ws');
+    const filters = { actions: { flow: this.flow.id } };
+
+    channel.request('subscribe', [this.flow, ...this.actions.models], { filters });
+
+    this.listenTo(channel, 'message', ({ category }, model) => {
+      if (category !== 'ResourceCreated') return;
+
+      model.fetch().then(bind(this._addAction, this));
+    });
   },
   _setFlowProgress() {
     const complete = this.actions.filter(action => action.isDone()).length;
@@ -110,7 +118,7 @@ export default SubRouterApp.extend({
     this.actions.add(action);
     this.editableCollection.add(action);
 
-    this.subscribe();
+    Radio.request('ws', 'add', action);
 
     this._setFlowProgress();
   },
@@ -119,13 +127,6 @@ export default SubRouterApp.extend({
   },
   onActionDestroy() {
     this._setFlowProgress();
-  },
-  onFlowMessage({ category, payload }) {
-    if (category !== 'ResourceCreated') return;
-    const { resource } = payload;
-
-    const fetchAction = Radio.request('entities', 'fetch:actions:model', resource.id);
-    fetchAction.then(bind(this._addAction, this));
   },
   onFlowChangeOwner(flow, _owner) {
     if (_owner.type === 'teams') return;
