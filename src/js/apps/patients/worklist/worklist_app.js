@@ -160,9 +160,8 @@ export default App.extend({
 
     channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
 
-    this.listenTo(channel, 'message', ({ category, resource, payload }) => {
-      const modelResource = category === 'ResourceCreated' ? payload.resource : resource;
-      const model = Radio.request('entities', 'get:store', modelResource);
+    this.listenTo(channel, 'message', ({ resource }) => {
+      const model = Radio.request('entities', 'get:store', resource);
 
       if (this.collection.get(model) || model.isFetching()) return;
 

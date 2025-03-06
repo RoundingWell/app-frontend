@@ -27,6 +27,9 @@ context('patient flow page', function() {
     attributes: {
       name: 'Test Flow',
     },
+    relationships: {
+      state: getRelationship(stateTodo),
+    },
   });
 
   const testAction = getAction({
@@ -156,18 +159,14 @@ context('patient flow page', function() {
         return fx;
       })
       .routeFlow(fx => {
-        fx.data = mergeJsonApi(testFlow, {
-          relationships: {
-            state: getRelationship(stateTodo),
-          },
-        });
+        fx.data = testFlow;
 
         return fx;
       })
       .routeFlowActions(fx => {
         fx.data = [testFlowAction];
 
-        fx.included.push(testProgramAction);
+        fx.included.push(testProgramAction, testFlow);
 
         return fx;
       })
@@ -1099,7 +1098,8 @@ context('patient flow page', function() {
         name: 'Socket Action',
       },
       relationships: {
-        'flow': getRelationship(testFlow),
+        flow: getRelationship(testFlow),
+        state: getRelationship(stateTodo),
       },
     });
 
@@ -1113,13 +1113,24 @@ context('patient flow page', function() {
     cy.sendWs({
       category: 'ResourceCreated',
       resource: {
-        type: testFlow.type,
-        id: testFlow.id,
+        type: otherAction.type,
+        id: otherAction.id,
+      },
+      payload: {},
+    });
+
+    // a notification that is sent for a resource we are currently fetching
+    // this notification is queued until model.fetch() is done for that action
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: otherAction.type,
+        id: otherAction.id,
       },
       payload: {
-        resource: {
-          type: otherAction.type,
-          id: otherAction.id,
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
         },
       },
     });
@@ -1134,6 +1145,12 @@ context('patient flow page', function() {
       .find('.is-selected')
       .next()
       .contains('Socket Action');
+
+    cy
+      .get('[data-content-region]')
+      .find('.is-selected')
+      .next()
+      .find('[data-state-region] .fa-circle-dot');
   });
 
   specify('failed flow', function() {
