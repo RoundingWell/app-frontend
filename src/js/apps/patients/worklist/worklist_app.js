@@ -160,42 +160,14 @@ export default App.extend({
 
     channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
 
-    this.listenTo(channel, 'message', ({ resource }) => {
-      const model = Radio.request('entities', 'get:store', resource);
-
+    this.listenTo(channel, 'message', (data, model) => {
       if (this.collection.get(model) || model.isFetching()) return;
 
-      if (filterKey === 'flows') {
-        this._fetchFlow(model);
+      model.fetch().then(() => {
+        this.collection.add(model);
 
-        return;
-      }
-
-      this._fetchAction(model);
-
-      return;
-    });
-  },
-  _fetchFlow(model) {
-    const fetchFlow = Radio.request('entities', 'fetch:flows:model', model.id);
-
-    fetchFlow.then(() => {
-      this.collection.add(model);
-
-      Radio.request('ws', 'add', model);
-    });
-  },
-  _fetchAction(model) {
-    const flowStates = this.getState('flowStates');
-
-    const fetchAction = Radio.request('entities', 'fetch:actions:model', model.id);
-
-    fetchAction.then(() => {
-      if (!flowStates.includes(model.getFlow().getState().id)) return;
-
-      this.collection.add(model);
-
-      Radio.request('ws', 'add', model);
+        Radio.request('ws', 'add', model);
+      });
     });
   },
   // NOTE: Shows views dependent on getState().getType()

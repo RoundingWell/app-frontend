@@ -485,9 +485,7 @@ context('worklist page', function() {
     cy
       .wait('@routeFlow')
       .its('request.url')
-      .should('contain', testNewSocketFlow.id)
-      .should('not.contain', 'fields[flows]=name,state')
-      .should('not.contain', 'include=program-action.program%2Cflow.program-flow.program');
+      .should('contain', testNewSocketFlow.id);
 
     cy
       .get('[data-count-region]')
@@ -1464,9 +1462,7 @@ context('worklist page', function() {
     cy
       .wait('@routeAction')
       .its('request.url')
-      .should('contain', testNewSocketAction.id)
-      .should('contain', 'fields[flows]=name,state')
-      .should('contain', 'include=program-action.program%2Cflow.program-flow.program');
+      .should('contain', testNewSocketAction.id);
 
     cy
       .get('[data-count-region]')
@@ -1567,30 +1563,6 @@ context('worklist page', function() {
 
         return fx;
       });
-
-    // should not be added to collection, flow state is not in current worklist filters
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testNewFlowStateSocketAction.type,
-        id: testNewFlowStateSocketAction.id,
-      },
-      payload: {
-        owner: {
-          type: currentClinician.type,
-          id: currentClinician.id,
-        },
-      },
-    });
-
-    cy
-      .wait('@routeAction')
-      .its('request.url')
-      .should('contain', testNewFlowStateSocketAction.id);
-
-    cy
-      .get('[data-count-region]')
-      .should('contain', '4 Actions');
   });
 
   specify('actions on a done-flow list', function() {
