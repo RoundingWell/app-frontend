@@ -17,15 +17,21 @@ function getWrapperTemplate(definition) {
   return { wrapperTemplate: Handlebars.compile(template) };
 }
 
-// NOTE: widget is a view or view definition
-export function buildWidget(widget, patient, widgetModel, options) {
-  const definition = widgetModel.get('definition');
+function getValues(slug, patientId) {
+  const widgetValues = Radio.request('entities', 'get:widgetValues:model', slug, patientId);
+  return widgetValues.get('values');
+}
 
+// NOTE: widget is a view or view definition
+export function buildWidget(widgetModel, patient) {
+  const widget = widgets[widgetModel.get('category')];
+  const values = getValues(widgetModel.get('slug'), patient.id);
+  const definition = widgetModel.get('definition');
   const wrapperTemplate = getWrapperTemplate(definition);
 
-  if (isFunction(widget)) return new widget(extend({ model: patient, slug: widgetModel.get('slug') }, options, definition, wrapperTemplate));
+  if (isFunction(widget)) return new widget(extend({ model: patient, values }, definition, wrapperTemplate));
 
-  return new View(extend({ model: patient }, options, definition, wrapperTemplate, widget));
+  return new View(extend({ model: patient, values }, definition, wrapperTemplate, widget));
 }
 
 // NOTE: These widgets are documented in ./README.md
@@ -34,14 +40,10 @@ const widgets = {
   widget: View.extend({
     className: 'widgets-value',
     initialize() {
-      const slug = this.getOption('slug');
-      const widgetValues = Radio.request('entities', 'get:widgetValues:model', slug, this.model.id);
-      this.values = widgetValues.get('values');
-
       this.template = Handlebars.compile(this.template);
     },
     serializeData() {
-      return this.values;
+      return this.getOption('values');
     },
   }),
   dob: {
