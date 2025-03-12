@@ -1055,7 +1055,8 @@ context('patient dashboard page', function() {
       .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
       .wait('@routePatientFlows')
-      .wait('@routePatientActions');
+      .wait('@routePatientActions')
+      .wait(200); // for initial ws connection to be created
 
     cy.sendWs({
       category: 'NameChanged',
@@ -1283,7 +1284,8 @@ context('patient dashboard page', function() {
       .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
       .wait('@routePatientFlows')
-      .wait('@routePatientActions');
+      .wait('@routePatientActions')
+      .wait(200); // for initial ws connection to be created
 
     cy.sendWs({
       category: 'NameChanged',
