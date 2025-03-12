@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import { NIL as NIL_UUID } from 'uuid';
 
 import App from 'js/base/app';
 
@@ -46,21 +47,19 @@ export default App.extend({
   subscribe() {
     const channel = Radio.channel('ws');
 
-    const filter = {
+    const filters = {
       states: this.states.groupByDone().notDone.getFilterIds(),
       patient: this.patient.id,
     };
 
     channel.request('subscribe', this.collection.models, {
-      filters: { actions: filter, flows: filter },
+      filters: { actions: { ...filters, flow: NIL_UUID }, flows: filters },
     });
 
     this.listenTo(channel, 'message', (data, model) => {
       if (this.collection.get(model) || model.isFetching()) return;
 
       model.fetch().then(() => {
-        if (model.type === 'patient-actions' && model.getFlow()) return;
-
         this.collection.add(model);
         Radio.request('ws', 'add', model);
       });
