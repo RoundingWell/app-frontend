@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
 import { getRelationship, mergeJsonApi } from 'helpers/json-api';
+import formatDate from 'helpers/format-date';
 
 import { getAction } from 'support/api/actions';
 import { getFlow } from 'support/api/flows';
@@ -398,6 +399,384 @@ context('patient archive page', function() {
     cy
       .url()
       .should('contain', `patient-action/1/form/${ testForm.id }`);
+  });
+
+  specify('flow list - socket notifications', function() {
+    const testPatient = getPatient({
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
+    const testSocketFlow = getFlow({
+      attributes: {
+        name: 'Test Flow - Subscribed on Page Load',
+        updated_at: testTs(),
+      },
+      relationships: {
+        state: getRelationship(stateDone),
+        patient: getRelationship(testPatient),
+        owner: getRelationship(teamCoordinator),
+      },
+    });
+
+    const testNewSocketFlow = getFlow({
+      attributes: {
+        name: 'New Flow - Created Elsewhere',
+        updated_at: testTsSubtract(2),
+      },
+      relationships: {
+        state: getRelationship(stateDone),
+        patient: getRelationship(testPatient),
+        owner: getRelationship(teamCoordinator),
+      },
+    });
+
+    const testNewStateSocketFlow = getFlow({
+      attributes: {
+        name: 'New Flow - State Updated to Match Current Filter',
+        updated_at: testTsSubtract(1),
+      },
+      relationships: {
+        state: getRelationship(stateDone),
+        patient: getRelationship(testPatient),
+        owner: getRelationship(teamCoordinator),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [testSocketFlow];
+
+        return fx;
+      })
+      .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testTs() })
+      .wait('@routePatient')
+      .wait('@routePatientFlows');
+
+    // state was set to be not done, which means it's removed from the list
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testSocketFlow.type,
+        id: testSocketFlow.id,
+      },
+      payload: {
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
+        },
+      },
+    });
+
+    // wait for fade-out animation to completely finish
+    cy.tick(1000);
+
+    cy
+      .get('.patient__empty-list')
+      .should('contain', 'No Archive');
+
+    cy
+      .routeFlow(fx => {
+        fx.data = testNewSocketFlow;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketFlow.type,
+        id: testNewSocketFlow.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .wait('@routeFlow')
+      .its('request.url')
+      .should('contain', testNewSocketFlow.id);
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .first()
+      .as('firstRow')
+      .should('contain', 'New Flow - Created Elsewhere');
+
+    cy
+      .routeFlow(fx => {
+        fx.data = testNewStateSocketFlow;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testNewStateSocketFlow.type,
+        id: testNewStateSocketFlow.id,
+      },
+      payload: {
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
+        },
+      },
+    });
+
+    // a notification that is sent for a resource we are currently fetching
+    // this notification is queued until model.fetch() is done for that flow
+    cy.sendWs({
+      category: 'OwnerChanged',
+      resource: {
+        type: testNewStateSocketFlow.type,
+        id: testNewStateSocketFlow.id,
+      },
+      payload: {
+        owner: {
+          type: teamNurse.type,
+          id: teamNurse.id,
+        },
+      },
+    });
+
+    cy
+      .wait('@routeFlow')
+      .its('request.url')
+      .should('contain', testNewStateSocketFlow.id);
+
+    cy
+      .get('@firstRow')
+      .should('contain', 'New Flow - State Updated to Match Current Filter');
+
+    cy
+      .get('@firstRow')
+      .find('[data-owner-region]')
+      .should('contain', 'NU');
+
+    // ensures we subscribe correctly to models added to the worklist via ws
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: testNewStateSocketFlow.type,
+        id: testNewStateSocketFlow.id,
+      },
+      payload: {
+        attributes: {
+          name: 'New Name Via Websocket',
+        },
+      },
+    });
+
+    cy
+      .get('@firstRow')
+      .should('contain', 'New Name Via Websocket');
+
+    cy
+      .get('@firstRow')
+      .find('.patient__action-ts')
+      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+  });
+
+  specify('action list - socket notifications', function() {
+    const testPatient = getPatient({
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
+    const testSocketAction = getAction({
+      attributes: {
+        name: 'Test Action - Subscribed on Page Load',
+        updated_at: testTs(),
+      },
+      relationships: {
+        state: getRelationship(stateDone),
+        patient: getRelationship(testPatient),
+        owner: getRelationship(teamCoordinator),
+      },
+    });
+
+    const testNewSocketAction = getAction({
+      attributes: {
+        name: 'New Action - Created Elsewhere',
+        updated_at: testTsSubtract(3),
+      },
+      relationships: {
+        state: getRelationship(stateDone),
+        patient: getRelationship(testPatient),
+        owner: getRelationship(teamCoordinator),
+      },
+    });
+
+    const testNewStateSocketAction = getAction({
+      attributes: {
+        name: 'New Action - State Updated to Match Current Filter',
+        updated_at: testTsSubtract(2),
+      },
+      relationships: {
+        state: getRelationship(stateDone),
+        patient: getRelationship(testPatient),
+        owner: getRelationship(teamCoordinator),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [testSocketAction];
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testTs() })
+      .wait('@routePatient')
+      .wait('@routePatientActions');
+
+    // state was set to done, which means it's removed from the list
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
+        },
+      },
+    });
+
+    // wait for fade-out animation to completely finish
+    cy.tick(1000);
+
+    cy
+      .get('.patient__empty-list')
+      .should('contain', 'No Archive');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testNewSocketAction;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', testNewSocketAction.id);
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .first()
+      .as('firstRow')
+      .should('contain', 'New Action - Created Elsewhere');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testNewStateSocketAction;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testNewStateSocketAction.type,
+        id: testNewStateSocketAction.id,
+      },
+      payload: {
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
+        },
+      },
+    });
+
+    // a notification that is sent for a resource we are currently fetching
+    // this notification is queued until model.fetch() is done for that flow
+    cy.sendWs({
+      category: 'OwnerChanged',
+      resource: {
+        type: testNewStateSocketAction.type,
+        id: testNewStateSocketAction.id,
+      },
+      payload: {
+        owner: {
+          type: teamNurse.type,
+          id: teamNurse.id,
+        },
+      },
+    });
+
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', testNewStateSocketAction.id);
+
+    cy
+      .get('@firstRow')
+      .should('contain', 'New Action - State Updated to Match Current Filter');
+
+    cy
+      .get('@firstRow')
+      .find('[data-owner-region]')
+      .should('contain', 'NU');
+
+    // ensures we subscribe correctly to models added to the worklist via ws
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: testNewStateSocketAction.type,
+        id: testNewStateSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          name: 'New Name Via Websocket',
+        },
+      },
+    });
+
+    cy
+      .get('@firstRow')
+      .should('contain', 'New Name Via Websocket');
+
+    cy
+      .get('@firstRow')
+      .find('.patient__action-ts')
+      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
   });
 
   specify('work with work:owned:manage permission', function() {
