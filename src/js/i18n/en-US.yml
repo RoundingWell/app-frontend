@@ -86,6 +86,8 @@ careOptsFrontend:
     dashboardApp:
       notFound: The Dashboard you requested does not exist.
     dashboardsAllViews:
+      emptyFindInListView:
+        noResults: No results match your Find in List search
       emptyView: No Dashboards
       layoutView:
         nameHeader: Name
