@@ -223,7 +223,7 @@ const PatientSearchPicklist = Component.extend({
 });
 
 const PatientSearchModal = View.extend({
-  className: 'modal',
+  className: 'modal--large',
   template: hbs`
     <a href="#" class="button--icon patient-search__close js-close">{{far "xmark"}}</a>
     <div data-picklist-region></div>
