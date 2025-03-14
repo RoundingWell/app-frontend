@@ -77,7 +77,12 @@ const PicklistItem = View.extend({
   },
   template: hbs`
     <div class="patient-search__picklist-item-name u-text--overflow">
-      <span>{{matchText name search}}{{~ remove_whitespace ~}}</span>
+      <div class="patient-search__picklist-item-name-icon">
+        {{far "address-card"}}
+      </div>
+      <div class="patient-search__picklist-item-name-text">
+        <span>{{matchText name search}}{{~ remove_whitespace ~}}</span>
+      </div>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
@@ -123,7 +128,10 @@ const HeaderView = View.extend({
   className: 'patient-search__picklist-header',
   template: hbs`
     <div class="patient-search__picklist-header-name">
-      {{ @intl.globals.search.patientSearchViews.headerView.patient }}
+      <div class="patient-search__picklist-header-name-icon"></div>
+      <div class="patient-search__picklist-header-name-text">
+        {{ @intl.globals.search.patientSearchViews.headerView.patient }}
+      </div>
     </div>
     <div class="patient-search__picklist-header-meta">
       <div class="patient-search__picklist-header-dob">
