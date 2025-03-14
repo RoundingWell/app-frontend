@@ -64,7 +64,13 @@ const EmptyView = View.extend({
 
 const PicklistItem = View.extend({
   tagName: 'li',
-  className: 'js-picklist-item patient-search__picklist-item',
+  className() {
+    const className = 'js-picklist-item patient-search__picklist-item';
+
+    if (this.model.get('status') !== 'active') return `${ className } is-inactive`;
+
+    return className;
+  },
   initialize({ state }) {
     this.state = state;
     this.listenTo(this.state, 'change:search', this.render);

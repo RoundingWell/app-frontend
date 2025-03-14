@@ -88,6 +88,11 @@
   justify-content: space-between;
   padding: 4px 20px;
 
+  &.is-inactive {
+    font-style: italic;
+    color: $black-60;
+  }
+
   &.is-highlighted,
   &:hover {
     background-color: color(blue);
