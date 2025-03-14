@@ -239,6 +239,7 @@ careOptsFrontend:
           dob: DOB
           id: Identifier
           patient: Patient
+          workspaceStatus: Workspace Status
   patients:
     patient:
       archive:

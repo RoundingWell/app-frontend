@@ -66,12 +66,17 @@
 }
 
 .patient-search__picklist-header-dob {
-  width: 76px;
+  width: 100px;
 }
 
 .patient-search__picklist-header-identifier {
   margin-left: 16px;
-  width: 160px;
+  width: 100px;
+}
+
+.patient-search__picklist-header-status {
+  margin-left: 16px;
+  width: 100px;
 }
 
 .patient-search__picklist-item {
@@ -128,12 +133,18 @@
 }
 
 .patient-search__picklist-item-dob {
-  width: 76px;
+  width: 100px;
 }
 
 .patient-search__picklist-item-identifier {
   margin-left: 16px;
-  width: 160px;
+  width: 100px;
+}
+
+.patient-search__picklist-item-status {
+  margin-left: 16px;
+  text-transform: capitalize;
+  width: 100px;
 }
 
 .patient-search__no-results {

@@ -93,6 +93,9 @@ const PicklistItem = View.extend({
           {{#if identifiers.0.value}}{{matchText identifiers.0.value search}}{{else}}&ndash;{{/if}}
         </div>
       {{/if}}
+      <div class="patient-search__picklist-item-status u-text--overflow">
+        {{status}}
+      </div>
     </div>
   `,
   templateContext() {
@@ -139,9 +142,12 @@ const HeaderView = View.extend({
       </div>
       {{#if hasIdentifiers}}
         <div class="patient-search__picklist-header-identifier">
-        {{ @intl.globals.search.patientSearchViews.headerView.id }}
+          {{ @intl.globals.search.patientSearchViews.headerView.id }}
         </div>
       {{/if}}
+      <div class="patient-search__picklist-header-status">
+        {{ @intl.globals.search.patientSearchViews.headerView.workspaceStatus }}
+      </div>
     </div>
   `,
   templateContext() {
