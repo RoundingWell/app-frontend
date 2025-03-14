@@ -11,13 +11,14 @@ context('Patient Quick Search', function() {
         first_name: 'Test',
         last_name: `${ index } Patient`,
         identifiers: index % 2 ? [] : [{ type: 'mrn', value: 'identifier-001' }],
+        status: index % 2 ? 'inactive' : 'active',
       },
     });
   });
 
   beforeEach(function() {
     const data = _.map(patients, patient => {
-      const { id, first_name, last_name, birth_date, identifiers } = patient.attributes;
+      const { id, first_name, last_name, birth_date, identifiers, status } = patient.attributes;
 
       return {
         id,
@@ -27,6 +28,7 @@ context('Patient Quick Search', function() {
           last_name,
           birth_date,
           identifiers,
+          status,
         },
         relationships: {
           patient: getRelationship(patient, 'patients'),
@@ -73,7 +75,7 @@ context('Patient Quick Search', function() {
       .should('have.class', 'is-active');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .as('searchModal')
       .should('contain', 'Search by')
       .find('.patient-search__input')
@@ -114,12 +116,20 @@ context('Patient Quick Search', function() {
       .wait('@routePatientSearch')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[search]=Te');
+      .should('contain', 'filter[search]=Test');
 
     cy
       .get('@searchModal')
       .find('.js-picklist-item')
       .should('have.length', 10);
+
+    cy
+      .get('@searchModal')
+      .find('.js-picklist-item')
+      .first()
+      .should('not.have.class', 'is-inactive')
+      .next()
+      .should('have.class', 'is-inactive');
 
     cy
       .get('@searchModal')
@@ -133,7 +143,8 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item strong')
       .contains('2')
       .parents('.js-picklist-item')
-      .contains('identifier-001')
+      .should('contain', 'identifier-001')
+      .should('contain', 'active')
       .click();
 
     cy
@@ -253,7 +264,7 @@ context('Patient Quick Search', function() {
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .as('searchModal')
       .find('.patient-search__input')
       .type('None')
