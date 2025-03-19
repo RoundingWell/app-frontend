@@ -97,18 +97,42 @@ export default App.extend({
     if (!this.isRestarting()) this.stopChildApp('filters');
   },
   beforeStart() {
-    const filter = this.getState().getEntityFilter();
+    this.filters = this.getState().getEntityFilter();
     const fields = { flows: ['name', 'state'] };
-    return Radio.request('entities', 'fetch:actions:collection', { data: { filter, fields } });
+
+    return Radio.request('entities', 'fetch:actions:collection', { data: { filter: this.filters, fields } });
   },
   onStart(options, collection) {
     this.collection = collection;
     this.filteredCollection = collection.clone();
 
+    this.subscribe();
+
     this.listenTo(this.filteredCollection, 'reset', this.showCountView);
     this.showCountView();
 
     this.showList();
+  },
+  subscribe() {
+    const channel = Radio.channel('ws');
+
+    channel.request('subscribe', this.collection.models, { filters: { actions: this.filters } });
+
+    this.listenTo(channel, 'message', ({ category }, model) => {
+      if (category === 'ActionDueChanged') {
+        this.showList();
+        return;
+      }
+
+      if (this.collection.get(model) || model.isFetching()) return;
+
+      model.fetch().then(() => {
+        this.collection.add(model);
+        Radio.request('ws', 'add', model);
+
+        this.showList();
+      });
+    });
   },
   showList() {
     const scheduleListView = new ScheduleListView({

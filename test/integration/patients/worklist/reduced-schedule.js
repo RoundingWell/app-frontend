@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import dayjs from 'dayjs';
 
 import { testDate, testDateAdd } from 'helpers/test-date';
 import { getRelationship } from 'helpers/json-api';
@@ -8,7 +9,7 @@ import { roleReducedEmployee } from 'support/api/roles';
 import { getAction } from 'support/api/actions';
 import { testForm } from 'support/api/forms';
 import { getPatient } from 'support/api/patients';
-import { stateTodo, stateInProgress } from 'support/api/states';
+import { stateTodo, stateInProgress, stateDone } from 'support/api/states';
 import { getFlow } from 'support/api/flows';
 import { teamCoordinator } from 'support/api/teams';
 
@@ -265,6 +266,331 @@ context('reduced schedule page', function() {
       .get('.sidebar')
       .find('.action-sidebar__name')
       .should('contain', 'Test Action');
+  });
+
+  specify('socket notifications', function() {
+    const testPatient = getPatient();
+    const testFlow = getFlow();
+    const currentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleReducedEmployee),
+      },
+    });
+
+    const testSocketAction = getAction({
+      attributes: {
+        name: 'Test Action - Subscribed on Page Load',
+        due_date: testDate(),
+        due_time: '06:00:00',
+        details: null,
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        form: getRelationship(testForm),
+        state: getRelationship(stateTodo),
+        flow: getRelationship(testFlow),
+      },
+    });
+
+    const testNewSocketAction = getAction({
+      attributes: {
+        name: 'New Action - Created Elsewhere',
+        due_date: testDate(),
+        due_time: '08:00:00',
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        form: getRelationship(testForm),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    const testNewStateSocketAction = getAction({
+      attributes: {
+        name: 'New Action - State Updated to Match Current Schedule Filter',
+        due_date: testDate(),
+        due_time: '07:00:00',
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    const testNewOwnerSocketAction = getAction({
+      attributes: {
+        name: 'New Action - Owner Updated to Match Current Schedule Filter',
+        due_date: testDate(),
+        due_time: '06:00:00',
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeCurrentClinician(fx => {
+        fx.data = currentClinician;
+
+        return fx;
+      })
+      .routeActions(fx => {
+        fx.data = [testSocketAction];
+
+        fx.included.push(testFlow);
+        fx.included.push(testPatient);
+
+        return fx;
+      })
+      .visit()
+      .wait('@routeActions')
+      .wait(200); // for initial ws connection to be created
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          name: 'New Name Via Websocket',
+        },
+      },
+    });
+
+    cy
+      .get('.schedule-list__table')
+      .find('.schedule-list__list-row .schedule-list__day-list')
+      .first()
+      .find('tr')
+      .first()
+      .as('firstAction')
+      .find('.schedule-list__action-state-name')
+      .should('contain', 'New Name Via Websocket');
+
+    cy.sendWs({
+      category: 'DetailsChanged',
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          details: 'New details via websocket.',
+        },
+      },
+    });
+
+    cy
+      .get('@firstAction')
+      .find('[data-details-region]')
+      .should('exist');
+
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
+        },
+      },
+    });
+
+    cy
+      .get('@firstAction')
+      .find('.schedule-list__action-state .fa-circle-dot')
+      .should('exist');
+
+    cy.sendWs({
+      category: 'SharingUpdated',
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          sharing: 'pending',
+          outreach: 'patient',
+        },
+      },
+    });
+
+    cy
+      .get('@firstAction')
+      .find('.js-form .fa-share-from-square')
+      .should('exist');
+
+    cy.sendWs({
+      category: 'ActionDueChanged',
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          due_date: testDateAdd(1),
+          due_time: '07:00:00',
+        },
+      },
+    });
+
+    cy
+      .get('.schedule-list__table')
+      .find('.schedule-list__list-row')
+      .first()
+      .find('.schedule-list__row-header .schedule-list__date')
+      .as('firstListRowDate')
+      .should('contain', dayjs(testDateAdd(1)).format('D'));
+
+    cy
+      .get('@firstAction')
+      .find('.schedule-list__due-time')
+      .should('contain', '7:00 AM');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testNewSocketAction;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+
+    // a notification that is sent for a resource we are currently fetching
+    // this notification is queued until model.fetch() is done for that action
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
+        },
+      },
+    });
+
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', testNewSocketAction.id);
+
+    // check actions count, new action was created, state was updated
+    cy
+      .get('[data-count-region]')
+      .should('contain', '2 Actions');
+
+    cy
+      .get('@firstListRowDate')
+      .should('contain', dayjs(testDate()).format('D'));
+
+    cy
+      .get('@firstAction')
+      .find('.schedule-list__action-state-name')
+      .should('contain', 'New Action - Created Elsewhere');
+
+    cy
+      .get('@firstAction')
+      .find('.schedule-list__action-state .fa-circle-dot')
+      .should('exist');
+
+    // ensures we subscribe correctly to models added to the worklist via ws
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {
+        state: {
+          type: stateDone.type,
+          id: stateDone.id,
+        },
+      },
+    });
+
+    cy
+      .get('@firstAction')
+      .find('.schedule-list__action-state .fa-circle-check')
+      .should('exist');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testNewStateSocketAction;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testNewStateSocketAction.type,
+        id: testNewStateSocketAction.id,
+      },
+      payload: {
+        state: {
+          type: stateTodo.type,
+          id: stateTodo.id,
+        },
+      },
+    });
+
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', testNewStateSocketAction.id);
+
+    cy
+      .get('@firstAction')
+      .find('.schedule-list__action-state-name')
+      .should('contain', 'New Action - State Updated to Match Current Schedule Filter');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testNewOwnerSocketAction;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'OwnerChanged',
+      resource: {
+        type: testNewOwnerSocketAction.type,
+        id: testNewOwnerSocketAction.id,
+      },
+      payload: {
+        owner: {
+          type: currentClinician.type,
+          id: currentClinician.id,
+        },
+      },
+    });
+
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', testNewOwnerSocketAction.id);
+
+    cy
+      .get('@firstAction')
+      .find('.schedule-list__action-state-name')
+      .should('contain', 'New Action - Owner Updated to Match Current Schedule Filter');
   });
 
   specify('maximum list count reached', function() {
