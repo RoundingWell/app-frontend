@@ -55,7 +55,6 @@ const _Model = BaseModel.extend({
         path: attributes.path,
         created_at: dayjs.utc().format(),
         _actions: [this.getResource()],
-        _patient: this.getPatient().getResource(),
         _view: attributes.urls.view,
         _download: attributes.urls.download,
       });
