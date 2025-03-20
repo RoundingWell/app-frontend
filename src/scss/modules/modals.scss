@@ -13,6 +13,12 @@
   width: 352px;
 }
 
+.modal--large {
+  @extend .modal;
+
+  width: 600px;
+}
+
 .modal--sidebar {
   background: $white;
   display: flex;

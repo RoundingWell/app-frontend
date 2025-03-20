@@ -418,7 +418,7 @@ context('App Nav', function() {
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-close')
       .click();
 
@@ -945,17 +945,17 @@ context('App Nav', function() {
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.patient-search__input')
       .should('have.value', 'First New Last');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-close .icon')
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .should('not.exist');
   });
 

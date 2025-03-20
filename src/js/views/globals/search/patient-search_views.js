@@ -64,7 +64,13 @@ const EmptyView = View.extend({
 
 const PicklistItem = View.extend({
   tagName: 'li',
-  className: 'js-picklist-item patient-search__picklist-item',
+  className() {
+    const className = 'js-picklist-item patient-search__picklist-item';
+
+    if (this.model.get('status') !== 'active') return `${ className } is-inactive`;
+
+    return className;
+  },
   initialize({ state }) {
     this.state = state;
     this.listenTo(this.state, 'change:search', this.render);
@@ -77,7 +83,12 @@ const PicklistItem = View.extend({
   },
   template: hbs`
     <div class="patient-search__picklist-item-name u-text--overflow">
-      <span>{{matchText name search}}{{~ remove_whitespace ~}}</span>
+      <div class="patient-search__picklist-item-name-icon">
+        {{far "address-card"}}
+      </div>
+      <div class="patient-search__picklist-item-name-text">
+        <span>{{matchText name search}}{{~ remove_whitespace ~}}</span>
+      </div>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
@@ -88,6 +99,9 @@ const PicklistItem = View.extend({
           {{#if identifiers.0.value}}{{matchText identifiers.0.value search}}{{else}}&ndash;{{/if}}
         </div>
       {{/if}}
+      <div class="patient-search__picklist-item-status u-text--overflow">
+        {{status}}
+      </div>
     </div>
   `,
   templateContext() {
@@ -123,7 +137,10 @@ const HeaderView = View.extend({
   className: 'patient-search__picklist-header',
   template: hbs`
     <div class="patient-search__picklist-header-name">
-      {{ @intl.globals.search.patientSearchViews.headerView.patient }}
+      <div class="patient-search__picklist-header-name-icon"></div>
+      <div class="patient-search__picklist-header-name-text">
+        {{ @intl.globals.search.patientSearchViews.headerView.patient }}
+      </div>
     </div>
     <div class="patient-search__picklist-header-meta">
       <div class="patient-search__picklist-header-dob">
@@ -131,9 +148,12 @@ const HeaderView = View.extend({
       </div>
       {{#if hasIdentifiers}}
         <div class="patient-search__picklist-header-identifier">
-        {{ @intl.globals.search.patientSearchViews.headerView.id }}
+          {{ @intl.globals.search.patientSearchViews.headerView.id }}
         </div>
       {{/if}}
+      <div class="patient-search__picklist-header-status">
+        {{ @intl.globals.search.patientSearchViews.headerView.workspaceStatus }}
+      </div>
     </div>
   `,
   templateContext() {
@@ -223,7 +243,7 @@ const PatientSearchPicklist = Component.extend({
 });
 
 const PatientSearchModal = View.extend({
-  className: 'modal',
+  className: 'modal--large',
   template: hbs`
     <a href="#" class="button--icon patient-search__close js-close">{{far "xmark"}}</a>
     <div data-picklist-region></div>
