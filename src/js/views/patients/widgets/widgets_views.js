@@ -2,7 +2,7 @@ import { View, CollectionView } from 'marionette';
 
 import hbs from 'handlebars-inline-precompile';
 
-import widgets, { buildWidget } from './widgets';
+import { buildWidget } from './widgets';
 
 import './widgets.scss';
 
@@ -18,14 +18,13 @@ const WidgetView = View.extend({
     content: '[data-content-region]',
   },
   initialize() {
-    const widget = this.getOption('widget');
     const patient = this.getOption('patient');
-    this.contentWidget = buildWidget(widget, patient, this.model);
+    this.contentWidget = buildWidget(this.model, patient);
   },
   serializeData() {
     return {
       ...this.model.attributes,
-      ...this.contentWidget.values,
+      ...this.contentWidget.getOption('values'),
     };
   },
   onRender() {
@@ -38,11 +37,8 @@ const WidgetView = View.extend({
 const WidgetCollectionView = CollectionView.extend({
   childView: WidgetView,
   childViewOptions(model) {
-    const widget = widgets[model.get('category')];
-
     return {
       itemClassName: this.getOption('itemClassName'),
-      widget,
       model,
       patient: this.model,
     };
