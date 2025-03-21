@@ -1063,7 +1063,7 @@ context('schedule page', function() {
       },
       {
         attributes: {
-          name: 'Second Action',
+          name: 'Second Action - Dash in Name',
           due_date: testDate(),
           due_time: '10:30:00',
         },
@@ -1282,7 +1282,7 @@ context('schedule page', function() {
 
     cy
       .get('@listSearch')
-      .type('Second Action');
+      .type('Second Action - Dash in Name');
 
     cy
       .get('[data-count-region]')
@@ -1294,7 +1294,7 @@ context('schedule page', function() {
       .find('.schedule-list__day-list-row')
       .should('have.length', 1)
       .first()
-      .should('contain', 'Second Action');
+      .should('contain', 'Second Action - Dash in Name');
 
     cy
       .get('@listSearch')
