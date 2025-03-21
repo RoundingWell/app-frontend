@@ -8,15 +8,17 @@ import { LayoutView, ListView } from 'js/views/patients/patient/archive/archive_
 
 export default App.extend({
   onBeforeStart({ patient }) {
+    const currentWorkspace = Radio.request('workspace', 'current');
+    const { done } = currentWorkspace.getStates().groupByDone();
+    this.states = done.getFilterIds();
+
     this.patient = patient;
+
     this.showView(new LayoutView({ model: patient }));
     this.getRegion('content').startPreloader();
   },
   beforeStart({ patient }) {
-    const currentWorkspace = Radio.request('workspace', 'current');
-    this.states = currentWorkspace.getStates();
-
-    const filter = { states: this.states.groupByDone().done.getFilterIds() };
+    const filter = { states: this.states };
 
     return [
       Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId: patient.id, filter }),
@@ -34,7 +36,7 @@ export default App.extend({
     const channel = Radio.channel('ws');
 
     const filters = {
-      states: this.states.groupByDone().done.getFilterIds(),
+      states: this.states,
       patient: this.patient.id,
     };
 

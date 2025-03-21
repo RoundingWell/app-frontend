@@ -14,20 +14,24 @@ export default App.extend({
   },
 
   onBeforeStart({ patient }) {
+    const currentWorkspace = Radio.request('workspace', 'current');
+    const { notDone } = currentWorkspace.getStates().groupByDone();
+    this.states = notDone.getFilterIds();
+
     this.currentUser = Radio.request('bootstrap', 'currentUser');
     this.patient = patient;
+
     this.showView(new LayoutView({ model: patient }));
+
     if (!this.currentUser.can('work:own')) {
       this.getRegion('addWorkflow').empty();
     }
+
     this.getRegion('content').startPreloader();
   },
 
   beforeStart({ patient }) {
-    const currentWorkspace = Radio.request('workspace', 'current');
-    this.states = currentWorkspace.getStates();
-
-    const filter = { states: this.states.groupByDone().notDone.getFilterIds() };
+    const filter = { states: this.states };
 
     return [
       Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId: patient.id, filter }),
@@ -48,7 +52,7 @@ export default App.extend({
     const channel = Radio.channel('ws');
 
     const filters = {
-      states: this.states.groupByDone().notDone.getFilterIds(),
+      states: this.states,
       patient: this.patient.id,
     };
 
