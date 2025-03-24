@@ -1138,15 +1138,6 @@ context('worklist page', function() {
       },
     });
 
-    const testDoneStateFlow = getFlow({
-      attributes: {
-        name: 'Test Flow - Has State Not In Current Filters',
-      },
-      relationships: {
-        state: getRelationship(stateDone),
-      },
-    });
-
     const testSocketAction = getAction({
       attributes: {
         name: 'Test Action - Subscribed on Page Load',
@@ -1198,20 +1189,6 @@ context('worklist page', function() {
       relationships: {
         state: getRelationship(stateTodo),
         flow: getRelationship(testFlow),
-        owner: getRelationship(currentClinician),
-        patient: getRelationship(testPatient1),
-      },
-    });
-
-    const testNewFlowStateSocketAction = getAction({
-      attributes: {
-        name: 'New Action - Flow State Does Not Match Current Filters',
-        updated_at: testTs(),
-        created_at: testTs(),
-      },
-      relationships: {
-        state: getRelationship(stateTodo),
-        flow: getRelationship(testDoneStateFlow),
         owner: getRelationship(currentClinician),
         patient: getRelationship(testPatient1),
       },
@@ -1554,15 +1531,6 @@ context('worklist page', function() {
     cy
       .get('@firstRow')
       .should('contain', 'New Action - Owner Updated to Match Current Worklist Filter');
-
-    cy
-      .routeAction(fx => {
-        fx.data = testNewFlowStateSocketAction;
-
-        fx.included.push(testDoneStateFlow);
-
-        return fx;
-      });
   });
 
   specify('actions on a done-flow list', function() {
