@@ -294,7 +294,7 @@ careOptsFrontend:
         emptyView:
           noScheduledActions: No Scheduled Actions
         scheduleTitleView:
-          tooltip: Schedule Worklist displays all Actions with a due date for you (or someone else on your team). States included are To Do and In Progress.
+          tooltip: Schedule Worklist displays all Actions with a due date for you (or someone else on your team).
         tableHeaderView:
           actionHeader: State, Action
           dueDateHeader: Due Date
@@ -630,20 +630,20 @@ careOptsFrontend:
         actionEmptyView: No Actions
         actionListTooltips: |
           {title, select,
-            owned_by {This worklist includes Actions with the Owner set to you (or someone else on your team). States included are To Do and In Progress.}
-            shared_by {This worklist includes Actions with the Owner set to { team } and { team } users. States included are To Do and In Progress.}
-            new_past_day {Actions added in the last 24 hours. States include To Do and In Progress.}
-            updated_past_three_days {Actions updated in the last 3 days. States include To Do and In Progress.}
+            owned_by {This worklist includes Actions with the Owner set to you (or someone else on your team).}
+            shared_by {This worklist includes Actions with the Owner set to { team } and { team } users.}
+            new_past_day {Actions added in the last 24 hours.}
+            updated_past_three_days {Actions updated in the last 3 days.}
             done_last_thirty_days {Actions completed in the last 30 days.}
           }
       flowViews:
         flowEmptyView: No Flows
         flowListTooltips: |
           {title, select,
-            owned_by {This worklist includes Flows with the Owner set to you (or someone else on your team). States included are To Do and In Progress.}
-            shared_by {This worklist includes Flows with the Owner set to { team } and { team } users. States included are To Do and In Progress.}
-            new_past_day {Flows added in the last 24 hours. States include To Do and In Progress.}
-            updated_past_three_days {Flows updated in the last 3 days. States include To Do and In Progress.}
+            owned_by {This worklist includes Flows with the Owner set to you (or someone else on your team).}
+            shared_by {This worklist includes Flows with the Owner set to { team } and { team } users.}
+            new_past_day {Flows added in the last 24 hours.}
+            updated_past_three_days {Flows updated in the last 3 days.}
             done_last_thirty_days {Flows completed in the last 30 days.}
           }
       tableHeaderTemplate:
