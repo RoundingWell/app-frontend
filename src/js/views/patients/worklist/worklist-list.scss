@@ -108,6 +108,10 @@
   white-space: nowrap;
 }
 
+.worklist-list__filter-date:not(:empty) {
+  margin-right: 16px;
+}
+
 .worklist-list__filter-sort .fa-arrow-down-arrow-up {
   margin-right: 8px;
 }
