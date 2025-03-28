@@ -13,6 +13,7 @@ export default App.extend({
     'subscribe': 'subscribe',
     'add': 'add',
     'unsubscribe': 'unsubscribe',
+    'trigger': 'triggerMessage',
   },
 
   initialize({ url }) {
@@ -102,24 +103,28 @@ export default App.extend({
     if (!_TEST_ && this.resources.length) this._subscribe();
   },
 
+  triggerMessage(data, model) {
+    const channel = this.getChannel();
+    if (model) model.trigger('message', data);
+    if (data.resource) channel.trigger(`message:${ data.resource.type }`, data, model);
+    channel.trigger('message', data, model);
+  },
+
   onMessage(event) {
     /* istanbul ignore next: Can't test this bref functionality in node websockets */
     if (!event.data) return;
-
-    let model;
-
-    const channel = this.getChannel();
 
     const data = JSON.parse(event.data);
 
     if (!data.category || data.name === 'pong') return;
 
-    if (data.resource) {
-      model = Radio.request('entities', 'get:store', data.resource);
-      model.handleMessage(data);
+    if (!data.resource) {
+      this.triggerMessage(data);
+      return;
     }
 
-    channel.trigger('message', data, model);
+    const model = Radio.request('entities', 'get:store', data.resource);
+    model.handleMessage(data);
   },
 
   _getResources(resources) {

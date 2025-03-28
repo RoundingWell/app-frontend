@@ -131,11 +131,13 @@ context('WS Service', function() {
     const channel = Radio.channel('ws');
 
     const handler = cy.stub();
+    const handler2 = cy.stub();
 
     cy
       .startService()
       .then(() => {
         service.listenTo(channel, 'message', handler);
+        service.listenTo(channel, 'message:Test', handler2);
 
         channel.request('subscribe', {});
       });
@@ -144,6 +146,7 @@ context('WS Service', function() {
       .sendWs({ id: 'foo', category: 'Test' })
       .then(() => {
         expect(handler).to.be.calledWith({ id: 'foo', category: 'Test' });
+        expect(handler2).to.be.calledWith({ id: 'foo', category: 'Test' });
       });
   });
 

@@ -1,5 +1,6 @@
 import { each, extend, isEmpty, isFunction, pick, reduce, result } from 'underscore';
 import Backbone from 'backbone';
+import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
 import JsonApiMixin from './jsonapi-mixin';
 
@@ -43,9 +44,16 @@ export default Backbone.Model.extend(extend({
       .then(response => {
         this._isFetching = false;
 
-        each(this._notifications, this._handleMessage, this);
+        // NOTE: If the response fails, a retry will include notiications results.
+        if (!response) {
+          delete this._notifications;
+          return this;
+        }
 
-        if (!response || response.ok) return this;
+        each(this._notifications, this._handleMessage, this);
+        delete this._notifications;
+
+        if (response.ok) return this;
 
         return response;
       })
@@ -126,8 +134,7 @@ export default Backbone.Model.extend(extend({
   _handleMessage({ category, resource, author, payload }) {
     const handler = this._getMessageHandler(category);
     if (handler) handler.call(this, payload, { category, resource, author });
-
-    this.trigger('message', { category, resource, author, payload });
+    Radio.request('ws', 'trigger', { category, resource, author, payload }, this);
   },
   handleMessage({ category, resource, author, payload }) {
     payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
