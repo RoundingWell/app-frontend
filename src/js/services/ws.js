@@ -4,6 +4,16 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
+const AdderApp = App.extend({
+  restartWithParent: false,
+  beforeStart({ model, dataParams }) {
+    return model.fetch({ data: dataParams });
+  },
+  onStart({ model, collection }) {
+    collection.add(model);
+  },
+});
+
 export default App.extend({
   HEART_BEAT_INTERVAL: 50000,
   channelName: 'ws',
@@ -14,6 +24,7 @@ export default App.extend({
     'add': 'add',
     'unsubscribe': 'unsubscribe',
     'trigger': 'triggerMessage',
+    'manage:add': 'manageAdd',
   },
 
   initialize({ url }) {
@@ -108,6 +119,21 @@ export default App.extend({
     if (model) model.trigger('message', data);
     if (data.resource) channel.trigger(`message:${ data.resource.type }`, data, model);
     channel.trigger('message', data, model);
+  },
+
+  manageAdd(app, collection, type, dataParams) {
+    const channel = this.getChannel();
+
+    app.listenTo(channel, `message:${ type }`, (data, model) => {
+      if (collection.get(model) || data.category === 'ResourceDeleted') return;
+
+      const appName = `${ model.type }-${ model.id }`;
+
+      if (app.isRunning() && app.getChildApp(appName)) return;
+
+      const adderApp = app.addChildApp(appName, AdderApp);
+      adderApp.start({ model, collection, dataParams });
+    });
   },
 
   onMessage(event) {

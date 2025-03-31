@@ -155,20 +155,21 @@ export default App.extend({
     this.showList();
   },
   subscribe() {
-    const channel = Radio.channel('ws');
-    const filterKey = this.getState().getType();
+    const isFlowType = this.getState().isFlowType();
 
-    channel.request('subscribe', this.collection.models, { filters: { [filterKey]: this.filters } });
+    if (isFlowType) {
+      Radio.request('ws', 'subscribe', this.collection.models, { filters: { flows: this.filters } });
+      Radio.request('ws', 'manage:add', this, this.collection, 'flows', { fields: { patients: ['first_name', 'last_name'] } });
+      return;
+    }
 
-    this.listenTo(channel, 'message', (data, model) => {
-      if (this.collection.get(model) || model.isFetching()) return;
+    const fields = {
+      patients: ['first_name', 'last_name'],
+      flows: ['name', 'state'],
+    };
 
-      model.fetch().then(() => {
-        this.collection.add(model);
-
-        Radio.request('ws', 'add', model);
-      });
-    });
+    Radio.request('ws', 'subscribe', this.collection.models, { filters: { actions: this.filters } });
+    Radio.request('ws', 'manage:add', this, this.collection, 'patient-actions', { fields });
   },
   // NOTE: Shows views dependent on getState().getType()
   showTypeViews() {

@@ -44,14 +44,14 @@ export default Backbone.Model.extend(extend({
       .then(response => {
         this._isFetching = false;
 
-        // NOTE: If the response fails, a retry will include notiications results.
+        // NOTE: If the response fails, a retry will include notifications results.
         if (!response) {
-          delete this._notifications;
+          this._notifications = null;
           return this;
         }
 
         each(this._notifications, this._handleMessage, this);
-        delete this._notifications;
+        this._notifications = null;
 
         if (response.ok) return this;
 
@@ -136,7 +136,7 @@ export default Backbone.Model.extend(extend({
     if (handler) handler.call(this, payload, { category, resource, author });
     Radio.request('ws', 'trigger', { category, resource, author, payload }, this);
   },
-  handleMessage({ category, resource, author, payload }) {
+  handleMessage({ category, resource, author, payload = {} }) {
     payload.attributes = extend({}, payload.attributes, { updated_at: dayjs.utc().format() });
 
     if (this.isFetching()) {
