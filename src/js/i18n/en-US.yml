@@ -192,6 +192,8 @@ careOptsFrontend:
         modalView:
           cancelText: Cancel
           submitText: Save
+        viewOnlyForm:
+          doneText: Done
     patientModal:
       patientModalTemplate:
         addPatient: Add Patient
