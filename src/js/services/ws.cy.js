@@ -1,6 +1,8 @@
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
+import 'js/entities-service/entities/flows';
+
 import WSService from './ws';
 
 let service;
@@ -131,19 +133,32 @@ context('WS Service', function() {
     const channel = Radio.channel('ws');
 
     const handler = cy.stub();
+    const handler2 = cy.stub();
 
     cy
       .startService()
       .then(() => {
         service.listenTo(channel, 'message', handler);
+        service.listenTo(channel, 'message:flows', handler2);
 
         channel.request('subscribe', {});
       });
 
     cy
-      .sendWs({ id: 'foo', category: 'Test' })
+      .sendWs({ category: 'Test', resource: { id: 'id', type: 'flows' } })
       .then(() => {
-        expect(handler).to.be.calledWith({ id: 'foo', category: 'Test' });
+        expect(handler).to.be.calledOnce;
+        const callArgs = handler.getCall(0).args;
+        expect(callArgs[0].category).to.equal('Test');
+        expect(callArgs[1].type).to.equal('flows');
+        expect(handler2).to.be.calledOnce;
+      });
+
+    cy
+      .sendWs({ category: 'Test' })
+      .then(() => {
+        expect(handler).to.be.calledTwice;
+        expect(handler2).to.be.calledOnce;
       });
   });
 

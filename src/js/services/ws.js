@@ -4,6 +4,16 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
+const AdderApp = App.extend({
+  restartWithParent: false,
+  beforeStart({ model, dataParams }) {
+    return model.fetch({ data: dataParams });
+  },
+  onStart({ model, collection }) {
+    collection.add(model);
+  },
+});
+
 export default App.extend({
   HEART_BEAT_INTERVAL: 50000,
   channelName: 'ws',
@@ -13,6 +23,8 @@ export default App.extend({
     'subscribe': 'subscribe',
     'add': 'add',
     'unsubscribe': 'unsubscribe',
+    'trigger': 'triggerMessage',
+    'manage:add': 'manageAdd',
   },
 
   initialize({ url }) {
@@ -102,24 +114,43 @@ export default App.extend({
     if (!_TEST_ && this.resources.length) this._subscribe();
   },
 
+  triggerMessage(data, model) {
+    const channel = this.getChannel();
+    if (model) model.trigger('message', data);
+    if (data.resource) channel.trigger(`message:${ data.resource.type }`, data, model);
+    channel.trigger('message', data, model);
+  },
+
+  manageAdd(app, collection, type, dataParams) {
+    const channel = this.getChannel();
+
+    app.listenTo(channel, `message:${ type }`, (data, model) => {
+      if (collection.get(model) || data.category === 'ResourceDeleted') return;
+
+      const appName = `${ model.type }-${ model.id }`;
+
+      if (app.isRunning() && app.getChildApp(appName)) return;
+
+      const adderApp = app.addChildApp(appName, AdderApp);
+      adderApp.start({ model, collection, dataParams });
+    });
+  },
+
   onMessage(event) {
     /* istanbul ignore next: Can't test this bref functionality in node websockets */
     if (!event.data) return;
-
-    let model;
-
-    const channel = this.getChannel();
 
     const data = JSON.parse(event.data);
 
     if (!data.category || data.name === 'pong') return;
 
-    if (data.resource) {
-      model = Radio.request('entities', 'get:store', data.resource);
-      model.handleMessage(data);
+    if (!data.resource) {
+      this.triggerMessage(data);
+      return;
     }
 
-    channel.trigger('message', data, model);
+    const model = Radio.request('entities', 'get:store', data.resource);
+    model.handleMessage(data);
   },
 
   _getResources(resources) {

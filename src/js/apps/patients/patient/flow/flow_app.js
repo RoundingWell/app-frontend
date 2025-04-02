@@ -82,6 +82,7 @@ export default SubRouterApp.extend({
     this.showSidebar();
 
     this.listenTo(this.actions, {
+      'add': this.onAddAction,
       'change:_state': this.onActionChangeState,
       'destroy': this.onActionDestroy,
     });
@@ -97,16 +98,9 @@ export default SubRouterApp.extend({
     this.stopChildApp('actionSidebar');
   },
   subscribe() {
-    const channel = Radio.channel('ws');
     const filters = { actions: { flow: this.flow.id } };
-
-    channel.request('subscribe', [this.flow, ...this.actions.models], { filters });
-
-    this.listenTo(channel, 'message', ({ category }, model) => {
-      if (category !== 'ResourceCreated') return;
-
-      model.fetch().then(bind(this._addAction, this));
-    });
+    Radio.request('ws', 'subscribe', [this.flow, ...this.actions.models], { filters });
+    Radio.request('ws', 'manage:add', this, this.actions, 'patient-actions');
   },
   _setFlowProgress() {
     const complete = this.actions.filter(action => action.isDone()).length;
@@ -114,8 +108,7 @@ export default SubRouterApp.extend({
 
     this.flow.set({ _progress: { complete, total } });
   },
-  _addAction(action) {
-    this.actions.add(action);
+  onAddAction(action) {
     this.editableCollection.add(action);
 
     Radio.request('ws', 'add', action);
@@ -261,7 +254,7 @@ export default SubRouterApp.extend({
   onAddProgramAction(programAction) {
     const action = programAction.createAction({ flow: this.flow });
     action.saveAll().then(() => {
-      this._addAction(action);
+      this.actions.add(action);
 
       Radio.trigger('event-router', 'flow:action', this.flow.id, action.id);
     });
