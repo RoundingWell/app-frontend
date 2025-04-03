@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import { v4 as uuid } from 'uuid';
 
 import formatDate from 'helpers/format-date';
@@ -19,11 +18,7 @@ context('program action sidebar', function() {
     const testProgram = getProgram();
 
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routeTags()
       .routeProgramActions(fx => {
         fx.data = getProgramActions({
@@ -881,12 +876,7 @@ context('program action sidebar', function() {
   specify('outreach disabled', function() {
     cy
       .routeTags()
-      .routeSettings(fx => {
-        const careTeamOutreach = _.find(fx.data, setting => setting.id === 'care_team_outreach');
-        careTeamOutreach.attributes.value = false;
-
-        return fx;
-      })
+      .routeSettings('care_team_outreach', false)
       .routeProgramAction()
       .routeProgramActions()
       .routeProgramFlows()
@@ -931,11 +921,7 @@ context('program action sidebar', function() {
     });
 
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routeTags()
       .routeProgramFlow(fx => {
         fx.data = testProgramFlow;

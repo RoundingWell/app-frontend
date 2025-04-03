@@ -731,11 +731,7 @@ context('action sidebar', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routePatient(fx => {
         fx.data = testPatient;
 
@@ -995,11 +991,7 @@ context('action sidebar', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routePatient(fx => {
         fx.data = testPatient;
 
@@ -1139,11 +1131,7 @@ context('action sidebar', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routeAction(fx => {
         fx.data = testAction;
 
@@ -1201,11 +1189,6 @@ context('action sidebar', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: false } });
-
-        return fx;
-      })
       .routeAction(fx => {
         fx.data = testAction;
 
@@ -1713,11 +1696,7 @@ context('action sidebar', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routeAction(fx => {
         fx.data = testAction;
 
@@ -1988,11 +1967,7 @@ context('action sidebar', function() {
     cy
       .routesForPatientAction()
       // NOTE: Tests upload attachments with canEdit permissions
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routeCurrentClinician(fx => {
         fx.data = getCurrentClinician({
           relationships: {

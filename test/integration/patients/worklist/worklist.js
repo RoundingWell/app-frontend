@@ -3055,14 +3055,22 @@ context('worklist page', function() {
     });
 
     cy
-      .routeSettings(fx => {
-        const sortingSettings = _.find(fx.data, setting => setting.id === 'sorting');
-        _.each(sortingSettings.attributes.value, function(sortMethod) {
-          sortMethod.sort_type = 'numeric';
-        });
-
-        return fx;
-      })
+      .routeSettings('sorting', [
+        {
+          id: 'sortCustomDesc',
+          text: 'Foo: Highest - Lowest',
+          direction: 'desc',
+          field_name: 'foo',
+          sort_type: 'numeric',
+        },
+        {
+          id: 'sortCustomAsc',
+          text: 'Foo: Lowest - Highest',
+          direction: 'asc',
+          field_name: 'foo',
+          sort_type: 'numeric',
+        },
+      ])
       .routeFlows(fx => {
         fx.data = [
           getFlow({ relationships: { patient: getRelationship(patient2) } }),
@@ -4226,14 +4234,8 @@ context('worklist page', function() {
 
         return fx;
       })
-      .routeSettings(fx => {
-        fx.data[0].attributes = {
-          value: {
-            widgets: ['sex', 'hbsWidget'],
-          },
-        };
-
-        return fx;
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: ['sex', 'hbsWidget'],
       })
       .routeWidgets(fx => {
         fx.data = [

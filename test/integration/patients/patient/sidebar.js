@@ -76,36 +76,27 @@ context('patient sidebar', function() {
 
         return fx;
       })
-      .routeSettings(fx => {
-        fx.data = [{
-          id: 'widgets_patient_sidebar',
-          attributes: {
-            value: {
-              widgets: [
-                'dob',
-                'sex',
-                'status',
-                'divider',
-                'workspaces',
-                'divider',
-                'formWidget',
-                'formModalWidget',
-                'readOnlyFormModalWidget',
-                'reportFormModalWidget',
-                'formModalWidgetSmall',
-                'formModalWidgetLarge',
-                'patientMRNIdentifier',
-                'patientSSNIdentifier',
-                'hbsWidget',
-                'hbsEmptyWidget',
-                'hbsNoRegionWidget',
-                'hbsEmptyTemplateWidget',
-              ],
-            },
-          },
-        }];
-
-        return fx;
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: [
+          'dob',
+          'sex',
+          'status',
+          'divider',
+          'workspaces',
+          'divider',
+          'formWidget',
+          'formModalWidget',
+          'readOnlyFormModalWidget',
+          'reportFormModalWidget',
+          'formModalWidgetSmall',
+          'formModalWidgetLarge',
+          'patientMRNIdentifier',
+          'patientSSNIdentifier',
+          'hbsWidget',
+          'hbsEmptyWidget',
+          'hbsNoRegionWidget',
+          'hbsEmptyTemplateWidget',
+        ],
       })
       .routeWidgets(fx => {
         const addWidget = _.partial(getResource, _, 'widgets');
@@ -551,19 +542,9 @@ context('patient sidebar', function() {
 
     cy
       .routesForPatientDashboard()
-      .routeSettings(fx => {
-        // NOTE: Ensures this button submit text and form_id for routing aren't used in this situation
-        fx.data.push({
-          id: 'patient_creation_form',
-          attributes: {
-            value: {
-              form_id: testForm.id,
-              submit_text: `Continue to ${ testForm.attributes.name }`,
-            },
-          },
-        });
-
-        return fx;
+      .routeSettings('patient_creation_form', {
+        form_id: testForm.id,
+        submit_text: `Continue to ${ testForm.attributes.name }`,
       })
       .routePatient(fx => {
         fx.data = testPatient;
@@ -633,19 +614,9 @@ context('patient sidebar', function() {
 
     cy
       .routesForPatientDashboard()
-      .routeSettings(fx => {
-        // NOTE: Ensures this submit text doesn't show for the submit button in this situation
-        fx.data.push({
-          id: 'patient_creation_form',
-          attributes: {
-            value: {
-              form_id: testForm.id,
-              submit_text: `Continue to ${ testForm.attributes.name }`,
-            },
-          },
-        });
-
-        return fx;
+      .routeSettings('patient_creation_form', {
+        form_id: testForm.id,
+        submit_text: `Continue to ${ testForm.attributes.name }`,
       })
       .routePatient(fx => {
         fx.data = testPatient;

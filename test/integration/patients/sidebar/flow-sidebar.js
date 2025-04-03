@@ -514,11 +514,7 @@ context('flow sidebar', function() {
 
     cy
       .routesForPatientDashboard()
-      .routeSettings(fx => {
-        fx.data = [{ id: 'require_done_flow', attributes: { value: true } }];
-
-        return fx;
-      })
+      .routeSettings('require_done_flow', true)
       .routeFlow(fx => {
         fx.data = testFlow;
 

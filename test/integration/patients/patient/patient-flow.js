@@ -153,11 +153,7 @@ context('patient flow page', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings(fx => {
-        fx.data.push({ id: 'upload_attachments', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('upload_attachments', true)
       .routeFlow(fx => {
         fx.data = testFlow;
 

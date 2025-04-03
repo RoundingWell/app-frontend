@@ -2,8 +2,7 @@
   {
     "id": "widgets_patient_sidebar",
     "value": {
-      "widgets": ["dob", "sex", "status", "divider", "workspaces"],
-      "fields": ["foo"]
+      "widgets": ["dob", "sex", "status", "divider", "workspaces"]
     }
   },
   {
@@ -47,5 +46,28 @@
         "field_name": "foo"
       }
     ]
+  },
+  {
+    "id": "manual_patient_creation",
+    "value": true
+  },
+  {
+    "id": "help_url",
+    "value": "https://customer-help-url.com/"
+  },
+  {
+    "id": "patient_creation_form",
+    "value": {
+      "form_id": "",
+      "submit_text": ""
+    }
+  },
+  {
+    "id": "upload_attachments",
+    "value": false
+  },
+  {
+    "id": "custom_filters",
+    "value": []
   }
 ]
