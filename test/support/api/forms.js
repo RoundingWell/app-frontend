@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import { v4 as uuid } from 'uuid';
 import { getResource, mergeJsonApi } from 'helpers/json-api';
 
 import fxTestForms from 'fixtures/collections/forms';
@@ -13,6 +14,8 @@ export const testForm = getResource(_.extend(fxTestForms[0], {
 }), TYPE);
 
 export function getForm(data) {
+  data = _.extend({ id: uuid() }, data);
+
   return mergeJsonApi(testForm, data);
 }
 
@@ -31,14 +34,14 @@ Cypress.Commands.add('routeForms', (mutator = _.identity) => {
     .as('routeForms');
 });
 
-Cypress.Commands.add('routeForm', (mutator = _.identity) => {
+Cypress.Commands.add('routeForm', (mutator = _.identity, id = '') => {
   const data = getForm();
 
   cy
-    .intercept('GET', '/api/forms/*', {
+    .intercept('GET', `/api/forms/${ id }*`, {
       body: mutator({ data, included: [] }),
     })
-    .as('routeForm');
+    .as(`routeForm${ id }`);
 });
 
 Cypress.Commands.add('routeFormByAction', (mutator = _.identity) => {

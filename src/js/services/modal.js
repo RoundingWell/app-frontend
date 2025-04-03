@@ -1,6 +1,8 @@
 import Radio from 'backbone.radio';
 import App from 'js/base/app';
 
+import intl from 'js/i18n';
+
 import FormsService from 'js/services/forms';
 
 import { ModalView, SidebarModalView, SmallModalView, IframeFormView } from 'js/views/globals/modal/modal_views';
@@ -49,11 +51,17 @@ export default App.extend({
   },
   showForm(patient, formName, form, size) {
     const formService = new FormsService({ patient, form });
+    const bodyView = new IframeFormView({ model: form, size });
+
+    if (form.isReadOnly()) {
+      this.showViewOnlyForm(formService, bodyView, formName);
+      return;
+    }
 
     const modal = this.showModal({
       headingText: formName,
       headerIcon: 'square-poll-horizontal',
-      bodyView: new IframeFormView({ model: form, size }),
+      bodyView,
       onBeforeDestroy() {
         formService.destroy();
       },
@@ -78,5 +86,17 @@ export default App.extend({
     });
 
     return modal;
+  },
+  showViewOnlyForm(formService, bodyView, formName) {
+    this.showModal({
+      headingText: formName,
+      submitText: intl.globals.modal.modalViews.viewOnlyForm.doneText,
+      cancelText: false,
+      headerIcon: 'square-poll-horizontal',
+      bodyView,
+      onBeforeDestroy() {
+        formService.destroy();
+      },
+    });
   },
 });

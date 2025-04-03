@@ -44,16 +44,30 @@ context('patient sidebar', function() {
       },
     });
 
+    const testReadOnlyForm = getForm({
+      attributes: {
+        options: {
+          read_only: true,
+        },
+      },
+    });
+
     cy
       .routesForPatientDashboard()
       .routeFormDefinition()
       .routeLatestFormResponse()
       .routeFormFields()
+      .routeForm()
       .routeForm(fx => {
         fx.data = testScriptReducerForm;
 
         return fx;
-      })
+      }, testScriptReducerForm.id)
+      .routeForm(fx => {
+        fx.data = testReadOnlyForm;
+
+        return fx;
+      }, testReadOnlyForm.id)
       .routeWidgetValues(fx => {
         fx.values = {
           sex: 'f',
@@ -76,6 +90,8 @@ context('patient sidebar', function() {
                 'divider',
                 'formWidget',
                 'formModalWidget',
+                'readOnlyFormModalWidget',
+                'reportFormModalWidget',
                 'formModalWidgetSmall',
                 'formModalWidgetLarge',
                 'patientMRNIdentifier',
@@ -111,6 +127,16 @@ context('patient sidebar', function() {
               display_name: 'Modal Form',
               form_id: testScriptReducerForm.id,
               form_name: 'Test Modal Form',
+              is_modal: true,
+            },
+          }),
+          addWidget({
+            slug: 'readOnlyFormModalWidget',
+            category: 'formWidget',
+            definition: {
+              display_name: 'Modal Read Only Form',
+              form_id: testReadOnlyForm.id,
+              form_name: 'Test Modal Read Only Form',
               is_modal: true,
             },
           }),
@@ -226,7 +252,7 @@ context('patient sidebar', function() {
       .wait('@routeWidgets');
 
     cy
-      .wait('@routeForm')
+      .wait(`@routeForm${ testScriptReducerForm.id }`)
       .itsUrl()
       .its('pathname')
       .should('contain', testScriptReducerForm.id);
@@ -272,6 +298,11 @@ context('patient sidebar', function() {
       .should('contain', 'Modal Form')
       .find('.widgets__form-widget')
       .should('contain', 'Test Modal Form')
+      .parents('.patient-sidebar__section')
+      .next()
+      .should('contain', 'Modal Read Only Form')
+      .find('.widgets__form-widget')
+      .should('contain', 'Test Modal Read Only Form')
       .parents('.patient-sidebar__section')
       .next()
       .find('.widgets__form-widget')
@@ -385,6 +416,35 @@ context('patient sidebar', function() {
     cy
       .get('.modal')
       .should('not.exist');
+
+    cy
+      .get('.patient-sidebar')
+      .find('.widgets__form-widget')
+      .contains('Test Modal Read Only Form')
+      .click()
+      .wait(`@routeForm${ testReadOnlyForm.id }`)
+      .wait('@routeFormDefinition');
+
+    cy
+      .iframe()
+      .as('iframe')
+      .find('.formio-editor-read-only-content');
+
+    cy
+      .get('.modal')
+      .find('.modal__footer-actions .js-close')
+      .should('not.exist');
+
+    cy
+      .get('.modal')
+      .find('.modal__footer-actions .js-submit')
+      .should('contain', 'Done');
+
+    cy
+      .get('.modal')
+      .find('.js-close')
+      .first()
+      .click();
 
     cy
       .get('@patientSidebar')
