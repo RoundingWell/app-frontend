@@ -57,11 +57,17 @@ context('patient sidebar', function() {
       .routeFormDefinition()
       .routeLatestFormResponse()
       .routeFormFields()
+      .routeForm()
       .routeForm(fx => {
         fx.data = testScriptReducerForm;
 
         return fx;
-      })
+      }, testScriptReducerForm.id)
+      .routeForm(fx => {
+        fx.data = testReadOnlyForm;
+
+        return fx;
+      }, testReadOnlyForm.id)
       .routeWidgetValues(fx => {
         fx.values = {
           sex: 'f',
@@ -246,7 +252,7 @@ context('patient sidebar', function() {
       .wait('@routeWidgets');
 
     cy
-      .wait('@routeForm')
+      .wait(`@routeForm${ testScriptReducerForm.id }`)
       .itsUrl()
       .its('pathname')
       .should('contain', testScriptReducerForm.id);
@@ -416,12 +422,13 @@ context('patient sidebar', function() {
       .find('.widgets__form-widget')
       .contains('Test Modal Read Only Form')
       .click()
-      .wait('@routeForm');
+      .wait(`@routeForm${ testReadOnlyForm.id }`)
+      .wait('@routeFormDefinition');
 
     cy
-      .get('@iframe')
-      .find('[name="data[fields.foo]"]')
-      .should('be.disabled');
+      .iframe()
+      .as('iframe')
+      .find('.formio-editor-read-only-content');
 
     cy
       .get('.modal')
