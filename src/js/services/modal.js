@@ -53,7 +53,7 @@ export default App.extend({
     const formService = new FormsService({ patient, form });
     const bodyView = new IframeFormView({ model: form, size });
 
-    if (form.isReadOnly() || form.isReport()) {
+    if (form.isReadOnly()) {
       this.showViewOnlyForm(formService, bodyView, formName);
       return;
     }

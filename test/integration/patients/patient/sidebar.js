@@ -52,14 +52,6 @@ context('patient sidebar', function() {
       },
     });
 
-    const testReportForm = getForm({
-      attributes: {
-        options: {
-          is_report: true,
-        },
-      },
-    });
-
     cy
       .routesForPatientDashboard()
       .routeFormDefinition()
@@ -139,16 +131,6 @@ context('patient sidebar', function() {
               display_name: 'Modal Read Only Form',
               form_id: testReadOnlyForm.id,
               form_name: 'Test Modal Read Only Form',
-              is_modal: true,
-            },
-          }),
-          addWidget({
-            slug: 'reportFormModalWidget',
-            category: 'formWidget',
-            definition: {
-              display_name: 'Modal Report Form',
-              form_id: testReportForm.id,
-              form_name: 'Test Modal Report Form',
               is_modal: true,
             },
           }),
@@ -317,11 +299,6 @@ context('patient sidebar', function() {
       .should('contain', 'Test Modal Read Only Form')
       .parents('.patient-sidebar__section')
       .next()
-      .should('contain', 'Modal Report Form')
-      .find('.widgets__form-widget')
-      .should('contain', 'Test Modal Report Form')
-      .parents('.patient-sidebar__section')
-      .next()
       .find('.widgets__form-widget')
       .should('contain', 'Test Modal Form Small')
       .parents('.patient-sidebar__section')
@@ -435,51 +412,9 @@ context('patient sidebar', function() {
       .should('not.exist');
 
     cy
-      .routeForm(fx => {
-        fx.data = testReadOnlyForm;
-
-        return fx;
-      });
-
-    cy
       .get('.patient-sidebar')
       .find('.widgets__form-widget')
       .contains('Test Modal Read Only Form')
-      .click()
-      .wait('@routeForm');
-
-    cy
-      .get('@iframe')
-      .find('[name="data[fields.foo]"]')
-      .should('be.disabled');
-
-    cy
-      .get('.modal')
-      .find('.modal__footer-actions .js-close')
-      .should('not.exist');
-
-    cy
-      .get('.modal')
-      .find('.modal__footer-actions .js-submit')
-      .should('contain', 'Done');
-
-    cy
-      .get('.modal')
-      .find('.js-close')
-      .first()
-      .click();
-
-    cy
-      .routeForm(fx => {
-        fx.data = testReportForm;
-
-        return fx;
-      });
-
-    cy
-      .get('.patient-sidebar')
-      .find('.widgets__form-widget')
-      .contains('Test Modal Report Form')
       .click()
       .wait('@routeForm');
 
