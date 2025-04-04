@@ -33,24 +33,15 @@ export default App.extend({
     this.showChildView('content', new ListView({ collection: this.collection }));
   },
   subscribe() {
-    const channel = Radio.channel('ws');
-
     const filters = {
       states: this.states,
       patient: this.patient.id,
     };
 
-    channel.request('subscribe', this.collection.models, {
+    Radio.request('ws', 'subscribe', this.collection.models, {
       filters: { actions: { ...filters, flow: NIL_UUID }, flows: filters },
     });
-
-    this.listenTo(channel, 'message', (data, model) => {
-      if (this.collection.get(model) || model.isFetching()) return;
-
-      model.fetch().then(() => {
-        this.collection.add(model);
-        Radio.request('ws', 'add', model);
-      });
-    });
+    Radio.request('ws', 'manage:add', this, this.collection, 'flows');
+    Radio.request('ws', 'manage:add', this, this.collection, 'patient-actions');
   },
 });
