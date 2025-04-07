@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import { NIL as NIL_UUID } from 'uuid';
 
 import App from 'js/base/app';
 
@@ -7,13 +8,17 @@ import { LayoutView, ListView } from 'js/views/patients/patient/archive/archive_
 
 export default App.extend({
   onBeforeStart({ patient }) {
+    const currentWorkspace = Radio.request('workspace', 'current');
+    const { done } = currentWorkspace.getStates().groupByDone();
+    this.states = done.getFilterIds();
+
+    this.patient = patient;
+
     this.showView(new LayoutView({ model: patient }));
     this.getRegion('content').startPreloader();
   },
   beforeStart({ patient }) {
-    const currentWorkspace = Radio.request('workspace', 'current');
-    const states = currentWorkspace.getStates();
-    const filter = { states: states.groupByDone().done.getFilterIds() };
+    const filter = { states: this.states };
 
     return [
       Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId: patient.id, filter }),
@@ -22,6 +27,21 @@ export default App.extend({
   },
   onStart({ patient }, actions, flows) {
     this.collection = new Backbone.Collection([...actions.models, ...flows.models]);
+
+    this.subscribe();
+
     this.showChildView('content', new ListView({ collection: this.collection }));
+  },
+  subscribe() {
+    const filters = {
+      states: this.states,
+      patient: this.patient.id,
+    };
+
+    Radio.request('ws', 'subscribe', this.collection.models, {
+      filters: { actions: { ...filters, flow: NIL_UUID }, flows: filters },
+    });
+    Radio.request('ws', 'manage:add', this, this.collection, 'flows');
+    Radio.request('ws', 'manage:add', this, this.collection, 'patient-actions');
   },
 });
