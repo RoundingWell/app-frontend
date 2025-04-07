@@ -60,6 +60,7 @@ context('Patient Quick Search', function() {
   specify('Modal', function() {
     cy
       .routesForPatientDashboard()
+      .routeSettings('manual_patient_creation', false)
       .routeActions()
       .visit()
       .wait('@routeActions');
@@ -247,11 +248,7 @@ context('Patient Quick Search', function() {
 
   specify('No Results with Patient Add', function() {
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'manual_patient_creation', attributes: { value: true } });
-
-        return fx;
-      })
+      .routeSettings('manual_patient_creation', true)
       .routesForPatientDashboard()
       .routeActions()
       .visit()

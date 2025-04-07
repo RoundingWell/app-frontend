@@ -43,6 +43,7 @@ context('App Nav', function() {
 
   specify('display nav', function() {
     cy
+      .routeSettings('help_url', null)
       .routePrograms()
       .routeDashboards()
       .routeClinicians()
@@ -380,11 +381,6 @@ context('App Nav', function() {
     localStorage.setItem('isNavMenuMinimized', true);
 
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'manual_patient_creation', attributes: { value: true } });
-
-        return fx;
-      })
       .routePrograms()
       .visit();
 
@@ -605,11 +601,6 @@ context('App Nav', function() {
 
     cy
       .routesForPatientDashboard()
-      .routeSettings(fx => {
-        fx.data.push({ id: 'manual_patient_creation', attributes: { value: true } });
-
-        return fx;
-      })
       .routeWorkspaceClinicians(fx => {
         fx.data = [testClinician];
 
@@ -739,11 +730,6 @@ context('App Nav', function() {
     const futureDate = dayjs(testDate).add(1, 'day');
 
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'manual_patient_creation', attributes: { value: true } });
-
-        return fx;
-      })
       .visitOnClock({ now: testDate, functionNames: ['Date'] });
 
     cy
@@ -961,11 +947,7 @@ context('App Nav', function() {
 
   specify('manual add patient disabled', function() {
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'manual_patient_creation', attributes: { value: false } });
-
-        return fx;
-      })
+      .routeSettings('manual_patient_creation', false)
       .visit();
 
     cy
@@ -976,11 +958,7 @@ context('App Nav', function() {
 
   specify('hidden help link', function() {
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'help_url', attributes: { value: false } });
-
-        return fx;
-      })
+      .routeSettings('help_url', false)
       .visit();
 
     cy
@@ -996,11 +974,6 @@ context('App Nav', function() {
 
   specify('custom help link url', function() {
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'help_url', attributes: { value: 'https://customer-help-url.com/' } });
-
-        return fx;
-      })
       .visit();
 
     cy
@@ -1017,19 +990,9 @@ context('App Nav', function() {
 
   specify('add patient custom form', function() {
     cy
-      .routeSettings(fx => {
-        fx.data.push({ id: 'manual_patient_creation', attributes: { value: true } });
-        fx.data.push({
-          id: 'patient_creation_form',
-          attributes: {
-            value: {
-              form_id: testForm.id,
-              submit_text: `Continue to ${ testForm.attributes.name }`,
-            },
-          },
-        });
-
-        return fx;
+      .routeSettings('patient_creation_form', {
+        form_id: testForm.id,
+        submit_text: `Continue to ${ testForm.attributes.name }`,
       })
       .visit();
 

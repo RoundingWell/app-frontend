@@ -85,11 +85,7 @@ context('filter sidebar', function() {
 
         return fx;
       })
-      .routeSettings(fx => {
-        fx.data.push({ id: 'custom_filters', attributes: { value: ['team', 'insurance'] } });
-
-        return fx;
-      })
+      .routeSettings('custom_filters', ['team', 'insurance'])
       .visit('/worklist/owned-by')
       .wait('@routeActions')
       .itsUrl()
@@ -720,11 +716,7 @@ context('filter sidebar', function() {
 
         return fx;
       })
-      .routeSettings(fx => {
-        fx.data.push({ id: 'custom_filters', attributes: { value: ['team', 'insurance'] } });
-
-        return fx;
-      })
+      .routeSettings('custom_filters', ['team', 'insurance'])
       .routeActions()
       .visit('/schedule')
       .wait('@routeActions')
@@ -1142,11 +1134,7 @@ context('filter sidebar', function() {
 
         return fx;
       })
-      .routeSettings(fx => {
-        fx.data.push({ id: 'custom_filters', attributes: { value: ['team', 'insurance'] } });
-
-        return fx;
-      })
+      .routeSettings('custom_filters', ['team', 'insurance'])
       .routeActions()
       .routeAction()
       .routePatientByAction()

@@ -1002,11 +1002,7 @@ context('Worklist bulk editing', function() {
 
   specify('bulk flow editing completed', function() {
     cy
-      .routeSettings(fx => {
-        fx.data = [{ id: 'require_done_flow', attributes: { value: true } }];
-
-        return fx;
-      })
+      .routeSettings('require_done_flow', true)
       .routeFlows(fx => {
         fx.data = [
           getFlow({
