@@ -464,8 +464,12 @@ context('patient archive page', function() {
       .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
       .wait('@routePatientActions')
-      .wait('@routePatientFlows')
-      .wait(200); // for initial ws connection to be created
+      .wait('@routeWorkspacePatient')
+      .wait('@routePatientFlows');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledOnce');
 
     // state was set to be not done, which means it's removed from the list
     cy.sendWs({
@@ -655,8 +659,11 @@ context('patient archive page', function() {
       .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
       .wait('@routePatientActions')
-      .wait('@routePatientFlows')
-      .wait(200); // for initial ws connection to be created
+      .wait('@routePatientFlows');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledOnce');
 
     // state was set to done, which means it's removed from the list
     cy.sendWs({

@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid, NIL as NIL_UUID } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -1055,8 +1055,23 @@ context('patient dashboard page', function() {
       .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
       .wait('@routePatientFlows')
-      .wait('@routePatientActions')
-      .wait(200); // for initial ws connection to be created
+      .wait('@routePatientActions');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledOnce');
+
+    cy
+      .get('@wsHandleMessage')
+      .then(stub => {
+        const states = [stateTodo.id, stateInProgress.id].join();
+        const patient = testPatient.id;
+        const { filters } = stub.getCall(0).args[0].data;
+        expect(filters).to.deep.equal({
+          actions: { states, patient, flow: NIL_UUID },
+          flows: { states, patient },
+        });
+      });
 
     cy.sendWs({
       category: 'NameChanged',
@@ -1284,8 +1299,11 @@ context('patient dashboard page', function() {
       .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
       .wait('@routePatientFlows')
-      .wait('@routePatientActions')
-      .wait(200); // for initial ws connection to be created
+      .wait('@routePatientActions');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledOnce');
 
     cy.sendWs({
       category: 'NameChanged',
