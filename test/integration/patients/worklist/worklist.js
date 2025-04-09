@@ -2736,7 +2736,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'include=patient.patient-fields.foo');
+      .should('contain', 'include=patient,patient.patient-fields.foo');
 
     cy
       .get('.worklist-list__toggle')
@@ -3573,7 +3573,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'include=patient.patient-fields.foo');
+      .should('contain', 'include=patient,patient.patient-fields.foo');
 
     cy
       .get('.worklist-list__filter-sort')

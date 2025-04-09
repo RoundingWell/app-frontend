@@ -125,19 +125,25 @@ export default App.extend({
     this.showView();
   },
   beforeStart() {
-    const listType = this.getState().getType();
+    const isFlowType = this.getState().isFlowType();
+    const entityRequest = isFlowType ? 'fetch:flows:collection' : 'fetch:actions:collection';
+
+    const includes = ['patient', ...this.sortOptions.getInclude()];
+    const fields = { patients: ['first_name', 'last_name', 'patient-fields'] };
     this.filters = this.getState().getEntityFilter();
 
-    const data = {
-      filter: this.filters,
-      include: this.sortOptions.getInclude(),
-    };
-
-    if (listType === 'actions') {
-      data.fields = { flows: ['name', 'state'] };
+    if (!isFlowType) {
+      fields.flows = ['name', 'state'];
+      includes.push('flow');
     }
 
-    return Radio.request('entities', `fetch:${ listType }:collection`, { data });
+    this.query = {
+      filter: this.filters,
+      fields,
+      include: includes.join(','),
+    };
+
+    return Radio.request('entities', entityRequest, { data: this.query });
   },
   onStart(options, collection) {
     this.collection = collection;
@@ -156,20 +162,11 @@ export default App.extend({
   },
   subscribe() {
     const isFlowType = this.getState().isFlowType();
+    const entityType = isFlowType ? 'flows' : 'patient-actions';
+    const filterType = isFlowType ? 'flows' : 'actions';
 
-    if (isFlowType) {
-      Radio.request('ws', 'subscribe', this.collection.models, { filters: { flows: this.filters } });
-      Radio.request('ws', 'manage:add', this, this.collection, 'flows', { fields: { patients: ['first_name', 'last_name'] } });
-      return;
-    }
-
-    const fields = {
-      patients: ['first_name', 'last_name'],
-      flows: ['name', 'state'],
-    };
-
-    Radio.request('ws', 'subscribe', this.collection.models, { filters: { actions: this.filters } });
-    Radio.request('ws', 'manage:add', this, this.collection, 'patient-actions', { fields });
+    Radio.request('ws', 'subscribe', this.collection.models, { filters: { [filterType]: this.filters } });
+    Radio.request('ws', 'manage:add', this, this.collection, entityType, this.query);
   },
   // NOTE: Shows views dependent on getState().getType()
   showTypeViews() {
