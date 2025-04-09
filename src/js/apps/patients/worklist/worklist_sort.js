@@ -54,7 +54,7 @@ const SortOptions = Backbone.Collection.extend({
 
     return map(uniq(fieldNames), fieldName => {
       return `patient.patient-fields.${ fieldName }`;
-    }).join(',');
+    });
   },
 });
 
