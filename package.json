@@ -192,7 +192,7 @@
     "eslint-plugin-cypress": "^4.0.0",
     "eslint-plugin-mocha": "^10.1.0",
     "fs-extra": "^11.1.1",
-    "globals": "^15.6.0",
+    "globals": "^16.0.0",
     "istanbul-lib-coverage": "^3.0.2",
     "js-yaml": "^4.1.0",
     "lodash.camelcase": "^4.3.0",
