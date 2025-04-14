@@ -339,7 +339,7 @@ context('patient flow page', function() {
       .should('contain', 'Response Saved');
 
     cy.sendWs({
-      category: 'CommentAdded',
+      category: 'ActionCommentAdded',
       author: getCurrentClinician().id,
       resource: {
         type: testFlowAction.type,
@@ -3007,7 +3007,7 @@ context('patient flow page', function() {
       .should('not.exist');
 
     cy.sendWs({
-      category: 'CommentAdded',
+      category: 'ActionCommentAdded',
       author: getCurrentClinician().id,
       resource: {
         type: testSocketAction.type,
