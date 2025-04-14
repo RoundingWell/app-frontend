@@ -209,7 +209,7 @@
     "vite": "^6.0.7",
     "vite-plugin-babel": "^1.2.0",
     "vite-plugin-eslint": "^1.8.1",
-    "vite-plugin-pwa": "^0.21.1",
+    "vite-plugin-pwa": "^1.0.0",
     "vite-plugin-stylelint": "^6.0.0",
     "yaml": "^2.1.1"
   },
