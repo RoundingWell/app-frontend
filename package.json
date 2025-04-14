@@ -181,7 +181,7 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@roundingwellos/babel-plugin-handlebars-inline-precompile": "^3.0.1",
     "@roundingwellos/faker": "^5.5.3",
-    "@stylistic/eslint-plugin-js": "^3.0.1",
+    "@stylistic/eslint-plugin-js": "^4.2.0",
     "babel-plugin-istanbul": "^7.0.0",
     "browserslist-to-esbuild": "^2.1.1",
     "cypress": "^14.0.0",
