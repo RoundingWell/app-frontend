@@ -4,4 +4,8 @@
 
 body {
   padding: 24px;
+
+  &.is-modal {
+    padding: 0 24px;
+  }
 }
