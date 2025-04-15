@@ -1407,7 +1407,7 @@ context('patient dashboard page', function() {
       .find('.fa-share-from-square');
 
     cy.sendWs({
-      category: 'CommentAdded',
+      category: 'ActionCommentAdded',
       author: currentClinician.id,
       resource: {
         type: testSocketAction.type,
