@@ -340,6 +340,10 @@ function startFormApp() {
     </div>
     <div class="loader__text js-loading">${ intl.regions.preload.loading }</div>
   `);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('modal')) $('body').addClass('is-modal');
+
   router = new Router();
   Backbone.history.start({ pushState: true });
 }
