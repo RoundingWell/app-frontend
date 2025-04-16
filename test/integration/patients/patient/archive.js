@@ -594,6 +594,20 @@ context('patient archive page', function() {
       .get('@firstRow')
       .find('.patient__action-ts')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: testNewStateSocketFlow.type,
+        id: testNewStateSocketFlow.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .should('have.length', 1);
   });
 
   specify('action list - socket notifications', function() {
@@ -788,6 +802,20 @@ context('patient archive page', function() {
       .get('@firstRow')
       .find('.patient__action-ts')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: testNewStateSocketAction.type,
+        id: testNewStateSocketAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .should('have.length', 1);
   });
 
   specify('work with work:owned:manage permission', function() {

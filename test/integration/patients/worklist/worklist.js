@@ -577,6 +577,24 @@ context('worklist page', function() {
     cy
       .get('@firstRow')
       .should('contain', 'New Flow - Owner Updated to Match Current Worklist Filter');
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: testNewOwnerSocketFlow.type,
+        id: testNewOwnerSocketFlow.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('[data-count-region]')
+      .should('contain', '3 Flows');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .should('have.length', 3);
   });
 
   specify('done flow list', function() {
@@ -1531,6 +1549,24 @@ context('worklist page', function() {
     cy
       .get('@firstRow')
       .should('contain', 'New Action - Owner Updated to Match Current Worklist Filter');
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: testNewOwnerSocketAction.type,
+        id: testNewOwnerSocketAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('[data-count-region]')
+      .should('contain', '3 Actions');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .should('have.length', 3);
   });
 
   specify('actions on a done-flow list', function() {
