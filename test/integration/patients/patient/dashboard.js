@@ -1232,6 +1232,20 @@ context('patient dashboard page', function() {
     cy
       .get('@firstRow')
       .should('contain', 'New Name Via Websocket');
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: testNewStateSocketFlow.type,
+        id: testNewStateSocketFlow.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .should('have.length', 1);
   });
 
   specify('action list - socket notifications', function() {
@@ -1577,6 +1591,20 @@ context('patient dashboard page', function() {
     cy
       .get('@firstRow')
       .should('contain', 'New Name Via Websocket');
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: testNewStateSocketAction.type,
+        id: testNewStateSocketAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .should('have.length', 1);
   });
 
   specify('non work:own clinician', function() {

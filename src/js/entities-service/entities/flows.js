@@ -20,6 +20,9 @@ const _Model = BaseModel.extend({
     DetailsChanged({ attributes }) {
       this.set(attributes);
     },
+    ResourceDeleted() {
+      this.destroy({ isDeleted: true });
+    },
   },
   urlRoot() {
     if (this.isNew()) {
