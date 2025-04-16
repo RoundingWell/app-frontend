@@ -2,12 +2,14 @@
 //   Colors
 // *************************************
 
+@use 'sass:map';
+
 // -------------------------------------
 //   Main Colors
 // -------------------------------------
 
 @function color($color, $tone: 'base') {
-  @return map-get(map-get($colors, $color), $tone);
+  @return map.get(map.get($colors, $color), $tone);
 }
 
 $colors: (

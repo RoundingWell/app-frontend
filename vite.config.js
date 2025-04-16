@@ -33,9 +33,7 @@ const css = {
       // remove this when we switch sass to use modern js api
       api: 'legacy',
       additionalData: `
-        @use 'sass:math';
-        @use 'sass:color';
-        @import 'src/scss/provider-variables.scss';
+        @use 'src/scss/provider-variables.scss' as *;
       `,
     },
   },
