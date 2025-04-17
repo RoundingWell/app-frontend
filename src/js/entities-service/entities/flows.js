@@ -20,6 +20,9 @@ const _Model = BaseModel.extend({
     DetailsChanged({ attributes }) {
       this.set(attributes);
     },
+    FlowProgressChanged({ attributes }) {
+      this.set({ _progress: attributes.progress });
+    },
     ResourceDeleted() {
       this.destroy({ isDeleted: true });
     },

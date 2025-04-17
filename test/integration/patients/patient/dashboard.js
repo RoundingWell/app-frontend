@@ -1005,6 +1005,12 @@ context('patient dashboard page', function() {
         patient: getRelationship(testPatient),
         owner: getRelationship(teamCoordinator),
       },
+      meta: {
+        progress: {
+          complete: 0,
+          total: 2,
+        },
+      },
     });
 
     const testNewSocketFlow = getFlow({
@@ -1116,6 +1122,28 @@ context('patient dashboard page', function() {
       .get('@firstRow')
       .find('[data-owner-region]')
       .should('contain', 'NU');
+
+    cy.sendWs({
+      category: 'FlowProgressChanged',
+      resource: {
+        type: testSocketFlow.type,
+        id: testSocketFlow.id,
+      },
+      payload: {
+        attributes: {
+          progress: {
+            complete: 1,
+            total: 3,
+          },
+        },
+      },
+    });
+
+    cy
+      .get('@firstRow')
+      .find('.patient__flow-progress')
+      .should('have.value', 1)
+      .should('have.attr', 'max', 3);
 
     // state was set to done, which means it's removed from the list
     cy.sendWs({
