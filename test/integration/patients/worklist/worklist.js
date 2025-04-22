@@ -14,7 +14,7 @@ import { getPatient } from 'support/api/patients';
 import { getPatientField } from 'support/api/patient-fields';
 import { getFlow, getFlows } from 'support/api/flows';
 import { getCurrentClinician, getClinician } from 'support/api/clinicians';
-import { stateTodo, stateInProgress, stateDone } from 'support/api/states';
+import { stateTodo, stateInProgress, stateDone, stateUnableToComplete, stateThmgTransfered } from 'support/api/states';
 import { getWidget } from 'support/api/widgets';
 import { roleAdmin, roleEmployee, roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
@@ -22,8 +22,9 @@ import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
 import { getComment } from 'support/api/comments';
 
+const currentClinician = getCurrentClinician();
+
 const testPatient1 = getPatient({
-  id: '1',
   attributes: {
     first_name: 'Test',
     last_name: 'Patient',
@@ -31,7 +32,6 @@ const testPatient1 = getPatient({
 });
 
 const testPatient2 = getPatient({
-  id: '2',
   attributes: {
     first_name: 'Other',
     last_name: 'Patient',
@@ -42,71 +42,71 @@ const STATE_VERSION = 'v6';
 
 context('worklist page', function() {
   specify('flow list', function() {
-    localStorage.setItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    const testFlows = [
+      getFlow({
+        attributes: {
+          name: 'First In List',
+          updated_at: testTs(),
+        },
+        relationships: {
+          owner: getRelationship(teamCoordinator),
+          state: getRelationship(stateTodo),
+          patient: getRelationship(testPatient1),
+        },
+        meta: {
+          progress: {
+            complete: 0,
+            total: 2,
+          },
+        },
+      }),
+      getFlow({
+        attributes: {
+          name: 'Last In List',
+          updated_at: testTsSubtract(2),
+        },
+        relationships: {
+          owner: getRelationship(teamCoordinator),
+          state: getRelationship(stateInProgress),
+          patient: getRelationship(testPatient2),
+        },
+      }),
+      getFlow({
+        attributes: {
+          name: 'Second In List',
+          details: null,
+          updated_at: testTsSubtract(1),
+        },
+        relationships: {
+          owner: getRelationship(teamCoordinator),
+          state: getRelationship(stateTodo),
+          patient: getRelationship(testPatient1),
+        },
+        meta: {
+          progress: {
+            complete: 2,
+            total: 10,
+          },
+        },
+      }),
+    ];
+
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       actionsSortId: 'sortUpdateDesc',
       flowsSortId: 'sortUpdateDesc',
-      clinicianId: '11111',
+      clinicianId: currentClinician.id,
       customFilters: {},
       actionsSelected: {},
       flowsSelected: {
-        '1': true,
+        [testFlows[0].id]: true,
       },
     }));
 
     cy
       .routesForPatientAction()
       .routeFlows(fx => {
-        fx.data = [
-          getFlow({
-            id: '1',
-            attributes: {
-              name: 'First In List',
-              updated_at: testTs(),
-            },
-            relationships: {
-              owner: getRelationship(teamCoordinator),
-              state: getRelationship(stateTodo),
-              patient: getRelationship(testPatient1),
-            },
-            meta: {
-              progress: {
-                complete: 0,
-                total: 2,
-              },
-            },
-          }),
-          getFlow({
-            attributes: {
-              name: 'Last In List',
-              updated_at: testTsSubtract(2),
-            },
-            relationships: {
-              owner: getRelationship(teamCoordinator),
-              state: getRelationship(stateInProgress),
-              patient: getRelationship(testPatient2),
-            },
-          }),
-          getFlow({
-            id: '2',
-            attributes: {
-              name: 'Second In List',
-              details: null,
-              updated_at: testTsSubtract(1),
-            },
-            relationships: {
-              owner: getRelationship(teamCoordinator),
-              state: getRelationship(stateTodo),
-              patient: getRelationship(testPatient1),
-            },
-            meta: {
-              progress: {
-                complete: 2,
-                total: 10,
-              },
-            },
-          }),
-        ];
+        fx.data = testFlows;
 
         fx.included.push(testPatient1, testPatient2);
 
@@ -222,7 +222,7 @@ context('worklist page', function() {
       .should('contain', 'State, Owner');
 
     cy
-      .intercept('PATCH', '/api/flows/1', {
+      .intercept('PATCH', `/api/flows/${ testFlows[0].id }`, {
         statusCode: 204,
         body: {},
       })
@@ -271,7 +271,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'flow/1');
+      .should('contain', `flow/${ testFlows[0].id }`);
 
     cy
       .go('back');
@@ -283,7 +283,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/dashboard/1')
+      .should('contain', `patient/dashboard/${ testPatient1.id }`)
       .wait('@routePatient');
 
     cy
@@ -304,8 +304,6 @@ context('worklist page', function() {
   });
 
   specify('flow list - socket notifications', function() {
-    const currentClinician = getCurrentClinician();
-
     const testSocketFlow = getFlow({
       attributes: {
         name: 'Test Flow - Subscribed on Page Load',
@@ -652,7 +650,7 @@ context('worklist page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[updated_at]=${ dayjs(testDate()).startOf('day').subtract(30, 'days').format() }`)
-      .should('contain', 'filter[states]=55555,66666,77777');
+      .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id },${ stateThmgTransfered.id }`);
 
     cy
       .intercept('PATCH', '/api/flows/*', {
@@ -681,13 +679,12 @@ context('worklist page', function() {
       .wait('@routePatchFlow')
       .its('request.body')
       .should(({ data }) => {
-        expect(data.relationships.state.data.id).to.equal('33333');
+        expect(data.relationships.state.data.id).to.equal(stateInProgress.id);
       });
   });
 
   specify('action list', function() {
     const testFlow = getFlow({
-      id: '1',
       attributes: {
         name: 'Test Flow',
       },
@@ -698,7 +695,6 @@ context('worklist page', function() {
 
     const testActions = [
       getAction({
-        id: '1',
         attributes: {
           name: 'First In List',
           details: 'Like the legend of the phoenix All ends with beginnings What keeps the planet spinning The force from the beginning Look We\'ve come too far To give up who we are So let\'s raise the bar And our cups to the stars',
@@ -709,14 +705,13 @@ context('worklist page', function() {
         relationships: {
           state: getRelationship(stateTodo),
           flow: getRelationship(testFlow),
-          files: getRelationship([{ id: '1' }], 'files'),
+          files: getRelationship([{ id: uuid() }], 'files'),
           owner: getRelationship(teamCoordinator),
           patient: getRelationship(testPatient1),
           comments: getRelationship([getComment()]),
         },
       }),
       getAction({
-        id: '3',
         attributes: {
           name: 'Last In List',
           details: 'Details gonna detail',
@@ -732,7 +727,6 @@ context('worklist page', function() {
         },
       }),
       getAction({
-        id: '2',
         attributes: {
           name: 'Second In List',
           details: null,
@@ -751,14 +745,14 @@ context('worklist page', function() {
 
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
-    localStorage.setItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       actionsSortId: 'sortUpdateDesc',
       flowsSortId: 'sortUpdateDesc',
-      clinicianId: '11111',
+      clinicianId: currentClinician.id,
       customFilters: {},
       actionsSelected: {
-        '1': true,
+        [testActions[0].id]: true,
       },
       flowsSelected: {},
     }));
@@ -774,10 +768,12 @@ context('worklist page', function() {
       })
       .routePatient(fx => {
         fx.data = testPatient1;
+
         return fx;
       })
       .routeAction(fx => {
         fx.data = testActions[0];
+
         return fx;
       })
       .routeFormByAction()
@@ -855,7 +851,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'flow/1/action/1');
+      .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }`);
 
     cy
       .go('back')
@@ -875,7 +871,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/1/action/2')
+      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[2].id }`)
       .wait('@routeAction');
 
     cy
@@ -894,7 +890,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/dashboard/1')
+      .should('contain', `patient/dashboard/${ testPatient1.id }`)
       .wait('@routePatient');
 
     cy
@@ -908,7 +904,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', 'flow/1/action/1')
+      .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }`)
       .wait('@routeFlowActions');
 
     cy
@@ -937,7 +933,7 @@ context('worklist page', function() {
       .wait('@routeActions');
 
     cy
-      .intercept('PATCH', '/api/actions/1', {
+      .intercept('PATCH', `/api/actions/${ testActions[0].id }`, {
         statusCode: 204,
         body: {},
       })
@@ -957,7 +953,7 @@ context('worklist page', function() {
       .wait('@routePatchAction')
       .its('request.body')
       .should(({ data }) => {
-        expect(data.relationships.state.data.id).to.equal('33333');
+        expect(data.relationships.state.data.id).to.equal(stateInProgress.id);
       });
 
     cy
@@ -1164,14 +1160,13 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/2/form/${ testForm.id }`);
+      .should('contain', `patient-action/${ testActions[2].id }/form/${ testForm.id }`);
 
     cy
       .go('back');
   });
 
   specify('action list - socket notifications', function() {
-    const currentClinician = getCurrentClinician();
     const testComment = getComment();
     const testSocketFileId = uuid();
 
@@ -1653,11 +1648,11 @@ context('worklist page', function() {
   });
 
   specify('maximum list count reached', function() {
-    localStorage.setItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       actionsSortId: 'sortUpdateDesc',
       flowsSortId: 'sortUpdateDesc',
-      clinicianId: '11111',
+      clinicianId: currentClinician.id,
       customFilters: {},
     }));
 
@@ -1669,7 +1664,6 @@ context('worklist page', function() {
           const patient = n % 2 ? testPatient1 : testPatient2;
 
           return getAction({
-            id: `${ n }`,
             attributes: {
               name: actionName,
             },
@@ -1695,7 +1689,6 @@ context('worklist page', function() {
           const patient = n % 2 ? testPatient1 : testPatient2;
 
           return getFlow({
-            id: `${ n }`,
             attributes: {
               name: flowName,
             },
@@ -1823,32 +1816,36 @@ context('worklist page', function() {
       role: getRelationship(roleEmployee),
     };
 
+    const testCurrentClinician = getCurrentClinician({ relationships });
+
+    const testClinician = getClinician({
+      id: uuid(),
+      attributes: { name: 'Test Clinician' },
+      relationships,
+    });
+
     cy
       .routeWorkspaceClinicians(fx => {
         fx.data = [
-          getCurrentClinician({ relationships }),
+          testCurrentClinician,
+          testClinician,
           getClinician({
-            id: 'test-clinician',
-            attributes: { name: 'Test Clinician' },
-            relationships,
-          }),
-          getClinician({
-            id: '1',
+            id: uuid(),
             attributes: { name: 'C Clinician' },
             relationships,
           }),
           getClinician({
-            id: '2',
+            id: uuid(),
             attributes: { name: 'A Clinician' },
             relationships,
           }),
           getClinician({
-            id: '3',
+            id: uuid(),
             attributes: { name: 'B Clinician' },
             relationships,
           }),
           getClinician({
-            id: '4',
+            id: uuid(),
             attributes: { name: 'Admin Clinician' },
             relationships: {
               team: getRelationship(teamCoordinator),
@@ -1874,8 +1871,8 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinicians]=11111')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[clinicians]=${ testCurrentClinician.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('[data-owner-filter-region]')
@@ -1909,8 +1906,8 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinicians]=test-clinician')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[clinicians]=${ testClinician.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('.list-page__title')
@@ -1932,8 +1929,8 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinicians]=11111')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[clinicians]=${ testCurrentClinician.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('.list-page__title')
@@ -1960,42 +1957,44 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinicians]=test-clinician');
+      .should('contain', `filter[clinicians]=${ testClinician.id }`);
   });
 
   specify('owner filtering', function() {
+    const relationships = {
+      role: getRelationship(roleEmployee),
+    };
+
+    const testClinicians = [
+      getCurrentClinician({ relationships }),
+      getClinician({
+        id: uuid(),
+        attributes: { name: 'Test Clinician' },
+        relationships: {
+          team: getRelationship(teamCoordinator),
+          role: getRelationship(roleEmployee),
+        },
+      }),
+      getClinician({
+        id: uuid(),
+        attributes: { name: 'C Clinician' },
+        relationships,
+      }),
+      getClinician({
+        id: uuid(),
+        attributes: { name: 'A Clinician' },
+        relationships,
+      }),
+      getClinician({
+        id: uuid(),
+        attributes: { name: 'B Clinician' },
+        relationships,
+      }),
+    ];
+
     cy
       .routeWorkspaceClinicians(fx => {
-        const relationships = {
-          role: getRelationship(roleEmployee),
-        };
-
-        fx.data = [
-          getCurrentClinician({ relationships }),
-          getClinician({
-            id: 'test-clinician',
-            attributes: { name: 'Test Clinician' },
-            relationships: {
-              team: getRelationship(teamCoordinator),
-              role: getRelationship(roleEmployee),
-            },
-          }),
-          getClinician({
-            id: '1',
-            attributes: { name: 'C Clinician' },
-            relationships,
-          }),
-          getClinician({
-            id: '2',
-            attributes: { name: 'A Clinician' },
-            relationships,
-          }),
-          getClinician({
-            id: '3',
-            attributes: { name: 'B Clinician' },
-            relationships,
-          }),
-        ];
+        fx.data = testClinicians;
 
         return fx;
       })
@@ -2045,7 +2044,7 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinicians]=1');
+      .should('contain', `filter[clinicians]=${ testClinicians[2].id }`);
 
     cy
       .get('[data-owner-toggle-region]')
@@ -2080,7 +2079,7 @@ context('worklist page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[clinicians]=${ NIL_UUID }`)
-      .should('contain', 'filter[teams]=22222');
+      .should('contain', `filter[teams]=${ teamNurse.id }`);
 
     cy
       .get('[data-owner-toggle-region]')
@@ -2093,7 +2092,7 @@ context('worklist page', function() {
       .itsUrl()
       .its('search')
       .should('not.contain', `filter[clinicians]=${ NIL_UUID }`)
-      .should('contain', 'filter[teams]=22222');
+      .should('contain', `filter[teams]=${ teamNurse.id }`);
   });
 
   // TODO: Move to component tests
@@ -2101,18 +2100,18 @@ context('worklist page', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
     const filterDate = testDateSubtract(1);
 
-    localStorage.setItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       actionsSortId: 'sortUpdateDesc',
       flowsSortId: 'sortUpdateDesc',
-      clinicianId: '11111',
+      clinicianId: currentClinician.id,
       customFilters: {},
       actionsDateFilters: {
         selectedDate: filterDate,
         dateType: 'created_at',
       },
       actionsSelected: {
-        '1': true,
+        [uuid()]: true,
       },
       flowsSelected: {},
       listType: 'flows',
@@ -2163,7 +2162,7 @@ context('worklist page', function() {
       .find('.js-prev')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.be.equal(testDateSubtract(2));
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2187,7 +2186,7 @@ context('worklist page', function() {
       .find('.js-next')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.be.equal(filterDate);
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2210,7 +2209,7 @@ context('worklist page', function() {
       .contains('Last Week')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
         expect(storage.actionsDateFilters.selectedWeek).to.be.null;
@@ -2236,7 +2235,7 @@ context('worklist page', function() {
       .find('.js-next')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedWeek, 'YYYY-MM-DD')).to.be.equal(dayjs(testDate()).startOf('week').format('YYYY-MM-DD'));
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -2272,7 +2271,7 @@ context('worklist page', function() {
       .find('.js-current-month')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.relativeDate).to.equal('thismonth');
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -2302,7 +2301,7 @@ context('worklist page', function() {
       .find('.js-prev')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDateSubtract(1, 'month'), 'MMM YYYY'));
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2342,7 +2341,7 @@ context('worklist page', function() {
       .find('.js-next')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDateAdd(1, 'month'), 'MMM YYYY'));
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2365,7 +2364,7 @@ context('worklist page', function() {
       .contains('Today')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.relativeDate).to.equal('today');
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -2395,7 +2394,7 @@ context('worklist page', function() {
       .find('.js-prev')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(testDateSubtract(1));
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2435,7 +2434,7 @@ context('worklist page', function() {
       .find('.js-next')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(formatDate(testDateAdd(1), 'YYYY-MM-DD'));
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2459,7 +2458,7 @@ context('worklist page', function() {
       .contains('Yesterday')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.relativeDate).to.equal('yesterday');
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -2487,7 +2486,7 @@ context('worklist page', function() {
       .find('.js-prev')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(testDateSubtract(2));
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2521,7 +2520,7 @@ context('worklist page', function() {
       .find('.js-next')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(testDate());
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
@@ -2544,7 +2543,7 @@ context('worklist page', function() {
       .find('.js-month')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -2571,7 +2570,7 @@ context('worklist page', function() {
       .find('.js-prev')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -2601,7 +2600,7 @@ context('worklist page', function() {
       .find('.js-next')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.relativeDate).to.be.null;
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -2675,7 +2674,7 @@ context('worklist page', function() {
       .contains('All Time')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsDateFilters.relativeDate).to.equal('alltime');
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
@@ -3196,11 +3195,11 @@ context('worklist page', function() {
   });
 
   specify('action sorting - preload', function() {
-    localStorage.setItem(`shared-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    localStorage.setItem(`shared-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'shared-by',
       actionsSortId: 'sortNotExisting',
       flowsSortId: 'sortUpdateDesc',
-      clinicianId: '11111',
+      clinicianId: currentClinician.id,
       customFilters: {},
       actionsDateFilters: {
         selectedDate: testDate(),
@@ -3224,7 +3223,7 @@ context('worklist page', function() {
       .contains('Added: Oldest - Newest')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`shared-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`shared-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.actionsSortId).to.equal('sortCreatedAsc');
       });
@@ -3681,11 +3680,11 @@ context('worklist page', function() {
   specify('find in list', function() {
     const lastYear = dayjs().year() - 1;
 
-    localStorage.setItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       actionsSortId: 'sortUpdateDesc',
       flowsSortId: 'sortUpdateDesc',
-      clinicianId: '11111',
+      clinicianId: currentClinician.id,
       customFilters: {},
       flowsDateFilters: {
         selectedMonth: `${ lastYear }-02-01`,
@@ -3718,7 +3717,7 @@ context('worklist page', function() {
             },
             relationships: {
               patient: getRelationship(testPatient1),
-              owner: getRelationship('11111', 'clinicians'),
+              owner: getRelationship(currentClinician),
               state: getRelationship(stateInProgress),
             },
           }),
@@ -4492,7 +4491,7 @@ context('worklist page', function() {
           name: 'Owned',
         },
         relationships: {
-          owner: getRelationship('11111', 'clinicians'),
+          owner: getRelationship(currentClinician),
           state: getRelationship(stateTodo),
           form: getRelationship(),
         },
@@ -4503,7 +4502,7 @@ context('worklist page', function() {
           name: 'Different Owner',
         },
         relationships: {
-          owner: getRelationship('22222', 'clinicians'),
+          owner: getRelationship(getClinician({ id: uuid() })),
           state: getRelationship(stateTodo),
         },
       },
@@ -4573,7 +4572,7 @@ context('worklist page', function() {
           name: 'Owned by Clinician',
         },
         relationships: {
-          owner: getRelationship('11111', 'clinicians'),
+          owner: getRelationship(currentClinician),
           state: getRelationship(stateTodo),
         },
       },
@@ -4683,6 +4682,33 @@ context('worklist page', function() {
   });
 
   specify('actions with work:team:manage permission', function() {
+    const testCurrentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleTeamEmployee),
+        team: getRelationship(teamCoordinator),
+      },
+    });
+
+    const testTeamMemberClinician = getClinician({
+      id: uuid(),
+      attributes: {
+        name: 'Team Member',
+      },
+      relationships: {
+        team: getRelationship(teamCoordinator),
+      },
+    });
+
+    const testNonTeamMemberClinician = getClinician({
+      id: uuid(),
+      attributes: {
+        name: 'Non Team Member',
+      },
+      relationships: {
+        team: getRelationship(teamNurse),
+      },
+    });
+
     const testActions = [
       {
         attributes: {
@@ -4700,7 +4726,7 @@ context('worklist page', function() {
           created_at: testTsSubtract(2),
         },
         relationships: {
-          owner: getRelationship('2', 'clinicians'),
+          owner: getRelationship(testTeamMemberClinician),
           state: getRelationship(stateInProgress),
         },
       },
@@ -4720,46 +4746,23 @@ context('worklist page', function() {
           created_at: testTsSubtract(4),
         },
         relationships: {
-          owner: getRelationship('3', 'clinicians'),
+          owner: getRelationship(testNonTeamMemberClinician),
           state: getRelationship(stateInProgress),
         },
       },
     ];
 
-    const currentClinician = getCurrentClinician({
-      relationships: {
-        role: getRelationship(roleTeamEmployee),
-        team: getRelationship(teamCoordinator),
-      },
-    });
-
     cy
       .routeCurrentClinician(fx => {
-        fx.data = currentClinician;
+        fx.data = testCurrentClinician;
 
         return fx;
       })
       .routeWorkspaceClinicians(fx => {
         fx.data = [
-          currentClinician,
-          getClinician({
-            id: '2',
-            attributes: {
-              name: 'Team Member',
-            },
-            relationships: {
-              team: getRelationship(teamCoordinator),
-            },
-          }),
-          getClinician({
-            id: '3',
-            attributes: {
-              name: 'Non Team Member',
-            },
-            relationships: {
-              team: getRelationship(teamNurse),
-            },
-          }),
+          testCurrentClinician,
+          testTeamMemberClinician,
+          testNonTeamMemberClinician,
         ];
 
         return fx;
@@ -4804,6 +4807,23 @@ context('worklist page', function() {
   });
 
   specify('flows with work:team:manage permission', function() {
+    const testCurrentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleTeamEmployee),
+        team: getRelationship(teamCoordinator),
+      },
+    });
+
+    const testNonTeamMemberClinician = getClinician({
+      id: uuid(),
+      attributes: {
+        name: 'Non Team Member',
+      },
+      relationships: {
+        team: getRelationship(teamNurse),
+      },
+    });
+
     const testFlows = [
       {
         attributes: {
@@ -4831,42 +4851,28 @@ context('worklist page', function() {
           created_at: testTsSubtract(2),
         },
         relationships: {
-          owner: getRelationship('2', 'clinicians'),
+          owner: getRelationship(testNonTeamMemberClinician),
           state: getRelationship(stateInProgress),
         },
       },
     ];
 
-    const currentClinician = getCurrentClinician({
-      relationships: {
-        role: getRelationship(roleTeamEmployee),
-        team: getRelationship(teamCoordinator),
-      },
-    });
-
     cy
       .routeCurrentClinician(fx => {
-        fx.data = currentClinician;
+        fx.data = testCurrentClinician;
 
         return fx;
       })
       .routeWorkspaceClinicians(fx => {
         fx.data = [
-          currentClinician,
-          getClinician({
-            id: '2',
-            attributes: {
-              name: 'Non Team Member',
-            },
-            relationships: {
-              team: getRelationship(teamNurse),
-            },
-          }),
+          testCurrentClinician,
+          testNonTeamMemberClinician,
         ];
         return fx;
       })
       .routeFlows(fx => {
         fx.data = _.map(testFlows, getFlow);
+
         return fx;
       })
       .routeActions()
@@ -4944,7 +4950,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .intercept('GET', '/api/actions?*', {
@@ -4970,7 +4976,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[states]=33333');
+      .should('contain', `filter[states]=${ stateInProgress.id }`);
 
     cy
       .routeActions();
@@ -4984,6 +4990,6 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
   });
 });
