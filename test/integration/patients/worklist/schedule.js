@@ -355,7 +355,6 @@ context('schedule page', function() {
       .routeActions(fx => {
         fx.data = _.times(50, index => {
           return getAction({
-            id: `${ index }`,
             attributes: {
               name: !index ? 'First Action' : `Action ${ index + 1 }`,
             },
@@ -728,6 +727,15 @@ context('schedule page', function() {
   });
 
   specify('bulk edit', function() {
+    const testActions = _.times(20, index => {
+      return getAction({
+        relationships: {
+          owner: getRelationship(currentClinician),
+          state: getRelationship(index % 2 ? stateTodo : stateInProgress),
+        },
+      });
+    });
+
     localStorage.setItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       clinicianId: currentClinician.id,
       customFilters: {},
@@ -737,20 +745,15 @@ context('schedule page', function() {
         selectedMonth: null,
         relativeDate: null,
       },
-      actionsSelected: { '1': true, '4444': true },
+      actionsSelected: {
+        [testActions[0].id]: true,
+        '4444': true,
+      },
     }));
 
     cy
       .routeActions(fx => {
-        fx.data = _.times(20, index => {
-          return getAction({
-            id: `${ index + 1 }`,
-            relationships: {
-              owner: getRelationship(currentClinician),
-              state: getRelationship(index % 2 ? stateTodo : stateInProgress),
-            },
-          });
-        });
+        fx.data = testActions;
 
         return fx;
       })
