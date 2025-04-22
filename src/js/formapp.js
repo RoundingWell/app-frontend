@@ -334,15 +334,17 @@ const Router = Backbone.Router.extend({
 });
 
 function startFormApp() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isModal = urlParams.get('modal');
+
   $('#root').append(`
-    <div class="loader__bar js-progress-bar">
+    <div class="loader__bar${ isModal ? ' u-margin--t-24' : '' } js-progress-bar">
       <div class="loader__bar-progress--loop"></div>
     </div>
     <div class="loader__text js-loading">${ intl.regions.preload.loading }</div>
   `);
 
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('modal')) $('body').addClass('is-modal');
+  if (isModal) $('body').addClass('is-modal');
 
   router = new Router();
   Backbone.history.start({ pushState: true });
