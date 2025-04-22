@@ -442,6 +442,12 @@ context('patient archive page', function() {
         patient: getRelationship(testPatient),
         owner: getRelationship(teamCoordinator),
       },
+      meta: {
+        progress: {
+          complete: 0,
+          total: 2,
+        },
+      },
     });
 
     cy
@@ -594,6 +600,28 @@ context('patient archive page', function() {
       .get('@firstRow')
       .find('.patient__action-ts')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+
+    cy.sendWs({
+      category: 'FlowProgressChanged',
+      resource: {
+        type: testNewStateSocketFlow.type,
+        id: testNewStateSocketFlow.id,
+      },
+      payload: {
+        attributes: {
+          progress: {
+            complete: 1,
+            total: 3,
+          },
+        },
+      },
+    });
+
+    cy
+      .get('@firstRow')
+      .find('.patient__flow-progress')
+      .should('have.value', 1)
+      .should('have.attr', 'max', 3);
 
     cy.sendWs({
       category: 'ResourceDeleted',

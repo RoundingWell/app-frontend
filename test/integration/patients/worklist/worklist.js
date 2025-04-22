@@ -317,6 +317,12 @@ context('worklist page', function() {
         owner: getRelationship(currentClinician),
         patient: getRelationship(testPatient1),
       },
+      meta: {
+        progress: {
+          complete: 0,
+          total: 2,
+        },
+      },
     });
 
     const testNewSocketFlow = getFlow({
@@ -449,6 +455,28 @@ context('worklist page', function() {
       .get('@firstRow')
       .find('[data-owner-region]')
       .should('contain', 'CO');
+
+    cy.sendWs({
+      category: 'FlowProgressChanged',
+      resource: {
+        type: testSocketFlow.type,
+        id: testSocketFlow.id,
+      },
+      payload: {
+        attributes: {
+          progress: {
+            complete: 1,
+            total: 3,
+          },
+        },
+      },
+    });
+
+    cy
+      .get('@firstRow')
+      .find('.worklist-list__flow-progress')
+      .should('have.value', 1)
+      .should('have.attr', 'max', 3);
 
     cy
       .routeFlow(fx => {
