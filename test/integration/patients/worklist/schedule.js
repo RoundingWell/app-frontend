@@ -1705,10 +1705,27 @@ context('schedule page', function() {
   });
 
   specify('bulk editing with work:team:manage permission', function() {
+    const testCurrentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleTeamEmployee),
+        team: getRelationship(teamNurse),
+      },
+    });
+
+    const testNonTeamMemberClincian = getClinician({
+      id: '3',
+      attributes: {
+        name: 'Non Team Member',
+      },
+      relationships: {
+        team: getRelationship(teamCoordinator),
+      },
+    });
+
     const testActions = [
       getAction({
         attributes: {
-          name: 'Owned by other team',
+          name: 'Owned by another team',
           due_date: testDateAdd(1),
           due_time: '9:00:00',
         },
@@ -1724,18 +1741,11 @@ context('schedule page', function() {
           due_time: '10:00:00',
         },
         relationships: {
-          owner: getRelationship('3', 'clinicians'),
+          owner: getRelationship(testNonTeamMemberClincian),
           state: getRelationship(stateInProgress),
         },
       }),
     ];
-
-    const testCurrentClinician = getCurrentClinician({
-      relationships: {
-        role: getRelationship(roleTeamEmployee),
-        team: getRelationship(teamNurse),
-      },
-    });
 
     cy
       .routeCurrentClinician(fx => {
@@ -1744,27 +1754,7 @@ context('schedule page', function() {
         return fx;
       })
       .routeWorkspaceClinicians(fx => {
-        fx.data = [
-          testCurrentClinician,
-          getClinician({
-            id: '2',
-            attributes: {
-              name: 'Team Member',
-            },
-            relationships: {
-              team: getRelationship(teamNurse),
-            },
-          }),
-          getClinician({
-            id: '3',
-            attributes: {
-              name: 'Non Team Member',
-            },
-            relationships: {
-              team: getRelationship(teamCoordinator),
-            },
-          }),
-        ];
+        fx.data = [testCurrentClinician, testNonTeamMemberClincian];
 
         return fx;
       })
