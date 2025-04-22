@@ -17,8 +17,9 @@ import { getWorkspacePatient } from 'support/api/workspace-patients';
 import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
 
+const currentClinician = getCurrentClinician();
+
 const testPatient1 = getPatient({
-  id: '1',
   attributes: {
     first_name: 'Test',
     last_name: 'Patient',
@@ -26,7 +27,6 @@ const testPatient1 = getPatient({
 });
 
 const testPatient2 = getPatient({
-  id: '2',
   attributes: {
     first_name: 'LongTest',
     last_name: 'PatientName',
@@ -34,7 +34,6 @@ const testPatient2 = getPatient({
 });
 
 const testFlow = getFlow({
-  id: '1',
   attributes: {
     name: 'Parent Flow',
   },
@@ -48,8 +47,7 @@ const STATE_VERSION = 'v6';
 context('schedule page', function() {
   specify('display schedule', function() {
     const testActions = [
-      {
-        id: '1',
+      getAction({
         attributes: {
           name: 'Last Action',
           details: 'Last Action Details',
@@ -61,9 +59,8 @@ context('schedule page', function() {
           form: getRelationship(testForm),
           state: getRelationship(stateTodo),
         },
-      },
-      {
-        id: '2',
+      }),
+      getAction({
         attributes: {
           name: 'Outreach Planning: Review Referral, Medical Chart Review, Targeting Interventions, and other tasks',
           due_date: testDate(),
@@ -75,9 +72,8 @@ context('schedule page', function() {
           flow: getRelationship(testFlow),
           state: getRelationship(stateInProgress),
         },
-      },
-      {
-        id: '3',
+      }),
+      getAction({
         attributes: {
           name: 'Second Action',
           details: null,
@@ -90,9 +86,8 @@ context('schedule page', function() {
           flow: getRelationship(testFlow),
           state: getRelationship(stateInProgress),
         },
-      },
-      {
-        id: '4',
+      }),
+      getAction({
         attributes: {
           name: 'Third Action',
           due_date: testDate(),
@@ -103,13 +98,13 @@ context('schedule page', function() {
           form: getRelationship(),
           state: getRelationship(stateDone),
         },
-      },
+      }),
     ];
 
     const testTime = dayjs().hour(12).minute(0).valueOf();
 
-    localStorage.setItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
-      clinicianId: '11111',
+    localStorage.setItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      clinicianId: currentClinician.id,
       customFilters: {},
       dateFilters: {
         dateType: 'due_date',
@@ -222,7 +217,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/archive/1/action/4')
+      .should('contain', `patient/archive/${ testPatient1.id }/action/${ testActions[3].id }`)
       .go('back');
 
     cy
@@ -273,7 +268,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/dashboard/1')
+      .should('contain', `patient/dashboard/${ testPatient1.id }`)
       .go('back');
 
     cy
@@ -288,7 +283,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/1/form/${ testForm.id }`)
+      .should('contain', `patient-action/${ testActions[0].id }/form/${ testForm.id }`)
       .go('back');
 
     cy
@@ -301,24 +296,12 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', 'patient/1/action/1')
+      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[0].id }`)
       .go('back');
 
     cy
       .routeAction(fx => {
-        fx.data = getAction({
-          id: '2',
-          attributes: {
-            name: 'Outreach Planning: Review Referral, Medical Chart Review, Targeting Interventions, and other tasks',
-            due_date: testDate(),
-            due_time: '06:45:00',
-          },
-          relationships: {
-            patient: getRelationship(testPatient2),
-            flow: getRelationship(testFlow),
-            state: getRelationship(stateInProgress),
-          },
-        });
+        fx.data = testActions[1];
 
         return fx;
       });
@@ -332,7 +315,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', 'flow/1/action/2')
+      .should('contain', `flow/${ testFlow.id }/action/${ testActions[1].id }`)
       .go('back');
 
     cy
@@ -356,8 +339,8 @@ context('schedule page', function() {
   });
 
   specify('maximum list count reached', function() {
-    localStorage.setItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
-      clinicianId: '11111',
+    localStorage.setItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      clinicianId: currentClinician.id,
       customFilters: {},
       dateFilters: {
         dateType: 'due_date',
@@ -462,8 +445,8 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinicians]=11111')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[clinicians]=${ currentClinician.id }`)
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .get('[data-owner-filter-region]')
@@ -482,7 +465,7 @@ context('schedule page', function() {
       .contains('Test Clinician')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.clinicianId).to.equal('test-id');
       });
@@ -508,7 +491,7 @@ context('schedule page', function() {
       .find('.js-today')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.dateFilters.relativeDate).to.equal('today');
         expect(storage.dateFilters.selectedDate).to.be.null;
@@ -531,7 +514,7 @@ context('schedule page', function() {
       .contains('Yesterday')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.dateFilters.relativeDate).to.equal('yesterday');
         expect(storage.dateFilters.selectedDate).to.be.null;
@@ -559,7 +542,7 @@ context('schedule page', function() {
       .find('.is-today')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.dateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(testDate());
         expect(storage.dateFilters.relativeDate).to.be.null;
@@ -592,7 +575,7 @@ context('schedule page', function() {
       .find('.js-month')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(formatDate(storage.dateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDateAdd(1, 'month'), 'MMM YYYY'));
         expect(storage.dateFilters.selectedDate).to.be.null;
@@ -620,7 +603,7 @@ context('schedule page', function() {
       .find('.js-current-month')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.dateFilters.selectedMonth).to.be.null;
         expect(storage.dateFilters.selectedDate).to.be.null;
@@ -648,7 +631,7 @@ context('schedule page', function() {
       .find('.js-current-week')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.dateFilters.selectedMonth).to.be.null;
         expect(storage.dateFilters.selectedDate).to.be.null;
@@ -671,7 +654,7 @@ context('schedule page', function() {
       .find('.js-prev')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.dateFilters.selectedMonth).to.be.null;
         expect(storage.dateFilters.selectedDate).to.be.null;
@@ -696,7 +679,7 @@ context('schedule page', function() {
       .contains('All Time')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.dateFilters.relativeDate).to.equal('alltime');
         expect(storage.dateFilters.selectedDate).to.be.null;
@@ -745,8 +728,8 @@ context('schedule page', function() {
   });
 
   specify('bulk edit', function() {
-    localStorage.setItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
-      clinicianId: '11111',
+    localStorage.setItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      clinicianId: currentClinician.id,
       customFilters: {},
       dateFilters: {
         dateType: 'due_date',
@@ -756,13 +739,14 @@ context('schedule page', function() {
       },
       actionsSelected: { '1': true, '4444': true },
     }));
+
     cy
       .routeActions(fx => {
         fx.data = _.times(20, index => {
           return getAction({
             id: `${ index + 1 }`,
             relationships: {
-              owner: getRelationship('11111', 'clinicians'),
+              owner: getRelationship(currentClinician),
               state: getRelationship(index % 2 ? stateTodo : stateInProgress),
             },
           });
@@ -1037,7 +1021,7 @@ context('schedule page', function() {
 
   specify('find in list', function() {
     const testActions = [
-      {
+      getAction({
         attributes: {
           name: 'Last Action',
           due_date: testDate(),
@@ -1046,10 +1030,10 @@ context('schedule page', function() {
         relationships: {
           patient: getRelationship(testPatient1),
           state: getRelationship(stateTodo),
-          form: getRelationship('1', 'forms'),
+          form: getRelationship(testForm),
         },
-      },
-      {
+      }),
+      getAction({
         attributes: {
           name: 'First Action',
           due_date: testDate(),
@@ -1060,8 +1044,8 @@ context('schedule page', function() {
           state: getRelationship(stateTodo),
           flow: getRelationship(testFlow),
         },
-      },
-      {
+      }),
+      getAction({
         attributes: {
           name: 'Second Action - Dash in Name',
           due_date: testDate(),
@@ -1072,8 +1056,8 @@ context('schedule page', function() {
           state: getRelationship(stateInProgress),
           flow: getRelationship(testFlow),
         },
-      },
-      {
+      }),
+      getAction({
         attributes: {
           name: 'Third Action',
           due_date: testDate(),
@@ -1084,7 +1068,7 @@ context('schedule page', function() {
           state: getRelationship(stateInProgress),
           flow: getRelationship(testFlow),
         },
-      },
+      }),
     ];
 
     cy
@@ -1569,17 +1553,17 @@ context('schedule page', function() {
 
   specify('bulk editing with work:owned:manage permission', function() {
     const testActions = [
-      {
+      getAction({
         attributes: {
           name: 'Last Action',
           due_date: testDate(),
           due_time: null,
         },
         relationships: {
-          owner: getRelationship('11111', 'clinicians'),
+          owner: getRelationship(currentClinician),
         },
-      },
-      {
+      }),
+      getAction({
         attributes: {
           name: 'First Action',
           due_date: testDate(),
@@ -1588,8 +1572,8 @@ context('schedule page', function() {
         relationships: {
           owner: getRelationship(teamNurse),
         },
-      },
-      {
+      }),
+      getAction({
         attributes: {
           name: 'Second Action',
           due_date: testDateAdd(3),
@@ -1598,17 +1582,17 @@ context('schedule page', function() {
         relationships: {
           owner: getRelationship(teamNurse),
         },
-      },
-      {
+      }),
+      getAction({
         attributes: {
           name: 'Third Action',
           due_date: testDateAdd(3),
           due_time: '14:00:00',
         },
         relationships: {
-          owner: getRelationship('11111', 'clinicians'),
+          owner: getRelationship(currentClinician),
         },
-      },
+      }),
     ];
 
     cy
@@ -1722,9 +1706,9 @@ context('schedule page', function() {
 
   specify('bulk editing with work:team:manage permission', function() {
     const testActions = [
-      {
+      getAction({
         attributes: {
-          name: 'Owned by team member',
+          name: 'Owned by other team',
           due_date: testDateAdd(1),
           due_time: '9:00:00',
         },
@@ -1732,8 +1716,8 @@ context('schedule page', function() {
           owner: getRelationship(teamCoordinator),
           state: getRelationship(stateInProgress),
         },
-      },
-      {
+      }),
+      getAction({
         attributes: {
           name: 'Owned by non team member',
           due_date: testDateAdd(1),
@@ -1743,10 +1727,10 @@ context('schedule page', function() {
           owner: getRelationship('3', 'clinicians'),
           state: getRelationship(stateInProgress),
         },
-      },
+      }),
     ];
 
-    const currentClinician = getCurrentClinician({
+    const testCurrentClinician = getCurrentClinician({
       relationships: {
         role: getRelationship(roleTeamEmployee),
         team: getRelationship(teamNurse),
@@ -1755,13 +1739,13 @@ context('schedule page', function() {
 
     cy
       .routeCurrentClinician(fx => {
-        fx.data = currentClinician;
+        fx.data = testCurrentClinician;
 
         return fx;
       })
       .routeWorkspaceClinicians(fx => {
         fx.data = [
-          currentClinician,
+          testCurrentClinician,
           getClinician({
             id: '2',
             attributes: {
@@ -1850,7 +1834,7 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
       .intercept('GET', '/api/actions?*', {
@@ -1876,7 +1860,7 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[states]=33333');
+      .should('contain', `filter[states]=${ stateInProgress.id }`);
 
     cy
       .routeActions();
@@ -1890,6 +1874,6 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
   });
 });
