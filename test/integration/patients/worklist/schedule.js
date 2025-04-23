@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
-import { v5 as uuid } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 
 import formatDate from 'helpers/format-date';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -146,7 +146,7 @@ context('schedule page', function() {
       })
       .routeWorkspacePatient(fx => {
         fx.data = getWorkspacePatient({
-          id: uuid(testPatient1.id, workspaceOne.id),
+          id: uuidv5(testPatient1.id, workspaceOne.id),
         });
 
         return fx;
@@ -747,7 +747,7 @@ context('schedule page', function() {
       },
       actionsSelected: {
         [testActions[0].id]: true,
-        '4444': true,
+        [uuidv4()]: true,
       },
     }));
 
@@ -1716,7 +1716,7 @@ context('schedule page', function() {
     });
 
     const testNonTeamMemberClincian = getClinician({
-      id: '3',
+      id: uuidv4(),
       attributes: {
         name: 'Non Team Member',
       },
