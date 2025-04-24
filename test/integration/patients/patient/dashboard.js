@@ -70,7 +70,7 @@ context('patient dashboard page', function() {
         patient: getRelationship(testPatient),
         state: getRelationship(stateTodo),
         form: getRelationship(testForm),
-        files: getRelationship([{ id: '1' }], 'files'),
+        files: getRelationship([{ id: uuid() }], 'files'),
         comments: getRelationship([getComment()]),
       },
     });
@@ -176,7 +176,7 @@ context('patient dashboard page', function() {
       .wait('@routePatientActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[states]=22222,33333');
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     // Filters out done id 55555
     cy
@@ -1645,7 +1645,7 @@ context('patient dashboard page', function() {
       })
       .routeCurrentClinician(fx => {
         fx.data = getCurrentClinician({
-          id: '123456',
+          id: uuid(),
           attributes: {
             enabled: true,
           },
@@ -1700,7 +1700,7 @@ context('patient dashboard page', function() {
               owner: getRelationship(currentClinican),
               state: getRelationship(stateTodo),
               form: getRelationship(testForm),
-              files: getRelationship([{ id: '1' }], 'files'),
+              files: getRelationship([{ id: uuid() }], 'files'),
             },
           }),
           getAction({
@@ -1787,7 +1787,7 @@ context('patient dashboard page', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

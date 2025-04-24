@@ -4,7 +4,7 @@ import { v4 as uuid } from 'uuid';
 import formatDate from 'helpers/format-date';
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, getErrors } from 'helpers/json-api';
 import { getActivity } from 'support/api/events';
 import { getAction } from 'support/api/actions';
 import stateColors from 'helpers/state-colors';
@@ -28,7 +28,7 @@ context('action sidebar', function() {
 
     const currentClinician = getCurrentClinician();
     const testClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Another Clinician',
       },
@@ -721,9 +721,34 @@ context('action sidebar', function() {
       },
     });
 
+    const testFiles = [
+      {
+        id: uuid(),
+        attributes: {
+          path: `patients/${ testPatient.id }/HRA.pdf`,
+          created_at: '2019-08-24T14:15:22Z',
+        },
+        meta: {
+          view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA.pdf`,
+          download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA.pdf`,
+        },
+      },
+      {
+        id: uuid(),
+        attributes: {
+          path: `patients/${ testPatient.id }/HRA v2.pdf`,
+          created_at: '2019-08-25T14:15:22Z',
+        },
+        meta: {
+          view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA%20v2.pdf`,
+          download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA%20v2.pdf`,
+        },
+      },
+    ];
+
     const testAction = getAction({
       relationships: {
-        'files': getRelationship([{ id: '1' }, { id: '2' }], 'files'),
+        'files': getRelationship([{ id: testFiles[0].id }, { id: testFiles[1].id }], 'files'),
         'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
       },
@@ -745,30 +770,7 @@ context('action sidebar', function() {
         return fx;
       })
       .routeActionFiles(fx => {
-        fx.data = [
-          {
-            id: '1',
-            attributes: {
-              path: `patients/${ testPatient.id }/HRA.pdf`,
-              created_at: '2019-08-24T14:15:22Z',
-            },
-            meta: {
-              view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA.pdf`,
-              download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA.pdf`,
-            },
-          },
-          {
-            id: '2',
-            attributes: {
-              path: `patients/${ testPatient.id }/HRA v2.pdf`,
-              created_at: '2019-08-25T14:15:22Z',
-            },
-            meta: {
-              view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA%20v2.pdf`,
-              download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA%20v2.pdf`,
-            },
-          },
-        ];
+        fx.data = testFiles;
 
         return fx;
       })
@@ -850,7 +852,7 @@ context('action sidebar', function() {
       .wait('@routeDeleteFile')
       .itsUrl()
       .its('pathname')
-      .should('contain', '/api/files/2');
+      .should('contain', `/api/files/${ testFiles[1].id }`);
 
     const putFileURL = '/api/actions/**/relationships/files?urls=upload';
 
@@ -865,17 +867,14 @@ context('action sidebar', function() {
           req.reply({
             statusCode: 400,
             body: {
-              errors: [
-                {
-                  id: '1',
-                  status: '400',
-                  title: 'Bad Request',
-                  detail: 'Another file exists for that path',
-                  source: {
-                    pointer: '/data/attributes/path',
-                  },
+              errors: getErrors({
+                status: 400,
+                title: 'Bad Request',
+                detail: 'Another file exists for that path',
+                source: {
+                  pointer: '/data/attributes/path',
                 },
-              ],
+              }),
             },
           });
           return;
@@ -1122,9 +1121,21 @@ context('action sidebar', function() {
       },
     });
 
+    const testFile = {
+      id: uuid(),
+      attributes: {
+        path: 'patients/1/HRA.pdf',
+        created_at: '2019-08-24T14:15:22Z',
+      },
+      meta: {
+        view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
+        download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+      },
+    };
+
     const testAction = getAction({
       relationships: {
-        'files': getRelationship([{ id: '1' }], 'files'),
+        'files': getRelationship([{ id: testFile.id }], 'files'),
         'program-action': getRelationship(testProgramAction),
       },
     });
@@ -1140,19 +1151,7 @@ context('action sidebar', function() {
         return fx;
       })
       .routeActionFiles(fx => {
-        fx.data = [
-          {
-            id: '1',
-            attributes: {
-              path: 'patients/1/HRA.pdf',
-              created_at: '2019-08-24T14:15:22Z',
-            },
-            meta: {
-              view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-              download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
-            },
-          },
-        ];
+        fx.data = [testFile];
 
         return fx;
       })
@@ -1180,9 +1179,21 @@ context('action sidebar', function() {
       },
     });
 
+    const testFile = {
+      id: uuid(),
+      attributes: {
+        path: 'patients/1/HRA.pdf',
+        created_at: '2019-08-24T14:15:22Z',
+      },
+      meta: {
+        view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
+        download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+      },
+    };
+
     const testAction = getAction({
       relationships: {
-        'files': getRelationship([{ id: '1' }], 'files'),
+        'files': getRelationship([{ id: testFile.id }], 'files'),
         'program-action': getRelationship(testProgramAction),
       },
     });
@@ -1197,19 +1208,7 @@ context('action sidebar', function() {
         return fx;
       })
       .routeActionFiles(fx => {
-        fx.data = [
-          {
-            id: '1',
-            attributes: {
-              path: 'patients/1/HRA.pdf',
-              created_at: '2019-08-24T14:15:22Z',
-            },
-            meta: {
-              view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-              download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
-            },
-          },
-        ];
+        fx.data = [testFile];
 
         return fx;
       })
@@ -1276,7 +1275,7 @@ context('action sidebar', function() {
               message: 'Message from Someone Else',
             },
             relationships: {
-              clinician: getRelationship('22222', 'clinicians'),
+              clinician: getRelationship(getClinician({ id: uuid() })),
             },
           }),
         ];
@@ -1777,13 +1776,12 @@ context('action sidebar', function() {
       .intercept('GET', '/api/actions/1*', {
         statusCode: 410,
         body: {
-          errors: [{
-            id: '1',
-            status: '410',
+          errors: getErrors({
+            status: 410,
             title: 'Not Found',
             detail: 'Cannot find action',
             source: { parameter: 'actionId' },
-          }],
+          }),
         },
       })
       .as('routeAction')
@@ -1948,6 +1946,18 @@ context('action sidebar', function() {
       },
     });
 
+    const testFile = {
+      id: uuid(),
+      attributes: {
+        path: 'patients/1/HRA.pdf',
+        created_at: '2019-08-24T14:15:22Z',
+      },
+      meta: {
+        view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
+        download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+      },
+    };
+
     const testAction = getAction({
       attributes: {
         outreach: 'disabled',
@@ -1959,7 +1969,7 @@ context('action sidebar', function() {
         'owner': getRelationship(getCurrentClinician()),
         'state': getRelationship(stateTodo),
         'form': getRelationship(testForm),
-        'files': getRelationship([{ id: '1' }], 'files'),
+        'files': getRelationship([{ id: testFile.id }], 'files'),
         'program-action': getRelationship(testProgramAction),
       },
     });
@@ -1984,19 +1994,7 @@ context('action sidebar', function() {
         return fx;
       })
       .routeActionFiles(fx => {
-        fx.data = [
-          {
-            id: '1',
-            attributes: {
-              path: 'patients/1/HRA.pdf',
-              created_at: '2019-08-24T14:15:22Z',
-            },
-            meta: {
-              view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-              download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
-            },
-          },
-        ];
+        fx.data = [testFile];
 
         return fx;
       })
@@ -2086,7 +2084,7 @@ context('action sidebar', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
@@ -2201,7 +2199,7 @@ context('action sidebar', function() {
         name: 'Not authored by Current User',
       },
       relationships: {
-        author: getRelationship('22222', 'clinicians'),
+        author: getRelationship(getClinician({ id: uuid() })),
         state: getRelationship(stateInProgress),
         owner: getRelationship(teamCoordinator),
       },
@@ -2270,7 +2268,7 @@ context('action sidebar', function() {
       },
     });
 
-    const otherClinician = getClinician({ id: '22222' });
+    const otherClinician = getClinician({ id: uuid() });
 
     const testFlow = getFlow({
       relationships: {
@@ -2371,7 +2369,7 @@ context('action sidebar', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

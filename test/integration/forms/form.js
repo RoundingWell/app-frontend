@@ -1,4 +1,4 @@
-import { v5 as uuid } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 
 import { getRelationship, getErrors } from 'helpers/json-api';
 
@@ -14,7 +14,7 @@ const testPatient = getPatient();
 
 function getTestPatientField(name, value) {
   return getPatientField({
-    id: uuid(`resource:field:${ name }`, testPatient.id),
+    id: uuidv5(`resource:field:${ name }`, testPatient.id),
     attributes: { name, value },
   });
 }
@@ -49,7 +49,7 @@ context('Noncontext Form', function() {
         fx.data = [
           currentClinician,
           getClinician({
-            id: '2',
+            id: uuidv4(),
             attributes: {
               name: 'Team Member',
             },
@@ -58,7 +58,7 @@ context('Noncontext Form', function() {
             },
           }),
           getClinician({
-            id: '3',
+            id: uuidv4(),
             attributes: {
               name: 'Non Team Member',
             },
@@ -441,7 +441,7 @@ context('Noncontext Form', function() {
       .wait('@routePatchPatientFieldFoo')
       .its('request.body.data')
       .then(data => {
-        expect(data.id).to.equal(uuid('resource:field:foo', testPatient.id));
+        expect(data.id).to.equal(uuidv5('resource:field:foo', testPatient.id));
         expect(data.attributes.name).to.equal('foo');
         expect(data.attributes.value).to.deep.equal(['one', 'two']);
       })
@@ -459,7 +459,7 @@ context('Noncontext Form', function() {
       .click()
       .wait('@routePatchPatientFieldBar')
       .its('request.body.data.id')
-      .should('equal', uuid('resource:field:bar', testPatient.id))
+      .should('equal', uuidv5('resource:field:bar', testPatient.id))
       .wait(100);
 
     cy
@@ -474,7 +474,7 @@ context('Noncontext Form', function() {
       .click()
       .wait('@routePatchPatientFieldBazinga')
       .its('request.body.data.id')
-      .should('equal', uuid('resource:field:bazinga', testPatient.id))
+      .should('equal', uuidv5('resource:field:bazinga', testPatient.id))
       .wait(100);
 
     cy

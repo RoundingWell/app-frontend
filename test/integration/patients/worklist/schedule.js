@@ -424,17 +424,19 @@ context('schedule page', function() {
   specify('filter schedule', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
+    const testClinician = getClinician({
+      id: uuidv4(),
+      attributes: { name: 'Test Clinician' },
+      relationships: {
+        team: getRelationship(teamNurse),
+        role: getRelationship(roleEmployee),
+      },
+    });
+
     cy
       .routeActions()
       .routeWorkspaceClinicians(fx => {
-        fx.data[1] = getClinician({
-          id: 'test-id',
-          attributes: { name: 'Test Clinician' },
-          relationships: {
-            team: getRelationship(teamNurse),
-            role: getRelationship(roleEmployee),
-          },
-        });
+        fx.data[1] = testClinician;
 
         return fx;
       })
@@ -466,14 +468,14 @@ context('schedule page', function() {
       .then(() => {
         const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
-        expect(storage.clinicianId).to.equal('test-id');
+        expect(storage.clinicianId).to.equal(testClinician.id);
       });
 
     cy
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[clinicians]=test-id');
+      .should('contain', `filter[clinicians]=${ testClinician.id }`);
 
     cy
       .get('[data-date-filter-region]')

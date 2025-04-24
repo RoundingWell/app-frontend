@@ -613,7 +613,7 @@ context('patient flow page', function() {
               state: getRelationship(stateTodo),
               owner: getRelationship(teamNurse),
               form: getRelationship(testForm),
-              files: getRelationship([{ id: '1' }], 'files'),
+              files: getRelationship([{ id: uuid() }], 'files'),
               comments: getRelationship([getComment()]),
             },
           }),
@@ -1199,16 +1199,16 @@ context('patient flow page', function() {
   });
 
   specify('flow owner assignment', function() {
+    const currentClinician = getCurrentClinician();
+    const otherClinician = getClinician({
+      id: uuid(),
+      attributes: {
+        name: 'Other Clinician',
+      },
+    });
+
     cy
       .routeWorkspaceClinicians(fx => {
-        const currentClinician = getCurrentClinician();
-        const otherClinician = getClinician({
-          id: '22222',
-          attributes: {
-            name: 'Other Clinician',
-          },
-        });
-
         fx.data = [currentClinician, otherClinician];
 
         return fx;
@@ -1242,7 +1242,7 @@ context('patient flow page', function() {
             },
             relationships: {
               state: getRelationship(stateTodo),
-              owner: getRelationship('22222', 'clinicians'),
+              owner: getRelationship(otherClinician),
               flow: getRelationship(testFlow),
             },
           }),
@@ -1327,8 +1327,8 @@ context('patient flow page', function() {
       .wait('@routePatchFlow')
       .its('request.body')
       .should(({ data }) => {
-        expect(data.relationships.owner.data.id).to.equal('11111');
-        expect(data.relationships.owner.data.type).to.equal('clinicians');
+        expect(data.relationships.owner.data.id).to.equal(currentClinician.id);
+        expect(data.relationships.owner.data.type).to.equal(currentClinician.type);
       });
 
     cy
@@ -1451,7 +1451,7 @@ context('patient flow page', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
@@ -1555,7 +1555,7 @@ context('patient flow page', function() {
           },
           relationships: {
             state: getRelationship(stateInProgress),
-            owner: getRelationship('22222', 'clinicians'),
+            owner: getRelationship(nonTeamMemberClinician),
           },
         });
 
@@ -2565,7 +2565,7 @@ context('patient flow page', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

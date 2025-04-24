@@ -10,10 +10,11 @@ import { stateTodo, stateInProgress, stateDone, stateUnableToComplete } from 'su
 const STATE_VERSION = 'v6';
 
 context('filter sidebar', function() {
+  const currentClinician = getCurrentClinician();
   const testStates = [stateTodo, stateInProgress, stateDone, stateUnableToComplete];
 
   specify('worklist filtering', function() {
-    localStorage.setItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       customFilters: {
         insurance: 'Medicare',
@@ -168,7 +169,7 @@ context('filter sidebar', function() {
       .contains('All')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.customFilters.insurance).to.be.null;
       })
@@ -204,7 +205,7 @@ context('filter sidebar', function() {
       .contains('BCBS PPO 100')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.customFilters.insurance).to.equal('BCBS PPO 100');
       })
@@ -229,7 +230,7 @@ context('filter sidebar', function() {
       .find('.js-clear-filters')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.customFilters.insurance).to.be.undefined;
       })
@@ -282,7 +283,7 @@ context('filter sidebar', function() {
       .first()
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([stateInProgress.id]);
       })
@@ -307,7 +308,7 @@ context('filter sidebar', function() {
       .first()
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.flowStates).to.deep.equal([stateInProgress.id]);
       })
@@ -347,7 +348,7 @@ context('filter sidebar', function() {
       .eq(1)
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([]);
       })
@@ -386,7 +387,7 @@ context('filter sidebar', function() {
       .eq(1)
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.flowStates).to.deep.equal([]);
       })
@@ -425,7 +426,7 @@ context('filter sidebar', function() {
       .eq(1)
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([stateInProgress.id]);
       })
@@ -462,7 +463,7 @@ context('filter sidebar', function() {
       .find('.js-clear-filters')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([stateTodo.id, stateInProgress.id]);
       })
@@ -600,7 +601,7 @@ context('filter sidebar', function() {
       .first()
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`done-last-thirty-days_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`done-last-thirty-days_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([stateUnableToComplete.id]);
       })
@@ -637,7 +638,7 @@ context('filter sidebar', function() {
       .find('.js-clear-filters')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`done-last-thirty-days_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`done-last-thirty-days_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([stateDone.id, stateUnableToComplete.id]);
       })
@@ -671,7 +672,7 @@ context('filter sidebar', function() {
   });
 
   specify('schedule filtering', function() {
-    localStorage.setItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+    localStorage.setItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       customFilters: {
         insurance: 'Medicare',
       },
@@ -719,427 +720,6 @@ context('filter sidebar', function() {
       .routeSettings('custom_filters', ['team', 'insurance'])
       .routeActions()
       .visit('/schedule')
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', 'filter[clinicians]=11111')
-      .should('contain', 'filter[@insurance]=Medicare')
-      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`);
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
-
-    cy
-      .get('.app-frame__sidebar .sidebar')
-      .as('filtersSidebar')
-      .find('.sidebar__heading')
-      .should('contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-clear-filters')
-      .should('not.be.disabled');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .should('have.length', 2)
-      .first()
-      .get('.sidebar__label')
-      .should('contain', 'Insurance Plans')
-      .get('[data-filter-button')
-      .should('contain', 'Medicare');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .eq(1)
-      .get('.sidebar__label')
-      .should('contain', 'Team')
-      .get('[data-filter-button')
-      .should('contain', 'All');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-input')
-      .should('have.attr', 'placeholder', 'Insurance Plans...');
-
-    cy
-      .get('.picklist__item')
-      .contains('All')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.customFilters.insurance).to.be.null;
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('not.contain', 'filter[@insurance]');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('not.contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-clear-filters')
-      .should('be.disabled');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
-      .click();
-
-    cy
-      .get('.picklist__item')
-      .contains('BCBS PPO 100')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.customFilters.insurance).to.equal('BCBS PPO 100');
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', 'filter[@insurance]=BCBS PPO 100');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-clear-filters')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.customFilters.insurance).to.be.undefined;
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('not.contain', 'filter[@insurance]');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('not.contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-states-filters-region]')
-      .find('.fa-square-check')
-      .should('have.length', 2);
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-states-filters-region]')
-      .find('[data-check-region]')
-      .first()
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.states).to.deep.equal([stateInProgress.id]);
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[states]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[states]=${ stateTodo.id }`);
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('contain', '1');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-flow-states-filters-region]')
-      .find('[data-check-region]')
-      .first()
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.flowStates).to.deep.equal([stateInProgress.id]);
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[flow_states]=${ stateInProgress.id }`)
-      .should('not.contain', `filter[flow_states]=${ stateTodo.id }`);
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('contain', '2');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-states-filters-region]')
-      .find('[data-check-region]')
-      .eq(1)
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.states).to.deep.equal([]);
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[states]=${ NIL_UUID }`);
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('contain', '2');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-flow-states-filters-region]')
-      .find('[data-check-region]')
-      .eq(1)
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.flowStates).to.deep.equal([]);
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[flow_states]=${ NIL_UUID }`);
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('contain', '2');
-
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
-      .click();
-
-    cy
-      .get('.picklist__item')
-      .contains('BCBS PPO 100')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '3');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('contain', '3');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-clear-filters')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.states).to.deep.equal([stateTodo.id, stateInProgress.id]);
-      })
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`)
-      .should('not.contain', 'filter[@insurance]');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '3');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('not.contain', '3');
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('not.exist');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
-
-    cy
-      .get('[data-select-all-region]')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('not.exist');
-
-    cy
-      .get('[data-filters-region]')
-      .find('.js-cancel')
-      .click();
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('exist');
-  });
-
-  specify('reduced schedule filtering', function() {
-    localStorage.setItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
-      customFilters: {
-        insurance: 'Medicare',
-      },
-      states: [stateTodo.id, stateInProgress.id],
-      flowStates: [stateTodo.id, stateInProgress.id],
-    }));
-
-    const currentClinician = getCurrentClinician({
-      relationships: {
-        role: getRelationship(roleReducedEmployee),
-      },
-    });
-
-    cy
-      .routesForPatientDashboard()
-      .routeCurrentClinician(fx => {
-        fx.data = currentClinician;
-
-        return fx;
-      })
-      .routeDirectories(fx => {
-        fx.data = [
-          {
-            attributes: {
-              name: 'Team',
-              slug: 'team',
-              value: [
-                'Coordinator',
-                'Nurse',
-              ],
-            },
-          },
-          {
-            attributes: {
-              name: 'Insurance Plans',
-              slug: 'insurance',
-              value: [
-                'BCBS PPO 100',
-                'Medicare',
-              ],
-            },
-          },
-          {
-            attributes: {
-              name: 'ACO',
-              slug: 'aco',
-              value: [
-                'Basic',
-                'Premier',
-              ],
-            },
-          },
-        ];
-
-        return fx;
-      })
-      .routeSettings('custom_filters', ['team', 'insurance'])
-      .routeActions()
-      .routeAction()
-      .routePatientByAction()
-      .routeFormByAction()
-      .visit()
       .wait('@routeActions')
       .itsUrl()
       .its('search')
@@ -1206,7 +786,7 @@ context('filter sidebar', function() {
       .contains('All')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.customFilters.insurance).to.be.null;
       })
@@ -1242,7 +822,7 @@ context('filter sidebar', function() {
       .contains('BCBS PPO 100')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.customFilters.insurance).to.equal('BCBS PPO 100');
       })
@@ -1267,7 +847,7 @@ context('filter sidebar', function() {
       .find('.js-clear-filters')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.customFilters.insurance).to.be.undefined;
       })
@@ -1280,8 +860,7 @@ context('filter sidebar', function() {
       .get('.list-page__filters')
       .find('[data-filters-region]')
       .find('button')
-      .should('not.contain', '1')
-      .click();
+      .should('not.contain', '1');
 
     cy
       .get('@filtersSidebar')
@@ -1301,7 +880,7 @@ context('filter sidebar', function() {
       .first()
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([stateInProgress.id]);
       })
@@ -1329,7 +908,7 @@ context('filter sidebar', function() {
       .first()
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.flowStates).to.deep.equal([stateInProgress.id]);
       })
@@ -1357,7 +936,7 @@ context('filter sidebar', function() {
       .eq(1)
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([]);
       })
@@ -1384,7 +963,7 @@ context('filter sidebar', function() {
       .eq(1)
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.flowStates).to.deep.equal([]);
       })
@@ -1432,7 +1011,429 @@ context('filter sidebar', function() {
       .find('.js-clear-filters')
       .click()
       .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_11111_${ workspaceOne.id }-${ STATE_VERSION }`));
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.states).to.deep.equal([stateTodo.id, stateInProgress.id]);
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('not.contain', 'filter[@insurance]');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('not.contain', '3');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('not.contain', '3');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.js-close')
+      .click();
+
+    cy
+      .get('@filtersSidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('[data-select-all-region]')
+      .click();
+
+    cy
+      .get('@filtersSidebar')
+      .find('.js-close')
+      .click();
+
+    cy
+      .get('@filtersSidebar')
+      .should('not.exist');
+
+    cy
+      .get('[data-filters-region]')
+      .find('.js-cancel')
+      .click();
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('@filtersSidebar')
+      .should('exist');
+  });
+
+  specify('reduced schedule filtering', function() {
+    const testCurrentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleReducedEmployee),
+      },
+    });
+
+    localStorage.setItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      customFilters: {
+        insurance: 'Medicare',
+      },
+      states: [stateTodo.id, stateInProgress.id],
+      flowStates: [stateTodo.id, stateInProgress.id],
+    }));
+
+    cy
+      .routesForPatientDashboard()
+      .routeCurrentClinician(fx => {
+        fx.data = testCurrentClinician;
+
+        return fx;
+      })
+      .routeDirectories(fx => {
+        fx.data = [
+          {
+            attributes: {
+              name: 'Team',
+              slug: 'team',
+              value: [
+                'Coordinator',
+                'Nurse',
+              ],
+            },
+          },
+          {
+            attributes: {
+              name: 'Insurance Plans',
+              slug: 'insurance',
+              value: [
+                'BCBS PPO 100',
+                'Medicare',
+              ],
+            },
+          },
+          {
+            attributes: {
+              name: 'ACO',
+              slug: 'aco',
+              value: [
+                'Basic',
+                'Premier',
+              ],
+            },
+          },
+        ];
+
+        return fx;
+      })
+      .routeSettings('custom_filters', ['team', 'insurance'])
+      .routeActions()
+      .routeAction()
+      .routePatientByAction()
+      .routeFormByAction()
+      .visit()
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[clinicians]=${ testCurrentClinician.id }`)
+      .should('contain', 'filter[@insurance]=Medicare')
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
+      .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`);
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('contain', '1');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.app-frame__sidebar .sidebar')
+      .as('filtersSidebar')
+      .find('.sidebar__heading')
+      .should('contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.js-clear-filters')
+      .should('not.be.disabled');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-filter-button]')
+      .should('have.length', 2)
+      .first()
+      .get('.sidebar__label')
+      .should('contain', 'Insurance Plans')
+      .get('[data-filter-button')
+      .should('contain', 'Medicare');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-filter-button]')
+      .eq(1)
+      .get('.sidebar__label')
+      .should('contain', 'Team')
+      .get('[data-filter-button')
+      .should('contain', 'All');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-filter-button]')
+      .first()
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-input')
+      .should('have.attr', 'placeholder', 'Insurance Plans...');
+
+    cy
+      .get('.picklist__item')
+      .contains('All')
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.customFilters.insurance).to.be.null;
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('not.contain', 'filter[@insurance]');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('not.contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('not.contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.js-clear-filters')
+      .should('be.disabled');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-filter-button]')
+      .first()
+      .click();
+
+    cy
+      .get('.picklist__item')
+      .contains('BCBS PPO 100')
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.customFilters.insurance).to.equal('BCBS PPO 100');
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', 'filter[@insurance]=BCBS PPO 100');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.js-clear-filters')
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.customFilters.insurance).to.be.undefined;
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('not.contain', 'filter[@insurance]');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('not.contain', '1')
+      .click();
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('not.contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-states-filters-region]')
+      .find('.fa-square-check')
+      .should('have.length', 2);
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-states-filters-region]')
+      .find('[data-check-region]')
+      .first()
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.states).to.deep.equal([stateInProgress.id]);
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[states]=${ stateTodo.id }`);
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('contain', '1');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-flow-states-filters-region]')
+      .find('[data-check-region]')
+      .first()
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.flowStates).to.deep.equal([stateInProgress.id]);
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[flow_states]=${ stateInProgress.id }`)
+      .should('not.contain', `filter[flow_states]=${ stateTodo.id }`);
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('contain', '2');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('contain', '2');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-states-filters-region]')
+      .find('[data-check-region]')
+      .eq(1)
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.states).to.deep.equal([]);
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[states]=${ NIL_UUID }`);
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('contain', '2');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('contain', '2');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-flow-states-filters-region]')
+      .find('[data-check-region]')
+      .eq(1)
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.flowStates).to.deep.equal([]);
+      })
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[flow_states]=${ NIL_UUID }`);
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('contain', '2');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('contain', '2');
+
+    cy
+      .get('@filtersSidebar')
+      .find('[data-filter-button]')
+      .first()
+      .click();
+
+    cy
+      .get('.picklist__item')
+      .contains('BCBS PPO 100')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('contain', '3');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.sidebar__heading')
+      .should('contain', '3');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.js-clear-filters')
+      .click()
+      .then(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ testCurrentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
         expect(storage.states).to.deep.equal([stateTodo.id, stateInProgress.id]);
       })

@@ -450,7 +450,7 @@ context('Patient Action Form', function() {
     cy
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -1140,7 +1140,7 @@ context('Patient Action Form', function() {
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -1820,7 +1820,7 @@ context('Patient Action Form', function() {
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -1971,7 +1971,7 @@ context('Patient Action Form', function() {
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -2113,7 +2113,7 @@ context('Patient Action Form', function() {
       .wait('@routeFormDefinition');
 
     const errors = getErrors({
-      status: '403',
+      status: 403,
       title: 'Forbidden',
       detail: 'Insufficient permissions',
     });
@@ -2174,14 +2174,11 @@ context('Patient Action Form', function() {
         statusCode: 400,
         delay: 100,
         body: {
-          errors: [
-            {
-              id: '1',
-              status: '400',
-              title: 'Invalid',
-              detail: 'Invalid request parameters',
-            },
-          ],
+          errors: getErrors({
+            status: 400,
+            title: 'Invalid',
+            detail: 'Invalid request parameters',
+          }),
         },
       })
       .as('postFormResponse');
@@ -2298,7 +2295,7 @@ context('Patient Action Form', function() {
       },
     });
 
-    const otherClinician = getClinician({ id: '22222' });
+    const otherClinician = getClinician({ id: uuid() });
 
     const testPatient = getPatient();
 
@@ -2466,7 +2463,7 @@ context('Patient Action Form', function() {
     });
 
     const nonTeamClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
