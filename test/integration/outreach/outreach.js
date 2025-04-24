@@ -450,7 +450,7 @@ context('Outreach', function() {
         delay: 100,
         body: {
           errors: getErrors({
-            status: 403,
+            status: '403',
             title: 'Forbidden',
             detail: 'Insufficient permissions',
           }),
@@ -505,7 +505,7 @@ context('Outreach', function() {
         statusCode: 404,
         body: {
           errors: getErrors({
-            status: 404,
+            status: '404',
             title: 'Not Found',
           }),
         },
@@ -525,7 +525,7 @@ context('Outreach', function() {
         statusCode: 409,
         body: {
           errors: getErrors({
-            status: 409,
+            status: '409',
             title: 'Conflict',
           }),
         },

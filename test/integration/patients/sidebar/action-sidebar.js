@@ -868,7 +868,7 @@ context('action sidebar', function() {
             statusCode: 400,
             body: {
               errors: getErrors({
-                status: 400,
+                status: '400',
                 title: 'Bad Request',
                 detail: 'Another file exists for that path',
                 source: {
@@ -1777,7 +1777,7 @@ context('action sidebar', function() {
         statusCode: 410,
         body: {
           errors: getErrors({
-            status: 410,
+            status: '410',
             title: 'Not Found',
             detail: 'Cannot find action',
             source: { parameter: 'actionId' },

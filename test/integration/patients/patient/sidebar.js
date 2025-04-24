@@ -351,7 +351,7 @@ context('patient sidebar', function() {
         delay: 300,
         body: {
           errors: getErrors({
-            status: 403,
+            status: '403',
             title: 'Forbidden',
             detail: 'Insufficient permissions',
           }),

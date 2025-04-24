@@ -2113,7 +2113,7 @@ context('Patient Action Form', function() {
       .wait('@routeFormDefinition');
 
     const errors = getErrors({
-      status: 403,
+      status: '403',
       title: 'Forbidden',
       detail: 'Insufficient permissions',
     });
@@ -2175,7 +2175,7 @@ context('Patient Action Form', function() {
         delay: 100,
         body: {
           errors: getErrors({
-            status: 400,
+            status: '400',
             title: 'Invalid',
             detail: 'Invalid request parameters',
           }),

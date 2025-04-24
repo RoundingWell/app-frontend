@@ -806,7 +806,7 @@ context('patient flow page', function() {
         statusCode: 403,
         body: {
           errors: getErrors({
-            status: 403,
+            status: '403',
             title: 'Forbidden',
             detail: 'Insufficient permissions to delete action',
           }),

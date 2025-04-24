@@ -53,7 +53,7 @@ context('dashboard', function() {
         statusCode: 404,
         body: {
           errors: getErrors({
-            status: 404,
+            status: '404',
             title: 'Not Found',
             detail: 'Cannot find dashboard',
           }),

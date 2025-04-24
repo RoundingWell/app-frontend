@@ -884,7 +884,7 @@ context('App Nav', function() {
         statusCode: 400,
         body: {
           errors: getErrors({
-            status: 400,
+            status: '400',
             title: 'Bad Request',
             detail: 'Similar patient exists',
           }),
