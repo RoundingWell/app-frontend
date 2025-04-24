@@ -1136,11 +1136,13 @@ context('Patient Action Form', function() {
       .clear()
       .type('New typing');
 
+    const testNewFormResponse = getFormResponse();
+
     cy
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse() },
+        body: { data: testNewFormResponse },
       })
       .as('routePostResponse');
 
@@ -1168,7 +1170,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/formapp/12345');
+      .should('have.attr', 'src', `/formapp/${ testNewFormResponse.id }`);
 
     cy
       .wait('@routeFormResponse');
