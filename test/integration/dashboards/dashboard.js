@@ -1,3 +1,7 @@
+import { v4 as uuid } from 'uuid';
+
+import { getErrors } from 'helpers/json-api';
+
 import { getDashboard } from 'support/api/dashboards';
 
 context('dashboard', function() {
@@ -41,21 +45,22 @@ context('dashboard', function() {
   });
 
   specify('dashboard does not exist', function() {
+    const testUuid = uuid();
+
     cy
       .routeDashboards()
-      .intercept('GET', '/api/dashboards/1', {
+      .intercept('GET', `/api/dashboards/${ testUuid }`, {
         statusCode: 404,
         body: {
-          errors: [{
-            id: '1',
+          errors: getErrors({
             status: '404',
             title: 'Not Found',
             detail: 'Cannot find dashboard',
-          }],
+          }),
         },
       })
       .as('routeDashboard404')
-      .visit('/dashboards/1')
+      .visit(`/dashboards/${ testUuid }`)
       .wait('@routeDashboard404');
 
     cy

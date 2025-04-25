@@ -1,5 +1,7 @@
+import { v4 as uuid } from 'uuid';
+
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, getErrors } from 'helpers/json-api';
 
 import { getActivity } from 'support/api/events';
 import { getFlow } from 'support/api/flows';
@@ -146,7 +148,7 @@ context('flow sidebar', function() {
         fx.data = [
           currentClinician,
           getClinician({
-            id: '22222',
+            id: uuid(),
             relationships: {
               team: getRelationship(teamCoordinator),
             },
@@ -444,14 +446,11 @@ context('flow sidebar', function() {
       .intercept('DELETE', `/api/flows/${ testFlow.id }`, {
         statusCode: 403,
         body: {
-          errors: [
-            {
-              id: '1',
-              status: 403,
-              title: 'Forbidden',
-              detail: 'Insufficient permissions to delete action',
-            },
-          ],
+          errors: getErrors({
+            status: '403',
+            title: 'Forbidden',
+            detail: 'Insufficient permissions to delete action',
+          }),
         },
       })
       .as('routeDeleteFlowFailure');
@@ -677,7 +676,7 @@ context('flow sidebar', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

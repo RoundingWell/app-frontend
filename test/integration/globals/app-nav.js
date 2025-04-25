@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
+import { v4 as uuid } from 'uuid';
 
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, getErrors } from 'helpers/json-api';
 
 import { testTs } from 'helpers/test-timestamp';
 
@@ -584,8 +585,10 @@ context('App Nav', function() {
     const currentDate = dayjs();
     const pastDate = currentDate.subtract(10, 'years');
 
+    const testNewPatientId = uuid();
+
     const testClinician = getClinician({
-      id: '1',
+      id: uuid(),
       attributes: {
         name: 'Test Clinician',
         email: 'test.clinician@roundingwell.com',
@@ -705,7 +708,7 @@ context('App Nav', function() {
         statusCode: 201,
         body: {
           data: {
-            id: '1',
+            id: testNewPatientId,
             first_name: 'First',
             last_name: 'Last',
           },
@@ -722,7 +725,7 @@ context('App Nav', function() {
 
     cy
       .url()
-      .should('contain', 'patient/dashboard/1');
+      .should('contain', `patient/dashboard/${ testNewPatientId }`);
   });
 
   specify('add patient failure', function() {
@@ -880,13 +883,11 @@ context('App Nav', function() {
       .intercept('PUT', '/api/patients', {
         statusCode: 400,
         body: {
-          errors: [
-            {
-              status: '400',
-              title: 'Bad Request',
-              detail: 'Similar patient exists',
-            },
-          ],
+          errors: getErrors({
+            status: '400',
+            title: 'Bad Request',
+            detail: 'Similar patient exists',
+          }),
         },
       })
       .as('routeSimilarPatientError');
@@ -989,6 +990,8 @@ context('App Nav', function() {
   });
 
   specify('add patient custom form', function() {
+    const testNewPatientId = uuid();
+
     cy
       .routeSettings('patient_creation_form', {
         form_id: testForm.id,
@@ -1076,7 +1079,7 @@ context('App Nav', function() {
         statusCode: 201,
         body: {
           data: {
-            id: '1',
+            id: testNewPatientId,
             first_name: 'First',
             last_name: 'Last',
           },
@@ -1092,6 +1095,6 @@ context('App Nav', function() {
 
     cy
       .url()
-      .should('contain', `/patient/1/form/${ testForm.id }`);
+      .should('contain', `/patient/${ testNewPatientId }/form/${ testForm.id }`);
   });
 });

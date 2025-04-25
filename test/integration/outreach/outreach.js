@@ -1,3 +1,4 @@
+import { v4 as uuid } from 'uuid';
 import dayjs from 'dayjs';
 
 import { getErrors, getRelationship } from 'helpers/json-api';
@@ -5,10 +6,18 @@ import { getErrors, getRelationship } from 'helpers/json-api';
 import { getFormFields } from 'support/api/form-fields';
 import { getPatient } from 'support/api/patients';
 import { getForm, testForm } from 'support/api/forms';
+import { getAction } from 'support/api/actions';
+import { getOutreachStatus } from 'support/api/outreach';
 
 context('Outreach', function() {
   beforeEach(function() {
     cy.viewport('iphone-x');
+  });
+
+  const testAction = getAction();
+  const testPatient = getPatient();
+  const testOutreachStatus = getOutreachStatus({
+    relationships: { patient: getRelationship(testPatient) },
   });
 
   specify('Opt-In success', function() {
@@ -217,10 +226,9 @@ context('Outreach', function() {
   });
 
   specify('User verification success', function() {
-    const testPatient = getPatient;
     cy
       .routeOutreachStatus(fx => {
-        fx.data.relationships.patient = getRelationship(testPatient);
+        fx.data = testOutreachStatus;
 
         return fx;
       })
@@ -231,7 +239,7 @@ context('Outreach', function() {
       })
       .routeFormActionDefinition()
       .routeFormActionFields()
-      .visit('/outreach/11111', { noWait: true, isRoot: true })
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatus');
 
     cy
@@ -258,8 +266,8 @@ context('Outreach', function() {
       .wait('@routeCreateVerifyCodeRequest')
       .its('request.body')
       .should(({ data }) => {
-        expect(data.type).to.equal('patient-actions');
-        expect(data.id).to.equal('11111');
+        expect(data.type).to.equal(testAction.type);
+        expect(data.id).to.equal(testAction.id);
       });
 
     cy
@@ -356,7 +364,7 @@ context('Outreach', function() {
         delay: 100,
         body: {
           data: {
-            id: '33333',
+            id: uuid(),
             type: 'patient-tokens',
             attributes: {
               token: 'token-success',
@@ -375,8 +383,8 @@ context('Outreach', function() {
       .wait('@routeVerifyCodeRequest')
       .its('request.body')
       .should(({ data }) => {
-        expect(data.type).to.equal('outreach');
-        expect(data.id).to.equal('11111');
+        expect(data.type).to.equal(testOutreachStatus.type);
+        expect(data.id).to.equal(testOutreachStatus.id);
         expect(data.attributes.code).to.equal('1234');
         expect(data.relationships.patient.data.id).to.equal(testPatient.id);
       });
@@ -389,7 +397,7 @@ context('Outreach', function() {
   specify('User verification - api error when creating new code', function() {
     cy
       .routeOutreachStatus()
-      .visit('/outreach/11111', { noWait: true, isRoot: true })
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatus');
 
     cy
@@ -414,7 +422,7 @@ context('Outreach', function() {
   specify('User verification - user entered an invalid code', function() {
     cy
       .routeOutreachStatus()
-      .visit('/outreach/11111', { noWait: true, isRoot: true })
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatus');
 
     cy
@@ -493,7 +501,7 @@ context('Outreach', function() {
 
   specify('User verification - no longer shared error', function() {
     cy
-      .intercept('GET', '/api/outreach?filter[action]=11111', {
+      .intercept('GET', `/api/outreach?filter[action]=${ testAction.id }`, {
         statusCode: 404,
         body: {
           errors: getErrors({
@@ -503,7 +511,7 @@ context('Outreach', function() {
         },
       })
       .as('routeOutreachStatusError')
-      .visit('/outreach/11111', { noWait: true, isRoot: true })
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatusError');
 
     cy
@@ -513,7 +521,7 @@ context('Outreach', function() {
 
   specify('User verification - form already submitted', function() {
     cy
-      .intercept('GET', '/api/outreach?filter[action]=11111', {
+      .intercept('GET', `/api/outreach?filter[action]=${ testAction.id }`, {
         statusCode: 409,
         body: {
           errors: getErrors({
@@ -523,7 +531,7 @@ context('Outreach', function() {
         },
       })
       .as('routeOutreachStatusError')
-      .visit('/outreach/11111', { noWait: true, isRoot: true })
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatusError');
 
     cy
@@ -555,7 +563,7 @@ context('Outreach', function() {
 
         return fx;
       })
-      .visit('/outreach/11111', { noWait: true, isRoot: true })
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatus');
 
     cy
@@ -604,7 +612,7 @@ context('Outreach', function() {
       .contains('Test Form');
 
     cy
-      .intercept('POST', '/api/actions/11111/relationships/form-responses', {
+      .intercept('POST', `/api/actions/${ testAction.id }/relationships/form-responses`, {
         statusCode: 400,
         delay: 100,
         body: {
@@ -640,7 +648,7 @@ context('Outreach', function() {
       .should(({ data }) => {
         expect(data.type).to.equal('form-responses');
         expect(data.id).to.not.be.empty;
-        expect(data.relationships.action.data.id).to.equal('11111');
+        expect(data.relationships.action.data.id).to.equal(testAction.id);
         expect(data.relationships.form.data.id).to.equal(testForm.id);
         expect(data.attributes.response.data.familyHistory).to.equal('New typing');
         expect(data.attributes.response.data.storyTime).to.equal('Once upon a time...');
@@ -655,7 +663,7 @@ context('Outreach', function() {
       .contains('This is a form error');
 
     cy
-      .intercept('POST', '/api/actions/11111/relationships/form-responses', {
+      .intercept('POST', `/api/actions/${ testAction.id }/relationships/form-responses`, {
         delay: 100,
         body: { data: {} },
       })
@@ -699,7 +707,7 @@ context('Outreach', function() {
 
         return fx;
       })
-      .visit('/outreach/11111', { noWait: true, isRoot: true })
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatus');
 
     cy
@@ -761,7 +769,7 @@ context('Outreach', function() {
 
   specify('500 error', function() {
     cy
-      .intercept('GET', '/api/outreach?filter[action]=11111', req => {
+      .intercept('GET', `/api/outreach?filter[action]=${ testAction.id }`, req => {
         req.reply({
           statusCode: 500,
           body: {},
@@ -770,7 +778,7 @@ context('Outreach', function() {
       .routeFormByAction()
       .routeFormActionDefinition()
       .routeFormActionFields()
-      .visit('/outreach/11111', { noWait: true, isRoot: true });
+      .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true });
 
     cy
       .url()
@@ -791,7 +799,7 @@ context('Outreach', function() {
 
     cy
       .url()
-      .should('contain', 'outreach/11111');
+      .should('contain', `outreach/${ testAction.id }`);
 
     cy
       .intercept('POST', '/api/outreach/otp', {
@@ -872,7 +880,7 @@ context('Outreach', function() {
       .contains('Oops! The page you requested can\’t be found.');
 
     cy
-      .visit('/outreach/11111/22222', { noWait: true, isRoot: true });
+      .visit(`/outreach/${ testAction.id }/page-does-not-exist`, { noWait: true, isRoot: true });
 
     cy
       .get('body')

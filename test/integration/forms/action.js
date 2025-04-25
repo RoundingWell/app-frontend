@@ -450,7 +450,7 @@ context('Patient Action Form', function() {
     cy
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -1136,11 +1136,13 @@ context('Patient Action Form', function() {
       .clear()
       .type('New typing');
 
+    const testNewFormResponse = getFormResponse();
+
     cy
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: testNewFormResponse },
       })
       .as('routePostResponse');
 
@@ -1168,7 +1170,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/formapp/12345');
+      .should('have.attr', 'src', `/formapp/${ testNewFormResponse.id }`);
 
     cy
       .wait('@routeFormResponse');
@@ -1820,7 +1822,7 @@ context('Patient Action Form', function() {
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -1971,7 +1973,7 @@ context('Patient Action Form', function() {
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -2174,14 +2176,11 @@ context('Patient Action Form', function() {
         statusCode: 400,
         delay: 100,
         body: {
-          errors: [
-            {
-              id: '1',
-              status: '400',
-              title: 'Invalid',
-              detail: 'Invalid request parameters',
-            },
-          ],
+          errors: getErrors({
+            status: '400',
+            title: 'Invalid',
+            detail: 'Invalid request parameters',
+          }),
         },
       })
       .as('postFormResponse');
@@ -2298,7 +2297,7 @@ context('Patient Action Form', function() {
       },
     });
 
-    const otherClinician = getClinician({ id: '22222' });
+    const otherClinician = getClinician({ id: uuid() });
 
     const testPatient = getPatient();
 
@@ -2466,7 +2465,7 @@ context('Patient Action Form', function() {
     });
 
     const nonTeamClinician = getClinician({
-      id: '22222',
+      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 
 import formatDate from 'helpers/format-date';
 import { testDate, testDateSubtract } from 'helpers/test-date';
-import { getResource, getRelationship } from 'helpers/json-api';
+import { getResource, getRelationship, getErrors } from 'helpers/json-api';
 
 import { workspaceOne, getWorkspace } from 'support/api/workspaces';
 import { getWorkspacePatient } from 'support/api/workspace-patients';
@@ -11,6 +11,7 @@ import { getPatient } from 'support/api/patients';
 import { getCurrentClinician } from 'support/api/clinicians';
 import { roleAdmin, roleEmployee } from 'support/api/roles';
 import { getForm, testForm } from 'support/api/forms';
+import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
   specify('display patient data', function() {
@@ -349,14 +350,11 @@ context('patient sidebar', function() {
         statusCode: 403,
         delay: 300,
         body: {
-          errors: [
-            {
-              id: '1',
-              status: 403,
-              title: 'Forbidden',
-              detail: 'Insufficient permissions',
-            },
-          ],
+          errors: getErrors({
+            status: '403',
+            title: 'Forbidden',
+            detail: 'Insufficient permissions',
+          }),
         },
       })
       .as('postFormResponse');
@@ -393,7 +391,7 @@ context('patient sidebar', function() {
     cy
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
-        body: { data: { id: '12345' } },
+        body: { data: getFormResponse() },
       })
       .as('postFormResponse');
 

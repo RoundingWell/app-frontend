@@ -32,6 +32,8 @@ context('Patient Form', function() {
   });
 
   specify('submitting the form', function() {
+    const testNewFormResponse = getFormResponse();
+
     cy
       .routesForPatientAction()
       .routeForm(fx => {
@@ -129,7 +131,7 @@ context('Patient Form', function() {
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: testNewFormResponse },
       })
       .as('routePostResponse');
 
@@ -154,7 +156,7 @@ context('Patient Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/formapp/12345');
+      .should('have.attr', 'src', `/formapp/${ testNewFormResponse.id }`);
 
     cy
       .wait('@routeFormResponse');
@@ -196,7 +198,7 @@ context('Patient Form', function() {
     cy
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
@@ -690,7 +692,7 @@ context('Patient Form', function() {
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse({ id: '12345' }) },
+        body: { data: getFormResponse() },
       })
       .as('routePostResponse');
 
