@@ -19,6 +19,7 @@ import { teamCoordinator, teamNurse, teamOther } from 'support/api/teams';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { workspaceOne } from 'support/api/workspaces';
 import { getComment } from 'support/api/comments';
+import { getFile } from 'support/api/files';
 
 const tomorrow = testDateAdd(1);
 
@@ -112,7 +113,7 @@ context('patient flow page', function() {
 
   specify('patient flow action sidebar', function() {
     const testFileId = uuid();
-    const testOtherFileId = uuid();
+    const testOtherFile = getFile();
     const testComment = getComment();
 
     const testPatient = getPatient({
@@ -147,7 +148,7 @@ context('patient flow page', function() {
         'form': getRelationship(testForm),
         'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
-        'files': getRelationship([{ id: testOtherFileId }], 'files'),
+        'files': getRelationship([testOtherFile]),
       },
     });
 
@@ -172,19 +173,7 @@ context('patient flow page', function() {
         return fx;
       })
       .routeActionFiles(fx => {
-        fx.data = [
-          {
-            id: testOtherFileId,
-            attributes: {
-              path: `patients/${ testPatient.id }/Other_file.pdf`,
-              created_at: testTsSubtract(1),
-            },
-            meta: {
-              view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/Other_File.pdf`,
-              download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/Other_File.pdf`,
-            },
-          },
-        ];
+        fx.data = [testOtherFile];
 
         return fx;
       })
@@ -613,7 +602,7 @@ context('patient flow page', function() {
               state: getRelationship(stateTodo),
               owner: getRelationship(teamNurse),
               form: getRelationship(testForm),
-              files: getRelationship([{ id: uuid() }], 'files'),
+              files: getRelationship([getFile()]),
               comments: getRelationship([getComment()]),
             },
           }),

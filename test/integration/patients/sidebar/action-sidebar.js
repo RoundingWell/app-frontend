@@ -20,6 +20,7 @@ import { getComment } from 'support/api/comments';
 import { getProgram } from 'support/api/programs';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { getFlow } from 'support/api/flows';
+import { getFile } from 'support/api/files';
 
 // TODO: Update to mergejson api
 context('action sidebar', function() {
@@ -722,33 +723,31 @@ context('action sidebar', function() {
     });
 
     const testFiles = [
-      {
-        id: uuid(),
+      getFile({
         attributes: {
           path: `patients/${ testPatient.id }/HRA.pdf`,
-          created_at: '2019-08-24T14:15:22Z',
+          created_at: testTsSubtract(1),
         },
         meta: {
           view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA.pdf`,
           download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA.pdf`,
         },
-      },
-      {
-        id: uuid(),
+      }),
+      getFile({
         attributes: {
           path: `patients/${ testPatient.id }/HRA v2.pdf`,
-          created_at: '2019-08-25T14:15:22Z',
+          created_at: testTs(),
         },
         meta: {
           view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA%20v2.pdf`,
           download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA%20v2.pdf`,
         },
-      },
+      }),
     ];
 
     const testAction = getAction({
       relationships: {
-        'files': getRelationship([{ id: testFiles[0].id }, { id: testFiles[1].id }], 'files'),
+        'files': getRelationship(testFiles),
         'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
       },
@@ -981,7 +980,7 @@ context('action sidebar', function() {
 
     const testAction = getAction({
       relationships: {
-        'files': getRelationship([], 'files'),
+        'files': getRelationship([]),
         'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
         'state': getRelationship(stateTodo),
@@ -1115,27 +1114,17 @@ context('action sidebar', function() {
   });
 
   specify('action attachments - uploads not allowed on program action', function() {
+    const testFile = getFile();
+
     const testProgramAction = getProgramAction({
       attributes: {
         allowed_uploads: [],
       },
     });
 
-    const testFile = {
-      id: uuid(),
-      attributes: {
-        path: 'patients/1/HRA.pdf',
-        created_at: '2019-08-24T14:15:22Z',
-      },
-      meta: {
-        view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-        download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
-      },
-    };
-
     const testAction = getAction({
       relationships: {
-        'files': getRelationship([{ id: testFile.id }], 'files'),
+        'files': getRelationship([testFile]),
         'program-action': getRelationship(testProgramAction),
       },
     });
@@ -1173,27 +1162,18 @@ context('action sidebar', function() {
   });
 
   specify('action attachments - uploads not allowed for org', function() {
+    const testPatient = getPatient();
+    const testFile = getFile();
+
     const testProgramAction = getProgramAction({
       attributes: {
         allowed_uploads: ['pdf'],
       },
     });
 
-    const testFile = {
-      id: uuid(),
-      attributes: {
-        path: 'patients/1/HRA.pdf',
-        created_at: '2019-08-24T14:15:22Z',
-      },
-      meta: {
-        view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-        download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
-      },
-    };
-
     const testAction = getAction({
       relationships: {
-        'files': getRelationship([{ id: testFile.id }], 'files'),
+        'files': getRelationship([testFile]),
         'program-action': getRelationship(testProgramAction),
       },
     });
@@ -1213,7 +1193,7 @@ context('action sidebar', function() {
         return fx;
       })
 
-      .visit(`/patient/1/action/${ testAction.id }`)
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeActionFiles');
 
@@ -1940,23 +1920,13 @@ context('action sidebar', function() {
   });
 
   specify('action with work:owned:manage permission', function() {
+    const testFile = getFile();
+
     const testProgramAction = getProgramAction({
       attributes: {
         allowed_uploads: ['pdf'],
       },
     });
-
-    const testFile = {
-      id: uuid(),
-      attributes: {
-        path: 'patients/1/HRA.pdf',
-        created_at: '2019-08-24T14:15:22Z',
-      },
-      meta: {
-        view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-        download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
-      },
-    };
 
     const testAction = getAction({
       attributes: {
@@ -1969,7 +1939,7 @@ context('action sidebar', function() {
         'owner': getRelationship(getCurrentClinician()),
         'state': getRelationship(stateTodo),
         'form': getRelationship(testForm),
-        'files': getRelationship([{ id: testFile.id }], 'files'),
+        'files': getRelationship([testFile]),
         'program-action': getRelationship(testProgramAction),
       },
     });

@@ -16,6 +16,7 @@ import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { getComment } from 'support/api/comments';
+import { getFile } from 'support/api/files';
 
 context('patient archive page', function() {
   const currentClinican = getCurrentClinician({
@@ -49,7 +50,7 @@ context('patient archive page', function() {
           patient: getRelationship(testPatient),
           state: getRelationship(stateDone),
           form: getRelationship(testForm),
-          files: getRelationship([{ id: uuid() }], 'files'),
+          files: getRelationship([getFile()]),
           comments: getRelationship([getComment()]),
         },
       }),
@@ -880,7 +881,7 @@ context('patient archive page', function() {
               owner: getRelationship(currentClinican),
               state: getRelationship(stateDone),
               form: getRelationship(testForm),
-              files: getRelationship([{ id: uuid() }], 'files'),
+              files: getRelationship([getFile()]),
             },
           }),
           getAction({
