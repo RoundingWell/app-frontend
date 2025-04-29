@@ -10,7 +10,7 @@ import { getPatient, getPatients } from './patients';
 import { getProgramActions } from './program-actions';
 import { getProgramFlow } from './program-flows';
 import { getProgram, programOne } from './programs';
-import { getState } from './states';
+import { getState, stateInProgress } from './states';
 import { getTeam } from './teams';
 
 const TYPE = 'flows';
@@ -56,7 +56,7 @@ Cypress.Commands.add('routeFlow', (mutator = _.identity) => {
 
   const data = getFlow({
     relationships: {
-      'state': getRelationship('33333', 'states'),
+      'state': getRelationship(stateInProgress),
       'program': getRelationship(program),
       'program-flow': getRelationship(programFlow),
     },

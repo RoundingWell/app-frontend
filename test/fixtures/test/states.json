@@ -1,6 +1,6 @@
 [
   {
-    "id": "22222",
+    "id": "123bbe66-db12-4994-9e69-4c51c938827b",
     "name": "To Do",
     "sequence": 100,
     "status": "queued",
@@ -11,7 +11,7 @@
     }
   },
   {
-    "id": "33333",
+    "id": "ae773a40-1e54-4967-9686-52c4fc2245a3",
     "name": "In Progress",
     "sequence": 200,
     "status": "started",
@@ -22,7 +22,7 @@
     }
   },
   {
-    "id": "55555",
+    "id": "e40ecab6-9069-4553-88b3-202e8d1e7fbf",
     "name": "Done",
     "sequence": 300,
     "status": "done",
@@ -33,7 +33,7 @@
     }
   },
   {
-    "id": "66666",
+    "id": "2a70a785-a3dd-43b0-93ed-355c320f0fef",
     "name": "Unable to Complete",
     "sequence": 400,
     "status": "done",
@@ -44,7 +44,7 @@
     }
   },
   {
-    "id": "77777",
+    "id": "4738aece-e6a6-4ee3-9c4b-713dc0031f30",
     "name": "THMG Transfered",
     "sequence": 400,
     "status": "done",
@@ -55,7 +55,7 @@
     }
   },
   {
-    "id": "88888",
+    "id": "0a520cc9-a745-4f63-af63-03261c16948b",
     "name": "Evernorth",
     "sequence": 500,
     "status": "done",
