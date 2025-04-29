@@ -15,12 +15,18 @@ export function getRoles() {
 
 const roles = getRoles();
 
-export const roleAdmin = _.find(roles, { id: '22222' });
-export const roleManager = _.find(roles, { id: '11111' });
-export const roleEmployee = _.find(roles, { id: '33333' });
-export const roleReducedEmployee = _.find(roles, { id: '44444' });
-export const roleNoFilterEmployee = _.find(roles, { id: '66666' });
-export const roleTeamEmployee = _.find(roles, { id: '77777' });
+function getRoleByName(name) {
+  return _.find(roles, role => {
+    return role.attributes.name === name;
+  });
+}
+
+export const roleAdmin = getRoleByName('admin');
+export const roleManager = getRoleByName('manager');
+export const roleEmployee = getRoleByName('employee');
+export const roleReducedEmployee = getRoleByName('restricted_employee');
+export const roleNoFilterEmployee = getRoleByName('restricted__filter_employee');
+export const roleTeamEmployee = getRoleByName('liason_employee');
 
 Cypress.Commands.add('routeRoles', (mutator = _.identity) => {
   const data = getResource(fxTestRoles, TYPE);
