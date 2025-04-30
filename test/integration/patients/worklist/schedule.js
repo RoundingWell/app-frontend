@@ -1855,6 +1855,7 @@ context('schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
+      .should('contain', 'include=patient')
       .should('contain', `filter[states]=${ stateInProgress.id }`);
 
     cy
