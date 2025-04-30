@@ -100,6 +100,7 @@ context('reduced schedule page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
+      .should('contain', 'include=patient')
       .should('contain', `filter[clinicians]=${ currentClinician.id }`)
       .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
       .should('contain', 'fields[flows]=name,state');
