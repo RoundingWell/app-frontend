@@ -21,6 +21,7 @@ import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
 import { getComment } from 'support/api/comments';
+import { getFile } from 'support/api/files';
 
 const currentClinician = getCurrentClinician();
 
@@ -705,7 +706,7 @@ context('worklist page', function() {
         relationships: {
           state: getRelationship(stateTodo),
           flow: getRelationship(testFlow),
-          files: getRelationship([{ id: uuid() }], 'files'),
+          files: getRelationship([getFile()]),
           owner: getRelationship(teamCoordinator),
           patient: getRelationship(testPatient1),
           comments: getRelationship([getComment()]),
@@ -1433,8 +1434,8 @@ context('worklist page', function() {
           path: 'patients/1/HRA.pdf',
           bucket: 'bucket_name',
           urls: {
-            view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-            download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+            view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient1.id }/view/HRA.pdf`,
+            download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient1.id }/download/HRA.pdf`,
           },
         },
       },

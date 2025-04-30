@@ -20,6 +20,7 @@ import { testForm } from 'support/api/forms';
 import { workspaceOne } from 'support/api/workspaces';
 import { roleEmployee, roleAdmin, roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { getComment } from 'support/api/comments';
+import { getFile } from 'support/api/files';
 
 import { ACTION_OUTREACH } from 'js/static';
 
@@ -70,7 +71,7 @@ context('patient dashboard page', function() {
         patient: getRelationship(testPatient),
         state: getRelationship(stateTodo),
         form: getRelationship(testForm),
-        files: getRelationship([{ id: uuid() }], 'files'),
+        files: getRelationship([getFile()]),
         comments: getRelationship([getComment()]),
       },
     });
@@ -1700,7 +1701,7 @@ context('patient dashboard page', function() {
               owner: getRelationship(currentClinican),
               state: getRelationship(stateTodo),
               form: getRelationship(testForm),
-              files: getRelationship([{ id: uuid() }], 'files'),
+              files: getRelationship([getFile()]),
             },
           }),
           getAction({
