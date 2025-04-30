@@ -65,7 +65,7 @@ context('dashboard', function() {
 
     cy
       .url()
-      .should('not.contain', 'dashboards/1')
+      .should('not.contain', `dashboards/${ testUuid }`)
       .should('contain', 'dashboards');
 
     cy
