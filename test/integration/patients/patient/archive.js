@@ -11,7 +11,7 @@ import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
 import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
-import { stateDone, stateInProgress, stateTodo, stateUnableToComplete, stateThmgTransfered } from 'support/api/states';
+import { stateDone, stateInProgress, stateTodo, stateUnableToComplete, stateThmgTransferred } from 'support/api/states';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
@@ -147,7 +147,7 @@ context('patient archive page', function() {
       .wait('@routePatientActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id },${ stateThmgTransfered.id }`);
+      .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id },${ stateThmgTransferred.id }`);
 
     // Filters only done id 55555
     cy

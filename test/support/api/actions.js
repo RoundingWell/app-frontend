@@ -7,7 +7,7 @@ import fxActions from 'fixtures/collections/actions';
 import { getClinician } from './clinicians';
 import { getFlow } from './flows';
 import { getPatient, getPatients } from './patients';
-import { getState } from './states';
+import { getState, stateInProgress } from './states';
 import { getTeam } from './teams';
 import { getProgramAction } from './program-actions';
 import { programOne } from './programs';
@@ -47,7 +47,7 @@ export function getActions({ attributes, relationships, meta } = {}, { sample = 
 Cypress.Commands.add('routeAction', (mutator = _.identity) => {
   const data = getAction({
     relationships: {
-      state: getRelationship('33333', 'states'),
+      state: getRelationship(stateInProgress),
     },
   });
 

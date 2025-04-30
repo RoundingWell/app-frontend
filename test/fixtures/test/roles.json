@@ -1,6 +1,6 @@
 [
   {
-    "id": "22222",
+    "id": "85c42103-e014-4482-8392-dc9aab215a02",
     "name": "admin",
     "label": "Admin",
     "description": "Full permissions",
@@ -20,7 +20,7 @@
     ]
   },
   {
-    "id": "11111",
+    "id": "44da594f-1460-4fbe-b2d6-75731658cfdc",
     "name": "manager",
     "label": "Manager",
     "description": "Able to manage clinicians, patients, programs, and view dashboards",
@@ -40,7 +40,7 @@
     ]
   },
   {
-    "id": "33333",
+    "id": "2606b628-86a9-4be2-830e-b0f541422e6d",
     "name": "employee",
     "label": "Employee",
     "description": "Able to access workspace only",
@@ -54,7 +54,7 @@
     ]
   },
   {
-    "id": "44444",
+    "id": "34984bfd-e370-496c-87c7-0e728893a7d2",
     "name": "restricted_employee",
     "label": "Restricted Employee",
     "description": "Able to access reduced workspace",
@@ -69,14 +69,14 @@
     ]
   },
   {
-    "id": "55555",
+    "id": "70c30b67-6e7d-47f6-a1fe-8bfe0f7a149a",
     "name": "patient",
     "label": "Patient",
     "description": "Limited access for outreach",
     "permissions": []
   },
   {
-    "id": "66666",
+    "id": "110eb40e-4a09-4969-8f93-869ced70c856",
     "name": "restricted__filter_employee",
     "label": "Restricted Filter Employee",
     "description": "Remove clinicians from worklist filters",
@@ -88,9 +88,9 @@
     ]
   },
   {
-    "id": "77777",
-    "name": "liason_employee",
-    "label": "Liason Employee",
+    "id": "7244daae-5396-4fb1-b28d-7f3acc537682",
+    "name": "liaison_employee",
+    "label": "Liaison Employee",
     "description": "Can only manage work owned by their team or team members.",
     "permissions": [
       "app:schedule:clinician_filter",
