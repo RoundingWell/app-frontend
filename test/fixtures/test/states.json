@@ -2,6 +2,7 @@
   {
     "id": "123bbe66-db12-4994-9e69-4c51c938827b",
     "name": "To Do",
+    "slug": "to-do",
     "sequence": 100,
     "status": "queued",
     "options": {
@@ -13,6 +14,7 @@
   {
     "id": "ae773a40-1e54-4967-9686-52c4fc2245a3",
     "name": "In Progress",
+    "slug": "in-progress",
     "sequence": 200,
     "status": "started",
     "options": {
@@ -24,6 +26,7 @@
   {
     "id": "e40ecab6-9069-4553-88b3-202e8d1e7fbf",
     "name": "Done",
+    "slug": "done",
     "sequence": 300,
     "status": "done",
     "options": {
@@ -35,6 +38,7 @@
   {
     "id": "2a70a785-a3dd-43b0-93ed-355c320f0fef",
     "name": "Unable to Complete",
+    "slug": "unable-to-complete",
     "sequence": 400,
     "status": "done",
     "options": {
@@ -46,6 +50,7 @@
   {
     "id": "4738aece-e6a6-4ee3-9c4b-713dc0031f30",
     "name": "THMG Transfered",
+    "slug": "thmg-transfered",
     "sequence": 400,
     "status": "done",
     "options": {
@@ -57,6 +62,7 @@
   {
     "id": "0a520cc9-a745-4f63-af63-03261c16948b",
     "name": "Evernorth",
+    "slug": "evernorth",
     "sequence": 500,
     "status": "done",
     "options": {

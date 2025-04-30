@@ -15,17 +15,17 @@ export function getState() {
 
 const states = getStates();
 
-function getStateByName(name) {
+function getStateBySlug(slug) {
   return _.find(states, state => {
-    return state.attributes.name === name;
+    return state.attributes.slug === slug;
   });
 }
 
-export const stateTodo = getStateByName('To Do');
-export const stateInProgress = getStateByName('In Progress');
-export const stateDone = getStateByName('Done');
-export const stateUnableToComplete = getStateByName('Unable to Complete');
-export const stateThmgTransfered = getStateByName('THMG Transfered');
+export const stateTodo = getStateBySlug('to-do');
+export const stateInProgress = getStateBySlug('in-progress');
+export const stateDone = getStateBySlug('done');
+export const stateUnableToComplete = getStateBySlug('unable-to-complete');
+export const stateThmgTransfered = getStateBySlug('thmg-transfered');
 
 Cypress.Commands.add('routeStates', (mutator = _.identity) => {
   const data = getStates();
