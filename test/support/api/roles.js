@@ -26,7 +26,7 @@ export const roleManager = getRoleByName('manager');
 export const roleEmployee = getRoleByName('employee');
 export const roleReducedEmployee = getRoleByName('restricted_employee');
 export const roleNoFilterEmployee = getRoleByName('restricted__filter_employee');
-export const roleTeamEmployee = getRoleByName('liason_employee');
+export const roleTeamEmployee = getRoleByName('liaison_employee');
 
 Cypress.Commands.add('routeRoles', (mutator = _.identity) => {
   const data = getResource(fxTestRoles, TYPE);

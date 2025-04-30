@@ -89,8 +89,8 @@
   },
   {
     "id": "7244daae-5396-4fb1-b28d-7f3acc537682",
-    "name": "liason_employee",
-    "label": "Liason Employee",
+    "name": "liaison_employee",
+    "label": "Liaison Employee",
     "description": "Can only manage work owned by their team or team members.",
     "permissions": [
       "app:schedule:clinician_filter",

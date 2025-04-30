@@ -14,7 +14,7 @@ import { getPatient } from 'support/api/patients';
 import { getPatientField } from 'support/api/patient-fields';
 import { getFlow, getFlows } from 'support/api/flows';
 import { getCurrentClinician, getClinician } from 'support/api/clinicians';
-import { stateTodo, stateInProgress, stateDone, stateUnableToComplete, stateThmgTransfered } from 'support/api/states';
+import { stateTodo, stateInProgress, stateDone, stateUnableToComplete, stateThmgTransferred } from 'support/api/states';
 import { getWidget } from 'support/api/widgets';
 import { roleAdmin, roleEmployee, roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
@@ -650,7 +650,7 @@ context('worklist page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[updated_at]=${ dayjs(testDate()).startOf('day').subtract(30, 'days').format() }`)
-      .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id },${ stateThmgTransfered.id }`);
+      .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id },${ stateThmgTransferred.id }`);
 
     cy
       .intercept('PATCH', '/api/flows/*', {
