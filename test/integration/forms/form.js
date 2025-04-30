@@ -104,7 +104,7 @@ context('Noncontext Form', function() {
               tableView: true,
               dataSrc: 'custom',
               data: {
-                custom: `values = getClinicians({ teamId: ${ teamCoordinator.id } });`,
+                custom: `values = getClinicians({ teamId: "${ teamCoordinator.id }" });`,
               },
               template: '<span>{{ item.name }}</span>',
               refreshOn: 'data',
