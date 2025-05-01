@@ -10,7 +10,7 @@ const TYPE = 'teams';
 function getFixture(data) {
   if (!data) return _.sample(fxTestTeams);
 
-  if (data.name) return _.find(fxTestTeams, { name: data.name });
+  if (data.abbr) return _.find(fxTestTeams, { abbr: data.abbr });
 
   if (!data.id) data.id = _.sample(fxTestTeams).id;
 
@@ -50,9 +50,9 @@ export function getTeams({ attributes, relationships, meta } = {}, { depth = 0 }
 }
 
 // Exporting only teams needed for testing variance
-export const teamCoordinator = getTeamResource({ name: 'Coordinator' });
-export const teamNurse = getTeamResource({ name: 'Nurse' });
-export const teamOther = getTeamResource({ name: 'Other' });
+export const teamCoordinator = getTeamResource({ abbr: 'CO' });
+export const teamNurse = getTeamResource({ abbr: 'NUR' });
+export const teamOther = getTeamResource({ abbr: 'OT' });
 
 Cypress.Commands.add('routeTeams', (mutator = _.identity) => {
   const data = getTeams();
