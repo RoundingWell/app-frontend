@@ -1,7 +1,11 @@
+import { v4 as uuid } from 'uuid';
+
 import { getDashboard } from 'support/api/dashboards';
 
 context('dashboards all list', function() {
   specify('display dashboards list', function() {
+    const testDashboardId = uuid();
+
     const testDashboards = [
       getDashboard({
         attributes: { name: 'Daily Dashboards' },
@@ -10,7 +14,11 @@ context('dashboards all list', function() {
         attributes: { name: 'Weekly Dashboard' },
       }),
       getDashboard({
-        attributes: { name: 'Monthly Dashboard' },
+        id: testDashboardId,
+        attributes: {
+          name: 'Monthly Dashboard',
+          embed_url: `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?identityprovider=quicksight`,
+        },
       }),
     ];
 
@@ -24,6 +32,9 @@ context('dashboards all list', function() {
         fx.data = testDashboards[2];
 
         return fx;
+      })
+      .intercept('GET', 'https://*.quicksight.aws.amazon.com/**', req => {
+        req.reply('<html><body class="test-iframe-content">Test Iframe Content</body></html>');
       })
       .visit('/dashboards')
       .wait('@routeDashboards');
@@ -63,9 +74,15 @@ context('dashboards all list', function() {
   });
 
   specify('find in list', function() {
+    const testDashboardId = uuid();
+
     const testDashboards = [
       getDashboard({
-        attributes: { name: 'Daily Dashboards' },
+        id: testDashboardId,
+        attributes: {
+          name: 'Daily Dashboards',
+          embed_url: `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?identityprovider=quicksight`,
+        },
       }),
       getDashboard({
         attributes: { name: 'Weekly Dashboard' },
@@ -82,6 +99,9 @@ context('dashboards all list', function() {
         fx.data = testDashboards[0];
 
         return fx;
+      })
+      .intercept('GET', 'https://*.quicksight.aws.amazon.com/**', req => {
+        req.reply('<html><body class="test-iframe-content">Test Iframe Content</body></html>');
       })
       .visit('/dashboards')
       .wait('@routeDashboards');

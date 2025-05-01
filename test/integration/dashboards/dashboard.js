@@ -6,10 +6,13 @@ import { getDashboard } from 'support/api/dashboards';
 
 context('dashboard', function() {
   specify('display dashboard', function() {
+    const testDashboardId = uuid();
+
     const testDashboard = getDashboard({
+      id: testDashboardId,
       attributes: {
         name: 'Test Dashboard',
-        embed_url: '/test_dashboard',
+        embed_url: `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?identityprovider=quicksight`,
       },
     });
 
@@ -19,6 +22,9 @@ context('dashboard', function() {
         fx.data = testDashboard;
 
         return fx;
+      })
+      .intercept('GET', 'https://*.quicksight.aws.amazon.com/**', req => {
+        req.reply('<html><body class="test-iframe-content">Test Iframe Content</body></html>');
       })
       .visit(`/dashboards/${ testDashboard.id }`)
       .wait('@routeDashboard');
@@ -31,7 +37,8 @@ context('dashboard', function() {
     cy
       .get('.dashboard__frame')
       .find('.dashboard__iframe iframe')
-      .should('have.attr', 'src', '/test_dashboard');
+      .should('have.attr', 'src')
+      .and('include', `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?`);
 
     cy
       .get('.dashboard__frame')
