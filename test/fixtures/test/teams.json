@@ -1,36 +1,36 @@
 [
   {
-    "id": "11111",
+    "id": "91604f78-918f-46bf-acd2-90c0adbc99e8",
     "name": "Coordinator",
     "abbr": "CO"
   },
   {
-    "id": "22222",
+    "id": "03a7a545-63fa-4d26-a6d0-3ccd601721c3",
     "name": "Nurse",
     "abbr": "NUR"
   },
   {
-    "id": "33333",
+    "id": "70e94c4f-d046-429a-8a34-53a78848886c",
     "name": "Pharmacist",
     "abbr": "PHM"
   },
   {
-    "id": "44444",
+    "id": "8f970589-ac01-4568-a540-8eb5b029f00c",
     "name": "Physician",
     "abbr": "PHS"
   },
   {
-    "id": "55555",
+    "id": "5f5c1f5e-79b8-4a67-b052-8a63f04f1b8e",
     "name": "Specialist",
     "abbr": "SPC"
   },
   {
-    "id": "66666",
+    "id": "10929fe8-cbeb-4991-840f-47a5750451fa",
     "name": "Supervisor",
     "abbr": "SUP"
   },
   {
-    "id": "77777",
+    "id": "ff1c5515-ed13-443b-a632-b1bfb2ee1fd6",
     "name": "Other",
     "abbr": "OT"
   }

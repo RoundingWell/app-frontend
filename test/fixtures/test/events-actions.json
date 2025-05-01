@@ -1,14 +1,8 @@
 [
   {
-    "id": "11111",
+    "id": "108cbc05-a26f-4f8e-91ed-13662ba4d322",
     "date": "2019-07-06T17:45:25.360Z",
     "event_type": "ActionCreated",
-    "source": "system",
-    "_relationships": {
-      "editor": {
-        "id": "11111",
-        "type": "clinicians"
-      }
-    }
+    "source": "system"
   }
 ]
