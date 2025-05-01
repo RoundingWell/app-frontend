@@ -1190,7 +1190,6 @@ context('patient flow page', function() {
   specify('flow owner assignment', function() {
     const currentClinician = getCurrentClinician();
     const otherClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Other Clinician',
       },
@@ -1440,7 +1439,6 @@ context('patient flow page', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
@@ -2554,7 +2552,6 @@ context('patient flow page', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
@@ -2640,7 +2637,7 @@ context('patient flow page', function() {
     const testSocketFileId = uuid();
     const testComment = getComment();
 
-    const testClinician = getClinician({ id: uuid() });
+    const testClinician = getClinician();
 
     const testSocketFlow = getFlow({
       attributes: {

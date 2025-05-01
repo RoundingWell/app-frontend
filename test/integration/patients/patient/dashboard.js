@@ -1646,7 +1646,6 @@ context('patient dashboard page', function() {
       })
       .routeCurrentClinician(fx => {
         fx.data = getCurrentClinician({
-          id: uuid(),
           attributes: {
             enabled: true,
           },
@@ -1788,7 +1787,6 @@ context('patient dashboard page', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

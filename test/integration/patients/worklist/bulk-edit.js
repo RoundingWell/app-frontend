@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 import formatDate from 'helpers/format-date';
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDateAdd } from 'helpers/test-date';
@@ -1334,7 +1332,6 @@ context('Worklist bulk editing', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

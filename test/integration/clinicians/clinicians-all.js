@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 import formatDate from 'helpers/format-date';
 import { testTs } from 'helpers/test-timestamp';
 import { getRelationship } from 'helpers/json-api';
@@ -13,7 +11,6 @@ context('clinicians list', function() {
   specify('display clinicians list', function() {
     const testClinicians = [
       getClinician({
-        id: uuid(),
         attributes: {
           name: 'Aaron Aaronson',
           last_active_at: testTs(),
@@ -24,7 +21,6 @@ context('clinicians list', function() {
         },
       }),
       getClinician({
-        id: uuid(),
         attributes: {
           name: 'Baron Baronson',
           last_active_at: null,
@@ -204,7 +200,6 @@ context('clinicians list', function() {
       .routeClinicians(fx => {
         fx.data = [
           getClinician({
-            id: uuid(),
             attributes: {
               name: 'Aaron Aaronson',
             },
@@ -214,7 +209,6 @@ context('clinicians list', function() {
             },
           }),
           getClinician({
-            id: uuid(),
             attributes: {
               name: 'Baron Baronson',
             },

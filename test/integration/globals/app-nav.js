@@ -588,7 +588,6 @@ context('App Nav', function() {
     const testNewPatientId = uuid();
 
     const testClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Test Clinician',
         email: 'test.clinician@roundingwell.com',

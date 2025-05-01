@@ -425,7 +425,6 @@ context('schedule page', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
     const testClinician = getClinician({
-      id: uuidv4(),
       attributes: { name: 'Test Clinician' },
       relationships: {
         team: getRelationship(teamNurse),
@@ -1718,7 +1717,6 @@ context('schedule page', function() {
     });
 
     const testNonTeamMemberClincian = getClinician({
-      id: uuidv4(),
       attributes: {
         name: 'Non Team Member',
       },

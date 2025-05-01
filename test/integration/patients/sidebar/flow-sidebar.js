@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { getRelationship, getErrors } from 'helpers/json-api';
 
@@ -148,7 +146,6 @@ context('flow sidebar', function() {
         fx.data = [
           currentClinician,
           getClinician({
-            id: uuid(),
             relationships: {
               team: getRelationship(teamCoordinator),
             },
@@ -676,7 +673,6 @@ context('flow sidebar', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

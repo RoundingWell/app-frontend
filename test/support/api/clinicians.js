@@ -1,4 +1,6 @@
 import _ from 'underscore';
+import { v4 as uuid } from 'uuid';
+
 import { testTs } from 'helpers/test-timestamp';
 import { getResource, getRelationship, mergeJsonApi } from 'helpers/json-api';
 
@@ -28,7 +30,7 @@ export function getCurrentClinician(data, { depth = 0 } = {}) {
 function getFixture(data) {
   if (!data) return _.sample(fxClinicians);
 
-  if (!data.id) throw new Error('Clinician id must be specified for overriding getClinician');
+  if (!data.id) data = _.extend({ id: uuid() }, data);
 
   return _.find(fxClinicians, { id: data.id }) || _.extend({}, _.sample(fxClinicians), { id: data.id });
 }
