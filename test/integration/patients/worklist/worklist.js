@@ -1820,7 +1820,6 @@ context('worklist page', function() {
     const testCurrentClinician = getCurrentClinician({ relationships });
 
     const testClinician = getClinician({
-      id: uuid(),
       attributes: { name: 'Test Clinician' },
       relationships,
     });
@@ -1831,22 +1830,18 @@ context('worklist page', function() {
           testCurrentClinician,
           testClinician,
           getClinician({
-            id: uuid(),
             attributes: { name: 'C Clinician' },
             relationships,
           }),
           getClinician({
-            id: uuid(),
             attributes: { name: 'A Clinician' },
             relationships,
           }),
           getClinician({
-            id: uuid(),
             attributes: { name: 'B Clinician' },
             relationships,
           }),
           getClinician({
-            id: uuid(),
             attributes: { name: 'Admin Clinician' },
             relationships: {
               team: getRelationship(teamCoordinator),
@@ -1969,7 +1964,6 @@ context('worklist page', function() {
     const testClinicians = [
       getCurrentClinician({ relationships }),
       getClinician({
-        id: uuid(),
         attributes: { name: 'Test Clinician' },
         relationships: {
           team: getRelationship(teamCoordinator),
@@ -1977,17 +1971,14 @@ context('worklist page', function() {
         },
       }),
       getClinician({
-        id: uuid(),
         attributes: { name: 'C Clinician' },
         relationships,
       }),
       getClinician({
-        id: uuid(),
         attributes: { name: 'A Clinician' },
         relationships,
       }),
       getClinician({
-        id: uuid(),
         attributes: { name: 'B Clinician' },
         relationships,
       }),
@@ -4503,7 +4494,7 @@ context('worklist page', function() {
           name: 'Different Owner',
         },
         relationships: {
-          owner: getRelationship(getClinician({ id: uuid() })),
+          owner: getRelationship(getClinician()),
           state: getRelationship(stateTodo),
         },
       },
@@ -4691,7 +4682,6 @@ context('worklist page', function() {
     });
 
     const testTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Team Member',
       },
@@ -4701,7 +4691,6 @@ context('worklist page', function() {
     });
 
     const testNonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
@@ -4816,7 +4805,6 @@ context('worklist page', function() {
     });
 
     const testNonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

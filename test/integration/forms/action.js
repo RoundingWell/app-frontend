@@ -2297,7 +2297,7 @@ context('Patient Action Form', function() {
       },
     });
 
-    const otherClinician = getClinician({ id: uuid() });
+    const otherClinician = getClinician();
 
     const testPatient = getPatient();
 
@@ -2465,7 +2465,6 @@ context('Patient Action Form', function() {
     });
 
     const nonTeamClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

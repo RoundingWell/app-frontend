@@ -29,7 +29,6 @@ context('action sidebar', function() {
 
     const currentClinician = getCurrentClinician();
     const testClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Another Clinician',
       },
@@ -1255,7 +1254,7 @@ context('action sidebar', function() {
               message: 'Message from Someone Else',
             },
             relationships: {
-              clinician: getRelationship(getClinician({ id: uuid() })),
+              clinician: getRelationship(getClinician()),
             },
           }),
         ];
@@ -2054,7 +2053,6 @@ context('action sidebar', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
@@ -2169,7 +2167,7 @@ context('action sidebar', function() {
         name: 'Not authored by Current User',
       },
       relationships: {
-        author: getRelationship(getClinician({ id: uuid() })),
+        author: getRelationship(getClinician()),
         state: getRelationship(stateInProgress),
         owner: getRelationship(teamCoordinator),
       },
@@ -2238,7 +2236,7 @@ context('action sidebar', function() {
       },
     });
 
-    const otherClinician = getClinician({ id: uuid() });
+    const otherClinician = getClinician();
 
     const testFlow = getFlow({
       relationships: {
@@ -2339,7 +2337,6 @@ context('action sidebar', function() {
     });
 
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },

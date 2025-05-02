@@ -183,7 +183,7 @@ context('Owner Component', function() {
   });
 
   specify('Current User is not in workspaces', function() {
-    const notInWorkspace = getClinician({ id: '12345', attributes: { name: 'Not in Workspace' } });
+    const notInWorkspace = getClinician({ attributes: { name: 'Not in Workspace' } });
     const owner = new Clinician({ data: notInWorkspace }, { parse: true });
 
     Radio.reply('bootstrap', 'currentUser', () => {
@@ -295,7 +295,6 @@ context('Owner Component', function() {
 
   specify('currentUser can work:team:manage', function() {
     const employee = getClinician({
-      id: '45678',
       attributes: { name: 'Employee' },
       relationships: {
         role: getRelationship(roleTeamEmployee),

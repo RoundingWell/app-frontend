@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 import { getErrors, getRelationship } from 'helpers/json-api';
 
 import stateColors from 'helpers/state-colors';
@@ -10,7 +8,6 @@ import { workspaceOne } from 'support/api/workspaces';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 
 const testClinician = getClinician({
-  id: uuid(),
   attributes: {
     name: 'Test Clinician',
     email: 'test.clinician@roundingwell.com',
@@ -339,7 +336,6 @@ context('clinician sidebar', function() {
 
   specify('incomplete clinician', function() {
     const incompleteClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Test Clinician',
         email: 'test.clinician@roundingwell.com',
@@ -368,7 +364,6 @@ context('clinician sidebar', function() {
 
   specify('never active clinician', function() {
     const inactiveClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Test Clinician',
         email: 'test.clinician@roundingwell.com',

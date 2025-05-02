@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { v4 as uuid } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
@@ -962,7 +961,6 @@ context('patient archive page', function() {
 
   specify('work with work:team:manage permission', function() {
     const nonTeamMemberClinician = getClinician({
-      id: uuid(),
       attributes: {
         name: 'Non Team Member',
       },
