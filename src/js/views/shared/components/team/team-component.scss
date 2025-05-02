@@ -1,9 +1,9 @@
 .team-component__team {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
   margin-left: 4px;
 }
 
 .is-highlighted .team-component__team {
-  color: $white;
+  color: #{$white};
 }

@@ -4,14 +4,14 @@
 }
 
 .table-list__header {
-  border-bottom: 1px solid $black-90;
-  color: $black-60;
+  border-bottom: 1px solid #{$black-90};
+  color: #{$black-60};
   font-size: 12px;
   padding: 8px;
 }
 
 .table-list__item {
-  border-bottom: 1px solid $black-90;
+  border-bottom: 1px solid #{$black-90};
   cursor: pointer;
 
   &:hover:not(.is-selected) {
@@ -19,7 +19,7 @@
   }
 
   &.is-selected {
-    background-color: $greyed;
+    background-color: #{$greyed};
   }
 }
 
@@ -32,14 +32,14 @@
 
 .table-list.is-dragging {
   .table-list__item {
-    background: $white;
+    background: #{$white};
 
     &.sortable-ghost {
       background: color(light_blue, light);
     }
 
     &.is-selected:not(.sortable-ghost) {
-      background-color: $greyed;
+      background-color: #{$greyed};
     }
   }
 }
@@ -52,7 +52,7 @@
 }
 
 .table-list__cell--empty {
-  color: $black-60;
+  color: #{$black-60};
 }
 
 .table-list__meta:not(:empty) {
@@ -60,8 +60,8 @@
 }
 
 .table-empty-list {
-  border-bottom: 1px solid $black-90;
-  color: $black-80;
+  border-bottom: 1px solid #{$black-90};
+  color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
   margin: 40px auto 20px;

@@ -1,5 +1,5 @@
 .modal {
-  background-color: $white;
+  background-color: #{$white};
   border-radius: 8px;
   box-shadow: 0 4px 8px 0 rgb(0 0 0 / 50%);
   position: absolute;
@@ -20,7 +20,7 @@
 }
 
 .modal--sidebar {
-  background: $white;
+  background: #{$white};
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -33,7 +33,7 @@
 
 .modal__header {
   align-items: center;
-  color: $black-20;
+  color: #{$black-20};
   display: flex;
   font-size: 24px;
   line-height: 1.2;
@@ -104,7 +104,7 @@
 }
 
 .modal__error {
-  color: $error-color;
+  color: #{$error-color};
 }
 
 .modal__form-iframe {
@@ -131,7 +131,7 @@
 
 .modal__form-label {
   align-items: center;
-  color: $black-60;
+  color: #{$black-60};
   display: flex;
   font-size: 14px;
   font-weight: 600;

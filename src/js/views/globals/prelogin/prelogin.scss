@@ -43,7 +43,7 @@ body {
   align-items: center;
   animation: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) 0.5s reveal-preloader forwards;
   box-sizing: border-box;
-  color: $black-20;
+  color: #{$black-20};
   display: flex;
   flex-direction: column;
   font-family: ProximaSoft, 'Droid Sans', 'helvetica neue', arial, sans-serif;
@@ -64,9 +64,9 @@ body {
 }
 
 .prelogin__content {
-  background-color: $white;
+  background-color: #{$white};
   border-radius: 4px;
-  color: $black-20;
+  color: #{$black-20};
   line-height: 2.6em;
   min-height: 380px;
   padding: 48px 0;
@@ -90,7 +90,7 @@ body {
   background-color: color(green);
   border: 1px solid color(green);
   border-radius: 4px;
-  color: $white;
+  color: #{$white};
   cursor: pointer;
   display: inline-block;
   font-family: ProximaSoft, 'Droid Sans', 'helvetica neue', arial, sans-serif;
@@ -127,7 +127,7 @@ body {
 }
 
 .prelogin__contact-info {
-  color: $black-60;
+  color: #{$black-60};
   margin-top: 40px;
 
   a {
@@ -146,7 +146,7 @@ body {
 }
 
 .prelogin__message {
-  color: $black-20;
+  color: #{$black-20};
   font-size: 28px;
   line-height: 40px;
   padding: 16px 80px;

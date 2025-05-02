@@ -4,9 +4,9 @@
 }
 
 .comment__author-label {
-  background: $black-90;
+  background: #{$black-90};
   border-radius: 16px;
-  color: $black-20;
+  color: #{$black-20};
   display: inline-block;
   font-size: 12px;
   font-weight: 600;
@@ -26,12 +26,12 @@
   font-size: 14px;
 
   .comment__author-name {
-    color: $black-20;
+    color: #{$black-20};
     font-weight: 600;
   }
 
   .comment__timestamp {
-    color: $black-60;
+    color: #{$black-60};
     font-size: 12px;
     margin-left: 4px;
   }

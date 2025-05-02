@@ -20,8 +20,8 @@
 }
 
 .error-page__dialog {
-  background-color: $white;
-  border: 1px solid $black-80;
+  background-color: #{$white};
+  border: 1px solid #{$black-80};
   border-radius: 6px;
 }
 
@@ -36,7 +36,7 @@
   padding: 16px;
 
   + .error-page__section {
-    border-top: 1px solid $black-80;
+    border-top: 1px solid #{$black-80};
   }
 }
 

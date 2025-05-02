@@ -6,6 +6,6 @@ html, body {
 }
 
 .app-root {
-  background-color: $bkg-color;
+  background-color: #{$bkg-color};
   -webkit-overflow-scrolling: touch;
 }

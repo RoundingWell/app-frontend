@@ -1,5 +1,5 @@
 .alert-box {
-  background-color: $white;
+  background-color: #{$white};
   border-radius: 4px;
   box-shadow: 0 0 10px rgb(0 0 0 / 50%);
   font-size: 14px;
@@ -17,28 +17,28 @@
 .alert-box__icon {
   border-radius: 4px 0 0 4px;
   bottom: 0;
-  color: $white;
+  color: #{$white};
   font-size: 16px;
   padding: 16px;
   position: absolute;
   top: 0;
   width: 48px;
 
-  &.success { background-color: $success-color; }
-  &.info { background-color: $info-color; }
-  &.warning { background-color: $warning-color; }
-  &.error { background-color: $error-color; }
+  &.success { background-color: #{$success-color}; }
+  &.info { background-color: #{$info-color}; }
+  &.warning { background-color: #{$warning-color}; }
+  &.error { background-color: #{$error-color}; }
 }
 
 .alert-box__body { padding: 16px 80px 16px 64px; }
 
 .alert-box__link {
-  color: $black-20;
+  color: #{$black-20};
   text-decoration: underline;
 }
 
 .alert-box__cancel {
-  color: $black-80;
+  color: #{$black-80};
   font-size: 12px;
   font-weight: 700;
   margin-top: 2px;
@@ -48,5 +48,5 @@
   top: 16px;
   transition: color 0.15s linear;
 
-  &:hover { color: $black-20; }
+  &:hover { color: #{$black-20}; }
 }

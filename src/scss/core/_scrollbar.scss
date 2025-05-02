@@ -13,14 +13,14 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: $black-60;
+  background-color: #{$black-60};
 
   // border should match background, can't be transparent
-  border: 2px solid $black-98;
+  border: 2px solid #{$black-98};
   border-radius: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: $black-98;
+  background-color: #{$black-98};
   border-radius: 8px;
 }

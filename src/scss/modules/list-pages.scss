@@ -3,7 +3,7 @@
 }
 
 .list-page__header-icon {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 16px;
   margin-left: 16px;
   vertical-align: bottom;
@@ -16,7 +16,7 @@
 
 .list-page__title {
   align-items: center;
-  border-bottom: 1px solid $black-90;
+  border-bottom: 1px solid #{$black-90};
   font-size: 24px;
   margin-bottom: 16px;
   padding-bottom: 16px;

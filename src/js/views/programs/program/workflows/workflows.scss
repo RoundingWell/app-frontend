@@ -21,12 +21,12 @@
 }
 
 .workflows__actions {
-  border-top: solid 1px $black-90;
+  border-top: solid 1px #{$black-90};
   padding: 16px 0;
 }
 
 .workflows__list {
-  border-top: solid 1px $black-90;
+  border-top: solid 1px #{$black-90};
 }
 
 .workflows__content {
@@ -34,8 +34,8 @@
 }
 
 .workflows__empty-list {
-  border-bottom: 1px solid $black-90;
-  color: $black-80;
+  border-bottom: 1px solid #{$black-90};
+  color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
   margin: 40px auto 20px;
@@ -65,7 +65,7 @@
   vertical-align: middle;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     font-size: 20px;
     margin-right: 16px;
     vertical-align: middle;
@@ -85,7 +85,7 @@
 }
 
 .workflows-action--draft {
-  color: $black-20;
+  color: #{$black-20};
   font-weight: bold;
 }
 

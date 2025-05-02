@@ -1,12 +1,12 @@
 .patient-sidebar {
-  border-left: 1px solid $black-90;
+  border-left: 1px solid #{$black-90};
   padding: 52px 24px 0;
   position: relative;
   width: 256px;
 }
 
 .patient-sidebar__name {
-  border-bottom: 1px solid $black-90;
+  border-bottom: 1px solid #{$black-90};
   font-size: 24px;
   line-height: 1em;
   padding-bottom: 16px;

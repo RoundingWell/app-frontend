@@ -1,5 +1,5 @@
 .widgets-value:empty::before {
-  color: $black-60;
+  color: #{$black-60};
 
   // &ndash;
   content: '–';

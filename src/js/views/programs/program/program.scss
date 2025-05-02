@@ -21,8 +21,8 @@
 }
 
 .program__context-trail {
-  background: $white;
-  color: $black-20;
+  background: #{$white};
+  color: #{$black-20};
   line-height: 1;
   padding: 16px 0;
   position: sticky;
@@ -30,7 +30,7 @@
   z-index: 1;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     font-size: 12px;
     margin-right: 8px;
     vertical-align: -0.0825em;
@@ -38,7 +38,7 @@
 }
 
 .program__context-link {
-  color: $black-60;
+  color: #{$black-60};
   cursor: pointer;
   font-weight: 600;
   margin-right: 8px;

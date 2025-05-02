@@ -15,13 +15,13 @@
 
 
 .dashboard__context-trail {
-  color: $black-20;
+  color: #{$black-20};
   line-height: 1;
   padding: 16px 0;
   z-index: 1;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     font-size: 12px;
     margin-right: 8px;
     vertical-align: -0.0825em;
@@ -29,7 +29,7 @@
 }
 
 .dashboard__context-link {
-  color: $black-60;
+  color: #{$black-60};
   cursor: pointer;
   font-weight: 600;
   margin-right: 8px;

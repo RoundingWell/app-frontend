@@ -7,7 +7,7 @@
 }
 
 .is-highlighted .program-sidebar__edit {
-  color: $white;
+  color: #{$white};
 }
 
 .program-sidebar__context-menu {
@@ -22,7 +22,7 @@
 }
 
 .program-sidebar__published {
-  color: $black;
+  color: #{$black};
   font-weight: 600;
 
   &.is-published {
@@ -35,7 +35,7 @@
 }
 
 .program-sidebar__heading {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
   margin-top: 8px;
 

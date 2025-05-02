@@ -2,7 +2,7 @@
 
 .button {
   background: none;
-  border: 1px solid $black-90;
+  border: 1px solid #{$black-90};
   border-radius: 4px;
   cursor: pointer;
   display: inline-block;
@@ -26,7 +26,7 @@
   }
 
   &.has-error {
-    border-color: $error-color;
+    border-color: #{$error-color};
   }
 
   .icon:first-child:not(:last-child) {
@@ -61,7 +61,7 @@
   &:focus {
     background-color: color(light_blue);
     border-color: color(light_blue);
-    color: $white;
+    color: #{$white};
   }
 
   .icon.fa-angle-down {
@@ -73,19 +73,19 @@
 .button-secondary {
   @extend .button;
 
-  color: $black-20;
+  color: #{$black-20};
   line-height: 16px;
   text-align: left;
 
   &:hover:enabled {
-    background-color: $white;
-    border-color: $black-60;
+    background-color: #{$white};
+    border-color: #{$black-60};
   }
 
   &:active:enabled,
   &:focus {
-    background-color: $black-90;
-    border-color: $black-60;
+    background-color: #{$black-90};
+    border-color: #{$black-60};
   }
 }
 
@@ -100,20 +100,20 @@
 .button-filter {
   @extend .button;
 
-  background: $white;
-  color: $black-20;
+  background: #{$white};
+  color: #{$black-20};
   font-size: 12px;
   line-height: 1;
 
   &:hover:enabled {
-    background-color: $black-95;
-    border-color: $black-80;
+    background-color: #{$black-95};
+    border-color: #{$black-80};
   }
 
   &:active:enabled,
   &:focus {
-    background-color: $black-90;
-    border-color: $black-90;
+    background-color: #{$black-90};
+    border-color: #{$black-90};
   }
 
   .icon.fa-angle-down {
@@ -140,7 +140,7 @@
   &:focus {
     background-color: color(light_blue);
     border-color: color(light_blue);
-    color: $white;
+    color: #{$white};
   }
 
   .icon {
@@ -154,18 +154,18 @@
 
   background-color: color(blue);
   border-color: color(blue);
-  color: $white;
+  color: #{$white};
   font-weight: 700;
 
   &:hover:enabled {
     background-color: color(blue, light);
-    color: $white;
+    color: #{$white};
   }
 
   &:active:enabled,
   &:focus {
     background-color: color(blue, dark);
-    color: $white;
+    color: #{$white};
   }
 }
 
@@ -174,7 +174,7 @@
 
   background-color: color(red);
   border-color: color(red);
-  color: $white;
+  color: #{$white};
   font-weight: 700;
 
   &:hover:enabled {
@@ -192,7 +192,7 @@
 
   background-color: color(green);
   border-color: color(green);
-  color: $white;
+  color: #{$white};
   font-weight: 700;
 
   &:hover:enabled {
@@ -208,18 +208,18 @@
 .button--grey {
   @extend .button;
 
-  background-color: $black-20;
-  border-color: $black-20;
-  color: $white;
+  background-color: #{$black-20};
+  border-color: #{$black-20};
+  color: #{$white};
   font-weight: 700;
 
   &:hover:enabled {
-    background-color: $black-40;
+    background-color: #{$black-40};
   }
 
   &:active:enabled,
   &:focus {
-    background-color: $black-40;
+    background-color: #{$black-40};
   }
 }
 
@@ -227,11 +227,11 @@
   @extend .button;
 
   border-color: transparent;
-  color: $black-60;
+  color: #{$black-60};
 
   &:hover,
   &:focus {
-    color: $black-20;
+    color: #{$black-20};
   }
 }
 
@@ -250,7 +250,7 @@
 
   &.is-disabled,
   &[disabled] {
-    color: $black-60;
+    color: #{$black-60};
   }
 }
 
@@ -261,12 +261,12 @@
 }
 
 .button--icon {
-  color: $black-60;
+  color: #{$black-60};
   transition: color 0.15s linear;
 
   &:hover,
   &:focus {
-    color: $black-20;
+    color: #{$black-20};
   }
 }
 
@@ -279,7 +279,7 @@
   }
 
   .icon {
-    color: $black-80;
+    color: #{$black-80};
   }
 
   .icon:first-child:not(:last-child) {
@@ -297,7 +297,7 @@
 }
 
 .button__value--indeterminate {
-  color: $black-60;
+  color: #{$black-60};
   font-style: italic;
   font-weight: bold;
 }

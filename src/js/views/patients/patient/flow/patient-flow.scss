@@ -20,8 +20,8 @@
 }
 
 .patient-flow__context-trail {
-  background: $white;
-  color: $black-20;
+  background: #{$white};
+  color: #{$black-20};
   line-height: 1;
   padding: 16px 0;
   position: sticky;
@@ -29,7 +29,7 @@
   z-index: 1;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     font-size: 12px;
     margin-right: 8px;
     vertical-align: -0.0825em;
@@ -37,7 +37,7 @@
 }
 
 .patient-flow__context-link {
-  color: $black-60;
+  color: #{$black-60};
   cursor: pointer;
   font-weight: 600;
   margin-right: 8px;
@@ -56,7 +56,7 @@
   }
 
   &.is-selected {
-    background-color: $greyed;
+    background-color: #{$greyed};
   }
 }
 
@@ -65,7 +65,7 @@
   margin-bottom: 16px;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     font-size: 20px;
     margin-right: 8px;
     vertical-align: bottom;
@@ -73,7 +73,7 @@
 }
 
 .patient-flow__details {
-  color: $black-60;
+  color: #{$black-60};
   display: inline-block;
   font-size: 14px;
   padding-right: 24px;
@@ -86,17 +86,17 @@
 }
 
 .patient-flow__actions {
-  border-top: $black-90 1px solid;
+  border-top: #{$black-90} 1px solid;
   padding: 16px 0;
 }
 
 .patient-flow__list {
-  border-top: $black-90 1px solid;
+  border-top: #{$black-90} 1px solid;
 }
 
 .patient-flow__empty-list {
-  border-bottom: 1px solid $black-90;
-  color: $black-80;
+  border-bottom: 1px solid #{$black-90};
+  color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
   margin: 40px auto 20px;

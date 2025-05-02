@@ -32,14 +32,14 @@
 }
 
 .patient-search__header {
-  border-bottom: 1px solid $black-90;
+  border-bottom: 1px solid #{$black-90};
   margin: 0 8px;
   padding-left: 16px;
 }
 
 .patient-search__picklist-header {
   align-items: center;
-  color: $black-60;
+  color: #{$black-60};
   display: flex;
   font-size: 12px;
   justify-content: space-between;
@@ -81,7 +81,7 @@
 
 .patient-search__picklist-item {
   align-items: center;
-  color: $black-20;
+  color: #{$black-20};
   cursor: pointer;
   display: flex;
   font-size: 14px;
@@ -89,24 +89,24 @@
   padding: 4px 20px;
 
   &.is-inactive {
-    color: $black-60;
+    color: #{$black-60};
     font-style: italic;
   }
 
   &.is-highlighted,
   &:hover {
     background-color: color(blue);
-    color: $white;
+    color: #{$white};
 
     .patient-search__picklist-item,
     .patient-search__picklist-item-meta {
-      color: $white;
+      color: #{$white};
     }
   }
 }
 
 .patient-search__picklist-item-meta:empty::before {
-  color: $black-60;
+  color: #{$black-60};
 
   // &ndash;
   content: '–';
@@ -149,7 +149,7 @@
 }
 
 .patient-search__no-results {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 14px;
   font-style: normal;
   margin: 0 8px;
@@ -158,7 +158,7 @@
 }
 
 .patient-search__tip {
-  border-bottom: 1px solid $black-90;
+  border-bottom: 1px solid #{$black-90};
   padding-bottom: 16px;
   padding-left: 60px;
   text-align: left;
@@ -178,7 +178,7 @@
 .patient-search__search-by-label {
   background-color: color(light_blue, light);
   border-radius: 4px;
-  color: $black-20;
+  color: #{$black-20};
   display: inline-block;
   font-weight: 600;
   margin-right: 8px;

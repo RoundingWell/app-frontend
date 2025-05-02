@@ -1,7 +1,7 @@
 $menu-hover-color: #375467;
 
 .app-nav {
-  color: $black-90;
+  color: #{$black-90};
   height: 100%;
   min-height: 652px;
   position: relative;
@@ -20,14 +20,14 @@ $menu-hover-color: #375467;
 }
 
 .app-nav__picklist .fa-arrow-up-right-from-square {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
   margin-left: 4px;
   vertical-align: 0;
 }
 
 .app-nav__picklist-heading {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 14px;
   line-height: 16px;
   margin-bottom: 4px;
@@ -36,8 +36,8 @@ $menu-hover-color: #375467;
 }
 
 .app-nav__picklist-workspace-name {
-  border-bottom: 1px solid $black-90;
-  color: $black-20;
+  border-bottom: 1px solid #{$black-90};
+  color: #{$black-20};
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -45,25 +45,25 @@ $menu-hover-color: #375467;
 
   &.is-highlighted:not(&.is-disabled),
   &:hover:not(&.is-disabled) {
-    background-color: $white;
-    color: $black-20;
+    background-color: #{$white};
+    color: #{$black-20};
   }
 }
 
 .app-nav__picklist-item {
-  color: $black-20;
+  color: #{$black-20};
   font-weight: 600;
   padding: 8px 16px;
 
   .icon {
-    color: $black-20;
+    color: #{$black-20};
   }
 
   &.is-highlighted:not(&.is-disabled),
   &:hover:not(&.is-disabled),
   &.is-selected {
     background-color: color(grey);
-    color: $black-20;
+    color: #{$black-20};
     position: relative;
 
     .icon {
@@ -83,7 +83,7 @@ $menu-hover-color: #375467;
 }
 
 .app-nav__picklist-bottom {
-  border-top: 1px solid $black-90;
+  border-top: 1px solid #{$black-90};
   margin-top: 8px;
   padding-top: 8px;
 }
@@ -93,8 +93,8 @@ $menu-hover-color: #375467;
   padding: 12px 16px;
 
   &:hover, &.is-active {
-    background-color: $menu-hover-color;
-    color: $white;
+    background-color: #{$menu-hover-color};
+    color: #{$white};
   }
 
   &.minimized {
@@ -115,7 +115,7 @@ $menu-hover-color: #375467;
 }
 
 .app-nav__header-title {
-  color: $white;
+  color: #{$white};
   display: inline-block;
   font-size: 16px;
   font-weight: 700;
@@ -152,8 +152,8 @@ $menu-hover-color: #375467;
   }
 
   &:hover, &.is-active {
-    background-color: $menu-hover-color;
-    color: $white;
+    background-color: #{$menu-hover-color};
+    color: #{$white};
     opacity: 1;
   }
 }
@@ -166,8 +166,8 @@ $menu-hover-color: #375467;
   position: relative;
 
   &:hover, &.is-selected {
-    background-color: $menu-hover-color;
-    color: $white;
+    background-color: #{$menu-hover-color};
+    color: #{$white};
     opacity: 1;
 
     &::before {
@@ -182,8 +182,8 @@ $menu-hover-color: #375467;
   }
 
   &.is-active {
-    background-color: $menu-hover-color;
-    color: $white;
+    background-color: #{$menu-hover-color};
+    color: #{$white};
     opacity: 1;
   }
 }
@@ -238,7 +238,7 @@ $menu-hover-color: #375467;
 
   &:hover, &.is-active {
     background-color: $menu-hover-color;
-    color: $white;
+    color: #{$white};
     opacity: 1;
   }
 }

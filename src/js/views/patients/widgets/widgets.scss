@@ -1,9 +1,9 @@
 .widgets__status-inactive {
-  color: $error-color;
+  color: #{$error-color};
 }
 
 .widgets__status-archived {
-  color: $black-60;
+  color: #{$black-60};
 }
 
 .widgets__form-widget {
@@ -25,13 +25,13 @@
 }
 
 .widgets__divider {
-  border-top: 1px solid $black-90;
+  border-top: 1px solid #{$black-90};
   content: '';
   display: block;
   height: 0;
 }
 
 .widgets__heading {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
 }

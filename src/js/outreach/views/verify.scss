@@ -21,13 +21,13 @@
     width: 56px;
 
     &.has-error {
-      border: 1px solid $error-color;
+      border: 1px solid #{$error-color};
     }
   }
 }
 
 .verify__error-text {
-  color: $error-color;
+  color: #{$error-color};
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 24px;

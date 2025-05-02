@@ -1,5 +1,5 @@
 .program-action--draft {
-  color: $black-20;
+  color: #{$black-20};
   font-weight: bold;
 }
 
@@ -15,7 +15,7 @@
   .program-action--automated,
   .program-action--conditional,
   .program-action--standard {
-    color: $white;
+    color: #{$white};
   }
 }
 
@@ -23,6 +23,6 @@
 .is-disabled {
   .program-action--automated,
   .program-action--standard {
-    color: $black-80;
+    color: #{$black-80};
   }
 }
