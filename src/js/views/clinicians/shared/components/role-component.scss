@@ -1,10 +1,10 @@
 .role-component__details {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
   line-height: 12px;
   margin-bottom: 4px;
 }
 
 .is-highlighted .role-component__details {
-  color: $white;
+  color: #{$white};
 }

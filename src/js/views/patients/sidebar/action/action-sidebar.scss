@@ -23,10 +23,10 @@
 }
 
 .action-sidebar__info {
-  background-color: $highlighted;
-  border: 1px solid $highlighted;
+  background-color: #{$highlighted};
+  border: 1px solid #{$highlighted};
   border-radius: 4px;
-  color: $black-20;
+  color: #{$black-20};
   font-size: 12px;
   line-height: 16px;
   max-width: 256px;
@@ -34,7 +34,7 @@
 }
 
 .action-sidebar__no-results {
-  color: $black-80;
+  color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
   margin: 20px auto 8px;
@@ -57,7 +57,7 @@
 }
 
 .action-sidebar__attachment-action {
-  color: $black-60;
+  color: #{$black-60};
   cursor: pointer;
   font-size: 12px;
 

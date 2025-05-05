@@ -11,7 +11,7 @@
 
 .picklist__item {
   align-items: center;
-  color: $black-20;
+  color: #{$black-20};
   cursor: pointer;
   display: flex;
   font-size: 14px;
@@ -21,13 +21,13 @@
   &.is-highlighted:not(&.is-disabled),
   &:hover:not(&.is-disabled) {
     background-color: color(blue);
-    color: $white;
+    color: #{$white};
 
     .picklist__alert,
     .picklist__meta,
     .picklist__meta-alt,
     .icon {
-      color: $white;
+      color: #{$white};
     }
   }
 
@@ -40,13 +40,13 @@
   }
 
   &.is-disabled {
-    color: $black-80;
+    color: #{$black-80};
     cursor: auto;
     font-weight: normal;
   }
 
   &.has-divider {
-    border-top: 1px solid $black-90;
+    border-top: 1px solid #{$black-90};
     margin-top: 4px;
     padding-top: 8px;
   }
@@ -62,7 +62,7 @@
 }
 
 .picklist--no-results {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 14px;
   font-style: italic;
   padding: 4px 16px;
@@ -77,7 +77,7 @@
 }
 
 .picklist__heading {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
   line-height: 16px;
   padding: 0 16px;
@@ -95,7 +95,7 @@
 }
 
 .picklist__group:not(:last-of-type) {
-  border-bottom: $black-90 solid 1px;
+  border-bottom: #{$black-90} solid 1px;
   padding-bottom: 8px;
 }
 
@@ -104,8 +104,8 @@
 }
 
 .picklist__info {
-  background: $highlighted;
-  color: $black-20;
+  background: #{$highlighted};
+  color: #{$black-20};
   font-size: 12px;
   line-height: 1.4;
   margin: 8px 8px 0;
@@ -113,7 +113,7 @@
   position: relative;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     left: 8px;
     position: absolute;
     top: 8px;

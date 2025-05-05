@@ -17,7 +17,7 @@
 }
 
 .form__content {
-  background-color: $white;
+  background-color: #{$white};
   height: calc(100vh - 68px);
   padding-top: 68px;
 

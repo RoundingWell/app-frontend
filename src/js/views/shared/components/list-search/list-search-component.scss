@@ -3,7 +3,7 @@
 
   &.is-applied {
     .icon {
-      color: $white;
+      color: #{$white};
     }
   }
 }
@@ -15,7 +15,7 @@
 }
 
 .list-search__clear-icon {
-  color: $black-60;
+  color: #{$black-60};
   cursor: pointer;
   line-height: 24px;
   position: absolute;
@@ -34,10 +34,10 @@
   .is-applied & {
     background-color: color(blue);
     border: 1px solid color(blue);
-    color: $white;
+    color: #{$white};
   }
 
   &::placeholder {
-    color: $black-20;
+    color: #{$black-20};
   }
 }

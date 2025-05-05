@@ -17,6 +17,6 @@
   .clinician-state--disabled,
   .clinician-state--pending,
   .clinician-state--active {
-    color: $white;
+    color: #{$white};
   }
 }

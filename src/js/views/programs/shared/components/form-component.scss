@@ -3,13 +3,13 @@
   padding: 8px 12px;
 
   &:hover:enabled {
-    background-color: $white;
-    border-color: $black-60;
+    background-color: #{$white};
+    border-color: #{$black-60};
   }
 
   &:active:enabled,
   &:focus {
-    background-color: $black-90;
-    border-color: $black-60;
+    background-color: #{$black-90};
+    border-color: #{$black-60};
   }
 }

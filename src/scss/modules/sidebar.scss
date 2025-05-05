@@ -1,5 +1,5 @@
 .sidebar {
-  border-left: 1px solid $black-90;
+  border-left: 1px solid #{$black-90};
   overflow-y: auto;
   padding: 16px 20px;
   width: 400px;
@@ -14,7 +14,7 @@
 }
 
 .sidebar__delete-icon {
-  color: $error-color;
+  color: #{$error-color};
 }
 
 .sidebar__save {
@@ -23,7 +23,7 @@
 }
 
 .sidebar__footer {
-  border-top: 1px solid $black-90;
+  border-top: 1px solid #{$black-90};
   font-size: 12px;
   font-weight: 600;
   margin-top: 16px;
@@ -35,7 +35,7 @@
 }
 
 .sidebar__label {
-  color: $black-60;
+  color: #{$black-60};
   display: inline-block;
   font-size: 12px;
   font-weight: 600;
@@ -45,13 +45,13 @@
 }
 
 .sidebar__attachments {
-  border-bottom: 1px solid $black-90;
-  border-top: 1px solid $black-90;
+  border-bottom: 1px solid #{$black-90};
+  border-top: 1px solid #{$black-90};
   padding: 16px 0;
 }
 
 .sidebar__activity {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
 
   .loader {
@@ -70,27 +70,27 @@
   padding: 8px;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     margin-right: 8px;
   }
 }
 
 .sidebar__section {
-  border-top: 1px solid $black-90;
+  border-top: 1px solid #{$black-90};
   margin-bottom: 8px;
   margin-top: 24px;
   padding-top: 16px;
 }
 
 .sidebar__section-label {
-  color: $black-20;
+  color: #{$black-20};
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
 .sidebar__dialog {
-  border: 1px solid $black-90;
+  border: 1px solid #{$black-90};
   border-radius: 4px;
   padding: 16px 20px;
   width: 100%;

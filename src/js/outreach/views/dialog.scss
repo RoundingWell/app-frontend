@@ -4,24 +4,24 @@
 }
 
 .site-title {
-  color: $white;
+  color: #{$white};
   font-size: 24px;
   padding: 20px 24px;
   text-transform: uppercase;
 }
 
 .dialog {
-  background: $white;
-  border: 1px solid $black-90;
+  background: #{$white};
+  border: 1px solid #{$black-90};
   border-radius: 4px;
-  color: $black-20;
+  color: #{$black-20};
   font-size: 20px;
   line-height: 1.4;
   padding: 24px;
 }
 
 .dialog__icon {
-  color: $black-20;
+  color: #{$black-20};
   margin: 0 auto 24px;
 
   .icon {
@@ -33,7 +33,7 @@
 .dialog__icon--success {
   @extend .dialog__icon;
 
-  color: $success-color;
+  color: #{$success-color};
 }
 
 .dialog__icon--blue {
@@ -45,11 +45,11 @@
 .dialog__icon--warn {
   @extend .dialog__icon;
 
-  color: $warning-color;
+  color: #{$warning-color};
 }
 
 .dialog__icon--error {
   @extend .dialog__icon;
 
-  color: $error-color;
+  color: #{$error-color};
 }

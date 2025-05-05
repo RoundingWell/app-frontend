@@ -4,7 +4,7 @@
 
 .schedule__count {
   align-items: center;
-  color: $black-60;
+  color: #{$black-60};
   display: flex;
   font-size: 12px;
   line-height: 1.2;
@@ -18,8 +18,8 @@
 }
 
 .schedule-list__header {
-  border-bottom: 1px solid $black-90;
-  color: $black-60;
+  border-bottom: 1px solid #{$black-90};
+  color: #{$black-60};
   font-size: 12px;
   padding: 8px;
 }
@@ -47,7 +47,7 @@
 }
 
 .schedule-list__list-row {
-  border-bottom: 1px solid $black-90;
+  border-bottom: 1px solid #{$black-90};
 }
 
 .schedule-list__list-cell {
@@ -72,12 +72,12 @@
 
   &.is-today {
     background: color(blue);
-    color: $white;
+    color: #{$white};
   }
 }
 
 .schedule-list__month-day {
-  color: $black-60;
+  color: #{$black-60};
 }
 
 .schedule-list__day-list {
@@ -95,7 +95,7 @@
   cursor: pointer;
 
   &.is-selected {
-    background: $greyed;
+    background: #{$greyed};
   }
 
   &.is-reduced {
@@ -104,7 +104,7 @@
 
   &:hover {
     .js-patient-sidebar-button {
-      color: $black-20;
+      color: #{$black-20};
     }
   }
 
@@ -155,7 +155,7 @@
   margin-right: 16px;
 
   .js-patient-sidebar-button {
-    color: $black-60;
+    color: #{$black-60};
   }
 }
 
@@ -164,7 +164,7 @@
 }
 
 .schedule-list__no-time {
-  color: $black-60;
+  color: #{$black-60};
 }
 
 .action-tooltip__flow {
@@ -172,7 +172,7 @@
 }
 
 .action-tooltip__flow-icon {
-  color: $black-60;
+  color: #{$black-60};
   line-height: 16px;
   padding-right: 8px;
   vertical-align: text-bottom;
@@ -184,7 +184,7 @@
 }
 
 .action-tooltip__action-icon {
-  color: $black-60;
+  color: #{$black-60};
   display: table-cell;
   padding-right: 8px;
   text-align: center;

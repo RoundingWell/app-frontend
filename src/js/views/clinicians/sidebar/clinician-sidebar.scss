@@ -9,7 +9,7 @@
 }
 
 .clinician-sidebar__locked-icon {
-  color: $black-60;
+  color: #{$black-60};
   line-height: 24px;
   position: absolute;
   right: 16px;
@@ -17,12 +17,12 @@
 }
 
 .clinician-sidebar__worklist {
-  border-top: 1px solid $black-90;
+  border-top: 1px solid #{$black-90};
   padding-top: 16px;
 }
 
 .clinician-sidebar__worklist-info {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 14px;
   margin-top: 12px;
 }

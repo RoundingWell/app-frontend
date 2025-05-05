@@ -24,7 +24,7 @@
 }
 
 .worklist-list__display-icon {
-  color: $black-60;
+  color: #{$black-60};
   display: inline-block;
   vertical-align: middle;
   width: 16px;
@@ -39,7 +39,7 @@
 
 .work-list__item:hover {
   .fa-square {
-    color: $black-20;
+    color: #{$black-20};
   }
 }
 
@@ -59,7 +59,7 @@
 }
 
 .worklist-list__flow-icon .icon {
-  color: $black-60;
+  color: #{$black-60};
 }
 
 .worklist-list__action-ts {
@@ -68,7 +68,7 @@
 }
 
 .worklist-list__flow-name {
-  color: $black-60;
+  color: #{$black-60};
   font-size: 12px;
 }
 
@@ -100,7 +100,7 @@
 
 .worklist-list__count {
   align-items: center;
-  color: $black-60;
+  color: #{$black-60};
   display: flex;
   font-size: 12px;
   line-height: 1.2;

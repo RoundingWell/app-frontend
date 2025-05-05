@@ -4,7 +4,7 @@
 @use '../provider-variables' as *;
 
 body {
-  color: $black-20;
+  color: #{$black-20};
   font-family: ProximaSoft, 'Droid Sans', 'helvetica neue', arial, sans-serif;
   font-size: 14px;
   line-height: 20px;

@@ -52,7 +52,7 @@
 
     &.is-prev-month,
     &.is-next-month {
-      color: $black-80;
+      color: #{$black-80};
     }
   }
 
@@ -73,7 +73,7 @@
 
     &:hover,
     &:active {
-      color: $white;
+      color: #{$white};
     }
 
     &:hover {
@@ -83,13 +83,13 @@
     &:active,
     &.is-selected {
       background-color: color(blue, dark);
-      color: $white;
+      color: #{$white};
     }
   }
 }
 
 .datepicker__button {
-  border: 1px solid $black-90;
+  border: 1px solid #{$black-90};
   border-bottom: 0;
   border-right: 0;
   font-weight: 600;

@@ -23,8 +23,8 @@
 }
 
 .patient__context-trail {
-  background: $white;
-  color: $black-20;
+  background: #{$white};
+  color: #{$black-20};
   line-height: 1;
 
   // NOTE: Margin added for alignment with sidebar icon & patient name.
@@ -35,7 +35,7 @@
   z-index: 1;
 
   .icon {
-    color: $black-60;
+    color: #{$black-60};
     font-size: 12px;
     margin-right: 8px;
     vertical-align: -0.0825em;
@@ -43,7 +43,7 @@
 }
 
 .patient__context-link {
-  color: $black-60;
+  color: #{$black-60};
   cursor: pointer;
   font-weight: 600;
   margin-right: 8px;
@@ -80,7 +80,7 @@
 }
 
 .patient__tab {
-  color: $black-60;
+  color: #{$black-60};
 
   &:hover {
     color: color(blue);
@@ -88,17 +88,17 @@
 }
 
 .patient__actions {
-  border-top: solid 1px $black-90;
+  border-top: solid 1px #{$black-90};
   padding: 16px 0;
 }
 
 .patient__list {
-  border-top: solid 1px $black-90;
+  border-top: solid 1px #{$black-90};
 }
 
 .patient__empty-list {
-  border-bottom: 1px solid $black-90;
-  color: $black-80;
+  border-bottom: 1px solid #{$black-90};
+  color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
   margin: 40px auto 20px;
@@ -144,7 +144,7 @@
 }
 
 .patient__action-display-icon {
-  color: $black-60;
+  color: #{$black-60};
   display: inline-block;
   vertical-align: middle;
   width: 16px;
@@ -158,7 +158,7 @@
 }
 
 .patient__flow-icon .icon {
-  color: $black-60;
+  color: #{$black-60};
 }
 
 .patient__flow-status {
