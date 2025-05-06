@@ -26,11 +26,8 @@ const ContextTrailView = View.extend({
 
 const IframeView = View.extend({
   className: 'flex-grow',
-  template: hbs`<div class="js-dashboard-container"></div>`,
-  ui: {
-    dashboardContainer: '.js-dashboard-container',
-  },
-  onRender() {
+  template: false,
+  initialize() {
     QuicksightEmbedding.createEmbeddingContext().then((embeddingContext => {
       embeddingContext.embedDashboard({
         url: this.model.get('embed_url'),
