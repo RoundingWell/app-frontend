@@ -6,14 +6,8 @@ import { getDashboard } from 'support/api/dashboards';
 
 context('dashboard', function() {
   specify('display dashboard', function() {
-    const testDashboardId = uuid();
-
     const testDashboard = getDashboard({
-      id: testDashboardId,
-      attributes: {
-        name: 'Test Dashboard',
-        embed_url: `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?identityprovider=quicksight`,
-      },
+      attributes: { name: 'Test Dashboard' },
     });
 
     cy
@@ -38,7 +32,7 @@ context('dashboard', function() {
       .get('.dashboard__frame')
       .find('.dashboard__iframe iframe')
       .should('have.attr', 'src')
-      .and('include', `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?`);
+      .and('include', `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboard.id }?`);
 
     cy
       .get('.dashboard__frame')

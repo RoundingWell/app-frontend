@@ -1,11 +1,7 @@
-import { v4 as uuid } from 'uuid';
-
 import { getDashboard } from 'support/api/dashboards';
 
 context('dashboards all list', function() {
   specify('display dashboards list', function() {
-    const testDashboardId = uuid();
-
     const testDashboards = [
       getDashboard({
         attributes: { name: 'Daily Dashboards' },
@@ -14,11 +10,7 @@ context('dashboards all list', function() {
         attributes: { name: 'Weekly Dashboard' },
       }),
       getDashboard({
-        id: testDashboardId,
-        attributes: {
-          name: 'Monthly Dashboard',
-          embed_url: `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?identityprovider=quicksight`,
-        },
+        attributes: { name: 'Monthly Dashboard' },
       }),
     ];
 
@@ -74,15 +66,9 @@ context('dashboards all list', function() {
   });
 
   specify('find in list', function() {
-    const testDashboardId = uuid();
-
     const testDashboards = [
       getDashboard({
-        id: testDashboardId,
-        attributes: {
-          name: 'Daily Dashboards',
-          embed_url: `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboardId }?identityprovider=quicksight`,
-        },
+        attributes: { name: 'Daily Dashboards' },
       }),
       getDashboard({
         attributes: { name: 'Weekly Dashboard' },
