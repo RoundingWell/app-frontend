@@ -18,7 +18,7 @@ context('dashboard', function() {
         return fx;
       })
       .intercept('GET', 'https://*.quicksight.aws.amazon.com/**', req => {
-        req.reply('<html><body class="test-iframe-content">Test Iframe Content</body></html>');
+        req.reply('<html><body>Test Iframe Content</body></html>');
       })
       .visit(`/dashboards/${ testDashboard.id }`)
       .wait('@routeDashboard');
