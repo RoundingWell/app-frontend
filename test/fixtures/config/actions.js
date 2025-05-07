@@ -1,4 +1,4 @@
-import faker from '@roundingwellos/faker';
+import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 import _ from 'underscore';
 import customParseFormatPlugin from 'dayjs/plugin/customParseFormat.js';
@@ -16,33 +16,33 @@ const times = _.times(96, function(n) {
 times.unshift({ time: null });
 
 export default () => {
-  const created = faker.date.between(
-    dayjs().subtract(1, 'week').format(),
-    dayjs().format(),
-  );
+  const created = faker.date.between({
+    from: dayjs().subtract(1, 'week').format(),
+    to: dayjs().format(),
+  });
 
-  const due = dayjs(faker.date.between(
-    dayjs().subtract(1, 'week').format(),
-    dayjs().add(1, 'week').format(),
-  ));
+  const due = dayjs(faker.date.between({
+    from: dayjs().subtract(1, 'week').format(),
+    to: dayjs().add(1, 'week').format(),
+  }));
 
   return {
-    id: faker.datatype.uuid(),
-    name: `${ faker.company.bsBuzz() } ${ faker.company.catchPhraseNoun() }`,
+    id: faker.string.uuid(),
+    name: `${ faker.company.buzzVerb() } ${ faker.company.catchPhraseNoun() }`,
     details: faker.lorem.sentences(),
     due_date: due.format('YYYY-MM-DD'),
-    due_time: (faker.random.arrayElement(times)).time,
-    duration: faker.datatype.number({
+    due_time: (faker.helpers.arrayElement(times)).time,
+    duration: faker.number.int({
       min: 0,
       max: 99,
     }),
-    sequence: faker.datatype.number(100),
+    sequence: faker.number.int(100),
     created_at: created,
     outreach: 'disabled',
     sharing: 'disabled',
-    updated_at: faker.date.between(
-      created,
-      dayjs().format(),
-    ),
+    updated_at: faker.date.between({
+      from: created,
+      to: dayjs().format(),
+    }),
   };
 };

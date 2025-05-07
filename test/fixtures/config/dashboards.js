@@ -1,11 +1,11 @@
-import faker from '@roundingwellos/faker';
+import { faker } from '@faker-js/faker';
 
 export default () => {
-  const id = faker.datatype.uuid();
+  const id = faker.string.uuid();
 
   return {
     id,
-    name: faker.name.title(),
+    name: faker.person.jobTitle(),
     description: faker.lorem.sentences(),
     embed_url: `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ id }?identityprovider=quicksight`,
   };

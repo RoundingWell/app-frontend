@@ -1,10 +1,10 @@
-import faker from '@roundingwellos/faker';
+import { faker } from '@faker-js/faker';
 
 export default () => {
   return {
-    id: faker.datatype.uuid(),
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
+    id: faker.string.uuid(),
+    first_name: faker.person.firstName(),
+    last_name: faker.person.lastName(),
     birth_date: faker.date.past(40, '2010-01-01'),
   };
 };

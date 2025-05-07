@@ -1,22 +1,22 @@
-import faker from '@roundingwellos/faker';
+import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
 export default () => {
   return {
-    id: faker.datatype.uuid(),
-    name: `${ faker.company.bsBuzz() } ${ faker.company.catchPhraseNoun() }`,
-    created_at: faker.date.between(
-      dayjs().subtract(3, 'week').format(),
-      dayjs().subtract(2, 'week').format(),
-    ),
-    updated_at: faker.date.between(
-      dayjs().subtract(2, 'week').format(),
-      dayjs().subtract(1, 'week').format(),
-    ),
-    submitted_at: faker.date.between(
-      dayjs().subtract(1, 'week').format(),
-      dayjs().format(),
-    ),
+    id: faker.string.uuid(),
+    name: `${ faker.company.buzzVerb() } ${ faker.company.catchPhraseNoun() }`,
+    created_at: faker.date.between({
+      from: dayjs().subtract(3, 'week').format(),
+      to: dayjs().subtract(2, 'week').format(),
+    }),
+    updated_at: faker.date.between({
+      from: dayjs().subtract(2, 'week').format(),
+      to: dayjs().subtract(1, 'week').format(),
+    }),
+    submitted_at: faker.date.between({
+      from: dayjs().subtract(1, 'week').format(),
+      to: dayjs().format(),
+    }),
     options: {},
   };
 };
