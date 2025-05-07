@@ -7,10 +7,7 @@ import { getDashboard } from 'support/api/dashboards';
 context('dashboard', function() {
   specify('display dashboard', function() {
     const testDashboard = getDashboard({
-      attributes: {
-        name: 'Test Dashboard',
-        embed_url: '/test_dashboard',
-      },
+      attributes: { name: 'Test Dashboard' },
     });
 
     cy
@@ -19,6 +16,9 @@ context('dashboard', function() {
         fx.data = testDashboard;
 
         return fx;
+      })
+      .intercept('GET', 'https://*.quicksight.aws.amazon.com/**', req => {
+        req.reply('<html><body>Test Iframe Content</body></html>');
       })
       .visit(`/dashboards/${ testDashboard.id }`)
       .wait('@routeDashboard');
@@ -31,7 +31,8 @@ context('dashboard', function() {
     cy
       .get('.dashboard__frame')
       .find('.dashboard__iframe iframe')
-      .should('have.attr', 'src', '/test_dashboard');
+      .should('have.attr', 'src')
+      .and('include', `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboard.id }?`);
 
     cy
       .get('.dashboard__frame')

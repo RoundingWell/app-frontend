@@ -25,6 +25,9 @@ context('dashboards all list', function() {
 
         return fx;
       })
+      .intercept('GET', 'https://*.quicksight.aws.amazon.com/**', req => {
+        req.reply('<html><body>Test Iframe Content</body></html>');
+      })
       .visit('/dashboards')
       .wait('@routeDashboards');
 
@@ -82,6 +85,9 @@ context('dashboards all list', function() {
         fx.data = testDashboards[0];
 
         return fx;
+      })
+      .intercept('GET', 'https://*.quicksight.aws.amazon.com/**', req => {
+        req.reply('<html><body>Test Iframe Content</body></html>');
       })
       .visit('/dashboards')
       .wait('@routeDashboards');
