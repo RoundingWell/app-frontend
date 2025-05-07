@@ -1,9 +1,12 @@
-import faker from '@roundingwellos/faker';
+import { faker } from '@faker-js/faker';
 
 export default () => {
   return {
-    id: faker.datatype.uuid(),
+    id: faker.string.uuid(),
     name: faker.lorem.word(),
-    value: faker.datatype.number(),
+    value: faker.number.int({
+      min: 0,
+      max: 100000,
+    }),
   };
 };

@@ -1,26 +1,26 @@
-import faker from '@roundingwellos/faker';
+import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 
 export default () => {
   return {
-    id: faker.datatype.uuid(),
-    name: faker.company.bs(),
+    id: faker.string.uuid(),
+    name: faker.company.buzzPhrase(),
     details: faker.lorem.sentences(),
-    published_at: faker.random.arrayElement([faker.date.between(
-      dayjs().subtract(2, 'week').format(),
-      dayjs().subtract(1, 'week').format(),
-    ), null]),
-    archived_at: faker.random.arrayElement([faker.date.between(
-      dayjs().subtract(2, 'week').format(),
-      dayjs().subtract(1, 'week').format(),
-    ), null]),
-    created_at: faker.date.between(
-      dayjs().subtract(2, 'week').format(),
-      dayjs().subtract(1, 'week').format(),
-    ),
-    updated_at: faker.date.between(
-      dayjs().subtract(1, 'week').format(),
-      dayjs().format(),
-    ),
+    published_at: faker.helpers.arrayElement([faker.date.between({
+      from: dayjs().subtract(2, 'week').format(),
+      to: dayjs().subtract(1, 'week').format(),
+    }), null]),
+    archived_at: faker.helpers.arrayElement([faker.date.between({
+      from: dayjs().subtract(2, 'week').format(),
+      to: dayjs().subtract(1, 'week').format(),
+    }), null]),
+    created_at: faker.date.between({
+      from: dayjs().subtract(2, 'week').format(),
+      to: dayjs().subtract(1, 'week').format(),
+    }),
+    updated_at: faker.date.between({
+      from: dayjs().subtract(1, 'week').format(),
+      to: dayjs().format(),
+    }),
   };
 };
