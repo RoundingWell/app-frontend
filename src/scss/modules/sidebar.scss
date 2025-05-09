@@ -1,7 +1,8 @@
 .sidebar {
   border-left: 1px solid #{$black-90};
   overflow-y: auto;
-  padding: 16px 20px;
+  padding: 16px 12px;
+  scrollbar-gutter: stable both-edges;
   width: 400px;
 }
 
