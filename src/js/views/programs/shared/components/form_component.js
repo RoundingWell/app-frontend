@@ -14,7 +14,7 @@ const i18n = intl.programs.shared.components.formComponent;
 const FormTemplate = hbs`
   <button class="js-button button-secondary button__group flex-grow" {{#if isDisabled}}disabled{{/if}}>
     {{far "square-poll-horizontal"}}<span>{{ name }}</span>
-  </button><button class="js-click-form button button__group form-component__form-button" {{#if isDisabled}}disabled{{/if}}>{{fas "up-right-and-down-left-from-center"}}</button>
+  </button>
 `;
 const NoFormTemplate = hbs`
   <button class="js-button button-secondary w-100" {{#if isDisabled}}disabled{{/if}}>
@@ -48,16 +48,11 @@ export default Droplist.extend({
       triggers: {
         'click .js-button': 'click',
         'focus .js-button': 'focus',
-        'click .js-click-form': 'click:form',
       },
     };
   },
   viewEvents: {
     'click': 'onClick',
-    'click:form': 'onViewClickForm',
-  },
-  onViewClickForm() {
-    this.triggerMethod('click:form', this.getState('selected'));
   },
   picklistOptions: {
     canClear: true,
