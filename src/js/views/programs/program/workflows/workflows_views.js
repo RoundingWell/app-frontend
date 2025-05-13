@@ -66,12 +66,8 @@ const ActionItemView = View.extend({
       icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
     };
   },
-  ui: {
-    'form': '.js-form',
-  },
   triggers: {
     'click': 'click',
-    'click @ui.form': 'click:form',
   },
   onClick() {
     if (this.model.isNew()) {
@@ -80,10 +76,6 @@ const ActionItemView = View.extend({
     }
 
     Radio.trigger('event-router', 'program:action', this.model.getProgram().id, this.model.id);
-  },
-  onClickForm() {
-    const form = this.model.getForm();
-    Radio.trigger('event-router', 'form:preview', form.id);
   },
   onRender() {
     this.showBehavior();

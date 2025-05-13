@@ -200,21 +200,15 @@ context('program workflows page', function() {
     cy
       .get('.table-list__item')
       .first()
-      .find('.js-form')
-      .click();
-
-    cy
-      .url()
-      .should('contain', `form/${ testForm.id }/preview`);
-
-    cy
-      .go('back');
+      .find('.fa-square-poll-horizontal')
+      .parent()
+      .should('be.disabled');
 
     cy
       .get('.table-list__item')
       .first()
       .next()
-      .find('.js-form')
+      .find('.fa-square-poll-horizontal')
       .should('not.exist');
   });
 
