@@ -235,29 +235,6 @@ const StoredSubmissionView = View.extend({
   },
 });
 
-const PreviewView = View.extend({
-  behaviors: [IframeFormBehavior],
-  className: 'form__frame',
-  template: hbs`
-    <div class="form__layout">
-      <div class="form__context-trail">
-        <a class="js-back form__context-link">{{fas "chevron-left"}}{{ @intl.forms.form.formViews.previewView.backBtn }}</a>
-        {{~fas "chevron-right"}}{{ @intl.forms.form.formViews.previewView.title }}
-      </div>
-      <div class="form__title"><span class="form__title-icon">{{far "square-poll-horizontal"}}</span>{{ name }}</div>
-      <div class="form__content">
-        <iframe src="/formapp/preview"></iframe>
-      </div>
-    </div>
-  `,
-  triggers: {
-    'click .js-back': 'click:back',
-  },
-  onClickBack() {
-    Radio.request('history', 'go:back');
-  },
-});
-
 const StatusView = View.extend({
   className: 'u-text-align--right',
   template: hbs`{{formatHTMLMessage (intlGet "forms.form.formViews.statusView.label") date=(formatDateTime updated_at "AT_TIME")}}`,
@@ -466,7 +443,6 @@ export {
   IframeView,
   StoredSubmissionView,
   FormStateActionsView,
-  PreviewView,
   StatusView,
   ReadOnlyView,
   LockedSubmitView,
