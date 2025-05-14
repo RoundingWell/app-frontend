@@ -393,6 +393,10 @@ context('worklist page', function() {
       .visitOnClock('/worklist/owned-by', { now: testTs() })
       .wait('@routeFlows');
 
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledOnce');
+
     cy.sendWs({
       category: 'NameChanged',
       resource: {
@@ -1270,6 +1274,10 @@ context('worklist page', function() {
       .routeLatestFormResponse()
       .visitOnClock('/worklist/owned-by', { now: testTs() })
       .wait('@routeActions');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledOnce');
 
     cy.sendWs({
       category: 'NameChanged',
