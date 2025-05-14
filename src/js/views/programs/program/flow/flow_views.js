@@ -139,12 +139,8 @@ const ActionItemView = View.extend({
     owner: '[data-owner-region]',
     due: '[data-due-region]',
   },
-  ui: {
-    'form': '.js-form',
-  },
   triggers: {
     'click': 'click',
-    'click @ui.form': 'click:form',
   },
   onClick() {
     if (this.model.isNew()) {
@@ -152,10 +148,6 @@ const ActionItemView = View.extend({
       return;
     }
     Radio.trigger('event-router', 'programFlow:action', this.model.getProgramFlow().id, this.model.id);
-  },
-  onClickForm() {
-    const form = this.model.getForm();
-    Radio.trigger('event-router', 'form:preview', form.id);
   },
   onEditing(isEditing) {
     this.$el.toggleClass('is-selected', isEditing);

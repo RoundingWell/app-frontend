@@ -49,7 +49,7 @@ export default App.extend({
     'submit:form': 'submitForm',
     'fetch:clinicians': 'fetchClinicians',
     'fetch:directory': 'fetchDirectory',
-    'fetch:form': 'fetchForm',
+
     'fetch:form:data': 'fetchFormPrefill',
     'fetch:form:response': 'fetchFormResponse',
     'update:storedSubmission': 'updateStoredSubmission',
@@ -179,15 +179,6 @@ export default App.extend({
       })
       .catch(({ responseData }) => {
         this.channelRequest('send', 'fetch:icd', { error: responseData, requestId });
-      });
-  },
-  fetchForm() {
-    return Promise.resolve(Radio.request('entities', 'fetch:forms:definition', this.form.id))
-      .then(definition => {
-        this.channelRequest('send', 'fetch:form', {
-          definition,
-          contextScripts: this.form.getContextScripts(),
-        });
       });
   },
   fetchFormStoreSubmission({ submission }) {

@@ -372,9 +372,6 @@ const SidebarView = View.extend({
       'change:form'(form) {
         this.action.saveForm(form);
       },
-      'click:form'(form) {
-        this.triggerMethod('click:form', form);
-      },
     });
 
     this.showChildView('form', formComponent);

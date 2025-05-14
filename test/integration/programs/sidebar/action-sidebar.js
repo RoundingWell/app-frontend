@@ -333,21 +333,18 @@ context('program action sidebar', function() {
     const testForms = [
       getForm(testForm),
       getForm({
-        id: uuid(),
         attributes: {
           name: 'C Form',
           published_at: null,
         },
       }),
       getForm({
-        id: uuid(),
         attributes: {
           name: 'B Form',
           published_at: testTs(),
         },
       }),
       getForm({
-        id: uuid(),
         attributes: {
           name: 'A Form',
           published_at: testTs(),
@@ -772,20 +769,6 @@ context('program action sidebar', function() {
       .get('.picklist')
       .contains('Test Form')
       .click();
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-region]')
-      .should('contain', 'Test Form')
-      .find('.fa-up-right-and-down-left-from-center')
-      .click();
-
-    cy
-      .url()
-      .should('contain', `form/${ testForm.id }/preview`);
-
-    cy
-      .go('back');
 
     cy
       .navigate(`/program-flow/${ testProgramFlow.id }`, 'two')

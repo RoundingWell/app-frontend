@@ -120,9 +120,6 @@ careOptsFrontend:
         lastUpdatedView:
           storedWork: Your work is stored automatically.
           updatedAt: Last edit was { updated }
-        previewView:
-          backBtn: Go Back
-          title: Form Preview
         readOnlyView:
           buttonText: Read Only
         lockedSubmitView:

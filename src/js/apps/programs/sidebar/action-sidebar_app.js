@@ -39,7 +39,6 @@ export default App.extend(extend({
     this.listenTo(contentView, {
       'save': this.onSave,
       'close': this.stop,
-      'click:form': this.onClickForm,
     });
 
     this.showChildView('content', contentView);
@@ -150,8 +149,5 @@ export default App.extend(extend({
   onStop() {
     this.action.trigger('editing', false);
     if (this.action && this.action.isNew()) this.action.destroy();
-  },
-  onClickForm(form) {
-    Radio.trigger('event-router', 'form:preview', form.id);
   },
 }, SidebarMixin));
