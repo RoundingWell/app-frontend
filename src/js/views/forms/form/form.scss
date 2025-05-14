@@ -13,6 +13,7 @@
   background: #{$black-95};
   display: flex;
   flex: 1;
+  height: 100vh;
   opacity: 0;
 
   &:not(:empty) {
