@@ -603,6 +603,7 @@ context('App Nav', function() {
 
     cy
       .routesForPatientDashboard()
+      .routeSettings('patient_creation_form', null)
       .routeWorkspaceClinicians(fx => {
         fx.data = [testClinician];
 
