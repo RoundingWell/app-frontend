@@ -175,13 +175,6 @@ async function renderForm({ definition, isReadOnly, storedSubmission, formData, 
   form._isReady = true;
 }
 
-async function renderPreview({ definition, contextScripts }) {
-  const evalContext = await getContext(contextScripts);
-
-  extend(evalContext, { isPreview: true });
-
-  Formio.createForm(document.getElementById('root'), definition, { evalContext });
-}
 
 async function renderResponse({ definition, formSubmission, contextScripts }) {
   const evalContext = await getContext(contextScripts);
@@ -309,16 +302,12 @@ const Router = Backbone.Router.extend({
   },
   routes: {
     'formapp/': 'renderForm',
-    'formapp/preview': 'renderPreview',
     'formapp/:id': 'renderResponse',
     'formapp/pdf/action/:actionId': 'renderActionPdf',
     'formapp/pdf/:formId/:patientId(/:responseId)': 'renderPdf',
   },
   renderForm() {
     this.request('fetch:form:data').then(renderForm);
-  },
-  renderPreview() {
-    this.request('fetch:form').then(renderPreview);
   },
   renderResponse(responseId) {
     this.request('fetch:form:response', { responseId }).then(renderResponse);
