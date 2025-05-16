@@ -6,6 +6,7 @@ context('handleErrors', function() {
       expect(error.message).to.equal('test error');
     });
   });
+
   specify('response error', function() {
     const fakeResponseError = {
       status: 400,
@@ -20,6 +21,7 @@ context('handleErrors', function() {
       expect(error.message).to.equal('Error Status: 400 - [{"details":"fake error"}]');
     });
   });
+
   specify('unknown error', function() {
     handleErrors({ foo: 'error' }).catch(error => {
       expect(error.message).to.equal('{"foo":"error"}');
