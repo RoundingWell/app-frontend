@@ -116,7 +116,7 @@ export default [
   {
     name: 'Mocha Linting',
     files: ['test/**', '**/*.cy.js'],
-    ...mocha.configs.flat.recommended,
+    ...mocha.configs.recommended,
   },
   {
     name: 'Chai Linting',
