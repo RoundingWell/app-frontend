@@ -27,8 +27,7 @@ const ActionFormApp = App.extend({
           formData: data.attributes,
           responseData: response.getFormData(),
           formSubmission: response.getResponse(),
-          contextScripts: form.getContextScripts(),
-          loaderReducers: form.getLoaderReducers(),
+          options: form.get('options'),
         } }, window.origin);
       });
   },
@@ -61,8 +60,7 @@ const FormApp = App.extend({
       formData: data.attributes,
       responseData: response.getFormData(),
       formSubmission: response.getResponse(),
-      contextScripts: form.getContextScripts(),
-      loaderReducers: form.getLoaderReducers(),
+      options: form.get('options'),
     } }, window.origin);
   },
 });

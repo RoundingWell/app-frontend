@@ -51,7 +51,7 @@ export default App.extend({
       definition: this.definition,
       formData: this.formData,
       formSubmission: {},
-      ...this.form.getContext(),
+      options: this.form.get('options'),
     });
   },
   showFormSaveDisabled() {

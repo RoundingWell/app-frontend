@@ -1,4 +1,4 @@
-import { map, get, debounce, omit } from 'underscore';
+import { map, get, debounce } from 'underscore';
 import dayjs from 'dayjs';
 import store from 'store';
 
@@ -188,7 +188,7 @@ export default App.extend({
       this.channelRequest('send', 'fetch:form:data', {
         definition,
         storedSubmission: submission,
-        ...omit(this.form.getContext(), 'loaderReducers'),
+        options: this.form.get('options'),
       });
     });
   },
@@ -216,7 +216,7 @@ export default App.extend({
         formData: data.attributes,
         responseData: response.getFormData(),
         formSubmission: response.getResponse(),
-        ...this.form.getContext(),
+        options: this.form.get('options'),
       });
     });
   },
@@ -246,7 +246,7 @@ export default App.extend({
         formData: data.attributes,
         responseData: response.getFormData(),
         formSubmission: response.getResponse(),
-        ...this.form.getContext(),
+        options: this.form.get('options'),
       });
     });
   },
@@ -259,7 +259,7 @@ export default App.extend({
         definition,
         responseData: response.getFormData(),
         formSubmission: response.getResponse(),
-        contextScripts: this.form.getContextScripts(),
+        options: this.form.get('options'),
       });
     });
   },
