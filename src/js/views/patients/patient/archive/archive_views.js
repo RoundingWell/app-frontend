@@ -271,7 +271,7 @@ const LayoutView = View.extend({
     },
   },
   template: hbs`
-    <div>
+    <div class="patient__tabs">
       <button class="patient__tab js-dashboard">
         {{~ @intl.patients.patient.archive.archiveViews.dashboardBtn ~}}
       </button>
@@ -279,7 +279,9 @@ const LayoutView = View.extend({
         {{~ @intl.patients.patient.archive.archiveViews.archiveBtn ~}}
       </span>
     </div>
-    <div data-content-region></div>
+    <div class="patient__list-container flex-region">
+      <div data-content-region></div>
+    </div>
   `,
   triggers: {
     'click .js-dashboard': 'click:dashboard',
