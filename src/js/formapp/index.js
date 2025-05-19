@@ -1,4 +1,4 @@
-/* global Formio, FormioUtils */
+/* global Formio */
 import 'formiojs/dist/formio.form.min';
 import 'formiojs/dist/formio.form.css';
 import '@fortawesome/fontawesome-pro/scss/fontawesome.scss';
@@ -17,16 +17,17 @@ import { addError } from 'js/datadog';
 
 import intl from 'js/i18n';
 
-import { versions } from './config';
+import { versions } from '../config';
 
 import {
+  getBeforeSubmit,
   getScriptContext,
   getSubmission,
   getChangeReducers,
   getResponse,
-} from 'js/formapp/utils';
+} from './utils';
 
-import 'js/formapp/components';
+import './components';
 
 import 'scss/formapp/comment.scss';
 import 'scss/formapp/form.scss';
@@ -88,10 +89,12 @@ const onChange = function(form, changeReducers) {
 
 const onChangeDebounce = debounce(onChange, 100);
 
-async function renderForm({ definition, isReadOnly, storedSubmission, formData, formSubmission, responseData, loaderReducers, changeReducers, submitReducers, contextScripts, beforeSubmit }) {
-  const evalContext = await getContext(contextScripts);
+async function renderForm({ definition, isReadOnly, storedSubmission, formData, formSubmission, responseData, options }) {
+  const { reducers, changeReducers, submitReducers, context, beforeSubmit } = options;
 
-  const submission = storedSubmission || await getSubmission(formData, formSubmission, responseData, loaderReducers, evalContext);
+  const evalContext = await getContext(context);
+
+  const submission = storedSubmission || await getSubmission(formData, formSubmission, responseData, reducers, evalContext);
   prevSubmission = structuredClone(submission);
 
   const form = await Formio.createForm(document.getElementById('root'), definition, {
@@ -148,7 +151,7 @@ async function renderForm({ definition, isReadOnly, storedSubmission, formData, 
       return;
     }
 
-    const data = FormioUtils.evaluate(beforeSubmit, form.evalContext({ formSubmission: response.data }));
+    const data = getBeforeSubmit(form, beforeSubmit, response.data);
 
     if (!data) {
       router.trigger('form:errors', [intl.formapp.failedSubmit]);
@@ -175,16 +178,9 @@ async function renderForm({ definition, isReadOnly, storedSubmission, formData, 
   form._isReady = true;
 }
 
-async function renderPreview({ definition, contextScripts }) {
-  const evalContext = await getContext(contextScripts);
 
-  extend(evalContext, { isPreview: true });
-
-  Formio.createForm(document.getElementById('root'), definition, { evalContext });
-}
-
-async function renderResponse({ definition, formSubmission, contextScripts }) {
-  const evalContext = await getContext(contextScripts);
+async function renderResponse({ definition, formSubmission, options }) {
+  const evalContext = await getContext(options.context);
 
   extend(evalContext, { isResponse: true });
 
@@ -199,10 +195,11 @@ async function renderResponse({ definition, formSubmission, contextScripts }) {
   });
 }
 
-async function renderPdf({ definition, formData, formSubmission, responseData, loaderReducers, contextScripts }) {
-  const evalContext = await getContext(contextScripts);
+async function renderPdf({ definition, formData, formSubmission, responseData, options }) {
+  const { reducers, context } = options;
+  const evalContext = await getContext(context);
 
-  const submission = await getSubmission(formData, formSubmission, responseData, loaderReducers, evalContext);
+  const submission = await getSubmission(formData, formSubmission, responseData, reducers, evalContext);
 
   const form = await Formio.createForm(document.getElementById('root'), definition, {
     evalContext,
@@ -309,19 +306,25 @@ const Router = Backbone.Router.extend({
   },
   routes: {
     'formapp/': 'renderForm',
-    'formapp/preview': 'renderPreview',
     'formapp/:id': 'renderResponse',
     'formapp/pdf/action/:actionId': 'renderActionPdf',
     'formapp/pdf/:formId/:patientId(/:responseId)': 'renderPdf',
   },
   renderForm() {
-    this.request('fetch:form:data').then(renderForm);
-  },
-  renderPreview() {
-    this.request('fetch:form').then(renderPreview);
+    Promise.all([
+      this.request('fetch:form:definition'),
+      this.request('fetch:form:data'),
+    ]).then(([definition, data]) => {
+      renderForm({ definition, ...data });
+    });
   },
   renderResponse(responseId) {
-    this.request('fetch:form:response', { responseId }).then(renderResponse);
+    Promise.all([
+      this.request('fetch:form:definition'),
+      this.request('fetch:form:response', { responseId }),
+    ]).then(([definition, data]) => {
+      renderResponse({ definition, ...data });
+    });
   },
   renderActionPdf(actionId) {
     this.once('form:pdf', renderPdf);

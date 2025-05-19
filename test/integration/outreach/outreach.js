@@ -237,7 +237,7 @@ context('Outreach', function() {
 
         return fx;
       })
-      .routeFormActionDefinition()
+      .routeFormDefinition()
       .routeFormActionFields()
       .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true })
       .wait('@routeOutreachStatus');
@@ -547,7 +547,7 @@ context('Outreach', function() {
 
         return fx;
       })
-      .routeFormActionDefinition()
+      .routeFormDefinition()
       .routeFormActionFields(fx => {
         fx.data = getFormFields({
           attributes: {
@@ -605,7 +605,7 @@ context('Outreach', function() {
       .wait('@routeVerifyCodeRequest')
       .wait('@routeFormByAction')
       .wait('@routeFormActionFields')
-      .wait('@routeFormActionDefinition');
+      .wait('@routeFormDefinition');
 
     cy
       .get('.form__title')
@@ -695,7 +695,7 @@ context('Outreach', function() {
 
         return fx;
       })
-      .routeFormActionDefinition()
+      .routeFormDefinition()
       .routeFormActionFields(fx => {
         fx.data = getFormFields({
           attributes: {
@@ -746,7 +746,7 @@ context('Outreach', function() {
       .click()
       .wait('@routeVerifyCodeRequest')
       .wait('@routeFormByAction')
-      .wait('@routeFormActionDefinition')
+      .wait('@routeFormDefinition')
       .wait('@routeFormActionFields');
 
     cy
@@ -776,7 +776,7 @@ context('Outreach', function() {
         });
       })
       .routeFormByAction()
-      .routeFormActionDefinition()
+      .routeFormDefinition()
       .routeFormActionFields()
       .visit(`/outreach/${ testAction.id }`, { noWait: true, isRoot: true });
 

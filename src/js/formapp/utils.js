@@ -1,6 +1,22 @@
 /* global Formio, FormioUtils */
-import { extend, reduce, values } from 'underscore';
+import { extend, reduce, values, size } from 'underscore';
 import { addError } from 'js/datadog';
+
+const defaultLoaderReducers = [`
+  const subm = _.extend({ patient: {} }, formSubmission,  formData);
+
+  subm.patient.fields = _.extend({}, _.get(formSubmission, 'patient.fields'), _.get(formData, 'patient.fields'));
+
+  return subm;
+`];
+
+const defaultSubmitReducers = [`
+  formData.fields = formSubmission.fields || _.get(formSubmission, 'patient.fields');
+
+  return formData;
+`];
+
+const defaultBeforeSubmit = 'return formSubmission;';
 
 // Mostly disables formio translations
 Formio.Components.components.htmlelement.prototype.t = txt => txt;
@@ -51,7 +67,7 @@ function getScriptContext(contextScripts, baseContext) {
   });
 }
 
-function getSubmission(formData, formSubmission, responseData, reducers, evalContext) {
+function getSubmission(formData, formSubmission, responseData, reducers = defaultLoaderReducers, evalContext) {
   return Formio.createForm(document.createElement('div'), {}, { evalContext }).then(form => {
     const submission = reduce(reducers, (memo, reducer) => {
       return FormioUtils.evaluate(reducer, form.evalContext({ formSubmission: memo, formData, responseData })) || memo;
@@ -76,6 +92,8 @@ function getChangeReducers(form, changeReducers, curSubmission, prevSubmission) 
 function getResponse(form, submitReducers, formSubmission) {
   const formData = { fields: {}, action: {}, flow: {}, artifacts: {} };
 
+  if (!size(submitReducers)) submitReducers = defaultSubmitReducers;
+
   return reduce(submitReducers, (memo, reducer) => {
     const context = form.evalContext({ formSubmission, formData: memo });
     const reducerFunction = evaluator(reducer, context);
@@ -85,7 +103,12 @@ function getResponse(form, submitReducers, formSubmission) {
   }, formData);
 }
 
+function getBeforeSubmit(form, beforeSubmit = defaultBeforeSubmit, formSubmission) {
+  return FormioUtils.evaluate(beforeSubmit, form.evalContext({ formSubmission }));
+}
+
 export {
+  getBeforeSubmit,
   getScriptContext,
   getSubmission,
   getChangeReducers,

@@ -2,66 +2,89 @@ import { testTs } from 'helpers/test-timestamp';
 import { getRelationship } from 'helpers/json-api';
 
 import { getAction } from 'support/api/actions';
-import { getForm } from 'support/api/forms';
 import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
+import { getFormFields } from 'support/api/form-fields';
 import { getFormResponse } from 'support/api/form-responses';
+import { getForm, testForm } from 'support/api/forms';
+
+const testPatient = getPatient();
 
 context('Formservice', function() {
   specify('display form with a response', function() {
-    cy
-      .visit('/formapp/pdf/1/1/1', { noWait: true, isRoot: true });
-
-    cy
-      .get('iframe')
-      .should('have.attr', 'src', '/formservice/1/1/1');
-
-    cy
-      .window()
-      .then(win => {
-        win.postMessage({ message: 'form:pdf', args: {
-          definition: {
-            components: [
-              {
-                key: 'fields.insurance',
-                type: 'container',
-                input: true,
-                label: 'Insurance',
-                tableView: false,
-                components: [
-                  {
-                    key: 'name',
-                    type: 'textfield',
-                    input: true,
-                    label: 'Insurance Name',
-                    tableView: true,
-                  },
-                ],
-              },
-            ],
-          },
-          formData: {
-            fields: {
-              insurance: {
-                name: 'Show the form submission',
-              },
-            },
-          },
-          formSubmission: {
+    const testFormResponse = getFormResponse({
+      attributes: {
+        response: {
+          data: {
             fields: {
               insurance: {
                 name: 'Test Insurance Name',
               },
             },
           },
-          contextScripts: {},
-          reducers: [],
-        } }, win.origin);
+        },
+      },
+    });
+
+    cy
+      .routeForm(fx => {
+        fx.data = testForm;
+
+        return fx;
+      })
+      .routeFormDefinition(fx => {
+        return {
+          display: 'form',
+          components: [
+            {
+              key: 'fields.insurance',
+              type: 'container',
+              input: true,
+              label: 'Insurance',
+              tableView: false,
+              components: [
+                {
+                  key: 'name',
+                  type: 'textfield',
+                  input: true,
+                  label: 'Insurance Name',
+                  tableView: true,
+                },
+              ],
+            },
+          ],
+        };
+      })
+      .routeFormFields(fx => {
+        fx.data = getFormFields({
+          attributes: {
+            fields: {
+              insurance: {
+                name: 'Show the form submission',
+              },
+            },
+          },
+        });
+
+        return fx;
+      })
+      .routeFormResponse(() => {
+        return {
+          data: testFormResponse,
+        };
       });
+
+
+    cy
+      .visit(`/formapp/pdf/${ testForm.id }/${ testPatient.id }/${ testFormResponse.id }`, { noWait: true, isRoot: true })
+      .wait('@routeForm')
+      .wait('@routeFormDefinition')
+      .wait('@routeFormFields')
+      .wait('@routeFormResponse');
 
     cy
       .get('[name="data[fields.insurance][name]"]')
-      .should('have.value', 'Test Insurance Name');
+      .should('have.value', 'Show the form submission');
   });
 
   specify('formservice iframe makes correct api requests', function() {
@@ -101,67 +124,10 @@ context('Formservice', function() {
       .wait('@routeFormResponse');
   });
 
-  specify('display action form with a response', function() {
-    cy
-      .visit('/formapp/pdf/action/1', { noWait: true, isRoot: true });
-
-    cy
-      .get('iframe')
-      .should('have.attr', 'src', '/formservice/action/1');
-
-    cy
-      .window()
-      .then(win => {
-        win.postMessage({ message: 'form:pdf', args: {
-          definition: {
-            components: [
-              {
-                key: 'fields.insurance',
-                type: 'container',
-                input: true,
-                label: 'Insurance',
-                tableView: false,
-                components: [
-                  {
-                    key: 'name',
-                    type: 'textfield',
-                    input: true,
-                    label: 'Insurance Name',
-                    tableView: true,
-                  },
-                ],
-              },
-            ],
-          },
-          formData: {
-            fields: {
-              insurance: {
-                name: 'Use form submission',
-              },
-            },
-          },
-          formSubmission: {
-            fields: {
-              insurance: {
-                name: 'Test Insurance Name',
-              },
-            },
-          },
-          contextScripts: {},
-          reducers: [],
-        } }, win.origin);
-      });
-
-    cy
-      .get('[name="data[fields.insurance][name]"]')
-      .should('have.value', 'Test Insurance Name');
-  });
-
   specify('action formservice latest response from action tags', function() {
     const createdAt = testTs();
 
     const testFlow = getFlow();
-    const testPatient = getPatient();
 
     const testReportForm = getForm({
       attributes: {
@@ -214,7 +180,64 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/actions/1/form', {
         statusCode: 200,
-        body: { data: getForm() },
+        body: { data: getForm({
+          attributes: {
+            options: {
+              is_report: true,
+            },
+          },
+        }) },
+      })
+      .as('routeFormModelByAction');
+
+    cy
+      .intercept('GET', '/api/actions/1/form/definition', {
+        statusCode: 200,
+        body: { data: {} },
+      })
+      .as('routeFormDefinitionByAction');
+
+    cy
+      .intercept('GET', '/api/actions/1/form/fields', {
+        statusCode: 200,
+        body: { data: [] },
+      })
+      .as('routeActionFormFields');
+
+    cy
+      .intercept('GET', '/api/actions/1*', {
+        statusCode: 200,
+        body: { data: getAction() },
+      })
+      .as('routeAction');
+
+    cy
+      .intercept('GET', '/api/patients/**/form-responses/submitted*', {
+        statusCode: 200,
+        body: { data: getFormResponse() },
+      })
+      .as('routeLatestFormSubmission');
+
+    cy
+      .visit('/formservice/action/1', { noWait: true, isRoot: true })
+      .wait('@routeFormModelByAction')
+      .wait('@routeFormDefinitionByAction')
+      .wait('@routeActionFormFields')
+      .wait('@routeAction')
+      .wait('@routeLatestFormSubmission');
+  });
+
+  specify('action non-report formservice iframe makes correct api requests', function() {
+    cy
+      .intercept('GET', '/api/actions/1/form', {
+        statusCode: 200,
+        body: { data: getForm({
+          attributes: {
+            options: {
+              is_report: false,
+            },
+          },
+        }) },
       })
       .as('routeFormModelByAction');
 

@@ -8,6 +8,7 @@ import App from 'js/base/app';
 
 import 'js/entities-service';
 
+// TODO: Move definition request to optional
 const ActionFormApp = App.extend({
   beforeStart({ actionId }) {
     return [
@@ -27,8 +28,7 @@ const ActionFormApp = App.extend({
           formData: data.attributes,
           responseData: response.getFormData(),
           formSubmission: response.getResponse(),
-          contextScripts: form.getContextScripts(),
-          loaderReducers: form.getLoaderReducers(),
+          options: form.get('options'),
         } }, window.origin);
       });
   },
@@ -61,8 +61,7 @@ const FormApp = App.extend({
       formData: data.attributes,
       responseData: response.getFormData(),
       formSubmission: response.getResponse(),
-      contextScripts: form.getContextScripts(),
-      loaderReducers: form.getLoaderReducers(),
+      options: form.get('options'),
     } }, window.origin);
   },
 });

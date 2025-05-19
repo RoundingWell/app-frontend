@@ -1,4 +1,4 @@
-import { map, get, debounce, omit } from 'underscore';
+import { map, get, debounce } from 'underscore';
 import dayjs from 'dayjs';
 import store from 'store';
 
@@ -49,7 +49,7 @@ export default App.extend({
     'submit:form': 'submitForm',
     'fetch:clinicians': 'fetchClinicians',
     'fetch:directory': 'fetchDirectory',
-
+    'fetch:form:definition': 'fetchFormDefinition',
     'fetch:form:data': 'fetchFormPrefill',
     'fetch:form:response': 'fetchFormResponse',
     'update:storedSubmission': 'updateStoredSubmission',
@@ -91,6 +91,8 @@ export default App.extend({
     return (this.latestResponse && this.latestResponse.getDraft()) || {};
   },
   getStoredSubmission() {
+    if (this.isReadOnly()) return {};
+
     const draft = this.getLatestDraft();
     const localDraft = store.get(this.getStoreId()) || {};
 
@@ -181,85 +183,64 @@ export default App.extend({
         this.channelRequest('send', 'fetch:icd', { error: responseData, requestId });
       });
   },
-  fetchFormStoreSubmission({ submission }) {
-    return Promise.all([
-      Radio.request('entities', 'fetch:forms:definition', this.form.id),
-    ]).then(([definition]) => {
-      this.channelRequest('send', 'fetch:form:data', {
-        definition,
-        storedSubmission: submission,
-        ...omit(this.form.getContext(), 'loaderReducers'),
-      });
+  fetchFormDefinition() {
+    const fetchFormDefinition = Radio.request('entities', 'fetch:forms:definition', this.form.id);
+
+    fetchFormDefinition.then(definition => {
+      this.channelRequest('send', 'fetch:form:definition', definition);
     });
   },
-  _getPrefillFilters(form, action, flow) {
+  fetchOtherFormResponse(flow) {
     const flowId = flow && flow.id;
-    const patientId = action.getPatient().id;
-    const actionTags = form.getPrefillActionTag();
-    const formId = !actionTags && form.getPrefillFormId();
-    const submittedAt = form.isReport() && `<=${ action.get('created_at') }`;
+    const patientId = this.action.getPatient().id;
+    const actionTags = this.form.getPrefillActionTag();
+    const formId = !actionTags && this.form.getPrefillFormId();
+    const submittedAt = this.form.isReport() && `<=${ this.action.get('created_at') }`;
 
-    return { patientId, flowId, formId, actionTags, submittedAt };
+    return Radio.request('entities', 'fetch:formResponses:byPatient', { patientId, flowId, formId, actionTags, submittedAt });
   },
-  fetchLatestFormSubmission(flow) {
-    const isReadOnly = this.isReadOnly();
-    const filter = this._getPrefillFilters(this.form, this.action, flow);
-
-    return Promise.all([
-      Radio.request('entities', 'fetch:forms:definition', this.form.id),
-      Radio.request('entities', 'fetch:forms:data', this.action.id, this.patient.id, this.form.id),
-      Radio.request('entities', 'fetch:formResponses:byPatient', filter),
-    ]).then(([definition, data, response]) => {
-      this.channelRequest('send', 'fetch:form:data', {
-        definition,
-        isReadOnly,
-        formData: data.attributes,
-        responseData: response.getFormData(),
-        formSubmission: response.getResponse(),
-        ...this.form.getContext(),
-      });
-    });
-  },
-  fetchFormPrefill() {
-    const storedSubmission = this.getStoredSubmission();
-    const isReadOnly = this.isReadOnly();
-
-    if (!isReadOnly && storedSubmission.updated) {
-      return this.fetchFormStoreSubmission(storedSubmission);
-    }
-
+  fetchLatestFormResponse() {
     const firstResponse = this.responses && this.responses.getFirstSubmission();
 
     if (!firstResponse && this.action) {
-      if (this.action.hasTag('prefill-latest-response')) return this.fetchLatestFormSubmission();
-      if (this.action.hasTag('prefill-flow-response')) return this.fetchLatestFormSubmission(this.action.getFlow());
+      if (this.action.hasTag('prefill-latest-response')) return this.fetchOtherFormResponse();
+      if (this.action.hasTag('prefill-flow-response')) return this.fetchOtherFormResponse(this.action.getFlow());
     }
 
-    return Promise.all([
-      Radio.request('entities', 'fetch:forms:definition', this.form.id),
-      Radio.request('entities', 'fetch:forms:data', get(this.action, 'id'), this.patient.id, this.form.id),
-      Radio.request('entities', 'fetch:formResponses:model', get(firstResponse, 'id')),
-    ]).then(([definition, data, response]) => {
+    return Radio.request('entities', 'fetch:formResponses:model', get(firstResponse, 'id'));
+  },
+  fetchFormPrefill() {
+    const storedSubmission = this.getStoredSubmission();
+
+    if (storedSubmission.updated) {
       this.channelRequest('send', 'fetch:form:data', {
-        definition,
-        isReadOnly,
+        storedSubmission: storedSubmission.submission,
+        options: this.form.get('options'),
+      });
+      return;
+    }
+
+    Promise.all([
+      Radio.request('entities', 'fetch:forms:data', get(this.action, 'id'), this.patient.id, this.form.id),
+      this.fetchLatestFormResponse(),
+    ]).then(([data, response]) => {
+      this.channelRequest('send', 'fetch:form:data', {
+        isReadOnly: this.isReadOnly(),
         formData: data.attributes,
         responseData: response.getFormData(),
         formSubmission: response.getResponse(),
-        ...this.form.getContext(),
+        options: this.form.get('options'),
       });
     });
   },
   fetchFormResponse({ responseId }) {
     return Promise.all([
-      Radio.request('entities', 'fetch:forms:definition', this.form.id),
       Radio.request('entities', 'fetch:formResponses:model', responseId),
-    ]).then(([definition, response]) => {
+    ]).then(([response]) => {
       this.channelRequest('send', 'fetch:form:response', {
-        definition,
         responseData: response.getFormData(),
         formSubmission: response.getResponse(),
-        contextScripts: this.form.getContextScripts(),
+        options: this.form.get('options'),
       });
     });
   },

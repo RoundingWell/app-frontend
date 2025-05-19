@@ -21,7 +21,7 @@ function startOutreach() {
 }
 
 function startForm() {
-  import('./formapp')
+  import('./formapp/index')
     .then(({ startFormApp }) => {
       startFormApp();
     });
@@ -42,7 +42,7 @@ function startFormService() {
 }
 
 function startAuth() {
-  import('./auth')
+  import('./auth/index')
     .then(({ auth }) => {
       auth(start);
     });
