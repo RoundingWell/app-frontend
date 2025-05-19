@@ -17,7 +17,7 @@ import { addError } from 'js/datadog';
 
 import intl from 'js/i18n';
 
-import { versions } from './config';
+import { versions } from '../config';
 
 import {
   getBeforeSubmit,
@@ -25,9 +25,9 @@ import {
   getSubmission,
   getChangeReducers,
   getResponse,
-} from 'js/formapp/utils';
+} from './utils';
 
-import 'js/formapp/components';
+import './components';
 
 import 'scss/formapp/comment.scss';
 import 'scss/formapp/form.scss';

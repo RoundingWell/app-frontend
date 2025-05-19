@@ -1,9 +1,9 @@
 import Radio from 'backbone.radio';
 
-import * as auth0 from './auth/auth0';
-import * as none from './auth/none';
-import * as kinde from './auth/kinde';
-import * as workos from './auth/workos';
+import * as auth0 from './auth0';
+import * as none from './none';
+import * as kinde from './kinde';
+import * as workos from './workos';
 
 import 'scss/app-root.scss';
 
