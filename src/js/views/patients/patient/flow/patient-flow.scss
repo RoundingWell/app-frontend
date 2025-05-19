@@ -1,6 +1,7 @@
 .patient-flow__frame {
   display: flex;
   flex: 1;
+  height: 100vh;
 }
 
 .patient-flow__layout {
@@ -8,7 +9,7 @@
   flex: 1;
   flex-direction: column;
   min-width: 744px;
-  padding: 0 24px;
+  padding: 0 12px;
   width: 100%;
 }
 
@@ -23,7 +24,7 @@
   background: #{$white};
   color: #{$black-20};
   line-height: 1;
-  padding: 16px 0;
+  padding: 16px 20px;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -45,6 +46,10 @@
   &:hover {
     color: color(blue);
   }
+}
+
+.patient-flow__header-container {
+  padding: 0 20px;
 }
 
 .patient-flow__header {
@@ -85,9 +90,19 @@
   width: 562px;
 }
 
+.patient-flow__actions-container {
+  padding: 0 20px;
+}
+
 .patient-flow__actions {
   border-top: #{$black-90} 1px solid;
   padding: 16px 0;
+}
+
+.patient-flow__list-container {
+  overflow-y: auto;
+  padding: 0 8px;
+  scrollbar-gutter: stable both-edges;
 }
 
 .patient-flow__list {
