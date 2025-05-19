@@ -618,6 +618,38 @@ context('Noncontext Form', function() {
       .should('contain', 'Error');
   });
 
+  specify('form custom url', { retries: 4 }, function() {
+    const testCustomForm = getForm({
+      attributes: {
+        options: {
+          url: '/images/roundingwell-logo.svg',
+        },
+      },
+    });
+
+    cy
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeForm(fx => {
+        fx.data = testCustomForm;
+
+        return fx;
+      })
+      .routeFormDefinition()
+      .routeLatestFormResponse()
+      .routeFormFields()
+      .visit(`/patient/${ testPatient.id }/form/${ testCustomForm.id }`)
+      .wait('@routePatient')
+      .wait('@routeForm');
+
+    cy
+      .get('iframe')
+      .should('have.attr', 'src', '/images/roundingwell-logo.svg');
+  });
+
   specify('form scripts and reducers', { retries: 4 }, function() {
     const testScriptReducerForm = getForm({
       attributes: {

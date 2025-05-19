@@ -18,6 +18,9 @@ const _Model = BaseModel.extend({
   isSubmitHidden() {
     return get(this.get('options'), 'submit_hidden');
   },
+  getFormUrl() {
+    return get(this.get('options'), 'url');
+  },
   getWidgets() {
     const formWidgets = get(this.get('options'), ['widgets', 'widgets']);
 
