@@ -311,10 +311,20 @@ const Router = Backbone.Router.extend({
     'formapp/pdf/:formId/:patientId(/:responseId)': 'renderPdf',
   },
   renderForm() {
-    this.request('fetch:form:data').then(renderForm);
+    Promise.all([
+      this.request('fetch:form:definition'),
+      this.request('fetch:form:data'),
+    ]).then(([definition, data]) => {
+      renderForm({ definition, ...data });
+    });
   },
   renderResponse(responseId) {
-    this.request('fetch:form:response', { responseId }).then(renderResponse);
+    Promise.all([
+      this.request('fetch:form:definition'),
+      this.request('fetch:form:response', { responseId }),
+    ]).then(([definition, data]) => {
+      renderResponse({ definition, ...data });
+    });
   },
   renderActionPdf(actionId) {
     this.once('form:pdf', renderPdf);

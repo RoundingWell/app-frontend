@@ -17,7 +17,6 @@ export default App.extend({
   beforeStart({ actionId }) {
     return [
       Radio.request('entities', 'fetch:forms:byAction', actionId),
-      Radio.request('entities', 'fetch:forms:definition:byAction', actionId),
       Radio.request('entities', 'fetch:forms:data', actionId),
     ];
   },
@@ -27,10 +26,9 @@ export default App.extend({
     dialogView.showChildView('content', new ErrorView());
     this.showView(dialogView);
   },
-  onStart({ actionId }, form, definition, data) {
+  onStart({ actionId }, form, data) {
     this.actionId = actionId;
     this.form = form;
-    this.definition = definition;
     this.formData = data.attributes;
     this.setView(new iFrameFormView({ model: this.form }));
     this.startService();
@@ -44,11 +42,18 @@ export default App.extend({
       'ready:form': this.showFormSave,
       'submit:form': this.submitForm,
       'fetch:form:data': this.getFormPrefill,
+      'fetch:form:definition': this.getFormDefinition,
     }, this);
+  },
+  getFormDefinition() {
+    const fetchFormDefinition = Radio.request('entities', 'fetch:forms:definition', this.form.id);
+
+    fetchFormDefinition.then(definition => {
+      this.channel.request('send', 'fetch:form:definition', definition);
+    });
   },
   getFormPrefill() {
     this.channel.request('send', 'fetch:form:data', {
-      definition: this.definition,
       formData: this.formData,
       formSubmission: {},
       options: this.form.get('options'),
