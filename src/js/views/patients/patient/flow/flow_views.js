@@ -357,12 +357,16 @@ const LayoutView = View.extend({
   template: hbs`
     <div class="patient-flow__layout">
       <div data-context-trail-region></div>
-      <div data-header-region></div>
-      <div class="patient-flow__actions">
-        <div data-select-all-region></div>
-        <div data-tools-region></div>
+      <div class="patient-flow__header-container" data-header-region></div>
+      <div class="patient-flow__actions-container">
+        <div class="patient-flow__actions">
+          <div data-select-all-region></div>
+          <div data-tools-region></div>
+        </div>
       </div>
-      <div data-action-list-region></div>
+      <div class="patient-flow__list-container flex-region">
+        <div data-action-list-region></div>
+      </div>
     </div>
     <div class="patient-flow__sidebar" data-sidebar-region></div>
   `,
