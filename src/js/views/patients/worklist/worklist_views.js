@@ -47,31 +47,11 @@ const LayoutView = View.extend({
     search: '[data-search-region]',
     count: '[data-count-region]',
   },
-  childViewEvents: {
-    'update:listDom': 'fixWidth',
-  },
   triggers: {
     'click @ui.select': 'click:select',
   },
   ui: {
-    listHeader: '.js-list-header',
-    list: '.js-list',
     select: '.js-select',
-  },
-  initialize() {
-    const userActivityCh = Radio.channel('user-activity');
-    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
-  },
-  fixWidth() {
-    /* istanbul ignore if */
-    if (!this.isRendered()) return;
-
-    const headerWidth = this.ui.listHeader.width();
-    const listWidth = this.ui.list.contents().width();
-    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
-    const scrollbarWidth = headerWidth - listWidth;
-
-    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
   },
 });
 
@@ -317,14 +297,11 @@ const ListView = CollectionView.extend({
     this.listenTo(state, 'change:searchQuery', this.searchList);
   },
   onAttach() {
-    this.triggerMethod('update:listDom', this);
-
     this.searchList(null, this.state.get('searchQuery'));
   },
   /* istanbul ignore next: future proof */
   onRenderChildren() {
     if (!this.isAttached()) return;
-    this.triggerMethod('update:listDom', this);
     this.triggerMethod('filtered', this.children.map('model'));
   },
   onSelect(selectedView, isShiftKeyPressed) {
