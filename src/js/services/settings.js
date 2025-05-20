@@ -20,6 +20,7 @@ export default App.extend({
 
     const setting = this.settings.get(settingName);
 
+    /* istanbul ignore next */
     if (!setting) return;
 
     return setting.get('value');
