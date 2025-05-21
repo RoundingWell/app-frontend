@@ -11,7 +11,7 @@ import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
 import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
-import { stateDone, stateInProgress, stateTodo, stateUnableToComplete, stateThmgTransferred, stateEvernorth } from 'support/api/states';
+import { stateDone, stateInProgress, stateTodo, stateUnableToComplete, stateThmgTransferred } from 'support/api/states';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
@@ -475,7 +475,7 @@ context('patient archive page', function() {
       .should('have.been.calledOnce')
       .then(stub => {
         const patient = testPatient.id;
-        const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id, stateEvernorth.id].join();
+        const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id].join();
 
         const { filters, resources } = stub.getCall(0).args[0].data;
 
@@ -720,7 +720,7 @@ context('patient archive page', function() {
       .should('have.been.calledOnce')
       .then(stub => {
         const patient = testPatient.id;
-        const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id, stateEvernorth.id].join();
+        const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id].join();
 
         const { filters, resources } = stub.getCall(0).args[0].data;
 

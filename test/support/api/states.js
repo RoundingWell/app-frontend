@@ -26,7 +26,6 @@ export const stateInProgress = getStateBySlug('in-progress');
 export const stateDone = getStateBySlug('done');
 export const stateUnableToComplete = getStateBySlug('unable-to-complete');
 export const stateThmgTransferred = getStateBySlug('thmg-transferred');
-export const stateEvernorth = getStateBySlug('evernorth');
 
 Cypress.Commands.add('routeStates', (mutator = _.identity) => {
   const data = getStates();
