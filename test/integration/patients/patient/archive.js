@@ -472,10 +472,7 @@ context('patient archive page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
-
-    cy
-      .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const patient = testPatient.id;
         const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id, stateEvernorth.id].join();
@@ -720,10 +717,7 @@ context('patient archive page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
-
-    cy
-      .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const patient = testPatient.id;
         const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id, stateEvernorth.id].join();

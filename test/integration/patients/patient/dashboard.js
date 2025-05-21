@@ -1066,10 +1066,7 @@ context('patient dashboard page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
-
-    cy
-      .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const states = [stateTodo.id, stateInProgress.id].join();
         const patient = testPatient.id;
@@ -1352,10 +1349,7 @@ context('patient dashboard page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
-
-    cy
-      .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const states = [stateTodo.id, stateInProgress.id].join();
         const patient = testPatient.id;

@@ -395,10 +395,7 @@ context('worklist page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
-
-    cy
-      .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const startOfMonth = dayjs().startOf('month').format();
         const endOfMonth = dayjs().endOf('month').format();
@@ -1298,10 +1295,7 @@ context('worklist page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
-
-    cy
-      .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const startOfMonth = dayjs().startOf('month').format();
         const endOfMonth = dayjs().endOf('month').format();

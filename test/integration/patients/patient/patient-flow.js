@@ -2699,6 +2699,7 @@ context('patient flow page', function() {
 
     cy
       .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const { filters, resources } = stub.getCall(0).args[0].data;
 
