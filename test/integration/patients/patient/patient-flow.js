@@ -2700,7 +2700,13 @@ context('patient flow page', function() {
     cy
       .get('@wsHandleMessage')
       .then(stub => {
-        expect(stub.getCall(0).args[0].data.resources).to.deep.equal([
+        const { filters, resources } = stub.getCall(0).args[0].data;
+
+        expect(filters).to.deep.equal({
+          actions: { flow: testSocketFlow.id },
+        });
+
+        expect(resources).to.deep.equal([
           getRelationship(testSocketFlow).data,
           getRelationship(testSocketAction).data,
         ]);

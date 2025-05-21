@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { NIL as NIL_UUID } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
@@ -10,7 +11,7 @@ import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
 import { workspaceOne } from 'support/api/workspaces';
 import { testForm } from 'support/api/forms';
-import { stateDone, stateInProgress, stateTodo, stateUnableToComplete, stateThmgTransferred } from 'support/api/states';
+import { stateDone, stateInProgress, stateTodo, stateUnableToComplete, stateThmgTransferred, stateEvernorth } from 'support/api/states';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
@@ -473,6 +474,24 @@ context('patient archive page', function() {
       .get('@wsHandleMessage')
       .should('have.been.calledOnce');
 
+    cy
+      .get('@wsHandleMessage')
+      .then(stub => {
+        const patient = testPatient.id;
+        const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id, stateEvernorth.id].join();
+
+        const { filters, resources } = stub.getCall(0).args[0].data;
+
+        expect(filters).to.deep.equal({
+          actions: { states, patient, flow: NIL_UUID },
+          flows: { states, patient },
+        });
+
+        expect(resources).to.deep.equal([
+          getRelationship(testSocketFlow).data,
+        ]);
+      });
+
     // state was set to be not done, which means it's removed from the list
     cy.sendWs({
       category: 'StateChanged',
@@ -702,6 +721,24 @@ context('patient archive page', function() {
     cy
       .get('@wsHandleMessage')
       .should('have.been.calledOnce');
+
+    cy
+      .get('@wsHandleMessage')
+      .then(stub => {
+        const patient = testPatient.id;
+        const states = [stateDone.id, stateUnableToComplete.id, stateThmgTransferred.id, stateEvernorth.id].join();
+
+        const { filters, resources } = stub.getCall(0).args[0].data;
+
+        expect(filters).to.deep.equal({
+          actions: { states, patient, flow: NIL_UUID },
+          flows: { states, patient },
+        });
+
+        expect(resources).to.deep.equal([
+          getRelationship(testSocketAction).data,
+        ]);
+      });
 
     // state was set to done, which means it's removed from the list
     cy.sendWs({
