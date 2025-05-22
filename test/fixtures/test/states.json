@@ -58,17 +58,5 @@
       "icon": "arrow-right-arrow-left",
       "color": "purple"
     }
-  },
-  {
-    "id": "0a520cc9-a745-4f63-af63-03261c16948b",
-    "name": "Evernorth",
-    "slug": "evernorth",
-    "sequence": 500,
-    "status": "done",
-    "options": {
-      "iconType": "far",
-      "icon": "circle-dashed",
-      "color": "purple"
-    }
   }
 ]

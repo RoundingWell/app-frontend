@@ -395,7 +395,25 @@ context('worklist page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
+      .should('have.been.calledOnce')
+      .then(stub => {
+        const startOfMonth = dayjs().startOf('month').format();
+        const endOfMonth = dayjs().endOf('month').format();
+
+        const { filters, resources } = stub.getCall(0).args[0].data;
+
+        expect(filters).to.deep.equal({
+          flows: {
+            created_at: [startOfMonth, endOfMonth].join(),
+            states: NIL_UUID,
+            clinicians: currentClinician.id,
+          },
+        });
+
+        expect(resources).to.deep.equal([
+          getRelationship(testSocketFlow).data,
+        ]);
+      });
 
     cy.sendWs({
       category: 'NameChanged',
@@ -1277,7 +1295,27 @@ context('worklist page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
+      .should('have.been.calledOnce')
+      .then(stub => {
+        const startOfMonth = dayjs().startOf('month').format();
+        const endOfMonth = dayjs().endOf('month').format();
+        const states = [stateTodo.id, stateInProgress.id].join();
+
+        const { filters, resources } = stub.getCall(0).args[0].data;
+
+        expect(filters).to.deep.equal({
+          actions: {
+            created_at: [startOfMonth, endOfMonth].join(),
+            states,
+            flow_states: states,
+            clinicians: currentClinician.id,
+          },
+        });
+
+        expect(resources).to.deep.equal([
+          getRelationship(testSocketAction).data,
+        ]);
+      });
 
     cy.sendWs({
       category: 'NameChanged',

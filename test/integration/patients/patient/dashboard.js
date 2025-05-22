@@ -1066,18 +1066,21 @@ context('patient dashboard page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
-
-    cy
-      .get('@wsHandleMessage')
+      .should('have.been.calledOnce')
       .then(stub => {
         const states = [stateTodo.id, stateInProgress.id].join();
         const patient = testPatient.id;
-        const { filters } = stub.getCall(0).args[0].data;
+
+        const { filters, resources } = stub.getCall(0).args[0].data;
+
         expect(filters).to.deep.equal({
           actions: { states, patient, flow: NIL_UUID },
           flows: { states, patient },
         });
+
+        expect(resources).to.deep.equal([
+          getRelationship(testSocketFlow).data,
+        ]);
       });
 
     cy.sendWs({
@@ -1346,7 +1349,22 @@ context('patient dashboard page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce');
+      .should('have.been.calledOnce')
+      .then(stub => {
+        const states = [stateTodo.id, stateInProgress.id].join();
+        const patient = testPatient.id;
+
+        const { filters, resources } = stub.getCall(0).args[0].data;
+
+        expect(filters).to.deep.equal({
+          actions: { states, patient, flow: NIL_UUID },
+          flows: { states, patient },
+        });
+
+        expect(resources).to.deep.equal([
+          getRelationship(testSocketAction).data,
+        ]);
+      });
 
     cy.sendWs({
       category: 'NameChanged',
