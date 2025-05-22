@@ -38,6 +38,7 @@
 .sidebar__label {
   color: #{$black-60};
   display: inline-block;
+  flex-shrink: 0;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
@@ -67,7 +68,6 @@
   font-size: 12px;
   line-height: 16px;
   margin-top: 8px;
-  max-width: 232px;
   padding: 8px;
 
   .icon {
