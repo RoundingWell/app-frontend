@@ -25,12 +25,12 @@ export default App.extend({
   channelName() {
     return `form${ this.getOption('form').id }`;
   },
-  channelRequest() {
+  send(message, ...args) {
     if (this.isDestroyed()) return;
 
     const channel = this.getChannel();
 
-    return channel.request(...arguments);
+    return channel.request('send', message, ...args);
   },
   initialize(options) {
     this.updateDraft = debounce(this.updateDraft, 15000);
@@ -50,7 +50,7 @@ export default App.extend({
     'fetch:clinicians': 'fetchClinicians',
     'fetch:directory': 'fetchDirectory',
     'fetch:form:definition': 'fetchFormDefinition',
-    'fetch:form:data': 'fetchFormPrefill',
+    'fetch:form:data': 'fetchFormData',
     'fetch:form:response': 'fetchFormResponse',
     'update:storedSubmission': 'updateStoredSubmission',
     'get:storedSubmission': 'getStoredSubmission',
@@ -131,64 +131,75 @@ export default App.extend({
     store.remove(this.getStoreId());
     this.trigger('update:submission');
   },
-  fetchField({ fieldName, requestId }) {
+  fetchField({ fieldName }, requestId) {
     const field = Radio.request('entities', 'patientFields:model', {
       name: fieldName,
       _patient: this.patient.getResource(),
     });
 
+    const message = 'fetch:field';
+
     return field.fetch()
       .then(() => {
-        this.channelRequest('send', 'fetch:field', { value: field.get('value'), requestId });
+        this.send(message, { value: field.get('value') }, requestId);
       })
       .catch(({ responseData }) => {
-        this.channelRequest('send', 'fetch:field', { error: responseData, requestId });
+        this.send(message, { error: responseData }, requestId);
       });
   },
-  updateField({ fieldName, value, requestId }) {
+  updateField({ fieldName, value }, requestId) {
     const field = Radio.request('entities', 'patientFields:model', {
       name: fieldName,
       value,
       _patient: this.patient.getResource(),
     });
 
+    const message = 'update:field';
+
     return field.saveAll()
       .then(() => {
-        this.channelRequest('send', 'update:field', { value: field.get('value'), requestId });
+        this.send(message, { value: field.get('value') }, requestId);
       })
       .catch(({ responseData }) => {
-        this.channelRequest('send', 'update:field', { error: responseData, requestId });
+        this.send(message, { error: responseData }, requestId);
       });
   },
-  fetchClinicians({ teamId, requestId }) {
+  fetchClinicians({ teamId }, requestId) {
     const clinicians = getClinicians(teamId);
 
-    this.channelRequest('send', 'fetch:directory', { value: clinicians.toJSON(), requestId });
+    this.send('fetch:directory', { value: clinicians.toJSON() }, requestId);
   },
-  fetchDirectory({ directoryName, query, requestId }) {
+  fetchDirectory({ directoryName, query }, requestId) {
+    const message = 'fetch:directory';
     return Promise.resolve(Radio.request('entities', 'fetch:directories:model', directoryName, query))
       .then(directory => {
-        this.channelRequest('send', 'fetch:directory', { value: directory.get('value'), requestId });
+        this.send(message, { value: directory.get('value') }, requestId);
       })
       .catch(({ responseData }) => {
-        this.channelRequest('send', 'fetch:directory', { error: responseData, requestId });
+        this.send(message, { error: responseData }, requestId);
       });
   },
-  fetchIcd({ by, requestId }) {
+  fetchIcd({ by }, requestId) {
+    const message = 'fetch:icd';
     return Promise.resolve(Radio.request('entities', 'fetch:icd', by))
       .then(icd => {
-        this.channelRequest('send', 'fetch:icd', { value: get(icd, ['data', 'icdCodes']), requestId });
+        this.send(message, { value: get(icd, ['data', 'icdCodes']) }, requestId);
       })
       .catch(({ responseData }) => {
-        this.channelRequest('send', 'fetch:icd', { error: responseData, requestId });
+        this.send(message, { error: responseData }, requestId);
       });
   },
-  fetchFormDefinition() {
+  fetchFormDefinition(args, requestId) {
     const fetchFormDefinition = Radio.request('entities', 'fetch:forms:definition', this.form.id);
-
-    fetchFormDefinition.then(definition => {
-      this.channelRequest('send', 'fetch:form:definition', definition);
-    });
+    const message = 'fetch:form:definition';
+    fetchFormDefinition
+      .then(definition => {
+        this.send(message, { value: definition }, requestId);
+      })
+      .catch(({ responseData }) => {
+        /* istanbul ignore next: Don't test BE errors */
+        this.send(message, { error: responseData }, requestId);
+      });
   },
   fetchOtherFormResponse(flow) {
     const flowId = flow && flow.id;
@@ -209,14 +220,15 @@ export default App.extend({
 
     return Radio.request('entities', 'fetch:formResponses:model', get(firstResponse, 'id'));
   },
-  fetchFormPrefill() {
+  fetchFormData(args, requestId) {
+    const message = 'fetch:form:data';
     const storedSubmission = this.getStoredSubmission();
 
     if (storedSubmission.updated) {
-      this.channelRequest('send', 'fetch:form:data', {
+      this.send(message, { value: {
         storedSubmission: storedSubmission.submission,
         options: this.form.get('options'),
-      });
+      } }, requestId);
       return;
     }
 
@@ -224,24 +236,31 @@ export default App.extend({
       Radio.request('entities', 'fetch:forms:data', get(this.action, 'id'), this.patient.id, this.form.id),
       this.fetchLatestFormResponse(),
     ]).then(([data, response]) => {
-      this.channelRequest('send', 'fetch:form:data', {
+      this.send(message, { value: {
         isReadOnly: this.isReadOnly(),
         formData: data.attributes,
         responseData: response.getFormData(),
         formSubmission: response.getResponse(),
         options: this.form.get('options'),
-      });
+      } }, requestId);
+    }).catch(({ responseData }) => {
+      /* istanbul ignore next: Don't test BE errors */
+      this.send(message, { error: responseData }, requestId);
     });
   },
-  fetchFormResponse({ responseId }) {
+  fetchFormResponse({ responseId }, requestId) {
+    const message = 'fetch:form:response';
     return Promise.all([
       Radio.request('entities', 'fetch:formResponses:model', responseId),
     ]).then(([response]) => {
-      this.channelRequest('send', 'fetch:form:response', {
+      this.send(message, { value: {
         responseData: response.getFormData(),
         formSubmission: response.getResponse(),
         options: this.form.get('options'),
-      });
+      } }, requestId);
+    }).catch(({ responseData }) => {
+      /* istanbul ignore next: Don't test BE errors */
+      this.send(message, { error: responseData }, requestId);
     });
   },
   useLatestDraft(responseData) {
@@ -302,8 +321,8 @@ export default App.extend({
 
         this.trigger('error', responseData.errors);
 
-        const errors = map(responseData.errors, 'detail');
-        this.channelRequest('send', 'form:errors', errors);
+        const error = map(responseData.errors, 'detail');
+        this.send('form:errors', { error });
       });
   },
 });

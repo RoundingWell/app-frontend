@@ -41,23 +41,23 @@ export default App.extend({
     this.channel.reply({
       'ready:form': this.showFormSave,
       'submit:form': this.submitForm,
-      'fetch:form:data': this.getFormPrefill,
-      'fetch:form:definition': this.getFormDefinition,
+      'fetch:form:data': this.getFormData,
+      'fetch:form:definition': this.fetchFormDefinition,
     }, this);
   },
-  getFormDefinition() {
+  fetchFormDefinition(args, requestId) {
     const fetchFormDefinition = Radio.request('entities', 'fetch:forms:definition', this.form.id);
 
     fetchFormDefinition.then(definition => {
-      this.channel.request('send', 'fetch:form:definition', definition);
+      this.channel.request('send', 'fetch:form:definition', { value: definition }, requestId);
     });
   },
-  getFormPrefill() {
-    this.channel.request('send', 'fetch:form:data', {
+  getFormData(args, requestId) {
+    this.channel.request('send', 'fetch:form:data', { value: {
       formData: this.formData,
       formSubmission: {},
       options: this.form.get('options'),
-    });
+    } }, requestId);
   },
   showFormSaveDisabled() {
     if (this.form.isReadOnly()) return;
@@ -85,8 +85,8 @@ export default App.extend({
         this.showFormSave();
         /* istanbul ignore next: Don't handle non-API errors */
         if (!responseData) return;
-        const errors = map(responseData.errors, 'detail');
-        this.channel.request('send', 'form:errors', errors);
+        const error = map(responseData.errors, 'detail');
+        this.channel.request('send', 'form:errors', { error });
       });
   },
 });

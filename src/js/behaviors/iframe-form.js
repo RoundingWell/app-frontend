@@ -11,9 +11,9 @@ export default Behavior.extend({
     this.channel = Radio.channel(`form${ this.view.model.id }`);
   },
   replies: {
-    send(message, args = {}) {
+    send(message, args = {}, requestId) {
       const iframeWindow = this.ui.iframe[0].contentWindow;
-      iframeWindow.postMessage({ message, args }, window.origin);
+      iframeWindow.postMessage({ message, args, requestId }, window.origin);
     },
     focus() {
       Radio.trigger('user-activity', 'iframe:focus', this.ui.iframe[0]);
@@ -27,7 +27,7 @@ export default Behavior.extend({
       /* istanbul ignore next: security check */
       if (origin !== window.origin || !data || !data.message) return;
 
-      this.channel.request(data.message, data.args);
+      this.channel.request(data.message, data.args, data.requestId);
     });
   },
   onBeforeDetach() {
