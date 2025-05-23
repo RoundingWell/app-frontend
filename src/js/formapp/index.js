@@ -8,7 +8,7 @@ import 'scss/formapp/bootstrap.min.css';
 
 import 'scss/formapp-core.scss';
 
-import { extend, map, debounce, uniqueId, each, isEmpty, isObject } from 'underscore';
+import { extend, map, debounce, each, isEmpty, isObject } from 'underscore';
 import $ from 'jquery';
 import Backbone from 'backbone';
 import Handlebars from 'handlebars/runtime';
@@ -44,25 +44,25 @@ function scrollTop() {
 }
 
 function updateField(fieldName, value) {
-  return router.updateField({ fieldName, value });
+  return router.request('update:field', { fieldName, value });
 }
 
 function getField(fieldName) {
-  return router.getField({ fieldName });
+  return router.request('fetch:field', { fieldName });
 }
 
 function getClinicians({ teamId } = {}) {
-  return router.getClinicians({ teamId });
+  return router.request('fetch:clinicians', { teamId });
 }
 
 function getDirectory(directoryName, query) {
-  return router.getDirectory({ directoryName, query });
+  return router.request('fetch:directory', { directoryName, query });
 }
 
 function getIcd(by) {
   // NOTE: Backwards compatible API
-  if (!isObject(by)) return router.getIcd({ by: { term: by } });
-  return router.getIcd({ by });
+  const args = isObject(by) ? { by } : { by: { term: by } };
+  return router.request('fetch:icd', args);
 }
 
 function getContext(contextScripts) {
@@ -211,98 +211,39 @@ async function renderPdf({ definition, formData, formSubmission, responseData, o
 
 const Router = Backbone.Router.extend({
   initialize() {
+    this.pending = {};
+
     window.addEventListener('message', ({ data, origin }) => {
       /* istanbul ignore next: security check */
-      if (origin !== window.origin || !data || !data.message) return;
+      if (origin !== window.origin || !data || !data.message || !data.args) return;
 
-      this.trigger(data.message, data.args);
+      const { value, error } = data.args;
+
+      if (this.pending[data.requestId]) {
+        const { resolve, reject } = this.pending[data.requestId];
+        delete this.pending[data.requestId];
+
+        error ? reject(error) : resolve(value);
+      }
+
+      this.trigger(data.message, error || value);
     }, false);
 
     $(window).on('focus', () => {
-      this.request('focus');
+      this.send('focus');
     });
 
-    this.request('version', versions.frontend);
-    this.requestResolves = {};
-    this.on({
-      'fetch:clinicians': this.onFetchClinicians,
-      'fetch:directory': this.onFetchDirectory,
-      'fetch:field': this.onFetchField,
-      'update:field': this.onUpdateField,
-      'fetch:icd': this.onFetchIcd,
-    });
+    this.send('version', versions.frontend);
+  },
+  send(message, args = {}) {
+    parent.postMessage({ message, args }, window.origin);
   },
   request(message, args = {}) {
-    const request = new Promise(resolve => {
-      this.once(message, resolve);
-      parent.postMessage({ message, args }, window.origin);
+    const requestId = crypto.randomUUID();
+    return new Promise((resolve, reject) => {
+      this.pending[requestId] = { resolve, reject, message };
+      parent.postMessage({ message, args, requestId }, window.origin);
     });
-
-    return request;
-  },
-  requestValue({ args, message, requestId }) {
-    const request = new Promise((resolve, reject) => {
-      this.requestResolves[requestId] = { resolve, reject };
-      parent.postMessage({
-        message,
-        args: extend({ requestId }, args),
-      }, window.origin);
-    });
-
-    return request;
-  },
-  resolveValue({ value, error, requestId }) {
-    // Prevents an edge case where a request is resolved
-    // after the form is submitted and reloaded
-    if (!this.requestResolves[requestId]) return;
-    const { resolve, reject } = this.requestResolves[requestId];
-    delete this.requestResolves[requestId];
-    error ? reject(error) : resolve(value);
-  },
-  getClinicians(args) {
-    const message = 'fetch:clinicians';
-    const requestId = uniqueId('clinicians');
-
-    return this.requestValue({ args, message, requestId });
-  },
-  onFetchClinicians(args) {
-    this.resolveValue(args);
-  },
-  getDirectory(args) {
-    const message = 'fetch:directory';
-    const requestId = uniqueId('directory');
-
-    return this.requestValue({ args, message, requestId });
-  },
-  onFetchDirectory(args) {
-    this.resolveValue(args);
-  },
-  getField(args) {
-    const message = 'fetch:field';
-    const requestId = uniqueId('field');
-
-    return this.requestValue({ args, message, requestId });
-  },
-  onFetchField(args) {
-    this.resolveValue(args);
-  },
-  updateField(args) {
-    const message = 'update:field';
-    const requestId = uniqueId('field');
-
-    return this.requestValue({ args, message, requestId });
-  },
-  onUpdateField(args) {
-    this.resolveValue(args);
-  },
-  getIcd(args) {
-    const message = 'fetch:icd';
-    const requestId = uniqueId('icd');
-
-    return this.requestValue({ args, message, requestId });
-  },
-  onFetchIcd(args) {
-    this.resolveValue(args);
   },
   routes: {
     'formapp/': 'renderForm',

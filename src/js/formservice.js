@@ -23,13 +23,13 @@ const ActionFormApp = App.extend({
 
     return Promise.resolve(Radio.request('entities', 'fetch:formResponses:byPatient', filter))
       .then(response => {
-        parent.postMessage({ message: 'form:pdf', args: {
+        parent.postMessage({ message: 'form:pdf', args: { value: {
           definition,
           formData: data.attributes,
           responseData: response.getFormData(),
           formSubmission: response.getResponse(),
           options: form.get('options'),
-        } }, window.origin);
+        } } }, window.origin);
       });
   },
   _getPrefillFilters(form, action) {
@@ -56,13 +56,13 @@ const FormApp = App.extend({
     ];
   },
   onStart(opts, form, definition, data, response) {
-    parent.postMessage({ message: 'form:pdf', args: {
+    parent.postMessage({ message: 'form:pdf', args: { value: {
       definition,
       formData: data.attributes,
       responseData: response.getFormData(),
       formSubmission: response.getResponse(),
       options: form.get('options'),
-    } }, window.origin);
+    } } }, window.origin);
   },
 });
 
