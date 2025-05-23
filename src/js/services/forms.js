@@ -197,6 +197,7 @@ export default App.extend({
         this.send(message, { value: definition }, requestId);
       })
       .catch(({ responseData }) => {
+        /* istanbul ignore next: Don't test BE errors */
         this.send(message, { error: responseData }, requestId);
       });
   },
@@ -243,6 +244,7 @@ export default App.extend({
         options: this.form.get('options'),
       } }, requestId);
     }).catch(({ responseData }) => {
+      /* istanbul ignore next: Don't test BE errors */
       this.send(message, { error: responseData }, requestId);
     });
   },
@@ -257,6 +259,7 @@ export default App.extend({
         options: this.form.get('options'),
       } }, requestId);
     }).catch(({ responseData }) => {
+      /* istanbul ignore next: Don't test BE errors */
       this.send(message, { error: responseData }, requestId);
     });
   },
