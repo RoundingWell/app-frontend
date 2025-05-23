@@ -11,7 +11,11 @@ context('dashboard', function() {
     });
 
     cy
-      .routeDashboards()
+      .routeDashboards(fx => {
+        fx.data = [testDashboard];
+
+        return fx;
+      })
       .routeDashboard(fx => {
         fx.data = testDashboard;
 
@@ -43,6 +47,19 @@ context('dashboard', function() {
       .url()
       .should('not.contain', `dashboards/${ testDashboard.id }`)
       .should('contain', 'dashboards');
+
+    cy
+      .get('.table-list')
+      .find('.table-list__item')
+      .first()
+      .click();
+
+    // dashboard loaded using cached aws sdk embedding context
+    cy
+      .get('.dashboard__frame')
+      .find('.dashboard__iframe iframe')
+      .should('have.attr', 'src')
+      .and('include', `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ testDashboard.id }?`);
   });
 
   specify('dashboard does not exist', function() {
