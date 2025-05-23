@@ -211,7 +211,7 @@ async function renderPdf({ definition, formData, formSubmission, responseData, o
 
 const Router = Backbone.Router.extend({
   initialize() {
-    this.pending = {};
+    this.pending = new Map();
 
     window.addEventListener('message', ({ data, origin }) => {
       /* istanbul ignore next: security check */
@@ -219,9 +219,9 @@ const Router = Backbone.Router.extend({
 
       const { value, error } = data.args;
 
-      if (this.pending[data.requestId]) {
-        const { resolve, reject } = this.pending[data.requestId];
-        delete this.pending[data.requestId];
+      if (this.pending.has(data.requestId)) {
+        const { resolve, reject } = this.pending.get(data.requestId);
+        this.pending.delete(data.requestId);
 
         error ? reject(error) : resolve(value);
       }
@@ -241,7 +241,7 @@ const Router = Backbone.Router.extend({
   request(message, args = {}) {
     const requestId = crypto.randomUUID();
     return new Promise((resolve, reject) => {
-      this.pending[requestId] = { resolve, reject, message };
+      this.pending.set(requestId, { resolve, reject });
       parent.postMessage({ message, args, requestId }, window.origin);
     });
   },
