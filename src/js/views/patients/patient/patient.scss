@@ -9,7 +9,6 @@
   flex: 1;
   flex-direction: column;
   min-width: 744px;
-  padding: 0 12px;
   width: 100%;
 }
 
@@ -30,7 +29,7 @@
 
   // NOTE: Margin added for alignment with sidebar icon & patient name.
   margin-bottom: 6px;
-  padding: 16px 20px;
+  padding: 16px 24px;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -55,7 +54,7 @@
 }
 
 .patient__tabs {
-  padding: 0 20px;
+  padding: 0 24px;
 }
 
 .patient__tab,
@@ -93,7 +92,7 @@
 }
 
 .patient__actions-container {
-  padding: 0 20px;
+  padding: 0 24px;
 }
 
 .patient__actions {
@@ -103,7 +102,7 @@
 
 .patient__list-container {
   overflow-y: auto;
-  padding: 0 8px;
+  padding: 0 12px;
   scrollbar-gutter: stable both-edges;
 }
 
