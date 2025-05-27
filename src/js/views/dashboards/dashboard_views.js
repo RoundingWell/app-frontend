@@ -1,6 +1,5 @@
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import * as QuicksightEmbedding from 'amazon-quicksight-embedding-sdk';
 
 import { View } from 'marionette';
 
@@ -27,15 +26,13 @@ const ContextTrailView = View.extend({
 const IframeView = View.extend({
   className: 'flex-grow',
   template: false,
-  initialize() {
-    QuicksightEmbedding.createEmbeddingContext().then((embeddingContext => {
-      embeddingContext.embedDashboard({
-        url: this.model.get('embed_url'),
-        container: this.el,
-        height: '100%',
-        width: '100%',
-      });
-    }));
+  initialize({ embeddingContext }) {
+    embeddingContext.embedDashboard({
+      url: this.model.get('embed_url'),
+      container: this.el,
+      height: '100%',
+      width: '100%',
+    });
   },
 });
 
