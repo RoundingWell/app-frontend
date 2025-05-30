@@ -7,11 +7,12 @@ import browserslistToEsbuild from 'browserslist-to-esbuild';
 
 import babel from 'vite-plugin-babel';
 import eslint from 'vite-plugin-eslint';
-import handlebars from './config/vite-plugin-handlebars-loader.js';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import stylelint from 'vite-plugin-stylelint';
 import { VitePWA } from 'vite-plugin-pwa';
 import yaml from './config/vite-plugin-yaml.js';
+import handlebars from './config/vite-plugin-handlebars-loader.js';
+import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
 
 import getFaIconSymbols from './config/fontawesome.js';
 
@@ -40,6 +41,7 @@ const css = {
 const cypressConfig = defineConfig({
   mode: 'test',
   plugins: [
+    inlineHbsCompile(),
     babel(),
     nodeResolve({
       modulePaths: [
@@ -77,6 +79,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      inlineHbsCompile(),
       babel({
         exclude: '**/formio.form.min*',
       }),
@@ -110,6 +113,9 @@ export default defineConfig(({ mode }) => {
         },
       }),
     ],
+    optimizeDeps: {
+      exclude: ['handlebars-inline-precompile'],
+    },
     define: {
       'import.meta.env.faIconSymbols': JSON.stringify(faIconSymbols),
       '_PRODUCTION_': JSON.stringify(isProduction),
