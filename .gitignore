@@ -14,9 +14,6 @@ pids
 *.seed
 *.pid.lock
 
-# NPM configuration (eg: Font Awesome Pro)
-.npmrc
-
 # Coverage directory used by tools like istanbul
 coverage
 

@@ -1,197 +1,175 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@1
-  cypress: cypress-io/cypress@3
+  cypress:   cypress-io/cypress@4
   coveralls: coveralls/coveralls@2
 
-# Commands: define reusable commands, e.g. for installing Edge.
-commands:
-  install-edge:
-    description: "Installs Microsoft Edge and creates an alias"
-    steps:
-      - run:
-          name: Setup Edge Repository
-          command: |
-            set -e
-            curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
-            sudo install -o root -g root -m 644 microsoft.gpg /etc/apt/trusted.gpg.d/
-            echo "deb [arch=amd64] https://packages.microsoft.com/repos/edge stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge-dev.list
-            rm microsoft.gpg
-      - run:
-          name: Install Edge
-          command: |
-            set -e
-            sudo apt update && sudo apt install -y microsoft-edge-stable
-      - run:
-          name: Alias Edge
-          command: sudo ln -sf /usr/bin/microsoft-edge /usr/bin/edge
+# ------------------------------------------------------------
+# EXECUTOR  –  Node 22 LTS image with Chrome 137, FF 139, Edge 137
+# ------------------------------------------------------------
+executors:
+  cypress-all-browsers:
+    docker:
+      - image: cypress/browsers:node-22.16.0-chrome-137.0.7151.68-1-ff-139.0.1-edge-137.0.3296.62-1
+    environment:
+      DISPLAY: :99
+      CYPRESS_DISPLAY: :99
+      CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
+      CYPRESS_watchForFileChanges: false
 
+# ------------------------------------------------------------
+# JOBS
+# ------------------------------------------------------------
 jobs:
-  install-and-persist:
-    executor:
-      name: cypress/default
-      node-version: "20.17"
-    steps:
-      # Authenticate with FontAwesome (ensure that $FONTAWESOME is set in your env).
-      - run:
-          name: Authenticate FontAwesome
-          command: |
-            npm config set "@fortawesome:registry" https://npm.fontawesome.com/
-            npm config set "//npm.fontawesome.com/:_authToken" $FONTAWESOME
-
-      # Install Cypress binaries (orb step may also handle caching).
-      - cypress/install
-
-      # Build the production version for tests.
-      - run:
-          name: Build Prod for Tests
-          command: npx vite build -m test
-
-      # Persist workspace data (e.g. built project and Cypress cache) for later jobs.
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - .cache/Cypress
-            - project
-
-  run-tests-in-parallel:
+  run-cypress:
     parameters:
-      cypress-command:
+      cypress_command:
         type: string
-        default: ""
+      start_command:
+        type: string
+        default: "npx vite preview -m test"
       parallelism:
         type: integer
         default: 10
-    executor:
-      name: cypress/default
-      node-version: "20.17"
+      upload_coverage:
+        type: boolean
+        default: true
+    executor: cypress-all-browsers
     parallelism: << parameters.parallelism >>
     steps:
-      # Attach the persisted workspace containing the build and Cypress cache.
-      - attach_workspace:
-          at: ~/
-      - cypress/run-tests:
-          start-command: 'npx vite preview -m test'
-          cypress-command: << parameters.cypress-command >>
+      # 1 Checkout
+      - checkout
 
-  coveralls:
-    executor:
-      name: cypress/default
-      node-version: "20.17"
+      # 2 Install & start virtual display
+      - run:
+          name: Install & start Xvfb
+          command: |
+            # launch 24-bit virtual display :99
+            Xvfb :99 -screen 0 1024x768x24 -nolisten tcp &
+            # wait until the X socket appears (max 10 s)
+            for i in {1..20}; do
+              if xdpyinfo -display :99 >/dev/null 2>&1; then
+                echo "🟢 Xvfb :99 is up"
+                break
+              fi
+              echo "⌛ waiting for Xvfb…"
+              sleep 0.5
+            done
+
+      # 3 Dependencies + Cypress binary (cached)
+      - cypress/install:
+          skip-checkout: true
+          install-browsers: false
+
+      # 4 Build app (cached)
+      - restore_cache:
+          keys:
+            - vite-dist-{{ checksum "vite.config.js" }}
+      - run: npx vite build -m test
+      - save_cache:
+          key: vite-dist-{{ checksum "vite.config.js" }}
+          paths: dist
+
+      # 5 Start Server
+      - when:
+          condition: << parameters.start_command >>
+          steps:
+            - run:
+                name: Start Server
+                command: << parameters.start_command >>
+                background: true
+
+      # 6 Run Cypress
+      - run:
+          name: Cypress tests
+          command: << parameters.cypress_command >>
+
+      # 7 Coverage upload (PR / push only)
+      - when:
+          condition: << parameters.upload_coverage >>
+          steps:
+            - run:
+                name: Install curl (if missing)
+                command: |
+                  if ! command -v curl >/dev/null; then
+                    apt-get update -y && apt-get install --no-install-recommends -y curl
+                  fi
+            - run: npm run coverage:report:ci || true
+            - coveralls/upload:
+                parallel: true
+
+  coveralls-finish:
+    docker:
+      - image: cimg/base:stable
     steps:
-      - attach_workspace:
-          at: ~/
       - coveralls/upload:
           parallel_finished: true
 
+# ------------------------------------------------------------
+# WORKFLOWS
+# ------------------------------------------------------------
 workflows:
   test-build:
+    when:
+      not:
+        equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
-      - install-and-persist:
-          name: Install & Persist To Workspace
-
-      # E2E Tests
-      - run-tests-in-parallel:
-          name: Run E2E Tests in Parallel
+      - run-cypress:
+          name: E2E
+          cypress_command: >
+            npx cypress run
+            --env COVERAGE=true
+            --parallel --record
+            --group care-ops-e2e
+      - run-cypress:
+          name: Component
+          parallelism: 6
+          start_command: ""
+          cypress_command: >
+            npx cypress run --component
+            --env COVERAGE=true
+            --parallel --record
+            --group care-ops-component
+      - coveralls-finish:
+          name: Coveralls
           requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --env COVERAGE=true --parallel --record --group care-ops-e2e --config watchForFileChanges=false
-          post-steps:
-            - run:
-                name: Report Coverage (E2E)
-                command: npm run coverage:report:ci
-            - coveralls/upload:
-                parallel: true
+            - E2E
+            - Component
 
-      # Component Tests
-      - run-tests-in-parallel:
-          name: Run Component Tests in Parallel
-          parallelism: 8
-          requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --component --env COVERAGE=true --parallel --record --group care-ops-component --config watchForFileChanges=false
-          post-steps:
-            - run:
-                name: Report Coverage (Component)
-                command: npm run coverage:report:ci
-            - coveralls/upload:
-                parallel: true
-
-      # Final Coveralls upload (merging reports if necessary).
-      - coveralls:
-          name: Upload to Coveralls
-          requires:
-            - Run E2E Tests in Parallel
-            - Run Component Tests in Parallel
-
-  test-cross-browser:
+  test-nightly:
     triggers:
       - schedule:
           cron: "0 11 * * *"
           filters:
             branches:
-              only:
-                - develop
+              only: develop
     jobs:
-      - install-and-persist:
-          name: Install & Persist To Workspace
+      - run-cypress:
+          name: Chrome nightly
+          upload_coverage: false
+          cypress_command: >
+            npx cypress run
+            --browser chrome
+            --parallel --record
+            --group chrome-e2e
+            --config retries=4
 
-      # Chrome tests.
-      - run-tests-in-parallel:
-          name: Chrome
-          pre-steps:
-            - browser-tools/install-chrome
-          requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --config retries=4 --env COVERAGE=false --browser chrome --parallel --record --group chrome-e2e
+      - run-cypress:
+          name: Firefox nightly
+          upload_coverage: false
+          cypress_command: >
+            npx cypress run
+            --browser firefox
+            --parallel --record
+            --group firefox-e2e
+            --config retries=4
 
-      - run-tests-in-parallel:
-          name: Chrome Components
-          pre-steps:
-            - browser-tools/install-chrome
-          requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --component --config retries=4 --env COVERAGE=false --browser chrome --parallel --record --group chrome-component
-
-      # Firefox tests.
-      - run-tests-in-parallel:
-          name: Firefox
-          pre-steps:
-            - browser-tools/install-firefox
-          requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --config retries=4 --env COVERAGE=false --browser firefox --parallel --record --group firefox-e2e
-
-      - run-tests-in-parallel:
-          name: Firefox Components
-          pre-steps:
-            - browser-tools/install-firefox
-          requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --component --config retries=4 --env COVERAGE=false --browser firefox --parallel --record --group firefox-component
-
-      # Edge tests.
-      - run-tests-in-parallel:
-          name: Edge
-          pre-steps:
-            - install-edge
-          requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --config retries=4 --env COVERAGE=false --browser edge --parallel --record --group edge-e2e
-
-      - run-tests-in-parallel:
-          name: Edge Components
-          pre-steps:
-            - install-edge
-          requires:
-            - Install & Persist To Workspace
-          cypress-command: >
-            npx cypress run --component --config retries=4 --env COVERAGE=false --browser edge --parallel --record --group edge-component
+      - run-cypress:
+          name: Edge nightly
+          upload_coverage: false
+          cypress_command: >
+            npx cypress run
+            --browser edge
+            --parallel --record
+            --group edge-e2e
+            --config retries=4

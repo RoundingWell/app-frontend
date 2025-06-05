@@ -2,7 +2,7 @@ import globals from 'globals';
 import js from '@eslint/js';
 import mocha from 'eslint-plugin-mocha';
 import pluginChaiFriendly from 'eslint-plugin-chai-friendly';
-import cypress from 'eslint-plugin-cypress/flat';
+import cypress from 'eslint-plugin-cypress';
 import stylisticJs from '@stylistic/eslint-plugin-js';
 
 export default [
