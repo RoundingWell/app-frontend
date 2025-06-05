@@ -12,7 +12,7 @@ function setToken(tokenString) {
 }
 
 function getToken() {
-  return token;
+  return `Bearer ${ token }`;
 }
 
 function logout() {
