@@ -24,6 +24,7 @@ function getToken() {
 
   return kinde
     .getToken()
+    .then(tk => `Bearer ${ tk }`)
     .catch(() => {
       logout();
     });

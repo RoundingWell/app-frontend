@@ -25,6 +25,7 @@ function getToken() {
 
   return authkit
     .getAccessToken()
+    .then(tk => `Bearer ${ tk }`)
     .catch(() => {
       logout();
     });

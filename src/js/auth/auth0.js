@@ -32,6 +32,7 @@ function getToken() {
 
   return auth0
     .getTokenSilently()
+    .then(tk => `Bearer ${ tk }`)
     .catch(() => {
       logout();
     });

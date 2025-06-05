@@ -59,7 +59,7 @@ async function buildFetcher(url, options = {}) {
     }),
   }, options);
 
-  if (token) options.headers.Authorization = `Bearer ${ token }`;
+  if (token) options.headers.Authorization = token;
 
   if (!options.method || options.method === 'GET') {
     url = getUrl(url, options.data);
