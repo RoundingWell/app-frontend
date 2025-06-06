@@ -10,6 +10,7 @@ import 'scss/formapp-core.scss';
 
 import { extend, map, debounce, each, isEmpty, isObject } from 'underscore';
 import $ from 'jquery';
+import { v4 as uuid } from 'uuid';
 import Backbone from 'backbone';
 import Handlebars from 'handlebars/runtime';
 import parsePhoneNumber from 'libphonenumber-js/min';
@@ -239,7 +240,7 @@ const Router = Backbone.Router.extend({
     parent.postMessage({ message, args }, window.origin);
   },
   request(message, args = {}) {
-    const requestId = crypto.randomUUID();
+    const requestId = uuid();
     return new Promise((resolve, reject) => {
       this.pending.set(requestId, { resolve, reject });
       parent.postMessage({ message, args, requestId }, window.origin);
