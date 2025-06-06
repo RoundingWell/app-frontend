@@ -14,6 +14,7 @@ executors:
     environment:
       DISPLAY: :99
       CYPRESS_DISPLAY: :99
+      CYPRESS_COVERAGE: true
       CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
       CYPRESS_watchForFileChanges: false
 
@@ -25,22 +26,22 @@ jobs:
     parameters:
       cypress_command:
         type: string
-      start_command:
-        type: string
-        default: "npx vite preview -m test"
+      should_build:
+        type: boolean
+        default: true
       parallelism:
         type: integer
-        default: 10
+        default: 12
       upload_coverage:
         type: boolean
         default: true
     executor: cypress-all-browsers
     parallelism: << parameters.parallelism >>
     steps:
-      # 1 Checkout
+      # Checkout
       - checkout
 
-      # 2 Install & start virtual display
+      # Install & start virtual display
       - run:
           name: Install & start Xvfb
           command: |
@@ -55,36 +56,39 @@ jobs:
               echo "⌛ waiting for Xvfb…"
               sleep 0.5
             done
-
-      # 3 Dependencies + Cypress binary (cached)
+      - restore_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
       - cypress/install:
           skip-checkout: true
           install-browsers: false
-
-      # 4 Build app (cached)
-      - restore_cache:
-          keys:
-            - vite-dist-{{ checksum "vite.config.js" }}
-      - run: npx vite build -m test
       - save_cache:
-          key: vite-dist-{{ checksum "vite.config.js" }}
-          paths: dist
+          key: node-modules-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
 
-      # 5 Start Server
+      # Build app (cached)
       - when:
-          condition: << parameters.start_command >>
+          condition: << parameters.should_build >>
           steps:
+            - restore_cache:
+                keys:
+                  - vite-dist-{{ checksum "vite.config.js" }}
+            - run: npx vite build -m test
+            - save_cache:
+                key: vite-dist-{{ checksum "vite.config.js" }}
+                paths: dist
+
             - run:
                 name: Start Server
-                command: << parameters.start_command >>
+                command: npx vite preview -m test
                 background: true
 
-      # 6 Run Cypress
+      # Run Cypress
       - run:
           name: Cypress tests
           command: << parameters.cypress_command >>
 
-      # 7 Coverage upload (PR / push only)
+      # Coverage upload (PR / push only)
       - when:
           condition: << parameters.upload_coverage >>
           steps:
@@ -94,7 +98,9 @@ jobs:
                   if ! command -v curl >/dev/null; then
                     apt-get update -y && apt-get install --no-install-recommends -y curl
                   fi
+
             - run: npm run coverage:report:ci || true
+
             - coveralls/upload:
                 parallel: true
 
@@ -121,15 +127,17 @@ workflows:
             --env COVERAGE=true
             --parallel --record
             --group care-ops-e2e
+
       - run-cypress:
           name: Component
           parallelism: 6
-          start_command: ""
+          should_build: false
           cypress_command: >
             npx cypress run --component
             --env COVERAGE=true
             --parallel --record
             --group care-ops-component
+
       - coveralls-finish:
           name: Coveralls
           requires:
@@ -155,6 +163,17 @@ workflows:
             --config retries=4
 
       - run-cypress:
+          name: Chrome nightly Component
+          parallelism: 6
+          should_build: false
+          cypress_command: >
+            npx cypress run --component
+            --browser chrome
+            --parallel --record
+            --group chrome-component
+            --config retries=4
+
+      - run-cypress:
           name: Firefox nightly
           upload_coverage: false
           cypress_command: >
@@ -165,6 +184,17 @@ workflows:
             --config retries=4
 
       - run-cypress:
+          name: Firefox nightly Component
+          parallelism: 6
+          should_build: false
+          cypress_command: >
+            npx cypress run --component
+            --browser firefox
+            --parallel --record
+            --group firefox-component
+            --config retries=4
+
+      - run-cypress:
           name: Edge nightly
           upload_coverage: false
           cypress_command: >
@@ -172,4 +202,15 @@ workflows:
             --browser edge
             --parallel --record
             --group edge-e2e
+            --config retries=4
+
+      - run-cypress:
+          name: Edge nightly Component
+          parallelism: 6
+          should_build: false
+          cypress_command: >
+            npx cypress run --component
+            --browser edge
+            --parallel --record
+            --group edge-component
             --config retries=4
