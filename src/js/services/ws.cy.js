@@ -25,7 +25,7 @@ context('WS Service', function() {
   beforeEach(function() {
     Radio.reply('bootstrap', 'currentUser', { clientKey });
     Radio.reply('workspace', 'current', { id: workspace });
-    Radio.reply('auth', 'getToken', () => 'token');
+    Radio.reply('auth', 'getToken', () => 'Bearer token');
     const url = 'ws://cypress-websocket/ws';
     cy.mockWs(url);
     service = new WSService({ url });

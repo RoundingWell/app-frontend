@@ -39,7 +39,7 @@ export default App.extend({
   },
 
   onStart({ data }, token) {
-    this.ws = new WebSocket(this.url, token);
+    this.ws = new WebSocket(this.url, token.split(' '));
     this.ws.addEventListener('open', this.onOpen.bind(this, data));
     this.ws.addEventListener('close', this.onClose.bind(this));
     this.ws.addEventListener('message', this.onMessage.bind(this));
