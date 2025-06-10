@@ -1,10 +1,12 @@
-import { appConfig } from 'js/config';
+import { isEmpty } from 'underscore';
+import { e2eConfig as config } from 'js/config';
 import { PATH_ROOT, PATH_LOGOUT } from './config';
 
-let token;
+
+let token = config.token;
 
 function should() {
-  return appConfig.cypress || !navigator.onLine;
+  return !isEmpty(config);
 }
 
 function setToken(tokenString) {
@@ -12,7 +14,7 @@ function setToken(tokenString) {
 }
 
 function getToken() {
-  return `Bearer ${ token }`;
+  return token;
 }
 
 function logout() {
