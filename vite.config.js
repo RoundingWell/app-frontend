@@ -5,11 +5,12 @@ import utcPlugin from 'dayjs/plugin/utc.js';
 import { defineConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
-import babel from 'vite-plugin-babel';
 import eslint from 'vite-plugin-eslint';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import stylelint from 'vite-plugin-stylelint';
 import { VitePWA } from 'vite-plugin-pwa';
+import istanbul from 'vite-plugin-istanbul';
+import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.js';
 import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
@@ -42,13 +43,19 @@ const cypressConfig = defineConfig({
   mode: 'test',
   plugins: [
     inlineHbsCompile(),
-    babel(),
     nodeResolve({
       modulePaths: [
         path.resolve('./node_modules'),
         path.resolve('./src'),
         path.resolve('./test'),
       ],
+    }),
+    istanbul({
+      requireEnv: true,
+      include: COVER_INCLUDE,
+      exclude: COVER_EXCLUDE,
+      extension: ['.js'],
+      cypress: true,
     }),
   ],
   resolve,
@@ -64,6 +71,7 @@ export {
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const isTest = mode === 'test' || process.env.NODE_ENV === 'test';
+
   const isCI = !!process.env.CI;
   const datePrefix = dayjs.utc().format('YYYYMMDD');
 
@@ -80,9 +88,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       inlineHbsCompile(),
-      babel({
-        exclude: '**/formio.form.min*',
-      }),
       eslint({
         failOnWarning: isCI,
         fix: !isCI,
@@ -112,6 +117,14 @@ export default defineConfig(({ mode }) => {
           ],
         },
       }),
+      istanbul({
+        requireEnv: true,
+        include: COVER_INCLUDE,
+        exclude: COVER_EXCLUDE,
+        extension: ['.js'],
+        cypress: true,
+        forceBuildInstrument: isTest,
+      }),
     ],
     optimizeDeps: {
       exclude: ['handlebars-inline-precompile'],
@@ -128,6 +141,7 @@ export default defineConfig(({ mode }) => {
     server: {
       open: !isTest,
       port: isTest ? 8090 : 8081,
+      hmr: isTest ? false : undefined,
       proxy: {
         '/api': {
           target: 'http://localhost:8080',
