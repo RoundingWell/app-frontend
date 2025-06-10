@@ -4,7 +4,7 @@ import { PATH_ROOT, PATH_LOGOUT } from './config';
 let token;
 
 function should() {
-  return sessionStorage.getItem('cypress') || appConfig.cypress || !navigator.onLine;
+  return appConfig.cypress || !navigator.onLine;
 }
 
 function setToken(tokenString) {
@@ -12,10 +12,6 @@ function setToken(tokenString) {
 }
 
 function getToken() {
-  const cypress = sessionStorage.getItem('cypress');
-
-  if (cypress) return;
-
   return `Bearer ${ token }`;
 }
 
