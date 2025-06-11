@@ -343,6 +343,13 @@ const ListView = CollectionView.extend({
 
     this.onListItemCanEdit = debounce(this.onListItemCanEdit, 60);
   },
+  onAttach() {
+    this.triggerMethod('update:listDom', this);
+  },
+  onRenderChildren() {
+    if (!this.isAttached()) return;
+    this.triggerMethod('update:listDom', this);
+  },
   onListItemCanEdit() {
     // NOTE: debounced in initialize
     this.triggerMethod('change:canEdit');
@@ -358,15 +365,13 @@ const LayoutView = View.extend({
     <div class="patient-flow__layout">
       <div data-context-trail-region></div>
       <div class="patient-flow__header-container" data-header-region></div>
-      <div class="patient-flow__actions-container">
+      <div class="patient-flow__actions-container js-list-header">
         <div class="patient-flow__actions">
           <div data-select-all-region></div>
           <div data-tools-region></div>
         </div>
       </div>
-      <div class="patient-flow__list-container flex-region">
-        <div data-action-list-region></div>
-      </div>
+      <div class="patient-flow__list-container flex-region js-list" data-action-list-region></div>
     </div>
     <div class="patient-flow__sidebar" data-sidebar-region></div>
   `,
@@ -380,7 +385,6 @@ const LayoutView = View.extend({
     actionList: {
       el: '[data-action-list-region]',
       regionClass: PreloadRegion,
-      replaceElement: true,
     },
     tools: {
       el: '[data-tools-region]',
@@ -390,6 +394,28 @@ const LayoutView = View.extend({
       el: '[data-select-all-region]',
       replaceElement: true,
     },
+  },
+  ui: {
+    listHeader: '.js-list-header',
+    list: '.js-list',
+  },
+  childViewEvents: {
+    'update:listDom': 'fixWidth',
+  },
+  initialize() {
+    const userActivityCh = Radio.channel('user-activity');
+    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
+  },
+  fixWidth() {
+    /* istanbul ignore if */
+    if (!this.isRendered()) return;
+
+    const headerWidth = this.ui.listHeader.width();
+    const listWidth = this.ui.list.contents().width();
+    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
+    const scrollbarWidth = headerWidth - listWidth;
+
+    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
   },
 });
 
