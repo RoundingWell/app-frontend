@@ -42,6 +42,28 @@ const LayoutView = View.extend({
     search: '[data-search-region]',
     count: '[data-count-region]',
   },
+  childViewEvents: {
+    'update:listDom': 'fixWidth',
+  },
+  ui: {
+    listHeader: '.js-list-header',
+    list: '.js-list',
+  },
+  initialize() {
+    const userActivityCh = Radio.channel('user-activity');
+    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
+  },
+  fixWidth() {
+    /* istanbul ignore if */
+    if (!this.isRendered()) return;
+
+    const headerWidth = this.ui.listHeader.width();
+    const listWidth = this.ui.list.contents().width();
+    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
+    const scrollbarWidth = headerWidth - listWidth;
+
+    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
+  },
   templateContext() {
     return {
       isReduced: this.getOption('isReduced'),
@@ -437,7 +459,11 @@ const ScheduleListView = CollectionView.extend({
     // NOTE: debounced in initialize
     this.triggerMethod('change:canEdit');
   },
+  onAttach() {
+    this.triggerMethod('update:listDom', this);
+  },
   onRenderChildren() {
+    this.triggerMethod('update:listDom', this);
     this.setVisibleChildren();
   },
   onChildFilter: debounce(function() {
