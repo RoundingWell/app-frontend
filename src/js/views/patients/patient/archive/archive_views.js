@@ -259,6 +259,13 @@ const ListView = CollectionView.extend({
   viewFilter({ model }) {
     return model.type === 'patient-events' || model.isDone();
   },
+  onAttach() {
+    this.triggerMethod('update:listDom', this);
+  },
+  onRenderChildren() {
+    if (!this.isAttached()) return;
+    this.triggerMethod('update:listDom', this);
+  },
 });
 
 const LayoutView = View.extend({
@@ -267,11 +274,10 @@ const LayoutView = View.extend({
     content: {
       el: '[data-content-region]',
       regionClass: PreloadRegion,
-      replaceElement: true,
     },
   },
   template: hbs`
-    <div class="patient__tabs">
+    <div class="patient__tabs js-list-header">
       <button class="patient__tab js-dashboard">
         {{~ @intl.patients.patient.archive.archiveViews.dashboardBtn ~}}
       </button>
@@ -279,12 +285,30 @@ const LayoutView = View.extend({
         {{~ @intl.patients.patient.archive.archiveViews.archiveBtn ~}}
       </span>
     </div>
-    <div class="patient__list-container flex-region">
-      <div data-content-region></div>
+    <div class="patient__list-container flex-region js-list" data-content-region>
     </div>
   `,
+  ui: {
+    listHeader: '.js-list-header',
+    list: '.js-list',
+  },
   triggers: {
     'click .js-dashboard': 'click:dashboard',
+  },
+  initialize() {
+    const userActivityCh = Radio.channel('user-activity');
+    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
+  },
+  fixWidth() {
+    /* istanbul ignore if */
+    if (!this.isRendered()) return;
+
+    const headerWidth = this.ui.listHeader.width();
+    const listWidth = this.ui.list.contents().width();
+    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
+    const scrollbarWidth = headerWidth - listWidth;
+
+    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
   },
   onClickDashboard() {
     Radio.trigger('event-router', 'patient:dashboard', this.model.id);

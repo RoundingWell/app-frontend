@@ -266,6 +266,13 @@ const ListView = CollectionView.extend({
   viewFilter({ model }) {
     return !model.isDone();
   },
+  onAttach() {
+    this.triggerMethod('update:listDom', this);
+  },
+  onRenderChildren() {
+    if (!this.isAttached()) return;
+    this.triggerMethod('update:listDom', this);
+  },
 });
 
 const LayoutView = View.extend({
@@ -274,12 +281,16 @@ const LayoutView = View.extend({
     content: {
       el: '[data-content-region]',
       regionClass: PreloadRegion,
-      replaceElement: true,
     },
     addWorkflow: '[data-add-workflow-region]',
   },
   ui: {
     loading: '.js-loading',
+    listHeader: '.js-list-header',
+    list: '.js-list',
+  },
+  childViewEvents: {
+    'update:listDom': 'fixWidth',
   },
   template: LayoutTemplate,
   triggers: {
@@ -297,6 +308,21 @@ const LayoutView = View.extend({
       duration: 400,
       direction: 'alternate',
     });
+  },
+  initialize() {
+    const userActivityCh = Radio.channel('user-activity');
+    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
+  },
+  fixWidth() {
+    /* istanbul ignore if */
+    if (!this.isRendered()) return;
+
+    const headerWidth = this.ui.listHeader.width();
+    const listWidth = this.ui.list.contents().width();
+    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
+    const scrollbarWidth = headerWidth - listWidth;
+
+    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
   },
 });
 
