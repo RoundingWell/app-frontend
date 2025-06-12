@@ -166,6 +166,7 @@ workflows:
           name: Chrome nightly Component
           parallelism: 6
           should_build: false
+          upload_coverage: false
           cypress_command: >
             npx cypress run --component
             --browser chrome
@@ -187,6 +188,7 @@ workflows:
           name: Firefox nightly Component
           parallelism: 6
           should_build: false
+          upload_coverage: false
           cypress_command: >
             npx cypress run --component
             --browser firefox
@@ -208,6 +210,7 @@ workflows:
           name: Edge nightly Component
           parallelism: 6
           should_build: false
+          upload_coverage: false
           cypress_command: >
             npx cypress run --component
             --browser edge
