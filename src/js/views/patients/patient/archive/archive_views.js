@@ -10,6 +10,8 @@ import 'scss/modules/table-list.scss';
 import { alphaSort } from 'js/utils/sorting';
 import PreloadRegion from 'js/regions/preload_region';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/views/patients/shared/read-only_views';
 
@@ -270,6 +272,7 @@ const ListView = CollectionView.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region patient__content',
+  behaviors: [FixListWidthBehavior],
   regions: {
     content: {
       el: '[data-content-region]',
@@ -295,20 +298,11 @@ const LayoutView = View.extend({
   triggers: {
     'click .js-dashboard': 'click:dashboard',
   },
-  initialize() {
-    const userActivityCh = Radio.channel('user-activity');
-    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
+  childViewEvents: {
+    'update:listDom': 'fixListWidth',
   },
-  fixWidth() {
-    /* istanbul ignore if */
-    if (!this.isRendered()) return;
-
-    const headerWidth = this.ui.listHeader.width();
-    const listWidth = this.ui.list.contents().width();
-    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
-    const scrollbarWidth = headerWidth - listWidth;
-
-    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
+  fixListWidth() {
+    this.triggerMethod('fix:list:width');
   },
   onClickDashboard() {
     Radio.trigger('event-router', 'patient:dashboard', this.model.id);

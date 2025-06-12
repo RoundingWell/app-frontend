@@ -6,6 +6,8 @@ import { View, CollectionView, Behavior } from 'marionette';
 
 import { alphaSort } from 'js/utils/sorting';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import 'scss/modules/buttons.scss';
 import 'scss/modules/progress-bar.scss';
 import 'scss/modules/table-list.scss';
@@ -277,6 +279,7 @@ const ListView = CollectionView.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region patient__content',
+  behaviors: [FixListWidthBehavior],
   regions: {
     content: {
       el: '[data-content-region]',
@@ -290,7 +293,7 @@ const LayoutView = View.extend({
     list: '.js-list',
   },
   childViewEvents: {
-    'update:listDom': 'fixWidth',
+    'update:listDom': 'fixListWidth',
   },
   template: LayoutTemplate,
   triggers: {
@@ -309,20 +312,8 @@ const LayoutView = View.extend({
       direction: 'alternate',
     });
   },
-  initialize() {
-    const userActivityCh = Radio.channel('user-activity');
-    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
-  },
-  fixWidth() {
-    /* istanbul ignore if */
-    if (!this.isRendered()) return;
-
-    const headerWidth = this.ui.listHeader.width();
-    const listWidth = this.ui.list.contents().width();
-    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
-    const scrollbarWidth = headerWidth - listWidth;
-
-    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
+  fixListWidth() {
+    this.triggerMethod('fix:list:width');
   },
 });
 

@@ -9,6 +9,8 @@ import 'scss/modules/table-list.scss';
 import intl from 'js/i18n';
 import PreloadRegion from 'js/regions/preload_region';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/views/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/views/patients/shared/read-only_views';
@@ -375,6 +377,7 @@ const LayoutView = View.extend({
     </div>
     <div class="patient-flow__sidebar" data-sidebar-region></div>
   `,
+  behaviors: [FixListWidthBehavior],
   regions: {
     contextTrail: {
       el: '[data-context-trail-region]',
@@ -400,22 +403,10 @@ const LayoutView = View.extend({
     list: '.js-list',
   },
   childViewEvents: {
-    'update:listDom': 'fixWidth',
+    'update:listDom': 'fixListWidth',
   },
-  initialize() {
-    const userActivityCh = Radio.channel('user-activity');
-    this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
-  },
-  fixWidth() {
-    /* istanbul ignore if */
-    if (!this.isRendered()) return;
-
-    const headerWidth = this.ui.listHeader.width();
-    const listWidth = this.ui.list.contents().width();
-    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
-    const scrollbarWidth = headerWidth - listWidth;
-
-    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
+  fixListWidth() {
+    this.triggerMethod('fix:list:width');
   },
 });
 
