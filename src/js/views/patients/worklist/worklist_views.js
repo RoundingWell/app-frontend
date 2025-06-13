@@ -50,19 +50,15 @@ const LayoutView = View.extend({
     search: '[data-search-region]',
     count: '[data-count-region]',
   },
-  childViewEvents: {
-    'update:listDom': 'fixListWidth',
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   triggers: {
     'click @ui.select': 'click:select',
   },
   ui: {
-    listHeader: '.js-list-header',
-    list: '.js-list',
     select: '.js-select',
-  },
-  fixListWidth() {
-    this.triggerMethod('fix:list:width');
   },
 });
 
@@ -308,14 +304,11 @@ const ListView = CollectionView.extend({
     this.listenTo(state, 'change:searchQuery', this.searchList);
   },
   onAttach() {
-    this.triggerMethod('update:listDom', this);
-
     this.searchList(null, this.state.get('searchQuery'));
   },
   /* istanbul ignore next: future proof */
   onRenderChildren() {
     if (!this.isAttached()) return;
-    this.triggerMethod('update:listDom', this);
     this.triggerMethod('filtered', this.children.map('model'));
   },
   onSelect(selectedView, isShiftKeyPressed) {

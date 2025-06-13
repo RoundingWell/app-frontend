@@ -5,18 +5,26 @@ export default Behavior.extend({
   initialize() {
     const userActivityCh = Radio.channel('user-activity');
     this.listenTo(userActivityCh, 'window:resize', this.fixWidth);
-
-    this.listenTo(this.view, 'fix:list:width', this.fixWidth);
+  },
+  ui: {
+    listHeader: '.js-list-header',
+    list: '.js-list',
+  },
+  onChildViewAttach() {
+    this.fixWidth();
+  },
+  onChildViewRenderChildren() {
+    this.fixWidth();
   },
   fixWidth() {
     /* istanbul ignore if */
-    if (!this.view.isRendered()) return;
+    if (!this.view.isAttached()) return;
 
-    const headerWidth = this.view.ui.listHeader.width();
-    const listWidth = this.view.ui.list.contents().width();
-    const listPadding = parseInt(this.view.ui.list.css('paddingRight'), 10);
+    const headerWidth = this.ui.listHeader.width();
+    const listWidth = this.ui.list.contents().width();
+    const listPadding = parseInt(this.ui.list.css('paddingRight'), 10);
     const scrollbarWidth = headerWidth - listWidth;
 
-    this.view.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
+    this.ui.list.css({ paddingRight: `${ listPadding - scrollbarWidth }px` });
   },
 });

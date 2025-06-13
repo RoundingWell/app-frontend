@@ -45,20 +45,14 @@ const LayoutView = View.extend({
     search: '[data-search-region]',
     count: '[data-count-region]',
   },
-  childViewEvents: {
-    'update:listDom': 'fixListWidth',
-  },
-  ui: {
-    listHeader: '.js-list-header',
-    list: '.js-list',
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   templateContext() {
     return {
       isReduced: this.getOption('isReduced'),
     };
-  },
-  fixListWidth() {
-    this.triggerMethod('fix:list:width');
   },
 });
 
@@ -450,11 +444,7 @@ const ScheduleListView = CollectionView.extend({
     // NOTE: debounced in initialize
     this.triggerMethod('change:canEdit');
   },
-  onAttach() {
-    this.triggerMethod('update:listDom', this);
-  },
   onRenderChildren() {
-    this.triggerMethod('update:listDom', this);
     this.setVisibleChildren();
   },
   onChildFilter: debounce(function() {

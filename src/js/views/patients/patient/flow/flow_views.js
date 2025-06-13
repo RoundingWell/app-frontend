@@ -345,13 +345,6 @@ const ListView = CollectionView.extend({
 
     this.onListItemCanEdit = debounce(this.onListItemCanEdit, 60);
   },
-  onAttach() {
-    this.triggerMethod('update:listDom', this);
-  },
-  onRenderChildren() {
-    if (!this.isAttached()) return;
-    this.triggerMethod('update:listDom', this);
-  },
   onListItemCanEdit() {
     // NOTE: debounced in initialize
     this.triggerMethod('change:canEdit');
@@ -398,15 +391,9 @@ const LayoutView = View.extend({
       replaceElement: true,
     },
   },
-  ui: {
-    listHeader: '.js-list-header',
-    list: '.js-list',
-  },
-  childViewEvents: {
-    'update:listDom': 'fixListWidth',
-  },
-  fixListWidth() {
-    this.triggerMethod('fix:list:width');
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
 });
 

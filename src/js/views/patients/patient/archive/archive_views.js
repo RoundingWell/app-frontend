@@ -261,13 +261,6 @@ const ListView = CollectionView.extend({
   viewFilter({ model }) {
     return model.type === 'patient-events' || model.isDone();
   },
-  onAttach() {
-    this.triggerMethod('update:listDom', this);
-  },
-  onRenderChildren() {
-    if (!this.isAttached()) return;
-    this.triggerMethod('update:listDom', this);
-  },
 });
 
 const LayoutView = View.extend({
@@ -291,18 +284,12 @@ const LayoutView = View.extend({
     <div class="patient__list-container flex-region js-list" data-content-region>
     </div>
   `,
-  ui: {
-    listHeader: '.js-list-header',
-    list: '.js-list',
-  },
   triggers: {
     'click .js-dashboard': 'click:dashboard',
   },
-  childViewEvents: {
-    'update:listDom': 'fixListWidth',
-  },
-  fixListWidth() {
-    this.triggerMethod('fix:list:width');
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   onClickDashboard() {
     Radio.trigger('event-router', 'patient:dashboard', this.model.id);

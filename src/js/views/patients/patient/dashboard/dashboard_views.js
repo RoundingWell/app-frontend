@@ -268,13 +268,6 @@ const ListView = CollectionView.extend({
   viewFilter({ model }) {
     return !model.isDone();
   },
-  onAttach() {
-    this.triggerMethod('update:listDom', this);
-  },
-  onRenderChildren() {
-    if (!this.isAttached()) return;
-    this.triggerMethod('update:listDom', this);
-  },
 });
 
 const LayoutView = View.extend({
@@ -289,11 +282,10 @@ const LayoutView = View.extend({
   },
   ui: {
     loading: '.js-loading',
-    listHeader: '.js-list-header',
-    list: '.js-list',
   },
-  childViewEvents: {
-    'update:listDom': 'fixListWidth',
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   template: LayoutTemplate,
   triggers: {
@@ -311,9 +303,6 @@ const LayoutView = View.extend({
       duration: 400,
       direction: 'alternate',
     });
-  },
-  fixListWidth() {
-    this.triggerMethod('fix:list:width');
   },
 });
 
