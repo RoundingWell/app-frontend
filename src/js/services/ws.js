@@ -31,7 +31,7 @@ export default App.extend({
     this.resources = new Backbone.Collection();
     this.persistent = {};
     this.ws = {};
-    this.url = url;
+    if (url) this.url = new URL(url);
   },
 
   beforeStart() {
@@ -39,7 +39,8 @@ export default App.extend({
   },
 
   onStart({ data }, token) {
-    this.ws = new WebSocket(this.url, token.split(' '));
+    this.url.searchParams.set('auth', token);
+    this.ws = new WebSocket(this.url.toString());
     this.ws.addEventListener('open', this.onOpen.bind(this, data));
     this.ws.addEventListener('close', this.onClose.bind(this));
     this.ws.addEventListener('message', this.onMessage.bind(this));
