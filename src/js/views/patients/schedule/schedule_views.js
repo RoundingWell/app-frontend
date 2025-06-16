@@ -8,6 +8,8 @@ import { alphaSort } from 'js/utils/sorting';
 import intl from 'js/i18n';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
 import 'scss/modules/table-list.scss';
@@ -26,6 +28,7 @@ import './schedule-list.scss';
 const LayoutView = View.extend({
   className: 'flex-region',
   template: LayoutTemplate,
+  behaviors: [FixListWidthBehavior],
   regions: {
     filters: '[data-filters-region]',
     table: '[data-table-region]',
@@ -41,6 +44,10 @@ const LayoutView = View.extend({
     dateFilter: '[data-date-filter-region]',
     search: '[data-search-region]',
     count: '[data-count-region]',
+  },
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   templateContext() {
     return {

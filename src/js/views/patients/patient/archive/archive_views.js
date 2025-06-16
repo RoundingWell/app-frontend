@@ -10,6 +10,8 @@ import 'scss/modules/table-list.scss';
 import { alphaSort } from 'js/utils/sorting';
 import PreloadRegion from 'js/regions/preload_region';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/views/patients/shared/read-only_views';
 
@@ -263,15 +265,15 @@ const ListView = CollectionView.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region patient__content',
+  behaviors: [FixListWidthBehavior],
   regions: {
     content: {
       el: '[data-content-region]',
       regionClass: PreloadRegion,
-      replaceElement: true,
     },
   },
   template: hbs`
-    <div class="patient__tabs">
+    <div class="patient__tabs js-list-header">
       <button class="patient__tab js-dashboard">
         {{~ @intl.patients.patient.archive.archiveViews.dashboardBtn ~}}
       </button>
@@ -279,12 +281,15 @@ const LayoutView = View.extend({
         {{~ @intl.patients.patient.archive.archiveViews.archiveBtn ~}}
       </span>
     </div>
-    <div class="patient__list-container flex-region">
-      <div data-content-region></div>
+    <div class="patient__list-container flex-region js-list" data-content-region>
     </div>
   `,
   triggers: {
     'click .js-dashboard': 'click:dashboard',
+  },
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   onClickDashboard() {
     Radio.trigger('event-router', 'patient:dashboard', this.model.id);

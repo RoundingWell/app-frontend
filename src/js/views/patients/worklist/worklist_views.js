@@ -7,6 +7,8 @@ import intl, { renderTemplate } from 'js/i18n';
 import underscored from 'js/utils/formatting/underscored';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
 import 'scss/modules/table-list.scss';
@@ -29,6 +31,7 @@ const i18n = intl.patients.worklist.worklistViews;
 const LayoutView = View.extend({
   className: 'flex-region',
   template: LayoutTemplate,
+  behaviors: [FixListWidthBehavior],
   regions: {
     dateFilter: '[data-date-filter-region]',
     filters: '[data-filters-region]',
@@ -46,6 +49,10 @@ const LayoutView = View.extend({
     },
     search: '[data-search-region]',
     count: '[data-count-region]',
+  },
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   triggers: {
     'click @ui.select': 'click:select',

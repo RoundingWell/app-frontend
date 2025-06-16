@@ -6,6 +6,8 @@ import { View, CollectionView, Behavior } from 'marionette';
 
 import { alphaSort } from 'js/utils/sorting';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import 'scss/modules/buttons.scss';
 import 'scss/modules/progress-bar.scss';
 import 'scss/modules/table-list.scss';
@@ -270,16 +272,20 @@ const ListView = CollectionView.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region patient__content',
+  behaviors: [FixListWidthBehavior],
   regions: {
     content: {
       el: '[data-content-region]',
       regionClass: PreloadRegion,
-      replaceElement: true,
     },
     addWorkflow: '[data-add-workflow-region]',
   },
   ui: {
     loading: '.js-loading',
+  },
+  childViewTriggers: {
+    'attach': 'childView:attach',
+    'render:children': 'childView:render:children',
   },
   template: LayoutTemplate,
   triggers: {
