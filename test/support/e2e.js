@@ -17,7 +17,7 @@ import 'js/base/dayjs';
 
 import './defaults';
 import './commands';
-import './coverage';
+import '@cypress/code-coverage/support';
 import './websockets';
 
 import './api/actions';
