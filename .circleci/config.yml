@@ -102,6 +102,7 @@ jobs:
             - run: npm run coverage:report:ci || true
 
             - coveralls/upload:
+                fail_on_error: false
                 parallel: true
 
   coveralls-finish:
