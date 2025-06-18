@@ -196,10 +196,12 @@ export default App.extend({
       .then(definition => {
         this.send(message, { value: definition }, requestId);
       })
-      .catch(({ responseData }) => {
+      .catch(
         /* istanbul ignore next: Don't test BE errors */
-        this.send(message, { error: responseData }, requestId);
-      });
+        ({ responseData }) => {
+          this.send(message, { error: responseData }, requestId);
+        },
+      );
   },
   fetchOtherFormResponse(flow) {
     const flowId = flow && flow.id;
@@ -235,18 +237,22 @@ export default App.extend({
     Promise.all([
       Radio.request('entities', 'fetch:forms:data', get(this.action, 'id'), this.patient.id, this.form.id),
       this.fetchLatestFormResponse(),
-    ]).then(([data, response]) => {
-      this.send(message, { value: {
-        isReadOnly: this.isReadOnly(),
-        formData: data.attributes,
-        responseData: response.getFormData(),
-        formSubmission: response.getResponse(),
-        options: this.form.get('options'),
-      } }, requestId);
-    }).catch(({ responseData }) => {
-      /* istanbul ignore next: Don't test BE errors */
-      this.send(message, { error: responseData }, requestId);
-    });
+    ])
+      .then(([data, response]) => {
+        this.send(message, { value: {
+          isReadOnly: this.isReadOnly(),
+          formData: data.attributes,
+          responseData: response.getFormData(),
+          formSubmission: response.getResponse(),
+          options: this.form.get('options'),
+        } }, requestId);
+      })
+      .catch(
+        /* istanbul ignore next: Don't test BE errors */
+        ({ responseData }) => {
+          this.send(message, { error: responseData }, requestId);
+        },
+      );
   },
   fetchFormResponse({ responseId }, requestId) {
     const message = 'fetch:form:response';
@@ -258,10 +264,12 @@ export default App.extend({
         formSubmission: response.getResponse(),
         options: this.form.get('options'),
       } }, requestId);
-    }).catch(({ responseData }) => {
+    }).catch(
       /* istanbul ignore next: Don't test BE errors */
-      this.send(message, { error: responseData }, requestId);
-    });
+      ({ responseData }) => {
+        this.send(message, { error: responseData }, requestId);
+      },
+    );
   },
   useLatestDraft(responseData) {
     responseData._form = this.form.getResource();
