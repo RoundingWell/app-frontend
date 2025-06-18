@@ -9,7 +9,7 @@ Backbone.Model.prototype.sync = function(method, model, options) {
   if (method === 'create') {
     let data = options.data || options.attrs || model.toJSON(options);
     if (isString(data)) data = JSON.parse(data);
-    data.data.id = uuid();
+    data.data.id = (model && model.createId) ? model.createId() : uuid();
     options.data = JSON.stringify(data);
   }
 
