@@ -5,6 +5,8 @@ import { View, CollectionView } from 'marionette';
 
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import PreloadRegion from 'js/regions/preload_region';
 
 const ItemView = View.extend({
@@ -82,21 +84,22 @@ const ListView = CollectionView.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region',
+  behaviors: [FixListWidthBehavior],
   template: hbs`
-  <div class="list-page__header">
-    <div class="flex list-page__title">
-      <div class="flex list-page__title-filter">
-        <span class="list-page__title-icon">{{far "gauge"}}</span>{{ @intl.dashboards.dashboardsAllViews.layoutView.title }}
+    <div class="list-page__header js-list-header">
+      <div class="flex list-page__title">
+        <div class="flex list-page__title-filter">
+          <span class="list-page__title-icon">{{far "gauge"}}</span>{{ @intl.dashboards.dashboardsAllViews.layoutView.title }}
+        </div>
+        <div class="u-margin--l-auto" data-search-region></div>
       </div>
-      <div class="u-margin--l-auto" data-search-region></div>
+      <table class="w-100">
+        <tr>
+          <td class="table-list__header w-100">{{ @intl.dashboards.dashboardsAllViews.layoutView.nameHeader }}</td>
+        </tr>
+      </table>
     </div>
-  </div>
-  <div class="flex-region list-page__list">
-    <table class="w-100"><tr>
-      <td class="table-list__header w-100">{{ @intl.dashboards.dashboardsAllViews.layoutView.nameHeader }}</td>
-    </tr></table>
-    <div class="flex-region" data-list-region></div>
-  </div>
+    <div class="flex-region list-page__list js-list" data-list-region></div>
   `,
   regions: {
     search: '[data-search-region]',
@@ -104,6 +107,10 @@ const LayoutView = View.extend({
       el: '[data-list-region]',
       regionClass: PreloadRegion,
     },
+  },
+  childViewTriggers: {
+    'render:children': 'childView:render:children',
+    'attach': 'childView:attach',
   },
 });
 

@@ -7,6 +7,8 @@ import intl from 'js/i18n';
 
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
+import FixListWidthBehavior from 'js/behaviors/fix-list-width';
+
 import PreloadRegion from 'js/regions/preload_region';
 import { RoleComponent, TeamComponent, StateComponent } from 'js/views/clinicians/shared/clinicians_views';
 
@@ -128,8 +130,9 @@ const ItemView = View.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region',
+  behaviors: [FixListWidthBehavior],
   template: hbs`
-    <div class="list-page__header">
+    <div class="list-page__header js-list-header">
       <div class="flex list-page__title">
         <div class="flex list-page__title-filter">
           <span class="list-page__title-icon">{{far "users-gear"}}</span>{{ @intl.clinicians.cliniciansAllViews.layoutView.title }}
@@ -137,16 +140,16 @@ const LayoutView = View.extend({
         <div class="clinicians__list-search" data-search-region></div>
       </div>
       <button class="u-margin--b-16 button-primary js-add-clinician">{{far "circle-plus"}}<span>{{ @intl.clinicians.cliniciansAllViews.layoutView.addClinicianButton }}</span></button>
+      <table class="w-100">
+        <tr>
+          <td class="table-list__header w-20">{{ @intl.clinicians.cliniciansAllViews.layoutView.clinicianHeader }}</td>
+          <td class="table-list__header w-30">{{ @intl.clinicians.cliniciansAllViews.layoutView.workspacesHeader }}</td>
+          <td class="table-list__header w-30">{{ @intl.clinicians.cliniciansAllViews.layoutView.attributesHeader }}</td>
+          <td class="table-list__header w-20">{{ @intl.clinicians.cliniciansAllViews.layoutView.lastActiveHeader }}</td>
+        </tr>
+      </table>
     </div>
-    <div class="flex-region list-page__list">
-      <table class="w-100"><tr>
-        <td class="table-list__header w-20">{{ @intl.clinicians.cliniciansAllViews.layoutView.clinicianHeader }}</td>
-        <td class="table-list__header w-30">{{ @intl.clinicians.cliniciansAllViews.layoutView.workspacesHeader }}</td>
-        <td class="table-list__header w-30">{{ @intl.clinicians.cliniciansAllViews.layoutView.attributesHeader }}</td>
-        <td class="table-list__header w-20">{{ @intl.clinicians.cliniciansAllViews.layoutView.lastActiveHeader }}</td>
-      </tr></table>
-      <div class="flex-region" data-list-region></div>
-    </div>
+    <div class="flex-region list-page__list js-list" data-list-region></div>
   `,
   regions: {
     list: {
@@ -162,6 +165,10 @@ const LayoutView = View.extend({
   },
   triggers: {
     'click .js-add-clinician': 'click:addClinician',
+  },
+  childViewTriggers: {
+    'render:children': 'childView:render:children',
+    'attach': 'childView:attach',
   },
 });
 
