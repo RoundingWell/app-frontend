@@ -38,7 +38,7 @@ context('clinicians list', function() {
       .wait('@routeClinicians');
 
     cy
-      .get('.list-page__list')
+      .get('.list-page__header')
       .find('.table-list__header')
       .first()
       .should('contain', 'Clinician')
