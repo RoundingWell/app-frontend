@@ -5,11 +5,11 @@ import utcPlugin from 'dayjs/plugin/utc.js';
 import { defineConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
+import { babel } from '@rollup/plugin-babel';
 import eslint from 'vite-plugin-eslint';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import stylelint from 'vite-plugin-stylelint';
 import { VitePWA } from 'vite-plugin-pwa';
-import istanbul from 'vite-plugin-istanbul';
 import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.js';
 import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
@@ -39,9 +39,28 @@ const css = {
   },
 };
 
-const cypressConfig = defineConfig({
+const babelPlugin = babel({
+  babelHelpers: 'bundled',
+
+  plugins: [
+    [
+      'istanbul',
+      {
+        include: COVER_INCLUDE,
+        exclude: COVER_EXCLUDE,
+      },
+    ],
+  ],
+  exclude: ['node_modules/**', 'test/**'],
+  extensions: ['.js'],
+  babelrc: false,
+  configFile: false,
+});
+
+export const cypressConfig = defineConfig({
   mode: 'test',
   plugins: [
+    babelPlugin,
     inlineHbsCompile(),
     nodeResolve({
       modulePaths: [
@@ -50,22 +69,11 @@ const cypressConfig = defineConfig({
         path.resolve('./test'),
       ],
     }),
-    istanbul({
-      requireEnv: true,
-      include: COVER_INCLUDE,
-      exclude: COVER_EXCLUDE,
-      extension: ['.js'],
-      cypress: true,
-    }),
   ],
   resolve,
   css,
   publicDir: false,
 });
-
-export {
-  cypressConfig,
-};
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -87,6 +95,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      isTest && babelPlugin,
       inlineHbsCompile(),
       eslint({
         failOnWarning: isCI,
@@ -116,14 +125,6 @@ export default defineConfig(({ mode }) => {
             '**/.DS_Store',
           ],
         },
-      }),
-      istanbul({
-        requireEnv: true,
-        include: COVER_INCLUDE,
-        exclude: COVER_EXCLUDE,
-        extension: ['.js'],
-        cypress: true,
-        forceBuildInstrument: isTest,
       }),
     ],
     optimizeDeps: {
