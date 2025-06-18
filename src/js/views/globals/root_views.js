@@ -221,7 +221,7 @@ const TooltipRegionView = TopRegionView.extend({
 
     this.setVerticalLocation(options);
   },
-  onRegionEmpty(options) {
+  onRegionEmpty() {
     this.stopListening(userActivityCh);
   },
   addClass(className) {

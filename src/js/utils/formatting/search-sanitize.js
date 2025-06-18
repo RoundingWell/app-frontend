@@ -4,7 +4,7 @@ export default str => {
   str = String(str);
 
   // dashes to spaces
-  str = str.replace(/\-/g, ' ');
+  str = str.replace(/-/g, ' ');
 
   // all non alphanumeric characters are removed
   str = str.replace(/[^\w\s]/g, '');
