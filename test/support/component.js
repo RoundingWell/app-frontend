@@ -3,7 +3,7 @@ import {
   getContainerEl,
 } from '@cypress/mount-utils';
 
-import './coverage';
+import '@cypress/code-coverage/support';
 import './websockets';
 
 import 'js/base/setup';

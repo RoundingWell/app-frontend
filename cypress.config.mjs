@@ -2,7 +2,7 @@ import { defineConfig } from 'cypress';
 import vitePreprocessor from 'cypress-vite';
 import { cypressConfig } from './vite.config.js';
 
-import coveragePlugin from './test/plugins/coverage.js';
+import codeCoverageTask from '@cypress/code-coverage/task.js';
 import fakerPlugin from './test/plugins/faker-generator.js';
 
 fakerPlugin();
@@ -10,7 +10,6 @@ fakerPlugin();
 process.env.NODE_ENV = 'test';
 
 function setupNodeEvents(on, config) {
-  coveragePlugin(on, config);
   on(
     'file:preprocessor',
     vitePreprocessor({
@@ -18,6 +17,10 @@ function setupNodeEvents(on, config) {
       ...cypressConfig,
     }),
   );
+
+  codeCoverageTask(on, config);
+
+  return config;
 }
 
 export default defineConfig({
