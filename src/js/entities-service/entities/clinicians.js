@@ -3,7 +3,8 @@ import Radio from 'backbone.radio';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import { NIL as NIL_UUID } from 'uuid';
+import { NIL as NIL_UUID, v5 as uuid } from 'uuid';
+import { RWELL_NS } from 'js/static';
 
 import trim from 'js/utils/formatting/trim';
 
@@ -12,6 +13,16 @@ const TYPE = 'clinicians';
 const _Model = BaseModel.extend({
   type: TYPE,
   urlRoot: '/api/clinicians',
+  createId() {
+    const email = this.get('email');
+
+    /* istanbul ignore next: dev protection */
+    if (!email) {
+      throw new Error('Cannot create clinician without email');
+    }
+
+    return uuid(`clinician:${ String(email).toLowerCase() }`, RWELL_NS);
+  },
   preinitialize() {
     this.on('change:_team', this.onChangeTeam);
   },
