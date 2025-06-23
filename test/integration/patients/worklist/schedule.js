@@ -705,6 +705,24 @@ context('schedule page', function() {
       .get('[data-date-filter-region]')
       .find('.js-next')
       .should('not.exist');
+
+    cy
+      .get('[data-date-filter-region]')
+      .should('contain', 'All Time')
+      .click();
+
+    cy
+      .get('.app-frame__pop-region')
+      .then($el => {
+        // checks that pop region doesn't show outside viewport bounds
+        const elInfo = $el[0].getBoundingClientRect();
+        const viewportWidth = Cypress.config('viewportWidth');
+        const viewportHeight = Cypress.config('viewportHeight');
+
+        const isOutOfBounds = elInfo.right > viewportWidth || elInfo.bottom > viewportHeight || elInfo.left < 0 || elInfo.top < 0;
+
+        expect(isOutOfBounds).to.be.false;
+      });
   });
 
   specify('restricted employee', function() {
