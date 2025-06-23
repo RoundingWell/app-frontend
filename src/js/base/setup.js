@@ -81,5 +81,5 @@ Backbone.Model.prototype.dayjs = function(attr) {
 // For use of escaping a string for within a regex
 // http://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex#6969486
 RegExp.escape = function(str) {
-  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+  return str.replace(/[\\^$.*+?()[\]{}|-]/g, '\\$&');
 };

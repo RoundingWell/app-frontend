@@ -10,7 +10,7 @@ import eslint from 'vite-plugin-eslint';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import stylelint from 'vite-plugin-stylelint';
 import { VitePWA } from 'vite-plugin-pwa';
-import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.js';
+import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.cjs';
 import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';

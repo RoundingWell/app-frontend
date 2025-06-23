@@ -1,144 +1,85 @@
 import globals from 'globals';
 import js from '@eslint/js';
 import mocha from 'eslint-plugin-mocha';
-import pluginChaiFriendly from 'eslint-plugin-chai-friendly';
 import cypress from 'eslint-plugin-cypress';
-import stylisticJs from '@stylistic/eslint-plugin-js';
+import chaiFriendly from 'eslint-plugin-chai-friendly';
+import stylistic from '@stylistic/eslint-plugin';
+
+/* ───────── Stylistic customisation ───────── */
+const stylisticRules = stylistic.configs.customize({
+  semi: true,
+  templateCurlySpacing: 'always',
+  arrowParens: 'as-needed',
+});
+
+/* ───────── Test presets pulled separately ───────── */
+const mochaPreset = mocha.configs.recommended;
+const cypressPreset = cypress.configs.recommended;
+const chaiPreset = chaiFriendly.configs.recommendedFlat;
+
+/* Hand-merged (explicit) composite for tests */
+const testPreset = {
+  plugins: {
+    ...mochaPreset.plugins,
+    ...cypressPreset.plugins,
+    ...chaiPreset.plugins,
+  },
+  rules: {
+    ...mochaPreset.rules,
+    ...cypressPreset.rules,
+    ...chaiPreset.rules,
+  },
+  languageOptions: {
+    ...mochaPreset.languageOptions,
+    ...cypressPreset.languageOptions,
+    ...chaiPreset.languageOptions,
+    globals: {
+      ...mochaPreset.languageOptions?.globals,
+      ...cypressPreset.languageOptions?.globals,
+      ...chaiPreset.languageOptions?.globals,
+    },
+  },
+};
 
 export default [
+  /* ─────────────────── Base (all files) ─────────────────── */
   js.configs.recommended,
   {
-    name: 'General Linting',
+    name: 'General',
+    plugins: { '@stylistic': stylistic },
     languageOptions: {
+      ecmaVersion: 2020,
+      sourceType: 'module',
       globals: {
         ...globals.browser,
         ...globals.node,
-        _PRODUCTION_: true,
-        _DEVELOP_: true,
-        _TEST_: true,
-        _NOW_: true,
+        _PRODUCTION_: 'readonly',
+        _DEVELOP_: 'readonly',
+        _TEST_: 'readonly',
+        _NOW_: 'readonly',
       },
-      ecmaVersion: 2020,
-      sourceType: 'module',
     },
-    plugins: {
-      '@stylistic/js': stylisticJs,
-    },
+    ...stylisticRules,
     rules: {
-      '@stylistic/js/array-bracket-spacing': ['error', 'never'],
-      'arrow-body-style': 'off',
-      '@stylistic/js/arrow-parens': [2, 'as-needed'],
-      'block-scoped-var': 'error',
-      '@stylistic/js/block-spacing': ['error', 'always'],
-      '@stylistic/js/brace-style': 'error',
-      '@stylistic/js/comma-dangle': ['error', 'always-multiline'],
-      '@stylistic/js/comma-spacing': 'error',
-      '@stylistic/js/comma-style': 'error',
       'complexity': ['error', 8],
-      '@stylistic/js/computed-property-spacing': ['error', 'never'],
-      'curly': ['error', 'multi-line'],
-      '@stylistic/js/dot-location': ['error', 'property'],
-      'dot-notation': 'error',
-      'eqeqeq': ['error', 'allow-null'],
-      'guard-for-in': 'error',
-      '@stylistic/js/indent': ['error', 2, { 'SwitchCase': 1 }],
-      '@stylistic/js/key-spacing': ['error'],
-      '@stylistic/js/keyword-spacing': 'error',
-      'no-alert': 'error',
-      'no-bitwise': 'error',
-      'no-caller': 'error',
-      'no-case-declarations': 'error',
-      'no-cond-assign': ['error', 'except-parens'],
+      'radix': ['error', 'always'],
       'no-console': 'warn',
-      'no-const-assign': 'error',
-      'no-debugger': 'warn',
-      'no-div-regex': 'error',
-      'no-duplicate-imports': 'error',
-      'no-else-return': 'error',
-      'no-empty': 'error',
-      'no-eval': 'error',
-      'no-extend-native': 'error',
-      'no-irregular-whitespace': 'error',
-      'no-iterator': 'error',
-      'no-lone-blocks': 'error',
-      'no-loop-func': 'error',
-      '@stylistic/js/no-multiple-empty-lines': 'error',
-      '@stylistic/js/no-multi-spaces': 'error',
-      'no-multi-str': 'error',
-      'no-new-wrappers': 'error',
-      'no-proto': 'error',
-      'no-return-assign': 'error',
-      'no-script-url': 'error',
-      'no-self-compare': 'error',
-      'no-sequences': 'error',
-      'no-spaced-func': 'error',
-      'no-shadow': 'error',
-      'no-undef': 'error',
-      'no-undef-init': 'error',
-      'no-unexpected-multiline': 'error',
-      'no-unneeded-ternary': 'error',
-      'no-unused-vars': ['error', { 'args': 'none' }],
-      'no-useless-concat': 'error',
-      'no-useless-escape': 'off',
+      'no-unused-vars': ['error', { args: 'none' }],
       'no-var': 'error',
-      '@stylistic/js/no-whitespace-before-property': 'error',
-      'no-with': 'error',
-      '@stylistic/js/object-curly-spacing': ['error', 'always'],
-      'one-var': ['error', 'never'],
-      '@stylistic/js/operator-linebreak': ['error', 'before', {
-        'overrides': {
-          '?': 'after',
-          ':': 'after',
-        },
-      }],
-      '@stylistic/js/padded-blocks': ['error', 'never'],
       'prefer-const': 'error',
       'prefer-template': 'error',
-      '@stylistic/js/quotes': ['error', 'single'],
-      '@stylistic/js/quote-props': ['error', 'consistent'],
-      'radix': ['error', 'always'],
-      '@stylistic/js/semi': ['error', 'always'],
-      '@stylistic/js/semi-spacing': ['error', {
-        'before': false,
-        'after': true,
-      }],
-      '@stylistic/js/space-before-blocks': 'error',
-      '@stylistic/js/space-before-function-paren': ['error', 'never'],
-      '@stylistic/js/space-in-parens': ['error', 'never'],
-      '@stylistic/js/spaced-comment': ['error', 'always'],
-      '@stylistic/js/space-infix-ops': 'error',
-      'strict': 'off',
-      '@stylistic/js/template-curly-spacing': ['error', 'always'],
-      'valid-typeof': 'error',
-      '@stylistic/js/wrap-iife': ['error', 'inside'],
     },
   },
+
+  /* ─────────────────── Test-only overrides ─────────────────── */
   {
-    name: 'Mocha Linting',
+    name: 'Tests: presets',
     files: ['test/**', '**/*.cy.js'],
-    ...mocha.configs.recommended,
+    ...testPreset,
   },
   {
-    name: 'Chai Linting',
+    name: 'Tests: local tweaks',
     files: ['test/**', '**/*.cy.js'],
-    ...pluginChaiFriendly.configs.recommendedFlat,
-  },
-  {
-    name: 'Cypress Linting',
-    files: ['test/**', '**/*.cy.js'],
-    ...cypress.configs.recommended,
-  },
-  {
-    name: 'Test Linting',
-    files: ['test/**', '**/*.cy.js'],
-    languageOptions: {
-      globals: {
-        ...globals.chai,
-        ...cypress.configs.globals.languageOptions.globals,
-      },
-      ecmaVersion: 2020,
-      sourceType: 'module',
-    },
     rules: {
       'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',

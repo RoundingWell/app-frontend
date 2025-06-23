@@ -870,20 +870,20 @@ context('Outreach', function() {
 
     cy
       .get('body')
-      .contains('Oops! The page you requested can\’t be found.');
+      .contains('Oops! The page you requested can’t be found.');
 
     cy
       .visit('/outreach/', { noWait: true, isRoot: true });
 
     cy
       .get('body')
-      .contains('Oops! The page you requested can\’t be found.');
+      .contains('Oops! The page you requested can’t be found.');
 
     cy
       .visit(`/outreach/${ testAction.id }/page-does-not-exist`, { noWait: true, isRoot: true });
 
     cy
       .get('body')
-      .contains('Oops! The page you requested can\’t be found.');
+      .contains('Oops! The page you requested can’t be found.');
   });
 });

@@ -205,7 +205,7 @@ context('Noncontext Form', function() {
               dataSrc: 'custom',
               data: {
                 custom: `
-                  values = getDirectory(\'bar\', { filter: { foo: \'bar\' }})
+                  values = getDirectory('bar', { filter: { foo: 'bar' }})
                     .catch(e => {
                       return ['bar', 'error'];
                     })
