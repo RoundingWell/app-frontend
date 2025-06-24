@@ -85,7 +85,6 @@ Cypress.Commands.add('routeClinician', (mutator = _.identity) => {
     .as('routeClinician');
 });
 
-
 Cypress.Commands.add('routeClinicians', (mutator = _.identity) => {
   const data = getClinicians();
 

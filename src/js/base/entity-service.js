@@ -57,4 +57,3 @@ export default MnObject.extend({
     return Promise.resolve(model);
   },
 });
-

@@ -97,4 +97,3 @@ Cypress.Commands.add('routeWorkspacePrograms', (mutator = _.identity) => {
     })
     .as('routeWorkspacePrograms');
 });
-

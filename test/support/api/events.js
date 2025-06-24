@@ -45,7 +45,6 @@ Cypress.Commands.add('routeActionActivity', (mutator = _.identity) => {
     .as('routeActionActivity');
 });
 
-
 Cypress.Commands.add('routeFlowActivity', (mutator = _.identity) => {
   const data = getActivities(fxTestFlowEvents);
 

@@ -47,4 +47,3 @@ export default App.extend({
     return this._isLoading;
   },
 });
-

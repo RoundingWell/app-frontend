@@ -24,7 +24,6 @@ context('Alert Service', function() {
       .find('.alert-box')
       .contains('info');
 
-
     cy
       .get('@root')
       .then(() => {

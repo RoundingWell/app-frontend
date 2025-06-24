@@ -73,7 +73,6 @@ context('Datepicker', function() {
     },
   });
 
-
   specify('Displaying', function() {
     const testView = new TestView({
       model: new Backbone.Model(),

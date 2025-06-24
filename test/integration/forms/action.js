@@ -1709,7 +1709,6 @@ context('Patient Action Form', function() {
       },
     });
 
-
     cy
       .routeFormByAction(fx => {
         fx.data = testWidgetsForm;

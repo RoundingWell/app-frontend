@@ -32,4 +32,3 @@ Cypress.Commands.add('routeWidgetValues', (mutator = _.identity) => {
 export {
   fxTestWidgets,
 };
-

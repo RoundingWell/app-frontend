@@ -33,8 +33,8 @@ $.hotkeys = {
 
   isTargetInput(target) {
     return textInputTypes.test(target.nodeName)
-    || $(target).attr('contenteditable')
-    || contains(textAcceptingInputTypes, target.type);
+      || $(target).attr('contenteditable')
+      || contains(textAcceptingInputTypes, target.type);
   },
 };
 
@@ -112,4 +112,3 @@ each(['keydown', 'keyup', 'keypress'], event => {
     add: keyHandler,
   };
 });
-

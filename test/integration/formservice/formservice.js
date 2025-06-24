@@ -74,7 +74,6 @@ context('Formservice', function() {
         };
       });
 
-
     cy
       .visit(`/formapp/pdf/${ testForm.id }/${ testPatient.id }/${ testFormResponse.id }`, { noWait: true, isRoot: true })
       .wait('@routeForm')

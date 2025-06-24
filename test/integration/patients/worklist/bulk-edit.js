@@ -180,7 +180,6 @@ context('Worklist bulk editing', function() {
       .find('.js-clear')
       .click();
 
-
     cy
       .get('@sidebar')
       .find('.js-close')

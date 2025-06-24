@@ -298,7 +298,6 @@ context('program workflows page', function() {
   specify('add action', function() {
     const testProgram = getProgram();
 
-
     cy
       .routeTags()
       .routeProgram(fx => {

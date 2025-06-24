@@ -43,7 +43,7 @@ if (self.location.hostname !== 'localhost') {
     const cacheNamesToDelete = cacheNames.filter(cacheName => {
       return (
         cacheName.startsWith('hashed-')
-          && !cacheName.startsWith(`hashed-${ _NOW_ }`)
+        && !cacheName.startsWith(`hashed-${ _NOW_ }`)
       );
     });
 

@@ -1534,4 +1534,3 @@ context('filter sidebar', function() {
       .should('contain', 'Third In Sequence');
   });
 });
-

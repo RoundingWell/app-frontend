@@ -27,6 +27,7 @@ class SnippetComponent extends NestedComponent {
     super(...args);
     this.noField = true;
   }
+
   static schema(...extendArgs) {
     return NestedComponent.schema({
       label: 'Snippet',

@@ -44,7 +44,6 @@ function registerKinde(path, connection) {
   });
 }
 
-
 async function createKinde(success) {
   const kindeCreateParams = {
     redirect_uri: location.origin + PATH_AUTHD,
@@ -91,7 +90,7 @@ function login(path = PATH_ROOT, connection = config.connections.default) {
 
   const loginPromptView = new LoginPromptView();
 
-  loginPromptView.on('click:login', ()=> {
+  loginPromptView.on('click:login', () => {
     registerKinde(path, connection);
   });
 

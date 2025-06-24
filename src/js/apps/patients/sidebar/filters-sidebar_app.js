@@ -34,7 +34,7 @@ export default App.extend(extend({
     this.listenTo(menuView, 'click:clear', () => {
       this.filtersState.setDefaultFilterStates();
     });
-    
+
     this.showChildView('menu', menuView);
   },
   showCustomFiltersView() {

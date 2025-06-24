@@ -179,7 +179,6 @@ async function renderForm({ definition, isReadOnly, storedSubmission, formData, 
   form._isReady = true;
 }
 
-
 async function renderResponse({ definition, formSubmission, options }) {
   const evalContext = await getContext(options.context);
 
