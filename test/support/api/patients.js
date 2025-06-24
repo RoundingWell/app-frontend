@@ -63,4 +63,3 @@ Cypress.Commands.add('routePatientByFlow', (mutator = _.identity) => {
     })
     .as('routePatientByFlow');
 });
-

@@ -202,7 +202,6 @@ context('Patient Form', function() {
       })
       .as('routePostResponse');
 
-
     cy
       .iframe()
       .find('[name="data[fields.foo]"]')
@@ -468,7 +467,6 @@ context('Patient Form', function() {
     cy
       .get('[data-form-updated-region]')
       .should('be.empty');
-
 
     cy
       .get('.form__controls')

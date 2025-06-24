@@ -38,4 +38,3 @@ const Entity = BaseEntity.extend({
 });
 
 export default new Entity();
-

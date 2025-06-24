@@ -996,7 +996,6 @@ context('program action sidebar', function() {
       },
     });
 
-
     cy
       .routeTags()
       .routeCurrentClinician(fx => {

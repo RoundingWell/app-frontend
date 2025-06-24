@@ -209,4 +209,3 @@ const StateModel = Backbone.Model.extend({
 extend(StateModel.prototype, MultiselectStateMixin);
 
 export default StateModel;
-

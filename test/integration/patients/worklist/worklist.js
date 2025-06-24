@@ -664,7 +664,6 @@ context('worklist page', function() {
       .visit('/worklist/done-last-thirty-days')
       .wait('@routeActions');
 
-
     cy
       .get('.worklist-list__toggle')
       .contains('Flows')
@@ -2154,7 +2153,6 @@ context('worklist page', function() {
       flowsSelected: {},
       listType: 'flows',
     }));
-
 
     cy
       .routeFlows()

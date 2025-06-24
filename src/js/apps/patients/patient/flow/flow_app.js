@@ -14,7 +14,6 @@ import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
 import FlowSiderbarApp from 'js/apps/patients/sidebar/flow-sidebar_app';
 import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 
-
 import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView, i18n } from 'js/views/patients/patient/flow/flow_views';
 import { BulkEditButtonView, BulkEditActionsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
 import { AddButtonView } from 'js/views/patients/shared/add-workflow/add-workflow_views';

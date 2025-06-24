@@ -101,7 +101,6 @@ context('Global Error Page', function() {
       return false;
     });
 
-
     cy
       .intercept('GET', '/api/states', {
         statusCode: 500,

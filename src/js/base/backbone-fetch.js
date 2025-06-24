@@ -25,6 +25,5 @@ Backbone.ajax = options => {
     })
     .catch(handleError);
 
-
   return fetcher;
 };

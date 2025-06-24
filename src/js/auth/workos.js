@@ -58,7 +58,7 @@ function login(state = PATH_ROOT) {
 
   const loginPromptView = new LoginPromptView();
 
-  loginPromptView.on('click:login', ()=> {
+  loginPromptView.on('click:login', () => {
     authkit.signIn({ state });
   });
 

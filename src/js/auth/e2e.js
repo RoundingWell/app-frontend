@@ -2,7 +2,6 @@ import { isEmpty } from 'underscore';
 import { e2eConfig as config } from 'js/config';
 import { PATH_ROOT, PATH_LOGOUT } from './config';
 
-
 let token = config.token;
 
 function should() {

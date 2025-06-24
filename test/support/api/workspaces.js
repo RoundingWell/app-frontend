@@ -9,7 +9,6 @@ import { getStates } from './states';
 
 const TYPE = 'workspaces';
 
-
 const fxSampleWorkspaces = _.rest(fxWorkspaces, 2);
 
 // Exporting only workspaces needed for testing variance
@@ -66,4 +65,3 @@ Cypress.Commands.add('routeWorkspaces', (mutator = _.identity) => {
     })
     .as('routeWorkspaces');
 });
-

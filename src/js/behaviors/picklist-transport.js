@@ -151,7 +151,6 @@ export default Behavior.extend({
     }
   },
 
-
   // Keylistener non-transport related events
   // -----------------------------------------
 

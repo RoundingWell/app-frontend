@@ -61,4 +61,3 @@ function formatDate(date, format) {
 export {
   formatDate,
 };
-

@@ -108,7 +108,7 @@ function login(appState = PATH_ROOT) {
 
   const loginPromptView = new LoginPromptView();
 
-  loginPromptView.on('click:login', ()=> {
+  loginPromptView.on('click:login', () => {
     loginWithRedirect({ appState });
   });
 

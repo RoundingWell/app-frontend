@@ -65,4 +65,3 @@ export default RouterApp.extend({
     this.showView(new ErrorView({ status }));
   },
 });
-

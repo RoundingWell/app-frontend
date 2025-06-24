@@ -1,4 +1,3 @@
-
 import { Server, WebSocket as MockedWebSocket } from 'mock-socket';
 
 let socketReady;

@@ -13,7 +13,7 @@ export default App.extend({
     this.showContent();
   },
   onStop() {
-    this.clinician.trigger('editing', false);    
+    this.clinician.trigger('editing', false);
   },
   showContent() {
     const sidebarView = new SidebarView({ model: this.clinician });

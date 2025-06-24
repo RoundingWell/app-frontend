@@ -804,7 +804,6 @@ context('patient dashboard page', function() {
       .should('contain', '1 Flow')
       .should('contain', 'One of One');
 
-
     cy
       .get('.picklist')
       .contains('Two Published Actions and Flows')
