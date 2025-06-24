@@ -59,8 +59,8 @@ export default [
         _NOW_: 'readonly',
       },
     },
-    ...stylisticRules,
     rules: {
+      ...stylisticRules.rules,
       'complexity': ['error', 8],
       'radix': ['error', 'always'],
       'no-console': 'warn',
