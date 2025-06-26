@@ -1,6 +1,6 @@
 import _ from 'underscore';
-import { v4 as uuid } from 'uuid';
-
+import { v4 as uuid, v5 as uuidv5 } from 'uuid';
+import { RWELL_NS } from 'js/static';
 import { testTs } from 'helpers/test-timestamp';
 import { getResource, getRelationship, mergeJsonApi } from 'helpers/json-api';
 
@@ -14,6 +14,10 @@ const TYPE = 'clinicians';
 
 const fxCurrentClinician = _.first(fxTestClinicians);
 const fxClinicians = _.rest(fxTestClinicians);
+
+export function getClinicianId(email) {
+  return uuidv5(`clinician:${ String(email).toLowerCase() }`, RWELL_NS);
+}
 
 export function getCurrentClinician(data, { depth = 0 } = {}) {
   const defaultRelationships = {
