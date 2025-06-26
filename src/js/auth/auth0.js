@@ -93,6 +93,13 @@ function loginWithRedirect(opts) {
   auth0.loginWithRedirect(extend({ prompt: 'login' }, opts));
 }
 
+/**
+ * Initiates the login process, displaying a login prompt or redirecting as appropriate.
+ *
+ * If running inside an iframe, forces navigation to the login path at the top window. If login prompts are disabled in the app configuration, immediately redirects to the Auth0 login. Otherwise, updates browser history to the login path, renders a login prompt view, and binds a click event to trigger the Auth0 login redirect.
+ *
+ * @param {string} [appState=PATH_ROOT] - Optional application state to preserve during login.
+ */
 function login(appState = PATH_ROOT) {
   // iframe buster
   if (top !== self) {

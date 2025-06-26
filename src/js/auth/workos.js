@@ -42,6 +42,13 @@ function logout() {
   window.location = PATH_LOGOUT;
 }
 
+/**
+ * Initiates the login process, handling iframe busting and optional login prompt display.
+ *
+ * If running inside an iframe, redirects the top window to the login path. If login prompts are disabled, immediately triggers the AuthKit sign-in flow. Otherwise, displays a login prompt and sets up a click handler to start the sign-in process when the user interacts.
+ *
+ * @param {string} [state=PATH_ROOT] - The state or path to return to after authentication.
+ */
 function login(state = PATH_ROOT) {
   // iframe buster
   if (top !== self) {

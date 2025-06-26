@@ -36,7 +36,10 @@ if (self.location.hostname !== 'localhost') {
     return `hashed-${ _NOW_ }-${ name }`;
   }
 
-  // Delete all hashed caches except the current one
+  /**
+   * Deletes all caches with names starting with 'hashed-' except for the current build's cache.
+   * @return {Promise<string[]>} A promise that resolves to an array of deleted cache names.
+   */
   async function deleteHashedCache() {
     const cacheNames = await self.caches.keys();
 

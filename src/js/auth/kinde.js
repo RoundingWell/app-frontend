@@ -37,6 +37,11 @@ function replaceState(state) {
   window.history.replaceState({}, document.title, state);
 }
 
+/**
+ * Registers the Kinde client with application state and authentication parameters for the specified path and connection.
+ * @param {string} path - The application path to store in the authentication state.
+ * @param {string} connection - The connection ID to use for authentication.
+ */
 function registerKinde(path, connection) {
   kinde.register({
     app_state: { path },
@@ -44,6 +49,14 @@ function registerKinde(path, connection) {
   });
 }
 
+/**
+ * Initializes and configures the Kinde OAuth client, handling authentication redirects and user state.
+ * 
+ * After redirection, invokes the provided callback if the user is authenticated, or triggers the login flow if not. Adjusts application path and local storage for special login cases.
+ * 
+ * @param {Function} success - Callback invoked after successful authentication and path adjustment.
+ * @return {Promise<Object>} A promise that resolves to the initialized Kinde client instance.
+ */
 async function createKinde(success) {
   const kindeCreateParams = {
     redirect_uri: location.origin + PATH_AUTHD,
@@ -74,6 +87,14 @@ function logout() {
   window.location = PATH_LOGOUT;
 }
 
+/**
+ * Initiates the login process, handling iframe busting, login prompts, and Kinde registration.
+ * 
+ * If executed within an iframe, forces navigation to the login path at the top window. Otherwise, updates browser history and either immediately registers the Kinde client or displays a login prompt, depending on application configuration.
+ * 
+ * @param {string} [path] - The path to redirect to after successful login.
+ * @param {string} [connection] - The connection ID to use for authentication.
+ */
 function login(path = PATH_ROOT, connection = config.connections.default) {
   // iframe buster
   if (top !== self) {

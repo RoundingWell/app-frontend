@@ -4,6 +4,10 @@ import { PATH_ROOT, PATH_LOGOUT } from './config';
 
 let token = config.token;
 
+/**
+ * Determines whether the configuration object is not empty.
+ * @return {boolean} True if the configuration contains properties; otherwise, false.
+ */
 function should() {
   return !isEmpty(config);
 }

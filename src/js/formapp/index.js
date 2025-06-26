@@ -90,6 +90,20 @@ const onChange = function(form, changeReducers) {
 
 const onChangeDebounce = debounce(onChange, 100);
 
+/**
+ * Renders and manages a Formio form, handling submission, validation, and event integration.
+ *
+ * Initializes the form with provided definition and data, sets up event handlers for form changes, navigation, errors, and submission, and communicates with the router for asynchronous operations. Supports read-only mode and custom reducer logic for change and submit events.
+ *
+ * @param {Object} params - The parameters for form rendering.
+ * @param {Object} params.definition - The Formio form definition.
+ * @param {boolean} params.isReadOnly - Whether the form should be rendered in read-only mode.
+ * @param {Object} [params.storedSubmission] - Previously stored submission data, if any.
+ * @param {Object} [params.formData] - Initial form data.
+ * @param {Object} [params.formSubmission] - Existing form submission data.
+ * @param {Object} [params.responseData] - Additional response data for the form.
+ * @param {Object} params.options - Configuration options including reducers, context, and hooks.
+ */
 async function renderForm({ definition, isReadOnly, storedSubmission, formData, formSubmission, responseData, options }) {
   const { reducers, changeReducers, submitReducers, context, beforeSubmit } = options;
 
@@ -179,6 +193,14 @@ async function renderForm({ definition, isReadOnly, storedSubmission, formData, 
   form._isReady = true;
 }
 
+/**
+ * Renders a read-only Formio form to display a form response.
+ * 
+ * @param {Object} params
+ * @param {Object} params.definition - The form definition object.
+ * @param {Object} params.formSubmission - The submission data to display.
+ * @param {Object} params.options - Additional rendering options, including context scripts.
+ */
 async function renderResponse({ definition, formSubmission, options }) {
   const evalContext = await getContext(options.context);
 
