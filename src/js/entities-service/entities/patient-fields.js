@@ -2,6 +2,8 @@ import { extend } from 'underscore';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
+import { v5 as uuid } from 'uuid';
+import { RWELL_NS } from 'js/static';
 
 const TYPE = 'patient-fields';
 
@@ -14,6 +16,17 @@ const _Model = BaseModel.extend({
   getPatient() {
     return this.getRelationship('_patient');
   },
+  createId() {
+    const patient = this.getPatient();
+    const name = this.get('name');
+
+    /* istanbul ignore next: dev protection */
+    if (!patient || !name) {
+      throw new Error('Cannot create patient-field without patient or name');
+    }
+
+    return uuid(`patient:${ patient.id }:field:${ String(name).toLowerCase() }`, RWELL_NS);
+  },
   saveAll(attrs) {
     attrs = extend({}, this.attributes, attrs);
 
@@ -21,7 +34,7 @@ const _Model = BaseModel.extend({
       patient: this.toRelation(attrs._patient),
     };
 
-    return this.save(attrs, { relationships }, { wait: true });
+    return this.save(attrs, { relationships }, { wait: true, type: 'PATCH' });
   },
 });
 

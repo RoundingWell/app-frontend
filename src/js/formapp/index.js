@@ -52,6 +52,10 @@ function getField(fieldName) {
   return router.request('fetch:field', { fieldName });
 }
 
+function getFieldHistory(fieldName, limit = 10, sort = 'newest') {
+  return router.request('fetch:fieldHistory', { fieldName, limit, sort });
+}
+
 function getClinicians({ teamId } = {}) {
   return router.request('fetch:clinicians', { teamId });
 }
@@ -67,7 +71,7 @@ function getIcd(by) {
 }
 
 function getContext(contextScripts) {
-  return getScriptContext(contextScripts, { getClinicians, getDirectory, getField, updateField, getIcd, Handlebars, TEMPLATES: {}, parsePhoneNumber });
+  return getScriptContext(contextScripts, { getClinicians, getDirectory, getField, getFieldHistory, updateField, getIcd, Handlebars, TEMPLATES: {}, parsePhoneNumber });
 }
 
 let prevSubmission;

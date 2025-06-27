@@ -1,11 +1,9 @@
-import { v5 as uuid } from 'uuid';
-
 import { getRelationship, getErrors } from 'helpers/json-api';
 
 import { getAction } from 'support/api/actions';
 import { getCurrentClinician, getClinician } from 'support/api/clinicians';
 import { getPatient } from 'support/api/patients';
-import { getPatientField } from 'support/api/patient-fields';
+import { getPatientField, getPatientFieldId } from 'support/api/patient-fields';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { getFormFields } from 'support/api/form-fields';
 import { getForm, testForm } from 'support/api/forms';
@@ -14,8 +12,10 @@ const testPatient = getPatient();
 
 function getTestPatientField(name, value) {
   return getPatientField({
-    id: uuid(`resource:field:${ name }`, testPatient.id),
     attributes: { name, value },
+    relationships: {
+      patient: getRelationship(testPatient),
+    },
   });
 }
 
@@ -290,6 +290,14 @@ context('Noncontext Form', function() {
         fx.data = getTestPatientField('foo', [1, 2]);
         return fx;
       }, 'foo')
+      .routePatientFieldHistory(fx => {
+        fx.data = getTestPatientField('foo', [3, 4]);
+        return fx;
+      }, 'foo')
+      .routePatientFieldHistory(fx => {
+        fx.data = getTestPatientField('bar', [5, 6]);
+        return fx;
+      }, 'bar')
       .intercept('GET', `/api/patients/${ testPatient.id }/fields/bar`, {
         statusCode: 400,
         body: { errors },
@@ -320,6 +328,32 @@ context('Noncontext Form', function() {
               input: true,
               custom: `
                 getField('foo')
+                  .then(value => {
+                    data.opts = value;
+                  });
+              `,
+            },
+            {
+              label: 'Test Get Field History',
+              action: 'custom',
+              key: 'test1-1',
+              type: 'button',
+              input: true,
+              custom: `
+                getFieldHistory('foo')
+                  .then(value => {
+                    data.opts = value;
+                  });
+              `,
+            },
+            {
+              label: 'Test Get Field History Filter',
+              action: 'custom',
+              key: 'test1-2',
+              type: 'button',
+              input: true,
+              custom: `
+                getFieldHistory('bar', 2, 'oldest')
                   .then(value => {
                     data.opts = value;
                   });
@@ -421,6 +455,42 @@ context('Noncontext Form', function() {
     cy
       .iframe()
       .find('button')
+      .contains('Test Get Field History')
+      .click()
+      .wait('@routePatientFieldfooHistory')
+      .its('request.query')
+      .then(data => {
+        expect(data.limit).to.equal('10');
+        expect(data.sort).to.equal('newest');
+      })
+      .wait(100);
+
+    cy
+      .iframe()
+      .find('.qa-results')
+      .should('contain', '3,4');
+
+    cy
+      .iframe()
+      .find('button')
+      .contains('Test Get Field History Filter')
+      .click()
+      .wait('@routePatientFieldbarHistory')
+      .its('request.query')
+      .then(data => {
+        expect(data.limit).to.equal('2');
+        expect(data.sort).to.equal('oldest');
+      })
+      .wait(100);
+
+    cy
+      .iframe()
+      .find('.qa-results')
+      .should('contain', '5,6');
+
+    cy
+      .iframe()
+      .find('button')
       .contains('Test Get Error')
       .click()
       .wait('@routePatientFieldbar')
@@ -439,7 +509,7 @@ context('Noncontext Form', function() {
       .wait('@routePatchPatientFieldFoo')
       .its('request.body.data')
       .then(data => {
-        expect(data.id).to.equal(uuid('resource:field:foo', testPatient.id));
+        expect(data.id).to.equal(getPatientFieldId(testPatient.id, 'foo'));
         expect(data.attributes.name).to.equal('foo');
         expect(data.attributes.value).to.deep.equal(['one', 'two']);
       })
@@ -457,7 +527,7 @@ context('Noncontext Form', function() {
       .click()
       .wait('@routePatchPatientFieldBar')
       .its('request.body.data.id')
-      .should('equal', uuid('resource:field:bar', testPatient.id))
+      .should('equal', getPatientFieldId(testPatient.id, 'bar'))
       .wait(100);
 
     cy
@@ -472,7 +542,7 @@ context('Noncontext Form', function() {
       .click()
       .wait('@routePatchPatientFieldBazinga')
       .its('request.body.data.id')
-      .should('equal', uuid('resource:field:bazinga', testPatient.id))
+      .should('equal', getPatientFieldId(testPatient.id, 'bazinga'))
       .wait(100);
 
     cy

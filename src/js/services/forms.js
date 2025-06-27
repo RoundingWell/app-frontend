@@ -56,6 +56,7 @@ export default App.extend({
     'get:storedSubmission': 'getStoredSubmission',
     'clear:storedSubmission': 'clearStoredSubmission',
     'fetch:field': 'fetchField',
+    'fetch:fieldHistory': 'fetchFieldHistory',
     'update:field': 'updateField',
     'fetch:icd': 'fetchIcd',
     'version': 'checkVersion',
@@ -146,6 +147,22 @@ export default App.extend({
       .catch(({ responseData }) => {
         this.send(message, { error: responseData }, requestId);
       });
+  },
+  fetchFieldHistory({ fieldName, limit, sort }, requestId) {
+    const message = 'fetch:fieldHistory';
+
+    return Radio.request('entities', 'fetch:patientFields:model:history', {
+      name: fieldName,
+      _patient: this.patient.getResource(),
+    }, { limit, sort })
+      .then(field => {
+        this.send(message, { value: field.get('value') }, requestId);
+      })
+      .catch(
+        /* istanbul ignore next: Don't test BE errors */
+        ({ responseData }) => {
+          this.send(message, { error: responseData }, requestId);
+        });
   },
   updateField({ fieldName, value }, requestId) {
     const field = Radio.request('entities', 'patientFields:model', {

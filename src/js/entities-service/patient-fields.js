@@ -1,18 +1,17 @@
-import { extend } from 'underscore';
-import { v5 as uuid } from 'uuid';
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model, Collection } from './entities/patient-fields';
 
 const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
   radioRequests: {
-    'patientFields:model': 'getPatientField',
+    'patientFields:model': 'getModel',
     'patientFields:collection': 'getCollection',
+    'fetch:patientFields:model:history': 'getModelHistory',
   },
-  getPatientField(attrs) {
-    const id = uuid(`resource:field:${ attrs.name.toLowerCase() }`, attrs._patient.id);
-
-    return this.getModel(extend({ id }, attrs));
+  getModelHistory({ _patient, name }, { limit, sort }) {
+    const model = this.getModel({ _patient, name }).clone();
+    const data = { limit, sort };
+    return model.fetch({ url: `${ model.url() }/history`, data });
   },
 });
 

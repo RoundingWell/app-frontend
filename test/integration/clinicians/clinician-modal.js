@@ -4,8 +4,7 @@ import stateColors from 'helpers/state-colors';
 import { workspaceOne } from 'support/api/workspaces';
 import { roleManager } from 'support/api/roles';
 import { teamNurse } from 'support/api/teams';
-import { v5 as uuid } from 'uuid';
-import { RWELL_NS } from 'js/static';
+import { getClinicianId } from 'support/api/clinicians';
 
 context('clinicians modal', function() {
   specify('add clinician', function() {
@@ -127,7 +126,7 @@ context('clinicians modal', function() {
       .wait('@routePostClinician')
       .its('request.body')
       .should(({ data }) => {
-        expect(data.id).to.equal(uuid('clinician:test.clinician@roundingwell.com', RWELL_NS));
+        expect(data.id).to.equal(getClinicianId('test.clinician@roundingwell.com'));
         expect(data.attributes.name).to.equal('Test Clinician');
         expect(data.attributes.email).to.equal('test.clinician@roundingwell.com');
         expect(data.relationships.role.data.id).to.equal(roleManager.id);
