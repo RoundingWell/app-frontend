@@ -290,6 +290,14 @@ context('Noncontext Form', function() {
         fx.data = getTestPatientField('foo', [1, 2]);
         return fx;
       }, 'foo')
+      .routePatientFieldHistory(fx => {
+        fx.data = getTestPatientField('foo', [3, 4]);
+        return fx;
+      }, 'foo')
+      .routePatientFieldHistory(fx => {
+        fx.data = getTestPatientField('bar', [5, 6]);
+        return fx;
+      }, 'bar')
       .intercept('GET', `/api/patients/${ testPatient.id }/fields/bar`, {
         statusCode: 400,
         body: { errors },
@@ -320,6 +328,32 @@ context('Noncontext Form', function() {
               input: true,
               custom: `
                 getField('foo')
+                  .then(value => {
+                    data.opts = value;
+                  });
+              `,
+            },
+            {
+              label: 'Test Get Field History',
+              action: 'custom',
+              key: 'test1-1',
+              type: 'button',
+              input: true,
+              custom: `
+                getFieldHistory('foo')
+                  .then(value => {
+                    data.opts = value;
+                  });
+              `,
+            },
+            {
+              label: 'Test Get Field History Filter',
+              action: 'custom',
+              key: 'test1-2',
+              type: 'button',
+              input: true,
+              custom: `
+                getFieldHistory('bar', 2, 'oldest')
                   .then(value => {
                     data.opts = value;
                   });
@@ -417,6 +451,42 @@ context('Noncontext Form', function() {
       .iframe()
       .find('.qa-results')
       .should('contain', '1,2');
+
+    cy
+      .iframe()
+      .find('button')
+      .contains('Test Get Field History')
+      .click()
+      .wait('@routePatientFieldfooHistory')
+      .its('request.query')
+      .then(data => {
+        expect(data.limit).to.equal('10');
+        expect(data.sort).to.equal('newest');
+      })
+      .wait(100);
+
+    cy
+      .iframe()
+      .find('.qa-results')
+      .should('contain', '3,4');
+
+    cy
+      .iframe()
+      .find('button')
+      .contains('Test Get Field History Filter')
+      .click()
+      .wait('@routePatientFieldbarHistory')
+      .its('request.query')
+      .then(data => {
+        expect(data.limit).to.equal('2');
+        expect(data.sort).to.equal('oldest');
+      })
+      .wait(100);
+
+    cy
+      .iframe()
+      .find('.qa-results')
+      .should('contain', '5,6');
 
     cy
       .iframe()

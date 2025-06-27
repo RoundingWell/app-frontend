@@ -40,3 +40,14 @@ Cypress.Commands.add('routePatientField', (mutator = _.identity, fieldName) => {
     })
     .as(alias);
 });
+
+Cypress.Commands.add('routePatientFieldHistory', (mutator = _.identity, fieldName) => {
+  const data = getPatientField();
+  const alias = fieldName ? `routePatientField${ fieldName }History` : 'routePatientFieldHistory';
+
+  cy
+    .intercept('GET', `/api/patients/**/fields/${ fieldName || '**' }/history**`, {
+      body: mutator({ data, included: [] }),
+    })
+    .as(alias);
+});
