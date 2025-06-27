@@ -17,7 +17,7 @@ export function getPatient(data, { depth = 0 } = {}) {
   const defaultRelationships = {
     'actions': getRelationship(getActions({}, { sample: 3, depth })),
     'flows': getRelationship(getFlows({}, { sample: 2, depth })),
-    'patient-fields': getRelationship(getPatientFields({}, { sample: 3 })),
+    'patient-fields': getRelationship(getPatientFields({}, { sample: 3, depth })),
     'visits': getRelationship([]),
     'workspaces': getRelationship(getWorkspaces()),
   };

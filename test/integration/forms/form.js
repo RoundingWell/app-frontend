@@ -1,11 +1,9 @@
-import { v5 as uuid } from 'uuid';
-
 import { getRelationship, getErrors } from 'helpers/json-api';
 
 import { getAction } from 'support/api/actions';
 import { getCurrentClinician, getClinician } from 'support/api/clinicians';
 import { getPatient } from 'support/api/patients';
-import { getPatientField } from 'support/api/patient-fields';
+import { getPatientField, getPatientFieldId } from 'support/api/patient-fields';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { getFormFields } from 'support/api/form-fields';
 import { getForm, testForm } from 'support/api/forms';
@@ -14,8 +12,10 @@ const testPatient = getPatient();
 
 function getTestPatientField(name, value) {
   return getPatientField({
-    id: uuid(`resource:field:${ name }`, testPatient.id),
     attributes: { name, value },
+    relationships: {
+      patient: getRelationship(testPatient),
+    },
   });
 }
 
@@ -439,7 +439,7 @@ context('Noncontext Form', function() {
       .wait('@routePatchPatientFieldFoo')
       .its('request.body.data')
       .then(data => {
-        expect(data.id).to.equal(uuid('resource:field:foo', testPatient.id));
+        expect(data.id).to.equal(getPatientFieldId(testPatient.id, 'foo'));
         expect(data.attributes.name).to.equal('foo');
         expect(data.attributes.value).to.deep.equal(['one', 'two']);
       })
@@ -457,7 +457,7 @@ context('Noncontext Form', function() {
       .click()
       .wait('@routePatchPatientFieldBar')
       .its('request.body.data.id')
-      .should('equal', uuid('resource:field:bar', testPatient.id))
+      .should('equal', getPatientFieldId(testPatient.id, 'bar'))
       .wait(100);
 
     cy
@@ -472,7 +472,7 @@ context('Noncontext Form', function() {
       .click()
       .wait('@routePatchPatientFieldBazinga')
       .its('request.body.data.id')
-      .should('equal', uuid('resource:field:bazinga', testPatient.id))
+      .should('equal', getPatientFieldId(testPatient.id, 'bazinga'))
       .wait(100);
 
     cy
