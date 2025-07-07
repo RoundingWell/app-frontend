@@ -156,7 +156,7 @@ export default App.extend({
       _patient: this.patient.getResource(),
     }, { limit, sort })
       .then(field => {
-        this.send(message, { value: field.get('value') }, requestId);
+        this.send(message, { value: field.get('values') }, requestId);
       })
       .catch(
         /* istanbul ignore next: Don't test BE errors */

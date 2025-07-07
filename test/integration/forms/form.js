@@ -291,11 +291,24 @@ context('Noncontext Form', function() {
         return fx;
       }, 'foo')
       .routePatientFieldHistory(fx => {
-        fx.data = getTestPatientField('foo', [3, 4]);
+        fx.data = {
+          attributes: {
+            values: [
+              {
+                value: [3, 4],
+              },
+              {
+                value: [1, 2],
+              },
+            ],
+          },
+        };
         return fx;
       }, 'foo')
       .routePatientFieldHistory(fx => {
-        fx.data = getTestPatientField('bar', [5, 6]);
+        fx.data = {
+          attributes: { values: [{ value: [5, 6] }] },
+        };
         return fx;
       }, 'bar')
       .intercept('GET', `/api/patients/${ testPatient.id }/fields/bar`, {
@@ -342,7 +355,7 @@ context('Noncontext Form', function() {
               custom: `
                 getFieldHistory('foo')
                   .then(value => {
-                    data.opts = value;
+                    data.opts = _.concat(value[0].value, value[1].value);
                   });
               `,
             },
@@ -355,7 +368,7 @@ context('Noncontext Form', function() {
               custom: `
                 getFieldHistory('bar', 2, 'oldest')
                   .then(value => {
-                    data.opts = value;
+                    data.opts = value[0].value;
                   });
               `,
             },
