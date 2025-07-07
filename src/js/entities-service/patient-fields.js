@@ -10,7 +10,7 @@ const Entity = BaseEntity.extend({
   },
   getModelHistory({ _patient, name }, { limit, sort }) {
     const model = this.getModel({ _patient, name }).clone();
-    const data = { limit, sort };
+    const data = { page: { limit }, sort };
     return model.fetch({ url: `${ model.url() }/history`, data });
   },
 });
