@@ -473,7 +473,7 @@ context('Noncontext Form', function() {
       .wait('@routePatientFieldfooHistory')
       .its('request.query')
       .then(data => {
-        expect(data.limit).to.equal('10');
+        expect(data.page.limit).to.equal('10');
         expect(data.sort).to.equal('newest');
       })
       .wait(100);
@@ -491,7 +491,7 @@ context('Noncontext Form', function() {
       .wait('@routePatientFieldbarHistory')
       .its('request.query')
       .then(data => {
-        expect(data.limit).to.equal('2');
+        expect(data.page.limit).to.equal('2');
         expect(data.sort).to.equal('oldest');
       })
       .wait(100);
