@@ -16,7 +16,8 @@
 .modal--large {
   @extend .modal;
 
-  width: 600px;
+  min-width: 600px;
+  width: auto;
 }
 
 .modal--sidebar {
@@ -127,6 +128,7 @@
   @extend .modal__form-iframe;
 
   height: 75vh;
+  width: 75vw;
 }
 
 .modal__form-label {

@@ -338,7 +338,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-submit')
       .should('be.disabled');
 
@@ -377,13 +377,13 @@ context('patient sidebar', function() {
       .type('New typing');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-submit')
       .should('be.disabled')
       .wait('@postFormResponse');
@@ -396,14 +396,14 @@ context('patient sidebar', function() {
       .as('postFormResponse');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click()
       .wait('@postFormResponse');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .should('not.exist');
 
     cy
@@ -420,17 +420,17 @@ context('patient sidebar', function() {
       .find('.formio-editor-read-only-content');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.modal__footer-actions .js-close')
       .should('not.exist');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.modal__footer-actions .js-submit')
       .should('contain', 'Done');
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-close')
       .first()
       .click();
@@ -442,7 +442,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-close')
       .first()
       .click();
@@ -454,7 +454,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal')
+      .get('.modal--large')
       .find('.js-close')
       .last()
       .click();
