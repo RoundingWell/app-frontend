@@ -5,29 +5,29 @@ import { getRelationship, getResource } from 'helpers/json-api';
 import { getPatient } from 'support/api/patients';
 
 context('Patient Quick Search', function() {
-  const patients = _.times(10, index => {
-    return getPatient({
-      attributes: {
-        first_name: 'Test',
-        last_name: `${ index } Patient`,
-        identifiers: index % 2 ? [] : [{ type: 'mrn', value: 'identifier-001' }],
-        status: index % 2 ? 'inactive' : 'active',
-      },
+  specify('Modal & default searching functionality', function() {
+    const patients = _.times(10, index => {
+      return getPatient({
+        attributes: {
+          first_name: 'Test',
+          last_name: `${ index } Patient`,
+          status: index % 2 ? 'inactive' : 'active',
+        },
+      });
     });
-  });
 
-  beforeEach(function() {
     const data = _.map(patients, patient => {
-      const { id, first_name, last_name, birth_date, identifiers, status } = patient.attributes;
+      const { first_name, last_name, birth_date, status } = patient.attributes;
 
       return {
-        id,
+        id: patient.id,
         type: 'patient-search-results',
         attributes: {
           first_name,
           last_name,
           birth_date,
-          identifiers,
+          identifiers: [],
+          value: null,
           status,
         },
         relationships: {
@@ -39,7 +39,7 @@ context('Patient Quick Search', function() {
     cy
       .intercept({
         method: 'GET',
-        url: 'api/patients?filter*',
+        url: '/api/patients?filter*',
       }, req => {
         if (req.url.includes('None')) {
           req.reply({ body: { data: [] } });
@@ -55,9 +55,7 @@ context('Patient Quick Search', function() {
         });
         req.alias = 'routePatientSearch';
       });
-  });
 
-  specify('Modal', function() {
     cy
       .routesForPatientDashboard()
       .routeSettings('manual_patient_creation', false)
@@ -85,7 +83,7 @@ context('Patient Quick Search', function() {
     cy
       .get('@searchModal')
       .find('.qa-search-option')
-      .should('have.length', 3);
+      .should('have.length', 4);
 
     cy
       .get('@searchModal')
@@ -104,9 +102,16 @@ context('Patient Quick Search', function() {
     cy
       .get('@searchModal')
       .find('.qa-search-option')
-      .last()
+      .eq(2)
       .should('contain', 'Health Plan ID')
       .should('contain', 'For example: 123456789');
+
+    cy
+      .get('@searchModal')
+      .find('.qa-search-option')
+      .last()
+      .should('contain', 'Phone Number')
+      .should('contain', 'For example: 555-1290');
 
     cy
       .get('@searchModal')
@@ -144,7 +149,6 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item strong')
       .contains('2')
       .parents('.js-picklist-item')
-      .should('contain', 'identifier-001')
       .should('contain', 'active')
       .click();
 
@@ -246,7 +250,137 @@ context('Patient Quick Search', function() {
       .go('back');
   });
 
+  specify('Search by identifier', function() {
+    const testPatient = getPatient({
+      attributes: {
+        status: 'active',
+        identifiers: [{ type: 'mrn', value: 'identifier-001' }],
+      },
+    });
+
+    const { first_name, last_name, birth_date, status } = testPatient.attributes;
+
+    const searchResultData = [{
+      id: testPatient.id,
+      type: 'patient-search-results',
+      attributes: {
+        first_name,
+        last_name,
+        birth_date,
+        identifiers: [{ type: 'mrn', value: 'identifier-001' }],
+        status,
+        value: null,
+      },
+      relationships: {
+        patient: getRelationship(testPatient, 'patients'),
+      },
+    }];
+
+    cy.intercept({
+      method: 'GET',
+      url: '/api/patients?filter*',
+    }, {
+      body: {
+        data: searchResultData,
+        included: [getResource(testPatient, 'patients')],
+      },
+      delay: 300,
+    }).as('routePatientSearch');
+
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('manual_patient_creation', false)
+      .routeActions()
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .get('.app-frame__nav')
+      .find('.js-search')
+      .as('search')
+      .click();
+
+    cy
+      .get('.modal--large')
+      .find('.patient-search__input')
+      .type('identifier-001')
+      .wait('@routePatientSearch');
+
+    cy
+      .get('.modal--large')
+      .find('.js-picklist-item strong')
+      .parents('.js-picklist-item')
+      .should('contain', 'identifier-001');
+  });
+
+  specify('Search by patient field', function() {
+    const testPatient = getPatient({
+      attributes: { status: 'active' },
+    });
+
+    const { first_name, last_name, birth_date, status } = testPatient.attributes;
+
+    const searchResultData = [{
+      id: testPatient.id,
+      type: 'patient-search-results',
+      attributes: {
+        first_name,
+        last_name,
+        birth_date,
+        identifiers: [],
+        status,
+        value: '+6513216543',
+      },
+      relationships: {
+        patient: getRelationship(testPatient, 'patients'),
+      },
+    }];
+
+    cy.intercept({
+      method: 'GET',
+      url: '/api/patients?filter*',
+    }, {
+      body: {
+        data: searchResultData,
+        included: [getResource(testPatient, 'patients')],
+      },
+      delay: 300,
+    }).as('routePatientSearch');
+
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('manual_patient_creation', false)
+      .routeActions()
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .get('.app-frame__nav')
+      .find('.js-search')
+      .as('search')
+      .click();
+
+    cy
+      .get('.modal--large')
+      .find('.patient-search__input')
+      .type('+6513216543')
+      .wait('@routePatientSearch');
+
+    cy
+      .get('.modal--large')
+      .find('.js-picklist-item strong')
+      .parents('.js-picklist-item')
+      .should('contain', '+6513216543');
+  });
+
   specify('No Results with Patient Add', function() {
+    cy.intercept({
+      method: 'GET',
+      url: '/api/patients?filter*',
+    }, {
+      body: { data: [] },
+    }).as('routeEmptyPatientSearch');
+
     cy
       .routeSettings('manual_patient_creation', true)
       .routesForPatientDashboard()
