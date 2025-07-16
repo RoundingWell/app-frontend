@@ -28,6 +28,12 @@ const TipTemplate = hbs`
         {{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}
       </div>
     {{/each}}
+    {{#each settings.queries}}
+      <div class="u-margin--t-8 qa-search-option">
+        <span class="patient-search__search-by-label">{{this.label}}</span>
+        {{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}
+      </div>
+    {{/each}}
   </div>
   <div class="patient-search__shortcut">{{fas "keyboard"}}<strong class="u-margin--l-8">{{ @intl.globals.search.patientSearchViews.emptyView.shortcut }}</strong></div>
 `;
@@ -96,7 +102,12 @@ const PicklistItem = View.extend({
       </div>
       {{#if hasIdentifiers}}
         <div class="patient-search__picklist-item-identifier u-text--overflow">
-          {{#if identifiers.0.value}}{{matchText identifiers.0.value search}}{{else}}&ndash;{{/if}}
+          {{matchText identifiers.0.value search}}
+        </div>
+      {{/if}}
+      {{#if hasFieldQueryResults}}
+        <div class="patient-search__picklist-item-query u-text--overflow">
+          {{matchText value search}}
         </div>
       {{/if}}
       <div class="patient-search__picklist-item-status u-text--overflow">
@@ -109,6 +120,7 @@ const PicklistItem = View.extend({
       name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
       hasIdentifiers: this.collection.hasIdentifiers(),
+      hasFieldQueryResults: this.collection.hasFieldQueryResults(),
     };
   },
 });
@@ -151,6 +163,11 @@ const HeaderView = View.extend({
           {{ @intl.globals.search.patientSearchViews.headerView.id }}
         </div>
       {{/if}}
+      {{#if hasFieldQueryResults}}
+        <div class="patient-search__picklist-header-query">
+          {{ @intl.globals.search.patientSearchViews.headerView.fieldQuery }}
+        </div>
+      {{/if}}
       <div class="patient-search__picklist-header-status">
         {{ @intl.globals.search.patientSearchViews.headerView.workspaceStatus }}
       </div>
@@ -159,6 +176,7 @@ const HeaderView = View.extend({
   templateContext() {
     return {
       hasIdentifiers: this.collection.hasIdentifiers(),
+      hasFieldQueryResults: this.collection.hasFieldQueryResults(),
     };
   },
 });

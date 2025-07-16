@@ -27,6 +27,13 @@
           "label": "Health Plan ID",
           "example": "123456789"
         }
+      ],
+      "queries": [
+        {
+          "id": "bcff68e4-49c6-4dbf-8f5b-45e63d664162",
+          "label": "Phone Number",
+          "example": "555-1290"
+        }
       ]
     }
   },

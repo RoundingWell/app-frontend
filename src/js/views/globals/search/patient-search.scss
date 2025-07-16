@@ -69,11 +69,8 @@
   width: 100px;
 }
 
-.patient-search__picklist-header-identifier {
-  margin-left: 16px;
-  width: 100px;
-}
-
+.patient-search__picklist-header-identifier,
+.patient-search__picklist-header-query,
 .patient-search__picklist-header-status {
   margin-left: 16px;
   width: 100px;
@@ -137,7 +134,8 @@
   width: 100px;
 }
 
-.patient-search__picklist-item-identifier {
+.patient-search__picklist-item-identifier,
+.patient-search__picklist-item-query {
   margin-left: 16px;
   width: 100px;
 }

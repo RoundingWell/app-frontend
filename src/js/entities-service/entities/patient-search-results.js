@@ -22,6 +22,7 @@ const Collection = BaseCollection.extend({
     if (search.length < 3) {
       if (!search.length || !this.prevSearch.includes(search)) {
         delete this._hasIdentifiers;
+        delete this._hasFieldQueryResults;
         this.reset();
         this.prevSearch = '';
       }
@@ -33,6 +34,13 @@ const Collection = BaseCollection.extend({
     this.prevSearch = search;
     this.isSearching = true;
     this._debouncedSearch(search);
+  },
+  hasFieldQueryResults() {
+    if (isBoolean(this._hasFieldQueryResults)) return this._hasFieldQueryResults;
+
+    this._hasFieldQueryResults = this.some(model => model.has('value'));
+
+    return this._hasFieldQueryResults;
   },
   hasIdentifiers() {
     if (isBoolean(this._hasIdentifiers)) return this._hasIdentifiers;
@@ -47,6 +55,7 @@ const Collection = BaseCollection.extend({
     const filter = { search };
 
     delete this._hasIdentifiers;
+    delete this._hasFieldQueryResults;
     this.controller.abort();
     this.controller = new AbortController();
 
