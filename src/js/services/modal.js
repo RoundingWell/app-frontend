@@ -59,6 +59,7 @@ export default App.extend({
     }
 
     const modal = this.showModal({
+      className: 'modal--large',
       headingText: formName,
       headerIcon: 'square-poll-horizontal',
       bodyView,
@@ -89,6 +90,7 @@ export default App.extend({
   },
   showViewOnlyForm(formService, bodyView, formName) {
     this.showModal({
+      className: 'modal--large',
       headingText: formName,
       submitText: intl.globals.modal.modalViews.viewOnlyForm.doneText,
       cancelText: false,
