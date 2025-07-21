@@ -260,7 +260,7 @@ context('Patient Quick Search', function() {
 
     const { first_name, last_name, birth_date, status } = testPatient.attributes;
 
-    const searchResultData = [{
+    const searchResult = {
       id: testPatient.id,
       type: 'patient-search-results',
       attributes: {
@@ -274,14 +274,14 @@ context('Patient Quick Search', function() {
       relationships: {
         patient: getRelationship(testPatient, 'patients'),
       },
-    }];
+    };
 
     cy.intercept({
       method: 'GET',
       url: '/api/patients?filter*',
     }, {
       body: {
-        data: searchResultData,
+        data: [searchResult],
         included: [getResource(testPatient, 'patients')],
       },
       delay: 300,
@@ -315,12 +315,15 @@ context('Patient Quick Search', function() {
 
   specify('Search by patient field', function() {
     const testPatient = getPatient({
-      attributes: { status: 'active' },
+      attributes: {
+        status: 'active',
+        birth_date: '2008-01-16',
+      },
     });
 
     const { first_name, last_name, birth_date, status } = testPatient.attributes;
 
-    const searchResultData = [{
+    const searchResult = {
       id: testPatient.id,
       type: 'patient-search-results',
       attributes: {
@@ -334,14 +337,14 @@ context('Patient Quick Search', function() {
       relationships: {
         patient: getRelationship(testPatient, 'patients'),
       },
-    }];
+    };
 
     cy.intercept({
       method: 'GET',
       url: '/api/patients?filter*',
     }, {
       body: {
-        data: searchResultData,
+        data: [searchResult],
         included: [getResource(testPatient, 'patients')],
       },
       delay: 300,
@@ -371,6 +374,40 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item strong')
       .parents('.js-picklist-item')
       .should('contain', '+6513216543');
+
+    cy.intercept({
+      method: 'GET',
+      url: '/api/patients?filter*',
+    }, {
+      body: {
+        data: [{
+          ...searchResult,
+          attributes: { ...searchResult.attributes, value: null },
+        }],
+        included: [getResource(testPatient, 'patients')],
+      },
+      delay: 300,
+    }).as('routePatientSearch');
+
+    // header & list views should re-render when users copy/paste/replace a search input
+    cy
+      .get('.modal--large')
+      .find('.patient-search__input')
+      .invoke('val', '2008-01-16')
+      .trigger('input')
+      .wait('@routePatientSearch');
+
+    cy
+      .get('.modal--large')
+      .find('.patient-search__picklist-header-meta')
+      .children()
+      .should('have.length', 2);
+
+    cy
+      .get('.modal--large')
+      .find('.patient-search__picklist-item-meta')
+      .children()
+      .should('have.length', 2);
   });
 
   specify('No Results with Patient Add', function() {
