@@ -39,9 +39,6 @@ const TipTemplate = hbs`
 `;
 
 const EmptyView = View.extend({
-  collectionEvents: {
-    'search': 'render',
-  },
   tagName: 'li',
   className: 'patient-search__no-results',
   initialize({ state }) {
@@ -184,7 +181,7 @@ const HeaderView = View.extend({
 const DialogView = View.extend({
   className: 'patient-search__picklist',
   collectionEvents: {
-    'search': 'showHeader',
+    'search': 'onSearchComplete',
   },
   modelEvents: {
     'change:search': 'showHeader',
@@ -222,10 +219,11 @@ const DialogView = View.extend({
   `,
   onRender() {
     this.showHeader();
-    this.showChildView('list', new ListView({
-      collection: this.collection,
-      model: this.model,
-    }));
+    this.showList();
+  },
+  onSearchComplete() {
+    this.showHeader();
+    this.showList();
   },
   showHeader() {
     if (!this.collection.length) {
@@ -234,6 +232,12 @@ const DialogView = View.extend({
     }
 
     this.showChildView('header', new HeaderView({ collection: this.collection }));
+  },
+  showList() {
+    this.showChildView('list', new ListView({
+      collection: this.collection,
+      model: this.model,
+    }));
   },
 });
 
