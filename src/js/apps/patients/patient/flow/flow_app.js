@@ -110,8 +110,6 @@ export default SubRouterApp.extend({
   onAddAction(action) {
     this.editableCollection.add(action);
 
-    Radio.request('ws', 'add', action);
-
     this._setFlowProgress();
   },
   onActionChangeState() {
