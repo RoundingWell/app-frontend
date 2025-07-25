@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "name": "@roundingwell/care-ops-fontawesome",
+  "version": "1.0.0",
+  "description": "Fontawesome svg importer for Care‑Ops Frontend",
+  "author": "RoundingWell",
+  "license": "CC-BY-4.0",
+  "homepage": "https://roundingwell.com",
+  "type": "module",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.0",
+    "@fortawesome/pro-light-svg-icons": "^6.1.0",
+    "@fortawesome/pro-regular-svg-icons": "^6.1.0",
+    "@fortawesome/pro-solid-svg-icons": "^6.1.0",
+    "@fortawesome/pro-thin-svg-icons": "^6.4.0"
+  },
+  "devDependencies": {
+    "lodash.camelcase": "^4.3.0"
+  },
+  "files": ["index.js"],
+  "main": "./index.js",
+  "exports": "./index.js",
+  "sideEffects": false
+}

@@ -1,4 +1,6 @@
 import path from 'path';
+import { readFileSync } from 'fs';
+
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc.js';
 
@@ -15,11 +17,12 @@ import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
 
-import getFaIconSymbols from './config/fontawesome.js';
+import getFaIconSymbols from '@roundingwell/care-ops-fontawesome';
 
 dayjs.extend(utcPlugin);
 
-const faIconSymbols = getFaIconSymbols();
+const fontawesome = JSON.parse(readFileSync('./fontawesome.json', 'utf8'));
+const faIconSymbols = getFaIconSymbols(fontawesome);
 
 const resolve = {
   alias: {
