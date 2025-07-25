@@ -10,7 +10,7 @@ import { addError } from 'js/datadog';
 import 'scss/provider-core.scss';
 import 'scss/app-root.scss';
 
-import { appConfig } from './config';
+import { appConfig } from '@roundingwell/care-ops-config';
 import initPlatform from 'js/utils/platform';
 
 import App from 'js/base/app';

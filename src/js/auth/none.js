@@ -1,4 +1,4 @@
-import { appConfig } from 'js/config';
+import { appConfig } from '@roundingwell/care-ops-config';
 import { PATH_ROOT, PATH_LOGOUT } from './config';
 
 let token;

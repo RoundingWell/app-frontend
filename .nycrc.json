@@ -8,7 +8,6 @@
     "src/js/auth/**",
     "src/js/formapp/**",
     "src/js/index.js",
-    "src/js/datadog.js",
-    "src/js/config.js"
+    "src/js/datadog.js"
   ]
 }

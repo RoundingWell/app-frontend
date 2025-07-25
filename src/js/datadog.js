@@ -1,6 +1,6 @@
 import { initLogs, initRum, setUser, startRum, addError, logResponse } from '@roundingwell/care-ops-datadog';
 
-import { datadogConfig as config, versions, appConfig } from './config';
+import { datadogConfig as config, versions, appConfig } from '@roundingwell/care-ops-config';
 
 function getEnv() {
   return `${ appConfig.env }.${ appConfig.stack }`;

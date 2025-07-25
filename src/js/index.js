@@ -1,8 +1,6 @@
-import 'core-js/modules/web.dom-exception.stack';
-import 'core-js/modules/web.structured-clone';
 import { Workbox } from 'workbox-window';
 
-import { fetchConfig, versions, appConfig } from './config';
+import { fetchConfig, versions, appConfig } from '@roundingwell/care-ops-config';
 import { initDataDog } from './datadog';
 
 import getRootRoute from 'js/utils/root-route';
@@ -75,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const isOutreach = rootRoute === 'outreach';
 
   if (_TEST_) {
-    versions.frontend = 'cypress';
+    versions.frontend = 'develop';
     appConfig.name = 'Cypress Clinic';
     appConfig.cypress = 'cypress';
     appConfig.ws = 'ws://cypress-websocket/ws';
