@@ -1,0 +1,26 @@
+// Form styles
+.form {
+  margin-bottom: 20px;
+  
+  &__group {
+    margin-bottom: 15px;
+  }
+  
+  &__label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  &__control {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+  }
+}

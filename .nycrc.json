@@ -6,7 +6,6 @@
     "src/**/*.cy.js",
     "src/js/base/**",
     "src/js/auth/**",
-    "src/js/formapp/**",
     "src/js/index.js",
     "src/js/datadog.js"
   ]

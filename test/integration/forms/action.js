@@ -1111,7 +1111,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/formapp/${ testFormResponses[2].id }`);
+      .should('have.attr', 'src', `/formapp/index.html?_TEST_=true&responseId=${ testFormResponses[2].id }`);
 
     cy
       .get('@metaRegion')
@@ -1170,7 +1170,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/formapp/${ testNewFormResponse.id }`);
+      .should('have.attr', 'src', `/formapp/index.html?_TEST_=true&responseId=${ testNewFormResponse.id }`);
 
     cy
       .wait('@routeFormResponse');
@@ -1485,7 +1485,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/formapp/${ testFormResponse.id }`);
+      .should('have.attr', 'src', `/formapp/index.html?_TEST_=true&responseId=${ testFormResponse.id }`);
 
     cy
       .get('.form__frame')
@@ -1497,7 +1497,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/formapp/');
+      .should('have.attr', 'src', '/formapp/index.html?_TEST_=true');
 
     cy
       .get('.js-back')
@@ -1560,7 +1560,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/formapp/');
+      .should('have.attr', 'src', '/formapp/index.html?_TEST_=true');
 
     cy
       .get('.js-back')

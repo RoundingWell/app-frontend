@@ -1,7 +1,7 @@
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import { appConfig } from 'js/config';
+import { appConfig } from '@roundingwell/care-ops-config';
 
 import './dialog.scss';
 

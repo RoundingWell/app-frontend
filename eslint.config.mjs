@@ -125,4 +125,11 @@ export default [
       'cypress/unsafe-to-chain-command': 'off',
     },
   },
+  {
+    ignores: [
+      'public/**',
+      'dist/**',
+      'coverage/**',
+    ],
+  },
 ];

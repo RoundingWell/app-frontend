@@ -4,7 +4,8 @@
 .gitignore export-ignore
 cypress.config.mjs export-ignore
 jsconfig.json export-ignore
-/.circleci export-ignore
-/.github export-ignore
-/release export-ignore
-/test export-ignore
+/.circleci/ export-ignore
+/.github/ export-ignore
+/release/ export-ignore
+/test/ export-ignore
+/public/formapp/ linguist-generated=true

@@ -73,6 +73,7 @@ export const cypressConfig = defineConfig({
       ],
     }),
   ],
+  exclude: ['public/formapp/assets/**'],
   resolve,
   css,
   publicDir: false,
@@ -151,6 +152,9 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:8080',
           rewrite: rewritePath => rewritePath.replace(/^\/api/, ''),
         },
+      },
+      watch: {
+        ignored: ['**/packages/care-ops-formio/**', '**/.stylelintcache', '**/public/formapp/**'],
       },
     },
     preview: {

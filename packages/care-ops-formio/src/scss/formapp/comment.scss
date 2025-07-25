@@ -1,0 +1,17 @@
+// Basic comment styles
+.comment {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  border-left: 3px solid #6c757d;
+  
+  &__header {
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
+  
+  &__content {
+    line-height: 1.5;
+  }
+}
