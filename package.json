@@ -8,6 +8,9 @@
   "license": "CC-BY-4.0",
   "homepage": "https://RoundingWell.com",
   "type": "module",
+  "workspaces": [
+    "packages/care-ops-datadog",
+  ],
   "scripts": {
     "analyze": "npx vite-bundle-visualizer",
     "prebuild": "npm i",
@@ -195,8 +198,6 @@
   },
   "dependencies": {
     "@auth0/auth0-spa-js": "^2.1.3",
-    "@datadog/browser-logs": "^6.2.1",
-    "@datadog/browser-rum": "^6.2.1",
     "@fortawesome/fontawesome-pro": "^6.1.0",
     "@fortawesome/fontawesome-svg-core": "^6.1.0",
     "@fortawesome/pro-light-svg-icons": "^6.1.0",
@@ -204,6 +205,7 @@
     "@fortawesome/pro-solid-svg-icons": "^6.1.0",
     "@fortawesome/pro-thin-svg-icons": "^6.4.0",
     "@kinde-oss/kinde-auth-pkce-js": "^4.2.0",
+    "@roundingwell/care-ops-datadog": "workspace:*",
     "@workos-inc/authkit-js": "^0.12.0",
     "amazon-quicksight-embedding-sdk": "^2.10.0",
     "animejs": "^3.2.1",
