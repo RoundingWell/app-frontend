@@ -56,6 +56,15 @@ jobs:
               echo "⌛ waiting for Xvfb…"
               sleep 0.5
             done
+      - run:
+          name: Configure npm registry auth
+          command: |
+            cat > ~/.npmrc \<< EOF
+            # Pro Font Awesome registry
+            @fortawesome:registry=https://npm.fontawesome.com/
+            //npm.fontawesome.com/:_authToken=${FONTAWESOME}
+            EOF
+            echo "📦 Created ~/.npmrc"
       - restore_cache:
           key: node-modules-{{ checksum "package-lock.json" }}
       - cypress/install:

@@ -1,0 +1,29 @@
+// Text alignment
+// -----------------------------------------------------------
+
+.u-text-align--center { text-align: center !important; }
+.u-text-align--left { text-align: left !important; }
+.u-text-align--right { text-align: right !important; }
+
+.u-text--overflow {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.u-text--nowrap {
+  white-space: nowrap !important;
+}
+
+.u-text--user-select {
+  user-select: none;
+}
+
+.u-text-link {
+  color: #0582DA;
+  cursor: pointer;
+}
+
+.u-text--italic {
+  font-style: italic;
+}

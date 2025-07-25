@@ -75,7 +75,7 @@ context('Formservice', function() {
       });
 
     cy
-      .visit(`/formapp/pdf/${ testForm.id }/${ testPatient.id }/${ testFormResponse.id }`, { noWait: true, isRoot: true })
+      .visit(`/formapp/index.html?_TEST_=true&pdf=1&formId=${ testForm.id }&patientId=${ testPatient.id }&responseId=${ testFormResponse.id }`, { noWait: true, isRoot: true })
       .wait('@routeForm')
       .wait('@routeFormDefinition')
       .wait('@routeFormFields')
@@ -164,7 +164,7 @@ context('Formservice', function() {
         return fx;
       })
       .routeLatestFormSubmission()
-      .visit(`/formapp/pdf/action/${ testAction.id }`, { noWait: true, isRoot: true });
+      .visit(`/formapp/index.html?_TEST_=true&pdf=1&actionId=${ testAction.id }`, { noWait: true, isRoot: true });
 
     cy
       .wait('@routeLatestFormSubmission')

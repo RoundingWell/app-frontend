@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "@roundingwell/care-ops-config",
+  "version": "1.0.0",
+  "description": "Config util for Care‑Ops Frontend",
+  "author": "RoundingWell",
+  "license": "CC-BY-4.0",
+  "homepage": "https://roundingwell.com",
+  "type": "module",
+  "files": ["index.js"],
+  "main": "./index.js",
+  "exports": "./index.js",
+  "sideEffects": false
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@careops/care-ops-formio",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "prebuild": "npm i",
+    "build": "vite build"
+  },
+  "workspaces": [
+    "../care-ops-config",
+    "../care-ops-datadog"
+  ],
+  "dependencies": {
+    "@roundingwell/care-ops-config": "workspace:*",
+    "@roundingwell/care-ops-datadog": "workspace:*",
+    "@fortawesome/fontawesome-pro": "^6.1.0",
+    "formiojs": "4.15.0-rc.12",
+    "handlebars": "^4.7.7",
+    "libphonenumber-js": "^1.10.38"
+  },
+  "devDependencies": {
+    "sass": "^1.69.5",
+    "vite": "^6.0.7"
+  }
+}

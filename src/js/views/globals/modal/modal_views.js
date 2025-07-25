@@ -97,7 +97,12 @@ const IframeFormView = View.extend({
 
     return 'modal__form-iframe';
   },
-  template: hbs`<iframe src="/formapp/?modal=1"></iframe>`,
+  template: hbs`<iframe src="{{ url }}&modal=1"></iframe>`,
+  templateContext() {
+    return {
+      url: this.model.getFormUrl(),
+    };
+  },
 });
 
 export {

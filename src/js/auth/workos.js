@@ -2,7 +2,7 @@ import { extend, isEmpty } from 'underscore';
 
 import { createClient } from '@workos-inc/authkit-js';
 
-import { workosConfig as config, appConfig } from 'js/config';
+import { workosConfig as config, appConfig } from '@roundingwell/care-ops-config';
 
 import { LoginPromptView } from 'js/views/globals/prelogin/prelogin_views';
 

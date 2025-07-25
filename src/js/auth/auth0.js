@@ -2,7 +2,7 @@ import { extend, isEmpty } from 'underscore';
 import Radio from 'backbone.radio';
 import { createAuth0Client } from '@auth0/auth0-spa-js';
 
-import { auth0Config as config, appConfig } from 'js/config';
+import { auth0Config as config, appConfig } from '@roundingwell/care-ops-config';
 
 import { LoginPromptView } from 'js/views/globals/prelogin/prelogin_views';
 

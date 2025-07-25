@@ -8,7 +8,7 @@ import App from 'js/base/app';
 
 import { FORM_RESPONSE_STATUS } from 'js/static';
 
-import { versions } from 'js/config';
+import { versions } from '@roundingwell/care-ops-config';
 
 function getClinicians(teamId) {
   if (teamId) {

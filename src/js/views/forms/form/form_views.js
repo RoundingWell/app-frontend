@@ -188,13 +188,7 @@ const LayoutView = View.extend({
 const IframeView = View.extend({
   behaviors: [IframeFormBehavior],
   className: 'form__content',
-  getTemplate() {
-    const url = this.model.getFormUrl();
-
-    if (url) return hbs`<iframe src="{{ url }}{{#if responseId}}?responseId={{ responseId }}{{/if}}"></iframe>`;
-
-    return hbs`<iframe src="/formapp/{{#if responseId}}{{ responseId }}{{/if}}"></iframe>`;
-  },
+  template: hbs`<iframe src="{{ url }}{{#if responseId}}&responseId={{ responseId }}{{/if}}"></iframe>`,
   templateContext() {
     return {
       responseId: this.getOption('responseId'),

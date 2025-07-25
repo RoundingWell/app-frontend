@@ -17,9 +17,14 @@ const iFrameFormView = View.extend({
     <div data-action-region></div>
   </div>
   <div class="form__content">
-    <iframe src="/formapp/"></iframe>
+    <iframe src="{{ url }}"></iframe>
   </div>
   `,
+  templateContext() {
+    return {
+      url: this.model.getFormUrl(),
+    };
+  },
 });
 
 const SaveView = View.extend({

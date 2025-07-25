@@ -1,10 +1,10 @@
 .page-content-block {
-  background-color: #{$white};
+  background-color: #FFF;
   padding: 8px 24px;
 }
 
 .table-bordered, .table-bordered td, .table-bordered th {
-  border: 1px solid #{$black-85} !important;
+  border: 1px solid #D8D8D8 !important;
 }
 
 .data-column {
@@ -41,7 +41,7 @@
 }
 
 .choices.is-disabled .choices__inner, .choices.is-disabled .choices__input {
-  background-color: #{$white};
+  background-color: #FFF;
 }
 
 .check-list .form-group {
@@ -58,7 +58,7 @@
 }
 
 .bg-light {
-  background-color: #{$white} !important;
+  background-color: #FFF !important;
 }
 
 .card-body {

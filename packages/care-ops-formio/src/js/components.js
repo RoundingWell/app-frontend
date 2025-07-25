@@ -1,7 +1,9 @@
 /* global Formio */
-import { debounce, isString } from 'underscore';
+
 const NestedComponent = Formio.Components.components.nested;
 const SelectComponent = Formio.Components.components.select;
+
+const { debounce, isString } = Formio.Utils._;
 
 // Modifies the emptyValue to avoid error on php mutating {} to []
 class SurveyComponent extends Formio.Components.components.survey {

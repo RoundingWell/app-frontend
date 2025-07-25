@@ -19,7 +19,8 @@ const _Model = BaseModel.extend({
     return get(this.get('options'), 'submit_hidden');
   },
   getFormUrl() {
-    return get(this.get('options'), 'url');
+    // NOTE: /formapp/ is legacy formio
+    return get(this.get('options'), 'url', `/formapp/index.html?_TEST_=${ _TEST_ }`);
   },
   getWidgets() {
     const formWidgets = get(this.get('options'), ['widgets', 'widgets']);

@@ -1,6 +1,8 @@
-/* global Formio, FormioUtils */
-import { extend, reduce, values, size } from 'underscore';
+/* global Formio */
+
 import { addError } from 'js/datadog';
+
+const { reduce, extend, size, values } = Formio.Utils._;
 
 const defaultLoaderReducers = [`
   const subm = _.extend({ patient: {} }, formSubmission,  formData);
@@ -58,7 +60,7 @@ Formio.Evaluator.evaluate = function(func, ...params) {
 function getScriptContext(contextScripts, baseContext) {
   return Formio.createForm(document.createElement('div'), {}).then(form => {
     const context = reduce(contextScripts, (memo, script) => {
-      return extend({}, memo, FormioUtils.evaluate(script, form.evalContext(memo)));
+      return extend({}, memo, Formio.Utils.evaluate(script, form.evalContext(memo)));
     }, baseContext);
 
     form.destroy();
@@ -70,7 +72,7 @@ function getScriptContext(contextScripts, baseContext) {
 function getSubmission(formData, formSubmission, responseData, reducers = defaultLoaderReducers, evalContext) {
   return Formio.createForm(document.createElement('div'), {}, { evalContext }).then(form => {
     const submission = reduce(reducers, (memo, reducer) => {
-      return FormioUtils.evaluate(reducer, form.evalContext({ formSubmission: memo, formData, responseData })) || memo;
+      return Formio.Utils.evaluate(reducer, form.evalContext({ formSubmission: memo, formData, responseData })) || memo;
     }, formSubmission);
 
     form.destroy();
@@ -84,8 +86,8 @@ const hasChangedFunction = 'return function hasChanged(key) { return !_.isEqual(
 function getChangeReducers(form, changeReducers, curSubmission, prevSubmission) {
   return reduce(changeReducers, (memo, reducer) => {
     const context = form.evalContext({ formSubmission: memo, prevSubmission });
-    context.hasChanged = FormioUtils.evaluate(hasChangedFunction, context);
-    return FormioUtils.evaluate(reducer, context) || memo;
+    context.hasChanged = Formio.Utils.evaluate(hasChangedFunction, context);
+    return Formio.Utils.evaluate(reducer, context) || memo;
   }, curSubmission);
 }
 
@@ -104,7 +106,7 @@ function getResponse(form, submitReducers, formSubmission) {
 }
 
 function getBeforeSubmit(form, beforeSubmit = defaultBeforeSubmit, formSubmission) {
-  return FormioUtils.evaluate(beforeSubmit, form.evalContext({ formSubmission }));
+  return Formio.Utils.evaluate(beforeSubmit, form.evalContext({ formSubmission }));
 }
 
 export {

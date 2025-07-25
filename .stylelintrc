@@ -4,7 +4,7 @@
     "stylelint-scss",
     "stylelint-order"
   ],
-  "ignoreFiles": ["coverage/**", "src/scss/provider-variables.scss", "src/scss/formapp/bootstrap.min.css"],
+  "ignoreFiles": ["coverage/**", "src/scss/provider-variables.scss", "public/**"],
   "rules": {
     "at-rule-no-unknown": null,
     "font-family-no-missing-generic-family-keyword": null,

@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "@roundingwell/care-ops-datadog",
+  "version": "1.0.0",
+  "description": "Shared Datadog helpers for Care‑Ops Frontend",
+  "author": "RoundingWell",
+  "license": "CC-BY-4.0",
+  "homepage": "https://roundingwell.com",
+  "type": "module",
+  "dependencies": {
+    "@datadog/browser-logs": "^6.2.1",
+    "@datadog/browser-rum":  "^6.2.1"
+  },
+  "files": ["index.js"],
+  "main": "./index.js",
+  "exports": "./index.js",
+  "sideEffects": false
+}

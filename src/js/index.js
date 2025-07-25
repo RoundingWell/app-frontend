@@ -1,8 +1,6 @@
-import 'core-js/modules/web.dom-exception.stack';
-import 'core-js/modules/web.structured-clone';
 import { Workbox } from 'workbox-window';
 
-import { fetchConfig, versions, appConfig } from './config';
+import { fetchConfig, versions, appConfig } from '@roundingwell/care-ops-config';
 import { initDataDog } from './datadog';
 
 import getRootRoute from 'js/utils/root-route';
@@ -17,13 +15,6 @@ function startOutreach() {
   import('./outreach/index')
     .then(({ startOutreachApp }) => {
       startOutreachApp();
-    });
-}
-
-function startForm() {
-  import('./formapp/index')
-    .then(({ startFormApp }) => {
-      startFormApp();
     });
 }
 
@@ -48,18 +39,22 @@ function startAuth() {
     });
 }
 
-function startApps({ isForm, isOutreach }) {
+function startApps({ isOutreach }) {
   if (isOutreach) {
     startOutreach();
     return;
   }
 
-  if (isForm) {
-    startForm();
-    return;
-  }
-
   startAuth();
+}
+
+function fetchWebsocket(success) {
+  fetch('/api/websockets')
+    .then(response => response.json())
+    .then(({ data }) => {
+      if (data.is_enabled) appConfig.ws = data.endpoint;
+      success();
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -71,24 +66,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  const isForm = rootRoute === 'formapp';
   const isOutreach = rootRoute === 'outreach';
 
   if (_TEST_) {
-    versions.frontend = 'cypress';
+    versions.frontend = 'develop';
     appConfig.name = 'Cypress Clinic';
     appConfig.cypress = 'cypress';
     appConfig.ws = 'ws://cypress-websocket/ws';
 
     if (location.pathname === '/logout') return;
 
-    startApps({ isForm, isOutreach });
+    startApps({ isOutreach });
     return;
   }
 
   fetchConfig(() => {
-    initDataDog({ isForm });
+    initDataDog();
 
-    startApps({ isForm, isOutreach });
-  }, isForm);
+    fetchWebsocket(() => {
+      startApps({ isOutreach });
+    });
+  }, _NOW_);
 });
