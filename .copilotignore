@@ -1,0 +1,15 @@
+# Ignore build outputs and dependencies
+node_modules/
+dist/
+coverage/
+public/formapp/assets/
+*.map
+*.min.js
+*.min.css
+
+# Ignore test outputs
+test/reports/
+.nyc_output/
+
+# Ignore cache directories
+.vite/

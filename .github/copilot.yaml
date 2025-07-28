@@ -1,0 +1,100 @@
+pull_request_review:
+  enabled: true
+  rules:
+    - name: Enforce RoundingWell coding standards and architecture
+      prompt: >
+        Follow RoundingWell's established coding standards and architectural patterns:
+
+        **Technology Stack - NO TypeScript:**
+        - Use JavaScript only - do not suggest TypeScript conversions or .ts files
+        - Follow ES6+ modern JavaScript patterns
+        - Use native JavaScript over external libraries when reasonable
+
+        **Code Style & Formatting:**
+        - Follow .editorconfig settings for consistent formatting
+        - Adhere to ESLint rules defined in .eslintrc.js
+        - Use Stylelint rules for SCSS/CSS code
+        - Import order: 3rd party → CSS → utilities → base classes → apps → views/components → templates → local CSS
+        - Use import aliases (js/*, scss/*) instead of relative paths
+        - Object keys should NOT be wrapped in quotes unless necessary
+        - Prefer const over let, never use var
+        - Use arrow functions for context when possible
+
+        **Marionette.js Architecture:**
+        - Follow Backbone.Marionette patterns for views and models
+        - Always use the `ui` hash when possible, avoid direct DOM queries
+        - Use `onRender`/`onDomRefresh` for view contents, `onAttach`/`onDetach` for view el
+        - Prefer `triggerMethod` over `trigger`, prefer `triggers` over `events`
+        - Event names should be `'verb:subject'` or `'context:verb:subject'` - what happened, not what will happen
+        - Views should only control DOM inside their own template
+
+        **SCSS/CSS Standards:**
+        - Follow BEM methodology (.block, .block__element, .block__element--modifier)
+        - Use JavaScript selectors with .js-* prefix for DOM queries
+        - Use state selectors .is-* and .has-* as adjoining classes only
+        - Never style .js-* selectors directly
+        - Import SCSS files into the JS files that use them
+
+        **Handlebars Templates:**
+        - Variable spacing: `{{ something }}`
+        - Logic no spacing: `{{#if something}}{{else}}{{/if}}`
+        - HTML attributes in double quotes: `class="myClass"`
+        - Attribute order: class, id/name, src/for/type/href/value, title/alt, role/aria-*, boolean
+        - Use `{{{ }}}` for HTML content, `{{ }}` for escaped content
+        - Keep templates focused - break large templates into smaller chunks
+
+        **Internationalization:**
+        - Use formatjs key naming: `view.directory.fileViews.viewName.stringContextName`
+        - Access via handlebars: `{{ @intl.path.to.key }}`
+        - HTML strings should be postfixed with `HTML` in key names
+        - Use dayjs for date formatting, not formatjs
+
+        **Code Organization:**
+        - Apps: business logic, data requests, layout creation
+        - Views: Marionette views with templates and styles
+        - Components: generic, configurable, terminal objects (datepickers, tooltips)
+        - Behaviors: closed functionality for user interactions
+        - Utils: utility methods and 3rd party interfaces
+        - Entities: Models/Collections for server interface
+
+        **Best Practices:**
+        - Functions should accomplish one task in <10 lines when possible
+        - Modules should ideally be <300 lines
+        - Use guard clauses to handle exceptions early
+        - Favor object composition over class inheritance
+        - Store state on state models, not instance properties
+        - Fetch should only happen in entities service
+
+        **Directory Structure:**
+        - Follow established patterns: apps mirror views structure
+        - Use `app-name/app-name_app.js` and `view-name_views.js` conventions
+        - Keep related templates and SCSS in same folders as JS files
+
+# Local development assistance
+code_generation:
+  enabled: true
+  rules:
+    - name: Follow RoundingWell patterns for new code
+      prompt: >
+        When generating new code, follow these RoundingWell conventions:
+        - Use Marionette.js patterns for views and components
+        - Follow established directory structure and naming conventions
+        - Import SCSS files in JS files that use them
+        - Use our established utility functions and base classes
+        - Follow BEM naming for CSS classes
+        - Use formatjs for internationalization
+
+# Chat assistance
+chat:
+  enabled: true
+  rules:
+    - name: Project context awareness
+      prompt: >
+        You are working on a Marionette.js/Backbone.js healthcare application.
+        Key context:
+        - This is a monorepo with packages for config, datadog, fontawesome, and formio
+        - Main app uses Marionette.js architecture patterns
+        - SCSS follows BEM methodology
+        - Tests use Cypress for e2e and component testing
+        - Build system uses Vite
+        - No TypeScript - JavaScript only
