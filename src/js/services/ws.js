@@ -39,6 +39,8 @@ export default App.extend({
   },
 
   onStart({ data }, token) {
+    /* istanbul ignore next: Essentially avoid offline */
+    if (!token) return;
     this.url.searchParams.set('auth', token);
     this.ws = new WebSocket(this.url.toString());
     this.ws.addEventListener('open', this.onOpen.bind(this, data));
