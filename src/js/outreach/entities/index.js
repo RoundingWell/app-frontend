@@ -13,7 +13,7 @@ Radio.reply('auth', {
     token = tokenString;
   },
   getToken() {
-    return token;
+    return `Bearer ${ token }`;
   },
 });
 
