@@ -17,7 +17,7 @@ async function startFormService() {
 }
 
 async function startAuth() {
-  const { auth } = await import('./auth/index');
+  const { auth } = await import('./auth');
   await auth();
 }
 

@@ -1,14 +1,14 @@
-import { AuthProvider } from './AuthProvider.js';
+import { AuthProvider } from '../AuthProvider.js';
 
-import createKindeClient from '@kinde-oss/kinde-auth-pkce-js';
+import { createClient } from '@workos-inc/authkit-js';
 
-export class KindeAuthProvider extends AuthProvider {
+export class WorkosAuthProvider extends AuthProvider {
   async getToken() {
     if (!this.client) return;
     if (!navigator.onLine && this.token) return this.token;
 
     return this.client
-      .getToken()
+      .getAccessToken()
       .then(token => {
         this.token = `Bearer ${ token }`;
         return this.token;
@@ -19,22 +19,30 @@ export class KindeAuthProvider extends AuthProvider {
       });
   }
 
-  login(path, connection = this.config.connections.default) {
-    this.client.register({
-      app_state: { path },
-      authUrlParams: { connection_id: connection },
-    });
+  login(path = AuthProvider.PATH_ROOT) {
+    this.client.signIn({ state: path });
   }
 
-  async _initClient() {
+  // If considered RW and rwClientId is set
+  _getClientId(pathName) {
+    const { clientId, rwClientId } = this.config;
+
+    // RWell specific login
+    if (rwClientId && (pathName === AuthProvider.PATH_RWELL || localStorage.getItem(AuthProvider.PATH_RWELL))) {
+      return rwClientId;
+    }
+
+    return clientId;
+  }
+
+  async _initClient(clientId) {
     return new Promise(resolve => {
       const clientConfig = {
-        ...this.config.createParams,
-        redirect_uri: location.origin + AuthProvider.PATH_AUTHD,
-        logout_uri: location.origin,
-        on_redirect_callback: (user, { path } = {}) => {
+        redirectUri: location.origin + AuthProvider.PATH_AUTHD,
+        onRedirectCallback: ({ user, state }) => {
+          const path = state;
           if (!user) {
-            this.loginPrompt({ appState: path });
+            this.loginPrompt(path);
             return;
           }
 
@@ -42,9 +50,10 @@ export class KindeAuthProvider extends AuthProvider {
 
           resolve();
         },
+        ...this.config.createClientOptions,
       };
 
-      createKindeClient(clientConfig)
+      createClient(clientId, clientConfig)
         .then(client => {
           this.client = client;
         });
@@ -58,19 +67,15 @@ export class KindeAuthProvider extends AuthProvider {
 
     const pathName = location.pathname;
 
-    await this._initClient();
+    const clientId = this._getClientId(pathName);
+
+    await this._initClient(clientId);
 
     if (pathName === AuthProvider.PATH_AUTHD) return;
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
-      this.client.logout();
-      return;
-    }
-
-    // RWell specific login
-    if (pathName === AuthProvider.PATH_RWELL || localStorage.getItem(AuthProvider.PATH_RWELL)) {
-      this.login(AuthProvider.PATH_RWELL, this.config.connections.roundingwell);
+      this.client.signOut({ returnTo: location.origin });
       return;
     }
 

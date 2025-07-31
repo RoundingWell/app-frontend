@@ -1,10 +1,10 @@
-import { AuthProvider } from './AuthProvider.js';
+import { AuthProvider } from '../AuthProvider.js';
 
 import { createAuth0Client } from '@auth0/auth0-spa-js';
 
 const RWELL_CONNECTION = 'google-oauth2';
 
-export class Auth0hAuthProvider extends AuthProvider {
+export class Auth0AuthProvider extends AuthProvider {
   async getToken() {
     if (!this.client) return;
     if (!navigator.onLine) return this.token;

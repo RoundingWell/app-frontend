@@ -10,9 +10,10 @@ import {
   appConfig,
 } from '@roundingwell/care-ops-config';
 
+import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
+
 import 'scss/app-root.scss';
 
-import { AuthProvider } from './AuthProvider.js';
 import { LoginPromptView } from 'js/views/globals/prelogin/prelogin_views';
 
 let authAgent;
@@ -37,17 +38,17 @@ async function selectAuthProvider() {
   const LoginView = getLoginView();
 
   if (!isEmpty(workosConfig)) {
-    const { WorkosAuthProvider } = await import('./workos.js');
+    const { WorkosAuthProvider } = await import('@roundingwell/care-ops-auth/workos.js');
     return new WorkosAuthProvider(workosConfig, LoginView);
   }
 
   if (!isEmpty(auth0Config)) {
-    const { Auth0AuthProvider } = await import('./auth0.js');
+    const { Auth0AuthProvider } = await import('@roundingwell/care-ops-auth/auth0.js');
     return new Auth0AuthProvider(auth0Config, LoginView);
   }
 
   if (!isEmpty(kindeConfig)) {
-    const { KindeAuthProvider } = await import('./kinde.js');
+    const { KindeAuthProvider } = await import('@roundingwell/care-ops-auth/kinde.js');
     return new KindeAuthProvider(kindeConfig, LoginView);
   }
 
