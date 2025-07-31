@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async() => {
 
   await fetchConfig(_NOW_);
 
-  if (!_TEST_) initDataDog();
+  initDataDog();
 
   await startAuth();
 
