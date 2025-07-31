@@ -21,7 +21,7 @@ beforeEach(function() {
   );
 
   cy
-    .intercept('GET', '/appconfig.json', {
+    .intercept('GET', '/appconfig.json*', {
       body: {
         app: {
           env: 'develop',
@@ -34,7 +34,7 @@ beforeEach(function() {
     });
 
   cy
-    .intercept('GET', '/api/websockets', {
+    .intercept('GET', '/api/websockets*', {
       body: {
         data: {
           is_enabled: true,

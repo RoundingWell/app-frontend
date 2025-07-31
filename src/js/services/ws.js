@@ -81,8 +81,6 @@ export default App.extend({
   },
 
   send(data) {
-    if (!this.url) return;
-
     if (this.ws.readyState === WebSocket.OPEN) {
       this.sendData(data);
       return;

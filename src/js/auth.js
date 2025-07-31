@@ -57,6 +57,7 @@ async function selectAuthProvider() {
 
 async function getAuthAgent() {
   if (_TEST_) {
+    defaultAuthProvider.setToken('test-token');
     return defaultAuthProvider;
   }
 
