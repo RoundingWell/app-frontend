@@ -48,15 +48,6 @@ function startApps({ isOutreach }) {
   startAuth();
 }
 
-function fetchWebsocket(success) {
-  fetch('/api/websockets')
-    .then(response => response.json())
-    .then(({ data }) => {
-      if (data.is_enabled) appConfig.ws = data.endpoint;
-      success();
-    });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
   const rootRoute = getRootRoute();
   const isFormService = rootRoute === 'formservice';
@@ -83,8 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchConfig(() => {
     initDataDog();
 
-    fetchWebsocket(() => {
       startApps({ isOutreach });
-    });
   }, _NOW_);
 });

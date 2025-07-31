@@ -73,7 +73,7 @@ const Application = App.extend({
   },
 
   startServices() {
-    new WSService({ url: appConfig.ws });
+    new WSService();
     new AlertService({ region: this.getRegion('alert') });
     new LastestListService();
     new ModalService({
