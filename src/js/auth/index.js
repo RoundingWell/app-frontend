@@ -1,5 +1,6 @@
 import { isEmpty } from 'underscore';
 import Radio from 'backbone.radio';
+import getRootRoute from 'js/utils/root-route';
 
 import {
   auth0Config,
@@ -25,6 +26,10 @@ function getLoginView() {
 // Provider selection logic based on config
 // In order of priority (highest to lowest)
 async function selectAuthProvider() {
+  if (getRootRoute() === 'outreach') {
+    return defaultAuthProvider;
+  }
+
   if (!isEmpty(e2eConfig)) {
     return new AuthProvider(e2eConfig);
   }
