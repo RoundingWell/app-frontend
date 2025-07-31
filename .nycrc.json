@@ -5,7 +5,7 @@
   "exclude": [
     "src/**/*.cy.js",
     "src/js/base/**",
-    "src/js/auth/**",
+    "src/js/auth.js",
     "src/js/index.js",
     "src/js/datadog.js"
   ]
