@@ -6,8 +6,8 @@ const datadogConfig = {};
 const appConfig = {};
 const versions = {};
 
-function fetchConfig(success, cache = Date.now()) {
-  fetch(`/appconfig.json?${ new URLSearchParams({ _: cache }) }`)
+function fetchConfig(cache = Date.now()) {
+  return fetch(`/appconfig.json?${ new URLSearchParams({ _: cache }) }`)
     .then(response => response.json())
     .then(config => {
       Object.assign(auth0Config, config.auth0);
@@ -17,8 +17,6 @@ function fetchConfig(success, cache = Date.now()) {
       Object.assign(datadogConfig, config.datadog);
       Object.assign(appConfig, config.app);
       Object.assign(versions, config.versions);
-
-      success();
     });
 }
 

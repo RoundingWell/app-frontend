@@ -324,18 +324,18 @@ function getQueryParams() {
   };
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  fetchConfig(() => {
-    const queryParams = getQueryParams();
+document.addEventListener('DOMContentLoaded', async() => {
+  await fetchConfig();
 
-    initDataDog({ isPdfPrinter: !!queryParams.pdf });
+  const queryParams = getQueryParams();
 
-    if (queryParams.modal) {
-      document.body.classList.add('is-modal');
-    }
+  if (!queryParams._TEST_) initDataDog({ isPdfPrinter: !!queryParams.pdf });
 
-    updateSubmissionDebounce = debounce(updateSubmission, queryParams._TEST_ ? 100 : 2000);
+  if (queryParams.modal) {
+    document.body.classList.add('is-modal');
+  }
 
-    startFormApp(queryParams);
-  }, true);
+  updateSubmissionDebounce = debounce(updateSubmission, queryParams._TEST_ ? 100 : 2000);
+
+  startFormApp(queryParams);
 });

@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const isOutreach = rootRoute === 'outreach';
+  await fetchConfig(_NOW_);
 
   if (_TEST_) {
     versions.frontend = 'develop';
@@ -71,9 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  fetchConfig(() => {
     initDataDog();
 
       startApps({ isOutreach });
-  }, _NOW_);
 });
