@@ -1,6 +1,6 @@
 import { Workbox } from 'workbox-window';
 
-import { fetchConfig, versions, appConfig } from '@roundingwell/care-ops-config';
+import { fetchConfig } from '@roundingwell/care-ops-config';
 import { initDataDog } from './datadog';
 
 import getRootRoute from 'js/utils/root-route';
@@ -11,68 +11,46 @@ if (_PRODUCTION_ && 'serviceWorker' in navigator) {
   wb.register();
 }
 
-function startOutreach() {
-  import('./outreach/index')
-    .then(({ startOutreachApp }) => {
-      startOutreachApp();
-    });
+async function startFormService() {
+  const { startFormServiceApp } = await import('./formservice');
+  startFormServiceApp();
 }
 
-function start() {
-  import('./app')
-    .then(({ startApp }) => {
-      startApp();
-    });
+async function startAuth() {
+  const { auth } = await import('./auth/index');
+  await auth();
 }
 
-function startFormService() {
-  import('./formservice')
-    .then(({ startFormServiceApp }) => {
-      startFormServiceApp();
-    });
+async function startOutreach() {
+  const { startOutreachApp } = await import('./outreach/index');
+  startOutreachApp();
 }
 
-function startAuth() {
-  import('./auth/index')
-    .then(({ auth }) => {
-      auth(start);
-    });
+async function start() {
+  const { startApp } = await import('./app');
+  startApp();
 }
 
-function startApps({ isOutreach }) {
-  if (isOutreach) {
+document.addEventListener('DOMContentLoaded', async() => {
+  const rootRoute = getRootRoute();
+
+  if (_TEST_ && rootRoute === 'logout') return;
+
+  if (rootRoute === 'formservice') {
+    await startFormService();
+    return;
+  }
+
+  await fetchConfig(_NOW_);
+
+  if (!_TEST_) initDataDog();
+
+  await startAuth();
+
+  if (rootRoute === 'outreach') {
     startOutreach();
     return;
   }
 
-  startAuth();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const rootRoute = getRootRoute();
-  const isFormService = rootRoute === 'formservice';
-
-  if (isFormService) {
-    startFormService();
-    return;
-  }
-
-  const isOutreach = rootRoute === 'outreach';
-  await fetchConfig(_NOW_);
-
-  if (_TEST_) {
-    versions.frontend = 'develop';
-    appConfig.name = 'Cypress Clinic';
-    appConfig.cypress = 'cypress';
-    appConfig.ws = 'ws://cypress-websocket/ws';
-
-    if (location.pathname === '/logout') return;
-
-    startApps({ isOutreach });
-    return;
-  }
-
-    initDataDog();
-
-      startApps({ isOutreach });
+  await start();
 });
