@@ -1,39 +1,78 @@
+import { isEmpty } from 'underscore';
 import Radio from 'backbone.radio';
 
-import * as auth0 from './auth0';
-import * as e2e from './e2e';
-import * as kinde from './kinde';
-import * as none from './none';
-import * as workos from './workos';
+import {
+  auth0Config,
+  e2eConfig,
+  kindeConfig,
+  workosConfig,
+  appConfig,
+} from '@roundingwell/care-ops-config';
 
 import 'scss/app-root.scss';
 
-let authAgent;
+import { AuthProvider } from './AuthProvider.js';
+import { LoginPromptView } from 'js/views/globals/prelogin/prelogin_views';
 
-function getAuthAgent() {
-  if (none.should()) return none;
+let authAgent;
+const defaultAuthProvider = new AuthProvider();
+
+function getLoginView() {
+  if (appConfig.disableLoginPrompt) return;
+  return LoginPromptView;
+}
+
+// Provider selection logic based on config
+// In order of priority (highest to lowest)
+async function selectAuthProvider() {
+  if (!isEmpty(e2eConfig)) {
+    return new AuthProvider(e2eConfig);
+  }
+
+  const LoginView = getLoginView();
+
+  if (!isEmpty(workosConfig)) {
+    const { WorkosAuthProvider } = await import('./workos.js');
+    return new WorkosAuthProvider(workosConfig, LoginView);
+  }
+
+  if (!isEmpty(auth0Config)) {
+    const { Auth0AuthProvider } = await import('./auth0.js');
+    return new Auth0AuthProvider(auth0Config, LoginView);
+  }
+
+  if (!isEmpty(kindeConfig)) {
+    const { KindeAuthProvider } = await import('./kinde.js');
+    return new KindeAuthProvider(kindeConfig, LoginView);
+  }
+
+  return defaultAuthProvider;
+}
+
+async function getAuthAgent() {
+  if (_TEST_) {
+    return defaultAuthProvider;
+  }
 
   if (authAgent) return authAgent;
 
-  // These should be ordered by priority lowest to highest
-  if (e2e.should()) authAgent = e2e;
-  if (auth0.should()) authAgent = auth0;
-  if (kinde.should()) authAgent = kinde;
-  if (workos.should()) authAgent = workos;
-
+  authAgent = await selectAuthProvider();
   return authAgent;
 }
 
-function setToken(tokenString) {
-  getAuthAgent().setToken(tokenString);
+async function setToken(tokenString) {
+  const agent = await getAuthAgent();
+  agent.setToken(tokenString);
 }
 
-function getToken() {
-  return getAuthAgent().getToken() || '';
+async function getToken() {
+  const agent = await getAuthAgent();
+  return agent.getToken();
 }
 
-function logout() {
-  getAuthAgent().logout();
+async function logout() {
+  const agent = await getAuthAgent();
+  agent.logout();
 }
 
 Radio.reply('auth', {
@@ -42,8 +81,9 @@ Radio.reply('auth', {
   getToken,
 });
 
-async function auth(success) {
-  getAuthAgent().auth(success);
+async function auth() {
+  const agent = await getAuthAgent();
+  return agent.auth();
 }
 
 export {
