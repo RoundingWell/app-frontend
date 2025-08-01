@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async() => {
   await startAuth();
 
   if (rootRoute === 'outreach') {
-    startOutreach();
+    await startOutreach();
     return;
   }
 
