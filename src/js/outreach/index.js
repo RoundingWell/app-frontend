@@ -22,7 +22,7 @@ const OutreachApp = RouterApp.extend({
     form: FormApp,
     optIn: OptInApp,
   },
-  routerAppName: 'PatientsApp',
+  routerAppName: 'OutreachApp',
   eventRoutes: {
     'outreach:id': {
       route: 'outreach/:id',
@@ -45,7 +45,12 @@ const OutreachApp = RouterApp.extend({
 
     this.listenTo(verifyApp, 'stop', () => {
       const token = Radio.request('auth', 'getToken');
-      if (!token) return;
+
+      /* istanbul ignore next: Should be impossible */
+      if (!token) {
+        Radio.trigger('event-router', 'unknownError');
+        return;
+      }
 
       this.startForm();
     });

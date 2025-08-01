@@ -27,20 +27,21 @@ context('WS Service', function() {
     Radio.reply('workspace', 'current', { id: workspace });
     Radio.reply('auth', 'getToken', () => 'Bearer token');
 
-    // Mock the websockets API endpoint
-    cy.intercept('GET', '/api/websockets', {
-      statusCode: 200,
-      body: {
-        data: {
-          is_enabled: true,
-          endpoint: 'ws://cypress-websocket/ws',
+    cy
+      .intercept('GET', '/api/websockets', {
+        statusCode: 200,
+        body: {
+          data: {
+            is_enabled: true,
+            endpoint: 'ws://cypress-websocket/ws',
+          },
         },
-      },
-    }).as('websocketsApi');
+      })
+      .as('websocketsApi');
 
     const url = 'ws://cypress-websocket/ws';
     cy.mockWs(url);
-    service = new WSService({ url });
+    service = new WSService();
   });
 
   afterEach(function() {
@@ -48,27 +49,6 @@ context('WS Service', function() {
     Radio.stopReplying('auth', 'getToken');
     Radio.stopReplying('bootstrap', 'currentUser');
     Radio.stopReplying('workspace', 'current');
-  });
-
-  specify('ws url not configured', function() {
-    service.destroy();
-
-    // Mock API response with disabled websockets
-    cy.intercept('GET', '/api/websockets', {
-      statusCode: 200,
-      body: {
-        data: {
-          is_enabled: false,
-        },
-      },
-    }).as('websocketsApiDisabled');
-
-    service = new WSService();
-    const channel = Radio.channel('ws');
-
-    channel.request('subscribe', { id: 'foo', type: 'bar' });
-
-    expect(service.isRunning()).to.be.false;
   });
 
   specify('Constructing the websocket', function() {
@@ -269,5 +249,46 @@ context('WS Service', function() {
         expect(service.url).to.be.instanceOf(URL);
         expect(service.url.searchParams.get('auth')).to.equal('Bearer token');
       });
+  });
+});
+
+/* eslint-disable-next-line */
+context('WS Service - Disabled', function() {
+  beforeEach(function() {
+    Radio.reply('bootstrap', 'currentUser', { clientKey });
+    Radio.reply('workspace', 'current', { id: workspace });
+    Radio.reply('auth', 'getToken', () => 'Bearer token');
+
+    cy
+      .intercept('GET', '/api/websockets', {
+        statusCode: 200,
+        body: {
+          data: {
+            is_enabled: false,
+            endpoint: 'ws://cypress-websocket/ws',
+          },
+        },
+      })
+      .as('websocketsApiDisabled');
+  });
+
+  afterEach(function() {
+    Radio.stopReplying('auth', 'getToken');
+    Radio.stopReplying('bootstrap', 'currentUser');
+    Radio.stopReplying('workspace', 'current');
+  });
+
+  specify('ws not enabled', function() {
+    const disabledService = new WSService();
+
+    disabledService.start();
+
+    cy.wait('@websocketsApiDisabled');
+
+    const channel = Radio.channel('ws');
+
+    channel.request('subscribe', { id: 'foo', type: 'bar' });
+
+    expect(disabledService.isRunning()).to.be.false;
   });
 });
