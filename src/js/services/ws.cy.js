@@ -26,6 +26,18 @@ context('WS Service', function() {
     Radio.reply('bootstrap', 'currentUser', { clientKey });
     Radio.reply('workspace', 'current', { id: workspace });
     Radio.reply('auth', 'getToken', () => 'Bearer token');
+
+    // Mock the websockets API endpoint
+    cy.intercept('GET', '/api/websockets', {
+      statusCode: 200,
+      body: {
+        data: {
+          is_enabled: true,
+          endpoint: 'ws://cypress-websocket/ws',
+        },
+      },
+    }).as('websocketsApi');
+
     const url = 'ws://cypress-websocket/ws';
     cy.mockWs(url);
     service = new WSService({ url });
@@ -41,7 +53,17 @@ context('WS Service', function() {
   specify('ws url not configured', function() {
     service.destroy();
 
-    service = new WSService({ url: null });
+    // Mock API response with disabled websockets
+    cy.intercept('GET', '/api/websockets', {
+      statusCode: 200,
+      body: {
+        data: {
+          is_enabled: false,
+        },
+      },
+    }).as('websocketsApiDisabled');
+
+    service = new WSService();
     const channel = Radio.channel('ws');
 
     channel.request('subscribe', { id: 'foo', type: 'bar' });
@@ -238,5 +260,14 @@ context('WS Service', function() {
       })
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[0], notifications[1]]));
+  });
+
+  specify('auth token added to websocket URL', function() {
+    cy
+      .startService()
+      .then(() => {
+        expect(service.url).to.be.instanceOf(URL);
+        expect(service.url.searchParams.get('auth')).to.equal('Bearer token');
+      });
   });
 });
