@@ -17,7 +17,7 @@
   "scripts": {
     "analyze": "npx vite-bundle-visualizer",
     "prebuild": "npm i",
-    "build": "vite build --force",
+    "build": "vite build",
     "formio:build": "npm run build --prefix packages/care-ops-formio",
     "coverage": "npm run coverage:clear && npm run coverage:component && npm run coverage:e2e && npm stop",
     "precoverage:e2e": "vite build -m test",
