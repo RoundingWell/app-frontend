@@ -10,7 +10,6 @@ import { addError } from 'js/datadog';
 import 'scss/provider-core.scss';
 import 'scss/app-root.scss';
 
-import { appConfig } from '@roundingwell/care-ops-config';
 import initPlatform from 'js/utils/platform';
 
 import App from 'js/base/app';
@@ -50,7 +49,7 @@ const Application = App.extend({
   // - A root layout is attached
   // - Global services are started
   onBeforeStart() {
-    new BootstrapService({ name: appConfig.name });
+    new BootstrapService();
     this.setView(new RootView());
     this.configComponents();
     this.startServices();
@@ -73,7 +72,7 @@ const Application = App.extend({
   },
 
   startServices() {
-    new WSService({ url: appConfig.ws });
+    new WSService();
     new AlertService({ region: this.getRegion('alert') });
     new LastestListService();
     new ModalService({

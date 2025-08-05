@@ -8,7 +8,7 @@ function getEnv() {
 
 function initDataDog() {
   // NOTE: Remove when developing and testing Datadog
-  if (!_PRODUCTION_) return;
+  if (!_PRODUCTION_ || _TEST_) return;
 
   const env = getEnv();
   const service = 'care-ops-frontend';

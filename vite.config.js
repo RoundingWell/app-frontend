@@ -127,6 +127,7 @@ export default defineConfig(({ mode }) => {
           globIgnores: [
             '**/*.map',
             '**/.DS_Store',
+            '**/formapp/assets/**',
           ],
         },
       }),

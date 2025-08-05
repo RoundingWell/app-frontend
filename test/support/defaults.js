@@ -21,6 +21,29 @@ beforeEach(function() {
   );
 
   cy
+    .intercept('GET', '/appconfig.json*', {
+      body: {
+        app: {
+          env: 'develop',
+          name: 'Cypress Clinic',
+        },
+        versions: {
+          frontend: 'develop',
+        },
+      },
+    });
+
+  cy
+    .intercept('GET', '/api/websockets*', {
+      body: {
+        data: {
+          is_enabled: true,
+          endpoint: 'ws://cypress-websocket/ws',
+        },
+      },
+    });
+
+  cy
     .routeCurrentClinician()
     .routeRoles()
     .routeTeams()

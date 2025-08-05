@@ -9,6 +9,7 @@
   "homepage": "https://RoundingWell.com",
   "type": "module",
   "workspaces": [
+    "packages/care-ops-auth",
     "packages/care-ops-config",
     "packages/care-ops-datadog",
     "packages/care-ops-fontawesome"
@@ -16,7 +17,7 @@
   "scripts": {
     "analyze": "npx vite-bundle-visualizer",
     "prebuild": "npm i",
-    "build": "vite build --force",
+    "build": "vite build",
     "formio:build": "npm run build --prefix packages/care-ops-formio",
     "coverage": "npm run coverage:clear && npm run coverage:component && npm run coverage:e2e && npm stop",
     "precoverage:e2e": "vite build -m test",
@@ -85,11 +86,9 @@
     "yaml": "^2.1.1"
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^2.1.3",
-    "@kinde-oss/kinde-auth-pkce-js": "^4.2.0",
+    "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
     "@roundingwell/care-ops-datadog": "workspace:*",
-    "@workos-inc/authkit-js": "^0.12.0",
     "amazon-quicksight-embedding-sdk": "^2.10.0",
     "animejs": "^3.2.1",
     "backbone": "^1.4.0",

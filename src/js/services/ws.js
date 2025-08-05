@@ -27,18 +27,34 @@ export default App.extend({
     'manage:add': 'manageAdd',
   },
 
-  initialize({ url }) {
+  initialize() {
     this.resources = new Backbone.Collection();
     this.persistent = {};
     this.ws = {};
-    if (url) this.url = new URL(url);
+  },
+
+  getUrl() {
+    if (this.url) return this.url;
+
+    return fetch('/api/websockets')
+      .then(response => response.json())
+      .then(({ data }) => {
+        if (!data.is_enabled) return;
+        this.url = new URL(data.endpoint);
+        return this.url;
+      });
   },
 
   beforeStart() {
-    return Radio.request('auth', 'getToken');
+    return [
+      Radio.request('auth', 'getToken'),
+      this.getUrl(),
+    ];
   },
 
   onStart({ data }, token) {
+    /* istanbul ignore next: Essentially avoid offline */
+    if (!token || !this.url) return;
     this.url.searchParams.set('auth', token);
     this.ws = new WebSocket(this.url.toString());
     this.ws.addEventListener('open', this.onOpen.bind(this, data));
@@ -65,8 +81,6 @@ export default App.extend({
   },
 
   send(data) {
-    if (!this.url) return;
-
     if (this.ws.readyState === WebSocket.OPEN) {
       this.sendData(data);
       return;

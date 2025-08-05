@@ -6,17 +6,6 @@ function getRelationship(id, type) {
   return { data: { type, id } };
 }
 
-let token;
-
-Radio.reply('auth', {
-  setToken(tokenString) {
-    token = tokenString;
-  },
-  getToken() {
-    return token;
-  },
-});
-
 function getPatientInfo({ actionId }) {
   return fetcher(`/api/outreach?filter[action]=${ actionId }`, {
     method: 'GET',
@@ -60,7 +49,7 @@ function validateVerificationCode({ outreachId, code, patientId }) {
   })
     .then(handleJSON)
     .then(({ data: { attributes } }) => {
-      Radio.request('auth', 'setToken', attributes.token);
+      Radio.request('auth', 'setToken', `Bearer ${ attributes.token }`);
       return Promise.resolve(attributes.token);
     });
 }
