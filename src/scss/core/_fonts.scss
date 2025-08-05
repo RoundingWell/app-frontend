@@ -34,88 +34,44 @@
 * © 2019 MyFonts Inc
 */
 
-/**
- * @license
- * MyFonts Webfont Build ID 4874935, 2022-05-24T10:54:48-0400
- *
- * The fonts listed in this notice are subject to the End User License
- * Agreement(s) entered into by the website owner. All other parties are
- * explicitly restricted from using the Licensed Webfonts(s).
- *
- * You may obtain a valid license at the URLs below.
- *
- * Webfont: SignPainterHouseScriptRg by House Industries
- * URL: https://www.myfonts.com/fonts/houseind/sign-painter/house-script-regular/
- * Copyright: (C)1999 House Industries/Brand Design Co., Inc.
- *
- *
- *
- * © 2022 MyFonts Inc
-*/
-
-@font-face {
-  font-family: SignPainterHouseScriptRg;
-  src:
-    url('/fonts/SignPainterHouseScriptRg/font.woff2') format('woff2'),
-    url('/fonts/SignPainterHouseScriptRg/font.woff') format('woff');
-}
-
 @font-face {
   font-family: ProximaSoft;
   font-style: normal;
   font-weight: normal;
-  src:
-    url('/fonts/ProximaSoft/3955CC_4_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_4_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_4_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_4_0.woff2') format('woff2');
 }
 
 @font-face {
   font-family: ProximaSoft;
   font-style: italic;
   font-weight: normal;
-  src:
-    url('/fonts/ProximaSoft/3955CC_5_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_5_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_5_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_5_0.woff2') format('woff2');
 }
 
 @font-face {
   font-family: ProximaSoft;
   font-style: normal;
   font-weight: 600;
-  src:
-    url('/fonts/ProximaSoft/3955CC_2_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_2_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_2_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_2_0.woff2') format('woff2');
 }
 
 @font-face {
   font-family: ProximaSoft;
   font-style: italic;
   font-weight: 600;
-  src:
-    url('/fonts/ProximaSoft/3955CC_3_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_3_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_3_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_3_0.woff2') format('woff2');
 }
 
 @font-face {
   font-family: ProximaSoft;
   font-style: normal;
   font-weight: bold;
-  src:
-    url('/fonts/ProximaSoft/3955CC_1_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_1_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_1_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_1_0.woff2') format('woff2');
 }
 
 @font-face {
   font-family: ProximaSoft;
   font-style: italic;
   font-weight: bold;
-  src:
-    url('/fonts/ProximaSoft/3955CC_0_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_0_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_0_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_0_0.woff2') format('woff2');
 }

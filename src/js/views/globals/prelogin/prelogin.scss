@@ -4,20 +4,14 @@
   font-family: ProximaSoft;
   font-style: normal;
   font-weight: normal;
-  src:
-    url('/fonts/ProximaSoft/3955CC_4_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_4_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_4_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_4_0.woff2') format('woff2');
 }
 
 @font-face {
   font-family: ProximaSoft;
   font-style: normal;
   font-weight: bold;
-  src:
-    url('/fonts/ProximaSoft/3955CC_1_0.woff2') format('woff2'),
-    url('/fonts/ProximaSoft/3955CC_1_0.woff') format('woff'),
-    url('/fonts/ProximaSoft/3955CC_1_0.ttf') format('truetype');
+  src: url('/fonts/ProximaSoft/3955CC_1_0.woff2') format('woff2');
 }
 
 body {
