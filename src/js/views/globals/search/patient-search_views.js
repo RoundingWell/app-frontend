@@ -85,39 +85,30 @@ const PicklistItem = View.extend({
     this.state.set({ selected: this.model });
   },
   template: hbs`
-    <div class="patient-search__picklist-item-name u-text--overflow">
-      <div class="patient-search__picklist-item-name-icon">
-        {{far "address-card"}}
-      </div>
-      <div class="patient-search__picklist-item-name-text">
-        <span>{{matchText name search}}{{~ remove_whitespace ~}}</span>
-      </div>
+    <div class="patient-search__picklist-item-name-icon">
+      {{far "address-card"}}
+    </div>
+    <div class="patient-search__picklist-item-name-text">
+      <span class="u-text--overflow">{{first_name}} {{last_name}}{{~ remove_whitespace ~}}</span>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
         {{formatDateTime birth_date "MM/DD/YYYY"}}
       </div>
-      {{#if hasIdentifiers}}
-        <div class="patient-search__picklist-item-identifier u-text--overflow">
-          {{matchText identifiers.0.value search}}
-        </div>
-      {{/if}}
-      {{#if hasFieldQueryResults}}
-        <div class="patient-search__picklist-item-query u-text--overflow">
-          {{matchText value search}}
-        </div>
-      {{/if}}
       <div class="patient-search__picklist-item-status u-text--overflow">
         {{status}}
+      </div>
+      <div class="patient-search__picklist-item-result-value u-text--overflow">
+        {{matchText match.value search}}
+      </div>
+      <div class="patient-search__picklist-item-result-label u-text--overflow">
+        {{match.label}}
       </div>
     </div>
   `,
   templateContext() {
     return {
-      name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
-      hasIdentifiers: this.collection.hasIdentifiers(),
-      hasFieldQueryResults: this.collection.hasFieldQueryResults(),
     };
   },
 });
@@ -145,37 +136,23 @@ const ListView = CollectionView.extend({
 const HeaderView = View.extend({
   className: 'patient-search__picklist-header',
   template: hbs`
-    <div class="patient-search__picklist-header-name">
-      <div class="patient-search__picklist-header-name-icon"></div>
-      <div class="patient-search__picklist-header-name-text">
-        {{ @intl.globals.search.patientSearchViews.headerView.patient }}
-      </div>
+    <div class="patient-search__picklist-header-name-icon"></div>
+    <div class="patient-search__picklist-header-name-text">
+      {{ @intl.globals.search.patientSearchViews.headerView.patient }}
     </div>
     <div class="patient-search__picklist-header-meta">
       <div class="patient-search__picklist-header-dob">
         {{ @intl.globals.search.patientSearchViews.headerView.dob }}
       </div>
-      {{#if hasIdentifiers}}
-        <div class="patient-search__picklist-header-identifier">
-          {{ @intl.globals.search.patientSearchViews.headerView.id }}
-        </div>
-      {{/if}}
-      {{#if hasFieldQueryResults}}
-        <div class="patient-search__picklist-header-query">
-          {{ @intl.globals.search.patientSearchViews.headerView.fieldQuery }}
-        </div>
-      {{/if}}
       <div class="patient-search__picklist-header-status">
         {{ @intl.globals.search.patientSearchViews.headerView.workspaceStatus }}
       </div>
+      <div class="patient-search__picklist-header-results">
+        {{ @intl.globals.search.patientSearchViews.headerView.results }}
+      </div>
+      <div class="patient-search__picklist-header-results-label"></div>
     </div>
   `,
-  templateContext() {
-    return {
-      hasIdentifiers: this.collection.hasIdentifiers(),
-      hasFieldQueryResults: this.collection.hasFieldQueryResults(),
-    };
-  },
 });
 
 const DialogView = View.extend({
@@ -265,7 +242,7 @@ const PatientSearchPicklist = Component.extend({
 });
 
 const PatientSearchModal = View.extend({
-  className: 'modal--large',
+  className: 'modal patient-search__modal',
   template: hbs`
     <a href="#" class="button--icon patient-search__close js-close">{{far "xmark"}}</a>
     <div data-picklist-region></div>

@@ -1,4 +1,4 @@
-import { debounce, get, isBoolean } from 'underscore';
+import { debounce } from 'underscore';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
@@ -21,8 +21,6 @@ const Collection = BaseCollection.extend({
     search = '') {
     if (search.length < 3) {
       if (!search.length || !this.prevSearch.includes(search)) {
-        delete this._hasIdentifiers;
-        delete this._hasFieldQueryResults;
         this.reset();
         this.prevSearch = '';
       }
@@ -35,27 +33,9 @@ const Collection = BaseCollection.extend({
     this.isSearching = true;
     this._debouncedSearch(search);
   },
-  hasFieldQueryResults() {
-    if (isBoolean(this._hasFieldQueryResults)) return this._hasFieldQueryResults;
-
-    this._hasFieldQueryResults = this.some(model => model.has('value'));
-
-    return this._hasFieldQueryResults;
-  },
-  hasIdentifiers() {
-    if (isBoolean(this._hasIdentifiers)) return this._hasIdentifiers;
-
-    this._hasIdentifiers = !!this.find(model => {
-      return get(model.get('identifiers'), 'length');
-    });
-
-    return this._hasIdentifiers;
-  },
   _debouncedSearch(search) {
     const filter = { search };
 
-    delete this._hasIdentifiers;
-    delete this._hasFieldQueryResults;
     this.controller.abort();
     this.controller = new AbortController();
 

@@ -238,10 +238,9 @@ careOptsFrontend:
           shortcut: "Keyboard Shortcut: /"
         headerView:
           dob: DOB
-          fieldQuery: Results
-          id: Identifier
           patient: Patient
-          workspaceStatus: Workspace Status
+          results: Results
+          workspaceStatus: Status
   patients:
     patient:
       archive:

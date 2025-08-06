@@ -1,7 +1,11 @@
+.patient-search__modal {
+  width: 700px;
+}
+
 .patient-search__picklist {
   display: flex;
   flex-direction: column;
-  height: 420px;
+  height: 460px;
 }
 
 .patient-search__close {
@@ -50,14 +54,13 @@
   }
 }
 
-.patient-search__picklist-header-name {
-  display: flex;
-  flex: 2;
-}
-
 .patient-search__picklist-header-name-icon {
   margin-right: 16px;
   width: 28px;
+}
+
+.patient-search__picklist-header-name-text {
+  flex: 1;
 }
 
 .patient-search__picklist-header-meta {
@@ -69,10 +72,10 @@
   width: 100px;
 }
 
-.patient-search__picklist-header-identifier,
-.patient-search__picklist-header-query,
+.patient-search__picklist-header-results,
+.patient-search__picklist-header-results-label,
 .patient-search__picklist-header-status {
-  margin-left: 16px;
+  margin-left: 12px;
   width: 100px;
 }
 
@@ -88,6 +91,10 @@
   &.is-inactive {
     color: #{$black-60};
     font-style: italic;
+
+    .patient-search__picklist-item-result-label {
+      font-style: normal;
+    }
   }
 
   &.is-highlighted,
@@ -96,7 +103,8 @@
     color: #{$white};
 
     .patient-search__picklist-item,
-    .patient-search__picklist-item-meta {
+    .patient-search__picklist-item-meta,
+    .patient-search__picklist-item-result-label {
       color: #{$white};
     }
   }
@@ -109,13 +117,6 @@
   content: '–';
 }
 
-.patient-search__picklist-item-name {
-  display: flex;
-  flex: 2;
-  font-size: 16px;
-  padding-right: 4px;
-}
-
 .patient-search__picklist-item-name-icon {
   align-items: center;
   display: flex;
@@ -124,25 +125,36 @@
   width: 28px;
 }
 
+.patient-search__picklist-item-name-text {
+  display: flex;
+  flex: 1;
+  margin-right: 8px;
+  min-width: 0;
+}
+
 .patient-search__picklist-item-meta {
   display: flex;
   flex: 1;
-  font-size: 14px;
 }
 
 .patient-search__picklist-item-dob {
   width: 100px;
 }
 
-.patient-search__picklist-item-identifier,
-.patient-search__picklist-item-query {
-  margin-left: 16px;
+.patient-search__picklist-item-status {
+  margin-left: 12px;
+  text-transform: capitalize;
   width: 100px;
 }
 
-.patient-search__picklist-item-status {
-  margin-left: 16px;
-  text-transform: capitalize;
+.patient-search__picklist-item-result-value {
+  margin-left: 12px;
+  width: 100px;
+}
+
+.patient-search__picklist-item-result-label {
+  color: #{$black-60};
+  margin-left: 12px;
   width: 100px;
 }
 

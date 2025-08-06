@@ -415,7 +415,7 @@ context('App Nav', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.js-close')
       .click();
 
@@ -932,17 +932,17 @@ context('App Nav', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.patient-search__input')
       .should('have.value', 'First New Last');
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.js-close .icon')
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .should('not.exist');
   });
 
