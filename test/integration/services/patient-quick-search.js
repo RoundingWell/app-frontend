@@ -26,9 +26,11 @@ context('Patient Quick Search', function() {
           first_name,
           last_name,
           birth_date,
-          identifiers: [],
-          value: null,
           status,
+          match: {
+            label: 'Name',
+            value: `${ first_name } ${ last_name }`,
+          },
         },
         relationships: {
           patient: getRelationship(patient, 'patients'),
@@ -267,9 +269,11 @@ context('Patient Quick Search', function() {
         first_name,
         last_name,
         birth_date,
-        identifiers: [{ type: 'mrn', value: 'identifier-001' }],
         status,
-        value: null,
+        match: {
+          label: 'MRN',
+          value: 'identifier-001',
+        },
       },
       relationships: {
         patient: getRelationship(testPatient, 'patients'),
@@ -330,9 +334,11 @@ context('Patient Quick Search', function() {
         first_name,
         last_name,
         birth_date,
-        identifiers: [],
         status,
-        value: '+6513216543',
+        match: {
+          label: 'Phone Number',
+          value: '+6513216543',
+        },
       },
       relationships: {
         patient: getRelationship(testPatient, 'patients'),
@@ -382,14 +388,14 @@ context('Patient Quick Search', function() {
       body: {
         data: [{
           ...searchResult,
-          attributes: { ...searchResult.attributes, value: null },
+          attributes: { ...searchResult.attributes, match: { label: 'DOB', value: '2008-01-16' } },
         }],
         included: [getResource(testPatient, 'patients')],
       },
       delay: 300,
     }).as('routePatientSearch');
 
-    // header & list views should re-render when users copy/paste/replace a search input
+    // list view should re-render when users copy/paste/replace a search input
     cy
       .get('.modal--large')
       .find('.patient-search__input')
@@ -399,15 +405,9 @@ context('Patient Quick Search', function() {
 
     cy
       .get('.modal--large')
-      .find('.patient-search__picklist-header-meta')
-      .children()
-      .should('have.length', 2);
-
-    cy
-      .get('.modal--large')
-      .find('.patient-search__picklist-item-meta')
-      .children()
-      .should('have.length', 2);
+      .find('.js-picklist-item strong')
+      .parents('.js-picklist-item')
+      .should('contain', '2008-01-16');
   });
 
   specify('No Results with Patient Add', function() {

@@ -90,25 +90,21 @@ const PicklistItem = View.extend({
         {{far "address-card"}}
       </div>
       <div class="patient-search__picklist-item-name-text">
-        <span>{{matchText name search}}{{~ remove_whitespace ~}}</span>
+        <span>{{name}}{{~ remove_whitespace ~}}</span>
       </div>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
         {{formatDateTime birth_date "MM/DD/YYYY"}}
       </div>
-      {{#if hasIdentifiers}}
-        <div class="patient-search__picklist-item-identifier u-text--overflow">
-          {{matchText identifiers.0.value search}}
-        </div>
-      {{/if}}
-      {{#if hasFieldQueryResults}}
-        <div class="patient-search__picklist-item-query u-text--overflow">
-          {{matchText value search}}
-        </div>
-      {{/if}}
       <div class="patient-search__picklist-item-status u-text--overflow">
         {{status}}
+      </div>
+      <div class="patient-search__picklist-item-result-value u-text--overflow">
+        {{matchText match.value search}}
+      </div>
+      <div class="patient-search__picklist-item-result-label u-text--overflow">
+        {{match.label}}
       </div>
     </div>
   `,
@@ -116,8 +112,6 @@ const PicklistItem = View.extend({
     return {
       name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
-      hasIdentifiers: this.collection.hasIdentifiers(),
-      hasFieldQueryResults: this.collection.hasFieldQueryResults(),
     };
   },
 });
@@ -155,27 +149,15 @@ const HeaderView = View.extend({
       <div class="patient-search__picklist-header-dob">
         {{ @intl.globals.search.patientSearchViews.headerView.dob }}
       </div>
-      {{#if hasIdentifiers}}
-        <div class="patient-search__picklist-header-identifier">
-          {{ @intl.globals.search.patientSearchViews.headerView.id }}
-        </div>
-      {{/if}}
-      {{#if hasFieldQueryResults}}
-        <div class="patient-search__picklist-header-query">
-          {{ @intl.globals.search.patientSearchViews.headerView.fieldQuery }}
-        </div>
-      {{/if}}
       <div class="patient-search__picklist-header-status">
         {{ @intl.globals.search.patientSearchViews.headerView.workspaceStatus }}
       </div>
+      <div class="patient-search__picklist-header-results">
+        {{ @intl.globals.search.patientSearchViews.headerView.results }}
+      </div>
+      <div class="patient-search__picklist-header-results-label"></div>
     </div>
   `,
-  templateContext() {
-    return {
-      hasIdentifiers: this.collection.hasIdentifiers(),
-      hasFieldQueryResults: this.collection.hasFieldQueryResults(),
-    };
-  },
 });
 
 const DialogView = View.extend({
