@@ -76,7 +76,7 @@ context('Patient Quick Search', function() {
       .should('have.class', 'is-active');
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .as('searchModal')
       .should('contain', 'Search by')
       .find('.patient-search__input')
@@ -305,13 +305,13 @@ context('Patient Quick Search', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.patient-search__input')
       .type('identifier-001')
       .wait('@routePatientSearch');
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.js-picklist-item strong')
       .parents('.js-picklist-item')
       .should('contain', 'identifier-001');
@@ -370,13 +370,13 @@ context('Patient Quick Search', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.patient-search__input')
       .type('+6513216543')
       .wait('@routePatientSearch');
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.js-picklist-item strong')
       .parents('.js-picklist-item')
       .should('contain', '+6513216543');
@@ -397,14 +397,14 @@ context('Patient Quick Search', function() {
 
     // list view should re-render when users copy/paste/replace a search input
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.patient-search__input')
       .invoke('val', '2008-01-16')
       .trigger('input')
       .wait('@routePatientSearch');
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .find('.js-picklist-item strong')
       .parents('.js-picklist-item')
       .should('contain', '2008-01-16');
@@ -432,7 +432,7 @@ context('Patient Quick Search', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.patient-search__modal')
       .as('searchModal')
       .find('.patient-search__input')
       .type('None')

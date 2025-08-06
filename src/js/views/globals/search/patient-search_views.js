@@ -85,13 +85,11 @@ const PicklistItem = View.extend({
     this.state.set({ selected: this.model });
   },
   template: hbs`
-    <div class="patient-search__picklist-item-name u-text--overflow">
-      <div class="patient-search__picklist-item-name-icon">
-        {{far "address-card"}}
-      </div>
-      <div class="patient-search__picklist-item-name-text">
-        <span>{{name}}{{~ remove_whitespace ~}}</span>
-      </div>
+    <div class="patient-search__picklist-item-name-icon">
+      {{far "address-card"}}
+    </div>
+    <div class="patient-search__picklist-item-name-text">
+      <span class="u-text--overflow">{{name}}{{~ remove_whitespace ~}}</span>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
@@ -139,11 +137,9 @@ const ListView = CollectionView.extend({
 const HeaderView = View.extend({
   className: 'patient-search__picklist-header',
   template: hbs`
-    <div class="patient-search__picklist-header-name">
-      <div class="patient-search__picklist-header-name-icon"></div>
-      <div class="patient-search__picklist-header-name-text">
-        {{ @intl.globals.search.patientSearchViews.headerView.patient }}
-      </div>
+    <div class="patient-search__picklist-header-name-icon"></div>
+    <div class="patient-search__picklist-header-name-text">
+      {{ @intl.globals.search.patientSearchViews.headerView.patient }}
     </div>
     <div class="patient-search__picklist-header-meta">
       <div class="patient-search__picklist-header-dob">
@@ -247,7 +243,7 @@ const PatientSearchPicklist = Component.extend({
 });
 
 const PatientSearchModal = View.extend({
-  className: 'modal--large',
+  className: 'modal patient-search__modal',
   template: hbs`
     <a href="#" class="button--icon patient-search__close js-close">{{far "xmark"}}</a>
     <div data-picklist-region></div>
