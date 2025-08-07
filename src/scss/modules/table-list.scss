@@ -1,18 +1,41 @@
 .table-list {
-  table-layout: fixed;
-  width: 100%;
+  display: grid;
+  flex: 1 1 auto;
+
+  /* grid-template-columns: Each page/component should define its own  */
+  grid-template-rows: auto 1fr;
+  min-height: 0;
+}
+
+.table-list__header,
+.table-list__list,
+.table-list__item {
+  column-gap: 8px;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
 }
 
 .table-list__header {
   border-bottom: 1px solid #{$black-90};
   color: #{$black-60};
   font-size: 12px;
-  padding: 8px;
+  grid-row: 1;
+  margin: 0 24px;
+  padding: 8px 0;
+}
+
+.table-list__list {
+  grid-auto-rows: min-content;
+  grid-row: 2;
 }
 
 .table-list__item {
+  align-items: center;
+  align-self: start;
   border-bottom: 1px solid #{$black-90};
   cursor: pointer;
+  padding: 12px 0;
 
   &:hover:not(.is-selected) {
     background-color: color(light_blue, light);
@@ -21,17 +44,8 @@
   &.is-selected {
     background-color: #{$greyed};
   }
-}
 
-.table-list__display-icon {
-  color: #999;
-  display: inline-block;
-  vertical-align: middle;
-  width: 16px;
-}
-
-.table-list.is-dragging {
-  .table-list__item {
+  .table-list.is-dragging & {
     background: #{$white};
 
     &.sortable-ghost {
@@ -44,32 +58,27 @@
   }
 }
 
-.table-list__cell {
-  overflow: hidden;
-  padding: 16px 8px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .table-list__cell--empty {
   color: #{$black-60};
 }
 
-.table-list__meta:not(:empty) {
-  margin-right: 8px;
+.table-list__item-check {
+  width: 20px;
 }
 
-.table-empty-list {
-  border-bottom: 1px solid #{$black-90};
+.table-list__display-icon {
+  color: #{$black-60};
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+}
+
+.table-list__empty-list {
   color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
+  grid-column: 1 / -1;
   margin: 40px auto 20px;
   padding: 20px;
   text-align: center;
-}
-
-.table-list__item-check {
-  padding: 16px 0;
-  width: 20px;
 }
