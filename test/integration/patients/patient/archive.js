@@ -532,6 +532,20 @@ context('patient archive page', function() {
       .its('request.url')
       .should('contain', testNewSocketFlow.id);
 
+    // verify the new flow is added to the ws subscription resources
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledTwice')
+      .then(stub => {
+        const secondCallData = stub.getCall(1).args[0].data;
+        const { resources } = secondCallData;
+
+        expect(resources).to.deep.include({
+          id: testNewSocketFlow.id,
+          type: testNewSocketFlow.type,
+        });
+      });
+
     cy
       .get('.app-frame__content')
       .find('.table-list__item')
@@ -776,6 +790,20 @@ context('patient archive page', function() {
       .wait('@routeAction')
       .its('request.url')
       .should('contain', testNewSocketAction.id);
+
+    // verify the new action is added to the ws subscription resources
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledTwice')
+      .then(stub => {
+        const secondCallData = stub.getCall(1).args[0].data;
+        const { resources } = secondCallData;
+
+        expect(resources).to.deep.include({
+          id: testNewSocketAction.id,
+          type: testNewSocketAction.type,
+        });
+      });
 
     cy
       .get('.app-frame__content')
