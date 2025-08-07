@@ -10,7 +10,7 @@
 .table-list__header,
 .table-list__list,
 .table-list__item {
-  column-gap: 8px;
+  column-gap: 16px;
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
@@ -21,8 +21,7 @@
   color: #{$black-60};
   font-size: 12px;
   grid-row: 1;
-  margin: 0 24px;
-  padding: 8px 0;
+  padding: 8px;
 }
 
 .table-list__list {
@@ -35,7 +34,7 @@
   align-self: start;
   border-bottom: 1px solid #{$black-90};
   cursor: pointer;
-  padding: 12px 0;
+  padding: 12px 8px;
 
   &:hover:not(.is-selected) {
     background-color: color(light_blue, light);
@@ -66,11 +65,28 @@
   width: 20px;
 }
 
-.table-list__display-icon {
+.table-list__icon .icon {
   color: #{$black-60};
   display: inline-block;
-  vertical-align: middle;
+  vertical-align: top;
   width: 16px;
+}
+
+.table-list__icon--large .icon {
+  display: inline-block;
+  font-size: 20px;
+  margin-right: 16px;
+  vertical-align: top;
+  width: 20px;
+}
+
+.table-list__meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: visible;
+  white-space: nowrap;
 }
 
 .table-list__empty-list {

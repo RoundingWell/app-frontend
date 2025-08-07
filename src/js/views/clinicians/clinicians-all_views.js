@@ -7,8 +7,6 @@ import intl from 'js/i18n';
 
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
-import FixListWidthBehavior from 'js/behaviors/fix-list-width';
-
 import PreloadRegion from 'js/regions/preload_region';
 import { RoleComponent, TeamComponent, StateComponent } from 'js/views/clinicians/shared/clinicians_views';
 
@@ -33,21 +31,13 @@ const RowBehavior = Behavior.extend({
 });
 
 const EmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.clinicians.cliniciansAllViews.emptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.clinicians.cliniciansAllViews.emptyView }}</h2>`,
 });
 
 const EmptyFindInListView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.clinicians.cliniciansAllViews.emptyFindInListView.noResults }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.clinicians.cliniciansAllViews.emptyFindInListView.noResults }}</h2>`,
 });
 
 const ItemView = View.extend({
@@ -56,7 +46,6 @@ const ItemView = View.extend({
   },
   className: 'table-list__item',
   behaviors: [RowBehavior],
-  tagName: 'tr',
   regions: {
     team: '[data-team-region]',
     role: '[data-role-region]',
@@ -66,14 +55,14 @@ const ItemView = View.extend({
     'click': 'click',
   },
   template: hbs`
-    <td class="table-list__cell w-20">{{#unless name}}{{ @intl.clinicians.cliniciansAllViews.itemView.newClinician }}{{/unless}}{{ name }}&#8203;</td>
-    <td class="table-list__cell w-30 {{#unless workspaces}}table-list__cell--empty{{/unless}}">{{#each workspaces}}{{#unless @first}}, {{/unless}}{{ this.name }}{{/each}}{{#unless workspaces}}{{ @intl.clinicians.cliniciansAllViews.itemView.noWorkspaces }}{{/unless}}&#8203;</td>
-    <td class="table-list__cell w-30">
-      <span class="u-margin--r-8" data-state-region></span>&#8203;{{~ remove_whitespace ~}}
-      <span class="u-margin--r-8" data-role-region></span>&#8203;{{~ remove_whitespace ~}}
-      <span data-team-region></span>&#8203;{{~ remove_whitespace ~}}
-    </td>
-    <td class="table-list__cell w-20 {{#unless last_active_at}}table-list__cell--empty{{/unless}}">{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</td>
+    <div class="u-text--overflow">{{#unless name}}{{ @intl.clinicians.cliniciansAllViews.itemView.newClinician }}{{/unless}}{{ name }}&#8203;</div>
+    <div class="u-text--overflow-two-lines{{#unless workspaces}} table-list__cell--empty{{/unless}}">{{#each workspaces}}{{#unless @first}}, {{/unless}}{{ this.name }}{{/each}}{{#unless workspaces}}{{ @intl.clinicians.cliniciansAllViews.itemView.noWorkspaces }}{{/unless}}&#8203;</div>
+    <div class="table-list__meta">
+      <span><span data-state-region></span>&#8203;</span>{{~ remove_whitespace ~}}
+      <span><span data-role-region></span>&#8203;</span>{{~ remove_whitespace ~}}
+      <span><span data-team-region></span>&#8203;</span>{{~ remove_whitespace ~}}
+    </div>
+    <div class="u-text--nowrap{{#unless last_active_at}} table-list__cell--empty{{/unless}}">{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</div>
   `,
   templateContext() {
     return {
@@ -130,9 +119,8 @@ const ItemView = View.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region',
-  behaviors: [FixListWidthBehavior],
   template: hbs`
-    <div class="list-page__header js-list-header">
+    <div class="list-page__header">
       <div class="flex list-page__title">
         <div class="flex list-page__title-filter">
           <span class="list-page__title-icon">{{far "users-gear"}}</span>{{ @intl.clinicians.cliniciansAllViews.layoutView.title }}
@@ -140,21 +128,22 @@ const LayoutView = View.extend({
         <div class="clinicians__list-search" data-search-region></div>
       </div>
       <button class="u-margin--b-16 button-primary js-add-clinician">{{far "circle-plus"}}<span>{{ @intl.clinicians.cliniciansAllViews.layoutView.addClinicianButton }}</span></button>
-      <table class="w-100">
-        <tr>
-          <td class="table-list__header w-20">{{ @intl.clinicians.cliniciansAllViews.layoutView.clinicianHeader }}</td>
-          <td class="table-list__header w-30">{{ @intl.clinicians.cliniciansAllViews.layoutView.workspacesHeader }}</td>
-          <td class="table-list__header w-30">{{ @intl.clinicians.cliniciansAllViews.layoutView.attributesHeader }}</td>
-          <td class="table-list__header w-20">{{ @intl.clinicians.cliniciansAllViews.layoutView.lastActiveHeader }}</td>
-        </tr>
-      </table>
     </div>
-    <div class="flex-region list-page__list js-list" data-list-region></div>
+    <div class="table-list clinicians-list__table-list">
+      <div class="table-list__header list-page__list-header">
+        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.clinicianHeader }}</div>
+        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.workspacesHeader }}</div>
+        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.attributesHeader }}</div>
+        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.lastActiveHeader }}</div>
+      </div>
+      <div class="table-list-scroll" data-list-region></div>
+    </div>
   `,
   regions: {
     list: {
       el: '[data-list-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
     sidebar: '[data-sidebar-region]',
     addClinician: {
@@ -166,15 +155,10 @@ const LayoutView = View.extend({
   triggers: {
     'click .js-add-clinician': 'click:addClinician',
   },
-  childViewTriggers: {
-    'render:children': 'childView:render:children',
-    'attach': 'childView:attach',
-  },
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list',
-  tagName: 'table',
+  className: 'table-list__list list-page__list',
   childView: ItemView,
   emptyView() {
     if (this.collection.length && this.state.get('searchQuery')) {
