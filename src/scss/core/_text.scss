@@ -13,6 +13,14 @@
   white-space: nowrap !important;
 }
 
+.u-text--overflow-two-lines {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
 .u-text--nowrap {
   white-space: nowrap !important;
 }
