@@ -8,7 +8,7 @@ export class AuthProvider {
   constructor(config = {}, LoginView = null) {
     this.config = config;
     this.LoginView = LoginView;
-    this.token = null;
+    this.token = config.token || null;
     this.client = null;
   }
 
