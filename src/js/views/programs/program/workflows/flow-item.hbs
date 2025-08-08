@@ -1,12 +1,12 @@
-<td class="table-list__cell w-40">
-  <span class="workflows__flow-icon">{{fas "folder"}}</span>{{~ remove_whitespace ~}}
-  <span class="workflows__flow-name">
+<div>
+  <span class="table-list__icon--large workflows__flow-icon">{{fas "folder"}}</span>{{~ remove_whitespace ~}}
+  <span>
     {{ name }}{{~ remove_whitespace ~}}
     {{~#unless name}}<em>{{ @intl.programs.program.workflows.flowItemTemplate.newProgramFlow }}</em>{{/unless~}}
   </span>
-</td>
-<td class="table-list__cell w-60">
-  <span class="table-list__meta workflows__flow-status">
+</div>
+<div class="table-list__meta">
+  <span class="workflows__flow-status">
     {{#if published}}
       {{#if isAutomated}}
         <span class="workflows-action--automated">{{far "bolt"}}</span>
@@ -17,6 +17,6 @@
       <span class="workflows-action--draft">{{far "pen-to-square"}}</span>
     {{/if}}
   </span>{{~ remove_whitespace ~}}
-  <span class="table-list__meta" data-owner-region></span>{{~ remove_whitespace ~}}
-  <span class="workflows__item-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
-</td>
+  <span data-owner-region></span>{{~ remove_whitespace ~}}
+</div>
+<div class="workflows__item-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>

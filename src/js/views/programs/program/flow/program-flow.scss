@@ -80,7 +80,7 @@
   margin-right: 16px;
   padding-right: 24px;
   vertical-align: top;
-  width: 40%;
+  width: calc(40% + 32px);
 }
 
 .program-flow__meta {
@@ -93,48 +93,30 @@
 }
 
 .program-flow__list {
-  border-top: #{$black-90} 1px solid;
+  border-top: 1px solid #{$black-90};
 }
 
-.program-flow__action-name {
-  display: table-cell;
-  vertical-align: middle;
-  white-space: normal;
+.program-flow__table-list {
+  grid-template-columns:
+    40px
+    minmax(280px, 40%)
+    minmax(max-content, auto)
+    85px
+    60px;
 }
 
-.program-flow__action-icon {
-  display: table-cell;
-  position: relative;
-  vertical-align: middle;
-
-  .icon {
-    color: color(blue);
-    font-size: 20px;
-    margin-right: 16px;
-    vertical-align: middle;
-    width: 20px;
-  }
+.program-flow__action-icon .icon {
+  color: color(blue);
 }
 
 .program-flow__action-ts {
-  float: right;
   font-size: 12px;
-  margin: 8px 0 0 8px;
-  min-width: 40px;
-  vertical-align: middle;
 }
 
 .program-flow__sort-handle {
-  align-items: center;
-  bottom: -16px;
   cursor: move;
   display: none;
-  justify-content: center;
-  position: absolute;
-  right: -16px;
-  text-align: center;
-  top: -16px;
-  width: 60px;
+  margin-left: 16px;
 }
 
 .is-draggable {
@@ -155,14 +137,4 @@
       display: none;
     }
   }
-}
-
-.program-flow__empty-list {
-  border-bottom: 1px solid #{$black-90};
-  color: #{$black-80};
-  font-size: 16px;
-  font-weight: 600;
-  margin: 40px auto 20px;
-  padding: 20px;
-  text-align: center;
 }

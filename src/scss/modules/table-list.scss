@@ -34,7 +34,7 @@
   align-self: start;
   border-bottom: 1px solid #{$black-90};
   cursor: pointer;
-  padding: 12px 8px;
+  padding: 16px 8px;
 
   &:hover:not(.is-selected) {
     background-color: color(light_blue, light);
