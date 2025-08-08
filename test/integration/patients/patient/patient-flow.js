@@ -1077,65 +1077,6 @@ context('patient flow page', function() {
       .get('[data-content-region]')
       .find('.is-selected')
       .contains('Conditional');
-
-    const otherAction = getAction({
-      attributes: {
-        name: 'Socket Action',
-      },
-      relationships: {
-        flow: getRelationship(testFlow),
-        state: getRelationship(stateTodo),
-      },
-    });
-
-    cy
-      .routeAction(fx => {
-        fx.data = otherAction;
-
-        return fx;
-      });
-
-    cy.sendWs({
-      category: 'ResourceCreated',
-      resource: {
-        type: otherAction.type,
-        id: otherAction.id,
-      },
-      payload: {},
-    });
-
-    // a notification that is sent for a resource we are currently fetching
-    // this notification is queued until model.fetch() is done for that action
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: otherAction.type,
-        id: otherAction.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
-        },
-      },
-    });
-
-    cy
-      .wait('@routeAction')
-      .its('request.url')
-      .should('contain', otherAction.id);
-
-    cy
-      .get('[data-content-region]')
-      .find('.is-selected')
-      .next()
-      .contains('Socket Action');
-
-    cy
-      .get('[data-content-region]')
-      .find('.is-selected')
-      .next()
-      .find('[data-state-region] .fa-circle-dot');
   });
 
   specify('failed flow', function() {
@@ -2670,6 +2611,17 @@ context('patient flow page', function() {
       },
     });
 
+    const testNewSocketAction = getAction({
+      attributes: {
+        name: 'New Action - Created Elsewhere',
+      },
+      relationships: {
+        flow: getRelationship(testSocketFlow),
+        state: getRelationship(stateTodo),
+        owner: getRelationship(teamOther),
+      },
+    });
+
     cy
       .routesForPatientAction()
       .routeFlow(fx => {
@@ -3050,5 +3002,63 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__empty-list')
       .contains('No Actions');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testNewSocketAction;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+
+    // a notification that is sent for a resource we are currently fetching
+    // this notification is queued until model.fetch() is done for that action
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {
+        state: {
+          type: stateInProgress.type,
+          id: stateInProgress.id,
+        },
+      },
+    });
+
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', testNewSocketAction.id);
+
+    // verify the new flow is added to the ws subscription resources
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledTwice')
+      .then(stub => {
+        const secondCallData = stub.getCall(1).args[0].data;
+        const { resources } = secondCallData;
+
+        expect(resources).to.deep.include({
+          id: testNewSocketAction.id,
+          type: testNewSocketAction.type,
+        });
+      });
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .first()
+      .should('contain', 'New Action - Created Elsewhere')
+      .find('[data-state-region] .fa-circle-dot');
   });
 });
