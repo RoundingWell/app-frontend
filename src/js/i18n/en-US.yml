@@ -241,6 +241,9 @@ careOptsFrontend:
           patient: Patient
           results: Results
           workspaceStatus: Status
+        picklistItemView:
+          labelDob: Birth Date
+          labelName: Name
   patients:
     patient:
       archive:

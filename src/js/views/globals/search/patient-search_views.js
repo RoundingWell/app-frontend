@@ -6,6 +6,8 @@ import { View, CollectionView, Region } from 'marionette';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/modals.scss';
 
+import intl from 'js/i18n';
+
 import Component from 'js/base/component';
 
 import InputFocusBehavior from 'js/behaviors/input-focus';
@@ -99,26 +101,29 @@ const PicklistItem = View.extend({
         {{status}}
       </div>
       <div class="patient-search__picklist-item-result-value u-text--overflow">
-        {{#unless isDefaultMatchType}}
+        {{#if shouldShowMatch}}
           {{matchText match.value search}}
-        {{/unless}}
+        {{/if}}
       </div>
       <div class="patient-search__picklist-item-result-label u-text--overflow">
-        {{#unless isDefaultMatchType}}
+        {{#if shouldShowMatch}}
           {{match.label}}
-        {{/unless}}
+        {{/if}}
       </div>
     </div>
   `,
   templateContext() {
-    const match = this.model.get('match');
-    const isDefaultMatchType = match.label === 'Name' || match.label === 'Birth Date';
-
     return {
-      isDefaultMatchType,
       name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
+      shouldShowMatch: this.shouldShowMatch(),
     };
+  },
+  shouldShowMatch() {
+    const label = this.model.get('match').label;
+    const i18n = intl.globals.search.patientSearchViews.picklistItemView;
+
+    return label !== i18n.labelName && label !== i18n.labelDob;
   },
 });
 
