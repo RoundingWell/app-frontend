@@ -89,7 +89,7 @@ const PicklistItem = View.extend({
       {{far "address-card"}}
     </div>
     <div class="patient-search__picklist-item-name-text">
-      <span class="u-text--overflow">{{first_name}} {{last_name}}{{~ remove_whitespace ~}}</span>
+      <span class="u-text--overflow">{{matchText name search}}{{~ remove_whitespace ~}}</span>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
@@ -108,6 +108,7 @@ const PicklistItem = View.extend({
   `,
   templateContext() {
     return {
+      name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
     };
   },
