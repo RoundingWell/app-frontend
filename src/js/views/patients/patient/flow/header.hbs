@@ -1,9 +1,7 @@
 <h1 class="patient-flow__name">{{fas "folder-open"}} {{ name }}</h1>
-<table class="table-list">
-  <td class="patient-flow__details">{{ details }}</td>{{~ remove_whitespace ~}}
-  <td class="patient-flow__meta">
-    <span class="table-list__meta u-margin--l-32" data-state-region></span>
-    <span class="table-list__meta" data-owner-region></span>
-    <progress class="js-progress progress-bar patient-flow__progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>{{~ remove_whitespace ~}}
-  </td>
-</table>
+<div>
+  <span class="patient-flow__details">{{ details }}</span>{{~ remove_whitespace ~}}
+  <span class="patient-flow__meta" data-state-region></span>{{~ remove_whitespace ~}}
+  <span class="patient-flow__meta" data-owner-region></span>{{~ remove_whitespace ~}}
+  <progress class="js-progress progress-bar patient-flow__progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>{{~ remove_whitespace ~}}
+</div>

@@ -82,39 +82,31 @@
   font-size: 14px;
   padding-right: 24px;
   vertical-align: top;
+  width: calc(40% + 98px);
 }
 
 .patient-flow__meta {
-  padding-left: 8px;
-  width: 562px;
-}
-
-.patient-flow__actions-container {
-  padding: 0 24px;
+  margin-right: 8px;
 }
 
 .patient-flow__actions {
-  border-top: #{$black-90} 1px solid;
+  border-top: 1px solid #{$black-90};
+  margin: 0 24px;
   padding: 16px 0;
 }
 
-.patient-flow__list-container {
-  overflow-y: auto;
-  padding: 0 24px;
-}
-
 .patient-flow__list {
-  border-top: #{$black-90} 1px solid;
+  border-top: 1px solid #{$black-90};
 }
 
-.patient-flow__empty-list {
-  border-bottom: 1px solid #{$black-90};
-  color: #{$black-80};
-  font-size: 16px;
-  font-weight: 600;
-  margin: 40px auto 20px;
-  padding: 20px;
-  text-align: center;
+.patient-flow__table-list {
+  grid-template-columns:
+    20px
+    40px
+    minmax(100px, 40%)
+    minmax(max-content, auto)
+    minmax(max-content, 84px);
+  padding: 0 24px;
 }
 
 .patient-flow__progress {

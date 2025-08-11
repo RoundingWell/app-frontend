@@ -9,8 +9,6 @@ import 'scss/modules/table-list.scss';
 import intl from 'js/i18n';
 import PreloadRegion from 'js/regions/preload_region';
 
-import FixListWidthBehavior from 'js/behaviors/fix-list-width';
-
 import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/views/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/views/patients/shared/read-only_views';
@@ -131,12 +129,8 @@ const HeaderView = View.extend({
 });
 
 const EmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="patient-flow__empty-list">
-      <h2>{{ @intl.patients.patient.flowViews.emptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.patients.patient.flowViews.emptyView }}</h2>`,
 });
 
 const ActionItemView = View.extend({
@@ -168,7 +162,6 @@ const ActionItemView = View.extend({
       commentCount: this.model.commentCount(),
     };
   },
-  tagName: 'tr',
   regions: {
     check: '[data-check-region]',
     details: '[data-details-region]',
@@ -323,8 +316,7 @@ const ActionItemView = View.extend({
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list patient-flow__list',
-  tagName: 'table',
+  className: 'table-list__list patient-flow__list',
   childView: ActionItemView,
   childViewOptions() {
     return {
@@ -360,17 +352,16 @@ const LayoutView = View.extend({
     <div class="patient-flow__layout">
       <div data-context-trail-region></div>
       <div class="patient-flow__header-container" data-header-region></div>
-      <div class="patient-flow__actions-container js-list-header">
-        <div class="patient-flow__actions">
-          <div data-select-all-region></div>
-          <div data-tools-region></div>
-        </div>
+      <div class="patient-flow__actions">
+        <div data-select-all-region></div>
+        <div data-tools-region></div>
       </div>
-      <div class="patient-flow__list-container flex-region js-list" data-action-list-region></div>
+      <div class="table-list patient-flow__table-list">
+        <div class="table-list__list" data-action-list-region></div>
+      </div>
     </div>
     <div class="patient-flow__sidebar" data-sidebar-region></div>
   `,
-  behaviors: [FixListWidthBehavior],
   regions: {
     contextTrail: {
       el: '[data-context-trail-region]',
@@ -381,6 +372,7 @@ const LayoutView = View.extend({
     actionList: {
       el: '[data-action-list-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
     tools: {
       el: '[data-tools-region]',
@@ -390,10 +382,6 @@ const LayoutView = View.extend({
       el: '[data-select-all-region]',
       replaceElement: true,
     },
-  },
-  childViewTriggers: {
-    'attach': 'childView:attach',
-    'render:children': 'childView:render:children',
   },
 });
 
