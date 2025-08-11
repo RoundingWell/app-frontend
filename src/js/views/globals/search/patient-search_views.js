@@ -99,15 +99,23 @@ const PicklistItem = View.extend({
         {{status}}
       </div>
       <div class="patient-search__picklist-item-result-value u-text--overflow">
-        {{matchText match.value search}}
+        {{#unless isDefaultMatchType}}
+          {{matchText match.value search}}
+        {{/unless}}
       </div>
       <div class="patient-search__picklist-item-result-label u-text--overflow">
-        {{match.label}}
+        {{#unless isDefaultMatchType}}
+          {{match.label}}
+        {{/unless}}
       </div>
     </div>
   `,
   templateContext() {
+    const match = this.model.get('match');
+    const isDefaultMatchType = match.label === 'Name' || match.label === 'Birth Date';
+
     return {
+      isDefaultMatchType,
       name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
     };
