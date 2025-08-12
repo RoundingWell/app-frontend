@@ -7,8 +7,6 @@ import intl, { renderTemplate } from 'js/i18n';
 import underscored from 'js/utils/formatting/underscored';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
-import FixListWidthBehavior from 'js/behaviors/fix-list-width';
-
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
 import 'scss/modules/table-list.scss';
@@ -31,16 +29,19 @@ const i18n = intl.patients.worklist.worklistViews;
 const LayoutView = View.extend({
   className: 'flex-region',
   template: LayoutTemplate,
-  behaviors: [FixListWidthBehavior],
   regions: {
     dateFilter: '[data-date-filter-region]',
     filters: '[data-filters-region]',
     toggle: '[data-toggle-region]',
     sort: '[data-sort-region]',
-    table: '[data-table-region]',
+    table: {
+      el: '[data-table-region]',
+      replaceElement: true,
+    },
     list: {
       el: '[data-list-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
     selectAll: '[data-select-all-region]',
     title: {
@@ -49,10 +50,6 @@ const LayoutView = View.extend({
     },
     search: '[data-search-region]',
     count: '[data-count-region]',
-  },
-  childViewTriggers: {
-    'attach': 'childView:attach',
-    'render:children': 'childView:render:children',
   },
   triggers: {
     'click @ui.select': 'click:select',
@@ -245,8 +242,8 @@ const AllFiltersButtonView = View.extend({
 });
 
 const TableHeaderView = View.extend({
+  className: 'table-list__header list-page__list-header',
   template: TableHeaderTemplate,
-  tagName: 'tr',
   templateContext() {
     return {
       isFlowList: this.getOption('isFlowList'),
@@ -255,17 +252,12 @@ const TableHeaderView = View.extend({
 });
 
 const EmptyFindInListView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.patients.worklist.worklistViews.emptyFindInListView.noResults }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.patients.worklist.worklistViews.emptyFindInListView.noResults }}</h2>`,
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list',
-  tagName: 'table',
+  className: 'table-list__list list-page__list',
   childView() {
     return this.isFlowList ? FlowItemView : ActionItemView;
   },

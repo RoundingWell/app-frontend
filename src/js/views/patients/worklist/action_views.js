@@ -14,17 +14,12 @@ import './worklist-list.scss';
 const ActionTooltipTemplate = hbs`{{formatMessage (intlGet "patients.worklist.actionViews.actionListTooltips") title=worklistId team=owner}}`;
 
 const ActionEmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.patients.worklist.actionViews.actionEmptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.patients.worklist.actionViews.actionEmptyView }}</h2>`,
 });
 
 const ActionItemView = View.extend({
   className: 'table-list__item work-list__item',
-  tagName: 'tr',
   template: ActionItemTemplate,
   regions: {
     check: '[data-check-region]',

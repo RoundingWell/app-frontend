@@ -1,25 +1,24 @@
-<td class="table-list__cell table-list__item-check js-no-click"><span data-check-region></span></td>
-<td class="table-list__cell w-15">
-  <span class="worklist-list__patient-sidebar-icon">
-    <button class="button-secondary--compact js-patient-sidebar-button">
-      {{far "address-card"}}&#8203;
-    </button>
-  </span>
-  <div class="worklist-list__patient-name js-patient">
-    {{ patient.first_name }} {{ patient.last_name }}&#8203;
-  </div>
-</td>
-<td class="table-list__cell worklist-list__item-name">
-  <span class="worklist-list__flow-icon">{{fas "folder"}}</span>{{~ remove_whitespace ~}}
-  <div class="worklist-list__name">
-    {{#if flowName}}<div class="worklist-list__flow-name">{{ flowName }}</div>{{/if}}&#8203;{{~ remove_whitespace ~}}
-    {{ name }}&#8203;{{~ remove_whitespace ~}}
-  </div>
-</td>
-<td class="table-list__cell worklist-list__meta">
-  <span class="table-list__meta" data-state-region></span>&#8203;<span class="worklist-list__search-helper">{{ state }}</span>&#8203;{{~ remove_whitespace ~}}
-  <span class="table-list__meta" data-owner-region></span>&#8203;<span class="worklist-list__search-helper">{{ owner }}</span>&#8203;{{~ remove_whitespace ~}}
+<div class="table-list__item-check js-no-click"><span data-check-region></span></div>
+<div>
+  <button class="button-secondary--compact js-patient-sidebar-button">
+    {{far "address-card"}}&#8203;
+  </button>
+</div>
+<div class="js-patient">
+  {{#if patient.segment}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ patient.segment }}&#8203;</div>{{/if}}{{~ remove_whitespace ~}}
+  <span class="u-text--overflow-two-lines worklist-list__patient-name">{{ patient.first_name }} {{ patient.last_name }}&#8203;</span>{{~ remove_whitespace ~}}
+</div>
+<div class="worklist-list__flow-icon">{{fas "folder"}}</div>{{~ remove_whitespace ~}}
+<div>
+  {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}{{~ remove_whitespace ~}}
+  <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>{{~ remove_whitespace ~}}
+</div>
+<div class="table-list__meta">
+  <span><span data-state-region></span>&#8203;<span class="worklist-list__search-helper">{{ state }}</span>&#8203;</span>{{~ remove_whitespace ~}}
+  <span><span data-owner-region></span>&#8203;<span class="worklist-list__search-helper">{{ owner }}</span>&#8203;</span>{{~ remove_whitespace ~}}
   <progress class="progress-bar worklist-list__flow-progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>&#8203;{{~ remove_whitespace ~}}
-</td>
-<td class="table-list__cell worklist-list__action-ts w-10">{{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</td>
-<td class="table-list__cell worklist-list__action-ts w-10">{{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</td>
+</div>
+<div class="worklist-list__action-ts">
+  <div class="worklist-list__overline">{{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</div>
+  <div>{{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</div>
+</div>
