@@ -99,7 +99,7 @@ export default App.extend({
   beforeStart() {
     const filter = this.getState().getEntityFilter();
     const fields = { flows: ['name', 'state'], patients: ['first_name', 'last_name'] };
-    const include = 'patient';
+    const include = 'patient,flow';
     return Radio.request('entities', 'fetch:actions:collection', { data: { filter, fields, include } });
   },
   onStart(options, collection) {
