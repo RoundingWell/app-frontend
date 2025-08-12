@@ -90,7 +90,9 @@ Radio.reply('auth', {
 
 async function auth() {
   const agent = await getAuthAgent();
-  return agent.auth();
+  return new Promise(resolve => {
+    agent.auth(resolve);
+  });
 }
 
 export {
