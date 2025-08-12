@@ -6,6 +6,8 @@ import { View, CollectionView, Region } from 'marionette';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/modals.scss';
 
+import intl from 'js/i18n';
+
 import Component from 'js/base/component';
 
 import InputFocusBehavior from 'js/behaviors/input-focus';
@@ -89,7 +91,7 @@ const PicklistItem = View.extend({
       {{far "address-card"}}
     </div>
     <div class="patient-search__picklist-item-name-text">
-      <span class="u-text--overflow">{{first_name}} {{last_name}}{{~ remove_whitespace ~}}</span>
+      <span class="u-text--overflow">{{matchText name search}}{{~ remove_whitespace ~}}</span>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
@@ -99,17 +101,29 @@ const PicklistItem = View.extend({
         {{status}}
       </div>
       <div class="patient-search__picklist-item-result-value u-text--overflow">
-        {{matchText match.value search}}
+        {{#if shouldShowMatch}}
+          {{matchText match.value search}}
+        {{/if}}
       </div>
       <div class="patient-search__picklist-item-result-label u-text--overflow">
-        {{match.label}}
+        {{#if shouldShowMatch}}
+          {{match.label}}
+        {{/if}}
       </div>
     </div>
   `,
   templateContext() {
     return {
+      name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
+      shouldShowMatch: this.shouldShowMatch(),
     };
+  },
+  shouldShowMatch() {
+    const label = this.model.get('match').label;
+    const i18n = intl.globals.search.patientSearchViews.picklistItemView;
+
+    return label !== i18n.labelName && label !== i18n.labelDob;
   },
 });
 

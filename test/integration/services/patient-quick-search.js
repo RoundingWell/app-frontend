@@ -151,7 +151,10 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item strong')
       .contains('2')
       .parents('.js-picklist-item')
+      .find('.patient-search__picklist-item-meta')
       .should('contain', 'active')
+      .should('not.contain', 'Patient')
+      .should('not.contain', 'Name')
       .click();
 
     cy
@@ -314,7 +317,8 @@ context('Patient Quick Search', function() {
       .get('.patient-search__modal')
       .find('.js-picklist-item strong')
       .parents('.js-picklist-item')
-      .should('contain', 'identifier-001');
+      .should('contain', 'identifier-001')
+      .should('contain', 'MRN');
   });
 
   specify('Search by patient field', function() {
@@ -379,7 +383,8 @@ context('Patient Quick Search', function() {
       .get('.patient-search__modal')
       .find('.js-picklist-item strong')
       .parents('.js-picklist-item')
-      .should('contain', '+6513216543');
+      .should('contain', '+6513216543')
+      .should('contain', 'Phone Number');
 
     cy.intercept({
       method: 'GET',
