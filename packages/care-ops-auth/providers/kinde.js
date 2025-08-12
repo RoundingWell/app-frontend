@@ -51,16 +51,22 @@ export class KindeAuthProvider extends AuthProvider {
     });
   }
 
-  async auth() {
+  async auth(success) {
     this.frameBust();
 
-    if (!navigator.onLine) return;
+    if (!navigator.onLine) {
+      success();
+      return;
+    }
 
     const pathName = location.pathname;
 
     await this._initClient();
 
-    if (pathName === AuthProvider.PATH_AUTHD) return;
+    if (pathName === AuthProvider.PATH_AUTHD) {
+      success();
+      return;
+    }
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
@@ -84,5 +90,7 @@ export class KindeAuthProvider extends AuthProvider {
     if (pathName === AuthProvider.PATH_LOGIN) {
       this.replaceState(AuthProvider.PATH_ROOT);
     }
+
+    success();
   }
 }

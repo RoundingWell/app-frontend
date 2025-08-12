@@ -12,11 +12,15 @@ export class AuthProvider {
     this.client = null;
   }
 
-  async auth() {
+  async auth(success) {
     if (location.pathname === AuthProvider.PATH_LOGOUT) {
       this.logout();
       return;
     }
+
+    this.handleAuthedPath(location.pathname);
+
+    success();
   }
 
   frameBust() {

@@ -25,10 +25,11 @@ export class Auth0AuthProvider extends AuthProvider {
     this.client.loginWithRedirect({ prompt: 'login', ...opts });
   }
 
-  async _authenticate() {
+  async _authenticate(success) {
     try {
       const { appState } = await this.client.handleRedirectCallback();
       this.handleAuthedPath(appState);
+      success();
     } catch {
       this.loginPrompt();
     }
@@ -51,17 +52,20 @@ export class Auth0AuthProvider extends AuthProvider {
     this.client = await createAuth0Client(clientConfig);
   }
 
-  async auth() {
+  async auth(success) {
     this.frameBust();
 
-    if (!navigator.onLine) return;
+    if (!navigator.onLine) {
+      success();
+      return;
+    }
 
     const appState = location.pathname;
 
     await this._initClient();
 
     if (appState === AuthProvider.PATH_AUTHD) {
-      await this._authenticate();
+      await this._authenticate(success);
       return;
     }
 
@@ -90,5 +94,7 @@ export class Auth0AuthProvider extends AuthProvider {
     if (appState === AuthProvider.PATH_LOGIN) {
       this.replaceState(AuthProvider.PATH_ROOT);
     }
+
+    success();
   }
 }
