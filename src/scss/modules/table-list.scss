@@ -90,11 +90,11 @@
 }
 
 .table-list__empty-list {
+  border-bottom: 1px solid #{$black-90};
   color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
   grid-column: 1 / -1;
-  margin: 40px auto 20px;
   padding: 20px;
   text-align: center;
 }

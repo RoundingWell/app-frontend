@@ -1,7 +1,7 @@
 <div>
-  <span class="table-list__icon--large workflows__flow-icon">{{fas "folder"}}</span>{{~ remove_whitespace ~}}
+  <span class="table-list__icon--large workflows__flow-icon">{{fas "folder"}}</span>
   <span>
-    {{ name }}{{~ remove_whitespace ~}}
+    {{ name }}
     {{~#unless name}}<em>{{ @intl.programs.program.workflows.flowItemTemplate.newProgramFlow }}</em>{{/unless~}}
   </span>
 </div>
@@ -16,7 +16,7 @@
     {{ else }}
       <span class="workflows-action--draft">{{far "pen-to-square"}}</span>
     {{/if}}
-  </span>{{~ remove_whitespace ~}}
-  <span data-owner-region></span>{{~ remove_whitespace ~}}
+  </span>
+  <span data-owner-region></span>
 </div>
 <div class="workflows__item-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>

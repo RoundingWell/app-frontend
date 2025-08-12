@@ -58,9 +58,9 @@ const ItemView = View.extend({
     <div class="u-text--overflow">{{#unless name}}{{ @intl.clinicians.cliniciansAllViews.itemView.newClinician }}{{/unless}}{{ name }}&#8203;</div>
     <div class="u-text--overflow-two-lines{{#unless workspaces}} table-list__cell--empty{{/unless}}">{{#each workspaces}}{{#unless @first}}, {{/unless}}{{ this.name }}{{/each}}{{#unless workspaces}}{{ @intl.clinicians.cliniciansAllViews.itemView.noWorkspaces }}{{/unless}}&#8203;</div>
     <div class="table-list__meta">
-      <span><span data-state-region></span>&#8203;</span>{{~ remove_whitespace ~}}
-      <span><span data-role-region></span>&#8203;</span>{{~ remove_whitespace ~}}
-      <span><span data-team-region></span>&#8203;</span>{{~ remove_whitespace ~}}
+      <span><span data-state-region></span>&#8203;</span>
+      <span><span data-role-region></span>&#8203;</span>
+      <span><span data-team-region></span>&#8203;</span>
     </div>
     <div class="u-text--nowrap{{#unless last_active_at}} table-list__cell--empty{{/unless}}">{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</div>
   `,

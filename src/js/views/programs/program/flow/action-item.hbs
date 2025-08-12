@@ -1,17 +1,17 @@
-<div class="table-list__icon--large program-flow__action-icon">{{far icon}}</div>{{~ remove_whitespace ~}}
+<div class="table-list__icon--large program-flow__action-icon">{{far icon}}</div>
 <div class="u-text--overflow-two-lines">
-  {{ name }}{{~ remove_whitespace ~}}
+  {{ name }}
   {{~#unless name}}<em>{{ @intl.programs.program.flow.actionItemTemplate.newProgramFlowAction }}</em>{{/unless~}}
 </div>
 <div class="table-list__meta">
-  <span data-behavior-region></span>{{~ remove_whitespace ~}}
-  <span data-owner-region></span>{{~ remove_whitespace ~}}
-  <span data-due-region></span>{{~ remove_whitespace ~}}
+  <span data-behavior-region></span>
+  <span data-owner-region></span>
+  <span data-due-region></span>
   <span>
     {{#if hasForm}}
       <button class="button-secondary--compact" disabled>{{far "square-poll-horizontal"}}</button>
     {{/if }}
-  </span>{{~ remove_whitespace ~}}
+  </span>
 </div>
 <div class="workflows__item-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>
 <div class="program-flow__sort-handle js-sort">{{fas "grip-vertical"}}</div>

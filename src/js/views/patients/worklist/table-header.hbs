@@ -1,14 +1,11 @@
-<div></div>
-<div>{{ @intl.patients.worklist.tableHeaderTemplate.patientHeader }}</div>
-<div></div>
-<div>
+<div style="grid-column: 2 / 4">{{ @intl.patients.worklist.tableHeaderTemplate.patientHeader }}</div>
+<div style="grid-column: span 2">
   {{#if isFlowList}}
     {{ @intl.patients.worklist.tableHeaderTemplate.flowHeader }}
   {{ else }}
     {{ @intl.patients.worklist.tableHeaderTemplate.actionHeader }}
   {{/if}}
 </div>
-<div></div>
 {{#if isFlowList}}
   <div>{{ @intl.patients.worklist.tableHeaderTemplate.flowAttrHeader }}</div>
 {{else}}

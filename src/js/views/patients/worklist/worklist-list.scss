@@ -31,13 +31,24 @@
   color: #{$black-60};
 }
 
+.worklist-list__details-icon {
+  color: #{$black-60};
+  margin-right: 8px;
+  width: 16px;
+}
+
+.worklist__action-display-icon {
+  color: #{$black-60};
+}
+
 .worklist-list__action-ts {
   font-size: 12px;
 }
 
 .worklist-list__overline {
   color: #{$black-60};
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .worklist-list__count {

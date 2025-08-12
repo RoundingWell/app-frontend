@@ -1,18 +1,18 @@
 <div>
-  <span class="table-list__icon--large workflows__action-icon">{{far icon}}</span>{{~ remove_whitespace ~}}
+  <span class="table-list__icon--large workflows__action-icon">{{far icon}}</span>
   <span>
-    {{ name }}{{~ remove_whitespace ~}}
+    {{ name }}
     {{~#unless name}}<em>{{ @intl.programs.program.workflows.actionItemTemplate.newProgramAction }}</em>{{/unless~}}
   </span>
 </div>
 <div class="table-list__meta">
-  <span data-behavior-region></span>{{~ remove_whitespace ~}}
-  <span data-owner-region></span>{{~ remove_whitespace ~}}
-  <span data-due-region></span>{{~ remove_whitespace ~}}
+  <span data-behavior-region></span>
+  <span data-owner-region></span>
+  <span data-due-region></span>
   <span>
     {{#if hasForm}}
       <button class="button-secondary--compact" disabled>{{far "square-poll-horizontal"}}</button>
     {{/if }}
-  </span>{{~ remove_whitespace ~}}
+  </span>
 </div>
 <div class="workflows__item-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>

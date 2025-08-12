@@ -5,18 +5,18 @@
   </button>
 </div>
 <div class="js-patient">
-  {{#if patient.segment}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ patient.segment }}&#8203;</div>{{/if}}{{~ remove_whitespace ~}}
-  <span class="u-text--overflow-two-lines worklist-list__patient-name">{{ patient.first_name }} {{ patient.last_name }}&#8203;</span>{{~ remove_whitespace ~}}
+  {{#if patient.segment}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ patient.segment }}&#8203;</div>{{/if}}
+  <span class="u-text--overflow-two-lines worklist-list__patient-name">{{ patient.first_name }} {{ patient.last_name }}&#8203;</span>
 </div>
-<div class="worklist-list__flow-icon">{{fas "folder"}}</div>{{~ remove_whitespace ~}}
+<div class="worklist-list__flow-icon">{{fas "folder"}}</div>
 <div>
-  {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}{{~ remove_whitespace ~}}
-  <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>{{~ remove_whitespace ~}}
+  {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}
+  <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>
 </div>
 <div class="table-list__meta">
-  <span><span data-state-region></span>&#8203;<span class="worklist-list__search-helper">{{ state }}</span>&#8203;</span>{{~ remove_whitespace ~}}
-  <span><span data-owner-region></span>&#8203;<span class="worklist-list__search-helper">{{ owner }}</span>&#8203;</span>{{~ remove_whitespace ~}}
-  <progress class="progress-bar worklist-list__flow-progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>&#8203;{{~ remove_whitespace ~}}
+  <span><span data-state-region></span>&#8203;<span class="worklist-list__search-helper">{{ state }}</span>&#8203;</span>
+  <span><span data-owner-region></span>&#8203;<span class="worklist-list__search-helper">{{ owner }}</span>&#8203;</span>
+  <progress class="progress-bar worklist-list__flow-progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>&#8203;
 </div>
 <div class="worklist-list__action-ts">
   <div class="worklist-list__overline">{{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</div>
