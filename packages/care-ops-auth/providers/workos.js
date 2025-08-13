@@ -35,29 +35,24 @@ export class WorkosAuthProvider extends AuthProvider {
     return clientId;
   }
 
-  async _initClient(clientId) {
-    return new Promise(resolve => {
-      const clientConfig = {
-        redirectUri: location.origin + AuthProvider.PATH_AUTHD,
-        onRedirectCallback: ({ user, state }) => {
-          const path = state;
-          if (!user) {
-            this.loginPrompt(path);
-            return;
-          }
+  async _initClient(clientId, success) {
+    const clientConfig = {
+      redirectUri: location.origin + AuthProvider.PATH_AUTHD,
+      onRedirectCallback: ({ user, state }) => {
+        const path = state;
+        if (!user) {
+          this.loginPrompt(path);
+          return;
+        }
 
-          this.handleAuthedPath(path);
+        this.handleAuthedPath(path);
 
-          resolve();
-        },
-        ...this.config.createClientOptions,
-      };
+        success();
+      },
+      ...this.config.createClientOptions,
+    };
 
-      createClient(clientId, clientConfig)
-        .then(client => {
-          this.client = client;
-        });
-    });
+    return createClient(clientId, clientConfig);
   }
 
   async auth(success) {
@@ -72,12 +67,10 @@ export class WorkosAuthProvider extends AuthProvider {
 
     const clientId = this._getClientId(pathName);
 
-    await this._initClient(clientId);
+    this.client = await this._initClient(clientId, success);
 
-    if (pathName === AuthProvider.PATH_AUTHD) {
-      success();
-      return;
-    }
+    // pathName will be PATH_AUTHD here if we are expecting client.onRedirectCallback
+    if (pathName === AuthProvider.PATH_AUTHD) return;
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
@@ -96,6 +89,7 @@ export class WorkosAuthProvider extends AuthProvider {
       this.replaceState(AuthProvider.PATH_ROOT);
     }
 
+    // If we're already authenticated and at the right path
     success();
   }
 }

@@ -26,29 +26,24 @@ export class KindeAuthProvider extends AuthProvider {
     });
   }
 
-  async _initClient() {
-    return new Promise(resolve => {
-      const clientConfig = {
-        ...this.config.createParams,
-        redirect_uri: location.origin + AuthProvider.PATH_AUTHD,
-        logout_uri: location.origin,
-        on_redirect_callback: (user, { path } = {}) => {
-          if (!user) {
-            this.loginPrompt({ appState: path });
-            return;
-          }
+  async _initClient(success) {
+    const clientConfig = {
+      ...this.config.createParams,
+      redirect_uri: location.origin + AuthProvider.PATH_AUTHD,
+      logout_uri: location.origin,
+      on_redirect_callback: (user, { path } = {}) => {
+        if (!user) {
+          this.loginPrompt({ appState: path });
+          return;
+        }
 
-          this.handleAuthedPath(path);
+        this.handleAuthedPath(path);
 
-          resolve();
-        },
-      };
+        success();
+      },
+    };
 
-      createKindeClient(clientConfig)
-        .then(client => {
-          this.client = client;
-        });
-    });
+    return createKindeClient(clientConfig);
   }
 
   async auth(success) {
@@ -61,12 +56,9 @@ export class KindeAuthProvider extends AuthProvider {
 
     const pathName = location.pathname;
 
-    await this._initClient();
+    this.client = await this._initClient(success);
 
-    if (pathName === AuthProvider.PATH_AUTHD) {
-      success();
-      return;
-    }
+    if (pathName === AuthProvider.PATH_AUTHD) return;
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
