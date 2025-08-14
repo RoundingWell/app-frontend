@@ -7,7 +7,7 @@
     48px
     48px
     minmax(120px, 0.6fr)
-    40px
+    32px
     minmax(200px, 1.4fr)
     minmax(max-content, 2fr)
     minmax(88px, auto);
@@ -24,11 +24,14 @@
 }
 
 .worklist-list__action-icon .icon {
-    color: color(blue);
+  color: color(blue);
+  font-size: 20px;
+  width: 20px;
 }
 
 .worklist-list__flow-icon .icon {
   color: #{$black-60};
+  font-size: 20px;
 }
 
 .worklist-list__details-icon {
