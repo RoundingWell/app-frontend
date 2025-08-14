@@ -1,4 +1,5 @@
 import buildMatcher from './build-matcher';
+import buildMatcherSubstrings from './build-matcher-substrings';
 import buildMatchersArray from './build-matchers-array';
 import collectionOf from './collection-of';
 import hasAllText from './has-all-text';
@@ -13,8 +14,12 @@ import words from './words';
 context('formatting', function() {
   specify('buildMatcher', function() {
     const matcher = buildMatcher('test string');
-
     expect(matcher).to.eql(/\btest|string/gi);
+  });
+
+  specify('buildMatcher - include substrings', function() {
+    const match = buildMatcherSubstrings('test string');
+    expect(match).to.eql(/test|string/gi);
   });
 
   specify('buildMatchersArray', function() {
@@ -52,7 +57,7 @@ context('formatting', function() {
 
     expect(result, 'default tag').to.equal('This is a <strong>test</strong>');
 
-    const result2 = matchText('This is a test', 'test', 'p class="test"', 'p');
+    const result2 = matchText('This is a test', 'test', { pretag: 'p class="test"', posttag: 'p' });
 
     expect(result2).to.equal('This is a <p class="test">test</p>');
   });
