@@ -31,7 +31,7 @@
     "dev": "vite -d",
     "test": "vite -m test & cypress open --env COVERAGE=true",
     "lint": "eslint --fix src/js/ && eslint --fix test/",
-    "prerelease": "npm run build",
+    "prerelease": "npm run formio:build && npm run build",
     "release": "node ./release/release.js",
     "prerelease:test": "npm run build",
     "release:test": "NODE_ENV=test node ./release/release.js",
