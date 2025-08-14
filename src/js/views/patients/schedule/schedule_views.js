@@ -8,8 +8,6 @@ import { alphaSort } from 'js/utils/sorting';
 import intl from 'js/i18n';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
-import FixListWidthBehavior from 'js/behaviors/fix-list-width';
-
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
 import 'scss/modules/table-list.scss';
@@ -28,13 +26,16 @@ import './schedule-list.scss';
 const LayoutView = View.extend({
   className: 'flex-region',
   template: LayoutTemplate,
-  behaviors: [FixListWidthBehavior],
   regions: {
     filters: '[data-filters-region]',
-    table: '[data-table-region]',
+    table: {
+      el: '[data-table-region]',
+      replaceElement: true,
+    },
     list: {
       el: '[data-list-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
     selectAll: '[data-select-all-region]',
     title: {
@@ -156,17 +157,16 @@ const SelectAllView = View.extend({
 });
 
 const TableHeaderView = View.extend({
+  className: 'table-list__header',
   template: hbs`
-    <td class="schedule-list__header schedule-list__header-due-date">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.dueDateHeader }}</td>
-    <td class="schedule-list__header schedule-list__header-state-patient">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.patientHeader }}</td>
-    <td class="schedule-list__header schedule-list__header-action">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.actionHeader }}</td>
-    <td class="schedule-list__header schedule-list__header-form">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.formheader }}</td>
+    <div class="schedule-list__header-span-2">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.dueDateHeader }}</div>
+    <div class="schedule-list__header-span-2">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.patientHeader }}</div>
+    <div class="schedule-list__header-span-2">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.actionHeader }}</div>
+    <div>{{ @intl.patients.schedule.scheduleViews.tableHeaderView.formheader }}</div>
   `,
-  tagName: 'tr',
 });
 
 const DayItemView = View.extend({
-  tagName: 'tr',
   className() {
     const className = 'schedule-list__day-list-row';
 
@@ -175,35 +175,29 @@ const DayItemView = View.extend({
     return className;
   },
   template: hbs`
-    <td class="schedule-list__action-list-cell schedule-list__due-time {{#if isOverdue}}is-overdue{{/if}}">
+    <div class="schedule-list__due-time {{#if isOverdue}}is-overdue{{/if}}">
       {{#unless isReduced}}<span class="u-margin--r-8" data-check-region></span>{{/unless}}
       {{#if due_time}}
         {{formatDateTime due_time "TIME" inputFormat="HH:mm:ss"}}&#8203;
       {{else}}
         <span class="schedule-list__no-time">{{ @intl.patients.schedule.scheduleViews.dayItemView.noTime }}</span>&#8203;
       {{/if}}
-    </td>
-    <td class="schedule-list__action-list-cell schedule-list__patient">
-      <div class="schedule-list__patient-details">
-        <span class="schedule-list__patient-sidebar-icon">
-          <button class="js-patient-sidebar-button">
-            {{far "address-card"}}
-          </button>
-        </span>&#8203;{{~ remove_whitespace ~}}
-        <span class="schedule-list__patient-name {{#if isReduced}}is-reduced{{else}}js-patient{{/if}}">{{ patient.first_name }} {{ patient.last_name }}</span>&#8203;
-      </div>
-    </td>
-    <td class="schedule-list__action-list-cell">
-      <div class="schedule-list__action-state-name">
-        <span class="schedule-list__action-state action--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon}}</span><span class="schedule-list__search-helper">{{ state }}</span>&#8203;{{~ remove_whitespace ~}}
-        <span class="{{#unless isReduced}}js-action{{/unless}}">{{ name }}</span>&#8203;{{~ remove_whitespace ~}}
-        <span class="schedule-list__search-helper">{{ flow }}</span>&#8203;{{~ remove_whitespace ~}}
-      </div>
-    </td>
-    <td class="schedule-list__action-list-cell schedule-list__action-details" data-details-region></td>
-    <td class="schedule-list__action-list-cell schedule-list__action-form">
+    </div>
+    <div>
+      <button class="schedule-list__patient-sidebar-icon js-patient-sidebar-button">
+        {{far "address-card"}}
+      </button>&#8203;
+    </div>
+    <div class="schedule-list__patient-name u-text--overflow-two-lines {{#if isReduced}}is-reduced{{else}}js-patient{{/if}}">{{ patient.first_name }} {{ patient.last_name }}&#8203;</div>
+    <div class="schedule-list__action-meta">
+      <span class="schedule-list__action-state action--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon}}</span><span class="schedule-list__search-helper">{{ state }}</span>&#8203;
+      <span class="u-text--overflow-two-lines{{#unless isReduced}} js-action{{/unless}}">{{ name }}</span>&#8203;
+      <span class="schedule-list__search-helper">{{ flow }}</span>&#8203;
+    </div>
+    <div class="schedule-list__action-details" data-details-region></div>
+    <div class="schedule-list__action-form">
       {{#if form}}<span class="js-form schedule-list__action-form-icon">{{#if hasOutreach}}{{far "share-from-square"}}{{else}}{{far "square-poll-horizontal"}}{{/if}}</span>{{/if}}
-    </td>
+    </div>
   `,
   regions: {
     check: '[data-check-region]',
@@ -311,18 +305,13 @@ const DayListView = CollectionView.extend({
       state: this.state,
     };
   },
-  tagName: 'tr',
   className: 'schedule-list__list-row',
   template: hbs`
-    <td class="schedule-list__list-cell">
-      <div class="schedule-list__row-header">
-        <span class="schedule-list__date {{#if isToday}}is-today{{/if}}">{{formatDateTime date "D"}}</span>
-        <span class="schedule-list__month-day">{{formatDateTime date "MMM, ddd"}}</span>
-      </div>
-      <div class="schedule-list__day-list">
-        <table class="schedule-list__day-list-table w-100" data-actions-region></table>
-      </div>
-    </td>
+    <div class="schedule-list__list-cell u-text--nowrap">
+      <span class="schedule-list__date {{#if isToday}}is-today{{/if}}">{{formatDateTime date "D"}}</span>
+      <span class="schedule-list__month-day">{{formatDateTime date "MMM, ddd"}}</span>
+    </div>
+    <div class="schedule-list__day-list schedule-list__list-cell" data-actions-region></div>
   `,
   templateContext() {
     const date = dayjs(this.model.get('date'));
@@ -375,26 +364,21 @@ const DayListView = CollectionView.extend({
 });
 
 const EmptyView = View.extend({
-  tagName: 'tr',
   template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.patients.schedule.scheduleViews.emptyView.noScheduledActions }}</h2>
-    </td>
+    <h2>{{ @intl.patients.schedule.scheduleViews.emptyView.noScheduledActions }}</h2>
   `,
+  className: 'table-list__empty-list',
 });
 
 const EmptyFindInListView = View.extend({
-  tagName: 'tr',
   template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.patients.schedule.scheduleViews.emptyFindInListView.noResults }}</h2>
-    </td>
+    <h2>{{ @intl.patients.schedule.scheduleViews.emptyFindInListView.noResults }}</h2>
   `,
+  className: 'table-list__empty-list',
 });
 
 const ScheduleListView = CollectionView.extend({
-  tagName: 'table',
-  className: 'schedule-list__table',
+  className: 'table-list__list schedule-list__list',
   childView: DayListView,
   childViewOptions(model) {
     if (!model) return;
