@@ -613,7 +613,7 @@ careOptsFrontend:
             updatedAt: Updated
     widgets:
       widgets:
-        dob: "{ dob } &ndash; (Age { age })"
+        dob: "{ dob } &ndash; (Age { age, number })"
         sex: |
           {sex, select,
             m {Male}
