@@ -30,7 +30,7 @@
 .app-frame__content {
   min-width: 440px;
   opacity: 0;
-  overflow-y: auto;
+  overflow: hidden auto;
 
   &:not(:empty) {
     animation: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) 0s reveal-content forwards;

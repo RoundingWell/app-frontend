@@ -3,6 +3,7 @@
   display: inline-block;
   font-size: 24px;
   line-height: 1;
+  margin-left: 24px;
   margin-right: 4px;
   padding: 0 16px 16px;
   position: relative;
@@ -21,11 +22,12 @@
 }
 
 .workflows__actions {
+  border-top: 1px solid #{$black-90};
+  margin: 0 24px;
   padding: 16px 0;
 }
 
 .workflows__table-list {
-  border-top: solid 1px #{$black-90};
   grid-template-columns:
     minmax(200px, 2fr)
     minmax(240px, 2.5fr)

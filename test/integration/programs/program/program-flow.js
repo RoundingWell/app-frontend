@@ -400,7 +400,8 @@ context('program flow page', function() {
       .find('.fa-file-lines');
 
     cy
-      .get('.program-flow__list')
+      .get('.js-draggable')
+      .eq(1)
       .trigger('dragover', 'center')
       .trigger('drop', 'center');
 

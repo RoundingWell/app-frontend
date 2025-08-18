@@ -61,7 +61,7 @@ context('dashboards all list', function() {
 
     cy
       .get('.table-list')
-      .find('.table-empty-list')
+      .find('.table-list__empty-list')
       .contains('No Dashboards');
   });
 
@@ -104,9 +104,9 @@ context('dashboards all list', function() {
       .should('have.class', 'is-applied');
 
     cy
-      .get('.list-page__list')
+      .get('.table-list')
       .as('dashboardList')
-      .find('.table-empty-list')
+      .find('.table-list__empty-list')
       .should('contain', 'No results match your Find in List search');
 
     cy

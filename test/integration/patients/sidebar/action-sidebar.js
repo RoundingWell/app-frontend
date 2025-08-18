@@ -1023,7 +1023,7 @@ context('action sidebar', function() {
       .wait('@routeActionFiles');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-paperclip')
       .should('not.exist');
 
@@ -1089,7 +1089,7 @@ context('action sidebar', function() {
       }, { force: true });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-paperclip')
       .should('exist');
 
@@ -1107,7 +1107,7 @@ context('action sidebar', function() {
       .wait('@routeDeleteFile');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-paperclip')
       .should('not.exist');
   });
@@ -1554,7 +1554,7 @@ context('action sidebar', function() {
       .wait('@routePostComment');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-comment')
       .should('exist')
       .next()
@@ -1587,7 +1587,7 @@ context('action sidebar', function() {
       .wait('@routePostComment');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-comment')
       .should('exist')
       .next()
@@ -1619,7 +1619,7 @@ context('action sidebar', function() {
       .wait('@routeDeleteComment');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-comment')
       .should('exist')
       .next()
@@ -1644,7 +1644,7 @@ context('action sidebar', function() {
       .wait('@routeDeleteComment');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-comment')
       .should('not.exist');
   });
@@ -1773,7 +1773,7 @@ context('action sidebar', function() {
 
     cy
       .wait('@routePatientFlows')
-      .get('.patient__list');
+      .get('.list-page__list');
   });
 
   specify('outreach', function() {
@@ -2130,11 +2130,10 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .last()
-      .find('.patient__action-name')
-      .click()
+      .click('top')
       .wait('@routeAction');
 
     cy
@@ -2216,7 +2215,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .contains('Not authored by Current User')
       .click()
@@ -2407,11 +2406,10 @@ context('action sidebar', function() {
       .and('contain', 'You are not able to change settings on this action.');
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .last()
-      .find('.patient__action-name')
-      .click();
+      .click('top');
 
     cy
       .get('[data-action-region]')

@@ -151,8 +151,8 @@ context('patient archive page', function() {
 
     // Filters only done id 55555
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 4);
 
     cy
@@ -170,7 +170,7 @@ context('patient archive page', function() {
       .as('routePatchFlow');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .first()
       .should('contain', 'First In List')
@@ -182,7 +182,7 @@ context('patient archive page', function() {
       .should('contain', 'Last In List');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .first()
       .find('[data-details-region]')
@@ -193,14 +193,14 @@ context('patient archive page', function() {
       .should('contain', 'Action details content.');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .eq(2)
       .find('[data-details-region]')
       .should('be.empty');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .eq(2)
       .find('[data-due-date-region]')
@@ -208,7 +208,7 @@ context('patient archive page', function() {
       .should('not.exist');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .eq(2)
       .find('[data-due-time-region]')
@@ -216,50 +216,50 @@ context('patient archive page', function() {
       .should('not.exist');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .eq(2)
       .find('.fa-paperclip')
       .should('not.exist');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .eq(2)
       .find('.fa-comment')
       .should('not.exist');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .should('contain', 'Second In List')
       .find('.patient__flow-icon');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .contains('First In List')
       .click();
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-owner-region] button')
       .should('contain', 'Clinician McTester')
       .should('be.disabled');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-due-date-region] button')
       .should('be.disabled');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-due-time-region] button')
       .should('be.disabled');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-state-region]')
       .find('.fa-circle-check')
@@ -279,8 +279,8 @@ context('patient archive page', function() {
       });
 
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 3);
 
     cy
@@ -294,8 +294,8 @@ context('patient archive page', function() {
       .click();
 
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 3);
 
     cy
@@ -310,8 +310,8 @@ context('patient archive page', function() {
       .click();
 
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 4);
 
     cy
@@ -320,7 +320,7 @@ context('patient archive page', function() {
       .routePatientByFlow();
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .last()
       .as('flowItem');
@@ -361,8 +361,8 @@ context('patient archive page', function() {
       .find('.fa-circle-exclamation');
 
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 3);
 
     cy
@@ -508,7 +508,7 @@ context('patient archive page', function() {
     cy.tick(1000);
 
     cy
-      .get('.patient__empty-list')
+      .get('.table-list__empty-list')
       .should('contain', 'No Archive');
 
     cy
@@ -767,7 +767,7 @@ context('patient archive page', function() {
     cy.tick(1000);
 
     cy
-      .get('.patient__empty-list')
+      .get('.table-list__empty-list')
       .should('contain', 'No Archive');
 
     cy
@@ -990,7 +990,7 @@ context('patient archive page', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .first()
@@ -1088,7 +1088,7 @@ context('patient archive page', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .first()

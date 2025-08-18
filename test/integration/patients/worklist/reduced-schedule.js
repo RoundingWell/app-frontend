@@ -148,7 +148,7 @@ context('reduced schedule page', function() {
       .should('contain', '2 Actions');
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .first()
@@ -455,9 +455,9 @@ context('reduced schedule page', function() {
       .should('be.empty');
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .as('scheduleList')
-      .find('.table-empty-list')
+      .find('.table-list__empty-list')
       .should('contain', 'No results match your Find in List search');
 
     cy

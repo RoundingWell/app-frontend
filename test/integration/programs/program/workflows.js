@@ -89,7 +89,7 @@ context('program workflows page', function() {
       .as('routePatchAction');
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.table-list__item')
       .first()
       .should('contain', 'First In List')
@@ -98,16 +98,15 @@ context('program workflows page', function() {
       .next()
       .should('contain', 'Third In List')
       .next()
-      .should('contain', 'Fourth In List')
-      .find('.workflows__flow-icon');
+      .should('contain', 'Fourth In List');
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .contains('First In List')
       .click();
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.is-selected')
       .find('[data-behavior-region]')
       .click();
@@ -125,7 +124,7 @@ context('program workflows page', function() {
       });
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.is-selected')
       .find('[data-owner-region]')
       .click();
@@ -143,7 +142,7 @@ context('program workflows page', function() {
       });
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.table-list__item')
       .last()
       .find('[data-owner-region]')
@@ -151,7 +150,7 @@ context('program workflows page', function() {
       .should('not.have.text');
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.is-selected')
       .find('[data-due-region]')
       .click();
@@ -169,7 +168,7 @@ context('program workflows page', function() {
       });
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.is-selected')
       .find('[data-due-region]')
       .click();
@@ -180,7 +179,7 @@ context('program workflows page', function() {
       .click();
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.is-selected')
       .find('[data-due-region]')
       .find('button')
@@ -248,7 +247,7 @@ context('program workflows page', function() {
       .wait('@routeProgramFlows');
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.table-list__item')
       .first()
       .as('flowItem');
@@ -286,8 +285,7 @@ context('program workflows page', function() {
 
     cy
       .get('@flowItem')
-      .find('.workflows__flow-name')
-      .click()
+      .click('top')
       .wait('@routeProgramFlow');
 
     cy
@@ -366,7 +364,7 @@ context('program workflows page', function() {
       .click();
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .should('not.contain', 'New Program Action')
       .find('.is-selected')
       .should('not.exist');
@@ -413,8 +411,7 @@ context('program workflows page', function() {
 
     cy
       .get('@newFlow')
-      .find('.workflows__flow-status svg')
-      .should('have.class', 'fa-pen-to-square');
+      .find('.fa-pen-to-square');
 
     cy
       .get('@newFlow')
@@ -486,7 +483,7 @@ context('program workflows page', function() {
       .click();
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .should('not.contain', 'New Program Flow')
       .find('.is-selected')
       .should('not.exist');

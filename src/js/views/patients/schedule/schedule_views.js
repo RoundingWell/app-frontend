@@ -157,7 +157,7 @@ const SelectAllView = View.extend({
 });
 
 const TableHeaderView = View.extend({
-  className: 'table-list__header',
+  className: 'table-list__header list-page__list-header schedule__list-header',
   template: hbs`
     <div class="schedule-list__header-span-2">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.dueDateHeader }}</div>
     <div class="schedule-list__header-span-2">{{ @intl.patients.schedule.scheduleViews.tableHeaderView.patientHeader }}</div>
@@ -378,7 +378,7 @@ const EmptyFindInListView = View.extend({
 });
 
 const ScheduleListView = CollectionView.extend({
-  className: 'table-list__list schedule-list__list',
+  className: 'table-list__list list-page__list schedule-list__list',
   childView: DayListView,
   childViewOptions(model) {
     if (!model) return;

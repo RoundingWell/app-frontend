@@ -215,9 +215,9 @@ context('worklist page', function() {
       .should('have.class', 'button--blue');
 
     cy
-      .get('.list-page__header')
-      .find('.table-list__header')
-      .eq(2)
+      .get('.table-list__header')
+      .children()
+      .eq(1)
       .should('contain', 'Flow')
       .next()
       .should('contain', 'State, Owner');
@@ -862,16 +862,14 @@ context('worklist page', function() {
       .should('contain', 'Flows');
 
     cy
-      .get('.list-page__header')
-      .find('.table-list__header')
-      .eq(2)
+      .get('.table-list__header')
+      .children()
+      .eq(1)
       .should('contain', 'Action')
       .next()
       .should('contain', 'State, Owner, Due, Form')
       .next()
-      .should('contain', 'Added')
-      .next()
-      .should('contain', 'Updated');
+      .should('contain', 'Dates');
 
     cy
       .routeFlow()
@@ -1712,7 +1710,7 @@ context('worklist page', function() {
       .should('contain', 'fields[flows]=name,state');
 
     cy
-      .get('.worklist-list__meta')
+      .get('.table-list__meta')
       .find('button')
       .should('not.exist');
 
@@ -3857,7 +3855,7 @@ context('worklist page', function() {
     cy
       .get('.list-page__list')
       .as('flowList')
-      .find('.table-empty-list')
+      .find('.table-list__empty-list')
       .should('contain', 'No results match your Find in List search');
 
     cy
@@ -4405,7 +4403,7 @@ context('worklist page', function() {
 
     cy
       .get('@firstRow')
-      .find('.worklist-list__patient-sidebar-icon .js-patient-sidebar-button')
+      .find('.js-patient-sidebar-button')
       .click();
 
     cy
@@ -4524,7 +4522,7 @@ context('worklist page', function() {
       .should('be.empty');
 
     cy
-      .get('.table-empty-list')
+      .get('.table-list__empty-list')
       .contains('No Flows');
   });
 
@@ -4543,7 +4541,7 @@ context('worklist page', function() {
       .should('be.empty');
 
     cy
-      .get('.table-empty-list')
+      .get('.table-list__empty-list')
       .contains('No Actions');
   });
 
@@ -4615,7 +4613,7 @@ context('worklist page', function() {
       .get('.app-frame__content')
       .find('.table-list__item')
       .first()
-      .find('.worklist-list__meta')
+      .find('.table-list__meta')
       .find('button:enabled')
       .should('have.length', 4);
 
@@ -4623,7 +4621,7 @@ context('worklist page', function() {
       .get('.app-frame__content')
       .find('.table-list__item')
       .last()
-      .find('.worklist-list__meta')
+      .find('.table-list__meta')
       .find('button')
       .should('not.exist');
   });

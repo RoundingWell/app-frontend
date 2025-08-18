@@ -156,7 +156,7 @@ const FlowItemView = View.extend({
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list__list',
+  className: 'table-list__list list-page__list',
   childView(item) {
     if (item.type === 'program-flows') {
       return FlowItemView;

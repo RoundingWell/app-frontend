@@ -62,7 +62,7 @@ const ItemView = View.extend({
       <span><span data-role-region></span>&#8203;</span>
       <span><span data-team-region></span>&#8203;</span>
     </div>
-    <div class="u-text--nowrap{{#unless last_active_at}} table-list__cell--empty{{/unless}}">{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</div>
+    <div class="{{#unless last_active_at}} table-list__cell--empty{{/unless}}">{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</div>
   `,
   templateContext() {
     return {
@@ -136,7 +136,7 @@ const LayoutView = View.extend({
         <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.attributesHeader }}</div>
         <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.lastActiveHeader }}</div>
       </div>
-      <div class="table-list-scroll" data-list-region></div>
+      <div class="list-page__list" data-list-region></div>
     </div>
   `,
   regions: {

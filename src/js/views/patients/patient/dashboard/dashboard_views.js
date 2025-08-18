@@ -244,7 +244,7 @@ const ListView = CollectionView.extend({
   childViewEvents: {
     'change:visible': 'filter',
   },
-  className: 'table-list__list patient__list',
+  className: 'table-list__list list-page__list',
   childView(item) {
     if (item.type === 'flows') {
       return FlowItemView;

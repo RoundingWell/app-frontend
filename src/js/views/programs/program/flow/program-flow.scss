@@ -8,7 +8,6 @@
   flex: 1;
   flex-direction: column;
   min-width: 744px;
-  padding: 0 24px;
   width: 100%;
 }
 
@@ -24,7 +23,7 @@
   background: #{$white};
   color: #{$black-20};
   line-height: 1;
-  padding: 16px 0 8px;
+  padding: 16px 24px 8px;
   position: sticky;
   top: 0;
   z-index: 1;
@@ -50,6 +49,7 @@
 
 .program-flow__header {
   cursor: pointer;
+  margin: 0 24px;
   padding: 8px 0 16px;
 
   &:hover:not(.is-selected) {
@@ -88,16 +88,13 @@
 
 .program-flow__actions {
   border-top: #{$black-90} 1px solid;
+  margin: 0 24px;
   padding: 16px 0;
-}
-
-.program-flow__list {
-  border-top: 1px solid #{$black-90};
 }
 
 .program-flow__table-list {
   grid-template-columns:
-    30px
+    60px
     minmax(280px, 40%)
     minmax(max-content, auto)
     minmax(max-content, 84px)
@@ -110,22 +107,18 @@
 
 .program-flow__action-ts {
   font-size: 12px;
+  text-align: right;
 }
 
 .program-flow__sort-handle {
   cursor: move;
   display: none;
-  margin-left: 16px;
 }
 
 .is-draggable {
   .program-flow__action-item:hover {
     .program-flow__sort-handle {
       display: flex;
-    }
-
-    .program-flow__action-ts {
-      display: none;
     }
   }
 }

@@ -316,7 +316,7 @@ const ActionItemView = View.extend({
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list__list patient-flow__list',
+  className: 'table-list__list list-page__list patient-flow__list',
   childView: ActionItemView,
   childViewOptions() {
     return {
@@ -357,7 +357,8 @@ const LayoutView = View.extend({
         <div data-tools-region></div>
       </div>
       <div class="table-list patient-flow__table-list">
-        <div class="table-list__list" data-action-list-region></div>
+        <div class="table-list__header list-page__list-header"></div>
+        <div class="table-list__list list-page__list" data-action-list-region></div>
       </div>
     </div>
     <div class="patient-flow__sidebar" data-sidebar-region></div>

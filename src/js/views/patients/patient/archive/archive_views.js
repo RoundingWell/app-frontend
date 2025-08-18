@@ -237,7 +237,7 @@ const ListView = CollectionView.extend({
   childViewEvents: {
     'change:visible': 'filter',
   },
-  className: 'table-list__list patient__list',
+  className: 'table-list__list list-page__list',
   childView(item) {
     if (item.type === 'flows') {
       return FlowItemView;
@@ -273,7 +273,8 @@ const LayoutView = View.extend({
       </span>
     </div>
     <div class="table-list patient__table-list">
-      <div class="table-list__list" data-content-region></div>
+      <div class="table-list__header list-page__list-header"></div>
+      <div class="table-list__list list-page__list" data-content-region></div>
     </div>
   `,
   triggers: {

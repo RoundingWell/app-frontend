@@ -169,7 +169,7 @@ context('schedule page', function() {
       .should('contain', formatDate(testDate(), 'MMM YYYY'));
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .last()
@@ -197,19 +197,19 @@ context('schedule page', function() {
       .find('.schedule-list__list-row .schedule-list__day-list')
       .first()
       .as('actionList')
-      .find('tr')
+      .find('.schedule-list__day-list-row')
       .first()
       .should('contain', '6:45 AM')
       .should('contain', 'Outreach Planning')
       .find('.is-overdue')
-      .parents('tr')
+      .parents('.schedule-list__day-list-row')
       .next()
       .should('contain', '10:31 AM')
       .should('contain', 'Second Action');
 
     cy
       .get('@actionList')
-      .find('tr')
+      .find('.schedule-list__day-list-row')
       .eq(2)
       .should('contain', '2:00 PM')
       .should('contain', 'Third Action')
@@ -222,7 +222,7 @@ context('schedule page', function() {
 
     cy
       .get('@actionList')
-      .find('tr')
+      .find('.schedule-list__day-list-row')
       .last()
       .find('.js-patient-sidebar-button')
       .click()
@@ -259,7 +259,7 @@ context('schedule page', function() {
 
     cy
       .get('@actionList')
-      .find('tr')
+      .find('.schedule-list__day-list-row')
       .last()
       .should('contain', 'No Time')
       .should('contain', 'Last Action')
@@ -308,7 +308,7 @@ context('schedule page', function() {
 
     cy
       .get('@actionList')
-      .find('tr')
+      .find('.schedule-list__day-list-row')
       .first()
       .find('.js-action')
       .click();
@@ -320,7 +320,7 @@ context('schedule page', function() {
 
     cy
       .get('@actionList')
-      .find('tr')
+      .find('.schedule-list__day-list-row')
       .last()
       .find('[data-details-region] div')
       .trigger('pointerover');
@@ -332,7 +332,7 @@ context('schedule page', function() {
 
     cy
       .get('@actionList')
-      .find('tr')
+      .find('.schedule-list__day-list-row')
       .eq(1)
       .find('[data-details-region]')
       .should('be.empty');
@@ -786,7 +786,7 @@ context('schedule page', function() {
       .should('contain', 'Edit 1 Action');
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 1)
       .first()
@@ -794,7 +794,7 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 0);
 
@@ -826,12 +826,12 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.schedule-list__table')
+      .find('.table-list__list')
       .find('.fa-square-check')
       .should('have.length', 0);
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 0);
 
@@ -845,12 +845,12 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.schedule-list__table')
+      .find('.table-list__list')
       .find('.fa-square-check')
       .should('have.length', 20);
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 20);
 
@@ -895,7 +895,7 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.schedule-list__table .fa-square')
+      .find('.table-list__list .fa-square')
       .should('have.length', 20);
 
     cy
@@ -930,7 +930,7 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.schedule-list__table .fa-square')
+      .find('.table-list__list .fa-square')
       .should('have.length', 20);
 
     cy
@@ -987,7 +987,7 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.schedule-list__table .schedule-list__day-list-row')
+      .find('.table-list__list .schedule-list__day-list-row')
       .should('have.length', 15);
 
     cy
@@ -1032,7 +1032,7 @@ context('schedule page', function() {
       .should('be.empty');
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .should('contain', 'No Scheduled Actions');
 
     cy
@@ -1145,9 +1145,9 @@ context('schedule page', function() {
       .should('be.empty');
 
     cy
-      .get('.list-page__list')
+      .get('.schedule-list__list')
       .as('scheduleList')
-      .find('.table-empty-list')
+      .find('.table-list__empty-list')
       .should('contain', 'No results match your Find in List search');
 
     cy
@@ -1399,7 +1399,7 @@ context('schedule page', function() {
 
     cy
       .tick(60) // tick past debounce
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .first()
@@ -1641,7 +1641,7 @@ context('schedule page', function() {
       .as('patchAction');
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .first()
@@ -1652,7 +1652,7 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .last()
@@ -1787,7 +1787,7 @@ context('schedule page', function() {
       .visit('/schedule');
 
     cy
-      .get('.schedule-list__table')
+      .get('.table-list__list')
       .find('.schedule-list__list-row')
       .first()
       .find('.schedule-list__day-list-row')

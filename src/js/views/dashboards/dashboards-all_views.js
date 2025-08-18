@@ -36,7 +36,7 @@ const EmptyFindInListView = View.extend({
 
 const ListView = CollectionView.extend({
   childView: ItemView,
-  className: 'table-list__list',
+  className: 'table-list__list list-page__list',
   emptyView() {
     if (this.collection.length && this.state.get('searchQuery')) {
       return EmptyFindInListView;
@@ -86,7 +86,7 @@ const LayoutView = View.extend({
       </div>
     </div>
     <div class="table-list dashboards__table-list">
-      <div class="table-list__header">
+      <div class="table-list__header list-page__list-header">
         <div>{{ @intl.dashboards.dashboardsAllViews.layoutView.nameHeader }}</div>
       </div>
       <div data-list-region></div>
@@ -97,6 +97,7 @@ const LayoutView = View.extend({
     list: {
       el: '[data-list-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
   },
 });

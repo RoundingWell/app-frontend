@@ -10,8 +10,7 @@
     0.7fr
     2fr
     32px
-    48px;
-  padding: 0 24px;
+    68px;
 }
 
 .schedule__count {
@@ -29,6 +28,10 @@
   }
 }
 
+.schedule__list-header {
+  column-gap: 8px;
+}
+
 .schedule-list__header-span-2 {
   grid-column: span 2;
 }
@@ -38,7 +41,7 @@
 }
 
 .schedule-list__list-row {
-  display: contents
+  display: contents;
 }
 
 .schedule-list__list-cell {
@@ -144,6 +147,10 @@
   .icon {
     font-size: 12px;
     line-height: 12px;
+  }
+
+  .fa-square-poll-horizontal {
+    width: 16px;
   }
 }
 

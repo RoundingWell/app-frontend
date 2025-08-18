@@ -196,8 +196,10 @@ context('clinician sidebar', function() {
       });
 
     cy
-      .get('[data-list-region]')
-      .find('.table-list__item .table-list__cell')
+      .get('.table-list')
+      .find('.table-list__item')
+      .first()
+      .children()
       .eq(1)
       .as('clinicianListItemWorkspaces')
       .should('not.contain', 'Workspace One');

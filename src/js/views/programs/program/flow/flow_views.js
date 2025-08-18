@@ -201,7 +201,7 @@ const ListView = CollectionView.extend({
   collectionEvents: {
     'change:id': 'onChangeId',
   },
-  className: 'table-list__list program-flow__list',
+  className: 'table-list__list list-page__list program-flow__list',
   childView: ActionItemView,
   emptyView: EmptyView,
   onDragEnd() {
@@ -220,6 +220,7 @@ const LayoutView = View.extend({
       <div data-header-region></div>
       <div data-add-action-region></div>
       <div class="table-list program-flow__table-list">
+        <div class="table-list__header list-page__list-header"></div>
         <div class="table-list__list" data-action-list-region></div>
       </div>
     </div>

@@ -38,8 +38,8 @@ context('clinicians list', function() {
       .wait('@routeClinicians');
 
     cy
-      .get('.list-page__header')
-      .find('.table-list__header')
+      .get('.table-list__header')
+      .children()
       .first()
       .should('contain', 'Clinician')
       .next()
@@ -57,17 +57,21 @@ context('clinicians list', function() {
 
     cy
       .get('.table-list')
-      .find('.table-list__item .table-list__cell')
+      .find('.table-list__item')
+      .first()
+      .children()
       .first()
       .should('contain', 'Aaron Aaronson')
       .next()
       .should('contain', 'Workspace One, Workspace Two')
       .next()
       .find('.clinician-state--active')
-      .parents('.table-list__cell')
+      .parents('.table-list__meta')
       .next()
-      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'))
-      .prev()
+      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+
+    cy
+      .get('[data-role-region]')
       .contains('Employee')
       .click();
 
@@ -75,14 +79,14 @@ context('clinicians list', function() {
       .get('.table-list')
       .find('.table-list__item')
       .eq(1)
-      .find('.table-list__cell')
+      .children()
       .first()
       .should('contain', 'Baron Baronson')
       .next()
       .should('contain', 'Workspace One, Workspace Two')
       .next()
       .find('.clinician-state--pending')
-      .parents('.table-list__cell')
+      .parents('.table-list__meta')
       .next()
       .contains('Never');
 
@@ -108,7 +112,8 @@ context('clinicians list', function() {
 
     cy
       .get('.table-list')
-      .find('.table-list__item .table-list__cell')
+      .find('.table-list__item')
+      .find('[data-team-region]')
       .contains('CO')
       .click();
 
@@ -191,7 +196,7 @@ context('clinicians list', function() {
       .wait('@routeClinicians');
 
     cy
-      .get('.table-empty-list')
+      .get('.table-list__empty-list')
       .contains('No Clinicians');
   });
 
@@ -238,7 +243,7 @@ context('clinicians list', function() {
     cy
       .get('.list-page__list')
       .as('cliniciansList')
-      .find('.table-empty-list')
+      .find('.table-list__empty-list')
       .should('contain', 'No results match your Find in List search');
 
     cy

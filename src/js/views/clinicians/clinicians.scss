@@ -4,7 +4,7 @@
 
 .clinicians-list__table-list {
   grid-template-columns:
-    minmax(min-content, 1fr)
+    minmax(180px, 1fr)
     minmax(200px, 2fr)
     minmax(max-content, 1.6fr)
     minmax(min-content, 1fr);

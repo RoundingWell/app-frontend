@@ -96,17 +96,12 @@
   padding: 16px 0;
 }
 
-.patient__list {
-  border-top: 1px solid #{$black-90};
-}
-
 .patient__table-list {
   grid-template-columns:
-    30px
+    60px
     minmax(100px, 40%)
     minmax(max-content, auto)
     minmax(max-content, 84px);
-  padding: 0 24px;
 }
 
 .patient__action-ts {
@@ -124,6 +119,11 @@
 
 .patient__action-display-icon {
   color: #{$black-60};
+  margin-left: 8px;
+}
+
+.patient__action-display-icon-text {
+  margin: 0 8px 0 4px;
 }
 
 .patient__flow-status {

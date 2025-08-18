@@ -16,7 +16,7 @@
 .list-page__list {
   height: 100%;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden auto;
   padding: 0 24px;
 }
 

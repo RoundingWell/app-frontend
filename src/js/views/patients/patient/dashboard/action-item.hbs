@@ -14,10 +14,10 @@
   </span>
   <span data-form-region></span>
   {{#if hasAttachments}}
-    <span class="patient__action-display-icon u-margin--l-8 u-margin--r-8">{{far "paperclip"}}</span>
+    <span class="patient__action-display-icon">{{far "paperclip"}}</span>
   {{/if}}
   {{#if commentCount}}
-    <span class="patient__action-display-icon u-margin--l-8">{{far "comment"}}<span class="patient__action-display-icon-text">{{commentCount}}</span></span>
+    <span class="patient__action-display-icon">{{far "comment"}}<span class="patient__action-display-icon-text">{{commentCount}}</span></span>
   {{/if}}
 </div>
 <div class="patient__action-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>

@@ -95,18 +95,13 @@
   padding: 16px 0;
 }
 
-.patient-flow__list {
-  border-top: 1px solid #{$black-90};
-}
-
 .patient-flow__table-list {
   grid-template-columns:
-    30px
+    48px
     30px
     minmax(100px, 40%)
     minmax(max-content, auto)
     minmax(max-content, 84px);
-  padding: 0 24px;
 }
 
 .patient-flow__progress {
