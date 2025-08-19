@@ -2,14 +2,16 @@
 // and wraps it in the pretag posttag.  Defaulting to <strong></strong>
 
 import buildMatcher from 'js/utils/formatting/build-matcher';
+import buildMatcherSubstrings from 'js/utils/formatting/build-matcher-substrings';
 
-export default (text, query, pretag, posttag) => {
+export default (text, query, options = {}) => {
   if (!text) return;
 
-  pretag = pretag || 'strong';
-  posttag = posttag || pretag;
+  const pretag = options.pretag || 'strong';
+  const posttag = options.posttag || pretag;
+  const includeSubstrings = !!options.includeSubstrings;
 
-  const matcher = buildMatcher(query);
+  const matcher = includeSubstrings ? buildMatcherSubstrings(query) : buildMatcher(query);
 
   return text.replace(matcher, `<${ pretag }>$&</${ posttag }>`);
 };

@@ -11,6 +11,7 @@ context('Handlebars helpers', function() {
       template: hbs`
         <div class="test-null">{{matchText "Patient Name" null}}</div>
         <div class="test-match">{{matchText "Patient Name" "Patient"}}</div>
+        <div class="test-match-substring">{{matchText "TestPatient Name" "patient" includeSubstrings=true}}</div>
         <div class="test-noescape">{{matchText "<span style='color: green'>Patient</span> Name" "Patient" noEscape=true}}</div>
       `,
     });
@@ -29,6 +30,11 @@ context('Handlebars helpers', function() {
     cy
       .get('@root')
       .find('.test-match strong')
+      .should('contain', 'Patient');
+
+    cy
+      .get('@root')
+      .find('.test-match-substring strong')
       .should('contain', 'Patient');
 
     cy

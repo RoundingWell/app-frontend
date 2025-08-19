@@ -275,7 +275,7 @@ context('Patient Quick Search', function() {
         status,
         match: {
           label: 'MRN',
-          value: 'identifier-001',
+          value: '311300999',
         },
       },
       relationships: {
@@ -310,14 +310,14 @@ context('Patient Quick Search', function() {
     cy
       .get('.patient-search__modal')
       .find('.patient-search__input')
-      .type('identifier-001')
+      .type('311300999')
       .wait('@routePatientSearch');
 
     cy
       .get('.patient-search__modal')
       .find('.js-picklist-item strong')
+      .should('contain', '311300999')
       .parents('.js-picklist-item')
-      .should('contain', 'identifier-001')
       .should('contain', 'MRN');
   });
 
@@ -341,7 +341,7 @@ context('Patient Quick Search', function() {
         status,
         match: {
           label: 'Phone Number',
-          value: '+6513216543',
+          value: '+16513216543',
         },
       },
       relationships: {
@@ -376,14 +376,14 @@ context('Patient Quick Search', function() {
     cy
       .get('.patient-search__modal')
       .find('.patient-search__input')
-      .type('+6513216543')
+      .type('65132')
       .wait('@routePatientSearch');
 
     cy
       .get('.patient-search__modal')
       .find('.js-picklist-item strong')
+      .should('contain', '65132')
       .parents('.js-picklist-item')
-      .should('contain', '+6513216543')
       .should('contain', 'Phone Number');
 
     cy.intercept({

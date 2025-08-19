@@ -12,7 +12,11 @@ const helpers = {
 
     if (!hash.noEscape) text = Handlebars.escapeExpression(text);
 
-    return new Handlebars.SafeString(matchText(text, query));
+    const options = {
+      includeSubstrings: !!hash.includeSubstrings,
+    };
+
+    return new Handlebars.SafeString(matchText(text, query, options));
   },
   formatDateTime(date, format, { hash = {} }) {
     if (!date) return new Handlebars.SafeString(hash.defaultHtml || '');

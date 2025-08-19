@@ -91,7 +91,7 @@ const PicklistItem = View.extend({
       {{far "address-card"}}
     </div>
     <div class="patient-search__picklist-item-name-text">
-      <span class="u-text--overflow">{{matchText name search}}{{~ remove_whitespace ~}}</span>
+      <span class="u-text--overflow">{{matchText name search includeSubstrings=true}}{{~ remove_whitespace ~}}</span>
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
@@ -102,7 +102,7 @@ const PicklistItem = View.extend({
       </div>
       <div class="patient-search__picklist-item-result-value u-text--overflow">
         {{#if shouldShowMatch}}
-          {{matchText match.value search}}
+          {{matchText match.value search includeSubstrings=true}}
         {{/if}}
       </div>
       <div class="patient-search__picklist-item-result-label u-text--overflow">
