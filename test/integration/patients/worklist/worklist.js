@@ -29,6 +29,7 @@ const testPatient1 = getPatient({
   attributes: {
     first_name: 'Test',
     last_name: 'Patient',
+    segment: 'Overline',
   },
 });
 
@@ -279,6 +280,7 @@ context('worklist page', function() {
 
     cy
       .get('@firstRow')
+      .should('contain', 'Overline')
       .contains('Test Patient')
       .click();
 
@@ -919,6 +921,7 @@ context('worklist page', function() {
 
     cy
       .get('@firstRow')
+      .should('contain', 'Overline')
       .contains('Test Patient')
       .click();
 
