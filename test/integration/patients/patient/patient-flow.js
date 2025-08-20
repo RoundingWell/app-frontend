@@ -637,13 +637,13 @@ context('patient flow page', function() {
       .wait('@routeFlowActions');
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .as('actionsList')
       .find('.table-list__item')
       .should('have.length', 3);
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .first()
       .find('[data-details-region]')
@@ -654,7 +654,7 @@ context('patient flow page', function() {
       .should('contain', 'Action details content.');
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .eq(1)
       .find('[data-details-region]')
@@ -1124,7 +1124,7 @@ context('patient flow page', function() {
       .wait('@routeFlowActions');
 
     cy
-      .get('.patient-flow__empty-list')
+      .get('.table-list__empty-list')
       .contains('No Actions');
   });
 
@@ -1211,7 +1211,7 @@ context('patient flow page', function() {
       .wait('@routeFlowActions');
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .as('actionsList');
 
     cy
@@ -1455,12 +1455,11 @@ context('patient flow page', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .first()
-      .find('.patient__action-name')
-      .click()
+      .click('top')
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
@@ -1493,8 +1492,7 @@ context('patient flow page', function() {
     cy
       .get('@listItems')
       .last()
-      .find('.patient__action-name')
-      .click()
+      .click('top')
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
@@ -2733,17 +2731,17 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
-      .find('.table-list__item .patient__action-name')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .contains('New Action Name');
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item .patient__action-ts')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item [data-details-region]')
       .should('be.empty');
 
@@ -2761,7 +2759,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item [data-details-region]')
       .should('not.be.empty');
 
@@ -2780,7 +2778,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .should($action => {
         expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
@@ -2788,7 +2786,7 @@ context('patient flow page', function() {
       });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item .patient__action-icon')
       .find('.fa-file-lines');
 
@@ -2807,7 +2805,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item .patient__action-icon')
       .find('.fa-share-from-square');
 
@@ -2890,7 +2888,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .should($action => {
         expect($action.find('.fa-circle-check')).to.exist;
@@ -2933,7 +2931,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-paperclip')
       .should('exist');
 
@@ -2947,7 +2945,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-paperclip')
       .should('not.exist');
 
@@ -2970,7 +2968,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-comment')
       .should('exist')
       .next()
@@ -2986,7 +2984,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item .fa-comment')
       .should('not.exist');
 
@@ -3000,7 +2998,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__empty-list')
+      .get('.table-list__empty-list')
       .contains('No Actions');
 
     cy

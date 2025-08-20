@@ -207,7 +207,7 @@ context('program action sidebar', function() {
       });
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.table-list__item')
       .contains('Test Name');
 
@@ -261,7 +261,7 @@ context('program action sidebar', function() {
       .should('contain', 'Insufficient permissions to delete action');
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.table-list__item')
       .contains('Test Name');
 
@@ -289,7 +289,7 @@ context('program action sidebar', function() {
       .should('contain', `api/program-actions/${ testProgramAction.id }`);
 
     cy
-      .get('.workflows__list')
+      .get('.table-list__list')
       .find('.table-list__item')
       .contains('Test Name')
       .should('not.exist');

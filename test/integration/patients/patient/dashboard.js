@@ -181,8 +181,8 @@ context('patient dashboard page', function() {
 
     // Filters out done id 55555
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 5);
 
     cy
@@ -200,7 +200,7 @@ context('patient dashboard page', function() {
       .as('routePatchFlow');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .first()
       .should('contain', 'First In List')
@@ -214,7 +214,7 @@ context('patient dashboard page', function() {
       .should('contain', 'Last In List');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .first()
       .find('[data-details-region]')
@@ -225,23 +225,23 @@ context('patient dashboard page', function() {
       .should('contain', 'Action details content.');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .eq(2)
       .find('[data-details-region]')
       .should('be.empty');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.fa-share-from-square');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .contains('First In List')
       .click();
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-state-region]')
       .find('.fa-circle-exclamation')
@@ -260,7 +260,7 @@ context('patient dashboard page', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-owner-region]')
       .should('contain', 'CO')
@@ -280,7 +280,7 @@ context('patient dashboard page', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-due-date-region]')
       .click();
@@ -299,7 +299,7 @@ context('patient dashboard page', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-due-time-region]')
       .click();
@@ -310,7 +310,7 @@ context('patient dashboard page', function() {
       .click();
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-due-time-region] .is-overdue');
 
@@ -322,7 +322,7 @@ context('patient dashboard page', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .last()
       .as('flowItem');
@@ -357,8 +357,7 @@ context('patient dashboard page', function() {
 
     cy
       .get('@flowItem')
-      .find('.patient__action-name')
-      .click()
+      .click('top')
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
@@ -371,7 +370,7 @@ context('patient dashboard page', function() {
       .go('back');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .find('[data-state-region]')
       .click();
@@ -391,8 +390,8 @@ context('patient dashboard page', function() {
       });
 
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 4);
 
     cy
@@ -406,8 +405,8 @@ context('patient dashboard page', function() {
       .click();
 
     cy
-      .get('.patient__list')
-      .find('tr')
+      .get('.list-page__list')
+      .find('.table-list__item')
       .should('have.lengthOf', 5);
 
     cy
@@ -850,7 +849,7 @@ context('patient dashboard page', function() {
       .should('contain', `patient/${ testPatient.id }/action/${ testOne }`);
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .should('contain', 'One of One');
 
@@ -895,7 +894,7 @@ context('patient dashboard page', function() {
       .should('contain', `patient/${ testPatient.id }/action/${ testTwo }`);
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .should('contain', 'One of Two');
 
@@ -934,7 +933,7 @@ context('patient dashboard page', function() {
       .should('contain', `patient/${ testPatient.id }/action/${ testThree }`);
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.is-selected')
       .should('contain', 'Two of Two');
 
@@ -1167,7 +1166,7 @@ context('patient dashboard page', function() {
     cy.tick(1000);
 
     cy
-      .get('.patient__empty-list')
+      .get('.table-list__empty-list')
       .should('contain', 'No Workflows');
 
     cy
@@ -1555,7 +1554,7 @@ context('patient dashboard page', function() {
     cy.tick(1000);
 
     cy
-      .get('.patient__empty-list')
+      .get('.table-list__empty-list')
       .should('contain', 'No Workflows');
 
     cy
@@ -1796,7 +1795,7 @@ context('patient dashboard page', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .first()
@@ -1894,7 +1893,7 @@ context('patient dashboard page', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .first()

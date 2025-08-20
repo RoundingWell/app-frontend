@@ -5,16 +5,13 @@ import { View, CollectionView } from 'marionette';
 
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
-import FixListWidthBehavior from 'js/behaviors/fix-list-width';
-
 import PreloadRegion from 'js/regions/preload_region';
 
 const ItemView = View.extend({
   template: hbs`
-    <td class="table-list__cell w-100">{{ name }}</td>
+    <div>{{ name }}</div>
   `,
   className: 'table-list__item',
-  tagName: 'tr',
   triggers: {
     'click': 'click',
   },
@@ -24,27 +21,22 @@ const ItemView = View.extend({
 });
 
 const EmptyView = View.extend({
-  tagName: 'tr',
   template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.dashboards.dashboardsAllViews.emptyView }}</h2>
-    </td>
+    <h2>{{ @intl.dashboards.dashboardsAllViews.emptyView }}</h2>
   `,
+  className: 'table-list__empty-list',
 });
 
 const EmptyFindInListView = View.extend({
-  tagName: 'tr',
   template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.dashboards.dashboardsAllViews.emptyFindInListView.noResults }}</h2>
-    </td>
+    <h2>{{ @intl.dashboards.dashboardsAllViews.emptyFindInListView.noResults }}</h2>
   `,
+  className: 'table-list__empty-list',
 });
 
 const ListView = CollectionView.extend({
   childView: ItemView,
-  className: 'table-list',
-  tagName: 'table',
+  className: 'table-list__list list-page__list',
   emptyView() {
     if (this.collection.length && this.state.get('searchQuery')) {
       return EmptyFindInListView;
@@ -84,33 +76,29 @@ const ListView = CollectionView.extend({
 
 const LayoutView = View.extend({
   className: 'flex-region',
-  behaviors: [FixListWidthBehavior],
   template: hbs`
-    <div class="list-page__header js-list-header">
+    <div class="list-page__header">
       <div class="flex list-page__title">
         <div class="flex list-page__title-filter">
           <span class="list-page__title-icon">{{far "gauge"}}</span>{{ @intl.dashboards.dashboardsAllViews.layoutView.title }}
         </div>
         <div class="u-margin--l-auto" data-search-region></div>
       </div>
-      <table class="w-100">
-        <tr>
-          <td class="table-list__header w-100">{{ @intl.dashboards.dashboardsAllViews.layoutView.nameHeader }}</td>
-        </tr>
-      </table>
     </div>
-    <div class="flex-region list-page__list js-list" data-list-region></div>
+    <div class="table-list dashboards__table-list">
+      <div class="table-list__header list-page__list-header">
+        <div>{{ @intl.dashboards.dashboardsAllViews.layoutView.nameHeader }}</div>
+      </div>
+      <div data-list-region></div>
+    </div>
   `,
   regions: {
     search: '[data-search-region]',
     list: {
       el: '[data-list-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
-  },
-  childViewTriggers: {
-    'render:children': 'childView:render:children',
-    'attach': 'childView:attach',
   },
 });
 

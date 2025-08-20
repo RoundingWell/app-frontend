@@ -651,11 +651,10 @@ careOptsFrontend:
       tableHeaderTemplate:
         actionHeader: Action
         actionAttrHeader: State, Owner, Due, Form
-        createdHeader: Added
+        datesHeader: Dates
         flowAttrHeader: State, Owner
         flowHeader: Flow
         patientHeader: Patient
-        updatedHeader: Updated
       teamComponent:
         defaultText: Select Team...
         headingText: Filter by Team

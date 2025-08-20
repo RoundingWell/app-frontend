@@ -2374,7 +2374,7 @@ context('Patient Action Form', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .first()
@@ -2421,7 +2421,7 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .last()
@@ -2565,7 +2565,7 @@ context('Patient Action Form', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .first()
@@ -2612,7 +2612,7 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .eq(1)
@@ -2661,7 +2661,7 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .as('listItems')
       .last()

@@ -16,17 +16,12 @@ import './worklist-list.scss';
 const FlowTooltipTemplate = hbs`{{formatMessage (intlGet "patients.worklist.flowViews.flowListTooltips") title=worklistId team=owner}}`;
 
 const FlowEmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="table-empty-list">
-      <h2>{{ @intl.patients.worklist.flowViews.flowEmptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.patients.worklist.flowViews.flowEmptyView }}</h2>`,
 });
 
 const FlowItemView = View.extend({
   className: 'table-list__item work-list__item',
-  tagName: 'tr',
   template: FlowItemTemplate,
   regions: {
     check: '[data-check-region]',

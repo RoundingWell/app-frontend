@@ -3,6 +3,7 @@
   display: inline-block;
   font-size: 24px;
   line-height: 1;
+  margin-left: 24px;
   margin-right: 4px;
   padding: 0 16px 16px;
   position: relative;
@@ -21,76 +22,41 @@
 }
 
 .workflows__actions {
-  border-top: solid 1px #{$black-90};
+  border-top: 1px solid #{$black-90};
+  margin: 0 24px;
   padding: 16px 0;
 }
 
-.workflows__list {
-  border-top: solid 1px #{$black-90};
+.workflows__table-list {
+  grid-template-columns:
+    minmax(200px, 2fr)
+    minmax(240px, 2.5fr)
+    minmax(120px, 1fr);
 }
 
-.workflows__content {
-  min-width: 520px;
-}
-
-.workflows__empty-list {
-  border-bottom: 1px solid #{$black-90};
-  color: #{$black-80};
-  font-size: 16px;
-  font-weight: 600;
-  margin: 40px auto 20px;
-  padding: 20px;
-  text-align: center;
-}
-
-.workflows__item-ts {
-  float: right;
-  font-size: 12px;
-  margin: 8px 0 0 8px;
-  min-width: 40px;
-  vertical-align: middle;
-}
-
-.workflows__action-name,
-.workflows__flow-name {
-  display: table-cell;
-  vertical-align: middle;
-  white-space: normal;
-}
-
-.workflows__action-icon,
-.workflows__flow-icon {
-  display: table-cell;
-  position: relative;
-  vertical-align: middle;
-
-  .icon {
-    color: #{$black-60};
-    font-size: 20px;
-    margin-right: 16px;
-    vertical-align: middle;
-    width: 20px;
-  }
-}
-
-.workflows__flow-status {
-  border: 1px solid transparent;
-  display: inline-block;
-  padding: 0 8px;
-  vertical-align: middle;
+.workflows__flow-icon .icon {
+  color: #{$black-60};
 }
 
 .workflows__action-icon .icon {
   color: color(blue);
 }
 
-.workflows-action--draft {
-  color: #{$black-20};
-  font-weight: bold;
+.workflows__item-ts {
+  font-size: 12px;
+  text-align: right;
+}
+
+.workflows__flow-status {
+  border: 1px solid rgb(0 0 0 / 0%);
+  padding: 0 8px;
+}
+
+.workflows-action--draft .icon{
+  vertical-align: top;
 }
 
 .workflows-action--published,
 .workflows-action--automated {
   color: color(green);
-  font-weight: bold;
 }

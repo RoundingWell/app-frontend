@@ -1,20 +1,14 @@
-<td class="table-list__header table-list__item-check"></td>
-<td class="table-list__header w-15">{{ @intl.patients.worklist.tableHeaderTemplate.patientHeader }}</td>
-<td class="table-list__header worklist-list__name-header">
+<div class="worklist-list__work-name-header">{{ @intl.patients.worklist.tableHeaderTemplate.patientHeader }}</div>
+<div class="worklist-list__header-span-2">
   {{#if isFlowList}}
     {{ @intl.patients.worklist.tableHeaderTemplate.flowHeader }}
   {{ else }}
     {{ @intl.patients.worklist.tableHeaderTemplate.actionHeader }}
   {{/if}}
-</td>
+</div>
 {{#if isFlowList}}
-  <td class="table-list__header worklist-list__flow-meta-header">
-    {{ @intl.patients.worklist.tableHeaderTemplate.flowAttrHeader }}
-  </td>
+  <div>{{ @intl.patients.worklist.tableHeaderTemplate.flowAttrHeader }}</div>
 {{else}}
-  <td class="table-list__header worklist-list__action-meta-header">
-    {{ @intl.patients.worklist.tableHeaderTemplate.actionAttrHeader }}
-  </td>
+  <div class="worklist-list__action-attr-header">{{ @intl.patients.worklist.tableHeaderTemplate.actionAttrHeader }}</div>
 {{/if}}
-<td class="table-list__header w-10">{{ @intl.patients.worklist.tableHeaderTemplate.createdHeader }}</td>
-<td class="table-list__header w-10">{{ @intl.patients.worklist.tableHeaderTemplate.updatedHeader }}</td>
+<div>{{ @intl.patients.worklist.tableHeaderTemplate.datesHeader }}</div>

@@ -18,10 +18,6 @@
   min-height: 0;
 }
 
-.patient__content {
-  min-width: 520px;
-}
-
 .patient__context-trail {
   background: #{$white};
   color: #{$black-20};
@@ -96,82 +92,38 @@
 }
 
 .patient__actions {
-  border-top: solid 1px #{$black-90};
+  border-top: 1px solid #{$black-90};
   padding: 16px 0;
 }
 
-.patient__list-container {
-  overflow-y: auto;
-  padding: 0 24px;
+.patient__table-list {
+  grid-template-columns:
+    60px
+    minmax(100px, 40%)
+    minmax(max-content, auto)
+    minmax(max-content, 84px);
 }
 
-.patient__list {
-  border-top: solid 1px #{$black-90};
-}
-
-.patient__empty-list {
-  border-bottom: 1px solid #{$black-90};
-  color: #{$black-80};
-  font-size: 16px;
-  font-weight: 600;
-  margin: 40px auto 20px;
-  padding: 20px;
-  text-align: center;
-}
-
-.patient__action-ts,
-.patient__event-ts {
-  float: right;
+.patient__action-ts {
   font-size: 12px;
-  margin: 8px 0 0 8px;
-  min-width: 40px;
-  vertical-align: middle;
+  text-align: right;
 }
 
-.patient__action-name,
-.patient__flow-name,
-.patient__event-name {
-  display: table-cell;
-  vertical-align: middle;
-  white-space: normal;
-}
-
-.patient__action-icon,
-.patient__flow-icon,
-.patient__event-icon {
-  display: table-cell;
-  position: relative;
-  vertical-align: middle;
-
-  .icon {
-    color: color(blue);
-    font-size: 20px;
-    margin-right: 16px;
-    vertical-align: middle;
-    width: 20px;
-  }
-}
-
-.patient__list-meta {
-  width: 562px;
-}
-
-.patient__action-display-icon {
-  color: #{$black-60};
-  display: inline-block;
-  vertical-align: middle;
-  width: 16px;
-}
-
-.patient__action-display-icon-text {
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: 2px;
-  vertical-align: top;
+.patient__action-icon .icon {
+  color: color(blue);
 }
 
 .patient__flow-icon .icon {
   color: #{$black-60};
+}
+
+.patient__action-display-icon {
+  color: #{$black-60};
+  margin-left: 8px;
+}
+
+.patient__action-display-icon-text {
+  margin: 0 8px 0 4px;
 }
 
 .patient__flow-status {

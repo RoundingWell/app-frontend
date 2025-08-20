@@ -26,12 +26,8 @@ import 'scss/domain/program-action-state.scss';
 import './workflows.scss';
 
 const EmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="workflows__empty-list">
-      <h2>{{ @intl.programs.program.workflows.workflowsViews.emptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.programs.program.workflows.workflowsViews.emptyView }}</h2>`,
 });
 
 const RowBehavior = Behavior.extend({
@@ -52,7 +48,6 @@ const RowBehavior = Behavior.extend({
 
 const ActionItemView = View.extend({
   className: 'table-list__item',
-  tagName: 'tr',
   behaviors: [RowBehavior],
   regions: {
     behavior: '[data-behavior-region]',
@@ -123,7 +118,6 @@ const ActionItemView = View.extend({
 
 const FlowItemView = View.extend({
   className: 'table-list__item',
-  tagName: 'tr',
   behaviors: [RowBehavior],
   regions: {
     owner: '[data-owner-region]',
@@ -162,8 +156,7 @@ const FlowItemView = View.extend({
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list workflows__list',
-  tagName: 'table',
+  className: 'table-list__list list-page__list',
   childView(item) {
     if (item.type === 'program-flows') {
       return FlowItemView;

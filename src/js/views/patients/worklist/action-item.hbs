@@ -1,36 +1,33 @@
-<td class="table-list__cell table-list__item-check js-no-click"><span data-check-region></span></td>
-<td class="table-list__cell w-15">
-  <span class="worklist-list__patient-sidebar-icon">
-    <button class="button-secondary--compact js-patient-sidebar-button">
-      {{far "address-card"}}&#8203;
-    </button>
-  </span>
-  <div class="worklist-list__patient-name js-patient">
-    {{ patient.first_name }} {{ patient.last_name }}&#8203;
-  </div>
-</td>
-<td class="table-list__cell worklist-list__item-name">
-  <span class="worklist-list__action-icon">{{far icon}}</span>{{~ remove_whitespace ~}}
-  <div class="worklist-list__name">
-    {{#if flowName}}<div class="worklist-list__flow-name">{{ flowName }}</div>{{/if}}&#8203;{{~ remove_whitespace ~}}
-    {{ name }}&#8203;{{~ remove_whitespace ~}}
-  </div>
-</td>
-<td class="table-list__cell worklist-list__meta">
-  <span class="worklist-list__display-icon u-margin--r-16" data-details-region></span>&#8203;{{~ remove_whitespace ~}}
-  <span class="table-list__meta" data-state-region></span>&#8203;<span class="worklist-list__search-helper">{{ state }}</span>&#8203;{{~ remove_whitespace ~}}
-  <span class="table-list__meta" data-owner-region></span>&#8203;<span class="worklist-list__search-helper">{{ owner }}</span>&#8203;{{~ remove_whitespace ~}}
-  <span class="table-list__meta">{{~ remove_whitespace ~}}
-    <span data-due-date-region></span>{{~ remove_whitespace ~}}
-    <span data-due-time-region></span>{{~ remove_whitespace ~}}
-  </span>{{~ remove_whitespace ~}}
-  <span class="table-list__meta" data-form-region></span>{{~ remove_whitespace ~}}&#8203;
+<div class="table-list__item-check js-no-click"><span data-check-region></span></div>
+<div>
+  <button class="button-secondary--compact js-patient-sidebar-button">
+    {{far "address-card"}}&#8203;
+  </button>
+</div>
+<div class="js-patient">
+  {{#if patient.segment}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ patient.segment }}&#8203;</div>{{/if}}
+  <span class="u-text--overflow-two-lines worklist-list__patient-name">{{ patient.first_name }} {{ patient.last_name }}&#8203;</span>
+</div>
+<div class="worklist-list__action-icon">{{far icon}}</div>
+<div>
+  {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}
+  <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>
+</div>
+<div class="table-list__meta">
+  <span class="worklist-list__details-icon" data-details-region></span>
+  <span><span data-state-region></span><span class="worklist-list__search-helper">&#8203;{{ state }}&#8203;</span></span>
+  <span><span data-owner-region></span><span class="worklist-list__search-helper">&#8203;{{ owner }}&#8203;</span></span>
+  <span><span data-due-date-region></span><span data-due-time-region></span></span>
+  <span><span data-form-region></span>&#8203;</span>
   {{#if hasAttachments}}
-    <span class="worklist-list__display-icon u-margin--l-8 u-margin--r-8">{{far "paperclip"}}</span>{{~ remove_whitespace ~}}
+    <span class="worklist__action-display-icon">{{far "paperclip"}}</span>
   {{/if}}
   {{#if commentCount}}
-    <span class="worklist-list__display-icon u-margin--l-8">{{far "comment"}}<span class="worklist-list__display-icon-text">{{commentCount}}</span></span>{{~ remove_whitespace ~}}
+    <span class="worklist__action-display-icon">{{far "comment"}}<span class="worklist__action-display-icon-text">{{commentCount}}</span></span>
   {{/if}}
-</td>
-<td class="table-list__cell worklist-list__action-ts w-10">{{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</td>
-<td class="table-list__cell worklist-list__action-ts w-10">{{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</td>
+</div>
+<div class="worklist-list__action-ts">
+  <div class="worklist-list__overline">{{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</div>
+  <div>{{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</div>
+</div>
+

@@ -6,8 +6,6 @@ import { View, CollectionView, Behavior } from 'marionette';
 
 import { alphaSort } from 'js/utils/sorting';
 
-import FixListWidthBehavior from 'js/behaviors/fix-list-width';
-
 import 'scss/modules/buttons.scss';
 import 'scss/modules/progress-bar.scss';
 import 'scss/modules/table-list.scss';
@@ -25,12 +23,8 @@ import 'scss/domain/action-state.scss';
 import '../patient.scss';
 
 const EmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="patient__empty-list">
-      <h2>{{ @intl.patients.patient.dashboard.dashboardViews.emptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.patients.patient.dashboard.dashboardViews.emptyView }}</h2>`,
 });
 
 const RowBehavior = Behavior.extend({
@@ -75,7 +69,6 @@ const DoneBehavior = Behavior.extend({
 
 const ActionItemView = View.extend({
   className: 'table-list__item',
-  tagName: 'tr',
   behaviors: [RowBehavior, DoneBehavior],
   regions: {
     details: '[data-details-region]',
@@ -198,7 +191,6 @@ const ActionItemView = View.extend({
 
 const FlowItemView = View.extend({
   className: 'table-list__item',
-  tagName: 'tr',
   modelEvents: {
     'change:_owner': 'render',
   },
@@ -252,8 +244,7 @@ const ListView = CollectionView.extend({
   childViewEvents: {
     'change:visible': 'filter',
   },
-  className: 'table-list patient__list',
-  tagName: 'table',
+  className: 'table-list__list list-page__list',
   childView(item) {
     if (item.type === 'flows') {
       return FlowItemView;
@@ -271,21 +262,17 @@ const ListView = CollectionView.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'flex-region patient__content',
-  behaviors: [FixListWidthBehavior],
+  className: 'flex-region',
   regions: {
     content: {
       el: '[data-content-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
     addWorkflow: '[data-add-workflow-region]',
   },
   ui: {
     loading: '.js-loading',
-  },
-  childViewTriggers: {
-    'attach': 'childView:attach',
-    'render:children': 'childView:render:children',
   },
   template: LayoutTemplate,
   triggers: {

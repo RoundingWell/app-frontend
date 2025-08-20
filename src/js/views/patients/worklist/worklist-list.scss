@@ -2,39 +2,19 @@
   margin-left: auto;
 }
 
-.worklist__header {
-  table-layout: fixed;
-}
-
-.worklist-list__patient-sidebar-icon {
-  display: table-cell;
-  position: relative;
-  vertical-align: middle;
-}
-
-.worklist-list__patient-name {
-  display: table-cell;
-  padding-left: 8px;
-  vertical-align: middle;
-  white-space: normal;
+.worklist__table-list {
+  grid-template-columns:
+    48px
+    48px
+    minmax(104px, 0.8fr)
+    32px
+    minmax(104px, 1.4fr)
+    minmax(max-content, 2fr)
+    minmax(88px, auto);
 }
 
 .worklist-list__patient-name:hover {
   color: color(blue);
-}
-
-.worklist-list__display-icon {
-  color: #{$black-60};
-  display: inline-block;
-  vertical-align: middle;
-  width: 16px;
-}
-
-.worklist-list__display-icon-text {
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: 2px;
-  vertical-align: top;
 }
 
 .work-list__item:hover {
@@ -43,59 +23,40 @@
   }
 }
 
-.worklist-list__action-icon,
-.worklist-list__flow-icon {
-  display: table-cell;
-  position: relative;
-  vertical-align: middle;
-
-  .icon {
-    color: color(blue);
-    font-size: 20px;
-    margin-right: 16px;
-    vertical-align: middle;
-    width: 20px;
-  }
+.worklist-list__action-icon .icon {
+  color: color(blue);
+  font-size: 20px;
+  width: 20px;
 }
 
 .worklist-list__flow-icon .icon {
   color: #{$black-60};
+  font-size: 20px;
+}
+
+.worklist-list__details-icon {
+  color: #{$black-60};
+  margin-right: 8px;
+  width: 16px;
+}
+
+.worklist__action-display-icon {
+  color: #{$black-60};
+  margin-left: 8px;
+}
+
+.worklist__action-display-icon-text {
+  margin: 0 8px 0 4px;
 }
 
 .worklist-list__action-ts {
   font-size: 12px;
-  vertical-align: middle;
 }
 
-.worklist-list__flow-name {
+.worklist-list__overline {
   color: #{$black-60};
   font-size: 12px;
-}
-
-.worklist-list__name {
-  display: table-cell;
-  vertical-align: middle;
-  white-space: normal;
-}
-
-.worklist-list__item-name,
-.worklist-list__name-header {
-  width: 17%;
-}
-
-.worklist-list__meta {
-  text-overflow: inherit;
-  width: 48%;
-}
-
-.worklist-list__action-meta-header {
-  padding-left: 40px;
-  width: 48%;
-}
-
-.worklist-list__flow-meta-header {
-  padding-left: 20px;
-  width: 48%;
+  line-height: 1.4;
 }
 
 .worklist-list__count {
@@ -128,6 +89,18 @@
 .worklist-list__filters {
   align-items: center;
   display: flex;
+}
+
+.worklist-list__work-name-header {
+  grid-column: 2 / 4;
+}
+
+.worklist-list__header-span-2 {
+  grid-column: span 2;
+}
+
+.worklist-list__action-attr-header {
+  margin-left: 32px;
 }
 
 .worklist-list__all-filters:not(:empty) {

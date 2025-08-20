@@ -1,21 +1,17 @@
-<td class="table-list__cell w-40">
-  <span class="program-flow__action-icon">{{far icon}}</span>{{~ remove_whitespace ~}}
-  <span class="program-flow__action-name">
-    {{ name }}{{~ remove_whitespace ~}}
-    {{~#unless name}}<em>{{ @intl.programs.program.flow.actionItemTemplate.newProgramFlowAction }}</em>{{/unless~}}
+<div class="table-list__icon--large program-flow__action-icon">{{far icon}}</div>
+<div class="u-text--overflow-two-lines">
+  {{ name }}
+  {{~#unless name}}<em>{{ @intl.programs.program.flow.actionItemTemplate.newProgramFlowAction }}</em>{{/unless~}}
+</div>
+<div class="table-list__meta">
+  <span data-behavior-region></span>
+  <span data-owner-region></span>
+  <span data-due-region></span>
+  <span>
+    {{#if hasForm}}
+      <button class="button-secondary--compact" disabled>{{far "square-poll-horizontal"}}</button>
+    {{/if }}
   </span>
-</td>
-<td class="table-list__cell w-60">
-  <div class="pos--relative">
-    <span class="table-list__meta" data-behavior-region></span>{{~ remove_whitespace ~}}
-    <span class="table-list__meta" data-owner-region></span>{{~ remove_whitespace ~}}
-    <span class="table-list__meta" data-due-region></span>{{~ remove_whitespace ~}}
-    <span class="table-list__meta">
-      {{#if hasForm}}
-        <button class="button-secondary--compact" disabled>{{far "square-poll-horizontal"}}</button>
-      {{/if }}
-    </span>{{~ remove_whitespace ~}}
-    <span class="program-flow__action-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
-    <span class="program-flow__sort-handle js-sort">{{fas "grip-vertical"}}</span>{{~ remove_whitespace ~}}
-  </div>
-</td>
+</div>
+<div class="program-flow__action-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>
+<div class="program-flow__sort-handle js-sort">{{fas "grip-vertical"}}</div>

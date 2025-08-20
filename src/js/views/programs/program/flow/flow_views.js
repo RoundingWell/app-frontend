@@ -107,12 +107,8 @@ const AddActionView = View.extend({
 });
 
 const EmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="program-flow__empty-list">
-      <h2>{{ @intl.programs.program.flow.flowViews.emptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.programs.program.flow.flowViews.emptyView }}</h2>`,
 });
 
 const ActionItemView = View.extend({
@@ -133,7 +129,6 @@ const ActionItemView = View.extend({
       icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
     };
   },
-  tagName: 'tr',
   regions: {
     behavior: '[data-behavior-region]',
     owner: '[data-owner-region]',
@@ -206,8 +201,7 @@ const ListView = CollectionView.extend({
   collectionEvents: {
     'change:id': 'onChangeId',
   },
-  className: 'table-list program-flow__list',
-  tagName: 'table',
+  className: 'table-list__list list-page__list program-flow__list',
   childView: ActionItemView,
   emptyView: EmptyView,
   onDragEnd() {
@@ -225,7 +219,10 @@ const LayoutView = View.extend({
       <div data-context-trail-region></div>
       <div data-header-region></div>
       <div data-add-action-region></div>
-      <div data-action-list-region></div>
+      <div class="table-list program-flow__table-list">
+        <div class="table-list__header list-page__list-header"></div>
+        <div class="table-list__list" data-action-list-region></div>
+      </div>
     </div>
     <div class="program-flow__sidebar" data-sidebar-region></div>
   `,

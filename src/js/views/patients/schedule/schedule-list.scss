@@ -2,6 +2,17 @@
   margin-left: auto;
 }
 
+.schedule__table-list {
+  grid-template-columns:
+    minmax(max-content, 0.4fr)
+    minmax(max-content, 0.6fr)
+    32px
+    0.7fr
+    2fr
+    32px
+    68px;
+}
+
 .schedule__count {
   align-items: center;
   color: #{$black-60};
@@ -17,47 +28,25 @@
   }
 }
 
-.schedule-list__header {
-  border-bottom: 1px solid #{$black-90};
-  color: #{$black-60};
-  font-size: 12px;
-  padding: 8px;
+.schedule__list-header {
+  column-gap: 8px;
 }
 
-.schedule-list__header-due-date {
-  width: 24%;
+.schedule-list__header-span-2 {
+  grid-column: span 2;
 }
 
-.schedule-list__header-state-patient {
-  width: 16%;
-}
-
-.schedule-list__header-action {
-  width: calc(68% - 84px);
-}
-
-.schedule-list__header-form {
-  padding-left: 32px;
-  width: 84px;
-}
-
-.schedule-list__table {
-  table-layout: fixed;
-  width: 100%;
+.schedule-list__list {
+  column-gap: 0;
 }
 
 .schedule-list__list-row {
-  border-bottom: 1px solid #{$black-90};
+  display: contents;
 }
 
 .schedule-list__list-cell {
-  display: flex;
+  border-bottom: 1px solid #{$black-90};
   padding: 8px 0;
-}
-
-.schedule-list__row-header {
-  white-space: nowrap;
-  width: 12%;
 }
 
 .schedule-list__date {
@@ -78,21 +67,23 @@
 
 .schedule-list__month-day {
   color: #{$black-60};
+  padding: 0 24px 0 4px;
 }
 
 .schedule-list__day-list {
   align-items: center;
-  display: flex;
-  padding: 8px 0;
-  width: 88%;
-}
-
-.schedule-list__day-list-table {
-  table-layout: fixed;
+  column-gap: 8px;
+  display: grid;
+  grid-column: 2 / 8;
+  grid-template-columns: subgrid;
 }
 
 .schedule-list__day-list-row {
   cursor: pointer;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  padding: 4px;
 
   &.is-selected {
     background: #{$greyed};
@@ -103,7 +94,7 @@
   }
 
   &:hover {
-    .js-patient-sidebar-button {
+    .schedule-list__patient-sidebar-icon {
       color: #{$black-20};
     }
   }
@@ -113,54 +104,30 @@
   }
 }
 
-.schedule-list__action-list-cell {
-  padding: 4px 8px;
-
-  &.is-overdue {
-    color: color(red);
-  }
+.schedule-list__due-time.is-overdue {
+  color: color(red);
 }
 
-.schedule-list__due-time {
-  width: 14%;
-}
-
-.schedule-list__patient {
-  width: 18%;
+.schedule-list__action-meta {
+  display: flex;
 }
 
 .schedule-list__action-details {
-  color: #999;
+  color: #{$black-60};
   padding: 0 16px 0 0;
   text-align: center;
-  width: 32px;
 }
 
 .schedule-list__action-form {
   padding: 0;
-  width: 48px;
-}
-
-.schedule-list__patient-details,
-.schedule-list__action-state-name {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
-  white-space: nowrap;
 }
 
 .schedule-list__patient-sidebar-icon {
-  margin-right: 16px;
-
-  .js-patient-sidebar-button {
-    color: #{$black-60};
-  }
+  color: #{$black-60};
 }
 
 .schedule-list__action-state {
-  margin-right: 16px;
+  margin-right: 12px;
 }
 
 .schedule-list__no-time {
@@ -180,6 +147,10 @@
   .icon {
     font-size: 12px;
     line-height: 12px;
+  }
+
+  .fa-square-poll-horizontal {
+    width: 16px;
   }
 }
 

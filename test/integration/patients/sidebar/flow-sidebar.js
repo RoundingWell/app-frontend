@@ -322,7 +322,7 @@ context('flow sidebar', function() {
       .should('be.disabled');
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .first()
       .as('flowAction')
@@ -390,7 +390,7 @@ context('flow sidebar', function() {
       .as('routePatchAction');
 
     cy
-      .get('.patient-flow__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .each(($el, index) => {
         cy
@@ -773,11 +773,10 @@ context('flow sidebar', function() {
       });
 
     cy
-      .get('.patient__list')
+      .get('.list-page__list')
       .find('.table-list__item')
       .last()
-      .find('.patient__action-name')
-      .click()
+      .click('top')
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions');

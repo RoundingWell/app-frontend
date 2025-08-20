@@ -10,8 +10,6 @@ import 'scss/modules/table-list.scss';
 import { alphaSort } from 'js/utils/sorting';
 import PreloadRegion from 'js/regions/preload_region';
 
-import FixListWidthBehavior from 'js/behaviors/fix-list-width';
-
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/views/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/views/patients/shared/read-only_views';
 
@@ -21,12 +19,8 @@ import FlowItemTemplate from './flow-item.hbs';
 import '../patient.scss';
 
 const EmptyView = View.extend({
-  tagName: 'tr',
-  template: hbs`
-    <td class="patient__empty-list">
-      <h2>{{ @intl.patients.patient.archive.archiveViews.emptyView }}</h2>
-    </td>
-  `,
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.patients.patient.archive.archiveViews.emptyView }}</h2>`,
 });
 
 const RowBehavior = Behavior.extend({
@@ -71,7 +65,6 @@ const DoneBehavior = Behavior.extend({
 
 const ActionItemView = View.extend({
   className: 'table-list__item',
-  tagName: 'tr',
   behaviors: [RowBehavior, DoneBehavior],
   regions: {
     details: '[data-details-region]',
@@ -184,7 +177,6 @@ const ActionItemView = View.extend({
 
 const FlowItemView = View.extend({
   className: 'table-list__item',
-  tagName: 'tr',
   modelEvents: {
     'change:_owner': 'render',
   },
@@ -245,8 +237,7 @@ const ListView = CollectionView.extend({
   childViewEvents: {
     'change:visible': 'filter',
   },
-  className: 'table-list patient__list',
-  tagName: 'table',
+  className: 'table-list__list list-page__list',
   childView(item) {
     if (item.type === 'flows') {
       return FlowItemView;
@@ -264,16 +255,16 @@ const ListView = CollectionView.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'flex-region patient__content',
-  behaviors: [FixListWidthBehavior],
+  className: 'flex-region',
   regions: {
     content: {
       el: '[data-content-region]',
       regionClass: PreloadRegion,
+      replaceElement: true,
     },
   },
   template: hbs`
-    <div class="patient__tabs js-list-header">
+    <div class="patient__tabs">
       <button class="patient__tab js-dashboard">
         {{~ @intl.patients.patient.archive.archiveViews.dashboardBtn ~}}
       </button>
@@ -281,15 +272,13 @@ const LayoutView = View.extend({
         {{~ @intl.patients.patient.archive.archiveViews.archiveBtn ~}}
       </span>
     </div>
-    <div class="patient__list-container flex-region js-list" data-content-region>
+    <div class="table-list patient__table-list">
+      <div class="table-list__header list-page__list-header"></div>
+      <div class="table-list__list list-page__list" data-content-region></div>
     </div>
   `,
   triggers: {
     'click .js-dashboard': 'click:dashboard',
-  },
-  childViewTriggers: {
-    'attach': 'childView:attach',
-    'render:children': 'childView:render:children',
   },
   onClickDashboard() {
     Radio.trigger('event-router', 'patient:dashboard', this.model.id);
