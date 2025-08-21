@@ -129,7 +129,7 @@ export default App.extend({
     const entityRequest = isFlowType ? 'fetch:flows:collection' : 'fetch:actions:collection';
 
     const includes = ['patient', ...this.sortOptions.getInclude()];
-    const fields = { patients: ['first_name', 'last_name', 'patient-fields'] };
+    const fields = { patients: ['first_name', 'last_name', 'patient-fields', 'segment'] };
     this.filters = this.getState().getEntityFilter();
 
     if (!isFlowType) {
