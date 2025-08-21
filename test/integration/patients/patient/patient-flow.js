@@ -113,7 +113,6 @@ context('patient flow page', function() {
 
   specify('patient flow action sidebar', function() {
     const testFileId = uuid();
-    const testOtherFile = getFile();
     const testComment = getComment();
 
     const testPatient = getPatient({
@@ -148,13 +147,13 @@ context('patient flow page', function() {
         'form': getRelationship(testForm),
         'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
-        'files': getRelationship([testOtherFile]),
+        'files': getRelationship([]),
       },
     });
 
     cy
       .routesForPatientAction()
-      .routeSettings('upload_attachments', true)
+      .routeSettings('upload_attachments', false)
       .routeFlow(fx => {
         fx.data = testFlow;
 
@@ -173,7 +172,7 @@ context('patient flow page', function() {
         return fx;
       })
       .routeActionFiles(fx => {
-        fx.data = [testOtherFile];
+        fx.data = [];
 
         return fx;
       })
@@ -439,7 +438,7 @@ context('patient flow page', function() {
       .get('[data-attachments-files-region]')
       .children()
       .as('attachmentItems')
-      .should('have.length', 2);
+      .should('have.length', 1);
 
     cy
       .get('@attachmentItems')
@@ -476,7 +475,7 @@ context('patient flow page', function() {
     cy
       .get('[data-attachments-files-region]')
       .children()
-      .should('have.length', 2);
+      .should('have.length', 1);
 
     cy
       .get('@attachmentItem')
@@ -489,6 +488,37 @@ context('patient flow page', function() {
       .contains('Download')
       .should('have.attr', 'href')
       .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA_v2.pdf`);
+
+    cy.sendWs({
+      category: 'AttachmentAdded',
+      resource: {
+        type: testFlowAction.type,
+        id: testFlowAction.id,
+      },
+      payload: {
+        clinician: {
+          type: 'clinicians',
+          id: uuid(),
+        },
+        file: {
+          type: 'files',
+          id: uuid(),
+        },
+        attributes: {
+          path: `patients/${ testPatient.id }/Other_HRA.pdf`,
+          bucket: 'bucket_name',
+          urls: {
+            view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/Other_HRA.pdf`,
+            download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/Other_HRA.pdf`,
+          },
+        },
+      },
+    });
+
+    cy
+      .get('[data-attachments-files-region]')
+      .children()
+      .should('have.length', 2);
 
     cy.sendWs({
       category: 'FileRemoved',
