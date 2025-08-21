@@ -79,7 +79,9 @@
   font-size: 14px;
   margin-right: 16px;
   vertical-align: top;
-  width: calc(40% + 22px);
+
+  /* 60 - 16px */
+  width: calc(40% + 44px);
 }
 
 .program-flow__meta {

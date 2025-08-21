@@ -80,9 +80,11 @@
   color: #{$black-60};
   display: inline-block;
   font-size: 14px;
-  padding-right: 24px;
+  margin-right: 16px;
   vertical-align: top;
-  width: calc(40% + 98px);
+
+  /* 48 + 32 + 16 icon */
+  width: calc(40% + 96px);
 }
 
 .patient-flow__meta {
@@ -98,7 +100,7 @@
 .patient-flow__table-list {
   grid-template-columns:
     48px
-    30px
+    32px
     minmax(100px, 40%)
     minmax(max-content, auto)
     minmax(max-content, 84px);

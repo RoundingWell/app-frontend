@@ -132,6 +132,7 @@ context('worklist page', function() {
       .wait('@routeFlows')
       .itsUrl()
       .its('search')
+      .should('contain', 'fields[patients]=first_name,last_name,patient-fields,segment')
       .should('not.contain', 'fields[flows]=name,state');
 
     cy
@@ -1710,6 +1711,7 @@ context('worklist page', function() {
       .wait('@routeActions')
       .itsUrl()
       .its('search')
+      .should('contain', 'fields[patients]=first_name,last_name,patient-fields,segment')
       .should('contain', 'fields[flows]=name,state');
 
     cy
