@@ -87,6 +87,9 @@ export default App.extend(extend({
     this.attachments.add(model);
 
     Radio.request('ws', 'add', model);
+
+    // to cover the scenario where the AttachmentsView hasn't been shown yet
+    if (this.attachments.length === 1) this.showAttachments();
   },
   onStart(options, activity, comments, attachments) {
     this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
