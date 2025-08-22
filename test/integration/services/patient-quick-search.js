@@ -393,7 +393,7 @@ context('Patient Quick Search', function() {
       body: {
         data: [{
           ...searchResult,
-          attributes: { ...searchResult.attributes, match: { label: 'DOB', value: '2008-01-16' } },
+          attributes: { ...searchResult.attributes, match: { label: 'Name', value: `${ first_name } ${ last_name }` } },
         }],
         included: [getResource(testPatient, 'patients')],
       },
@@ -404,15 +404,27 @@ context('Patient Quick Search', function() {
     cy
       .get('.patient-search__modal')
       .find('.patient-search__input')
-      .invoke('val', '2008-01-16')
+      .invoke('val', `${ first_name }`)
       .trigger('input')
       .wait('@routePatientSearch');
 
     cy
       .get('.patient-search__modal')
-      .find('.js-picklist-item strong')
-      .parents('.js-picklist-item')
-      .should('contain', '2008-01-16');
+      .find('.js-picklist-item')
+      .first()
+      .find('.patient-search__picklist-item-result-value')
+      .should($el => {
+        expect($el.text().trim()).to.be.empty;
+      });
+
+    cy
+      .get('.patient-search__modal')
+      .find('.js-picklist-item')
+      .first()
+      .find('.patient-search__picklist-item-result-label')
+      .should($el => {
+        expect($el.text().trim()).to.be.empty;
+      });
   });
 
   specify('No Results with Patient Add', function() {
