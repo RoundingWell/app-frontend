@@ -95,7 +95,11 @@ const PicklistItem = View.extend({
     </div>
     <div class="patient-search__picklist-item-meta">
       <div class="patient-search__picklist-item-dob u-text--overflow">
-        {{formatDateTime birth_date "MM/DD/YYYY"}}
+        {{#if isDobMatch}}
+          <strong>{{formatDateTime birth_date "MM/DD/YYYY"}}</strong>
+        {{else}}
+          {{formatDateTime birth_date "MM/DD/YYYY"}}
+        {{/if}}
       </div>
       <div class="patient-search__picklist-item-status u-text--overflow">
         {{status}}
@@ -117,6 +121,7 @@ const PicklistItem = View.extend({
       name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       search: this.state.get('search'),
       shouldShowMatch: this.shouldShowMatch(),
+      isDobMatch: this.isDobMatch(),
     };
   },
   shouldShowMatch() {
@@ -124,6 +129,12 @@ const PicklistItem = View.extend({
     const i18n = intl.globals.search.patientSearchViews.picklistItemView;
 
     return label !== i18n.labelName && label !== i18n.labelDob;
+  },
+  isDobMatch() {
+    const label = this.model.get('match').label;
+    const i18n = intl.globals.search.patientSearchViews.picklistItemView;
+
+    return label === i18n.labelDob;
   },
 });
 

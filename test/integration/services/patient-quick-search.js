@@ -11,12 +11,13 @@ context('Patient Quick Search', function() {
         attributes: {
           first_name: 'Test',
           last_name: `${ index } Patient`,
+          birth_date: '2008-01-16',
           status: index % 2 ? 'inactive' : 'active',
         },
       });
     });
 
-    const data = _.map(patients, patient => {
+    const searchResults = _.map(patients, patient => {
       const { first_name, last_name, birth_date, status } = patient.attributes;
 
       return {
@@ -50,7 +51,7 @@ context('Patient Quick Search', function() {
         }
         req.reply({
           body: {
-            data,
+            data: searchResults,
             included: [...getResource(patients, 'patients')],
           },
           delay: 300,
@@ -251,6 +252,32 @@ context('Patient Quick Search', function() {
       .get('@searchModal')
       .should('contain', 'Search by');
 
+    cy.intercept({
+      method: 'GET',
+      url: '/api/patients?filter*',
+    }, {
+      body: {
+        data: [{
+          ...searchResults[0],
+          attributes: { ...searchResults[0].attributes, match: { label: 'Birth Date', value: '2008-01-16' } },
+        }],
+        included: [getResource(patients[0], 'patients')],
+      },
+      delay: 300,
+    }).as('routePatientSearch');
+
+    cy
+      .get('@searchModal')
+      .find('.patient-search__input')
+      .clear()
+      .type('01/16/2008')
+      .wait('@routePatientSearch');
+
+    cy
+      .get('@searchModal')
+      .find('.js-picklist-item strong')
+      .should('contain', '01/16/2008');
+
     cy
       .go('back');
   });
@@ -393,7 +420,7 @@ context('Patient Quick Search', function() {
       body: {
         data: [{
           ...searchResult,
-          attributes: { ...searchResult.attributes, match: { label: 'DOB', value: '2008-01-16' } },
+          attributes: { ...searchResult.attributes, match: { label: 'Name', value: `${ first_name } ${ last_name }` } },
         }],
         included: [getResource(testPatient, 'patients')],
       },
@@ -404,15 +431,27 @@ context('Patient Quick Search', function() {
     cy
       .get('.patient-search__modal')
       .find('.patient-search__input')
-      .invoke('val', '2008-01-16')
+      .invoke('val', `${ first_name }`)
       .trigger('input')
       .wait('@routePatientSearch');
 
     cy
       .get('.patient-search__modal')
-      .find('.js-picklist-item strong')
-      .parents('.js-picklist-item')
-      .should('contain', '2008-01-16');
+      .find('.js-picklist-item')
+      .first()
+      .find('.patient-search__picklist-item-result-value')
+      .should($el => {
+        expect($el.text().trim()).to.be.empty;
+      });
+
+    cy
+      .get('.patient-search__modal')
+      .find('.js-picklist-item')
+      .first()
+      .find('.patient-search__picklist-item-result-label')
+      .should($el => {
+        expect($el.text().trim()).to.be.empty;
+      });
   });
 
   specify('No Results with Patient Add', function() {
