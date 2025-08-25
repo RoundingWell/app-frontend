@@ -35,7 +35,7 @@ const CustomFilterView = View.extend({
   className: 'flex flex-align-center u-margin--b-8',
   template: hbs`
     <h4 class="sidebar__label">{{ name }}</h4>
-    <div class="flex-grow" data-filter-button></div>
+    <div class="flex-grow u-text--overflow" data-filter-button></div>
   `,
   regions: {
     filterButton: '[data-filter-button]',
