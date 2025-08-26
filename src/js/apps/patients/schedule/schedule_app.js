@@ -119,6 +119,8 @@ export default App.extend({
     return Radio.request('entities', 'fetch:actions:collection', { data: { filter, fields, include } });
   },
   onStart(options, collection) {
+    this.setWorklist(collection.getMeta('worklist'));
+
     this.collection = collection;
     this.filteredCollection = collection.clone();
     this.editableCollection = collection.clone();
@@ -130,6 +132,11 @@ export default App.extend({
     this.toggleBulkSelect();
 
     this.showList();
+  },
+  setWorklist(worklist) {
+    this.getState().setWorklist(worklist);
+    const filtersState = this.getFiltersState();
+    filtersState.set('worklist', worklist);
   },
   showList() {
     const scheduleListView = new ScheduleListView({

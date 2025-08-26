@@ -11,6 +11,7 @@ export default Backbone.Model.extend({
     return {
       isReduced: true,
       searchQuery: '',
+      worklist: null,
     };
   },
   getFiltersState() {
@@ -19,6 +20,7 @@ export default Backbone.Model.extend({
       states: this.get('states'),
       flowStates: this.get('flowStates'),
       listType: 'actions',
+      worklist: this.getWorklist(),
     };
   },
   preinitialize() {
@@ -53,6 +55,12 @@ export default Backbone.Model.extend({
       states: this.get('states').join() || NIL_UUID,
       flow_states: this.get('flowStates').join() || NIL_UUID,
     };
+  },
+  getWorklist() {
+    return this.get('worklist');
+  },
+  setWorklist(worklist) {
+    return this.set('worklist', worklist);
   },
   getOwner() {
     return this.currentClinician;

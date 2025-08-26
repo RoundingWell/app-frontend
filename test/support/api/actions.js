@@ -80,7 +80,12 @@ Cypress.Commands.add('routeActions', (mutator = routeActions) => {
 
   const body = mutator({ data, included });
 
-  if (!body.meta) body.meta = { actions: { total: body.data.length } };
+  if (!body.meta) {
+    body.meta = {
+      actions: { total: body.data.length },
+      worklist: uuid(),
+    };
+  }
 
   cy
     .intercept('GET', '/api/actions?*', { body })

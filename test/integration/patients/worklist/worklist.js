@@ -126,6 +126,13 @@ context('worklist page', function() {
       .wait('@routeActions');
 
     cy
+      .get('.js-patient') // Wait for list to render
+      .should(() => {
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+        expect(storage.actionsWorklist).to.exist;
+      });
+
+    cy
       .get('.worklist-list__toggle')
       .contains('Flows')
       .click()
@@ -134,6 +141,13 @@ context('worklist page', function() {
       .its('search')
       .should('contain', 'fields[patients]=first_name,last_name,patient-fields,segment')
       .should('not.contain', 'fields[flows]=name,state');
+
+    cy
+      .get('.js-patient') // Wait for list to render
+      .should(() => {
+        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+        expect(storage.flowsWorklist).to.exist;
+      });
 
     cy
       .get('[data-filters-region]')

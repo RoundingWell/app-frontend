@@ -19,6 +19,8 @@ const StateModel = Backbone.Model.extend({
     return {
       actionsSortId: 'sortCreatedDesc',
       flowsSortId: 'sortCreatedDesc',
+      actionsWorklist: null,
+      flowsWorklist: null,
       actionsDateFilters: {
         dateType: 'created_at',
         selectedDate: null,
@@ -48,6 +50,7 @@ const StateModel = Backbone.Model.extend({
       customFilters: this.get('customFilters'),
       states: this.get('states'),
       flowStates: this.get('flowStates'),
+      worklist: this.getWorklist(),
       listType: this.get('listType'),
       isDoneOnly: this.id === 'done-last-thirty-days',
     };
@@ -93,6 +96,12 @@ const StateModel = Backbone.Model.extend({
   },
   isFlowType() {
     return this.getType() === 'flows';
+  },
+  getWorklist() {
+    return this.get(`${ this.getType() }Worklist`);
+  },
+  setWorklist(worklist) {
+    return this.set(`${ this.getType() }Worklist`, worklist);
   },
   getSort() {
     return this.get(`${ this.getType() }SortId`);
