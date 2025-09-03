@@ -5,6 +5,9 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/sidebar.scss';
 
 import Droplist from 'js/components/droplist';
+
+import PreloadRegion from 'js/regions/preload_region';
+
 import { CheckComponent } from 'js/views/patients/shared/actions_views';
 
 import intl from 'js/i18n';
@@ -13,18 +16,32 @@ import './filters-sidebar.scss';
 
 const i18n = intl.patients.sidebar.filters.filtersSidebarViews;
 
+const ItemTemplate = hbs`
+  {{~#if value ~}}
+    <span class="flex-grow">{{ value }}</span>
+    {{~#if total}}<span class="filters-sidebar__filter-count">{{ total }}</span>{{/if}}
+  {{~ else ~}}
+    <span>{{ defaultText }}</span>
+  {{~/if~}}
+`;
+
 const CustomFilterDropList = Droplist.extend({
   popWidth() {
     return this.getView().$el.outerWidth();
   },
   viewOptions: {
-    className: 'button-secondary w-100',
-    template: hbs`{{ name }}`,
+    className: 'button-secondary w-100 flex',
+    template: hbs`{{ value }}{{#unless value}}{{ defaultText }}{{/unless}}`,
+    templateContext: {
+      defaultText: i18n.customFilterView.defaultText,
+    },
   },
   picklistOptions() {
     return {
-      attr: 'name',
+      itemTemplate: ItemTemplate,
       isSelectlist: true,
+      canClear: true,
+      clearText: i18n.customFilterDropList.defaultText,
       headingText: i18n.customFilterDropList.headingText,
       placeholderText: `${ this.getOption('filterTitle') }...`,
     };
@@ -32,6 +49,9 @@ const CustomFilterDropList = Droplist.extend({
 });
 
 const CustomFilterView = View.extend({
+  modelEvents: {
+    'change:values': 'render',
+  },
   className: 'flex flex-align-center u-margin--b-8',
   template: hbs`
     <h4 class="sidebar__label">{{ name }}</h4>
@@ -42,35 +62,44 @@ const CustomFilterView = View.extend({
   },
   initialize({ state }) {
     this.state = state;
-    this.slug = this.model.get('slug');
 
     this.listenTo(state, 'change:customFilters', this.render);
   },
   onRender() {
-    const options = this.getOptions();
-    const selected = options.get(this.state.getFilter(this.slug)) || options.at(0);
+    const slug = this.model.get('slug');
+    const values = this.model.getValues();
+    const selected = values.find({ value: this.state.getFilter(slug) }) || null;
 
     const customFilter = new CustomFilterDropList({
-      collection: options,
+      lists: [
+        {
+          collection: values,
+          viewFilter({ model }) {
+            return model.get('total') > 0;
+          },
+        },
+        {
+          headingText: i18n.customFilterView.noResultsHeading,
+          collection: values,
+          viewFilter({ model }) {
+            return model.get('total') === 0;
+          },
+        },
+      ],
       state: { selected },
       filterTitle: this.model.get('name'),
     });
 
-    this.listenTo(customFilter.getState(), 'change:selected', (state, { id }) => {
-      this.state.setFilter(this.slug, id);
+    this.listenTo(customFilter.getState(), 'change:selected', (state, newSelected) => {
+      if (!newSelected) {
+        this.state.setFilter(slug, null);
+        return;
+      }
+
+      this.state.setFilter(slug, newSelected.get('value'));
     });
 
     this.showChildView('filterButton', customFilter);
-  },
-  getOptions() {
-    const options = this.model.getOptions().clone();
-
-    options.unshift({
-      id: null,
-      name: i18n.customFilterView.defaultText,
-    });
-
-    return options;
   },
 });
 
@@ -82,8 +111,14 @@ const CustomFiltersView = CollectionView.extend({
       state: this.getOption('state'),
     };
   },
+  collectionEvents: {
+    'change:name': 'filter',
+  },
   viewComparator({ model }) {
     return String(model.get('name')).toLowerCase();
+  },
+  viewFilter({ model }) {
+    return model.has('name');
   },
 });
 
@@ -197,16 +232,22 @@ const MenuView = View.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'flex-grow',
+  className: 'flex-grow filters-sidebar',
   template: hbs`
     <div data-custom-filters-region></div>
     <div data-states-filters-region></div>
     <div data-flow-states-filters-region></div>
   `,
   regions: {
-    customFilters: '[data-custom-filters-region]',
+    customFilters: {
+      el: '[data-custom-filters-region]',
+      regionClass: PreloadRegion,
+    },
     statesFilters: '[data-states-filters-region]',
     flowStatesFilters: '[data-flow-states-filters-region]',
+  },
+  onRender() {
+    this.getRegion('customFilters').startPreloader();
   },
 });
 

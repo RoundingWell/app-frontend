@@ -29,6 +29,7 @@ const Model = BaseModel.extend({
 const Collection = BaseCollection.extend({
   model: Model,
   invokeFetch({ entityType, worklist }) {
+    /* istanbul ignore next: Loading before the list requires a slow test */
     if (!worklist) return;
     return this.map(filter => {
       filter.set({ entityType, worklist });

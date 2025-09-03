@@ -10,6 +10,7 @@ import { LayoutView, HeadingView, MenuView, CustomFiltersView, StatesFiltersView
 export default App.extend(extend({
   onStart({ filtersState }) {
     this.filtersState = filtersState;
+    this.filters = Radio.request('entities', 'filters:customFilters');
 
     this.showHeadingView();
     this.showMenu();
@@ -18,7 +19,15 @@ export default App.extend(extend({
     this.showStatesFiltersView();
     this.showFlowStatesFiltersView();
 
-    this.listenTo(filtersState, 'change:listType', this.showFlowStatesFiltersView);
+    this.listenTo(filtersState, {
+      'change:listType'() {
+        this.showFlowStatesFiltersView();
+        this.fetchFilters();
+      },
+      'change:worklist'() {
+        this.fetchFilters();
+      },
+    });
   },
   onClose() {
     this.stop();
@@ -37,21 +46,21 @@ export default App.extend(extend({
 
     this.showChildView('menu', menuView);
   },
+  fetchFilters() {
+    return this.filters.invokeFetch({
+      entityType: this.filtersState.get('listType'),
+      worklist: this.filtersState.get('worklist'),
+    });
+  },
   showCustomFiltersView() {
-    const collection = Radio.request('workspace', 'directories');
-
-    const customFilters = Radio.request('settings', 'get', 'custom_filters');
-
-    if (customFilters && customFilters.length) {
-      const filteredDirectories = collection.filter(directory => {
-        return customFilters.includes(directory.get('slug'));
+    Promise.allSettled(this.fetchFilters())
+      .then(() => {
+        this._showCustomFiltersView();
       });
-
-      collection.reset(filteredDirectories);
-    }
-
+  },
+  _showCustomFiltersView() {
     const customFiltersView = new CustomFiltersView({
-      collection,
+      collection: this.filters,
       state: this.filtersState,
     });
 

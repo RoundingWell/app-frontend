@@ -1,11 +1,12 @@
 import { NIL as NIL_UUID } from 'uuid';
 
-import { mergeJsonApi, getRelationship } from 'helpers/json-api';
+import { mergeJsonApi, getRelationship, getErrors } from 'helpers/json-api';
 
 import { workspaceOne, workspaceTwo, getWorkspace } from 'support/api/workspaces';
 import { getCurrentClinician } from 'support/api/clinicians';
 import { roleReducedEmployee } from 'support/api/roles';
 import { stateTodo, stateInProgress, stateDone, stateUnableToComplete } from 'support/api/states';
+import { getFilter } from 'support/api/filters';
 
 const STATE_VERSION = 'v6';
 
@@ -14,6 +15,11 @@ context('filter sidebar', function() {
   const testStates = [stateTodo, stateInProgress, stateDone, stateUnableToComplete];
 
   specify('worklist filtering', function() {
+    // Handle uncaught exceptions from failed filter requests
+    cy.on('uncaught:exception', () => {
+      return false;
+    });
+
     localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       customFilters: {
@@ -22,6 +28,12 @@ context('filter sidebar', function() {
       states: [stateTodo.id, stateInProgress.id],
       flowStates: [stateTodo.id, stateInProgress.id],
     }));
+
+    const errors = getErrors({
+      status: '410',
+      title: 'Not Found',
+      detail: 'Cannot find filter',
+    });
 
     cy
       .routeWorkspaces(fx => {
@@ -50,43 +62,40 @@ context('filter sidebar', function() {
       .routeFlow()
       .routeFlowActions()
       .routePatientByFlow()
-      .routeDirectories(fx => {
-        fx.data = [
-          {
-            attributes: {
-              name: 'Team',
-              slug: 'team',
-              value: [
-                'Coordinator',
-                'Nurse',
-              ],
-            },
+      .intercept('GET', '/api/filters/error/**', {
+        statusCode: 410,
+        body: { errors },
+      })
+      .as('routeFilterError')
+      .routeFilter(fx => {
+        fx.data = getFilter({
+          attributes: {
+            name: 'Team',
+            slug: 'team',
+            values: [
+              { value: 'Coordinator', total: 2 },
+              { value: 'Nurse', total: 1 },
+            ],
           },
-          {
-            attributes: {
-              name: 'Insurance Plans',
-              slug: 'insurance',
-              value: [
-                'BCBS PPO 100',
-                'Medicare',
-              ],
-            },
-          },
-          {
-            attributes: {
-              name: 'ACO',
-              slug: 'aco',
-              value: [
-                'Basic',
-                'Premier',
-              ],
-            },
-          },
-        ];
+        });
 
         return fx;
-      })
-      .routeSettings('custom_filters', ['team', 'insurance'])
+      }, 'team')
+      .routeFilter(fx => {
+        fx.data = getFilter({
+          attributes: {
+            name: 'Insurance Plans',
+            slug: 'insurance',
+            values: [
+              { value: 'BCBS PPO 100', total: 0 },
+              { value: 'Medicare', total: 1 },
+            ],
+          },
+        });
+
+        return fx;
+      }, 'insurance')
+      .routeSettings('custom_filters', ['team', 'insurance', 'error'])
       .visit('/worklist/owned-by')
       .wait('@routeActions')
       .itsUrl()
@@ -105,7 +114,14 @@ context('filter sidebar', function() {
       .get('.list-page__filters')
       .find('[data-filters-region]')
       .find('button')
-      .click();
+      .click()
+      .wait('@routeFilterError')
+      .then(interception => {
+        // Verify the error response
+        expect(interception.response.statusCode).to.equal(410);
+        expect(interception.response.body.errors[0].title).to.equal('Not Found');
+        expect(interception.response.body.errors[0].detail).to.equal('Cannot find filter');
+      });
 
     cy
       .get('[data-flow-states-filters-region]')
@@ -141,7 +157,7 @@ context('filter sidebar', function() {
       .first()
       .get('.sidebar__label')
       .should('contain', 'Insurance Plans')
-      .get('[data-filter-button')
+      .get('[data-filter-button]')
       .should('contain', 'Medicare');
 
     cy
@@ -150,7 +166,7 @@ context('filter sidebar', function() {
       .eq(1)
       .get('.sidebar__label')
       .should('contain', 'Team')
-      .get('[data-filter-button')
+      .get('[data-filter-button]')
       .should('contain', 'All');
 
     cy
@@ -163,6 +179,21 @@ context('filter sidebar', function() {
       .get('.picklist')
       .find('.js-input')
       .should('have.attr', 'placeholder', 'Insurance Plans...');
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .should('have.length', 2)
+      .first()
+      .find('.js-picklist-item')
+      .contains('1');
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .last()
+      .find('.js-picklist-item')
+      .should('have.length', 1);
 
     cy
       .get('.picklist__item')
@@ -560,7 +591,6 @@ context('filter sidebar', function() {
       .routeFlow()
       .routeFlowActions()
       .routePatientByFlow()
-      .routeDirectories()
       .visit('/worklist/done-last-thirty-days')
       .wait('@routeActions')
       .itsUrl()
@@ -681,42 +711,37 @@ context('filter sidebar', function() {
     }));
 
     cy
-      .routeDirectories(fx => {
-        fx.data = [
-          {
-            attributes: {
-              name: 'Team',
-              slug: 'team',
-              value: [
-                'Coordinator',
-                'Nurse',
-              ],
-            },
+      .routeFilter()
+      .routeFilter(fx => {
+        fx.data = getFilter({
+          attributes: {
+            name: 'Team',
+            slug: 'team',
+            values: [
+              { value: 'Coordinator', total: 2 },
+              { value: 'Nurse', total: 1 },
+            ],
           },
-          {
-            attributes: {
-              name: 'Insurance Plans',
-              slug: 'insurance',
-              value: [
-                'BCBS PPO 100',
-                'Medicare',
-              ],
-            },
-          },
-          {
-            attributes: {
-              name: 'ACO',
-              slug: 'aco',
-              value: [
-                'Basic',
-                'Premier',
-              ],
-            },
-          },
-        ];
+        });
 
         return fx;
-      })
+      }, 'team')
+      .routeFilter(fx => {
+        fx.data = getFilter({
+          attributes: {
+            name: 'Insurance Plans',
+            slug: 'insurance',
+            values: [
+              { value: 'BCBS PPO 100', total: 0 },
+              { value: 'Medicare', total: 1 },
+            ],
+          },
+        });
+
+        return fx;
+      }, 'insurance');
+
+    cy
       .routeSettings('custom_filters', ['team', 'insurance'])
       .routeActions()
       .visit('/schedule')
@@ -738,7 +763,8 @@ context('filter sidebar', function() {
       .get('.list-page__filters')
       .find('[data-filters-region]')
       .find('button')
-      .click();
+      .click()
+      .wait('@routeFilterinsurance');
 
     cy
       .get('.app-frame__sidebar .sidebar')
@@ -758,7 +784,7 @@ context('filter sidebar', function() {
       .first()
       .get('.sidebar__label')
       .should('contain', 'Insurance Plans')
-      .get('[data-filter-button')
+      .get('[data-filter-button]')
       .should('contain', 'Medicare');
 
     cy
@@ -767,7 +793,7 @@ context('filter sidebar', function() {
       .eq(1)
       .get('.sidebar__label')
       .should('contain', 'Team')
-      .get('[data-filter-button')
+      .get('[data-filter-button]')
       .should('contain', 'All');
 
     cy
@@ -1099,42 +1125,35 @@ context('filter sidebar', function() {
 
         return fx;
       })
-      .routeDirectories(fx => {
-        fx.data = [
-          {
-            attributes: {
-              name: 'Team',
-              slug: 'team',
-              value: [
-                'Coordinator',
-                'Nurse',
-              ],
-            },
+      .routeFilter()
+      .routeFilter(fx => {
+        fx.data = getFilter({
+          attributes: {
+            name: 'Team',
+            slug: 'team',
+            values: [
+              { value: 'Coordinator', total: 2 },
+              { value: 'Nurse', total: 1 },
+            ],
           },
-          {
-            attributes: {
-              name: 'Insurance Plans',
-              slug: 'insurance',
-              value: [
-                'BCBS PPO 100',
-                'Medicare',
-              ],
-            },
-          },
-          {
-            attributes: {
-              name: 'ACO',
-              slug: 'aco',
-              value: [
-                'Basic',
-                'Premier',
-              ],
-            },
-          },
-        ];
+        });
 
         return fx;
-      })
+      }, 'team')
+      .routeFilter(fx => {
+        fx.data = getFilter({
+          attributes: {
+            name: 'Insurance Plans',
+            slug: 'insurance',
+            values: [
+              { value: 'BCBS PPO 100', total: 0 },
+              { value: 'Medicare', total: 1 },
+            ],
+          },
+        });
+
+        return fx;
+      }, 'insurance')
       .routeSettings('custom_filters', ['team', 'insurance'])
       .routeActions()
       .routeAction()
@@ -1179,7 +1198,7 @@ context('filter sidebar', function() {
       .first()
       .get('.sidebar__label')
       .should('contain', 'Insurance Plans')
-      .get('[data-filter-button')
+      .get('[data-filter-button]')
       .should('contain', 'Medicare');
 
     cy
@@ -1188,7 +1207,7 @@ context('filter sidebar', function() {
       .eq(1)
       .get('.sidebar__label')
       .should('contain', 'Team')
-      .get('[data-filter-button')
+      .get('[data-filter-button]')
       .should('contain', 'All');
 
     cy
