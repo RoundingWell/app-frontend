@@ -65,7 +65,6 @@ Cypress.Commands.overwrite('visit', (originalFn, url = '/', options = {}) => {
 
   let waits = [
     '@routeWorkspaceClinicians',
-    '@routeDirectories',
     '@routeWorkspacePrograms',
     '@routeStates',
     '@routeForms',
