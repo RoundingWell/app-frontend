@@ -26,6 +26,7 @@ import './api/comments';
 import './api/dashboards';
 import './api/events';
 import './api/files';
+import './api/filters';
 import './api/flows';
 import './api/forms';
 import './api/form-definition';
