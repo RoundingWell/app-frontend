@@ -22,7 +22,12 @@ const Model = BaseModel.extend({
     return `/api/filters/${ this.get('slug') }/${ this.get('entityType') }?${ params.toString() }`;
   },
   getValues() {
-    return new FilterValues(this.get('values'));
+    const values = new FilterValues(this.get('values'));
+    return {
+      withTotals: new FilterValues(values.reject({ total: 0 })),
+      withoutTotals: new FilterValues(values.filter({ total: 0 })),
+      values,
+    };
   },
 });
 

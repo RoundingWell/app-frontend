@@ -18,7 +18,7 @@ const i18n = intl.patients.sidebar.filters.filtersSidebarViews;
 
 const ItemTemplate = hbs`
   {{~#if value ~}}
-    <span class="flex-grow">{{ value }}</span>
+    <span class="flex-grow">{{matchText value query}}</span>
     {{~#if total}}<span class="filters-sidebar__filter-count">{{ total }}</span>{{/if}}
   {{~ else ~}}
     <span>{{ defaultText }}</span>
@@ -67,23 +67,17 @@ const CustomFilterView = View.extend({
   },
   onRender() {
     const slug = this.model.get('slug');
-    const values = this.model.getValues();
+    const { withTotals, withoutTotals, values } = this.model.getValues();
     const selected = values.find({ value: this.state.getFilter(slug) }) || null;
 
     const customFilter = new CustomFilterDropList({
       lists: [
         {
-          collection: values,
-          viewFilter({ model }) {
-            return model.get('total') > 0;
-          },
+          collection: withTotals,
         },
         {
           headingText: i18n.customFilterView.noResultsHeading,
-          collection: values,
-          viewFilter({ model }) {
-            return model.get('total') === 0;
-          },
+          collection: withoutTotals,
         },
       ],
       state: { selected },
