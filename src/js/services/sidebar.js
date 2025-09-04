@@ -26,6 +26,8 @@ export default App.extend({
   },
 
   startSidebarApp(app, appOptions, viewOptions) {
+    if (this.currentApp === app) return this.currentApp;
+
     this.stopSidebarApp();
 
     this.currentApp = app;
@@ -41,6 +43,7 @@ export default App.extend({
 
     this.listenTo(app, 'stop', () => {
       this.getRegion().empty();
+      delete this.currentApp;
     });
 
     return this.currentApp;
