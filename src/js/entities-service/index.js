@@ -12,6 +12,8 @@ import './events';
 
 import './files';
 
+import './filters';
+
 import './flows';
 
 import './forms';

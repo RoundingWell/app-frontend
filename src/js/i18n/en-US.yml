@@ -564,9 +564,11 @@ careOptsFrontend:
       filters:
         filtersSidebarViews:
           customFilterDropList:
+            defaultText: All
             headingText: Filter by
           customFilterView:
             defaultText: All
+            noResultsHeading: No Results
           flowStatesFiltersView:
             headingText: Show Actions from Flows with Flow States
           headingView:

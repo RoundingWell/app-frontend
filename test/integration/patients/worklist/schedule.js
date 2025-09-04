@@ -162,7 +162,11 @@ context('schedule page', function() {
 
     cy
       .get('[data-count-region]')
-      .should('contain', '20 Actions');
+      .should('contain', '20 Actions')
+      .should(() => {
+        const storage = JSON.parse(localStorage.getItem(`schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+        expect(storage.worklist).to.exist;
+      });
 
     cy
       .get('[data-date-filter-region]')

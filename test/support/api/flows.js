@@ -93,7 +93,12 @@ Cypress.Commands.add('routeFlows', (mutator = routeFlows) => {
 
   const body = mutator({ data, included });
 
-  if (!body.meta) body.meta = { flows: { total: body.data.length } };
+  if (!body.meta) {
+    body.meta = {
+      flows: { total: body.data.length },
+      worklist: uuid(),
+    };
+  }
 
   cy
     .intercept('GET', '/api/flows?*', { body })

@@ -28,6 +28,7 @@ const StateModel = Backbone.Model.extend({
       lastSelectedIndex: null,
       actionsSelected: {},
       searchQuery: '',
+      worklist: null,
     };
   },
   getFiltersState() {
@@ -35,6 +36,7 @@ const StateModel = Backbone.Model.extend({
       customFilters: this.get('customFilters'),
       states: this.get('states'),
       flowStates: this.get('flowStates'),
+      worklist: this.getWorklist(),
       listType: this.getType(),
     };
   },
@@ -67,6 +69,12 @@ const StateModel = Backbone.Model.extend({
   },
   getType() {
     return 'actions';
+  },
+  getWorklist() {
+    return this.get('worklist');
+  },
+  setWorklist(worklist) {
+    return this.set('worklist', worklist);
   },
   setDateFilters(filters) {
     this.set('dateFilters', clone(filters));

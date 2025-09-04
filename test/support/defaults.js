@@ -47,7 +47,6 @@ beforeEach(function() {
     .routeCurrentClinician()
     .routeRoles()
     .routeTeams()
-    .routeDirectories()
     .routeSettings()
     .routeWorkspaces()
     .routeWidgets()

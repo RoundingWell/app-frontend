@@ -8,7 +8,6 @@ export default App.extend({
   channelName: 'workspace',
   radioRequests: {
     'current': 'getCurrentWorkspace',
-    'directories': 'getDirectories',
     'fetch': 'fetchWorkspace',
   },
   _getWorkspace(slug) {
@@ -39,9 +38,6 @@ export default App.extend({
 
     return this.currentWorkspace;
   },
-  getDirectories() {
-    return this.directories.clone();
-  },
   _getSharedWorkspaces(programs) {
     const sharedWorkspaces = Radio.request('entities', 'workspaces:collection');
 
@@ -58,15 +54,12 @@ export default App.extend({
   },
   beforeStart() {
     return [
-      Radio.request('entities', 'fetch:directories:filterable'),
       Radio.request('entities', 'fetch:programs:byWorkspace', this.currentWorkspace.id),
       Radio.request('entities', 'fetch:states:collection'),
       Radio.request('entities', 'fetch:forms:collection'),
     ];
   },
-  onStart(options, directories, programs) {
-    this.directories = directories;
-
+  onStart(options, programs) {
     const workspaces = this._getSharedWorkspaces(programs);
 
     const clinicianRequests = workspaces.map(workspace => {
