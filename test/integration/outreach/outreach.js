@@ -167,9 +167,6 @@ context('Outreach', function() {
 
   specify('Opt-In error', function() {
     cy
-      .visit('/outreach/opt-in', { noWait: true, isRoot: true });
-
-    cy
       .intercept('POST', '/api/outreach', {
         delay: 100,
         statusCode: 400,
