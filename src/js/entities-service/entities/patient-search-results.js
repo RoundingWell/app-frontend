@@ -19,6 +19,8 @@ const Collection = BaseCollection.extend({
   search(
     /* istanbul ignore next */
     search = '') {
+    search = search.trim();
+
     if (search.length < 3) {
       if (!search.length || !this.prevSearch.includes(search)) {
         this.reset();
