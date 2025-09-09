@@ -184,6 +184,20 @@ context('Patient Quick Search', function() {
 
     cy
       .get('@searchModal')
+      .find('.patient-search__input')
+      .type('   ');
+
+    cy
+      .get('@searchModal')
+      .should('contain', 'No results match your query');
+
+    cy
+      .get('@searchModal')
+      .find('.patient-search__input')
+      .clear();
+
+    cy
+      .get('@searchModal')
       .should('contain', 'Search by');
 
     cy
