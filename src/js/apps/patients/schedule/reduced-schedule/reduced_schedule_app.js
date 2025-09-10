@@ -1,3 +1,4 @@
+import { get } from 'underscore';
 import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
@@ -39,15 +40,15 @@ export default App.extend({
   startFiltersApp({ setDefaults } = {}) {
     const filtersApp = this.startChildApp('filters', { state: this.getState().getFiltersState() });
 
-    const filterState = filtersApp.getState();
+    this.filterState = filtersApp.getState();
 
-    filtersApp.listenTo(filterState, 'change', () => {
-      this.setState(filterState.getFiltersState());
+    filtersApp.listenTo(this.filterState, 'change', () => {
+      this.setState(this.filterState.getFiltersState());
     });
 
-    if (setDefaults) filterState.setDefaultFilterStates();
+    if (setDefaults) this.filterState.setDefaultFilterStates();
 
-    this.setState(filterState.getFiltersState());
+    this.setState(this.filterState.getFiltersState());
   },
   onChangeSearchQuery(state) {
     this.currentSearchQuery = state.get('searchQuery');
@@ -112,6 +113,12 @@ export default App.extend({
     this.showCountView();
 
     this.showList();
+  },
+  /* istanbul ignore next: error handling */
+  onFail(options, error) {
+    if (get(error, ['response', 'status']) === 400) {
+      this.filterState.setDefaultFilterStates();
+    }
   },
   setWorklist(worklist) {
     this.getState().setWorklist(worklist);
