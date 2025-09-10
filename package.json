@@ -12,7 +12,8 @@
     "packages/care-ops-auth",
     "packages/care-ops-config",
     "packages/care-ops-datadog",
-    "packages/care-ops-fontawesome"
+    "packages/care-ops-fontawesome",
+    "packages/five9"
   ],
   "scripts": {
     "analyze": "npx vite-bundle-visualizer",
@@ -89,6 +90,7 @@
     "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
     "@roundingwell/care-ops-datadog": "workspace:*",
+    "@roundingwell/five9": "workspace:*",
     "amazon-quicksight-embedding-sdk": "^2.10.0",
     "animejs": "^3.2.1",
     "backbone": "^1.4.0",

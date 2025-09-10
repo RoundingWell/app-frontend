@@ -1,0 +1,17 @@
+{
+  "name": "@roundingwell/five9",
+  "version": "1.0.0",
+  "description": "Five9 CRM SDK integration",
+  "main": "index.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "postinstall": "node update-sdk.js",
+    "update": "node update-sdk.js"
+  },
+  "files": [
+    "index.js",
+    "update-sdk.js",
+    "five9.crm.sdk.js"
+  ]
+}
