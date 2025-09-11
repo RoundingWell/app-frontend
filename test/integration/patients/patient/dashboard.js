@@ -994,10 +994,12 @@ context('patient dashboard page', function() {
   });
 
   specify('flow list - socket notifications', function() {
+    const testDateTime = testTs();
+
     const testSocketFlow = getFlow({
       attributes: {
         name: 'Test Flow - Subscribed on Page Load',
-        updated_at: testTs(),
+        updated_at: testTsSubtract(1),
       },
       relationships: {
         state: getRelationship(stateTodo),
@@ -1015,7 +1017,6 @@ context('patient dashboard page', function() {
     const testNewSocketFlow = getFlow({
       attributes: {
         name: 'New Flow - Created Elsewhere',
-        updated_at: testTsSubtract(2),
       },
       relationships: {
         state: getRelationship(stateTodo),
@@ -1027,7 +1028,6 @@ context('patient dashboard page', function() {
     const testNewStateSocketFlow = getFlow({
       attributes: {
         name: 'New Flow - State Updated to Match Current Filter',
-        updated_at: testTsSubtract(1),
       },
       relationships: {
         state: getRelationship(stateTodo),
@@ -1057,7 +1057,7 @@ context('patient dashboard page', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
+      .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testDateTime })
       .wait('@routePatient')
       .wait('@routePatientFlows')
       .wait('@routePatientActions');
@@ -1104,7 +1104,7 @@ context('patient dashboard page', function() {
     cy
       .get('@firstRow')
       .find('.patient__action-ts')
-      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+      .should('contain', formatDate(testDateTime, 'TIME_OR_DAY'));
 
     cy.sendWs({
       category: 'OwnerChanged',
@@ -1293,6 +1293,7 @@ context('patient dashboard page', function() {
   });
 
   specify('action list - socket notifications', function() {
+    const testDateTime = testTs();
     const currentClinician = getCurrentClinician();
     const testSocketComment = getComment();
     const testSocketFileId = uuid();
@@ -1300,7 +1301,7 @@ context('patient dashboard page', function() {
     const testSocketAction = getAction({
       attributes: {
         name: 'Test Action - Subscribed on Page Load',
-        updated_at: testTs(),
+        updated_at: testTsSubtract(1),
       },
       relationships: {
         state: getRelationship(stateTodo),
@@ -1312,7 +1313,6 @@ context('patient dashboard page', function() {
     const testNewSocketAction = getAction({
       attributes: {
         name: 'New Action - Created Elsewhere',
-        updated_at: testTsSubtract(3),
       },
       relationships: {
         state: getRelationship(stateTodo),
@@ -1324,7 +1324,6 @@ context('patient dashboard page', function() {
     const testNewStateSocketAction = getAction({
       attributes: {
         name: 'New Action - State Updated to Match Current Filter',
-        updated_at: testTsSubtract(2),
       },
       relationships: {
         state: getRelationship(stateTodo),
@@ -1354,7 +1353,7 @@ context('patient dashboard page', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
+      .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testDateTime })
       .wait('@routePatient')
       .wait('@routePatientFlows')
       .wait('@routePatientActions');
@@ -1401,7 +1400,7 @@ context('patient dashboard page', function() {
     cy
       .get('@firstRow')
       .find('.patient__action-ts')
-      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+      .should('contain', formatDate(testDateTime, 'TIME_OR_DAY'));
 
     cy.sendWs({
       category: 'DetailsChanged',

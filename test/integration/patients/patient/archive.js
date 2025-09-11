@@ -399,6 +399,8 @@ context('patient archive page', function() {
   });
 
   specify('flow list - socket notifications', function() {
+    const testDateTime = testTs();
+
     const testPatient = getPatient({
       relationships: {
         workspaces: getRelationship(workspaceOne),
@@ -408,7 +410,7 @@ context('patient archive page', function() {
     const testSocketFlow = getFlow({
       attributes: {
         name: 'Test Flow - Subscribed on Page Load',
-        updated_at: testTs(),
+        updated_at: testTsSubtract(1),
       },
       relationships: {
         state: getRelationship(stateDone),
@@ -420,7 +422,6 @@ context('patient archive page', function() {
     const testNewSocketFlow = getFlow({
       attributes: {
         name: 'New Flow - Created Elsewhere',
-        updated_at: testTsSubtract(2),
       },
       relationships: {
         state: getRelationship(stateDone),
@@ -432,7 +433,6 @@ context('patient archive page', function() {
     const testNewStateSocketFlow = getFlow({
       attributes: {
         name: 'New Flow - State Updated to Match Current Filter',
-        updated_at: testTsSubtract(1),
       },
       relationships: {
         state: getRelationship(stateDone),
@@ -464,7 +464,7 @@ context('patient archive page', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testTs() })
+      .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testDateTime })
       .wait('@routePatient')
       .wait('@routePatientActions')
       .wait('@routeWorkspacePatient')
@@ -488,6 +488,31 @@ context('patient archive page', function() {
           getRelationship(testSocketFlow).data,
         ]);
       });
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: testSocketFlow.type,
+        id: testSocketFlow.id,
+      },
+      payload: {
+        attributes: {
+          name: 'New Name Via Websocket',
+        },
+      },
+    });
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .first()
+      .as('firstRow')
+      .should('contain', 'New Name Via Websocket');
+
+    cy
+      .get('@firstRow')
+      .find('.patient__action-ts')
+      .should('contain', formatDate(testDateTime, 'TIME_OR_DAY'));
 
     // state was set to be not done, which means it's removed from the list
     cy.sendWs({
@@ -547,10 +572,7 @@ context('patient archive page', function() {
       });
 
     cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
-      .first()
-      .as('firstRow')
+      .get('@firstRow')
       .should('contain', 'New Flow - Created Elsewhere');
 
     cy
@@ -622,11 +644,6 @@ context('patient archive page', function() {
       .get('@firstRow')
       .should('contain', 'New Name Via Websocket');
 
-    cy
-      .get('@firstRow')
-      .find('.patient__action-ts')
-      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
-
     cy.sendWs({
       category: 'FlowProgressChanged',
       resource: {
@@ -665,6 +682,8 @@ context('patient archive page', function() {
   });
 
   specify('action list - socket notifications', function() {
+    const testDateTime = testTs();
+
     const testPatient = getPatient({
       relationships: {
         workspaces: getRelationship(workspaceOne),
@@ -674,7 +693,7 @@ context('patient archive page', function() {
     const testSocketAction = getAction({
       attributes: {
         name: 'Test Action - Subscribed on Page Load',
-        updated_at: testTs(),
+        updated_at: testTsSubtract(1),
       },
       relationships: {
         state: getRelationship(stateDone),
@@ -686,7 +705,6 @@ context('patient archive page', function() {
     const testNewSocketAction = getAction({
       attributes: {
         name: 'New Action - Created Elsewhere',
-        updated_at: testTsSubtract(3),
       },
       relationships: {
         state: getRelationship(stateDone),
@@ -698,7 +716,6 @@ context('patient archive page', function() {
     const testNewStateSocketAction = getAction({
       attributes: {
         name: 'New Action - State Updated to Match Current Filter',
-        updated_at: testTsSubtract(2),
       },
       relationships: {
         state: getRelationship(stateDone),
@@ -724,7 +741,7 @@ context('patient archive page', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testTs() })
+      .visitOnClock(`/patient/archive/${ testPatient.id }`, { now: testDateTime })
       .wait('@routePatient')
       .wait('@routePatientActions')
       .wait('@routePatientFlows');
@@ -747,6 +764,31 @@ context('patient archive page', function() {
           getRelationship(testSocketAction).data,
         ]);
       });
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: {
+        type: testSocketAction.type,
+        id: testSocketAction.id,
+      },
+      payload: {
+        attributes: {
+          name: 'New Name Via Websocket',
+        },
+      },
+    });
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .first()
+      .as('firstRow')
+      .should('contain', 'New Name Via Websocket');
+
+    cy
+      .get('@firstRow')
+      .find('.patient__action-ts')
+      .should('contain', formatDate(testDateTime, 'TIME_OR_DAY'));
 
     // state was set to done, which means it's removed from the list
     cy.sendWs({
@@ -806,10 +848,7 @@ context('patient archive page', function() {
       });
 
     cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
-      .first()
-      .as('firstRow')
+      .get('@firstRow')
       .should('contain', 'New Action - Created Elsewhere');
 
     cy
@@ -880,11 +919,6 @@ context('patient archive page', function() {
     cy
       .get('@firstRow')
       .should('contain', 'New Name Via Websocket');
-
-    cy
-      .get('@firstRow')
-      .find('.patient__action-ts')
-      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
     cy.sendWs({
       category: 'ResourceDeleted',
