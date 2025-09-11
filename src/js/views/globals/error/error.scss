@@ -2,7 +2,7 @@
   background-color: #F9F9F9;
   height: 100%;
   position: relative;
-  z-index: 100;
+  z-index: var(--z-error);
 }
 
 .error-page__contains {
@@ -16,7 +16,6 @@
   top: 50%;
   transform: translateY(-50%);
   width: 260px;
-  z-index: 1;
 }
 
 .error-page__dialog {

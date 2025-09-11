@@ -1,0 +1,17 @@
+// Z-Index Scale
+// Centralized z-index management using CSS custom properties
+// Keep this scale consistent and add new layers as needed
+
+:root {
+  // Base layers (1-9)
+  --z-base: 1;
+
+  // UI layers (10-99)
+  --z-positioned: 10;
+
+  // Overlay layers (100-999)
+  --z-overlay: 100;
+
+  // System layers (1000+)
+  --z-error: 1000;
+}

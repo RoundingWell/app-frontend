@@ -1,14 +1,9 @@
 .fill-window {
-  height: 100%;
-  left: 0;
+  inset: 0;
   overflow: hidden;
-
-  // allows for below interactions on non-IE browsers
   pointer-events: none;
-  position: absolute;
-  top: 0;
-  width: 100%;
-  z-index: 10;
+  position: fixed;
+  z-index: var(--z-overlay);
 
   > * {
     pointer-events: all;
@@ -16,11 +11,11 @@
 }
 
 @keyframes darken {
-  0% {
+  from {
     background: rgb(0 0 0 / 0%);
   }
 
-  100% {
+  to {
     background: rgb(0 0 0 / 70%);
   }
 }
