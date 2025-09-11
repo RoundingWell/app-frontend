@@ -11,6 +11,9 @@ import { getPatient } from 'support/api/patients';
 import { stateTodo, stateInProgress } from 'support/api/states';
 import { getFlow } from 'support/api/flows';
 import { teamCoordinator } from 'support/api/teams';
+import { workspaceOne } from 'support/api/workspaces';
+
+const STATE_VERSION = 'v6';
 
 context('reduced schedule page', function() {
   specify('display schedule', function() {
@@ -541,6 +544,67 @@ context('reduced schedule page', function() {
       .get('.list-page__header')
       .find('[data-search-region] .list-search__container')
       .should('have.class', 'is-applied');
+  });
+
+  specify('400 error - set default filter state', function() {
+    const currentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleReducedEmployee),
+      },
+    });
+
+    localStorage.setItem(`reduced-schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      id: 'reduced-schedule',
+      customFilters: {
+        invalid_filter: 'Medicare',
+      },
+      states: [stateTodo.id, stateInProgress.id],
+      flowStates: [stateTodo.id, stateInProgress.id],
+    }));
+
+    cy
+      .routesForPatientAction()
+      .routeCurrentClinician(fx => {
+        fx.data = currentClinician;
+
+        return fx;
+      })
+      .routeActions()
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .intercept('GET', /\/api\/actions.*filter\[%40invalid_filter\]/, {
+        statusCode: 400,
+        body: {},
+      })
+      .as('routeActionsError');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.app-frame__sidebar .sidebar')
+      .find('[data-states-filters-region]')
+      .find('[data-check-region]')
+      .eq(0)
+      .click()
+      .wait('@routeActionsError');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .should('not.contain', '2')
+      .should(() => {
+        const storage = JSON.parse(localStorage.getItem(`reduced-schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
+
+        expect(storage.customFilters).to.deep.equal({});
+        expect(storage.states).to.deep.equal([stateTodo.id, stateInProgress.id]);
+      });
   });
 
   specify('500 error', function() {
