@@ -40,7 +40,8 @@ export default SubRouterApp.extend({
   },
   onBeforeStart() {
     this.resetStateDefaults();
-    this.showView(new LayoutView());
+
+    this.getRegion().startPreloader();
   },
   beforeStart({ flowId }) {
     return [
@@ -68,6 +69,8 @@ export default SubRouterApp.extend({
     this.addOpts = this.getAddOpts(this.flow.getProgramFlow());
 
     this.subscribe();
+
+    this.showView(new LayoutView());
 
     this.showChildView('contextTrail', new ContextTrailView({
       model: this.flow,
