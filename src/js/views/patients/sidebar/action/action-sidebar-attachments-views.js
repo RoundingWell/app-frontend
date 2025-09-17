@@ -1,7 +1,7 @@
 import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
 import { View, CollectionView } from 'marionette';
-import anime from 'animejs';
+import { animate } from 'animejs';
 
 import { alphaSort } from 'js/utils/sorting';
 
@@ -53,10 +53,9 @@ const AttachmentView = View.extend({
     /* istanbul ignore if: Avoids async change errors */
     if (!this.isRendered() || !this.ui.progress.length) return;
 
-    anime({
-      targets: this.ui.progress[0],
+    animate(this.ui.progress[0], {
       width: `${ this.model.get('_progress') }%`,
-      easing: 'easeInOutSine',
+      ease: 'inOutSine',
     });
   },
   onClickRemove() {

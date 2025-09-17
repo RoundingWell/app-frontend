@@ -1,11 +1,10 @@
-import anime from 'animejs';
+import { animate } from 'animejs';
 
 function animSidebar(targets) {
-  return anime({
-    targets,
-    translateX: [{ value: 20, duration: 0 }, { value: 0, duration: 200 }],
-    opacity: [{ value: 0, duration: 0 }, { value: 1, duration: 300 }],
-    easing: 'easeInOutQuad',
+  return animate(targets, {
+    translateX: [{ to: 20, duration: 0 }, { to: 0, duration: 200 }],
+    opacity: [{ from: 0 }, { to: 1, duration: 300 }],
+    ease: 'inOutQuad',
   });
 }
 

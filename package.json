@@ -92,7 +92,7 @@
     "@roundingwell/care-ops-datadog": "workspace:*",
     "@roundingwell/five9": "workspace:*",
     "amazon-quicksight-embedding-sdk": "^2.10.0",
-    "animejs": "^3.2.1",
+    "animejs": "^4.1.3",
     "backbone": "^1.4.0",
     "backbone.eventrouter": "^1.0.1",
     "backbone.marionette": "^4.1.2",

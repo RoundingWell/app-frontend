@@ -1,4 +1,4 @@
-import anime from 'animejs';
+import { createTimeline } from 'animejs';
 
 import hbs from 'handlebars-inline-precompile';
 
@@ -31,21 +31,19 @@ const LoadingView = View.extend({
     this.showLoader(timeout / 2, timeout / 2 + 200);
   },
   showLoader(delay, duration) {
-    const anim = anime.timeline({
-      easing: 'easeInQuad',
-      delay,
+    const anim = createTimeline({
+      defaults: {
+        ease: 'inQuad',
+        delay,
+      },
     });
 
     anim
-      .add({
-        opacity: [0, 1],
-        targets: this.ui.progressBar[0],
-        duration,
+      .add(this.ui.progressBar[0], {
+        opacity: { to: 1, duration },
       })
-      .add({
-        opacity: [0, 1],
-        targets: this.ui.loading[0],
-        duration: duration - 100,
+      .add(this.ui.loading[0], {
+        opacity: { to: 1, duration: duration - 100 },
       }, 100);
   },
 });

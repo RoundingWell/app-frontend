@@ -1,4 +1,4 @@
-import anime from 'animejs';
+import { animate } from 'animejs';
 import Radio from 'backbone.radio';
 
 import hbs from 'handlebars-inline-precompile';
@@ -46,16 +46,15 @@ const DoneBehavior = Behavior.extend({
   },
   onChangeState() {
     if (this.view.model.isDone()) {
-      anime({
-        targets: this.el,
+      animate(this.el, {
         delay: 300,
-        duration: 500,
-        opacity: [1, 0],
-        easing: 'easeOutQuad',
-        complete: () => {
+        opacity: { to: 0, duration: 500 },
+        ease: 'outQuad',
+        onComplete: () => {
           this.view.triggerMethod('change:visible');
         },
       });
+
       return;
     }
 
@@ -282,13 +281,11 @@ const LayoutView = View.extend({
     Radio.trigger('event-router', 'patient:archive', this.model.id);
   },
   onRender() {
-    anime({
-      targets: this.ui.loading[0],
-      opacity: 0.5,
-      loop: true,
-      easing: 'easeInOutSine',
-      duration: 400,
-      direction: 'alternate',
+    animate(this.ui.loading[0], {
+      opacity: { from: 0.5, duration: 400 },
+      loop: Infinity,
+      ease: 'inOutSine',
+      alternate: true,
     });
   },
 });

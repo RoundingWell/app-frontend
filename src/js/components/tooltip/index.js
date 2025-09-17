@@ -1,6 +1,6 @@
 import { bind, delay as _delay, extend, result } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
-import anime from 'animejs';
+import { animate } from 'animejs';
 import { View } from 'marionette';
 
 import Component from 'js/base/component';
@@ -67,10 +67,8 @@ export default Component.extend({
     clearTimeout(this.delayTimeout);
   },
   onShow() {
-    anime({
-      targets: this.getView().el,
-      duration: 1500,
-      opacity: [0, 1],
+    animate(this.getView().el, {
+      opacity: { to: 1, duration: 500 },
     });
   },
   viewOptions() {
