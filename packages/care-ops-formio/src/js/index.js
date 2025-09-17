@@ -117,7 +117,7 @@ function formSubmit(form, options, response) {
     });
 
     parentRequest('submit:form', { response: submitResponse });
-  } catch (e) {
+  } catch(e) {
     form.setAlert('danger', 'Failed to submit form. Please try again.');
     addError(e);
   }
@@ -324,6 +324,17 @@ function getQueryParams() {
   };
 }
 
+function showPreloaderHTML() {
+  const loaderHTML = `
+    <div class="loader__bar js-progress-bar">
+      <div class="loader__bar-progress--loop"></div>
+    </div>
+    <div class="loader__text js-loading">Loading...</div>
+  `;
+
+  document.getElementById('root').innerHTML = loaderHTML;
+}
+
 document.addEventListener('DOMContentLoaded', async() => {
   await fetchConfig();
 
@@ -334,6 +345,8 @@ document.addEventListener('DOMContentLoaded', async() => {
   if (queryParams.modal) {
     document.body.classList.add('is-modal');
   }
+
+  showPreloaderHTML();
 
   updateSubmissionDebounce = debounce(updateSubmission, queryParams._TEST_ ? 100 : 2000);
 
