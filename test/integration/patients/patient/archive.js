@@ -347,7 +347,8 @@ context('patient archive page', function() {
     cy
       .get('.picklist')
       .contains('To Do')
-      .click();
+      .click()
+      .tick(800); // the length of the animation
 
     cy
       .wait('@routePatchFlow')

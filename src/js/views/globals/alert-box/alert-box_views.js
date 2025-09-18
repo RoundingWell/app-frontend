@@ -1,5 +1,5 @@
 import { bind } from 'underscore';
-import anime from 'animejs';
+import { animate } from 'animejs';
 import { View, CollectionView } from 'marionette';
 
 import AlertTemplate from './alert-box.hbs';
@@ -26,12 +26,10 @@ const AlertView = View.extend({
     this.mergeOptions(options, OPTIONS);
   },
   onAttach() {
-    anime({
-      targets: this.el,
-      duration: 900,
+    animate(this.el, {
       translateY: [-10, 0],
-      opacity: [0, 1],
-      easing: 'easeInOutQuad',
+      opacity: [{ from: 0 }, { to: 1, duration: 900 }],
+      ease: 'inOutQuad',
     });
   },
   onClickDismiss() {
@@ -47,12 +45,10 @@ const AlertView = View.extend({
   _dismiss() {
     this.isDismissed = true;
 
-    anime({
-      targets: this.el,
-      opacity: [1, 0],
-      duration: 800,
-      easing: 'easeInSine',
-      complete: bind(this.destroy, this),
+    animate(this.el, {
+      opacity: [{ from: 1 }, { to: 0, duration: 800 }],
+      ease: 'inSine',
+      onComplete: bind(this.destroy, this),
     });
   },
   dismiss() {
