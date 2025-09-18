@@ -1,3 +1,4 @@
+/* eslint-disable */
 /*!
  * Five9 CRM SDK Javascript library
  * version: 1.0.11
@@ -17,7 +18,7 @@ window.crmSdkVersion = '1.0.11';
     root.Five9 = root.Five9 || {};
     root.Five9.CrmSdk = factory();
   }
-}(this, function () {
+}(globalThis, function () {
 
 // We use RequireJS modules inside.
 // Since this library can be included into projects with JS/node modules support
