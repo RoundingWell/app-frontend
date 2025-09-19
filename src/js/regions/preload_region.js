@@ -32,6 +32,7 @@ const LoadingView = View.extend({
   },
   showLoader(delay, duration) {
     const anim = createTimeline({
+      autoplay: false,
       defaults: {
         ease: 'inQuad',
         delay,
@@ -45,6 +46,9 @@ const LoadingView = View.extend({
       .add(this.ui.loading[0], {
         opacity: { to: 1, duration: duration - 100 },
       }, 100);
+
+    anim.init();
+    anim.play();
   },
 });
 
