@@ -8,8 +8,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIVE9_SDK_URL = 'https://app.five9.com/dev/sdk/crm/latest/five9.crm.sdk.js';
-const SDK_PATH = join(__dirname, 'five9.crm.sdk.js');
-const INDEX_PATH = join(__dirname, 'index.js');
+const SDK_PATH = join(__dirname, 'sdk/five9.crm.sdk.js');
+const INDEX_PATH = join(__dirname, 'sdk/index.js');
 
 async function fileExists(filePath) {
   try {

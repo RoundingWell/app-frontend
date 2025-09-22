@@ -130,6 +130,7 @@ export default [
       'public/**',
       'dist/**',
       'coverage/**',
+      'packages/**/sdk/**',
     ],
   },
 ];
