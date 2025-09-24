@@ -26,8 +26,10 @@ const CLASS_OPTIONS = [
   'emptyViewOptions',
   'headingText',
   'infoText',
+  'isListsAsync',
   'isSelectlist',
   'lists',
+  'loadingText',
   'noResultsText',
   'placeholderText',
   'template',
@@ -48,8 +50,14 @@ const isSelectList = false;
 
 const PicklistEmpty = View.extend({
   tagName: 'li',
-  className: 'picklist--no-results',
-  template: hbs`{{ noResultsText }}`,
+  className: 'picklist__message',
+  template: hbs`
+    {{#if isLoading}}
+      {{ loadingText }}
+    {{else}}
+      {{ noResultsText }}
+    {{/if}}
+  `,
   serializeData() {
     return this.options;
   },
@@ -175,7 +183,22 @@ const Picklists = CollectionView.extend({
 
     this.debouncedFilter = debounce(this.filter, 1);
 
-    each(this.lists, this.addList, this);
+    if (this.isListsAsync) {
+      this.isLoading = true;
+      this.lists.then(lists => {
+        this.isLoading = false;
+        this.addLists(lists);
+        if (!this.children.length) this.render();
+      });
+
+      return;
+    }
+
+    this.addLists(this.lists);
+  },
+  addLists(lists) {
+    this.lists = lists;
+    each(lists, this.addList, this);
   },
   addList(list) {
     const options = extend({
@@ -205,7 +228,11 @@ const Picklists = CollectionView.extend({
     this.$('.js-picklist-item').first().addClass('is-highlighted');
   },
   emptyViewOptions() {
-    return { noResultsText: this.noResultsText };
+    return {
+      isLoading: this.isLoading,
+      loadingText: this.loadingText,
+      noResultsText: this.noResultsText,
+    };
   },
   templateContext() {
     return {
@@ -229,6 +256,7 @@ export default Component.extend({
   clearText: intl.components.picklist.clearText,
   headingText: '',
   infoText: '',
+  loadingText: intl.components.picklist.loadingText,
   noResultsText: intl.components.picklist.noResultsText,
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);

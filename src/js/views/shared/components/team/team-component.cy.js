@@ -31,7 +31,7 @@ context('Team Component', function() {
 
     cy
       .get('.picklist')
-      .find('.picklist--no-results');
+      .find('.picklist__message');
   });
 
   specify('isCompact', function() {
