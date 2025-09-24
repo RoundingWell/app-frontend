@@ -178,4 +178,62 @@ context('Picklist', function() {
       .get('.picklist')
       .contains('Infotext:');
   });
+
+  specify('it should show loading then render promise lists', function() {
+    let resolveLists;
+    const listsPromise = new Promise(resolve => {
+      resolveLists = resolve;
+    });
+
+    cy
+      .mount(() => new Picklist({
+        isListsAsync: true,
+        lists: listsPromise,
+        loadingText: 'Loading Items...',
+        noResultsText: 'Nothing Here',
+      }))
+      .as('root');
+
+    cy.get('.picklist__message').should('contain', 'Loading Items...');
+
+    cy.then(() => resolveLists(lists));
+
+    cy.get('.picklist__message').should('not.exist');
+    cy.get('.picklist').find('.js-picklist-item').its('length').should('be.greaterThan', 0);
+  });
+
+  specify('it should support custom loading text', function() {
+    let resolveLists;
+    const listsPromise = new Promise(resolve => {
+      resolveLists = resolve;
+    });
+
+    cy.mount(() => new Picklist({
+      isListsAsync: true,
+      lists: listsPromise,
+      loadingText: 'Please Wait...',
+    }));
+
+    cy.get('.picklist__message').should('contain', 'Please Wait...');
+    cy.then(() => resolveLists(lists));
+    cy.get('.picklist__message').should('not.exist');
+  });
+
+  specify('it should show no results when promise resolves empty', function() {
+    let resolveLists;
+    const listsPromise = new Promise(resolve => {
+      resolveLists = resolve;
+    });
+
+    cy.mount(() => new Picklist({
+      isListsAsync: true,
+      lists: listsPromise,
+      loadingText: 'Loading Items...',
+      noResultsText: 'No Results Found',
+    }));
+
+    cy.get('.picklist__message').should('contain', 'Loading Items...');
+    cy.then(() => resolveLists([]));
+    cy.get('.picklist__message').should('contain', 'No Results Found');
+  });
 });

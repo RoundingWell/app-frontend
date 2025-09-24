@@ -81,6 +81,7 @@ careOptsFrontend:
       defaultText: Choose One...
     picklist:
       clearText: Clear Selection
+      loadingText: Loading...
       noResultsText: No results found
   dashboards:
     dashboardApp:

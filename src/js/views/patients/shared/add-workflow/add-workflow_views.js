@@ -51,7 +51,7 @@ const AddButtonView = View.extend({
 
 const itemClasses = {
   new: 'u-text--italic',
-  noResults: 'picklist--no-results',
+  noResults: 'picklist__message',
 };
 
 export {
