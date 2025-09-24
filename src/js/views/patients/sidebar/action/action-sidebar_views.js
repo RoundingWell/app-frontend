@@ -61,12 +61,14 @@ const SidebarView = View.extend({
   className: 'flex-grow',
   template: hbs`
     <div data-action-region></div>
+    <div data-dialer-region></div>
     <div data-form-region></div>
     <div data-attachments-region></div>
     <div class="action-sidebar__activity" data-activity-region></div>
   `,
   regions: {
     action: '[data-action-region]',
+    dialer: '[data-dialer-region]',
     form: {
       el: '[data-form-region]',
       replaceElement: true,

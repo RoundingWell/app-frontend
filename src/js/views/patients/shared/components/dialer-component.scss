@@ -1,0 +1,36 @@
+.dialer-component__phone-icon {
+  color: #0582DA;
+
+  .picklist__item.is-highlighted & {
+    color: white;
+  }
+}
+
+.dialer-component__phone-label {
+  color: #999;
+  font-size: 12px;
+  margin-left: auto;
+  text-transform: capitalize;
+
+  .dialer-component__phone-label-call {
+    align-items: center;
+    display: none;
+
+    .icon {
+      font-size: 11px;
+      margin: 0 0 2px 4px;
+    }
+  }
+
+  .picklist__item.is-highlighted & {
+    color: white;
+
+    .dialer-component__phone-label-default {
+      display: none;
+    }
+
+    .dialer-component__phone-label-call {
+      display: flex;
+    }
+  }
+}

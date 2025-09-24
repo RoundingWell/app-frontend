@@ -13,6 +13,7 @@ import { SidebarMixin } from 'js/services/sidebar';
 
 import { SidebarView, MenuView, HeadingView, FooterView } from 'js/views/patients/sidebar/action/action-sidebar_views';
 import { ActionView, ReadOnlyActionView } from 'js/views/patients/sidebar/action/action-sidebar-action_views';
+import { DialerView } from 'js/views/patients/sidebar/action/action-sidebar-dialer_views';
 import { FormLayoutView } from 'js/views/patients/sidebar/action/action-sidebar-forms_views';
 import { CommentFormView } from 'js/views/patients/shared/comments_views';
 import { ActivitiesView, TimestampsView } from 'js/views/patients/sidebar/action/action-sidebar-activity-views';
@@ -108,6 +109,7 @@ export default App.extend(extend({
     this.showChildView('content', sidebarView);
     this.showAction();
     this.showForm();
+    this.showDialer();
 
     sidebarView.getRegion('activity').startPreloader();
   },
@@ -175,6 +177,11 @@ export default App.extend(extend({
   },
   onClickUndoCancel() {
     this.action.save({ sharing: ACTION_SHARING.PENDING });
+  },
+  showDialer() {
+    if (!Radio.request('settings', 'get', 'dialer')) return;
+
+    this.showContentView('dialer', new DialerView({ model: this.action }));
   },
   showActivity() {
     const activitiesView = new ActivitiesView({
