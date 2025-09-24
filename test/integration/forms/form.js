@@ -704,9 +704,7 @@ context('Noncontext Form', function() {
   specify('form custom url', { retries: 4 }, function() {
     const testCustomForm = getForm({
       attributes: {
-        options: {
-          url: '/images/roundingwell-logo.svg',
-        },
+        url: '/images/roundingwell-logo.svg',
       },
     });
 
