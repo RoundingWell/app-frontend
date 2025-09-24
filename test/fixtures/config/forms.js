@@ -5,6 +5,7 @@ export default () => {
   return {
     id: faker.string.uuid(),
     name: `${ faker.company.buzzVerb() } ${ faker.company.catchPhraseNoun() }`,
+    url: null,
     created_at: faker.date.between({
       from: dayjs().subtract(3, 'week').format(),
       to: dayjs().subtract(2, 'week').format(),
