@@ -67,8 +67,18 @@
   font-size: 14px;
   font-style: italic;
   padding: 4px 16px;
+}
 
-  .icon:first-child {
+.picklist__message-loading {
+  align-items: center;
+  display: flex;
+  font-size: 12px;
+  font-style: normal;
+  justify-content: center;
+  margin: 8px 0;
+
+  .icon {
+    font-size: 8px;
     margin-right: 8px;
   }
 }
