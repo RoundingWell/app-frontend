@@ -32,6 +32,7 @@ export default App.extend(extend({
   },
   onStateChangeCanEdit() {
     this.showAction();
+    this.showDialer();
   },
   onStateChangeCanDelete() {
     this.showMenu();
@@ -181,7 +182,10 @@ export default App.extend(extend({
   showDialer() {
     if (!Radio.request('settings', 'get', 'dialer')) return;
 
-    this.showContentView('dialer', new DialerView({ model: this.action }));
+    this.showContentView('dialer', new DialerView({
+      model: this.action,
+      canEdit: this.getState('canEdit'),
+    }));
   },
   showActivity() {
     const activitiesView = new ActivitiesView({

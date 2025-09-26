@@ -56,8 +56,13 @@ export default Component.extend({
     'click': 'onClick',
   },
   viewOptions() {
+    const isDisabled = this.getState('isDisabled');
+
     return {
       tagName: 'button',
+      attributes: {
+        disabled: isDisabled,
+      },
       className: 'button-secondary w-100 action-sidebar__form',
       template: hbs`{{far "phone"}}<span>{{ @intl.patients.shared.components.dialerComponent.defaultText }}</span>`,
       triggers: {

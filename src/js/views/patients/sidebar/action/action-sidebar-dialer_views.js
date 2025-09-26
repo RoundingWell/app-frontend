@@ -17,12 +17,18 @@ const DialerView = View.extend({
   regions: {
     dialerButton: '[data-dialer-button-region]',
   },
+  modelEvents: {
+    'change:_state': 'render',
+  },
   onRender() {
     this.showDialerButton();
   },
   showDialerButton() {
+    const isDisabled = this.model.isDone() || !this.getOption('canEdit');
+
     const dialerComponent = new DialerComponent({
       action: this.model,
+      state: { isDisabled },
     });
 
     this.showChildView('dialerButton', dialerComponent);
