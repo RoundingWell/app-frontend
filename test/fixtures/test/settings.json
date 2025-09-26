@@ -76,5 +76,9 @@
   {
     "id": "custom_filters",
     "value": []
+  },
+  {
+    "id": "dialer",
+    "value": null
   }
 ]
