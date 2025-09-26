@@ -22,7 +22,6 @@ import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { getFlow } from 'support/api/flows';
 import { getFile } from 'support/api/files';
 
-// TODO: Update to mergejson api
 context('action sidebar', function() {
   specify('display action sidebar', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
@@ -319,7 +318,8 @@ context('action sidebar', function() {
       .wait('@routePatientFlows')
       .wait('@routeAction')
       .wait('@routeActionActivity')
-      .wait('@routePatient');
+      .wait('@routePatient')
+      .tick(350); // since this test uses visitOnClock, we need this for the sidebar animation
 
     cy
       .get('.sidebar')
