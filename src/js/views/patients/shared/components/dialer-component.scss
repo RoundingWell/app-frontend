@@ -1,13 +1,13 @@
 .dialer-component__phone-icon {
-  color: #0582DA;
+  color: color(blue);
 
   .picklist__item.is-highlighted & {
-    color: white;
+    color: #{$white};
   }
 }
 
 .dialer-component__phone-label {
-  color: #999;
+  color: #{$black-60};
   font-size: 12px;
   margin-left: auto;
   text-transform: capitalize;
@@ -23,7 +23,7 @@
   }
 
   .picklist__item.is-highlighted & {
-    color: white;
+    color: #{$white};
 
     .dialer-component__phone-label-default {
       display: none;
