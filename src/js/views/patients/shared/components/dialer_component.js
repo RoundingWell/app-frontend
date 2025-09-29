@@ -45,12 +45,6 @@ export default Component.extend({
       },
     });
 
-    phones.each(model => {
-      model.set('onSelect', () => {
-        Radio.request('dialer', 'call', model.get('number'), this.action);
-      });
-    });
-
     return phones;
   },
   viewEvents: {
@@ -94,6 +88,10 @@ export default Component.extend({
       lists,
       isListsAsync: true,
       popWidth: view.$el.outerWidth(),
+    });
+
+    this.listenTo(optionlist, 'select', ({ model }) => {
+      Radio.request('dialer', 'call', model.get('number'), this.action);
     });
 
     optionlist.show();
