@@ -68,12 +68,20 @@ const PicklistEmpty = View.extend({
     return this.options;
   },
   onRender() {
-    animate(this.ui.loading[0], {
-      opacity: { to: 1, duration: 400 },
-      loop: Infinity,
-      ease: 'inOutSine',
-      alternate: true,
-    });
+    if (this.getOption('isLoading')) {
+      this._loadingAnimation = animate(this.ui.loading[0], {
+        opacity: { to: 1, duration: 400 },
+        loop: Infinity,
+        ease: 'inOutSine',
+        alternate: true,
+      });
+    }
+  },
+  onDestroy() {
+    if (this._loadingAnimation) {
+      this._loadingAnimation.cancel();
+      this._loadingAnimation = null;
+    }
   },
 });
 
