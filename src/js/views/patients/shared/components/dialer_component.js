@@ -63,7 +63,7 @@ export default Component.extend({
       attributes: {
         disabled: isDisabled,
       },
-      className: 'button-secondary w-100 action-sidebar__form',
+      className: 'button-secondary w-100 action-sidebar__dialer-button',
       template: hbs`{{far "phone"}}<span>{{ @intl.patients.shared.components.dialerComponent.defaultText }}</span>`,
       triggers: {
         'click': 'click',
