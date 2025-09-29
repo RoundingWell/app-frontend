@@ -15,10 +15,11 @@ const i18n = intl.patients.shared.components.dialerComponent;
 
 export default Component.extend({
   initialize({ action }) {
-    this.field = this.getField(action);
+    this.action = action;
+    this.field = this.getField();
   },
-  getField(action) {
-    const patient = action.getPatient();
+  getField() {
+    const patient = this.action.getPatient();
 
     return Radio.request('entities', 'patientFields:model', {
       name: 'phones',
@@ -46,7 +47,7 @@ export default Component.extend({
 
     phones.each(model => {
       model.set('onSelect', () => {
-        Radio.request('dialer', 'call', model.get('number'));
+        Radio.request('dialer', 'call', model.get('number'), this.action);
       });
     });
 
