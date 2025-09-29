@@ -77,7 +77,6 @@ export default Component.extend({
     const lists = this.getLists();
 
     const optionlist = new Optionlist({
-      attr: 'number',
       ui: view.$el,
       uiView: view,
       headingText: i18n.headingText,
