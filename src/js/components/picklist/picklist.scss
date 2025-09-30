@@ -82,11 +82,11 @@
 .picklist__message-loading {
   align-items: center;
   animation: picklist-pulse 400ms ease-in-out infinite alternate;
+  color: #{$black-60};
   display: flex;
   font-size: 12px;
-  font-style: normal;
   justify-content: center;
-  margin: 8px 0;
+  margin: 16px 0;
 
   .icon {
     font-size: 8px;
