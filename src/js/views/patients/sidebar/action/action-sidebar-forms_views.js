@@ -19,7 +19,7 @@ const FormView = View.extend({
     };
   },
   tagName: 'button',
-  className: 'button-secondary w-100 action-sidebar__form-button',
+  className: 'button-secondary w-100 action-sidebar__button',
   template: hbs`{{far "square-poll-horizontal"}}<span>{{ name }}</span>`,
   triggers: {
     'click': 'click',
