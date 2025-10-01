@@ -20,12 +20,17 @@ export default App.extend({
   },
 
   // Start a route from a currentRoute passed from a routerapp
-  startRoute({ event, eventArgs }) {
+  startRoute(currentRoute) {
+    this.triggerMethod('before:startRoute', currentRoute);
+
+    const { event, eventArgs } = currentRoute;
     const action = this._eventRoutes[event];
 
     if (!action) return;
 
     action.apply(this, eventArgs);
+
+    this.triggerMethod('startRoute', currentRoute);
   },
 
   mixinOptions(options) {

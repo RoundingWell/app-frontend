@@ -36,6 +36,13 @@ export default SubRouterApp.extend({
     };
   },
 
+  onBeforeStartRoute() {
+    if (this.action) {
+      this.action.trigger('editing', false);
+      delete this.action;
+    }
+  },
+
   onBeforeStart() {
     this.getRegion().startPreloader();
   },
