@@ -1,5 +1,7 @@
 import './actions';
 
+import './artifacts';
+
 import './clinicians';
 
 import './comments';
