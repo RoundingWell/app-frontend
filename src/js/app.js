@@ -27,6 +27,7 @@ import HistoryService from 'js/services/history';
 import LastestListService from 'js/services/latest-list';
 import ModalService from 'js/services/modal';
 import WSService from 'js/services/ws';
+import DialerService from 'js/services/dialer';
 
 import ErrorApp from 'js/apps/globals/error_app';
 
@@ -86,6 +87,7 @@ const Application = App.extend({
       modalSmallRegion: this.getRegion('modalSmall'),
       modalSidebarRegion: this.getRegion('modalSidebar'),
     });
+    new DialerService({ region: this.getRegion('overlay') });
   },
 
   setListeners() {
