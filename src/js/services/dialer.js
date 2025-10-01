@@ -25,9 +25,10 @@ export default App.extend({
     }
   },
   five9CallComplete(data) {
-    const artifact = Radio.request('entities', 'artifacts:model', { data });
-    artifact.id = data.sessionID;
-    artifact.type = 'five9-call-log-data';
-    artifact.save();
+    Radio.request('entities', 'save:artifacts:model', {
+      artifact: 'five9-call-log',
+      identifier: data.sessionID,
+      values: data,
+    });
   },
 });
