@@ -17,9 +17,12 @@ export default App.extend({
       const providerName = currentOrg.get('name');
 
       const { call, init } = await import('@roundingwell/care-ops-five9');
-      this.call = call;
+      this._call = call;
       init({ region: this.getRegion(), providerName });
     }
+  },
+  call(number, action) {
+    this._call(number, action);
   },
   five9CallComplete(data) {
     Radio.request('entities', 'save:artifacts:model', {
