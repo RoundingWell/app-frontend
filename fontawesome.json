@@ -39,6 +39,7 @@
     "keyboard",
     "list",
     "magnifying-glass",
+    "phone",
     "right-from-bracket",
     "right-to-bracket",
     "square-caret-left",
@@ -112,6 +113,8 @@
     "users",
     "users-gear",
     "window",
+    "window-maximize",
+    "window-minimize",
     "xmark"
   ]
 }
