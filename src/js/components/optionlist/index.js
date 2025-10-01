@@ -49,6 +49,12 @@ export default Picklist.extend({
     if (model.get('isDisabled')) return;
 
     const onSelect = model.get('onSelect');
+
+    if (!onSelect) {
+      this.destroy();
+      return;
+    }
+
     onSelect.call(this, model);
 
     this.destroy();

@@ -50,12 +50,15 @@ const isSelectList = false;
 
 const PicklistEmpty = View.extend({
   tagName: 'li',
-  className: 'picklist__message',
   template: hbs`
     {{#if isLoading}}
-      {{ loadingText }}
+      <div class="picklist__message-loading">
+        {{fas "circle"}}{{ loadingText }}
+      </div>
     {{else}}
-      {{ noResultsText }}
+      <div class="picklist__message">
+        {{ noResultsText }}
+      </div>
     {{/if}}
   `,
   serializeData() {

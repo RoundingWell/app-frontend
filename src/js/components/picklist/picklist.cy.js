@@ -194,7 +194,7 @@ context('Picklist', function() {
       }))
       .as('root');
 
-    cy.get('.picklist__message').should('contain', 'Loading Items...');
+    cy.get('.picklist__message-loading').should('contain', 'Loading Items...');
 
     cy.then(() => resolveLists(lists));
 
@@ -214,9 +214,9 @@ context('Picklist', function() {
       loadingText: 'Please Wait...',
     }));
 
-    cy.get('.picklist__message').should('contain', 'Please Wait...');
+    cy.get('.picklist__message-loading').should('contain', 'Please Wait...');
     cy.then(() => resolveLists(lists));
-    cy.get('.picklist__message').should('not.exist');
+    cy.get('.picklist__message-loading').should('not.exist');
   });
 
   specify('it should show no results when promise resolves empty', function() {
@@ -232,7 +232,7 @@ context('Picklist', function() {
       noResultsText: 'No Results Found',
     }));
 
-    cy.get('.picklist__message').should('contain', 'Loading Items...');
+    cy.get('.picklist__message-loading').should('contain', 'Loading Items...');
     cy.then(() => resolveLists([]));
     cy.get('.picklist__message').should('contain', 'No Results Found');
   });

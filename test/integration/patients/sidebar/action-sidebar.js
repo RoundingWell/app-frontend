@@ -21,8 +21,8 @@ import { getProgram } from 'support/api/programs';
 import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { getFlow } from 'support/api/flows';
 import { getFile } from 'support/api/files';
+import { getPatientField } from 'support/api/patient-fields';
 
-// TODO: Update to mergejson api
 context('action sidebar', function() {
   specify('display action sidebar', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
@@ -319,7 +319,8 @@ context('action sidebar', function() {
       .wait('@routePatientFlows')
       .wait('@routeAction')
       .wait('@routeActionActivity')
-      .wait('@routePatient');
+      .wait('@routePatient')
+      .tick(350); // since this test uses visitOnClock, we need this for the sidebar animation
 
     cy
       .get('.sidebar')
@@ -630,6 +631,11 @@ context('action sidebar', function() {
 
     cy
       .get('.sidebar')
+      .find('[data-dialer-region]')
+      .should('be.empty');
+
+    cy
+      .get('.sidebar')
       .find('[data-attachments-region]')
       .should('be.empty');
 
@@ -710,6 +716,158 @@ context('action sidebar', function() {
     cy
       .get('.alert-box')
       .should('contain', 'The Action you requested does not exist');
+  });
+
+  specify('action phone dialer', function() {
+    const testFlow = getFlow({
+      relationships: {
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    const testAction = getAction({
+      relationships: {
+        state: getRelationship(stateTodo),
+        flow: getRelationship(testFlow),
+      },
+    });
+
+    cy
+      .routeSettings('dialer', 'five9')
+      .routesForPatientAction()
+      .routeFlow(fx => {
+        fx.data = testFlow;
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [testAction];
+
+        return fx;
+      })
+      .routePatientField(fx => {
+        fx.data = getPatientField({
+          attributes: {
+            name: 'phones',
+            value: [
+              {
+                label: 'home',
+                number: '+16195561434',
+                preferred: false,
+              },
+              {
+                label: 'mobile',
+                number: '+13215551234',
+                preferred: true,
+              },
+            ],
+          },
+        });
+
+        return fx;
+      })
+      .routePatientByFlow()
+
+      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeFlow');
+
+    cy
+      .intercept('PATCH', `/api/actions/${ testAction.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchAction');
+
+    cy
+      .intercept('PATCH', `/api/flows/${ testFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchFlow');
+
+    cy
+      .get('.sidebar')
+      .find('[data-dialer-region] button')
+      .as('actionDialerButton')
+      .click()
+      .wait('@routePatientField');
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .should('have.length', 2)
+      .first()
+      .should('contain', '(321) 555-1234');
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('@actionDialerButton')
+      .click();
+
+    cy
+      .get('@routePatientField.all')
+      .should('have.length', 1);
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.sidebar')
+      .find('[data-state-region] button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Complete')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('@actionDialerButton')
+      .should('be.disabled');
+
+    cy
+      .get('.sidebar')
+      .find('[data-state-region] button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('To Do')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('@actionDialerButton')
+      .should('not.be.disabled');
+
+    cy
+      .get('[data-header-region]')
+      .find('[data-state-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Complete')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click();
+
+    cy
+      .get('@actionDialerButton')
+      .should('be.disabled');
   });
 
   specify('action attachments', function() {

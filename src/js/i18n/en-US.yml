@@ -408,6 +408,10 @@ careOptsFrontend:
               lastweek {Last Week}
               today {Today}
               yesterday {Yesterday}}"
+        dialerComponent:
+          callLabel: Call
+          defaultText: Call Number...
+          headingText: Phone Numbers
         dueComponent:
           defaultText: Select Date...
         durationComponent:
@@ -543,6 +547,8 @@ careOptsFrontend:
             edited: (Edited)
           createdAt: Added
           updatedAt: Updated
+        dialerView:
+          label: Dialer
         formSharingTemplate:
           buttonCancelText: Cancel Share
           buttonResponseText: View Response
