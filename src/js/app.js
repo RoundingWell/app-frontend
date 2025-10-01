@@ -40,7 +40,6 @@ const Application = App.extend({
   channelName: 'app',
   radioRequests: {
     'show:pop': 'showPop',
-    'show:overlay': 'showOverlay',
   },
 
   initialize() {
@@ -71,11 +70,6 @@ const Application = App.extend({
   showPop(view, opts) {
     const popRegion = this.getRegion('pop');
     return popRegion.show(view, opts);
-  },
-
-  showOverlay(view, opts) {
-    const overlayRegion = this.getRegion('overlay');
-    return overlayRegion.show(view, opts);
   },
 
   startServices() {

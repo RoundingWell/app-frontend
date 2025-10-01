@@ -10,8 +10,6 @@ export default App.extend({
     'five9CallComplete': 'five9CallComplete',
   },
   async init() {
-    if (this._initialized) return;
-
     const dialerSetting = Radio.request('settings', 'get', 'dialer');
 
     if (dialerSetting === 'five9') {
@@ -21,7 +19,6 @@ export default App.extend({
       const { call, init } = await import('@roundingwell/care-ops-five9');
       this.call = call;
       init({ region: this.getRegion(), providerName });
-      this._initialized = true;
     }
   },
   five9CallComplete(data) {
