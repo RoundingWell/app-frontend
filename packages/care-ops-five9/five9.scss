@@ -11,6 +11,8 @@ $five9-call-ended-hover: color(red, dark);
   border-radius: 8px 8px 0 0;
   bottom: 0;
   box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
+  display: flex;
+  flex-direction: column;
   height: 36px;
   overflow: hidden;
   position: fixed;
@@ -31,6 +33,7 @@ $five9-call-ended-hover: color(red, dark);
   color: white;
   cursor: pointer;
   display: flex;
+  flex: 0 0 auto;
   font-weight: bold;
   justify-content: space-between;
   padding: 8px 16px;
@@ -59,5 +62,15 @@ $five9-call-ended-hover: color(red, dark);
 }
 
 .five9-panel__iframe {
-  height: 100%;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  pointer-events: none;
+  visibility: hidden;
+
+
+  .five9-panel.is-open & {
+    pointer-events: auto;
+    visibility: visible;
+  }
 }
