@@ -817,8 +817,19 @@ context('action sidebar', function() {
       .should('have.length', 1);
 
     cy
-      .get('body')
-      .type('{esc}');
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .first()
+      .click();
+
+    cy
+      .get('.five9-panel')
+      .should('have.class', 'is-open');
+
+    cy
+      .get('.five9-panel__header')
+      .find('[data-status-region]')
+      .click();
 
     cy
       .get('.sidebar')
