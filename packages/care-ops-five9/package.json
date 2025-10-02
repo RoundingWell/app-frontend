@@ -1,5 +1,5 @@
 {
-  "name": "@roundingwell/five9",
+  "name": "@roundingwell/care-ops-five9",
   "version": "1.0.0",
   "description": "Five9 CRM SDK integration",
   "main": "index.js",
@@ -10,8 +10,7 @@
     "update": "node update-sdk.js"
   },
   "files": [
-    "index.js",
-    "update-sdk.js",
-    "five9.crm.sdk.js"
+    "sdk/**",
+    "update-sdk.js"
   ]
 }

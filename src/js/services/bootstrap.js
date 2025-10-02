@@ -86,6 +86,8 @@ export default App.extend({
     Radio.reset('workspace');
     new WorkspaceService({ route: getWorkspaceRoute() });
 
+    Radio.request('dialer', 'init');
+
     this.resolvePromise(currentUser);
   },
   onFail(options, ...args) {

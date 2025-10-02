@@ -50,7 +50,7 @@ The SDK is automatically downloaded and updated when the package is installed:
 
 ```bash
 npm install # Updates all workspace packages (includes Five9)
-cd packages/five9 && npm run update  # Direct package update
+cd packages/care-ops-five9 && npm run update  # Direct package update
 ```
 
 The update script (`update-sdk.js`):
@@ -63,11 +63,11 @@ The update script (`update-sdk.js`):
 ## File Structure
 
 ```
-packages/five9/
+packages/care-ops-five9/
 ├── package.json         # Package configuration with postinstall hook
 ├── update-sdk.js        # SDK download and wrapper generation script
 ├── index.js            # Auto-generated ES module wrapper
-├── five9.crm.sdk.js    # Downloaded Five9 SDK (excluded from git)
+├── sdk/five9.crm.sdk.js    # Downloaded Five9 SDK (excluded from git)
 └── README.md           # This file
 ```
 
