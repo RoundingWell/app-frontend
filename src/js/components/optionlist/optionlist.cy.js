@@ -38,6 +38,9 @@ context('Optionlist', function() {
         isDisabled: true,
         hasDivider: true,
       },
+      {
+        text: 'Test 3',
+      },
     ]);
 
     cy
@@ -79,6 +82,21 @@ context('Optionlist', function() {
       .then(picklistItem => {
         expect(onSelect).to.not.be.called;
         expect(picklistItem).to.exist;
+      });
+
+    cy
+      .get('@root')
+      .contains('Test Menu')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .last()
+      .click()
+      .then(picklistItem => {
+        expect(onSelect).to.not.be.called;
+        expect(picklistItem).to.not.exist;
       });
 
     cy
