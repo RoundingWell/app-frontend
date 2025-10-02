@@ -63,6 +63,11 @@ const TopRegionView = View.extend({
   },
 });
 
+const OverlayRegionView = TopRegionView.extend({
+  className: 'fill-window',
+  behaviors: [],
+});
+
 const PreloaderRegionView = TopRegionView.extend({
   // NOTE: ensures preload can't close on user click
   contains: preventRegionClose,
@@ -316,6 +321,7 @@ const RootView = CollectionView.extend({
     this.addRegionView('modalLoading', new ModalRegionView({ $body, contains: preventRegionClose }));
     this.addRegionView('alert', new TopRegionView());
     this.addRegionView('pop', new PopRegionView({ $body }));
+    this.addRegionView('overlay', new OverlayRegionView());
     this.addRegionView('preloader', new PreloaderRegionView());
     this.addRegionView('error', new TopRegionView());
   },
