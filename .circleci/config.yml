@@ -17,6 +17,7 @@ executors:
       CYPRESS_COVERAGE: true
       CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
       CYPRESS_watchForFileChanges: false
+      PNPM_STORE_PATH: ~/.pnpm-store
 
 # ------------------------------------------------------------
 # JOBS
@@ -66,14 +67,29 @@ jobs:
             EOF
             echo "📦 Created ~/.npmrc"
       - restore_cache:
-          key: node-modules-{{ checksum "package-lock.json" }}
-      - cypress/install:
-          skip-checkout: true
-          install-browsers: false
+          keys:
+            - pnpm-store-{{ checksum "pnpm-lock.yaml" }}
+            - pnpm-store-
+      - run:
+          name: Install dependencies
+          command: |
+            corepack enable
+            pnpm install --frozen-lockfile
       - save_cache:
-          key: node-modules-{{ checksum "package-lock.json" }}
+          key: pnpm-store-{{ checksum "pnpm-lock.yaml" }}
           paths:
-            - node_modules
+            - ~/.pnpm-store
+      - restore_cache:
+          keys:
+            - cypress-cache-{{ checksum "pnpm-lock.yaml" }}
+            - cypress-cache-
+      - run:
+          name: Ensure Cypress binary
+          command: pnpm exec cypress install
+      - save_cache:
+          key: cypress-cache-{{ checksum "pnpm-lock.yaml" }}
+          paths:
+            - ~/.cache/Cypress
 
       # Build app (cached)
       - when:
@@ -82,14 +98,14 @@ jobs:
             - restore_cache:
                 keys:
                   - vite-dist-{{ checksum "vite.config.js" }}
-            - run: npx vite build -m test
+            - run: pnpm exec vite build -m test
             - save_cache:
                 key: vite-dist-{{ checksum "vite.config.js" }}
                 paths: dist
 
             - run:
                 name: Start Server
-                command: npx vite preview -m test
+                command: pnpm exec vite preview -m test
                 background: true
 
       # Run Cypress
@@ -108,7 +124,7 @@ jobs:
                     apt-get update -y && apt-get install --no-install-recommends -y curl
                   fi
 
-            - run: npm run coverage:report:ci || true
+            - run: pnpm run coverage:report:ci || true
 
             - coveralls/upload:
                 fail_on_error: false
@@ -133,7 +149,7 @@ workflows:
       - run-cypress:
           name: E2E
           cypress_command: >
-            npx cypress run
+            pnpm exec cypress run
             --env COVERAGE=true
             --parallel --record
             --group care-ops-e2e
@@ -143,7 +159,7 @@ workflows:
           parallelism: 6
           should_build: false
           cypress_command: >
-            npx cypress run --component
+            pnpm exec cypress run --component
             --env COVERAGE=true
             --parallel --record
             --group care-ops-component
@@ -166,7 +182,7 @@ workflows:
           name: Chrome nightly
           upload_coverage: false
           cypress_command: >
-            npx cypress run
+            pnpm exec cypress run
             --browser chrome
             --parallel --record
             --group chrome-e2e
@@ -178,7 +194,7 @@ workflows:
           should_build: false
           upload_coverage: false
           cypress_command: >
-            npx cypress run --component
+            pnpm exec cypress run --component
             --browser chrome
             --parallel --record
             --group chrome-component
@@ -188,7 +204,7 @@ workflows:
           name: Firefox nightly
           upload_coverage: false
           cypress_command: >
-            npx cypress run
+            pnpm exec cypress run
             --browser firefox
             --parallel --record
             --group firefox-e2e
@@ -200,7 +216,7 @@ workflows:
           should_build: false
           upload_coverage: false
           cypress_command: >
-            npx cypress run --component
+            pnpm exec cypress run --component
             --browser firefox
             --parallel --record
             --group firefox-component
@@ -210,7 +226,7 @@ workflows:
           name: Edge nightly
           upload_coverage: false
           cypress_command: >
-            npx cypress run
+            pnpm exec cypress run
             --browser edge
             --parallel --record
             --group edge-e2e
@@ -222,7 +238,7 @@ workflows:
           should_build: false
           upload_coverage: false
           cypress_command: >
-            npx cypress run --component
+            pnpm exec cypress run --component
             --browser edge
             --parallel --record
             --group edge-component

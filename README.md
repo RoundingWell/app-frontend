@@ -10,7 +10,7 @@ Documentation for the RoundingWell frontend can be found within `README.md` file
 
 ## Dependencies & Installation
 
-We use [npm](npmjs.com) for our package manager
+We use [pnpm](https://pnpm.io/) for our package manager. `package-lock.json` is no longer used and attempting to install with `npm` will fail thanks to a guard script. (Set `SKIP_PNPM_CHECK=true` if you absolutely need to bypass it, e.g. for tooling experiments.)
 
 ### Node
 
@@ -25,16 +25,18 @@ $ nvm use
 
 Then you will need to run
 ```
-$ npm i
+$ corepack enable
+$ pnpm install
 ```
+Corepack is bundled with modern Node releases and ensures the correct pnpm version (`pnpm@9.12.2`) is available. Run `corepack enable` again after switching Node versions via `nvm`.
 
 ## Releasing
 
-Releases are automated via an npm script.
+Releases are automated via a pnpm script.
 Make a new temporary local branch consisting of the commits you want to release.
 Then run
 ```
-$ npm run release
+$ pnpm run release
 ```
 
 It will automatically create a release branch on origin named `release/YYYYMMDD`
@@ -43,7 +45,7 @@ All dates are in UTC.
 
 To make a release outside of this convention, pass it a branch name.
 ```
-$ npm run release test-foo
+$ pnpm run release test-foo
 ```
 
 This will create the branch `release/test-foo`
@@ -66,22 +68,22 @@ These branches are useful for sharing to ship to dev sandboxes, and should not b
 
 All development work should branch off of and PR into the `develop` branch.
 
-There are two npm commands most useful for development:
+There are two pnpm commands most useful for development:
 
 Useful for local development with vite local dev-server and the [backend docker instance](https://github.com/RoundingWell/care-ops-backend)
 ```
-$ npm run dev
+$ pnpm run dev
 ```
 
 To develop in the [Cypress](cypress.io) gui:
 ```
-$ npm test
+$ pnpm test
 ```
 
 Occasionally the vite server does not release the port, so dev-ing in either environment uses the wrong port and fails.
 To fix this try:
 ```
-$ npm stop
+$ pnpm stop
 ```
 If this doesn't work try turning your computer off and then on again 😜
 
@@ -140,7 +142,7 @@ nonUnique.get('foo') === 'bar'; // false
 ## Font Awesome
 
 This project uses [Font Awesome Pro](https://fontawesome.com/how-to-use/on-the-web/setup/using-package-managers#installing-pro)
-and should be setup globally to work with npm for devs. [Logging into the doc page](https://fontawesome.com/how-to-use/on-the-web/setup/using-package-managers#installing-pro) will provide the license needed.
+and should be setup globally so pnpm can authenticate with the private registry. [Logging into the doc page](https://fontawesome.com/how-to-use/on-the-web/setup/using-package-managers#installing-pro) will provide the license needed.
 
 Icons are loaded with subsetting. To use an icon with Font Awesome it needs to be set in `package.json`
 

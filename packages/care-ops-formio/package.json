@@ -2,14 +2,11 @@
   "name": "@careops/care-ops-formio",
   "private": true,
   "version": "1.0.0",
+  "packageManager": "pnpm@9.12.2",
   "scripts": {
-    "prebuild": "npm i",
+    "prebuild": "pnpm install",
     "build": "vite build"
   },
-  "workspaces": [
-    "../care-ops-config",
-    "../care-ops-datadog"
-  ],
   "dependencies": {
     "@roundingwell/care-ops-config": "workspace:*",
     "@roundingwell/care-ops-datadog": "workspace:*",
