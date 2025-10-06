@@ -32,6 +32,7 @@ const TooltipView = View.extend({
 export default Component.extend({
   ViewClass: TooltipView,
   className: 'tooltip',
+  /* istanbul ignore next: Branch only for testing */
   delay: _TEST_ ? 0 : 200,
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
