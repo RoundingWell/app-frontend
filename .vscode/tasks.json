@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Start Vite dev server on port 8081"
+    },
+    {
+      "label": "npm: lint",
+      "type": "shell",
+      "command": "npm run lint",
+      "group": "build",
+      "problemMatcher": ["$eslint-stylish"],
+      "detail": "Run ESLint with automatic fixes"
+    },
+    {
+      "label": "npm: test",
+      "type": "shell",
+      "command": "npm test",
+      "group": "test",
+      "detail": "Open Cypress test runner with Vite in test mode"
+    },
+    {
+      "label": "npm: coverage",
+      "type": "shell",
+      "command": "npm run coverage",
+      "group": "test",
+      "detail": "Run full coverage suite (component + e2e)"
+    },
+    {
+      "label": "npm: release",
+      "type": "shell",
+      "command": "npm run release",
+      "group": "build",
+      "detail": "Create a release branch and build assets"
+    },
+    {
+      "label": "npm: stop",
+      "type": "shell",
+      "command": "npm run stop",
+      "detail": "Stop Vite processes and clear cache"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "stylelint.vscode-stylelint",
+    "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
+    "redhat.vscode-yaml",
+    "cypress.cypress",
+    "streetsidesoftware.code-spell-checker",
+    "eamodio.gitlens"
+  ],
+  "unwantedRecommendations": []
+}
