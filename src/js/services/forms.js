@@ -200,7 +200,7 @@ export default App.extend({
     const message = 'fetch:icd';
     return Promise.resolve(Radio.request('entities', 'fetch:icd', by))
       .then(icd => {
-        this.send(message, { value: get(icd, ['data', 'icdCodes']) }, requestId);
+        this.send(message, { value: get(icd, ['data', 'icd_codes']) }, requestId);
       })
       .catch(({ responseData }) => {
         this.send(message, { error: responseData }, requestId);
