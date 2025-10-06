@@ -238,7 +238,8 @@ context('patient dashboard page', function() {
     cy
       .get('.list-page__list')
       .contains('First In List')
-      .click();
+      .click()
+      .tick(350); // this test uses visitOnClock, so needed for the sidebar animation
 
     cy
       .get('.list-page__list')
@@ -320,6 +321,27 @@ context('patient dashboard page', function() {
       .should(({ data }) => {
         expect(data.attributes.due_time).to.equal('09:45:00');
       });
+
+    cy
+      .get('.patient__tabs')
+      .find('.js-archive')
+      .click();
+
+    cy
+      .get('.patient__tabs')
+      .find('.js-dashboard')
+      .click();
+
+    cy
+      .get('.list-page__list')
+      .find('.is-selected')
+      .should('not.exist');
+
+    cy
+      .get('.list-page__list')
+      .contains('First In List')
+      .click()
+      .tick(350); // this test uses visitOnClock, so needed for the sidebar animation
 
     cy
       .get('.list-page__list')
