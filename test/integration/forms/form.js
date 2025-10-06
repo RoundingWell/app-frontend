@@ -576,7 +576,7 @@ context('Noncontext Form', function() {
       .intercept('POST', '/api/graphql', {
         body: {
           data: {
-            icdCodes: [
+            icd_codes: [
               {
                 code: 'X1',
                 description: 'Typhoid infection',

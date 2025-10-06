@@ -6,9 +6,12 @@ const Entity = BaseEntity.extend({
     'fetch:icd': 'fetchIcd',
   },
   fetchIcd({ term, prefixes, year = 2024 }) {
-    const variables = { term, prefixes, year };
-    const query = `query ($term: String!, $prefixes: [String!], $year: Int!) {
-      icdCodes(term: $term, prefixes: $prefixes, year: $year) {
+    const variables = {
+      filter: { term, prefixes, year },
+    };
+
+    const query = `query ($filter: IcdCodeFilter) {
+      icd_codes(filter: $filter) {
         code
         description
         hcc_v24
