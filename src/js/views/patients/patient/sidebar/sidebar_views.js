@@ -1,4 +1,3 @@
-import { bind } from 'underscore';
 import Radio from 'backbone.radio';
 import Backbone from 'backbone';
 import { View } from 'marionette';
@@ -69,23 +68,21 @@ const SidebarView = View.extend({
 
     const menuOptions = new Backbone.Collection([
       {
+        event: canEditPatient ? 'click:patientEdit' : 'click:patientView',
         text: canEditPatient ? i18n.menuOptions.edit : i18n.menuOptions.view,
-        onSelect: bind(this.triggerMethod, this, canEditPatient ? 'click:patientEdit' : 'click:patientView'),
       },
     ]);
 
     if (workspacePatient.canEdit()) {
       menuOptions.push({
+        event: 'click:activeStatus',
         text: workspacePatientStatus !== PATIENT_STATUS.ACTIVE ? i18n.menuOptions.activate : i18n.menuOptions.inactivate,
-        onSelect: bind(this.triggerMethod, this, 'click:activeStatus'),
       });
 
       if (workspacePatientStatus !== PATIENT_STATUS.ARCHIVED) {
         menuOptions.push({
+          event: 'click:shouldArchive',
           text: i18n.menuOptions.archive,
-          onSelect: () => {
-            this.showConfirmArchiveModal();
-          },
         });
       }
     }
@@ -100,9 +97,15 @@ const SidebarView = View.extend({
       popWidth: 248,
     });
 
+    this.listenTo(optionlist, 'select', ({ model }) => {
+      const event = model.get('event');
+
+      this.triggerMethod(event);
+    });
+
     optionlist.show();
   },
-  showConfirmArchiveModal() {
+  onClickShouldArchive() {
     const modal = Radio.request('modal', 'show:small', {
       bodyText: i18n.archiveModal.bodyText,
       headingText: i18n.archiveModal.headingText,

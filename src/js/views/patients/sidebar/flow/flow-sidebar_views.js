@@ -1,4 +1,4 @@
-import { bind, extend } from 'underscore';
+import { extend } from 'underscore';
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
@@ -40,11 +40,7 @@ const MenuView = View.extend({
     'click': 'click',
   },
   onClick() {
-    const menuOptions = new Backbone.Collection([
-      {
-        onSelect: bind(this.triggerMethod, this, 'delete'),
-      },
-    ]);
+    const menuOptions = new Backbone.Collection([{}]);
 
     const optionlist = new Optionlist({
       ui: this.$el,
@@ -54,6 +50,10 @@ const MenuView = View.extend({
       lists: [{ collection: menuOptions }],
       align: 'right',
       popWidth: 248,
+    });
+
+    this.listenTo(optionlist, 'select', () => {
+      this.triggerMethod('delete');
     });
 
     optionlist.show();
