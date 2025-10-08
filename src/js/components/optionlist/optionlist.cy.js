@@ -27,19 +27,14 @@ context('Optionlist', function() {
   });
 
   specify('Displaying', function() {
-    const onSelect = cy.stub();
     const collection = new Backbone.Collection([
       {
         text: 'Test 1',
-        onSelect,
       },
       {
         text: 'Test 2',
         isDisabled: true,
         hasDivider: true,
-      },
-      {
-        text: 'Test 3',
       },
     ]);
 
@@ -64,9 +59,7 @@ context('Optionlist', function() {
       .first()
       .click()
       .then(picklistItem => {
-        expect(onSelect).to.be.calledOnce;
         expect(picklistItem).to.not.exist;
-        onSelect.resetHistory();
       });
 
     cy
@@ -80,23 +73,7 @@ context('Optionlist', function() {
       .first()
       .click()
       .then(picklistItem => {
-        expect(onSelect).to.not.be.called;
         expect(picklistItem).to.exist;
-      });
-
-    cy
-      .get('@root')
-      .contains('Test Menu')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .last()
-      .click()
-      .then(picklistItem => {
-        expect(onSelect).to.not.be.called;
-        expect(picklistItem).to.not.exist;
       });
 
     cy

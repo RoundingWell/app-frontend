@@ -97,7 +97,7 @@ const SidebarView = View.extend({
       popWidth: 248,
     });
 
-    this.listenTo(optionlist, 'select', ({ model }) => {
+    this.listenTo(optionlist, 'select', model => {
       const event = model.get('event');
 
       this.triggerMethod(event);

@@ -45,7 +45,7 @@ const AddButtonView = View.extend({
       lists: this.getOption('lists'),
     });
 
-    this.listenTo(optionlist, 'select', ({ model }) => {
+    this.listenTo(optionlist, 'select', model => {
       const programItem = model.get('programItem');
 
       if (!programItem) return;

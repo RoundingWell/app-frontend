@@ -30,7 +30,9 @@ export default Picklist.extend({
   },
   viewTriggers: {
     'close': 'close',
-    'picklist:item:select': 'select',
+  },
+  viewEvents: {
+    'picklist:item:select': 'onPicklistSelect',
   },
   position() {
     return this.uiView.getBounds(this.ui);
@@ -45,17 +47,10 @@ export default Picklist.extend({
   onClose() {
     this.destroy();
   },
-  onSelect({ model }) {
+  onPicklistSelect({ model }) {
     if (model.get('isDisabled')) return;
 
-    const onSelect = model.get('onSelect');
-
-    if (!onSelect) {
-      this.destroy();
-      return;
-    }
-
-    onSelect.call(this, model);
+    this.triggerMethod('select', model);
 
     this.destroy();
   },
