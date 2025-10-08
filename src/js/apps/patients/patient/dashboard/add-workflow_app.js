@@ -1,15 +1,10 @@
-import { bind, noop } from 'underscore';
+import { noop } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
 import { AddButtonView, i18n, itemClasses } from 'js/views/patients/shared/add-workflow/add-workflow_views';
-
-const optEvents = {
-  'program-actions': 'add:programAction',
-  'program-flows': 'add:programFlow',
-};
 
 export default App.extend({
   beforeStart() {
@@ -31,9 +26,20 @@ export default App.extend({
 
     programs.reset(addablePrograms);
 
-    this.showView(new AddButtonView({
+    const addButtonView = new AddButtonView({
       lists: this.getProgramsOpts(programs),
-    }));
+    });
+
+    this.listenTo(addButtonView, {
+      'add:programAction'(programItem) {
+        this.triggerMethod('add:programAction', programItem);
+      },
+      'add:programFlow'(programItem) {
+        this.triggerMethod('add:programFlow', programItem);
+      },
+    });
+
+    this.showView(addButtonView);
   },
   getProgramsOpts(programs) {
     return programs.map(program => {
@@ -68,7 +74,7 @@ export default App.extend({
         text: item.get('name'),
         itemType: item.type,
         hasOutreach: item.type === 'program-actions' && item.hasOutreach(),
-        onSelect: bind(this.triggerMethod, this, optEvents[item.type], item),
+        programItem: item,
       };
     });
   },

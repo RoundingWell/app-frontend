@@ -1086,6 +1086,15 @@ context('patient flow page', function() {
       .should('not.contain', 'Draft');
 
     cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.patient-flow__actions')
+      .contains('Add')
+      .click();
+
+    cy
       .get('.picklist')
       .find('.picklist__item')
       .first()
