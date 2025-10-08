@@ -8,9 +8,7 @@ import { defineConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
 import { babel } from '@rollup/plugin-babel';
-import eslint from 'vite-plugin-eslint';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
-import stylelint from 'vite-plugin-stylelint';
 import { VitePWA } from 'vite-plugin-pwa';
 import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.cjs';
 import yaml from './config/vite-plugin-yaml.js';
@@ -84,7 +82,6 @@ export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const isTest = mode === 'test' || process.env.NODE_ENV === 'test';
 
-  const isCI = !!process.env.CI;
   const datePrefix = dayjs.utc().format('YYYYMMDD');
 
   const modulePaths = [
@@ -101,14 +98,6 @@ export default defineConfig(({ mode }) => {
     plugins: [
       isTest && babelPlugin,
       inlineHbsCompile(),
-      eslint({
-        failOnWarning: isCI,
-        fix: !isCI,
-      }),
-      stylelint({
-        emitWarningAsError: isCI,
-        fix: !isCI,
-      }),
       handlebars(),
       yaml(),
       nodeResolve({

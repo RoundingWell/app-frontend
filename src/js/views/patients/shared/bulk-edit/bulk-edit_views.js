@@ -79,7 +79,7 @@ const FlowsStateComponent = StateComponent.extend({
 
 const BulkEditButtonView = View.extend({
   template: hbs`
-   <button class="button--blue js-bulk-edit">
+    <button class="button--blue js-bulk-edit">
       {{#if isFlowList}}
         {{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editFlows") itemCount=items.length}}
       {{else}}
