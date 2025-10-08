@@ -20,7 +20,8 @@ const _Model = BaseModel.extend({
   },
   getFormUrl() {
     // NOTE: /formapp/ is legacy formio
-    return this.get('url') || `/formapp/index.html?_TEST_=${ _TEST_ }`;
+    const url = this.get('url') || '/formapp/index.html';
+    return `${ url }?_TEST_=${ _TEST_ }`;
   },
   getWidgets() {
     const formWidgets = get(this.get('options'), ['widgets', 'widgets']);
