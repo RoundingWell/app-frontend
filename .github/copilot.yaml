@@ -3,72 +3,40 @@ pull_request_review:
   rules:
     - name: Enforce RoundingWell coding standards and architecture
       prompt: >
-        Follow RoundingWell's established coding standards and architectural patterns:
+        Review the diff using these checkpoints:
 
-        **Technology Stack - NO TypeScript:**
-        - Use JavaScript only - do not suggest TypeScript conversions or .ts files
-        - Follow ES6+ modern JavaScript patterns
-        - Use native JavaScript over external libraries when reasonable
+        **Tooling & Formatting**
+        - Respect `.editorconfig`, `eslint.config.mjs`, and `.stylelintrc`; no dangling semicolons/spacing violations.
+        - Imports follow the order: 3rd party → CSS/SCSS → utilities/base → apps → views/components → templates → local CSS.
+        - Use repo aliases (`js/*`, `scss/*`) instead of long relative paths.
 
-        **Code Style & Formatting:**
-        - Follow .editorconfig settings for consistent formatting
-        - Adhere to ESLint rules defined in .eslintrc.js
-        - Use Stylelint rules for SCSS/CSS code
-        - Import order: 3rd party → CSS → utilities → base classes → apps → views/components → templates → local CSS
-        - Use import aliases (js/*, scss/*) instead of relative paths
-        - Object keys should NOT be wrapped in quotes unless necessary
-        - Prefer const over let, never use var
-        - Use arrow functions for context when possible
+        **Architecture Guardrails**
+        - Views must use the Marionette `ui` hash, `triggers`, and `triggerMethod`; avoid direct DOM manipulation.
+        - AJAX/data access belongs in `src/js/entities-service/**`; views/apps should request data via Backbone.Radio or state models.
+        - Keep feature-flag code easy to remove (guard clause pattern, minimal branching).
 
-        **Marionette.js Architecture:**
-        - Follow Backbone.Marionette patterns for views and models
-        - Always use the `ui` hash when possible, avoid direct DOM queries
-        - Use `onRender`/`onDomRefresh` for view contents, `onAttach`/`onDetach` for view el
-        - Prefer `triggerMethod` over `trigger`, prefer `triggers` over `events`
-        - Event names should be `'verb:subject'` or `'context:verb:subject'` - what happened, not what will happen
-        - Views should only control DOM inside their own template
+        **Templating & Styles**
+        - SCSS follows BEM naming; do not style `.js-*` selectors and keep nesting shallow.
+        - Handlebars spacing: `{{ something }}` for values, `{{#if}}{{else}}{{/if}}` without extra spaces.
+        - Attribute order: class, id/name, src/for/type/href/value, title/alt, role/aria-*, boolean.
+        - Use `{{{ }}}` only when rendering trusted HTML and ensure matching SCSS is imported from the JS module.
 
-        **SCSS/CSS Standards:**
-        - Follow BEM methodology (.block, .block__element, .block__element--modifier)
-        - Use JavaScript selectors with .js-* prefix for DOM queries
-        - Use state selectors .is-* and .has-* as adjoining classes only
-        - Never style .js-* selectors directly
-        - Import SCSS files into the JS files that use them
+        **Internationalization**
+        - Keys follow `view.directory.fileViews.viewName.stringContext`; HTML strings get an `HTML` suffix.
+        - Access strings through `{{ @intl.path.to.key }}` and use `dayjs` for date formatting.
 
-        **Handlebars Templates:**
-        - Variable spacing: `{{ something }}`
-        - Logic no spacing: `{{#if something}}{{else}}{{/if}}`
-        - HTML attributes in double quotes: `class="myClass"`
-        - Attribute order: class, id/name, src/for/type/href/value, title/alt, role/aria-*, boolean
-        - Use `{{{ }}}` for HTML content, `{{ }}` for escaped content
-        - Keep templates focused - break large templates into smaller chunks
+        **Generated & Restricted Files**
+        - Flag edits to `packages/**/sdk/**`, FontAwesome bundles, or `release/` scripts unless clearly regenerated.
+        - Ensure Formio/Five9 integrations go through existing update scripts.
 
-        **Internationalization:**
-        - Use formatjs key naming: `view.directory.fileViews.viewName.stringContextName`
-        - Access via handlebars: `{{ @intl.path.to.key }}`
-        - HTML strings should be postfixed with `HTML` in key names
-        - Use dayjs for date formatting, not formatjs
+        **Testing & Coverage**
+        - Changes that affect UI logic should update/introduce Cypress component specs; flow/regression changes need e2e specs.
+        - Remind authors to run `npm run lint`, `npm run coverage:component`, and `npm run coverage:e2e`.
 
-        **Code Organization:**
-        - Apps: business logic, data requests, layout creation
-        - Views: Marionette views with templates and styles
-        - Components: generic, configurable, terminal objects (datepickers, tooltips)
-        - Behaviors: closed functionality for user interactions
-        - Utils: utility methods and 3rd party interfaces
-        - Entities: Models/Collections for server interface
-
-        **Best Practices:**
-        - Functions should accomplish one task in <10 lines when possible
-        - Modules should ideally be <300 lines
-        - Use guard clauses to handle exceptions early
-        - Favor object composition over class inheritance
-        - Store state on state models, not instance properties
-        - Fetch should only happen in entities service
-
-        **Directory Structure:**
-        - Follow established patterns: apps mirror views structure
-        - Use `app-name/app-name_app.js` and `view-name_views.js` conventions
-        - Keep related templates and SCSS in same folders as JS files
+        **Quality Checks**
+        - Functions remain focused (<10 lines when practical); guard clauses handle edge cases first.
+        - Modules stay <300 lines; suggest splitting when larger.
+        - Ensure state is stored on models, not ad-hoc properties; favor composition over inheritance.
 
 # Local development assistance
 code_generation:
@@ -76,13 +44,15 @@ code_generation:
   rules:
     - name: Follow RoundingWell patterns for new code
       prompt: >
-        When generating new code, follow these RoundingWell conventions:
-        - Use Marionette.js patterns for views and components
-        - Follow established directory structure and naming conventions
-        - Import SCSS files in JS files that use them
-        - Use our established utility functions and base classes
-        - Follow BEM naming for CSS classes
-        - Use formatjs for internationalization
+        When generating code, follow these conventions:
+        - JavaScript only—no TypeScript files or typings.
+        - Use Marionette patterns: define `ui`, prefer `triggers`, call `triggerMethod` when emitting events.
+        - Import SCSS from the module that renders the view; use BEM `.block__element--modifier` naming and avoid styling `.js-*` hooks.
+        - Put data fetching in `src/js/entities-service/**`; other layers talk to entities via Backbone.Radio.
+        - Add/update matching Cypress specs (`*.cy.js` or `test/integration/**`) and remind the reader to run coverage scripts.
+        - Format Handlebars correctly (`{{ value }}`, `{{#if}}{{else}}{{/if}}`) and place strings in `src/js/i18n/en-US.yml` with formatjs key naming and `HTML` suffix for raw markup.
+        - Keep functions small with guard clauses, keep modules <300 lines, and store state on models.
+        - Suggest updates to release/Five9/Formio assets only via their helper scripts.
 
 # Chat assistance
 chat:
@@ -90,11 +60,12 @@ chat:
   rules:
     - name: Project context awareness
       prompt: >
-        You are working on a Marionette.js/Backbone.js healthcare application.
-        Key context:
-        - This is a monorepo with packages for config, datadog, fontawesome, and formio
-        - Main app uses Marionette.js architecture patterns
-        - SCSS follows BEM methodology
-        - Tests use Cypress for e2e and component testing
-        - Build system uses Vite
-        - No TypeScript - JavaScript only
+        You are working on a Marionette.js/Backbone.js healthcare frontend.
+        Key facts:
+        - Vite drives builds/tests; scripts of interest: `npm run dev`, `npm run test`, `npm run coverage`, `npm run stop`.
+        - Cypress component specs live under `src/**/*.cy.js`; e2e specs live under `test/integration/**`.
+        - Linting uses `eslint.config.mjs` (flat config) and `.stylelintrc` for SCSS with BEM requirements.
+        - Handlebars templates use tight spacing (`{{ value }}`) and formatjs keys (`view.directory.fileViews.viewName.key`).
+        - Networking logic belongs to `src/js/entities-service/**`; avoid suggesting direct fetch/XHR elsewhere.
+        - Generated artifacts (Five9 SDK, FontAwesome, release bundles) should be updated via existing scripts, not manual edits.
+        - No TypeScript; stick to modern JavaScript.

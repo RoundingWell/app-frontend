@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Vite: Launch Frontend",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:8081",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "npm: dev"
+    },
+    {
+      "name": "Cypress Component Runner",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run coverage:component"
+    },
+    {
+      "name": "Cypress E2E Runner",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run coverage:e2e"
+    }
+  ]
+}

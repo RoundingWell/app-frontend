@@ -1,0 +1,12 @@
+{
+  "Exclude": [
+    "^packages/",
+    "^public/",
+    "^coverage/",
+    "^dist/",
+    "^cypress/",
+    "^test/",
+    "^node_modules/",
+    "^\\.git/"
+  ]
+}

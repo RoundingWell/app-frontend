@@ -4,6 +4,19 @@ orbs:
   cypress:   cypress-io/cypress@4
   coveralls: coveralls/coveralls@2
 
+commands:
+  setup-fa-auth:
+    steps:
+      - run:
+          name: Configure npm registry auth
+          command: |
+            cat > ~/.npmrc \<< EOF
+            # Pro Font Awesome registry
+            @fortawesome:registry=https://npm.fontawesome.com/
+            //npm.fontawesome.com/:_authToken=${FONTAWESOME}
+            EOF
+            echo "📦 Created ~/.npmrc"
+
 # ------------------------------------------------------------
 # EXECUTOR  –  Node 22 LTS image with Chrome 137, FF 139, Edge 137
 # ------------------------------------------------------------
@@ -22,6 +35,31 @@ executors:
 # JOBS
 # ------------------------------------------------------------
 jobs:
+  lint:
+    docker:
+      - image: cimg/node:22.16
+    steps:
+      - checkout
+      - setup-fa-auth
+      - restore_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - save_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+      - run:
+          name: ESLint
+          command: npm run eslint
+      - run:
+          name: Stylelint
+          command: npm run stylelint
+      - run:
+          name: EditorConfig
+          command: npm run editorconfig
+
   run-cypress:
     parameters:
       cypress_command:
@@ -56,15 +94,7 @@ jobs:
               echo "⌛ waiting for Xvfb…"
               sleep 0.5
             done
-      - run:
-          name: Configure npm registry auth
-          command: |
-            cat > ~/.npmrc \<< EOF
-            # Pro Font Awesome registry
-            @fortawesome:registry=https://npm.fontawesome.com/
-            //npm.fontawesome.com/:_authToken=${FONTAWESOME}
-            EOF
-            echo "📦 Created ~/.npmrc"
+      - setup-fa-auth
       - restore_cache:
           key: node-modules-{{ checksum "package-lock.json" }}
       - cypress/install:
@@ -130,6 +160,8 @@ workflows:
       not:
         equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:
+      - lint:
+          name: Lint
       - run-cypress:
           name: E2E
           cypress_command: >

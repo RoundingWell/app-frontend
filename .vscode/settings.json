@@ -1,0 +1,51 @@
+{
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "plaintext": false,
+    "markdown": true
+  },
+  "github.copilot.editor.enableAutoCompletions": true,
+  "github.copilot.chat.welcomeMessage": "never",
+  "github.copilot.referencesInChat": true,
+
+  // Help Copilot understand your project structure
+  "files.associations": {
+    "*.hbs": "handlebars"
+  },
+
+  // Include relevant files for context
+  "github.copilot.chat.codeGeneration.useCodebaseContext": true,
+  "github.copilot.chat.scopeSelection": true,
+
+  // Keep VS Code aligned with repo tooling
+  "eslint.experimental.useFlatConfig": true,
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "json"
+  ],
+  "stylelint.validate": [
+    "scss",
+    "css"
+  ],
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.stylelintcache": true,
+    "**/coverage/**": true,
+    "**/packages/care-ops-formio/**": true,
+    "**/public/formapp/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/.nyc_output": true
+  }
+}

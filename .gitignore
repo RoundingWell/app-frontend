@@ -54,3 +54,15 @@ typings/
 
 # Generated Testing Fixtures
 test/fixtures/collections/
+
+# VS Code local state
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.vscode/*.code-snippets
+.vscode/workspaceStorage/
+.vscode/globalStorage/
+.vscode/*.db
+.vscode/*.zip
