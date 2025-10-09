@@ -10,8 +10,8 @@
 
 .textarea-flex__container {
   height: auto;
+  overflow-wrap: break-word;
   resize: none;
   visibility: hidden;
   white-space: pre-wrap;
-  word-wrap: break-word;
 }
