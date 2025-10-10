@@ -1043,7 +1043,8 @@ context('patient flow page', function() {
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
+      .wait('@routeFlowActions')
+      .wait(60); // for ListView debounce of 'change:canEdit' trigger
 
     const conditionalAction = getAction({
       attributes: {
@@ -1084,15 +1085,6 @@ context('patient flow page', function() {
       .last()
       .should('contain', 'Published')
       .should('not.contain', 'Draft');
-
-    cy
-      .get('body')
-      .type('{esc}');
-
-    cy
-      .get('.patient-flow__actions')
-      .contains('Add')
-      .click();
 
     cy
       .get('.picklist')
