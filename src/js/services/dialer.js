@@ -27,11 +27,11 @@ export default App.extend({
   call(number, action) {
     this._call(number, action);
   },
-  five9CallComplete(data) {
+  five9CallComplete(identifier, values) {
     Radio.request('entities', 'save:artifacts:model', {
       artifact: 'five9-call-log',
-      identifier: data.sessionID,
-      values: data,
+      identifier,
+      values,
     });
   },
 });
