@@ -1,4 +1,4 @@
-import { bind, get } from 'underscore';
+import { get } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
@@ -146,16 +146,22 @@ export default SubRouterApp.extend({
         text: action.get('name'),
         itemType: action.type,
         hasOutreach: action.hasOutreach(),
-        onSelect: bind(this.triggerMethod, this, 'add:programAction', action),
+        programItem: action,
       };
     });
   },
 
   showAdd() {
-    this.showChildView('tools', new AddButtonView({
+    const addButtonView = new AddButtonView({
       headingText: i18n.addActionHeadingText,
       lists: [{ collection: new Backbone.Collection(this.addOpts) }],
-    }));
+    });
+
+    this.listenTo(addButtonView, 'add:programAction', programItem => {
+      this.triggerMethod('add:programAction', programItem);
+    });
+
+    this.showChildView('tools', addButtonView);
   },
 
   toggleBulkSelect() {

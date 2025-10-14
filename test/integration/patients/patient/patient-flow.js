@@ -1043,7 +1043,8 @@ context('patient flow page', function() {
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
+      .wait('@routeFlowActions')
+      .wait(60); // for ListView debounce of 'change:canEdit' trigger
 
     const conditionalAction = getAction({
       attributes: {

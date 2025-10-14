@@ -90,7 +90,7 @@ export default Component.extend({
       popWidth: view.$el.outerWidth(),
     });
 
-    this.listenTo(optionlist, 'select', ({ model }) => {
+    this.listenTo(optionlist, 'select', model => {
       Radio.request('dialer', 'call', model.get('number'), this.action);
     });
 

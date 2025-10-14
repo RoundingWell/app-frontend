@@ -1,4 +1,4 @@
-import { bind, some } from 'underscore';
+import { some } from 'underscore';
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
@@ -125,11 +125,7 @@ const BulkEditActionsHeaderView = View.extend({
   },
   onClickMenu() {
     const itemCount = this.collection.length;
-    const menuOptions = new Backbone.Collection([
-      {
-        onSelect: bind(this.triggerMethod, this, 'confirm:delete'),
-      },
-    ]);
+    const menuOptions = new Backbone.Collection([{}]);
 
     const optionlist = new Optionlist({
       ui: this.ui.menu,
@@ -140,6 +136,10 @@ const BulkEditActionsHeaderView = View.extend({
       lists: [{ collection: menuOptions }],
       align: 'right',
       popWidth: 248,
+    });
+
+    this.listenTo(optionlist, 'select', () => {
+      this.triggerMethod('confirm:delete');
     });
 
     optionlist.show();
@@ -179,11 +179,7 @@ const BulkEditFlowsHeaderView = View.extend({
   },
   onClickMenu() {
     const itemCount = this.collection.length;
-    const menuOptions = new Backbone.Collection([
-      {
-        onSelect: bind(this.triggerMethod, this, 'confirm:delete'),
-      },
-    ]);
+    const menuOptions = new Backbone.Collection([{}]);
 
     const optionlist = new Optionlist({
       ui: this.ui.menu,
@@ -194,6 +190,10 @@ const BulkEditFlowsHeaderView = View.extend({
       lists: [{ collection: menuOptions }],
       align: 'right',
       popWidth: 248,
+    });
+
+    this.listenTo(optionlist, 'select', () => {
+      this.triggerMethod('confirm:delete');
     });
 
     optionlist.show();
