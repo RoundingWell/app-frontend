@@ -29,8 +29,7 @@ context('Dialer Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('dialer', 'five9CallComplete', {
-          sessionID: 'abc1234',
+        Radio.request('dialer', 'five9CallComplete', 'abc1234', {
           callDuration: 42,
           disposition: 'completed',
         });
@@ -47,7 +46,6 @@ context('Dialer Service', function() {
             artifact: 'five9-call-log',
             identifier: 'abc1234',
             values: {
-              sessionID: 'abc1234',
               callDuration: 42,
               disposition: 'completed',
             },

@@ -54,9 +54,9 @@ export default App.extend({
       callEnded: () => {
         this.setState('callTime', null);
       },
-      callFinished: ({ callLogData }) => {
+      callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
-        Radio.request('dialer', 'five9CallComplete', callLogData);
+        Radio.request('dialer', 'five9CallComplete', callData.interactionId, callLogData);
       },
     });
   },
