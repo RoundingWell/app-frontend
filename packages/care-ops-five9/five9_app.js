@@ -44,9 +44,19 @@ export default App.extend({
     interaction.subscribe({
       callStarted: async({ callData }) => {
         this.setState('isCalling', true);
-        // TODO: Waiting on client for cav id
-        // const interactionId = callData.interactionId;
-        // await interaction.setCav({
+        const actionId = this.getState('actionId');
+
+        if (!actionId) return;
+
+        await interaction.setCav({
+          interactionId: callData.interactionId,
+          cavList: [
+            {
+              id: '300000000000151',
+              value: actionId,
+            },
+          ],
+        });
       },
       callAccepted: () => {
         this.setState('callTime', dayjs());
@@ -56,6 +66,7 @@ export default App.extend({
       },
       callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
+        this.setState('actionId', null);
         Radio.request('dialer', 'five9CallComplete', callData.interactionId, callLogData);
       },
     });
@@ -67,7 +78,7 @@ export default App.extend({
     if (this.getState('isCalling')) return;
 
     this.setState('pendingCall', number);
-    this.setState('action', action.id);
+    this.setState('actionId', action.id);
 
     this._call();
   },
