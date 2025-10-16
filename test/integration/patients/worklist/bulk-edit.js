@@ -444,6 +444,12 @@ context('Worklist bulk editing', function() {
       .should('be.disabled');
 
     cy
+      .get('@bulkEditSidebar')
+      .find('[data-footer-region] button')
+      .should('not.have.class', 'js-submit')
+      .should('be.disabled');
+
+    cy
       .wait('@patchFlow1')
       .its('request.body')
       .should(({ data }) => {
@@ -875,6 +881,12 @@ context('Worklist bulk editing', function() {
     cy
       .get('@bulkEditSidebar')
       .find('[data-duration-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-footer-region] button')
+      .should('not.have.class', 'js-submit')
       .should('be.disabled');
 
     cy

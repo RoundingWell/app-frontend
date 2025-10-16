@@ -93,7 +93,7 @@ export default App.extend({
   onSubmit() {
     this.setState({ isSaving: true });
 
-    this.modal.disableSubmit();
+    this.modal.showSavingFooter();
 
     const applyOwner = !!this.getState('applyOwner');
     if (applyOwner) {

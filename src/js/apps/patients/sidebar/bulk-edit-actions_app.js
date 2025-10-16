@@ -151,7 +151,7 @@ export default App.extend({
   onSubmit() {
     this.setState({ isSaving: true });
 
-    this.modal.disableSubmit();
+    this.modal.showSavingFooter();
 
     this.triggerMethod('save', this.getState().getData());
   },

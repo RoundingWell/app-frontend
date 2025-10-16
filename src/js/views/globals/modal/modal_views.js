@@ -1,4 +1,5 @@
 import { extend } from 'underscore';
+import { animate } from 'animejs';
 import hbs from 'handlebars-inline-precompile';
 import { View, Region } from 'marionette';
 
@@ -19,6 +20,36 @@ const i18n = intl.globals.modal.modalViews;
 
 const ReplaceElRegion = Region.extend({ replaceElement: true, timeout: 0 });
 
+const SavingFooterView = View.extend({
+  className: 'flex',
+  template: hbs`
+    <div class="button--text" disabled>{{ savingInfoText }}</div>
+    <button class="{{ buttonClass }} js-loading" disabled>
+      <span>{{ savingSubmitText }}</span>
+    </button>
+  `,
+  ui: {
+    loading: '.js-loading',
+  },
+  serializeData() {
+    return extend({}, this.options);
+  },
+  onRender() {
+    this.animation = animate(this.ui.loading[0], {
+      opacity: [1, 0.5],
+      loop: Infinity,
+      duration: 400,
+      ease: 'inOutSine',
+      alternate: true,
+    });
+  },
+  onBeforeDestroy() {
+    if (this.animation) {
+      this.animation.cancel();
+    }
+  },
+});
+
 const ModalView = View.extend({
   className: 'modal',
   buttonClass: 'button--green',
@@ -26,6 +57,8 @@ const ModalView = View.extend({
   headerIconType: 'far',
   cancelText: i18n.modalView.cancelText,
   submitText: i18n.modalView.submitText,
+  savingSubmitText: i18n.modalView.savingSubmitText,
+  savingInfoText: i18n.modalView.savingInfoText,
   regionClass: ReplaceElRegion,
   regions: {
     header: '[data-header-region]',
@@ -33,7 +66,10 @@ const ModalView = View.extend({
       el: '[data-body-region]',
       regionClass: PreloadRegion.extend({ timeout: 0 }),
     },
-    footer: '[data-footer-region]',
+    footer: {
+      el: '[data-footer-region]',
+      replaceElement: false,
+    },
     info: '[data-info-region]',
   },
   childViewTriggers: {
@@ -63,6 +99,13 @@ const ModalView = View.extend({
   },
   onCancel() {
     this.destroy();
+  },
+  showSavingFooter() {
+    this.showChildView('footer', new SavingFooterView({
+      buttonClass: this.buttonClass,
+      savingSubmitText: this.savingSubmitText,
+      savingInfoText: this.savingInfoText,
+    }));
   },
   disableSubmit(disable = true) {
     this.ui.submit.prop('disabled', disable);
