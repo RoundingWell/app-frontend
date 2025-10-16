@@ -220,6 +220,7 @@ const BulkEditActionsBodyView = View.extend({
     'change:date': 'showDueDateTime',
     'change:timeMulti': 'showDueTime',
     'change:durationMulti': 'showDuration',
+    'change:isSaving': 'render',
   },
   className: 'modal__content--sidebar',
   template: BulkEditActionBodyTemplate,
@@ -231,25 +232,35 @@ const BulkEditActionsBodyView = View.extend({
     duration: '[data-duration-region]',
   },
   onRender() {
+    this.isSaving = this.model.get('isSaving');
+
     this.showState();
     this.showOwner();
     this.showDueDateTime();
     this.showDuration();
   },
   getStateComponent() {
+    const isDisabled = this.isSaving;
+
     if (this.model.get('stateMulti')) {
       return new StateComponent({
         viewOptions: {
+          attributes: {
+            disabled: isDisabled,
+          },
           className: 'button-secondary w-100',
           template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
         },
       });
     }
 
-    return new StateComponent({ stateId: this.model.get('stateId') });
+    return new StateComponent({
+      stateId: this.model.get('stateId'),
+      state: { isDisabled },
+    });
   },
   getOwnerComponent() {
-    const isDisabled = this.model.someComplete();
+    const isDisabled = this.model.someComplete() || this.isSaving;
 
     if (this.model.get('ownerMulti')) {
       return new OwnerComponent({
@@ -270,7 +281,7 @@ const BulkEditActionsBodyView = View.extend({
     });
   },
   getDueDateComponent() {
-    const isDisabled = this.model.someComplete();
+    const isDisabled = this.model.someComplete() || this.isSaving;
 
     if (this.model.get('dateMulti')) {
       return new DueComponent({
@@ -302,7 +313,7 @@ const BulkEditActionsBodyView = View.extend({
       return new TimeComponent({
         viewOptions: {
           attributes: {
-            disabled: this.model.get('dateMulti') || this.model.someComplete(),
+            disabled: this.model.get('dateMulti') || this.model.someComplete() || this.isSaving,
           },
           className: 'button-secondary time-component w-100',
           template: hbs`{{far "clock"}} <span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDueTimeDefaultText }}</span>`,
@@ -311,7 +322,7 @@ const BulkEditActionsBodyView = View.extend({
     }
 
     const time = this.model.get('time');
-    const isDisabled = (this.model.get('dateMulti') && !time) || !this.model.get('date') || this.model.someComplete();
+    const isDisabled = (this.model.get('dateMulti') && !time) || !this.model.get('date') || this.model.someComplete() || this.isSaving;
     const isOverdue = getIsOverdue(this.model.get('date'), time);
 
     return new TimeComponent({
@@ -321,7 +332,7 @@ const BulkEditActionsBodyView = View.extend({
     });
   },
   getDurationComponent() {
-    const isDisabled = this.model.someComplete();
+    const isDisabled = this.model.someComplete() || this.isSaving;
 
     if (this.model.get('durationMulti')) {
       return new DurationComponent({
@@ -398,12 +409,17 @@ const ApplyOwnerView = View.extend({
   },
   className: 'u-margin--t-4 u-margin--l-16',
   template: hbs`
-    <button class="button--checkbox js-apply-owner"{{#if ownerMulti}} disabled{{/if}}>
+    <button class="button--checkbox js-apply-owner"{{#if isDisabled}} disabled{{/if}}>
       {{#if applyOwner}}{{fas "square-check"}}{{else}}{{fal "square"}}{{/if~}}
       <span>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditFlowBodyTemplate.applyOwnerLabel }}</span>
     </button>`,
   triggers: {
     'click .js-apply-owner': 'click:select',
+  },
+  templateContext() {
+    return {
+      isDisabled: this.model.get('ownerMulti') || this.model.get('isSaving'),
+    };
   },
   onClickSelect() {
     this.model.set('applyOwner', !this.model.get('applyOwner'));
@@ -414,6 +430,7 @@ const BulkEditFlowsBodyView = View.extend({
   modelEvents: {
     'change:stateMulti': 'showState',
     'change:ownerMulti': 'showOwner',
+    'change:isSaving': 'render',
   },
   className: 'modal__content--sidebar',
   template: BulkEditFlowBodyTemplate,
@@ -423,15 +440,22 @@ const BulkEditFlowsBodyView = View.extend({
     applyOwner: '[data-apply-owner-region]',
   },
   onRender() {
+    this.isSaving = this.model.get('isSaving');
+
     this.showState();
     this.showOwner();
     this.showApplyOwner();
   },
   getStateComponent() {
+    const isDisabled = this.isSaving;
+
     if (this.model.get('stateMulti')) {
       return new FlowsStateComponent({
         flows: this.collection,
         viewOptions: {
+          attributes: {
+            disabled: isDisabled,
+          },
           className: 'button-secondary w-100',
           template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
         },
@@ -441,10 +465,11 @@ const BulkEditFlowsBodyView = View.extend({
     return new FlowsStateComponent({
       flows: this.collection,
       stateId: this.model.get('stateId'),
+      state: { isDisabled },
     });
   },
   getOwnerComponent() {
-    const isDisabled = this.model.someComplete();
+    const isDisabled = this.model.someComplete() || this.isSaving;
 
     if (this.model.get('ownerMulti')) {
       return new OwnerComponent({
