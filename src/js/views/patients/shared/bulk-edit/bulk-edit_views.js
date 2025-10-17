@@ -407,7 +407,7 @@ const ApplyOwnerView = View.extend({
     'change:applyOwner': 'render',
     'change:ownerMulti': 'render',
   },
-  className: 'u-margin--t-4 u-margin--l-16',
+  className: 'u-margin--l-16',
   template: hbs`
     <button class="button--checkbox js-apply-owner"{{#if isDisabled}} disabled{{/if}}>
       {{#if applyOwner}}{{fas "square-check"}}{{else}}{{fal "square"}}{{/if~}}
