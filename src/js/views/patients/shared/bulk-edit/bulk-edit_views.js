@@ -108,7 +108,7 @@ const BulkEditActionsHeaderView = View.extend({
       </div>
       <div>
         {{#if isDevelop}}<button class="button--icon u-margin--r-8 js-menu">{{far "ellipsis"}}</button>{{/if}}
-        <button class="button--icon js-close">{{far "xmark"}}</button>
+        <button class="button--icon js-close">{{fas "xmark"}}</button>
       </div>
     </div>
   `,
@@ -167,7 +167,7 @@ const BulkEditFlowsHeaderView = View.extend({
       </div>
       <div>
         <button class="button--icon u-margin--r-8 js-menu">{{far "ellipsis"}}</button>
-        <button class="button--icon js-close">{{far "xmark"}}</button>
+        <button class="button--icon js-close">{{fas "xmark"}}</button>
       </div>
     </div>
   `,
