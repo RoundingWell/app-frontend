@@ -320,7 +320,6 @@ careOptsFrontend:
           noResultsText: No Published Actions
       bulkEdit:
         bulkEditViews:
-          bulkDeleteFlowsSuccess: "{itemCount, plural, one {# Flow has been deleted} other {# Flows have been deleted}}"
           bulkDueDateDefaultText: Multiple Dates...
           bulkDueTimeDefaultText: Multiple Times...
           bulkDurationDefaultText: Multiple Durations...
@@ -342,9 +341,6 @@ careOptsFrontend:
             stateLabel: State
           bulkEditFlowsHeaderView:
             headingText: "{itemCount, plural, one {Edit # Flow} other {Edit # Flows}}"
-            menuOptions:
-              delete: "{itemCount, plural, one {Delete Flow} other {Delete Flows}}"
-              headingText: Flow Menu
           bulkEditFlowsSuccess: "{itemCount, plural, one {# Flow has been updated} other {# Flows have been updated}}"
           bulkOwnerDefaultText: Multiple Owners...
           bulkOwnerInfoText: "Tip: To assign a clinician, filter the worklist to a specific workspace."
@@ -358,10 +354,6 @@ careOptsFrontend:
               bodyText: There are actions not set to a Done state on some of the flows. You must set all actions to a Done state before setting flows to a Done state.
               headingText: Flow Actions Must Be Done
               submitText: OK
-          confirmDeleteFlowsModal:
-            bodyText: Are you sure you want to delete the selected Flows? This cannot be undone.
-            headingText: Delete Flows?
-            submitText: Delete
       commentsViews:
         commentFormView:
           placeholder: Add a comment...

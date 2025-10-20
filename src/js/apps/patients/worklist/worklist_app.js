@@ -20,7 +20,7 @@ import { CountView } from 'js/views/patients/shared/list_views';
 import { getSortOptions } from './worklist_sort';
 
 import { ListView, SelectAllView, LayoutView, ListTitleView, TableHeaderView, SortDroplist, TypeToggleView, AllFiltersButtonView } from 'js/views/patients/worklist/worklist_views';
-import { BulkEditButtonView, BulkEditFlowsSuccessTemplate, BulkEditActionsSuccessTemplate, BulkDeleteFlowsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
+import { BulkEditButtonView, BulkEditFlowsSuccessTemplate, BulkEditActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
 import { sidebarOptions } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
 
 const FiltersApp = App.extend({
@@ -298,20 +298,7 @@ export default App.extend({
             this.restart();
           });
       },
-      'delete'() {
-        const itemCount = this.selected.length;
-
-        this.selected.destroy()
-          .then(() => {
-            this.showDeleteSuccess(itemCount);
-            app.stop();
-            this.getState().clearSelected();
-          });
-      },
     });
-  },
-  showDeleteSuccess(itemCount) {
-    Radio.request('alert', 'show:success', renderTemplate(BulkDeleteFlowsSuccessTemplate, { itemCount }));
   },
   showUpdateSuccess(itemCount) {
     if (this.getState().isFlowType()) {

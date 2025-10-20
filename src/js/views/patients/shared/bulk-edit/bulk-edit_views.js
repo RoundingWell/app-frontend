@@ -1,5 +1,4 @@
 import { some } from 'underscore';
-import Backbone from 'backbone';
 import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
@@ -10,8 +9,6 @@ import intl from 'js/i18n';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/modals.scss';
 import 'scss/modules/sidebar.scss';
-
-import Optionlist from 'js/components/optionlist';
 
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, DurationComponent } from 'js/views/patients/shared/actions_views';
 
@@ -121,50 +118,10 @@ const BulkEditFlowsHeaderView = View.extend({
         <h3 class="sidebar__heading">{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditFlowsHeaderView.headingText") itemCount=items.length}}</h3>
       </div>
       <div>
-        <button class="button--icon u-margin--r-8 js-menu">{{far "ellipsis"}}</button>
         <button class="button--icon js-close">{{fas "xmark"}}</button>
       </div>
     </div>
   `,
-  triggers: {
-    'click @ui.menu': 'click:menu',
-  },
-  ui: {
-    menu: '.js-menu',
-  },
-  onClickMenu() {
-    const itemCount = this.collection.length;
-    const menuOptions = new Backbone.Collection([{}]);
-
-    const optionlist = new Optionlist({
-      ui: this.ui.menu,
-      uiView: this,
-      headingText: i18n.bulkEditFlowsHeaderView.menuOptions.headingText,
-      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditFlowsHeaderView.menuOptions.delete") itemCount=itemCount}}</span>`,
-      itemTemplateContext: { itemCount },
-      lists: [{ collection: menuOptions }],
-      align: 'right',
-      popWidth: 248,
-    });
-
-    this.listenTo(optionlist, 'select', () => {
-      this.triggerMethod('confirm:delete');
-    });
-
-    optionlist.show();
-  },
-  onConfirmDelete() {
-    const modal = Radio.request('modal', 'show:small', {
-      bodyText: i18n.confirmDeleteFlowsModal.bodyText,
-      headingText: i18n.confirmDeleteFlowsModal.headingText,
-      submitText: i18n.confirmDeleteFlowsModal.submitText,
-      buttonClass: 'button--red',
-      onSubmit: () => {
-        modal.destroy();
-        this.triggerMethod('delete', this.collection);
-      },
-    });
-  },
 });
 
 const BulkEditActionsBodyView = View.extend({
@@ -471,8 +428,6 @@ const BulkEditFlowsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.sha
 
 const BulkEditActionsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditActionsSuccess") itemCount=itemCount}}`;
 
-const BulkDeleteFlowsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkDeleteFlowsSuccess") itemCount=itemCount}}`;
-
 export {
   BulkEditButtonView,
   BulkEditActionsHeaderView,
@@ -481,5 +436,4 @@ export {
   BulkEditFlowsBodyView,
   BulkEditFlowsSuccessTemplate,
   BulkEditActionsSuccessTemplate,
-  BulkDeleteFlowsSuccessTemplate,
 };
