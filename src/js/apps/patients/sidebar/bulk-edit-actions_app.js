@@ -128,6 +128,7 @@ export default App.extend({
     const headerView = new BulkEditActionsHeaderView({
       collection: this.getState('collection'),
     });
+
     const bodyView = new BulkEditActionsBodyView({
       model: this.getState(),
       collection: this.getState('collection'),
@@ -148,7 +149,10 @@ export default App.extend({
     });
   },
   onSubmit() {
-    this.modal.disableSubmit();
+    this.setState({ isSaving: true });
+
+    this.modal.showSavingFooter();
+
     this.triggerMethod('save', this.getState().getData());
   },
   onStop() {

@@ -189,6 +189,8 @@ careOptsFrontend:
       modalViews:
         modalView:
           cancelText: Cancel
+          savingInfoText: Applying your changes.
+          savingSubmitText: Saving...
           submitText: Save
         viewOnlyForm:
           doneText: Done

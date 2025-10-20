@@ -392,6 +392,7 @@ context('Worklist bulk editing', function() {
       .intercept('PATCH', `/api/flows/${ testFlows[0].id }`, {
         statusCode: 204,
         body: {},
+        delay: 100, // give extra time to check button disabled attributes before modal is closed
       })
       .as('patchFlow1')
       .intercept('PATCH', `/api/flows/${ testFlows[2].id }`, {
@@ -426,6 +427,27 @@ context('Worklist bulk editing', function() {
       .get('@bulkEditSidebar')
       .find('.js-submit')
       .click();
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-state-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-owner-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-apply-owner-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-footer-region] button')
+      .should('not.have.class', 'js-submit')
+      .should('be.disabled');
 
     cy
       .wait('@patchFlow1')
@@ -721,6 +743,7 @@ context('Worklist bulk editing', function() {
       .intercept('PATCH', `/api/actions/${ testActions[0].id }`, {
         statusCode: 204,
         body: {},
+        delay: 100, // give extra time to check button disabled attributes before modal is closed
       })
       .as('patchAction1')
       .intercept('PATCH', `/api/actions/${ testActions[2].id }`, {
@@ -834,6 +857,37 @@ context('Worklist bulk editing', function() {
       .get('@bulkEditSidebar')
       .find('.js-submit')
       .click();
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-state-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-owner-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-due-date-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-due-time-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-duration-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-footer-region] button')
+      .should('not.have.class', 'js-submit')
+      .should('be.disabled');
 
     cy
       .wait('@patchAction1')
