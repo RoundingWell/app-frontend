@@ -2135,70 +2135,8 @@ context('patient flow page', function() {
       .should('contain', '3 Actions have been updated');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item .js-select')
-      .click({ multiple: true });
-
-    cy
-      .get('.table-list')
-      .find('.table-list__item .js-select')
-      .last()
-      .click();
-
-    cy
-      .get('[data-header-region]')
-      .next()
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .intercept('DELETE', '/api/actions/*', {
-        statusCode: 204,
-        body: {},
-      });
-
-    cy
-      .get('.modal--sidebar')
-      .find('.modal__header--sidebar')
-      .should('contain', 'Edit 2 Actions')
-      .find('.js-menu')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .contains('Delete Actions')
-      .click();
-
-    cy
-      .get('.modal--small')
-      .should('contain', 'Delete Actions?')
-      .should('contain', 'Are you sure you want to delete the selected Actions? This cannot be undone.')
-      .find('.js-submit')
-      .click();
-
-    cy
-      .get('.alert-box')
-      .should('contain', '2 Actions have been deleted');
-
-    cy
-      .get('.modal--small')
-      .should('not.exist');
-
-    cy
-      .get('.modal--sidebar')
-      .should('not.exist');
-
-    cy
-      .get('[data-header-region]')
-      .next()
-      .find('.js-bulk-edit')
-      .should('not.exist');
-
-    cy
       .get('.app-frame__content')
       .find('.table-list__item')
-      .should('have.length', 1)
       .first()
       .find('.js-select')
       .click();

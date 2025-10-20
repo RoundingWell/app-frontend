@@ -20,7 +20,7 @@ import { CountView } from 'js/views/patients/shared/list_views';
 import { getSortOptions } from './worklist_sort';
 
 import { ListView, SelectAllView, LayoutView, ListTitleView, TableHeaderView, SortDroplist, TypeToggleView, AllFiltersButtonView } from 'js/views/patients/worklist/worklist_views';
-import { BulkEditButtonView, BulkEditFlowsSuccessTemplate, BulkEditActionsSuccessTemplate, BulkDeleteFlowsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
+import { BulkEditButtonView, BulkEditFlowsSuccessTemplate, BulkEditActionsSuccessTemplate, BulkDeleteFlowsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
 import { sidebarOptions } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
 
 const FiltersApp = App.extend({
@@ -311,12 +311,7 @@ export default App.extend({
     });
   },
   showDeleteSuccess(itemCount) {
-    if (this.getState().isFlowType()) {
-      Radio.request('alert', 'show:success', renderTemplate(BulkDeleteFlowsSuccessTemplate, { itemCount }));
-      return;
-    }
-
-    Radio.request('alert', 'show:success', renderTemplate(BulkDeleteActionsSuccessTemplate, { itemCount }));
+    Radio.request('alert', 'show:success', renderTemplate(BulkDeleteFlowsSuccessTemplate, { itemCount }));
   },
   showUpdateSuccess(itemCount) {
     if (this.getState().isFlowType()) {

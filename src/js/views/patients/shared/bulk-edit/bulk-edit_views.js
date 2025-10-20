@@ -107,55 +107,10 @@ const BulkEditActionsHeaderView = View.extend({
       <h3 class="sidebar__heading">{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditActionsHeaderView.headingText") itemCount=items.length}}</h3>
       </div>
       <div>
-        {{#if isDevelop}}<button class="button--icon u-margin--r-8 js-menu">{{far "ellipsis"}}</button>{{/if}}
         <button class="button--icon js-close">{{fas "xmark"}}</button>
       </div>
     </div>
   `,
-  templateContext() {
-    return {
-      isDevelop: _DEVELOP_ || _TEST_,
-    };
-  },
-  triggers: {
-    'click @ui.menu': 'click:menu',
-  },
-  ui: {
-    menu: '.js-menu',
-  },
-  onClickMenu() {
-    const itemCount = this.collection.length;
-    const menuOptions = new Backbone.Collection([{}]);
-
-    const optionlist = new Optionlist({
-      ui: this.ui.menu,
-      uiView: this,
-      headingText: i18n.bulkEditActionsHeaderView.menuOptions.headingText,
-      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditActionsHeaderView.menuOptions.delete") itemCount=itemCount}}</span>`,
-      itemTemplateContext: { itemCount },
-      lists: [{ collection: menuOptions }],
-      align: 'right',
-      popWidth: 248,
-    });
-
-    this.listenTo(optionlist, 'select', () => {
-      this.triggerMethod('confirm:delete');
-    });
-
-    optionlist.show();
-  },
-  onConfirmDelete() {
-    const modal = Radio.request('modal', 'show:small', {
-      bodyText: i18n.confirmDeleteActionsModal.bodyText,
-      headingText: i18n.confirmDeleteActionsModal.headingText,
-      submitText: i18n.confirmDeleteActionsModal.submitText,
-      buttonClass: 'button--red',
-      onSubmit: () => {
-        modal.destroy();
-        this.triggerMethod('delete', this.collection);
-      },
-    });
-  },
 });
 
 const BulkEditFlowsHeaderView = View.extend({
@@ -518,8 +473,6 @@ const BulkEditActionsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.s
 
 const BulkDeleteFlowsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkDeleteFlowsSuccess") itemCount=itemCount}}`;
 
-const BulkDeleteActionsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkDeleteActionsSuccess") itemCount=itemCount}}`;
-
 export {
   BulkEditButtonView,
   BulkEditActionsHeaderView,
@@ -529,5 +482,4 @@ export {
   BulkEditFlowsSuccessTemplate,
   BulkEditActionsSuccessTemplate,
   BulkDeleteFlowsSuccessTemplate,
-  BulkDeleteActionsSuccessTemplate,
 };

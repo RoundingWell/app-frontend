@@ -955,46 +955,6 @@ context('schedule page', function() {
       .find('.fa-square-minus');
 
     cy
-      .get('@filterRegion')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .intercept('DELETE', '/api/actions/*', {
-        statusCode: 204,
-        body: {},
-      });
-
-    cy
-      .get('.modal--sidebar')
-      .find('.modal__header--sidebar')
-      .should('contain', 'Edit 5 Actions')
-      .find('.js-menu')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .contains('Delete Actions')
-      .click();
-
-    cy
-      .get('.modal--small')
-      .should('contain', 'Delete Actions?')
-      .should('contain', 'Are you sure you want to delete the selected Actions? This cannot be undone.')
-      .find('.js-submit')
-      .click();
-
-    cy
-      .get('.alert-box')
-      .should('contain', '5 Actions have been deleted');
-
-    cy
-      .get('.app-frame__content')
-      .find('.table-list__list .schedule-list__day-list-row')
-      .should('have.length', 15);
-
-    cy
       .intercept('PATCH', '/api/actions/*', {
         statusCode: 400,
         body: {},

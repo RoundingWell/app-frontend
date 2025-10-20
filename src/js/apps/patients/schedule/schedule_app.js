@@ -18,7 +18,7 @@ import SearchComponent from 'js/views/shared/components/list-search';
 import { CountView } from 'js/views/patients/shared/list_views';
 
 import { LayoutView, ScheduleTitleView, TableHeaderView, SelectAllView, ScheduleListView, AllFiltersButtonView } from 'js/views/patients/schedule/schedule_views';
-import { BulkEditButtonView, BulkEditActionsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
+import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
 import { sidebarOptions } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
 
 const FiltersApp = App.extend({
@@ -254,16 +254,6 @@ export default App.extend({
             this.getState().clearSelected();
             this.restart();
           });
-      },
-      'delete'() {
-        const itemCount = this.selected.length;
-
-        this.selected.destroy().then(() => {
-          Radio.request('alert', 'show:success', renderTemplate(BulkDeleteActionsSuccessTemplate, { itemCount }));
-          app.stop();
-          this.getState().clearSelected();
-          this.showList();
-        });
       },
     });
   },
