@@ -1,4 +1,4 @@
-import { partial, pick } from 'underscore';
+import { pick } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
@@ -71,6 +71,7 @@ export default App.extend({
     const headerView = new BulkEditFlowsHeaderView({
       collection: this.getState('collection'),
     });
+
     const bodyView = new BulkEditFlowsBodyView({
       model: this.getState(),
       collection: this.getState('collection'),
@@ -80,10 +81,6 @@ export default App.extend({
       headerView,
       bodyView,
       onSubmit: this.onSubmit.bind(this),
-    });
-
-    this.listenTo(headerView, {
-      'delete': partial(this.triggerMethod, 'delete'),
     });
 
     this.listenTo(this.modal, {

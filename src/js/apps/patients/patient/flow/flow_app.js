@@ -15,7 +15,7 @@ import FlowSiderbarApp from 'js/apps/patients/sidebar/flow-sidebar_app';
 import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 
 import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView, i18n } from 'js/views/patients/patient/flow/flow_views';
-import { BulkEditButtonView, BulkEditActionsSuccessTemplate, BulkDeleteActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
+import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
 import { AddButtonView } from 'js/views/patients/shared/add-workflow/add-workflow_views';
 
 export default SubRouterApp.extend({
@@ -213,19 +213,7 @@ export default SubRouterApp.extend({
             this.restart({ flowId: this.flow.id, currentRoute: this.currentRoute });
           });
       },
-      'delete'() {
-        const itemCount = this.selected.length;
-
-        this.selected.destroy().then(() => {
-          this.showDeleteSuccess(itemCount);
-          app.stop();
-          this.getState().clearSelected();
-        });
-      },
     });
-  },
-  showDeleteSuccess(itemCount) {
-    Radio.request('alert', 'show:success', renderTemplate(BulkDeleteActionsSuccessTemplate, { itemCount }));
   },
   showUpdateSuccess(itemCount) {
     Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));

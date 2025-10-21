@@ -320,16 +320,11 @@ careOptsFrontend:
           noResultsText: No Published Actions
       bulkEdit:
         bulkEditViews:
-          bulkDeleteActionsSuccess: "{itemCount, plural, one {# Action has been deleted} other {# Actions have been deleted}}"
-          bulkDeleteFlowsSuccess: "{itemCount, plural, one {# Flow has been deleted} other {# Flows have been deleted}}"
           bulkDueDateDefaultText: Multiple Dates...
           bulkDueTimeDefaultText: Multiple Times...
           bulkDurationDefaultText: Multiple Durations...
           bulkEditActionsHeaderView:
             headingText: "{itemCount, plural, one {Edit # Action} other {Edit # Actions}}"
-            menuOptions:
-              delete: "{itemCount, plural, one {Delete Action} other {Delete Actions}}"
-              headingText: Action Menu
           bulkEditActionsSuccess: "{itemCount, plural, one {# Action has been updated} other {# Actions have been updated}}"
           bulkEditActionBodyTemplate:
             dueDateLabel: Due
@@ -346,9 +341,6 @@ careOptsFrontend:
             stateLabel: State
           bulkEditFlowsHeaderView:
             headingText: "{itemCount, plural, one {Edit # Flow} other {Edit # Flows}}"
-            menuOptions:
-              delete: "{itemCount, plural, one {Delete Flow} other {Delete Flows}}"
-              headingText: Flow Menu
           bulkEditFlowsSuccess: "{itemCount, plural, one {# Flow has been updated} other {# Flows have been updated}}"
           bulkOwnerDefaultText: Multiple Owners...
           bulkOwnerInfoText: "Tip: To assign a clinician, filter the worklist to a specific workspace."
@@ -362,14 +354,6 @@ careOptsFrontend:
               bodyText: There are actions not set to a Done state on some of the flows. You must set all actions to a Done state before setting flows to a Done state.
               headingText: Flow Actions Must Be Done
               submitText: OK
-          confirmDeleteActionsModal:
-            bodyText: Are you sure you want to delete the selected Actions? This cannot be undone.
-            headingText: Delete Actions?
-            submitText: Delete
-          confirmDeleteFlowsModal:
-            bodyText: Are you sure you want to delete the selected Flows? This cannot be undone.
-            headingText: Delete Flows?
-            submitText: Delete
       commentsViews:
         commentFormView:
           placeholder: Add a comment...
