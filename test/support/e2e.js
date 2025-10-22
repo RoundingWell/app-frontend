@@ -12,7 +12,6 @@
 // You can read more here:
 // https://on.cypress.io/guides/configuration#section-global
 // ***********************************************************
-import 'cypress-plugin-tab';
 import 'js/base/dayjs';
 
 import './defaults';
