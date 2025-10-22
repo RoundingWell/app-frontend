@@ -111,9 +111,12 @@ context('program action sidebar', function() {
       .get('.sidebar')
       .find('[data-name-region] .js-input')
       .type('Test Name')
-      .tab()
-      .tab()
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB)
+      .press(Cypress.Keyboard.Keys.TAB)
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .should('have.class', 'js-cancel')
       .typeEnter();
 
@@ -188,7 +191,10 @@ context('program action sidebar', function() {
       .find('[data-details-region] .js-input')
       .type('a{backspace}')
       .type('Test{enter} Details')
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .should('have.class', 'js-save')
       .typeEnter();
 

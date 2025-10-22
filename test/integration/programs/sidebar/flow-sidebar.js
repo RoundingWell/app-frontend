@@ -271,7 +271,10 @@ context('program flow sidebar', function() {
       .get('@flowSidebar')
       .find('[data-details-region] textarea')
       .type('Here are some details')
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .should('have.class', 'js-save')
       .typeEnter();
 

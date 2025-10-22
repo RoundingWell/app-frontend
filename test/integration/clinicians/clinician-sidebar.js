@@ -410,8 +410,11 @@ context('clinician sidebar', function() {
       .find('[data-email-region] .js-input')
       .clear()
       .type('edited.email@roundingwell.com')
-      .tab()
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB)
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .should('have.class', 'js-cancel')
       .typeEnter();
 
@@ -440,7 +443,10 @@ context('clinician sidebar', function() {
       .should('have.value', 'test.clinician@roundingwell.com')
       .clear()
       .type('edited.email@roundingwell.com')
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .should('have.class', 'js-save')
       .typeEnter();
 
@@ -475,7 +481,10 @@ context('clinician sidebar', function() {
       .find('[data-email-region] .js-input')
       .clear()
       .type('edited.email@roundingwell.com')
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .typeEnter()
       .wait('@routePatchClinicianError');
 
