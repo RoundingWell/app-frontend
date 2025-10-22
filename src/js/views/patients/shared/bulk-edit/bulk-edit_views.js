@@ -1,4 +1,4 @@
-import { some } from 'underscore';
+import { get, some } from 'underscore';
 import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
@@ -167,7 +167,7 @@ const BulkEditActionsBodyView = View.extend({
     }
 
     return new StateComponent({
-      stateId: this.model.get('stateId'),
+      stateId: get(this.model.get('state'), 'id'),
       state: { isDisabled },
     });
   },
@@ -376,7 +376,7 @@ const BulkEditFlowsBodyView = View.extend({
 
     return new FlowsStateComponent({
       flows: this.collection,
-      stateId: this.model.get('stateId'),
+      stateId: get(this.model.get('state'), 'id'),
       state: { isDisabled },
     });
   },

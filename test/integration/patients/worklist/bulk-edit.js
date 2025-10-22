@@ -519,6 +519,16 @@ context('Worklist bulk editing', function() {
     cy
       .get('@bulkEditSidebar')
       .find('[data-state-region]')
+      .contains('Done');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-owner-region]')
+      .contains('Nurse');
+
+    cy
+      .get('@bulkEditSidebar')
+      .find('[data-state-region]')
       .click();
 
     cy
@@ -880,6 +890,26 @@ context('Worklist bulk editing', function() {
       .get('[data-filters-region]')
       .find('.js-bulk-edit')
       .click();
+
+    cy
+      .get('[data-state-region]')
+      .should('contain', 'To Do');
+
+    cy
+      .get('[data-owner-region]')
+      .should('contain', 'Nurse');
+
+    cy
+      .get('[data-due-date-region]')
+      .should('contain', formatDate(tomorrow, 'LONG'));
+
+    cy
+      .get('[data-due-time-region]')
+      .should('contain', '10:00 AM');
+
+    cy
+      .get('[data-duration-region]')
+      .should('contain', '5 mins');
 
     cy
       .intercept('PATCH', '/api/actions/*', {
