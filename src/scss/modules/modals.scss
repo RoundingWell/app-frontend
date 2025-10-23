@@ -97,6 +97,13 @@
   flex-direction: row-reverse;
 }
 
+.modal__footer-saving-info {
+  color: #{$black-60};
+  font-size: 14px;
+  font-weight: 600;
+  margin-right: 16px;
+}
+
 .modal__footer-info {
   flex-grow: 1;
   font-size: 12px;

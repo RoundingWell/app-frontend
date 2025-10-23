@@ -21,9 +21,9 @@ const i18n = intl.globals.modal.modalViews;
 const ReplaceElRegion = Region.extend({ replaceElement: true, timeout: 0 });
 
 const SavingFooterView = View.extend({
-  className: 'flex',
+  className: 'flex flex-align-center',
   template: hbs`
-    <div class="button--text" disabled>{{ savingInfoText }}</div>
+    <div class="modal__footer-saving-info">{{ savingInfoText }}</div>
     <button class="{{ buttonClass }} js-loading" disabled>
       <span>{{ savingSubmitText }}</span>
     </button>
