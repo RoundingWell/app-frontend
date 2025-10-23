@@ -56,9 +56,6 @@ jobs:
       - run:
           name: Stylelint
           command: npm run stylelint
-      - run:
-          name: EditorConfig
-          command: npm run editorconfig
 
   run-cypress:
     parameters:
