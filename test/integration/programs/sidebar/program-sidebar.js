@@ -218,9 +218,12 @@ context('program sidebar', function() {
       .find('[data-name-region] .js-input')
       .clear()
       .type('cancel this text')
-      .tab()
-      .tab()
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB)
+      .press(Cypress.Keyboard.Keys.TAB)
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .should('have.class', 'js-cancel')
       .typeEnter();
 
@@ -329,8 +332,11 @@ context('program sidebar', function() {
       .find('[data-name-region] .js-input')
       .clear()
       .type('Tester McProgramington')
-      .tab()
-      .tab()
+      .press(Cypress.Keyboard.Keys.TAB)
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
       .should('have.class', 'js-save')
       .typeEnter();
 
