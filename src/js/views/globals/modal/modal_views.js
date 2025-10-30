@@ -44,6 +44,7 @@ const SavingFooterView = View.extend({
     });
   },
   onBeforeDestroy() {
+    /* istanbul ignore else */
     if (this.animation) {
       this.animation.cancel();
     }
