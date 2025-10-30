@@ -28,6 +28,7 @@ export class Auth0AuthProvider extends AuthProvider {
   async _authenticate(success) {
     try {
       const { appState } = await this.client.handleRedirectCallback();
+      await this.client.getTokenSilently();
       this.handleAuthedPath(appState);
       success();
     } catch {
@@ -40,6 +41,7 @@ export class Auth0AuthProvider extends AuthProvider {
       ...this.config,
       authorizationParams: {
         redirect_uri: location.origin + AuthProvider.PATH_AUTHD,
+        scope: 'openid profile email offline_access',
         audience: 'care-ops-backend',
         ...this.config.authorizationParams,
       },
@@ -81,6 +83,13 @@ export class Auth0AuthProvider extends AuthProvider {
         appState,
         authorizationParams: { connection: RWELL_CONNECTION },
       });
+      return;
+    }
+
+    try {
+      await this.client.getTokenSilently();
+    } catch {
+      this.loginPrompt({ appState });
       return;
     }
 

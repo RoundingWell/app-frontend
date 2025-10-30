@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc.js';
 
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
 import { babel } from '@rollup/plugin-babel';
@@ -78,6 +78,7 @@ export const cypressConfig = defineConfig({
 });
 
 // https://vitejs.dev/config/
+
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
   const isTest = mode === 'test' || process.env.NODE_ENV === 'test';
@@ -139,8 +140,9 @@ export default defineConfig(({ mode }) => {
       hmr: isTest ? false : undefined,
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
-          rewrite: rewritePath => rewritePath.replace(/^\/api/, ''),
+          target: 'https://quality-assurance.roundingwell.com/',
+          changeOrigin: true,
+          secure: true,
         },
       },
       watch: {
