@@ -48,8 +48,6 @@ const AddButtonView = View.extend({
     this.listenTo(optionlist, 'select', model => {
       const programItem = model.get('programItem');
 
-      if (!programItem) return;
-
       const isProgramAction = model.get('itemType') === 'program-actions';
       const messageType = isProgramAction ? 'add:programAction' : 'add:programFlow';
 
