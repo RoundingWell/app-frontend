@@ -288,26 +288,7 @@ const Collection = BaseCollection.extend({
   url: '/api/actions',
   model: Model,
   save(attrs) {
-    return this._processBatches(attrs);
-  },
-  async _processBatches(
-    attrs,
-    /* istanbul ignore next: Branch only for testing */
-    batchSize = _TEST_ ? 2 : 25,
-  ) {
-    const results = [];
-    let count = 0;
-
-    while (count < this.length) {
-      const batch = new Collection(this.slice(count, count + batchSize));
-      const batchSaves = batch.invoke('saveAll', attrs);
-      const batchResults = await Promise.all(batchSaves);
-
-      results.push(...batchResults);
-      count += batchSize;
-    }
-
-    return results;
+    return this.batchInvoke('saveAll', 25, attrs);
   },
   groupByDate() {
     const groupedCollection = this.groupBy('due_date');
