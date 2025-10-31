@@ -131,31 +131,10 @@ const Collection = BaseCollection.extend({
   url: '/api/flows',
   model: Model,
   save(attrs) {
-    return this._processBatches(attrs);
-  },
-  async _processBatches(
-    attrs,
-    /* istanbul ignore next: Branch only for testing */
-    batchSize = _TEST_ ? 2 : 25,
-  ) {
-    const results = [];
-    let count = 0;
-
-    while (count < this.length) {
-      const batch = new Collection(this.slice(count, count + batchSize));
-      const batchSaves = batch.invoke('saveAll', attrs);
-      const batchResults = await Promise.all(batchSaves);
-
-      results.push(...batchResults);
-      count += batchSize;
-    }
-
-    return results;
+    return this.batchInvoke('saveAll', 20, attrs);
   },
   applyOwner(owner) {
-    const saves = this.invoke('applyOwner', owner);
-
-    return Promise.all(saves);
+    return this.batchInvoke('applyOwner', 20, owner);
   },
 });
 
