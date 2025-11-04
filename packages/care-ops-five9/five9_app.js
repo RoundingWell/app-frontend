@@ -48,6 +48,8 @@ export default App.extend({
 
         if (!actionId) return;
 
+        Radio.request('dialer', 'five9CallComplete', callData.interactionId, { actionId });
+
         await interaction.setCav({
           interactionId: callData.interactionId,
           cavList: [
@@ -67,7 +69,7 @@ export default App.extend({
       callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
         this.setState('actionId', null);
-        Radio.request('dialer', 'five9CallComplete', callData.interactionId, callLogData);
+        Radio.request('dialer', 'five9CallComplete', callData.interactionId, { callLog: callLogData });
       },
     });
   },
