@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc.js';
 
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
 import { babel } from '@rollup/plugin-babel';
@@ -78,7 +78,9 @@ export const cypressConfig = defineConfig({
 });
 
 // https://vitejs.dev/config/
+/* eslint-disable complexity */
 export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
   const isTest = mode === 'test' || process.env.NODE_ENV === 'test';
 
@@ -139,8 +141,12 @@ export default defineConfig(({ mode }) => {
       hmr: isTest ? false : undefined,
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
-          rewrite: rewritePath => rewritePath.replace(/^\/api/, ''),
+          target: env.VITE_DEV_API_URL || 'http://localhost:8080',
+          changeOrigin: true,
+          secure: !!env.VITE_DEV_API_URL,
+          ...(!env.VITE_DEV_API_URL && {
+            rewrite: rewritePath => rewritePath.replace(/^\/api/, ''),
+          }),
         },
       },
       watch: {
