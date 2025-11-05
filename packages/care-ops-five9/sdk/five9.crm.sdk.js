@@ -19,6 +19,16 @@ window.crmSdkVersion = '1.0.11';
     root.Five9.CrmSdk = factory();
   }
 }(globalThis, function () {
+  // Patched by care-ops: silence noisy Five9 logging
+  var __five9Console = globalThis.console || {};
+  var console = {
+    log: function () {},
+    debug: function () {},
+    info: function () {},
+    warn: __five9Console.warn ? __five9Console.warn.bind(__five9Console) : function () {},
+    error: __five9Console.error ? __five9Console.error.bind(__five9Console) : function () {},
+  };
+
 
 // We use RequireJS modules inside.
 // Since this library can be included into projects with JS/node modules support

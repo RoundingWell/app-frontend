@@ -64,6 +64,31 @@ async function downloadSDK() {
       '}(globalThis, function',
     );
 
+    // Silence verbose logging without touching the global console
+    const consoleSilencer = [
+      '  // Patched by care-ops: silence noisy Five9 logging',
+      '  var __five9Console = globalThis.console || {};',
+      '  var console = {',
+      '    log: function () {},',
+      '    debug: function () {},',
+      '    info: function () {},',
+      '    warn: __five9Console.warn ? __five9Console.warn.bind(__five9Console) : function () {},',
+      '    error: __five9Console.error ? __five9Console.error.bind(__five9Console) : function () {},',
+      '  };',
+    ].join('\n');
+
+    if (!fixedContent.includes('__five9Console')) {
+      const factoryWrapperPattern = /}\(globalThis,\s*function\s*\(\)\s*{/;
+      if (factoryWrapperPattern.test(fixedContent)) {
+        fixedContent = fixedContent.replace(
+          factoryWrapperPattern,
+          match => `${ match }\n${ consoleSilencer }\n`,
+        );
+      } else {
+        console.warn('⚠️  Could not locate Five9 factory wrapper to silence logging');
+      }
+    }
+
     // Add eslint disable comment at the top since this is a third-party file
     if (!fixedContent.startsWith('/* eslint-disable */')) {
       fixedContent = `/* eslint-disable */\n${ fixedContent }`;
