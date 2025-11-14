@@ -75,7 +75,7 @@
     "fs-extra": "^11.1.1",
     "globals": "^16.0.0",
     "istanbul-lib-coverage": "^3.0.2",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.1.1",
     "magic-string": "^0.30.17",
     "mock-socket": "^9.3.1",
     "nyc": "^17.0.0",
