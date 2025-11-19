@@ -337,6 +337,11 @@ context('program flow page', function() {
               name: 'First In List',
               updated_at: testTs(),
               outreach: 'patient',
+              options: {
+                icon: 'caret-down',
+                iconType: 'fas',
+                color: 'red',
+              },
             },
             relationships: {
               'owner': getRelationship(),
@@ -462,10 +467,25 @@ context('program flow page', function() {
       .as('actionList')
       .find('.table-list__item')
       .first()
+      .find('.u-text--overflow-two-lines')
       .should('contain', 'Second In List')
-      .next()
+      .find('svg')
+      .should('not.exist');
+
+    cy
+      .get('@actionList')
+      .find('.table-list__item')
+      .eq(1)
+      .find('.u-text--overflow-two-lines')
       .should('contain', 'First In List')
-      .next()
+      .find('svg.fa-caret-down')
+      .should('exist');
+
+    cy
+      .get('.program-flow__list')
+      .as('actionList')
+      .find('.table-list__item')
+      .last()
       .should('contain', 'Third In List');
 
     cy
