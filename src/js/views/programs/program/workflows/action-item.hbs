@@ -1,6 +1,9 @@
 <div>
   <span class="table-list__icon--large workflows__action-icon">{{far icon}}</span>
-  <span>
+  <span class="workflows__action-name">
+    {{#if options.icon}}
+      <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
+    {{/if}}
     {{ name }}
     {{~#unless name}}<em>{{ @intl.programs.program.workflows.actionItemTemplate.newProgramAction }}</em>{{/unless~}}
   </span>
