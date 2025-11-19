@@ -9,6 +9,7 @@ import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueT
 
 import ActionItemTemplate from './action-item.hbs';
 
+import 'scss/domain/action-icons.scss';
 import './worklist-list.scss';
 
 const ActionTooltipTemplate = hbs`{{formatMessage (intlGet "patients.worklist.actionViews.actionListTooltips") title=worklistId team=owner}}`;
