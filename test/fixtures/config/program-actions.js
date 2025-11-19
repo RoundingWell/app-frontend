@@ -10,6 +10,7 @@ export default () => {
       min: 0,
       max: 99,
     }),
+    options: {},
     outreach: 'disabled',
     published_at: faker.helpers.arrayElement([faker.date.between({
       from: dayjs().subtract(2, 'week').format(),
