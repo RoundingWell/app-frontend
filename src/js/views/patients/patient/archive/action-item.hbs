@@ -1,5 +1,10 @@
 <div class="table-list__icon--large patient__action-icon">{{far icon}}</div>
-<div class="u-text--overflow-two-lines">{{ name }}</div>
+<div class="u-text--overflow-two-lines">
+  {{#if options.icon}}
+    <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
+  {{/if}}
+  {{ name }}
+</div>
 <div class="table-list__meta">
   <span class="table-list__icon u-margin--r-8" data-details-region></span>
   <span data-state-region></span>

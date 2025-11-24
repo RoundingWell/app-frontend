@@ -37,6 +37,11 @@ context('reduced schedule page', function() {
         name: 'Test Action',
         due_date: testDate(),
         due_time: null,
+        options: {
+          icon: 'caret-down',
+          iconType: 'fas',
+          color: 'red',
+        },
       },
       relationships: {
         patient: getRelationship(testPatient),
@@ -209,6 +214,15 @@ context('reduced schedule page', function() {
       .first()
       .find('.schedule-list__day-list-row')
       .should('have.class', 'is-reduced')
+      .find('.schedule-list__action-meta .u-text--overflow-two-lines')
+      .find('svg.fa-caret-down')
+      .should('exist');
+
+    cy
+      .get('@scheduleList')
+      .find('.schedule-list__list-row')
+      .first()
+      .find('.schedule-list__day-list-row')
       .contains('Test Action')
       .click();
 
@@ -228,6 +242,15 @@ context('reduced schedule page', function() {
       .url()
       .should('contain', `patient-action/${ testAction.id }/form/${ testForm.id }`)
       .go('back');
+
+    cy
+      .get('@scheduleList')
+      .find('.schedule-list__list-row')
+      .eq(1)
+      .find('.schedule-list__day-list-row')
+      .find('.schedule-list__action-meta .u-text--overflow-two-lines')
+      .find('svg')
+      .should('not.exist');
 
     cy
       .get('@scheduleList')

@@ -11,6 +11,7 @@ import SortableList from 'js/behaviors/sortable-list';
 import ActionItemTemplate from './action-item.hbs';
 import HeaderTemplate from './header.hbs';
 
+import 'scss/domain/action-icons.scss';
 import './program-flow.scss';
 
 const ContextTrailView = View.extend({

@@ -11,7 +11,12 @@
 <div class="worklist-list__action-icon">{{far icon}}</div>
 <div>
   {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}
-  <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>
+  <span class="u-text--overflow-two-lines">
+    {{#if options.icon}}
+      <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
+    {{/if}}
+    {{ name }}&#8203;
+  </span>
 </div>
 <div class="table-list__meta">
   <span class="worklist-list__details-icon" data-details-region></span>

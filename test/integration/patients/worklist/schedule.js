@@ -65,6 +65,11 @@ context('schedule page', function() {
           name: 'Outreach Planning: Review Referral, Medical Chart Review, Targeting Interventions, and other tasks',
           due_date: testDate(),
           due_time: '06:45:00',
+          options: {
+            icon: 'caret-down',
+            iconType: 'fas',
+            color: 'red',
+          },
         },
         relationships: {
           patient: getRelationship(testPatient2),
@@ -204,12 +209,22 @@ context('schedule page', function() {
       .find('.schedule-list__day-list-row')
       .first()
       .should('contain', '6:45 AM')
-      .should('contain', 'Outreach Planning')
       .find('.is-overdue')
-      .parents('.schedule-list__day-list-row')
-      .next()
+      .parent()
+      .find('.js-action')
+      .should('contain', 'Outreach Planning')
+      .find('svg.fa-caret-down')
+      .should('exist');
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .eq(1)
       .should('contain', '10:31 AM')
-      .should('contain', 'Second Action');
+      .find('.js-action')
+      .should('contain', 'Second Action')
+      .find('svg')
+      .should('not.exist');
 
     cy
       .get('@actionList')

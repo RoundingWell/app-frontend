@@ -754,6 +754,11 @@ context('worklist page', function() {
           due_date: testDate(),
           due_time: '06:01:00',
           updated_at: testTs(),
+          options: {
+            icon: 'caret-down',
+            iconType: 'fas',
+            color: 'red',
+          },
         },
         relationships: {
           state: getRelationship(stateTodo),
@@ -849,12 +854,26 @@ context('worklist page', function() {
       .find('.table-list__item')
       .first()
       .as('firstRow')
-      .should('contain', 'First In List')
-      .should('contain', 'Test Flow')
       .should('have.class', 'is-selected')
-      .next()
+      .should('contain', 'Test Flow')
+      .find('.u-text--overflow-two-lines')
+      .should('contain', 'First In List')
+      .find('svg.fa-caret-down')
+      .should('exist');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .eq(1)
+      .find('.u-text--overflow-two-lines')
       .should('contain', 'Second In List')
-      .next()
+      .find('svg')
+      .should('not.exist');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .last()
       .should('contain', 'Last In List');
 
     cy

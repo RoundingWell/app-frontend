@@ -44,6 +44,11 @@ context('patient archive page', function() {
           due_date: null,
           due_time: null,
           updated_at: testTs(),
+          options: {
+            icon: 'caret-down',
+            iconType: 'fas',
+            color: 'red',
+          },
         },
         relationships: {
           owner: getRelationship(currentClinican),
@@ -173,12 +178,30 @@ context('patient archive page', function() {
       .get('.list-page__list')
       .find('.table-list__item')
       .first()
+      .find('.u-text--overflow-two-lines')
       .should('contain', 'First In List')
-      .next()
-      .should('contain', 'Second In List')
-      .next()
+      .find('svg.fa-caret-down')
+      .should('exist');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .eq(1)
+      .should('contain', 'Second In List');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .eq(2)
+      .find('.u-text--overflow-two-lines')
       .should('contain', 'Third In List')
-      .next()
+      .find('svg')
+      .should('not.exist');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .last()
       .should('contain', 'Last In List');
 
     cy
