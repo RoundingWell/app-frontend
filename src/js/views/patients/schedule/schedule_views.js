@@ -177,7 +177,7 @@ const DayItemView = View.extend({
   },
   template: hbs`
     <div class="schedule-list__due-time {{#if isOverdue}}is-overdue{{/if}}">
-      {{#unless isReduced}}<span class="u-margin--r-8" data-check-region></span>{{/unless}}
+      {{#unless isReduced}}<div class="schedule-list__check" data-check-region></div>{{/unless}}
       {{#if due_time}}
         {{formatDateTime due_time "TIME" inputFormat="HH:mm:ss"}}&#8203;
       {{else}}

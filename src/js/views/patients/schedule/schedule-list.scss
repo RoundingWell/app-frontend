@@ -104,8 +104,17 @@
   }
 }
 
-.schedule-list__due-time.is-overdue {
-  color: color(red);
+.schedule-list__due-time {
+  display: flex;
+
+  &.is-overdue {
+    color: color(red);
+  }
+}
+
+.schedule-list__check {
+  margin-right: 8px;
+  width: 20px;
 }
 
 .schedule-list__action-meta {
