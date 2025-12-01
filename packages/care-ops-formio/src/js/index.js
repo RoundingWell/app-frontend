@@ -261,7 +261,9 @@ function handleNamedMessage(message, value, error) {
     return;
   }
 
-  addError(new Error(`Unhandled message: ${ message } ${ error || value }`));
+  const errorValue = error || value;
+  const errorMessage = isObject(errorValue) ? JSON.stringify(errorValue) : errorValue;
+  addError(new Error(`Unhandled message: ${ message } ${ errorMessage }`));
 }
 
 function handleMessage({ data, origin }) {
