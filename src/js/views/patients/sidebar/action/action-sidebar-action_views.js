@@ -14,18 +14,10 @@ import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateTimeView, ReadOnly
 
 import ActionDetailsTemplate from './action-details.hbs';
 
-import 'scss/domain/action-icons.scss';
 import './action-sidebar.scss';
 
 const NameView = View.extend({
-  template: hbs`
-    <div class="action-sidebar__name flex flex-align-center">
-      {{#if options.icon}}
-        <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
-      {{/if}}
-      {{ name }}
-    </div>
-  `,
+  template: hbs`<div class="action-sidebar__name">{{ name }}</div>`,
 });
 
 const SaveView = View.extend({
