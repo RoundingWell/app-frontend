@@ -65,6 +65,11 @@ context('patient dashboard page', function() {
         due_date: null,
         due_time: null,
         updated_at: testTs(),
+        options: {
+          icon: 'caret-down',
+          iconType: 'fas',
+          color: 'red',
+        },
       },
       relationships: {
         owner: getRelationship(teamCoordinator),
@@ -204,13 +209,35 @@ context('patient dashboard page', function() {
       .find('.table-list__item')
       .first()
       .should('contain', 'First In List')
-      .next()
-      .should('contain', 'Second In List')
-      .next()
+      .find('.table-list__icon--large')
+      .find('.action-icon--red .fa-caret-down');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .eq(1)
+      .should('contain', 'Second In List');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .eq(2)
       .should('contain', 'Third In List')
-      .next()
+      .find('.table-list__icon--large')
+      .find('.fa-file-lines');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .eq(3)
       .should('contain', 'Outreach')
-      .next()
+      .find('.table-list__icon--large')
+      .find('.fa-share-from-square');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .last()
       .should('contain', 'Last In List');
 
     cy
