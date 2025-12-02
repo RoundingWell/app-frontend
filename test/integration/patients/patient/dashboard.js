@@ -65,11 +65,6 @@ context('patient dashboard page', function() {
         due_date: null,
         due_time: null,
         updated_at: testTs(),
-        options: {
-          icon: 'caret-down',
-          iconType: 'fas',
-          color: 'red',
-        },
       },
       relationships: {
         owner: getRelationship(teamCoordinator),
@@ -208,24 +203,10 @@ context('patient dashboard page', function() {
       .get('.list-page__list')
       .find('.table-list__item')
       .first()
-      .find('.u-text--overflow-two-lines')
       .should('contain', 'First In List')
-      .find('svg.fa-caret-down')
-      .should('exist');
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .eq(1)
-      .find('.u-text--overflow-two-lines')
+      .next()
       .should('contain', 'Second In List')
-      .find('svg')
-      .should('not.exist');
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .eq(2)
+      .next()
       .should('contain', 'Third In List')
       .next()
       .should('contain', 'Outreach')

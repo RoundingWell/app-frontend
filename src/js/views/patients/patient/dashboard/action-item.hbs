@@ -1,9 +1,6 @@
 
 <div class="table-list__icon--large patient__action-icon">{{far icon}}</div>
 <div class="u-text--overflow-two-lines">
-  {{#if options.icon}}
-    <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
-  {{/if}}
   {{ name }}
   {{~#unless name}}<em>{{ @intl.patients.patient.dashboard.dashboardViews.newAction }}</em>{{/unless~}}
 </div>
