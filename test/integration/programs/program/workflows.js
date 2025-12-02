@@ -44,6 +44,11 @@ context('program workflows page', function() {
             attributes: {
               name: 'Third In List',
               updated_at: testTsSubtract(2),
+              options: {
+                icon: 'caret-down',
+                iconType: 'fas',
+                color: 'red',
+              },
             },
           }),
           getProgramAction({
@@ -92,12 +97,26 @@ context('program workflows page', function() {
       .get('.table-list__list')
       .find('.table-list__item')
       .first()
-      .should('contain', 'First In List')
-      .next()
-      .should('contain', 'Second In List')
-      .next()
+      .should('contain', 'First In List');
+
+    cy
+      .get('.table-list__list')
+      .find('.table-list__item')
+      .eq(1)
+      .should('contain', 'Second In List');
+
+    cy
+      .get('.table-list__list')
+      .find('.table-list__item')
+      .eq(2)
       .should('contain', 'Third In List')
-      .next()
+      .find('.table-list__icon--large')
+      .find('.action-icon--red .fa-caret-down');
+
+    cy
+      .get('.table-list__list')
+      .find('.table-list__item')
+      .last()
       .should('contain', 'Fourth In List');
 
     cy
