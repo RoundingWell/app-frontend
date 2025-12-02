@@ -21,7 +21,6 @@ import { CheckComponent, DetailsTooltip } from 'js/views/patients/shared/actions
 
 import LayoutTemplate from './layout.hbs';
 
-import 'scss/domain/action-icons.scss';
 import './schedule-list.scss';
 
 const LayoutView = View.extend({
@@ -192,12 +191,7 @@ const DayItemView = View.extend({
     <div class="schedule-list__patient-name u-text--overflow-two-lines {{#if isReduced}}is-reduced{{else}}js-patient{{/if}}">{{ patient.first_name }} {{ patient.last_name }}&#8203;</div>
     <div class="schedule-list__action-meta">
       <span class="schedule-list__action-state action--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon}}</span><span class="schedule-list__search-helper">{{ state }}</span>&#8203;
-      <span class="u-text--overflow-two-lines{{#unless isReduced}} js-action{{/unless}}">
-        {{#if options.icon}}
-          <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
-        {{/if}}
-        {{ name }}
-      </span>&#8203;
+      <span class="u-text--overflow-two-lines{{#unless isReduced}} js-action{{/unless}}">{{ name }}</span>&#8203;
       <span class="schedule-list__search-helper">{{ flow }}</span>&#8203;
     </div>
     <div class="schedule-list__action-details" data-details-region></div>
