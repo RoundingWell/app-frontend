@@ -16,6 +16,7 @@ import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueT
 import HeaderTemplate from './header.hbs';
 import ActionItemTemplate from './action-item.hbs';
 
+import 'scss/domain/action-icons.scss';
 import '../patient.scss';
 import './patient-flow.scss';
 
