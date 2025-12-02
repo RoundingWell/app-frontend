@@ -347,6 +347,11 @@ context('program flow page', function() {
             attributes: {
               sequence: 2,
               name: 'Third In List',
+              options: {
+                icon: 'caret-down',
+                iconType: 'fas',
+                color: 'red',
+              },
             },
           }),
           mergeJsonApi(testProgramFlowActions[2], {
@@ -398,6 +403,12 @@ context('program flow page', function() {
       .first()
       .next()
       .find('.fa-file-lines');
+
+    cy
+      .get('.table-list__item')
+      .last()
+      .find('.table-list__icon--large')
+      .find('.action-icon--red .fa-caret-down');
 
     cy
       .get('.js-draggable')
