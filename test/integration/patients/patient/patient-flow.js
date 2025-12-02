@@ -626,11 +626,6 @@ context('patient flow page', function() {
               sequence: 1,
               outreach: 'patient',
               sharing: 'sent',
-              options: {
-                icon: 'caret-down',
-                iconType: 'fas',
-                color: 'red',
-              },
             },
             relationships: {
               flow: getRelationship(testFlow),
@@ -700,7 +695,6 @@ context('patient flow page', function() {
       .find('.table-list__item')
       .first()
       .should($action => {
-        expect($action.find('.u-text--overflow-two-lines').find('svg.fa-caret-down')).to.exist;
         expect($action.find('.fa-circle-exclamation')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('NUR');
         expect($action.find('[data-due-date-region] .is-overdue')).to.exist;
@@ -716,7 +710,6 @@ context('patient flow page', function() {
       .first()
       .next()
       .should($action => {
-        expect($action.find('.u-text--overflow-two-lines').find('svg')).to.not.exist;
         expect($action.find('.fa-circle-dot')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('.fa-paperclip')).to.not.exist;

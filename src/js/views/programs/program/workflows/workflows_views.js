@@ -23,7 +23,6 @@ import FlowItemTemplate from './flow-item.hbs';
 import LayoutTemplate from './layout.hbs';
 
 import 'scss/domain/program-action-state.scss';
-import 'scss/domain/action-icons.scss';
 import './workflows.scss';
 
 const EmptyView = View.extend({

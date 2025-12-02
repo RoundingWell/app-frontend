@@ -56,11 +56,6 @@ context('action sidebar', function() {
         due_time: '06:01:00',
         updated_at: testTs(),
         sharing: true,
-        options: {
-          icon: 'caret-down',
-          iconType: 'fas',
-          color: 'red',
-        },
       },
       relationships: {
         owner: getRelationship(currentClinician),
@@ -326,12 +321,6 @@ context('action sidebar', function() {
       .wait('@routeActionActivity')
       .wait('@routePatient')
       .tick(350); // since this test uses visitOnClock, we need this for the sidebar animation
-
-    cy
-      .get('.sidebar')
-      .find('[data-action-region] .action-sidebar__name')
-      .find('svg.fa-caret-down')
-      .should('exist');
 
     cy
       .get('.sidebar')
@@ -1892,9 +1881,7 @@ context('action sidebar', function() {
 
     cy
       .get('.action-sidebar__name')
-      .should('contain', 'Program Action Name')
-      .find('svg')
-      .should('not.exist');
+      .should('contain', 'Program Action Name');
 
     cy
       .get('.sidebar')

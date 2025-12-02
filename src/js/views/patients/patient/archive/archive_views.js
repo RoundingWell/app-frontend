@@ -16,7 +16,6 @@ import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueT
 import ActionItemTemplate from './action-item.hbs';
 import FlowItemTemplate from './flow-item.hbs';
 
-import 'scss/domain/action-icons.scss';
 import '../patient.scss';
 
 const EmptyView = View.extend({

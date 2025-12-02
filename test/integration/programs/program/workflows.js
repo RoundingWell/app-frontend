@@ -21,11 +21,6 @@ context('program workflows page', function() {
         days_until_due: null,
         created_at: testTs(),
         updated_at: testTs(),
-        options: {
-          icon: 'caret-down',
-          iconType: 'fas',
-          color: 'red',
-        },
       },
       relationships: {
         'program': getRelationship(testProgram),
@@ -97,26 +92,10 @@ context('program workflows page', function() {
       .get('.table-list__list')
       .find('.table-list__item')
       .first()
-      .find('.workflows__action-icon')
-      .next()
       .should('contain', 'First In List')
-      .find('svg.fa-caret-down')
-      .should('exist');
-
-    cy
-      .get('.table-list__list')
-      .find('.table-list__item')
-      .eq(1)
-      .find('.workflows__action-icon')
       .next()
       .should('contain', 'Second In List')
-      .find('svg')
-      .should('not.exist');
-
-    cy
-      .get('.table-list__list')
-      .find('.table-list__item')
-      .eq(2)
+      .next()
       .should('contain', 'Third In List')
       .next()
       .should('contain', 'Fourth In List');
