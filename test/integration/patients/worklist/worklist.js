@@ -754,6 +754,11 @@ context('worklist page', function() {
           due_date: testDate(),
           due_time: '06:01:00',
           updated_at: testTs(),
+          options: {
+            icon: 'caret-down',
+            iconType: 'fas',
+            color: 'red',
+          },
         },
         relationships: {
           state: getRelationship(stateTodo),
@@ -849,13 +854,27 @@ context('worklist page', function() {
       .find('.table-list__item')
       .first()
       .as('firstRow')
-      .should('contain', 'First In List')
-      .should('contain', 'Test Flow')
       .should('have.class', 'is-selected')
-      .next()
+      .should('contain', 'Test Flow')
+      .should('contain', 'First In List')
+      .find('.worklist-list__action-icon')
+      .find('.action-icon--red .fa-caret-down');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .eq(1)
       .should('contain', 'Second In List')
-      .next()
-      .should('contain', 'Last In List');
+      .find('.worklist-list__action-icon')
+      .find('.fa-file-lines');
+
+    cy
+      .get('.app-frame__content')
+      .find('.table-list__item')
+      .last()
+      .should('contain', 'Last In List')
+      .find('.worklist-list__action-icon')
+      .find('.fa-share-from-square');
 
     cy
       .get('@firstRow')

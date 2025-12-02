@@ -8,7 +8,13 @@
   {{#if patient.segment}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ patient.segment }}&#8203;</div>{{/if}}
   <span class="u-text--overflow-two-lines worklist-list__patient-name">{{ patient.first_name }} {{ patient.last_name }}&#8203;</span>
 </div>
-<div class="worklist-list__action-icon">{{far icon}}</div>
+<div class="worklist-list__action-icon">
+  {{#if options.icon}}
+    <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
+  {{else}}
+    {{far icon}}
+  {{/if}}
+</div>
 <div>
   {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}
   <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>
