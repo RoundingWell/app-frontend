@@ -8,6 +8,7 @@ import Optionlist from 'js/components/optionlist';
 
 import intl from 'js/i18n';
 
+import 'scss/domain/action-icons.scss';
 import './add-workflow.scss';
 
 const i18n = intl.patients.shared.addWorkflow.addWorkflowViews;
@@ -18,10 +19,24 @@ const AddWorkflowOptlist = Optionlist.extend({
   placeholderText: i18n.addWorkflowOptlist.placeholderText,
   itemTemplateContext() {
     const isProgramAction = this.model.get('itemType') === 'program-actions';
-    const actionIcon = this.model.get('hasOutreach') ? 'share-from-square' : 'file-lines';
+    const defaultActionIcon = this.model.get('hasOutreach') ? 'share-from-square' : 'file-lines';
+    const hasCustomIcon = this.model.get('customIcon')?.icon;
+
+    if (hasCustomIcon) {
+      const customIcon = this.model.get('customIcon');
+
+      return {
+        icon: {
+          icon: customIcon.icon,
+          type: customIcon.iconType,
+          classes: `action-icon--${ customIcon.color }`,
+        },
+      };
+    }
+
     return {
       icon: {
-        icon: isProgramAction ? actionIcon : 'folder',
+        icon: isProgramAction ? defaultActionIcon : 'folder',
         type: isProgramAction ? 'far' : 'fas',
         classes: 'add-workflow__picklist-icon',
       },

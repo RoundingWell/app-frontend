@@ -74,6 +74,7 @@ export default App.extend({
         text: item.get('name'),
         itemType: item.type,
         hasOutreach: item.type === 'program-actions' && item.hasOutreach(),
+        customIcon: item.get('options'),
         programItem: item,
       };
     });

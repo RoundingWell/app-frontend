@@ -539,6 +539,11 @@ context('patient dashboard page', function() {
           archived_at: null,
           details: 'details',
           days_until_due: 1,
+          options: {
+            icon: 'caret-down',
+            iconType: 'fas',
+            color: 'red',
+          },
         },
         relationships: {
           owner: getRelationship(teamCoordinator),
@@ -847,19 +852,54 @@ context('patient dashboard page', function() {
 
     cy
       .get('.picklist')
+      .contains('No Actions, No Flows')
+      .next()
+      .find('.picklist__item')
+      .first()
+      .find('.fa-file-lines');
+
+    cy
+      .get('.picklist')
       .contains('Two Actions, One Published, One Flow')
       .next()
+      .find('.picklist__item')
+      .first()
       .should('contain', '1 Flow')
-      .should('contain', 'One of One');
+      .find('.fa-folder');
+
+    cy
+      .get('.picklist')
+      .contains('Two Actions, One Published, One Flow')
+      .next()
+      .find('.picklist__item')
+      .last()
+      .should('contain', 'One of One')
+      .find('.action-icon--red.fa-caret-down');
 
     cy
       .get('.picklist')
       .contains('Two Published Actions and Flows')
       .next()
       .should('contain', '2 Flow')
-      .should('contain', '3 Flow')
+      .should('contain', '3 Flow');
+
+    cy
+      .get('.picklist')
+      .contains('Two Published Actions and Flows')
+      .next()
+      .find('.picklist__item')
+      .eq(2)
       .should('contain', 'One of Two')
-      .should('contain', 'Two of Two');
+      .find('.fa-share-from-square');
+
+    cy
+      .get('.picklist')
+      .contains('Two Published Actions and Flows')
+      .next()
+      .find('.picklist__item')
+      .last()
+      .should('contain', 'Two of Two')
+      .find('.fa-file-lines');
 
     cy
       .get('.picklist')

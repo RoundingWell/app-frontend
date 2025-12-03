@@ -927,6 +927,11 @@ context('patient flow page', function() {
               details: 'details',
               days_until_due: 1,
               sequence: 1,
+              options: {
+                icon: 'caret-down',
+                iconType: 'fas',
+                color: 'red',
+              },
             },
             relationships: {
               owner: getRelationship(teamCoordinator),
@@ -1093,7 +1098,8 @@ context('patient flow page', function() {
       .find('.picklist__item')
       .last()
       .should('contain', 'Published')
-      .should('not.contain', 'Draft');
+      .should('not.contain', 'Draft')
+      .find('.action-icon--red.fa-caret-down');
 
     cy
       .get('.picklist')

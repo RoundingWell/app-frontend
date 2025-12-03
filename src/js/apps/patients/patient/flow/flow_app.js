@@ -146,6 +146,7 @@ export default SubRouterApp.extend({
         text: action.get('name'),
         itemType: action.type,
         hasOutreach: action.hasOutreach(),
+        customIcon: action.get('options'),
         programItem: action,
       };
     });
