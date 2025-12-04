@@ -591,6 +591,7 @@ context('patient flow page', function() {
         details: null,
         due_date: testDateAdd(1),
         created_at: testTsSubtract(3),
+        outreach: 'patient',
         sequence: 3,
       },
       relationships: {
@@ -626,6 +627,11 @@ context('patient flow page', function() {
               sequence: 1,
               outreach: 'patient',
               sharing: 'sent',
+              options: {
+                icon: 'caret-down',
+                iconType: 'fas',
+                color: 'red',
+              },
             },
             relationships: {
               flow: getRelationship(testFlow),
@@ -695,6 +701,7 @@ context('patient flow page', function() {
       .find('.table-list__item')
       .first()
       .should($action => {
+        expect($action.find('.table-list__icon--large .action-icon--red .fa-caret-down')).to.exist;
         expect($action.find('.fa-circle-exclamation')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('NUR');
         expect($action.find('[data-due-date-region] .is-overdue')).to.exist;
@@ -710,6 +717,7 @@ context('patient flow page', function() {
       .first()
       .next()
       .should($action => {
+        expect($action.find('.table-list__icon--large .fa-file-lines')).to.exist;
         expect($action.find('.fa-circle-dot')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('.fa-paperclip')).to.not.exist;
@@ -721,6 +729,7 @@ context('patient flow page', function() {
       .find('.table-list__item')
       .last()
       .should($action => {
+        expect($action.find('.table-list__icon--large .fa-share-from-square')).to.exist;
         expect($action.find('.fa-circle-check')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('[data-owner-region] button')).to.be.disabled;
@@ -918,6 +927,11 @@ context('patient flow page', function() {
               details: 'details',
               days_until_due: 1,
               sequence: 1,
+              options: {
+                icon: 'caret-down',
+                iconType: 'fas',
+                color: 'red',
+              },
             },
             relationships: {
               owner: getRelationship(teamCoordinator),
@@ -1084,7 +1098,8 @@ context('patient flow page', function() {
       .find('.picklist__item')
       .last()
       .should('contain', 'Published')
-      .should('not.contain', 'Draft');
+      .should('not.contain', 'Draft')
+      .find('.action-icon--red.fa-caret-down');
 
     cy
       .get('.picklist')

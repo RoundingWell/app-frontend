@@ -23,10 +23,13 @@
   }
 }
 
-.worklist-list__action-icon .icon {
+.worklist-list__action-icon {
   color: color(blue);
-  font-size: 20px;
-  width: 20px;
+
+  .icon {
+    font-size: 20px;
+    width: 20px;
+  }
 }
 
 .worklist-list__flow-icon .icon {

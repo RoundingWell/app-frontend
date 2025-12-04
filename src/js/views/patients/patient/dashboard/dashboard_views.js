@@ -20,6 +20,7 @@ import FlowItemTemplate from './flow-item.hbs';
 import LayoutTemplate from './layout.hbs';
 
 import 'scss/domain/action-state.scss';
+import 'scss/domain/action-icons.scss';
 import '../patient.scss';
 
 const EmptyView = View.extend({
