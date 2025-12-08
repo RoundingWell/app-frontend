@@ -74,8 +74,7 @@ export class WorkosAuthProvider extends AuthProvider {
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
-      await this.client.signOut({ navigate: false });
-      window.location = AuthProvider.PATH_LOGIN;
+      this.client.signOut({ returnTo: location.origin });
       return;
     }
 
