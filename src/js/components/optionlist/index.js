@@ -32,6 +32,7 @@ export default Picklist.extend({
     'close': 'close',
   },
   viewEvents: {
+    'watch:change': 'onWatchChange',
     'picklist:item:select': 'onPicklistSelect',
   },
   position() {
