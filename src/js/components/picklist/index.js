@@ -69,7 +69,7 @@ const PicklistEmpty = View.extend({
 const PicklistItem = View.extend({
   tagName: 'li',
   itemTemplate: hbs`
-    <div class="flex-grow">{{#if icon}}{{fa icon.type icon.icon classes=icon.classes}}{{/if}}<span>{{matchText text query}}</span></div>
+    <div class="picklist__item-content">{{#if icon}}{{fa icon.type icon.icon classes=icon.classes}}{{/if}}<span>{{matchText text query}}</span></div>
     {{#if isChecked}}{{fas "check"}}{{/if}}
   `,
   itemClassName() {
