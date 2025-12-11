@@ -327,6 +327,7 @@ careOptsFrontend:
             headingText: "{itemCount, plural, one {Edit # Action} other {Edit # Actions}}"
           bulkEditActionsSuccess: "{itemCount, plural, one {# Action has been updated} other {# Actions have been updated}}"
           bulkEditActionBodyTemplate:
+            applyOwnerLabel: Apply Owner to Flows
             dueDateLabel: Due
             durationLabel: Duration
             ownerLabel: Owner

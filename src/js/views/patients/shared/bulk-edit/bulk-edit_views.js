@@ -142,6 +142,7 @@ const BulkEditActionsBodyView = View.extend({
     dueDate: '[data-due-date-region]',
     dueTime: '[data-due-time-region]',
     duration: '[data-duration-region]',
+    applyOwner: '[data-apply-owner-region]',
   },
   onRender() {
     this.isSaving = this.model.get('isSaving');
@@ -150,6 +151,7 @@ const BulkEditActionsBodyView = View.extend({
     this.showOwner();
     this.showDueDateTime();
     this.showDuration();
+    this.showApplyOwner();
   },
   getStateComponent() {
     const isDisabled = this.isSaving;
@@ -312,6 +314,12 @@ const BulkEditActionsBodyView = View.extend({
 
     this.showChildView('duration', durationComponent);
   },
+  showApplyOwner() {
+    this.showChildView('applyOwner', new ApplyOwnerView({
+      model: this.model,
+      isForFlows: false,
+    }));
+  },
 });
 
 const ApplyOwnerView = View.extend({
@@ -323,14 +331,22 @@ const ApplyOwnerView = View.extend({
   template: hbs`
     <button class="button--checkbox js-apply-owner"{{#if isDisabled}} disabled{{/if}}>
       {{#if applyOwner}}{{fas "square-check"}}{{else}}{{fal "square"}}{{/if~}}
-      <span>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditFlowBodyTemplate.applyOwnerLabel }}</span>
+      {{#if isForFlows}}
+        <span>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditFlowBodyTemplate.applyOwnerLabel }}</span>
+      {{else}}
+        <span>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditActionBodyTemplate.applyOwnerLabel }}</span>
+      {{/if}}
     </button>`,
   triggers: {
     'click .js-apply-owner': 'click:select',
   },
+  initialize({ isForFlows }) {
+    this.isForFlows = isForFlows;
+  },
   templateContext() {
     return {
       isDisabled: this.model.get('ownerMulti') || this.model.get('isSaving'),
+      isForFlows: this.isForFlows,
     };
   },
   onClickSelect() {
@@ -420,6 +436,7 @@ const BulkEditFlowsBodyView = View.extend({
   showApplyOwner() {
     this.showChildView('applyOwner', new ApplyOwnerView({
       model: this.model,
+      isForFlows: true,
     }));
   },
 });
