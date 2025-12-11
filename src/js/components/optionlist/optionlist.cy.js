@@ -20,6 +20,7 @@ context('Optionlist', function() {
         ui: this.ui.button,
         uiView: this,
         lists: [{ collection: this.collection }],
+        isSelectlist: true,
       });
 
       optionlist.show();
@@ -88,5 +89,20 @@ context('Optionlist', function() {
     cy
       .get('.picklist')
       .should('not.exist');
+
+    cy
+      .get('@root')
+      .contains('Test Menu')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-input')
+      .type('Test 1');
+
+    cy
+      .get('.picklist')
+      .find('.picklist__item')
+      .should('have.length', 1);
   });
 });
