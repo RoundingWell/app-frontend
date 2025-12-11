@@ -203,4 +203,44 @@ context('Tooltip', function() {
       .get('.tooltip')
       .should('not.exist');
   });
+
+  specify('shouldShowOnClick option', function() {
+    const NoClickView = View.extend({
+      tagName: 'button',
+      className: 'button--blue',
+      template: hbs`No Pointer Down Listener`,
+      attributes: {
+        style: 'margin: 20px;',
+      },
+      ui: {
+        'button': 'button',
+      },
+      onRender() {
+        new Tooltip({
+          message: 'Not shown on pointerdown event',
+          uiView: this,
+          ui: this.$el,
+          ignoreEl: this.el,
+          shouldShowOnClick: false,
+        });
+      },
+    });
+
+    cy
+      .mount(rootView => {
+        Tooltip.setRegion(rootView.getRegion('tooltip'));
+        return new NoClickView();
+      })
+      .as('root');
+
+    cy
+      .get('@root')
+      .contains('No Pointer Down Listener')
+      .trigger('pointerdown')
+      .wait(200); // account for 200ms delay when showing tooltips
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
+  });
 });

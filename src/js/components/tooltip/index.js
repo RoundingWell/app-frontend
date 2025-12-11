@@ -15,6 +15,7 @@ const CLASS_OPTIONS = [
   'messageHtml',
   'orientation',
   'position',
+  'shouldShowOnClick',
   'uiView',
   'ui',
 ];
@@ -33,6 +34,7 @@ export default Component.extend({
   ViewClass: TooltipView,
   className: 'tooltip',
   delay: /* istanbul ignore next: Branch only for testing */ _TEST_ ? 0 : 200,
+  shouldShowOnClick: true,
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
 
@@ -49,7 +51,11 @@ export default Component.extend({
 
     this.ui.on('mouseleave.tooltip', bind(this.hideTooltip, this));
 
-    this.ui.on('pointerdown.tooltip', bind(this.showTooltip, this));
+    const shouldShowOnClick = result(this, 'shouldShowOnClick');
+
+    if (shouldShowOnClick) {
+      this.ui.on('pointerdown.tooltip', bind(this.showTooltip, this));
+    }
   },
   showTooltip() {
     clearTimeout(this.delayTimeout);
