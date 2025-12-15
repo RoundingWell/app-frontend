@@ -157,6 +157,7 @@ const CommentView = View.extend({
       messageHtml: renderTemplate(template, { edited }),
       uiView: this,
       ui: this.ui.edit,
+      shouldShowOnClick: false,
     });
   },
   onClickEdit() {
