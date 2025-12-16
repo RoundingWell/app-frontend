@@ -823,7 +823,7 @@ context('action sidebar', function() {
       .click();
 
     cy
-      .get('.five9-panel')
+      .get('.five9-wrapper')
       .should('have.class', 'is-open');
 
     cy

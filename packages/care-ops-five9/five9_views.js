@@ -50,21 +50,23 @@ const StatusView = View.extend({
 
 // https://app.five9.com/clients/integrations/adt.li.main.html?f9crmapi=true&f9verticalthreshold=300px#login/showLogin
 const LayoutView = View.extend({
-  className: 'five9-panel',
+  className: 'five9-wrapper',
   template: hbs`
-    <div class="five9-panel__header js-header">
-      {{fas "phone"}}
-      <span data-heading-region>Five9</span>
-      <span data-status-region></span>
+    <div class="five9-panel">
+      <div class="five9-panel__header js-header">
+        {{fas "phone"}}
+        <span data-heading-region>Five9</span>
+        <span data-status-region></span>
+      </div>
+      <iframe
+        class="five9-panel__iframe"
+        src="https://app.five9.com/clients/integrations/adt.li.main.html?f9crmapi=true&f9verticalthreshold=300px"
+        title="Five9 Dialer"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        sandbox="allow-scripts allow-forms allow-same-origin allow-popups">
+      </iframe>
     </div>
-    <iframe
-      class="five9-panel__iframe"
-      src="https://app.five9.com/clients/integrations/adt.li.main.html?f9crmapi=true&f9verticalthreshold=300px"
-      title="Five9 Dialer"
-      loading="lazy"
-      referrerpolicy="no-referrer"
-      sandbox="allow-scripts allow-forms allow-same-origin allow-popups">
-    </iframe>
   `,
   regions: {
     heading: '[data-heading-region]',
