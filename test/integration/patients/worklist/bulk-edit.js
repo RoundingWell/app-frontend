@@ -544,6 +544,12 @@ context('Worklist bulk editing', function() {
   });
 
   specify('bulk actions editing', function() {
+    const testFlow = getFlow({
+      relationships: {
+        state: getRelationship(stateTodo),
+      },
+    });
+
     const testActions = [
       getAction({
         attributes: {
@@ -556,6 +562,7 @@ context('Worklist bulk editing', function() {
         relationships: {
           owner: getRelationship(getCurrentClinician()),
           state: getRelationship(stateTodo),
+          flow: getRelationship(testFlow),
         },
       }),
       getAction({
@@ -566,6 +573,7 @@ context('Worklist bulk editing', function() {
         },
         relationships: {
           state: getRelationship(stateTodo),
+          flow: getRelationship(testFlow),
         },
       }),
       getAction({
@@ -580,6 +588,7 @@ context('Worklist bulk editing', function() {
           owner: getRelationship(teamCoordinator),
           state: getRelationship(stateTodo),
           form: getRelationship(testForm),
+          flow: getRelationship(testFlow),
         },
       }),
       getAction({
@@ -588,6 +597,7 @@ context('Worklist bulk editing', function() {
         },
         relationships: {
           state: getRelationship(stateInProgress),
+          flow: getRelationship(),
         },
       }),
     ];
@@ -595,6 +605,8 @@ context('Worklist bulk editing', function() {
     cy
       .routeActions(fx => {
         fx.data = testActions;
+
+        fx.included.push(testFlow);
 
         return fx;
       })
@@ -675,6 +687,13 @@ context('Worklist bulk editing', function() {
       .get('@bulkEditSidebar')
       .find('[data-duration-region]')
       .should('contain', 'Multiple Durations...');
+
+    cy
+      .intercept('PATCH', '/api/flows/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('patchFlowOwner');
 
     cy
       .intercept('PATCH', `/api/actions/${ testActions[0].id }`, {
@@ -792,6 +811,11 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('@bulkEditSidebar')
+      .find('.js-apply-owner')
+      .click();
+
+    cy
+      .get('@bulkEditSidebar')
       .find('.js-submit')
       .click();
 
@@ -822,9 +846,24 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('@bulkEditSidebar')
+      .find('[data-apply-owner-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@bulkEditSidebar')
       .find('[data-footer-region] button')
       .should('not.have.class', 'js-submit')
       .should('be.disabled');
+
+    cy
+      .wait(['@patchFlowOwner', '@patchFlowOwner', '@patchFlowOwner'])
+      .get('@patchFlowOwner.all').should('have.length', 3);
+
+    cy
+      .get('@patchFlowOwner.all')
+      .each(interception => {
+        expect(interception.request.body.data.relationships.owner.data.id).to.equal(teamNurse.id);
+      });
 
     cy
       .wait('@patchAction1')

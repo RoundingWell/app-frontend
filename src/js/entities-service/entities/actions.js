@@ -237,6 +237,13 @@ const _Model = BaseModel.extend({
       },
     });
   },
+  applyOwner(owner) {
+    const flow = this.getFlow();
+
+    if (!flow) return;
+
+    return flow.saveOwner(owner);
+  },
   saveOwner(owner) {
     return this.save({ _owner: owner.getResource() }, {
       relationships: {
@@ -288,7 +295,10 @@ const Collection = BaseCollection.extend({
   url: '/api/actions',
   model: Model,
   save(attrs) {
-    return this.batchInvoke('saveAll', 25, attrs);
+    return this.batchInvoke('saveAll', 20, attrs);
+  },
+  applyOwner(owner) {
+    return this.batchInvoke('applyOwner', 20, owner);
   },
   groupByDate() {
     const groupedCollection = this.groupBy('due_date');
