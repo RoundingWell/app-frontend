@@ -15,6 +15,7 @@ const CLASS_OPTIONS = [
   'messageHtml',
   'orientation',
   'position',
+  'shouldDelay',
   'uiView',
   'ui',
 ];
@@ -32,7 +33,12 @@ const TooltipView = View.extend({
 export default Component.extend({
   ViewClass: TooltipView,
   className: 'tooltip',
-  delay: 0,
+  delay() {
+    if (_TEST_) return 0;
+
+    /* istanbul ignore next */
+    return this.shouldDelay ? 200 : 0;
+  },
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
 
