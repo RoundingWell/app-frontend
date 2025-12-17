@@ -105,7 +105,6 @@ const FormStateActionsView = View.extend({
       message,
       uiView: this,
       ui: this.ui.sidebarButton,
-      shouldShowOnClick: false,
     });
   },
   renderExpandTooltip() {
@@ -116,7 +115,6 @@ const FormStateActionsView = View.extend({
       message,
       uiView: this,
       ui: this.ui.expandButton,
-      shouldShowOnClick: false,
     });
   },
   renderHistoryTooltip() {
@@ -127,7 +125,6 @@ const FormStateActionsView = View.extend({
       message,
       uiView: this,
       ui: this.ui.historyButton,
-      shouldShowOnClick: false,
     });
   },
 });
