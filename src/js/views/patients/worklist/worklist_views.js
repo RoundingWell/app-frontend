@@ -184,6 +184,7 @@ const ListTitleView = View.extend({
       uiView: this,
       ui: this.ui.tooltip,
       orientation: 'vertical',
+      shouldDelay: true,
     });
   },
   showLabel() {
