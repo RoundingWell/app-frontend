@@ -51,6 +51,7 @@ const DetailsTooltip = View.extend({
       }),
       uiView: this,
       ui: this.$el,
+      shouldDelay: true,
     });
   },
   _formatDetails(details) {
