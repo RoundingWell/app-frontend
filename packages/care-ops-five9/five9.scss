@@ -6,6 +6,7 @@ $five9-call-ended: color(red);
 $five9-call-ended-hover: color(red, dark);
 
 .five9-wrapper {
+  border-radius: 8px 8px 0 0;
   bottom: 0;
   position: fixed;
   right: 40px;
@@ -60,6 +61,35 @@ $five9-call-ended-hover: color(red, dark);
     &:hover {
       background-color: $five9-call-ended-hover;
     }
+  }
+}
+
+.five9-panel__patient-btn {
+  align-items: center;
+  background-color: white;
+  border: 1px solid $five9-color;
+  border-radius: 8px;
+  color: $five9-color;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  text-overflow: ellipsis;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+  white-space: nowrap;
+  width: 100%;
+
+  &:hover {
+    background-color: color(light_blue, light);
+  }
+
+  svg {
+    flex-shrink: 0;
+    margin: 0 6px;
   }
 }
 

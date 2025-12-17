@@ -14,14 +14,18 @@ export default App.extend({
   stateEvents: {
     'change:isLoggedIn': 'onLoginChange',
   },
-  initialize({ providerName }) {
+  initialize({ providerName, patients }) {
+    this.patients = patients;
     this.registerApi(providerName);
     this.handleLogin();
     this.subscribe();
   },
   startAfterInitialized: true,
   onStart() {
-    this.showView(new LayoutView({ model: this.getState() }));
+    this.showView(new LayoutView({
+      model: this.getState(),
+      collection: this.patients,
+    }));
   },
   onLoginChange() {
     this._call();

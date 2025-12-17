@@ -1,6 +1,9 @@
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
+
+const patients = new Backbone.Collection([]);
 
 export default App.extend({
   channelName: 'dialer',
@@ -21,7 +24,7 @@ export default App.extend({
 
       const { call, init } = await import('@roundingwell/care-ops-five9');
       this._call = call;
-      init({ region: this.getRegion(), providerName });
+      init({ region: this.getRegion(), providerName, patients });
     }
   },
   call(number, action) {
