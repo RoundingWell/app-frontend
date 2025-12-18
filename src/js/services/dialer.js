@@ -10,6 +10,7 @@ export default App.extend({
   radioRequests: {
     'call': 'call',
     'init': 'init',
+    'callNumber': 'callNumber',
     'five9CallComplete': 'five9CallComplete',
   },
   async init() {
@@ -29,6 +30,44 @@ export default App.extend({
   },
   call(number, action) {
     this._call(number, action);
+  },
+  callNumber(values) {
+    if (!values) {
+      patients.reset();
+      return;
+    }
+
+    const { actionId, number } = values;
+    const currentUrl = window.location.href;
+    const action = Radio.request('entities', 'actions:model', actionId);
+
+    if (action) {
+      const patient = action.getPatient();
+
+      if (patient) {
+        if (!currentUrl.includes(patient.id)) {
+          patients.add({
+            id: patient.id,
+            name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
+          });
+        }
+
+        return;
+      }
+    }
+
+    const searchCollection = Radio.request('entities', 'searchPatients:collection');
+
+    searchCollection.fetch({ data: { 'filter[search]': number } }).then(() => {
+      searchCollection.each(patient => {
+        if (!currentUrl.includes(patient.id)) {
+          patients.add({
+            id: patient.id,
+            name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
+          });
+        }
+      });
+    });
   },
   five9CallComplete(identifier, values) {
     Radio.request('entities', 'save:artifacts:model', {
