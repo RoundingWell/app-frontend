@@ -1999,6 +1999,13 @@ context('patient flow page', function() {
       .should('contain', 'Multiple Durations...');
 
     cy
+      .intercept('PATCH', '/api/flows/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('patchFlowOwner');
+
+    cy
       .intercept('PATCH', `/api/actions/${ testFlowActions[0].id }`, {
         statusCode: 204,
         body: {},
@@ -2109,8 +2116,20 @@ context('patient flow page', function() {
 
     cy
       .get('@bulkEditSidebar')
+      .find('.js-apply-owner')
+      .click();
+
+    cy
+      .get('@bulkEditSidebar')
       .find('.js-submit')
       .click();
+
+    cy
+      .wait('@patchFlowOwner')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data.relationships.owner.data.id).to.equal(teamNurse.id);
+      });
 
     cy
       .wait('@patchAction1')
