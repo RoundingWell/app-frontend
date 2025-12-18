@@ -33,10 +33,10 @@ const TooltipView = View.extend({
 export default Component.extend({
   ViewClass: TooltipView,
   className: 'tooltip',
+  /* istanbul ignore next */
   delay() {
     if (_TEST_) return 0;
 
-    /* istanbul ignore next */
     return this.shouldDelay ? 200 : 0;
   },
   constructor: function(options) {
