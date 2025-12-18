@@ -233,6 +233,9 @@ export default App.extend({
     });
 
     this.listenTo(app, {
+      'applyOwner'(owner) {
+        this.selected.applyOwner(owner);
+      },
       'save'(saveData) {
         const itemCount = this.selected.length;
 

@@ -755,6 +755,7 @@ context('schedule page', function() {
         relationships: {
           owner: getRelationship(currentClinician),
           state: getRelationship(index % 2 ? stateTodo : stateInProgress),
+          flow: getRelationship(testFlow),
         },
       });
     });
@@ -777,6 +778,8 @@ context('schedule page', function() {
     cy
       .routeActions(fx => {
         fx.data = testActions;
+
+        fx.included.push(testFlow);
 
         return fx;
       })
@@ -870,6 +873,13 @@ context('schedule page', function() {
       .should('contain', 'Edit 20 Actions');
 
     cy
+      .intercept('PATCH', '/api/flows/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('patchFlowOwner');
+
+    cy
       .intercept('PATCH', '/api/actions/*', {
         statusCode: 204,
         body: {},
@@ -924,8 +934,14 @@ context('schedule page', function() {
 
     cy
       .get('@bulkEditSidebar')
+      .find('.js-apply-owner')
+      .click();
+
+    cy
+      .get('@bulkEditSidebar')
       .find('.js-submit')
       .click()
+      .wait('@patchFlowOwner')
       .wait('@patchAction');
 
     cy
