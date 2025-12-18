@@ -64,11 +64,13 @@ export default App.extend({
           ],
         });
       },
-      callAccepted: () => {
+      callAccepted: ({ callData }) => {
         this.setState('callTime', dayjs());
+        Radio.request('dialer', 'callNumber', { actionId: this.getState('actionId'), number: callData.number });
       },
       callEnded: () => {
         this.setState('callTime', null);
+        Radio.request('dialer', 'callNumber', null);
       },
       callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
