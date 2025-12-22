@@ -44,31 +44,27 @@ export default App.extend({
       const patient = action.getPatient();
 
       if (patient) {
-        patients.add({
-          id: patient.id,
-          name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
-        });
-
+        this._addPatient(patient);
         return;
       }
     }
 
     const searchCollection = Radio.request('entities', 'searchPatients:collection');
 
-    searchCollection.fetch({ data: { 'filter[search]': number } }).then(() => {
-      searchCollection.each(patient => {
-        patients.add({
-          id: patient.id,
-          name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
-        });
-      });
-    });
+    searchCollection.fetch({ data: { 'filter[search]': number } })
+      .then(() => searchCollection.each(this._addPatient, this));
   },
   five9CallComplete(identifier, values) {
     Radio.request('entities', 'save:artifacts:model', {
       artifact: 'five9-call-log',
       identifier,
       values,
+    });
+  },
+  _addPatient(patient) {
+    patients.add({
+      id: patient.id,
+      name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
     });
   },
 });
