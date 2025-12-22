@@ -67,6 +67,13 @@ const PatientButtonItemView = View.extend({
 
 const PatientButtonsView = CollectionView.extend({
   childView: PatientButtonItemView,
+  initialize() {
+    this.listenTo(Radio.channel('history'), 'change:route', this.render);
+  },
+  viewFilter({ model }) {
+    const currentUrl = window.location.href;
+    return !currentUrl.includes(model.id);
+  },
 });
 
 // https://app.five9.com/clients/integrations/adt.li.main.html?f9crmapi=true&f9verticalthreshold=300px#login/showLogin

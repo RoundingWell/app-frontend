@@ -38,19 +38,16 @@ export default App.extend({
     }
 
     const { actionId, number } = values;
-    const currentUrl = window.location.href;
     const action = Radio.request('entities', 'actions:model', actionId);
 
     if (action) {
       const patient = action.getPatient();
 
       if (patient) {
-        if (!currentUrl.includes(patient.id)) {
-          patients.add({
-            id: patient.id,
-            name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
-          });
-        }
+        patients.add({
+          id: patient.id,
+          name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
+        });
 
         return;
       }
@@ -60,12 +57,10 @@ export default App.extend({
 
     searchCollection.fetch({ data: { 'filter[search]': number } }).then(() => {
       searchCollection.each(patient => {
-        if (!currentUrl.includes(patient.id)) {
-          patients.add({
-            id: patient.id,
-            name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
-          });
-        }
+        patients.add({
+          id: patient.id,
+          name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
+        });
       });
     });
   },
