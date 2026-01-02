@@ -38,15 +38,13 @@ export default App.extend({
     }
 
     const { actionId, number } = values;
+
     const action = Radio.request('entities', 'actions:model', actionId);
+    const patient = action.getPatient();
 
-    if (action) {
-      const patient = action.getPatient();
-
-      if (patient) {
-        this._addPatient(patient);
-        return;
-      }
+    if (patient) {
+      this._addPatient(patient);
+      return;
     }
 
     const searchCollection = Radio.request('entities', 'searchPatients:collection');
