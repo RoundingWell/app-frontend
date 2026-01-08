@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import parsePhoneNumber from 'libphonenumber-js/min';
 
 import App from 'js/base/app';
 
@@ -47,10 +48,14 @@ export default App.extend({
       return;
     }
 
-    const searchCollection = Radio.request('entities', 'searchPatients:collection');
+    const phone = parsePhoneNumber(number, 'US');
 
-    searchCollection.fetch({ data: { 'filter[search]': number } })
-      .then(() => searchCollection.each(this._addPatient, this));
+    if (phone && phone.isValid()) {
+      const searchCollection = Radio.request('entities', 'searchPatients:collection');
+
+      searchCollection.fetch({ data: { 'filter[search]': number } })
+        .then(() => searchCollection.each(this._addPatient, this));
+    }
   },
   five9CallComplete(identifier, values) {
     Radio.request('entities', 'save:artifacts:model', {
