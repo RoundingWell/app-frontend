@@ -52,7 +52,7 @@ export default App.extend({
 
         if (!actionId) return;
 
-        Radio.request('dialer', 'five9CallComplete', callData.interactionId, { actionId });
+        Radio.request('dialer', 'five9Call', { callData, actionId });
 
         await interaction.setCav({
           interactionId: callData.interactionId,
@@ -66,6 +66,7 @@ export default App.extend({
       },
       callAccepted: ({ callData }) => {
         this.setState('callTime', dayjs());
+
         Radio.request('dialer', 'callNumber', { actionId: this.getState('actionId'), number: callData.number });
       },
       callEnded: () => {
@@ -75,7 +76,7 @@ export default App.extend({
       callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
         this.setState('actionId', null);
-        Radio.request('dialer', 'five9CallComplete', callData.interactionId, { callLog: callLogData });
+        Radio.request('dialer', 'five9Call', { callData, callLogData });
       },
     });
   },

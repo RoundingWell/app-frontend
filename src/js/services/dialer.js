@@ -12,7 +12,7 @@ export default App.extend({
     'call': 'call',
     'init': 'init',
     'callNumber': 'callNumber',
-    'five9CallComplete': 'five9CallComplete',
+    'five9Call': 'five9Call',
   },
   async init() {
     /* istanbul ignore next: prevent re-initialization */
@@ -57,10 +57,12 @@ export default App.extend({
         .then(() => searchCollection.each(this._addPatient, this));
     }
   },
-  five9CallComplete(identifier, values) {
+  five9Call(values) {
+    const { callData } = values;
+
     Radio.request('entities', 'save:artifacts:model', {
       artifact: 'five9-call-log',
-      identifier,
+      identifier: callData.interactionId,
       values,
     });
   },
