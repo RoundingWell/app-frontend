@@ -11,7 +11,7 @@ export default App.extend({
   radioRequests: {
     'call': 'call',
     'init': 'init',
-    'callNumber': 'callNumber',
+    'showPatientLinks': 'showPatientLinks',
     'five9Call': 'five9Call',
   },
   async init() {
@@ -32,13 +32,13 @@ export default App.extend({
   call(number, action) {
     this._call(number, action);
   },
-  callNumber(values) {
-    if (!values) {
+  showPatientLinks(callData) {
+    if (!callData) {
       patients.reset();
       return;
     }
 
-    const { actionId, number } = values;
+    const { actionId, number } = callData;
 
     const action = Radio.request('entities', 'actions:model', actionId);
     const patient = action.getPatient();

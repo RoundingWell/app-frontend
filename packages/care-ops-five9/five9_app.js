@@ -1,5 +1,7 @@
+import { get } from 'underscore';
 import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
+import fetcher, { handleJSON } from 'js/base/fetch';
 import { applicationApi, crmApi, interactionApi } from './sdk/index';
 
 import App from 'js/base/app';
@@ -64,14 +66,16 @@ export default App.extend({
           ],
         });
       },
-      callAccepted: ({ callData }) => {
+      callAccepted: async({ callData }) => {
         this.setState('callTime', dayjs());
 
-        Radio.request('dialer', 'callNumber', { actionId: this.getState('actionId'), number: callData.number });
+        const number = await this._getCallNumber(callData);
+
+        Radio.request('dialer', 'showPatientLinks', { actionId: this.getState('actionId'), number });
       },
       callEnded: () => {
         this.setState('callTime', null);
-        Radio.request('dialer', 'callNumber', null);
+        Radio.request('dialer', 'showPatientLinks', null);
       },
       callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
@@ -97,5 +101,25 @@ export default App.extend({
     if (!this.getState('isLoggedIn') || !number) return;
     interaction.click2dial({ click2DialData: { clickToDialNumber: number } });
     this.setState('pendingCall', null);
+  },
+  async _getCallNumber(callData) {
+    const { number, agent } = callData;
+
+    if (number.includes('agent:')) {
+      const { data } = await fetcher('/api/artifacts/search', {
+        data: {
+          filter: {
+            type: 'five9-call-log',
+            path: 'callData.agent',
+            term: agent,
+            limit: 1,
+          },
+        },
+      }).then(handleJSON);
+
+      return get(data, '0.attributes.callData.number');
+    }
+
+    return number;
   },
 });

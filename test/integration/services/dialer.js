@@ -112,7 +112,7 @@ context('Dialer Service', function() {
 
     cy
       .getRadio(Radio => {
-        Radio.request('dialer', 'callNumber', {
+        Radio.request('dialer', 'showPatientLinks', {
           actionId: testAction.id,
           number: null,
         });
@@ -133,7 +133,7 @@ context('Dialer Service', function() {
 
     cy
       .getRadio(Radio => {
-        Radio.request('dialer', 'callNumber', {
+        Radio.request('dialer', 'showPatientLinks', {
           actionId: testAction.id,
           number: null,
         });
@@ -152,7 +152,7 @@ context('Dialer Service', function() {
 
     cy
       .getRadio(Radio => {
-        Radio.request('dialer', 'callNumber', {
+        Radio.request('dialer', 'showPatientLinks', {
           actionId: testAction.id,
           number: null,
         });
@@ -164,7 +164,7 @@ context('Dialer Service', function() {
 
     cy
       .getRadio(Radio => {
-        Radio.request('dialer', 'callNumber', null);
+        Radio.request('dialer', 'showPatientLinks', null);
       });
 
     cy
@@ -183,7 +183,7 @@ context('Dialer Service', function() {
 
     cy
       .getRadio(Radio => {
-        Radio.request('dialer', 'callNumber', {
+        Radio.request('dialer', 'showPatientLinks', {
           actionId: null,
           number: '+16513216543 ',
         });
