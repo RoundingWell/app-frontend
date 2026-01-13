@@ -1,13 +1,18 @@
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import parsePhoneNumber from 'libphonenumber-js/min';
 
 import App from 'js/base/app';
+
+const patients = new Backbone.Collection([]);
 
 export default App.extend({
   channelName: 'dialer',
   radioRequests: {
     'call': 'call',
     'init': 'init',
-    'five9CallComplete': 'five9CallComplete',
+    'showPatientLinks': 'showPatientLinks',
+    'five9Call': 'five9Call',
   },
   async init() {
     /* istanbul ignore next: prevent re-initialization */
@@ -21,17 +26,50 @@ export default App.extend({
 
       const { call, init } = await import('@roundingwell/care-ops-five9');
       this._call = call;
-      init({ region: this.getRegion(), providerName });
+      init({ region: this.getRegion(), providerName, patients });
     }
   },
   call(number, action) {
     this._call(number, action);
   },
-  five9CallComplete(identifier, values) {
+  showPatientLinks(callData) {
+    if (!callData) {
+      patients.reset();
+      return;
+    }
+
+    const { actionId, number } = callData;
+
+    const action = Radio.request('entities', 'actions:model', actionId);
+    const patient = action.getPatient();
+
+    if (patient) {
+      this._addPatient(patient);
+      return;
+    }
+
+    const phone = parsePhoneNumber(number, 'US');
+
+    if (phone && phone.isValid()) {
+      const searchCollection = Radio.request('entities', 'searchPatients:collection');
+
+      searchCollection.fetch({ data: { 'filter[search]': number } })
+        .then(() => searchCollection.each(this._addPatient, this));
+    }
+  },
+  five9Call(values) {
+    const { callData } = values;
+
     Radio.request('entities', 'save:artifacts:model', {
       artifact: 'five9-call-log',
-      identifier,
+      identifier: callData.interactionId,
       values,
+    });
+  },
+  _addPatient(patient) {
+    patients.add({
+      id: patient.id,
+      name: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
     });
   },
 });

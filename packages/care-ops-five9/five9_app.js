@@ -1,5 +1,7 @@
+import { get } from 'underscore';
 import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
+import fetcher, { handleJSON } from 'js/base/fetch';
 import { applicationApi, crmApi, interactionApi } from './sdk/index';
 
 import App from 'js/base/app';
@@ -14,14 +16,18 @@ export default App.extend({
   stateEvents: {
     'change:isLoggedIn': 'onLoginChange',
   },
-  initialize({ providerName }) {
+  initialize({ providerName, patients }) {
+    this.patients = patients;
     this.registerApi(providerName);
     this.handleLogin();
     this.subscribe();
   },
   startAfterInitialized: true,
   onStart() {
-    this.showView(new LayoutView({ model: this.getState() }));
+    this.showView(new LayoutView({
+      model: this.getState(),
+      collection: this.patients,
+    }));
   },
   onLoginChange() {
     this._call();
@@ -48,7 +54,7 @@ export default App.extend({
 
         if (!actionId) return;
 
-        Radio.request('dialer', 'five9CallComplete', callData.interactionId, { actionId });
+        Radio.request('dialer', 'five9Call', { callData, actionId });
 
         await interaction.setCav({
           interactionId: callData.interactionId,
@@ -60,16 +66,21 @@ export default App.extend({
           ],
         });
       },
-      callAccepted: () => {
+      callAccepted: async({ callData }) => {
         this.setState('callTime', dayjs());
+
+        const number = await this._getCallNumber(callData);
+
+        Radio.request('dialer', 'showPatientLinks', { actionId: this.getState('actionId'), number });
       },
       callEnded: () => {
         this.setState('callTime', null);
+        Radio.request('dialer', 'showPatientLinks', null);
       },
       callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
         this.setState('actionId', null);
-        Radio.request('dialer', 'five9CallComplete', callData.interactionId, { callLog: callLogData });
+        Radio.request('dialer', 'five9Call', { callData, callLogData });
       },
     });
   },
@@ -90,5 +101,25 @@ export default App.extend({
     if (!this.getState('isLoggedIn') || !number) return;
     interaction.click2dial({ click2DialData: { clickToDialNumber: number } });
     this.setState('pendingCall', null);
+  },
+  async _getCallNumber(callData) {
+    const { number, agent } = callData;
+
+    if (number.includes('agent:')) {
+      const { data } = await fetcher('/api/artifacts/search', {
+        data: {
+          filter: {
+            type: 'five9-call-log',
+            path: 'callData.agent',
+            term: agent,
+            limit: 1,
+          },
+        },
+      }).then(handleJSON);
+
+      return get(data, '0.attributes.callData.number');
+    }
+
+    return number;
   },
 });

@@ -5,23 +5,26 @@ $five9-call-active-hover: color(green, dark);
 $five9-call-ended: color(red);
 $five9-call-ended-hover: color(red, dark);
 
-.five9-panel {
-  background: white;
-  border: 1px solid #{$black-90};
+.five9-wrapper {
   border-radius: 8px 8px 0 0;
   bottom: 0;
+  position: fixed;
+  right: 40px;
+  width: 300px;
+}
+
+.five9-panel {
+  background: white;
+  border-radius: 8px 8px 0 0;
   box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
   display: flex;
   flex-direction: column;
   height: 36px;
   overflow: hidden;
-  position: fixed;
-  right: 40px;
   transition: height 0.2s ease;
-  width: 300px;
 
-  &.is-open {
-    height: 90vh;
+  .five9-wrapper.is-open & {
+    height: 80vh;
   }
 }
 
@@ -61,15 +64,42 @@ $five9-call-ended-hover: color(red, dark);
   }
 }
 
+.five9-panel__patient-btn {
+  align-items: center;
+  background-color: white;
+  border: 1px solid $five9-color;
+  border-radius: 8px;
+  color: $five9-color;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  text-overflow: ellipsis;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+  white-space: nowrap;
+  width: 100%;
+
+  &:hover {
+    background-color: color(light_blue, light);
+  }
+
+  svg {
+    flex-shrink: 0;
+    margin: 0 6px;
+  }
+}
+
 .five9-panel__iframe {
-  flex: 1 1 auto;
-  height: auto;
   min-height: 0;
   pointer-events: none;
   visibility: hidden;
 
-
-  .five9-panel.is-open & {
+  .five9-wrapper.is-open & {
+    flex: 1 1 auto;
     pointer-events: auto;
     visibility: visible;
   }

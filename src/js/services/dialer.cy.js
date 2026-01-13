@@ -16,7 +16,7 @@ context('Dialer Service', function() {
       .as('root');
   });
 
-  specify('five9CallComplete', function() {
+  specify('five9Call', function() {
     cy
       .intercept('PATCH', '/api/artifacts/**', {
         statusCode: 201,
@@ -29,9 +29,14 @@ context('Dialer Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('dialer', 'five9CallComplete', 'abc1234', {
-          callDuration: 42,
-          disposition: 'completed',
+        Radio.request('dialer', 'five9Call', {
+          callData: {
+            interactionId: 'abc1234',
+          },
+          callLogData: {
+            callDuration: 42,
+            disposition: 'completed',
+          },
         });
       });
 
@@ -46,8 +51,13 @@ context('Dialer Service', function() {
             artifact: 'five9-call-log',
             identifier: 'abc1234',
             values: {
-              callDuration: 42,
-              disposition: 'completed',
+              callData: {
+                interactionId: 'abc1234',
+              },
+              callLogData: {
+                callDuration: 42,
+                disposition: 'completed',
+              },
             },
           },
         },
