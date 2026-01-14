@@ -58,14 +58,8 @@ function getDirectory(directoryName, query) {
   return parentRequest('fetch:directory', { directoryName, query });
 }
 
-function getIcd(by) {
-  // NOTE: Backwards compatible API
-  const args = isObject(by) ? { by } : { by: { term: by } };
-  return parentRequest('fetch:icd', args);
-}
-
 function getContext(contextScripts) {
-  return getScriptContext(contextScripts, { getClinicians, getDirectory, getField, getFieldHistory, updateField, getIcd, Handlebars, TEMPLATES: {}, parsePhoneNumber });
+  return getScriptContext(contextScripts, { getClinicians, getDirectory, getField, getFieldHistory, updateField, Handlebars, TEMPLATES: {}, parsePhoneNumber });
 }
 
 let prevSubmission;

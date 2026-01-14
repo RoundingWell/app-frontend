@@ -58,7 +58,6 @@ export default App.extend({
     'fetch:field': 'fetchField',
     'fetch:fieldHistory': 'fetchFieldHistory',
     'update:field': 'updateField',
-    'fetch:icd': 'fetchIcd',
     'version': 'checkVersion',
   },
   readyForm() {
@@ -191,16 +190,6 @@ export default App.extend({
     return Promise.resolve(Radio.request('entities', 'fetch:directories:model', directoryName, query))
       .then(directory => {
         this.send(message, { value: directory.get('value') }, requestId);
-      })
-      .catch(({ responseData }) => {
-        this.send(message, { error: responseData }, requestId);
-      });
-  },
-  fetchIcd({ by }, requestId) {
-    const message = 'fetch:icd';
-    return Promise.resolve(Radio.request('entities', 'fetch:icd', by))
-      .then(icd => {
-        this.send(message, { value: get(icd, ['data', 'icd_codes']) }, requestId);
       })
       .catch(({ responseData }) => {
         this.send(message, { error: responseData }, requestId);
