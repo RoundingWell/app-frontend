@@ -28,8 +28,6 @@ let formsCollection;
 function getForms(workspace) {
   if (formsCollection) return formsCollection;
   formsCollection = workspace.getForms();
-  const formModels = formsCollection.reject({ published_at: null });
-  formsCollection.reset(formModels);
   return formsCollection;
 }
 

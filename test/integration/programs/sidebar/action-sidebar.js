@@ -340,20 +340,12 @@ context('program action sidebar', function() {
       getForm(testForm),
       getForm({
         attributes: {
-          name: 'C Form',
-          published_at: null,
-        },
-      }),
-      getForm({
-        attributes: {
           name: 'B Form',
-          published_at: testTs(),
         },
       }),
       getForm({
         attributes: {
           name: 'A Form',
-          published_at: testTs(),
         },
       }),
     ];
@@ -686,8 +678,6 @@ context('program action sidebar', function() {
     cy
       .get('.picklist')
       .find('.js-picklist-item')
-      .should('not.contain', 'C Form')
-      .eq(1)
       .should('contain', 'A Form')
       .next()
       .should('contain', 'B Form')
