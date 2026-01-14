@@ -1533,10 +1533,12 @@ context('schedule page', function() {
       .click();
 
     cy
-      .navigate('/worklist');
+      .navigate('/worklist')
+      .wait('@routeActions');
 
     cy
-      .go('back');
+      .go('back')
+      .wait('@routeActions');
 
     cy
       .get('@scheduleList')
