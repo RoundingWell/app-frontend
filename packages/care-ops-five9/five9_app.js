@@ -106,7 +106,7 @@ export default App.extend({
     const { number, agent } = callData;
 
     if (number.includes('agent:')) {
-      const { data } = await fetcher('/api/artifacts/search', {
+      const { data } = await fetcher('/api/artifacts', {
         data: {
           filter: {
             type: 'five9-call-log',
