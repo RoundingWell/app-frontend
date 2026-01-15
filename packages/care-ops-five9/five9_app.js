@@ -117,7 +117,7 @@ export default App.extend({
         },
       }).then(handleJSON);
 
-      return get(data, '0.attributes.values.callData.number');
+      return get(data, ['0', 'attributes', 'values', 'callData', 'number']);
     }
 
     return number;
