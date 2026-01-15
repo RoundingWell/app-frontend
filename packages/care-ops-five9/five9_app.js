@@ -103,7 +103,7 @@ export default App.extend({
     this.setState('pendingCall', null);
   },
   async _getCallNumber(callData) {
-    const { number, agent } = callData;
+    const { number } = callData;
 
     if (number.includes('agent:')) {
       const { data } = await fetcher('/api/artifacts', {
@@ -111,13 +111,13 @@ export default App.extend({
           filter: {
             type: 'five9-call-log',
             path: 'callData.agent',
-            term: agent,
+            term: number.replace('agent:', ''),
             limit: 1,
           },
         },
       }).then(handleJSON);
 
-      return get(data, '0.attributes.callData.number');
+      return get(data, '0.attributes.values.callData.number');
     }
 
     return number;
