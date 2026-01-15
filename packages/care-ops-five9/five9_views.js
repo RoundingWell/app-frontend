@@ -105,6 +105,7 @@ const LayoutView = View.extend({
   modelEvents: {
     'change:isOpen': 'onChangeIsOpen',
     'change:isCalling': 'showCallState',
+    'change:isTransferredCall': 'showCallState',
     'change:callTime': 'showCallState',
   },
   ui: {
@@ -134,21 +135,25 @@ const LayoutView = View.extend({
     this.$el.toggleClass('is-open', this.model.get('isOpen'));
   },
   showCallState() {
+    const isTransferredCall = this.model.get('isTransferredCall');
     const callTime = this.model.get('callTime');
     const isCalling = !!this.model.get('isCalling');
 
-    this.ui.header.toggleClass('is-call-active', isCalling);
+    this.ui.header.toggleClass('is-call-active', isTransferredCall || callTime);
+
+    if (isTransferredCall) {
+      this.showChildView('heading', new View({ template: hbs`Transferred Call` }));
+      return;
+    }
 
     if (callTime) {
       this.showChildView('heading', new TimerView({ startTime: callTime }));
       return;
     }
 
-    const isCallEnded = isCalling && !callTime;
+    this.ui.header.toggleClass('is-call-ended', isCalling);
 
-    this.ui.header.toggleClass('is-call-ended', isCallEnded);
-
-    if (isCallEnded) {
+    if (isCalling) {
       this.showChildView('heading', new CallEndedView({ startTime: this.model.previous('callTime') }));
       return;
     }
