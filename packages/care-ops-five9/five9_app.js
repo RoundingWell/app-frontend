@@ -74,6 +74,7 @@ export default App.extend({
         Radio.request('dialer', 'showPatientLinks', { actionId: this.getState('actionId'), number });
       },
       callEnded: () => {
+        this.setState('isTransferredCall', null);
         this.setState('callTime', null);
         Radio.request('dialer', 'showPatientLinks', null);
       },
@@ -106,6 +107,8 @@ export default App.extend({
     const { number } = callData;
 
     if (number.includes('agent:')) {
+      this.setState('isTransferredCall', true);
+
       const { data } = await fetcher('/api/artifacts', {
         data: {
           filter: {
@@ -117,7 +120,7 @@ export default App.extend({
         },
       }).then(handleJSON);
 
-      return get(data, '0.attributes.values.callData.number');
+      return get(data, ['0', 'attributes', 'values', 'callData', 'number']);
     }
 
     return number;
