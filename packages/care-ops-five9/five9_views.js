@@ -135,18 +135,19 @@ const LayoutView = View.extend({
     this.$el.toggleClass('is-open', this.model.get('isOpen'));
   },
   showCallState() {
-    const isTransferredCall = this.model.get('isTransferredCall');
     const callTime = this.model.get('callTime');
+    const hasCallTime = !!callTime;
+    const isTransferredCall = !!this.model.get('isTransferredCall');
     const isCalling = !!this.model.get('isCalling');
 
-    this.ui.header.toggleClass('is-call-active', isTransferredCall || callTime);
+    this.ui.header.toggleClass('is-call-active', isTransferredCall || hasCallTime);
 
     if (isTransferredCall) {
       this.showChildView('heading', new View({ template: hbs`Transferred Call` }));
       return;
     }
 
-    if (callTime) {
+    if (hasCallTime) {
       this.showChildView('heading', new TimerView({ startTime: callTime }));
       return;
     }
