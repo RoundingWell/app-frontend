@@ -82,6 +82,7 @@ export default App.extend({
         this.setState('isCalling', false);
         this.setState('actionId', null);
         Radio.request('dialer', 'five9Call', { callData, callLogData });
+        Radio.request('dialer', 'showPatientLinks', null);
       },
     });
   },
