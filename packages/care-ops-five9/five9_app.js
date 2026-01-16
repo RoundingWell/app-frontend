@@ -74,13 +74,21 @@ export default App.extend({
         Radio.request('dialer', 'showPatientLinks', { actionId: this.getState('actionId'), number });
       },
       callEnded: () => {
-        this.setState('isTransferredCall', null);
-        this.setState('callTime', null);
+        this.setState({
+          isTransferredCall: null,
+          callTime: null,
+        });
+
         Radio.request('dialer', 'showPatientLinks', null);
       },
       callFinished: ({ callLogData, callData }) => {
-        this.setState('isCalling', false);
-        this.setState('actionId', null);
+        this.setState({
+          isCalling: false,
+          actionId: null,
+          callTime: null,
+          isTransferredCall: null,
+        });
+
         Radio.request('dialer', 'five9Call', { callData, callLogData });
         Radio.request('dialer', 'showPatientLinks', null);
       },
