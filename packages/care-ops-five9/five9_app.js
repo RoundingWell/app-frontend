@@ -81,6 +81,7 @@ export default App.extend({
       callFinished: ({ callLogData, callData }) => {
         this.setState('isCalling', false);
         this.setState('actionId', null);
+        this.setState('callTime', null);
         Radio.request('dialer', 'five9Call', { callData, callLogData });
         Radio.request('dialer', 'showPatientLinks', null);
       },
