@@ -4328,10 +4328,12 @@ context('worklist page', function() {
       .click();
 
     cy
-      .navigate('/schedule');
+      .navigate('/schedule')
+      .wait('@routeActions');
 
     cy
-      .go('back');
+      .go('back')
+      .wait('@routeActions');
 
     cy
       .get('@lastTableListItem')
