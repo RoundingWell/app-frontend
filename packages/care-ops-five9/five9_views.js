@@ -24,7 +24,7 @@ const TimerView = View.extend({
     this.startTime = startTime;
   },
   onRender() {
-    delay(() => this.render(), 60000);
+    delay(() => this.render(), 1000);
   },
   template: hbs`Call: {{ minutes }}:{{ seconds }}`,
   templateContext() {
