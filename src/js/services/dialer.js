@@ -48,6 +48,8 @@ export default App.extend({
       return;
     }
 
+    if (!number) return;
+
     const phone = parsePhoneNumber(number, 'US');
 
     if (phone && phone.isValid()) {
