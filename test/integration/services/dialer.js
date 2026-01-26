@@ -164,6 +164,18 @@ context('Dialer Service', function() {
 
     cy
       .getRadio(Radio => {
+        Radio.request('dialer', 'showPatientLinks', {
+          actionId: null,
+          number: null,
+        });
+      });
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 1);
+
+    cy
+      .getRadio(Radio => {
         Radio.request('dialer', 'showPatientLinks', null);
       });
 
@@ -185,7 +197,7 @@ context('Dialer Service', function() {
       .getRadio(Radio => {
         Radio.request('dialer', 'showPatientLinks', {
           actionId: null,
-          number: '+16513216543 ',
+          number: '+16513216543',
         });
       });
 
