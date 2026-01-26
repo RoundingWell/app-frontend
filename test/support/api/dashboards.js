@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import { v4 as uuid } from 'uuid';
 
 import { getResource, mergeJsonApi } from 'helpers/json-api';
 
@@ -8,6 +9,11 @@ const TYPE = 'dashboards';
 
 export function getDashboard(data) {
   const resource = getResource(_.sample(fxTestDashboards), TYPE);
+
+  data = _.extend({ id: uuid() }, data);
+
+  const embed_url = `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ data.id }?identityprovider=quicksight`;
+  data.attributes = _.extend({ embed_url }, data.attributes);
 
   return mergeJsonApi(resource, data);
 }

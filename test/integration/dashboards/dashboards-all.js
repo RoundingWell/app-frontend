@@ -4,7 +4,7 @@ context('dashboards all list', function() {
   specify('display dashboards list', function() {
     const testDashboards = [
       getDashboard({
-        attributes: { name: 'Daily Dashboards' },
+        attributes: { name: 'Daily Dashboard' },
       }),
       getDashboard({
         attributes: { name: 'Weekly Dashboard' },
