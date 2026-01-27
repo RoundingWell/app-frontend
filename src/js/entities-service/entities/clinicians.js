@@ -26,17 +26,15 @@ const _Model = BaseModel.extend({
   preinitialize() {
     this.on('change:_team', this.onChangeTeam);
   },
-  validate(attrs) {
-    if (!trim(attrs.name)) {
-      return 'A clinician name is required';
-    }
+  /* eslint-disable complexity */
+  validate(attrs, options = {}) {
+    if (!trim(attrs.name)) return 'A clinician name is required';
+    if (!trim(attrs.email)) return 'A clinician email address is required';
+    if (!attrs._role) return 'A clinician role is required';
 
-    if (!trim(attrs.email)) {
-      return 'A clinician email address is required';
-    }
-
-    if (!attrs._role) {
-      return 'A clinician role is required';
+    if (options.isManualCreation) {
+      if (!attrs._team) return 'A clinician team is required';
+      if (!attrs._workspaces?.length) return 'A clinician workspace is required';
     }
   },
   onChangeTeam() {

@@ -117,7 +117,7 @@ export default SubRouterApp.extend({
     clinicianModal.disableSubmit();
     clinicianModal.listenTo(clinicianClone, {
       'change'() {
-        clinicianModal.disableSubmit(!clinicianClone.isValid());
+        clinicianModal.disableSubmit(!clinicianClone.isValid({ isManualCreation: true }));
       },
     });
   },
