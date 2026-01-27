@@ -1,7 +1,7 @@
 <img title="RoundingWell" src="https://camo.githubusercontent.com/a8c1c4b81171f74dc9d0e2c791c096e626901ac9/68747470733a2f2f67697463646e2e78797a2f7265706f2f526f756e64696e6757656c6c2f636172652d6f70732d66726f6e74656e642f366438343532643262663335376436663866623361353632373332646637643531616535373639312f7372632f6173736574732f696d616765732f726f756e64696e6777656c6c2d6c6f676f2e737667" width="300">
 
-[![CircleCI](https://circleci.com/gh/RoundingWell/care-ops-frontend.svg?style=svg)](https://circleci.com/gh/RoundingWell/care-ops-frontend)
-[![Coverage Status](https://coveralls.io/repos/github/RoundingWell/care-ops-frontend/badge.svg)](https://coveralls.io/github/RoundingWell/care-ops-frontend)
+[![CircleCI](https://circleci.com/gh/RoundingWell/app-frontend.svg?style=svg)](https://circleci.com/gh/RoundingWell/app-frontend)
+[![Coverage Status](https://coveralls.io/repos/github/RoundingWell/app-frontend/badge.svg)](https://coveralls.io/github/RoundingWell/app-frontend)
 [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/ep9zr6/runs)
 
 # Getting Started: Frontend

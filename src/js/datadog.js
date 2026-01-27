@@ -11,7 +11,7 @@ function initDataDog() {
   if (!_PRODUCTION_ || _TEST_) return;
 
   const env = getEnv();
-  const service = 'care-ops-frontend';
+  const service = 'app-frontend';
 
   initLogs({
     env,

@@ -4,7 +4,7 @@
 
 For the provider app we are using Yahoo's [formatjs](https://formatjs.io/) through the
 [handlebars-intl](https://formatjs.io/handlebars/) lib. Our translation will be key based
-and found in the directory [`/assets/js/i18n`](https://github.com/RoundingWell/care-ops-frontend/tree/develop/src/js/i18n).
+and found in the directory [`/assets/js/i18n`](https://github.com/RoundingWell/app-frontend/tree/develop/src/js/i18n).
 
 The key naming strategy currently under consideration is:
 `view.directory.fileViews.viewName.stringContextName` where the first part is the
