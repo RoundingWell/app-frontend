@@ -21,6 +21,7 @@ context('clinicians modal', function() {
       .get('.modal')
       .as('modal')
       .find('.js-submit')
+      .as('submitButton')
       .should('be.disabled');
 
     cy
@@ -32,11 +33,19 @@ context('clinicians modal', function() {
       .type('{enter}');
 
     cy
+      .get('@submitButton')
+      .should('be.disabled');
+
+    cy
       .get('@modal')
       .find('[data-email-region] .js-input')
       .should('have.attr', 'placeholder', 'clinician@organization.com')
       .type('test.clinician@roundingwell.com')
       .type('{enter}');
+
+    cy
+      .get('@submitButton')
+      .should('be.disabled');
 
     cy
       .get('@modal')
@@ -50,22 +59,14 @@ context('clinicians modal', function() {
       .click();
 
     cy
-      .intercept('POST', '/api/clinicians', {
-        statusCode: 201,
-        body: {
-          data: {
-            enabled: true,
-            last_active_at: '2021-10-18T04:25:22.961Z',
-          },
-        },
-      })
-      .as('routePostClinician');
+      .get('@submitButton')
+      .should('be.disabled');
 
     cy
       .get('.modal')
       .as('modal')
       .find('.js-submit')
-      .should('not.be.disabled');
+      .should('be.disabled');
 
     cy
       .get('@modal')
@@ -79,6 +80,10 @@ context('clinicians modal', function() {
       .click();
 
     cy
+      .get('@submitButton')
+      .should('be.disabled');
+
+    cy
       .get('@modal')
       .get('[data-workspaces-region] .list-manager__droplist')
       .click();
@@ -88,6 +93,10 @@ context('clinicians modal', function() {
       .find('.js-picklist-item')
       .contains('Workspace One')
       .click();
+
+    cy
+      .get('@submitButton')
+      .should('not.be.disabled');
 
     cy
       .get('@modal')
@@ -116,6 +125,39 @@ context('clinicians modal', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .should('contain', 'Workspace Two');
+
+    cy
+      .get('@modal')
+      .find('.list-manager__item')
+      .find('.js-remove')
+      .click();
+
+    cy
+      .get('@submitButton')
+      .should('be.disabled');
+
+    cy
+      .get('@modal')
+      .get('[data-workspaces-region] .list-manager__droplist')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Workspace One')
+      .click();
+
+    cy
+      .intercept('POST', '/api/clinicians', {
+        statusCode: 201,
+        body: {
+          data: {
+            enabled: true,
+            last_active_at: '2021-10-18T04:25:22.961Z',
+          },
+        },
+      })
+      .as('routePostClinician');
 
     cy
       .get('@modal')
@@ -174,6 +216,28 @@ context('clinicians modal', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .contains('Manager')
+      .click();
+
+    cy
+      .get('@modal')
+      .find('[data-team-region] button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Nurse')
+      .click();
+
+    cy
+      .get('@modal')
+      .get('[data-workspaces-region] .list-manager__droplist')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Workspace One')
       .click();
 
     const errors = getErrors([
