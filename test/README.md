@@ -91,7 +91,7 @@ It is important to test all various data scenarios. What does it do when no resu
 
 Fixtures should be json files loaded in `test/fixtures/`.
 
-[More Info...](https://github.com/RoundingWell/care-ops-frontend/tree/develop/test/fixtures#test-fixtures)
+[More Info...](https://github.com/RoundingWell/app-frontend/tree/develop/test/fixtures#test-fixtures)
 
 ## Composing APIs
 

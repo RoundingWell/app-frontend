@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc.js';
 import shell from 'shelljs';
 
-const REPO_NAME = 'git@github.com:RoundingWell/care-ops-frontend.git';
+const REPO_NAME = 'git@github.com:RoundingWell/app-frontend.git';
 
 dayjs.extend(utcPlugin);
 

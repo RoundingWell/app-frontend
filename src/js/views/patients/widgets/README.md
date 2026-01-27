@@ -2,7 +2,7 @@
 
 ## Defined Widgets
 
-All available widget types are currently located in the [widgets file](https://github.com/RoundingWell/care-ops-frontend/blob/develop/src/js/views/patients/widgets/widgets.js)
+All available widget types are currently located in the [widgets file](https://github.com/RoundingWell/app-frontend/blob/develop/src/js/views/patients/widgets/widgets.js)
 
 Most are hardcoded such as `dob` which formats and displays the patient's Date of Birth
 
