@@ -4,6 +4,23 @@ orbs:
   cypress:   cypress-io/cypress@4
   coveralls: coveralls/coveralls@2
 
+aliases:
+  .tag-filter: &tag-filter
+    filters:
+      tags:
+        only: /.*/
+
+  when-release: &when-release
+    and:
+      - matches:
+          pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+          value: << pipeline.git.tag >>
+
+  prod-deploy-job: &prod-deploy-job
+    context: aws-prod
+    requires:
+      - release-approval
+
 commands:
   setup-fa-auth:
     steps:
@@ -148,6 +165,52 @@ jobs:
       - coveralls/upload:
           parallel_finished: true
 
+  build:
+    docker:
+      - image: cimg/node:22.16
+    steps:
+      - checkout
+      - setup-fa-auth
+      - restore_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Npm build
+          command: npm run build
+      - save_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+            - package.json
+            - package-lock.json
+
+  deploy:
+    docker:
+      - image: cimg/node:22.16
+    parameters:
+      stage:
+        type: string
+      deploy-name:
+        type: string
+        default: Deploy to S3
+    steps:
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: node-modules-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: << parameters.deploy-name >>
+          command: npm run deploy -- --stage=<< parameters.stage >>
+
 # ------------------------------------------------------------
 # WORKFLOWS
 # ------------------------------------------------------------
@@ -256,3 +319,37 @@ workflows:
             --parallel --record
             --group edge-component
             --config retries=4
+
+  deploy-sandboxes:
+    when: *when-release
+    jobs:
+      - build:
+          <<: *tag-filter
+          context: aws-prod
+      - release-approval:
+          <<: *tag-filter
+          type: approval
+          requires:
+            - build
+      - deploy:
+          <<: [*tag-filter, *prod-deploy-job]
+          name: deploy sandboxes
+          stage: sandbox
+          deploy-name: Deploy sandbox stacks to S3
+
+  deploy-clients:
+    when: *when-release
+    jobs:
+      - build:
+          <<: *tag-filter
+          context: aws-prod
+      - release-approval:
+          <<: *tag-filter
+          type: approval
+          requires:
+            - build
+      - deploy:
+          <<: [*tag-filter, *prod-deploy-job]
+          name: deploy prod
+          stage: prod
+          deploy-name: Deploy production clients to S3
