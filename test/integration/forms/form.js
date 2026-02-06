@@ -277,6 +277,81 @@ context('Noncontext Form', function() {
       .should('contain', 'error');
   });
 
+  specify('getPatientsBy - identifier', function() {
+    const testAction = getAction({
+      relationships: {
+        form: getRelationship(testForm),
+      },
+    });
+
+    cy
+      .intercept('GET', '/api/patients?filter*', {
+        body: { data: [getPatient({ attributes: { first_name: 'Test', last_name: 'Patient' } })] },
+      })
+      .as('routeGetPatientsByIdentifier')
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routeFormByAction()
+      .routeFormDefinition(fx => {
+        return {
+          display: 'form',
+          components: [
+            {
+              label: 'Test Get Patient By Identifier',
+              action: 'custom',
+              key: 'test1',
+              type: 'button',
+              input: true,
+              custom: `
+                getPatientsBy('MRN', '123456')
+                  .then(value => {
+                    data.opts = value[0].first_name + ' ' + value[0].last_name;
+                  });
+              `,
+            },
+            {
+              label: 'HTML',
+              tag: 'div',
+              content: '<span class="results">{{ data.opts }}</span>',
+              refreshOnChange: true,
+              key: 'html',
+              type: 'htmlelement',
+              input: false,
+              tableView: false,
+            },
+          ],
+        };
+      })
+      .routeFormActionFields()
+      .routeLatestFormResponse()
+      .routeActionActivity()
+      .routePatientByAction()
+      .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
+      .wait('@routeFormByAction')
+      .wait('@routeAction')
+      .wait('@routePatientByAction')
+      .wait('@routeFormDefinition');
+
+    cy
+      .iframe()
+      .find('button')
+      .click()
+      .wait('@routeGetPatientsByIdentifier')
+      .itsUrl()
+      .should(({ search }) => {
+        expect(search).to.contain('filter[type]=MRN');
+        expect(search).to.contain('filter[identifier]=123456');
+      });
+
+    cy
+      .iframe()
+      .find('.results')
+      .should('contain', 'Test Patient');
+  });
+
   specify('update patient field', { retries: 4 }, function() {
     const errors = getErrors();
 
