@@ -50,6 +50,10 @@ function getFieldHistory(fieldName, limit = 10, sort = 'newest') {
   return parentRequest('fetch:fieldHistory', { fieldName, limit, sort });
 }
 
+function getPatientsBy(type, identifier) {
+  return parentRequest('fetch:patientsBy', { type, identifier });
+}
+
 function getClinicians({ teamId } = {}) {
   return parentRequest('fetch:clinicians', { teamId });
 }
@@ -59,7 +63,7 @@ function getDirectory(directoryName, query) {
 }
 
 function getContext(contextScripts) {
-  return getScriptContext(contextScripts, { getClinicians, getDirectory, getField, getFieldHistory, updateField, Handlebars, TEMPLATES: {}, parsePhoneNumber });
+  return getScriptContext(contextScripts, { getClinicians, getDirectory, getField, getFieldHistory, getPatientsBy, updateField, Handlebars, TEMPLATES: {}, parsePhoneNumber });
 }
 
 let prevSubmission;
