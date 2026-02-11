@@ -17,7 +17,6 @@
   ],
   "scripts": {
     "analyze": "npx vite-bundle-visualizer",
-    "prebuild": "npm i",
     "build": "vite build",
     "deploy": "node scripts/deploy.js",
     "formio:build": "npm run build --prefix packages/care-ops-formio",
