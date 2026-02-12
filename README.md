@@ -30,37 +30,34 @@ $ npm i
 
 ## Releasing
 
-Releases are automated via an npm script.
-Make a new temporary local branch consisting of the commits you want to release.
-Then run
+Releases are tag-based and deployed by CircleCI from release tags.
+Deployment steps for local and CircleCI runs are documented in `docs/deploy.md`.
+
+Allowed release sources:
+- local branch `develop`
+- local branch matching `release/*`
+
+Release command:
 ```
 $ npm run release
 ```
 
-It will automatically create a release branch on origin named `release/YYYYMMDD`
-If that release branch already exists it will increment the branch name ie: `release/YYYYMMDD-1`
-All dates are in UTC.
-
-To make a release outside of this convention, pass it a branch name.
+Dry run (runs checks and prints the next tag without creating/pushing):
 ```
-$ npm run release test-foo
+$ npm run release -- --dry-run
 ```
 
-This will create the branch `release/test-foo`
+Tag format:
+- `release-YYYYMMDD.N` (UTC date, sequence starts at `1`)
+- Example: `release-20260212.1`
 
-Release branches should _never_ get merged back into `develop`.
-If a hotfix needs to be made to a release, the fix should ideally first be made to `develop` and picked into a new release.
-The new release, if necessary, can be branched off of a previous release, whatever is easiest to compose a release branch containing only the commits desired.
-In some situations some fixes must be applied differently to a release branch than to `develop`.  This is ok!  The commits specific to a release do not need to go back into `develop`.
+Tag immutability:
+- release tags are treated as immutable
+- existing remote release tags are never reused or moved
 
-Essentially this follows the release branches with [Gitlab flow](https://docs.gitlab.com/ee/topics/gitlab_flow.html#release-branches-with-gitlab-flow)
-
-### Test Releases
-
-Test releases are built with sourcemaps and follow the same pattern as a regular release.
-Besides the build difference, the branch name will be `test/YYYYMMDD`.
-
-These branches are useful for sharing to ship to dev sandboxes, and should not be used in production.
+Release behavior changes:
+- release no longer creates/pushes release branches
+- release no longer commits `dist`
 
 ## Development
 
