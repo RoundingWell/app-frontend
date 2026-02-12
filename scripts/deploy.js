@@ -1,44 +1,17 @@
 #!/usr/bin/env node
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import { CloudFormationClient, DescribeStacksCommand, ListStacksCommand } from '@aws-sdk/client-cloudformation';
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
-import { fromSSO, fromEnv } from '@aws-sdk/credential-providers';
-import { execFileSync } from 'child_process';
+import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
+import { DescribeStacksCommand, ListStacksCommand } from '@aws-sdk/client-cloudformation';
 import { parseArgs } from 'node:util';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { writeAppConfig } from './generate-appconfig.js';
+import { createAwsClients, fetchSecretJson } from './lib/aws.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-/**
- * Get AWS credentials based on environment
- * @returns {Object} AWS credentials
- */
-function getCredentials() {
-  return process.env.CI ?
-    fromEnv() :
-    fromSSO({ profile: process.env.AWS_PROFILE || 'default' });
-}
-
-/**
- * Create AWS clients
- * @returns {Object} AWS clients
- */
-function createAwsClients() {
-  const region = process.env.AWS_REGION || 'us-west-2';
-  const credentials = getCredentials();
-
-  return {
-    s3: new S3Client({ region, credentials }),
-    cloudFront: new CloudFrontClient({ region, credentials }),
-    cloudFormation: new CloudFormationClient({ region, credentials }),
-    secretsManager: new SecretsManagerClient({ region, credentials }),
-  };
-}
 
 /**
  * Get WebsiteBucket output from a CloudFormation stack
@@ -77,33 +50,46 @@ async function getStageStacks(cfClient, stage, filterStack) {
   if (filterStack) {
     // Query specific stack
     const stackName = `careops-${ stage }-${ filterStack }`;
-    const bucketName = await getStackWebsiteBucket(cfClient, stackName);
-    if (bucketName) {
-      stackBuckets.set(filterStack, bucketName);
-    }
+    await addStackBucket(stackBuckets, cfClient, filterStack, stackName);
     return stackBuckets;
   }
 
-  // List all stacks for the stage
-  const command = new ListStacksCommand({
-    StackStatusFilter: ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'UPDATE_ROLLBACK_COMPLETE'],
-  });
-
-  const response = await cfClient.send(command);
   const prefix = `careops-${ stage }-`;
+  let nextToken;
 
-  for (const stack of response.StackSummaries || []) {
-    if (!stack.StackName.startsWith(prefix)) continue;
+  do {
+    const command = new ListStacksCommand({
+      StackStatusFilter: ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'UPDATE_ROLLBACK_COMPLETE'],
+      ...(nextToken ? { NextToken: nextToken } : {}),
+    });
 
-    const stackIdentifier = stack.StackName.slice(prefix.length);
+    const response = await cfClient.send(command);
 
-    const bucketName = await getStackWebsiteBucket(cfClient, stack.StackName);
-    if (bucketName) {
-      stackBuckets.set(stackIdentifier, bucketName);
+    for (const stack of response.StackSummaries || []) {
+      if (!stack.StackName.startsWith(prefix)) continue;
+
+      const stackIdentifier = stack.StackName.slice(prefix.length);
+      await addStackBucket(stackBuckets, cfClient, stackIdentifier, stack.StackName);
     }
-  }
+
+    nextToken = response.NextToken;
+  } while (nextToken);
 
   return stackBuckets;
+}
+
+/**
+ * Resolve and add WebsiteBucket for a stack when available
+ * @param {Map<string, string>} stackBuckets - Target map
+ * @param {CloudFormationClient} cfClient - CloudFormation client
+ * @param {string} stackIdentifier - Stack identifier
+ * @param {string} stackName - CloudFormation stack name
+ */
+async function addStackBucket(stackBuckets, cfClient, stackIdentifier, stackName) {
+  const bucketName = await getStackWebsiteBucket(cfClient, stackName);
+  if (bucketName) {
+    stackBuckets.set(stackIdentifier, bucketName);
+  }
 }
 
 /**
@@ -182,12 +168,9 @@ async function uploadDirectory(s3Client, bucketName, dirPath, prefix = '') {
  * Generate appconfig for a specific stack
  * @param {string} stack - The stack name
  */
-function generateAppConfig(stack) {
+async function generateAppConfig(stack) {
   process.stdout.write(`Generating appconfig for stack: ${ stack }\n`);
-  execFileSync('node', [path.join(__dirname, 'generate-appconfig.js')], {
-    stdio: 'inherit',
-    env: { ...process.env, STACK: stack },
-  });
+  await writeAppConfig(stack);
 }
 
 /**
@@ -198,18 +181,7 @@ function generateAppConfig(stack) {
  */
 async function fetchStackSecrets(secretsClient, stack) {
   const secretName = `careops/customer/${ stack }`;
-
-  const command = new GetSecretValueCommand({
-    SecretId: secretName,
-  });
-
-  const response = await secretsClient.send(command);
-
-  if (!response.SecretString) {
-    throw new Error(`Secret value is empty for stack: ${ stack }`);
-  }
-
-  return JSON.parse(response.SecretString);
+  return fetchSecretJson(secretsClient, secretName);
 }
 
 /**
@@ -248,7 +220,7 @@ async function invalidateCloudFront(cloudFrontClient, stack, distroId) {
 async function deployToStack(clients, stack, bucketName, distDir) {
   process.stdout.write(`\nDeploying to stack: ${ stack }\n`);
 
-  generateAppConfig(stack);
+  await generateAppConfig(stack);
 
   process.stdout.write(`Uploading dist directory to ${ bucketName }...\n`);
   await uploadDirectory(clients.s3, bucketName, distDir);
@@ -268,6 +240,34 @@ async function deployToStack(clients, stack, bucketName, distDir) {
   process.stdout.write(`Deployment to ${ stack } complete\n`);
 }
 
+function resolveDeployInputs(values) {
+  const stage = values.stage || process.env.DEPLOY_STAGE;
+  const filterStack = values.stack || process.env.DEPLOY_STACK;
+  const deployAwsProfile = process.env.DEPLOY_AWS_PROFILE;
+
+  if (deployAwsProfile && !process.env.AWS_PROFILE) {
+    process.env.AWS_PROFILE = deployAwsProfile;
+  }
+
+  if (!stage) {
+    process.stderr.write('Error: --stage is required (or set DEPLOY_STAGE)\n');
+    process.stderr.write('Usage: npm run deploy -- --stage=prod [--stack=qa2]\n');
+    process.stderr.write('   or: npm run deploy:dev (uses .env)\n');
+    process.exit(1);
+  }
+
+  return { stage, filterStack };
+}
+
+function formatStackFilter(filterStack) {
+  return filterStack ? ` (stack: ${ filterStack })` : '';
+}
+
+function formatNoStacksError(stage, filterStack) {
+  const stackMsg = filterStack ? ` with stack: ${ filterStack }` : '';
+  return `No stacks found: careops-${ stage }-*${ stackMsg }\n`;
+}
+
 /**
  * Main deployment function
  */
@@ -279,15 +279,8 @@ async function main() {
     },
   });
 
-  const { stage, stack: filterStack } = values;
-
-  if (!stage) {
-    process.stderr.write('Error: --stage is required\n');
-    process.stderr.write('Usage: npm run deploy -- --stage=prod [--stack=qa2]\n');
-    process.exit(1);
-  }
-
-  const stackFilter = filterStack ? ` (stack: ${ filterStack })` : '';
+  const { stage, filterStack } = resolveDeployInputs(values);
+  const stackFilter = formatStackFilter(filterStack);
 
   // Create AWS clients once and reuse
   const clients = createAwsClients();
@@ -297,8 +290,7 @@ async function main() {
   const stackBuckets = await getStageStacks(clients.cloudFormation, stage, filterStack);
 
   if (stackBuckets.size === 0) {
-    const stackMsg = filterStack ? ` with stack: ${ filterStack }` : '';
-    process.stderr.write(`No stacks found: careops-${ stage }-*${ stackMsg }\n`);
+    process.stderr.write(formatNoStacksError(stage, filterStack));
     process.exit(1);
   }
 
