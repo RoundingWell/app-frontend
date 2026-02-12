@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import { buildAppConfig } from './lib/appconfig.js';
-import { createSecretsManagerClient, fetchSecretJson } from './lib/aws.js';
+import { createSecretsManagerClient, fetchStackSecrets, getStackSecretName } from './lib/aws.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -52,27 +52,11 @@ function handleSecretsError(error, secretName) {
   if (err.name === 'ResourceNotFoundException') {
     throw new Error(
       `Secret not found: ${ secretName }\n`
-      + 'Available stacks should be in AWS Secrets Manager under careops/customer/',
+      + 'Available stacks should be in AWS Secrets Manager under customer/<stage>/',
     );
   }
 
   throw err;
-}
-
-/**
- * Fetch stack secrets from AWS Secrets Manager using AWS SDK
- * @param {string} stack - Stack identifier
- * @returns {Promise<Object>} Parsed secret object
- */
-async function fetchStackSecrets(stack) {
-  const secretName = `careops/customer/${ stack }`;
-  const client = createSecretsManagerClient();
-
-  try {
-    return await fetchSecretJson(client, secretName);
-  } catch(error) {
-    handleSecretsError(error, secretName);
-  }
 }
 
 /**
@@ -111,13 +95,30 @@ function generateAppConfig(secrets, stack) {
 /**
  * Generate and write appconfig.json for a stack
  * @param {string} stack - Stack identifier
+ * @param {string} stage - Deployment stage
  */
-export async function writeAppConfig(stack = process.env.STACK || 'localhost') {
+export async function writeAppConfig(
+  stack = process.env.STACK || 'localhost',
+  stage = process.env.STAGE || process.env.DEPLOY_STAGE,
+) {
   if (stack === 'localhost') {
     return;
   }
 
-  const secrets = await fetchStackSecrets(stack);
+  if (!stage) {
+    throw new Error('Stage is required when generating appconfig for non-localhost stacks');
+  }
+
+  const secretName = getStackSecretName(stage, stack);
+  const client = createSecretsManagerClient();
+
+  let secrets;
+  try {
+    secrets = await fetchStackSecrets(client, stage, stack);
+  } catch(error) {
+    handleSecretsError(error, secretName);
+  }
+
   const appConfig = generateAppConfig(secrets, stack);
 
   const distDir = path.join(__dirname, '../dist');
