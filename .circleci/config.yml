@@ -340,7 +340,7 @@ workflows:
           <<: [*tag-filter, *prod-deploy-job]
           name: deploy sandboxes
           stage: sandbox
-          deploy-name: Deploy sandbox stacks to S3
+          deploy-name: Deploy assets to sandbox stacks
 
   deploy-clients:
     when: *when-release
@@ -357,4 +357,4 @@ workflows:
           <<: [*tag-filter, *prod-deploy-job]
           name: deploy prod
           stage: prod
-          deploy-name: Deploy production stacks to S3
+          deploy-name: Deploy assets to production stacks
