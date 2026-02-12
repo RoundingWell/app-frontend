@@ -15,7 +15,7 @@ aliases:
   when-release: &when-release
     and:
       - matches:
-          pattern: '^release-[0-9]{8}\.[0-9]+$'
+          pattern: '^v[0-9]{8}\.[0-9]+$'
           value: << pipeline.git.tag >>
 
   prod-deploy-job: &prod-deploy-job
@@ -55,15 +55,12 @@ commands:
       - run:
           name: Verify Node version matches .nvmrc
           command: |
-            if [ ! -f .nvmrc ]; then
-              echo "Missing .nvmrc at repo root"
-              exit 1
-            fi
             expected="$(tr -d '[:space:]' < .nvmrc | sed 's/^v//')"
             expected_major_minor="$(echo "$expected" | cut -d. -f1,2)"
-            actual_major_minor="$(node -p 'process.versions.node.split(".").slice(0, 2).join(".")')"
-            if [ "$expected_major_minor" != "$actual_major_minor" ]; then
-              echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${actual_major_minor}"
+            image_version="$(node -v)"
+            image_version="${image_version#v}"
+            if [[ "$image_version" != "$expected_major_minor".* ]]; then
+              echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${image_version}"
               exit 1
             fi
       - setup-fa-auth
@@ -360,4 +357,4 @@ workflows:
           <<: [*tag-filter, *prod-deploy-job]
           name: deploy prod
           stage: prod
-          deploy-name: Deploy production clients to S3
+          deploy-name: Deploy production stacks to S3

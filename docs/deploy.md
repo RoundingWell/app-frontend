@@ -77,7 +77,7 @@ This resolves CloudFormation stack:
 - `careops-<stage>-<stack-id>`
 
 And then:
-1. Generates `dist/appconfig.json` from Secrets Manager secret `careops/customer/<stack-id>`
+1. Generates `dist/appconfig.json` from Secrets Manager secret `customer/<stage>/<stack-id>`
 2. Uploads `dist/` to the stack's WebsiteBucket
 3. Invalidates CloudFront if the secret contains `DistroId`
 
@@ -94,7 +94,7 @@ This discovers all `careops-<stage>-*` stacks (with pagination) and deploys each
 ## CircleCI Deploys
 
 CircleCI deploy workflows run only for release tags matching:
-- `release-YYYYMMDD.N`
+- `vYYYYMMDD.N`
 
 Current deploy workflows:
 - `deploy-sandboxes` (stage `sandbox`)
