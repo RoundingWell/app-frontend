@@ -1,0 +1,31 @@
+{
+  "app": {
+    "env": "dev",
+    "stack": "nick",
+    "name": "RoundingWell",
+    "disableLoginPrompt": false,
+    "enableWebsockets": true
+  },
+  "datadog": {
+    "applicationId": "72496c17-540f-4aad-b5bb-848b8e836a3d",
+    "clientToken": "pubdf015273e710a5a7b64bd5c80f126b9a"
+  },
+  "deployment": {
+    "time": "2026-02-06T17:25:01.446-06:00",
+    "source": "Manual Deployment"
+  },
+  "versions": {
+    "backend": "",
+    "frontend": "86ddb15b"
+  },
+  "auth0": {
+    "domain": "auth.roundingwell.com",
+    "clientId": "8ab5Iodh3hmJSQy0xgGEa1kUDFBKrUH4",
+    "authorizationParams": {
+      "connection": "google-oauth2",
+      "organization": ""
+    },
+    "useRefreshTokens": true,
+    "cacheLocation": "localstorage"
+  }
+}
