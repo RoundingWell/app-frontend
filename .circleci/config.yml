@@ -4,6 +4,25 @@ orbs:
   cypress:   cypress-io/cypress@4
   coveralls: coveralls/coveralls@2
 
+aliases:
+  .node-image: &node-image cimg/node:22.16
+
+  .tag-filter: &tag-filter
+    filters:
+      tags:
+        only: /.*/
+
+  when-release: &when-release
+    and:
+      - matches:
+          pattern: '^v[0-9]{8}\.[0-9]+$'
+          value: << pipeline.git.tag >>
+
+  prod-deploy-job: &prod-deploy-job
+    context: aws-prod
+    requires:
+      - release-approval
+
 commands:
   setup-fa-auth:
     steps:
@@ -16,6 +35,38 @@ commands:
             //npm.fontawesome.com/:_authToken=${FONTAWESOME}
             EOF
             echo "📦 Created ~/.npmrc"
+
+  restore-npm-cache:
+    steps:
+      - restore_cache:
+          keys:
+            - npm-cache-v1-{{ checksum "package-lock.json" }}
+            - npm-cache-v1-
+
+  save-npm-cache:
+    steps:
+      - save_cache:
+          key: npm-cache-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+
+  install-dependencies:
+    steps:
+      - run:
+          name: Verify Node version matches .nvmrc
+          command: |
+            expected="$(tr -d '[:space:]' < .nvmrc | sed 's/^v//')"
+            expected_major_minor="$(echo "$expected" | cut -d. -f1,2)"
+            image_version="$(node -v)"
+            image_version="${image_version#v}"
+            if [[ "$image_version" != "$expected_major_minor".* ]]; then
+              echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${image_version}"
+              exit 1
+            fi
+      - setup-fa-auth
+      - run:
+          name: Install dependencies
+          command: npm ci --prefer-offline --no-audit
 
 # ------------------------------------------------------------
 # EXECUTOR  –  Node 22 LTS image with Chrome 137, FF 139, Edge 137
@@ -37,19 +88,12 @@ executors:
 jobs:
   lint:
     docker:
-      - image: cimg/node:22.16
+      - image: *node-image
     steps:
       - checkout
-      - setup-fa-auth
-      - restore_cache:
-          key: node-modules-{{ checksum "package-lock.json" }}
-      - run:
-          name: Install dependencies
-          command: npm ci
-      - save_cache:
-          key: node-modules-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
+      - restore-npm-cache
+      - install-dependencies
+      - save-npm-cache
       - run:
           name: ESLint
           command: npm run eslint
@@ -91,28 +135,17 @@ jobs:
               echo "⌛ waiting for Xvfb…"
               sleep 0.5
             done
-      - setup-fa-auth
-      - restore_cache:
-          key: node-modules-{{ checksum "package-lock.json" }}
+      - restore-npm-cache
+      - install-dependencies
       - cypress/install:
           skip-checkout: true
           install-browsers: false
-      - save_cache:
-          key: node-modules-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
 
-      # Build app (cached)
+      # Build app
       - when:
           condition: << parameters.should_build >>
           steps:
-            - restore_cache:
-                keys:
-                  - vite-dist-{{ checksum "vite.config.js" }}
             - run: npx vite build -m test
-            - save_cache:
-                key: vite-dist-{{ checksum "vite.config.js" }}
-                paths: dist
 
             - run:
                 name: Start Server
@@ -147,6 +180,41 @@ jobs:
     steps:
       - coveralls/upload:
           parallel_finished: true
+
+  build:
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - restore-npm-cache
+      - install-dependencies
+      - save-npm-cache
+      - run:
+          name: Npm build
+          command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  deploy:
+    docker:
+      - image: *node-image
+    parameters:
+      stage:
+        type: string
+      deploy-name:
+        type: string
+        default: Deploy to S3
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore-npm-cache
+      - install-dependencies
+      - run:
+          name: << parameters.deploy-name >>
+          command: npm run deploy -- --stage=<< parameters.stage >>
 
 # ------------------------------------------------------------
 # WORKFLOWS
@@ -256,3 +324,37 @@ workflows:
             --parallel --record
             --group edge-component
             --config retries=4
+
+  deploy-sandboxes:
+    when: *when-release
+    jobs:
+      - build:
+          <<: *tag-filter
+          context: aws-prod
+      - release-approval:
+          <<: *tag-filter
+          type: approval
+          requires:
+            - build
+      - deploy:
+          <<: [*tag-filter, *prod-deploy-job]
+          name: deploy sandboxes
+          stage: sandbox
+          deploy-name: Deploy assets to sandbox stacks
+
+  deploy-prod:
+    when: *when-release
+    jobs:
+      - build:
+          <<: *tag-filter
+          context: aws-prod
+      - release-approval:
+          <<: *tag-filter
+          type: approval
+          requires:
+            - build
+      - deploy:
+          <<: [*tag-filter, *prod-deploy-job]
+          name: deploy prod
+          stage: prod
+          deploy-name: Deploy assets to production stacks
