@@ -8,7 +8,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { writeAppConfig } from './generate-appconfig.js';
-import { createAwsClients, fetchSecretJson } from './lib/aws.js';
+import { createAwsClients, fetchStackSecrets } from './lib/aws.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -166,22 +166,12 @@ async function uploadDirectory(s3Client, bucketName, dirPath, prefix = '') {
 
 /**
  * Generate appconfig for a specific stack
+ * @param {string} stage - Deployment stage
  * @param {string} stack - The stack name
  */
-async function generateAppConfig(stack) {
+async function generateAppConfig(stage, stack) {
   process.stdout.write(`Generating appconfig for stack: ${ stack }\n`);
-  await writeAppConfig(stack);
-}
-
-/**
- * Fetch stack secrets from AWS Secrets Manager
- * @param {SecretsManagerClient} secretsClient - Secrets Manager client instance
- * @param {string} stack - Stack identifier
- * @returns {Promise<Object>} Parsed secret object
- */
-async function fetchStackSecrets(secretsClient, stack) {
-  const secretName = `careops/customer/${ stack }`;
-  return fetchSecretJson(secretsClient, secretName);
+  await writeAppConfig(stack, stage);
 }
 
 /**
@@ -213,21 +203,22 @@ async function invalidateCloudFront(cloudFrontClient, stack, distroId) {
 /**
  * Deploy to a single stack
  * @param {Object} clients - AWS clients
+ * @param {string} stage - Deployment stage
  * @param {string} stack - Stack name
  * @param {string} bucketName - S3 bucket name
  * @param {string} distDir - Path to dist directory
  */
-async function deployToStack(clients, stack, bucketName, distDir) {
+async function deployToStack(clients, stage, stack, bucketName, distDir) {
   process.stdout.write(`\nDeploying to stack: ${ stack }\n`);
 
-  await generateAppConfig(stack);
+  await generateAppConfig(stage, stack);
 
   process.stdout.write(`Uploading dist directory to ${ bucketName }...\n`);
   await uploadDirectory(clients.s3, bucketName, distDir);
 
   // Invalidate CloudFront if distribution exists
   try {
-    const secrets = await fetchStackSecrets(clients.secretsManager, stack);
+    const secrets = await fetchStackSecrets(clients.secretsManager, stage, stack);
     if (secrets.DistroId) {
       await invalidateCloudFront(clients.cloudFront, stack, secrets.DistroId);
     } else {
@@ -302,7 +293,7 @@ async function main() {
   const distDir = path.join(__dirname, '../dist');
 
   for (const [stack, bucketName] of stackBuckets) {
-    await deployToStack(clients, stack, bucketName, distDir);
+    await deployToStack(clients, stage, stack, bucketName, distDir);
   }
 
   process.stdout.write('\nAll deployments complete!\n');
