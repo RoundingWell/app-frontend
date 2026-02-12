@@ -19,6 +19,7 @@
     "analyze": "npx vite-bundle-visualizer",
     "build": "vite build",
     "deploy": "node scripts/deploy.js",
+    "predeploy:dev": "npm run build",
     "deploy:dev": "node --env-file=.env scripts/deploy.js",
     "formio:build": "npm run build --prefix packages/care-ops-formio",
     "coverage": "npm run coverage:clear && npm run coverage:component && npm run coverage:e2e && npm stop",
