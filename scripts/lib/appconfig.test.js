@@ -22,7 +22,7 @@ test('parseBool returns false for non-truthy values', () => {
 test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () => {
   const config = buildAppConfig({
     secrets: {
-      Auth0Name: 'Acme',
+      OrganizationName: 'Acme',
       DisableLoginPrompt: 'true',
       WebsocketsEnabled: 'no',
       DatadogAppId: 'dd-app',
@@ -32,6 +32,7 @@ test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () 
       Auth0Connection: 'Username-Password-Authentication',
       Auth0Organization: 'org_123',
     },
+    stage: 'prod',
     stack: 'customer-a',
     version: 'abc1234',
     deploymentTime: '2026-02-12T00:00:00-06:00',
@@ -74,7 +75,7 @@ test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () 
 test('buildAppConfig prioritizes WorkOS and strips null provider branch', () => {
   const config = buildAppConfig({
     secrets: {
-      Auth0Name: 'Acme',
+      OrganizationName: 'Acme',
       DisableLoginPrompt: 'false',
       WebsocketsEnabled: 'yes',
       DatadogAppId: 'dd-app',
@@ -84,6 +85,7 @@ test('buildAppConfig prioritizes WorkOS and strips null provider branch', () => 
       Auth0ClientDomain: 'acme.auth0.com',
       Auth0ClientID: 'auth0-client',
     },
+    stage: 'qa',
     stack: 'qa2',
     version: 'def5678',
     deploymentTime: '2026-02-12T08:00:00-06:00',

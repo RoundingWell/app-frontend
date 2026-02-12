@@ -1,28 +1,4 @@
 /**
- * Determine the stage from stack name
- * Matches backend Stage::fromStack() logic
- * @param {string} stack - Stack identifier
- * @returns {string}
- */
-export function getStageFromStack(stack) {
-  const stageMap = {
-    'rw': 'local',
-    'test': 'local',
-    'derek': 'dev',
-    'nick': 'dev',
-    'paul': 'dev',
-    'sean': 'dev',
-    'will': 'dev',
-    'woody': 'dev',
-    'zak': 'dev',
-    'qa2': 'qa',
-    'quality-assurance': 'qa',
-  };
-
-  return stageMap[stack] || 'prod';
-}
-
-/**
  * Parse boolean value from string (matches PHP filter_var FILTER_VALIDATE_BOOL)
  * @param {string|boolean} value - Value to parse
  * @returns {boolean}
@@ -110,6 +86,7 @@ function removeNullValues(obj) {
  * Matches backend AppConfig::toArray() logic
  * @param {Object} params - Build params
  * @param {Object} params.secrets - Stack secrets from Secrets Manager
+ * @param {string} params.stage - Deployment stage
  * @param {string} params.stack - Stack identifier
  * @param {string} params.version - Frontend version string
  * @param {string} params.deploymentTime - Deployment time in ISO8601
@@ -118,19 +95,18 @@ function removeNullValues(obj) {
  */
 export function buildAppConfig({
   secrets,
+  stage,
   stack,
   version,
   deploymentTime,
   deploymentSource,
 }) {
-  const stage = getStageFromStack(stack);
-
   // Base config matching PHP AppConfig::toArray()
   const config = {
     app: {
       env: stage,
       stack,
-      name: secrets.Auth0Name || '',
+      name: secrets.OrganizationName || '',
       disableLoginPrompt: parseBool(secrets.DisableLoginPrompt || 'false'),
       enableWebsockets: parseBool(secrets.WebsocketsEnabled || 'no'),
     },

@@ -79,12 +79,14 @@ function getDeploymentTime() {
  * Generate appconfig.json from stack secrets
  * Matches backend AppConfig::toArray() logic
  * @param {Object} secrets - Stack secrets from Secrets Manager
+ * @param {string} stage - Deployment stage
  * @param {string} stack - Stack identifier
  * @returns {Object} appconfig object
  */
-function generateAppConfig(secrets, stack) {
+function generateAppConfig(secrets, stage, stack) {
   return buildAppConfig({
     secrets,
+    stage,
     stack,
     version: getVersion(),
     deploymentTime: getDeploymentTime(),
@@ -119,7 +121,7 @@ export async function writeAppConfig(
     handleSecretsError(error, secretName);
   }
 
-  const appConfig = generateAppConfig(secrets, stack);
+  const appConfig = generateAppConfig(secrets, stage, stack);
 
   const distDir = path.join(__dirname, '../dist');
   const configPath = path.join(distDir, 'appconfig.json');
