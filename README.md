@@ -30,7 +30,7 @@ $ npm i
 
 ## Releasing
 
-Releases are tag-based and deployed by CircleCI from release tags.
+Releases are tag-based and deployed by CircleCI from version tags.
 Deployment steps for local and CircleCI runs are documented in `docs/deploy.md`.
 
 Allowed release sources:
@@ -48,8 +48,8 @@ $ npm run release -- --dry-run
 ```
 
 Tag format:
-- `release-YYYYMMDD.N` (UTC date, sequence starts at `1`)
-- Example: `release-20260212.1`
+- `vYYYYMMDD.N` (UTC date, sequence starts at `1`)
+- Example: `v20260212.1`
 
 Tag immutability:
 - release tags are treated as immutable
