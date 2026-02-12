@@ -342,7 +342,7 @@ workflows:
           stage: sandbox
           deploy-name: Deploy assets to sandbox stacks
 
-  deploy-clients:
+  deploy-prod:
     when: *when-release
     jobs:
       - build:

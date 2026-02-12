@@ -98,7 +98,7 @@ CircleCI deploy workflows run only for release tags matching:
 
 Current deploy workflows:
 - `deploy-sandboxes` (stage `sandbox`)
-- `deploy-clients` (stage `prod`)
+- `deploy-prod` (stage `prod`)
 
 Each workflow does:
 1. `build` job produces `dist/`
