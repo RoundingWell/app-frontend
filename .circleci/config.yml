@@ -206,6 +206,12 @@ jobs:
       deploy-name:
         type: string
         default: Deploy to S3
+      marker-environment:
+        type: string
+        default: unknown
+      marker-deployment-name:
+        type: string
+        default: deploy
     steps:
       - checkout
       - attach_workspace:
@@ -213,8 +219,40 @@ jobs:
       - restore-npm-cache
       - install-dependencies
       - run:
+          name: CircleCI Deploy Marker Plan
+          command: |
+            set -euo pipefail
+            if [ -z "<< pipeline.git.tag >>" ]; then
+              echo "No pipeline.git.tag; skipping deploy marker plan"
+              exit 0
+            fi
+            circleci run release plan "<< parameters.marker-deployment-name >>" \
+              --environment-name="<< parameters.marker-environment >>" \
+              --component-name="app-frontend" \
+              --target-version="<< pipeline.git.tag >>"
+      - run:
           name: << parameters.deploy-name >>
           command: npm run deploy -- --stage=<< parameters.stage >>
+      - run:
+          name: CircleCI Deploy Marker Success
+          when: on_success
+          command: |
+            set -euo pipefail
+            if [ -z "<< pipeline.git.tag >>" ]; then
+              echo "No pipeline.git.tag; skipping deploy marker success"
+              exit 0
+            fi
+            circleci run release update "<< parameters.marker-deployment-name >>" --status=SUCCESS
+      - run:
+          name: CircleCI Deploy Marker Failure
+          when: on_fail
+          command: |
+            set -euo pipefail
+            if [ -z "<< pipeline.git.tag >>" ]; then
+              echo "No pipeline.git.tag; skipping deploy marker failure"
+              exit 0
+            fi
+            circleci run release update "<< parameters.marker-deployment-name >>" --status=FAILED
 
 # ------------------------------------------------------------
 # WORKFLOWS
@@ -341,6 +379,8 @@ workflows:
           name: deploy sandboxes
           stage: sandbox
           deploy-name: Deploy assets to sandbox stacks
+          marker-environment: sandbox
+          marker-deployment-name: deploy-sandbox
 
   deploy-prod:
     when: *when-release
@@ -358,3 +398,5 @@ workflows:
           name: deploy prod
           stage: prod
           deploy-name: Deploy assets to production stacks
+          marker-environment: prod
+          marker-deployment-name: deploy-prod
