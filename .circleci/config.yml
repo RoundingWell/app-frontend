@@ -76,8 +76,6 @@ executors:
     docker:
       - image: cypress/browsers:node-22.16.0-chrome-137.0.7151.68-1-ff-139.0.1-edge-137.0.3296.62-1
     environment:
-      DISPLAY: :99
-      CYPRESS_DISPLAY: :99
       CYPRESS_COVERAGE: true
       CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
       CYPRESS_watchForFileChanges: false
@@ -119,22 +117,6 @@ jobs:
     steps:
       # Checkout
       - checkout
-
-      # Install & start virtual display
-      - run:
-          name: Install & start Xvfb
-          command: |
-            # launch 24-bit virtual display :99
-            Xvfb :99 -screen 0 1024x768x24 -nolisten tcp &
-            # wait until the X socket appears (max 10 s)
-            for i in {1..20}; do
-              if xdpyinfo -display :99 >/dev/null 2>&1; then
-                echo "🟢 Xvfb :99 is up"
-                break
-              fi
-              echo "⌛ waiting for Xvfb…"
-              sleep 0.5
-            done
       - restore-npm-cache
       - install-dependencies
       - cypress/install:
@@ -155,7 +137,7 @@ jobs:
       # Run Cypress
       - run:
           name: Cypress tests
-          command: << parameters.cypress_command >>
+          command: xvfb-run -a << parameters.cypress_command >>
 
       # Coverage upload (PR / push only)
       - when:
