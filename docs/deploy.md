@@ -38,10 +38,20 @@ Run deploy with local defaults:
 npm run deploy:dev
 ```
 
+Deploy QA stacks directly (no stage/stack args needed):
+
+```bash
+npm run deploy:qa
+npm run deploy:qa2
+```
+
 Notes:
 - CLI args still work and override stage/stack values:
-  - `npm run deploy:dev -- --stage=sandbox --stack=qa2`
+  - `npm run deploy:dev -- --stage=qa --stack=qa2`
 - If `AWS_PROFILE` is already set in your shell, it takes precedence over `DEPLOY_AWS_PROFILE`.
+- QA app stack names:
+  - `careops-qa-quality-assurance` (`npm run deploy:qa`)
+  - `careops-qa-qa2` (`npm run deploy:qa2`)
 
 ## Find Your AWS Profile
 
