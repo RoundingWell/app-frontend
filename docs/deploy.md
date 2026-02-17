@@ -89,7 +89,7 @@ This resolves CloudFormation stack:
 And then:
 1. Generates `dist/appconfig.json` from Secrets Manager secret `customer/<stage>/<stack-id>`
 2. Uploads `dist/` to the stack's WebsiteBucket
-3. Invalidates CloudFront if the secret contains `DistroId`
+3. Invalidates CloudFront if the secret contains `DistroId` or `DistroID`
 
 ## Local Deploy: All Stacks In A Stage
 
@@ -138,4 +138,4 @@ npm run release
   - Verify SSO login and `AWS_PROFILE`.
 
 - `No CloudFront distribution found, skipping invalidation`
-  - Expected when `DistroId` is absent from stack secret.
+  - Expected when both `DistroId` and `DistroID` are absent from stack secret.

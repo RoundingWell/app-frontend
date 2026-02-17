@@ -219,8 +219,9 @@ async function deployToStack(clients, stage, stack, bucketName, distDir) {
   // Invalidate CloudFront if distribution exists
   try {
     const secrets = await fetchStackSecrets(clients.secretsManager, stage, stack);
-    if (secrets.DistroId) {
-      await invalidateCloudFront(clients.cloudFront, stack, secrets.DistroId);
+    const distroId = secrets.DistroId || secrets.DistroID;
+    if (distroId) {
+      await invalidateCloudFront(clients.cloudFront, stack, distroId);
     } else {
       process.stdout.write('No CloudFront distribution found, skipping invalidation\n');
     }
