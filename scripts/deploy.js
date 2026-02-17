@@ -46,8 +46,14 @@ async function getStackWebsiteBucket(cfClient, stackName) {
  */
 async function getStageStacks(cfClient, stage, filterStack) {
   const stackBuckets = new Map();
+  const isProdStage = stage.toLowerCase() === 'prod';
 
   if (filterStack) {
+    if (isProdStage && filterStack.endsWith('-sandbox')) {
+      process.stdout.write(`Skipping sandbox stack for prod stage: ${ filterStack }\n`);
+      return stackBuckets;
+    }
+
     // Query specific stack
     const stackName = `careops-${ stage }-${ filterStack }`;
     await addStackBucket(stackBuckets, cfClient, filterStack, stackName);
@@ -69,6 +75,7 @@ async function getStageStacks(cfClient, stage, filterStack) {
       if (!stack.StackName.startsWith(prefix)) continue;
 
       const stackIdentifier = stack.StackName.slice(prefix.length);
+      if (isProdStage && stackIdentifier.endsWith('-sandbox')) continue;
       await addStackBucket(stackBuckets, cfClient, stackIdentifier, stack.StackName);
     }
 
