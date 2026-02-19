@@ -82,12 +82,20 @@ const _Model = BaseModel.extend({
   },
   isVisibleToCurrentUser() {
     const visibleToTeamsList = this.get('_teams');
+    const visibleToRolesList = this.get('_roles');
     const currentUser = Radio.request('bootstrap', 'currentUser');
-    const currentUserTeam = currentUser.getTeam();
 
-    if (!size(visibleToTeamsList)) return true;
+    if (size(visibleToTeamsList)) {
+      const currentUserTeam = currentUser.getTeam();
+      if (!visibleToTeamsList.find(team => team.id === currentUserTeam.id)) return false;
+    }
 
-    return !!visibleToTeamsList.find(team => team.id === currentUserTeam.id);
+    if (size(visibleToRolesList)) {
+      const currentUserRole = currentUser.getRole();
+      if (!visibleToRolesList.find(role => role.id === currentUserRole.id)) return false;
+    }
+
+    return true;
   },
   saveForm(form) {
     form = this.toRelation(form);
