@@ -25,7 +25,7 @@ export function getPatientField(data) {
 }
 
 export function getPatientFields({ attributes, relationships, meta } = {}, { sample = 3, depth } = {}) {
-  if (depth++ > 1) return;
+  if (depth > 1) return;
 
   return _.times(sample, () => getPatientField({ attributes, relationships, meta }));
 }
