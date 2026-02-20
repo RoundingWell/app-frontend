@@ -122,7 +122,7 @@
     "dayjs": "^1.10.6",
     "handlebars": "^4.7.7",
     "handlebars-intl": "^1.1.2",
-    "jquery": "^3.6.0",
+    "jquery": "^4.0.0",
     "libphonenumber-js": "^1.10.38",
     "marionette.toolkit": "^6.2.0",
     "sortablejs": "^1.14.0",
