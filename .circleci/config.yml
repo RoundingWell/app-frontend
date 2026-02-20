@@ -78,7 +78,6 @@ executors:
     environment:
       DISPLAY: :99
       CYPRESS_DISPLAY: :99
-      CYPRESS_COVERAGE: true
       CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
       CYPRESS_watchForFileChanges: false
 
@@ -269,7 +268,6 @@ workflows:
           name: E2E
           cypress_command: >
             npx cypress run
-            --env COVERAGE=true
             --parallel --record
             --group care-ops-e2e
 
@@ -279,7 +277,6 @@ workflows:
           should_build: false
           cypress_command: >
             npx cypress run --component
-            --env COVERAGE=true
             --parallel --record
             --group care-ops-component
 
