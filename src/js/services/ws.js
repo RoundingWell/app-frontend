@@ -1,6 +1,7 @@
 import { each, map, values, isArray } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import { v4 as uuid } from 'uuid';
 
 import App from 'js/base/app';
 
@@ -64,6 +65,8 @@ export default App.extend({
   },
 
   _subscribe() {
+    this.subscriptionVersion = uuid();
+
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const currentWorkspace = Radio.request('workspace', 'current');
 
@@ -71,6 +74,7 @@ export default App.extend({
       clientKey: currentUser.clientKey,
       workspace: currentWorkspace.id,
       resources: this.resources.toJSON(),
+      subscriptionVersion: this.subscriptionVersion,
     };
 
     if (this.filters) data.filters = this.filters;
@@ -159,6 +163,8 @@ export default App.extend({
     const data = JSON.parse(event.data);
 
     if (!data.category || data.name === 'pong') return;
+
+    if (data.subscription_version && data.subscription_version !== this.subscriptionVersion) return;
 
     if (!data.resource) {
       this.triggerMessage(data);
