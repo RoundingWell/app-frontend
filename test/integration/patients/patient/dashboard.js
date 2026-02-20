@@ -524,6 +524,7 @@ context('patient dashboard page', function() {
   specify('add action and flow', function() {
     const currentClinican = getCurrentClinician({
       relationships: {
+        team: getRelationship(teamNurse),
         role: getRelationship(roleEmployee),
       },
     });
@@ -549,6 +550,7 @@ context('patient dashboard page', function() {
           owner: getRelationship(teamCoordinator),
           form: getRelationship(testForm),
           teams: getRelationship([teamNurse]),
+          roles: getRelationship([roleEmployee]),
         },
       }),
       getProgramAction({
@@ -576,6 +578,32 @@ context('patient dashboard page', function() {
       }),
       getProgramAction({
         attributes: {
+          name: 'Visible - restricted to current user team',
+          behavior: 'standard',
+          published_at: testTs(),
+          archived_at: null,
+          details: '',
+          days_until_due: null,
+        },
+        relationships: {
+          teams: getRelationship([teamNurse]),
+        },
+      }),
+      getProgramAction({
+        attributes: {
+          name: 'Visible - restricted to current user role',
+          behavior: 'standard',
+          published_at: testTs(),
+          archived_at: null,
+          details: '',
+          days_until_due: null,
+        },
+        relationships: {
+          roles: getRelationship([roleEmployee]),
+        },
+      }),
+      getProgramAction({
+        attributes: {
           name: 'Should not show - unpublished',
           behavior: 'standard',
           published_at: null,
@@ -614,6 +642,19 @@ context('patient dashboard page', function() {
           teams: getRelationship([teamCoordinator]),
         },
       }),
+      getProgramAction({
+        attributes: {
+          name: 'Should not show - not visible to current user role',
+          behavior: 'standard',
+          published_at: testTs(),
+          archived_at: null,
+          details: '',
+          days_until_due: 1,
+        },
+        relationships: {
+          roles: getRelationship([roleAdmin]),
+        },
+      }),
     ];
 
     const testProgramFlows = [
@@ -629,6 +670,7 @@ context('patient dashboard page', function() {
           state: getRelationship(stateTodo),
           owner: getRelationship(teamOther),
           teams: getRelationship([teamNurse]),
+          roles: getRelationship([roleEmployee]),
         },
       }),
       getProgramFlow({
@@ -651,6 +693,30 @@ context('patient dashboard page', function() {
         },
         relationships: {
           program: getRelationship(testProgramIds[1], 'programs'),
+        },
+      }),
+      getProgramFlow({
+        attributes: {
+          name: 'Visible - restricted to current user team',
+          behavior: 'standard',
+          published_at: testTs(),
+          archived_at: null,
+        },
+        relationships: {
+          program: getRelationship(testProgramIds[1], 'programs'),
+          teams: getRelationship([teamNurse]),
+        },
+      }),
+      getProgramFlow({
+        attributes: {
+          name: 'Visible - restricted to current user role',
+          behavior: 'standard',
+          published_at: testTs(),
+          archived_at: null,
+        },
+        relationships: {
+          program: getRelationship(testProgramIds[1], 'programs'),
+          roles: getRelationship([roleEmployee]),
         },
       }),
       getProgramFlow({
@@ -696,6 +762,18 @@ context('patient dashboard page', function() {
         relationships: {
           program: getRelationship(testProgramIds[1], 'programs'),
           teams: getRelationship([teamCoordinator]),
+        },
+      }),
+      getProgramFlow({
+        attributes: {
+          name: 'Should not show - not visible to current user role',
+          behavior: 'standard',
+          published_at: testTs(),
+          archived_at: null,
+        },
+        relationships: {
+          program: getRelationship(testProgramIds[1], 'programs'),
+          roles: getRelationship([roleAdmin]),
         },
       }),
     ];
@@ -737,6 +815,9 @@ context('patient dashboard page', function() {
               { id: testProgramFlows[4].id },
               { id: testProgramFlows[5].id },
               { id: testProgramFlows[6].id },
+              { id: testProgramFlows[7].id },
+              { id: testProgramFlows[8].id },
+              { id: testProgramFlows[9].id },
             ], 'flows',
           ),
           'program-actions': getRelationship(
@@ -747,6 +828,9 @@ context('patient dashboard page', function() {
               { id: testProgramActions[4].id },
               { id: testProgramActions[5].id },
               { id: testProgramActions[6].id },
+              { id: testProgramActions[7].id },
+              { id: testProgramActions[8].id },
+              { id: testProgramActions[9].id },
             ], 'actions',
           ),
         },
@@ -872,9 +956,21 @@ context('patient dashboard page', function() {
       .contains('Two Actions, One Published, One Flow')
       .next()
       .find('.picklist__item')
-      .last()
+      .eq(1)
       .should('contain', 'One of One')
       .find('.action-icon--red.fa-caret-down');
+
+    cy
+      .get('.picklist')
+      .contains('Two Actions, One Published, One Flow')
+      .next()
+      .find('.picklist__item')
+      .eq(2)
+      .should('contain', 'Visible - restricted to current user role')
+      .parent()
+      .find('.picklist__item')
+      .last()
+      .should('contain', 'Visible - restricted to current user team');
 
     cy
       .get('.picklist')
@@ -897,9 +993,16 @@ context('patient dashboard page', function() {
       .contains('Two Published Actions and Flows')
       .next()
       .find('.picklist__item')
-      .last()
+      .eq(3)
       .should('contain', 'Two of Two')
       .find('.fa-file-lines');
+
+    cy
+      .get('.picklist')
+      .contains('Two Published Actions and Flows')
+      .next()
+      .should('contain', 'Visible - restricted to current user team')
+      .should('contain', 'Visible - restricted to current user role');
 
     cy
       .get('.picklist')
