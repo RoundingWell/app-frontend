@@ -98,18 +98,6 @@ context('WS Service', function() {
 
     const closedTest = { id: 'foo', type: 'bar' };
 
-    const notification = {
-      state: {},
-      data: {
-        name: 'Subscribe',
-        data: {
-          clientKey,
-          workspace,
-          resources: [closedTest],
-        },
-      },
-    };
-
     cy
       .startService()
       .then(() => {
@@ -127,7 +115,18 @@ context('WS Service', function() {
       .should('be.calledTwice')
       .then(spy => {
         const secondCall = spy.getCall(1);
-        expect(secondCall.args[0]).to.deep.equal(notification);
+        expect(secondCall.args[0]).to.deep.equal({
+          state: {},
+          data: {
+            name: 'Subscribe',
+            data: {
+              clientKey,
+              workspace,
+              resources: [closedTest],
+              subscriptionVersion: service.subscriptionVersion,
+            },
+          },
+        });
       });
   });
 
@@ -147,7 +146,13 @@ context('WS Service', function() {
       });
 
     cy
-      .sendWs({ category: 'Test', resource: { id: 'id', type: 'flows' } })
+      .then(() =>
+        cy.sendWs({
+          category: 'Test',
+          resource: { id: 'id', type: 'flows' },
+          subscription_version: service.subscriptionVersion,
+        }),
+      )
       .then(() => {
         expect(handler).to.be.calledOnce;
         const callArgs = handler.getCall(0).args;
@@ -156,11 +161,33 @@ context('WS Service', function() {
         expect(handler2).to.be.calledOnce;
       });
 
+    // subscription_version intentially left undefined to test that message is still handled
     cy
-      .sendWs({ category: 'Test' })
       .then(() => {
-        expect(handler).to.be.calledTwice;
-        expect(handler2).to.be.calledOnce;
+        handler.reset();
+        handler2.reset();
+
+        cy.sendWs({ category: 'Test' });
+      })
+      .then(() => {
+        expect(handler).to.be.calledOnce;
+        expect(handler2).to.not.be.called;
+      });
+
+    // should not handle this message because subscription_version doesn't match
+    cy
+      .then(() => {
+        handler.reset();
+        handler2.reset();
+
+        cy.sendWs({
+          category: 'Test',
+          subscription_version: 'stale-version',
+        });
+      })
+      .then(() => {
+        expect(handler).to.not.be.called;
+        expect(handler2).to.not.be.called;
       });
   });
 
@@ -191,6 +218,7 @@ context('WS Service', function() {
           clientKey,
           workspace,
           resources,
+          subscriptionVersion: Cypress.sinon.match.string,
         },
       };
     }
