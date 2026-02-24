@@ -12,7 +12,7 @@ import { getProgramFlow } from './program-flows';
 const TYPE = 'program-actions';
 
 export function getProgramAction(data, { depth = 0 } = {}) {
-  if (depth++ > 2) return;
+  if (depth > 2) return;
 
   const defaultRelationships = {
     'owner': _.random(1) ? getRelationship(getTeam()) : getRelationship(),
