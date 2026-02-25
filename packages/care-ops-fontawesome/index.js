@@ -12,7 +12,7 @@ function getIconHtml(lib, fonts) {
     const iconName = camelCase(`fa-${ iconClass }`);
     /* eslint-disable-next-line no-console */
     if (!lib[iconName]) console.error('Missing icon:', iconName);
-    return icon(lib[iconName], { symbol: true }).html;
+    return icon(lib[iconName], { symbol: true }).html.map(h => h.replace('<symbol ', '<symbol overflow="visible" '));
   });
 }
 
