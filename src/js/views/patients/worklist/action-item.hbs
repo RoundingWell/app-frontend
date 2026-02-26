@@ -23,7 +23,10 @@
   <span class="worklist-list__details-icon" data-details-region></span>
   <span><span data-state-region></span><span class="worklist-list__search-helper">&#8203;{{ state }}&#8203;</span></span>
   <span><span data-owner-region></span><span class="worklist-list__search-helper">&#8203;{{ owner }}&#8203;</span></span>
-  <span><span data-due-date-region></span><span data-due-time-region></span></span>
+  <span>
+    <span data-due-date-region></span>{{~ remove_whitespace ~}}
+    <span data-due-time-region></span>
+  </span>
   <span><span data-form-region></span>&#8203;</span>
   {{#if hasAttachments}}
     <span class="worklist__action-display-icon">{{far "paperclip"}}</span>
