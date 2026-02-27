@@ -270,6 +270,18 @@ jobs:
             tar -C dist -czf /tmp/dist.tar.gz .
             sha256sum /tmp/dist.tar.gz > /tmp/dist.tar.gz.sha256
       - run:
+          name: CircleCI Release Marker Plan
+          command: |
+            set -euo pipefail
+            if [ -z "<< pipeline.git.tag >>" ]; then
+              echo "No pipeline.git.tag; skipping release marker plan"
+              exit 0
+            fi
+            circleci run release plan "release-<< pipeline.git.tag >>" \
+              --environment-name="release" \
+              --component-name="app-frontend" \
+              --target-version="<< pipeline.git.tag >>"
+      - run:
           name: Upload build artifact once per tag
           command: |
             set -euo pipefail
@@ -279,6 +291,26 @@ jobs:
               --tag="<< pipeline.git.tag >>" \
               --artifact=/tmp/dist.tar.gz \
               --checksum=/tmp/dist.tar.gz.sha256
+      - run:
+          name: CircleCI Release Marker Success
+          when: on_success
+          command: |
+            set -euo pipefail
+            if [ -z "<< pipeline.git.tag >>" ]; then
+              echo "No pipeline.git.tag; skipping release marker success"
+              exit 0
+            fi
+            circleci run release update "release-<< pipeline.git.tag >>" --status=SUCCESS
+      - run:
+          name: CircleCI Release Marker Failure
+          when: on_fail
+          command: |
+            set -euo pipefail
+            if [ -z "<< pipeline.git.tag >>" ]; then
+              echo "No pipeline.git.tag; skipping release marker failure"
+              exit 0
+            fi
+            circleci run release update "release-<< pipeline.git.tag >>" --status=FAILED
 
 # ------------------------------------------------------------
 # WORKFLOWS
