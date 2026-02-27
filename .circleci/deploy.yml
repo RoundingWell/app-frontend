@@ -59,45 +59,38 @@ jobs:
               exit 1
             fi
 
-            deploy_stage=""
-            deploy_stack=""
+            if [[ "$target_env" != *:* ]]; then
+              echo "Unsupported deploy environment: $target_env"
+              echo "Expected format: <stage>:<stack>"
+              echo "Examples: qa:*, sandbox:*, prod:*, qa:qa2, sandbox:banana, prod:apple"
+              exit 1
+            fi
 
-            case "$target_env" in
-              qa)
-                deploy_stage="qa"
-                deploy_stack="quality-assurance"
-                ;;
-              qa2)
-                deploy_stage="qa"
-                deploy_stack="qa2"
-                ;;
-              all-sandboxes|sandbox)
-                deploy_stage="sandbox"
-                ;;
-              all-prod|prod)
-                deploy_stage="prod"
-                ;;
-              *-sandbox)
-                deploy_stage="sandbox"
-                deploy_stack="${target_env%-sandbox}"
-                ;;
-              *-prod)
-                deploy_stage="prod"
-                deploy_stack="${target_env%-prod}"
+            deploy_stage="${target_env%%:*}"
+            deploy_stack="${target_env#*:}"
+
+            case "$deploy_stage" in
+              qa|sandbox|prod)
                 ;;
               *)
-                echo "Unsupported deploy environment: $target_env"
-                echo "Supported: qa, qa2, all-sandboxes, all-prod, <stack>-sandbox, <stack>-prod"
+                echo "Unsupported deploy stage: $deploy_stage"
+                echo "Supported stages: qa, sandbox, prod"
                 exit 1
                 ;;
             esac
 
-            if [ -n "$deploy_stack" ] && [ "$deploy_stack" = "$target_env" ]; then
-              echo "Invalid deploy stack parsed from environment: $target_env"
+            if [ -z "$deploy_stack" ]; then
+              echo "Deploy stack segment cannot be empty in target environment: $target_env"
               exit 1
             fi
 
-            marker_name="deploy-${target_env}-${target_version}"
+            if [ "$deploy_stack" = "*" ] || [ "$deploy_stack" = "all" ]; then
+              deploy_stack=""
+            fi
+
+            marker_env_slug="${target_env//:/-}"
+            marker_env_slug="${marker_env_slug//\*/all}"
+            marker_name="deploy-${marker_env_slug}-${target_version}"
 
             {
               echo "DEPLOY_TARGET_ENV=$target_env"
