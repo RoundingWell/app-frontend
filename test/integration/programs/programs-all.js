@@ -35,7 +35,8 @@ context('program all list', function() {
 
         return fx;
       })
-      .visit('/programs');
+      .visit('/programs')
+      .wait('@routePrograms');
 
     cy
       .get('.table-list__item')
