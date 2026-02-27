@@ -91,8 +91,15 @@ async function main() {
   });
 
   const artifactAlreadyExists = await objectExists(s3Client, inputs.bucket, artifactKey);
-  if (artifactAlreadyExists) {
-    throw new Error(`Artifact already exists for tag ${ inputs.tag }: s3://${ inputs.bucket }/${ artifactKey }`);
+  const checksumAlreadyExists = await objectExists(s3Client, inputs.bucket, checksumKey);
+
+  if (artifactAlreadyExists || checksumAlreadyExists) {
+    const existingKeys = [
+      artifactAlreadyExists ? `s3://${ inputs.bucket }/${ artifactKey }` : null,
+      checksumAlreadyExists ? `s3://${ inputs.bucket }/${ checksumKey }` : null,
+    ].filter(Boolean).join(', ');
+
+    throw new Error(`Artifact publish blocked for immutable tag ${ inputs.tag }; existing object(s): ${ existingKeys }`);
   }
 
   await uploadFile(s3Client, inputs.bucket, artifactKey, inputs.artifactPath, 'application/gzip');
