@@ -18,11 +18,6 @@ aliases:
           pattern: '^v[0-9]{8}\.[0-9]+$'
           value: << pipeline.git.tag >>
 
-  prod-deploy-job: &prod-deploy-job
-    context: aws-prod
-    requires:
-      - release-approval
-
 commands:
   setup-fa-auth:
     steps:
@@ -253,6 +248,38 @@ jobs:
             fi
             circleci run release update "<< parameters.marker-deployment-name >>" --status=FAILED
 
+  publish-build-artifact:
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore-npm-cache
+      - install-dependencies
+      - run:
+          name: Package build artifact
+          command: |
+            set -euo pipefail
+            tag="<< pipeline.git.tag >>"
+            if [ -z "$tag" ]; then
+              echo "No pipeline.git.tag; refusing to publish artifact"
+              exit 1
+            fi
+
+            tar -C dist -czf /tmp/dist.tar.gz .
+            sha256sum /tmp/dist.tar.gz > /tmp/dist.tar.gz.sha256
+      - run:
+          name: Upload build artifact once per tag
+          command: |
+            set -euo pipefail
+            npm run artifact:publish -- \
+              --bucket=rw-frontend-artifacts \
+              --prefix=app-frontend \
+              --tag="<< pipeline.git.tag >>" \
+              --artifact=/tmp/dist.tar.gz \
+              --checksum=/tmp/dist.tar.gz.sha256
+
 # ------------------------------------------------------------
 # WORKFLOWS
 # ------------------------------------------------------------
@@ -360,40 +387,14 @@ workflows:
             --group edge-component
             --config retries=4
 
-  deploy-sandboxes:
+  release-artifact:
     when: *when-release
     jobs:
       - build:
           <<: *tag-filter
-          context: aws-prod
-      - release-approval:
+      - publish-build-artifact:
           <<: *tag-filter
-          type: approval
+          name: publish release artifact
+          context: aws-prod
           requires:
             - build
-      - deploy:
-          <<: [*tag-filter, *prod-deploy-job]
-          name: deploy sandboxes
-          stage: sandbox
-          deploy-name: Deploy assets to sandbox stacks
-          marker-environment: sandbox
-          marker-deployment-name: deploy-sandbox
-
-  deploy-prod:
-    when: *when-release
-    jobs:
-      - build:
-          <<: *tag-filter
-          context: aws-prod
-      - release-approval:
-          <<: *tag-filter
-          type: approval
-          requires:
-            - build
-      - deploy:
-          <<: [*tag-filter, *prod-deploy-job]
-          name: deploy prod
-          stage: prod
-          deploy-name: Deploy assets to production stacks
-          marker-environment: prod
-          marker-deployment-name: deploy-prod
