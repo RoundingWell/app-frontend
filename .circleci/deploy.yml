@@ -108,14 +108,14 @@ jobs:
             } >> "$BASH_ENV"
       - run:
           name: Download release artifact
+          no_output_timeout: 5m
           command: |
             set -euo pipefail
             npm run artifact:download -- \
               --bucket=rw-frontend-artifacts \
               --prefix=app-frontend \
               --tag="$DEPLOY_TARGET_VERSION" \
-              --artifact=/tmp/dist.tar.gz \
-              --checksum=/tmp/dist.tar.gz.sha256
+              --artifact=/tmp/dist.tar.gz
       - run:
           name: Unpack release artifact
           command: |

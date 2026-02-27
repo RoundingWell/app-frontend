@@ -14,7 +14,7 @@ function resolveInputs(values) {
   const prefix = values.prefix || process.env.ARTIFACT_PREFIX || 'app-frontend';
   const tag = values.tag || process.env.ARTIFACT_TAG;
   const artifactPath = values.artifact || process.env.ARTIFACT_PATH || '/tmp/dist.tar.gz';
-  const checksumPath = values.checksum || process.env.ARTIFACT_CHECKSUM_PATH || '/tmp/dist.tar.gz.sha256';
+  const checksumPath = values.checksum || process.env.ARTIFACT_CHECKSUM_PATH || `${ artifactPath }.sha256`;
 
   if (!tag) {
     throw new Error('Tag is required (--tag or ARTIFACT_TAG)');
