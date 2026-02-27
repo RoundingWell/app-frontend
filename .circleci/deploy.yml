@@ -1,0 +1,160 @@
+version: 2.1
+
+aliases:
+  .node-image: &node-image cimg/node:22.16
+
+commands:
+  setup-fa-auth:
+    steps:
+      - run:
+          name: Configure npm registry auth
+          command: |
+            cat > ~/.npmrc \<< EOF
+            # Pro Font Awesome registry
+            @fortawesome:registry=https://npm.fontawesome.com/
+            //npm.fontawesome.com/:_authToken=${FONTAWESOME}
+            EOF
+            echo "Created ~/.npmrc"
+
+  install-dependencies:
+    steps:
+      - run:
+          name: Verify Node version matches .nvmrc
+          command: |
+            expected="$(tr -d '[:space:]' < .nvmrc | sed 's/^v//')"
+            expected_major_minor="$(echo "$expected" | cut -d. -f1,2)"
+            image_version="$(node -v)"
+            image_version="${image_version#v}"
+            if [[ "$image_version" != "$expected_major_minor".* ]]; then
+              echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${image_version}"
+              exit 1
+            fi
+      - setup-fa-auth
+      - run:
+          name: Install dependencies
+          command: npm ci --prefer-offline --no-audit
+
+jobs:
+  deploy-from-artifact:
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - install-dependencies
+      - run:
+          name: Resolve deploy target
+          command: |
+            set -euo pipefail
+
+            target_env="<< pipeline.deploy.target_environment_name >>"
+            target_version="<< pipeline.deploy.target_version >>"
+
+            if [ -z "$target_env" ]; then
+              echo "Deploy target environment is required"
+              exit 1
+            fi
+
+            if [ -z "$target_version" ]; then
+              echo "Deploy target version is required"
+              exit 1
+            fi
+
+            deploy_stage=""
+            deploy_stack=""
+
+            case "$target_env" in
+              qa)
+                deploy_stage="qa"
+                deploy_stack="quality-assurance"
+                ;;
+              qa2)
+                deploy_stage="qa"
+                deploy_stack="qa2"
+                ;;
+              all-sandboxes|sandbox)
+                deploy_stage="sandbox"
+                ;;
+              all-prod|prod)
+                deploy_stage="prod"
+                ;;
+              *-sandbox)
+                deploy_stage="sandbox"
+                deploy_stack="${target_env%-sandbox}"
+                ;;
+              *-prod)
+                deploy_stage="prod"
+                deploy_stack="${target_env%-prod}"
+                ;;
+              *)
+                echo "Unsupported deploy environment: $target_env"
+                echo "Supported: qa, qa2, all-sandboxes, all-prod, <stack>-sandbox, <stack>-prod"
+                exit 1
+                ;;
+            esac
+
+            if [ -n "$deploy_stack" ] && [ "$deploy_stack" = "$target_env" ]; then
+              echo "Invalid deploy stack parsed from environment: $target_env"
+              exit 1
+            fi
+
+            marker_name="deploy-${target_env}-${target_version}"
+
+            {
+              echo "DEPLOY_TARGET_ENV=$target_env"
+              echo "DEPLOY_TARGET_VERSION=$target_version"
+              echo "DEPLOY_STAGE=$deploy_stage"
+              echo "DEPLOY_STACK=$deploy_stack"
+              echo "DEPLOY_MARKER_NAME=$marker_name"
+            } >> "$BASH_ENV"
+      - run:
+          name: Download release artifact
+          command: |
+            set -euo pipefail
+            npm run artifact:download -- \
+              --bucket=rw-frontend-artifacts \
+              --prefix=app-frontend \
+              --tag="$DEPLOY_TARGET_VERSION" \
+              --artifact=/tmp/dist.tar.gz \
+              --checksum=/tmp/dist.tar.gz.sha256
+      - run:
+          name: Unpack release artifact
+          command: |
+            set -euo pipefail
+            rm -rf dist
+            mkdir -p dist
+            tar -C dist -xzf /tmp/dist.tar.gz
+      - run:
+          name: CircleCI Deploy Marker Plan
+          command: |
+            set -euo pipefail
+            circleci run release plan "$DEPLOY_MARKER_NAME" \
+              --environment-name="$DEPLOY_TARGET_ENV" \
+              --component-name="app-frontend" \
+              --target-version="$DEPLOY_TARGET_VERSION"
+      - run:
+          name: Deploy selected target
+          command: |
+            set -euo pipefail
+            if [ -n "$DEPLOY_STACK" ]; then
+              npm run deploy -- --stage="$DEPLOY_STAGE" --stack="$DEPLOY_STACK"
+            else
+              npm run deploy -- --stage="$DEPLOY_STAGE"
+            fi
+      - run:
+          name: CircleCI Deploy Marker Success
+          when: on_success
+          command: |
+            set -euo pipefail
+            circleci run release update "$DEPLOY_MARKER_NAME" --status=SUCCESS
+      - run:
+          name: CircleCI Deploy Marker Failure
+          when: on_fail
+          command: |
+            set -euo pipefail
+            circleci run release update "$DEPLOY_MARKER_NAME" --status=FAILED
+
+workflows:
+  deploy:
+    jobs:
+      - deploy-from-artifact:
+          context: aws-prod
