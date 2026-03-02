@@ -147,7 +147,21 @@ jobs:
             circleci run release update "$DEPLOY_MARKER_NAME" --status=FAILED
 
 workflows:
-  deploy:
+  deploy-qa:
+    when:
+      matches:
+        pattern: '^qa:'
+        value: << pipeline.deploy.environment_name >>
+    jobs:
+      - deploy-from-artifact:
+          context: aws-dev
+
+  deploy-non-qa:
+    when:
+      not:
+        matches:
+          pattern: '^qa:'
+          value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
           context: aws-prod
