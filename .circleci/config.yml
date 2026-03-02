@@ -15,7 +15,7 @@ aliases:
   when-release: &when-release
     and:
       - matches:
-          pattern: '^v[0-9]{8}\.[0-9]+$'
+          pattern: '^v[0-9]{6}\.[0-9]+$'
           value: << pipeline.git.tag >>
 
 commands:

@@ -182,7 +182,7 @@ function listRemoteTags(tagPattern) {
 }
 
 function computeNextReleaseTag() {
-  const datePart = dayjs.utc().format('YYYYMMDD');
+  const datePart = dayjs.utc().format('YYMMDD');
   const prefix = `v${ datePart }`;
   const matchingTags = listRemoteTags(`refs/tags/${ prefix }.*`)
     .filter(tag => new RegExp(`^${ prefix }\\.\\d+$`).test(tag));
