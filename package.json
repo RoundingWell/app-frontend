@@ -19,6 +19,8 @@
     "analyze": "npx vite-bundle-visualizer",
     "build": "vite build",
     "deploy": "node scripts/deploy.js",
+    "artifact:publish": "node scripts/publish-artifact.js",
+    "artifact:download": "node scripts/download-artifact.js",
     "predeploy:dev": "npm run build",
     "deploy:dev": "node --env-file=.env scripts/deploy.js",
     "predeploy:qa": "npm run build",
