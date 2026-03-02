@@ -46,7 +46,7 @@ jobs:
           command: |
             set -euo pipefail
 
-            target_env="<< pipeline.deploy.target_environment_name >>"
+            target_env="<< pipeline.deploy.environment_name >>"
             target_version="<< pipeline.deploy.target_version >>"
 
             if [ -z "$target_env" ]; then
