@@ -17,10 +17,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Get the current git commit SHA
+ * Get frontend version for appconfig
+ * Prefers release/tag version when available in CI.
  * @returns {string}
  */
 function getVersion() {
+  const tagVersion = process.env.DEPLOY_TARGET_VERSION || process.env.CIRCLE_TAG;
+  if (tagVersion) {
+    return tagVersion.trim();
+  }
+
   try {
     return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
   } catch {

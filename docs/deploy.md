@@ -104,7 +104,7 @@ This discovers all `careops-<stage>-*` stacks (with pagination) and deploys each
 ## CircleCI Deploys
 
 CircleCI deploy workflows run only for release tags matching:
-- `vYYYYMMDD.N`
+- `vYYMMDD.N`
 
 Current deploy workflows:
 - `deploy-sandboxes` (stage `sandbox`)

@@ -48,8 +48,8 @@ $ npm run release -- --dry-run
 ```
 
 Tag format:
-- `vYYYYMMDD.N` (UTC date, sequence starts at `1`)
-- Example: `v20260212.1`
+- `vYYMMDD.N` (UTC date, sequence starts at `1`)
+- Example: `v260212.1`
 
 Tag immutability:
 - release tags are treated as immutable
