@@ -278,6 +278,31 @@ jobs:
               --component-name="app-frontend" \
               --target-version="<< pipeline.git.tag >>"
       - run:
+          name: Upload sourcemaps to Datadog
+          command: |
+            set -euo pipefail
+
+            if [ -z "${DATADOG_API_KEY:-}" ]; then
+              echo "DATADOG_API_KEY is required to upload sourcemaps"
+              exit 1
+            fi
+
+            if ! find dist -type f -name '*.js.map' | grep -q .; then
+              echo "No *.js.map files found in dist; failing release artifact publish"
+              exit 1
+            fi
+
+            site_arg=()
+            if [ -n "${DATADOG_SITE:-}" ]; then
+              site_arg+=(--datadog-site="${DATADOG_SITE}")
+            fi
+
+            npx --yes @datadog/datadog-ci@5.8.0 sourcemaps upload dist \
+              --service="app-frontend" \
+              --release-version="<< pipeline.git.tag >>" \
+              --minified-path-prefix="${DATADOG_MINIFIED_PATH_PREFIX:-/}" \
+              "${site_arg[@]}"
+      - run:
           name: Upload build artifact once per tag
           command: |
             set -euo pipefail
