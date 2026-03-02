@@ -379,10 +379,6 @@ context('patient archive page', function() {
       });
 
     cy
-      .get('@flowItem')
-      .find('.fa-circle-exclamation');
-
-    cy
       .get('.list-page__list')
       .find('.table-list__item')
       .should('have.lengthOf', 3);

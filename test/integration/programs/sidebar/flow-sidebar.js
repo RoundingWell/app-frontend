@@ -183,7 +183,8 @@ context('program flow sidebar', function() {
         updated_at: testTs(),
       },
       relationships: {
-        'program': getRelationship(testProgram),
+        program: getRelationship(testProgram),
+        owner: getRelationship(null),
       },
     });
 
