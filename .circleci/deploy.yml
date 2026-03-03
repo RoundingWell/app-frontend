@@ -150,7 +150,7 @@ workflows:
   deploy-qa:
     when:
       matches:
-        pattern: '^qa:'
+        pattern: '^qa:[a-z0-9*-]+$'
         value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
@@ -160,7 +160,7 @@ workflows:
     when:
       not:
         matches:
-          pattern: '^qa:'
+          pattern: '^qa:[a-z0-9*-]+$'
           value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
