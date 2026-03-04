@@ -93,11 +93,11 @@ jobs:
             marker_name="deploy-${marker_env_slug}-${target_version}"
 
             {
-              echo "DEPLOY_TARGET_ENV=$target_env"
-              echo "DEPLOY_TARGET_VERSION=$target_version"
-              echo "DEPLOY_STAGE=$deploy_stage"
-              echo "DEPLOY_STACK=$deploy_stack"
-              echo "DEPLOY_MARKER_NAME=$marker_name"
+              echo "export DEPLOY_TARGET_ENV=$target_env"
+              echo "export DEPLOY_TARGET_VERSION=$target_version"
+              echo "export DEPLOY_STAGE=$deploy_stage"
+              echo "export DEPLOY_STACK=$deploy_stack"
+              echo "export DEPLOY_MARKER_NAME=$marker_name"
             } >> "$BASH_ENV"
       - run:
           name: Download release artifact
@@ -150,7 +150,7 @@ workflows:
   deploy-qa:
     when:
       matches:
-        pattern: '^qa:'
+        pattern: '^qa:[a-z0-9*-]+$'
         value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
@@ -160,7 +160,7 @@ workflows:
     when:
       not:
         matches:
-          pattern: '^qa:'
+          pattern: '^qa:[a-z0-9*-]+$'
           value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
