@@ -24,7 +24,6 @@
     "disableLoginPrompt": false,
     "config": {
       "clientId": "client_01J7M1FVZZMHM6KTVTN5ZKRME1",
-      "rwClientId": "",
       "createClientOptions": {}
     }
   },

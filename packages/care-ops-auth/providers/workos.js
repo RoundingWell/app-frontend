@@ -23,18 +23,6 @@ export class WorkosAuthProvider extends AuthProvider {
     this.client.signIn({ state: path });
   }
 
-  // If considered RW and rwClientId is set
-  _getClientId(pathName) {
-    const { clientId, rwClientId } = this.config;
-
-    // RWell specific login
-    if (rwClientId && (pathName === AuthProvider.PATH_RWELL || localStorage.getItem(AuthProvider.PATH_RWELL))) {
-      return rwClientId;
-    }
-
-    return clientId;
-  }
-
   async _initClient(clientId, success) {
     const clientConfig = {
       redirectUri: location.origin + AuthProvider.PATH_AUTHD,
@@ -65,7 +53,7 @@ export class WorkosAuthProvider extends AuthProvider {
 
     const pathName = location.pathname;
 
-    const clientId = this._getClientId(pathName);
+    const { clientId } = this.config;
 
     this.client = await this._initClient(clientId, success);
 
