@@ -41,11 +41,15 @@ test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () 
 
   assert.deepEqual(config, {
     app: {
-      env: 'prod',
+      stage: 'prod',
       stack: 'customer-a',
+      version: 'abc1234',
+      env: 'prod',
       name: 'Acme',
       disableLoginPrompt: true,
-      enableWebsockets: false,
+    },
+    versions: {
+      frontend: 'abc1234',
     },
     datadog: {
       applicationId: 'dd-app',
@@ -54,10 +58,6 @@ test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () 
     deployment: {
       time: '2026-02-12T00:00:00-06:00',
       source: 'Manual Deployment',
-    },
-    versions: {
-      backend: '',
-      frontend: 'abc1234',
     },
     auth0: {
       domain: 'acme.auth0.com',
@@ -94,11 +94,15 @@ test('buildAppConfig prioritizes WorkOS and strips null provider branch', () => 
 
   assert.deepEqual(config, {
     app: {
-      env: 'qa',
+      stage: 'qa',
       stack: 'qa2',
+      version: 'def5678',
+      env: 'qa',
       name: 'Acme',
       disableLoginPrompt: false,
-      enableWebsockets: true,
+    },
+    versions: {
+      frontend: 'def5678',
     },
     datadog: {
       applicationId: 'dd-app',
@@ -107,10 +111,6 @@ test('buildAppConfig prioritizes WorkOS and strips null provider branch', () => 
     deployment: {
       time: '2026-02-12T08:00:00-06:00',
       source: 'Continuous Integration',
-    },
-    versions: {
-      backend: '',
-      frontend: 'def5678',
     },
     workos: {
       clientId: 'workos-client',

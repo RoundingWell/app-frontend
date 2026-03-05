@@ -685,7 +685,7 @@ context('Noncontext Form', function() {
 
     cy
       .intercept('GET', '/appconfig.json', {
-        body: { versions: { frontend: 'foo' } },
+        body: { app: { version: 'foo' } },
       })
       .routePatient(fx => {
         fx.data = testPatient;

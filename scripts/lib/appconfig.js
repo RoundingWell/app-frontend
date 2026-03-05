@@ -104,11 +104,11 @@ export function buildAppConfig({
   // Base config matching PHP AppConfig::toArray()
   const config = {
     app: {
-      env: stage,
+      stage,
       stack,
+      version,
       name: secrets.OrganizationName || '',
       disableLoginPrompt: parseBool(secrets.DisableLoginPrompt || 'false'),
-      enableWebsockets: parseBool(secrets.WebsocketsEnabled || 'no'),
     },
     datadog: {
       applicationId: secrets.DatadogAppId || '',
@@ -118,12 +118,15 @@ export function buildAppConfig({
       time: deploymentTime,
       source: deploymentSource,
     },
-    versions: {
-      backend: '',
-      frontend: version,
-    },
     auth0: null,
     workos: null,
+  };
+
+  // TEMP legacy compatibility block.
+  // Remove after downstream consumers fully migrate to app.stage/app.version.
+  config.app.env = stage;
+  config.versions = {
+    frontend: version,
   };
 
   // Add WorkOS or Auth0 (WorkOS takes priority)

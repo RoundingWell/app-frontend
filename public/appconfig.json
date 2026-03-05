@@ -1,9 +1,10 @@
 {
   "app": {
     "disableLoginPrompt": true,
-    "env": "develop",
+    "stage": "dev",
     "stack": "localhost",
-    "name": "Salvation Clinic"
+    "name": "Salvation Clinic",
+    "version": "dev"
   },
   "auth0": {
     "domain": "auth.roundingwell.com",
@@ -11,8 +12,7 @@
     "authorizationParams": {
       "connection": "google-oauth2"
     },
-    "cacheLocation": "localstorage",
-    "useRefreshTokens": true
+    "cacheLocation": "localstorage"
   },
   "-kinde": {
     "createParams": {
@@ -34,9 +34,5 @@
   "datadog": {
     "clientToken": "pubdf015273e710a5a7b64bd5c80f126b9a",
     "applicationId": "72496c17-540f-4aad-b5bb-848b8e836a3d"
-  },
-  "versions": {
-    "frontend": "develop",
-    "backend": ""
   }
 }

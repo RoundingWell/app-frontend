@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async() => {
     return;
   }
 
-  await fetchConfig(_NOW_);
+  await fetchConfig();
 
   initDataDog();
 

@@ -7,9 +7,8 @@ import '@fortawesome/fontawesome-pro/scss/solid.scss';
 import 'scss/bootstrap.min.css';
 import 'scss/formapp-core.scss';
 
+import { fetchConfig, getAppVersion } from '@roundingwell/care-ops-config';
 import { addError, initDataDog } from 'js/datadog';
-
-import { fetchConfig, versions } from '@roundingwell/care-ops-config';
 
 import Handlebars from 'handlebars/runtime';
 import parsePhoneNumber from 'libphonenumber-js/min';
@@ -304,8 +303,7 @@ function startFormApp(queryParams) {
   window.addEventListener('message', handleMessage);
   window.addEventListener('focus', () => parent.postMessage({ message: 'focus' }, window.origin));
 
-  // Send version info on startup
-  parent.postMessage({ message: 'version', args: versions.frontend }, window.origin);
+  parent.postMessage({ message: 'version', args: getAppVersion() }, window.origin);
 
   handleQuery(queryParams);
 }

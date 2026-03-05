@@ -24,11 +24,9 @@ beforeEach(function() {
     .intercept('GET', '/appconfig.json*', {
       body: {
         app: {
-          env: 'develop',
+          stage: 'dev',
           name: 'Cypress Clinic',
-        },
-        versions: {
-          frontend: 'develop',
+          version: 'dev',
         },
       },
     });

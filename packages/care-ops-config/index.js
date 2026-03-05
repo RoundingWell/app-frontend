@@ -1,32 +1,56 @@
-const auth0Config = {};
-const e2eConfig = {};
-const kindeConfig = {};
-const workosConfig = {};
-const datadogConfig = {};
-const appConfig = {};
-const versions = {};
+let configState = null;
 
-function fetchConfig(cache = Date.now()) {
-  return fetch(`/appconfig.json?${ new URLSearchParams({ _: cache }) }`)
+function fetchConfig() {
+  return fetch('/appconfig.json', { cache: 'no-store' })
     .then(response => response.json())
     .then(config => {
-      Object.assign(auth0Config, config.auth0);
-      Object.assign(e2eConfig, config.e2e);
-      Object.assign(kindeConfig, config.kinde);
-      Object.assign(workosConfig, config.workos);
-      Object.assign(datadogConfig, config.datadog);
-      Object.assign(appConfig, config.app);
-      Object.assign(versions, config.versions);
+      configState = config;
     });
 }
 
+function getConfigSection(name) {
+  return configState[name];
+}
+
+function getAppConfig() {
+  return getConfigSection('app');
+}
+
+function getEnvName() {
+  const app = getAppConfig();
+  return `${ app.stage }.${ app.stack }`;
+}
+
+function getAppVersion() {
+  return getAppConfig().version;
+}
+
+function getDatadogLogsOptions(service) {
+  const datadog = getConfigSection('datadog');
+  return {
+    env: getEnvName(),
+    service,
+    clientToken: datadog.clientToken,
+    version: getAppVersion(),
+  };
+}
+
+function getDatadogRumOptions(service) {
+  const datadog = getConfigSection('datadog');
+  return {
+    env: getEnvName(),
+    service,
+    clientToken: datadog.clientToken,
+    version: getAppVersion(),
+    applicationId: datadog.applicationId,
+  };
+}
+
 export {
-  auth0Config,
-  e2eConfig,
   fetchConfig,
-  kindeConfig,
-  workosConfig,
-  datadogConfig,
-  appConfig,
-  versions,
+  getConfigSection,
+  getAppConfig,
+  getAppVersion,
+  getDatadogLogsOptions,
+  getDatadogRumOptions,
 };

@@ -3,11 +3,8 @@ import Radio from 'backbone.radio';
 import getRootRoute from 'js/utils/root-route';
 
 import {
-  auth0Config,
-  e2eConfig,
-  kindeConfig,
-  workosConfig,
-  appConfig,
+  getConfigSection,
+  getAppConfig,
 } from '@roundingwell/care-ops-config';
 
 import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
@@ -20,7 +17,7 @@ let authAgent;
 const defaultAuthProvider = new AuthProvider();
 
 function getLoginView() {
-  if (appConfig.disableLoginPrompt) return;
+  if (getAppConfig().disableLoginPrompt) return;
   return LoginPromptView;
 }
 
@@ -31,22 +28,26 @@ async function selectAuthProvider() {
     return defaultAuthProvider;
   }
 
+  const e2eConfig = getConfigSection('e2e');
   if (!isEmpty(e2eConfig)) {
     return new AuthProvider(e2eConfig);
   }
 
   const LoginView = getLoginView();
 
+  const workosConfig = getConfigSection('workos');
   if (!isEmpty(workosConfig)) {
     const { WorkosAuthProvider } = await import('@roundingwell/care-ops-auth/workos.js');
     return new WorkosAuthProvider(workosConfig, LoginView);
   }
 
+  const auth0Config = getConfigSection('auth0');
   if (!isEmpty(auth0Config)) {
     const { Auth0AuthProvider } = await import('@roundingwell/care-ops-auth/auth0.js');
     return new Auth0AuthProvider(auth0Config, LoginView);
   }
 
+  const kindeConfig = getConfigSection('kinde');
   if (!isEmpty(kindeConfig)) {
     const { KindeAuthProvider } = await import('@roundingwell/care-ops-auth/kinde.js');
     return new KindeAuthProvider(kindeConfig, LoginView);
