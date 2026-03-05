@@ -47,12 +47,6 @@ async function selectAuthProvider() {
     return new Auth0AuthProvider(auth0Config, LoginView);
   }
 
-  const kindeConfig = getConfigSection('kinde');
-  if (!isEmpty(kindeConfig)) {
-    const { KindeAuthProvider } = await import('@roundingwell/care-ops-auth/kinde.js');
-    return new KindeAuthProvider(kindeConfig, LoginView);
-  }
-
   return defaultAuthProvider;
 }
 

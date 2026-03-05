@@ -14,18 +14,6 @@
     },
     "cacheLocation": "localstorage"
   },
-  "-kinde": {
-    "createParams": {
-      "audience": "care-ops-backend",
-      "client_id": "af4a982eafc845fc9df2e185b42d9ea6",
-      "domain": "https://kinde.roundingwell.com",
-      "is_dangerously_use_local_storage": true
-    },
-    "connections": {
-      "default": "conn_52f40d20db634985917ed7445d3167d0",
-      "roundingwell": "conn_52f40d20db634985917ed7445d3167d0"
-    }
-  },
   "-workos": {
     "clientId": "client_01J7M1FVZZMHM6KTVTN5ZKRME1",
     "rwClientId": "",
