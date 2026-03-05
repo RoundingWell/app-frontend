@@ -1,32 +1,67 @@
-const auth0Config = {};
-const e2eConfig = {};
-const kindeConfig = {};
-const workosConfig = {};
-const datadogConfig = {};
-const appConfig = {};
-const versions = {};
+const configState = {};
 
-function fetchConfig(cache = Date.now()) {
-  return fetch(`/appconfig.json?${ new URLSearchParams({ _: cache }) }`)
+function fetchConfig() {
+  return fetch('/appconfig.json', { cache: 'no-store' })
     .then(response => response.json())
     .then(config => {
-      Object.assign(auth0Config, config.auth0);
-      Object.assign(e2eConfig, config.e2e);
-      Object.assign(kindeConfig, config.kinde);
-      Object.assign(workosConfig, config.workos);
-      Object.assign(datadogConfig, config.datadog);
-      Object.assign(appConfig, config.app);
-      Object.assign(versions, config.versions);
+      configState.app = config.app || {};
+      configState.auth = config.auth || {};
+      configState.datadog = config.datadog || {};
     });
 }
 
+function getAuthConfig() {
+  return configState.auth.config;
+}
+
+function getAuthProvider() {
+  return configState.auth.provider;
+}
+
+function getAuthDisableLoginPrompt() {
+  return configState.auth.disableLoginPrompt;
+}
+
+function getAppName() {
+  return configState.app.name;
+}
+
+function getEnvName() {
+  return `${ configState.app.stage }.${ configState.app.stack }`;
+}
+
+function getAppVersion() {
+  return configState.app.version;
+}
+
+function getDatadogLogsOptions(service) {
+  const datadog = configState.datadog;
+  return {
+    env: getEnvName(),
+    service,
+    clientToken: datadog.clientToken,
+    version: getAppVersion(),
+  };
+}
+
+function getDatadogRumOptions(service) {
+  const datadog = configState.datadog;
+  return {
+    env: getEnvName(),
+    service,
+    clientToken: datadog.clientToken,
+    version: getAppVersion(),
+    applicationId: datadog.applicationId,
+  };
+}
+
 export {
-  auth0Config,
-  e2eConfig,
   fetchConfig,
-  kindeConfig,
-  workosConfig,
-  datadogConfig,
-  appConfig,
-  versions,
+  getAppName,
+  getAppVersion,
+  getAuthConfig,
+  getAuthProvider,
+  getAuthDisableLoginPrompt,
+  getDatadogLogsOptions,
+  getDatadogRumOptions,
 };

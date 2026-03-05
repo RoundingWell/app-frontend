@@ -8,7 +8,7 @@ import App from 'js/base/app';
 
 import { FORM_RESPONSE_STATUS } from 'js/static';
 
-import { versions } from '@roundingwell/care-ops-config';
+import { getAppVersion } from '@roundingwell/care-ops-config';
 
 function getClinicians(teamId) {
   if (teamId) {
@@ -68,7 +68,7 @@ export default App.extend({
   },
   checkVersion(feVersion) {
     /* istanbul ignore if: can't test reload */
-    if (feVersion !== versions.frontend) window.location.reload();
+    if (feVersion !== getAppVersion()) window.location.reload();
   },
   isReadOnly() {
     const isLocked = this.action && this.action.isLocked();

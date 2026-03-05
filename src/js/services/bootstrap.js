@@ -1,7 +1,7 @@
 import { includes, reject } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
-import { appConfig } from '@roundingwell/care-ops-config';
+import { getAppName } from '@roundingwell/care-ops-config';
 
 import getWorkspaceRoute from 'js/utils/root-route';
 
@@ -58,7 +58,7 @@ export default App.extend({
     return this.teams.clone();
   },
   initialize() {
-    this.organization = new Backbone.Model({ name: appConfig.name });
+    this.organization = new Backbone.Model({ name: getAppName() });
 
     // NOTE: handle pre-init'd workspace requests
     Radio.reply('workspace', 'current');

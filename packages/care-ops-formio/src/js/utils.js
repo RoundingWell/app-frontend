@@ -42,7 +42,7 @@ const evaluator = Formio.Evaluator.evaluator;
 Formio.Evaluator.evaluator = function(func, ...params) {
   try {
     return evaluator(func, ...params);
-  } catch (e) {
+  } catch(e) {
     addError(e);
   }
 };
@@ -52,7 +52,7 @@ const evaluate = Formio.Evaluator.evaluate;
 Formio.Evaluator.evaluate = function(func, ...params) {
   try {
     return evaluate(func, ...params);
-  } catch (e) {
+  } catch(e) {
     addError(e);
   }
 };

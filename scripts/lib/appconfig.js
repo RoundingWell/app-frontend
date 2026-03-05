@@ -1,63 +1,75 @@
-/**
- * Parse boolean value from string (matches PHP filter_var FILTER_VALIDATE_BOOL)
- * @param {string|boolean} value - Value to parse
- * @returns {boolean}
- */
-export function parseBool(value) {
-  if (typeof value === 'boolean') return value;
-  if (typeof value !== 'string') return false;
-
-  const truthyValues = ['1', 'true', 'on', 'yes'];
-  return truthyValues.includes(value.toLowerCase());
+function getDisableLoginPrompt(secrets) {
+  return String(secrets.DisableLoginPrompt ?? '').toLowerCase() === 'true';
 }
 
 /**
- * Create WorkOS config object
+ * Create auth config for WorkOS
  * @param {Object} secrets - Stack secrets
  * @returns {Object}
  */
-function createWorkOsConfig(secrets) {
+function createWorkOsAuthConfig(secrets) {
   return {
-    clientId: secrets.WorkOsClientId || '',
-    createClientOptions: {
-      apiHostname: secrets.WorkOsApiDomain || 'login.roundingwell.com',
+    provider: 'workos',
+    disableLoginPrompt: getDisableLoginPrompt(secrets),
+    config: {
+      clientId: secrets.WorkOsClientId || '',
+      createClientOptions: {
+        apiHostname: secrets.WorkOsApiDomain || 'login.roundingwell.com',
+      },
     },
   };
 }
 
 /**
- * Create Auth0 config object
+ * Create auth config for Auth0
  * @param {Object} secrets - Stack secrets
  * @returns {Object}
  */
-function createAuth0Config(secrets) {
+function createAuth0AuthConfig(secrets) {
   return {
-    domain: secrets.Auth0ClientDomain || '',
-    clientId: secrets.Auth0ClientID || secrets.Auth0ClientId || '',
-    authorizationParams: {
-      connection: secrets.Auth0Connection || '',
-      organization: secrets.Auth0Organization || secrets.Auth0OrgId || '',
+    provider: 'auth0',
+    disableLoginPrompt: getDisableLoginPrompt(secrets),
+    config: {
+      domain: secrets.Auth0ClientDomain || '',
+      clientId: secrets.Auth0ClientID || secrets.Auth0ClientId || '',
+      authorizationParams: {
+        connection: secrets.Auth0Connection || '',
+        organization: secrets.Auth0Organization || secrets.Auth0OrgId || '',
+        audience: secrets.Auth0Audience || 'care-ops-backend',
+      },
+      useRefreshTokens: true,
+      cacheLocation: 'localstorage',
     },
-    useRefreshTokens: true,
-    cacheLocation: 'localstorage',
   };
 }
 
 /**
- * Add WorkOS or Auth0 config based on what's available
- * WorkOS takes priority if clientId exists
+ * Add auth config based on available secrets.
+ * WorkOS takes priority if clientId exists.
  * @param {Object} config - Config object to modify
  * @param {Object} secrets - Stack secrets
  */
 function addAuthProvider(config, secrets) {
-  const workOsClientId = secrets.WorkOsClientId || '';
+  config.auth = secrets.WorkOsClientId ?
+    createWorkOsAuthConfig(secrets) :
+    createAuth0AuthConfig(secrets);
+}
 
-  if (workOsClientId) {
-    config.workos = createWorkOsConfig(secrets);
-    config.auth0 = null;
-  } else {
-    config.auth0 = createAuth0Config(secrets);
-    config.workos = null;
+function addLegacyAuthKeys(config) {
+  if (!config.auth || !config.auth.provider) return;
+  const legacyAuth = {
+    provider: config.auth.provider,
+    disableLoginPrompt: config.auth.disableLoginPrompt,
+    ...(config.auth.config || {}),
+  };
+
+  if (config.auth.provider === 'workos') {
+    config.workos = legacyAuth;
+    return;
+  }
+
+  if (config.auth.provider === 'auth0') {
+    config.auth0 = legacyAuth;
   }
 }
 
@@ -104,11 +116,10 @@ export function buildAppConfig({
   // Base config matching PHP AppConfig::toArray()
   const config = {
     app: {
-      env: stage,
+      stage,
       stack,
+      version,
       name: secrets.OrganizationName || '',
-      disableLoginPrompt: parseBool(secrets.DisableLoginPrompt || 'false'),
-      enableWebsockets: parseBool(secrets.WebsocketsEnabled || 'no'),
     },
     datadog: {
       applicationId: secrets.DatadogAppId || '',
@@ -118,16 +129,22 @@ export function buildAppConfig({
       time: deploymentTime,
       source: deploymentSource,
     },
-    versions: {
-      backend: '',
-      frontend: version,
-    },
-    auth0: null,
-    workos: null,
   };
 
   // Add WorkOS or Auth0 (WorkOS takes priority)
   addAuthProvider(config, secrets);
+
+  // TEMP legacy compatibility block.
+  // Remove after downstream consumers fully migrate to app.stage/app.version.
+  config.app.env = stage;
+  config.app.disableLoginPrompt = config.auth.disableLoginPrompt;
+  config.versions = {
+    frontend: version,
+  };
+
+  // TEMP legacy auth compatibility keys.
+  // Remove after downstream consumers fully migrate to the `auth` block.
+  addLegacyAuthKeys(config);
 
   // Remove null values (matches PHP nullifyAny)
   return removeNullValues(config);

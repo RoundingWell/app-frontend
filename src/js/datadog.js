@@ -1,32 +1,15 @@
 import { initLogs, initRum, setUser, startRum, addError, logResponse } from '@roundingwell/care-ops-datadog';
 
-import { datadogConfig as config, versions, appConfig } from '@roundingwell/care-ops-config';
-
-function getEnv() {
-  return `${ appConfig.env }.${ appConfig.stack }`;
-}
+import { getDatadogLogsOptions, getDatadogRumOptions } from '@roundingwell/care-ops-config';
 
 function initDataDog() {
   // NOTE: Remove when developing and testing Datadog
   if (!_PRODUCTION_ || _TEST_) return;
 
-  const env = getEnv();
   const service = 'app-frontend';
 
-  initLogs({
-    env,
-    service,
-    clientToken: config.clientToken,
-    version: versions.frontend,
-  });
-
-  initRum({
-    env,
-    service,
-    applicationId: config.applicationId,
-    clientToken: config.clientToken,
-    version: versions.frontend,
-  });
+  initLogs(getDatadogLogsOptions(service));
+  initRum(getDatadogRumOptions(service));
 }
 
 export {

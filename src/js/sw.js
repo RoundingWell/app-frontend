@@ -64,7 +64,15 @@ if (self.location.hostname !== 'localhost') {
 
   registerRoute(
     ({ url }) => url.pathname.includes('appconfig.json'),
-    new NetworkFirst({ cacheName: 'cache-appconfig' }),
+    new NetworkFirst({
+      cacheName: 'cache-appconfig',
+      networkTimeoutSeconds: 3,
+      plugins: [
+        new CacheableResponsePlugin({
+          statuses: [200],
+        }),
+      ],
+    }),
   );
 
   // Caches api GET responses for the listed status codes
