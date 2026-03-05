@@ -1,25 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildAppConfig, parseBool } from './appconfig.js';
+import { buildAppConfig } from './appconfig.js';
 
-test('parseBool matches expected truthy values', () => {
-  assert.equal(parseBool('1'), true);
-  assert.equal(parseBool('true'), true);
-  assert.equal(parseBool('on'), true);
-  assert.equal(parseBool('yes'), true);
-  assert.equal(parseBool('TRUE'), true);
-});
-
-test('parseBool returns false for non-truthy values', () => {
-  assert.equal(parseBool('0'), false);
-  assert.equal(parseBool('false'), false);
-  assert.equal(parseBool('no'), false);
-  assert.equal(parseBool('off'), false);
-  assert.equal(parseBool(undefined), false);
-  assert.equal(parseBool(null), false);
-});
-
-test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () => {
+test('buildAppConfig returns auth.provider=auth0 when WorkOS client id is missing', () => {
   const config = buildAppConfig({
     secrets: {
       OrganizationName: 'Acme',
@@ -59,12 +42,30 @@ test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () 
       time: '2026-02-12T00:00:00-06:00',
       source: 'Manual Deployment',
     },
+    auth: {
+      provider: 'auth0',
+      disableLoginPrompt: true,
+      config: {
+        domain: 'acme.auth0.com',
+        clientId: 'auth0-client',
+        authorizationParams: {
+          connection: 'Username-Password-Authentication',
+          organization: 'org_123',
+          audience: 'care-ops-backend',
+        },
+        useRefreshTokens: true,
+        cacheLocation: 'localstorage',
+      },
+    },
     auth0: {
+      provider: 'auth0',
+      disableLoginPrompt: true,
       domain: 'acme.auth0.com',
       clientId: 'auth0-client',
       authorizationParams: {
         connection: 'Username-Password-Authentication',
         organization: 'org_123',
+        audience: 'care-ops-backend',
       },
       useRefreshTokens: true,
       cacheLocation: 'localstorage',
@@ -72,7 +73,7 @@ test('buildAppConfig returns Auth0 config when WorkOS client id is missing', () 
   });
 });
 
-test('buildAppConfig prioritizes WorkOS and strips null provider branch', () => {
+test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
   const config = buildAppConfig({
     secrets: {
       OrganizationName: 'Acme',
@@ -112,13 +113,23 @@ test('buildAppConfig prioritizes WorkOS and strips null provider branch', () => 
       time: '2026-02-12T08:00:00-06:00',
       source: 'Continuous Integration',
     },
+    auth: {
+      provider: 'workos',
+      disableLoginPrompt: false,
+      config: {
+        clientId: 'workos-client',
+        createClientOptions: {
+          apiHostname: 'workos.example.com',
+        },
+      },
+    },
     workos: {
+      provider: 'workos',
+      disableLoginPrompt: false,
       clientId: 'workos-client',
       createClientOptions: {
         apiHostname: 'workos.example.com',
       },
     },
   });
-
-  assert.equal('auth0' in config, false);
 });

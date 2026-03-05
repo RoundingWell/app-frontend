@@ -1,7 +1,7 @@
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import { getAppConfig } from '@roundingwell/care-ops-config';
+import { getAppName } from '@roundingwell/care-ops-config';
 
 import './dialog.scss';
 
@@ -16,7 +16,7 @@ const DialogView = View.extend({
   `,
   templateContext() {
     return {
-      name: getAppConfig().name,
+      name: getAppName(),
     };
   },
   regions: {

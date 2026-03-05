@@ -1,10 +1,10 @@
-import { isEmpty } from 'underscore';
 import Radio from 'backbone.radio';
 import getRootRoute from 'js/utils/root-route';
 
 import {
-  getConfigSection,
-  getAppConfig,
+  getAuthConfig,
+  getAuthProvider,
+  getAuthDisableLoginPrompt,
 } from '@roundingwell/care-ops-config';
 
 import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
@@ -17,34 +17,28 @@ let authAgent;
 const defaultAuthProvider = new AuthProvider();
 
 function getLoginView() {
-  if (getAppConfig().disableLoginPrompt) return;
+  if (getAuthDisableLoginPrompt()) return;
   return LoginPromptView;
 }
 
-// Provider selection logic based on config
-// In order of priority (highest to lowest)
 async function selectAuthProvider() {
-  if (getRootRoute() === 'outreach') {
-    return defaultAuthProvider;
+  if (getRootRoute() === 'outreach') return defaultAuthProvider;
+
+  const providerConfig = getAuthConfig();
+  const authProvider = getAuthProvider();
+
+  if (authProvider === 'e2e') {
+    return new AuthProvider(providerConfig);
   }
 
-  const e2eConfig = getConfigSection('e2e');
-  if (!isEmpty(e2eConfig)) {
-    return new AuthProvider(e2eConfig);
-  }
-
-  const LoginView = getLoginView();
-
-  const workosConfig = getConfigSection('workos');
-  if (!isEmpty(workosConfig)) {
+  if (authProvider === 'workos') {
     const { WorkosAuthProvider } = await import('@roundingwell/care-ops-auth/workos.js');
-    return new WorkosAuthProvider(workosConfig, LoginView);
+    return new WorkosAuthProvider(providerConfig, getLoginView());
   }
 
-  const auth0Config = getConfigSection('auth0');
-  if (!isEmpty(auth0Config)) {
+  if (authProvider === 'auth0') {
     const { Auth0AuthProvider } = await import('@roundingwell/care-ops-auth/auth0.js');
-    return new Auth0AuthProvider(auth0Config, LoginView);
+    return new Auth0AuthProvider(providerConfig, getLoginView());
   }
 
   return defaultAuthProvider;

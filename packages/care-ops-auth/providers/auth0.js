@@ -40,7 +40,6 @@ export class Auth0AuthProvider extends AuthProvider {
       ...this.config,
       authorizationParams: {
         redirect_uri: location.origin + AuthProvider.PATH_AUTHD,
-        audience: 'care-ops-backend',
         ...this.config.authorizationParams,
       },
     };

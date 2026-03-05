@@ -1,32 +1,41 @@
-let configState = null;
+const configState = {};
 
 function fetchConfig() {
   return fetch('/appconfig.json', { cache: 'no-store' })
     .then(response => response.json())
     .then(config => {
-      configState = config;
+      configState.app = config.app || {};
+      configState.auth = config.auth || {};
+      configState.datadog = config.datadog || {};
     });
 }
 
-function getConfigSection(name) {
-  return configState[name];
+function getAuthConfig() {
+  return configState.auth.config;
 }
 
-function getAppConfig() {
-  return getConfigSection('app');
+function getAuthProvider() {
+  return configState.auth.provider;
+}
+
+function getAuthDisableLoginPrompt() {
+  return configState.auth.disableLoginPrompt;
+}
+
+function getAppName() {
+  return configState.app.name;
 }
 
 function getEnvName() {
-  const app = getAppConfig();
-  return `${ app.stage }.${ app.stack }`;
+  return `${ configState.app.stage }.${ configState.app.stack }`;
 }
 
 function getAppVersion() {
-  return getAppConfig().version;
+  return configState.app.version;
 }
 
 function getDatadogLogsOptions(service) {
-  const datadog = getConfigSection('datadog');
+  const datadog = configState.datadog;
   return {
     env: getEnvName(),
     service,
@@ -36,7 +45,7 @@ function getDatadogLogsOptions(service) {
 }
 
 function getDatadogRumOptions(service) {
-  const datadog = getConfigSection('datadog');
+  const datadog = configState.datadog;
   return {
     env: getEnvName(),
     service,
@@ -48,9 +57,11 @@ function getDatadogRumOptions(service) {
 
 export {
   fetchConfig,
-  getConfigSection,
-  getAppConfig,
+  getAppName,
   getAppVersion,
+  getAuthConfig,
+  getAuthProvider,
+  getAuthDisableLoginPrompt,
   getDatadogLogsOptions,
   getDatadogRumOptions,
 };

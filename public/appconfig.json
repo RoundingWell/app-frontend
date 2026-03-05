@@ -1,23 +1,32 @@
 {
   "app": {
-    "disableLoginPrompt": true,
     "stage": "dev",
     "stack": "localhost",
     "name": "Salvation Clinic",
     "version": "dev"
   },
-  "auth0": {
-    "domain": "auth.roundingwell.com",
-    "clientId": "UVGIL27XqwGsJwsTfEyz50c1qg3Ll1p6",
-    "authorizationParams": {
-      "connection": "google-oauth2"
-    },
-    "cacheLocation": "localstorage"
+  "auth": {
+    "provider": "auth0",
+    "disableLoginPrompt": true,
+    "config": {
+      "domain": "auth.roundingwell.com",
+      "clientId": "UVGIL27XqwGsJwsTfEyz50c1qg3Ll1p6",
+      "authorizationParams": {
+        "connection": "google-oauth2",
+        "audience": "care-ops-backend"
+      },
+      "cacheLocation": "localstorage",
+      "useRefreshTokens": true
+    }
   },
-  "-workos": {
-    "clientId": "client_01J7M1FVZZMHM6KTVTN5ZKRME1",
-    "rwClientId": "",
-    "createClientOptions": {}
+  "~auth": {
+    "provider": "workos",
+    "disableLoginPrompt": false,
+    "config": {
+      "clientId": "client_01J7M1FVZZMHM6KTVTN5ZKRME1",
+      "rwClientId": "",
+      "createClientOptions": {}
+    }
   },
   "datadog": {
     "clientToken": "pubdf015273e710a5a7b64bd5c80f126b9a",
