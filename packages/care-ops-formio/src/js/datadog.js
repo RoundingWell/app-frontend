@@ -5,7 +5,7 @@ function initDataDog({ isPdfPrinter }) {
   // NOTE: Remove when developing and testing Datadog
   if (location.hostname === 'localhost') return;
 
-  const service = 'care-ops-forms';
+  const service = 'customer-forms-legacy';
 
   initLogs(getDatadogLogsOptions(service));
 
