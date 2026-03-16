@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  aws-cli: circleci/aws-cli@4.0
+
 aliases:
   .node-image: &node-image cimg/node:22.16
 
@@ -33,6 +36,11 @@ commands:
       - run:
           name: Install dependencies
           command: npm ci --prefer-offline --no-audit
+
+  setup-aws-oidc:
+    steps:
+      - aws-cli/setup:
+          role_arn: ${AWS_ROLE_ARN}
 
 jobs:
   deploy-from-artifact:
@@ -99,6 +107,7 @@ jobs:
               echo "export DEPLOY_STACK=$deploy_stack"
               echo "export DEPLOY_MARKER_NAME=$marker_name"
             } >> "$BASH_ENV"
+      - setup-aws-oidc
       - run:
           name: Download release artifact
           no_output_timeout: 5m

@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  aws-cli: circleci/aws-cli@4.0
   cypress:   cypress-io/cypress@4
   coveralls: coveralls/coveralls@2
 
@@ -62,6 +63,11 @@ commands:
       - run:
           name: Install dependencies
           command: npm ci --prefer-offline --no-audit
+
+  setup-aws-oidc:
+    steps:
+      - aws-cli/setup:
+          role_arn: ${AWS_ROLE_ARN}
 
 # ------------------------------------------------------------
 # EXECUTOR  –  Node 22 LTS image with Chrome 137, FF 139, Edge 137
@@ -224,6 +230,19 @@ jobs:
               --environment-name="<< parameters.marker-environment >>" \
               --component-name="app-frontend" \
               --target-version="<< pipeline.git.tag >>"
+      - when:
+          condition:
+            equal: [ prod, << parameters.stage >> ]
+          steps:
+            - setup-aws-oidc:
+                role-arn: *aws-prod-role-arn
+      - when:
+          condition:
+            not:
+              equal: [ prod, << parameters.stage >> ]
+          steps:
+            - setup-aws-oidc:
+                role-arn: *aws-dev-role-arn
       - run:
           name: << parameters.deploy-name >>
           command: npm run deploy -- --stage=<< parameters.stage >>
@@ -302,6 +321,7 @@ jobs:
               --release-version="<< pipeline.git.tag >>" \
               --minified-path-prefix="${DATADOG_MINIFIED_PATH_PREFIX:-/}" \
               "${site_arg[@]}"
+      - setup-aws-oidc
       - run:
           name: Upload build artifact once per tag
           command: |

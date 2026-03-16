@@ -2,16 +2,16 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { CloudFrontClient } from '@aws-sdk/client-cloudfront';
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
-import { fromSSO, fromEnv } from '@aws-sdk/credential-providers';
+import { fromSSO } from '@aws-sdk/credential-providers';
 
 /**
- * Get AWS credentials based on environment
- * @returns {Object} AWS credentials provider
+ * Get the credential provider to use for AWS clients.
+ * Local development uses the configured AWS SSO profile, while CI falls back
+ * to the AWS SDK's default credential resolution.
+ * @returns {Object|undefined} AWS credentials provider
  */
 export function getCredentials() {
-  return process.env.CI ?
-    fromEnv() :
-    fromSSO({ profile: process.env.AWS_PROFILE || 'default' });
+  return process.env.CI ? undefined : fromSSO({ profile: process.env.AWS_PROFILE || 'default' });
 }
 
 /**
