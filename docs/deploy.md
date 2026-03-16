@@ -112,7 +112,7 @@ The tag pipeline in [`.circleci/config.yml`](../.circleci/config.yml):
 2. Uploads sourcemaps to Datadog
 3. Packages `dist/` as `/tmp/dist.tar.gz`
 4. Publishes the artifact and checksum once per tag to:
-   - bucket: `rw-frontend-artifacts`
+   - bucket: `rw-frontend-artifacts-dev`
    - prefix: `app-frontend`
 
 CircleCI assumes AWS roles via OIDC before AWS-backed steps:
@@ -127,7 +127,7 @@ The deploy pipeline in [`.circleci/deploy.yml`](../.circleci/deploy.yml):
 1. Requires:
    - `pipeline.deploy.environment_name`
    - `pipeline.deploy.target_version`
-2. Downloads the tagged artifact from `rw-frontend-artifacts/app-frontend/<tag>/dist.tar.gz`
+2. Downloads the tagged artifact from `rw-frontend-artifacts-dev/app-frontend/<tag>/dist.tar.gz`
 3. Unpacks the artifact into `dist/`
 4. Runs:
 ```bash
@@ -143,6 +143,11 @@ Supported deploy environments:
 Role selection:
 - `qa:*` deploys assume the dev account role
 - `sandbox:*` and `prod:*` deploys assume the prod account role
+
+Artifact ownership:
+- the release artifact is published to the dev-account bucket
+- QA deploys read that bucket with the dev role
+- sandbox and prod deploys read that same bucket with the prod role
 
 ## Triggering A CircleCI Deploy
 

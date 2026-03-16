@@ -10,7 +10,7 @@ import { parseArgs } from 'node:util';
 import { getCredentials, getRegion } from './lib/aws.js';
 
 function resolveInputs(values) {
-  const bucket = values.bucket || process.env.ARTIFACT_BUCKET || 'rw-frontend-artifacts';
+  const bucket = values.bucket || process.env.ARTIFACT_BUCKET || 'rw-frontend-artifacts-dev';
   const prefix = values.prefix || process.env.ARTIFACT_PREFIX || 'app-frontend';
   const tag = values.tag || process.env.ARTIFACT_TAG;
   const artifactPath = values.artifact || process.env.ARTIFACT_PATH || '/tmp/dist.tar.gz';

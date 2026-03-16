@@ -327,7 +327,7 @@ jobs:
           command: |
             set -euo pipefail
             npm run artifact:publish -- \
-              --bucket=rw-frontend-artifacts \
+              --bucket=rw-frontend-artifacts-dev \
               --prefix=app-frontend \
               --tag="<< pipeline.git.tag >>" \
               --artifact=/tmp/dist.tar.gz
@@ -459,6 +459,6 @@ workflows:
       - publish-build-artifact:
           <<: *tag-filter
           name: publish release artifact
-          context: aws-prod
+          context: aws-dev
           requires:
             - build

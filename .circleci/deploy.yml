@@ -114,7 +114,7 @@ jobs:
           command: |
             set -euo pipefail
             npm run artifact:download -- \
-              --bucket=rw-frontend-artifacts \
+              --bucket=rw-frontend-artifacts-dev \
               --prefix=app-frontend \
               --tag="$DEPLOY_TARGET_VERSION" \
               --artifact=/tmp/dist.tar.gz
