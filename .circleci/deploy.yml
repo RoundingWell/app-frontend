@@ -167,10 +167,9 @@ workflows:
 
   deploy-non-qa:
     when:
-      not:
-        matches:
-          pattern: '^qa:[a-z0-9*-]+$'
-          value: << pipeline.deploy.environment_name >>
+      matches:
+        pattern: '^(sandbox|prod):[a-z0-9*-]+$'
+        value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
           context: aws-prod
