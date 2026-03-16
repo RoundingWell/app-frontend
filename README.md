@@ -30,7 +30,7 @@ $ npm i
 
 ## Releasing
 
-Releases are tag-based and deployed by CircleCI from version tags.
+Releases are tag-based. CircleCI publishes a release artifact from version tags, and deploys consume that artifact.
 Deployment steps for local and CircleCI runs are documented in `docs/deploy.md`.
 
 Allowed release sources:
