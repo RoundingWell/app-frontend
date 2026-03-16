@@ -81,12 +81,12 @@ export function startRum() {
   datadogRum.startSessionReplayRecording();
 }
 
-export function addError(error) {
+export function addError(error, context) {
   if (!rumReady) {
     console.error(error); // eslint-disable-line no-console
     return;
   }
-  datadogRum.addError(error);
+  datadogRum.addError(error, context);
 }
 
 /**

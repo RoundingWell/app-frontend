@@ -30,7 +30,7 @@ import 'scss/print.scss';
 import 'scss/pdf.scss';
 
 import 'scss/loader.scss';
-const { extend, map, debounce, forEach, isEmpty, isObject, uniqueId } = Formio.Utils._;
+const { extend, map, debounce, forEach, isEmpty, uniqueId } = Formio.Utils._;
 
 const pending = new Map();
 const namedHandlers = new Map();
@@ -258,9 +258,9 @@ function handleNamedMessage(message, value, error) {
     return;
   }
 
-  const errorValue = error || value;
-  const errorMessage = isObject(errorValue) ? JSON.stringify(errorValue) : errorValue;
-  addError(new Error(`Unhandled message: ${ message } ${ errorMessage }`));
+  addError(new Error(`Unhandled postMessage: ${ message }`), {
+    payload: error ?? value,
+  });
 }
 
 function handleMessage({ data, origin }) {
