@@ -3,7 +3,7 @@
 This document covers:
 - deploying locally to a single dev/sandbox stack
 - deploying locally to all stacks in a stage
-- how CircleCI deploys from release tags
+- how CircleCI publishes release artifacts and deploys them
 
 ## Prerequisites
 
@@ -21,6 +21,7 @@ npm run build
 ```
 4. Ensure AWS credentials are available.
 For local runs, scripts use AWS SSO credentials (`AWS_PROFILE`, default profile if unset).
+In CircleCI, AWS auth is provided via OIDC role assumption; long-lived access keys are not required.
 
 ## Local Dev Deploy Config File
 
@@ -101,32 +102,64 @@ AWS_PROFILE=<your-profile> npm run deploy -- --stage=sandbox
 
 This discovers all `careops-<stage>-*` stacks (with pagination) and deploys each one.
 
-## CircleCI Deploys
+## CircleCI Release Artifacts
 
-CircleCI deploy workflows run only for release tags matching:
+Release artifact publishing runs only for version tags matching:
 - `vYYMMDD.N`
 
-Current deploy workflows:
-- `deploy-sandboxes` (stage `sandbox`)
-- `deploy-prod` (stage `prod`)
+The tag pipeline in [`.circleci/config.yml`](../.circleci/config.yml):
+1. Builds `dist/`
+2. Uploads sourcemaps to Datadog
+3. Packages `dist/` as `/tmp/dist.tar.gz`
+4. Publishes the artifact and checksum once per tag to:
+   - bucket: `rw-frontend-artifacts-dev`
+   - prefix: `app-frontend`
 
-Each workflow does:
-1. `build` job produces `dist/`
-2. `release-approval` manual approval gate
-3. `deploy` job runs:
+CircleCI assumes AWS roles via OIDC before AWS-backed steps:
+- dev account: `arn:aws:iam::104566035342:role/CircleCIRole`
+- prod account: `arn:aws:iam::543732963292:role/CircleCIRole`
+
+## CircleCI Deploys
+
+Deploys run from the published release artifact, not directly from the tag build.
+
+The deploy pipeline in [`.circleci/deploy.yml`](../.circleci/deploy.yml):
+1. Requires:
+   - `pipeline.deploy.environment_name`
+   - `pipeline.deploy.target_version`
+2. Downloads the tagged artifact from `rw-frontend-artifacts-dev/app-frontend/<tag>/dist.tar.gz`
+3. Unpacks the artifact into `dist/`
+4. Runs:
 ```bash
-npm run deploy -- --stage=<stage>
+npm run deploy -- --stage=<stage> [--stack=<stack>]
 ```
 
-## Triggering CircleCI Deploy
+Supported deploy environments:
+- `qa:*`
+- `sandbox:*`
+- `prod:*`
+- specific stacks such as `qa:qa2`, `sandbox:banana`, `prod:apple`
 
-1. Create/push a release tag:
+Role selection:
+- `qa:*` deploys assume the dev account role
+- `sandbox:*` and `prod:*` deploys assume the prod account role
+
+Artifact ownership:
+- the release artifact is published to the dev-account bucket
+- QA deploys read that bucket with the dev role
+- sandbox and prod deploys read that same bucket with the prod role
+
+## Triggering A CircleCI Deploy
+
+1. Create and push a release tag:
 ```bash
 npm run release
 ```
-2. Open CircleCI pipeline for that tag.
-3. Approve `release-approval`.
-4. CircleCI runs deploy jobs for sandbox and prod workflows.
+2. Wait for the tag pipeline to publish the release artifact.
+3. In CircleCI Deploy, start a deploy using:
+   - `environment_name=<stage>:<stack|*>`
+   - `target_version=<release-tag>`
+4. The deploy pipeline downloads the artifact for that tag and deploys only the selected target environment.
 
 ## Troubleshooting
 
@@ -135,7 +168,8 @@ npm run release
   - Confirm CloudFormation stack naming convention.
 
 - `AWS credentials not available`
-  - Verify SSO login and `AWS_PROFILE`.
+  - Local deploy: verify SSO login and `AWS_PROFILE`.
+  - CircleCI deploy: verify the job assumed the expected `CircleCIRole` via `aws-cli/setup`.
 
 - `No CloudFront distribution found, skipping invalidation`
   - Expected when both `DistroId` and `DistroID` are absent from stack secret.

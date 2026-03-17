@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  aws-cli: circleci/aws-cli@4.0
   cypress:   cypress-io/cypress@4
   coveralls: coveralls/coveralls@2
 
@@ -62,6 +63,11 @@ commands:
       - run:
           name: Install dependencies
           command: npm ci --prefer-offline --no-audit
+
+  setup-aws-oidc:
+    steps:
+      - aws-cli/setup:
+          role_arn: ${AWS_ROLE_ARN}
 
 # ------------------------------------------------------------
 # EXECUTOR  –  Node 22 LTS image with Chrome 137, FF 139, Edge 137
@@ -191,63 +197,6 @@ jobs:
           paths:
             - dist
 
-  deploy:
-    docker:
-      - image: *node-image
-    parameters:
-      stage:
-        type: string
-      deploy-name:
-        type: string
-        default: Deploy to S3
-      marker-environment:
-        type: string
-        default: unknown
-      marker-deployment-name:
-        type: string
-        default: deploy
-    steps:
-      - checkout
-      - attach_workspace:
-          at: .
-      - restore-npm-cache
-      - install-dependencies
-      - run:
-          name: CircleCI Deploy Marker Plan
-          command: |
-            set -euo pipefail
-            if [ -z "<< pipeline.git.tag >>" ]; then
-              echo "No pipeline.git.tag; skipping deploy marker plan"
-              exit 0
-            fi
-            circleci run release plan "<< parameters.marker-deployment-name >>" \
-              --environment-name="<< parameters.marker-environment >>" \
-              --component-name="app-frontend" \
-              --target-version="<< pipeline.git.tag >>"
-      - run:
-          name: << parameters.deploy-name >>
-          command: npm run deploy -- --stage=<< parameters.stage >>
-      - run:
-          name: CircleCI Deploy Marker Success
-          when: on_success
-          command: |
-            set -euo pipefail
-            if [ -z "<< pipeline.git.tag >>" ]; then
-              echo "No pipeline.git.tag; skipping deploy marker success"
-              exit 0
-            fi
-            circleci run release update "<< parameters.marker-deployment-name >>" --status=SUCCESS
-      - run:
-          name: CircleCI Deploy Marker Failure
-          when: on_fail
-          command: |
-            set -euo pipefail
-            if [ -z "<< pipeline.git.tag >>" ]; then
-              echo "No pipeline.git.tag; skipping deploy marker failure"
-              exit 0
-            fi
-            circleci run release update "<< parameters.marker-deployment-name >>" --status=FAILED
-
   publish-build-artifact:
     docker:
       - image: *node-image
@@ -302,12 +251,13 @@ jobs:
               --release-version="<< pipeline.git.tag >>" \
               --minified-path-prefix="${DATADOG_MINIFIED_PATH_PREFIX:-/}" \
               "${site_arg[@]}"
+      - setup-aws-oidc
       - run:
           name: Upload build artifact once per tag
           command: |
             set -euo pipefail
             npm run artifact:publish -- \
-              --bucket=rw-frontend-artifacts \
+              --bucket=rw-frontend-artifacts-dev \
               --prefix=app-frontend \
               --tag="<< pipeline.git.tag >>" \
               --artifact=/tmp/dist.tar.gz
@@ -439,6 +389,6 @@ workflows:
       - publish-build-artifact:
           <<: *tag-filter
           name: publish release artifact
-          context: aws-prod
+          context: aws-dev
           requires:
             - build

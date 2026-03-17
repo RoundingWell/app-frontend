@@ -256,7 +256,7 @@ function printSummary({ tagName, headSha, branchName, dryRun }) {
   writeLine(`Tag: ${ tagName }`);
   writeLine(`Commit SHA: ${ headSha }`);
   writeLine(`Branch: ${ branchName }`);
-  writeLine('Next step: CircleCI should now deploy from this tag.');
+  writeLine('Next step: CircleCI should now publish the release artifact for this tag.');
 }
 
 async function main() {
