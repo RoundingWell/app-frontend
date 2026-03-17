@@ -12,6 +12,12 @@ export default App.extend({
     this.settings = settings;
   },
   getSetting(settingName) {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+    const clinicianSettings = currentUser.get('settings');
+    const clinicianSetting = get(clinicianSettings, settingName);
+
+    if (!isUndefined(clinicianSetting)) return clinicianSetting;
+
     const currentWorkspace = Radio.request('workspace', 'current');
     const workspaceSettings = currentWorkspace.get('settings');
     const workspaceSetting = get(workspaceSettings, settingName);
