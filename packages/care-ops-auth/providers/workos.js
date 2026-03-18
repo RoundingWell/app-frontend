@@ -24,12 +24,18 @@ export class WorkosAuthProvider extends AuthProvider {
   }
 
   async _initClient(clientId, success) {
+    let client;
     const clientConfig = {
       redirectUri: location.origin + AuthProvider.PATH_AUTHD,
       onRedirectCallback: ({ user, state }) => {
         const path = state;
         if (!user) {
           this.loginPrompt(path);
+          return;
+        }
+
+        if (path === AuthProvider.PATH_LOGOUT) {
+          client.signOut({ returnTo: location.origin });
           return;
         }
 
@@ -40,7 +46,8 @@ export class WorkosAuthProvider extends AuthProvider {
       ...this.config.createClientOptions,
     };
 
-    return createClient(clientId, clientConfig);
+    client = createClient(clientId, clientConfig);
+    return client;
   }
 
   async auth(success) {
@@ -62,12 +69,8 @@ export class WorkosAuthProvider extends AuthProvider {
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
-      try {
-        await this.client.getAccessToken();
-      } catch {
-        // Ignore bootstrap failures and let signOut() handle the no-session case.
-      }
-      this.client.signOut({ returnTo: location.origin });
+      // Force a login to ensure the correct session id is logged out
+      this.client.signIn({ state: AuthProvider.PATH_LOGOUT });
       return;
     }
 
