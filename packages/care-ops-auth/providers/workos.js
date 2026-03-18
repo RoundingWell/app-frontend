@@ -62,6 +62,11 @@ export class WorkosAuthProvider extends AuthProvider {
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
+      try {
+        await this.client.getAccessToken();
+      } catch {
+        // Ignore bootstrap failures and let signOut() handle the no-session case.
+      }
       this.client.signOut({ returnTo: location.origin });
       return;
     }
