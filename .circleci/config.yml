@@ -68,6 +68,7 @@ commands:
     steps:
       - aws-cli/setup:
           role_arn: ${AWS_ROLE_ARN}
+          role_session_name: app-frontend-${CIRCLE_BUILD_NUM}
 
 # ------------------------------------------------------------
 # EXECUTOR  –  Node 22 LTS image with Chrome 137, FF 139, Edge 137

@@ -55,6 +55,7 @@ commands:
     steps:
       - aws-cli/setup:
           role_arn: ${AWS_ROLE_ARN}
+          role_session_name: app-frontend-${CIRCLE_BUILD_NUM}
 
 jobs:
   deploy-from-artifact:
