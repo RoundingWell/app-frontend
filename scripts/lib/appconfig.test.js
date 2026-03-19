@@ -16,7 +16,7 @@ test('buildAppConfig returns auth.provider=auth0 when WorkOS client id is missin
       Auth0Organization: 'org_123',
     },
     stage: 'prod',
-    stack: 'customer-a',
+    organization: 'customer-a',
     version: 'abc1234',
     deploymentTime: '2026-02-12T00:00:00-06:00',
     deploymentSource: 'Manual Deployment',
@@ -25,6 +25,7 @@ test('buildAppConfig returns auth.provider=auth0 when WorkOS client id is missin
   assert.deepEqual(config, {
     app: {
       stage: 'prod',
+      organization: 'customer-a',
       stack: 'customer-a',
       version: 'abc1234',
       env: 'prod',
@@ -87,7 +88,7 @@ test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
       Auth0ClientID: 'auth0-client',
     },
     stage: 'qa',
-    stack: 'qa2',
+    organization: 'qa2',
     version: 'def5678',
     deploymentTime: '2026-02-12T08:00:00-06:00',
     deploymentSource: 'Continuous Integration',
@@ -96,6 +97,7 @@ test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
   assert.deepEqual(config, {
     app: {
       stage: 'qa',
+      organization: 'qa2',
       stack: 'qa2',
       version: 'def5678',
       env: 'qa',

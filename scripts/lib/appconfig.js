@@ -94,12 +94,12 @@ function removeNullValues(obj) {
 }
 
 /**
- * Build appconfig object from stack secrets
+ * Build appconfig object from organization secrets
  * Matches backend AppConfig::toArray() logic
  * @param {Object} params - Build params
- * @param {Object} params.secrets - Stack secrets from Secrets Manager
+ * @param {Object} params.secrets - Organization secrets from Secrets Manager
  * @param {string} params.stage - Deployment stage
- * @param {string} params.stack - Stack identifier
+ * @param {string} params.organization - Organization identifier
  * @param {string} params.version - Frontend version string
  * @param {string} params.deploymentTime - Deployment time in ISO8601
  * @param {string} params.deploymentSource - Deployment source
@@ -108,7 +108,7 @@ function removeNullValues(obj) {
 export function buildAppConfig({
   secrets,
   stage,
-  stack,
+  organization,
   version,
   deploymentTime,
   deploymentSource,
@@ -117,7 +117,7 @@ export function buildAppConfig({
   const config = {
     app: {
       stage,
-      stack,
+      organization,
       version,
       name: secrets.OrganizationName || '',
     },
@@ -137,6 +137,7 @@ export function buildAppConfig({
   // TEMP legacy compatibility block.
   // Remove after downstream consumers fully migrate to app.stage/app.version.
   config.app.env = stage;
+  config.app.stack = organization;
   config.app.disableLoginPrompt = config.auth.disableLoginPrompt;
   config.versions = {
     frontend: version,

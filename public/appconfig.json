@@ -1,7 +1,7 @@
 {
   "app": {
     "stage": "dev",
-    "stack": "localhost",
+    "organization": "localhost",
     "name": "Salvation Clinic",
     "version": "dev"
   },

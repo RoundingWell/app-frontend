@@ -67,35 +67,35 @@ All development work should branch off of and PR into the `develop` branch.
 
 #### Backend Setup
 
-To develop against a remote AWS dev stack:
+To develop against a remote AWS dev organization:
 
-1. **Deploy your backend stack** (replace `stack` with your stack name, e.g., `john`):
+1. **Deploy your backend organization** (replace `john` with your organization slug):
    ```
    bin/console deploy:dev john
    ```
 
 2. **After your first login**, prepare a clinician account:
    ```
-   bin/remote stack console clinician:prepare your.email@roundingwell.com
+   bin/remote <organization> console clinician:prepare your.email@roundingwell.com
    ```
-   For example, if your stack name is `john`:
+   For example, if your organization slug is `john`:
    ```
    bin/remote john console clinician:prepare john.doe@roundingwell.com
    ```
 
 #### Frontend Setup
 
-Create a `.env` file in the project root with your dev stack URL:
+Create a `.env` file in the project root with your dev organization URL:
 ```
-VITE_DEV_API_URL=https://stack.roundingwell.dev
+VITE_DEV_API_URL=https://john.roundingwell.dev
 ```
-Replace `stack` with your stack name (e.g., `https://john.roundingwell.dev`).
+Replace `john` with your organization slug.
 
 ### Running the Development Server
 
 There are two npm commands most useful for development:
 
-Useful for local development with vite local dev-server and your remote dev stack (https://github.com/RoundingWell/care-ops-backend)
+Useful for local development with vite local dev-server and your remote dev organization (https://github.com/RoundingWell/care-ops-backend)
 ```
 $ npm run dev
 ```

@@ -1,8 +1,8 @@
 # Deployment Runbook
 
 This document covers:
-- deploying locally to a single dev/sandbox stack
-- deploying locally to all stacks in a stage
+- deploying locally to a single dev/sandbox organization
+- deploying locally to all organizations in a stage
 - how CircleCI publishes release artifacts and deploys them
 
 ## Prerequisites
@@ -30,7 +30,7 @@ Use the existing repo `.env` file and set deploy defaults:
 ```bash
 DEPLOY_AWS_PROFILE=dev
 DEPLOY_STAGE=dev
-DEPLOY_STACK=paul
+DEPLOY_ORGANIZATION=paul
 ```
 
 Run deploy with local defaults:
@@ -39,7 +39,7 @@ Run deploy with local defaults:
 npm run deploy:dev
 ```
 
-Deploy QA stacks directly (no stage/stack args needed):
+Deploy QA organizations directly (no stage/organization args needed):
 
 ```bash
 npm run deploy:qa
@@ -47,10 +47,10 @@ npm run deploy:qa2
 ```
 
 Notes:
-- CLI args still work and override stage/stack values:
-  - `npm run deploy:dev -- --stage=qa --stack=qa2`
+- CLI args still work and override stage/organization values:
+  - `npm run deploy:dev -- --stage=qa --organization=qa2`
 - If `AWS_PROFILE` is already set in your shell, it takes precedence over `DEPLOY_AWS_PROFILE`.
-- QA app stack names:
+- QA app organization identifiers:
   - `careops-qa-quality-assurance` (`npm run deploy:qa`)
   - `careops-qa-qa2` (`npm run deploy:qa2`)
 
@@ -71,36 +71,36 @@ Typical names look like:
 - `dev`
 - `localstack`
 
-## Local Deploy: Single Dev Stack
+## Local Deploy: Single Dev Organization
 
-Deploy a single stack by passing both `--stage` and `--stack`.
+Deploy a single organization by passing both `--stage` and `--organization`.
 
 ```bash
-AWS_PROFILE=<your-profile> npm run deploy -- --stage=dev --stack=<stack-id>
+AWS_PROFILE=<your-profile> npm run deploy -- --stage=dev --organization=<organization-id>
 ```
 
 Example:
 ```bash
-AWS_PROFILE=default npm run deploy -- --stage=dev --stack=paul
+AWS_PROFILE=default npm run deploy -- --stage=dev --organization=paul
 ```
 
 This resolves CloudFormation stack:
-- `careops-<stage>-<stack-id>`
+- `careops-<stage>-<organization-id>`
 
 And then:
-1. Generates `dist/appconfig.json` from Secrets Manager secret `customer/<stage>/<stack-id>`
-2. Uploads `dist/` to the stack's WebsiteBucket
+1. Generates `dist/appconfig.json` from Secrets Manager secret `customer/<stage>/<organization-id>`
+2. Uploads `dist/` to the organization's WebsiteBucket
 3. Invalidates CloudFront if the secret contains `DistroId` or `DistroID`
 
-## Local Deploy: All Stacks In A Stage
+## Local Deploy: All Organizations In A Stage
 
-Deploy every stack in a stage by omitting `--stack`:
+Deploy every organization in a stage by omitting `--organization`:
 
 ```bash
 AWS_PROFILE=<your-profile> npm run deploy -- --stage=sandbox
 ```
 
-This discovers all `careops-<stage>-*` stacks (with pagination) and deploys each one.
+This discovers all `careops-<stage>-*` organizations (with pagination) and deploys each one.
 
 ## CircleCI Release Artifacts
 
@@ -131,14 +131,14 @@ The deploy pipeline in [`.circleci/deploy.yml`](../.circleci/deploy.yml):
 3. Unpacks the artifact into `dist/`
 4. Runs:
 ```bash
-npm run deploy -- --stage=<stage> [--stack=<stack>]
+npm run deploy -- --stage=<stage> [--organization=<organization>]
 ```
 
 Supported deploy environments:
 - `qa:*`
 - `sandbox:*`
 - `prod:*`
-- specific stacks such as `qa:qa2`, `sandbox:banana`, `prod:apple`
+- specific organizations such as `qa:qa2`, `sandbox:banana`, `prod:apple`
 
 Role selection:
 - `qa:*` deploys assume the dev account role
@@ -157,14 +157,18 @@ npm run release
 ```
 2. Wait for the tag pipeline to publish the release artifact.
 3. In CircleCI Deploy, start a deploy using:
-   - `environment_name=<stage>:<stack|*>`
+   - `environment_name=<stage>:<organization|*>`
    - `target_version=<release-tag>`
 4. The deploy pipeline downloads the artifact for that tag and deploys only the selected target environment.
 
+The backend and AWS infrastructure must already expose the renamed organization contract for this repo to deploy successfully:
+- CloudFormation stack names must resolve as `careops-<stage>-<organization>`
+- Secrets Manager entries must resolve as `customer/<stage>/<organization>`
+
 ## Troubleshooting
 
-- `No stacks found: careops-<stage>-*`
-  - Check `--stage` and `--stack` values.
+- `No organizations found: careops-<stage>-*`
+  - Check `--stage` and `--organization` values.
   - Confirm CloudFormation stack naming convention.
 
 - `AWS credentials not available`
@@ -172,4 +176,4 @@ npm run release
   - CircleCI deploy: verify the job assumed the expected `CircleCIRole` via `aws-cli/setup`.
 
 - `No CloudFront distribution found, skipping invalidation`
-  - Expected when both `DistroId` and `DistroID` are absent from stack secret.
+  - Expected when both `DistroId` and `DistroID` are absent from the organization secret.
