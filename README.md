@@ -17,14 +17,14 @@ We use [npm](npmjs.com) for our package manager
 You will need [Node.js](http://www.nodejs.org). It is recommended that devs [install nvm](https://github.com/creationix/nvm#install-script) the node version manager. NVM allows you to change node versions on the fly.
 
 Once NVM is installed, activate the right Node version with:
-```
+```shell
 $ nvm use
 ```
 
 ## Installing Project Dependencies
 
 Then you will need to run
-```
+```shell
 $ npm i
 ```
 
@@ -38,12 +38,12 @@ Allowed release sources:
 - local branch matching `release/*`
 
 Release command:
-```
+```shell
 $ npm run release
 ```
 
 Dry run (runs checks and prints the next tag without creating/pushing):
-```
+```shell
 $ npm run release -- --dry-run
 ```
 
@@ -70,44 +70,44 @@ All development work should branch off of and PR into the `develop` branch.
 To develop against a remote AWS dev organization:
 
 1. **Deploy your backend organization** (replace `john` with your organization slug):
-   ```
+   ```shell
    bin/console deploy:dev john
    ```
 
 2. **After your first login**, prepare a clinician account:
+   ```shell
+   bin/remote <organization> console clinician:prepare <email>
    ```
-   bin/remote <organization> console clinician:prepare your.email@roundingwell.com
-   ```
-   For example, if your organization slug is `john`:
-   ```
+   For example, if your organization is `john` and your email is `john.doe@roundingwell.com`:
+   ```shell
    bin/remote john console clinician:prepare john.doe@roundingwell.com
    ```
 
 #### Frontend Setup
 
 Create a `.env` file in the project root with your dev organization URL:
-```
+```env
 VITE_DEV_API_URL=https://john.roundingwell.dev
 ```
-Replace `john` with your organization slug.
+_Note: Replace `john` with **your** organization slug._
 
 ### Running the Development Server
 
 There are two npm commands most useful for development:
 
-Useful for local development with vite local dev-server and your remote dev organization (https://github.com/RoundingWell/care-ops-backend)
-```
+Use this for local development with the Vite dev server against your remote [care-ops-backend](https://github.com/RoundingWell/care-ops-backend) environment:
+```shell
 $ npm run dev
 ```
 
-To develop in the [Cypress](cypress.io) gui:
-```
+Use this to develop in the [Cypress](https://cypress.io) GUI:
+```shell
 $ npm test
 ```
 
-Occasionally the vite server does not release the port, so dev-ing in either environment uses the wrong port and fails.
-To fix this try:
-```
+Occasionally the Vite server does not release the port, so development in either environment will use the wrong port and fail.
+To fix this, try:
+```shell
 $ npm stop
 ```
 If this doesn't work try turning your computer off and then on again 😜

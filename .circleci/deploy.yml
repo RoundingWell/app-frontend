@@ -105,7 +105,7 @@ jobs:
             esac
 
             if [ -z "$deploy_organization" ]; then
-              echo "Deploy organization segment cannot be empty in target environment: $target_env"
+              echo "Deploy organization cannot be empty for target environment: $target_env"
               exit 1
             fi
 

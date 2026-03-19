@@ -101,7 +101,7 @@ Deploy every organization in a stage by omitting `--organization`:
 AWS_PROFILE=<your-profile> npm run deploy -- --stage=sandbox
 ```
 
-This pages CloudFormation results, filters by the `stage=<stage>` tag, and deploys each matching organization bucket.
+This pages CloudFormation results, filters by the `stage=<stage>` tag, and deploys each matching environment.
 
 ## CircleCI Release Artifacts
 
@@ -139,7 +139,7 @@ Supported deploy environments:
 - `qa:*`
 - `sandbox:*`
 - `prod:*`
-- specific envs such as `qa:qa2`, `sandbox:banana`, `prod:apple`
+- specific environments such as `qa:qa2`, `sandbox:banana`, `prod:apple`
 
 Role selection:
 - `qa:*` deploys assume the dev account role
@@ -160,22 +160,22 @@ npm run release
 3. In CircleCI Deploy, start a deploy using:
    - `environment_name=<stage>:<organization|*>`
    - `target_version=<release-tag>`
-4. The deploy pipeline downloads the artifact for that tag and deploys only the selected target environment.
+4. The deploy pipeline downloads the artifact for that tag and deploys the target environment.
 
-The backend and AWS infrastructure must already expose the environment deploy contract for this repo to deploy successfully:
-- the CloudFormation deploy target must carry `stage` and `organization` tags
-- the matching CloudFormation result must expose a `WebsiteBucket` output
-- Secrets Manager entries must resolve as `customer/<stage>/<organization>`
+The AWS account must expose the deploy target to run successfully:
+- Secrets Manager must have a secret named `customer/<stage>/<organization>`
+- CloudFormation stack must have `stage` and `organization` tags
+- CloudFormation stack must have a `WebsiteBucket` output
 
 ## Troubleshooting
 
 - `No environments found for stage=<stage>`
   - Check `--stage` and `--organization` values.
-  - Confirm the CloudFormation tags include the expected `stage` and `organization` values.
+  - Confirm the CloudFormation tags include `stage` and `organization`.
 
 - `AWS credentials not available`
   - Local deploy: verify SSO login and `AWS_PROFILE`.
   - CircleCI deploy: verify the job assumed the expected `CircleCIRole` via `aws-cli/setup`.
 
 - `No CloudFront distribution found, skipping invalidation`
-  - Expected when both `DistroId` and `DistroID` are absent from the organization secret.
+  - Verify that `DistroId` (or `DistroID`) is defined in the organization secret.

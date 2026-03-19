@@ -7,7 +7,7 @@ let rumReady = false;
 /**
  * Initialise Datadog Logs.
  * @param {Object} opts
- * @param {string} opts.env          - appConfig.stage + '.' + appConfig.organization
+ * @param {string} opts.env          - `${ appConfig.stage }.${ appConfig.organization }`
  * @param {string} opts.clientToken
  * @param {string} opts.service
  * @param {string} opts.version

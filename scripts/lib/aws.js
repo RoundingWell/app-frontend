@@ -80,13 +80,13 @@ export function getOrganizationSecretName(stage, organization) {
 }
 
 /**
- * Fetch organization secrets from AWS Secrets Manager
+ * Fetch organization secret from AWS Secrets Manager
  * @param {SecretsManagerClient} secretsClient - Secrets Manager client
  * @param {string} stage - Deployment stage
  * @param {string} organization - Organization identifier
  * @returns {Promise<Object>} Parsed secret object
  */
-export async function fetchOrganizationSecrets(secretsClient, stage, organization) {
+export async function fetchOrganizationSecret(secretsClient, stage, organization) {
   const secretName = getOrganizationSecretName(stage, organization);
   return fetchSecretJson(secretsClient, secretName);
 }

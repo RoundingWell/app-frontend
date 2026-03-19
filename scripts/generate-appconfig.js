@@ -8,13 +8,21 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import { buildAppConfig } from './lib/appconfig.js';
-import { createSecretsManagerClient, fetchOrganizationSecrets, getOrganizationSecretName } from './lib/aws.js';
+import { createSecretsManagerClient, fetchOrganizationSecret, getOrganizationSecretName } from './lib/aws.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function isMainModule() {
+  if (!process.argv[1]) {
+    return false;
+  }
+
+  return path.resolve(process.argv[1]) === __filename;
+}
 
 /**
  * Get frontend version for appconfig
@@ -110,14 +118,14 @@ async function fetchAppConfigSecrets(client, stage, organization) {
   const secretName = getOrganizationSecretName(stage, organization);
 
   try {
-    return await fetchOrganizationSecrets(client, stage, organization);
+    return await fetchOrganizationSecret(client, stage, organization);
   } catch(error) {
     handleSecretsError(error, secretName);
   }
 }
 
 /**
- * Generate and write appconfig.json for an organization
+ * Generate and write appconfig.json for an organization.
  * @param {string} organization - Organization identifier
  * @param {string} stage - Deployment stage
  */
@@ -154,6 +162,6 @@ async function main() {
   }
 }
 
-if (process.argv[1] === __filename) {
+if (isMainModule()) {
   main();
 }

@@ -8,7 +8,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { writeAppConfig } from './generate-appconfig.js';
-import { createAwsClients, fetchOrganizationSecrets } from './lib/aws.js';
+import { createAwsClients, fetchOrganizationSecret } from './lib/aws.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,12 +18,12 @@ const DEPLOYABLE_STATUSES = new Set([
   'UPDATE_ROLLBACK_COMPLETE',
 ]);
 
-function formatEnvironmentName(stage, organization) {
-  return `${ stage }.${ organization }`;
-}
+function isMainModule() {
+  if (!process.argv[1]) {
+    return false;
+  }
 
-function shouldSkipOrganization(stage, organization) {
-  return stage.toLowerCase() === 'prod' && organization.endsWith('-sandbox');
+  return path.resolve(process.argv[1]) === __filename;
 }
 
 /**
@@ -40,6 +40,10 @@ function getTagValue(deploymentTarget, key) {
   return deploymentTarget.Tags?.find(tag => tag.Key === key)?.Value || '';
 }
 
+function getTargetName(deploymentTarget) {
+  return deploymentTarget.StackName || '<unknown-stack>';
+}
+
 function isDeployableTarget(deploymentTarget) {
   return DEPLOYABLE_STATUSES.has(deploymentTarget.StackStatus);
 }
@@ -51,7 +55,6 @@ function matchesOrganizationTarget(deploymentTarget, stage, filterOrganization) 
   if (targetStage !== stage) return false;
   if (!targetOrganization) return false;
   if (filterOrganization && targetOrganization !== filterOrganization) return false;
-  if (shouldSkipOrganization(stage, targetOrganization)) return false;
 
   return true;
 }
@@ -63,7 +66,7 @@ function matchesOrganizationTarget(deploymentTarget, stage, filterOrganization) 
  * @param {string} filterOrganization - Optional specific organization identifier to filter
  * @returns {Promise<Map>} Map of organization identifiers to bucket names
  */
-async function getStageOrganizations(cfClient, stage, filterOrganization) {
+async function listStageOrganizations(cfClient, stage, filterOrganization) {
   const organizationBuckets = new Map();
   let nextToken;
 
@@ -93,11 +96,22 @@ function addOrganizationsFromPage(organizationBuckets, response, stage, filterOr
     if (!isDeployableTarget(deploymentTarget)) continue;
     if (!matchesOrganizationTarget(deploymentTarget, stage, filterOrganization)) continue;
 
-    const organizationIdentifier = getTagValue(deploymentTarget, 'organization');
     const bucketName = getWebsiteBucketOutput(deploymentTarget);
-    if (bucketName) {
-      organizationBuckets.set(organizationIdentifier, bucketName);
+    const organizationIdentifier = getTagValue(deploymentTarget, 'organization');
+
+    if (!bucketName) {
+      throw new Error(
+        `CloudFormation target ${ getTargetName(deploymentTarget) } matched stage=${ stage } and organization=${ organizationIdentifier } but has no WebsiteBucket output`,
+      );
     }
+
+    if (organizationBuckets.has(organizationIdentifier)) {
+      throw new Error(
+        `Duplicate CloudFormation targets found for stage=${ stage } and organization=${ organizationIdentifier }`,
+      );
+    }
+
+    organizationBuckets.set(organizationIdentifier, bucketName);
   }
 }
 
@@ -212,7 +226,7 @@ async function invalidateCloudFront(cloudFrontClient, organization, distroId) {
   });
 
   await cloudFrontClient.send(command);
-  process.stdout.write(`CloudFront invalidation created for organization: ${ organization }\n`);
+  process.stdout.write(`CloudFront invalidation created for distribution ${ distroId } of ${ organization }\n`);
 }
 
 /**
@@ -224,7 +238,7 @@ async function invalidateCloudFront(cloudFrontClient, organization, distroId) {
  * @param {string} distDir - Path to dist directory
  */
 async function deployToOrganization(clients, stage, organization, bucketName, distDir) {
-  process.stdout.write(`\nDeploying environment: ${ formatEnvironmentName(stage, organization) }\n`);
+  process.stdout.write(`\nDeploying ${ organization } (${ stage })\n`);
 
   await generateAppConfig(stage, organization);
 
@@ -232,7 +246,7 @@ async function deployToOrganization(clients, stage, organization, bucketName, di
   await uploadDirectory(clients.s3, bucketName, distDir);
 
   try {
-    const secrets = await fetchOrganizationSecrets(clients.secretsManager, stage, organization);
+    const secrets = await fetchOrganizationSecret(clients.secretsManager, stage, organization);
     const distroId = secrets.DistroId || secrets.DistroID;
     if (distroId) {
       await invalidateCloudFront(clients.cloudFront, organization, distroId);
@@ -243,7 +257,7 @@ async function deployToOrganization(clients, stage, organization, bucketName, di
     process.stderr.write(`Warning: Could not invalidate CloudFront: ${ error.message }\n`);
   }
 
-  process.stdout.write(`Deployment complete for environment: ${ formatEnvironmentName(stage, organization) }\n`);
+  process.stdout.write(`Deployed ${ organization } (${ stage })\n`);
 }
 
 export function resolveDeployInputs(values) {
@@ -257,7 +271,7 @@ export function resolveDeployInputs(values) {
 
   if (!stage) {
     process.stderr.write('Error: --stage is required (or set DEPLOY_STAGE)\n');
-    process.stderr.write('Usage: npm run deploy -- --stage=prod [--organization=qa2]\n');
+    process.stderr.write('Usage: npm run deploy -- --stage=prod [--organization=salvation]\n');
     process.stderr.write('   or: npm run deploy:dev (uses .env)\n');
     process.exit(1);
   }
@@ -292,7 +306,7 @@ async function main() {
 
   process.stdout.write(`Querying CloudFormation organizations by tags for stage: ${ stage }${ organizationFilter }\n`);
 
-  const organizationBuckets = await getStageOrganizations(clients.cloudFormation, stage, filterOrganization);
+  const organizationBuckets = await listStageOrganizations(clients.cloudFormation, stage, filterOrganization);
 
   if (organizationBuckets.size === 0) {
     process.stderr.write(formatNoOrganizationsError(stage, filterOrganization));
@@ -313,7 +327,7 @@ async function main() {
   process.stdout.write('\nAll deployments complete!\n');
 }
 
-if (process.argv[1] === __filename) {
+if (isMainModule()) {
   main().catch(error => {
     process.stderr.write(`Deployment failed: ${ error.message }\n`);
     process.exit(1);
