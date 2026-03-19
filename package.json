@@ -48,7 +48,6 @@
     "editorconfig": "editorconfig-checker",
     "release": "node ./scripts/release.js",
     "release:dry-run": "node ./scripts/release.js --dry-run",
-    "release:legacy-branch": "node ./scripts/release-branch-legacy.js",
     "prestart": "npm run build",
     "start": "vite preview",
     "stop": "pkill -f vite || true && rimraf node_modules/.vite"
