@@ -5,7 +5,7 @@
     "name": "Salvation Clinic",
     "version": "dev"
   },
-  "auth": {
+  "~auth": {
     "provider": "auth0",
     "disableLoginPrompt": true,
     "config": {
@@ -19,12 +19,14 @@
       "useRefreshTokens": true
     }
   },
-  "~auth": {
+  "auth": {
     "provider": "workos",
     "disableLoginPrompt": false,
     "config": {
       "clientId": "client_01J7M1FVZZMHM6KTVTN5ZKRME1",
-      "createClientOptions": {}
+      "createClientOptions": {
+        "devMode": true
+      }
     }
   },
   "datadog": {

@@ -122,6 +122,7 @@ test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
         clientId: 'workos-client',
         createClientOptions: {
           apiHostname: 'workos.example.com',
+          devMode: true,
         },
       },
     },
@@ -131,7 +132,26 @@ test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
       clientId: 'workos-client',
       createClientOptions: {
         apiHostname: 'workos.example.com',
+        devMode: true,
       },
     },
   });
+});
+
+test('buildAppConfig omits WorkOS devMode outside dev and qa', () => {
+  const config = buildAppConfig({
+    secrets: {
+      OrganizationName: 'Acme',
+      WorkOsClientId: 'workos-client',
+      WorkOsApiDomain: 'workos.example.com',
+    },
+    stage: 'prod',
+    organization: 'customer-a',
+    version: 'ghi9012',
+    deploymentTime: '2026-02-12T08:00:00-06:00',
+    deploymentSource: 'Continuous Integration',
+  });
+
+  assert.equal(config.auth.config.createClientOptions.devMode, undefined);
+  assert.equal(config.workos.createClientOptions.devMode, undefined);
 });
