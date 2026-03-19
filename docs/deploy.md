@@ -71,9 +71,9 @@ Typical names look like:
 - `dev`
 - `localstack`
 
-## Local Deploy: Single Dev Organization
+## Local Deploy: Single Dev Environment
 
-Deploy a single organization by passing both `--stage` and `--organization`.
+Deploy a single environment by passing both `--stage` and `--organization`.
 
 ```bash
 AWS_PROFILE=<your-profile> npm run deploy -- --stage=dev --organization=<organization-id>
@@ -84,8 +84,9 @@ Example:
 AWS_PROFILE=default npm run deploy -- --stage=dev --organization=paul
 ```
 
-This resolves CloudFormation stack:
-- `careops-<stage>-<organization-id>`
+This discovers the deploy target in CloudFormation by tags:
+- `stage=<stage>`
+- `organization=<organization-id>`
 
 And then:
 1. Generates `dist/appconfig.json` from Secrets Manager secret `customer/<stage>/<organization-id>`
@@ -100,7 +101,7 @@ Deploy every organization in a stage by omitting `--organization`:
 AWS_PROFILE=<your-profile> npm run deploy -- --stage=sandbox
 ```
 
-This discovers all `careops-<stage>-*` organizations (with pagination) and deploys each one.
+This pages CloudFormation results, filters by the `stage=<stage>` tag, and deploys each matching organization bucket.
 
 ## CircleCI Release Artifacts
 
@@ -138,7 +139,7 @@ Supported deploy environments:
 - `qa:*`
 - `sandbox:*`
 - `prod:*`
-- specific organizations such as `qa:qa2`, `sandbox:banana`, `prod:apple`
+- specific envs such as `qa:qa2`, `sandbox:banana`, `prod:apple`
 
 Role selection:
 - `qa:*` deploys assume the dev account role
@@ -161,15 +162,16 @@ npm run release
    - `target_version=<release-tag>`
 4. The deploy pipeline downloads the artifact for that tag and deploys only the selected target environment.
 
-The backend and AWS infrastructure must already expose the renamed organization contract for this repo to deploy successfully:
-- CloudFormation stack names must resolve as `careops-<stage>-<organization>`
+The backend and AWS infrastructure must already expose the environment deploy contract for this repo to deploy successfully:
+- the CloudFormation deploy target must carry `stage` and `organization` tags
+- the matching CloudFormation result must expose a `WebsiteBucket` output
 - Secrets Manager entries must resolve as `customer/<stage>/<organization>`
 
 ## Troubleshooting
 
-- `No organizations found: careops-<stage>-*`
+- `No environments found for stage=<stage>`
   - Check `--stage` and `--organization` values.
-  - Confirm CloudFormation stack naming convention.
+  - Confirm the CloudFormation tags include the expected `stage` and `organization` values.
 
 - `AWS credentials not available`
   - Local deploy: verify SSO login and `AWS_PROFILE`.

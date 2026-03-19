@@ -2,7 +2,7 @@
 
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import { DescribeStacksCommand, ListStacksCommand } from '@aws-sdk/client-cloudformation';
+import { DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 import { parseArgs } from 'node:util';
 import fs from 'fs/promises';
 import path from 'path';
@@ -12,15 +12,14 @@ import { createAwsClients, fetchOrganizationSecrets } from './lib/aws.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const DEPLOYABLE_STATUSES = new Set([
+  'CREATE_COMPLETE',
+  'UPDATE_COMPLETE',
+  'UPDATE_ROLLBACK_COMPLETE',
+]);
 
-/**
- * Build the CloudFormation stack name for an organization deploy target.
- * @param {string} stage - Deployment stage
- * @param {string} organization - Organization identifier
- * @returns {string}
- */
-export function getCloudFormationStackName(stage, organization) {
-  return `careops-${ stage }-${ organization }`;
+function formatEnvironmentName(stage, organization) {
+  return `${ stage }.${ organization }`;
 }
 
 function shouldSkipOrganization(stage, organization) {
@@ -28,31 +27,37 @@ function shouldSkipOrganization(stage, organization) {
 }
 
 /**
- * Get WebsiteBucket output from a CloudFormation stack.
- * @param {CloudFormationClient} cfClient - CloudFormation client instance
- * @param {string} cloudFormationStackName - Full CloudFormation stack name
- * @returns {Promise<string|null>} Website bucket name or null
+ * Find the WebsiteBucket output on a CloudFormation deploy target.
+ * @param {Object} deploymentTarget - DescribeStacks result item
+ * @returns {string|null}
  */
-async function getOrganizationWebsiteBucket(cfClient, cloudFormationStackName) {
-  try {
-    const command = new DescribeStacksCommand({ StackName: cloudFormationStackName });
-    const response = await cfClient.send(command);
+function getWebsiteBucketOutput(deploymentTarget) {
+  const websiteBucketOutput = deploymentTarget.Outputs?.find(output => output.OutputKey === 'WebsiteBucket');
+  return websiteBucketOutput?.OutputValue || null;
+}
 
-    const stack = response.Stacks?.[0];
-    if (!stack?.Outputs) return null;
+function getTagValue(deploymentTarget, key) {
+  return deploymentTarget.Tags?.find(tag => tag.Key === key)?.Value || '';
+}
 
-    const websiteBucketOutput = stack.Outputs.find(output => output.OutputKey === 'WebsiteBucket');
-    return websiteBucketOutput?.OutputValue || null;
-  } catch(error) {
-    if (error.name === 'ValidationError') {
-      return null;
-    }
-    throw error;
-  }
+function isDeployableTarget(deploymentTarget) {
+  return DEPLOYABLE_STATUSES.has(deploymentTarget.StackStatus);
+}
+
+function matchesOrganizationTarget(deploymentTarget, stage, filterOrganization) {
+  const targetStage = getTagValue(deploymentTarget, 'stage');
+  const targetOrganization = getTagValue(deploymentTarget, 'organization');
+
+  if (targetStage !== stage) return false;
+  if (!targetOrganization) return false;
+  if (filterOrganization && targetOrganization !== filterOrganization) return false;
+  if (shouldSkipOrganization(stage, targetOrganization)) return false;
+
+  return true;
 }
 
 /**
- * Get all organizations for a stage with their website buckets.
+ * Get all organizations for a stage with their website buckets by CloudFormation tags.
  * @param {CloudFormationClient} cfClient - CloudFormation client instance
  * @param {string} stage - Deployment stage (dev, qa, prod, sandbox)
  * @param {string} filterOrganization - Optional specific organization identifier to filter
@@ -60,29 +65,15 @@ async function getOrganizationWebsiteBucket(cfClient, cloudFormationStackName) {
  */
 async function getStageOrganizations(cfClient, stage, filterOrganization) {
   const organizationBuckets = new Map();
-
-  if (filterOrganization) {
-    if (shouldSkipOrganization(stage, filterOrganization)) {
-      process.stdout.write(`Skipping sandbox organization for prod stage: ${ filterOrganization }\n`);
-      return organizationBuckets;
-    }
-
-    const cloudFormationStackName = getCloudFormationStackName(stage, filterOrganization);
-    await addOrganizationBucket(organizationBuckets, cfClient, filterOrganization, cloudFormationStackName);
-    return organizationBuckets;
-  }
-
-  const prefix = `careops-${ stage }-`;
   let nextToken;
 
   do {
-    const command = new ListStacksCommand({
-      StackStatusFilter: ['CREATE_COMPLETE', 'UPDATE_COMPLETE', 'UPDATE_ROLLBACK_COMPLETE'],
+    const command = new DescribeStacksCommand({
       ...(nextToken ? { NextToken: nextToken } : {}),
     });
 
     const response = await cfClient.send(command);
-    await addOrganizationsFromPage(organizationBuckets, response, cfClient, prefix, stage);
+    addOrganizationsFromPage(organizationBuckets, response, stage, filterOrganization);
 
     nextToken = response.NextToken;
   } while (nextToken);
@@ -90,27 +81,23 @@ async function getStageOrganizations(cfClient, stage, filterOrganization) {
   return organizationBuckets;
 }
 
-async function addOrganizationsFromPage(organizationBuckets, response, cfClient, prefix, stage) {
-  for (const stack of response.StackSummaries || []) {
-    if (!stack.StackName.startsWith(prefix)) continue;
-
-    const organizationIdentifier = stack.StackName.slice(prefix.length);
-    if (shouldSkipOrganization(stage, organizationIdentifier)) continue;
-    await addOrganizationBucket(organizationBuckets, cfClient, organizationIdentifier, stack.StackName);
-  }
-}
-
 /**
- * Resolve and add WebsiteBucket for an organization when available.
+ * Resolve and add WebsiteBucket for organizations in a DescribeStacks page.
  * @param {Map<string, string>} organizationBuckets - Target map
- * @param {CloudFormationClient} cfClient - CloudFormation client
- * @param {string} organizationIdentifier - Organization identifier
- * @param {string} cloudFormationStackName - CloudFormation stack name
+ * @param {Object} response - DescribeStacks response page
+ * @param {string} stage - Deployment stage
+ * @param {string} filterOrganization - Optional specific organization identifier to filter
  */
-async function addOrganizationBucket(organizationBuckets, cfClient, organizationIdentifier, cloudFormationStackName) {
-  const bucketName = await getOrganizationWebsiteBucket(cfClient, cloudFormationStackName);
-  if (bucketName) {
-    organizationBuckets.set(organizationIdentifier, bucketName);
+function addOrganizationsFromPage(organizationBuckets, response, stage, filterOrganization) {
+  for (const deploymentTarget of response.Stacks || []) {
+    if (!isDeployableTarget(deploymentTarget)) continue;
+    if (!matchesOrganizationTarget(deploymentTarget, stage, filterOrganization)) continue;
+
+    const organizationIdentifier = getTagValue(deploymentTarget, 'organization');
+    const bucketName = getWebsiteBucketOutput(deploymentTarget);
+    if (bucketName) {
+      organizationBuckets.set(organizationIdentifier, bucketName);
+    }
   }
 }
 
@@ -140,6 +127,10 @@ function getContentType(filePath) {
   };
 
   return contentTypes[ext] || 'application/octet-stream';
+}
+
+function shouldSkipUploadEntry(entryName) {
+  return entryName.startsWith('.');
 }
 
 /**
@@ -174,6 +165,8 @@ async function uploadDirectory(s3Client, bucketName, dirPath, prefix = '') {
   const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
   for (const entry of entries) {
+    if (shouldSkipUploadEntry(entry.name)) continue;
+
     const fullPath = path.join(dirPath, entry.name);
     const s3Key = prefix ? `${ prefix }/${ entry.name }` : entry.name;
 
@@ -231,7 +224,7 @@ async function invalidateCloudFront(cloudFrontClient, organization, distroId) {
  * @param {string} distDir - Path to dist directory
  */
 async function deployToOrganization(clients, stage, organization, bucketName, distDir) {
-  process.stdout.write(`\nDeploying to organization: ${ organization }\n`);
+  process.stdout.write(`\nDeploying environment: ${ formatEnvironmentName(stage, organization) }\n`);
 
   await generateAppConfig(stage, organization);
 
@@ -250,7 +243,7 @@ async function deployToOrganization(clients, stage, organization, bucketName, di
     process.stderr.write(`Warning: Could not invalidate CloudFront: ${ error.message }\n`);
   }
 
-  process.stdout.write(`Deployment to ${ organization } complete\n`);
+  process.stdout.write(`Deployment complete for environment: ${ formatEnvironmentName(stage, organization) }\n`);
 }
 
 export function resolveDeployInputs(values) {
@@ -273,12 +266,12 @@ export function resolveDeployInputs(values) {
 }
 
 export function formatOrganizationFilter(filterOrganization) {
-  return filterOrganization ? ` (organization: ${ filterOrganization })` : '';
+  return filterOrganization ? ` (org: ${ filterOrganization })` : '';
 }
 
 export function formatNoOrganizationsError(stage, filterOrganization) {
-  const organizationMsg = filterOrganization ? ` with organization: ${ filterOrganization }` : '';
-  return `No organizations found: careops-${ stage }-*${ organizationMsg }\n`;
+  const organizationMsg = filterOrganization ? ` org=${ filterOrganization }` : '';
+  return `No environments found for stage=${ stage }${ organizationMsg }\n`;
 }
 
 /**
@@ -297,7 +290,7 @@ async function main() {
 
   const clients = createAwsClients();
 
-  process.stdout.write(`Querying CloudFormation organizations for stage: ${ stage }${ organizationFilter }\n`);
+  process.stdout.write(`Querying CloudFormation organizations by tags for stage: ${ stage }${ organizationFilter }\n`);
 
   const organizationBuckets = await getStageOrganizations(clients.cloudFormation, stage, filterOrganization);
 
@@ -320,7 +313,7 @@ async function main() {
   process.stdout.write('\nAll deployments complete!\n');
 }
 
-if (import.meta.main) {
+if (process.argv[1] === __filename) {
   main().catch(error => {
     process.stderr.write(`Deployment failed: ${ error.message }\n`);
     process.exit(1);
