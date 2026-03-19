@@ -70,23 +70,23 @@ export async function fetchSecretJson(secretsClient, secretName) {
 }
 
 /**
- * Build stack secret name
+ * Build organization secret name
  * @param {string} stage - Deployment stage
- * @param {string} stack - Stack identifier
+ * @param {string} organization - Organization identifier
  * @returns {string} Secret name
  */
-export function getStackSecretName(stage, stack) {
-  return `customer/${ stage }/${ stack }`;
+export function getOrganizationSecretName(stage, organization) {
+  return `customer/${ stage }/${ organization }`;
 }
 
 /**
- * Fetch stack secrets from AWS Secrets Manager
+ * Fetch organization secret from AWS Secrets Manager
  * @param {SecretsManagerClient} secretsClient - Secrets Manager client
  * @param {string} stage - Deployment stage
- * @param {string} stack - Stack identifier
+ * @param {string} organization - Organization identifier
  * @returns {Promise<Object>} Parsed secret object
  */
-export async function fetchStackSecrets(secretsClient, stage, stack) {
-  const secretName = getStackSecretName(stage, stack);
+export async function fetchOrganizationSecret(secretsClient, stage, organization) {
+  const secretName = getOrganizationSecretName(stage, organization);
   return fetchSecretJson(secretsClient, secretName);
 }

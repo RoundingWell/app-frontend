@@ -8,13 +8,21 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import { buildAppConfig } from './lib/appconfig.js';
-import { createSecretsManagerClient, fetchStackSecrets, getStackSecretName } from './lib/aws.js';
+import { createSecretsManagerClient, fetchOrganizationSecret, getOrganizationSecretName } from './lib/aws.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+function isMainModule() {
+  if (!process.argv[1]) {
+    return false;
+  }
+
+  return path.resolve(process.argv[1]) === __filename;
+}
 
 /**
  * Get frontend version for appconfig
@@ -58,7 +66,7 @@ function handleSecretsError(error, secretName) {
   if (err.name === 'ResourceNotFoundException') {
     throw new Error(
       `Secret not found: ${ secretName }\n`
-      + 'Available stacks should be in AWS Secrets Manager under customer/<stage>/',
+      + 'Available organizations should be in AWS Secrets Manager under customer/<stage>/',
     );
   }
 
@@ -82,52 +90,58 @@ function getDeploymentTime() {
 }
 
 /**
- * Generate appconfig.json from stack secrets
+ * Generate appconfig.json from organization secrets
  * Matches backend AppConfig::toArray() logic
- * @param {Object} secrets - Stack secrets from Secrets Manager
+ * @param {Object} secrets - Organization secrets from Secrets Manager
  * @param {string} stage - Deployment stage
- * @param {string} stack - Stack identifier
+ * @param {string} organization - Organization identifier
  * @returns {Object} appconfig object
  */
-function generateAppConfig(secrets, stage, stack) {
+function generateAppConfig(secrets, stage, organization) {
   return buildAppConfig({
     secrets,
     stage,
-    stack,
+    organization,
     version: getVersion(),
     deploymentTime: getDeploymentTime(),
     deploymentSource: getDeploymentSource(),
   });
 }
 
-/**
- * Generate and write appconfig.json for a stack
- * @param {string} stack - Stack identifier
- * @param {string} stage - Deployment stage
- */
-export async function writeAppConfig(
-  stack = process.env.STACK || 'localhost',
-  stage = process.env.STAGE || process.env.DEPLOY_STAGE,
-) {
-  if (stack === 'localhost') {
-    return;
-  }
-
+function ensureStage(stage, organization) {
   if (!stage) {
-    throw new Error('Stage is required when generating appconfig for non-localhost stacks');
+    throw new Error(`Stage is required when generating appconfig for organization: ${ organization }`);
   }
+}
 
-  const secretName = getStackSecretName(stage, stack);
-  const client = createSecretsManagerClient();
+async function fetchAppConfigSecrets(client, stage, organization) {
+  const secretName = getOrganizationSecretName(stage, organization);
 
-  let secrets;
   try {
-    secrets = await fetchStackSecrets(client, stage, stack);
+    return await fetchOrganizationSecret(client, stage, organization);
   } catch(error) {
     handleSecretsError(error, secretName);
   }
+}
 
-  const appConfig = generateAppConfig(secrets, stage, stack);
+/**
+ * Generate and write appconfig.json for an organization.
+ * @param {string} organization - Organization identifier
+ * @param {string} stage - Deployment stage
+ */
+export async function writeAppConfig(
+  organization = process.env.ORGANIZATION || process.env.DEPLOY_ORGANIZATION || 'localhost',
+  stage = process.env.STAGE || process.env.DEPLOY_STAGE,
+) {
+  if (organization === 'localhost') {
+    return;
+  }
+
+  ensureStage(stage, organization);
+  const client = createSecretsManagerClient();
+  const secrets = await fetchAppConfigSecrets(client, stage, organization);
+
+  const appConfig = generateAppConfig(secrets, stage, organization);
 
   const distDir = path.join(__dirname, '../dist');
   const configPath = path.join(distDir, 'appconfig.json');
@@ -148,6 +162,6 @@ async function main() {
   }
 }
 
-if (import.meta.main) {
+if (isMainModule()) {
   main();
 }

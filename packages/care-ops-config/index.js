@@ -27,7 +27,7 @@ function getAppName() {
 }
 
 function getEnvName() {
-  return `${ configState.app.stage }.${ configState.app.stack }`;
+  return `${ configState.app.stage }.${ configState.app.organization }`;
 }
 
 function getAppVersion() {

@@ -86,13 +86,13 @@ jobs:
 
             if [[ "$target_env" != *:* ]]; then
               echo "Unsupported deploy environment: $target_env"
-              echo "Expected format: <stage>:<stack>"
+              echo "Expected format: <stage>:<organization>"
               echo "Examples: qa:*, sandbox:*, prod:*, qa:qa2, sandbox:banana, prod:apple"
               exit 1
             fi
 
             deploy_stage="${target_env%%:*}"
-            deploy_stack="${target_env#*:}"
+            deploy_organization="${target_env#*:}"
 
             case "$deploy_stage" in
               qa|sandbox|prod)
@@ -104,13 +104,13 @@ jobs:
                 ;;
             esac
 
-            if [ -z "$deploy_stack" ]; then
-              echo "Deploy stack segment cannot be empty in target environment: $target_env"
+            if [ -z "$deploy_organization" ]; then
+              echo "Deploy organization cannot be empty for target environment: $target_env"
               exit 1
             fi
 
-            if [ "$deploy_stack" = "*" ] || [ "$deploy_stack" = "all" ]; then
-              deploy_stack=""
+            if [ "$deploy_organization" = "*" ] || [ "$deploy_organization" = "all" ]; then
+              deploy_organization=""
             fi
 
             marker_env_slug="${target_env//:/-}"
@@ -121,7 +121,7 @@ jobs:
               echo "export DEPLOY_TARGET_ENV=$target_env"
               echo "export DEPLOY_TARGET_VERSION=$target_version"
               echo "export DEPLOY_STAGE=$deploy_stage"
-              echo "export DEPLOY_STACK=$deploy_stack"
+              echo "export DEPLOY_ORGANIZATION=$deploy_organization"
               echo "export DEPLOY_MARKER_NAME=$marker_name"
             } >> "$BASH_ENV"
       - setup-aws-oidc
@@ -154,8 +154,8 @@ jobs:
           name: Deploy selected target
           command: |
             set -euo pipefail
-            if [ -n "$DEPLOY_STACK" ]; then
-              npm run deploy -- --stage="$DEPLOY_STAGE" --stack="$DEPLOY_STACK"
+            if [ -n "$DEPLOY_ORGANIZATION" ]; then
+              npm run deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION"
             else
               npm run deploy -- --stage="$DEPLOY_STAGE"
             fi
