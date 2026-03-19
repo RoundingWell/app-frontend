@@ -1,0 +1,8 @@
+{
+  "name": "@roundingwell/care-ops-ringcentral",
+  "version": "1.0.0",
+  "description": "RingCentral Embeddable integration",
+  "main": "index.js",
+  "type": "module",
+  "private": true
+}
