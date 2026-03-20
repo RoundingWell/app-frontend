@@ -63,4 +63,42 @@ context('Dialer Service', function() {
         },
       });
   });
+
+  specify('ringcentralCall', function() {
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy
+      .get('@root')
+      .then(() => {
+        Radio.request('dialer', 'ringcentralCall', {
+          callData: {
+            callId: 'abc1234',
+          },
+        });
+      });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body')
+      .should('deep.equal', {
+        data: {
+          type: 'artifacts',
+          id: uuid('ringcentral-call-log:abc1234', RWELL_NS),
+          attributes: {
+            artifact: 'ringcentral-call-log',
+            identifier: 'abc1234',
+            values: {
+              callData: {
+                callId: 'abc1234',
+              },
+            },
+          },
+        },
+      });
+  });
 });

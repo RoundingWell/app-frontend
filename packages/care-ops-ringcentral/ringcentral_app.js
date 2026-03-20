@@ -1,3 +1,5 @@
+import Radio from 'backbone.radio';
+
 import App from 'js/base/app';
 
 import { LayoutView } from './ringcentral_views';
@@ -33,6 +35,8 @@ export default App.extend({
       }
 
       if (data.type === 'rc-call-end-notify') {
+        Radio.request('dialer', 'ringcentralCall', { callData: data.call });
+
         this.setState('isCalling', false);
         this.setState('actionId', null);
       }
