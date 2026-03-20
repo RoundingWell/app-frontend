@@ -4,10 +4,22 @@ import { LayoutView } from './ringcentral_views';
 
 export default App.extend({
   startAfterInitialized: true,
+  stateEvents: {
+    'change:isDialerReady': 'onDialerReady',
+  },
+  onDialerReady() {
+    this._call();
+  },
   onStart() {
     this.showView(new LayoutView({
       model: this.getState(),
     }));
+
+    window.addEventListener('message', ({ data }) => {
+      if (data.type === 'rc-dialer-status-notify') {
+        this.setState('isDialerReady', data.ready);
+      }
+    });
   },
   call(number, action) {
     this.setState('isOpen', true);
@@ -21,6 +33,8 @@ export default App.extend({
     this._call();
   },
   _call() {
+    if (!this.getState('isDialerReady')) return;
+
     const number = this.getState('pendingCall');
     if (!number) return;
 
