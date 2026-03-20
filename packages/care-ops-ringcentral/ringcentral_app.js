@@ -31,6 +31,11 @@ export default App.extend({
       if (data.type === 'rc-call-ring-notify') {
         this.setState('isCalling', true);
       }
+
+      if (data.type === 'rc-call-end-notify') {
+        this.setState('isCalling', false);
+        this.setState('actionId', null);
+      }
     });
   },
   call(number, action) {
