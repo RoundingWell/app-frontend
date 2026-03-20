@@ -1,4 +1,6 @@
+import { delay } from 'underscore';
 import Radio from 'backbone.radio';
+import dayjs from 'dayjs';
 
 import App from 'js/base/app';
 
@@ -34,11 +36,20 @@ export default App.extend({
         this.setState('isCalling', true);
       }
 
+      if (data.type === 'rc-call-start-notify') {
+        this.setState('isCalling', true);
+        this.setState('callTime', dayjs());
+      }
+
       if (data.type === 'rc-call-end-notify') {
         Radio.request('dialer', 'ringcentralCall', { callData: data.call });
 
-        this.setState('isCalling', false);
-        this.setState('actionId', null);
+        this.setState('callTime', null);
+
+        delay(() => {
+          this.setState('isCalling', false);
+          this.setState('actionId', null);
+        }, 10000);
       }
     });
   },

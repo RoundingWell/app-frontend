@@ -1,7 +1,45 @@
+import { delay } from 'underscore';
+import dayjs from 'dayjs';
+
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
 import './ringcentral.scss';
+
+function timeSince(startTime) {
+  const now = dayjs();
+  const diff = now.diff(startTime);
+  const minutes = Math.floor(diff / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+
+  return {
+    minutes: String(minutes).padStart(2, '0'),
+    seconds: String(seconds).padStart(2, '0'),
+  };
+}
+
+const TimerView = View.extend({
+  initialize({ startTime }) {
+    this.startTime = startTime;
+  },
+  onRender() {
+    delay(() => this.render(), 1000);
+  },
+  template: hbs`Call: {{ minutes }}:{{ seconds }}`,
+  templateContext() {
+    return timeSince(this.startTime);
+  },
+});
+
+const CallEndedView = View.extend({
+  initialize({ startTime }) {
+    this.startTime = startTime;
+  },
+  template: hbs`Call Ended: {{ minutes }}:{{ seconds }}`,
+  templateContext() {
+    return timeSince(this.startTime);
+  },
+});
 
 const StatusView = View.extend({
   getTemplate() {
@@ -16,7 +54,7 @@ const LayoutView = View.extend({
     <div class="rc-panel">
       <div class="rc-panel__header js-header">
         {{fas "phone"}}
-        <span>RingCentral</span>
+        <span data-heading-region>RingCentral</span>
         <span data-status-region></span>
       </div>
       <iframe
@@ -31,10 +69,13 @@ const LayoutView = View.extend({
     </div>
   `,
   regions: {
+    heading: '[data-heading-region]',
     status: '[data-status-region]',
   },
   modelEvents: {
     'change:isOpen': 'onChangeIsOpen',
+    'change:isCalling': 'showCallState',
+    'change:callTime': 'showCallState',
   },
   ui: {
     header: '.js-header',
@@ -50,10 +91,31 @@ const LayoutView = View.extend({
     this.showPanelStatus();
   },
   onRender() {
+    this.showCallState();
     this.showPanelStatus();
   },
   togglePanel() {
     this.$el.toggleClass('is-open', this.model.get('isOpen'));
+  },
+  showCallState() {
+    const callTime = this.model.get('callTime');
+    const hasCallTime = !!callTime;
+    const isCalling = !!this.model.get('isCalling');
+
+    this.ui.header.toggleClass('is-call-active', hasCallTime);
+    this.ui.header.toggleClass('is-call-ended', !hasCallTime && isCalling);
+
+    if (hasCallTime) {
+      this.showChildView('heading', new TimerView({ startTime: callTime }));
+      return;
+    }
+
+    if (isCalling) {
+      this.showChildView('heading', new CallEndedView({ startTime: this.model.previous('callTime') }));
+      return;
+    }
+
+    this.showChildView('heading', new View({ template: hbs`RingCentral` }));
   },
   showPanelStatus() {
     this.showChildView('status', new StatusView({ model: this.model }));

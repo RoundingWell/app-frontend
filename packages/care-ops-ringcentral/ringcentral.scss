@@ -1,5 +1,9 @@
 $rc-color: #237ba9;
 $rc-color-hover: #1e678c;
+$rc-call-active: color(green);
+$rc-call-active-hover: color(green, dark);
+$rc-call-ended: color(red);
+$rc-call-ended-hover: color(red, dark);
 
 .rc-wrapper {
   border-radius: 8px 8px 0 0;
@@ -45,6 +49,22 @@ $rc-color-hover: #1e678c;
 
   &:hover {
     background-color: $rc-color-hover;
+  }
+
+  &.is-call-active {
+    background-color: $rc-call-active;
+
+    &:hover {
+      background-color: $rc-call-active-hover;
+    }
+  }
+
+  &.is-call-ended {
+    background-color: $rc-call-ended;
+
+    &:hover {
+      background-color: $rc-call-ended-hover;
+    }
   }
 }
 
