@@ -327,7 +327,7 @@ context('Dialer Service', function() {
       .wait('@routeActionFiles');
 
     cy
-      .get('.rc-wrapper')
+      .get('.ringcentral-wrapper')
       .find('[data-patient-buttons-region] button')
       .should('have.length', 0);
 
@@ -340,7 +340,7 @@ context('Dialer Service', function() {
       });
 
     cy
-      .get('.rc-wrapper')
+      .get('.ringcentral-wrapper')
       .find('[data-patient-buttons-region] button')
       .as('patientButtons')
       .should('have.length', 1)

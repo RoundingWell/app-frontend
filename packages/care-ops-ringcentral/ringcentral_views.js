@@ -44,7 +44,7 @@ const CallEndedView = View.extend({
 
 const PatientButtonItemView = View.extend({
   tagName: 'button',
-  className: 'rc-panel__patient-btn',
+  className: 'ringcentral-panel__patient-btn',
   template: hbs`
     <span>Jump to</span>
     {{far "address-card"}}
@@ -77,17 +77,17 @@ const StatusView = View.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'rc-wrapper',
+  className: 'ringcentral-wrapper',
   template: hbs`
     <div data-patient-buttons-region></div>
-    <div class="rc-panel">
-      <div class="rc-panel__header js-header">
+    <div class="ringcentral-panel">
+      <div class="ringcentral-panel__header js-header">
         {{fas "phone"}}
         <span data-heading-region>RingCentral</span>
         <span data-status-region></span>
       </div>
       <iframe
-        class="rc-panel__iframe"
+        class="ringcentral-panel__iframe"
         src="https://apps.ringcentral.com/integration/ringcentral-embeddable/latest/app.html?clientId=e2M8xGmJjcGcHFuFe7epUC"
         title="RingCentral Dialer"
         loading="lazy"

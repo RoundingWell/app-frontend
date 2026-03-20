@@ -1,11 +1,11 @@
-$rc-color: #237ba9;
-$rc-color-hover: #1e678c;
-$rc-call-active: color(green);
-$rc-call-active-hover: color(green, dark);
-$rc-call-ended: color(red);
-$rc-call-ended-hover: color(red, dark);
+$ringcentral-color: #237ba9;
+$ringcentral-color-hover: #1e678c;
+$ringcentral-call-active: color(green);
+$ringcentral-call-active-hover: color(green, dark);
+$ringcentral-call-ended: color(red);
+$ringcentral-call-ended-hover: color(red, dark);
 
-.rc-wrapper {
+.ringcentral-wrapper {
   border-radius: 8px 8px 0 0;
   bottom: 0;
   position: fixed;
@@ -13,7 +13,7 @@ $rc-call-ended-hover: color(red, dark);
   width: 300px;
 }
 
-.rc-panel {
+.ringcentral-panel {
   background: white;
   border-radius: 8px 8px 0 0;
   box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
@@ -23,14 +23,14 @@ $rc-call-ended-hover: color(red, dark);
   overflow: hidden;
   transition: height 0.2s ease;
 
-  .rc-wrapper.is-open & {
+  .ringcentral-wrapper.is-open & {
     height: 80vh;
   }
 }
 
-.rc-panel__header {
+.ringcentral-panel__header {
   align-items: center;
-  background-color: $rc-color;
+  background-color: $ringcentral-color;
   border: 0;
   border-radius: 8px 8px 0 0;
   color: white;
@@ -48,33 +48,33 @@ $rc-call-ended-hover: color(red, dark);
   }
 
   &:hover {
-    background-color: $rc-color-hover;
+    background-color: $ringcentral-color-hover;
   }
 
   &.is-call-active {
-    background-color: $rc-call-active;
+    background-color: $ringcentral-call-active;
 
     &:hover {
-      background-color: $rc-call-active-hover;
+      background-color: $ringcentral-call-active-hover;
     }
   }
 
   &.is-call-ended {
-    background-color: $rc-call-ended;
+    background-color: $ringcentral-call-ended;
 
     &:hover {
-      background-color: $rc-call-ended-hover;
+      background-color: $ringcentral-call-ended-hover;
     }
   }
 }
 
 
-.rc-panel__patient-btn {
+.ringcentral-panel__patient-btn {
   align-items: center;
   background-color: white;
-  border: 1px solid $rc-color;
+  border: 1px solid $ringcentral-color;
   border-radius: 8px;
-  color: $rc-color;
+  color: $ringcentral-color;
   cursor: pointer;
   display: flex;
   font-size: 14px;
@@ -98,12 +98,12 @@ $rc-call-ended-hover: color(red, dark);
   }
 }
 
-.rc-panel__iframe {
+.ringcentral-panel__iframe {
   min-height: 0;
   pointer-events: none;
   visibility: hidden;
 
-  .rc-wrapper.is-open & {
+  .ringcentral-wrapper.is-open & {
     flex: 1 1 auto;
     pointer-events: auto;
     visibility: visible;

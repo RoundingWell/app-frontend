@@ -83,7 +83,7 @@ export default App.extend({
 
     if (!this.getState('isLoggedIn')) return;
 
-    const iframe = document.querySelector('.rc-panel__iframe');
+    const iframe = document.querySelector('.ringcentral-panel__iframe');
     if (!iframe) return;
 
     iframe.contentWindow.postMessage({
