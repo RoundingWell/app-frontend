@@ -4,6 +4,7 @@ import { getAction } from 'support/api/actions';
 import { getPatient } from 'support/api/patients';
 import { getFlow } from 'support/api/flows';
 import { stateTodo } from 'support/api/states';
+import { getCurrentClinician } from 'support/api/clinicians';
 
 context('Dialer Service', function() {
   specify('five9 - patient dashboard buttons', function() {
@@ -73,7 +74,15 @@ context('Dialer Service', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings('dialer', 'five9')
+      .routeCurrentClinician(fx => {
+        fx.data = getCurrentClinician({
+          attributes: {
+            settings: { dialer: 'five9' },
+          },
+        });
+
+        return fx;
+      })
       .routeFlow(fx => {
         fx.data = testFlow;
 
@@ -277,7 +286,15 @@ context('Dialer Service', function() {
 
     cy
       .routesForPatientAction()
-      .routeSettings('dialer', 'ringcentral')
+      .routeCurrentClinician(fx => {
+        fx.data = getCurrentClinician({
+          attributes: {
+            settings: { dialer: 'ringcentral' },
+          },
+        });
+
+        return fx;
+      })
       .routeFlow(fx => {
         fx.data = testFlow;
 
