@@ -25,6 +25,7 @@ const LayoutView = View.extend({
         title="RingCentral Dialer"
         loading="lazy"
         referrerpolicy="no-referrer"
+        allow="microphone"
         sandbox="allow-scripts allow-forms allow-same-origin allow-popups">
       </iframe>
     </div>
