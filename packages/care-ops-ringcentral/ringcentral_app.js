@@ -27,6 +27,10 @@ export default App.extend({
       if (data.type === 'rc-login-status-notify') {
         this.setState('isLoggedIn', data.loggedIn);
       }
+
+      if (data.type === 'rc-call-ring-notify') {
+        this.setState('isCalling', true);
+      }
     });
   },
   call(number, action) {
