@@ -6,8 +6,12 @@ export default App.extend({
   startAfterInitialized: true,
   stateEvents: {
     'change:isDialerReady': 'onDialerReady',
+    'change:isLoggedIn': 'onLoginChange',
   },
   onDialerReady() {
+    this._call();
+  },
+  onLoginChange() {
     this._call();
   },
   onStart() {
@@ -18,6 +22,10 @@ export default App.extend({
     window.addEventListener('message', ({ data }) => {
       if (data.type === 'rc-dialer-status-notify') {
         this.setState('isDialerReady', data.ready);
+      }
+
+      if (data.type === 'rc-login-status-notify') {
+        this.setState('isLoggedIn', data.loggedIn);
       }
     });
   },
@@ -37,6 +45,8 @@ export default App.extend({
 
     const number = this.getState('pendingCall');
     if (!number) return;
+
+    if (!this.getState('isLoggedIn')) return;
 
     const iframe = document.querySelector('.rc-panel__iframe');
     if (!iframe) return;
