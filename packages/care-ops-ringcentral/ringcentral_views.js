@@ -1,8 +1,9 @@
 import { delay } from 'underscore';
+import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
 
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
+import { View, CollectionView } from 'marionette';
 
 import './ringcentral.scss';
 
@@ -41,6 +42,33 @@ const CallEndedView = View.extend({
   },
 });
 
+const PatientButtonItemView = View.extend({
+  tagName: 'button',
+  className: 'rc-panel__patient-btn',
+  template: hbs`
+    <span>Jump to</span>
+    {{far "address-card"}}
+    <span class="u-text--overflow">{{ name }}</span>
+  `,
+  triggers: {
+    'click': 'click',
+  },
+  onClick() {
+    Radio.trigger('event-router', 'patient:dashboard', this.model.id);
+  },
+});
+
+const PatientButtonsView = CollectionView.extend({
+  childView: PatientButtonItemView,
+  initialize() {
+    this.listenTo(Radio.channel('history'), 'change:route', this.render);
+  },
+  viewFilter({ model }) {
+    const currentUrl = window.location.href;
+    return !currentUrl.includes(model.id);
+  },
+});
+
 const StatusView = View.extend({
   getTemplate() {
     if (!this.model.get('isOpen')) return hbs`{{far "window-maximize"}}`;
@@ -51,6 +79,7 @@ const StatusView = View.extend({
 const LayoutView = View.extend({
   className: 'rc-wrapper',
   template: hbs`
+    <div data-patient-buttons-region></div>
     <div class="rc-panel">
       <div class="rc-panel__header js-header">
         {{fas "phone"}}
@@ -69,6 +98,7 @@ const LayoutView = View.extend({
     </div>
   `,
   regions: {
+    patientButtons: '[data-patient-buttons-region]',
     heading: '[data-heading-region]',
     status: '[data-status-region]',
   },
@@ -91,8 +121,14 @@ const LayoutView = View.extend({
     this.showPanelStatus();
   },
   onRender() {
+    this.showPatientButtons();
     this.showCallState();
     this.showPanelStatus();
+  },
+  showPatientButtons() {
+    this.showChildView('patientButtons', new PatientButtonsView({
+      collection: this.collection,
+    }));
   },
   togglePanel() {
     this.$el.toggleClass('is-open', this.model.get('isOpen'));

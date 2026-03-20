@@ -6,8 +6,8 @@ function call(number, action) {
   dialerApp.call(number, action);
 }
 
-function init({ region }) {
-  dialerApp = new RingCentralApp({ region });
+function init({ region, patients }) {
+  dialerApp = new RingCentralApp({ region, patients });
 }
 
 export { call, init };

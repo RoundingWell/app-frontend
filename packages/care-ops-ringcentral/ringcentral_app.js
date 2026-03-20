@@ -18,9 +18,13 @@ export default App.extend({
   onLoginChange() {
     this._call();
   },
+  initialize({ patients }) {
+    this.patients = patients;
+  },
   onStart() {
     this.showView(new LayoutView({
       model: this.getState(),
+      collection: this.patients,
     }));
 
     window.addEventListener('message', ({ data }) => {
@@ -39,12 +43,19 @@ export default App.extend({
       if (data.type === 'rc-call-start-notify') {
         this.setState('isCalling', true);
         this.setState('callTime', dayjs());
+
+        Radio.request('dialer', 'showPatientLinks', {
+          actionId: this.getState('actionId'),
+          number: data.call?.to,
+        });
       }
 
       if (data.type === 'rc-call-end-notify') {
         Radio.request('dialer', 'ringcentralCall', { callData: data.call });
 
         this.setState('callTime', null);
+
+        Radio.request('dialer', 'showPatientLinks', null);
 
         delay(() => {
           this.setState('isCalling', false);

@@ -33,7 +33,7 @@ export default App.extend({
     if (dialerSetting === 'ringcentral') {
       const { call, init } = await import('@roundingwell/care-ops-ringcentral');
       this._call = call;
-      init({ region: this.getRegion() });
+      init({ region: this.getRegion(), patients });
     }
   },
   call(number, action) {
