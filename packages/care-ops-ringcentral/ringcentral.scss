@@ -1,0 +1,62 @@
+$rc-color: #237ba9;
+$rc-color-hover: #1e678c;
+
+.rc-wrapper {
+  border-radius: 8px 8px 0 0;
+  bottom: 0;
+  position: fixed;
+  right: 40px;
+  width: 300px;
+}
+
+.rc-panel {
+  background: white;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
+  display: flex;
+  flex-direction: column;
+  height: 36px;
+  overflow: hidden;
+  transition: height 0.2s ease;
+
+  .rc-wrapper.is-open & {
+    height: 80vh;
+  }
+}
+
+.rc-panel__header {
+  align-items: center;
+  background-color: $rc-color;
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  font-weight: bold;
+  justify-content: space-between;
+  padding: 8px 16px;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+
+  .icon.fa-window-minimize {
+    transform: translateY(-4px);
+  }
+
+  &:hover {
+    background-color: $rc-color-hover;
+  }
+}
+
+
+.rc-panel__iframe {
+  min-height: 0;
+  pointer-events: none;
+  visibility: hidden;
+
+  .rc-wrapper.is-open & {
+    flex: 1 1 auto;
+    pointer-events: auto;
+    visibility: visible;
+  }
+}
