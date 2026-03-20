@@ -2,12 +2,17 @@ function getDisableLoginPrompt(secrets) {
   return String(secrets.DisableLoginPrompt ?? '').toLowerCase() === 'true';
 }
 
+function shouldEnableWorkOsDevMode(stage) {
+  return stage === 'dev' || stage === 'qa';
+}
+
 /**
  * Create auth config for WorkOS
  * @param {Object} secrets - Stack secrets
+ * @param {string} stage - Deployed stage
  * @returns {Object}
  */
-function createWorkOsAuthConfig(secrets) {
+function createWorkOsAuthConfig(secrets, stage) {
   return {
     provider: 'workos',
     disableLoginPrompt: getDisableLoginPrompt(secrets),
@@ -15,6 +20,7 @@ function createWorkOsAuthConfig(secrets) {
       clientId: secrets.WorkOsClientId || '',
       createClientOptions: {
         apiHostname: secrets.WorkOsApiDomain || 'login.roundingwell.com',
+        ...(shouldEnableWorkOsDevMode(stage) ? { devMode: true } : {}),
       },
     },
   };
@@ -51,7 +57,7 @@ function createAuth0AuthConfig(secrets) {
  */
 function addAuthProvider(config, secrets) {
   config.auth = secrets.WorkOsClientId ?
-    createWorkOsAuthConfig(secrets) :
+    createWorkOsAuthConfig(secrets, config.app.stage) :
     createAuth0AuthConfig(secrets);
 }
 
