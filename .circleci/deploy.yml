@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   aws-cli: circleci/aws-cli@4.0
+  slack: circleci/slack@6.1.3
 
 aliases:
   .node-image: &node-image cimg/node:22.16
@@ -171,6 +172,36 @@ jobs:
           command: |
             set -euo pipefail
             circleci run release update "$DEPLOY_MARKER_NAME" --status=FAILED
+      - slack/notify:
+          event: fail
+          custom: |
+            {
+              "text": "Frontend deploy to << pipeline.deploy.environment_name >> << pipeline.deploy.target_version >>: failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Frontend deploy to << pipeline.deploy.environment_name >> `<< pipeline.deploy.target_version >>`: failed\n<${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}|View run>"
+                  }
+                }
+              ]
+            }
+      - slack/notify:
+          event: pass
+          custom: |
+            {
+              "text": "Frontend deploy to << pipeline.deploy.environment_name >> << pipeline.deploy.target_version >>: success",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "Frontend deploy to << pipeline.deploy.environment_name >> `<< pipeline.deploy.target_version >>`: success\n<${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}|View run>"
+                  }
+                }
+              ]
+            }
 
 workflows:
   deploy-qa:
@@ -180,7 +211,9 @@ workflows:
         value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
-          context: aws-dev
+          context:
+            - aws-dev
+            - slack-secrets
 
   deploy-non-qa:
     when:
@@ -189,4 +222,6 @@ workflows:
         value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
-          context: aws-prod
+          context:
+            - aws-prod
+            - slack-secrets
