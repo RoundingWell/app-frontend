@@ -87,7 +87,7 @@ jobs:
             if [[ "$target_env" != *:* ]]; then
               echo "Unsupported deploy environment: $target_env"
               echo "Expected format: <stage>:<organization>"
-              echo "Examples: qa:*, sandbox:*, prod:*, qa:qa2, sandbox:banana, prod:apple"
+              echo "Examples: dev:nick, qa:*, sandbox:banana, prod:apple"
               exit 1
             fi
 
@@ -95,11 +95,11 @@ jobs:
             deploy_organization="${target_env#*:}"
 
             case "$deploy_stage" in
-              qa|sandbox|prod)
+              dev|qa|sandbox|prod)
                 ;;
               *)
                 echo "Unsupported deploy stage: $deploy_stage"
-                echo "Supported stages: qa, sandbox, prod"
+                echo "Supported stages: dev, qa, sandbox, prod"
                 exit 1
                 ;;
             esac
@@ -173,16 +173,16 @@ jobs:
             circleci run release update "$DEPLOY_MARKER_NAME" --status=FAILED
 
 workflows:
-  deploy-qa:
+  deploy-dev:
     when:
       matches:
-        pattern: '^qa:[a-z0-9*-]+$'
+        pattern: '^(dev|qa):[a-z0-9*-]+$'
         value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
           context: aws-dev
 
-  deploy-non-qa:
+  deploy-prod:
     when:
       matches:
         pattern: '^(sandbox|prod):[a-z0-9*-]+$'
