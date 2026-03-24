@@ -136,14 +136,20 @@ npm run deploy -- --stage=<stage> [--organization=<organization>]
 ```
 
 Supported deploy environments:
+- `dev:<organization>`
+- `dev:*`
 - `qa:*`
 - `sandbox:*`
 - `prod:*`
-- specific environments such as `qa:qa2`, `sandbox:banana`, `prod:apple`
+- specific environments such as `dev:nick`, `qa:qa2`, `sandbox:banana`, `prod:apple`
 
-Role selection:
-- `qa:*` deploys assume the dev account role
-- `sandbox:*` and `prod:*` deploys assume the prod account role
+Dev-account deploys:
+- `dev:<organization>` or `dev:*`
+- `qa:*`
+
+Prod-account deploys:
+- `sandbox:*`
+- `prod:*`
 
 Artifact ownership:
 - the release artifact is published to the dev-account bucket
