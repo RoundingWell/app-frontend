@@ -147,6 +147,29 @@ function shouldSkipUploadEntry(entryName) {
   return entryName.startsWith('.');
 }
 
+const FINAL_UPLOAD_ORDER = new Map([
+  ['appconfig.json', 1],
+  ['index.html', 2],
+  ['sw.js', 3],
+]);
+
+function compareUploadEntries(a, b, prefix = '') {
+  const aPriority = prefix === '' ? (FINAL_UPLOAD_ORDER.get(a.name) || 0) : 0;
+  const bPriority = prefix === '' ? (FINAL_UPLOAD_ORDER.get(b.name) || 0) : 0;
+
+  // Hold back the stable root files that act as rollout cutover points.
+  if (aPriority !== bPriority) return aPriority - bPriority;
+  if (a.isDirectory() !== b.isDirectory()) return a.isDirectory() ? -1 : 1;
+
+  return a.name.localeCompare(b.name);
+}
+
+export function sortUploadEntries(entries, prefix = '') {
+  return [...entries]
+    .filter(entry => !shouldSkipUploadEntry(entry.name))
+    .sort((a, b) => compareUploadEntries(a, b, prefix));
+}
+
 /**
  * Upload a single file to S3.
  * @param {S3Client} s3Client - S3 client instance
@@ -176,11 +199,12 @@ async function uploadFile(s3Client, bucketName, filePath, key) {
  * @param {string} prefix - The S3 key prefix
  */
 async function uploadDirectory(s3Client, bucketName, dirPath, prefix = '') {
-  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  const entries = sortUploadEntries(
+    await fs.readdir(dirPath, { withFileTypes: true }),
+    prefix,
+  );
 
   for (const entry of entries) {
-    if (shouldSkipUploadEntry(entry.name)) continue;
-
     const fullPath = path.join(dirPath, entry.name);
     const s3Key = prefix ? `${ prefix }/${ entry.name }` : entry.name;
 
