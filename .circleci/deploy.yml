@@ -117,6 +117,7 @@ jobs:
             marker_env_slug="${target_env//:/-}"
             marker_env_slug="${marker_env_slug//\*/all}"
             marker_name="deploy-${marker_env_slug}-${target_version}"
+            deploy_run_url="${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}"
 
             {
               echo "export DEPLOY_TARGET_ENV=$target_env"
@@ -124,6 +125,7 @@ jobs:
               echo "export DEPLOY_STAGE=$deploy_stage"
               echo "export DEPLOY_ORGANIZATION=$deploy_organization"
               echo "export DEPLOY_MARKER_NAME=$marker_name"
+              echo "export DEPLOY_RUN_URL=$deploy_run_url"
             } >> "$BASH_ENV"
       - setup-aws-oidc
       - run:
@@ -172,6 +174,24 @@ jobs:
           command: |
             set -euo pipefail
             circleci run release update "$DEPLOY_MARKER_NAME" --status=FAILED
+      - run:
+          name: Notify QA2 E2E repo
+          when: on_success
+          command: |
+            set -euo pipefail
+
+            if [ "$DEPLOY_STAGE" != "qa" ] || { [ -n "$DEPLOY_ORGANIZATION" ] && [ "$DEPLOY_ORGANIZATION" != "qa2" ]; }; then
+              exit 0
+            fi
+
+            {
+              git fetch --force --tags origin
+              source_sha="$(git rev-list -n 1 "$DEPLOY_TARGET_VERSION")"
+              node scripts/dispatch-qa2-e2e.js \
+                --version="$DEPLOY_TARGET_VERSION" \
+                --source-sha="$source_sha" \
+                --source-run-url="$DEPLOY_RUN_URL"
+            } || echo "QA2 E2E dispatch failed; rerun the deploy or dispatch manually if needed."
       - slack/notify:
           event: fail
           custom: |
@@ -182,7 +202,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Frontend deploy to << pipeline.deploy.environment_name >> `<< pipeline.deploy.target_version >>`: failed\n<${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}|View run>"
+                    "text": "Frontend deploy to << pipeline.deploy.environment_name >> `<< pipeline.deploy.target_version >>`: failed\n<${DEPLOY_RUN_URL:-${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}}|View run>"
                   }
                 }
               ]
@@ -197,7 +217,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "Frontend deploy to << pipeline.deploy.environment_name >> `<< pipeline.deploy.target_version >>`: success\n<${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}|View run>"
+                    "text": "Frontend deploy to << pipeline.deploy.environment_name >> `<< pipeline.deploy.target_version >>`: success\n<${DEPLOY_RUN_URL:-${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}}|View run>"
                   }
                 }
               ]
