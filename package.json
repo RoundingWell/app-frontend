@@ -125,7 +125,7 @@
     "backbone.radio": "^2.0.0",
     "backbone.store": "^1.1.1",
     "dayjs": "^1.10.6",
-    "handlebars": "^4.7.7",
+    "handlebars": "^4.7.9",
     "handlebars-intl": "^1.1.2",
     "jquery": "^4.0.0",
     "libphonenumber-js": "^1.10.38",
