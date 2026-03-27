@@ -134,6 +134,7 @@ The deploy pipeline in [`.circleci/deploy.yml`](../.circleci/deploy.yml):
 ```bash
 npm run deploy -- --stage=<stage> [--organization=<organization>]
 ```
+5. For QA deploys that include `qa2` (`qa:qa2` and `qa:*`), posts `qa2_deploy_succeeded` to `RoundingWell/app-tests`
 
 Supported deploy environments:
 - `dev:<organization>`
@@ -155,6 +156,25 @@ Artifact ownership:
 - the release artifact is published to the dev-account bucket
 - QA deploys read that bucket with the dev role
 - sandbox and prod deploys read that same bucket with the prod role
+
+Additional CircleCI secrets for the QA2 E2E dispatch step:
+- `GH_APP_ID`
+- `GH_APP_PRIVATE_KEY`
+- `GH_APP_INSTALLATION_ID`
+
+For QA deploys that include `qa2`, [`.circleci/deploy.yml`](../.circleci/deploy.yml) resolves the release SHA, passes the release tag, SHA, and a CircleCI run URL to [`scripts/dispatch-qa2-e2e.js`](../scripts/dispatch-qa2-e2e.js), and that script uses the GitHub App credentials above plus the `app-tests` installation id to mint a short-lived installation token before posting `repository_dispatch` with this payload:
+
+```json
+{
+  "source_repo": "RoundingWell/app-frontend",
+  "component": "frontend",
+  "source_ref": "refs/tags/<release-tag>",
+  "source_sha": "<release-commit-sha>",
+  "source_run_url": "<circleci-build-url>",
+  "environment": "qa2",
+  "source_system": "circleci"
+}
+```
 
 ## Triggering A CircleCI Deploy
 
