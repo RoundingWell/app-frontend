@@ -40,6 +40,17 @@ export default App.extend({
         this.setState('isLoggedIn', data.loggedIn);
       }
 
+      // when user creates a call from dial pad
+      if (data.type === 'rc-call-init-notify') {
+        if (this._callEndTimer) {
+          clearTimeout(this._callEndTimer);
+          this._callEndTimer = null;
+        }
+
+        this.setState('callState', null);
+        this.setState('actionId', null);
+      }
+
       // when a user accepts a ringing inbound call or outbound call is connected
       if (data.type === 'rc-call-start-notify') {
         this.setState('callState', 'active');
