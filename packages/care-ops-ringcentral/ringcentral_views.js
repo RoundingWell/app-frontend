@@ -104,7 +104,7 @@ const LayoutView = View.extend({
   },
   modelEvents: {
     'change:isOpen': 'onChangeIsOpen',
-    'change:isCalling': 'showCallState',
+    'change:callState': 'showCallState',
     'change:callTime': 'showCallState',
   },
   ui: {
@@ -134,19 +134,18 @@ const LayoutView = View.extend({
     this.$el.toggleClass('is-open', this.model.get('isOpen'));
   },
   showCallState() {
+    const callState = this.model.get('callState');
     const callTime = this.model.get('callTime');
-    const hasCallTime = !!callTime;
-    const isCalling = !!this.model.get('isCalling');
 
-    this.ui.header.toggleClass('is-call-active', hasCallTime);
-    this.ui.header.toggleClass('is-call-ended', !hasCallTime && isCalling);
+    this.ui.header.toggleClass('is-call-active', callState === 'active');
+    this.ui.header.toggleClass('is-call-ended', callState === 'ended');
 
-    if (hasCallTime) {
+    if (callState === 'active') {
       this.showChildView('heading', new TimerView({ startTime: callTime }));
       return;
     }
 
-    if (isCalling) {
+    if (callState === 'ended') {
       this.showChildView('heading', new CallEndedView({ startTime: this.model.previous('callTime') }));
       return;
     }

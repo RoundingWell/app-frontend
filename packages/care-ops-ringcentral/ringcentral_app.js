@@ -30,20 +30,19 @@ export default App.extend({
     window.addEventListener('message', ({ data, origin }) => {
       if (origin !== 'https://apps.ringcentral.com') return;
 
+      // fired when dialer is ready
       if (data.type === 'rc-dialer-status-notify') {
         this.setState('isDialerReady', data.ready);
       }
 
+      // when a user has logged in or out in the iframe
       if (data.type === 'rc-login-status-notify') {
         this.setState('isLoggedIn', data.loggedIn);
       }
 
-      if (data.type === 'rc-call-ring-notify') {
-        this.setState('isCalling', true);
-      }
-
+      // when a user accepts a ringing inbound call or outbound call is connected
       if (data.type === 'rc-call-start-notify') {
-        this.setState('isCalling', true);
+        this.setState('callState', 'active');
         this.setState('callTime', dayjs());
 
         Radio.request('dialer', 'showPatientLinks', {
@@ -52,16 +51,18 @@ export default App.extend({
         });
       }
 
+      // when a call is ended
       if (data.type === 'rc-call-end-notify') {
         Radio.request('dialer', 'ringcentralCall', { callData: data.call });
 
+        this.setState('callState', 'ended');
         this.setState('callTime', null);
 
         Radio.request('dialer', 'showPatientLinks', null);
 
         this._callEndTimer = delay(() => {
           this._callEndTimer = null;
-          this.setState('isCalling', false);
+          this.setState('callState', null);
           this.setState('actionId', null);
         }, 10000);
       }
@@ -71,12 +72,12 @@ export default App.extend({
     this.setState('isOpen', true);
 
     // If there's an active call, only show the panel
-    if (this.getState('isCalling') && !this._callEndTimer) return;
+    if (this.getState('callState') === 'active') return;
 
     if (this._callEndTimer) {
       clearTimeout(this._callEndTimer);
       this._callEndTimer = null;
-      this.setState('isCalling', false);
+      this.setState('callState', null);
       this.setState('actionId', null);
     }
 
