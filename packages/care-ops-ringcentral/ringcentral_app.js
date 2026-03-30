@@ -59,7 +59,8 @@ export default App.extend({
 
         Radio.request('dialer', 'showPatientLinks', null);
 
-        delay(() => {
+        this._callEndTimer = delay(() => {
+          this._callEndTimer = null;
           this.setState('isCalling', false);
           this.setState('actionId', null);
         }, 10000);
@@ -70,7 +71,14 @@ export default App.extend({
     this.setState('isOpen', true);
 
     // If there's an active call, only show the panel
-    if (this.getState('isCalling')) return;
+    if (this.getState('isCalling') && !this._callEndTimer) return;
+
+    if (this._callEndTimer) {
+      clearTimeout(this._callEndTimer);
+      this._callEndTimer = null;
+      this.setState('isCalling', false);
+      this.setState('actionId', null);
+    }
 
     this.setState('pendingCall', number);
     this.setState('actionId', action.id);
