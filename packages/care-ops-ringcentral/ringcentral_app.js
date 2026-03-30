@@ -27,7 +27,9 @@ export default App.extend({
       collection: this.patients,
     }));
 
-    window.addEventListener('message', ({ data }) => {
+    window.addEventListener('message', ({ data, origin }) => {
+      if (origin !== 'https://apps.ringcentral.com') return;
+
       if (data.type === 'rc-dialer-status-notify') {
         this.setState('isDialerReady', data.ready);
       }
@@ -90,7 +92,7 @@ export default App.extend({
       type: 'rc-adapter-new-call',
       phoneNumber: number,
       toCall: true,
-    }, '*');
+    }, 'https://apps.ringcentral.com');
 
     this.setState('pendingCall', null);
   },
