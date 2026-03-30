@@ -53,8 +53,8 @@ export default App.extend({
 
       // when a user accepts a ringing inbound call or outbound call is connected
       if (data.type === 'rc-call-start-notify') {
-        this.setState('callState', 'active');
         this.setState('callTime', dayjs());
+        this.setState('callState', 'active');
 
         Radio.request('dialer', 'showPatientLinks', {
           actionId: this.getState('actionId'),

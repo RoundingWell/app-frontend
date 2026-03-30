@@ -105,7 +105,6 @@ const LayoutView = View.extend({
   modelEvents: {
     'change:isOpen': 'onChangeIsOpen',
     'change:callState': 'showCallState',
-    'change:callTime': 'showCallState',
   },
   ui: {
     header: '.js-header',
