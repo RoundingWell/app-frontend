@@ -53,12 +53,14 @@ export default App.extend({
 
       // when a user accepts a ringing inbound call or outbound call is connected
       if (data.type === 'rc-call-start-notify') {
+        const isTransferredCall = data.call?.direction === 'Inbound' && data.call?.isForwarded === true;
+
         this.setState('callTime', dayjs());
-        this.setState('callState', 'active');
+        this.setState('callState', isTransferredCall ? 'transferred' : 'active');
 
         Radio.request('dialer', 'showPatientLinks', {
           actionId: this.getState('actionId'),
-          number: data.call?.to,
+          number: isTransferredCall ? data.call?.from : data.call?.to,
         });
       }
 
@@ -83,7 +85,7 @@ export default App.extend({
     this.setState('isOpen', true);
 
     // If there's an active call, only show the panel
-    if (this.getState('callState') === 'active') return;
+    if (['active', 'transferred'].includes(this.getState('callState'))) return;
 
     if (this._callEndTimer) {
       clearTimeout(this._callEndTimer);

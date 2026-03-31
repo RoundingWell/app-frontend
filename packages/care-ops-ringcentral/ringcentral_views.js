@@ -136,11 +136,16 @@ const LayoutView = View.extend({
     const callState = this.model.get('callState');
     const callTime = this.model.get('callTime');
 
-    this.ui.header.toggleClass('is-call-active', callState === 'active');
+    this.ui.header.toggleClass('is-call-active', callState === 'active' || callState === 'transferred');
     this.ui.header.toggleClass('is-call-ended', callState === 'ended');
 
     if (callState === 'active') {
       this.showChildView('heading', new TimerView({ startTime: callTime }));
+      return;
+    }
+
+    if (callState === 'transferred') {
+      this.showChildView('heading', new View({ template: hbs`Transferred Call` }));
       return;
     }
 
