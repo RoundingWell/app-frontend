@@ -11,6 +11,11 @@ import { babel } from '@rollup/plugin-babel';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { VitePWA } from 'vite-plugin-pwa';
 import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.cjs';
+import {
+  ROOT_SHARED_RUNTIME_MODULE_IDS,
+  ROOT_SHARED_RUNTIME_MODULES,
+  SHARED_RUNTIME_DEV_MODULES,
+} from './config/shared-runtime.js';
 import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
@@ -29,6 +34,40 @@ const resolve = {
   },
   mainFields: ['module', 'main', 'browser'],
 };
+
+const SHARED_RUNTIME_PRECACHE_IGNORES = ['**/shared/**'];
+
+function sharedRuntimeDevPlugin() {
+  return {
+    name: 'shared-runtime-dev-plugin',
+    apply: 'serve',
+    configureServer(server) {
+      server.middlewares.use(async(req, res, next) => {
+        const requestPath = req.url ? req.url.split('?')[0] : '';
+        const sourcePath = SHARED_RUNTIME_DEV_MODULES[requestPath];
+
+        if (!sourcePath) {
+          next();
+          return;
+        }
+
+        try {
+          const result = await server.transformRequest(sourcePath);
+
+          if (!result) {
+            next();
+            return;
+          }
+
+          res.setHeader('Content-Type', 'application/javascript');
+          res.end(result.code);
+        } catch(error) {
+          next(error);
+        }
+      });
+    },
+  };
+}
 
 const css = {
   preprocessorOptions: {
@@ -83,7 +122,6 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isProduction = mode === 'production';
   const isTest = mode === 'test' || process.env.NODE_ENV === 'test';
-
   const datePrefix = dayjs.utc().format('YYYYMMDD');
 
   const modulePaths = [
@@ -98,6 +136,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      sharedRuntimeDevPlugin(),
       isTest && babelPlugin,
       inlineHbsCompile(),
       handlebars(),
@@ -119,6 +158,7 @@ export default defineConfig(({ mode }) => {
             '**/*.map',
             '**/.DS_Store',
             '**/formapp/assets/**',
+            ...SHARED_RUNTIME_PRECACHE_IGNORES,
           ],
         },
       }),
@@ -160,7 +200,9 @@ export default defineConfig(({ mode }) => {
       sourcemap: 'hidden',
       target: browserslistToEsbuild(),
       rollupOptions: {
+        external: ROOT_SHARED_RUNTIME_MODULE_IDS,
         output: {
+          paths: ROOT_SHARED_RUNTIME_MODULES,
           entryFileNames: `${ datePrefix }-[name]-[hash].js`,
           chunkFileNames: `${ datePrefix }-[name]-[hash].js`,
         },

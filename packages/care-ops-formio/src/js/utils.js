@@ -1,6 +1,6 @@
 /* global Formio */
 
-import { addError } from 'js/datadog';
+import { addError } from '@roundingwell/care-ops-forms';
 
 const { reduce, extend, size, values } = Formio.Utils._;
 

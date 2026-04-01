@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "@roundingwell/care-ops-forms",
+  "version": "1.0.0",
+  "description": "Shared forms runtime helpers for Care-Ops Frontend",
+  "author": "RoundingWell",
+  "license": "CC-BY-4.0",
+  "homepage": "https://roundingwell.com",
+  "type": "module",
+  "files": ["index.js"],
+  "main": "./index.js",
+  "exports": "./index.js",
+  "sideEffects": false,
+  "dependencies": {
+    "@roundingwell/care-ops-config": "workspace:*",
+    "@roundingwell/care-ops-datadog": "workspace:*"
+  }
+}
