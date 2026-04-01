@@ -312,7 +312,6 @@ function startFormApp(queryParams) {
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
-    _TEST_: params.get('_TEST_') === 'true',
     modal: params.get('modal'),
     pdf: params.get('pdf'),
     responseId: params.get('responseId'),
@@ -337,8 +336,9 @@ document.addEventListener('DOMContentLoaded', async() => {
   await fetchConfig();
 
   const queryParams = getQueryParams();
+  const isLocalhost = window.location.hostname === 'localhost';
 
-  if (!queryParams._TEST_) initDataDog({ isPdfPrinter: !!queryParams.pdf });
+  if (!isLocalhost) initDataDog({ isPdfPrinter: Boolean(queryParams.pdf) });
 
   if (queryParams.modal) {
     document.body.classList.add('is-modal');
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', async() => {
 
   showPreloaderHTML();
 
-  updateSubmissionDebounce = debounce(updateSubmission, queryParams._TEST_ ? 100 : 2000);
+  updateSubmissionDebounce = debounce(updateSubmission, isLocalhost ? 100 : 2000);
 
   startFormApp(queryParams);
 });

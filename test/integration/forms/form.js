@@ -666,7 +666,7 @@ context('Noncontext Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/images/roundingwell-logo.svg?_TEST_=true');
+      .should('have.attr', 'src', '/images/roundingwell-logo.svg');
   });
 
   specify('form scripts and reducers', { retries: 4 }, function() {

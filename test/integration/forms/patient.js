@@ -72,7 +72,7 @@ context('Patient Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/formapp/index.html?_TEST_=true');
+      .should('have.attr', 'src', '/formapp/index.html');
 
     cy
       .get('.js-expand-button')
@@ -156,7 +156,7 @@ context('Patient Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/formapp/index.html?_TEST_=true&responseId=${ testNewFormResponse.id }`);
+      .should('have.attr', 'src', `/formapp/index.html?responseId=${ testNewFormResponse.id }`);
 
     cy
       .wait('@routeFormResponse');
