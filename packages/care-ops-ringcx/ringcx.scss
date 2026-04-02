@@ -1,0 +1,71 @@
+$ringcx-color: #f58220;
+$ringcx-color-hover: #d66c16;
+$ringcx-call-active: color(green);
+$ringcx-call-active-hover: color(green, dark);
+
+.ringcx-wrapper {
+  border-radius: 8px 8px 0 0;
+  bottom: 0;
+  position: fixed;
+  right: 40px;
+  width: 300px;
+}
+
+.ringcx-panel {
+  background: white;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
+  display: flex;
+  flex-direction: column;
+  height: 36px;
+  overflow: hidden;
+  transition: height 0.2s ease;
+
+  .ringcx-wrapper.is-open & {
+    height: 80vh;
+  }
+}
+
+.ringcx-panel__header {
+  align-items: center;
+  background-color: $ringcx-color;
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  font-weight: bold;
+  justify-content: space-between;
+  padding: 8px 16px;
+  transition: background-color 0.15s linear;
+
+  .ringcx-wrapper.is-open &.is-call-active,
+  &.is-call-active {
+    background-color: $ringcx-call-active;
+
+    &:hover {
+      background-color: $ringcx-call-active-hover;
+    }
+  }
+
+  &:hover {
+    background-color: $ringcx-color-hover;
+  }
+
+  .icon.fa-window-minimize {
+    transform: translateY(-4px);
+  }
+}
+
+.ringcx-panel__iframe {
+  min-height: 0;
+  pointer-events: none;
+  visibility: hidden;
+
+  .ringcx-wrapper.is-open & {
+    flex: 1 1 auto;
+    pointer-events: auto;
+    visibility: visible;
+  }
+}

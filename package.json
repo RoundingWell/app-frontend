@@ -14,6 +14,7 @@
     "packages/care-ops-datadog",
     "packages/care-ops-five9",
     "packages/care-ops-fontawesome",
+    "packages/care-ops-ringcx",
     "packages/care-ops-ringcentral"
   ],
   "scripts": {
