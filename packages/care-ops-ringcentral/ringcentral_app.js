@@ -1,5 +1,4 @@
 import Radio from 'backbone.radio';
-import dayjs from 'dayjs';
 
 import App from 'js/base/app';
 
@@ -49,7 +48,6 @@ export default App.extend({
       if (data.type === 'rc-call-start-notify') {
         const isTransferredCall = data.call?.direction === 'Inbound' && data.call?.isForwarded === true;
 
-        this.setState('callTime', dayjs());
         this.setState('callState', isTransferredCall ? 'transferred' : 'active');
 
         Radio.request('dialer', 'showPatientLinks', {
@@ -63,7 +61,6 @@ export default App.extend({
         Radio.request('dialer', 'ringcentralCall', { callData: data.call });
 
         this.setState('callState', null);
-        this.setState('callTime', null);
         this.setState('actionId', null);
 
         Radio.request('dialer', 'showPatientLinks', null);

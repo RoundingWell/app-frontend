@@ -20,8 +20,8 @@ function timeSince(startTime) {
 }
 
 const TimerView = View.extend({
-  initialize({ startTime }) {
-    this.startTime = startTime;
+  initialize() {
+    this.startTime = dayjs();
   },
   onRender() {
     delay(() => this.render(), 1000);
@@ -124,12 +124,11 @@ const LayoutView = View.extend({
   },
   showCallState() {
     const callState = this.model.get('callState');
-    const callTime = this.model.get('callTime');
 
     this.ui.header.toggleClass('is-call-active', callState === 'active' || callState === 'transferred');
 
     if (callState === 'active') {
-      this.showChildView('heading', new TimerView({ startTime: callTime }));
+      this.showChildView('heading', new TimerView());
       return;
     }
 
