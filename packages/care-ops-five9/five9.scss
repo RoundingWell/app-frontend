@@ -43,6 +43,10 @@ $five9-call-ended-hover: color(red, dark);
   transition: background-color 0.15s;
   transition-timing-function: linear;
 
+  .icon.fa-window-minimize {
+    transform: translateY(-4px);
+  }
+
   &:hover {
     background-color: $five9-color-hover;
   }
