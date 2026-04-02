@@ -13,7 +13,6 @@ import { animSidebar } from 'js/anim';
 import PreloadRegion from 'js/regions/preload_region';
 
 import IframeFormBehavior from 'js/behaviors/iframe-form';
-
 import ModalTemplate from './modal.hbs';
 
 const i18n = intl.globals.modal.modalViews;
@@ -141,10 +140,10 @@ const IframeFormView = View.extend({
 
     return 'modal__form-iframe';
   },
-  template: hbs`<iframe src="{{ url }}&modal=1"></iframe>`,
+  template: hbs`<iframe src="{{ url }}"></iframe>`,
   templateContext() {
     return {
-      url: this.model.getFormUrl(),
+      url: this.model.getFormUrl({ modal: 1 }),
     };
   },
 });

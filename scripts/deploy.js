@@ -17,6 +17,7 @@ const DEPLOYABLE_STATUSES = new Set([
   'UPDATE_COMPLETE',
   'UPDATE_ROLLBACK_COMPLETE',
 ]);
+const SHARED_RUNTIME_CACHE_CONTROL = 'no-cache';
 
 function isMainModule() {
   if (!process.argv[1]) {
@@ -170,6 +171,10 @@ export function sortUploadEntries(entries, prefix = '') {
     .sort((a, b) => compareUploadEntries(a, b, prefix));
 }
 
+function isSharedRuntimeAsset(assetPath) {
+  return assetPath.replace(/^\//, '').startsWith('shared/');
+}
+
 /**
  * Upload a single file to S3.
  * @param {S3Client} s3Client - S3 client instance
@@ -180,12 +185,14 @@ export function sortUploadEntries(entries, prefix = '') {
 async function uploadFile(s3Client, bucketName, filePath, key) {
   const fileContent = await fs.readFile(filePath);
   const contentType = getContentType(filePath);
+  const cacheControl = isSharedRuntimeAsset(key) ? SHARED_RUNTIME_CACHE_CONTROL : undefined;
 
   const command = new PutObjectCommand({
     Bucket: bucketName,
     Key: key,
     Body: fileContent,
     ContentType: contentType,
+    ...(cacheControl && { CacheControl: cacheControl }),
   });
 
   await s3Client.send(command);

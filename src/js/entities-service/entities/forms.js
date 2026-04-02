@@ -18,10 +18,18 @@ const _Model = BaseModel.extend({
   isSubmitHidden() {
     return get(this.get('options'), 'submit_hidden');
   },
-  getFormUrl() {
+  getFormUrl(params = {}) {
     // NOTE: /formapp/ is legacy formio
-    const url = this.get('url') || '/formapp/index.html';
-    return `${ url }?_TEST_=${ _TEST_ }`;
+    const baseUrl = this.get('url') || '/formapp/index.html';
+    const url = new URL(baseUrl, window.location.origin);
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value == null) return;
+
+      url.searchParams.set(key, value);
+    });
+
+    return `${ url.pathname }${ url.search }${ url.hash }`;
   },
   getWidgets() {
     const formWidgets = get(this.get('options'), ['widgets', 'widgets']);

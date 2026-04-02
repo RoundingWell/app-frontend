@@ -13,7 +13,6 @@ import Droplist from 'js/components/droplist';
 import Tooltip from 'js/components/tooltip';
 
 import IframeFormBehavior from 'js/behaviors/iframe-form';
-
 import './form.scss';
 
 const ContextTrailView = View.extend({
@@ -188,11 +187,12 @@ const LayoutView = View.extend({
 const IframeView = View.extend({
   behaviors: [IframeFormBehavior],
   className: 'form__content',
-  template: hbs`<iframe src="{{ url }}{{#if responseId}}&responseId={{ responseId }}{{/if}}"></iframe>`,
+  template: hbs`<iframe src="{{ url }}"></iframe>`,
   templateContext() {
     return {
-      responseId: this.getOption('responseId'),
-      url: this.model.getFormUrl(),
+      url: this.model.getFormUrl({
+        responseId: this.getOption('responseId'),
+      }),
     };
   },
 });

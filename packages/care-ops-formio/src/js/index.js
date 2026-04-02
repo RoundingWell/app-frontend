@@ -7,8 +7,7 @@ import '@fortawesome/fontawesome-pro/scss/solid.scss';
 import 'scss/bootstrap.min.css';
 import 'scss/formapp-core.scss';
 
-import { fetchConfig, getAppVersion } from '@roundingwell/care-ops-config';
-import { addError, initDataDog } from 'js/datadog';
+import { addError, initFormServices } from '@roundingwell/care-ops-forms';
 
 import Handlebars from 'handlebars/runtime';
 import parsePhoneNumber from 'libphonenumber-js/min';
@@ -303,8 +302,6 @@ function startFormApp(queryParams) {
   window.addEventListener('message', handleMessage);
   window.addEventListener('focus', () => parent.postMessage({ message: 'focus' }, window.origin));
 
-  parent.postMessage({ message: 'version', args: getAppVersion() }, window.origin);
-
   handleQuery(queryParams);
 }
 
@@ -312,7 +309,6 @@ function startFormApp(queryParams) {
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
-    _TEST_: params.get('_TEST_') === 'true',
     modal: params.get('modal'),
     pdf: params.get('pdf'),
     responseId: params.get('responseId'),
@@ -334,11 +330,14 @@ function showPreloaderHTML() {
 }
 
 document.addEventListener('DOMContentLoaded', async() => {
-  await fetchConfig();
-
   const queryParams = getQueryParams();
+  const isLocalhost = window.location.hostname === 'localhost';
 
-  if (!queryParams._TEST_) initDataDog({ isPdfPrinter: !!queryParams.pdf });
+  try {
+    await initFormServices({ ddService: 'customer-forms-legacy' });
+  } catch (error) {
+    addError(error);
+  }
 
   if (queryParams.modal) {
     document.body.classList.add('is-modal');
@@ -346,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async() => {
 
   showPreloaderHTML();
 
-  updateSubmissionDebounce = debounce(updateSubmission, queryParams._TEST_ ? 100 : 2000);
+  updateSubmissionDebounce = debounce(updateSubmission, isLocalhost ? 100 : 2000);
 
   startFormApp(queryParams);
 });

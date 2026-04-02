@@ -4,6 +4,8 @@ import { NetworkOnly, NetworkFirst, CacheFirst } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { PrecacheFallbackPlugin, precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 
+const SHARED_RUNTIME_PREFIX = '/shared/';
+
 // Ensure that updates to the underlying service worker take effect immediately
 // for both the current client and all other active clients.
 self.skipWaiting();
@@ -57,7 +59,10 @@ if (self.location.hostname !== 'localhost') {
   deleteHashedCache();
 
   const staticHashedAssetsRoute = new Route(({ request }) => {
-    return ['script', 'style'].includes(request.destination);
+    return (
+      ['script', 'style'].includes(request.destination)
+      && !new URL(request.url).pathname.startsWith(SHARED_RUNTIME_PREFIX)
+    );
   }, new CacheFirst({ cacheName: getHashedCacheName('static-hashed-assets') }));
 
   registerRoute(staticHashedAssetsRoute);

@@ -146,7 +146,7 @@ jobs:
       - when:
           condition: << parameters.should_build >>
           steps:
-            - run: npx vite build -m test
+            - run: npm run build -- --mode test
 
             - run:
                 name: Start Server

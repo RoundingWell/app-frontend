@@ -101,7 +101,7 @@ export default App.extend({
     this.showSidebar();
 
     // Note: triggers onChangeResponseId to showContent
-    this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id', false) });
+    this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id') });
 
     this.showView();
   },
