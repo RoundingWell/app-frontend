@@ -1,7 +1,13 @@
 import RingCentralApp from './ringcentral_app';
 
-function init({ region }) {
-  new RingCentralApp({ region });
+let dialerApp;
+
+function call(number, action) {
+  dialerApp.call(number, action);
 }
 
-export { init };
+function init({ region, patients }) {
+  dialerApp = new RingCentralApp({ region, patients });
+}
+
+export { call, init };

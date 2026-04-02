@@ -13,6 +13,7 @@ export default App.extend({
     'init': 'init',
     'showPatientLinks': 'showPatientLinks',
     'five9Call': 'five9Call',
+    'ringcentralCall': 'ringcentralCall',
   },
   async init() {
     /* istanbul ignore next: prevent re-initialization */
@@ -30,8 +31,9 @@ export default App.extend({
     }
 
     if (dialerSetting === 'ringcentral') {
-      const { init } = await import('@roundingwell/care-ops-ringcentral');
-      init({ region: this.getRegion() });
+      const { call, init } = await import('@roundingwell/care-ops-ringcentral');
+      this._call = call;
+      init({ region: this.getRegion(), patients });
     }
   },
   call(number, action) {
@@ -70,6 +72,15 @@ export default App.extend({
     Radio.request('entities', 'save:artifacts:model', {
       artifact: 'five9-call-log',
       identifier: callData.interactionId,
+      values,
+    });
+  },
+  ringcentralCall(values) {
+    const { callData } = values;
+
+    Radio.request('entities', 'save:artifacts:model', {
+      artifact: 'ringcentral-call-log',
+      identifier: callData.callId,
       values,
     });
   },

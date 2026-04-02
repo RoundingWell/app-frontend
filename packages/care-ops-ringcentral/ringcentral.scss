@@ -1,7 +1,11 @@
-$rc-color: #237ba9;
-$rc-color-hover: #1e678c;
+$ringcentral-color: #237ba9;
+$ringcentral-color-hover: #1e678c;
+$ringcentral-call-active: color(green);
+$ringcentral-call-active-hover: color(green, dark);
+$ringcentral-call-ended: color(red);
+$ringcentral-call-ended-hover: color(red, dark);
 
-.rc-wrapper {
+.ringcentral-wrapper {
   border-radius: 8px 8px 0 0;
   bottom: 0;
   position: fixed;
@@ -9,7 +13,7 @@ $rc-color-hover: #1e678c;
   width: 300px;
 }
 
-.rc-panel {
+.ringcentral-panel {
   background: white;
   border-radius: 8px 8px 0 0;
   box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
@@ -19,14 +23,14 @@ $rc-color-hover: #1e678c;
   overflow: hidden;
   transition: height 0.2s ease;
 
-  .rc-wrapper.is-open & {
+  .ringcentral-wrapper.is-open & {
     height: 80vh;
   }
 }
 
-.rc-panel__header {
+.ringcentral-panel__header {
   align-items: center;
-  background-color: $rc-color;
+  background-color: $ringcentral-color;
   border: 0;
   border-radius: 8px 8px 0 0;
   color: white;
@@ -44,17 +48,62 @@ $rc-color-hover: #1e678c;
   }
 
   &:hover {
-    background-color: $rc-color-hover;
+    background-color: $ringcentral-color-hover;
+  }
+
+  &.is-call-active {
+    background-color: $ringcentral-call-active;
+
+    &:hover {
+      background-color: $ringcentral-call-active-hover;
+    }
+  }
+
+  &.is-call-ended {
+    background-color: $ringcentral-call-ended;
+
+    &:hover {
+      background-color: $ringcentral-call-ended-hover;
+    }
   }
 }
 
 
-.rc-panel__iframe {
+.ringcentral-panel__patient-btn {
+  align-items: center;
+  background-color: white;
+  border: 1px solid $ringcentral-color;
+  border-radius: 8px;
+  color: $ringcentral-color;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  text-overflow: ellipsis;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+  white-space: nowrap;
+  width: 100%;
+
+  &:hover {
+    background-color: color(light_blue, light);
+  }
+
+  svg {
+    flex-shrink: 0;
+    margin: 0 6px;
+  }
+}
+
+.ringcentral-panel__iframe {
   min-height: 0;
   pointer-events: none;
   visibility: hidden;
 
-  .rc-wrapper.is-open & {
+  .ringcentral-wrapper.is-open & {
     flex: 1 1 auto;
     pointer-events: auto;
     visibility: visible;
