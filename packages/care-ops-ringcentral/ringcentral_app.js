@@ -1,4 +1,3 @@
-import { delay } from 'underscore';
 import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
 
@@ -42,11 +41,6 @@ export default App.extend({
 
       // when user creates a call from dial pad
       if (data.type === 'rc-call-init-notify') {
-        if (this._callEndTimer) {
-          clearTimeout(this._callEndTimer);
-          this._callEndTimer = null;
-        }
-
         this.setState('callState', null);
         this.setState('actionId', null);
       }
@@ -68,16 +62,11 @@ export default App.extend({
       if (data.type === 'rc-call-end-notify') {
         Radio.request('dialer', 'ringcentralCall', { callData: data.call });
 
-        this.setState('callState', 'ended');
+        this.setState('callState', null);
         this.setState('callTime', null);
+        this.setState('actionId', null);
 
         Radio.request('dialer', 'showPatientLinks', null);
-
-        this._callEndTimer = delay(() => {
-          this._callEndTimer = null;
-          this.setState('callState', null);
-          this.setState('actionId', null);
-        }, 10000);
       }
     });
   },
@@ -86,13 +75,6 @@ export default App.extend({
 
     // If there's an active call, only show the panel
     if (['active', 'transferred'].includes(this.getState('callState'))) return;
-
-    if (this._callEndTimer) {
-      clearTimeout(this._callEndTimer);
-      this._callEndTimer = null;
-      this.setState('callState', null);
-      this.setState('actionId', null);
-    }
 
     this.setState('pendingCall', number);
     this.setState('actionId', action.id);

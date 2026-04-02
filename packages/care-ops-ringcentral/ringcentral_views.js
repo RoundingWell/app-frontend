@@ -32,16 +32,6 @@ const TimerView = View.extend({
   },
 });
 
-const CallEndedView = View.extend({
-  initialize({ startTime }) {
-    this.startTime = startTime;
-  },
-  template: hbs`Call Ended: {{ minutes }}:{{ seconds }}`,
-  templateContext() {
-    return timeSince(this.startTime);
-  },
-});
-
 const PatientButtonItemView = View.extend({
   tagName: 'button',
   className: 'ringcentral-panel__patient-btn',
@@ -137,7 +127,6 @@ const LayoutView = View.extend({
     const callTime = this.model.get('callTime');
 
     this.ui.header.toggleClass('is-call-active', callState === 'active' || callState === 'transferred');
-    this.ui.header.toggleClass('is-call-ended', callState === 'ended');
 
     if (callState === 'active') {
       this.showChildView('heading', new TimerView({ startTime: callTime }));
@@ -146,11 +135,6 @@ const LayoutView = View.extend({
 
     if (callState === 'transferred') {
       this.showChildView('heading', new View({ template: hbs`Transferred Call` }));
-      return;
-    }
-
-    if (callState === 'ended') {
-      this.showChildView('heading', new CallEndedView({ startTime: this.model.previous('callTime') }));
       return;
     }
 
