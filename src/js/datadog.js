@@ -8,8 +8,8 @@ function initDataDog() {
 
   const service = 'app-frontend';
 
-  initLogs(getDatadogLogsOptions(service));
-  initRum(getDatadogRumOptions(service));
+  initLogs(getDatadogLogsOptions({ service }));
+  initRum(getDatadogRumOptions({ service }));
 }
 
 export {
