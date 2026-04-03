@@ -34,23 +34,27 @@ function getAppVersion() {
   return configState.app.version;
 }
 
-function getDatadogLogsOptions(service) {
+function getDatadogVersion(version) {
+  return version || getAppVersion();
+}
+
+function getDatadogLogsOptions({ service, version } = {}) {
   const datadog = configState.datadog;
   return {
     env: getEnvName(),
     service,
     clientToken: datadog.clientToken,
-    version: getAppVersion(),
+    version: getDatadogVersion(version),
   };
 }
 
-function getDatadogRumOptions(service) {
+function getDatadogRumOptions({ service, version } = {}) {
   const datadog = configState.datadog;
   return {
     env: getEnvName(),
     service,
     clientToken: datadog.clientToken,
-    version: getAppVersion(),
+    version: getDatadogVersion(version),
     applicationId: datadog.applicationId,
   };
 }

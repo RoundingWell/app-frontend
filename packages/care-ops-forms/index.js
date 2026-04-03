@@ -44,13 +44,14 @@ function postFormsVersion(targetWindow = parent, targetOrigin = window.origin) {
 function initFormsDatadog({
   isPdfPrinter,
   service,
+  version,
 }) {
   if (location.hostname === 'localhost') return Promise.resolve();
 
   if (!formsDatadogPromise) {
     formsDatadogPromise = fetchFormsConfig()
       .then(() => {
-        const logOptions = getDatadogLogsOptions(service);
+        const logOptions = getDatadogLogsOptions({ service, version });
 
         if (!logOptions.clientToken) return;
 
@@ -58,7 +59,7 @@ function initFormsDatadog({
 
         if (isPdfPrinter) return;
 
-        const rumOptions = getDatadogRumOptions(service);
+        const rumOptions = getDatadogRumOptions({ service, version });
 
         if (!rumOptions.applicationId) return;
 
@@ -76,6 +77,7 @@ function initFormsDatadog({
 
 async function initFormServices({
   ddService = 'customer-forms',
+  ddVersion,
   targetWindow = parent,
   targetOrigin = window.origin,
 } = {}) {
@@ -85,6 +87,7 @@ async function initFormServices({
   await initFormsDatadog({
     isPdfPrinter: isPdfFormRequest(),
     service: ddService,
+    version: ddVersion,
   });
 }
 
