@@ -114,9 +114,6 @@ jobs:
               deploy_organization=""
             fi
 
-            marker_env_slug="${target_env//:/-}"
-            marker_env_slug="${marker_env_slug//\*/all}"
-            marker_name="deploy-${marker_env_slug}-${target_version}"
             deploy_run_url="${CIRCLE_BUILD_URL:-https://app.circleci.com/pipelines/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_PIPELINE_ID}}"
 
             {
@@ -124,10 +121,34 @@ jobs:
               echo "export DEPLOY_TARGET_VERSION=$target_version"
               echo "export DEPLOY_STAGE=$deploy_stage"
               echo "export DEPLOY_ORGANIZATION=$deploy_organization"
-              echo "export DEPLOY_MARKER_NAME=$marker_name"
               echo "export DEPLOY_RUN_URL=$deploy_run_url"
             } >> "$BASH_ENV"
       - setup-aws-oidc
+      - run:
+          name: Resolve deploy marker environments
+          command: |
+            set -euo pipefail
+
+            deploy_tmp_dir="$(mktemp -d)"
+            marker_env_file="$deploy_tmp_dir/deploy-marker-environments.txt"
+            deploy_targets_file="$deploy_tmp_dir/deploy-targets.json"
+            deploy_marker_status_file="$deploy_tmp_dir/deploy-marker-status.json"
+
+            if [ -n "$DEPLOY_ORGANIZATION" ]; then
+              npm run deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION" --write-targets-file="$deploy_targets_file" --list-marker-environments > "$marker_env_file"
+            else
+              npm run deploy -- --stage="$DEPLOY_STAGE" --write-targets-file="$deploy_targets_file" --list-marker-environments > "$marker_env_file"
+            fi
+
+            if [ ! -s "$marker_env_file" ]; then
+              echo "No deploy marker environments were resolved"
+              exit 1
+            fi
+
+            printf 'export DEPLOY_TMP_DIR=%q\n' "$deploy_tmp_dir" >> "$BASH_ENV"
+            printf 'export DEPLOY_MARKER_ENV_FILE=%q\n' "$marker_env_file" >> "$BASH_ENV"
+            printf 'export DEPLOY_MARKER_STATUS_FILE=%q\n' "$deploy_marker_status_file" >> "$BASH_ENV"
+            printf 'export DEPLOY_TARGETS_FILE=%q\n' "$deploy_targets_file" >> "$BASH_ENV"
       - run:
           name: Download release artifact
           no_output_timeout: 5m
@@ -149,31 +170,41 @@ jobs:
           name: CircleCI Deploy Marker Plan
           command: |
             set -euo pipefail
-            circleci run release plan "$DEPLOY_MARKER_NAME" \
-              --environment-name="$DEPLOY_TARGET_ENV" \
+            node scripts/deploy-markers.js plan \
               --component-name="app-frontend" \
+              --env-file="$DEPLOY_MARKER_ENV_FILE" \
               --target-version="$DEPLOY_TARGET_VERSION"
       - run:
           name: Deploy selected target
           command: |
             set -euo pipefail
             if [ -n "$DEPLOY_ORGANIZATION" ]; then
-              npm run deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION"
+              npm run deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION" --read-targets-file="$DEPLOY_TARGETS_FILE" --marker-status-file="$DEPLOY_MARKER_STATUS_FILE"
             else
-              npm run deploy -- --stage="$DEPLOY_STAGE"
+              npm run deploy -- --stage="$DEPLOY_STAGE" --read-targets-file="$DEPLOY_TARGETS_FILE" --marker-status-file="$DEPLOY_MARKER_STATUS_FILE"
             fi
       - run:
           name: CircleCI Deploy Marker Success
           when: on_success
           command: |
             set -euo pipefail
-            circleci run release update "$DEPLOY_MARKER_NAME" --status=SUCCESS
+            node scripts/deploy-markers.js update \
+              --deploy-result="success" \
+              --env-file="$DEPLOY_MARKER_ENV_FILE" \
+              --status-file="$DEPLOY_MARKER_STATUS_FILE" \
+              --target-environment="$DEPLOY_TARGET_ENV" \
+              --target-version="$DEPLOY_TARGET_VERSION"
       - run:
           name: CircleCI Deploy Marker Failure
           when: on_fail
           command: |
             set -euo pipefail
-            circleci run release update "$DEPLOY_MARKER_NAME" --status=FAILED
+            node scripts/deploy-markers.js update \
+              --deploy-result="failure" \
+              --env-file="$DEPLOY_MARKER_ENV_FILE" \
+              --status-file="$DEPLOY_MARKER_STATUS_FILE" \
+              --target-environment="$DEPLOY_TARGET_ENV" \
+              --target-version="$DEPLOY_TARGET_VERSION"
       - run:
           name: Notify QA2 E2E repo
           when: on_success

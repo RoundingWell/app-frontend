@@ -4,6 +4,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import { DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 import { parseArgs } from 'node:util';
+import fsSync from 'node:fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -319,30 +320,121 @@ export function formatNoOrganizationsError(stage, filterOrganization) {
   return `No environments found for stage=${ stage }${ organizationMsg }\n`;
 }
 
+export function buildDeployMarkerEnvironments(stage, filterOrganization, organizations) {
+  if (filterOrganization) {
+    return [`${ stage }:${ filterOrganization }`];
+  }
+
+  const concreteEnvironments = [...organizations]
+    .filter(Boolean)
+    .sort((a, b) => a.localeCompare(b))
+    .map(organization => `${ stage }:${ organization }`);
+
+  return [`${ stage }:*`, ...concreteEnvironments];
+}
+
+export function writeDeployMarkerStatus(statusFile, markerStatus) {
+  if (!statusFile) return;
+  fsSync.writeFileSync(statusFile, `${ JSON.stringify(markerStatus, null, 2) }\n`);
+}
+
+export function readResolvedDeployTargets(targetsFile) {
+  if (!targetsFile) {
+    throw new Error('Resolved deploy targets file path is required.');
+  }
+
+  if (!fsSync.existsSync(targetsFile)) {
+    throw new Error(`Resolved deploy targets file not found: ${ targetsFile }`);
+  }
+
+  let payload;
+
+  try {
+    payload = JSON.parse(fsSync.readFileSync(targetsFile, 'utf8'));
+  } catch {
+    throw new Error(`Resolved deploy targets file is not valid JSON: ${ targetsFile }`);
+  }
+
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw new Error(`Resolved deploy targets payload must be a JSON object: ${ targetsFile }`);
+  }
+
+  const { organizationBuckets } = payload;
+
+  if (!Array.isArray(organizationBuckets)) {
+    throw new Error(`Resolved deploy targets payload must include an organizationBuckets array: ${ targetsFile }`);
+  }
+
+  const hasInvalidEntry = organizationBuckets.some(entry => !Array.isArray(entry) || entry.length !== 2);
+
+  if (hasInvalidEntry) {
+    throw new Error(`Resolved deploy targets organizationBuckets must be an array of [key, value] entries: ${ targetsFile }`);
+  }
+
+  return new Map(organizationBuckets);
+}
+
+export function writeResolvedDeployTargets(targetsFile, organizationBuckets) {
+  if (!targetsFile) return;
+  fsSync.writeFileSync(targetsFile, `${ JSON.stringify({
+    organizationBuckets: [...organizationBuckets.entries()],
+  }, null, 2) }\n`);
+}
+
+export function formatFailedDeploymentsError(failedEnvironments) {
+  return `Deployment failed for environments: ${ failedEnvironments.join(', ') }`;
+}
+
 /**
  * Main deployment function.
  */
 async function main() {
   const { values } = parseArgs({
     options: {
+      'read-targets-file': { type: 'string' },
+      'marker-status-file': { type: 'string' },
       'stage': { type: 'string' },
       'organization': { type: 'string' },
+      'list-marker-environments': { type: 'boolean' },
+      'write-targets-file': { type: 'string' },
     },
   });
 
   const { stage, filterOrganization } = resolveDeployInputs(values);
   const organizationFilter = formatOrganizationFilter(filterOrganization);
-
+  const isListingMarkerEnvironments = values['list-marker-environments'];
   const clients = createAwsClients();
 
-  process.stdout.write(`Querying CloudFormation organizations by tags for stage: ${ stage }${ organizationFilter }\n`);
-
-  const organizationBuckets = await listStageOrganizations(clients.cloudFormation, stage, filterOrganization);
+  let organizationBuckets;
+  if (values['read-targets-file']) {
+    organizationBuckets = readResolvedDeployTargets(values['read-targets-file']);
+    if (!isListingMarkerEnvironments) {
+      process.stdout.write(`Loaded deploy targets from ${ values['read-targets-file'] }\n`);
+    }
+  } else {
+    if (!isListingMarkerEnvironments) {
+      process.stdout.write(`Querying CloudFormation organizations by tags for stage: ${ stage }${ organizationFilter }\n`);
+    }
+    organizationBuckets = await listStageOrganizations(clients.cloudFormation, stage, filterOrganization);
+    writeResolvedDeployTargets(values['write-targets-file'], organizationBuckets);
+  }
 
   if (organizationBuckets.size === 0) {
     process.stderr.write(formatNoOrganizationsError(stage, filterOrganization));
     process.exit(1);
   }
+
+  if (isListingMarkerEnvironments) {
+    const environments = buildDeployMarkerEnvironments(stage, filterOrganization, organizationBuckets.keys());
+    process.stdout.write(`${ environments.join('\n') }\n`);
+    return;
+  }
+
+  const markerStatus = {
+    failedEnvironments: [],
+    successfulEnvironments: [],
+  };
+  writeDeployMarkerStatus(values['marker-status-file'], markerStatus);
 
   process.stdout.write(`Found ${ organizationBuckets.size } organizations to deploy:\n`);
   organizationBuckets.forEach((bucketName, organization) => {
@@ -352,7 +444,21 @@ async function main() {
   const distDir = path.join(__dirname, '../dist');
 
   for (const [organization, bucketName] of organizationBuckets) {
-    await deployToOrganization(clients, stage, organization, bucketName, distDir);
+    const environment = `${ stage }:${ organization }`;
+
+    try {
+      await deployToOrganization(clients, stage, organization, bucketName, distDir);
+      markerStatus.successfulEnvironments.push(environment);
+      writeDeployMarkerStatus(values['marker-status-file'], markerStatus);
+    } catch (error) {
+      markerStatus.failedEnvironments.push(environment);
+      writeDeployMarkerStatus(values['marker-status-file'], markerStatus);
+      process.stderr.write(`Deployment failed for ${ environment }: ${ error.message }\n`);
+    }
+  }
+
+  if (markerStatus.failedEnvironments.length) {
+    throw new Error(formatFailedDeploymentsError(markerStatus.failedEnvironments));
   }
 
   process.stdout.write('\nAll deployments complete!\n');

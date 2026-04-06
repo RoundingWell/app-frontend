@@ -134,7 +134,12 @@ The deploy pipeline in [`.circleci/deploy.yml`](../.circleci/deploy.yml):
 ```bash
 npm run deploy -- --stage=<stage> [--organization=<organization>]
 ```
-5. For QA deploys that include `qa2` (`qa:qa2` and `qa:*`), posts `qa2_deploy_succeeded` to `RoundingWell/app-tests`
+5. Writes CircleCI deploy markers for every environment resolved from the deploy target:
+   - specific targets such as `qa:qa2` write one marker for that concrete environment
+   - stage-wide targets such as `qa:*`, `sandbox:*`, and `prod:*` retain the wildcard marker and also write one marker per concrete environment discovered from CloudFormation tags for that stage
+   - stage-wide deploys continue through every resolved environment and fail the job at the end if any targets fail
+   - if a stage-wide deploy partially succeeds, concrete environment markers reflect the per-environment outcomes while the wildcard marker reflects the overall deploy result
+6. For QA deploys that include `qa2` (`qa:qa2` and `qa:*`), posts `qa2_deploy_succeeded` to `RoundingWell/app-tests`
 
 Supported deploy environments:
 - `dev:<organization>`
@@ -187,6 +192,7 @@ npm run release
    - `environment_name=<stage>:<organization|*>`
    - `target_version=<release-tag>`
 4. The deploy pipeline downloads the artifact for that tag and deploys the target environment.
+5. For stage-wide `dev:*`, `qa:*`, `sandbox:*`, and `prod:*` deploys, the pipeline also writes markers for each concrete environment it resolved for that stage so later environment-specific deploys stay visible in CircleCI Deploy.
 
 The AWS account must expose the deploy target to run successfully:
 - Secrets Manager must have a secret named `customer/<stage>/<organization>`
