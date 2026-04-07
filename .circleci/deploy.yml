@@ -135,9 +135,9 @@ jobs:
             deploy_marker_status_file="$deploy_tmp_dir/deploy-marker-status.json"
 
             if [ -n "$DEPLOY_ORGANIZATION" ]; then
-              npm run deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION" --write-targets-file="$deploy_targets_file" --list-marker-environments > "$marker_env_file"
+              npm run --silent deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION" --write-targets-file="$deploy_targets_file" --list-marker-environments > "$marker_env_file"
             else
-              npm run deploy -- --stage="$DEPLOY_STAGE" --write-targets-file="$deploy_targets_file" --list-marker-environments > "$marker_env_file"
+              npm run --silent deploy -- --stage="$DEPLOY_STAGE" --write-targets-file="$deploy_targets_file" --list-marker-environments > "$marker_env_file"
             fi
 
             if [ ! -s "$marker_env_file" ]; then
