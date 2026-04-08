@@ -47,6 +47,8 @@ typings/
 
 # dotenv environment variables file
 .env
+
+# claude code
 .claude/
 
 # Users Environment Variables
