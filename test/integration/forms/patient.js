@@ -110,22 +110,13 @@ context('Patient Form', function() {
       .should('not.exist');
 
     cy
-      .iframe()
-      .as('iframe');
-
-    cy
-      .get('@iframe')
-      .should('contain', 'Family Medical History');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[familyHistory]"]')
-      .type('Here is some typing');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[storyTime]"]')
-      .type('Once upon a time...');
+      .get('iframe')
+      .then(iframe => {
+        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+          familyHistory: 'Here is some typing',
+          storyTime: 'Once upon a time...',
+        });
+      });
 
     cy
       .intercept('POST', '/api/form-responses', {
@@ -203,12 +194,13 @@ context('Patient Form', function() {
       .as('routePostResponse');
 
     cy
-      .iframe()
-      .find('[name="data[fields.foo]"]')
-      .type('bar');
+      .get('iframe')
+      .then(iframe => {
+        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', { fields: { foo: 'bar' } });
+      });
 
     cy
-      .wait(300) // NOTE: must wait due to debounce in iframe
+      .wait(300) // NOTE: must wait for postMessage to be processed by parent
       .then(() => {
         const storage = JSON.parse(localStorage.getItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`));
 
@@ -293,9 +285,13 @@ context('Patient Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .iframe()
-      .find('[name="data[fields.foo]"]')
-      .should('have.value', 'bar');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.storedSubmission.fields.foo).to.equal('bar');
+      });
   });
 
   specify('restoring stored submission', function() {
@@ -352,9 +348,13 @@ context('Patient Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .iframe()
-      .find('[name="data[fields.foo]"]')
-      .should('have.value', 'foo');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.storedSubmission.fields.foo).to.equal('foo');
+      });
   });
 
   specify('discarding stored submission', function() {
@@ -421,9 +421,13 @@ context('Patient Form', function() {
       .should('not.contain', 'Last edit was');
 
     cy
-      .iframe()
-      .find('[name="data[fields.foo]"]')
-      .should('have.value', 'bar');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.formData.fields.foo).to.equal('bar');
+      });
   });
 
   specify('read only form', function() {
@@ -479,9 +483,13 @@ context('Patient Form', function() {
       .should('not.exist');
 
     cy
-      .iframe()
-      .find('[name="data[fields.foo]"]')
-      .should('have.value', 'bar');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.formData.fields.foo).to.equal('bar');
+      });
   });
 
   specify('store expanded state in localStorage', function() {
@@ -677,14 +685,13 @@ context('Patient Form', function() {
       .wait('@routeFormFields');
 
     cy
-      .iframe()
-      .find('textarea[name="data[familyHistory]"]')
-      .type('Here is some typing');
-
-    cy
-      .iframe()
-      .find('textarea[name="data[storyTime]"]')
-      .type('Once upon a time...');
+      .get('iframe')
+      .then(iframe => {
+        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+          familyHistory: 'Here is some typing',
+          storyTime: 'Once upon a time...',
+        });
+      });
 
     cy
       .intercept('POST', '/api/form-responses', {
@@ -811,20 +818,13 @@ context('Patient Form', function() {
       .as('postFormResponse');
 
     cy
-      .iframe()
-      .as('iframe');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[familyHistory]"]')
-      .clear()
-      .type('New typing');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[storyTime]"]')
-      .clear()
-      .type('New typing');
+      .get('iframe')
+      .then(iframe => {
+        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+          familyHistory: 'New typing',
+          storyTime: 'New typing',
+        });
+      });
 
     cy
       .get('.form__controls')
@@ -846,9 +846,13 @@ context('Patient Form', function() {
       .wait('@postFormResponse');
 
     cy
-      .get('@iframe')
-      .find('.alert')
-      .contains('Insufficient permissions');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const formErrors = receivedMessages.find(m => m.message === 'form:errors');
+
+        expect(formErrors.args.error[0]).to.equal('Insufficient permissions');
+      });
   });
 
   specify('form error', function() {
@@ -887,20 +891,13 @@ context('Patient Form', function() {
       .as('postFormResponse');
 
     cy
-      .iframe()
-      .as('iframe');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[familyHistory]"]')
-      .clear()
-      .type('New typing');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[storyTime]"]')
-      .clear()
-      .type('New typing');
+      .get('iframe')
+      .then(iframe => {
+        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+          familyHistory: 'New typing',
+          storyTime: 'New typing',
+        });
+      });
 
     cy
       .get('.form__controls')
@@ -910,9 +907,13 @@ context('Patient Form', function() {
       .wait('@postFormResponse');
 
     cy
-      .get('@iframe')
-      .find('.alert')
-      .contains('Insufficient permissions');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const formErrors = receivedMessages.find(m => m.message === 'form:errors');
+
+        expect(formErrors.args.error[0]).to.equal('Insufficient permissions');
+      });
   });
 
   specify('hidden submit button', function() {
@@ -941,8 +942,13 @@ context('Patient Form', function() {
       .wait('@routeFormFields');
 
     cy
-      .iframe()
-      .find('textarea[name="data[familyHistory]"]');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const definition = receivedMessages.find(m => m.message === 'fetch:form:definition');
+
+        expect(definition.args.value.components[0].components.find(c => c.key === 'familyHistory'), 'familyHistory component').to.exist;
+      });
 
     cy
       .get('.form__controls')

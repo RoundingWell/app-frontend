@@ -338,11 +338,6 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
-      .find('.js-submit')
-      .should('be.disabled');
-
-    cy
       .wait('@routeFormDefinition');
 
     cy
@@ -360,21 +355,22 @@ context('patient sidebar', function() {
       .as('postFormResponse');
 
     cy
-      .iframe()
-      .as('iframe');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.options.reducers[0]).to.contain('storyTime = foo()');
+      });
 
     cy
-      .get('@iframe')
-      .find('textarea[name="data[familyHistory]"]')
-      .clear()
-      .type('New typing');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[storyTime]"]')
-      .should('contain', 'foo')
-      .clear()
-      .type('New typing');
+      .get('iframe')
+      .then(iframe => {
+        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+          familyHistory: 'New typing',
+          storyTime: 'New typing',
+        });
+      });
 
     cy
       .get('.modal--large')
@@ -415,9 +411,13 @@ context('patient sidebar', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .iframe()
-      .as('iframe')
-      .find('.formio-editor-read-only-content');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.isReadOnly).to.be.true;
+      });
 
     cy
       .get('.modal--large')

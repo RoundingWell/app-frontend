@@ -621,20 +621,13 @@ context('Outreach', function() {
       .as('postFormResponseError');
 
     cy
-      .iframe()
-      .as('iframe');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[familyHistory]"]')
-      .clear()
-      .type('New typing');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[storyTime]"]')
-      .clear()
-      .type('Once upon a time...');
+      .get('iframe')
+      .then(iframe => {
+        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+          familyHistory: 'New typing',
+          storyTime: 'Once upon a time...',
+        });
+      });
 
     cy
       .get('[data-action-region]')
@@ -655,9 +648,13 @@ context('Outreach', function() {
       });
 
     cy
-      .iframe()
-      .find('.alert')
-      .contains('This is a form error');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const formErrors = receivedMessages.find(m => m.message === 'form:errors');
+
+        expect(formErrors.args.error[0]).to.equal('This is a form error');
+      });
 
     cy
       .intercept('POST', `/api/actions/${ testAction.id }/relationships/form-responses`, {
@@ -755,13 +752,13 @@ context('Outreach', function() {
       .should('not.contain', 'Submit');
 
     cy
-      .iframe()
-      .as('iframe');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
 
-    cy
-      .get('@iframe')
-      .find('input[name="data[fields.foo]"]')
-      .should('have.value', 'bar');
+        expect(response.args.value.formData.fields.foo).to.equal('bar');
+      });
   });
 
   specify('500 error', function() {
