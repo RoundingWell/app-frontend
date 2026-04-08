@@ -1,58 +1,45 @@
 pull_request_review:
   enabled: true
   rules:
-    - name: Enforce RoundingWell coding standards and architecture
+    - name: Follow canonical frontend AI guidance
       prompt: >
-        Review the diff using these checkpoints:
+        `/AGENTS.md` is the canonical source for repo-wide AI guidance. Review the diff with these checkpoints:
 
-        **Tooling & Formatting**
-        - Respect `.editorconfig`, `eslint.config.mjs`, and `.stylelintrc`; no dangling semicolons/spacing violations.
-        - Imports follow the order: 3rd party → CSS/SCSS → utilities/base → apps → views/components → templates → local CSS.
-        - Use repo aliases (`js/*`, `scss/*`) instead of long relative paths.
-
-        **Architecture Guardrails**
-        - Views must use the Marionette `ui` hash, `triggers`, and `triggerMethod`; avoid direct DOM manipulation.
-        - AJAX/data access belongs in `src/js/entities-service/**`; views/apps should request data via Backbone.Radio or state models.
-        - Keep feature-flag code easy to remove (guard clause pattern, minimal branching).
-
-        **Templating & Styles**
-        - SCSS follows BEM naming; do not style `.js-*` selectors and keep nesting shallow.
-        - Handlebars spacing: `{{ something }}` for values, `{{#if}}{{else}}{{/if}}` without extra spaces.
-        - Attribute order: class, id/name, src/for/type/href/value, title/alt, role/aria-*, boolean.
-        - Use `{{{ }}}` only when rendering trusted HTML and ensure matching SCSS is imported from the JS module.
-
-        **Internationalization**
-        - Keys follow `view.directory.fileViews.viewName.stringContext`; HTML strings get an `HTML` suffix.
-        - Access strings through `{{ @intl.path.to.key }}` and use `dayjs` for date formatting.
-
-        **Generated & Restricted Files**
-        - Flag edits to `packages/**/sdk/**`, FontAwesome bundles, or `release/` scripts unless clearly regenerated.
-        - Ensure Formio/Five9 integrations go through existing update scripts.
-
-        **Testing & Coverage**
-        - Changes that affect UI logic should update/introduce Cypress component specs; flow/regression changes need e2e specs.
-        - Remind authors to run `npm run lint`, `npm run coverage:component`, and `npm run coverage:e2e`.
-
-        **Quality Checks**
-        - Functions remain focused (<10 lines when practical); guard clauses handle edge cases first.
-        - Modules stay <300 lines; suggest splitting when larger.
-        - Ensure state is stored on models, not ad-hoc properties; favor composition over inheritance.
+        - JavaScript only. Do not introduce TypeScript.
+        - Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
+        - Route data access through `src/js/entities-service/**`.
+        - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
+        - Prefer this import order: third-party libraries, SCSS or CSS modules, shared utilities and base classes, entities and service modules, apps and controllers, views and components, then templates and final local style overrides.
+        - Keep Handlebars spacing tight: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
+        - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
+        - Component specs live in `src/**/*.cy.js`.
+        - E2E specs live in `test/integration/**/*.js`.
+        - Fixtures live in `test/fixtures/**`.
+        - Treat `scripts/**` and `packages/care-ops-five9/sdk/**` as sensitive areas and flag manual edits that bypass their helper scripts.
+        - Put findings first.
+        - Prioritize repo-specific risks first: `scripts/**`, `packages/care-ops-five9/sdk/**`, `src/js/entities-service/**`, Marionette view patterns, and template or SCSS coupling.
+        - Keep review comments short, direct, and evidence-based. Explain only when needed.
+        - Avoid low-signal comments on tiny mechanical or pure copy-only diffs unless a repo-specific risk is involved.
 
 # Local development assistance
 code_generation:
   enabled: true
   rules:
-    - name: Follow RoundingWell patterns for new code
+    - name: Follow canonical frontend patterns
       prompt: >
-        When generating code, follow these conventions:
-        - JavaScript only—no TypeScript files or typings.
-        - Use Marionette patterns: define `ui`, prefer `triggers`, call `triggerMethod` when emitting events.
-        - Import SCSS from the module that renders the view; use BEM `.block__element--modifier` naming and avoid styling `.js-*` hooks.
-        - Put data fetching in `src/js/entities-service/**`; other layers talk to entities via Backbone.Radio.
-        - Add/update matching Cypress specs (`*.cy.js` or `test/integration/**`) and remind the reader to run coverage scripts.
-        - Format Handlebars correctly (`{{ value }}`, `{{#if}}{{else}}{{/if}}`) and place strings in `src/js/i18n/en-US.yml` with formatjs key naming and `HTML` suffix for raw markup.
-        - Keep functions small with guard clauses, keep modules <300 lines, and store state on models.
-        - Suggest updates to release/Five9/Formio assets only via their helper scripts.
+        `/AGENTS.md` is the canonical source for repo-wide AI guidance. When generating code:
+        - Stay in JavaScript.
+        - Use Marionette patterns: define `ui`, prefer `triggers`, and use `triggerMethod`.
+        - Put data fetching in `src/js/entities-service/**`.
+        - Import SCSS from the rendering module and use BEM naming without styling `.js-*` hooks.
+        - Prefer this import order: third-party libraries, SCSS or CSS modules, shared utilities and base classes, entities and service modules, apps and controllers, views and components, then templates and final local style overrides.
+        - Keep Handlebars spacing tight: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
+        - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
+        - Component specs live in `src/**/*.cy.js`.
+        - E2E specs live in `test/integration/**/*.js`.
+        - Fixtures live in `test/fixtures/**`.
+        - Treat `scripts/**` and `packages/care-ops-five9/sdk/**` as sensitive areas.
+        - Keep suggestions short and operational. Put actions before rationale.
 
 # Chat assistance
 chat:
@@ -60,12 +47,14 @@ chat:
   rules:
     - name: Project context awareness
       prompt: >
-        You are working on a Marionette.js/Backbone.js healthcare frontend.
+        `/AGENTS.md` is the canonical source for repo-wide AI guidance.
         Key facts:
-        - Vite drives builds/tests; scripts of interest: `npm run dev`, `npm run test`, `npm run coverage`, `npm run stop`.
-        - Cypress component specs live under `src/**/*.cy.js`; e2e specs live under `test/integration/**`.
-        - Linting uses `eslint.config.mjs` (flat config) and `.stylelintrc` for SCSS with BEM requirements.
-        - Handlebars templates use tight spacing (`{{ value }}`) and formatjs keys (`view.directory.fileViews.viewName.key`).
-        - Networking logic belongs to `src/js/entities-service/**`; avoid suggesting direct fetch/XHR elsewhere.
-        - Generated artifacts (Five9 SDK, FontAwesome, release bundles) should be updated via existing scripts, not manual edits.
-        - No TypeScript; stick to modern JavaScript.
+        - This is a Marionette.js and Backbone.js frontend built with Vite.
+        - Component specs live in `src/**/*.cy.js`.
+        - E2E specs live in `test/integration/**/*.js`.
+        - Fixtures live in `test/fixtures/**`.
+        - Networking logic belongs in `src/js/entities-service/**`.
+        - Sensitive areas include `scripts/**` and `packages/care-ops-five9/sdk/**`.
+        - Keep responses short and operational. Avoid preamble, filler, and repetition.
+        - Put actions and results before rationale.
+        - Explain only for tradeoffs, failures, uncertainty, or required evidence.
