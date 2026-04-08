@@ -1,0 +1,107 @@
+# Care Ops Frontend - AI Agent Guidelines
+
+- Applies to: all AI agents operating in this repository
+- Canonical reference: `/AGENTS.md`
+
+Start here. Load additional docs only when referenced below.
+
+Load a scoped overlay only when the task touches:
+
+- `scripts/**` -> `scripts/AGENTS.md`
+- `packages/care-ops-five9/**` -> `packages/care-ops-five9/AGENTS.md`
+
+## Instruction Priority
+
+1. System and developer instructions
+2. `/AGENTS.md`
+3. Scoped `AGENTS.md` files in subdirectories
+4. Agent-specific companion docs such as `.github/copilot-instructions.md`
+5. General repo documentation
+
+## Repository Snapshot
+
+- Stack: Backbone, Marionette, Handlebars, SCSS, Vite, Cypress, npm workspaces.
+- Core app code lives in `src/js/**`; styles live in `src/scss/**`; shared packages live in `packages/**`.
+- Component Cypress specs live in `src/**/*.cy.js`.
+- E2E Cypress specs live in `test/integration/**/*.js`.
+- Fixtures and Cypress support files live in `test/fixtures/**` and `test/support/**`.
+- Repo aliases map `js/*` to `src/js/*` in `jsconfig.json` and `vite.config.js`.
+
+## Core Guardrails
+
+- Stay in JavaScript. Do not introduce TypeScript or a new framework.
+- Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
+- Route data access through `src/js/entities-service/**` instead of introducing ad hoc fetch logic elsewhere.
+- Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
+- Keep feature flags easy to remove. Prefer guard-clause style branching.
+- Reuse existing utilities and workspace packages before adding dependencies.
+- Use i18n keys that match the repo's existing formatjs-style naming.
+
+## Communication
+
+- Keep responses short and operational.
+- Put actions and results before rationale.
+- Avoid preamble, filler, and repetition.
+- Explain only when tradeoffs, failures, uncertainty, or required evidence make it necessary.
+
+## Template, Style, and Import Conventions
+
+- Prefer this import order when adding or reorganizing imports:
+  1. polyfills and third-party libraries
+  2. SCSS or CSS modules
+  3. shared utilities and base classes
+  4. entities and service modules
+  5. apps and controllers
+  6. views and components
+  7. templates and final local style overrides
+- Handlebars spacing should stay tight and consistent: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
+- Use `{{{ }}}` only for trusted HTML.
+- Keep attribute order predictable in templates: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
+- Keep selectors shallow and prefer new blocks to deep nesting.
+
+## Sensitive Areas
+
+- `packages/care-ops-five9/sdk/**` contains downloaded vendor code plus a local patch. Update it through `packages/care-ops-five9/update-sdk.js`, not by hand.
+- `scripts/**` drives release, artifact, and deploy flows. Preserve CLI flags, output shape, and release semantics when editing.
+- Workspace packages under `packages/**` are shared entry points for the app. Treat public APIs as stable unless the task explicitly changes them.
+
+## Reviewing Changes
+
+- Put findings first.
+- Put repo-specific risks first:
+  - `scripts/**` release and deploy behavior
+  - `packages/care-ops-five9/sdk/**` and the SDK wrapper flow
+  - `src/js/entities-service/**` data-access boundaries
+  - Marionette view patterns such as `ui`, `triggers`, and scoped DOM behavior
+  - template and SCSS coupling
+- Keep review output concise and operational.
+- Explain only when severity, tradeoffs, failures, uncertainty, or evidence require it.
+- Review is most useful for non-trivial diffs, risky refactors, shared package changes, release or deploy changes, and behavior changes that may not be caught by lint.
+- Review is less useful for tiny mechanical edits, pure copy changes, or changes where tests and lint already provide the meaningful signal.
+
+## Validation
+
+- Use `npm run lint` for code changes that affect files covered by the repo lint setup.
+- Run targeted Cypress coverage commands when UI behavior changes:
+  - `npm run coverage:component`
+  - `npm run coverage:e2e`
+  - `npm run coverage`
+- Never claim validation passed unless you actually ran the command.
+
+## Common Commands
+
+- `npm run dev`
+- `npm run test`
+- `npm run lint`
+- `npm run coverage:component`
+- `npm run coverage:e2e`
+- `npm run coverage`
+- `npm run stop`
+
+## AI Docs Maintenance
+
+- `AGENTS.md` is the canonical source for repo-wide AI guidance.
+- Companion docs should summarize or scope rules, not restate them with conflicting details.
+- Copilot prompt surfaces intentionally inline a small subset of rules that they must see locally, such as import order and review-output constraints.
+- Prefer deleting stale AI docs over maintaining low-signal indexes or checklists.
+- This repo intentionally does not maintain a dedicated AI-doc audit script. Keep AI docs accurate through same-patch updates, targeted repo inspection, AI review when warranted, and human review.

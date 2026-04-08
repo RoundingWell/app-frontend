@@ -47,6 +47,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.claude/
 
 # Users Environment Variables
 .lock-wscript
