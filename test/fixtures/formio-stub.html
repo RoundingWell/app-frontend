@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+  <script>
+    const pending = new Map();
+    const receivedMessages = [];
+
+    let _fetchedFormData = {};
+    let _fetchedFormSubmission = {};
+    let _currentSubmission = null;
+
+    function parentRequest(message, args = {}) {
+      return new Promise((resolve, reject) => {
+        const requestId = `req_${ Math.random().toString(36).slice(2) }`;
+        pending.set(requestId, { resolve, reject });
+        parent.postMessage({ message, args, requestId }, window.origin);
+      });
+    }
+
+    function parentSend(message, args = {}) {
+      if (message === 'update:storedSubmission') {
+        _currentSubmission = args;
+      }
+      parent.postMessage({ message, args }, window.origin);
+    }
+
+    window.addEventListener('message', ({ data, origin }) => {
+      if (origin !== window.origin || !data || !data.message) return;
+      const { message, requestId, args = {} } = data;
+      const { value, error } = args;
+
+      receivedMessages.push(data);
+
+      if (requestId && pending.has(requestId)) {
+        const { resolve, reject } = pending.get(requestId);
+        pending.delete(requestId);
+        error ? reject(error) : resolve(value);
+        return;
+      }
+
+      if (message === 'form:submit') submitForm();
+    });
+
+    window.iframeStub = {
+      send: parentSend,
+      request: parentRequest,
+      receivedMessages,
+    };
+
+    function submitForm() {
+      const base = _currentSubmission || {};
+      const data = {
+        ..._fetchedFormData,
+        ..._fetchedFormSubmission,
+        ...base,
+        fields: { ...(_fetchedFormData.fields || {}), ...(base.fields || {}) },
+      };
+      parentRequest('submit:form', { response: { data, fields: data.fields } });
+    }
+
+    function renderForm(data = {}, { sendReady = true } = {}) {
+      _fetchedFormData = data.formData || {};
+      _fetchedFormSubmission = data.formSubmission || {};
+      if (sendReady) parentSend('ready:form');
+    }
+
+    async function loadForm() {
+      const [, data] = await Promise.all([
+        parentRequest('fetch:form:definition'),
+        parentRequest('fetch:form:data'),
+      ]);
+      renderForm(data);
+    }
+
+    async function loadResponse(responseId) {
+      const [, data] = await Promise.all([
+        parentRequest('fetch:form:definition'),
+        parentRequest('fetch:form:response', { responseId }),
+      ]);
+      // Does not send ready:form — mirrors formio's renderResponse behaviour,
+      // which keeps the parent's Update button visible instead of replacing it with Submit.
+      renderForm(data, { sendReady: false });
+    }
+
+    async function init() {
+      try {
+        const res = await fetch('/appconfig.json');
+        const config = await res.json();
+        parentSend('version', config && config.app && config.app.version);
+      } catch(_) {
+        parentSend('version', null);
+      }
+
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get('modal')) document.body.classList.add('is-modal');
+
+      if (params.get('responseId')) {
+        await loadResponse(params.get('responseId'));
+      } else {
+        await loadForm();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
