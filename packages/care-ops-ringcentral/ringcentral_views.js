@@ -125,20 +125,15 @@ const LayoutView = View.extend({
   showCallState() {
     const callState = this.model.get('callState');
 
-    this.ui.header.toggleClass('is-call-active', callState === 'ringing' || callState === 'active' || callState === 'transferred');
-
-    if (callState === 'active') {
-      this.showChildView('heading', new TimerView());
-      return;
-    }
-
-    if (callState === 'transferred') {
-      this.showChildView('heading', new View({ template: hbs`Transferred Call` }));
-      return;
-    }
+    this.ui.header.toggleClass('is-call-active', callState === 'ringing' || callState === 'active');
 
     if (callState === 'ringing') {
       this.showChildView('heading', new View({ template: hbs`Incoming Call` }));
+      return;
+    }
+
+    if (callState === 'active') {
+      this.showChildView('heading', new TimerView());
       return;
     }
 
