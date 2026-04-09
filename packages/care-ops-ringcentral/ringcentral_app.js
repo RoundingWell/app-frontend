@@ -44,6 +44,13 @@ export default App.extend({
         this.setState('actionId', null);
       }
 
+      // when an inbound call is ringing
+      if (data.type === 'rc-call-ring-notify') {
+        if (['active', 'transferred'].includes(this.getState('callState'))) return;
+
+        this.setState('callState', 'ringing');
+      }
+
       // when a user accepts a ringing inbound call or outbound call is connected
       if (data.type === 'rc-call-start-notify') {
         const isTransferredCall = data.call?.direction === 'Inbound' && data.call?.isForwarded === true;
