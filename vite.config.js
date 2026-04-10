@@ -110,7 +110,6 @@ export const cypressConfig = defineConfig({
       ],
     }),
   ],
-  exclude: ['public/formapp/assets/**'],
   resolve,
   css,
   publicDir: false,
@@ -157,7 +156,6 @@ export default defineConfig(({ mode }) => {
           globIgnores: [
             '**/*.map',
             '**/.DS_Store',
-            '**/formapp/assets/**',
             ...SHARED_RUNTIME_PRECACHE_IGNORES,
           ],
         },
@@ -190,7 +188,7 @@ export default defineConfig(({ mode }) => {
         },
       },
       watch: {
-        ignored: ['**/packages/care-ops-formio/**', '**/.stylelintcache', '**/public/formapp/**'],
+        ignored: ['**/.stylelintcache'],
       },
     },
     preview: {

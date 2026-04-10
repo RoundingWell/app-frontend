@@ -96,8 +96,6 @@ careOptsFrontend:
     dashboardViews:
       contextTrailView:
         contextBackBtn: Back to List
-  formapp:
-    failedSubmit: Failed to submit form. Please try again.
   forms:
     form:
       formApp:

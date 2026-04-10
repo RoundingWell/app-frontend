@@ -332,6 +332,11 @@ context('patient sidebar', function() {
       .should('have.css', 'display', 'none');
 
     cy
+      .intercept('GET', '/forms/formio/**', {
+        delay: 200,
+        fixture: 'formio-stub.html',
+      })
+      .as('routeFormApp')
       .get('@patientSidebar')
       .find('.widgets__form-widget')
       .contains('Test Modal Form')
@@ -343,6 +348,7 @@ context('patient sidebar', function() {
       .should('be.disabled');
 
     cy
+      .wait('@routeFormApp')
       .wait('@routeFormDefinition');
 
     cy
@@ -360,21 +366,22 @@ context('patient sidebar', function() {
       .as('postFormResponse');
 
     cy
-      .iframe()
-      .as('iframe');
+      .iframeStub()
+      .should(iframeStub => {
+        const response = iframeStub.receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response, 'fetch:form:data response').to.exist;
+        expect(response.args.value.options.reducers[0]).to.contain('storyTime = foo()');
+      });
 
     cy
-      .get('@iframe')
-      .find('textarea[name="data[familyHistory]"]')
-      .clear()
-      .type('New typing');
-
-    cy
-      .get('@iframe')
-      .find('textarea[name="data[storyTime]"]')
-      .should('contain', 'foo')
-      .clear()
-      .type('New typing');
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
+          familyHistory: 'New typing',
+          storyTime: 'New typing',
+        });
+      });
 
     cy
       .get('.modal--large')
@@ -415,9 +422,13 @@ context('patient sidebar', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .iframe()
-      .as('iframe')
-      .find('.formio-editor-read-only-content');
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.isReadOnly).to.be.true;
+      });
 
     cy
       .get('.modal--large')

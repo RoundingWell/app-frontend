@@ -21,6 +21,9 @@ beforeEach(function() {
   );
 
   cy
+    .intercept('GET', '/forms/formio/**', { fixture: 'formio-stub.html' });
+
+  cy
     .intercept('GET', '/appconfig.json*', {
       body: {
         app: {

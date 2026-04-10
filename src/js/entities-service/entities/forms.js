@@ -19,8 +19,7 @@ const _Model = BaseModel.extend({
     return get(this.get('options'), 'submit_hidden');
   },
   getFormUrl(params = {}) {
-    // NOTE: /formapp/ is legacy formio
-    const baseUrl = this.get('url') || '/formapp/index.html';
+    const baseUrl = this.get('url') || '/forms/formio/index.html';
     const url = new URL(baseUrl, window.location.origin);
 
     Object.entries(params).forEach(([key, value]) => {

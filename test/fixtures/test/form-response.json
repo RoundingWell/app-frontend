@@ -12,8 +12,8 @@
     "browserName": "Netscape",
     "offset": -360,
     "onLine": true,
-    "pathName": "/formapp/6de1fe73-cdd2-46a6-820c-a660de74dbfb/a/e4ebbbae-02b1-44a8-bc60-b21fedbb1aae",
-    "referrer": "http://localhost:8081/formapp/6de1fe73-cdd2-46a6-820c-a660de74dbfb/a/e4ebbbae-02b1-44a8-bc60-b21fedbb1aae",
+    "pathName": "/forms/formio/6de1fe73-cdd2-46a6-820c-a660de74dbfb/a/e4ebbbae-02b1-44a8-bc60-b21fedbb1aae",
+    "referrer": "http://localhost:8081/forms/formio/6de1fe73-cdd2-46a6-820c-a660de74dbfb/a/e4ebbbae-02b1-44a8-bc60-b21fedbb1aae",
     "timezone": "America/Chicago",
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:70.0) Gecko/20100101 Firefox/70.0"
   },
