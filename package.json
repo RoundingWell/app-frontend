@@ -34,7 +34,6 @@
     "deploy:qa": "node --env-file=.env scripts/deploy.js --stage=qa --organization=quality-assurance",
     "predeploy:qa2": "npm run build",
     "deploy:qa2": "node --env-file=.env scripts/deploy.js --stage=qa --organization=qa2",
-    "formio:build": "npm run build --prefix packages/care-ops-formio",
     "coverage": "npm run coverage:clear && npm run coverage:component && npm run coverage:e2e && npm stop",
     "precoverage:e2e": "npm run build -- --mode test",
     "coverage:e2e": "vite preview -m test & cypress run",

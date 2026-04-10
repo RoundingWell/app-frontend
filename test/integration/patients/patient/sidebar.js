@@ -332,7 +332,7 @@ context('patient sidebar', function() {
       .should('have.css', 'display', 'none');
 
     cy
-      .intercept('GET', '/formapp/**', {
+      .intercept('GET', '/forms/formio/**', {
         delay: 200,
         fixture: 'formio-stub.html',
       })
