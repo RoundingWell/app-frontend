@@ -8,23 +8,27 @@ import App from 'js/base/app';
 
 import 'js/entities-service';
 
-// TODO: Move definition request to optional
+// TODO: remove after the last Form.io PDF is replaced.
+function isFormIo() {
+  return document.referrer.includes('formio');
+}
+
 const ActionFormApp = App.extend({
   beforeStart({ actionId }) {
     return [
       Radio.request('entities', 'fetch:forms:byAction', actionId),
-      Radio.request('entities', 'fetch:forms:definition:byAction', actionId),
       Radio.request('entities', 'fetch:forms:data', actionId),
       Radio.request('entities', 'fetch:actions:model', actionId),
+      isFormIo() && Radio.request('entities', 'fetch:forms:definition:byAction', actionId),
     ];
   },
-  onStart(opts, form, definition, data, action) {
+  onStart(opts, form, data, action, definition) {
     const filter = this._getPrefillFilters(form, action);
 
     return Promise.resolve(Radio.request('entities', 'fetch:formResponses:byPatient', filter))
       .then(response => {
         parent.postMessage({ message: 'form:pdf', args: { value: {
-          definition,
+          ...(definition && { definition }),
           formData: data.attributes,
           responseData: response.getFormData(),
           formSubmission: response.getResponse(),
@@ -50,14 +54,14 @@ const FormApp = App.extend({
   beforeStart({ formId, patientId, responseId }) {
     return [
       Radio.request('entities', 'fetch:forms:model', formId),
-      Radio.request('entities', 'fetch:forms:definition', formId),
       Radio.request('entities', 'fetch:forms:data', null, patientId, formId),
       Radio.request('entities', 'fetch:formResponses:model', responseId),
+      isFormIo() && Radio.request('entities', 'fetch:forms:definition', formId),
     ];
   },
-  onStart(opts, form, definition, data, response) {
+  onStart(opts, form, data, response, definition) {
     parent.postMessage({ message: 'form:pdf', args: { value: {
-      definition,
+      ...(definition && { definition }),
       formData: data.attributes,
       responseData: response.getFormData(),
       formSubmission: response.getResponse(),
