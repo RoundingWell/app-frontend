@@ -110,9 +110,9 @@ context('Patient Form', function() {
       .should('not.exist');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'Here is some typing',
           storyTime: 'Once upon a time...',
         });
@@ -194,17 +194,19 @@ context('Patient Form', function() {
       .as('routePostResponse');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', { fields: { foo: 'bar' } });
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', { fields: { foo: 'bar' } });
       });
 
     cy
-      .wait(300) // NOTE: must wait for postMessage to be processed by parent
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`));
+      .window()
+      .should(win => {
+        const storage = win.localStorage.getItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`);
 
-        expect(storage.submission.fields.foo).to.equal('bar');
+        expect(storage, 'draft storage').to.exist;
+
+        expect(JSON.parse(storage).submission.fields.foo).to.equal('bar');
       });
 
     cy
@@ -685,9 +687,9 @@ context('Patient Form', function() {
       .wait('@routeFormFields');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'Here is some typing',
           storyTime: 'Once upon a time...',
         });
@@ -818,9 +820,9 @@ context('Patient Form', function() {
       .as('postFormResponse');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'New typing',
           storyTime: 'New typing',
         });
@@ -891,9 +893,9 @@ context('Patient Form', function() {
       .as('postFormResponse');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'New typing',
           storyTime: 'New typing',
         });

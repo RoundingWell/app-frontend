@@ -96,16 +96,16 @@ context('Noncontext Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:clinicians', {});
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:clinicians', {});
       })
       .should('have.length', 3);
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:clinicians', { teamId: teamCoordinator.id });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:clinicians', { teamId: teamCoordinator.id });
       })
       .should('have.length', 2)
       .invoke('map', clinician => clinician.name)
@@ -153,9 +153,9 @@ context('Noncontext Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:directory', { directoryName: 'foo', query: { filter: { foo: 'bar' } } });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:directory', { directoryName: 'foo', query: { filter: { foo: 'bar' } } });
       })
       .should('deep.equal', ['one', 'two']);
 
@@ -168,9 +168,9 @@ context('Noncontext Form', function() {
       });
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:directory', { directoryName: 'bar', query: { filter: { foo: 'bar' } } })
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:directory', { directoryName: 'bar', query: { filter: { foo: 'bar' } } })
           .then(() => ({ error: false }), () => ({ error: true }));
       })
       .should('deep.equal', { error: true });
@@ -214,9 +214,9 @@ context('Noncontext Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:patientsBy', { type: 'MRN', identifier: '123456' });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:patientsBy', { type: 'MRN', identifier: '123456' });
       })
       .should('have.length', 1)
       .its('0')
@@ -298,16 +298,16 @@ context('Noncontext Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:field', { fieldName: 'foo' });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:field', { fieldName: 'foo' });
       })
       .should('deep.equal', [1, 2]);
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:fieldHistory', { fieldName: 'foo', limit: 10, sort: 'newest' });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:fieldHistory', { fieldName: 'foo', limit: 10, sort: 'newest' });
       })
       .should('have.length', 2);
 
@@ -320,9 +320,9 @@ context('Noncontext Form', function() {
       });
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:fieldHistory', { fieldName: 'bar', limit: 2, sort: 'oldest' });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:fieldHistory', { fieldName: 'bar', limit: 2, sort: 'oldest' });
       })
       .its('0.value')
       .should('deep.equal', [5, 6]);
@@ -336,17 +336,17 @@ context('Noncontext Form', function() {
       });
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('fetch:field', { fieldName: 'bar' })
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('fetch:field', { fieldName: 'bar' })
           .then(() => ({ error: false }), () => ({ error: true }));
       })
       .should('deep.equal', { error: true });
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('update:field', { fieldName: 'foo', value: ['one', 'two'] });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('update:field', { fieldName: 'foo', value: ['one', 'two'] });
       })
       .should('deep.equal', ['one', 'two']);
 
@@ -360,9 +360,9 @@ context('Noncontext Form', function() {
       });
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('update:field', { fieldName: 'bar', value: ['one', 'two'] })
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('update:field', { fieldName: 'bar', value: ['one', 'two'] })
           .then(() => ({ error: false }), () => ({ error: true }));
       })
       .should('deep.equal', { error: true });
@@ -373,9 +373,9 @@ context('Noncontext Form', function() {
       .should('equal', getPatientFieldId(testPatient.id, 'bar'));
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        return iframe[0].contentWindow.iframeStub.request('update:field', { fieldName: 'bazinga', value: ['one', 'two'] });
+      .iframeStub()
+      .then(iframeStub => {
+        return iframeStub.request('update:field', { fieldName: 'bazinga', value: ['one', 'two'] });
       })
       .should('deep.equal', ['one', 'two']);
 
@@ -470,7 +470,7 @@ context('Noncontext Form', function() {
       .get('iframe')
       .should(([iframe]) => {
         const { receivedMessages } = iframe.contentWindow.iframeStub;
-        const response = receivedMessages.find(m => m.message === 'fetch:form:data');
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
 
         expect(response, 'fetch:form:data response').to.exist;
         expect(response.args.value.formData.fields.foo).to.equal('bar');

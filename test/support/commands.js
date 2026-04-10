@@ -113,6 +113,13 @@ Cypress.Commands.add('iframe', (getSelector = 'iframe') => {
     .then(cy.wrap);
 });
 
+Cypress.Commands.add('iframeStub', (getSelector = 'iframe') => {
+  return cy
+    .get(getSelector)
+    .its('0.contentWindow.iframeStub')
+    .should('exist');
+});
+
 Cypress.Commands.add('typeEnter', { prevSubject: true }, $el => {
   if (!$el) return;
 

@@ -332,12 +332,23 @@ context('patient sidebar', function() {
       .should('have.css', 'display', 'none');
 
     cy
+      .intercept('GET', '/formapp/**', {
+        delay: 200,
+        fixture: 'formio-stub.html',
+      })
+      .as('routeFormApp')
       .get('@patientSidebar')
       .find('.widgets__form-widget')
       .contains('Test Modal Form')
       .click();
 
     cy
+      .get('.modal--large')
+      .find('.js-submit')
+      .should('be.disabled');
+
+    cy
+      .wait('@routeFormApp')
       .wait('@routeFormDefinition');
 
     cy
@@ -355,18 +366,18 @@ context('patient sidebar', function() {
       .as('postFormResponse');
 
     cy
-      .get('iframe')
-      .should(([iframe]) => {
-        const { receivedMessages } = iframe.contentWindow.iframeStub;
-        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+      .iframeStub()
+      .should(iframeStub => {
+        const response = iframeStub.receivedMessages.findLast(m => m.message === 'fetch:form:data');
 
+        expect(response, 'fetch:form:data response').to.exist;
         expect(response.args.value.options.reducers[0]).to.contain('storyTime = foo()');
       });
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'New typing',
           storyTime: 'New typing',
         });

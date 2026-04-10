@@ -56,9 +56,13 @@
         ..._fetchedFormData,
         ..._fetchedFormSubmission,
         ...base,
-        fields: { ...(_fetchedFormData.fields || {}), ...(base.fields || {}) },
+        fields: {
+          ...(_fetchedFormData.fields || {}),
+          ...(_fetchedFormSubmission.fields || {}),
+          ...(base.fields || {}),
+        },
       };
-      parentRequest('submit:form', { response: { data, fields: data.fields } });
+      parentSend('submit:form', { response: { data, fields: data.fields } });
     }
 
     function renderForm(data = {}, { sendReady = true } = {}) {

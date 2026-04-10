@@ -177,17 +177,18 @@ context('Patient Action Form', function() {
       .as('routePostResponse');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', { fields: { foo: 'bar' } });
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', { fields: { foo: 'bar' } });
       });
 
     cy
-      .wait(300) // NOTE: must wait due to debounce in iframe
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`));
+      .window()
+      .should(win => {
+        const storage = win.localStorage.getItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`);
 
-        expect(storage.submission.fields.foo).to.equal('bar');
+        expect(storage, 'draft storage').to.exist;
+        expect(JSON.parse(storage).submission.fields.foo).to.equal('bar');
       });
 
     cy
@@ -368,24 +369,19 @@ context('Patient Action Form', function() {
       .get('iframe')
       .should(([iframe]) => {
         const { receivedMessages } = iframe.contentWindow.iframeStub;
-        const response = receivedMessages.find(m => m.message === 'fetch:form:data');
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
 
         expect(response.args.value.storedSubmission.fields.foo).to.equal('bar');
       });
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', { fields: { foo: 'baz' } });
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', { fields: { foo: 'baz' } });
       });
 
     cy
-      .wait(300); // NOTE: must wait due to debounce in iframe
-
-    cy
-      .get('.form__controls')
-      .find('.form__submit-status-text')
-      .should('contain', 'Last edit was a few seconds ago');
+      .wait(0);
 
     cy
       .tick(15000);
@@ -396,6 +392,7 @@ context('Patient Action Form', function() {
       .should(({ data }) => {
         expect(data.id).to.equal(formResponse.id);
         expect(data.attributes.status).to.equal(FORM_RESPONSE_STATUS.DRAFT);
+        expect(data.attributes.response.data.fields.foo).to.equal('baz');
       });
   });
 
@@ -499,13 +496,10 @@ context('Patient Action Form', function() {
       .should('not.contain', 'Last edit was');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', { fields: { foo: 'baz' } });
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', { fields: { foo: 'baz' } });
       });
-
-    cy
-      .wait(300); // NOTE: must wait due to debounce in iframe
 
     cy
       .get('.form__controls')
@@ -1128,9 +1122,9 @@ context('Patient Action Form', function() {
       .wait('@routeFormActionFields');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'New typing',
         });
       });
@@ -1887,17 +1881,19 @@ context('Patient Action Form', function() {
       .should('have.length', 2);
 
     cy
-      .get('iframe')
-      .click();
+      .window()
+      .then(win => {
+        win.postMessage({ message: 'focus' }, win.origin);
+      });
 
     cy
       .get('.picklist')
       .should('not.exist');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'Here is some typing',
           storyTime: 'Once upon a time...',
         });
@@ -1978,9 +1974,9 @@ context('Patient Action Form', function() {
       .as('routePostResponse');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'Here is some typing',
           storyTime: 'Once upon a time...',
         });
@@ -2046,9 +2042,9 @@ context('Patient Action Form', function() {
       .as('postFormResponse');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'New typing',
           storyTime: 'New typing',
         });
@@ -2125,16 +2121,20 @@ context('Patient Action Form', function() {
       .as('postFormResponse');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'New typing',
           storyTime: 'New typing',
         });
       });
 
     cy
-      .wait(300)
+      .get('.form__controls')
+      .find('.form__submit-status-text')
+      .should('contain', 'Last edit was a few seconds ago');
+
+    cy
       .tick(15000);
 
     cy
@@ -2769,8 +2769,6 @@ context('Patient Action Form', function() {
       .wait('@routePatientByAction')
       .wait('@routeFormDefinition');
 
-    cy.wait(300);
-
     cy
       .get('.form__controls')
       .find('.js-save-button')
@@ -2818,8 +2816,6 @@ context('Patient Action Form', function() {
       .wait('@routeFormByAction')
       .wait('@routeFormDefinition');
 
-    cy.wait(300);
-
     cy
       .get('.form__controls')
       .find('.js-save-button')
@@ -2829,7 +2825,7 @@ context('Patient Action Form', function() {
       .get('iframe')
       .should(([iframe]) => {
         const { receivedMessages } = iframe.contentWindow.iframeStub;
-        const formData = receivedMessages.find(m => m.message === 'fetch:form:data');
+        const formData = receivedMessages.findLast(m => m.message === 'fetch:form:data');
 
         expect(formData.args.value.storedSubmission.familyHistory).to.equal('Form draft work done in another tab.');
       });
@@ -2865,8 +2861,6 @@ context('Patient Action Form', function() {
       .wait('@routePatientByAction')
       .wait('@routeFormByAction')
       .wait('@routeFormDefinition');
-
-    cy.wait(300);
 
     cy
       .get('.form__controls')

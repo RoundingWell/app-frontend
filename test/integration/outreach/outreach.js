@@ -621,9 +621,9 @@ context('Outreach', function() {
       .as('postFormResponseError');
 
     cy
-      .get('iframe')
-      .then(iframe => {
-        iframe[0].contentWindow.iframeStub.send('update:storedSubmission', {
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
           familyHistory: 'New typing',
           storyTime: 'Once upon a time...',
         });
