@@ -1,1 +1,0 @@
-Shortcut Story ID: [sc-###]
