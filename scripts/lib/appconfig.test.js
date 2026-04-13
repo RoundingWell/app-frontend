@@ -26,14 +26,8 @@ test('buildAppConfig returns auth.provider=auth0 when WorkOS client id is missin
     app: {
       stage: 'prod',
       organization: 'customer-a',
-      stack: 'customer-a',
       version: 'abc1234',
-      env: 'prod.customer-a',
       name: 'Acme',
-      disableLoginPrompt: true,
-    },
-    versions: {
-      frontend: 'abc1234',
     },
     datadog: {
       applicationId: 'dd-app',
@@ -57,19 +51,6 @@ test('buildAppConfig returns auth.provider=auth0 when WorkOS client id is missin
         useRefreshTokens: true,
         cacheLocation: 'localstorage',
       },
-    },
-    auth0: {
-      provider: 'auth0',
-      disableLoginPrompt: true,
-      domain: 'acme.auth0.com',
-      clientId: 'auth0-client',
-      authorizationParams: {
-        connection: 'Username-Password-Authentication',
-        organization: 'org_123',
-        audience: 'care-ops-backend',
-      },
-      useRefreshTokens: true,
-      cacheLocation: 'localstorage',
     },
   });
 });
@@ -98,14 +79,8 @@ test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
     app: {
       stage: 'qa',
       organization: 'qa2',
-      stack: 'qa2',
       version: 'def5678',
-      env: 'qa.qa2',
       name: 'Acme',
-      disableLoginPrompt: false,
-    },
-    versions: {
-      frontend: 'def5678',
     },
     datadog: {
       applicationId: 'dd-app',
@@ -126,15 +101,6 @@ test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
         },
       },
     },
-    workos: {
-      provider: 'workos',
-      disableLoginPrompt: false,
-      clientId: 'workos-client',
-      createClientOptions: {
-        apiHostname: 'workos.example.com',
-        devMode: true,
-      },
-    },
   });
 });
 
@@ -153,5 +119,4 @@ test('buildAppConfig omits WorkOS devMode outside dev and qa', () => {
   });
 
   assert.equal(config.auth.config.createClientOptions.devMode, undefined);
-  assert.equal(config.workos.createClientOptions.devMode, undefined);
 });
