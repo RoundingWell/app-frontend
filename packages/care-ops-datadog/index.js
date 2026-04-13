@@ -1,33 +1,31 @@
 import { datadogRum } from '@datadog/browser-rum';
 import { datadogLogs } from '@datadog/browser-logs';
 
-let logsReady = false;
 let rumReady = false;
 
 /**
  * Initialise Datadog Logs.
  * @param {Object} opts
- * @param {string} opts.env          - `${ appConfig.stage }.${ appConfig.organization }`
+ * @param {string} opts.env
  * @param {string} opts.clientToken
  * @param {string} opts.service
  * @param {string} opts.version
+ * @param {string} opts.organization
  */
-export function initLogs({ env, clientToken, service, version }) {
+export function initLogs({ env, clientToken, service, version, organization }) {
   datadogLogs.init({
     env,
     clientToken,
     service,
     version,
+    forwardErrorsToLogs: false,
     useSecureSessionCookie: true,
     usePartitionedCrossSiteSessionCookie: true,
-    beforeSend(log) {
-      const msg = String(log.message);
-      if (msg.includes('Uncaught "[Response]"')) return false;
-      if (msg.includes('Failed to fetch')) return false;
-      return log?.http?.status_code !== 0;
-    },
   });
-  logsReady = true;
+
+  if (organization) {
+    datadogLogs.logger.addTag('organization', organization);
+  }
 }
 
 /**
@@ -64,7 +62,14 @@ export function initRum({
         && event.resource.type === 'fetch'
         && context?.response?.status >= 400
       ) {
-        event.context = { ...event.context, context };
+        const { body } = context.requestInit || {};
+
+        let requestBody;
+        if (typeof body === 'string') {
+          try { requestBody = JSON.parse(body); } catch (e) { requestBody = body; }
+        }
+
+        event.context = { ...event.context, requestBody };
       }
     },
   });
@@ -87,24 +92,4 @@ export function addError(error, context) {
     return;
   }
   datadogRum.addError(error, context);
-}
-
-/**
- * Log a fetch response (clones so you can still read it later).
- */
-export async function logResponse(url, options, response) {
-  if (!logsReady) return;
-
-  const clone = response.clone();
-  const contentType = String(clone.headers.get('Content-Type'));
-  const responseBody = contentType.includes('json') ? await clone.json() : await clone.text();
-  const responseHeads = Object.fromEntries(clone.headers);
-
-  datadogLogs.logger.info(`Response status ${ clone.status }`, {
-    url,
-    options,
-    status: clone.status,
-    responseHeaders: responseHeads,
-    responseBody,
-  });
 }

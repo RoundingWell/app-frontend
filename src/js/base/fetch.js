@@ -2,8 +2,6 @@
 import { isObject, isArray, defaults, extend, map, flatten, reduce, first, rest, get } from 'underscore';
 import Radio from 'backbone.radio';
 
-import { logResponse } from 'js/datadog';
-
 const fetchers = [];
 
 function registerFetcher(baseUrl, fetcher, controller) {
@@ -156,8 +154,6 @@ export default async(url, options) => {
         }
 
         if (response.status >= 400) {
-          logResponse(url, options, response);
-
           const contentType = String(response.headers.get('Content-Type'));
 
           if (!contentType.includes('json')) {
