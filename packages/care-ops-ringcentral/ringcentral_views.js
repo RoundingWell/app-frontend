@@ -50,12 +50,11 @@ const PatientButtonItemView = View.extend({
 
 const PatientButtonsView = CollectionView.extend({
   childView: PatientButtonItemView,
-  initialize() {
-    this.listenTo(Radio.channel('history'), 'change:route', this.render);
+  collectionEvents: {
+    'change:currentPatientId': 'render',
   },
   viewFilter({ model }) {
-    const currentUrl = window.location.href;
-    return !currentUrl.includes(model.id);
+    return this.collection.currentPatientId !== model.id;
   },
 });
 

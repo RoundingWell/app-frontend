@@ -15,6 +15,13 @@ export default App.extend({
     'five9Call': 'five9Call',
     'ringcentralCall': 'ringcentralCall',
   },
+  radioEvents: {
+    'change:currentPatientId': 'updateCurrentPatientId',
+  },
+  updateCurrentPatientId(patientId) {
+    patients.currentPatientId = patientId;
+    patients.trigger('change:currentPatientId');
+  },
   async init() {
     /* istanbul ignore next: prevent re-initialization */
     if (this._call) return;
