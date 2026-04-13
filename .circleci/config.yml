@@ -287,6 +287,22 @@ workflows:
       - lint:
           name: Lint
       - run-cypress:
+          filters:
+            branches:
+              only: develop
+            tags:
+              ignore: /.*/
+          name: E2E develop
+          parallelism: 1
+          cypress_command: >
+            npx cypress run
+
+      - run-cypress:
+          filters:
+            branches:
+              ignore: develop
+            tags:
+              ignore: /.*/
           name: E2E
           cypress_command: >
             npx cypress run
@@ -294,6 +310,23 @@ workflows:
             --group care-ops-e2e
 
       - run-cypress:
+          filters:
+            branches:
+              only: develop
+            tags:
+              ignore: /.*/
+          name: Component develop
+          parallelism: 1
+          should_build: false
+          cypress_command: >
+            npx cypress run --component
+
+      - run-cypress:
+          filters:
+            branches:
+              ignore: develop
+            tags:
+              ignore: /.*/
           name: Component
           parallelism: 6
           should_build: false
@@ -303,6 +336,22 @@ workflows:
             --group care-ops-component
 
       - coveralls-finish:
+          filters:
+            branches:
+              only: develop
+            tags:
+              ignore: /.*/
+          name: Coveralls develop
+          requires:
+            - E2E develop
+            - Component develop
+
+      - coveralls-finish:
+          filters:
+            branches:
+              ignore: develop
+            tags:
+              ignore: /.*/
           name: Coveralls
           requires:
             - E2E
@@ -318,68 +367,59 @@ workflows:
     jobs:
       - run-cypress:
           name: Chrome nightly
+          parallelism: 1
           upload_coverage: false
           cypress_command: >
             npx cypress run
             --browser chrome
-            --parallel --record
-            --group chrome-e2e
             --config retries=4
 
       - run-cypress:
           name: Chrome nightly Component
-          parallelism: 6
+          parallelism: 1
           should_build: false
           upload_coverage: false
           cypress_command: >
             npx cypress run --component
             --browser chrome
-            --parallel --record
-            --group chrome-component
             --config retries=4
 
       - run-cypress:
           name: Firefox nightly
+          parallelism: 1
           upload_coverage: false
           cypress_command: >
             npx cypress run
             --browser firefox
-            --parallel --record
-            --group firefox-e2e
             --config retries=4
 
       - run-cypress:
           name: Firefox nightly Component
-          parallelism: 6
+          parallelism: 1
           should_build: false
           upload_coverage: false
           cypress_command: >
             npx cypress run --component
             --browser firefox
-            --parallel --record
-            --group firefox-component
             --config retries=4
 
       - run-cypress:
           name: Edge nightly
+          parallelism: 1
           upload_coverage: false
           cypress_command: >
             npx cypress run
             --browser edge
-            --parallel --record
-            --group edge-e2e
             --config retries=4
 
       - run-cypress:
           name: Edge nightly Component
-          parallelism: 6
+          parallelism: 1
           should_build: false
           upload_coverage: false
           cypress_command: >
             npx cypress run --component
             --browser edge
-            --parallel --record
-            --group edge-component
             --config retries=4
 
   release-artifact:
