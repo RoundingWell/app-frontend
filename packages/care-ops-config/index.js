@@ -26,10 +26,6 @@ function getAppName() {
   return configState.app.name;
 }
 
-function getEnvName() {
-  return `${ configState.app.stage }.${ configState.app.organization }`;
-}
-
 function getAppVersion() {
   return configState.app.version;
 }
@@ -41,17 +37,18 @@ function getDatadogVersion(version) {
 function getDatadogLogsOptions({ service, version } = {}) {
   const datadog = configState.datadog;
   return {
-    env: getEnvName(),
+    env: configState.app.stage,
     service,
     clientToken: datadog.clientToken,
     version: getDatadogVersion(version),
+    organization: configState.app.organization,
   };
 }
 
 function getDatadogRumOptions({ service, version } = {}) {
   const datadog = configState.datadog;
   return {
-    env: getEnvName(),
+    env: configState.app.stage,
     service,
     clientToken: datadog.clientToken,
     version: getDatadogVersion(version),
