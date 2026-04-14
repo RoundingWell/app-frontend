@@ -2,7 +2,7 @@ import path from 'path';
 
 import { describe, expect, it } from 'vitest';
 
-import { mergeCoverage } from './merge-coverage.mjs';
+import { mergeCoverage, normalizeCoveragePaths } from './merge-coverage.mjs';
 
 const cliniciansPath = path.resolve('src/js/entities-service/entities/clinicians.js');
 
@@ -85,68 +85,67 @@ describe('mergeCoverage', () => {
 
     expect(merged[cliniciansPath].b[0]).toEqual([1]);
   });
+});
 
-  it('supplements matching non-owned statements with unit coverage hits', () => {
-    const cypressCoverage = {
-      [cliniciansPath]: {
-        statementMap: {
-          0: { start: { line: 5, column: 0 }, end: { line: 5, column: 20 } },
-          1: { start: { line: 10, column: 0 }, end: { line: 10, column: 30 } },
-        },
-        fnMap: {},
-        branchMap: {},
-        s: { 0: 1, 1: 0 },
-        f: {},
-        b: {},
-      },
-    };
-    const unitCoverage = {
-      [cliniciansPath]: {
-        statementMap: {
-          5: { start: { line: 10, column: 0 }, end: { line: 10, column: 30 } },
-        },
-        fnMap: {},
-        branchMap: {},
-        s: { 5: 3 },
-        f: {},
-        b: {},
+describe('normalizeCoveragePaths', () => {
+  it('rewrites absolute paths from a different prefix to use the current cwd', () => {
+    const foreignPrefix = '/root/project';
+    const foreignPath = `${ foreignPrefix }/src/js/app.js`;
+    const coverage = {
+      [foreignPath]: {
+        path: foreignPath,
+        statementMap: { 0: { start: { line: 1, column: 0 }, end: { line: 1, column: 10 } } },
+        s: { 0: 1 },
       },
     };
 
-    const merged = mergeCoverage(cypressCoverage, unitCoverage);
+    const normalized = normalizeCoveragePaths(coverage);
+    const expectedPath = path.resolve('src/js/app.js');
 
-    expect(merged[cliniciansPath].s[0]).toBe(1);
-    expect(merged[cliniciansPath].s[1]).toBe(3);
+    expect(Object.keys(normalized)).toEqual([expectedPath]);
+    expect(normalized[expectedPath].path).toBe(expectedPath);
+    expect(normalized[expectedPath].s[0]).toBe(1);
   });
 
-  it('supplements matching non-owned functions with unit coverage hits', () => {
+  it('normalizes both coverage sets to the same keys for merging', () => {
     const cypressCoverage = {
-      [cliniciansPath]: {
+      '/root/project/src/js/app.js': {
         statementMap: {},
-        fnMap: {
-          0: { name: 'validate', decl: { start: { line: 20, column: 2 }, end: { line: 20, column: 10 } }, loc: { start: { line: 20, column: 2 }, end: { line: 25, column: 3 } } },
+        fnMap: {},
+        branchMap: {
+          0: {
+            line: 10,
+            type: 'if',
+            locations: [{ start: { line: 10, column: 4 }, end: { line: 12, column: 5 } }],
+          },
         },
-        branchMap: {},
         s: {},
-        f: { 0: 0 },
-        b: {},
+        f: {},
+        b: { 0: [0] },
       },
     };
     const unitCoverage = {
-      [cliniciansPath]: {
+      '/home/circleci/project/src/js/app.js': {
         statementMap: {},
-        fnMap: {
-          4: { name: 'validate', decl: { start: { line: 20, column: 2 }, end: { line: 20, column: 10 } }, loc: { start: { line: 20, column: 2 }, end: { line: 25, column: 3 } } },
+        fnMap: {},
+        branchMap: {
+          3: {
+            line: 10,
+            type: 'if',
+            locations: [{ start: { line: 10, column: 4 }, end: { line: 12, column: 5 } }],
+          },
         },
-        branchMap: {},
         s: {},
-        f: { 4: 2 },
-        b: {},
+        f: {},
+        b: { 3: [1] },
       },
     };
 
-    const merged = mergeCoverage(cypressCoverage, unitCoverage);
+    const normalizedCypress = normalizeCoveragePaths(cypressCoverage);
+    const normalizedUnit = normalizeCoveragePaths(unitCoverage);
+    const merged = mergeCoverage(normalizedCypress, normalizedUnit);
 
-    expect(merged[cliniciansPath].f[0]).toBe(2);
+    const expectedPath = path.resolve('src/js/app.js');
+    expect(merged[expectedPath].b[0]).toEqual([1]);
   });
 });

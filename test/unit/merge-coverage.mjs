@@ -15,11 +15,33 @@ function readCoverage(filePath) {
     {};
 }
 
-const ownedFiles = new Set(OWNED_COVERAGE_FILES.map(filePath => path.resolve(filePath)));
-
-function getLocationSignature(location) {
-  return JSON.stringify(location);
+// Extract the project-relative suffix from an absolute instrumented path.
+// Coverage files from different CI containers may have different absolute
+// prefixes (e.g. /home/circleci/project vs /root/project). Normalizing
+// to a common prefix ensures file-level matching works across containers.
+function getPathSuffix(filePath) {
+  const srcIndex = filePath.indexOf('/src/');
+  return srcIndex >= 0 ? filePath.slice(srcIndex) : filePath;
 }
+
+export function normalizeCoveragePaths(coverage) {
+  const cwd = process.cwd();
+  const normalized = {};
+
+  for (const [filePath, data] of Object.entries(coverage)) {
+    const suffix = getPathSuffix(filePath);
+    const normalizedPath = suffix === filePath ? filePath : path.join(cwd, suffix.slice(1));
+    normalized[normalizedPath] = data;
+
+    if (data.path) {
+      data.path = normalizedPath;
+    }
+  }
+
+  return normalized;
+}
+
+const ownedFiles = new Set(OWNED_COVERAGE_FILES.map(filePath => path.resolve(filePath)));
 
 function getBranchSignature(branchMeta) {
   const line = branchMeta.line || branchMeta.loc?.start?.line || null;
@@ -28,56 +50,6 @@ function getBranchSignature(branchMeta) {
     line,
     type: branchMeta.type,
     locations: branchMeta.locations,
-  });
-}
-
-function getFunctionSignature(fnMeta) {
-  return JSON.stringify({
-    name: fnMeta.name,
-    decl: fnMeta.decl,
-    loc: fnMeta.loc,
-  });
-}
-
-function supplementStatementHits(targetCoverage, sourceCoverage) {
-  targetCoverage.s ||= {};
-
-  const targetBySignature = new Map(
-    Object.entries(targetCoverage.statementMap || {}).map(([id, loc]) => {
-      return [getLocationSignature(loc), id];
-    }),
-  );
-
-  Object.entries(sourceCoverage.statementMap || {}).forEach(([sourceId, sourceLoc]) => {
-    const targetId = targetBySignature.get(getLocationSignature(sourceLoc));
-
-    if (targetId === undefined) return;
-
-    targetCoverage.s[targetId] = Math.max(
-      targetCoverage.s[targetId] || 0,
-      (sourceCoverage.s || {})[sourceId] || 0,
-    );
-  });
-}
-
-function supplementFunctionHits(targetCoverage, sourceCoverage) {
-  targetCoverage.f ||= {};
-
-  const targetBySignature = new Map(
-    Object.entries(targetCoverage.fnMap || {}).map(([id, meta]) => {
-      return [getFunctionSignature(meta), id];
-    }),
-  );
-
-  Object.entries(sourceCoverage.fnMap || {}).forEach(([sourceId, sourceMeta]) => {
-    const targetId = targetBySignature.get(getFunctionSignature(sourceMeta));
-
-    if (targetId === undefined) return;
-
-    targetCoverage.f[targetId] = Math.max(
-      targetCoverage.f[targetId] || 0,
-      (sourceCoverage.f || {})[sourceId] || 0,
-    );
   });
 }
 
@@ -117,8 +89,6 @@ export function mergeCoverage(cypressCoverage, unitCoverage) {
     const targetCoverage = mergedCoverage[filePath];
     if (!targetCoverage) continue;
 
-    supplementStatementHits(targetCoverage, sourceCoverage);
-    supplementFunctionHits(targetCoverage, sourceCoverage);
     supplementBranchHits(targetCoverage, sourceCoverage);
   }
 
@@ -126,8 +96,34 @@ export function mergeCoverage(cypressCoverage, unitCoverage) {
 }
 
 function main() {
-  const cypressCoverage = readCoverage(CYPRESS_COVERAGE_PATH);
-  const unitCoverage = readCoverage(UNIT_COVERAGE_PATH);
+  const rawCypressCoverage = readCoverage(CYPRESS_COVERAGE_PATH);
+  const rawUnitCoverage = readCoverage(UNIT_COVERAGE_PATH);
+
+  // Normalize paths so coverage from different CI containers can be matched.
+  const cypressCoverage = normalizeCoveragePaths(rawCypressCoverage);
+  const unitCoverage = normalizeCoveragePaths(rawUnitCoverage);
+
+  const cypressFileCount = Object.keys(cypressCoverage).length;
+  const unitFileCount = Object.keys(unitCoverage).length;
+
+  console.log(`Cypress coverage: ${ cypressFileCount } files`);
+  console.log(`Unit coverage: ${ unitFileCount } files`);
+
+  if (unitFileCount === 0) {
+    console.warn('WARNING: Unit coverage is empty. Check that coverage-final.json was copied correctly.');
+  }
+
+  // Diagnostic: count overlapping non-owned files
+  const unitNonOwned = Object.keys(unitCoverage).filter(f => !ownedFiles.has(f));
+  const overlapping = unitNonOwned.filter(f => cypressCoverage[f]);
+  console.log(`Unit non-owned files: ${ unitNonOwned.length }, overlapping with Cypress: ${ overlapping.length }`);
+
+  if (overlapping.length === 0 && unitNonOwned.length > 0) {
+    console.warn('WARNING: Zero path overlap between unit and Cypress non-owned files.');
+    console.warn('  Sample unit paths:', unitNonOwned.slice(0, 3));
+    console.warn('  Sample Cypress paths:', Object.keys(cypressCoverage).slice(0, 3));
+  }
+
   const mergedCoverage = mergeCoverage(cypressCoverage, unitCoverage);
 
   for (const filePath of ownedFiles) {
