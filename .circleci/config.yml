@@ -158,29 +158,103 @@ jobs:
           name: Cypress tests
           command: << parameters.cypress_command >>
 
-      # Coverage upload (PR / push only)
+      # Coverage artifacts (PR / push only)
       - when:
           condition: << parameters.upload_coverage >>
           steps:
             - run:
-                name: Install curl (if missing)
+                name: Collect coverage artifacts
                 command: |
-                  if ! command -v curl >/dev/null; then
-                    apt-get update -y && apt-get install --no-install-recommends -y curl
+                  if [ ! -d .nyc_output ]; then
+                    echo "No .nyc_output directory found"
+                    exit 1
                   fi
 
-            - run: npm run coverage:report:ci || true
+                  if [ ! -f .nyc_output/out.json ]; then
+                    echo "No Cypress coverage JSON found"
+                    exit 1
+                  fi
 
-            - coveralls/upload:
-                fail_on_error: false
-                parallel: true
+                  mkdir -p ".ci-coverage/${CIRCLE_JOB}/${CIRCLE_NODE_INDEX}"
+                  cp .nyc_output/out.json ".ci-coverage/${CIRCLE_JOB}/${CIRCLE_NODE_INDEX}/out.json"
 
-  coveralls-finish:
+            - persist_to_workspace:
+                root: .
+                paths:
+                  - .ci-coverage
+
+  run-unit:
     docker:
-      - image: cimg/base:stable
+      - image: *node-image
     steps:
+      - checkout
+      - restore-npm-cache
+      - install-dependencies
+      - run:
+          name: Unit tests with coverage
+          command: npm run coverage:unit
+      - run:
+          name: Collect coverage artifacts
+          command: |
+            if [ ! -d .nyc_output ]; then
+              echo "No .nyc_output directory found"
+              exit 1
+            fi
+
+            mkdir -p ".ci-coverage/unit/0"
+            cp .nyc_output/coverage-final.json ".ci-coverage/unit/0/coverage-final.json"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .ci-coverage
+
+  coverage-report:
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore-npm-cache
+      - install-dependencies
+      - run:
+          name: Merge coverage artifacts
+          command: |
+            rm -rf .nyc_output coverage
+            mkdir -p .nyc_output
+
+            unit_file="$(find .ci-coverage/unit -type f -name 'coverage-final.json' | head -n 1)"
+
+            if [ -z "$unit_file" ]; then
+              echo "No unit coverage JSON found"
+              exit 1
+            fi
+
+            cp "$unit_file" .nyc_output/coverage-final.json
+
+            cypress_count=$(find .ci-coverage -type f -name 'out.json' | wc -l | tr -d ' ')
+
+            if [ "$cypress_count" -eq 0 ]; then
+              echo "No Cypress coverage JSON files found"
+              exit 1
+            fi
+
+            rm -rf /tmp/cypress-coverage
+            mkdir -p /tmp/cypress-coverage
+
+            count=0
+            while IFS= read -r file; do
+              cp "$file" "/tmp/cypress-coverage/${count}.json"
+              count=$((count + 1))
+            done < <(find .ci-coverage -type f -name 'out.json' | sort)
+
+            npx nyc merge /tmp/cypress-coverage .nyc_output/out.json
+            npm run coverage:merge
+            npm run coverage:check:baseline
+            npm run coverage:check:migrated
+            npm run coverage:report:ci
       - coveralls/upload:
-          parallel_finished: true
+          fail_on_error: false
 
   build:
     docker:
@@ -328,34 +402,40 @@ workflows:
             tags:
               ignore: /.*/
           name: Component
-          parallelism: 6
+          parallelism: 1
           should_build: false
           cypress_command: >
             npx cypress run --component
-            --parallel --record
-            --group care-ops-component
 
-      - coveralls-finish:
+      - run-unit:
+          filters:
+            tags:
+              ignore: /.*/
+          name: Unit
+
+      - coverage-report:
           filters:
             branches:
               only: develop
             tags:
               ignore: /.*/
-          name: Coveralls develop
+          name: Coverage develop
           requires:
             - E2E develop
             - Component develop
+            - Unit
 
-      - coveralls-finish:
+      - coverage-report:
           filters:
             branches:
               ignore: develop
             tags:
               ignore: /.*/
-          name: Coveralls
+          name: Coverage
           requires:
             - E2E
             - Component
+            - Unit
 
   test-nightly:
     triggers:

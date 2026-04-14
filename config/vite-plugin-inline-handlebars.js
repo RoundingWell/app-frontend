@@ -13,8 +13,10 @@ export default function viteHbsInlineCompile() {
   return {
     name: PLUGIN_NAME,
     transform(code, id) {
+      const [cleanId] = id.split('?');
+
       // only process if its a js file
-      if (!JS_FILE_REGEX.test(id)) return null;
+      if (!JS_FILE_REGEX.test(cleanId)) return null;
 
       const string = new MagicString(code);
 
@@ -43,7 +45,7 @@ export default function viteHbsInlineCompile() {
 
           codeWasChanged = true;
         } catch (error) {
-          console.error(`Error compiling handlebars template in ${ id }:`, error);
+          console.error(`Error compiling handlebars template in ${ cleanId }:`, error);
           throw error;
         }
       }
