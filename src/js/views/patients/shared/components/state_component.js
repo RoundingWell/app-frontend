@@ -13,6 +13,7 @@ import 'scss/domain/action-state.scss';
 
 const i18n = intl.patients.shared.components.stateComponent;
 
+/* istanbul ignore next: inline-precompiled template output */
 const StateTemplate = hbs`<span class="action--{{ options.color }}">{{fa options.iconType options.icon}}{{#unless isCompact}}<span>{{ name }}</span>{{/unless}}</span>`;
 
 const statuses = [STATE_STATUS.QUEUED, STATE_STATUS.STARTED, STATE_STATUS.DONE];
