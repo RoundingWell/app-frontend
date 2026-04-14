@@ -287,7 +287,7 @@ context('patient archive page', function() {
       .click();
 
     cy
-      .get('.picklist')
+      .get('.picklist', { timeout: 10000 })
       .contains('In Progress')
       .click()
       .tick(800); // the length of the animation
@@ -310,7 +310,7 @@ context('patient archive page', function() {
       .click();
 
     cy
-      .get('.picklist')
+      .get('.picklist', { timeout: 10000 })
       .contains('To Do')
       .click();
 
@@ -325,7 +325,7 @@ context('patient archive page', function() {
       .click();
 
     cy
-      .get('.picklist')
+      .get('.picklist', { timeout: 10000 })
       .find('.js-picklist-item')
       .contains('Done')
       .click();
@@ -366,7 +366,7 @@ context('patient archive page', function() {
       .click();
 
     cy
-      .get('.picklist')
+      .get('.picklist', { timeout: 10000 })
       .contains('To Do')
       .click()
       .tick(800); // the length of the animation

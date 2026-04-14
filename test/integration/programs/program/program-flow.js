@@ -92,7 +92,8 @@ context('program flow page', function() {
       .click();
 
     cy
-      .get('.js-picklist-item')
+      .get('.picklist', { timeout: 10000 })
+      .find('.js-picklist-item')
       .contains('Programs')
       .click()
       .go('back');

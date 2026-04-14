@@ -778,8 +778,7 @@ context('Patient Form', function() {
       });
 
     cy
-      .wait(200)
-      .url()
+      .location('pathname', { timeout: 10000 })
       .should('contain', `/patient/dashboard/${ testPatient.id }`);
   });
 

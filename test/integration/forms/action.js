@@ -1920,8 +1920,7 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .wait(200)
-      .url()
+      .location('pathname', { timeout: 10000 })
       .should('contain', `/flow/${ testFlow.id }`);
   });
 
@@ -1991,8 +1990,7 @@ context('Patient Action Form', function() {
       .wait('@routePostResponse');
 
     cy
-      .wait(200)
-      .url()
+      .location('pathname', { timeout: 10000 })
       .should('contain', `/patient/dashboard/${ testPatient.id }`);
   });
 
