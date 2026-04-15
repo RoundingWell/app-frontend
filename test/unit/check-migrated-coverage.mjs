@@ -40,7 +40,7 @@ const failures = [];
 
 for (const relativePath of OWNED_COVERAGE_FILES) {
   const entry = Object.entries(coverage).find(([filePath]) => {
-    return filePath.endsWith(relativePath);
+    return filePath.endsWith(`/${ relativePath }`) || filePath === relativePath;
   });
 
   if (!entry) {

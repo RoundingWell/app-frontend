@@ -47,6 +47,9 @@ describe('formatting', () => {
     expect(matchText('This is a test', 'test', { pretag: 'p class="test"', posttag: 'p' })).toBe(
       'This is a <p class="test">test</p>',
     );
+    expect(matchText('This is testing', 'test', { includeSubstrings: true })).toBe(
+      'This is <strong>test</strong>ing',
+    );
   });
 
   it('px', () => {

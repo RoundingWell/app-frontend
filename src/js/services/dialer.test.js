@@ -141,11 +141,12 @@ describe('Dialer Service', () => {
       first_name: 'Pat',
       last_name: 'Ient',
     });
+    const resetSpy = vi.spyOn(Backbone.Collection.prototype, 'reset');
 
     service._addPatient(patient);
     service.showPatientLinks(null);
 
-    expect(five9Init).not.toHaveBeenCalled();
+    expect(resetSpy).toHaveBeenCalledWith();
   });
 
   it('adds the action patient when one exists', () => {

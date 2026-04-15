@@ -12,7 +12,15 @@ if (!fs.existsSync(COVERAGE_PATH)) {
   process.exit(1);
 }
 
-const coverage = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
+let coverage;
+
+try {
+  coverage = JSON.parse(fs.readFileSync(COVERAGE_PATH, 'utf8'));
+} catch(error) {
+  console.error(`Failed to parse coverage file: ${ COVERAGE_PATH }`);
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
+}
 
 let relevantLines = 0;
 let coveredLines = 0;
