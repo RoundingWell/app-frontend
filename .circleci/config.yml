@@ -250,11 +250,14 @@ jobs:
 
             npx nyc merge /tmp/cypress-coverage .nyc_output/out.json
             npm run coverage:merge
-            npm run coverage:check:baseline
-            npm run coverage:check:migrated
             npm run coverage:report:ci
       - coveralls/upload:
           fail_on_error: false
+      - run:
+          name: Enforce coverage thresholds
+          command: |
+            npm run coverage:check:baseline
+            npm run coverage:check:migrated
 
   build:
     docker:
@@ -406,6 +409,8 @@ workflows:
           should_build: false
           cypress_command: >
             npx cypress run --component
+            --record
+            --group care-ops-component
 
       - run-unit:
           filters:
