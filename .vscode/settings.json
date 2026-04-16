@@ -19,7 +19,6 @@
   "github.copilot.chat.scopeSelection": true,
 
   // Keep VS Code aligned with repo tooling
-  "eslint.experimental.useFlatConfig": true,
   "editor.formatOnSave": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
