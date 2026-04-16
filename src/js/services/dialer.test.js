@@ -135,6 +135,21 @@ describe('Dialer Service', () => {
     expect(ringcentralInit).not.toHaveBeenCalled();
   });
 
+  it('updates currentPatientId on the patients collection', async() => {
+    Radio.reply('settings', 'get', () => 'five9');
+    Radio.reply('bootstrap', 'organization', () => ({ get: () => 'RoundingWell' }));
+
+    await service.init();
+
+    const { patients } = five9Init.mock.calls[0][0];
+    const triggerSpy = vi.spyOn(patients, 'trigger');
+
+    Radio.trigger('dialer', 'change:currentPatientId', 'patient-1');
+
+    expect(patients.currentPatientId).toBe('patient-1');
+    expect(triggerSpy).toHaveBeenCalledWith('change:currentPatientId');
+  });
+
   it('clears patient links when no call data is provided', () => {
     const patient = new Backbone.Model({
       id: 'patient-1',

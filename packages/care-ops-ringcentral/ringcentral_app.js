@@ -44,15 +44,22 @@ export default App.extend({
         this.setState('actionId', null);
       }
 
+      // when an inbound call is ringing
+      if (data.type === 'rc-call-ring-notify') {
+        if (this.getState('callState') === 'active') return;
+
+        this.setState('callState', 'ringing');
+      }
+
       // when a user accepts a ringing inbound call or outbound call is connected
       if (data.type === 'rc-call-start-notify') {
-        const isTransferredCall = data.call?.direction === 'Inbound' && data.call?.isForwarded === true;
+        const isInboundCall = data.call?.direction === 'Inbound';
 
-        this.setState('callState', isTransferredCall ? 'transferred' : 'active');
+        this.setState('callState', 'active');
 
         Radio.request('dialer', 'showPatientLinks', {
           actionId: this.getState('actionId'),
-          number: isTransferredCall ? data.call?.from : data.call?.to,
+          number: isInboundCall ? data.call?.from : data.call?.to,
         });
       }
 
@@ -71,7 +78,7 @@ export default App.extend({
     this.setState('isOpen', true);
 
     // If there's an active call, only show the panel
-    if (['active', 'transferred'].includes(this.getState('callState'))) return;
+    if (this.getState('callState') === 'active') return;
 
     this.setState('pendingCall', number);
     this.setState('actionId', action.id);

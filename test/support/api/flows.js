@@ -44,7 +44,7 @@ export function getFlows({ attributes, relationships, meta } = {}, { sample = 3,
   return _.times(sample, () => getFlow({ attributes, relationships, meta }, { depth }));
 }
 
-Cypress.Commands.add('routeFlow', (mutator = _.identity) => {
+Cypress.Commands.add('routeFlow', (mutator = _.identity, options = {}) => {
   const program = getProgram();
   const programActions = getProgramActions({});
   const programFlow = getProgramFlow({
@@ -67,6 +67,7 @@ Cypress.Commands.add('routeFlow', (mutator = _.identity) => {
   cy
     .intercept('GET', '/api/flows/*', {
       body: mutator({ data, included }),
+      ...options,
     })
     .as('routeFlow');
 });

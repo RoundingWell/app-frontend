@@ -50,12 +50,11 @@ const PatientButtonItemView = View.extend({
 
 const PatientButtonsView = CollectionView.extend({
   childView: PatientButtonItemView,
-  initialize() {
-    this.listenTo(Radio.channel('history'), 'change:route', this.render);
+  collectionEvents: {
+    'change:currentPatientId': 'render',
   },
   viewFilter({ model }) {
-    const currentUrl = window.location.href;
-    return !currentUrl.includes(model.id);
+    return this.collection.currentPatientId !== model.id;
   },
 });
 
@@ -125,15 +124,15 @@ const LayoutView = View.extend({
   showCallState() {
     const callState = this.model.get('callState');
 
-    this.ui.header.toggleClass('is-call-active', callState === 'active' || callState === 'transferred');
+    this.ui.header.toggleClass('is-call-active', callState === 'ringing' || callState === 'active');
 
-    if (callState === 'active') {
-      this.showChildView('heading', new TimerView());
+    if (callState === 'ringing') {
+      this.showChildView('heading', new View({ template: hbs`Incoming Call` }));
       return;
     }
 
-    if (callState === 'transferred') {
-      this.showChildView('heading', new View({ template: hbs`Transferred Call` }));
+    if (callState === 'active') {
+      this.showChildView('heading', new TimerView());
       return;
     }
 

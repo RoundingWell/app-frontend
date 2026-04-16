@@ -62,6 +62,19 @@ export default RouterApp.extend({
     },
   },
 
+  onBeforeAppRoute(event, patientId) {
+    // if routing to flow route, currentPatientId is set by flow_app's onStart()
+    if (event.startsWith('flow')) return;
+
+    // determines if dialer patient buttons are shown or hidden
+    const isPatientRoute = event.startsWith('patient');
+    Radio.trigger('dialer', 'change:currentPatientId', isPatientRoute ? patientId : null);
+  },
+
+  onStop() {
+    Radio.trigger('dialer', 'change:currentPatientId', null);
+  },
+
   showPatient(patientId) {
     this.startRoute('patient', { patientId });
   },

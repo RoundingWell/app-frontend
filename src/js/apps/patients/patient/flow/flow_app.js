@@ -66,6 +66,9 @@ export default SubRouterApp.extend({
     this.currentRoute = currentRoute;
     this.editableCollection = actions.clone();
     this.patient = patient;
+
+    Radio.trigger('dialer', 'change:currentPatientId', patient.id);
+
     this.addOpts = this.getAddOpts(this.flow.getProgramFlow());
 
     this.subscribe();
