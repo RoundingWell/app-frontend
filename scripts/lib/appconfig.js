@@ -61,24 +61,6 @@ function addAuthProvider(config, secrets) {
     createAuth0AuthConfig(secrets);
 }
 
-function addLegacyAuthKeys(config) {
-  if (!config.auth || !config.auth.provider) return;
-  const legacyAuth = {
-    provider: config.auth.provider,
-    disableLoginPrompt: config.auth.disableLoginPrompt,
-    ...(config.auth.config || {}),
-  };
-
-  if (config.auth.provider === 'workos') {
-    config.workos = legacyAuth;
-    return;
-  }
-
-  if (config.auth.provider === 'auth0') {
-    config.auth0 = legacyAuth;
-  }
-}
-
 /**
  * Remove null/undefined values from object (matches PHP nullifyAny)
  * @param {Object} obj - Object to clean
@@ -139,20 +121,6 @@ export function buildAppConfig({
 
   // Add WorkOS or Auth0 (WorkOS takes priority)
   addAuthProvider(config, secrets);
-
-  // TEMP legacy compatibility block.
-  // Remove after downstream consumers fully migrate away from
-  // app.env/app.stack/app.disableLoginPrompt and versions.frontend.
-  config.app.env = `${ stage }.${ organization }`;
-  config.app.stack = organization;
-  config.app.disableLoginPrompt = config.auth.disableLoginPrompt;
-  config.versions = {
-    frontend: version,
-  };
-
-  // TEMP legacy auth compatibility keys.
-  // Remove after downstream consumers fully migrate to the `auth` block.
-  addLegacyAuthKeys(config);
 
   // Remove null values (matches PHP nullifyAny)
   return removeNullValues(config);
