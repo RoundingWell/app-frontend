@@ -18,7 +18,7 @@ const EmptyView = View.extend({
 const ItemView = View.extend({
   className: 'table-list__item',
   template: hbs`
-    <div>{{ name }}</div>
+    <div data-testid="program-list-name">{{ name }}</div>
     <div class="programs-list__published{{#if published}} is-published{{/if}}">
       {{#if published}}{{fas "toggle-on"}}{{else}}{{far "toggle-off"}}{{/if}}
       {{formatMessage (intlGet "programs.programsAllViews.itemView.published") published=published}}

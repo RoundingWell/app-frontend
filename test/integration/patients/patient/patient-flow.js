@@ -1,5 +1,4 @@
 import _ from 'underscore';
-import dayjs from 'dayjs';
 import { v4 as uuid } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
@@ -177,7 +176,7 @@ context('patient flow page', function() {
         return fx;
       })
       .routeActionActivity()
-      .visit(`/flow/${ testFlow.id }/action/${ testFlowAction.id }`)
+      .visitOnClock(`/flow/${ testFlow.id }/action/${ testFlowAction.id }`, { now: testTs() })
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
@@ -187,7 +186,7 @@ context('patient flow page', function() {
 
     cy
       .get('.sidebar')
-      .find('[data-action-region] .action-sidebar__name')
+      .find('[data-action-region] [data-testid="action-sidebar-name"]')
       .should('contain', 'Test Action');
 
     cy.sendWs({
@@ -205,7 +204,7 @@ context('patient flow page', function() {
 
     cy
       .get('.sidebar')
-      .find('[data-action-region] .action-sidebar__name')
+      .find('[data-action-region] [data-testid="action-sidebar-name"]', { timeout: 10000 })
       .should('contain', 'New Websocket Name');
 
     cy
@@ -213,7 +212,7 @@ context('patient flow page', function() {
       .find('.sidebar__footer')
       .contains('Updated')
       .next()
-      .should('contain', formatDate(dayjs.utc().format(), 'AT_TIME'));
+      .should('contain', formatDate(testTs(), 'AT_TIME'));
 
     cy
       .get('.sidebar')
@@ -349,9 +348,13 @@ context('patient flow page', function() {
       .find('.comment__item')
       .last()
       .as('socketComment')
-      .should('contain', formatDate(dayjs.utc().format(), 'AT_TIME'))
       .should('contain', 'Clinician McTester')
       .should('contain', 'New websocket comment.');
+
+    cy
+      .get('@socketComment')
+      .find('[data-testid="action-comment-timestamp"]')
+      .should('contain', formatDate(testTs(), 'AT_TIME'));
 
     cy
       .get('@socketComment')
@@ -686,7 +689,7 @@ context('patient flow page', function() {
       .trigger('pointerover');
 
     cy
-      .get('.tooltip')
+      .get('.tooltip', { timeout: 10000 })
       .should('contain', 'Action details content.');
 
     cy
@@ -1054,11 +1057,11 @@ context('patient flow page', function() {
         return fx;
       })
       .routeActionActivity()
-      .visit(`/flow/${ testFlow.id }`)
+      .visitOnClock(`/flow/${ testFlow.id }`, { now: testTs() })
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
-      .wait(60); // for ListView debounce of 'change:canEdit' trigger
+      .tick(60); // tick past debounce
 
     const conditionalAction = getAction({
       attributes: {

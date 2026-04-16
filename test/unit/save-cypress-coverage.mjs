@@ -1,0 +1,24 @@
+/* eslint-disable no-console */
+import fs from 'fs';
+import path from 'path';
+
+const [targetName] = process.argv.slice(2);
+const sourcePath = '.nyc_output/out.json';
+
+if (!targetName) {
+  console.error('Usage: node test/unit/save-cypress-coverage.mjs <target-name>');
+  process.exit(1);
+}
+
+if (!fs.existsSync(sourcePath)) {
+  console.error(`Coverage file not found: ${ sourcePath }`);
+  process.exit(1);
+}
+
+const targetDir = '.nyc_output/cypress';
+const targetPath = path.join(targetDir, `${ targetName }.json`);
+
+fs.mkdirSync(targetDir, { recursive: true });
+fs.copyFileSync(sourcePath, targetPath);
+
+console.log(`Saved Cypress coverage to ${ targetPath }.`);

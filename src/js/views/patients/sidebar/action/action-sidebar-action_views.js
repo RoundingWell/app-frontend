@@ -17,7 +17,7 @@ import ActionDetailsTemplate from './action-details.hbs';
 import './action-sidebar.scss';
 
 const NameView = View.extend({
-  template: hbs`<div class="action-sidebar__name">{{ name }}</div>`,
+  template: hbs`<div class="action-sidebar__name" data-testid="action-sidebar-name">{{ name }}</div>`,
 });
 
 const SaveView = View.extend({
@@ -51,7 +51,7 @@ const DetailsView = View.extend({
 const ReadOnlyActionView = View.extend({
   template: hbs`
     <div class="pos--relative">
-      <div class="action-sidebar__name">{{ name }}</div>
+      <div class="action-sidebar__name" data-testid="action-sidebar-name">{{ name }}</div>
     </div>
     <div class="u-margin--t-8">
     {{ details }}{{#unless details}}<span class="sidebar--no-results">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.noDetails }}</span>{{/unless}}

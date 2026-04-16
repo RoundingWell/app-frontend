@@ -940,9 +940,11 @@ context('worklist page', function() {
       .click('top');
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[2].id }`)
       .wait('@routeAction');
+
+    cy
+      .location('pathname', { timeout: 10000 })
+      .should('contain', `/patient/${ testPatient1.id }/action/${ testActions[2].id }`);
 
     cy
       .get('.patient__layout')
@@ -960,9 +962,11 @@ context('worklist page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/dashboard/${ testPatient1.id }`)
       .wait('@routePatient');
+
+    cy
+      .location('pathname', { timeout: 10000 })
+      .should('contain', `/patient/dashboard/${ testPatient1.id }`);
 
     cy
       .go('back')

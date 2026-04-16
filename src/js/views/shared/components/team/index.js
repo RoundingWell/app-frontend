@@ -12,6 +12,7 @@ import './team-component.scss';
 
 const i18n = intl.shared.components.teamComponent;
 
+/* istanbul ignore next: inline-precompiled template output */
 const TeamItemTemplate = hbs`<div>{{matchText name query}} <span class="team-component__team">{{matchText abbr query}}</span></div>`;
 
 export default Droplist.extend({
