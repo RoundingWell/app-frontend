@@ -1,0 +1,27 @@
+test/README.md
+  ffc0931798fef4c5 15
+test/AGENTS.md
+  ffc0931798fef4c5 7
+package.json
+  ffc0931798fef4c5 37,42-43,45,47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "15aaa8b2e98cf3db29297a5b8bcc9ad5717ce85a",
+  "prompts": {
+    "ffc0931798fef4c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d887c-a471-7792-b22f-876b2e5dd6f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 64,
+      "accepted_lines": 7,
+      "overriden_lines": 0
+    }
+  }
+}
