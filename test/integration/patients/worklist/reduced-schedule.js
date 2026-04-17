@@ -252,8 +252,24 @@ context('reduced schedule page', function() {
       .navigate(`/patient/${ testPatient.id }/action/${ testAction.id }`);
 
     cy
+      .get('.sidebar')
+      .find('.action-sidebar__name')
+      .should('contain', 'Test Action');
+
+    cy
+      .navigate(`/patient/archive/${ testPatient.id }`);
+
+    cy
       .get('.patient__context-trail')
       .should('contain', 'First Last');
+
+    cy
+      .navigate(`/patient/archive/${ testPatient.id }/action/${ testAction.id }`);
+
+    cy
+      .get('.sidebar')
+      .find('.action-sidebar__name')
+      .should('contain', 'Test Action');
 
     cy
       .routeFlow()
