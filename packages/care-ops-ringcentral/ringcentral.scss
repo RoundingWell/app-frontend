@@ -25,6 +25,7 @@ $ringcentral-call-ended-hover: color(red, dark);
 
   .ringcentral-wrapper.is-open & {
     height: 80vh;
+    max-height: 760px;
   }
 }
 
