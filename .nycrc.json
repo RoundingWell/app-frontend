@@ -4,6 +4,7 @@
   "include": ["src/js/**/*.js"],
   "exclude": [
     "src/**/*.cy.js",
+    "src/**/*.test.js",
     "src/js/base/**",
     "src/js/auth.js",
     "src/js/index.js",

@@ -35,6 +35,35 @@ const resolve = {
   mainFields: ['module', 'main', 'browser'],
 };
 
+export const testResolve = {
+  alias: {
+    ...resolve.alias,
+    'fixtures': path.resolve('./test/fixtures'),
+    'helpers': path.resolve('./test/helpers'),
+    'js': path.resolve('./src/js'),
+    'scss': path.resolve('./src/scss'),
+    'support': path.resolve('./test/support'),
+  },
+  mainFields: resolve.mainFields,
+};
+
+export const testDefine = {
+  '_PRODUCTION_': JSON.stringify(false),
+  '_DEVELOP_': JSON.stringify(false),
+  '_TEST_': JSON.stringify(true),
+  '_NOW_': JSON.stringify(Date.now()),
+};
+
+export const APP_MODULE_PATHS = [
+  path.resolve('./node_modules'),
+  path.resolve('./src'),
+];
+
+export const TEST_MODULE_PATHS = [
+  ...APP_MODULE_PATHS,
+  path.resolve('./test'),
+];
+
 const SHARED_RUNTIME_PRECACHE_IGNORES = ['**/shared/**'];
 
 function sharedRuntimeDevPlugin() {
@@ -97,20 +126,23 @@ const babelPlugin = babel({
   configFile: false,
 });
 
+export function createTestPlugins({ instrumentCoverage = false, modulePaths = TEST_MODULE_PATHS } = {}) {
+  return [
+    instrumentCoverage && babelPlugin,
+    inlineHbsCompile(),
+    handlebars(),
+    yaml(),
+    nodeResolve({
+      modulePaths,
+    }),
+  ].filter(Boolean);
+}
+
 export const cypressConfig = defineConfig({
   mode: 'test',
-  plugins: [
-    babelPlugin,
-    inlineHbsCompile(),
-    nodeResolve({
-      modulePaths: [
-        path.resolve('./node_modules'),
-        path.resolve('./src'),
-        path.resolve('./test'),
-      ],
-    }),
-  ],
-  resolve,
+  define: testDefine,
+  plugins: createTestPlugins({ instrumentCoverage: true }),
+  resolve: testResolve,
   css,
   publicDir: false,
 });
@@ -123,26 +155,16 @@ export default defineConfig(({ mode }) => {
   const isTest = mode === 'test' || process.env.NODE_ENV === 'test';
   const datePrefix = dayjs.utc().format('YYYYMMDD');
 
-  const modulePaths = [
-    path.resolve('./node_modules'),
-    path.resolve('./src'),
-  ];
-
   if (isTest) {
     process.env.NODE_ENV = 'test';
-    modulePaths.push(path.resolve('./test'));
   }
+
+  const modulePaths = isTest ? TEST_MODULE_PATHS : APP_MODULE_PATHS;
 
   return {
     plugins: [
       sharedRuntimeDevPlugin(),
-      isTest && babelPlugin,
-      inlineHbsCompile(),
-      handlebars(),
-      yaml(),
-      nodeResolve({
-        modulePaths,
-      }),
+      ...createTestPlugins({ instrumentCoverage: isTest, modulePaths }),
       isProduction && VitePWA({
         strategies: 'injectManifest',
         manifest: false,

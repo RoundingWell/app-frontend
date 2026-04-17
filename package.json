@@ -35,7 +35,7 @@
     "predeploy:qa2": "npm run build",
     "deploy:qa2": "node --env-file=.env scripts/deploy.js --stage=qa --organization=qa2",
     "coverage": "npm run coverage:clear && npm run coverage:unit && npm run coverage:component && npm run coverage:e2e && npm run coverage:cypress:merge && npm run coverage:merge && npm run coverage:check:baseline && npm run coverage:check:migrated && npm run coverage:report && npm stop",
-    "coverage:unit": "vitest run --coverage",
+    "coverage:unit": "VITEST_COVERAGE=1 vitest run --coverage",
     "precoverage:e2e": "npm run build -- --mode test",
     "coverage:e2e": "node test/unit/run-cypress-coverage.mjs e2e",
     "coverage:component": "cypress run --component && node test/unit/save-cypress-coverage.mjs component",

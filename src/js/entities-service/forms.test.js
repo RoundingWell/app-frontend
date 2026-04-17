@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-const { fetcher, handleJSON } = vi.hoisted(() => ({
+const mockedFetch = vi.hoisted(() => ({
   fetcher: vi.fn(),
   handleJSON: vi.fn(async response => response.json()),
 }));
+const { fetcher, handleJSON } = mockedFetch;
 
 vi.mock('js/base/fetch', () => {
   return {

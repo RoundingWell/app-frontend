@@ -2,17 +2,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
-const {
-  five9Call,
-  five9Init,
-  ringcentralCall,
-  ringcentralInit,
-} = vi.hoisted(() => ({
+const mockedDialers = vi.hoisted(() => ({
   five9Call: vi.fn(),
   five9Init: vi.fn(),
   ringcentralCall: vi.fn(),
   ringcentralInit: vi.fn(),
 }));
+const {
+  five9Call,
+  five9Init,
+  ringcentralCall,
+  ringcentralInit,
+} = mockedDialers;
 
 vi.mock('@roundingwell/care-ops-five9', () => ({
   call: five9Call,
