@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import fs from 'fs';
 import path from 'path';
+import { normalizeCoverageMap } from './normalize-coverage-map.mjs';
 
 const [targetName] = process.argv.slice(2);
 const sourcePath = '.nyc_output/out.json';
@@ -17,8 +18,10 @@ if (!fs.existsSync(sourcePath)) {
 
 const targetDir = '.nyc_output/cypress';
 const targetPath = path.join(targetDir, `${ targetName }.json`);
+const sourceCoverage = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+const normalizedCoverage = normalizeCoverageMap(sourceCoverage);
 
 fs.mkdirSync(targetDir, { recursive: true });
-fs.copyFileSync(sourcePath, targetPath);
+fs.writeFileSync(targetPath, JSON.stringify(normalizedCoverage));
 
 console.log(`Saved Cypress coverage to ${ targetPath }.`);

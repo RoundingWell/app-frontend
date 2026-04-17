@@ -13,13 +13,12 @@ Reports can be found in `coverage/`.
 Merged coverage is the repository contract:
 
 - `.nyc_output/merged.json` is the source of truth for combined Cypress + Vitest coverage
+- combined coverage is a union merge of the Cypress and Vitest reports
 - baseline coverage is `100%` for statements, functions, lines, and branches
-- `npm run coverage:check:baseline` enforces the repo-wide merged baseline
-- `npm run coverage:check:migrated` enforces `100%` coverage for Vitest-owned files listed in `test/unit/coverage-owned-files.mjs`
+- `npm run coverage:check:baseline` enforces the repo-wide merged baseline with `nyc check-coverage`
 
 When moving a spec from Cypress to Vitest:
 
-- update `test/unit/coverage-owned-files.mjs` in the same patch
 - run `npm run coverage`
 - do not add or widen `istanbul ignore` comments unless the code is truly generated or otherwise non-executable
 

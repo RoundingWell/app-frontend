@@ -117,6 +117,7 @@ const babelPlugin = babel({
       {
         include: COVER_INCLUDE,
         exclude: COVER_EXCLUDE,
+        cwd: process.cwd(),
       },
     ],
   ],

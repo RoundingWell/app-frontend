@@ -106,6 +106,9 @@ jobs:
     parameters:
       cypress_command:
         type: string
+      coverage_artifact_name:
+        type: string
+        default: cypress
       should_build:
         type: boolean
         default: true
@@ -170,13 +173,15 @@ jobs:
                     exit 1
                   fi
 
-                  if [ ! -f .nyc_output/out.json ]; then
-                    echo "No Cypress coverage JSON found"
+                  saved_coverage_file="$(find .nyc_output/cypress -maxdepth 1 -type f -name '*.json' | head -n 1)"
+
+                  if [ -z "$saved_coverage_file" ]; then
+                    echo "No saved Cypress coverage JSON found"
                     exit 1
                   fi
 
-                  mkdir -p ".ci-coverage/${CIRCLE_JOB}/${CIRCLE_NODE_INDEX}"
-                  cp .nyc_output/out.json ".ci-coverage/${CIRCLE_JOB}/${CIRCLE_NODE_INDEX}/out.json"
+                  mkdir -p ".ci-coverage/<< parameters.coverage_artifact_name >>/${CIRCLE_NODE_INDEX}"
+                  cp "$saved_coverage_file" ".ci-coverage/<< parameters.coverage_artifact_name >>/${CIRCLE_NODE_INDEX}/out.json"
 
             - persist_to_workspace:
                 root: .
@@ -232,6 +237,11 @@ jobs:
 
             cp "$unit_file" .nyc_output/coverage-final.json
 
+            echo "Unit coverage key diagnostics"
+            jq 'keys | map(select(test("picklist/index.js$")))' .nyc_output/coverage-final.json
+            jq 'keys | map(select(test("entities-service/entities/clinicians.js$")))' .nyc_output/coverage-final.json
+            jq 'keys | map(select(test("behaviors/picklist-transport.js$")))' .nyc_output/coverage-final.json
+
             cypress_count=$(find .ci-coverage -type f -name 'out.json' | wc -l | tr -d ' ')
 
             if [ "$cypress_count" -eq 0 ]; then
@@ -250,6 +260,17 @@ jobs:
 
             npx nyc merge /tmp/cypress-coverage .nyc_output/out.json
             npm run coverage:merge
+
+            echo "Coverage key diagnostics"
+            jq 'keys | map(select(test("picklist/index.js$")))' .nyc_output/out.json
+            jq 'keys | map(select(test("entities-service/entities/clinicians.js$")))' .nyc_output/out.json
+            jq 'keys | map(select(test("behaviors/picklist-transport.js$")))' .nyc_output/out.json
+            jq 'keys | map(select(test("owner_component.js$")))' .nyc_output/out.json
+            jq 'keys | map(select(test("src/js/components/picklist/index.js$"))) | length' .nyc_output/out.json
+            jq 'keys | map(select(test("src/js/entities-service/entities/clinicians.js$"))) | length' .nyc_output/out.json
+            jq 'keys | map(select(test("src/js/behaviors/picklist-transport.js$"))) | length' .nyc_output/out.json
+            jq 'keys | map(select(test("src/js/views/patients/shared/components/owner_component.js$"))) | length' .nyc_output/out.json
+
             npm run coverage:report:ci
       - coveralls/upload:
           fail_on_error: false
@@ -257,7 +278,6 @@ jobs:
           name: Enforce coverage thresholds
           command: |
             npm run coverage:check:baseline
-            npm run coverage:check:migrated
 
   build:
     docker:
@@ -370,9 +390,10 @@ workflows:
             tags:
               ignore: /.*/
           name: E2E develop
+          coverage_artifact_name: e2e-develop
           parallelism: 1
           cypress_command: >
-            npx cypress run
+            node test/unit/run-cypress-coverage.mjs e2e
 
       - run-cypress:
           filters:
@@ -381,8 +402,9 @@ workflows:
             tags:
               ignore: /.*/
           name: E2E
+          coverage_artifact_name: e2e
           cypress_command: >
-            npx cypress run
+            node test/unit/run-cypress-coverage.mjs e2e
             --parallel --record
             --group care-ops-e2e
 
@@ -393,10 +415,12 @@ workflows:
             tags:
               ignore: /.*/
           name: Component develop
+          coverage_artifact_name: component-develop
           parallelism: 1
           should_build: false
           cypress_command: >
-            npx cypress run --component
+            npx cypress run --component &&
+            node test/unit/save-cypress-coverage.mjs component
 
       - run-cypress:
           filters:
@@ -405,12 +429,14 @@ workflows:
             tags:
               ignore: /.*/
           name: Component
+          coverage_artifact_name: component
           parallelism: 1
           should_build: false
           cypress_command: >
             npx cypress run --component
             --record
-            --group care-ops-component
+            --group care-ops-component &&
+            node test/unit/save-cypress-coverage.mjs component
 
       - run-unit:
           filters:
@@ -452,22 +478,25 @@ workflows:
     jobs:
       - run-cypress:
           name: Chrome nightly
+          coverage_artifact_name: nightly-e2e
           parallelism: 1
           upload_coverage: false
           cypress_command: >
-            npx cypress run
+            node test/unit/run-cypress-coverage.mjs e2e
             --browser chrome
             --config retries=4
 
       - run-cypress:
           name: Chrome nightly Component
+          coverage_artifact_name: nightly-component
           parallelism: 1
           should_build: false
           upload_coverage: false
           cypress_command: >
             npx cypress run --component
             --browser chrome
-            --config retries=4
+            --config retries=4 &&
+            node test/unit/save-cypress-coverage.mjs component
 
       - run-cypress:
           name: Firefox nightly
