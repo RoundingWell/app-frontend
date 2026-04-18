@@ -833,6 +833,9 @@ context('patient flow page', function() {
       .should('contain', '11:15 AM');
 
     cy
+      .wait('@routePatchAction');
+
+    cy
       .intercept('DELETE', `/api/actions/${ testListAction.id }`, {
         statusCode: 403,
         body: {

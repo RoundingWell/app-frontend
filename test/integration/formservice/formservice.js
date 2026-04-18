@@ -2,7 +2,21 @@ import { getAction } from 'support/api/actions';
 import { getFormResponse } from 'support/api/form-responses';
 import { getForm } from 'support/api/forms';
 
+function syncIframeCoverage() {
+  cy
+    .get('iframe')
+    .its('0.contentWindow.__coverage__')
+    .should('exist')
+    .then(iframeCoverage => {
+      cy.task('combineCoverage', JSON.stringify(iframeCoverage), { log: false });
+    });
+}
+
 context('Formservice', function() {
+  afterEach(function() {
+    syncIframeCoverage();
+  });
+
   specify('action formservice makes correct api requests', function() {
     cy
       .intercept('GET', '/api/actions/1/form', {
@@ -49,6 +63,66 @@ context('Formservice', function() {
       .wait('@routeActionFormFields')
       .wait('@routeAction')
       .wait('@routeLatestFormSubmission');
+  });
+
+  specify('action formservice fetches submitted responses by action tag', function() {
+    const testAction = getAction({
+      attributes: {
+        tags: ['prefill-latest-response'],
+      },
+    });
+
+    cy
+      .intercept('GET', '/api/actions/1/form', {
+        statusCode: 200,
+        body: { data: getForm({
+          attributes: {
+            options: {
+              is_report: true,
+              prefill_action_tag: 'foo-tag',
+            },
+          },
+        }) },
+      })
+      .as('routeFormModelByAction');
+
+    cy
+      .intercept('GET', '/api/actions/1/form/fields', {
+        statusCode: 200,
+        body: { data: [] },
+      })
+      .as('routeActionFormFields');
+
+    cy
+      .intercept('GET', '/api/actions/1*', {
+        statusCode: 200,
+        body: { data: testAction },
+      })
+      .as('routeAction');
+
+    cy
+      .intercept('GET', '/api/patients/**/form-responses/submitted*', {
+        statusCode: 200,
+        body: { data: getFormResponse() },
+      })
+      .as('routeLatestFormSubmission');
+
+    cy
+      .intercept('GET', '/forms/custom/pdf.html*', { fixture: 'formservice-parent.html' });
+
+    cy
+      .visit('/forms/custom/pdf.html?serviceUrl=%2Fformservice%2Faction%2F1', { noWait: true, isRoot: true });
+
+    cy
+      .wait('@routeFormModelByAction')
+      .wait('@routeActionFormFields')
+      .wait('@routeAction');
+
+    cy
+      .wait('@routeLatestFormSubmission')
+      .its('request.url')
+      .should('include', 'filter[action_tags]=foo-tag')
+      .and('not.include', 'filter[actions]=');
   });
 
   specify('action formservice adds form definition for formio', function() {

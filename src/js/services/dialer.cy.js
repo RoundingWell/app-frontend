@@ -4,12 +4,14 @@ import { RWELL_NS } from 'js/static';
 import DialerService from './dialer';
 
 context('Dialer Service', function() {
+  let service;
+
   beforeEach(function() {
     cy
       .clock()
       .mount(rootView => {
         const region = rootView.getRegion('overlay');
-        new DialerService({ region });
+        service = new DialerService({ region });
 
         return '<div></div>';
       })
@@ -100,5 +102,40 @@ context('Dialer Service', function() {
           },
         },
       });
+  });
+
+  specify('showPatientLinks ignores invalid phone numbers', function() {
+    const fetchSearch = cy.stub().as('fetchSearch');
+    const request = Radio.request;
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'actions:model') {
+        return {
+          getPatient() {
+            return null;
+          },
+        };
+      }
+
+      if (channelName === 'entities' && requestName === 'searchPatients:collection') {
+        return {
+          fetch: fetchSearch,
+          each() {},
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    cy.then(() => {
+      service.showPatientLinks({
+        actionId: 'action-1',
+        number: '123',
+      });
+    });
+
+    cy
+      .get('@fetchSearch')
+      .should('not.have.been.called');
   });
 });
