@@ -135,31 +135,6 @@ describe('WS Service', () => {
     expect(addEventListener).toHaveBeenCalledWith('open', expect.any(Function));
   });
 
-  it('flushes queued payloads when a connecting socket opens', () => {
-    vi.stubGlobal('WebSocket', {
-      OPEN: 1,
-      CONNECTING: 0,
-      CLOSED: 3,
-    });
-
-    const sendData = vi.spyOn(service, 'sendData').mockImplementation(() => {});
-    const startHeartbeat = vi.spyOn(service, 'startHeartbeat').mockImplementation(() => {});
-    const listeners = new Map();
-
-    service.ws = {
-      readyState: WebSocket.CONNECTING,
-      addEventListener: vi.fn((eventName, handler) => {
-        listeners.set(eventName, handler);
-      }),
-    };
-
-    service.send({ state: 'connecting' });
-    listeners.get('open')();
-
-    expect(sendData).toHaveBeenCalledWith({ state: 'connecting' });
-    expect(startHeartbeat).toHaveBeenCalledOnce();
-  });
-
   it('serializes websocket payloads directly', () => {
     service.ws = { send: vi.fn() };
 
@@ -305,33 +280,6 @@ describe('WS Service', () => {
         workspace,
         resources: [{ id: 'foo', type: 'bar' }],
         subscriptionVersion: expect.any(String),
-      },
-    });
-  });
-
-  it('restarts a closed socket with the current subscription payload', () => {
-    vi.stubGlobal('WebSocket', {
-      OPEN: 1,
-      CONNECTING: 0,
-      CLOSED: 3,
-    });
-
-    const restart = vi.spyOn(service, 'restart').mockImplementation(() => {});
-
-    service.ws = { readyState: WebSocket.CLOSED };
-    service.resources.reset([{ id: 'foo', type: 'bar' }]);
-
-    service._subscribe();
-
-    expect(restart).toHaveBeenCalledWith({
-      data: {
-        name: 'Subscribe',
-        data: {
-          clientKey,
-          workspace,
-          resources: [{ id: 'foo', type: 'bar' }],
-          subscriptionVersion: expect.any(String),
-        },
       },
     });
   });

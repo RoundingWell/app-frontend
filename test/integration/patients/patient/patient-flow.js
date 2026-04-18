@@ -1057,7 +1057,7 @@ context('patient flow page', function() {
         return fx;
       })
       .routeActionActivity()
-      .visitOnClock(`/flow/${ testFlow.id }`, { now: testTs() })
+      .visitOnClock(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
       .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
