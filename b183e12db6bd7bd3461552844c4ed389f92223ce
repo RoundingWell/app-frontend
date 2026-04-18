@@ -1,0 +1,23 @@
+.circleci/config.yml
+  21b61dc8b427e7ef 180
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "b183e12db6bd7bd3461552844c4ed389f92223ce",
+  "prompts": {
+    "21b61dc8b427e7ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019da143-9999-7492-b7d8-7a79b569a39e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
