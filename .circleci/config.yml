@@ -242,6 +242,10 @@ jobs:
             jq 'keys | map(select(test("picklist/index.js$")))' .nyc_output/coverage-final.json
             jq 'keys | map(select(test("entities-service/entities/clinicians.js$")))' .nyc_output/coverage-final.json
             jq 'keys | map(select(test("behaviors/picklist-transport.js$")))' .nyc_output/coverage-final.json
+            echo "Unit branch map diagnostics"
+            jq '.["/home/circleci/project/src/js/components/picklist/index.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/coverage-final.json
+            jq '.["/home/circleci/project/src/js/entities-service/entities/clinicians.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/coverage-final.json
+            jq '.["/home/circleci/project/src/js/behaviors/picklist-transport.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/coverage-final.json
 
             cypress_count=$(find .ci-coverage -type f -name 'out.json' | wc -l | tr -d ' ')
 
@@ -260,6 +264,10 @@ jobs:
             done < <(find .ci-coverage -type f -name 'out.json' | sort)
 
             npx nyc merge /tmp/cypress-coverage .nyc_output/out.json
+            echo "Merged Cypress branch map diagnostics"
+            jq '.["/home/circleci/project/src/js/components/picklist/index.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/out.json
+            jq '.["/home/circleci/project/src/js/entities-service/entities/clinicians.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/out.json
+            jq '.["/home/circleci/project/src/js/behaviors/picklist-transport.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/out.json
             npm run coverage:merge
 
             echo "Coverage key diagnostics"
@@ -271,6 +279,10 @@ jobs:
             jq 'keys | map(select(test("src/js/entities-service/entities/clinicians.js$"))) | length' .nyc_output/out.json
             jq 'keys | map(select(test("src/js/behaviors/picklist-transport.js$"))) | length' .nyc_output/out.json
             jq 'keys | map(select(test("src/js/views/patients/shared/components/owner_component.js$"))) | length' .nyc_output/out.json
+            echo "Final merged branch map diagnostics"
+            jq '.["/home/circleci/project/src/js/components/picklist/index.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/out.json
+            jq '.["/home/circleci/project/src/js/entities-service/entities/clinicians.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/out.json
+            jq '.["/home/circleci/project/src/js/behaviors/picklist-transport.js"] | { branchMapCount: (.branchMap | length), branchHitCount: (.b | length), statementCount: (.statementMap | length), fnCount: (.fnMap | length) }' .nyc_output/out.json
 
             npm run coverage:report:ci
       - coveralls/upload:
