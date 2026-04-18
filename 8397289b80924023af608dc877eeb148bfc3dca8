@@ -1,0 +1,29 @@
+src/js/services/dialer.cy.js
+  ffc0931798fef4c5 7-8,14,106-140
+test/integration/formservice/formservice.js
+  ffc0931798fef4c5 5-14,16-19,68-125
+test/integration/patients/patient/patient-flow.js
+  ffc0931798fef4c5 835-836
+src/js/entities-service/entities/clinicians.js
+  ffc0931798fef4c5 30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "8397289b80924023af608dc877eeb148bfc3dca8",
+  "prompts": {
+    "ffc0931798fef4c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d887c-a471-7792-b22f-876b2e5dd6f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 260,
+      "total_deletions": 43,
+      "accepted_lines": 116,
+      "overriden_lines": 0
+    }
+  }
+}
