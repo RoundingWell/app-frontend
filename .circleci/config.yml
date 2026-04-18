@@ -75,6 +75,7 @@ commands:
 # ------------------------------------------------------------
 executors:
   cypress-all-browsers:
+    working_directory: /home/circleci/project
     docker:
       - image: cypress/browsers:node-22.16.0-chrome-137.0.7151.68-1-ff-139.0.1-edge-137.0.3296.62-1
     environment:

@@ -4,7 +4,6 @@ import path from 'path';
 import libCoverage from 'istanbul-lib-coverage';
 import { BaseCoverageProvider } from 'vitest/node';
 import vitestPackage from 'vitest/package.json' with { type: 'json' };
-import { normalizeCoverageMap } from '../normalize-coverage-map.mjs';
 
 export class VitestBabelCoverageProvider extends BaseCoverageProvider {
   name = 'custom';
@@ -36,8 +35,7 @@ export class VitestBabelCoverageProvider extends BaseCoverageProvider {
     await fs.mkdir(this.options.reportsDirectory, { recursive: true });
 
     const reportPath = path.join(this.options.reportsDirectory, 'coverage-final.json');
-    const normalizedCoverage = normalizeCoverageMap(coverageMap.toJSON());
 
-    await fs.writeFile(reportPath, JSON.stringify(normalizedCoverage));
+    await fs.writeFile(reportPath, JSON.stringify(coverageMap.toJSON()));
   }
 }

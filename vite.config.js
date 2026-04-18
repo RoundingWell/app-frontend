@@ -7,7 +7,6 @@ import utcPlugin from 'dayjs/plugin/utc.js';
 import { defineConfig, loadEnv } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
 
-import { babel } from '@rollup/plugin-babel';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { VitePWA } from 'vite-plugin-pwa';
 import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.cjs';
@@ -19,6 +18,7 @@ import {
 import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
+import { istanbulRelativePaths } from './config/vite-plugin-istanbul-relative.js';
 
 import getFaIconSymbols from '@roundingwell/care-ops-fontawesome';
 
@@ -108,28 +108,15 @@ const css = {
   },
 };
 
-const babelPlugin = babel({
-  babelHelpers: 'bundled',
-
-  plugins: [
-    [
-      'istanbul',
-      {
-        include: COVER_INCLUDE,
-        exclude: COVER_EXCLUDE,
-        cwd: process.cwd(),
-      },
-    ],
-  ],
-  exclude: ['node_modules/**', 'test/**'],
-  extensions: ['.js'],
-  babelrc: false,
-  configFile: false,
+const instrumentPlugin = istanbulRelativePaths({
+  root: process.cwd(),
+  include: COVER_INCLUDE,
+  exclude: COVER_EXCLUDE,
 });
 
 export function createTestPlugins({ instrumentCoverage = false, modulePaths = TEST_MODULE_PATHS } = {}) {
   return [
-    instrumentCoverage && babelPlugin,
+    instrumentCoverage && instrumentPlugin,
     inlineHbsCompile(),
     handlebars(),
     yaml(),
