@@ -6,12 +6,10 @@ export default function() {
   return {
     name: 'vite-plugin-yaml',
     async transform(code, id) {
-      const [cleanId] = id.split('?');
-
-      if (yamlExtension.test(cleanId)) {
+      if (yamlExtension.test(id)) {
         try {
           const yamlData = load(code, {
-            filename: cleanId,
+            filename: id,
           });
 
           return {
@@ -19,7 +17,7 @@ export default function() {
             map: { mappings: '' },
           };
         } catch (exception) {
-          console.error(`${ cleanId } errored during yaml processing: `, exception);
+          console.error(`${ id } errored during yaml processing: `, exception);
           return null;
         }
       }

@@ -5,17 +5,9 @@ import chaiFriendly from 'eslint-plugin-chai-friendly';
 import cypress from 'eslint-plugin-cypress';
 import stylistic from '@stylistic/eslint-plugin';
 
-const CYPRESS_TEST_FILES = [
-  'test/integration/**',
-  'test/support/**',
-  'test/helpers/**',
-  'test/plugins/**',
+const TEST_FILES = [
+  'test/**',
   '**/*.cy.js',
-];
-
-const VITEST_TEST_FILES = [
-  'src/**/*.test.js',
-  'test/unit/**/*.test.js',
 ];
 
 export default [
@@ -105,12 +97,12 @@ export default [
     },
   },
   {
-    files: CYPRESS_TEST_FILES,
+    files: TEST_FILES,
     ...mocha.configs.recommended,
   },
   {
     name: 'Mocha overrides',
-    files: CYPRESS_TEST_FILES,
+    files: TEST_FILES,
     rules: {
       'mocha/no-mocha-arrows': 'off',
       'mocha/no-setup-in-describe': 'off',
@@ -118,28 +110,19 @@ export default [
     },
   },
   {
-    files: CYPRESS_TEST_FILES,
+    files: TEST_FILES,
     ...chaiFriendly.configs.recommendedFlat,
   },
   {
-    files: CYPRESS_TEST_FILES,
+    files: TEST_FILES,
     ...cypress.configs.recommended,
   },
   {
     name: 'Cypress overrides',
-    files: CYPRESS_TEST_FILES,
+    files: TEST_FILES,
     rules: {
       'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',
-    },
-  },
-  {
-    name: 'Vitest globals',
-    files: VITEST_TEST_FILES,
-    languageOptions: {
-      globals: {
-        ...globals.vitest,
-      },
     },
   },
   {
