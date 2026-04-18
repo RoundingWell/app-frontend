@@ -1,0 +1,35 @@
+test/integration/programs/program/program-flow.js
+  21b61dc8b427e7ef 86-89,98,102-106
+test/integration/programs/programs-all.js
+  21b61dc8b427e7ef 78-81,84
+test/integration/patients/sidebar/action-sidebar.js
+  21b61dc8b427e7ef 1695-1696
+test/integration/patients/worklist/worklist.js
+  21b61dc8b427e7ef 839,1242
+test/integration/forms/action.js
+  21b61dc8b427e7ef 2768-2769
+test/integration/patients/worklist/schedule.js
+  21b61dc8b427e7ef 159,292
+test/integration/patients/worklist/reduced-schedule.js
+  21b61dc8b427e7ef 101,231
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "cef3d80e94e61f7f70c6148a26202581266d0ec1",
+  "prompts": {
+    "21b61dc8b427e7ef": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019da143-9999-7492-b7d8-7a79b569a39e",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 40,
+      "total_deletions": 22,
+      "accepted_lines": 31,
+      "overriden_lines": 0
+    }
+  }
+}
