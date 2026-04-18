@@ -836,6 +836,7 @@ context('worklist page', function() {
       })
       .routeFormByAction()
       .routeFormDefinition()
+      .routeFormActionFields()
       .routeLatestFormResponse()
       .visitOnClock('/worklist/owned-by', { now: testTime, functionNames: ['Date'] });
 
@@ -1238,6 +1239,7 @@ context('worklist page', function() {
       .should('contain', `patient-action/${ testActions[2].id }/form/${ testForm.id }`);
 
     cy
+      .wait('@routeFormActionFields')
       .go('back');
   });
 

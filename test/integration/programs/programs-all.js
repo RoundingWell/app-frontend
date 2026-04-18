@@ -75,10 +75,13 @@ context('program all list', function() {
     cy
       .get('.table-list__item')
       .first()
-      .click();
+      .click()
+      .wait('@routeProgram')
+      .wait('@routeProgramActions')
+      .wait('@routeProgramFlows');
 
     cy
-      .location('pathname', { timeout: 10000 })
+      .location('pathname')
       .should('contain', `/program/${ firstProgram.id }`);
   });
 });

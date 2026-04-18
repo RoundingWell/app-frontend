@@ -156,6 +156,7 @@ context('schedule page', function() {
       .routePatientByFlow()
       .routeFormByAction()
       .routeFormDefinition()
+      .routeFormActionFields()
       .routeLatestFormResponse()
       .visitOnClock('/schedule', { now: testTime, functionNames: ['Date'] })
       .wait('@routeActions');
@@ -288,6 +289,7 @@ context('schedule page', function() {
     cy
       .url()
       .should('contain', `patient-action/${ testActions[0].id }/form/${ testForm.id }`)
+      .wait('@routeFormActionFields')
       .go('back');
 
     cy

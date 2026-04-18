@@ -83,7 +83,10 @@ context('program flow page', function() {
       .should('contain', `program/${ testProgramId }`);
 
     cy
-      .go('back');
+      .go('back')
+      .wait('@routeProgramFlow')
+      .wait('@routeProgramFlowActions')
+      .wait('@routeProgramByProgramFlow');
 
     cy
       .get('.app-nav')
@@ -92,11 +95,15 @@ context('program flow page', function() {
       .click();
 
     cy
-      .get('.picklist', { timeout: 10000 })
+      .get('.picklist')
       .find('.js-picklist-item')
       .contains('Programs')
       .click()
-      .go('back');
+      .wait('@routePrograms')
+      .go('back')
+      .wait('@routeProgramFlow')
+      .wait('@routeProgramFlowActions')
+      .wait('@routeProgramByProgramFlow');
 
     cy
       .get('.program-flow__context-trail')

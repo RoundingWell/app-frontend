@@ -1692,7 +1692,8 @@ context('action sidebar', function() {
       .wait('@routePatientActions')
       .wait('@routePatientFlows')
       .wait('@routeAction')
-      .wait('@routeActionFiles');
+      .wait('@routeActionFiles')
+      .wait('@routeActionComments');
 
     cy
       .get('.sidebar')
