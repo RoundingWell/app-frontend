@@ -2,13 +2,13 @@
 
 Utility methods and interfaces to 3rd party utility libraries.
 
-# Util Unit testing
+# Util Component Testing
 ## What is a Unit?
 
 A "unit" will be defined as a `.js` file.
 So each js file we test will have its own test file.
-The unit test directory structure should mirror the application directory structure.
-`test/unit/` should mirror `js/`
+Utility component specs should live next to the utility module as `*.cy.js`.
+For example, `src/js/utils/sorting.js` is covered by `src/js/utils/sorting.cy.js`.
 
 ## When Writing a Test
 

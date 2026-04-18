@@ -18,6 +18,17 @@ context('Dialer Service', function() {
       .as('root');
   });
 
+  afterEach(function() {
+    if (Radio.request.restore) {
+      Radio.request.restore();
+    }
+
+    if (service) {
+      service.destroy();
+      service = null;
+    }
+  });
+
   specify('five9Call', function() {
     cy
       .intercept('PATCH', '/api/artifacts/**', {

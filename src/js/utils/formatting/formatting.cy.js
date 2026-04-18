@@ -7,6 +7,7 @@ import matchText from './match-text';
 import px from './px';
 import removeNewline from './remove-newline';
 import searchSanitize from './search-sanitize';
+import startsWith from './starts-with';
 import trim from './trim';
 import underscored from './underscored';
 import words from './words';
@@ -60,6 +61,10 @@ context('formatting', function() {
     const result2 = matchText('This is a test', 'test', { pretag: 'p class="test"', posttag: 'p' });
 
     expect(result2).to.equal('This is a <p class="test">test</p>');
+
+    const result3 = matchText('This is testing', 'test', { includeSubstrings: true });
+
+    expect(result3).to.equal('This is <strong>test</strong>ing');
   });
 
   specify('px', function() {
@@ -76,6 +81,16 @@ context('formatting', function() {
     const result = searchSanitize('   Hi@-World-');
 
     expect(result).to.equal('hi world');
+  });
+
+  specify('startsWith', function() {
+    expect(startsWith(), 'no str').to.be.undefined;
+
+    expect(startsWith('care ops', 'care')).to.be.true;
+
+    expect(startsWith('care ops', 'ops')).to.be.false;
+
+    expect(startsWith(12345, 123)).to.be.true;
   });
 
   specify('trim', function() {

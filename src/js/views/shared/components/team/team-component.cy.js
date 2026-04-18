@@ -6,6 +6,10 @@ import { teamCoordinator, getTeams } from 'support/api/teams';
 import TeamComponent from './index';
 
 context('Team Component', function() {
+  afterEach(function() {
+    Radio.channel('bootstrap').reset();
+  });
+
   specify('No Default', function() {
     Radio.reply('bootstrap', 'teams', () => {
       return new Teams();

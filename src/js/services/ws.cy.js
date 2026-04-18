@@ -161,7 +161,7 @@ context('WS Service', function() {
         expect(handler2).to.be.calledOnce;
       });
 
-    // subscription_version intentially left undefined to test that message is still handled
+    // subscription_version intentionally left undefined to test that message is still handled
     cy
       .then(() => {
         handler.reset();

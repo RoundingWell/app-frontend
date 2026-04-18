@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // TODO: Export this to a vite plugin
 import Handlebars from 'handlebars';
 import fs from 'fs';
@@ -11,12 +12,14 @@ export default function viteHbsPlugin(hbsOptions = {}) {
     enforce: 'pre',
 
     async load(id) {
-      if (fileRegex.test(id)) {
+      const [cleanId] = id.split('?');
+
+      if (fileRegex.test(cleanId)) {
         let hbsCode;
         try {
-          hbsCode = await fs.promises.readFile(id, 'utf8');
-        } catch (exception) {
-          console.warn(`${ id } couldn't be loaded by ${ VITE_PLUGIN_NAME }: `, exception);
+          hbsCode = await fs.promises.readFile(cleanId, 'utf8');
+        } catch(exception) {
+          console.warn(`${ cleanId } couldn't be loaded by ${ VITE_PLUGIN_NAME }: `, exception);
           return null;
         }
         try {
@@ -25,8 +28,8 @@ export default function viteHbsPlugin(hbsOptions = {}) {
             import HandlebarsRuntime from 'handlebars/runtime';
             export default HandlebarsRuntime.template(${ compiledHbs.toString() });
           `;
-        } catch (exception) {
-          console.error(`${ id } errored during Handlebars compiling: `, exception);
+        } catch(exception) {
+          console.error(`${ cleanId } errored during Handlebars compiling: `, exception);
           return null;
         }
       }

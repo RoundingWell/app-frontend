@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { load } from 'js-yaml';
 
 const yamlExtension = /\.ya?ml$/;
@@ -6,18 +7,20 @@ export default function() {
   return {
     name: 'vite-plugin-yaml',
     async transform(code, id) {
-      if (yamlExtension.test(id)) {
+      const [cleanId] = id.split('?');
+
+      if (yamlExtension.test(cleanId)) {
         try {
           const yamlData = load(code, {
-            filename: id,
+            filename: cleanId,
           });
 
           return {
             code: `const data = ${ JSON.stringify(yamlData) };\nexport default data;`,
             map: { mappings: '' },
           };
-        } catch (exception) {
-          console.error(`${ id } errored during yaml processing: `, exception);
+        } catch(exception) {
+          console.error(`${ cleanId } errored during yaml processing: `, exception);
           return null;
         }
       }

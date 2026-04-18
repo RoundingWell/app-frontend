@@ -3,16 +3,27 @@ import Radio from 'backbone.radio';
 import AlertService from './alert';
 
 context('Alert Service', function() {
+  let alertService;
+
   beforeEach(function() {
     cy
       .clock()
       .mount(rootView => {
         const region = rootView.getRegion('alert');
-        new AlertService({ region });
+        alertService = new AlertService({ region });
 
         return '<style>.alert-box{ opacity:1!important; }</style>';
       })
       .as('root');
+  });
+
+  afterEach(function() {
+    if (alertService) {
+      alertService.destroy();
+      alertService = null;
+    }
+
+    Radio.channel('alert').reset();
   });
 
   specify('Displaying', function() {
