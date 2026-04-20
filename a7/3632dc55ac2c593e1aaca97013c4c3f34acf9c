@@ -1,0 +1,72 @@
+packages/care-ops-auth/providers/workos.js
+  fa4165694154abf7 5-13,15-30,32,35,40,42-48,52-70,75-107,153-182,200-204
+packages/care-ops-auth/AuthProvider.js
+  fa4165694154abf7 83-84
+src/js/base/fetch.js
+  fa4165694154abf7 80-86,156,159-162,164-167
+src/js/auth/workos.test.js
+  fa4165694154abf7 7-307
+src/js/base/fetch.test.js
+  fa4165694154abf7 1-77
+src/js/auth.js
+  fa4165694154abf7 76-80,87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "a73632dc55ac2c593e1aaca97013c4c3f34acf9c",
+  "prompts": {
+    "0c9483ad38ec9cf9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dab3b-04e7-73b0-9667-21a2a9166cec",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 44,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "ee562af3a9c7449f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dab7d-74d5-76d1-8039-6f4312f9c587",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "f449ef233ac1808e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dabff-82b5-7252-b5c4-46dc451d7937",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 11,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    },
+    "fa4165694154abf7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019da1d9-e57c-7ad1-87f8-705a84cb5cb5",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 488,
+      "total_deletions": 359,
+      "accepted_lines": 378,
+      "overriden_lines": 0
+    }
+  }
+}
