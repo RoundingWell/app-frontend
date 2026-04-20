@@ -9,11 +9,18 @@ import {
 
 import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
 
+import { addAction } from 'js/datadog';
+
 import 'scss/app-root.scss';
 
 import { LoginPromptView } from 'js/views/globals/prelogin/prelogin_views';
 
 let authAgent;
+
+function trackAuthEvent(name, context) {
+  addAction(name, context);
+}
+
 const defaultAuthProvider = new AuthProvider();
 
 function getLoginView() {
@@ -33,7 +40,7 @@ async function selectAuthProvider() {
 
   if (authProvider === 'workos') {
     const { WorkosAuthProvider } = await import('@roundingwell/care-ops-auth/workos.js');
-    return new WorkosAuthProvider(providerConfig, getLoginView());
+    return new WorkosAuthProvider(providerConfig, getLoginView(), trackAuthEvent);
   }
 
   if (authProvider === 'auth0') {
@@ -66,12 +73,18 @@ async function getToken() {
   return agent.getToken();
 }
 
+async function handleUnauthorized(retry) {
+  const agent = await getAuthAgent();
+  return agent.handleUnauthorized(retry);
+}
+
 async function logout() {
   const agent = await getAuthAgent();
-  agent.logout();
+  return agent.logout();
 }
 
 Radio.reply('auth', {
+  handleUnauthorized,
   logout,
   setToken,
   getToken,

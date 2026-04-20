@@ -58,7 +58,7 @@ context('Global Error Page', function() {
       .should('not.exist');
   });
 
-  specify('401 token error', function() {
+  specify('401 token error keeps the current workspace route', function() {
     cy
       .intercept('GET', '/api/clinicians/me', {
         statusCode: 401,
@@ -79,7 +79,7 @@ context('Global Error Page', function() {
 
     cy
       .url()
-      .should('contain', '/logout');
+      .should('contain', '/one/');
   });
 
   specify('non-json error', function() {

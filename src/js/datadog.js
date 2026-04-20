@@ -1,4 +1,4 @@
-import { initLogs, initRum, setUser, startRum, addError } from '@roundingwell/care-ops-datadog';
+import { initLogs, initRum, setUser, startRum, addError, addAction } from '@roundingwell/care-ops-datadog';
 
 import { getDatadogLogsOptions, getDatadogRumOptions } from '@roundingwell/care-ops-config';
 
@@ -16,5 +16,6 @@ export {
   initDataDog,
   setUser,
   startRum,
+  addAction,
   addError,
 };

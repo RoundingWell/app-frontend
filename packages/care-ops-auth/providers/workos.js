@@ -2,25 +2,107 @@ import { AuthProvider } from '../AuthProvider.js';
 
 import { createClient } from '@workos-inc/authkit-js';
 
+function hasWorkosSessionCookie(clientId) {
+  // Mirrors AuthKit's internal hasSessionCookie() check; no public helper is exported.
+  const match = document.cookie.match(/(?:^|;\s*)workos-has-session=([^;]*)/);
+  if (!match) return false;
+
+  const cookieValue = match[1];
+  return cookieValue === '1' ? true : cookieValue.split('.').includes(clientId);
+}
+
 export class WorkosAuthProvider extends AuthProvider {
-  async getToken() {
+  constructor(config = {}, LoginView = null, trackAuthEvent = () => {}) {
+    super(config, LoginView);
+    this.trackAuthEvent = trackAuthEvent;
+    this.recoveryPromise = null;
+    this.loginPrompted = false;
+  }
+
+  authEvent(name, context = {}) {
+    this.trackAuthEvent(name, {
+      ...context,
+      pathname: location.pathname,
+      online: navigator.onLine,
+    });
+  }
+
+  async getToken(options) {
     if (!this.client) return;
-    if (!navigator.onLine && this.token) return this.token;
+    if (!navigator.onLine) return this.token;
 
     return this.client
-      .getAccessToken()
+      .getAccessToken(options)
       .then(token => {
         this.token = `Bearer ${ token }`;
         return this.token;
       })
-      .catch(() => {
+      .catch(error => {
         if (!navigator.onLine) return;
-        this.logout();
+
+        this.authEvent('AUTH_GET_TOKEN_FAILED', {
+          reason: 'get_access_token_failed',
+          error: error?.message,
+        });
+        this.token = null;
+        throw error;
       });
+  }
+
+  async recoverToken() {
+    return this.getToken({ forceRefresh: true });
+  }
+
+  async recoverAuth() {
+    if (!this.recoveryPromise) {
+      this.loginPrompted = false;
+      this.recoveryPromise = Promise.resolve()
+        // Clear the app bearer so concurrent callers don't reuse a stale header while AuthKit refreshes.
+        .then(() => this.clearToken())
+        .then(() => this.recoverToken())
+        .finally(() => {
+          this.recoveryPromise = null;
+        });
+    }
+
+    return this.recoveryPromise;
   }
 
   login(path = AuthProvider.PATH_ROOT) {
     this.client.signIn({ state: path });
+  }
+
+  loginPromptOnce(reason) {
+    if (this.loginPrompted) return;
+
+    this.loginPrompted = true;
+    this.loginPrompt(location.pathname, reason);
+  }
+
+  loginPrompt(path, reason = 'auth_required') {
+    this.authEvent('AUTH_LOGIN_PROMPT', { reason });
+    super.loginPrompt(path);
+  }
+
+  async handleUnauthorized(retry) {
+    this.authEvent('AUTH_401', { reason: 'api_unauthorized' });
+
+    if (!navigator.onLine) return;
+
+    try {
+      await this.recoverAuth();
+    } catch {
+      this.loginPromptOnce('auth_recovery_failed');
+      return;
+    }
+
+    const response = await retry();
+
+    if (response.status === 401) {
+      this.loginPromptOnce('auth_retry_unauthorized');
+    }
+
+    return response;
   }
 
   async _initClient(clientId, success) {
@@ -68,8 +150,36 @@ export class WorkosAuthProvider extends AuthProvider {
 
     if (pathName === AuthProvider.PATH_LOGOUT) {
       this.token = null;
-      // Force a login to ensure the correct session id is logged out
-      this.client.signIn({ state: AuthProvider.PATH_LOGOUT });
+
+      let user = null;
+
+      try {
+        user = await this.client.getUser();
+      } catch (e) {
+        this.authEvent('AUTH_LOGOUT', {
+          reason: 'logout_get_user_failed',
+          error: e?.message,
+        });
+      }
+
+      if (user) {
+        try {
+          await this.client.signOut({ returnTo: location.origin });
+          return;
+        } catch (e) {
+          this.authEvent('AUTH_LOGOUT', {
+            reason: 'logout_sign_out_failed',
+            error: e?.message,
+          });
+        }
+      }
+
+      if (hasWorkosSessionCookie(clientId)) {
+        this.client.signIn({ state: AuthProvider.PATH_LOGOUT });
+        return;
+      }
+
+      this.replaceRoot();
       return;
     }
 
@@ -86,5 +196,17 @@ export class WorkosAuthProvider extends AuthProvider {
 
     // If we're already authenticated and at the right path
     success();
+  }
+
+  async logout(reason = 'user') {
+    this.token = null;
+
+    this.authEvent('AUTH_LOGOUT', { reason });
+
+    try {
+      await this.client.signOut({ returnTo: location.origin });
+    } catch {
+      this.replaceRoot();
+    }
   }
 }
