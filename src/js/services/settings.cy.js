@@ -1,20 +1,21 @@
-import { afterEach, beforeEach, describe, it, expect } from 'vitest';
 import Radio from 'backbone.radio';
 
-import SettingsService from 'js/services/settings';
+import SettingsService from './settings';
 
 import { Model as Clinician } from 'js/entities-service/entities/clinicians';
 import { Model as Workspace } from 'js/entities-service/entities/workspaces';
 import { Collection as Settings } from 'js/entities-service/entities/settings';
 
-describe('Settings Service', () => {
+context('Settings Service', function() {
   let service;
 
-  beforeEach(() => {
+  beforeEach(function() {
     const currentUser = new Clinician({ settings: { baz: 'clinician' } });
+
     Radio.reply('bootstrap', 'currentUser', () => currentUser);
 
     const currentWorkspace = new Workspace({ settings: { bar: 1, baz: 'workspace' } });
+
     Radio.reply('workspace', 'current', () => currentWorkspace);
 
     const settings = new Settings([
@@ -26,21 +27,27 @@ describe('Settings Service', () => {
     service = new SettingsService({ settings });
   });
 
-  afterEach(() => {
+  afterEach(function() {
     Radio.reset('bootstrap');
     Radio.reset('workspace');
     service.destroy();
   });
 
-  it('gets an organization setting', () => {
-    expect(Radio.request('settings', 'get', 'foo')).toBe('value');
+  specify('Get Org Setting', function() {
+    const setting = Radio.request('settings', 'get', 'foo');
+
+    expect(setting).to.equal('value');
   });
 
-  it('gets a workspace setting before the organization setting', () => {
-    expect(Radio.request('settings', 'get', 'bar')).toBe(1);
+  specify('Get Workspace Setting', function() {
+    const setting = Radio.request('settings', 'get', 'bar');
+
+    expect(setting).to.equal(1);
   });
 
-  it('gets a clinician setting before workspace and organization settings', () => {
-    expect(Radio.request('settings', 'get', 'baz')).toBe('clinician');
+  specify('Get Clinician Setting', function() {
+    const setting = Radio.request('settings', 'get', 'baz');
+
+    expect(setting).to.equal('clinician');
   });
 });

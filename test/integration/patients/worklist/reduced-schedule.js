@@ -98,6 +98,7 @@ context('reduced schedule page', function() {
       .routePatientByAction()
       .routeFormByAction()
       .routeFormDefinition()
+      .routeFormActionFields()
       .routeLatestFormResponse()
       .visit()
       .wait('@routeActions')
@@ -227,6 +228,7 @@ context('reduced schedule page', function() {
     cy
       .url()
       .should('contain', `patient-action/${ testAction.id }/form/${ testForm.id }`)
+      .wait('@routeFormActionFields')
       .go('back');
 
     cy

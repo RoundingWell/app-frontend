@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { load } from 'js-yaml';
 
 const yamlExtension = /\.ya?ml$/;
@@ -18,7 +19,7 @@ export default function() {
             code: `const data = ${ JSON.stringify(yamlData) };\nexport default data;`,
             map: { mappings: '' },
           };
-        } catch (exception) {
+        } catch(exception) {
           console.error(`${ cleanId } errored during yaml processing: `, exception);
           return null;
         }

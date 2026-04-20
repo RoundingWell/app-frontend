@@ -2,20 +2,13 @@
 
 Utility methods and interfaces to 3rd party utility libraries.
 
-# Util Unit testing
+# Util Component Testing
 ## What is a Unit?
 
 A "unit" will be defined as a `.js` file.
 So each js file we test will have its own test file.
-The unit test directory structure should mirror the application directory structure.
-Vitest suites should live next to the source file they cover as `*.test.js`.
-
-Examples:
-
-- `src/js/utils/sorting.js`
-- `src/js/utils/sorting.test.js`
-
-Coverage-tooling tests and shared Vitest setup stay under `test/unit/**`.
+Utility component specs should live next to the utility module as `*.cy.js`.
+For example, `src/js/utils/sorting.js` is covered by `src/js/utils/sorting.cy.js`.
 
 ## When Writing a Test
 

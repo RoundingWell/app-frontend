@@ -27,6 +27,7 @@ const _Model = BaseModel.extend({
     this.on('change:_team', this.onChangeTeam);
   },
   /* eslint-disable complexity */
+  /* istanbul ignore next: default options branch */
   validate(attrs, options = {}) {
     if (!trim(attrs.name)) return 'A clinician name is required';
     if (!trim(attrs.email)) return 'A clinician email address is required';

@@ -2765,7 +2765,8 @@ context('Patient Action Form', function() {
       .wait('@routeFormByAction')
       .wait('@routeLatestFormResponse')
       .wait('@routePatientByAction')
-      .wait('@routeFormDefinition');
+      .wait('@routeFormDefinition')
+      .wait('@routeFormActionFields');
 
     cy
       .get('.form__controls')

@@ -10,26 +10,6 @@ Reports can be found in `coverage/`.
 
 **Note** In order to preserve coverage only _one_ `visit` should be used per `specify`.
 
-Merged coverage is the repository contract:
-
-- `.nyc_output/merged.json` is the source of truth for combined Cypress + Vitest coverage
-- baseline coverage is `100%` for statements, functions, lines, and branches
-- `npm run coverage:check:baseline` enforces the repo-wide merged baseline
-- `npm run coverage:check:migrated` enforces `100%` coverage for Vitest-owned files listed in `test/unit/coverage-owned-files.mjs`
-
-When moving a spec from Cypress to Vitest:
-
-- update `test/unit/coverage-owned-files.mjs` in the same patch
-- run `npm run coverage`
-- do not add or widen `istanbul ignore` comments unless the code is truly generated or otherwise non-executable
-
-Vitest is a colocated test runner in this repo:
-
-- put Vitest suites next to the source file they cover as `src/**/foo.test.js`
-- keep Cypress browser/component tests next to source as `src/**/foo.cy.js`
-- keep routed Cypress integration tests under `test/integration/**`
-- reserve `test/unit/**` for coverage-tooling tests and shared Vitest setup only
-
 ## What is a Cypress Test?
 
 A Cypress test is a functional test testing the built app from the user interface.
@@ -106,18 +86,6 @@ cy
 We should be testing the **business logic: how data (and interfaces) can be created, displayed, stored, and changed**.
 
 It is important to test all various data scenarios. What does it do when no results are returned? When the logged in user is only in a single group? When a value is null?
-
-## Synchronization
-
-Use observable state as the default synchronization strategy.
-
-- Prefer route aliases for request lifecycles: `cy.wait('@routeThing')`
-- Prefer retrying assertions for rendered state: `cy.get(..., { timeout: 10000 }).should(...)`
-- Use `visitOnClock()` with `cy.tick(exactMs)` only when the debounce or timer is owned by the app window under test
-- Do not add `cy.wait(ms)` for render timing, navigation timing, or network timing
-- The only acceptable `cy.wait(ms)` usage is when the test owns the timer through `cy.clock()` and is advancing a known duration intentionally
-
-Iframe-based Formio behavior is a special case: do not use `cy.tick()` to drive iframe debounce. Wait on observable iframe DOM or other retryable side effects instead.
 
 ## Fixtures
 

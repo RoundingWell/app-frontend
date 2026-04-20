@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import Handlebars from 'handlebars';
 import MagicString from 'magic-string';
 
@@ -44,7 +45,7 @@ export default function viteHbsInlineCompile() {
           string.overwrite(start, end, `HandlebarsRuntime.template(${ compiled })`);
 
           codeWasChanged = true;
-        } catch (error) {
+        } catch(error) {
           console.error(`Error compiling handlebars template in ${ cleanId }:`, error);
           throw error;
         }
