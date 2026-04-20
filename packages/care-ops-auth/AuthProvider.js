@@ -68,6 +68,10 @@ export class AuthProvider {
     window.location = AuthProvider.PATH_LOGOUT;
   }
 
+  clearToken() {
+    this.token = null;
+  }
+
   setToken(tokenString) {
     this.token = tokenString;
   }
@@ -76,7 +80,13 @@ export class AuthProvider {
     return this.token;
   }
 
+  async handleUnauthorized() {}
+
   replaceState(state) {
     window.history.replaceState({}, document.title, state);
+  }
+
+  replaceRoot() {
+    location.replace(location.origin);
   }
 }

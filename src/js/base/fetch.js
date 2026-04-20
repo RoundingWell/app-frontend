@@ -76,6 +76,14 @@ async function buildFetcher(url, options = {}) {
   return registerFetcher(baseUrl, fetch(url, options), controller);
 }
 
+async function handleUnauthorized(url, options = {}) {
+  return Radio.request('auth', 'handleUnauthorized', async() => {
+    // recoverAuth force-refreshes through AuthKit; the retry uses the SDK-cached fresh token.
+    return buildFetcher(url, options)
+      .finally(() => removeFetcher(url));
+  });
+}
+
 function getValue(value) {
   return encodeURIComponent(value ?? '');
 }
@@ -145,14 +153,18 @@ export default async(url, options) => {
   const fetcher = getActiveFetcher(url, options) || buildFetcher(url, options);
 
   return fetcher
-    .then(async response => {
+    .then(response => {
       removeFetcher(url);
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          Radio.request('auth', 'logout');
-        }
+      if (response.status === 401) {
+        return handleUnauthorized(url, options)
+          .then(retryResponse => retryResponse || response);
+      }
 
+      return response;
+    })
+    .then(response => {
+      if (!response.ok) {
         if (response.status >= 400) {
           const contentType = String(response.headers.get('Content-Type'));
 

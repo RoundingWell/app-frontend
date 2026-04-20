@@ -86,6 +86,11 @@ export function startRum() {
   datadogRum.startSessionReplayRecording();
 }
 
+export function addAction(name, context) {
+  if (!rumReady) return;
+  datadogRum.addAction(name, context);
+}
+
 export function addError(error, context) {
   if (!rumReady) {
     console.error(error); // eslint-disable-line no-console
