@@ -2,60 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { buildAppConfig } from './appconfig.js';
 
-test('buildAppConfig returns auth.provider=auth0 when WorkOS client id is missing', () => {
-  const config = buildAppConfig({
-    secrets: {
-      OrganizationName: 'Acme',
-      DisableLoginPrompt: 'true',
-      WebsocketsEnabled: 'no',
-      DatadogAppId: 'dd-app',
-      DatadogClientToken: 'dd-token',
-      Auth0ClientDomain: 'acme.auth0.com',
-      Auth0ClientID: 'auth0-client',
-      Auth0Connection: 'Username-Password-Authentication',
-      Auth0Organization: 'org_123',
-    },
-    stage: 'prod',
-    organization: 'customer-a',
-    version: 'abc1234',
-    deploymentTime: '2026-02-12T00:00:00-06:00',
-    deploymentSource: 'Manual Deployment',
-  });
-
-  assert.deepEqual(config, {
-    app: {
-      stage: 'prod',
-      organization: 'customer-a',
-      version: 'abc1234',
-      name: 'Acme',
-    },
-    datadog: {
-      applicationId: 'dd-app',
-      clientToken: 'dd-token',
-    },
-    deployment: {
-      time: '2026-02-12T00:00:00-06:00',
-      source: 'Manual Deployment',
-    },
-    auth: {
-      provider: 'auth0',
-      disableLoginPrompt: true,
-      config: {
-        domain: 'acme.auth0.com',
-        clientId: 'auth0-client',
-        authorizationParams: {
-          connection: 'Username-Password-Authentication',
-          organization: 'org_123',
-          audience: 'care-ops-backend',
-        },
-        useRefreshTokens: true,
-        cacheLocation: 'localstorage',
-      },
-    },
-  });
-});
-
-test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
+test('buildAppConfig sets auth.provider=workos', () => {
   const config = buildAppConfig({
     secrets: {
       OrganizationName: 'Acme',
@@ -65,8 +12,6 @@ test('buildAppConfig prioritizes WorkOS and sets auth.provider=workos', () => {
       DatadogClientToken: 'dd-token',
       WorkOsClientId: 'workos-client',
       WorkOsApiDomain: 'workos.example.com',
-      Auth0ClientDomain: 'acme.auth0.com',
-      Auth0ClientID: 'auth0-client',
     },
     stage: 'qa',
     organization: 'qa2',

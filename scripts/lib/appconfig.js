@@ -27,38 +27,12 @@ function createWorkOsAuthConfig(secrets, stage) {
 }
 
 /**
- * Create auth config for Auth0
- * @param {Object} secrets - Stack secrets
- * @returns {Object}
- */
-function createAuth0AuthConfig(secrets) {
-  return {
-    provider: 'auth0',
-    disableLoginPrompt: getDisableLoginPrompt(secrets),
-    config: {
-      domain: secrets.Auth0ClientDomain || '',
-      clientId: secrets.Auth0ClientID || secrets.Auth0ClientId || '',
-      authorizationParams: {
-        connection: secrets.Auth0Connection || '',
-        organization: secrets.Auth0Organization || secrets.Auth0OrgId || '',
-        audience: secrets.Auth0Audience || 'care-ops-backend',
-      },
-      useRefreshTokens: true,
-      cacheLocation: 'localstorage',
-    },
-  };
-}
-
-/**
  * Add auth config based on available secrets.
- * WorkOS takes priority if clientId exists.
  * @param {Object} config - Config object to modify
  * @param {Object} secrets - Stack secrets
  */
 function addAuthProvider(config, secrets) {
-  config.auth = secrets.WorkOsClientId ?
-    createWorkOsAuthConfig(secrets, config.app.stage) :
-    createAuth0AuthConfig(secrets);
+  config.auth = createWorkOsAuthConfig(secrets, config.app.stage);
 }
 
 /**
@@ -119,7 +93,7 @@ export function buildAppConfig({
     },
   };
 
-  // Add WorkOS or Auth0 (WorkOS takes priority)
+  // Add auth provider
   addAuthProvider(config, secrets);
 
   // Remove null values (matches PHP nullifyAny)
