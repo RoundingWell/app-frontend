@@ -5,20 +5,6 @@
     "name": "Salvation Clinic",
     "version": "dev"
   },
-  "~auth": {
-    "provider": "auth0",
-    "disableLoginPrompt": true,
-    "config": {
-      "domain": "auth.roundingwell.com",
-      "clientId": "UVGIL27XqwGsJwsTfEyz50c1qg3Ll1p6",
-      "authorizationParams": {
-        "connection": "google-oauth2",
-        "audience": "care-ops-backend"
-      },
-      "cacheLocation": "localstorage",
-      "useRefreshTokens": true
-    }
-  },
   "auth": {
     "provider": "workos",
     "disableLoginPrompt": false,

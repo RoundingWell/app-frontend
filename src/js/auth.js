@@ -43,11 +43,6 @@ async function selectAuthProvider() {
     return new WorkosAuthProvider(providerConfig, getLoginView(), trackAuthEvent);
   }
 
-  if (authProvider === 'auth0') {
-    const { Auth0AuthProvider } = await import('@roundingwell/care-ops-auth/auth0.js');
-    return new Auth0AuthProvider(providerConfig, getLoginView());
-  }
-
   return defaultAuthProvider;
 }
 
