@@ -20,12 +20,12 @@ $ringcentral-call-ended-hover: color(red, dark);
   display: flex;
   flex-direction: column;
   height: 36px;
+  max-height: 760px;
   overflow: hidden;
   transition: height 0.2s ease;
 
   .ringcentral-wrapper.is-open & {
     height: 80vh;
-    max-height: 760px;
   }
 }
 
