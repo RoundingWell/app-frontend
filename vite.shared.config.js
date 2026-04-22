@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => {
     publicDir: false,
     build: {
       target,
-      sourcemap: true,
+      sourcemap: 'hidden',
       emptyOutDir: false,
       minify: 'esbuild',
       outDir: sharedRuntimeDir,
