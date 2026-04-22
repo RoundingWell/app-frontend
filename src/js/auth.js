@@ -1,5 +1,4 @@
 import Radio from 'backbone.radio';
-import getRootRoute from 'js/utils/root-route';
 
 import {
   getAuthConfig,
@@ -29,8 +28,6 @@ function getLoginView() {
 }
 
 async function selectAuthProvider() {
-  if (getRootRoute() === 'outreach') return defaultAuthProvider;
-
   const providerConfig = getAuthConfig();
   const authProvider = getAuthProvider();
 
