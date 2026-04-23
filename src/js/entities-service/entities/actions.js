@@ -225,11 +225,6 @@ const _Model = BaseModel.extend({
   },
   saveState(state) {
     const saveOpts = { _state: state.getResource() };
-    const sharing = this.get('sharing');
-
-    if (state.isDone() && ![ACTION_SHARING.DISABLED, ACTION_SHARING.RESPONDED].includes(sharing)) {
-      saveOpts.sharing = ACTION_SHARING.CANCELED;
-    }
 
     return this.save(saveOpts, {
       relationships: {

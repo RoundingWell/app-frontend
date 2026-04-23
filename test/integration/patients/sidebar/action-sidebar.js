@@ -1947,6 +1947,16 @@ context('action sidebar', function() {
   });
 
   specify('outreach', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
     const testAction = getAction({
       attributes: {
         outreach: 'patient',
@@ -1955,6 +1965,7 @@ context('action sidebar', function() {
       relationships: {
         form: getRelationship(testForm),
         state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
       },
     });
 
@@ -1965,7 +1976,12 @@ context('action sidebar', function() {
 
         return fx;
       })
-      .visit(`/patient/1/action/${ testAction.id }`)
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
       .wait('@routeAction');
 
     cy
@@ -1982,69 +1998,12 @@ context('action sidebar', function() {
 
     cy
       .get('.sidebar')
-      .contains('Cancel Share')
-      .click();
-
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.sharing).to.equal('canceled');
-      });
-
-    cy
-      .get('.sidebar')
-      .contains('Undo Cancel Share')
-      .click();
-
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.sharing).to.equal('pending');
-      });
-  });
-
-  specify('outreach error', function() {
-    const testAction = getAction({
-      attributes: {
-        outreach: 'patient',
-        sharing: 'error_no_phone',
-      },
-      relationships: {
-        form: getRelationship(testForm),
-        state: getRelationship(stateTodo),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        return fx;
-      })
-      .visit(`/patient/1/action/${ testAction.id }`)
-      .wait('@routeAction');
-
-    cy
-      .intercept('PATCH', `/api/actions/${ testAction.id }`, {
-        statusCode: 204,
-        body: {},
-      })
-      .as('routePatchAction');
-
-    cy
-      .get('.sidebar')
-      .contains('Share Form Now')
-      .click();
-
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.sharing).to.equal('pending');
-      });
+      .find('[data-form-sharing-region]')
+      .should('contain', 'Share Form')
+      .should('contain', 'Test Patient')
+      .should('contain', 'Waiting for Response')
+      .find('.fa-circle-dot')
+      .should('exist');
   });
 
   specify('outreach form', function() {

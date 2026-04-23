@@ -535,10 +535,7 @@ careOptsFrontend:
         dialerView:
           label: Dialer
         formSharingTemplate:
-          buttonCancelText: Cancel Share
           buttonResponseText: View Response
-          buttonShareText: Share Form Now
-          buttonUndoText: Undo Cancel Share
           label: Share Form
           recipientLabel: Recipient
           stateText: |
