@@ -138,7 +138,7 @@
     "sortablejs": "^1.14.0",
     "store": "^2.0.12",
     "underscore": "^1.13.1",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.50.0"
