@@ -813,10 +813,7 @@ careOptsFrontend:
         actionSidebarViews:
           disabledSaveView:
             saveBtn: Save
-          formSharingButtonView:
-            buttonText: Enable Form Sharing
           formSharingView:
-            disableButtonText: Disable Sharing
             label: Share Form
             recipientDefault: Patient
             recipientLabel: Recipient

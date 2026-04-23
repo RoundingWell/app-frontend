@@ -129,29 +129,11 @@ const HeadingView = View.extend({
   },
 });
 
-const FormSharingButtonView = View.extend({
-  tagName: 'button',
-  className: 'button--blue w-100',
-  attributes() {
-    return {
-      disabled: this.getOption('isDisabled'),
-    };
-  },
-  triggers: {
-    'click': 'click',
-  },
-  template: hbs`{{far "share-from-square"}} {{ @intl.programs.sidebar.action.actionSidebarViews.formSharingButtonView.buttonText }}`,
-});
-
 const FormSharingView = View.extend({
   className: 'sidebar__dialog',
-  triggers: {
-    'click .js-disable': 'click',
-  },
   template: hbs`
     <div class="flex">
       <h3 class="sidebar__heading flex-grow">{{far "share-from-square" classes="u-margin--r-8"}}{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.label }}</h3>
-      <button class="button--link js-disable">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.disableButtonText }}</button>
     </div>
     <div class="flex u-margin--t-16">
       <h4 class="sidebar__label--inset u-margin--t-8">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.recipientLabel }}</h4>
@@ -420,7 +402,6 @@ export {
   MenuView,
   TimestampsView,
   SidebarView,
-  FormSharingButtonView,
   FormSharingView,
   UploadsEnabledView,
 };
