@@ -1,6 +1,6 @@
 import { AuthProvider } from '../AuthProvider.js';
 
-import { createClient } from '@workos-inc/authkit-js';
+import { createClient, LoginRequiredError } from '@workos-inc/authkit-js';
 
 function hasWorkosSessionCookie(clientId) {
   // Mirrors AuthKit's internal hasSessionCookie() check; no public helper is exported.
@@ -16,7 +16,7 @@ export class WorkosAuthProvider extends AuthProvider {
     super(config, LoginView);
     this.trackAuthEvent = trackAuthEvent;
     this.recoveryPromise = null;
-    this.loginPrompted = false;
+    this.reauthPending = false;
   }
 
   authEvent(name, context = {}) {
@@ -30,32 +30,47 @@ export class WorkosAuthProvider extends AuthProvider {
   async getToken(options) {
     if (!this.client) return;
     if (!navigator.onLine) return this.token;
+    if (this.reauthPending) return null;
 
     return this.client
       .getAccessToken(options)
       .then(token => {
         this.token = `Bearer ${ token }`;
+        this.reauthPending = false;
         return this.token;
       })
       .catch(error => {
         if (!navigator.onLine) return;
 
         this.authEvent('AUTH_GET_TOKEN_FAILED', {
-          reason: 'get_access_token_failed',
+          reason: error instanceof LoginRequiredError ? 'login_required' : 'get_access_token_failed',
           error: error?.message,
         });
         this.token = null;
-        throw error;
+
+        if (error instanceof LoginRequiredError) {
+          this.beginReauth('auth_login_required');
+        }
+
+        return null;
       });
   }
 
   async recoverToken() {
-    return this.getToken({ forceRefresh: true });
+    if (!this.client) {
+      throw new LoginRequiredError();
+    }
+
+    const token = await this.client.getAccessToken({ forceRefresh: true });
+
+    this.token = `Bearer ${ token }`;
+    this.reauthPending = false;
+
+    return this.token;
   }
 
   async recoverAuth() {
     if (!this.recoveryPromise) {
-      this.loginPrompted = false;
       this.recoveryPromise = Promise.resolve()
         // Clear the app bearer so concurrent callers don't reuse a stale header while AuthKit refreshes.
         .then(() => this.clearToken())
@@ -72,15 +87,21 @@ export class WorkosAuthProvider extends AuthProvider {
     this.client.signIn({ state: path });
   }
 
-  loginPromptOnce(reason) {
-    if (this.loginPrompted) return;
+  beginReauth(reason, path = location.pathname) {
+    if (this.reauthPending) return;
 
-    this.loginPrompted = true;
-    this.loginPrompt(location.pathname, reason);
+    this.loginPrompt(path, reason);
   }
 
   loginPrompt(path, reason = 'auth_required') {
+    this.reauthPending = true;
     this.authEvent('AUTH_LOGIN_PROMPT', { reason });
+
+    if (!this.client) {
+      this.replaceState(AuthProvider.PATH_LOGIN);
+      return;
+    }
+
     super.loginPrompt(path);
   }
 
@@ -88,18 +109,21 @@ export class WorkosAuthProvider extends AuthProvider {
     this.authEvent('AUTH_401', { reason: 'api_unauthorized' });
 
     if (!navigator.onLine) return;
+    if (this.reauthPending) return;
 
     try {
       await this.recoverAuth();
-    } catch {
-      this.loginPromptOnce('auth_recovery_failed');
+    } catch (error) {
+      if (error instanceof LoginRequiredError) {
+        this.beginReauth('auth_recovery_failed');
+      }
       return;
     }
 
     const response = await retry();
 
     if (response.status === 401) {
-      this.loginPromptOnce('auth_retry_unauthorized');
+      this.beginReauth('auth_retry_unauthorized');
     }
 
     return response;
@@ -121,6 +145,7 @@ export class WorkosAuthProvider extends AuthProvider {
           return;
         }
 
+        authProvider.reauthPending = false;
         authProvider.handleAuthedPath(path);
 
         success();
@@ -194,12 +219,15 @@ export class WorkosAuthProvider extends AuthProvider {
       this.replaceState(AuthProvider.PATH_ROOT);
     }
 
+    this.reauthPending = false;
+
     // If we're already authenticated and at the right path
     success();
   }
 
   async logout(reason = 'user') {
     this.token = null;
+    this.reauthPending = false;
 
     this.authEvent('AUTH_LOGOUT', { reason });
 

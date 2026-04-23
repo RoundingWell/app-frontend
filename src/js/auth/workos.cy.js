@@ -1,5 +1,6 @@
 import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
 import { WorkosAuthProvider } from '@roundingwell/care-ops-auth/workos.js';
+import { LoginRequiredError } from '@workos-inc/authkit-js';
 
 function setOnline(value) {
   Object.defineProperty(navigator, 'onLine', {
@@ -36,31 +37,56 @@ context('WorkosAuthProvider', function() {
     setOnline(true);
   });
 
-  specify('clears the local token and throws when token acquisition fails', function() {
+  specify('starts re-auth and returns null when token acquisition requires login', function() {
+    const error = new LoginRequiredError();
+    const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
+    provider.token = 'Bearer old-token';
+    provider.client = {
+      getAccessToken: cy.stub().rejects(error),
+      signIn: cy.stub(),
+    };
+    provider.logout = cy.stub();
+
+    return provider.getToken().then(token => {
+      expect(token).to.be.null;
+      expect(provider.token).to.be.null;
+      expect(provider.client.getAccessToken).to.have.been.calledOnce;
+      expect(provider.client.signIn).to.have.been.calledWith({ state: '/' });
+      expectAuthEvent(trackAuthEvent, 'AUTH_GET_TOKEN_FAILED', {
+        reason: 'login_required',
+        error: 'No access token available',
+        pathname: '/',
+        online: true,
+      });
+      expectAuthEvent(trackAuthEvent, 'AUTH_LOGIN_PROMPT', {
+        reason: 'auth_login_required',
+        pathname: '/',
+        online: true,
+      });
+      expect(provider.logout).not.to.have.been.called;
+    });
+  });
+
+  specify('returns null without prompting for non-login token failures', function() {
     const error = new Error('token failed');
     const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
     provider.token = 'Bearer old-token';
     provider.client = {
       getAccessToken: cy.stub().rejects(error),
+      signIn: cy.stub(),
     };
-    provider.logout = cy.stub();
 
-    return provider.getToken().then(
-      () => {
-        throw new Error('Expected getToken to reject');
-      },
-      rejectedError => {
-        expect(rejectedError).to.equal(error);
-        expect(provider.token).to.be.null;
-        expectAuthEvent(trackAuthEvent, 'AUTH_GET_TOKEN_FAILED', {
-          reason: 'get_access_token_failed',
-          error: 'token failed',
-          pathname: '/',
-          online: true,
-        });
-        expect(provider.logout).not.to.have.been.called;
-      },
-    );
+    return provider.getToken().then(token => {
+      expect(token).to.be.null;
+      expect(provider.token).to.be.null;
+      expect(provider.client.signIn).not.to.have.been.called;
+      expectAuthEvent(trackAuthEvent, 'AUTH_GET_TOKEN_FAILED', {
+        reason: 'get_access_token_failed',
+        error: 'token failed',
+        pathname: '/',
+        online: true,
+      });
+    });
   });
 
   specify('does nothing when token acquisition is requested offline', function() {
@@ -76,6 +102,19 @@ context('WorkosAuthProvider', function() {
       expect(token).to.be.null;
       expect(provider.client.getAccessToken).not.to.have.been.called;
       expect(provider.logout).not.to.have.been.called;
+    });
+  });
+
+  specify('does not keep retrying normal token reads while re-auth is pending', function() {
+    const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
+    provider.reauthPending = true;
+    provider.client = {
+      getAccessToken: cy.stub(),
+    };
+
+    return provider.getToken().then(token => {
+      expect(token).to.be.null;
+      expect(provider.client.getAccessToken).not.to.have.been.called;
     });
   });
 
@@ -173,7 +212,7 @@ context('WorkosAuthProvider', function() {
     });
   });
 
-  specify('allows independent recovery cycles to prompt independently', function() {
+  specify('does not keep retrying recovery while re-auth is pending', function() {
     const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
     provider.client = {
       getAccessToken: cy.stub().resolves('new-token'),
@@ -183,8 +222,8 @@ context('WorkosAuthProvider', function() {
     return provider.handleUnauthorized(cy.stub().resolves({ status: 401 }))
       .then(() => provider.handleUnauthorized(cy.stub().resolves({ status: 401 })))
       .then(() => {
-        expect(provider.client.getAccessToken).to.have.been.calledTwice;
-        expect(provider.client.signIn).to.have.been.calledTwice;
+        expect(provider.client.getAccessToken).to.have.been.calledOnce;
+        expect(provider.client.signIn).to.have.been.calledOnce;
       });
   });
 
@@ -192,7 +231,7 @@ context('WorkosAuthProvider', function() {
     const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
     const retry = cy.stub();
     provider.client = {
-      getAccessToken: cy.stub().rejects(new Error('recovery failed')),
+      getAccessToken: cy.stub().rejects(new LoginRequiredError()),
       signIn: cy.stub(),
     };
 
@@ -200,6 +239,23 @@ context('WorkosAuthProvider', function() {
       expect(response).to.be.undefined;
       expect(retry).not.to.have.been.called;
       expect(provider.client.signIn).to.have.been.calledWith({ state: '/' });
+      expectAuthEvent(trackAuthEvent, 'AUTH_LOGIN_PROMPT', {
+        reason: 'auth_recovery_failed',
+        pathname: '/',
+        online: true,
+      });
+    });
+  });
+
+  specify('prompts for login when 401 recovery runs before client init', function() {
+    const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
+    const retry = cy.stub();
+
+    return provider.handleUnauthorized(retry).then(response => {
+      expect(response).to.be.undefined;
+      expect(retry).not.to.have.been.called;
+      expect(provider.token).to.be.null;
+      expect(provider.reauthPending).to.be.true;
       expectAuthEvent(trackAuthEvent, 'AUTH_LOGIN_PROMPT', {
         reason: 'auth_recovery_failed',
         pathname: '/',
