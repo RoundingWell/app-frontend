@@ -1881,9 +1881,9 @@ context('Patient Action Form', function() {
       .should('have.length', 2);
 
     cy
-      .window()
-      .then(win => {
-        win.postMessage({ message: 'focus' }, win.origin);
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('focus');
       });
 
     cy

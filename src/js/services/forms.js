@@ -43,6 +43,7 @@ export default App.extend({
   onBeforeDestroy() {
     this.updateDraft.cancel();
     this.refreshForm.cancel();
+    this.getChannel().reset();
   },
   radioRequests: {
     'ready:form': 'readyForm',
