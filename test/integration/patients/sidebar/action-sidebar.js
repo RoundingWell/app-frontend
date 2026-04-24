@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { v4 as uuid } from 'uuid';
 
 import formatDate from 'helpers/format-date';
-import { testTs, testTsSubtract } from 'helpers/test-timestamp';
+import { testTs, testTsSubtract, testTsAdd } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
 import { getRelationship, getErrors } from 'helpers/json-api';
 import { getActivity } from 'support/api/events';
@@ -1957,10 +1957,40 @@ context('action sidebar', function() {
       },
     });
 
-    const testAction = getAction({
+    const testOutreachAction = getAction({
       attributes: {
+        name: 'Outreach Action',
         outreach: 'patient',
         sharing: 'pending',
+        updated_at: testTsAdd(2),
+      },
+      relationships: {
+        form: getRelationship(testForm),
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
+      },
+    });
+
+    const testCanceledOutreachAction = getAction({
+      attributes: {
+        name: 'Canceled Outreach Action',
+        outreach: 'patient',
+        sharing: 'canceled',
+        updated_at: testTsAdd(1),
+      },
+      relationships: {
+        form: getRelationship(testForm),
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
+      },
+    });
+
+    const testErrorOutreachAction = getAction({
+      attributes: {
+        name: 'Error Outreach Action',
+        outreach: 'patient',
+        sharing: 'error_opt_out',
+        updated_at: testTsAdd(0),
       },
       relationships: {
         form: getRelationship(testForm),
@@ -1972,7 +2002,7 @@ context('action sidebar', function() {
     cy
       .routesForPatientAction()
       .routeAction(fx => {
-        fx.data = testAction;
+        fx.data = testOutreachAction;
 
         return fx;
       })
@@ -1981,11 +2011,23 @@ context('action sidebar', function() {
 
         return fx;
       })
-      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .routePatientActions(fx => {
+        fx.data = [testOutreachAction, testCanceledOutreachAction, testErrorOutreachAction];
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/action/${ testOutreachAction.id }`)
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows')
       .wait('@routeAction');
 
     cy
-      .intercept('PATCH', `/api/actions/${ testAction.id }`, {
+      .intercept('PATCH', `/api/actions/${ testOutreachAction.id }`, {
         statusCode: 204,
         body: {},
       })
@@ -2003,6 +2045,32 @@ context('action sidebar', function() {
       .should('contain', 'Test Patient')
       .should('contain', 'Waiting for Response')
       .find('.fa-circle-dot')
+      .should('exist');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .contains('Canceled Outreach Action')
+      .click();
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .should('contain', 'Form Sharing Canceled')
+      .find('.fa-octagon-minus')
+      .should('exist');
+
+    cy
+      .get('.list-page__list')
+      .find('.table-list__item')
+      .contains('Error Outreach Action')
+      .click();
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .should('contain', 'Recipient Opted Out')
+      .find('.fa-octagon-minus')
       .should('exist');
   });
 
