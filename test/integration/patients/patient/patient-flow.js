@@ -134,7 +134,7 @@ context('patient flow page', function() {
       attributes: {
         name: 'Test Action',
         duration: 10,
-        outreach: 'disabled',
+        outreach: null,
         sharing: 'disabled',
         updated_at: testTsSubtract(1),
         allowed_uploads: ['pdf'],

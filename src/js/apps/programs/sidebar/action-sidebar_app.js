@@ -80,7 +80,7 @@ export default App.extend(extend({
     this.showContentView('allowUploads', uploadsEnabledView);
   },
   showFormSharing() {
-    if (!Radio.request('settings', 'get', 'care_team_outreach') || !this.action.hasOutreach()) return;
+    if (!this.action.hasOutreach()) return;
 
     const formSharingView = new FormSharingView();
 

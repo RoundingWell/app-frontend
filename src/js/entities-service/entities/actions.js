@@ -154,7 +154,7 @@ const _Model = BaseModel.extend({
     return contains(this.get('tags'), tagName);
   },
   hasOutreach() {
-    return this.get('outreach') !== ACTION_OUTREACH.DISABLED;
+    return this.get('outreach') === ACTION_OUTREACH.PATIENT;
   },
   hasSharing() {
     return this.get('sharing') !== ACTION_SHARING.DISABLED;

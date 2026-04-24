@@ -816,26 +816,6 @@ context('program action sidebar', function() {
       .should('not.exist');
   });
 
-  specify('outreach disabled', function() {
-    cy
-      .routeTags()
-      .routeSettings('care_team_outreach', false)
-      .routeProgramAction()
-      .routeProgramActions()
-      .routeProgramFlows()
-      .routeProgram()
-      .visit('/program/1/action/1')
-      .wait('@routeProgramActions')
-      .wait('@routeProgramFlows')
-      .wait('@routeProgramAction')
-      .wait('@routeProgram');
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .should('be.empty');
-  });
-
   specify('enable/disable attachment uploads', function() {
     const testActionId = uuid();
     const testProgramFlow = getProgramFlow({
@@ -851,7 +831,7 @@ context('program action sidebar', function() {
         details: 'Details',
         published_at: testTs(),
         behavior: 'standard',
-        outreach: 'disabled',
+        outreach: null,
         allowed_uploads: [],
         days_until_due: 5,
         created_at: testTs(),
@@ -897,6 +877,11 @@ context('program action sidebar', function() {
       .get('.program-flow__list')
       .contains('Name')
       .click();
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .should('be.empty');
 
     cy
       .get('.sidebar')
