@@ -78,7 +78,7 @@ const _Model = BaseModel.extend({
     return this.getRelationship('_form');
   },
   hasOutreach() {
-    return this.get('outreach') !== ACTION_OUTREACH.DISABLED;
+    return this.get('outreach') === ACTION_OUTREACH.PATIENT;
   },
   isVisibleToCurrentUser() {
     const visibleToTeamsList = this.get('_teams');
@@ -100,7 +100,6 @@ const _Model = BaseModel.extend({
   saveForm(form) {
     form = this.toRelation(form);
     const saveData = { _form: form.data };
-    if (!form.data) saveData.outreach = ACTION_OUTREACH.DISABLED;
 
     return this.save(saveData, {
       relationships: { form },

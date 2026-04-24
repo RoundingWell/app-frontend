@@ -10,10 +10,6 @@
     "value": false
   },
   {
-    "id": "care_team_outreach",
-    "value": true
-  },
-  {
     "id": "patient_search",
     "value": {
       "identifiers": [

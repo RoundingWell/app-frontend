@@ -97,12 +97,6 @@ context('program action sidebar', function() {
 
     cy
       .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .contains('Enable Form Sharing')
-      .should('be.disabled');
-
-    cy
-      .get('.sidebar')
       .find('[data-allow-uploads-region]')
       .contains('Enable Attachment Uploads')
       .should('be.disabled');
@@ -223,6 +217,11 @@ context('program action sidebar', function() {
       .should('be.empty');
 
     cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .should('be.empty');
+
+    cy
       .get('.sidebar__footer')
       .contains('Added')
       .next()
@@ -324,7 +323,7 @@ context('program action sidebar', function() {
         published_at: null,
         archived_at: null,
         behavior: 'standard',
-        outreach: 'disabled',
+        outreach: 'patient',
         allowed_uploads: [],
         days_until_due: 5,
         created_at: testTs(),
@@ -665,12 +664,6 @@ context('program action sidebar', function() {
 
     cy
       .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .contains('Enable Form Sharing')
-      .should('be.disabled');
-
-    cy
-      .get('.sidebar')
       .find('[data-form-region]')
       .contains('Add Form...')
       .click();
@@ -694,39 +687,6 @@ context('program action sidebar', function() {
 
     cy
       .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .contains('Enable Form Sharing')
-      .should('not.be.disabled')
-      .click();
-
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.outreach).to.equal('patient');
-      });
-
-    cy
-      .get('.sidebar')
-      .find('.js-disable')
-      .click();
-
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.outreach).to.equal('disabled');
-      });
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .contains('Enable Form Sharing')
-      .click()
-      .wait('@routePatchAction');
-
-    cy
-      .get('.sidebar')
       .find('[data-form-region]')
       .click();
 
@@ -740,7 +700,6 @@ context('program action sidebar', function() {
       .its('request.body')
       .should(({ data }) => {
         expect(data.relationships.form.data).to.be.null;
-        expect(data.attributes.outreach).to.equal('disabled');
       });
 
     cy
@@ -784,6 +743,11 @@ context('program action sidebar', function() {
     cy
       .get('.picklist')
       .should('contain', 'No Available Forms');
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .should('exist');
   });
 
   specify('display action sidebar with no workspace forms', function() {
@@ -852,26 +816,6 @@ context('program action sidebar', function() {
       .should('not.exist');
   });
 
-  specify('outreach disabled', function() {
-    cy
-      .routeTags()
-      .routeSettings('care_team_outreach', false)
-      .routeProgramAction()
-      .routeProgramActions()
-      .routeProgramFlows()
-      .routeProgram()
-      .visit('/program/1/action/1')
-      .wait('@routeProgramActions')
-      .wait('@routeProgramFlows')
-      .wait('@routeProgramAction')
-      .wait('@routeProgram');
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .should('be.empty');
-  });
-
   specify('enable/disable attachment uploads', function() {
     const testActionId = uuid();
     const testProgramFlow = getProgramFlow({
@@ -887,7 +831,7 @@ context('program action sidebar', function() {
         details: 'Details',
         published_at: testTs(),
         behavior: 'standard',
-        outreach: 'disabled',
+        outreach: null,
         allowed_uploads: [],
         days_until_due: 5,
         created_at: testTs(),
@@ -933,6 +877,11 @@ context('program action sidebar', function() {
       .get('.program-flow__list')
       .contains('Name')
       .click();
+
+    cy
+      .get('.sidebar')
+      .find('[data-form-sharing-region]')
+      .should('be.empty');
 
     cy
       .get('.sidebar')

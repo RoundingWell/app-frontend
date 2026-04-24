@@ -535,10 +535,7 @@ careOptsFrontend:
         dialerView:
           label: Dialer
         formSharingTemplate:
-          buttonCancelText: Cancel Share
           buttonResponseText: View Response
-          buttonShareText: Share Form Now
-          buttonUndoText: Undo Cancel Share
           label: Share Form
           recipientLabel: Recipient
           stateText: |
@@ -813,10 +810,7 @@ careOptsFrontend:
         actionSidebarViews:
           disabledSaveView:
             saveBtn: Save
-          formSharingButtonView:
-            buttonText: Enable Form Sharing
           formSharingView:
-            disableButtonText: Disable Sharing
             label: Share Form
             recipientDefault: Patient
             recipientLabel: Recipient

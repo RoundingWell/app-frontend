@@ -3,8 +3,6 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { ACTION_OUTREACH } from 'js/static';
-
 import { SidebarMixin } from 'js/services/sidebar';
 
 import {
@@ -12,7 +10,6 @@ import {
   MenuView,
   HeadingView,
   TimestampsView,
-  FormSharingButtonView,
   FormSharingView,
   UploadsEnabledView,
 } from 'js/views/programs/sidebar/action/action-sidebar_views';
@@ -44,16 +41,11 @@ export default App.extend(extend({
     this.showChildView('content', contentView);
 
     this.listenTo(this.action, {
-      'change:_form change:outreach': this.onChangeOutreach,
       'change:allowed_uploads': this.showUploadsEnabled,
     });
 
     this.showFormSharing();
     this.showUploadsEnabled();
-  },
-  onChangeOutreach() {
-    this.showHeading();
-    this.showFormSharing();
   },
   showHeading() {
     this.showChildView('heading', new HeadingView({ model: this.action }));
@@ -88,31 +80,9 @@ export default App.extend(extend({
     this.showContentView('allowUploads', uploadsEnabledView);
   },
   showFormSharing() {
-    if (!Radio.request('settings', 'get', 'care_team_outreach')) return;
-
-    const form = this.action.getForm();
-
-    if (!form) {
-      this.showContentView('formSharing', new FormSharingButtonView({ isDisabled: true }));
-      return;
-    }
-
-    if (!this.action.hasOutreach()) {
-      const button = new FormSharingButtonView();
-
-      this.listenTo(button, 'click', () => {
-        this.action.save({ outreach: 'patient' });
-      });
-
-      this.showContentView('formSharing', button);
-      return;
-    }
+    if (!this.action.hasOutreach()) return;
 
     const formSharingView = new FormSharingView();
-
-    this.listenTo(formSharingView, 'click', () => {
-      this.action.save({ outreach: ACTION_OUTREACH.DISABLED });
-    });
 
     this.showContentView('formSharing', formSharingView);
   },

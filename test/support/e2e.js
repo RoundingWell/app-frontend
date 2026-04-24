@@ -31,7 +31,6 @@ import './api/forms';
 import './api/form-definition';
 import './api/form-fields';
 import './api/form-responses';
-import './api/outreach';
 import './api/patient-fields';
 import './api/patients';
 import './api/program-actions';

@@ -18,25 +18,3 @@
   <button class="button--link js-response">{{ @intl.patients.sidebar.action.formSharingTemplate.buttonResponseText }}</button>
 </div>
 {{/if~}}
-
-{{~#if isCanceled}}
-<div class="u-margin--t-8">
-  <button class="button--link js-undo-cancel"{{#if isDone}} disabled{{/if}}>{{ @intl.patients.sidebar.action.formSharingTemplate.buttonUndoText }}</button>
-</div>
-{{/if~}}
-
-{{~#if isWaiting}}
-<div class="u-margin--t-8">
-  <button class="button--link js-cancel">{{ @intl.patients.sidebar.action.formSharingTemplate.buttonCancelText }}</button>
-</div>
-{{/if~}}
-
-{{~#if isError}}
-<div class="flex u-margin--t-8">
-  <div class="flex-grow">
-    <button class="button--link js-cancel"{{#if isDone}} disabled{{/if}}>{{ @intl.patients.sidebar.action.formSharingTemplate.buttonCancelText }}</button>
-  </div>
-  <button class="button--link js-share"{{#if isDone}} disabled{{/if}}>{{ @intl.patients.sidebar.action.formSharingTemplate.buttonShareText }}</button>
-</div>
-{{/if~}}
-

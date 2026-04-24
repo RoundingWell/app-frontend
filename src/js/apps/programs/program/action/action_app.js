@@ -2,7 +2,7 @@ import Radio from 'backbone.radio';
 
 import intl from 'js/i18n';
 
-import { ACTION_OUTREACH, PROGRAM_BEHAVIORS } from 'js/static';
+import { PROGRAM_BEHAVIORS } from 'js/static';
 
 import App from 'js/base/app';
 
@@ -22,7 +22,6 @@ export default App.extend({
         behavior: PROGRAM_BEHAVIORS.STANDARD,
         published_at: null,
         archived_at: null,
-        outreach: ACTION_OUTREACH.DISABLED,
       });
     }
 

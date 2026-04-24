@@ -60,9 +60,6 @@ function getSharingOpts(sharing) {
 const FormSharingView = View.extend({
   className: 'sidebar__dialog u-margin--t-24',
   triggers: {
-    'click .js-share': 'click:share',
-    'click .js-cancel': 'click:cancelShare',
-    'click .js-undo-cancel': 'click:undoCancelShare',
     'click .js-response': 'click:response',
   },
   template: FormSharingTemplate,
@@ -70,33 +67,17 @@ const FormSharingView = View.extend({
     const patient = this.model.getPatient();
     const sharing = this.model.get('sharing');
     const stateOptions = getSharingOpts(sharing);
-    const isPending = sharing === ACTION_SHARING.PENDING;
-    const isSent = sharing === ACTION_SHARING.SENT;
     const isResponded = sharing === ACTION_SHARING.RESPONDED;
-    const isCanceled = sharing === ACTION_SHARING.CANCELED;
 
     return {
       stateOptions,
-      isWaiting: isSent || isPending,
       isResponded,
-      isCanceled,
-      isError: !isPending && !isSent && !isResponded && !isCanceled,
       patient: patient.pick('first_name', 'last_name'),
-      isDone: this.model.isDone(),
     };
   },
 });
 
 const FormLayoutView = View.extend({
-  modelEvents: {
-    'change:sharing': 'onChangeSharing',
-    'change:_state': 'onChangeActionState',
-  },
-  childViewTriggers: {
-    'click:share': 'click:share',
-    'click:cancelShare': 'click:cancelShare',
-    'click:undoCancelShare': 'click:undoCancelShare',
-  },
   template: hbs`
     <div class="flex{{#if hasForm}} u-margin--t-8{{/if}}">
       {{#if hasForm}}<h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarFormsViews.formLayoutView.formLabel }}</h4>{{/if}}
@@ -114,12 +95,6 @@ const FormLayoutView = View.extend({
   regions: {
     form: '[data-form-region]',
     formSharing: '[data-form-sharing-region]',
-  },
-  onChangeSharing() {
-    this.showFormSharing();
-  },
-  onChangeActionState() {
-    this.showFormSharing();
   },
   onRender() {
     this.showForm();

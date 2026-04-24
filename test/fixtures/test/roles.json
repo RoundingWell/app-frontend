@@ -69,13 +69,6 @@
     ]
   },
   {
-    "id": "70c30b67-6e7d-47f6-a1fe-8bfe0f7a149a",
-    "name": "patient",
-    "label": "Patient",
-    "description": "Limited access for outreach",
-    "permissions": []
-  },
-  {
     "id": "110eb40e-4a09-4969-8f93-869ced70c856",
     "name": "restricted__filter_employee",
     "label": "Restricted Filter Employee",

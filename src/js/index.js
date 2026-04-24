@@ -21,11 +21,6 @@ async function startAuth() {
   await auth();
 }
 
-async function startOutreach() {
-  const { startOutreachApp } = await import('./outreach/index');
-  startOutreachApp();
-}
-
 async function start() {
   const { startApp } = await import('./app');
   startApp();
@@ -46,11 +41,6 @@ document.addEventListener('DOMContentLoaded', async() => {
   initDataDog();
 
   await startAuth();
-
-  if (rootRoute === 'outreach') {
-    await startOutreach();
-    return;
-  }
 
   await start();
 });

@@ -7,8 +7,6 @@ import App from 'js/base/app';
 
 import intl from 'js/i18n';
 
-import { ACTION_SHARING } from 'js/static';
-
 import { SidebarMixin } from 'js/services/sidebar';
 
 import { SidebarView, MenuView, HeadingView, FooterView } from 'js/views/patients/sidebar/action/action-sidebar_views';
@@ -162,22 +160,10 @@ export default App.extend(extend({
 
     this.listenTo(formView, {
       'click:form': this.onClickForm,
-      'click:share': this.onClickShare,
-      'click:cancelShare': this.onClickCancel,
-      'click:undoCancelShare': this.onClickUndoCancel,
     });
   },
   onClickForm(form) {
     Radio.trigger('event-router', 'form:patientAction', this.action.id, form.id);
-  },
-  onClickShare() {
-    this.action.save({ sharing: ACTION_SHARING.PENDING });
-  },
-  onClickCancel() {
-    this.action.save({ sharing: ACTION_SHARING.CANCELED });
-  },
-  onClickUndoCancel() {
-    this.action.save({ sharing: ACTION_SHARING.PENDING });
   },
   showDialer() {
     if (!Radio.request('settings', 'get', 'dialer')) return;

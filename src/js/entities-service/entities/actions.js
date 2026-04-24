@@ -32,9 +32,6 @@ const _Model = BaseModel.extend({
     DetailsChanged({ attributes }) {
       this.set(attributes);
     },
-    SharingUpdated({ attributes }) {
-      this.set(attributes);
-    },
     ActionCommentAdded({ comment, attributes }, { author }) {
       const commentModel = Radio.request('entities', 'comments:model', {
         id: comment.id,
@@ -157,7 +154,7 @@ const _Model = BaseModel.extend({
     return contains(this.get('tags'), tagName);
   },
   hasOutreach() {
-    return this.get('outreach') !== ACTION_OUTREACH.DISABLED;
+    return this.get('outreach') === ACTION_OUTREACH.PATIENT;
   },
   hasSharing() {
     return this.get('sharing') !== ACTION_SHARING.DISABLED;
@@ -225,11 +222,6 @@ const _Model = BaseModel.extend({
   },
   saveState(state) {
     const saveOpts = { _state: state.getResource() };
-    const sharing = this.get('sharing');
-
-    if (state.isDone() && ![ACTION_SHARING.DISABLED, ACTION_SHARING.RESPONDED].includes(sharing)) {
-      saveOpts.sharing = ACTION_SHARING.CANCELED;
-    }
 
     return this.save(saveOpts, {
       relationships: {
