@@ -1,0 +1,27 @@
+src/js/services/forms.cy.js
+  3cc805d7a9cc92d4 1-44
+src/js/services/forms.js
+  3cc805d7a9cc92d4 46
+src/js/behaviors/iframe-form.cy.js
+  3cc805d7a9cc92d4 1-88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "8741d71243689a78fa47dd6475f21dd77ea5d0ec",
+  "prompts": {
+    "3cc805d7a9cc92d4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dbff7-fd5a-7942-ac24-bdd137bdb304",
+        "model": "gpt-5.4-mini"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 171,
+      "total_deletions": 40,
+      "accepted_lines": 134,
+      "overriden_lines": 0
+    }
+  }
+}
