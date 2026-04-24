@@ -1653,24 +1653,6 @@ context('patient dashboard page', function() {
       });
 
     cy.sendWs({
-      category: 'SharingUpdated',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          sharing: 'pending',
-          outreach: 'patient',
-        },
-      },
-    });
-
-    cy
-      .get('@firstRow')
-      .find('.fa-share-from-square');
-
-    cy.sendWs({
       category: 'ActionCommentAdded',
       author: currentClinician.id,
       resource: {

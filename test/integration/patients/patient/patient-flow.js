@@ -286,46 +286,6 @@ context('patient flow page', function() {
       .should('be.empty');
 
     cy.sendWs({
-      category: 'SharingUpdated',
-      resource: {
-        type: testFlowAction.type,
-        id: testFlowAction.id,
-      },
-      payload: {
-        attributes: {
-          sharing: 'enabled',
-          outreach: 'patient',
-        },
-      },
-    });
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .find('.action-sidebar__sharing-state')
-      .should('contain', 'Waiting for Response');
-
-    cy.sendWs({
-      category: 'SharingUpdated',
-      resource: {
-        type: testFlowAction.type,
-        id: testFlowAction.id,
-      },
-      payload: {
-        attributes: {
-          sharing: 'responded',
-          outreach: 'patient',
-        },
-      },
-    });
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .find('.action-sidebar__sharing-state')
-      .should('contain', 'Response Saved');
-
-    cy.sendWs({
       category: 'ActionCommentAdded',
       author: getCurrentClinician().id,
       resource: {
@@ -2793,30 +2753,6 @@ context('patient flow page', function() {
         expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
         expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
       });
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item .patient__action-icon')
-      .find('.fa-file-lines');
-
-    cy.sendWs({
-      category: 'SharingUpdated',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          sharing: 'pending',
-          outreach: 'patient',
-        },
-      },
-    });
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item .patient__action-icon')
-      .find('.fa-share-from-square');
 
     cy
       .get('.patient-flow__progress')

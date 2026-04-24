@@ -78,9 +78,6 @@ const FormSharingView = View.extend({
 });
 
 const FormLayoutView = View.extend({
-  modelEvents: {
-    'change:sharing': 'onChangeSharing',
-  },
   template: hbs`
     <div class="flex{{#if hasForm}} u-margin--t-8{{/if}}">
       {{#if hasForm}}<h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarFormsViews.formLayoutView.formLabel }}</h4>{{/if}}
@@ -98,9 +95,6 @@ const FormLayoutView = View.extend({
   regions: {
     form: '[data-form-region]',
     formSharing: '[data-form-sharing-region]',
-  },
-  onChangeSharing() {
-    this.showFormSharing();
   },
   onRender() {
     this.showForm();

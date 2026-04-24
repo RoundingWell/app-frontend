@@ -32,9 +32,6 @@ const _Model = BaseModel.extend({
     DetailsChanged({ attributes }) {
       this.set(attributes);
     },
-    SharingUpdated({ attributes }) {
-      this.set(attributes);
-    },
     ActionCommentAdded({ comment, attributes }, { author }) {
       const commentModel = Radio.request('entities', 'comments:model', {
         id: comment.id,
