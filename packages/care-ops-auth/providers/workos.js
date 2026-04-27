@@ -16,6 +16,7 @@ export class WorkosAuthProvider extends AuthProvider {
     super(config, LoginView);
     this.trackAuthEvent = trackAuthEvent;
     this.recoveryPromise = null;
+    this.tokenPromise = null;
     this.reauthPending = false;
   }
 
@@ -31,8 +32,9 @@ export class WorkosAuthProvider extends AuthProvider {
     if (!this.client) return;
     if (!navigator.onLine) return this.token;
     if (this.reauthPending) return null;
+    if (this.tokenPromise) return this.tokenPromise;
 
-    return this.client
+    this.tokenPromise = this.client
       .getAccessToken(options)
       .then(token => {
         this.token = `Bearer ${ token }`;
@@ -53,7 +55,12 @@ export class WorkosAuthProvider extends AuthProvider {
         }
 
         return null;
+      })
+      .finally(() => {
+        this.tokenPromise = null;
       });
+
+    return this.tokenPromise;
   }
 
   async recoverToken() {
@@ -102,7 +109,15 @@ export class WorkosAuthProvider extends AuthProvider {
       return;
     }
 
-    super.loginPrompt(path);
+    try {
+      super.loginPrompt(path);
+    } catch (error) {
+      this.authEvent('AUTH_LOGIN_PROMPT_FAILED', {
+        reason: 'render_failed',
+        error: error?.message,
+      });
+      this.login(path);
+    }
   }
 
   async handleUnauthorized(retry) {
