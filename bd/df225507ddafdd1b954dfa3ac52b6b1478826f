@@ -1,0 +1,25 @@
+packages/care-ops-auth/providers/workos.js
+  221c8051b839b171 19,35,37,58-60,62-63,112-120
+src/js/auth/workos.cy.js
+  221c8051b839b171 108-149,272-297
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "bddf225507ddafdd1b954dfa3ac52b6b1478826f",
+  "prompts": {
+    "221c8051b839b171": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c6a249b9-3395-4638-be7f-6d196643ebac",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 85,
+      "total_deletions": 2,
+      "accepted_lines": 85,
+      "overriden_lines": 0
+    }
+  }
+}
