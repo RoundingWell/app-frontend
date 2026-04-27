@@ -162,12 +162,6 @@ export default RouterApp.extend({
     const workspace = Radio.request('workspace', 'current');
     const workspaceSlug = workspace.get('slug');
 
-    const currentUser = Radio.request('bootstrap', 'currentUser');
-
-    if (currentUser.can('app:schedule:reduced')) {
-      return `/${ workspaceSlug }/schedule`;
-    }
-
     return `/${ workspaceSlug }/worklist/owned-by`;
   },
   // NOTE: Don't stop this app on no match
@@ -264,10 +258,6 @@ export default RouterApp.extend({
 
     if (!currentUser.can('programs:manage')) {
       adminNavMenu.remove('ProgramsApp');
-    }
-
-    if (currentUser.can('app:schedule:reduced')) {
-      patientsAppWorkflowsNav.reset(patientsAppWorkflowsNav.filter({ event: 'schedule' }));
     }
 
     this.setView(new AppNavView({ model: this.getState() }));

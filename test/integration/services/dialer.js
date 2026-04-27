@@ -6,7 +6,6 @@ import { getFlow } from 'support/api/flows';
 import { stateTodo } from 'support/api/states';
 import { getCurrentClinician } from 'support/api/clinicians';
 import { workspaceOne } from 'support/api/workspaces';
-import { roleReducedEmployee } from 'support/api/roles';
 
 const STATE_VERSION = 'v6';
 
@@ -89,7 +88,7 @@ context('Dialer Service', function() {
       listType: 'flows',
       flowsSortId: 'sortCreatedDesc',
       clinicianId: currentClinician.id,
-      states: [stateTodo],
+      states: [stateTodo.id],
       customFilters: {},
     }));
 
@@ -342,15 +341,28 @@ context('Dialer Service', function() {
       attributes: {
         settings: { dialer: 'ringcentral' },
       },
-      relationships: {
-        role: getRelationship(roleReducedEmployee),
-      },
     });
+
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      id: 'owned-by',
+      listType: 'flows',
+      flowsSortId: 'sortCreatedDesc',
+      clinicianId: currentClinician.id,
+      states: [stateTodo.id],
+      customFilters: {},
+    }));
 
     cy
       .routesForPatientAction()
       .routeCurrentClinician(fx => {
         fx.data = currentClinician;
+
+        return fx;
+      })
+      .routeFlows(fx => {
+        fx.data = [testFlow];
+
+        fx.included.push(testPatient);
 
         return fx;
       })
@@ -363,14 +375,6 @@ context('Dialer Service', function() {
         fx.data = [testAction];
 
         fx.included.push(testFlow);
-
-        return fx;
-      })
-      .routeActions(fx => {
-        fx.data = [testAction];
-
-        fx.included.push(testFlow);
-        fx.included.push(testPatient);
 
         return fx;
       })
@@ -412,10 +416,10 @@ context('Dialer Service', function() {
       .get('[data-nav-content-region]')
       .find('[data-worklists-region]')
       .find('.app-nav__link')
-      .contains('Schedule')
-      .as('navScheduleLink')
+      .contains('Owned By')
+      .as('navOwnedByLink')
       .click()
-      .wait('@routeActions');
+      .wait('@routeFlows');
 
     cy
       .get('.ringcentral-wrapper')
@@ -476,17 +480,13 @@ context('Dialer Service', function() {
       .wait('@routePatientActions');
 
     cy
-      .get('@navScheduleLink')
+      .get('@navOwnedByLink')
       .click()
-      .wait('@routeActions');
+      .wait('@routeFlows');
 
     cy
       .get('@patientButtons')
-      .should('have.length', 1)
-      .click()
-      .wait('@routePatient')
-      .wait('@routePatientFlows')
-      .wait('@routePatientActions');
+      .should('have.length', 1);
 
     cy
       .get('.table-list__item')

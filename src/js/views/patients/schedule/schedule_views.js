@@ -50,11 +50,6 @@ const LayoutView = View.extend({
     'attach': 'childView:attach',
     'render:children': 'childView:render:children',
   },
-  templateContext() {
-    return {
-      isReduced: this.getOption('isReduced'),
-    };
-  },
 });
 
 const TitleLabelView = View.extend({
@@ -168,16 +163,10 @@ const TableHeaderView = View.extend({
 });
 
 const DayItemView = View.extend({
-  className() {
-    const className = 'schedule-list__day-list-row';
-
-    if (this.getOption('state').get('isReduced')) return `${ className } is-reduced`;
-
-    return className;
-  },
+  className: 'schedule-list__day-list-row',
   template: hbs`
     <div class="schedule-list__due-time {{#if isOverdue}}is-overdue{{/if}}">
-      {{#unless isReduced}}<div class="schedule-list__check" data-check-region></div>{{/unless}}
+      <div class="schedule-list__check" data-check-region></div>
       {{#if due_time}}
         {{formatDateTime due_time "TIME" inputFormat="HH:mm:ss"}}&#8203;
       {{else}}
@@ -189,10 +178,10 @@ const DayItemView = View.extend({
         {{far "address-card"}}
       </button>&#8203;
     </div>
-    <div class="schedule-list__patient-name u-text--overflow-two-lines {{#if isReduced}}is-reduced{{else}}js-patient{{/if}}">{{ patient.first_name }} {{ patient.last_name }}&#8203;</div>
+    <div class="schedule-list__patient-name u-text--overflow-two-lines js-patient">{{ patient.first_name }} {{ patient.last_name }}&#8203;</div>
     <div class="schedule-list__action-meta">
       <span class="schedule-list__action-state action--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon}}</span><span class="schedule-list__search-helper">{{ state }}</span>&#8203;
-      <span class="u-text--overflow-two-lines{{#unless isReduced}} js-action{{/unless}}">{{ name }}</span>&#8203;
+      <span class="u-text--overflow-two-lines js-action">{{ name }}</span>&#8203;
       <span class="schedule-list__search-helper">{{ flow }}</span>&#8203;
     </div>
     <div class="schedule-list__action-details" data-details-region></div>
@@ -215,7 +204,6 @@ const DayItemView = View.extend({
       form: this.model.getForm(),
       flow: this.model.getFlow() && this.model.getFlow().get('name'),
       hasOutreach: this.model.hasOutreach(),
-      isReduced: this.isReduced,
     };
   },
   ui: {
@@ -233,7 +221,6 @@ const DayItemView = View.extend({
   initialize({ state }) {
     this.state = state;
     this.flow = this.model.getFlow();
-    this.isReduced = state.get('isReduced');
 
     this.listenTo(state, {
       'select:multiple': this.showCheck,
@@ -256,7 +243,7 @@ const DayItemView = View.extend({
     this.$el.toggleClass('is-selected', isSelected);
   },
   showCheck() {
-    if (this.isReduced || !this.canEdit) return;
+    if (!this.canEdit) return;
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
@@ -278,8 +265,6 @@ const DayItemView = View.extend({
     Radio.trigger('event-router', 'form:patientAction', this.model.id, this.model.getForm().id);
   },
   onClick() {
-    if (this.isReduced) return;
-
     if (this.flow) {
       Radio.trigger('event-router', 'flow:action', this.flow.id, this.model.id);
       return;

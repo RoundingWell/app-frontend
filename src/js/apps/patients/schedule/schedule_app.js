@@ -98,9 +98,7 @@ export default App.extend({
 
     this.initListState();
 
-    this.setView(new LayoutView({
-      isReduced: this.getState('isReduced'),
-    }));
+    this.setView(new LayoutView());
 
     this.showDisabledSelectAll();
     this.showSearchView();

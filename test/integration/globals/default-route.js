@@ -3,7 +3,6 @@ import { NIL as NIL_UUID } from 'uuid';
 import { getErrors, getRelationship } from 'helpers/json-api';
 
 import { getCurrentClinician } from 'support/api/clinicians';
-import { roleReducedEmployee } from 'support/api/roles';
 
 context('default routes', function() {
   specify('default route', function() {
@@ -48,25 +47,6 @@ context('default routes', function() {
     cy
       .get('.prelogin__message')
       .contains('Hold up, your account is not set up yet. Please notify your manager or administrator to correct this issue.');
-  });
-
-  specify('current clinician has reduced patient schedule access', function() {
-    cy
-      .routesForDefault()
-      .routeCurrentClinician(fx => {
-        fx.data = getCurrentClinician({
-          relationships: {
-            role: getRelationship(roleReducedEmployee),
-          },
-        });
-
-        return fx;
-      })
-      .visit();
-
-    cy
-      .url()
-      .should('contain', 'schedule');
   });
 
   specify('current clinician has no team', function() {
