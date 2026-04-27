@@ -22,16 +22,19 @@ export default Behavior.extend({
   onAttach() {
     this.channel.reply(this.replies, this);
 
-    $(window).on('message', ({ originalEvent }) => {
+    this.messageHandler = ({ originalEvent }) => {
       const { data, origin } = originalEvent;
+      const iframeWindow = this.ui.iframe[0].contentWindow;
       /* istanbul ignore next: security check */
-      if (origin !== window.origin || !data || !data.message) return;
+      if (origin !== window.origin || originalEvent.source !== iframeWindow || !data || !data.message) return;
 
       this.channel.request(data.message, data.args, data.requestId);
-    });
+    };
+
+    $(window).on('message', this.messageHandler);
   },
   onBeforeDetach() {
-    $(window).off('message');
+    $(window).off('message', this.messageHandler);
     this.channel.stopReplying(keys(this.replies).join(' '));
   },
 });
