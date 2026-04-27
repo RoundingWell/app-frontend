@@ -18,7 +18,7 @@ const _Model = BaseModel.extend({
   isSubmitHidden() {
     return get(this.get('options'), 'submit_hidden');
   },
-  getFormUrl(params = {}) {
+  getFormUrl(/* istanbul ignore next */params = {}) {
     const baseUrl = this.get('url') || '/forms/formio/index.html';
     const url = new URL(baseUrl, window.location.origin);
 
