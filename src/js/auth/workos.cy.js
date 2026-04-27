@@ -105,6 +105,48 @@ context('WorkosAuthProvider', function() {
     });
   });
 
+  specify('coalesces concurrent getToken calls into a single AuthKit request', function() {
+    let resolveToken;
+    const tokenPromise = new Promise(resolve => {
+      resolveToken = resolve;
+    });
+    const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
+    provider.client = {
+      getAccessToken: cy.stub().returns(tokenPromise),
+    };
+
+    const first = provider.getToken();
+    const second = provider.getToken();
+    const third = provider.getToken();
+
+    resolveToken('new-token');
+
+    return Promise.all([first, second, third]).then(tokens => {
+      expect(tokens).to.deep.equal([
+        'Bearer new-token',
+        'Bearer new-token',
+        'Bearer new-token',
+      ]);
+      expect(provider.client.getAccessToken).to.have.been.calledOnce;
+    });
+  });
+
+  specify('clears the in-flight token promise after completion', function() {
+    const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
+    provider.client = {
+      getAccessToken: cy.stub()
+        .onFirstCall().resolves('first-token')
+        .onSecondCall().resolves('second-token'),
+    };
+
+    return provider.getToken()
+      .then(() => provider.getToken())
+      .then(token => {
+        expect(token).to.equal('Bearer second-token');
+        expect(provider.client.getAccessToken).to.have.been.calledTwice;
+      });
+  });
+
   specify('does not keep retrying normal token reads while re-auth is pending', function() {
     const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
     provider.reauthPending = true;
@@ -225,6 +267,32 @@ context('WorkosAuthProvider', function() {
         expect(provider.client.getAccessToken).to.have.been.calledOnce;
         expect(provider.client.signIn).to.have.been.calledOnce;
       });
+  });
+
+  specify('falls back to direct sign-in when the login prompt view fails to render', function() {
+    function ThrowingLoginView() {
+      this.on = () => {};
+      this.render = () => {
+        throw new TypeError('e.querySelectorAll is not a function');
+      };
+    }
+
+    const provider = new WorkosAuthProvider({}, ThrowingLoginView, trackAuthEvent);
+    provider.client = {
+      getAccessToken: cy.stub().rejects(new LoginRequiredError()),
+      signIn: cy.stub(),
+    };
+
+    return provider.getToken().then(token => {
+      expect(token).to.be.null;
+      expect(provider.client.signIn).to.have.been.calledWith({ state: '/' });
+      expectAuthEvent(trackAuthEvent, 'AUTH_LOGIN_PROMPT_FAILED', {
+        reason: 'render_failed',
+        error: 'e.querySelectorAll is not a function',
+        pathname: '/',
+        online: true,
+      });
+    });
   });
 
   specify('prompts for login when 401 recovery fails', function() {
