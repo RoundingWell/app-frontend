@@ -24,7 +24,6 @@ function getRoleByName(name) {
 export const roleAdmin = getRoleByName('admin');
 export const roleManager = getRoleByName('manager');
 export const roleEmployee = getRoleByName('employee');
-export const roleReducedEmployee = getRoleByName('restricted_employee');
 export const roleNoFilterEmployee = getRoleByName('restricted__filter_employee');
 export const roleTeamEmployee = getRoleByName('liaison_employee');
 

@@ -24,14 +24,13 @@ export default App.extend({
   },
   beforeStart() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
-    const isReduced = currentUser.can('app:schedule:reduced');
     const hasDashboards = currentUser.can('dashboards:view');
     const hasClinicians = currentUser.can('clinicians:manage');
     const hasPrograms = currentUser.can('programs:manage');
 
     return [
       Radio.request('workspace', 'fetch'),
-      isReduced ? import('js/apps/patients/reduced-patients-main_app.js') : import('js/apps/patients/patients-main_app'),
+      import('js/apps/patients/patients-main_app'),
       hasDashboards ? import('js/apps/dashboards/dashboards-main_app.js') : null,
       hasClinicians ? import('js/apps/clinicians/clinicians-main_app.js') : null,
       hasPrograms ? import('js/apps/programs/programs-main_app.js') : null,

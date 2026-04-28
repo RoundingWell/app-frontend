@@ -4,11 +4,9 @@
     <div class="schedule__list-search" data-search-region></div>
   </div>
   <div class="list-page__filters flex">
-    {{#unless isReduced}}
-      <div class="flex u-margin--r-24" data-select-all-region></div>
-    {{/unless}}
+    <div class="flex u-margin--r-24" data-select-all-region></div>
     <div class="flex flex-align-center w-100" data-filters-region></div>
-    <div class="schedule__count{{#if isReduced}} is-reduced{{/if}}" data-count-region></div>
+    <div class="schedule__count" data-count-region></div>
     <div class="flex u-text--nowrap" data-date-filter-region></div>
   </div>
 </div>

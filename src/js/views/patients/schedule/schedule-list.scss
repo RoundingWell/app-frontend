@@ -21,11 +21,6 @@
   line-height: 1.2;
   margin-right: 24px;
   white-space: nowrap;
-
-  &.is-reduced {
-    margin-right: 0;
-    min-height: 36px;
-  }
 }
 
 .schedule__list-header {
@@ -89,17 +84,13 @@
     background: #{$greyed};
   }
 
-  &.is-reduced {
-    cursor: default;
-  }
-
   &:hover {
     .schedule-list__patient-sidebar-icon {
       color: #{$black-20};
     }
   }
 
-  &:hover:not(.is-selected, .is-reduced) {
+  &:hover:not(.is-selected) {
     background-color: color(light_blue, light);
   }
 }
@@ -184,11 +175,7 @@
 .schedule-list__action-form-icon {
   cursor: pointer;
 
-  &.is-reduced {
-    cursor: default;
-  }
-
-  &:hover:not(.is-reduced) {
+  &:hover {
     color: color(blue);
   }
 }

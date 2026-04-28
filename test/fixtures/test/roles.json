@@ -54,21 +54,6 @@
     ]
   },
   {
-    "id": "34984bfd-e370-496c-87c7-0e728893a7d2",
-    "name": "restricted_employee",
-    "label": "Restricted Employee",
-    "description": "Able to access reduced workspace",
-    "permissions": [
-      "work:authored:delete",
-      "work:manage",
-      "work:owned:delete",
-      "work:owned:manage",
-      "app:schedule:reduced",
-      "work:own",
-      "dashboards:view"
-    ]
-  },
-  {
     "id": "110eb40e-4a09-4969-8f93-869ced70c856",
     "name": "restricted__filter_employee",
     "label": "Restricted Filter Employee",

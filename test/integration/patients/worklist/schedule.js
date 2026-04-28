@@ -128,6 +128,16 @@ context('schedule page', function() {
               },
             });
           }),
+          getAction({
+            attributes: {
+              name: 'Action with no due date - should be filtered out',
+              due_date: null,
+            },
+            relationships: {
+              patient: getRelationship(testPatient1),
+              state: getRelationship(stateTodo),
+            },
+          }),
         ];
 
         fx.included.push(testPatient1, testPatient2, testFlow);
