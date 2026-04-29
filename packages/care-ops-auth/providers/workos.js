@@ -165,6 +165,11 @@ export class WorkosAuthProvider extends AuthProvider {
 
         success();
       },
+      onRefreshFailure() {
+        authProvider.authEvent('AUTH_REFRESH_FAILED', { reason: 'refresh_failed' });
+        if (!navigator.onLine) return;
+        authProvider.beginReauth('auth_refresh_failed');
+      },
       ...this.config.createClientOptions,
     };
 
