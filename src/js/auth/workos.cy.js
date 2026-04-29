@@ -11,6 +11,13 @@ function setOnline(value) {
   });
 }
 
+function mockAccessToken({ iat = Date.now() / 1000, exp = Date.now() / 1000 + 3600 } = {}) {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = btoa(JSON.stringify({ sid: 'session', iat, exp }));
+
+  return `${ header }.${ payload }.signature`;
+}
+
 function expectAuthEvent(trackAuthEvent, name, context) {
   const match = trackAuthEvent
     .getCalls()
@@ -33,6 +40,7 @@ context('WorkosAuthProvider', function() {
 
   afterEach(function() {
     document.cookie = 'workos-has-session=; Max-Age=0; path=/';
+    localStorage.removeItem('workos:refresh-token:client');
     window.history.pushState({}, '', '/');
     setOnline(true);
   });
@@ -326,6 +334,63 @@ context('WorkosAuthProvider', function() {
       expect(provider.reauthPending).to.be.true;
       expectAuthEvent(trackAuthEvent, 'AUTH_LOGIN_PROMPT', {
         reason: 'auth_recovery_failed',
+        pathname: '/',
+        online: true,
+      });
+    });
+  });
+
+  specify('starts re-auth when AuthKit background refresh fails', function() {
+    const now = Date.now() / 1000;
+    const provider = new WorkosAuthProvider({
+      createClientOptions: {
+        apiHostname: location.hostname,
+        port: Number(location.port),
+        https: false,
+        devMode: true,
+      },
+    }, null, trackAuthEvent);
+    let refreshCount = 0;
+
+    localStorage.setItem('workos:refresh-token:client', 'refresh-token');
+    cy.intercept('POST', '**/user_management/authenticate', req => {
+      refreshCount += 1;
+      req.reply(refreshCount === 1 ?
+        {
+          statusCode: 200,
+          body: {
+            user: { id: 'user' },
+            access_token: mockAccessToken({ iat: now, exp: now }),
+            refresh_token: 'refresh-token',
+          },
+        } :
+        {
+          statusCode: 400,
+          body: {
+            error: 'invalid_grant',
+            error_description: 'Session has already ended.',
+          },
+        });
+    }).as('authRefresh');
+
+    cy.wrap(provider._initClient('client', cy.stub()))
+      .then(client => {
+        provider.client = client;
+        cy.stub(client, 'signIn').as('signIn');
+      });
+
+    cy.wait('@authRefresh');
+    cy.wait('@authRefresh');
+    cy.get('@signIn').should('have.been.calledWith', { state: '/' });
+
+    cy.then(() => {
+      expectAuthEvent(trackAuthEvent, 'AUTH_REFRESH_FAILED', {
+        reason: 'refresh_failed',
+        pathname: '/',
+        online: true,
+      });
+      expectAuthEvent(trackAuthEvent, 'AUTH_LOGIN_PROMPT', {
+        reason: 'auth_refresh_failed',
         pathname: '/',
         online: true,
       });
