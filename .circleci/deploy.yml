@@ -275,16 +275,17 @@ jobs:
               *) exit 0 ;;
             esac
 
-            {
-              ./scripts/download-linear-release.sh
-              git fetch --force --tags origin
-              /tmp/linear-release update \
-                --release-version="$DEPLOY_TARGET_VERSION" \
-                --stage="$linear_stage"
-              if [ "$DEPLOY_STAGE" = "prod" ]; then
-                /tmp/linear-release complete \
-                  --release-version="$DEPLOY_TARGET_VERSION"
-              fi
+            # set -e is suspended on the left side of `||`, so chain commands
+            # with `&&` to short-circuit on the first failure and let the
+            # group's exit code reflect the actual outcome.
+            { ./scripts/download-linear-release.sh \
+                && git fetch --force --tags origin \
+                && /tmp/linear-release update \
+                     --release-version="$DEPLOY_TARGET_VERSION" \
+                     --stage="$linear_stage" \
+                && { [ "$DEPLOY_STAGE" != "prod" ] \
+                     || /tmp/linear-release complete \
+                          --release-version="$DEPLOY_TARGET_VERSION"; }
             } || echo "Linear release update failed; deploy succeeded. Sync manually if needed."
 
 workflows:
