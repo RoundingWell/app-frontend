@@ -253,18 +253,64 @@ jobs:
                 }
               ]
             }
+      - run:
+          name: Update Linear release stage
+          when: on_success
+          command: |
+            set -uo pipefail
+
+            case "$DEPLOY_STAGE" in
+              qa)      linear_stage="QA" ;;
+              sandbox) linear_stage="Sandbox" ;;
+              prod)
+                # Only the wildcard prod:* deploy represents a real release
+                # event. Org-scoped prod deploys (e.g. prod:demonstration,
+                # prod:apple) must not advance or complete the Linear release.
+                if [ -n "$DEPLOY_ORGANIZATION" ]; then
+                  echo "Skipping Linear release update for prod:$DEPLOY_ORGANIZATION"
+                  exit 0
+                fi
+                linear_stage="Released"
+                ;;
+              *) exit 0 ;;
+            esac
+
+            # set -e is suspended on the left side of `||`, so chain commands
+            # with `&&` to short-circuit on the first failure and let the
+            # group's exit code reflect the actual outcome.
+            { ./scripts/download-linear-release.sh \
+                && git fetch --force --tags origin \
+                && /tmp/linear-release update \
+                     --release-version="$DEPLOY_TARGET_VERSION" \
+                     --stage="$linear_stage" \
+                && { [ "$DEPLOY_STAGE" != "prod" ] \
+                     || /tmp/linear-release complete \
+                          --release-version="$DEPLOY_TARGET_VERSION"; }
+            } || echo "Linear release update failed; deploy succeeded. Sync manually if needed."
 
 workflows:
   deploy-dev:
     when:
       matches:
-        pattern: '^(dev|qa):[a-z0-9*-]+$'
+        pattern: '^dev:[a-z0-9*-]+$'
         value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
           context:
             - aws-dev
             - slack-secrets
+
+  deploy-qa:
+    when:
+      matches:
+        pattern: '^qa:[a-z0-9*-]+$'
+        value: << pipeline.deploy.environment_name >>
+    jobs:
+      - deploy-from-artifact:
+          context:
+            - aws-dev
+            - slack-secrets
+            - linear-secrets
 
   deploy-prod:
     when:
@@ -276,3 +322,4 @@ workflows:
           context:
             - aws-prod
             - slack-secrets
+            - linear-secrets

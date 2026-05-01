@@ -274,6 +274,22 @@ jobs:
           command: |
             set -euo pipefail
             circleci run release update "release-<< pipeline.git.tag >>" --status=FAILED
+      - run:
+          name: Sync Linear release
+          when: on_success
+          command: |
+            set -uo pipefail
+            # set -e is suspended on the left side of `||`, so chain commands
+            # with `&&` to short-circuit on the first failure and let the
+            # group's exit code reflect the actual outcome.
+            { ./scripts/download-linear-release.sh \
+                && git fetch --force --tags origin \
+                && /tmp/linear-release sync \
+                     --release-version="<< pipeline.git.tag >>" \
+                && /tmp/linear-release update \
+                     --release-version="<< pipeline.git.tag >>" \
+                     --stage="Started"
+            } || echo "Linear release sync failed; artifact published. Sync manually if needed."
 
 # ------------------------------------------------------------
 # WORKFLOWS
@@ -428,6 +444,8 @@ workflows:
       - publish-build-artifact:
           <<: *tag-filter
           name: publish release artifact
-          context: aws-dev
+          context:
+            - aws-dev
+            - linear-secrets
           requires:
             - build

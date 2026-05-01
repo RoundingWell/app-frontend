@@ -140,6 +140,13 @@ npm run deploy -- --stage=<stage> [--organization=<organization>]
    - stage-wide deploys continue through every resolved environment and fail the job at the end if any targets fail
    - if a stage-wide deploy partially succeeds, concrete environment markers reflect the per-environment outcomes while the wildcard marker reflects the overall deploy result
 6. For QA deploys that include `qa2` (`qa:qa2` and `qa:*`), posts `qa2_deploy_succeeded` to `RoundingWell/app-tests`
+7. Updates the Linear release stage by running the pinned `linear/linear-release` CLI (downloaded by [`scripts/download-linear-release.sh`](../scripts/download-linear-release.sh)):
+   - `qa:*` and specific `qa:<organization>` deploys → `update --stage=QA`
+   - `sandbox:*` and specific `sandbox:<organization>` deploys → `update --stage=Sandbox`
+   - `prod:*` (wildcard only) → `update --stage=Released`, then `complete`
+   - org-scoped `prod:<organization>` deploys (e.g. `prod:demonstration`, `prod:apple`) are skipped — only the wildcard prod deploy represents a release event
+   - `dev` deploys are skipped
+   - the step is failure-tolerant (`|| echo …`); a Linear API or download failure does not fail the deploy job
 
 Supported deploy environments:
 - `dev:<organization>`
@@ -166,6 +173,11 @@ Additional CircleCI secrets for the QA2 E2E dispatch step:
 - `GH_APP_ID`
 - `GH_APP_PRIVATE_KEY`
 - `GH_APP_INSTALLATION_ID`
+
+CircleCI context for the Linear release steps:
+- `linear-secrets` context, providing `LINEAR_ACCESS_KEY` (Linear release pipeline access key)
+- attached to the `release-artifact` workflow in [`.circleci/config.yml`](../.circleci/config.yml) (sync + `Started` stage on tag build), and to the `deploy-qa` and `deploy-prod` workflows in [`.circleci/deploy.yml`](../.circleci/deploy.yml). The `deploy-dev` workflow does not have access to the Linear secret.
+- the Linear release pipeline is configured as **scheduled**; stages used: built-in `Started`, custom `QA` (frozen) and `Sandbox`, and built-in terminal `Released`. CI also calls `complete` after a successful prod deploy.
 
 For QA deploys that include `qa2`, [`.circleci/deploy.yml`](../.circleci/deploy.yml) resolves the release SHA, passes the release tag, SHA, and a CircleCI run URL to [`scripts/dispatch-qa2-e2e.js`](../scripts/dispatch-qa2-e2e.js), and that script uses the GitHub App credentials above plus the `app-tests` installation id to mint a short-lived installation token before posting `repository_dispatch` with this payload:
 
