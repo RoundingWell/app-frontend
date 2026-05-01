@@ -1,0 +1,27 @@
+scripts/dispatch-qa2-e2e.test.js
+  abcc8faa78eed068 46-47
+scripts/dispatch-qa2-e2e.js
+  abcc8faa78eed068 25-26
+docs/deploy.md
+  abcc8faa78eed068 178-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "998917ba7d4e563c8a34bae638c7fd52b2a7bd57",
+  "prompts": {
+    "abcc8faa78eed068": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019de331-295b-7370-a425-de22bc588e0f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 6,
+      "total_deletions": 9,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    }
+  }
+}
