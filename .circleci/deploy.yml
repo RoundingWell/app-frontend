@@ -58,6 +58,19 @@ commands:
           role_arn: ${AWS_ROLE_ARN}
           role_session_name: app-frontend-${CIRCLE_BUILD_NUM}
 
+  download-linear-release:
+    steps:
+      - run:
+          name: Download Linear Release CLI
+          command: |
+            set -euo pipefail
+            linear_release_version="v0.7.0"
+            linear_release_sha256="c82e10e79ac54bfa5efff69124add2aa793d91b0d5e32c1ed56ab856eb2a7e79"
+            linear_release_url="https://github.com/linear/linear-release/releases/download/${linear_release_version}/linear-release-linux-x64"
+            curl -fsSL "$linear_release_url" -o /tmp/linear-release
+            echo "${linear_release_sha256}  /tmp/linear-release" | sha256sum -c -
+            chmod +x /tmp/linear-release
+
 jobs:
   deploy-from-artifact:
     docker:
@@ -205,6 +218,36 @@ jobs:
               --status-file="$DEPLOY_MARKER_STATUS_FILE" \
               --target-environment="$DEPLOY_TARGET_ENV" \
               --target-version="$DEPLOY_TARGET_VERSION"
+      - download-linear-release
+      - run:
+          name: Update Linear release stage
+          when: on_success
+          command: |
+            set -euo pipefail
+
+            case "$DEPLOY_STAGE" in
+              qa)      linear_stage="QA" ;;
+              sandbox) linear_stage="Sandbox" ;;
+              prod)
+                if [ "$DEPLOY_ORGANIZATION" = "demonstration" ]; then
+                  echo "Skipping Linear release update for prod:demonstration"
+                  exit 0
+                fi
+                linear_stage="Released"
+                ;;
+              *)       exit 0 ;;
+            esac
+
+            git fetch --force --tags origin
+
+            /tmp/linear-release update \
+              --release-version="$DEPLOY_TARGET_VERSION" \
+              --stage="$linear_stage"
+
+            if [ "$DEPLOY_STAGE" = "prod" ]; then
+              /tmp/linear-release complete \
+                --release-version="$DEPLOY_TARGET_VERSION"
+            fi
       - run:
           name: Notify QA2 E2E repo
           when: on_success
@@ -265,6 +308,7 @@ workflows:
           context:
             - aws-dev
             - slack-secrets
+            - linear-secrets
 
   deploy-prod:
     when:
@@ -276,3 +320,4 @@ workflows:
           context:
             - aws-prod
             - slack-secrets
+            - linear-secrets
