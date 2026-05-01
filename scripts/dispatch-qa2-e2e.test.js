@@ -40,11 +40,10 @@ test('buildClientPayload matches app-tests dispatch contract', () => {
     sourceRunUrl: 'https://circleci.example/run',
   }), {
     source_repo: 'RoundingWell/app-frontend',
-    component: 'frontend',
     source_ref: 'refs/tags/v260327.1',
     source_sha: 'abc123',
     source_run_url: 'https://circleci.example/run',
-    environment: 'qa2',
-    source_system: 'circleci',
+    organization: 'qa2',
+    stage: 'qa',
   });
 });

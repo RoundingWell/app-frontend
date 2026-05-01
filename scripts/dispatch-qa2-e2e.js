@@ -19,12 +19,11 @@ function isMainModule() {
 export function buildClientPayload({ version, sourceSha, sourceRunUrl }) {
   return {
     source_repo: 'RoundingWell/app-frontend',
-    component: 'frontend',
     source_ref: `refs/tags/${ version }`,
     source_sha: sourceSha,
     source_run_url: sourceRunUrl,
-    environment: 'qa2',
-    source_system: 'circleci',
+    organization: 'qa2',
+    stage: 'qa',
   };
 }
 

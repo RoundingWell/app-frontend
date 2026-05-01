@@ -172,12 +172,11 @@ For QA deploys that include `qa2`, [`.circleci/deploy.yml`](../.circleci/deploy.
 ```json
 {
   "source_repo": "RoundingWell/app-frontend",
-  "component": "frontend",
   "source_ref": "refs/tags/<release-tag>",
   "source_sha": "<release-commit-sha>",
   "source_run_url": "<circleci-build-url>",
-  "environment": "qa2",
-  "source_system": "circleci"
+  "organization": "qa2",
+  "stage": "qa"
 }
 ```
 
