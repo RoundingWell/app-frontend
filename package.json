@@ -97,7 +97,7 @@
     "magic-string": "^0.30.17",
     "mock-socket": "^9.3.1",
     "nyc": "^18.0.0",
-    "postcss": "^8.3.6",
+    "postcss": "^8.5.13",
     "rimraf": "^6.0.1",
     "sass": "^1.42.1",
     "shelljs": "^0.10.0",
