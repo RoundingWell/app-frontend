@@ -1,0 +1,28 @@
+src/js/base/helpers.cy.js
+  89db2d9603410630 4,8-9,94-250
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "96480728214ce60ce56599b815ad233af9600770",
+  "prompts": {
+    "89db2d9603410630": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019df473-5961-71e2-a79c-107a3bbcca1c",
+        "model": "gpt-5.5"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 102,
+      "total_deletions": 1,
+      "accepted_lines": 157,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_447dd16e2f0674": {
+      "author": "Paul Falgout"
+    }
+  }
+}
