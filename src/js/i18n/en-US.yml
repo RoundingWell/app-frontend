@@ -383,7 +383,7 @@ careOptsFrontend:
             addButton: Added
             dueButton: Due
             updateButton: Updated
-          dateTypes: "{type, select, created_at {Added} due_date {Due} updated_at {Updated}}"
+          dateTypes: "{type, select, created_at {Added} due_date {Due} updated_at {Updated} other {}}"
           relativeDate: "{relativeTo, select,
               alltime {All Time}
               calendar {Select from calendar...}
@@ -392,7 +392,8 @@ careOptsFrontend:
               thisweek {This Week}
               lastweek {Last Week}
               today {Today}
-              yesterday {Yesterday}}"
+              yesterday {Yesterday}
+              other {}}"
         dialerComponent:
           callLabel: Call
           defaultText: Call Number...
@@ -433,8 +434,8 @@ careOptsFrontend:
         countView:
           actionsCount: "{itemCount, plural, one {# Action} other {# Actions}}"
           flowsCount: "{itemCount, plural, one {# Flow} other {# Flows}}"
-          maximumListCount: Showing {maximumCount} of {totalInDb, number} {isFlowList, select, true {Flows} false {Actions}}.
-          maximumListCountNarrowed: Showing {itemCount} of {maximumCount} {isFlowList, select, true {Flows} false {Actions}}.
+          maximumListCount: Showing {maximumCount} of {totalInDb, number} {isFlowList, select, true {Flows} false {Actions} other {}}.
+          maximumListCountNarrowed: Showing {itemCount} of {maximumCount} {isFlowList, select, true {Flows} false {Actions} other {}}.
           narrowFilters: Try narrowing your filters.
       readOnlyViews:
         readOnlyDurationView:
@@ -617,6 +618,7 @@ careOptsFrontend:
             active {Active}
             inactive {Inactive}
             archived {Archived}
+            other {}
           }
     worklist:
       actionViews:
@@ -628,6 +630,7 @@ careOptsFrontend:
             new_past_day {Actions added in the last 24 hours.}
             updated_past_three_days {Actions updated in the last 3 days.}
             done_last_thirty_days {Actions completed in the last 30 days.}
+            other {}
           }
       flowViews:
         flowEmptyView: No Flows
@@ -638,6 +641,7 @@ careOptsFrontend:
             new_past_day {Flows added in the last 24 hours.}
             updated_past_three_days {Flows updated in the last 3 days.}
             done_last_thirty_days {Flows completed in the last 30 days.}
+            other {}
           }
       tableHeaderTemplate:
         actionHeader: Action
@@ -665,6 +669,7 @@ careOptsFrontend:
               new_past_day {New < 1 Day: }
               updated_past_three_days {Updated < 3 Days: }
               done_last_thirty_days {Done < 30 Days: }
+              other {}
             }
           listTitles: |
             {title, select,
@@ -673,6 +678,7 @@ careOptsFrontend:
               new_past_day {New < 24 hrs: { owner }}
               updated_past_three_days {Updated < 3 Days: {owner}}
               done_last_thirty_days {Done < 30 Days: {owner}}
+              other {}
             }
         noOwnerToggleView:
           noOwner: No Owner
@@ -723,6 +729,7 @@ careOptsFrontend:
             {published, select,
               true {On}
               false {Off}
+              other {}
             }
           state: Program State
         sidebarViews:
@@ -751,6 +758,7 @@ careOptsFrontend:
           {published, select,
             true {On}
             false {Off}
+            other {}
           }
       layoutView:
         title: Programs
@@ -791,6 +799,7 @@ careOptsFrontend:
             {status, select,
               true {On}
               false {Off}
+              other {}
             }
     sidebar:
       action:

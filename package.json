@@ -116,6 +116,7 @@
     "yaml": "^2.1.1"
   },
   "dependencies": {
+    "@formatjs/intl": "^4.1.8",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
@@ -131,7 +132,6 @@
     "backbone.store": "^1.1.1",
     "dayjs": "^1.10.6",
     "handlebars": "^4.7.9",
-    "handlebars-intl": "^1.1.2",
     "jquery": "^4.0.0",
     "libphonenumber-js": "^1.10.38",
     "marionette.toolkit": "^6.2.0",
