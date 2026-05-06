@@ -2,10 +2,10 @@ import { extend, isString, keys, reduce } from 'underscore';
 import dayjs from 'dayjs';
 import Handlebars from 'handlebars/dist/cjs/handlebars';
 import HandlebarsRuntime from 'handlebars/runtime';
-import HandlebarsIntl from 'handlebars-intl';
 import { setRenderer } from 'marionette';
 
 import localEnUs from './en-US.yml';
+import { registerWith } from './intl';
 
 const localeKey = 'careOptsFrontend';
 
@@ -32,8 +32,8 @@ function setLocale(locale = 'en-US') {
 
 setLocale();
 
-HandlebarsIntl.registerWith(Handlebars);
-HandlebarsIntl.registerWith(HandlebarsRuntime);
+registerWith(Handlebars);
+registerWith(HandlebarsRuntime);
 
 setRenderer(renderTemplate);
 
