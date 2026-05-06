@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         external: sharedRuntimeBuild.externalModules || [],
         output: {
-          inlineDynamicImports: true,
+          codeSplitting: false,
           paths: sharedRuntimeBuild.paths || {},
           entryFileNames: sharedRuntimeBuild.fileName,
           chunkFileNames: sharedRuntimeBuild.fileName,
