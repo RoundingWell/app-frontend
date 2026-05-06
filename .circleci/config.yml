@@ -6,7 +6,7 @@ orbs:
   coveralls: coveralls/coveralls@2
 
 aliases:
-  .node-image: &node-image cimg/node:22.16
+  .node-image: &node-image cimg/node:24.15
 
   .tag-filter: &tag-filter
     filters:
@@ -20,6 +20,20 @@ aliases:
           value: << pipeline.git.tag >>
 
 commands:
+  verify-node-version:
+    steps:
+      - run:
+          name: Verify Node version matches .nvmrc
+          command: |
+            expected="$(tr -d '[:space:]' < .nvmrc | sed 's/^v//')"
+            expected_major_minor="$(echo "$expected" | cut -d. -f1,2)"
+            image_version="$(node -v)"
+            image_version="${image_version#v}"
+            if [[ "$image_version" != "$expected_major_minor".* ]]; then
+              echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${image_version}"
+              exit 1
+            fi
+
   setup-fa-auth:
     steps:
       - run:
@@ -48,17 +62,7 @@ commands:
 
   install-dependencies:
     steps:
-      - run:
-          name: Verify Node version matches .nvmrc
-          command: |
-            expected="$(tr -d '[:space:]' < .nvmrc | sed 's/^v//')"
-            expected_major_minor="$(echo "$expected" | cut -d. -f1,2)"
-            image_version="$(node -v)"
-            image_version="${image_version#v}"
-            if [[ "$image_version" != "$expected_major_minor".* ]]; then
-              echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${image_version}"
-              exit 1
-            fi
+      - verify-node-version
       - setup-fa-auth
       - run:
           name: Install dependencies
@@ -71,12 +75,12 @@ commands:
           role_session_name: app-frontend-${CIRCLE_BUILD_NUM}
 
 # ------------------------------------------------------------
-# EXECUTOR  –  Node 22 LTS image with Chrome 137, FF 139, Edge 137
+# EXECUTOR  –  Node 24 LTS image with Chrome 147, FF 150, Edge 147
 # ------------------------------------------------------------
 executors:
   cypress-all-browsers:
     docker:
-      - image: cypress/browsers:node-22.16.0-chrome-137.0.7151.68-1-ff-139.0.1-edge-137.0.3296.62-1
+      - image: cypress/browsers:node-24.15.0-chrome-147.0.7727.137-1-ff-150.0.1-edge-147.0.3912.86-1
     environment:
       DISPLAY: :99
       CYPRESS_DISPLAY: :99
@@ -137,10 +141,12 @@ jobs:
               sleep 0.5
             done
       - restore-npm-cache
-      - install-dependencies
+      - verify-node-version
+      - setup-fa-auth
       - cypress/install:
           skip-checkout: true
           install-browsers: false
+          install-command: npm ci --prefer-offline --no-audit
 
       # Build app
       - when:

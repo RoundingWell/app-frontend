@@ -150,6 +150,7 @@ export default defineConfig(({ mode }) => {
         srcDir: 'src/js',
         filename: 'sw.js',
         injectManifest: {
+          rollupFormat: 'iife',
           globPatterns: [
             '**/*.{html,js,css,woff2,webmanifest}',
           ],

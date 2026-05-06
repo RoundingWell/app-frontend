@@ -10,14 +10,8 @@
 window.crmSdkVersion = '1.0.11';
 
 (function (root, factory) {
-  if (typeof define === 'function') {
-    define(factory);
-  } else if (typeof exports === 'object') {
-    module.exports = factory();
-  } else {
-    root.Five9 = root.Five9 || {};
-    root.Five9.CrmSdk = factory();
-  }
+  root.Five9 = root.Five9 || {};
+  root.Five9.CrmSdk = factory();
 }(globalThis, function () {
   // Patched by care-ops: silence noisy Five9 logging
   var __five9Console = globalThis.console || {};

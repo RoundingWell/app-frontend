@@ -8,8 +8,8 @@
   "homepage": "https://roundingwell.com",
   "type": "module",
   "dependencies": {
-    "@datadog/browser-logs": "^6.2.1",
-    "@datadog/browser-rum":  "^6.2.1"
+    "@datadog/browser-logs": "^7.0.0",
+    "@datadog/browser-rum": "^7.0.0"
   },
   "files": ["index.js"],
   "main": "./index.js",

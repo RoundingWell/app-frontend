@@ -64,6 +64,16 @@ async function downloadSDK() {
       '}(globalThis, function',
     );
 
+    fixedContent = fixedContent.replace(
+      /\(function\s*\(root,\s*factory\)\s*{\s*if\s*\(typeof define === 'function'\)\s*{\s*define\(factory\);\s*}\s*else if\s*\(typeof exports === 'object'\)\s*{\s*module\.exports = factory\(\);\s*}\s*else\s*{\s*root\.Five9 = root\.Five9 \|\| {};\s*root\.Five9\.CrmSdk = factory\(\);\s*}\s*}\(globalThis,\s*function\s*\(\)\s*{/,
+      [
+        '(function (root, factory) {',
+        '  root.Five9 = root.Five9 || {};',
+        '  root.Five9.CrmSdk = factory();',
+        '}(globalThis, function () {',
+      ].join('\n'),
+    );
+
     // Silence verbose logging without touching the global console
     const consoleSilencer = [
       '  // Patched by care-ops: silence noisy Five9 logging',
@@ -108,7 +118,7 @@ async function downloadSDK() {
       return localContent;
     }
     console.error('💥 No local copy available and download failed!');
-    throw new Error('Cannot proceed without SDK file');
+    throw new Error('Cannot proceed without SDK file', { cause: error });
   }
 }
 

@@ -56,9 +56,10 @@ cd packages/care-ops-five9 && npm run update  # Direct package update
 The update script (`update-sdk.js`):
 1. Downloads the latest SDK from `https://app.five9.com/dev/sdk/crm/latest/five9.crm.sdk.js`
 2. Validates the downloaded file
-3. Analyzes the SDK structure to detect all APIs and enums
-4. Auto-generates the ES module wrapper with current exports
-5. Updates `index.js` with the latest API surface
+3. Patches the UMD wrapper to attach to `globalThis.Five9` even when an AMD `define()` is present
+4. Analyzes the SDK structure to detect all APIs and enums
+5. Auto-generates the ES module wrapper with current exports
+6. Updates `index.js` with the latest API surface
 
 ## File Structure
 
@@ -71,11 +72,10 @@ packages/care-ops-five9/
 └── README.md           # This file
 ```
 
-## Global Cleanup
+## Global Capture
 
-The wrapper automatically cleans up global namespace pollution:
+The wrapper captures the SDK global:
 - Captures `window.Five9.CrmSdk` and `window.crmSdkVersion`
-- Deletes the global references to prevent conflicts
 - Exports the captured values through clean ES module interface
 
-This ensures the Five9 SDK doesn't interfere with other code in your application.
+This keeps the ES module exports stable even when browser tooling has installed an AMD `define()`.
