@@ -1086,6 +1086,44 @@ context('filter sidebar', function() {
       .should('not.exist');
 
     cy
+      .intercept('GET', '/api/filters/team/**', {
+        delay: 1000,
+        body: {
+          data: getFilter({
+            attributes: {
+              name: 'Team',
+              slug: 'team',
+              values: [
+                { value: 'Coordinator', total: 2 },
+                { value: 'Nurse', total: 1 },
+              ],
+            },
+          }),
+          included: [],
+        },
+      })
+      .as('delayedRouteFilterTeam');
+
+    cy
+      .get('.list-page__filters')
+      .find('[data-filters-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.app-frame__sidebar .sidebar')
+      .as('filtersSidebar')
+      .find('.js-close')
+      .click();
+
+    cy
+      .wait('@delayedRouteFilterTeam');
+
+    cy
+      .get('@filtersSidebar')
+      .should('not.exist');
+
+    cy
       .get('.list-page__filters')
       .find('[data-filters-region]')
       .find('button')

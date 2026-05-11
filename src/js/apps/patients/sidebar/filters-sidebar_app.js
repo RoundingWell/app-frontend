@@ -53,8 +53,10 @@ export default App.extend(extend({
     });
   },
   showCustomFiltersView() {
-    Promise.allSettled(this.fetchFilters())
+    Promise.allSettled(this.fetchFilters() || [])
       .then(() => {
+        if (!this.isRunning()) return;
+
         this._showCustomFiltersView();
       });
   },
