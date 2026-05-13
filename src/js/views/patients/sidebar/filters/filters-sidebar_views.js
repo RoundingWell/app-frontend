@@ -30,7 +30,7 @@ const CustomFilterDropList = Droplist.extend({
     return this.getView().$el.outerWidth();
   },
   viewOptions: {
-    className: 'button-secondary w-100 flex',
+    className: 'button-secondary w-100',
     template: hbs`{{ value }}{{#unless value}}{{ defaultText }}{{/unless}}`,
     templateContext: {
       defaultText: i18n.customFilterView.defaultText,
