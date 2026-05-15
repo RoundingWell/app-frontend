@@ -1,0 +1,21 @@
+test/integration/patients/sidebar/action-sidebar.js
+  s_44c886cd8fd84f::t_9bfd3aaac2c2e4 26-61,2038-2045,2069,2074-2077
+config/vite-plugin-fontawesome.js
+  s_44c886cd8fd84f::t_0062ebfc3eaa75 7-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "e8b72ac5f24846abd65af494bf636c761c7e4299",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}
