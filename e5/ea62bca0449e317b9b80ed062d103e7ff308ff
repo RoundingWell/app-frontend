@@ -1,0 +1,32 @@
+src/scss/README.md
+  s_44c886cd8fd84f::t_64d44811add301 169
+packages/care-ops-fontawesome/package.json
+  s_44c886cd8fd84f::t_5e6d60fa0917c4 20-21,23-25
+src/js/base/fontawesome.js
+  s_44c886cd8fd84f::t_47fdf9bf2d2b89 5,9,12-17,19-27,30,33
+  s_44c886cd8fd84f::t_cbd3befa19766e 28-29,31-32
+config/vite-plugin-shared-icons.js
+  s_44c886cd8fd84f::t_a068c84a3de4d3 16
+  s_44c886cd8fd84f::t_64d44811add301 1-15,17-99
+config/vite-plugin-fontawesome.js
+  s_44c886cd8fd84f::t_a3579269ce5901 1-41
+vite.config.js
+  s_44c886cd8fd84f::t_a3579269ce5901 21,135
+  s_44c886cd8fd84f::t_64d44811add301 22,136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "e5ea62bca0449e317b9b80ed062d103e7ff308ff",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}
