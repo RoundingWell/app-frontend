@@ -3,6 +3,8 @@ import hbs from 'handlebars-inline-precompile';
 
 import { View } from 'marionette';
 
+import { embedDashboard } from '@roundingwell/care-ops-quicksight';
+
 import PreloadRegion from 'js/regions/preload_region';
 
 import './dashboard.scss';
@@ -26,8 +28,8 @@ const ContextTrailView = View.extend({
 const IframeView = View.extend({
   className: 'flex-grow',
   template: false,
-  initialize({ embeddingContext }) {
-    embeddingContext.embedDashboard({
+  initialize() {
+    embedDashboard({
       url: this.model.get('embed_url'),
       container: this.el,
       height: '100%',
