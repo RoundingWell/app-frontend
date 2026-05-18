@@ -1,12 +1,16 @@
 import * as QuicksightEmbedding from 'amazon-quicksight-embedding-sdk';
 
-let embeddingContext;
+let embeddingContextPromise;
 
-async function getEmbeddingContext() {
-  if (!embeddingContext) {
-    embeddingContext = await QuicksightEmbedding.createEmbeddingContext();
+function getEmbeddingContext() {
+  if (!embeddingContextPromise) {
+    embeddingContextPromise = QuicksightEmbedding.createEmbeddingContext()
+      .catch(err => {
+        embeddingContextPromise = null;
+        throw err;
+      });
   }
-  return embeddingContext;
+  return embeddingContextPromise;
 }
 
 async function embedDashboard({ url, container, height = '100%', width = '100%' }) {
