@@ -24,10 +24,25 @@ context('localStore', function() {
     expect(localStore.get('my-key')).to.deep.equal({ a: 1 });
   });
 
+  specify('set does not throw when storage is unavailable', function() {
+    cy.stub(localStorage, 'setItem').throws(new DOMException('blocked', 'SecurityError'));
+    expect(() => localStore.set('key', 'val')).not.to.throw();
+  });
+
+  specify('set rethrows QuotaExceededError', function() {
+    cy.stub(localStorage, 'setItem').throws(new DOMException('quota', 'QuotaExceededError'));
+    expect(() => localStore.set('key', 'val')).to.throw('quota');
+  });
+
   specify('remove deletes the key', function() {
     localStore.set('del-key', 'value');
     localStore.remove('del-key');
     expect(localStore.get('del-key')).to.be.undefined;
+  });
+
+  specify('remove does not throw when storage is unavailable', function() {
+    cy.stub(localStorage, 'removeItem').throws(new DOMException('blocked', 'SecurityError'));
+    expect(() => localStore.remove('key')).not.to.throw();
   });
 
   specify('each iterates all entries with (value, key)', function() {
@@ -54,5 +69,10 @@ context('localStore', function() {
     expect(localStore.get('form-subm-a')).to.be.undefined;
     expect(localStore.get('form-subm-b')).to.be.undefined;
     expect(localStore.get('keep')).to.equal('yes');
+  });
+
+  specify('each does not throw when storage is unavailable', function() {
+    cy.stub(localStorage, 'key').throws(new DOMException('blocked', 'SecurityError'));
+    expect(() => localStore.each(() => {})).not.to.throw();
   });
 });
