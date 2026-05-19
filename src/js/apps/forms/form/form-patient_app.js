@@ -1,6 +1,7 @@
 import { extend } from 'underscore';
 import Radio from 'backbone.radio';
-import store from 'store';
+
+import localStore from 'js/utils/local-store';
 
 import App from 'js/base/app';
 
@@ -34,7 +35,7 @@ export default App.extend({
     },
   },
   initFormState() {
-    const storedState = store.get(`form-state_${ this.currentUser.id }`);
+    const storedState = localStore.get(`form-state_${ this.currentUser.id }`);
 
     this.setState(extend({ isExpanded: true, saveButtonType: 'save' }, storedState));
   },
@@ -123,7 +124,7 @@ export default App.extend({
     'change:isExpanded': 'showSidebar',
   },
   onChangeState(state) {
-    store.set(`form-state_${ this.currentUser.id }`, state.pick('isExpanded', 'saveButtonType'));
+    localStore.set(`form-state_${ this.currentUser.id }`, state.pick('isExpanded', 'saveButtonType'));
   },
   showStateActions() {
     const actionsView = new FormStateActionsView({

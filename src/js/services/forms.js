@@ -1,8 +1,8 @@
 import { map, get, debounce } from 'underscore';
 import dayjs from 'dayjs';
-import store from 'store';
-
 import Radio from 'backbone.radio';
+
+import localStore from 'js/utils/local-store';
 
 import App from 'js/base/app';
 
@@ -96,7 +96,7 @@ export default App.extend({
     if (this.isReadOnly()) return {};
 
     const draft = this.getLatestDraft();
-    const localDraft = store.get(this.getStoreId()) || {};
+    const localDraft = localStore.get(this.getStoreId()) || {};
 
     if (draft.updated && (!localDraft.updated || dayjs(draft.updated).isAfter(localDraft.updated))) {
       this.trigger('update:submission', draft.updated);
@@ -116,13 +116,13 @@ export default App.extend({
     this._draft = submission;
 
     try {
-      store.set(this.getStoreId(), { submission, updated });
+      localStore.set(this.getStoreId(), { submission, updated });
       this.trigger('update:submission', updated);
     } catch /* istanbul ignore next: Tested locally, test runner borks on CI */ {
-      store.each((value, key) => {
-        if (String(key).startsWith('form-subm-')) store.remove(key);
+      localStore.each((value, key) => {
+        if (String(key).startsWith('form-subm-')) localStore.remove(key);
       });
-      store.set(this.getStoreId(), { submission, updated });
+      localStore.set(this.getStoreId(), { submission, updated });
     }
 
     this.updateDraft();
@@ -130,7 +130,7 @@ export default App.extend({
   },
   clearStoredSubmission() {
     this.latestResponse = null;
-    store.remove(this.getStoreId());
+    localStore.remove(this.getStoreId());
     this.trigger('update:submission');
   },
   fetchField({ fieldName }, requestId) {

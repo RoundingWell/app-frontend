@@ -1,10 +1,11 @@
 import { clone, extend, omit, reduce } from 'underscore';
 import dayjs from 'dayjs';
-import store from 'store';
 import { NIL as NIL_UUID } from 'uuid';
 
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+
+import localStore from 'js/utils/local-store';
 
 import MultiselectStateMixin from 'js/mixins/multiselect-state_mixin';
 
@@ -53,13 +54,13 @@ const StateModel = Backbone.Model.extend({
     return `schedule_${ this.currentClinician.id }_${ this.currentWorkspace.id }-${ STATE_VERSION }`;
   },
   getStore() {
-    return store.get(this.getStoreKey());
+    return localStore.get(this.getStoreKey());
   },
   removeStore() {
-    store.remove(this.getStoreKey());
+    localStore.remove(this.getStoreKey());
   },
   onChange() {
-    store.set(this.getStoreKey(), omit(this.attributes, 'filtersCount', 'lastSelectedIndex', 'searchQuery'));
+    localStore.set(this.getStoreKey(), omit(this.attributes, 'filtersCount', 'lastSelectedIndex', 'searchQuery'));
   },
   setSearchQuery(searchQuery = '') {
     return this.set({
