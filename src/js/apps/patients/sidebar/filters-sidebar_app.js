@@ -53,7 +53,7 @@ export default App.extend(extend({
     });
   },
   showCustomFiltersView() {
-    Promise.allSettled(this.fetchFilters() || [])
+    Promise.allSettled(this.fetchFilters() || /* istanbul ignore next */ [])
       .then(() => {
         if (!this.isRunning()) return;
 
