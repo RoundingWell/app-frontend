@@ -1,6 +1,7 @@
 import { extend, get } from 'underscore';
 import Radio from 'backbone.radio';
-import store from 'store';
+
+import localStore from 'js/utils/local-store';
 
 import App from 'js/base/app';
 
@@ -41,7 +42,7 @@ export default App.extend({
     actionSidebar: ActionSiderbarApp,
   },
   initFormState() {
-    const storedState = store.get(`form-state_${ this.currentUser.id }`);
+    const storedState = localStore.get(`form-state_${ this.currentUser.id }`);
 
     this.setState(extend({
       responseId: null,
@@ -172,7 +173,7 @@ export default App.extend({
     'change:responseId': 'onChangeResponseId',
   },
   onChangeState(state) {
-    store.set(`form-state_${ this.currentUser.id }`, state.pick('isExpanded', 'saveButtonType'));
+    localStore.set(`form-state_${ this.currentUser.id }`, state.pick('isExpanded', 'saveButtonType'));
   },
   onChangeResponseId() {
     this.showFormActions();

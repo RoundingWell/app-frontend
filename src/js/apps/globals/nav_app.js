@@ -2,7 +2,7 @@ import { compact, isEqual, noop, partial, defer } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
-import store from 'store';
+import localStore from 'js/utils/local-store';
 
 import RouterApp from 'js/base/routerapp';
 
@@ -229,7 +229,7 @@ export default RouterApp.extend({
     const currentAppName = this.getState('currentApp');
     this.setSelectedAdminNavItem(currentAppName);
 
-    store.set('isNavMenuMinimized', this.getState('isMinimized'));
+    localStore.set('isNavMenuMinimized', this.getState('isMinimized'));
   },
   getNavMatch(appName, event, eventArgs) {
     return this._navMatch(patientsAppWorkflowsNav, event, eventArgs);
@@ -240,14 +240,14 @@ export default RouterApp.extend({
     });
   },
   onBeforeStart() {
-    const storedState = store.get('isNavMenuMinimized');
+    const storedState = localStore.get('isNavMenuMinimized');
 
     if (storedState) {
       this.setState('isMinimized', storedState);
       return;
     }
 
-    store.set('isNavMenuMinimized', this.getState('isMinimized'));
+    localStore.set('isNavMenuMinimized', this.getState('isMinimized'));
   },
   onStart() {
     const currentUser = Radio.request('bootstrap', 'currentUser');

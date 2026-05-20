@@ -1,6 +1,7 @@
 import { get } from 'underscore';
 import Radio from 'backbone.radio';
-import store from 'store';
+
+import localStore from 'js/utils/local-store';
 
 import App from 'js/base/app';
 
@@ -17,14 +18,14 @@ export default App.extend({
     if (!workspaces.length) throw 'No workspaces found';
 
     return workspaces.find({ slug })
-      || workspaces.find({ id: store.get('currentWorkspace') })
+      || workspaces.find({ id: localStore.get('currentWorkspace') })
       || workspaces.at(0);
   },
   _setCurrentWorkspace(route) {
     const workspace = this._getWorkspace(route);
 
     if (workspace.id !== get(this.currentWorkspace, 'id')) {
-      store.set('currentWorkspace', workspace.id);
+      localStore.set('currentWorkspace', workspace.id);
       this.currentWorkspace = workspace;
       this.getChannel().trigger('change:workspace', workspace);
     }
