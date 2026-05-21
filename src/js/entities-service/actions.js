@@ -1,6 +1,11 @@
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model, Collection } from './entities/actions';
 
+export const ACTION_INCLUDE = [
+  'program-action.program',
+  'flow.program-flow.program',
+].join();
+
 const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
   radioRequests: {
@@ -13,16 +18,11 @@ const Entity = BaseEntity.extend({
     'fetch:actions:collection:byFlow': 'fetchActionsByFlow',
   },
   fetchAction(id) {
-    const include = [
-      'program-action.program',
-      'flow.program-flow.program',
-    ].join();
-
-    return this.fetchModel(id, { data: { include } });
+    return this.fetchModel(id, { data: { include: ACTION_INCLUDE } });
   },
   fetchActionWithResponses(id) {
     const data = {
-      include: ['form-responses'],
+      include: [ACTION_INCLUDE, 'form-responses'].join(),
       fields: {
         'form-responses': ['status', 'updated_at', 'editor'],
       },
@@ -37,9 +37,10 @@ const Entity = BaseEntity.extend({
     return this.fetchCollection({ url, data });
   },
   fetchActionsByFlow(flowId) {
+    const data = { include: ACTION_INCLUDE };
     const url = `/api/flows/${ flowId }/relationships/actions`;
 
-    return this.fetchCollection({ url });
+    return this.fetchCollection({ url, data });
   },
 });
 

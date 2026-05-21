@@ -4,6 +4,9 @@ import { NIL as NIL_UUID } from 'uuid';
 
 import App from 'js/base/app';
 
+import { ACTION_INCLUDE } from 'js/entities-service/actions';
+import { FLOW_INCLUDE } from 'js/entities-service/flows';
+
 import AddWorkflowApp from './add-workflow_app';
 
 import { LayoutView, ListView } from 'js/views/patients/patient/dashboard/dashboard_views';
@@ -57,8 +60,8 @@ export default App.extend({
     Radio.request('ws', 'subscribe', this.collection.models, {
       filters: { actions: { ...filters, flow: NIL_UUID }, flows: filters },
     });
-    Radio.request('ws', 'manage:add', this, this.collection, 'flows');
-    Radio.request('ws', 'manage:add', this, this.collection, 'patient-actions');
+    Radio.request('ws', 'manage:add', this, this.collection, 'flows', { include: FLOW_INCLUDE });
+    Radio.request('ws', 'manage:add', this, this.collection, 'patient-actions', { include: ACTION_INCLUDE });
   },
   startAddWorkflow() {
     if (!this.currentUser.can('work:own')) return;

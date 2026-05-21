@@ -1,6 +1,12 @@
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model, Collection } from './entities/flows';
 
+export const FLOW_INCLUDE = [
+  'program-flow',
+  'program-flow.program',
+  'program-flow.program-actions',
+].join();
+
 const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
   radioRequests: {
@@ -11,12 +17,7 @@ const Entity = BaseEntity.extend({
     'fetch:flows:collection:byPatient': 'fetchFlowsByPatient',
   },
   fetchFlow(id) {
-    const include = [
-      'program-flow',
-      'program-flow.program',
-      'program-flow.program-actions',
-    ].join();
-    return this.fetchModel(id, { data: { include } });
+    return this.fetchModel(id, { data: { include: FLOW_INCLUDE } });
   },
   fetchFlowsByPatient({ patientId, filter }) {
     const data = { filter };

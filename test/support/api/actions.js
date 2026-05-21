@@ -138,7 +138,7 @@ Cypress.Commands.add('routeFlowActions', (mutator = routeFlowActions) => {
   const included = [];
 
   cy
-    .intercept('GET', '/api/flows/**/relationships/actions', {
+    .intercept('GET', '/api/flows/**/relationships/actions*', {
       body: mutator({ data, included }),
     })
     .as('routeFlowActions');
