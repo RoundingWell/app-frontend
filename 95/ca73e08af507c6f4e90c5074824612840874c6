@@ -1,0 +1,19 @@
+src/js/sw.js
+  s_3a941aeb6ba832::t_087d7151aa6c3e 8,62,65-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "95ca73e08af507c6f4e90c5074824612840874c6",
+  "prompts": {},
+  "sessions": {
+    "s_3a941aeb6ba832": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e48d4-5144-7d42-8c37-5d261f0ca8d3",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}
