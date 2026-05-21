@@ -1,0 +1,20 @@
+src/js/entities-service/entities/actions.js
+  s_4fb06412cf7174::t_6458446a1ed6af 15-24,31,33-34,127-131
+  s_4fb06412cf7174::t_0b44bfcf4c7905 25-30,32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "ecb6e518afacb6674ca193ec7a4cdc29e41f6022",
+  "prompts": {},
+  "sessions": {
+    "s_4fb06412cf7174": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b07-77d6-7830-a0b1-2388fef5777a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
