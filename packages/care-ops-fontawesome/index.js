@@ -16,7 +16,7 @@ function getIconHtml(lib, fonts) {
   });
 }
 
-export default ({ fas, far, fal, fat } = {}) => {
+export default ({ fas = [], far = [], fal = [], fat = [] } = {}) => {
   return [
     ...getIconHtml(fasIcons, fas),
     ...getIconHtml(farIcons, far),

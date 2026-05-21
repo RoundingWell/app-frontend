@@ -1,5 +1,4 @@
 import path from 'path';
-import { readFileSync } from 'fs';
 
 import dayjs from 'dayjs';
 import utcPlugin from 'dayjs/plugin/utc.js';
@@ -19,13 +18,9 @@ import {
 import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
-
-import getFaIconSymbols from '@roundingwell/care-ops-fontawesome';
+import fontawesome from './config/vite-plugin-fontawesome.js';
 
 dayjs.extend(utcPlugin);
-
-const fontawesome = JSON.parse(readFileSync('./fontawesome.json', 'utf8'));
-const faIconSymbols = getFaIconSymbols(fontawesome);
 
 const resolve = {
   alias: {
@@ -136,6 +131,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       sharedRuntimeDevPlugin(),
+      fontawesome(),
       isTest && babelPlugin,
       inlineHbsCompile(),
       handlebars(),
@@ -166,7 +162,6 @@ export default defineConfig(({ mode }) => {
       exclude: ['handlebars-inline-precompile'],
     },
     define: {
-      'import.meta.env.faIconSymbols': JSON.stringify(faIconSymbols),
       '_PRODUCTION_': JSON.stringify(isProduction),
       '_DEVELOP_': JSON.stringify(mode === 'development'),
       '_TEST_': JSON.stringify(isTest),

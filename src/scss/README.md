@@ -162,9 +162,8 @@ It contains mostly font size, padding, and color variables.
 Ideally when a group of styles is deprecated it is moved into a module named with `___-legacy.scss` in the filename.
 These styles are open season for refactoring and should not be reused.
 
-## Icon Fonts
+## Icons
 
-We utilize https://fontawesome.com for icons
+Care Ops renders SVG icons with hidden `<symbol>` definitions and same-document `<use>` references from the `{{fa}}`, `{{fas}}`, `{{far}}`, `{{fal}}`, and `{{fat}}` helpers.
 
-It is recommended that you [setup the fontawesome-pro registery globally](https://fontawesome.com/how-to-use/on-the-web/setup/using-package-managers#installing-pro).
-You will need the RoundingWell FontAwesome token for this.
+App icons are listed in `packages/care-ops-fontawesome/manifest.json` and inlined into `index.html`. Customer/shared icon bundles served from `/icons/icons.js` are owned by `customer-assets`.

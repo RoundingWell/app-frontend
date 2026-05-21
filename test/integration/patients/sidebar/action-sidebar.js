@@ -23,6 +23,90 @@ import { getFlow } from 'support/api/flows';
 import { getFile } from 'support/api/files';
 import { getPatientField } from 'support/api/patient-fields';
 
+const sharedIconScript = `const symbols = [{
+  id: 'far-fa-octagon-minus',
+  prefix: 'far',
+  iconName: 'octagon-minus',
+  width: 16,
+  height: 16,
+  paths: ['M1 1h14v14H1z'],
+}];
+const attribute = 'data-care-ops-fontawesome-shared-symbols';
+const svgNamespace = 'http://www.w3.org/2000/svg';
+
+function setAttributes(element, attributes) {
+  for (const [name, value] of Object.entries(attributes)) {
+    element.setAttribute(name, String(value));
+  }
+}
+
+function createSymbolsSvg(targetDocument) {
+  const svg = targetDocument.createElementNS(svgNamespace, 'svg');
+
+  svg.style.display = 'none';
+
+  for (const symbolDefinition of symbols) {
+    const symbol = targetDocument.createElementNS(svgNamespace, 'symbol');
+
+    setAttributes(symbol, {
+      'aria-hidden': 'true',
+      'data-icon': symbolDefinition.iconName,
+      'data-prefix': symbolDefinition.prefix,
+      'id': symbolDefinition.id,
+      'overflow': 'visible',
+      'role': 'img',
+      'viewBox': \`0 0 \${ symbolDefinition.width } \${ symbolDefinition.height }\`,
+    });
+
+    for (const pathData of symbolDefinition.paths) {
+      const path = targetDocument.createElementNS(svgNamespace, 'path');
+
+      setAttributes(path, {
+        d: pathData,
+        fill: 'currentColor',
+      });
+      symbol.appendChild(path);
+    }
+
+    svg.appendChild(symbol);
+  }
+
+  return svg;
+}
+
+function mountIconSymbols(options = {}) {
+  const targetDocument = options.document || globalThis.document;
+
+  if (!targetDocument?.body) return null;
+
+  const existingContainer = targetDocument.querySelector(\`[\${ attribute }]\`);
+
+  if (existingContainer) return existingContainer;
+
+  const container = targetDocument.createElement('div');
+
+  container.setAttribute(attribute, '');
+  container.style.display = 'none';
+  container.appendChild(createSymbolsSvg(targetDocument));
+  targetDocument.body.insertBefore(container, targetDocument.body.firstChild);
+
+  return container;
+}
+
+if (globalThis.document?.body) {
+  mountIconSymbols();
+} else if (globalThis.document) {
+  globalThis.document.addEventListener('DOMContentLoaded', () => mountIconSymbols(), { once: true });
+}
+
+export {
+  mountIconSymbols,
+  symbols,
+};
+
+export default mountIconSymbols;
+`;
+
 context('action sidebar', function() {
   specify('display action sidebar', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
@@ -2000,6 +2084,14 @@ context('action sidebar', function() {
     });
 
     cy
+      .intercept('GET', '/icons/icons.js', {
+        statusCode: 200,
+        headers: { 'content-type': 'application/javascript' },
+        body: sharedIconScript,
+      })
+      .as('routeSharedIcons');
+
+    cy
       .routesForPatientAction()
       .routeAction(fx => {
         fx.data = testOutreachAction;
@@ -2022,9 +2114,15 @@ context('action sidebar', function() {
         return fx;
       })
       .visit(`/patient/${ testPatient.id }/action/${ testOutreachAction.id }`)
+      .wait('@routeSharedIcons')
       .wait('@routePatientActions')
       .wait('@routePatientFlows')
       .wait('@routeAction');
+
+    cy
+      .get('[data-care-ops-fontawesome-shared-symbols]')
+      .find('#far-fa-octagon-minus')
+      .should('have.attr', 'overflow', 'visible');
 
     cy
       .intercept('PATCH', `/api/actions/${ testOutreachAction.id }`, {
