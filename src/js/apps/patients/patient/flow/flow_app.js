@@ -7,6 +7,8 @@ import handleErrors from 'js/utils/handle-errors';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
+import { ACTION_INCLUDE } from 'js/entities-service/actions';
+
 import StateModel from './flow_state';
 
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
@@ -105,7 +107,7 @@ export default SubRouterApp.extend({
   subscribe() {
     const filters = { actions: { flow: this.flow.id } };
     Radio.request('ws', 'subscribe', [this.flow, ...this.actions.models], { filters });
-    Radio.request('ws', 'manage:add', this, this.actions, 'patient-actions');
+    Radio.request('ws', 'manage:add', this, this.actions, 'patient-actions', { include: ACTION_INCLUDE });
   },
   _setFlowProgress() {
     const complete = this.actions.filter(action => action.isDone()).length;
