@@ -1,0 +1,28 @@
+test/integration/patients/patient/dashboard.js
+  s_4fb06412cf7174::t_7f7961e8398f25 30,41
+  s_4fb06412cf7174::t_708dabacb6dde0 118,1020
+src/js/views/patients/sidebar/action/action-sidebar-action_views.js
+  s_4fb06412cf7174::t_373653e6484b21 23-27,240
+src/js/apps/patients/patient/dashboard/dashboard_app.js
+  s_4fb06412cf7174::t_4986c38c525501 11-21,71-72
+src/js/views/patients/patient/dashboard/dashboard_views.js
+  s_4fb06412cf7174::t_c49948bb743a60 31-35,140,234
+src/js/entities-service/entities/actions.js
+  s_4fb06412cf7174::t_fc4e616671401b 107-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "a53e8bd712890699cf5f86600522f86a56c0cb7e",
+  "prompts": {},
+  "sessions": {
+    "s_4fb06412cf7174": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b07-77d6-7830-a0b1-2388fef5777a",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}
