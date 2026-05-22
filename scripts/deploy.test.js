@@ -91,6 +91,57 @@ test('readDeployMarkerStatus defaults missing marker deployment progress', () =>
   );
 });
 
+test('readDeployMarkerStatus reports invalid marker deployment progress JSON', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'invalid-deploy-marker-status-'));
+  const statusFile = path.join(tempDir, 'status.json');
+
+  fs.writeFileSync(statusFile, '');
+
+  assert.throws(
+    () => readDeployMarkerStatus(statusFile),
+    new RegExp(`Deploy marker status file is not valid JSON: ${ statusFile.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }\\. Delete it and retry\\.`),
+  );
+
+  fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+test('readDeployMarkerStatus normalizes malformed marker deployment progress payloads', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'malformed-deploy-marker-status-'));
+  const statusFile = path.join(tempDir, 'status.json');
+
+  fs.writeFileSync(statusFile, JSON.stringify({ successfulEnvironments: ['sandbox:apple'] }));
+
+  assert.deepEqual(
+    readDeployMarkerStatus(statusFile),
+    {
+      failedEnvironments: [],
+      successfulEnvironments: ['sandbox:apple'],
+    },
+  );
+
+  fs.writeFileSync(statusFile, JSON.stringify({ failedEnvironments: 'sandbox:apple' }));
+
+  assert.deepEqual(
+    readDeployMarkerStatus(statusFile),
+    {
+      failedEnvironments: [],
+      successfulEnvironments: [],
+    },
+  );
+
+  fs.writeFileSync(statusFile, JSON.stringify([]));
+
+  assert.deepEqual(
+    readDeployMarkerStatus(statusFile),
+    {
+      failedEnvironments: [],
+      successfulEnvironments: [],
+    },
+  );
+
+  fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
 test('formatFailedDeploymentsError summarizes all failed environments', () => {
   assert.equal(
     formatFailedDeploymentsError(['qa:qa2', 'qa:quality-assurance']),

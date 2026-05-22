@@ -146,7 +146,7 @@ jobs:
               exit 1
             fi
 
-            if [ "$DEPLOY_TARGET_ENV" = "sandbox:*" ]; then
+            if [ "$DEPLOY_STAGE" = "sandbox" ] && [ -z "$DEPLOY_ORGANIZATION" ]; then
               npm run --silent deploy -- --stage="prod" --organization="demonstration" --write-targets-file="$prod_demonstration_targets_file" --list-marker-environments >> "$marker_env_file"
               printf 'export DEPLOY_PROD_DEMONSTRATION_TARGETS_FILE=%q\n' "$prod_demonstration_targets_file" >> "$BASH_ENV"
             fi

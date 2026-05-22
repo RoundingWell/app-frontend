@@ -349,14 +349,31 @@ export function writeDeployMarkerStatus(statusFile, markerStatus) {
 }
 
 export function readDeployMarkerStatus(statusFile) {
+  const defaultStatus = {
+    failedEnvironments: [],
+    successfulEnvironments: [],
+  };
+
   if (!statusFile || !fsSync.existsSync(statusFile)) {
-    return {
-      failedEnvironments: [],
-      successfulEnvironments: [],
-    };
+    return defaultStatus;
   }
 
-  return JSON.parse(fsSync.readFileSync(statusFile, 'utf8'));
+  let payload;
+
+  try {
+    payload = JSON.parse(fsSync.readFileSync(statusFile, 'utf8'));
+  } catch (error) {
+    throw new Error(`Deploy marker status file is not valid JSON: ${ statusFile }. Delete it and retry. ${ error.message }`);
+  }
+
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return defaultStatus;
+  }
+
+  return {
+    failedEnvironments: Array.isArray(payload.failedEnvironments) ? payload.failedEnvironments : [],
+    successfulEnvironments: Array.isArray(payload.successfulEnvironments) ? payload.successfulEnvironments : [],
+  };
 }
 
 export function readResolvedDeployTargets(targetsFile) {
