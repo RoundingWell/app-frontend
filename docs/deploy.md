@@ -137,6 +137,8 @@ npm run deploy -- --stage=<stage> [--organization=<organization>]
 5. Writes CircleCI deploy markers for every environment resolved from the deploy target:
    - specific targets such as `qa:qa2` write one marker for that concrete environment
    - stage-wide targets such as `qa:*`, `sandbox:*`, and `prod:*` retain the wildcard marker and also write one marker per concrete environment discovered from CloudFormation tags for that stage
+   - `sandbox:*` also deploys `prod:demonstration` from the same artifact and writes a marker for that environment
+   - `prod:*` excludes `prod:demonstration`; deploy it explicitly or through `sandbox:*`
    - stage-wide deploys continue through every resolved environment and fail the job at the end if any targets fail
    - if a stage-wide deploy partially succeeds, concrete environment markers reflect the per-environment outcomes while the wildcard marker reflects the overall deploy result
 6. For QA deploys that include `qa2` (`qa:qa2` and `qa:*`), posts `qa2_deploy_succeeded` to `RoundingWell/app-tests`
@@ -161,8 +163,8 @@ Dev-account deploys:
 - `qa:*`
 
 Prod-account deploys:
-- `sandbox:*`
-- `prod:*`
+- `sandbox:*` plus `prod:demonstration`
+- `prod:*` excluding `prod:demonstration`
 
 Artifact ownership:
 - the release artifact is published to the dev-account bucket

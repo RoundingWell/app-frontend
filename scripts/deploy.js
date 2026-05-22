@@ -19,6 +19,7 @@ const DEPLOYABLE_STATUSES = new Set([
   'UPDATE_ROLLBACK_COMPLETE',
 ]);
 const SHARED_RUNTIME_CACHE_CONTROL = 'no-cache';
+const PROD_WILDCARD_EXCLUDED_ORGANIZATIONS = new Set(['demonstration']);
 
 function isMainModule() {
   if (!process.argv[1]) {
@@ -61,6 +62,13 @@ function matchesOrganizationTarget(deploymentTarget, stage, filterOrganization) 
   return true;
 }
 
+export function shouldIncludeDeployTarget(stage, filterOrganization, organizationIdentifier) {
+  if (filterOrganization) return true;
+  if (stage !== 'prod') return true;
+
+  return !PROD_WILDCARD_EXCLUDED_ORGANIZATIONS.has(organizationIdentifier);
+}
+
 /**
  * Get all organizations for a stage with their website buckets by CloudFormation tags.
  * @param {CloudFormationClient} cfClient - CloudFormation client instance
@@ -100,6 +108,8 @@ function addOrganizationsFromPage(organizationBuckets, response, stage, filterOr
 
     const bucketName = getWebsiteBucketOutput(deploymentTarget);
     const organizationIdentifier = getTagValue(deploymentTarget, 'organization');
+
+    if (!shouldIncludeDeployTarget(stage, filterOrganization, organizationIdentifier)) continue;
 
     if (!bucketName) {
       throw new Error(
@@ -338,6 +348,17 @@ export function writeDeployMarkerStatus(statusFile, markerStatus) {
   fsSync.writeFileSync(statusFile, `${ JSON.stringify(markerStatus, null, 2) }\n`);
 }
 
+export function readDeployMarkerStatus(statusFile) {
+  if (!statusFile || !fsSync.existsSync(statusFile)) {
+    return {
+      failedEnvironments: [],
+      successfulEnvironments: [],
+    };
+  }
+
+  return JSON.parse(fsSync.readFileSync(statusFile, 'utf8'));
+}
+
 export function readResolvedDeployTargets(targetsFile) {
   if (!targetsFile) {
     throw new Error('Resolved deploy targets file path is required.');
@@ -430,10 +451,7 @@ async function main() {
     return;
   }
 
-  const markerStatus = {
-    failedEnvironments: [],
-    successfulEnvironments: [],
-  };
+  const markerStatus = readDeployMarkerStatus(values['marker-status-file']);
   writeDeployMarkerStatus(values['marker-status-file'], markerStatus);
 
   process.stdout.write(`Found ${ organizationBuckets.size } organizations to deploy:\n`);

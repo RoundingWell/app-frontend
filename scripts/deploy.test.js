@@ -6,7 +6,9 @@ import test from 'node:test';
 import {
   buildDeployMarkerEnvironments,
   formatFailedDeploymentsError,
+  readDeployMarkerStatus,
   readResolvedDeployTargets,
+  shouldIncludeDeployTarget,
   writeDeployMarkerStatus,
   writeResolvedDeployTargets,
 } from './deploy.js';
@@ -32,6 +34,13 @@ test('buildDeployMarkerEnvironments returns only the requested concrete environm
   );
 });
 
+test('shouldIncludeDeployTarget excludes demonstration only from prod wildcard deploys', () => {
+  assert.equal(shouldIncludeDeployTarget('prod', '', 'demonstration'), false);
+  assert.equal(shouldIncludeDeployTarget('prod', 'demonstration', 'demonstration'), true);
+  assert.equal(shouldIncludeDeployTarget('prod', '', 'apple'), true);
+  assert.equal(shouldIncludeDeployTarget('sandbox', '', 'demonstration'), true);
+});
+
 test('writeDeployMarkerStatus persists marker deployment progress', () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-marker-status-'));
   const statusFile = path.join(tempDir, 'status.json');
@@ -50,6 +59,36 @@ test('writeDeployMarkerStatus persists marker deployment progress', () => {
   );
 
   fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+test('readDeployMarkerStatus preserves existing marker deployment progress', () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-marker-status-'));
+  const statusFile = path.join(tempDir, 'status.json');
+
+  fs.writeFileSync(statusFile, JSON.stringify({
+    failedEnvironments: [],
+    successfulEnvironments: ['sandbox:apple'],
+  }));
+
+  assert.deepEqual(
+    readDeployMarkerStatus(statusFile),
+    {
+      failedEnvironments: [],
+      successfulEnvironments: ['sandbox:apple'],
+    },
+  );
+
+  fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+test('readDeployMarkerStatus defaults missing marker deployment progress', () => {
+  assert.deepEqual(
+    readDeployMarkerStatus(''),
+    {
+      failedEnvironments: [],
+      successfulEnvironments: [],
+    },
+  );
 });
 
 test('formatFailedDeploymentsError summarizes all failed environments', () => {
