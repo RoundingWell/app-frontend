@@ -1,0 +1,23 @@
+src/js/index.js
+  s_183c10637573b8::t_7dd0c85c05eea8 24,47,51
+index.html
+  s_183c10637573b8::t_f47a35b2337224 14
+vite.config.js
+  s_183c10637573b8::t_2251ba13e87205 68-69,82-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "2ffe9b74650e0f8e5593cdbe229b870336f96010",
+  "prompts": {},
+  "sessions": {
+    "s_183c10637573b8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5eac-2ac5-7e70-b484-2705102e8f5d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
