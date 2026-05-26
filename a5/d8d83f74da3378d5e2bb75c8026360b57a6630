@@ -1,0 +1,27 @@
+src/js/apps/globals/app-frame_app.js
+  s_183c10637573b8::t_9aff05b05648f6 11-19,65-68
+src/js/services/dialer.js
+  s_183c10637573b8::t_2ea92058e7fe6d 51,69
+  s_183c10637573b8::t_a4ee6bfc201dbc 45-48
+  s_183c10637573b8::t_512475a71dcbf4 96-98
+src/js/sw.js
+  s_183c10637573b8::t_32c8be3555293e 3,20
+src/js/base/helpers.js
+  s_183c10637573b8::t_9468d008dc841b 8-16,44
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "a5d8d83f74da3378d5e2bb75c8026360b57a6630",
+  "prompts": {},
+  "sessions": {
+    "s_183c10637573b8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5eac-2ac5-7e70-b484-2705102e8f5d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
