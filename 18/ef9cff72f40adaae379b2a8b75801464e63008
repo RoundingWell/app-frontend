@@ -1,0 +1,19 @@
+src/js/utils/local-store.cy.js
+  s_5997dd76fdbacb::t_75472ecaa89607 27-32,43-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "18ef9cff72f40adaae379b2a8b75801464e63008",
+  "prompts": {},
+  "sessions": {
+    "s_5997dd76fdbacb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e69aa-2a80-7d92-9054-606eb18ce30c",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
