@@ -133,6 +133,7 @@ jobs:
             marker_env_file="$deploy_tmp_dir/deploy-marker-environments.txt"
             deploy_targets_file="$deploy_tmp_dir/deploy-targets.json"
             deploy_marker_status_file="$deploy_tmp_dir/deploy-marker-status.json"
+            prod_demonstration_targets_file="$deploy_tmp_dir/prod-demonstration-targets.json"
 
             if [ -n "$DEPLOY_ORGANIZATION" ]; then
               npm run --silent deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION" --write-targets-file="$deploy_targets_file" --list-marker-environments > "$marker_env_file"
@@ -143,6 +144,11 @@ jobs:
             if [ ! -s "$marker_env_file" ]; then
               echo "No deploy marker environments were resolved"
               exit 1
+            fi
+
+            if [ "$DEPLOY_STAGE" = "sandbox" ] && [ -z "$DEPLOY_ORGANIZATION" ]; then
+              npm run --silent deploy -- --stage="prod" --organization="demonstration" --write-targets-file="$prod_demonstration_targets_file" --list-marker-environments >> "$marker_env_file"
+              printf 'export DEPLOY_PROD_DEMONSTRATION_TARGETS_FILE=%q\n' "$prod_demonstration_targets_file" >> "$BASH_ENV"
             fi
 
             printf 'export DEPLOY_TMP_DIR=%q\n' "$deploy_tmp_dir" >> "$BASH_ENV"
@@ -182,6 +188,10 @@ jobs:
               npm run deploy -- --stage="$DEPLOY_STAGE" --organization="$DEPLOY_ORGANIZATION" --read-targets-file="$DEPLOY_TARGETS_FILE" --marker-status-file="$DEPLOY_MARKER_STATUS_FILE"
             else
               npm run deploy -- --stage="$DEPLOY_STAGE" --read-targets-file="$DEPLOY_TARGETS_FILE" --marker-status-file="$DEPLOY_MARKER_STATUS_FILE"
+            fi
+
+            if [ -n "${DEPLOY_PROD_DEMONSTRATION_TARGETS_FILE:-}" ]; then
+              npm run deploy -- --stage="prod" --organization="demonstration" --read-targets-file="$DEPLOY_PROD_DEMONSTRATION_TARGETS_FILE" --marker-status-file="$DEPLOY_MARKER_STATUS_FILE"
             fi
       - run:
           name: CircleCI Deploy Marker Success
