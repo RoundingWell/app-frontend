@@ -1,0 +1,23 @@
+test/integration/patients/worklist/worklist.js
+  s_112b393b39f139::t_06c13d2cbb7307 1613-1654
+test/integration/patients/patient/dashboard.js
+  s_112b393b39f139::t_06c13d2cbb7307 1040-1049
+test/integration/patients/patient/patient-flow.js
+  s_112b393b39f139::t_06c13d2cbb7307 1085-1094
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d1b6050e75fc6acb52c78186b6e7b9982e31ed37",
+  "prompts": {},
+  "sessions": {
+    "s_112b393b39f139": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e6512-bc8a-7080-afd2-d11fc83a3d20",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
