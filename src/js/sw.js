@@ -1,5 +1,6 @@
 import { clientsClaim } from 'workbox-core';
 import { registerRoute, Route } from 'workbox-routing';
+import { enable as enableNavigationPreload } from 'workbox-navigation-preload';
 import { NetworkOnly, NetworkFirst, CacheFirst } from 'workbox-strategies';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 import { PrecacheFallbackPlugin, precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
@@ -16,6 +17,7 @@ if (self.location.hostname !== 'localhost') {
   cleanupOutdatedCaches();
 
   precacheAndRoute(self.__WB_MANIFEST);
+  enableNavigationPreload();
 
   // Any navigation loads the precached index.html
   const networkOnlyNavigationRoute = new Route(({ request }) => {

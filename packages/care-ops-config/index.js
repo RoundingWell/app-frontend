@@ -1,7 +1,7 @@
 const configState = {};
 
 function fetchConfig() {
-  return fetch('/appconfig.json', { cache: 'no-store' })
+  return fetch('/appconfig.json', { cache: 'no-cache' })
     .then(response => response.json())
     .then(config => {
       configState.app = config.app || {};

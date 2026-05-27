@@ -64,6 +64,45 @@ function sharedRuntimeDevPlugin() {
   };
 }
 
+function modulePreloadEntryPlugin(moduleIds) {
+  const normalizedModuleIds = moduleIds.map(moduleId => moduleId.replace(/^\//, ''));
+
+  return {
+    name: 'module-preload-entry-plugin',
+    apply: 'build',
+    transformIndexHtml: {
+      order: 'post',
+      handler(html, ctx) {
+        const bundle = ctx.bundle;
+        if (!bundle) return html;
+
+        const tags = Object.values(bundle)
+          .filter(chunk => {
+            if (chunk.type !== 'chunk') return false;
+            const chunkModuleIds = [chunk.facadeModuleId, ...chunk.moduleIds]
+              .filter(Boolean)
+              .map(chunkModuleId => path.relative(process.cwd(), chunkModuleId).split(path.sep).join('/'));
+
+            return normalizedModuleIds.some(moduleId => {
+              return chunkModuleIds.includes(moduleId);
+            });
+          })
+          .map(chunk => ({
+            tag: 'link',
+            attrs: {
+              rel: 'modulepreload',
+              crossorigin: true,
+              href: `/${ chunk.fileName }`,
+            },
+            injectTo: 'head',
+          }));
+
+        return tags;
+      },
+    },
+  };
+}
+
 const css = {
   preprocessorOptions: {
     scss: {
@@ -131,6 +170,13 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       sharedRuntimeDevPlugin(),
+      modulePreloadEntryPlugin([
+        '/src/js/auth.js',
+        '/src/js/app.js',
+        '/src/js/apps/globals/app-frame_app.js',
+        '/packages/care-ops-auth/AuthProvider.js',
+        '/packages/care-ops-auth/providers/workos.js',
+      ]),
       fontawesome(),
       isTest && babelPlugin,
       inlineHbsCompile(),
