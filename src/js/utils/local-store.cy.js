@@ -24,6 +24,12 @@ context('localStore', function() {
     expect(localStore.get('my-key')).to.deep.equal({ a: 1 });
   });
 
+  specify('set with undefined removes the key', function() {
+    localStore.set('rm-key', 'value');
+    localStore.set('rm-key', undefined);
+    expect(localStore.get('rm-key')).to.be.undefined;
+  });
+
   specify('set does not throw when storage is unavailable', function() {
     cy.stub(localStorage, 'setItem').throws(new DOMException('blocked', 'SecurityError'));
     expect(() => localStore.set('key', 'val')).not.to.throw();
@@ -32,6 +38,11 @@ context('localStore', function() {
   specify('set rethrows QuotaExceededError', function() {
     cy.stub(localStorage, 'setItem').throws(new DOMException('quota', 'QuotaExceededError'));
     expect(() => localStore.set('key', 'val')).to.throw('quota');
+  });
+
+  specify('set rethrows unexpected errors', function() {
+    cy.stub(localStorage, 'setItem').throws(new Error('unexpected'));
+    expect(() => localStore.set('key', 'val')).to.throw('unexpected');
   });
 
   specify('remove deletes the key', function() {
