@@ -52,9 +52,9 @@ const _Model = BaseModel.extend({
       },
       _program_action: this.getResource(),
     };
-
     if (patient) attrs._patient = patient.getResource();
     if (flow) attrs._flow = flow.getResource();
+    attrs._program = this.getProgram().getResource();
 
     return Radio.request('entities', 'actions:model', attrs);
   },
