@@ -1,0 +1,21 @@
+src/js/base/cache/idb.js
+  s_4f8dcbf2626875::t_e00beddbfbb134 1-73
+src/js/base/cache/idb.cy.js
+  s_4f8dcbf2626875::t_1431f4e2584f6e 1-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "5d50dcd6c8ea6e166c5cbb41130fbc6a871a4031",
+  "prompts": {},
+  "sessions": {
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
