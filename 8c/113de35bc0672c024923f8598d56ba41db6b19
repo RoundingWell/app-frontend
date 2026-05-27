@@ -1,0 +1,21 @@
+src/js/apps/patients/worklist/worklist_state.js
+  s_112b393b39f139::t_37ead06631912c 83-86
+src/js/apps/patients/worklist/worklist_app.js
+  s_112b393b39f139::t_20d7f9daae6a79 165,222-227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "8c113de35bc0672c024923f8598d56ba41db6b19",
+  "prompts": {},
+  "sessions": {
+    "s_112b393b39f139": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e6512-bc8a-7080-afd2-d11fc83a3d20",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}
