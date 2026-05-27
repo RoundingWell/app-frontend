@@ -258,6 +258,7 @@ export default SubRouterApp.extend({
     const action = programAction.createAction({ flow: this.flow });
     action.saveAll().then(() => {
       this.actions.add(action);
+      Radio.request('ws', 'add', action);
 
       Radio.trigger('event-router', 'flow:action', this.flow.id, action.id);
     });

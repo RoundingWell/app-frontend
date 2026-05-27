@@ -81,6 +81,7 @@ export default App.extend({
     const action = programAction.createAction({ patient: this.patient });
     action.saveAll().then(() => {
       this.collection.unshift(action);
+      Radio.request('ws', 'add', action);
 
       Radio.trigger('event-router', 'patient:action', this.patient.id, action.id);
     });
