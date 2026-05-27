@@ -1,0 +1,21 @@
+packages/care-ops-config/index.js
+  s_183c10637573b8::t_b064c1c185bd06 4
+index.html
+  s_183c10637573b8::t_b064c1c185bd06 14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "5c31f4c6c00d3c659a6d44818826d5d1484653f7",
+  "prompts": {},
+  "sessions": {
+    "s_183c10637573b8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5eac-2ac5-7e70-b484-2705102e8f5d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
