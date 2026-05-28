@@ -1082,6 +1082,17 @@ context('patient flow page', function() {
       });
 
     cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        const subscribedResources = _.flatten(stub.getCalls().map(call => call.args[0].data.resources));
+
+        expect(subscribedResources).to.deep.include({
+          id: conditionalAction.id,
+          type: conditionalAction.type,
+        });
+      });
+
+    cy
       .url()
       .should('contain', `flow/${ testFlow.id }/action/${ conditionalAction.id }`);
 

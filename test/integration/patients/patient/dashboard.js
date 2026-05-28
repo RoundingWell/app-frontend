@@ -1037,6 +1037,17 @@ context('patient dashboard page', function() {
       });
 
     cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        const subscribedResources = _.flatten(stub.getCalls().map(call => call.args[0].data.resources));
+
+        expect(subscribedResources).to.deep.include({
+          id: testOne,
+          type: 'patient-actions',
+        });
+      });
+
+    cy
       .url()
       .should('contain', `patient/${ testPatient.id }/action/${ testOne }`);
 

@@ -1610,6 +1610,48 @@ context('worklist page', function() {
       .get('@firstRow')
       .find('[data-state-region] .fa-circle-check');
 
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .get('[data-count-region]')
+      .should('contain', '1 Action');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testNewSocketAction;
+
+        return fx;
+      });
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+
+    cy
+      .wait('@routeAction')
+      .its('request.url')
+      .should('contain', testNewSocketAction.id);
+
+    cy
+      .get('[data-count-region]')
+      .should('contain', '2 Actions');
+
+    cy
+      .get('@firstRow')
+      .should('contain', 'New Action - Created Elsewhere');
+
     cy
       .routeAction(fx => {
         fx.data = testNewStateSocketAction;

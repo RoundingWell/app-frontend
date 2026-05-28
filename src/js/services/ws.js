@@ -13,6 +13,7 @@ const AdderApp = App.extend({
   onStart({ model, collection }) {
     collection.add(model);
     Radio.request('ws', 'add', model);
+    this.destroy();
   },
 });
 
