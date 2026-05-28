@@ -1,6 +1,7 @@
 // NOTE: Not using sass to prevent overriding form.io with base sass reset :-/
 
 @font-face {
+  font-display: swap;
   font-family: ProximaSoft;
   font-style: normal;
   font-weight: normal;
@@ -8,6 +9,7 @@
 }
 
 @font-face {
+  font-display: swap;
   font-family: ProximaSoft;
   font-style: normal;
   font-weight: bold;

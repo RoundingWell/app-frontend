@@ -21,8 +21,11 @@ async function startAuth() {
   await auth();
 }
 
-async function start() {
-  const { startApp } = await import('./app');
+async function loadApp() {
+  return import('./app');
+}
+
+async function start({ startApp }) {
   startApp();
 }
 
@@ -40,7 +43,10 @@ document.addEventListener('DOMContentLoaded', async() => {
 
   initDataDog();
 
-  await startAuth();
+  const authPromise = startAuth();
+  const appPromise = loadApp();
 
-  await start();
+  const [, appModule] = await Promise.all([authPromise, appPromise]);
+
+  await start(appModule);
 });
