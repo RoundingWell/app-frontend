@@ -1,6 +1,7 @@
 //  Similar to https://github.com/akre54/Backbone.Fetch
 import { isObject, isArray, defaults, extend, map, flatten, reduce, first, rest, get } from 'underscore';
 import Radio from 'backbone.radio';
+import dayjs from 'dayjs';
 
 const fetchers = [];
 
@@ -117,8 +118,10 @@ function serializeParams(obj) {
   return map(obj, buildParams).join('&');
 }
 
-// Makes data object into `/url?param1=value1&param2=value2` string
-function getUrl(url, data) {
+// Makes data object into `/url?param1=value1&param2=value2` string.
+// Exported so the cache layer can key on the same canonical GET URL the
+// fetch layer actually requests (otherwise data-bearing fetches collide).
+export function getUrl(url, data) {
   if (!isObject(data)) return url;
 
   const params = serializeParams(data);
@@ -127,12 +130,34 @@ function getUrl(url, data) {
   return `${ url }?${ params }`;
 }
 
-export function getData(response, dataType) {
+export async function getData(response, dataType) {
   response = response.clone();
 
-  if (dataType === 'json' && response.status !== 204) return response.json();
+  if (dataType === 'json' && response.status !== 204) {
+    const data = await response.json();
+    stampCachedTs(data);
+    return data;
+  }
 
   return response.text();
+}
+
+// Writes __cached_ts onto each JSON:API resource's `attributes`. No-op on
+// shapes without `attributes` (non-JSON:API responses pass through unchanged).
+function stampCachedTs(responseData) {
+  if (!responseData) return;
+
+  const ts = dayjs.utc().format();
+  const { data, included } = responseData;
+
+  if (Array.isArray(data)) data.forEach(d => stampResource(d, ts));
+  else if (data) stampResource(data, ts);
+
+  if (Array.isArray(included)) included.forEach(d => stampResource(d, ts));
+}
+
+function stampResource(resource, ts) {
+  if (resource && resource.attributes) resource.attributes.__cached_ts = ts;
 }
 
 export async function handleJSON(response) {

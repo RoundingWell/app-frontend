@@ -10,11 +10,14 @@ import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
 
 import { addAction } from 'js/datadog';
 
+import { clearCache, pruneOtherPartitions } from 'js/base/cache/entity-cache';
+
 import 'scss/app-root.scss';
 
 import { LoginPromptView } from 'js/views/globals/prelogin/prelogin_views';
 
 let authAgent;
+let cachedUserId;
 
 function trackAuthEvent(name, context) {
   addAction(name, context);
@@ -75,17 +78,31 @@ async function logout() {
   return agent.logout();
 }
 
+function getUserId() {
+  return cachedUserId;
+}
+
 Radio.reply('auth', {
   handleUnauthorized,
   logout,
   setToken,
   getToken,
+  getUserId,
 });
 
 async function auth() {
+  if (location.pathname === AuthProvider.PATH_LOGOUT) {
+    await clearCache();
+  }
+
   const agent = await getAuthAgent();
+
   return new Promise(resolve => {
-    agent.auth(resolve);
+    agent.auth(async() => {
+      cachedUserId = await agent.getUserId();
+      await pruneOtherPartitions(cachedUserId);
+      resolve();
+    });
   });
 }
 

@@ -135,6 +135,7 @@
     "backbone.store": "^2.0.0",
     "dayjs": "^1.10.6",
     "handlebars": "^4.7.9",
+    "idb": "^7.1.1",
     "jquery": "^4.0.0",
     "libphonenumber-js": "^1.10.38",
     "marionette.toolkit": "^6.2.0",

@@ -2,6 +2,7 @@ import { clone, invoke, extend, map, get } from 'underscore';
 import Backbone from 'backbone';
 
 import JsonApiMixin from './jsonapi-mixin';
+import { setResponse } from './cache/entity-cache';
 
 export default Backbone.Collection.extend(extend({
   getResources() {
@@ -17,9 +18,11 @@ export default Backbone.Collection.extend(extend({
       return response;
     });
   },
-  parse(response) {
+  parse(response, options) {
     /* istanbul ignore if */
     if (!response || !response.data) return response;
+
+    if (options && options._cacheKey) setResponse(options._cacheKey, response);
 
     this.cacheIncluded(response.included);
 

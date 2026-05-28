@@ -80,6 +80,10 @@ export class AuthProvider {
     return this.token;
   }
 
+  async getUserId() {
+    return undefined;
+  }
+
   async handleUnauthorized() {}
 
   replaceState(state) {

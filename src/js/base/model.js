@@ -5,6 +5,7 @@ import dayjs from 'dayjs';
 import JsonApiMixin from './jsonapi-mixin';
 
 import { getStore } from './entity-service';
+import { setResponse } from './cache/entity-cache';
 
 export default Backbone.Model.extend(extend({
   getRelationship(key) {
@@ -66,9 +67,11 @@ export default Backbone.Model.extend(extend({
   isFetching() {
     return this._isFetching;
   },
-  parse(response) {
+  parse(response, options) {
     /* istanbul ignore if */
     if (!response || !response.data) return response;
+
+    if (options && options._cacheKey) setResponse(options._cacheKey, response);
 
     this.cacheIncluded(response.included);
 
