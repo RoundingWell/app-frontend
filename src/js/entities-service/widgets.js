@@ -3,6 +3,7 @@ import { _Model, Model, Collection } from './entities/widgets';
 
 const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
+  isWorkspaceScoped: false,
   radioRequests: {
     'widgets:model': 'getModel',
     'widgets:collection': 'getCollection',
@@ -10,7 +11,7 @@ const Entity = BaseEntity.extend({
   },
   fetchWidgets({ filter = {} } = {}) {
     const data = { filter };
-    return this.fetchCollection({ data });
+    return this.fetchCollectionCache({ data });
   },
 
 });

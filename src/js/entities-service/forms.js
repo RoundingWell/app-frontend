@@ -10,7 +10,7 @@ const Entity = BaseEntity.extend({
     'forms:model': 'getModel',
     'forms:collection': 'getCollection',
     'fetch:forms:model': 'fetchModel',
-    'fetch:forms:collection': 'fetchCollection',
+    'fetch:forms:collection': 'fetchCollectionCache',
     'fetch:forms:definition': 'fetchDefinition',
     'fetch:forms:data': 'fetchFormData',
     'fetch:forms:byAction': 'fetchByAction',
