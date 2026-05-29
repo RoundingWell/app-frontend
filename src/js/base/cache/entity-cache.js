@@ -8,7 +8,7 @@ import idb from './idb';
 
 export const ENTRY_VERSION = 1;
 // SWR refreshes on every online load, so TTL only bounds offline / cold-start staleness.
-const TTL_HOURS = 24;
+const TTL_HOURS = 24 * 7;
 const STORE = 'entities';
 const KEY_SEPARATOR = '|';
 
@@ -21,8 +21,10 @@ export async function getResponse(key) {
   if (!key) return null;
   const entry = await idb.get(STORE, key);
   if (!entry) return null;
-  if (entry.entryVersion !== ENTRY_VERSION) return null;
-  if (dayjs.utc().diff(dayjs.utc(entry.ts), 'hour') >= TTL_HOURS) return null;
+  if (entry.entryVersion !== ENTRY_VERSION || dayjs.utc().diff(dayjs.utc(entry.ts), 'hour') >= TTL_HOURS) {
+    idb.delete(STORE, key); // opportunistic cleanup of unusable entries
+    return null;
+  }
   return entry.response;
 }
 

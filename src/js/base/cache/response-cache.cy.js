@@ -51,6 +51,16 @@ function stripStampsFromResponse(resp) {
   return clone;
 }
 
+// Cache write is fire-and-forget from inside parse; poll for it to land.
+function waitForCache(key, attempts = 20) {
+  return getResponse(key).then(resp => {
+    if (resp) return resp;
+    if (attempts <= 0) throw new Error(`cache write for ${ key } never landed`);
+    return new Promise(r => setTimeout(r, 25))
+      .then(() => waitForCache(key, attempts - 1));
+  });
+}
+
 context('cache/response-cache — replay equivalence', function() {
   beforeEach(function() {
     idb.__reset();
@@ -77,10 +87,7 @@ context('cache/response-cache — replay equivalence', function() {
       const liveClinician = Radio.request('entities', 'clinicians:model', 'c1');
       const liveClinicianAttrs = stripVolatile(liveClinician.attributes);
 
-      // The success callback writes the response into IDB asynchronously; give the
-      // microtask queue a tick to let setResponse complete.
-      return new Promise(resolve => setTimeout(resolve, 50))
-        .then(() => getResponse('user_test||/api/roles'))
+      return waitForCache('user_test||/api/roles')
         .then(cachedResp => {
           // The cached response carries __cached_ts stamps applied at the fetch
           // layer; strip them for structural comparison with the input fixture.
@@ -113,17 +120,21 @@ context('cache/response-cache — replay equivalence', function() {
     Radio.reply('auth', 'getUserId', () => 'user_test'); // sync
     cy.intercept('GET', '/api/roles*', { body: ROLES_RESPONSE }).as('rolesFetch');
 
-    return Radio.request('entities', 'fetch:roles:collection').then(collection => {
+    // cy.wrap keeps cy.wait in the Cypress command queue, not a raw-Promise .then.
+    cy.wrap(Radio.request('entities', 'fetch:roles:collection')).then(collection => {
       expect(collection.length).to.equal(2);
     });
+    cy.wait('@rolesFetch');
   });
 
   specify('no userId — falls through to live fetch, no cache read', function() {
-    Radio.reply('auth', 'getUserId', () => Promise.resolve(undefined));
+    // Sync undefined: the cache branch checks userId synchronously.
+    Radio.reply('auth', 'getUserId', () => undefined);
     cy.intercept('GET', '/api/roles*', { body: ROLES_RESPONSE }).as('rolesFetch');
 
-    return Radio.request('entities', 'fetch:roles:collection').then(collection => {
+    cy.wrap(Radio.request('entities', 'fetch:roles:collection')).then(collection => {
       expect(collection.length).to.equal(2);
     });
+    cy.wait('@rolesFetch');
   });
 });

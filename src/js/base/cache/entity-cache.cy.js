@@ -51,10 +51,10 @@ context('cache/entity-cache — getResponse / setResponse', function() {
       });
   });
 
-  specify('returns null for an entry older than the TTL (24 hours)', function() {
+  specify('returns null for an entry older than the TTL (1 week)', function() {
     return idb.put('entities', 'u|/api/roles', {
       entryVersion: ENTRY_VERSION,
-      ts: dayjs.utc().subtract(25, 'hour').format(),
+      ts: dayjs.utc().subtract(8, 'day').format(),
       response: SAMPLE,
     })
       .then(() => getResponse('u|/api/roles'))

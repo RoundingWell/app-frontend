@@ -99,8 +99,12 @@ async function auth() {
 
   return new Promise(resolve => {
     agent.auth(async() => {
-      cachedUserId = await agent.getUserId();
-      await pruneOtherPartitions(cachedUserId);
+      try {
+        cachedUserId = await agent.getUserId();
+        await pruneOtherPartitions(cachedUserId);
+      } catch {
+        // swallow — boot without cache rather than crash auth.
+      }
       resolve();
     });
   });

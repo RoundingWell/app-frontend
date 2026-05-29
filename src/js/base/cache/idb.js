@@ -19,8 +19,13 @@ function getDb() {
       },
     }).catch(() => null);
   } catch {
-    dbPromise = Promise.resolve(null);
+    return Promise.resolve(null);
   }
+
+  // Don't memoize a failed open; clear so the next caller retries.
+  dbPromise.then(db => {
+    if (!db) dbPromise = undefined;
+  });
 
   return dbPromise;
 }
