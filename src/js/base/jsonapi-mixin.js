@@ -1,5 +1,4 @@
 import { each, isArray, isNull, isUndefined, map, pick } from 'underscore';
-import dayjs from 'dayjs';
 import underscored from 'js/utils/formatting/underscored';
 
 import { getStore } from './entity-service';
@@ -45,8 +44,6 @@ export default {
   },
   parseModel(data) {
     const modelData = this.parseId(data.attributes, data.id);
-
-    modelData.__cached_ts = dayjs.utc().format();
 
     each(data.meta, (value, key) => {
       modelData[`_${ underscored(key) }`] = value;

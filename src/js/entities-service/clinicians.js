@@ -15,7 +15,7 @@ const Entity = BaseEntity.extend({
     'fetch:clinicians:byWorkspace': 'fetchByWorkspace',
   },
   fetchCurrentClinician() {
-    return this.fetchBy('/api/clinicians/me')
+    return this.fetchByCache('/api/clinicians/me', { cacheScope: 'user' })
       .then(currentUser => {
         setUser(currentUser.pick('id', 'name', 'email'));
         startRum();
@@ -27,7 +27,7 @@ const Entity = BaseEntity.extend({
     const url = `/api/workspaces/${ workspaceId }/relationships/clinicians`;
     const workspace = Radio.request('entities', 'workspaces:model', workspaceId);
 
-    return this.fetchCollection({ url })
+    return this.fetchCollectionCache({ url })
       .then(clinicians => {
         workspace.updateClinicians(clinicians);
       });

@@ -16,7 +16,7 @@ const Entity = BaseEntity.extend({
   },
   fetchProgramsByWorkspace(workspaceId) {
     const url = `/api/workspaces/${ workspaceId }/relationships/programs`;
-    return this.fetchCollection({ url });
+    return this.fetchCollectionCache({ url });
   },
 });
 

@@ -63,6 +63,16 @@ export class WorkosAuthProvider extends AuthProvider {
     return this.tokenPromise;
   }
 
+  async getUserId() {
+    if (!this.client) return undefined;
+    try {
+      const user = await this.client.getUser();
+      return user?.id;
+    } catch {
+      return undefined;
+    }
+  }
+
   async recoverToken() {
     if (!this.client) {
       throw new LoginRequiredError();

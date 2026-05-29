@@ -3,10 +3,11 @@ import { _Model, Model, Collection } from './entities/roles';
 
 const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
+  isWorkspaceScoped: false,
   radioRequests: {
     'roles:model': 'getModel',
     'roles:collection': 'getCollection',
-    'fetch:roles:collection': 'fetchCollection',
+    'fetch:roles:collection': 'fetchCollectionCache',
   },
 });
 
