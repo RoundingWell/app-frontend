@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import {
+  addOrganizationsFromPage,
   buildDeployMarkerEnvironments,
   formatFailedDeploymentsError,
   readDeployMarkerStatus,
@@ -12,6 +13,61 @@ import {
   writeDeployMarkerStatus,
   writeResolvedDeployTargets,
 } from './deploy.js';
+
+function stack(name, organization, { stage = 'sandbox', websiteBucket } = {}) {
+  const outputs = websiteBucket ?
+    [{ OutputKey: 'WebsiteBucket', OutputValue: websiteBucket }] :
+    [{ OutputKey: 'HttpApiUrl', OutputValue: 'https://example.test' }];
+
+  return {
+    StackName: name,
+    StackStatus: 'CREATE_COMPLETE',
+    Tags: [
+      { Key: 'stage', Value: stage },
+      { Key: 'organization', Value: organization },
+    ],
+    Outputs: outputs,
+  };
+}
+
+test('addOrganizationsFromPage maps a website stack to its WebsiteBucket', () => {
+  const organizationBuckets = new Map();
+  const response = { Stacks: [stack('careops-sandbox-vumc', 'vumc', { websiteBucket: 'vumc-bucket' })] };
+
+  addOrganizationsFromPage(organizationBuckets, response, 'sandbox', '');
+
+  assert.deepEqual([...organizationBuckets], [['vumc', 'vumc-bucket']]);
+});
+
+test('addOrganizationsFromPage skips a sibling stack that shares the tags but has no WebsiteBucket output', () => {
+  const organizationBuckets = new Map();
+  const response = {
+    Stacks: [
+      stack('adit-sandbox-vumc', 'vumc'),
+      stack('careops-sandbox-vumc', 'vumc', { websiteBucket: 'vumc-bucket' }),
+    ],
+  };
+
+  // adit-sandbox-vumc matched stage=sandbox/organization=vumc but is not a website stack.
+  addOrganizationsFromPage(organizationBuckets, response, 'sandbox', '');
+
+  assert.deepEqual([...organizationBuckets], [['vumc', 'vumc-bucket']]);
+});
+
+test('addOrganizationsFromPage throws when two website stacks claim the same organization', () => {
+  const organizationBuckets = new Map();
+  const response = {
+    Stacks: [
+      stack('careops-sandbox-vumc', 'vumc', { websiteBucket: 'vumc-bucket' }),
+      stack('careops-sandbox-vumc-dupe', 'vumc', { websiteBucket: 'other-bucket' }),
+    ],
+  };
+
+  assert.throws(
+    () => addOrganizationsFromPage(organizationBuckets, response, 'sandbox', ''),
+    /Duplicate CloudFormation targets/,
+  );
+});
 
 test('buildDeployMarkerEnvironments retains wildcard and adds sorted concrete environments', () => {
   assert.deepEqual(

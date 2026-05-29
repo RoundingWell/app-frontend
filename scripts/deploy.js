@@ -43,10 +43,6 @@ function getTagValue(deploymentTarget, key) {
   return deploymentTarget.Tags?.find(tag => tag.Key === key)?.Value || '';
 }
 
-function getTargetName(deploymentTarget) {
-  return deploymentTarget.StackName || '<unknown-stack>';
-}
-
 function isDeployableTarget(deploymentTarget) {
   return DEPLOYABLE_STATUSES.has(deploymentTarget.StackStatus);
 }
@@ -101,7 +97,7 @@ async function listStageOrganizations(cfClient, stage, filterOrganization) {
  * @param {string} stage - Deployment stage
  * @param {string} filterOrganization - Optional specific organization identifier to filter
  */
-function addOrganizationsFromPage(organizationBuckets, response, stage, filterOrganization) {
+export function addOrganizationsFromPage(organizationBuckets, response, stage, filterOrganization) {
   for (const deploymentTarget of response.Stacks || []) {
     if (!isDeployableTarget(deploymentTarget)) continue;
     if (!matchesOrganizationTarget(deploymentTarget, stage, filterOrganization)) continue;
@@ -111,11 +107,11 @@ function addOrganizationsFromPage(organizationBuckets, response, stage, filterOr
 
     if (!shouldIncludeDeployTarget(stage, filterOrganization, organizationIdentifier)) continue;
 
-    if (!bucketName) {
-      throw new Error(
-        `CloudFormation target ${ getTargetName(deploymentTarget) } matched stage=${ stage } and organization=${ organizationIdentifier } but has no WebsiteBucket output`,
-      );
-    }
+    // The stage/organization tags are shared across every stack for an org (website,
+    // adit, backend, ...), so they cannot identify the website stack on their own.
+    // The WebsiteBucket output is the only tag-independent signal of a deploy target,
+    // so a matched stack without it is a sibling stack we simply skip.
+    if (!bucketName) continue;
 
     if (organizationBuckets.has(organizationIdentifier)) {
       throw new Error(
