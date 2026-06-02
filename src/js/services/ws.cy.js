@@ -270,6 +270,159 @@ context('WS Service', function() {
       .should('be.calledWith', testData([notifications[0], notifications[1]]));
   });
 
+  specify('Subscribing with filters and no resources', function() {
+    const channel = Radio.channel('ws');
+    const filters = {
+      category: 'Action',
+      status: ['active'],
+    };
+
+    channel.request('subscribe', [], { filters });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('be.calledWith', {
+        name: 'Subscribe',
+        data: {
+          clientKey,
+          workspace,
+          resources: [],
+          subscriptionVersion: Cypress.sinon.match.string,
+          filters,
+        },
+      });
+  });
+
+  specify('Resubscribing filter-only subscriptions after socket close', function() {
+    const channel = Radio.channel('ws');
+    const filters = {
+      category: 'Flow',
+      status: ['active'],
+    };
+
+    cy
+      .startService()
+      .then(() => {
+        channel.request('subscribe', [], { filters });
+        const subscriptionVersion = service.subscriptionVersion;
+
+        service.ws.close();
+
+        return cy.get('@startService').should('be.calledTwice').then(spy => {
+          const secondCall = spy.getCall(1);
+
+          expect(secondCall.args[0]).to.deep.equal({
+            state: {},
+            data: {
+              name: 'Subscribe',
+              data: {
+                clientKey,
+                workspace,
+                resources: [],
+                subscriptionVersion: service.subscriptionVersion,
+                filters,
+              },
+            },
+          });
+          expect(service.subscriptionVersion).to.not.equal(subscriptionVersion);
+        });
+      });
+  });
+
+  specify('Ignoring empty filters without subscribed resources', function() {
+    const channel = Radio.channel('ws');
+
+    cy
+      .startService()
+      .then(() => {
+        channel.request('subscribe', [], { filters: {} });
+      })
+      .get('@wsHandleMessage')
+      .should('be.calledWith', {
+        name: 'Subscribe',
+        data: {
+          clientKey,
+          workspace,
+          resources: [],
+          subscriptionVersion: Cypress.sinon.match.string,
+        },
+      })
+      .then(() => {
+        service.ws.close();
+      });
+
+    cy
+      .get('@startService')
+      .should('be.calledOnce');
+  });
+
+  specify('Clearing filters before reconnecting resource subscriptions', function() {
+    const channel = Radio.channel('ws');
+    const resource = { id: 'foo', type: 'bar' };
+
+    cy
+      .startService()
+      .then(() => {
+        channel.request('subscribe', [], {
+          filters: {
+            category: 'Action',
+          },
+        });
+      })
+      .get('@wsHandleMessage')
+      .should('be.calledWith', {
+        name: 'Subscribe',
+        data: {
+          clientKey,
+          workspace,
+          resources: [],
+          subscriptionVersion: Cypress.sinon.match.string,
+          filters: {
+            category: 'Action',
+          },
+        },
+      })
+      .then(() => {
+        channel.request('subscribe', resource);
+      })
+      .get('@wsHandleMessage')
+      .should('have.been.calledTwice')
+      .then(spy => {
+        expect(spy.lastCall.args[0]).to.deep.equal({
+          name: 'Subscribe',
+          data: {
+            clientKey,
+            workspace,
+            resources: [resource],
+            subscriptionVersion: service.subscriptionVersion,
+          },
+        });
+      })
+      .then(() => {
+        service.ws.close();
+      });
+
+    cy
+      .get('@startService')
+      .should('be.calledTwice')
+      .then(spy => {
+        const call = spy.getCall(1);
+
+        expect(call.args[0]).to.deep.equal({
+          state: {},
+          data: {
+            name: 'Subscribe',
+            data: {
+              clientKey,
+              workspace,
+              resources: [resource],
+              subscriptionVersion: service.subscriptionVersion,
+            },
+          },
+        });
+      });
+  });
+
   specify('auth token added to websocket URL', function() {
     cy
       .startService()
