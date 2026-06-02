@@ -1,4 +1,4 @@
-import { each, map, values, isArray } from 'underscore';
+import { each, map, values, isArray, isEmpty } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import { v4 as uuid } from 'uuid';
@@ -78,7 +78,7 @@ export default App.extend({
       subscriptionVersion: this.subscriptionVersion,
     };
 
-    if (this.filters) data.filters = this.filters;
+    if (this._hasFilters()) data.filters = this.filters;
 
     this.send({
       name: 'Subscribe',
@@ -109,8 +109,12 @@ export default App.extend({
     this.ws.send(JSON.stringify(data));
   },
 
+  _hasFilters() {
+    return !isEmpty(this.filters);
+  },
+
   _hasSubscription() {
-    return this.resources.length || this.filters;
+    return !!this.resources.length || this._hasFilters();
   },
 
   onOpen(data) {

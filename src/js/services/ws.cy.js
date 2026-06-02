@@ -329,6 +329,33 @@ context('WS Service', function() {
       });
   });
 
+  specify('Ignoring empty filters without subscribed resources', function() {
+    const channel = Radio.channel('ws');
+
+    cy
+      .startService()
+      .then(() => {
+        channel.request('subscribe', [], { filters: {} });
+      })
+      .get('@wsHandleMessage')
+      .should('be.calledWith', {
+        name: 'Subscribe',
+        data: {
+          clientKey,
+          workspace,
+          resources: [],
+          subscriptionVersion: Cypress.sinon.match.string,
+        },
+      })
+      .then(() => {
+        service.ws.close();
+      });
+
+    cy
+      .get('@startService')
+      .should('be.calledOnce');
+  });
+
   specify('Clearing filters before reconnecting resource subscriptions', function() {
     const channel = Radio.channel('ws');
     const resource = { id: 'foo', type: 'bar' };
