@@ -24,7 +24,7 @@ const Entity = BaseEntity.extend({
       });
   },
   fetchByWorkspace(workspaceId) {
-    const url = `/api/workspaces/${ workspaceId }/relationships/clinicians`;
+    const url = `/api/workspaces/${ workspaceId }/clinicians`;
     const workspace = Radio.request('entities', 'workspaces:model', workspaceId);
 
     return this.fetchCollectionCache({ url })
