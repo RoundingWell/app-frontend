@@ -109,6 +109,10 @@ export default App.extend({
     this.ws.send(JSON.stringify(data));
   },
 
+  _hasSubscription() {
+    return this.resources.length || this.filters;
+  },
+
   onOpen(data) {
     if (data) this.sendData(data);
     this.startHeartbeat();
@@ -131,8 +135,8 @@ export default App.extend({
 
   onClose() {
     this.stopHeartbeat();
-    /* istanbul ignore next: resubscribing in tests causes test leaking */
-    if (!_TEST_ && this.resources.length) this._subscribe();
+    if (!this.isRunning()) return;
+    if (this._hasSubscription()) this._subscribe();
   },
 
   triggerMessage(data, model) {
