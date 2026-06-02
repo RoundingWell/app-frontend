@@ -9,7 +9,7 @@ const Entity = BaseEntity.extend({
     'fetch:comments:collection:byAction': 'fetchCommentsByAction',
   },
   fetchCommentsByAction(actionId) {
-    const url = `/api/actions/${ actionId }/relationships/comments`;
+    const url = `/api/actions/${ actionId }/comments`;
 
     return this.fetchCollection({ url });
   },

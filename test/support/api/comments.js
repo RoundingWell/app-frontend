@@ -28,7 +28,7 @@ Cypress.Commands.add('routeActionComments', (mutator = _.identity) => {
   const data = getComments();
 
   cy
-    .intercept('GET', '/api/actions/**/relationships/comments', {
+    .intercept('GET', '/api/actions/**/comments', {
       body: mutator({ data, included: [] }),
     })
     .as('routeActionComments');
