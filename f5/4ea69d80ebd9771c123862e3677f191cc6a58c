@@ -1,0 +1,58 @@
+src/js/services/ws.cy.js
+  s_ad5c04bd2d2b47::t_7b3790028572da 269-273
+  s_ad5c04bd2d2b47::t_ddb6b742674296 216-220
+  s_ad5c04bd2d2b47::t_3133460d98f050 259-263,278-279,289-290,297-298,305-306
+  s_ad5c04bd2d2b47::t_4f813721697c32 330-331
+  s_ad5c04bd2d2b47::t_bcecae4a06639f 624-625,633,636-640,642
+  s_ad5c04bd2d2b47::t_90a85292a62c97 408-527
+  s_ad5c04bd2d2b47::t_a6c0ccc038c0e1 275-277,286-288,295-296,303-304
+  s_ad5c04bd2d2b47::t_487f815be83e7a 215,224,237,240,268,317,325,332,337
+  s_6d0dd6537d3367::t_6f5741ed8e1f5b 557,565-573,575-577,585-591,593-597,599-602,604-608,610,612
+  s_6d0dd6537d3367::t_7231c2a89d6e35 562-563,592,674-689
+  s_6d0dd6537d3367::t_b513c83bcdaa1c 574
+  s_ad5c04bd2d2b47::t_2315f9a29b5a38 627-629
+  s_ad5c04bd2d2b47::t_1edcd1997b3906 630
+  s_ad5c04bd2d2b47::t_c6b5d2b7a961cd 206-214,221-223,225-236,238-239,241-258,264-267,274,280-285,291-294,299-302,307-316,323-324,326-329,333-336,338-340
+  s_ad5c04bd2d2b47::t_34b5acc1393549 647-650
+  s_ad5c04bd2d2b47::t_b0717217315448 318-322
+  s_6d0dd6537d3367::t_6d98524c86fdcb 579-580,583
+  s_ad5c04bd2d2b47::t_5d223fd3e02be5 616-623,626,631-632,634-635,641,643-646,651-673
+  s_6d0dd6537d3367::t_5b8e6252d94831 581-582
+src/js/services/ws.js
+  s_ad5c04bd2d2b47::t_9919544c6ccf5b 331
+  s_ad5c04bd2d2b47::t_b0380cbfcf90f3 341
+  s_ad5c04bd2d2b47::t_ea9107bef0d554 191-197
+  s_ad5c04bd2d2b47::t_3a8987c6e50f9f 76-88,90-96,98-101
+  s_ad5c04bd2d2b47::t_3e87a7ee273542 190,215-230,233,249
+  s_ad5c04bd2d2b47::t_c05863c662f062 235-237
+  s_ad5c04bd2d2b47::t_0c2d5503dd9262 241-246,251
+  s_ad5c04bd2d2b47::t_4b34161826f6de 22-25
+  s_6d0dd6537d3367::t_8862b22d0d8a84 26-28,44,156-184,186-187,238-240,247-248,250
+  s_6d0dd6537d3367::t_f91e8bbf002a17 89
+  s_ad5c04bd2d2b47::t_ca5ffd2daa5493 120-122
+  s_ad5c04bd2d2b47::t_09885f1f3cfb8a 312,318
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "f54ea69d80ebd9771c123862e3677f191cc6a58c",
+  "prompts": {},
+  "sessions": {
+    "s_6d0dd6537d3367": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e88d2-72c6-71c1-b061-e5c5e2252ff3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_ad5c04bd2d2b47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f2292312-c0e1-4410-8e55-04dcb8e37db7",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
