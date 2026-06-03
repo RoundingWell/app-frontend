@@ -1,4 +1,5 @@
 import _ from 'underscore';
+import { v4 as uuid } from 'uuid';
 import { getResource, getRelationship, mergeJsonApi } from 'helpers/json-api';
 
 import fxPrograms from 'fixtures/collections/programs';
@@ -27,7 +28,7 @@ function getProgramResource(id, defaultRelationships) {
 
   if (testWorkspace) return mergeJsonApi(testWorkspace, { relationships: defaultRelationships });
 
-  return getResource(_.sample(fxSamplePrograms), TYPE, defaultRelationships);
+  return getResource({ ..._.sample(fxSamplePrograms), id: uuid() }, TYPE, defaultRelationships);
 }
 
 export function getProgram(data, { depth = 0, id } = {}) {
