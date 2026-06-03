@@ -103,7 +103,7 @@ Cypress.Commands.add('routeWorkspaceClinicians', (mutator = _.identity) => {
   const data = [{ id: fxCurrentClinician.id, type: TYPE }, ...getClinicians()];
 
   cy
-    .intercept('GET', '/api/workspaces/**/relationships/clinicians*', {
+    .intercept('GET', '/api/workspaces/**/clinicians*', {
       body: mutator({ data, included: [] }),
     })
     .as('routeWorkspaceClinicians');

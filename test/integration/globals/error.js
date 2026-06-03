@@ -125,7 +125,7 @@ context('Global Error Page', function() {
     });
 
     cy
-      .intercept('GET', '/api/workspaces/**/relationships/clinicians*', {
+      .intercept('GET', '/api/workspaces/**/clinicians*', {
         statusCode: 500,
         body: {},
       })
