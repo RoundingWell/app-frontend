@@ -1,0 +1,24 @@
+test/support/api/forms.js
+  s_74fc403b85ce4e::t_0ee145f035960e 28
+  s_74fc403b85ce4e::t_e1d61a248a7c4e 29-36
+src/js/entities-service/forms.js
+  s_74fc403b85ce4e::t_420dc1681a3ceb 21,28
+  s_74fc403b85ce4e::t_e1d61a248a7c4e 7-8,15
+  s_74fc403b85ce4e::t_6d1f6178f78354 22-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "03f0414760b95652af266e7ccc7bcaea5f82c5a6",
+  "prompts": {},
+  "sessions": {
+    "s_74fc403b85ce4e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9151-b593-7143-95cf-18e836f533f9",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
