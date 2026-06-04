@@ -1,0 +1,13 @@
+src/js/services/ws.cy.js
+  ai_agent 206-390,458-599,629,634-635,637-651,653-657,659-671,673-676,678-682,684,686-758,762-777
+src/js/services/ws.js
+  ai_agent 7,23-29,45,51-52,77-95,97-98,117-118,152-180,182-183,186,204-219,222,224-238,299,305,318,328
+test/integration/patients/patient/dashboard.js
+  ai_agent 1310,1606
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "23e1533a48e8c68663aa7bd47214a58a6bd59226",
+  "prompts": {}
+}
