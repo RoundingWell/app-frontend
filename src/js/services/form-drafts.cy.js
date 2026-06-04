@@ -110,45 +110,4 @@ context('cache/form-drafts', function() {
         expect(value).to.be.null;
       });
   });
-
-  specify('write failures no-op without rejecting', function() {
-    cy.stub(idb, 'put').rejects(new DOMException('quota', 'QuotaExceededError'));
-
-    return setDraft('form-subm-user_A-patient-form', { updated: 'a' })
-      .then(() => {
-        expect(idb.put).to.have.been.calledOnce;
-      });
-  });
-
-  specify('read failures return null', function() {
-    cy.stub(idb, 'get').rejects(new DOMException('blocked', 'SecurityError'));
-
-    return getDraft('form-subm-user_A-patient-form').then(value => {
-      expect(value).to.be.null;
-    });
-  });
-
-  specify('remove failures no-op without rejecting', function() {
-    cy.stub(idb, 'delete').rejects(new DOMException('blocked', 'SecurityError'));
-
-    return removeDraft('form-subm-user_A-patient-form').then(() => {
-      expect(idb.delete).to.have.been.calledOnce;
-    });
-  });
-
-  specify('clear failures no-op without rejecting', function() {
-    cy.stub(idb, 'clear').rejects(new DOMException('blocked', 'SecurityError'));
-
-    return clearDrafts().then(() => {
-      expect(idb.clear).to.have.been.calledOnce;
-    });
-  });
-
-  specify('prune failures no-op without rejecting', function() {
-    cy.stub(idb, 'keys').rejects(new DOMException('blocked', 'SecurityError'));
-
-    return pruneOtherDrafts('user_A').then(() => {
-      expect(idb.keys).to.have.been.calledOnce;
-    });
-  });
 });

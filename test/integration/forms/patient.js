@@ -28,6 +28,7 @@ const testReadOnlyForm = getForm({
 context('Patient Form', function() {
   beforeEach(function() {
     cy
+      .clearFormDrafts()
       .routeWorkspacePatient();
   });
 
@@ -166,6 +167,8 @@ context('Patient Form', function() {
   });
 
   specify('storing stored submission', function() {
+    const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`;
+
     cy
       .routeForm(fx => {
         fx.data = testForm;
@@ -200,13 +203,10 @@ context('Patient Form', function() {
       });
 
     cy
-      .window()
-      .should(win => {
-        const storage = win.localStorage.getItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`);
-
-        expect(storage, 'draft storage').to.exist;
-
-        expect(JSON.parse(storage).submission.fields.foo).to.equal('bar');
+      .waitForFormDraft(draftKey, { exists: true })
+      .should(draft => {
+        expect(draft, 'draft storage').to.exist;
+        expect(draft.submission.fields.foo).to.equal('bar');
       });
 
     cy
@@ -234,12 +234,12 @@ context('Patient Form', function() {
   });
 
   specify('restoring draft', function() {
-    localStorage.setItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, JSON.stringify({
+    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, {
       updated: testTsSubtract(1),
       submission: {
         fields: { foo: 'foo' },
       },
-    }));
+    });
 
     cy
       .routeForm(fx => {
@@ -297,12 +297,12 @@ context('Patient Form', function() {
   });
 
   specify('restoring stored submission', function() {
-    localStorage.setItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, JSON.stringify({
+    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, {
       updated: testTs(),
       submission: {
         fields: { foo: 'foo' },
       },
-    }));
+    });
 
     cy
       .routeForm(fx => {
@@ -360,12 +360,14 @@ context('Patient Form', function() {
   });
 
   specify('discarding stored submission', function() {
-    localStorage.setItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, JSON.stringify({
+    const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`;
+
+    cy.setFormDraft(draftKey, {
       updated: testTs(),
       submission: {
         fields: { foo: 'foo' },
       },
-    }));
+    });
 
     cy
       .routeForm(fx => {
@@ -423,6 +425,12 @@ context('Patient Form', function() {
       .should('not.contain', 'Last edit was');
 
     cy
+      .waitForFormDraft(draftKey, { exists: false })
+      .should(draft => {
+        expect(draft).to.be.null;
+      });
+
+    cy
       .get('iframe')
       .should(([iframe]) => {
         const { receivedMessages } = iframe.contentWindow.iframeStub;
@@ -433,12 +441,12 @@ context('Patient Form', function() {
   });
 
   specify('read only form', function() {
-    localStorage.setItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testReadOnlyForm.id }`, JSON.stringify({
+    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testReadOnlyForm.id }`, {
       updated: testTs(),
       submission: {
         fields: { foo: 'foo' },
       },
-    }));
+    });
 
     cy
       .routePatient(fx => {
