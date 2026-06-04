@@ -1,0 +1,31 @@
+src/js/auth.cy.js
+  s_e997a78bf5d765::t_06cb8e2324095a 3,5
+  s_e997a78bf5d765::t_7d912683a19bbe 6
+  s_e997a78bf5d765::t_6baae7b764a9ac 7-17,20-62
+src/js/auth.js
+  s_e997a78bf5d765::t_02f3a78261883f 96,105-108
+  s_e997a78bf5d765::t_7d912683a19bbe 14
+src/js/base/cache/idb.js
+  s_e997a78bf5d765::t_02f3a78261883f 5-6
+src/js/services/form-drafts.js
+  s_e997a78bf5d765::t_1b56eb6ddb08ed 1-61
+src/js/services/form-drafts.cy.js
+  s_e997a78bf5d765::t_1b56eb6ddb08ed 2-154
+  s_e997a78bf5d765::t_7d912683a19bbe 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "06c89f92fe20990f843df912a96916776aa0a62f",
+  "prompts": {},
+  "sessions": {
+    "s_e997a78bf5d765": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e917a-44cf-77e3-82e5-294bbb031211",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
