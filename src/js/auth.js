@@ -11,6 +11,7 @@ import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
 import { addAction } from 'js/datadog';
 
 import { clearCache, pruneOtherPartitions } from 'js/base/cache/entity-cache';
+import { clearDrafts, pruneOtherDrafts } from 'js/services/form-drafts';
 
 import 'scss/app-root.scss';
 
@@ -92,7 +93,7 @@ Radio.reply('auth', {
 
 async function auth() {
   if (location.pathname === AuthProvider.PATH_LOGOUT) {
-    await clearCache();
+    await Promise.all([clearCache(), clearDrafts()]);
   }
 
   const agent = await getAuthAgent();
@@ -101,7 +102,10 @@ async function auth() {
     agent.auth(async() => {
       try {
         cachedUserId = await agent.getUserId();
-        await pruneOtherPartitions(cachedUserId);
+        await Promise.all([
+          pruneOtherPartitions(cachedUserId),
+          pruneOtherDrafts(cachedUserId),
+        ]);
       } catch {
         // swallow — boot without cache rather than crash auth.
       }

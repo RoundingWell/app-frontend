@@ -2,8 +2,8 @@ import { openDB } from 'idb';
 
 const DB_NAME = 'careops-cache';
 // IndexedDB database version — bump only for object-store schema changes.
-const DB_VERSION = 1;
-const STORES = ['entities'];
+const DB_VERSION = 2;
+const STORES = ['entities', 'formDrafts'];
 
 let dbPromise;
 
