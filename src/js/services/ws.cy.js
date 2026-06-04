@@ -203,6 +203,35 @@ context('WS Service', function() {
       .sendWs({ name: 'pong' });
   });
 
+  specify('Clearing timers on stop', function() {
+    const channel = Radio.channel('ws');
+    const resource = { id: 'foo', type: 'bar' };
+
+    cy
+      .startService()
+      .then(() => {
+        service.HEART_BEAT_INTERVAL = 10;
+        cy.spy(service, 'sendData').as('sendData');
+      });
+
+    cy.clock();
+    cy
+      .then(() => {
+        channel.request('subscribe', resource);
+      })
+      .get('@sendData')
+      .should('be.calledOnce')
+      .then(() => {
+        service.stop();
+        service.sendData.resetHistory();
+      });
+
+    cy
+      .tick(10)
+      .get('@sendData')
+      .should('not.be.called');
+  });
+
   specify('Subscribing', function() {
     const notifications = [
       { id: 'foo', type: 'bar' },
@@ -299,34 +328,161 @@ context('WS Service', function() {
       category: 'Flow',
       status: ['active'],
     };
+    let subscriptionVersion;
 
     cy
       .startService()
       .then(() => {
+        service.RECONNECT_BASE_DELAY = 1000;
+        cy.stub(Math, 'random').returns(0);
         channel.request('subscribe', [], { filters });
-        const subscriptionVersion = service.subscriptionVersion;
-
-        service.ws.close();
-
-        return cy.get('@startService').should('be.calledTwice').then(spy => {
-          const secondCall = spy.getCall(1);
-
-          expect(secondCall.args[0]).to.deep.equal({
-            state: {},
-            data: {
-              name: 'Subscribe',
-              data: {
-                clientKey,
-                workspace,
-                resources: [],
-                subscriptionVersion: service.subscriptionVersion,
-                filters,
-              },
-            },
-          });
-          expect(service.subscriptionVersion).to.not.equal(subscriptionVersion);
-        });
+      })
+      .get('@wsHandleMessage')
+      .should('be.calledWith', {
+        name: 'Subscribe',
+        data: {
+          clientKey,
+          workspace,
+          resources: [],
+          subscriptionVersion: Cypress.sinon.match.string,
+          filters,
+        },
+      })
+      .then(() => {
+        subscriptionVersion = service.subscriptionVersion;
       });
+
+    cy.clock();
+    cy.then(() => {
+      service.ws.readyState = WebSocket.CLOSED;
+      service.onClose();
+    });
+
+    cy
+      .get('@startService')
+      .should('be.calledOnce')
+      .tick(999)
+      .get('@startService')
+      .should('be.calledOnce')
+      .tick(1);
+
+    cy
+      .get('@startService')
+      .should('be.calledTwice')
+      .then(spy => {
+        const secondCall = spy.getCall(1);
+
+        expect(secondCall.args[0]).to.deep.equal({
+          state: {},
+          data: {
+            name: 'Subscribe',
+            data: {
+              clientKey,
+              workspace,
+              resources: [],
+              subscriptionVersion: service.subscriptionVersion,
+              filters,
+            },
+          },
+        });
+        expect(service.subscriptionVersion).to.not.equal(subscriptionVersion);
+      });
+  });
+
+  specify('Skipping reconnect without active subscriptions', function() {
+    const channel = Radio.channel('ws');
+
+    cy
+      .startService()
+      .then(() => {
+        service.RECONNECT_BASE_DELAY = 1000;
+        channel.request('subscribe', []);
+      });
+
+    cy.clock();
+    cy
+      .then(() => {
+        service.ws.readyState = WebSocket.CLOSED;
+        service.onClose();
+        // No subscription, so no reconnect was scheduled.
+        expect(service.reconnect).to.be.undefined;
+      })
+      .tick(1000)
+      .get('@startService')
+      .should('be.calledOnce');
+  });
+
+  specify('Skipping scheduled resubscribe after subscriptions clear', function() {
+    cy
+      .startService()
+      .then(() => {
+        service.RECONNECT_BASE_DELAY = 1000;
+        cy.stub(Math, 'random').returns(0);
+        cy.spy(service, '_subscribe').as('_subscribe');
+      });
+
+    cy.clock();
+    cy.then(() => {
+      // Schedule a reconnect with no resources, so the timer is a no-op.
+      service.startReconnect();
+    });
+
+    cy
+      .tick(1000)
+      .get('@_subscribe')
+      .should('not.be.called')
+      .then(() => {
+        expect(service.reconnect).to.be.null;
+      });
+  });
+
+  specify('Applying reconnect backoff and jitter', function() {
+    service.RECONNECT_BASE_DELAY = 1000;
+    service.RECONNECT_MAX_DELAY = 3000;
+
+    // Jitter spans [0, RECONNECT_BASE_DELAY); 0.5 => +500.
+    cy
+      .stub(Math, 'random')
+      .returns(0.5);
+
+    service.reconnectAttempts = 0;
+    expect(service._getReconnectDelay()).to.equal(1500);
+
+    service.reconnectAttempts = 1;
+    expect(service._getReconnectDelay()).to.equal(2500);
+
+    // Backoff is capped at RECONNECT_MAX_DELAY.
+    service.reconnectAttempts = 2;
+    expect(service._getReconnectDelay()).to.equal(3500);
+
+    service.reconnectAttempts = 8;
+    expect(service._getReconnectDelay()).to.equal(3500);
+  });
+
+  specify('Resetting backoff and clearing a pending reconnect when the socket opens', function() {
+    cy
+      .startService()
+      .then(() => {
+        service.RECONNECT_BASE_DELAY = 1000;
+        service.reconnectAttempts = 3;
+        cy.spy(service, '_subscribe').as('_subscribe');
+      });
+
+    cy.clock();
+    cy.then(() => {
+      service.startReconnect();
+      expect(service.reconnect).to.not.be.null;
+
+      // A successful (re)open resets backoff and cancels the pending reconnect.
+      service.onOpen();
+      expect(service.reconnectAttempts).to.equal(0);
+      expect(service.reconnect).to.be.null;
+    });
+
+    cy
+      .tick(1000)
+      .get('@_subscribe')
+      .should('not.be.called');
   });
 
   specify('Ignoring empty filters without subscribed resources', function() {

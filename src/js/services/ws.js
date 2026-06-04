@@ -4,6 +4,7 @@ import Radio from 'backbone.radio';
 import { v4 as uuid } from 'uuid';
 
 import App from 'js/base/app';
+import fetcher, { handleJSON } from 'js/base/fetch';
 
 const AdderApp = App.extend({
   restartWithParent: false,
@@ -19,6 +20,8 @@ const AdderApp = App.extend({
 
 export default App.extend({
   HEART_BEAT_INTERVAL: 50000,
+  RECONNECT_BASE_DELAY: 1000,
+  RECONNECT_MAX_DELAY: 30000,
   channelName: 'ws',
 
   radioRequests: {
@@ -34,13 +37,14 @@ export default App.extend({
     this.resources = new Backbone.Collection();
     this.persistent = {};
     this.ws = {};
+    this.reconnectAttempts = 0;
   },
 
   getUrl() {
     if (this.url) return this.url;
 
-    return fetch('/api/websockets')
-      .then(response => response.json())
+    return fetcher('/api/websockets')
+      .then(handleJSON)
       .then(({ data }) => {
         if (!data.is_enabled) return;
         this.url = new URL(data.endpoint);
@@ -118,6 +122,8 @@ export default App.extend({
   },
 
   onOpen(data) {
+    this.stopReconnect();
+    this.reconnectAttempts = 0;
     if (data) this.sendData(data);
     this.startHeartbeat();
   },
@@ -137,10 +143,40 @@ export default App.extend({
     this.heartBeat = null;
   },
 
+  _getReconnectDelay() {
+    const backoff = Math.min(this.RECONNECT_MAX_DELAY, this.RECONNECT_BASE_DELAY * (2 ** this.reconnectAttempts));
+
+    return backoff + Math.floor(Math.random() * this.RECONNECT_BASE_DELAY);
+  },
+
+  startReconnect() {
+    this.stopReconnect();
+
+    this.reconnect = setTimeout(() => {
+      this.reconnect = null;
+      if (!this.isRunning() || !this._hasSubscription()) return;
+      this._subscribe();
+    }, this._getReconnectDelay());
+
+    this.reconnectAttempts += 1;
+  },
+
+  stopReconnect() {
+    if (!this.reconnect) return;
+
+    clearTimeout(this.reconnect);
+    this.reconnect = null;
+  },
+
   onClose() {
     this.stopHeartbeat();
-    if (!this.isRunning()) return;
-    if (this._hasSubscription()) this._subscribe();
+    if (!this.isRunning() || !this._hasSubscription()) return;
+    this.startReconnect();
+  },
+
+  onBeforeStop() {
+    this.stopHeartbeat();
+    this.stopReconnect();
   },
 
   triggerMessage(data, model) {
