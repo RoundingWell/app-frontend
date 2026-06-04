@@ -4,17 +4,28 @@ import { _Model, Model, Collection } from './entities/forms';
 
 import BaseModel from 'js/base/model';
 
+const FORM_COLLECTION_FIELDS = ['name', 'details', 'created_at', 'updated_at'];
+
 const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
   radioRequests: {
     'forms:model': 'getModel',
     'forms:collection': 'getCollection',
     'fetch:forms:model': 'fetchModel',
-    'fetch:forms:collection': 'fetchCollectionCache',
+    'fetch:forms:collection': 'fetchFormsCollection',
     'fetch:forms:definition': 'fetchDefinition',
     'fetch:forms:data': 'fetchFormData',
     'fetch:forms:byAction': 'fetchByAction',
     'fetch:forms:definition:byAction': 'fetchDefinitionByAction',
+  },
+  fetchFormsCollection() {
+    const data = {
+      fields: {
+        forms: FORM_COLLECTION_FIELDS,
+      },
+    };
+
+    return this.fetchCollectionCache({ data });
   },
   fetchDefinition(formId) {
     return fetcher(`/api/forms/${ formId }/definition`).then(handleJSON);
