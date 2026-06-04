@@ -8,6 +8,26 @@ import WSService from './ws';
 let service;
 const clientKey = 'clientKey';
 const workspace = 'workspaceId';
+const endpoint = 'ws://cypress-websocket/ws';
+
+function getWsResponse(token, options = {}) {
+  return {
+    statusCode: 200,
+    body: {
+      data: {
+        is_enabled: true,
+        endpoint,
+        authentication: {
+          type: 'connect-token',
+          token,
+          query_parameter: 'connect_token',
+          expires_in: 60,
+        },
+        ...options,
+      },
+    },
+  };
+}
 
 Cypress.Commands.add('startService', () => {
   const startStub = cy.stub().as('startService');
@@ -27,20 +47,16 @@ context('WS Service', function() {
     Radio.reply('workspace', 'current', { id: workspace });
     Radio.reply('auth', 'getToken', () => 'Bearer token');
 
+    let tokenId = 0;
+
     cy
-      .intercept('GET', '/api/websockets', {
-        statusCode: 200,
-        body: {
-          data: {
-            is_enabled: true,
-            endpoint: 'ws://cypress-websocket/ws',
-          },
-        },
+      .intercept('GET', '/api/websockets', req => {
+        tokenId += 1;
+        req.reply(getWsResponse(`connect-token-${ tokenId }`));
       })
       .as('websocketsApi');
 
-    const url = 'ws://cypress-websocket/ws';
-    cy.mockWs(url);
+    cy.mockWs(endpoint);
     service = new WSService();
   });
 
@@ -579,12 +595,58 @@ context('WS Service', function() {
       });
   });
 
-  specify('auth token added to websocket URL', function() {
+  specify('websocket config request includes normal auth', function() {
+    cy.startService();
+
+    cy
+      .wait('@websocketsApi')
+      .then(({ request }) => {
+        expect(request.headers.authorization).to.equal('Bearer token');
+        expect(request.headers.workspace).to.equal(workspace);
+        expect(request.headers['client-key']).to.equal(clientKey);
+      });
+  });
+
+  specify('connect token added to websocket URL', function() {
     cy
       .startService()
       .then(() => {
-        expect(service.url).to.be.instanceOf(URL);
-        expect(service.url.searchParams.get('auth')).to.equal('Bearer token');
+        const url = new URL(service.ws.url);
+
+        expect(url.searchParams.get('connect_token')).to.equal('connect-token-1');
+        expect(url.toString()).to.not.include('Bearer');
+      });
+  });
+
+  specify('reconnecting fetches a fresh connect token', function() {
+    const channel = Radio.channel('ws');
+
+    cy
+      .startService()
+      .then(() => {
+        channel.request('subscribe', { id: 'foo', type: 'bar' });
+        service.ws.close();
+      });
+
+    cy
+      .get('@startService')
+      .should('be.calledTwice')
+      .then(() => {
+        const url = new URL(service.ws.url);
+
+        expect(url.searchParams.get('connect_token')).to.equal('connect-token-2');
+      });
+
+    cy
+      .get('@websocketsApi.all')
+      .should('have.length', 2);
+  });
+
+  specify('websocket auth does not use Sec-WebSocket-Protocol', function() {
+    cy
+      .startService()
+      .then(() => {
+        expect(service.ws.protocol).to.equal('');
       });
   });
 });
@@ -602,7 +664,7 @@ context('WS Service - Disabled', function() {
         body: {
           data: {
             is_enabled: false,
-            endpoint: 'ws://cypress-websocket/ws',
+            endpoint,
           },
         },
       })

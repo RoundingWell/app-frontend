@@ -40,6 +40,12 @@ beforeEach(function() {
         data: {
           is_enabled: true,
           endpoint: 'ws://cypress-websocket/ws',
+          authentication: {
+            type: 'connect-token',
+            token: 'connect-token',
+            query_parameter: 'connect_token',
+            expires_in: 60,
+          },
         },
       },
     });
