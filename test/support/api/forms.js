@@ -25,11 +25,16 @@ export function getForms() {
 
 Cypress.Commands.add('routeForms', (mutator = _.identity) => {
   cy
-    .intercept('GET', '/api/forms', {
-      body: mutator({
-        data: getForms(),
-        included: [],
-      }),
+    .intercept({ method: 'GET', pathname: '/api/forms' }, req => {
+      const params = new URL(req.url).searchParams;
+      expect(params.get('fields[forms]')).to.equal('name,details,created_at,updated_at');
+
+      req.reply({
+        body: mutator({
+          data: getForms(),
+          included: [],
+        }),
+      });
     })
     .as('routeForms');
 });
