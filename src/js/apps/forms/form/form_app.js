@@ -208,15 +208,23 @@ export default App.extend({
   onClickHistoryButton() {
     this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id'), shouldShowHistory: !this.getState('shouldShowHistory') });
   },
-  showContent() {
+  canShowStoredSubmission() {
     const responseId = this.getState('responseId');
+    return !this.isReadOnly && !this.isLocked && !responseId;
+  },
+  async showContent() {
+    const showContentRequestId = (this._showContentRequestId || 0) + 1;
+    this._showContentRequestId = showContentRequestId;
 
-    if (this.isReadOnly || this.isLocked || responseId) {
+    if (!this.canShowStoredSubmission()) {
       this.showForm();
       return;
     }
 
-    const { updated } = Radio.request(`form${ this.form.id }`, 'get:storedSubmission');
+    const { updated } = await Radio.request(`form${ this.form.id }`, 'get:storedSubmission');
+
+    /* istanbul ignore if: difficult to force stale async render */
+    if (this.isDestroyed() || this._showContentRequestId !== showContentRequestId || !this.canShowStoredSubmission()) return;
 
     if (updated) {
       const storedSubmissionView = this.showChildView('form', new StoredSubmissionView({ updated }));
@@ -225,8 +233,8 @@ export default App.extend({
         'submit'() {
           this.showForm();
         },
-        'discard:submission'() {
-          Radio.request(`form${ this.form.id }`, 'clear:storedSubmission');
+        async 'discard:submission'() {
+          await Radio.request(`form${ this.form.id }`, 'clear:storedSubmission');
           this.showForm();
           this.showFormActions();
         },

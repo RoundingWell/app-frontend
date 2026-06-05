@@ -24,6 +24,7 @@ import { FORM_RESPONSE_STATUS } from 'js/static';
 context('Patient Action Form', function() {
   beforeEach(function() {
     cy
+      .clearFormDrafts()
       .routeWorkspacePatient()
       .routesForDefault();
   });
@@ -144,6 +145,8 @@ context('Patient Action Form', function() {
       },
     });
 
+    const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`;
+
     cy
       .routeAction(fx => {
         fx.data = testAction;
@@ -183,12 +186,10 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .window()
-      .should(win => {
-        const storage = win.localStorage.getItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`);
-
-        expect(storage, 'draft storage').to.exist;
-        expect(JSON.parse(storage).submission.fields.foo).to.equal('bar');
+      .waitForFormDraft(draftKey, { exists: true })
+      .should(draft => {
+        expect(draft, 'draft storage').to.exist;
+        expect(draft.submission.fields.foo).to.equal('bar');
       });
 
     cy
@@ -224,12 +225,12 @@ context('Patient Action Form', function() {
       },
     });
 
-    localStorage.setItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`, JSON.stringify({
+    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`, {
       updated: testTs(),
       submission: {
         fields: { foo: 'foo' },
       },
-    }));
+    });
 
     cy
       .routeAction(fx => {
@@ -313,12 +314,12 @@ context('Patient Action Form', function() {
       },
     });
 
-    localStorage.setItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`, JSON.stringify({
+    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`, {
       updated: testTsSubtract(1),
       submission: {
         fields: { foo: 'foo' },
       },
-    }));
+    });
 
     cy
       .routeAction(fx => {
@@ -416,12 +417,14 @@ context('Patient Action Form', function() {
       },
     });
 
-    localStorage.setItem(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`, JSON.stringify({
+    const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`;
+
+    cy.setFormDraft(draftKey, {
       updated: testTs(),
       submission: {
         fields: { foo: 'foo' },
       },
-    }));
+    });
 
     cy
       .routeAction(fx => {
@@ -494,6 +497,12 @@ context('Patient Action Form', function() {
       .find('.form__submit-status')
       .should('contain', 'Your work is stored automatically.')
       .should('not.contain', 'Last edit was');
+
+    cy
+      .waitForFormDraft(draftKey, { exists: false })
+      .should(draft => {
+        expect(draft).to.be.null;
+      });
 
     cy
       .iframeStub()

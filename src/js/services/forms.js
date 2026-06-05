@@ -2,9 +2,8 @@ import { map, get, debounce } from 'underscore';
 import dayjs from 'dayjs';
 import Radio from 'backbone.radio';
 
-import localStore from 'js/utils/local-store';
-
 import App from 'js/base/app';
+import { getDraft, setDraft, removeDraft } from 'js/services/form-drafts';
 
 import { FORM_RESPONSE_STATUS } from 'js/static';
 
@@ -92,11 +91,11 @@ export default App.extend({
 
     return (this.latestResponse && this.latestResponse.getDraft()) || {};
   },
-  getStoredSubmission() {
+  async getStoredSubmission() {
     if (this.isReadOnly()) return {};
 
     const draft = this.getLatestDraft();
-    const localDraft = localStore.get(this.getStoreId()) || {};
+    const localDraft = await getDraft(this.getStoreId()) || {};
 
     if (draft.updated && (!localDraft.updated || dayjs(draft.updated).isAfter(localDraft.updated))) {
       this.trigger('update:submission', draft.updated);
@@ -115,22 +114,15 @@ export default App.extend({
     // Cache the draft for debounced updateDraft
     this._draft = submission;
 
-    try {
-      localStore.set(this.getStoreId(), { submission, updated });
-      this.trigger('update:submission', updated);
-    } catch /* istanbul ignore next: Tested locally, test runner borks on CI */ {
-      localStore.each((value, key) => {
-        if (String(key).startsWith('form-subm-')) localStore.remove(key);
-      });
-      localStore.set(this.getStoreId(), { submission, updated });
-    }
+    setDraft(this.getStoreId(), { submission, updated });
+    this.trigger('update:submission', updated);
 
     this.updateDraft();
     this.refreshForm();
   },
-  clearStoredSubmission() {
+  async clearStoredSubmission() {
     this.latestResponse = null;
-    localStore.remove(this.getStoreId());
+    await removeDraft(this.getStoreId());
     this.trigger('update:submission');
   },
   fetchField({ fieldName }, requestId) {
@@ -245,9 +237,9 @@ export default App.extend({
 
     return Radio.request('entities', 'fetch:formResponses:model', get(firstResponse, 'id'));
   },
-  fetchFormData(args, requestId) {
+  async fetchFormData(args, requestId) {
     const message = 'fetch:form:data';
-    const storedSubmission = this.getStoredSubmission();
+    const storedSubmission = await this.getStoredSubmission();
 
     if (storedSubmission.updated) {
       this.send(message, { value: {
@@ -257,25 +249,25 @@ export default App.extend({
       return;
     }
 
-    Promise.all([
-      Radio.request('entities', 'fetch:forms:data', get(this.action, 'id'), this.patient.id, this.form.id),
-      this.fetchLatestFormResponse(),
-    ])
-      .then(([data, response]) => {
-        this.send(message, { value: {
-          isReadOnly: this.isReadOnly(),
-          formData: data.attributes,
-          responseData: response.getFormData(),
-          formSubmission: response.getResponse(),
-          options: this.form.get('options'),
-        } }, requestId);
-      })
-      .catch(
-        /* istanbul ignore next: Don't test BE errors */
-        ({ responseData }) => {
-          this.send(message, { error: responseData }, requestId);
-        },
-      );
+    try {
+      const [data, response] = await Promise.all([
+        Radio.request('entities', 'fetch:forms:data', get(this.action, 'id'), this.patient.id, this.form.id),
+        this.fetchLatestFormResponse(),
+      ]);
+
+      this.send(message, { value: {
+        isReadOnly: this.isReadOnly(),
+        formData: data.attributes,
+        responseData: response.getFormData(),
+        formSubmission: response.getResponse(),
+        options: this.form.get('options'),
+      } }, requestId);
+    } catch(
+      { responseData }
+    ) {
+      /* istanbul ignore next: Don't test BE errors */
+      this.send(message, { error: responseData }, requestId);
+    }
   },
   fetchFormResponse({ responseId }, requestId) {
     const message = 'fetch:form:response';
@@ -340,11 +332,11 @@ export default App.extend({
     const formResponse = Radio.request('entities', 'formResponses:model', data);
 
     return formResponse.saveAll()
-      .then(() => {
+      .then(async() => {
         // Cancel any draft updates or stale form refreshes that may have been queued while the form was submitting
         this.updateDraft.cancel();
         this.refreshForm.cancel();
-        this.clearStoredSubmission();
+        await this.clearStoredSubmission();
         this.trigger('success', formResponse);
       }).catch(({ responseData }) => {
         /* istanbul ignore next: Don't handle non-API errors */
