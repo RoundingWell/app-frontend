@@ -13,7 +13,6 @@ import WidgetsHeaderApp from 'js/apps/forms/widgets/widgets_header_app';
 import {
   LayoutView,
   IframeView,
-  StoredSubmissionView,
   FormStateActionsView,
   StatusView,
   ReadOnlyView,
@@ -141,40 +140,7 @@ export default App.extend({
   onClickExpandButton() {
     this.toggleState('isExpanded');
   },
-  canShowStoredSubmission() {
-    return !this.isReadOnly;
-  },
-  async showContent() {
-    const showContentRequestId = (this._showContentRequestId || 0) + 1;
-    this._showContentRequestId = showContentRequestId;
-
-    if (!this.canShowStoredSubmission()) {
-      this.showForm();
-      return;
-    }
-
-    const { updated } = await Radio.request(`form${ this.form.id }`, 'get:storedSubmission');
-
-    /* istanbul ignore if: difficult to force stale async render */
-    if (this.isDestroyed() || this._showContentRequestId !== showContentRequestId || !this.canShowStoredSubmission()) return;
-
-    if (updated) {
-      const storedSubmissionView = this.showChildView('form', new StoredSubmissionView({ updated }));
-
-      this.listenTo(storedSubmissionView, {
-        'submit'() {
-          this.showForm();
-        },
-        async 'discard:submission'() {
-          await Radio.request(`form${ this.form.id }`, 'clear:storedSubmission');
-          this.showForm();
-          this.showFormActions();
-        },
-      });
-
-      return;
-    }
-
+  showContent() {
     this.showForm();
   },
   showForm(responseId) {

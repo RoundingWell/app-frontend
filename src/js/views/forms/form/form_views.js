@@ -197,45 +197,6 @@ const IframeView = View.extend({
   },
 });
 
-const StoredSubmissionView = View.extend({
-  className: 'form__content',
-  template: hbs`
-    <div class="form__prompt">
-      <h2 class="form__prompt-title">{{ @intl.forms.form.formViews.storedSubmissionView.title }}</h2>
-      <div class="form__prompt-dialog">
-        <div class="flex-shrink">
-          <button class="button--blue button--large js-submit">{{ @intl.forms.form.formViews.storedSubmissionView.submitButton }}</button>
-          <div class="u-margin--t-16">{{formatHTMLMessage (intlGet "forms.form.formViews.storedSubmissionView.updated") updated=(formatDateTime updated "TIME_OR_DAY")}}</div>
-        </div>
-        <div class="flex-shrink">
-          <button class="button-secondary button--large form__discard-button js-discard" style="color:red">{{ @intl.forms.form.formViews.storedSubmissionView.cancelButton }}</button>
-        </div>
-      </div>
-    </div>
-  `,
-  templateContext() {
-    return {
-      updated: this.getOption('updated'),
-    };
-  },
-  triggers: {
-    'click .js-submit': 'submit',
-    'click .js-discard': 'discard',
-  },
-  onDiscard() {
-    const modal = Radio.request('modal', 'show:small', {
-      bodyText: i18n.storedSubmissionView.discardModal.bodyText,
-      headingText: i18n.storedSubmissionView.discardModal.headingText,
-      submitText: i18n.storedSubmissionView.discardModal.submitText,
-      buttonClass: 'button--red',
-      onSubmit: () => {
-        modal.destroy();
-        this.triggerMethod('discard:submission');
-      },
-    });
-  },
-});
-
 const StatusView = View.extend({
   className: 'u-text-align--right',
   template: hbs`{{formatHTMLMessage (intlGet "forms.form.formViews.statusView.label") date=(formatDateTime updated_at "AT_TIME")}}`,
@@ -442,7 +403,6 @@ const HistoryView = View.extend({
 export {
   LayoutView,
   IframeView,
-  StoredSubmissionView,
   FormStateActionsView,
   StatusView,
   ReadOnlyView,

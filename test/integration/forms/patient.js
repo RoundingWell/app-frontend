@@ -270,21 +270,13 @@ context('Patient Form', function() {
       })
       .visitOnClock(`/patient/${ testPatient.id }/form/${ testForm.id }`, { now: testTs() })
       .wait('@routeForm')
-      .wait('@routePatient');
+      .wait('@routePatient')
+      .wait('@routeFormDefinition');
 
     cy
       .get('.form__controls')
       .find('.form__submit-status')
       .should('contain', 'Last edit was a few seconds ago');
-
-    cy
-      .get('.form__content')
-      .should('contain', `Last edit was ${ formatDate(testTs(), 'TIME_OR_DAY') }`)
-      .find('.js-submit')
-      .click();
-
-    cy
-      .wait('@routeFormDefinition');
 
     cy
       .get('iframe')
@@ -333,21 +325,13 @@ context('Patient Form', function() {
       })
       .visitOnClock(`/patient/${ testPatient.id }/form/${ testForm.id }`, { now: testTs() })
       .wait('@routeForm')
-      .wait('@routePatient');
+      .wait('@routePatient')
+      .wait('@routeFormDefinition');
 
     cy
       .get('.form__controls')
       .find('.form__submit-status')
       .should('contain', 'Last edit was a few seconds ago');
-
-    cy
-      .get('.form__content')
-      .should('contain', `Last edit was ${ formatDate(testTs(), 'TIME_OR_DAY') }`)
-      .find('.js-submit')
-      .click();
-
-    cy
-      .wait('@routeFormDefinition');
 
     cy
       .get('iframe')
@@ -356,87 +340,6 @@ context('Patient Form', function() {
         const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
 
         expect(response.args.value.storedSubmission.fields.foo).to.equal('foo');
-      });
-  });
-
-  specify('discarding stored submission', function() {
-    const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`;
-
-    cy.setFormDraft(draftKey, {
-      updated: testTs(),
-      submission: {
-        fields: { foo: 'foo' },
-      },
-    });
-
-    cy
-      .routeForm(fx => {
-        fx.data = testForm;
-
-        return fx;
-      })
-      .routeFormDefinition()
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routeFormFields(fx => {
-        fx.data = getFormFields({
-          attributes: {
-            fields: {
-              foo: 'bar',
-            },
-          },
-        });
-
-        return fx;
-      })
-      .routeLatestFormResponse()
-      .visitOnClock(`/patient/${ testPatient.id }/form/${ testForm.id }`, { now: testTs() })
-      .wait('@routeForm')
-      .wait('@routePatient');
-
-    cy
-      .get('.form__controls')
-      .find('.form__submit-status')
-      .should('contain', 'Your work is stored automatically.')
-      .should('contain', 'Last edit was a few seconds ago');
-
-    cy
-      .get('.form__content')
-      .should('contain', `Last edit was ${ formatDate(testTs(), 'TIME_OR_DAY') }`)
-      .find('.js-discard')
-      .click();
-
-    cy
-      .get('.modal--small')
-      .find('.js-submit')
-      .click();
-
-    cy
-      .wait('@routeFormDefinition')
-      .wait('@routeFormFields');
-
-    cy
-      .get('.form__controls')
-      .find('.form__submit-status')
-      .should('contain', 'Your work is stored automatically.')
-      .should('not.contain', 'Last edit was');
-
-    cy
-      .waitForFormDraft(draftKey, { exists: false })
-      .should(draft => {
-        expect(draft).to.be.null;
-      });
-
-    cy
-      .get('iframe')
-      .should(([iframe]) => {
-        const { receivedMessages } = iframe.contentWindow.iframeStub;
-        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
-
-        expect(response.args.value.formData.fields.foo).to.equal('bar');
       });
   });
 

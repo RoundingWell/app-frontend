@@ -267,22 +267,14 @@ context('Patient Action Form', function() {
       })
       .visitOnClock(`/patient-action/${ testAction.id }/form/${ testForm.id }`, { now: testTs() })
       .wait('@routeAction')
-      .wait('@routePatientByAction');
+      .wait('@routePatientByAction')
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
 
     cy
       .get('.form__controls')
       .find('.form__submit-status')
       .should('contain', 'Last edit was a few seconds ago');
-
-    cy
-      .get('.form__content')
-      .should('contain', `Last edit was ${ formatDate(testTs(), 'TIME_OR_DAY') }`)
-      .find('.js-submit')
-      .click();
-
-    cy
-      .wait('@routeFormByAction')
-      .wait('@routeFormDefinition');
 
     cy
       .get('iframe')
@@ -342,7 +334,9 @@ context('Patient Action Form', function() {
       })
       .visitOnClock(`/patient-action/${ testAction.id }/form/${ testForm.id }`, { now: testTs() })
       .wait('@routeAction')
-      .wait('@routePatientByAction');
+      .wait('@routePatientByAction')
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
 
     cy
       .intercept('PATCH', `/api/form-responses/${ formResponse.id }`, {
@@ -355,16 +349,6 @@ context('Patient Action Form', function() {
       .get('.form__controls')
       .find('.form__submit-status')
       .should('contain', 'Last edit was a few seconds ago');
-
-    cy
-      .get('.form__content')
-      .should('contain', `Last edit was ${ formatDate(testTs(), 'TIME_OR_DAY') }`)
-      .find('.js-submit')
-      .click();
-
-    cy
-      .wait('@routeFormByAction')
-      .wait('@routeFormDefinition');
 
     cy
       .get('iframe')
@@ -394,136 +378,6 @@ context('Patient Action Form', function() {
         expect(data.id).to.equal(formResponse.id);
         expect(data.attributes.status).to.equal(FORM_RESPONSE_STATUS.DRAFT);
         expect(data.attributes.response.data.fields.foo).to.equal('baz');
-      });
-  });
-
-  specify('discarding stored submission', function() {
-    const formResponse = getFormResponse({
-      attributes: {
-        status: FORM_RESPONSE_STATUS.DRAFT,
-        updated_at: testTsSubtract(1),
-        response: {
-          data: { fields: { foo: 'bazinga' } },
-        },
-      },
-    });
-
-    const testPatient = getPatient();
-
-    const testAction = getAction({
-      relationships: {
-        'form': getRelationship(testForm),
-        'form-responses': getRelationship([formResponse]),
-      },
-    });
-
-    const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }-${ testAction.id }`;
-
-    cy.setFormDraft(draftKey, {
-      updated: testTs(),
-      submission: {
-        fields: { foo: 'foo' },
-      },
-    });
-
-    cy
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        return fx;
-      })
-      .routeFormActionFields(fx => {
-        fx.data = getFormFields({
-          attributes: {
-            fields: { foo: 'bar' },
-          },
-        });
-
-        return fx;
-      })
-      .routeFormByAction(fx => {
-        fx.data = testForm;
-
-        return fx;
-      })
-      .routeLatestFormResponse(() => {
-        return {
-          data: formResponse,
-        };
-      })
-      .routeFormDefinition()
-      .routeActionActivity()
-      .routePatientByAction(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .visitOnClock(`/patient-action/${ testAction.id }/form/${ testForm.id }`, { now: testTs() })
-      .wait('@routeAction')
-      .wait('@routePatientByAction')
-      .wait('@routeLatestFormResponse');
-
-    cy
-      .intercept('POST', '/api/form-responses', {
-        statusCode: 201,
-        body: { data: getFormResponse() },
-      })
-      .as('routePostResponse');
-
-    cy
-      .get('.form__controls')
-      .find('.form__submit-status')
-      .should('contain', 'Your work is stored automatically.')
-      .should('contain', 'Last edit was a few seconds ago');
-
-    cy
-      .get('.form__content')
-      .should('contain', `Last edit was ${ formatDate(testTs(), 'TIME_OR_DAY') }`)
-      .find('.js-discard')
-      .click();
-
-    cy
-      .get('.modal--small')
-      .find('.js-submit')
-      .click();
-
-    cy
-      .wait('@routeFormByAction')
-      .wait('@routeFormDefinition')
-      .wait('@routeFormActionFields');
-
-    cy
-      .get('.form__controls')
-      .find('.form__submit-status')
-      .should('contain', 'Your work is stored automatically.')
-      .should('not.contain', 'Last edit was');
-
-    cy
-      .waitForFormDraft(draftKey, { exists: false })
-      .should(draft => {
-        expect(draft).to.be.null;
-      });
-
-    cy
-      .iframeStub()
-      .then(iframeStub => {
-        iframeStub.send('update:storedSubmission', { fields: { foo: 'baz' } });
-      });
-
-    cy
-      .get('.form__controls')
-      .find('.form__submit-status-text')
-      .should('contain', 'Last edit was a few seconds ago');
-
-    cy
-      .tick(15000);
-
-    cy
-      .wait('@routePostResponse')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.id).to.not.equal(formResponse.id);
-        expect(data.attributes.status).to.equal(FORM_RESPONSE_STATUS.DRAFT);
       });
   });
 
@@ -2813,14 +2667,7 @@ context('Patient Action Form', function() {
     cy
       .tick(1800000)
       .wait('@routeLatestFormResponse')
-      .wait('@routePatientByAction');
-
-    cy
-      .get('.form__content')
-      .find('.js-submit')
-      .click();
-
-    cy
+      .wait('@routePatientByAction')
       .wait('@routeFormByAction')
       .wait('@routeFormDefinition');
 

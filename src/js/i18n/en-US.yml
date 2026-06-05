@@ -133,15 +133,6 @@ careOptsFrontend:
             droplistItemText: Submit Form + Go Back
         statusView:
           label: Last submitted { date }
-        storedSubmissionView:
-          cancelButton: Discard My Work...
-          discardModal:
-            bodyText: Discarding your unsubmitted work on this form will load the latest data for this patient, but you'll lose your unsubmitted work.
-            headingText: Are you sure?
-            submitText: Discard My Work
-          submitButton: Load Form with My Work
-          title: You have unsubmitted work on this form. Would you like to load your work?
-          updated: Last edit was { updated }
         updateView:
           buttonText: Update
   globals:
