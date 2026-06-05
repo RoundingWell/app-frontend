@@ -235,6 +235,13 @@ export default defineConfig(({ mode }) => {
             secure: true,
           },
         }),
+        ...(!isTest && env.VITE_DEV_API_URL && {
+          '/forms': {
+            target: env.VITE_DEV_API_URL,
+            changeOrigin: true,
+            secure: true,
+          },
+        }),
       },
       watch: {
         ignored: ['**/.stylelintcache'],
