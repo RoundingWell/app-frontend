@@ -211,8 +211,12 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__submit-status-text')
-      .should('contain', 'Last edit was a few seconds ago');
+      .find('.form__actions-icon:has(.fa-shield-check)')
+      .click();
+
+    cy
+      .get('.form__draft-menu')
+      .should('contain', 'Last saved a few seconds ago');
 
     cy
       .tick(15000);
@@ -228,9 +232,27 @@ context('Patient Form', function() {
       .tick(45000);
 
     cy
+      .get('.form__draft-menu')
+      .should('contain', 'Last saved a minute ago');
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', { fields: { foo: 'baz' } });
+      });
+
+    cy
       .get('.form__controls')
-      .find('.form__submit-status-text')
-      .should('contain', 'Last edit was a minute ago');
+      .find('.form__actions-icon:has(.fa-shield-check)')
+      .click();
+
+    cy
+      .get('.form__draft-menu')
+      .should('contain', 'Last saved a few seconds ago');
   });
 
   specify('restoring draft', function() {
@@ -275,8 +297,12 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__submit-status')
-      .should('contain', 'Last edit was a few seconds ago');
+      .find('.form__actions-icon:has(.fa-shield-check)')
+      .click();
+
+    cy
+      .get('.form__draft-menu')
+      .should('contain', 'Last saved a few seconds ago');
 
     cy
       .get('iframe')
@@ -330,8 +356,12 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__submit-status')
-      .should('contain', 'Last edit was a few seconds ago');
+      .find('.form__actions-icon:has(.fa-shield-check)')
+      .click();
+
+    cy
+      .get('.form__draft-menu')
+      .should('contain', 'Last saved a few seconds ago');
 
     cy
       .get('iframe')
@@ -340,6 +370,88 @@ context('Patient Form', function() {
         const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
 
         expect(response.args.value.storedSubmission.fields.foo).to.equal('foo');
+      });
+  });
+
+  specify('discarding stored submission', function() {
+    const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`;
+
+    cy.setFormDraft(draftKey, {
+      updated: testTs(),
+      submission: {
+        fields: { foo: 'foo' },
+      },
+    });
+
+    cy
+      .routeForm(fx => {
+        fx.data = testForm;
+
+        return fx;
+      })
+      .routeFormDefinition()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFormFields(fx => {
+        fx.data = getFormFields({
+          attributes: {
+            fields: {
+              foo: 'bar',
+            },
+          },
+        });
+
+        return fx;
+      })
+      .routeLatestFormResponse()
+      .visitOnClock(`/patient/${ testPatient.id }/form/${ testForm.id }`, { now: testTs() })
+      .wait('@routeForm')
+      .wait('@routePatient');
+
+    cy
+      .get('.form__controls')
+      .find('.form__actions-icon:has(.fa-shield-check)')
+      .click();
+
+    cy
+      .get('.form__draft-menu-saved')
+      .should('contain', 'Last saved a few seconds ago');
+
+    cy
+      .get('.form__draft-menu')
+      .find('.js-discard')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click();
+
+    cy
+      .wait('@routeFormDefinition')
+      .wait('@routeFormFields');
+
+    cy
+      .get('.form__controls')
+      .find('[data-draft-status-region]')
+      .should('be.empty');
+
+    cy
+      .waitForFormDraft(draftKey, { exists: false })
+      .should(draft => {
+        expect(draft).to.be.null;
+      });
+
+    cy
+      .get('iframe')
+      .should(([iframe]) => {
+        const { receivedMessages } = iframe.contentWindow.iframeStub;
+        const response = receivedMessages.findLast(m => m.message === 'fetch:form:data');
+
+        expect(response.args.value.formData.fields.foo).to.equal('bar');
       });
   });
 
@@ -382,7 +494,7 @@ context('Patient Form', function() {
       .wait('@routeFormFields');
 
     cy
-      .get('[data-form-updated-region]')
+      .get('[data-draft-status-region]')
       .should('be.empty');
 
     cy

@@ -116,9 +116,14 @@ careOptsFrontend:
           nameText: '• By { name }'
         historyView:
           currentVersionButton: Back to Current Version
-        lastUpdatedView:
-          storedWork: Your work is stored automatically.
-          updatedAt: Last edit was { updated }
+        draftStatusView:
+          discardDraft: Discard draft...
+          discardModal:
+            bodyText: Discarding your unsubmitted work on this form will load the latest data for this patient, but you'll lose your unsubmitted work.
+            headingText: Are you sure?
+            submitText: Discard My Work
+          storedWork: Your draft is saved automatically.
+          updatedAt: Last saved { updated }
         readOnlyView:
           buttonText: Read Only
         lockedSubmitView:
