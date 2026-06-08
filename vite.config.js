@@ -228,6 +228,20 @@ export default defineConfig(({ mode }) => {
             rewrite: rewritePath => rewritePath.replace(/^\/api/, ''),
           }),
         },
+        ...(env.VITE_DEV_API_URL && {
+          '/icons': {
+            target: env.VITE_DEV_API_URL,
+            changeOrigin: true,
+            secure: true,
+          },
+        }),
+        ...(!isTest && env.VITE_DEV_API_URL && {
+          '/forms': {
+            target: env.VITE_DEV_API_URL,
+            changeOrigin: true,
+            secure: true,
+          },
+        }),
       },
       watch: {
         ignored: ['**/.stylelintcache'],
