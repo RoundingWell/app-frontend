@@ -144,7 +144,7 @@ const LayoutView = View.extend({
           <div data-status-region>&nbsp;</div>
           <div class="form__controls">
             <div data-state-actions-region></div>
-            <div data-form-updated-region></div>
+            <div data-draft-status-region></div>
             <div data-form-action-region></div>
           </div>
         </div>
@@ -158,7 +158,7 @@ const LayoutView = View.extend({
   regions: {
     contextTrail: '[data-context-trail-region]',
     form: '[data-form-region]',
-    formUpdated: '[data-form-updated-region]',
+    draftStatus: '[data-draft-status-region]',
     formAction: {
       el: '[data-form-action-region]',
       replaceElement: true,
@@ -194,45 +194,6 @@ const IframeView = View.extend({
         responseId: this.getOption('responseId'),
       }),
     };
-  },
-});
-
-const StoredSubmissionView = View.extend({
-  className: 'form__content',
-  template: hbs`
-    <div class="form__prompt">
-      <h2 class="form__prompt-title">{{ @intl.forms.form.formViews.storedSubmissionView.title }}</h2>
-      <div class="form__prompt-dialog">
-        <div class="flex-shrink">
-          <button class="button--blue button--large js-submit">{{ @intl.forms.form.formViews.storedSubmissionView.submitButton }}</button>
-          <div class="u-margin--t-16">{{formatHTMLMessage (intlGet "forms.form.formViews.storedSubmissionView.updated") updated=(formatDateTime updated "TIME_OR_DAY")}}</div>
-        </div>
-        <div class="flex-shrink">
-          <button class="button-secondary button--large form__discard-button js-discard" style="color:red">{{ @intl.forms.form.formViews.storedSubmissionView.cancelButton }}</button>
-        </div>
-      </div>
-    </div>
-  `,
-  templateContext() {
-    return {
-      updated: this.getOption('updated'),
-    };
-  },
-  triggers: {
-    'click .js-submit': 'submit',
-    'click .js-discard': 'discard',
-  },
-  onDiscard() {
-    const modal = Radio.request('modal', 'show:small', {
-      bodyText: i18n.storedSubmissionView.discardModal.bodyText,
-      headingText: i18n.storedSubmissionView.discardModal.headingText,
-      submitText: i18n.storedSubmissionView.discardModal.submitText,
-      buttonClass: 'button--red',
-      onSubmit: () => {
-        modal.destroy();
-        this.triggerMethod('discard:submission');
-      },
-    });
   },
 });
 
@@ -290,35 +251,64 @@ const SaveButtonTypeDroplist = Droplist.extend({
   },
 });
 
-const LastUpdatedView = View.extend({
-  className: 'form__submit-status',
+const DraftMenuView = View.extend({
+  className: 'form__draft-menu',
   template: hbs`
-    <div class="form__submit-status-icon">
-      {{far "shield-check"}}
-    </div>
-    <div class="form__submit-status-text">
-      <div class="u-text--overflow">{{ @intl.forms.form.formViews.lastUpdatedView.storedWork }}</div>
-      {{#if updated}}
-        <div class="u-text--overflow">{{formatHTMLMessage (intlGet "forms.form.formViews.lastUpdatedView.updatedAt") updated=(formatDateTime updated "AGO_OR_TODAY")}}</div>
-      {{/if}}
-    </div>
+    <div class="form__draft-menu-info">{{ @intl.forms.form.formViews.draftStatusView.storedWork }}</div>
+    <div class="form__draft-menu-saved">{{formatHTMLMessage (intlGet "forms.form.formViews.draftStatusView.updatedAt") updated=(formatDateTime updated "AGO_OR_TODAY")}}</div>
+    <button class="form__draft-menu-discard-button js-discard">{{ @intl.forms.form.formViews.draftStatusView.discardDraft }}</button>
   `,
-  templateContext() {
-    return {
-      updated: this.updated,
-    };
+  modelEvents: {
+    'change:updated': 'render',
   },
-  initialize({ updated }) {
-    this.updated = updated;
-
-    if (this.updated) {
-      this.renderInterval = setInterval(() => {
-        this.render();
-      }, 45000);
-    }
+  templateContext() {
+    return { updated: this.model.get('updated') };
+  },
+  triggers: {
+    'click .js-discard': 'click:discard',
+  },
+  initialize() {
+    this.renderInterval = setInterval(() => {
+      this.render();
+    }, 45000);
   },
   onBeforeDestroy() {
     clearInterval(this.renderInterval);
+  },
+});
+
+const DraftStatusView = Droplist.extend({
+  align: 'right',
+  viewOptions: {
+    className: 'form__actions-icon u-margin--l-16 u-margin--r-0',
+    template: hbs`{{far "shield-check"}}`,
+  },
+  initialize({ model }) {
+    this.model = model;
+  },
+  showPicklist() {
+    const menuView = new DraftMenuView({ model: this.model });
+
+    this.popRegion.show(menuView, this.popRegionOptions());
+    this.bindEvents(menuView, this._picklistEvents);
+  },
+  _picklistEvents: {
+    'click:discard': 'onClickDiscard',
+    'destroy': 'onPicklistDestroy',
+  },
+  onClickDiscard() {
+    this.popRegion.empty();
+
+    const modal = Radio.request('modal', 'show:small', {
+      bodyText: i18n.draftStatusView.discardModal.bodyText,
+      headingText: i18n.draftStatusView.discardModal.headingText,
+      submitText: i18n.draftStatusView.discardModal.submitText,
+      buttonClass: 'button--red',
+      onSubmit: () => {
+        modal.destroy();
+        this.triggerMethod('discard:submission');
+      },
+    });
   },
 });
 
@@ -442,7 +432,6 @@ const HistoryView = View.extend({
 export {
   LayoutView,
   IframeView,
-  StoredSubmissionView,
   FormStateActionsView,
   StatusView,
   ReadOnlyView,
@@ -450,5 +439,5 @@ export {
   SaveView,
   UpdateView,
   HistoryView,
-  LastUpdatedView,
+  DraftStatusView,
 };

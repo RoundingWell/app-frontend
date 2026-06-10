@@ -13,12 +13,11 @@ import WidgetsHeaderApp from 'js/apps/forms/widgets/widgets_header_app';
 import {
   LayoutView,
   IframeView,
-  StoredSubmissionView,
   FormStateActionsView,
   StatusView,
   ReadOnlyView,
   SaveView,
-  LastUpdatedView,
+  DraftStatusView,
 } from 'js/views/forms/form/form_views';
 
 export default App.extend({
@@ -117,11 +116,12 @@ export default App.extend({
     this.showFormSave();
   },
   onFormServiceUpdateSubmission(updated) {
-    this.showLastUpdated(updated);
+    this.setState({ updated });
   },
   stateEvents: {
     'change': 'onChangeState',
     'change:isExpanded': 'showSidebar',
+    'change:updated': 'onChangeDraftStatus',
   },
   onChangeState(state) {
     localStore.set(`form-state_${ this.currentUser.id }`, state.pick('isExpanded', 'saveButtonType'));
@@ -141,41 +141,17 @@ export default App.extend({
   onClickExpandButton() {
     this.toggleState('isExpanded');
   },
-  canShowStoredSubmission() {
-    return !this.isReadOnly;
+  showContent() {
+    if (!this.isReadOnly) this.loadDraftStatus();
+    this.showForm();
   },
-  async showContent() {
-    const showContentRequestId = (this._showContentRequestId || 0) + 1;
-    this._showContentRequestId = showContentRequestId;
-
-    if (!this.canShowStoredSubmission()) {
-      this.showForm();
-      return;
-    }
-
+  async loadDraftStatus() {
     const { updated } = await Radio.request(`form${ this.form.id }`, 'get:storedSubmission');
 
     /* istanbul ignore if: difficult to force stale async render */
-    if (this.isDestroyed() || this._showContentRequestId !== showContentRequestId || !this.canShowStoredSubmission()) return;
+    if (this.isDestroyed()) return;
 
-    if (updated) {
-      const storedSubmissionView = this.showChildView('form', new StoredSubmissionView({ updated }));
-
-      this.listenTo(storedSubmissionView, {
-        'submit'() {
-          this.showForm();
-        },
-        async 'discard:submission'() {
-          await Radio.request(`form${ this.form.id }`, 'clear:storedSubmission');
-          this.showForm();
-          this.showFormActions();
-        },
-      });
-
-      return;
-    }
-
-    this.showForm();
+    this.setState({ updated });
   },
   showForm(responseId) {
     this.showChildView('form', new IframeView({
@@ -205,10 +181,26 @@ export default App.extend({
   showReadOnly() {
     this.showChildView('formAction', new ReadOnlyView());
   },
-  showLastUpdated(updated) {
-    const lastUpdatedView = new LastUpdatedView({ updated });
+  onChangeDraftStatus() {
+    const updated = this.getState('updated');
 
-    this.showChildView('formUpdated', lastUpdatedView);
+    if (!updated) {
+      this.getRegion('draftStatus').empty();
+      return;
+    }
+
+    if (this.getRegion('draftStatus').hasView()) return;
+
+    const draftStatusView = new DraftStatusView({ model: this.getState() });
+    this.showChildView('draftStatus', draftStatusView);
+
+    this.listenTo(draftStatusView, {
+      async 'discard:submission'() {
+        await Radio.request(`form${ this.form.id }`, 'clear:storedSubmission');
+        this.showForm();
+        this.showFormActions();
+      },
+    });
   },
   showFormSaveDisabled() {
     if (this.isSubmitHidden) return;
