@@ -11,7 +11,8 @@ import { getClinicianModal } from 'js/views/clinicians/clinician-modal/clinician
 
 export default SubRouterApp.extend({
   routerAppName: 'CliniciansApp',
-  eventRoutes: {
+  routeScope: [],
+  routeActions: {
     'clinician': 'showClinicianSidebar',
     'clinicians:all': 'hideCliniciansSidebar',
   },
@@ -38,7 +39,7 @@ export default SubRouterApp.extend({
   beforeStart() {
     return Radio.request('entities', 'fetch:clinicians:collection');
   },
-  onStart({ currentRoute }, clinicians) {
+  onStart(options, clinicians) {
     this.clinicians = clinicians;
 
     this.showChildView('list', new ListView({
@@ -46,7 +47,7 @@ export default SubRouterApp.extend({
       state: this.getState(),
     }));
 
-    this.startRoute(currentRoute);
+    this.startCurrentRoute();
   },
   showSearchView() {
     const searchComponent = this.showChildView('search', new SearchComponent({
@@ -75,6 +76,7 @@ export default SubRouterApp.extend({
 
     Radio.request('sidebar', 'start', sidebarApp, { clinician });
 
+    this.stopListening(sidebarApp, 'close');
     this.listenTo(sidebarApp, 'close', () => {
       Radio.trigger('event-router', 'clinicians:all');
     });

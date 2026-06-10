@@ -14,7 +14,9 @@ import { LayoutView } from 'js/views/programs/program/program_views';
 import { SidebarView } from 'js/views/programs/program/sidebar/sidebar-views';
 
 export default SubRouterApp.extend({
-  eventRoutes() {
+  routeScope: ['programId'],
+
+  routeActions() {
     return {
       'program:details': partial(this.startCurrent, 'workflows'),
       'program:action': this.startProgramAction,
@@ -45,14 +47,14 @@ export default SubRouterApp.extend({
     return Radio.request('entities', 'fetch:programs:model', programId);
   },
 
-  onStart({ currentRoute }, program) {
+  onStart(options, program) {
     this.program = program;
 
     this.setView(new LayoutView({ model: program }));
 
     this.showSidebar();
 
-    this.startRoute(currentRoute);
+    this.startCurrentRoute();
 
     this.showView();
   },

@@ -25,7 +25,7 @@ export default RouterApp.extend({
     'worklist': {
       action: 'showPatientsWorklist',
       route: 'worklist/:id',
-      isList: true,
+      meta: { isList: true },
     },
     'patient:dashboard': {
       action: 'showPatient',
@@ -58,11 +58,11 @@ export default RouterApp.extend({
     'schedule': {
       action: 'showSchedule',
       route: 'schedule',
-      isList: true,
+      meta: { isList: true },
     },
   },
 
-  onBeforeAppRoute(event, patientId) {
+  onBeforeAppRoute({ event, eventArgs: [patientId] }) {
     // if routing to flow route, currentPatientId is set by flow_app's onStart()
     if (event.startsWith('flow')) return;
 
