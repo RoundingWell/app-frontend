@@ -1,4 +1,4 @@
-import { extend, isEqual, isFunction, partial, reduce, rest, result } from 'underscore';
+import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import EventRouter from 'backbone.eventrouter';
@@ -36,20 +36,25 @@ export default App.extend({
     this._currentRoute = null;
   },
 
-  // For each route in the hash creates a routeTriggers hash
+  // For each route in the hash creates a routeTriggers hash,
+  // prefixing every (non-root) route or alias with the workspace slug
   getRouteTriggers() {
-    return reduce(this._routes, function(routeTriggers, { route, root }, eventName) {
-      if (root) {
-        routeTriggers[eventName] = route;
-        return routeTriggers;
-      }
-
-      const currentWorkspace = Radio.request('workspace', 'current');
-      const workspace = currentWorkspace.get('slug');
-      routeTriggers[eventName] = route ? `${ workspace }/${ route }` : workspace;
+    return reduce(this._routes, (routeTriggers, { route, root }, eventName) => {
+      routeTriggers[eventName] = isArray(route) ?
+        map(route, pattern => this._prefixRoute(pattern, root)) :
+        this._prefixRoute(route, root);
 
       return routeTriggers;
     }, {});
+  },
+
+  _prefixRoute(route, root) {
+    if (root) return route;
+
+    const currentWorkspace = Radio.request('workspace', 'current');
+    const workspace = currentWorkspace.get('slug');
+
+    return route ? `${ workspace }/${ route }` : workspace;
   },
 
   getEventActions(eventRoutes, routeAction) {
@@ -78,17 +83,25 @@ export default App.extend({
       this.start();
     }
 
-    this.triggerMethod('before:appRoute', event, ...args);
-
-    Radio.request('nav', 'select', this.routerAppName, event, args);
-    Radio.request('sidebar', 'stop');
-
-    this.setLatestList(event, args);
+    const definition = this._routes[event];
 
     this._currentRoute = {
       event,
       eventArgs: args,
+      definition: {
+        action: definition.action,
+        route: isArray(definition.route) ? definition.route[0] : definition.route,
+        root: definition.root,
+        meta: definition.meta || {},
+      },
     };
+
+    this.triggerMethod('before:appRoute', this._currentRoute);
+
+    Radio.request('nav', 'select', this.routerAppName, event, args);
+    Radio.request('sidebar', 'stop');
+
+    this.setLatestList(this._currentRoute);
 
     if (!isFunction(action)) {
       action = this[action];
@@ -96,16 +109,18 @@ export default App.extend({
 
     action.apply(this, args);
 
-    this.triggerMethod('appRoute', event, ...args);
+    this.triggerMethod('appRoute', this._currentRoute);
   },
 
-  setLatestList(event, eventArgs) {
-    if (this._routes[event].isList) {
-      Radio.request('history', 'set:latestList', event, eventArgs);
+  setLatestList(routeContext) {
+    const { meta } = routeContext.definition;
+
+    if (meta.isList) {
+      Radio.request('history', 'set:latestList', routeContext.event, routeContext.eventArgs);
       return;
     }
 
-    if (!this._routes[event].clearLatestList) return;
+    if (!meta.clearLatestList) return;
 
     Radio.request('history', 'set:latestList', false);
   },
@@ -114,24 +129,40 @@ export default App.extend({
   startCurrent(appName, options) {
     this.stopCurrent();
 
+    const child = this.getChildApp(appName);
+
+    // only SubRouterApp children participate in route dispatch and scope identity;
+    // plain list/leaf children (worklist, schedule, programs-all) do neither
+    if (isFunction(child.setCurrentRoute)) {
+      child.setCurrentRoute(this.getCurrentRoute());
+    }
+
     this._currentAppName = appName;
-    this._currentAppOptions = options;
+    this._currentAppScope = this.getChildScope(child, options);
+    this._current = child;
 
-    options = extend({
-      currentRoute: this._currentRoute,
-    }, options);
+    // child apps are singletons; ensure exactly one stop listener
+    this.stopListening(child, 'stop');
+    this.listenTo(child, 'stop', this._handleChildStop);
 
-    const app = this.startChildApp(appName, options);
+    this.startChildApp(appName, options);
 
-    this._current = app;
+    return child;
+  },
 
-    return app;
+  getChildScope(child, options) {
+    return isFunction(child.getRouteScope) ? child.getRouteScope(options) : undefined;
   },
 
   startRoute(appName, options) {
-    if (this.isCurrent(appName, options) && this.getCurrent().isRunning()) {
-      return this.getCurrent().startRoute(this.getCurrentRoute());
+    const child = this.getChildApp(appName);
+    const scope = this.getChildScope(child, options);
+    const current = this.getCurrent();
+
+    if (current && this.isCurrent(appName, scope) && (current.isRunning() || current.isLoading())) {
+      return current.startRoute(this.getCurrentRoute());
     }
+
     return this.startCurrent(appName, options);
   },
 
@@ -139,22 +170,41 @@ export default App.extend({
     return this._current;
   },
 
-  isCurrent(appName, options) {
+  isCurrent(appName, scope) {
     return (appName === this._currentAppName)
-      && (isEqual(options, this._currentAppOptions));
+      && (isEqual(scope, this._currentAppScope));
   },
 
   getCurrentRoute() {
     return this._currentRoute;
   },
 
+  getCurrentRouteMeta() {
+    return this._currentRoute && this._currentRoute.definition.meta;
+  },
+
+  _handleChildStop() {
+    // Preserve the current child through Toolkit restart().
+    if (this._current && this._current.isRestarting()) return;
+
+    this._clearCurrent();
+  },
+
   stopCurrent() {
     if (!this._current) return;
 
-    this._current.stop();
+    const current = this._current;
+
+    this.stopListening(current, 'stop');
+    this._clearCurrent();
+
+    current.stop();
+  },
+
+  _clearCurrent() {
     this._current = null;
     this._currentAppName = null;
-    this._currentAppOptions = null;
+    this._currentAppScope = null;
   },
 
   // takes an event and translates data into the applicable url fragment

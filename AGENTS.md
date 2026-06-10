@@ -9,6 +9,7 @@ Load a scoped overlay only when the task touches:
 
 - `scripts/**` -> `scripts/AGENTS.md`
 - `packages/care-ops-five9/**` -> `packages/care-ops-five9/AGENTS.md`
+- routing infrastructure (`src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`) or application route definitions -> `src/js/base/routing.md`
 
 ## Instruction Priority
 
