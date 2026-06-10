@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/patient_app.js
+  s_2f5d775ddb4a37::t_803eedee0d5a26 154-157
+  s_2f5d775ddb4a37::t_6b17f81719bc46 79
+test/integration/patients/sidebar/action-sidebar.js
+  s_2f5d775ddb4a37::t_bdf333636ced50 2893-2975
+  s_2f5d775ddb4a37::t_e2d13fefa2f299 2846-2847
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "bae0609f170c07bad0f5f228eead59d64bf125b6",
+  "prompts": {},
+  "sessions": {
+    "s_2f5d775ddb4a37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "97d5b7b3-3d60-4064-90fb-56ac3e4bc258",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
