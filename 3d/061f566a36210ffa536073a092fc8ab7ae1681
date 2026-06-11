@@ -1,0 +1,55 @@
+src/js/apps/patients/patients-main_app.js
+  s_5a146704f00d9c::t_f92b503ac0b904 68
+  s_5a146704f00d9c::t_e264606af4a4f2 97,105-106,124,127
+  s_5a146704f00d9c::t_36893fe02876e8 1,4-5,31-39,46,60,62,64-66,69-76,80,87,90-92,131-183
+  s_5a146704f00d9c::t_d9bb0ca8115a01 41-44,48-51,55-58,77-78
+  s_5a146704f00d9c::t_00e765dd55d132 128
+  s_5a146704f00d9c::t_e7d34c362b0c4b 81-84
+src/js/views/patients/patient/archive/archive_views.js
+  s_5a146704f00d9c::t_8fe40ad206b198 194
+  s_5a146704f00d9c::t_da58a8c8770a37 90
+src/js/apps/patients/patient/patient_app.js
+  s_5a146704f00d9c::t_f92b503ac0b904 29
+  s_5a146704f00d9c::t_bdeabd4008f9a6 72,76,129,134,139-140
+  s_5a146704f00d9c::t_26b45ec77f7fb6 13,37,92,106
+  s_5a146704f00d9c::t_e7d34c362b0c4b 27,98-99
+  s_5a146704f00d9c::t_bb7c44e76b4606 39,79,143-144
+  s_5a146704f00d9c::t_36893fe02876e8 1-2,9-12,14,17,24-26,28,30,35-36,38,45,54,56,74-75,77,84-88,91,93-95,100-102,105,107-111,113-118,120-125,128,131,133,136-137
+src/js/views/patients/schedule/schedule_views.js
+  s_5a146704f00d9c::t_da58a8c8770a37 274
+src/js/views/patients/patient/dashboard/dashboard_views.js
+  s_5a146704f00d9c::t_8fe40ad206b198 214
+src/js/views/patients/worklist/action_views.js
+  s_5a146704f00d9c::t_da58a8c8770a37 74
+src/js/apps/patients/patient/dashboard/dashboard_app.js
+  s_5a146704f00d9c::t_8fe40ad206b198 94
+src/js/apps/patients/patient/flow/flow_app.js
+  s_5a146704f00d9c::t_8fe40ad206b198 63
+  s_5a146704f00d9c::t_9e9a7370b84e0f 257,299,304,314
+src/js/apps/patients/patient/action/action_app.js
+  s_5a146704f00d9c::t_c4fdddcf2e4548 88-89
+  s_5a146704f00d9c::t_081db0c86480e8 178-180,184-185,188-191
+  s_5a146704f00d9c::t_080f585e6229e9 1,39,110,340
+  s_5a146704f00d9c::t_26b45ec77f7fb6 2-38,40-59,61-62,64-78,80,82-87,90-109,113-114,116-119,121-177,181-183,195-311,324-325,327-339
+  s_5a146704f00d9c::t_6e8756edd83d49 81,111,115,120,186-187,194,312-323,326
+  s_5a146704f00d9c::t_3619c42f7771b0 112,192-193
+  s_5a146704f00d9c::t_c9fba98c284e76 60,63,79
+src/js/views/patients/patient/flow/flow_views.js
+  s_5a146704f00d9c::t_8fe40ad206b198 180
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3d061f566a36210ffa536073a092fc8ab7ae1681",
+  "prompts": {},
+  "sessions": {
+    "s_5a146704f00d9c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b99-b4a2-7582-bd31-5b23242fc748",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
