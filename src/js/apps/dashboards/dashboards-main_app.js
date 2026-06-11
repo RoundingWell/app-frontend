@@ -15,7 +15,7 @@ export default RouterApp.extend({
     'dashboards:all': {
       action: 'showDashboardsAll',
       route: 'dashboards',
-      isList: true,
+      meta: { isList: true },
     },
     'dashboard': {
       action: 'showDashboard',

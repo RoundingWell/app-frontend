@@ -29,7 +29,8 @@ export default SubRouterApp.extend({
     bulkEditActions: BulkEditActionsApp,
     flowSidebar: FlowSiderbarApp,
   },
-  eventRoutes: {
+  routeScope: ['flowId'],
+  routeActions: {
     'flow': 'hideSidebar',
     'flow:action': 'showActionSidebar',
     'flow:details': 'showFlowDetails',
@@ -62,10 +63,9 @@ export default SubRouterApp.extend({
 
     handleErrors(error);
   },
-  onStart({ currentRoute }, flow, actions, patient) {
+  onStart(options, flow, actions, patient) {
     this.flow = flow;
     this.actions = actions;
-    this.currentRoute = currentRoute;
     this.editableCollection = actions.clone();
     this.patient = patient;
 
@@ -98,7 +98,7 @@ export default SubRouterApp.extend({
       'change:_owner': this.onFlowChangeOwner,
     });
 
-    this.startRoute(currentRoute);
+    this.startCurrentRoute();
   },
   hideSidebar() {
     this.stopChildApp('flowSidebar');
@@ -219,7 +219,7 @@ export default SubRouterApp.extend({
           .catch(() => {
             Radio.request('alert', 'show:error', i18n.bulkEditFailure);
             this.getState().clearSelected();
-            this.restart({ flowId: this.flow.id, currentRoute: this.currentRoute });
+            this.restart({ flowId: this.flow.id });
           });
       },
     });
@@ -307,6 +307,7 @@ export default SubRouterApp.extend({
 
     Radio.request('sidebar', 'start', sidebarApp, { action });
 
+    this.stopListening(sidebarApp, 'close');
     this.listenTo(sidebarApp, 'close', () => {
       Radio.trigger('event-router', 'flow', flowId);
     });
@@ -321,6 +322,7 @@ export default SubRouterApp.extend({
 
     Radio.request('sidebar', 'start', sidebarApp, { flow: this.flow });
 
+    this.stopListening(sidebarApp, 'close');
     this.listenTo(sidebarApp, 'close', () => {
       Radio.trigger('event-router', 'flow', this.flow.id);
     });

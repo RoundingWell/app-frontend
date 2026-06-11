@@ -13,7 +13,7 @@ export default RouterApp.extend({
     'clinicians:all': {
       action: 'showCliniciansAll',
       route: 'clinicians',
-      isList: true,
+      meta: { isList: true },
     },
     'clinician': {
       action: 'showCliniciansAll',

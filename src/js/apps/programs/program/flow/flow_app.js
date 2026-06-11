@@ -17,7 +17,8 @@ export default SubRouterApp.extend({
     programSidebar: ProgramSidebarApp,
     flowSidebar: FlowSidebarApp,
   },
-  eventRoutes: {
+  routeScope: ['flowId'],
+  routeActions: {
     'programFlow:action': 'showActionSidebar',
     'programFlow:action:new': 'showActionSidebar',
   },
@@ -35,7 +36,7 @@ export default SubRouterApp.extend({
     Radio.trigger('event-router', 'notFound');
     this.stop();
   },
-  onStart({ currentRoute }, program, flow, actions) {
+  onStart(options, program, flow, actions) {
     this.program = program;
     this.flow = flow;
     this.actions = actions;
@@ -52,7 +53,7 @@ export default SubRouterApp.extend({
     this.showActionList();
     this.showProgramSidebar();
 
-    this.startRoute(currentRoute);
+    this.startCurrentRoute();
   },
 
   maintainFlowActions() {

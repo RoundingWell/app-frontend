@@ -795,7 +795,25 @@ context('action sidebar', function() {
       .url()
       .should('not.contain', '/action/');
 
+    // the action is deleted, so the on-demand fetch on navigating back returns 410
+    cy
+      .intercept('GET', `/api/actions/${ testAction.id }*`, {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find action',
+            source: { parameter: 'actionId' },
+          }),
+        },
+      })
+      .as('routeDeletedAction');
+
     cy.go('back');
+
+    cy
+      .wait('@routeDeletedAction');
 
     cy
       .get('.alert-box')
@@ -2710,5 +2728,308 @@ context('action sidebar', function() {
       .get('[data-action-region]')
       .should('contain', 'Permissions')
       .and('contain', 'You are not able to change settings on this action.');
+  });
+
+  // A patient action route can coalesce into a still-loading PatientApp (scope is the
+  // patient, not the action). The action model is therefore not fetched by patient
+  // startup and is not in the dashboard list, so the dispatch must fetch it on demand
+  // rather than report it missing.
+  specify('loads an action navigated to while the patient is still loading', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
+    const testAction = getAction({
+      attributes: {
+        name: 'Coalesced Action',
+        updated_at: testTs(),
+      },
+      relationships: {
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routePatientActions(fx => {
+        // action is NOT in the dashboard list, so it is not cached that way
+        fx.data = [];
+
+        return fx;
+      })
+      .routePatientByAction(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      });
+
+    // delay the patient model so PatientApp stays in its loading state
+    cy.intercept('GET', '/api/patients/**?*', {
+      body: { data: testPatient, included: [] },
+      delay: 1000,
+    });
+
+    cy.visit(`/patient/dashboard/${ testPatient.id }`);
+
+    // while PatientApp is loading (preloader shown), navigate to the action
+    cy.get('.loader').should('exist');
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, testAction.id);
+    });
+
+    // the action is fetched on demand and the sidebar renders (rather than "not found")
+    cy
+      .wait('@routeAction')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('.action-sidebar__name')
+      .should('contain', 'Coalesced Action');
+  });
+
+  specify('ignores stale on-demand action fetches after a newer action route', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
+    const staleAction = getAction({
+      id: 'stale-action',
+      relationships: {
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
+      },
+    });
+
+    const currentAction = getAction({
+      id: 'current-action',
+      attributes: {
+        name: 'Current Action',
+        updated_at: testTs(),
+      },
+      relationships: {
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeActionActivity()
+      .routeActionComments()
+      .routeActionFiles()
+      .intercept('GET', `/api/actions/${ staleAction.id }*`, {
+        statusCode: 410,
+        delay: 500,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find action',
+            source: { parameter: 'actionId' },
+          }),
+        },
+      })
+      .as('routeStaleAction')
+      .intercept('GET', `/api/actions/${ currentAction.id }*`, {
+        body: { data: currentAction, included: [] },
+      })
+      .as('routeCurrentAction');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient');
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
+    });
+
+    cy
+      .wait('@routeCurrentAction')
+      .wait('@routeActionActivity')
+      .wait('@routeStaleAction');
+
+    cy
+      .get('.action-sidebar__name')
+      .should('contain', 'Current Action');
+
+    cy
+      .get('.alert-box__body')
+      .should('not.exist');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/action/${ currentAction.id }`);
+  });
+
+  specify('ignores a stale on-demand action fetch that succeeds after a newer route', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
+    const staleAction = getAction({
+      id: 'stale-action',
+      attributes: {
+        name: 'Stale Action',
+      },
+      relationships: {
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
+      },
+    });
+
+    const currentAction = getAction({
+      id: 'current-action',
+      attributes: {
+        name: 'Current Action',
+        updated_at: testTs(),
+      },
+      relationships: {
+        state: getRelationship(stateTodo),
+        patient: getRelationship(testPatient),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeActionActivity()
+      .routeActionComments()
+      .routeActionFiles()
+      // the stale fetch succeeds, but resolves after the newer route
+      .intercept('GET', `/api/actions/${ staleAction.id }*`, {
+        body: { data: staleAction, included: [] },
+        delay: 500,
+      })
+      .as('routeStaleAction')
+      .intercept('GET', `/api/actions/${ currentAction.id }*`, {
+        body: { data: currentAction, included: [] },
+      })
+      .as('routeCurrentAction');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient');
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
+    });
+
+    cy
+      .wait('@routeCurrentAction')
+      .wait('@routeStaleAction');
+
+    // the stale fetch resolved last, but its sidebar is suppressed
+    cy
+      .get('.action-sidebar__name')
+      .should('contain', 'Current Action');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/action/${ currentAction.id }`);
+  });
+
+  // The on-demand fetch must honor the same status-aware handling as beforeStart:
+  // a 410 shows "not found" and redirects to the patient dashboard rather than
+  // leaving the URL on a dead action route.
+  specify('redirects to the patient dashboard when an on-demand action is gone', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .intercept('GET', '/api/actions/*', {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find action',
+            source: { parameter: 'actionId' },
+          }),
+        },
+      })
+      .as('routeGoneAction');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient');
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, '1');
+    });
+
+    cy
+      .wait('@routeGoneAction');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .url()
+      .should('contain', `/patient/dashboard/${ testPatient.id }`)
+      .should('not.contain', '/action/');
   });
 });

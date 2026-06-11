@@ -17,7 +17,7 @@ export default RouterApp.extend({
     'programs:all': {
       action: 'showProgramsAll',
       route: 'programs',
-      isList: true,
+      meta: { isList: true },
     },
     'program:details': {
       action: 'showProgram',

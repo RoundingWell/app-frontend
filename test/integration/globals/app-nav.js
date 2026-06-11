@@ -1023,7 +1023,12 @@ context('App Nav', function() {
       .click();
 
     cy
-      .routePatient()
+      .routePatient(fx => {
+        fx.data.id = testNewPatientId;
+
+        return fx;
+      })
+      .routeWorkspacePatient()
       .routeForm(fx => {
         fx.data = testForm;
 
@@ -1053,5 +1058,13 @@ context('App Nav', function() {
     cy
       .url()
       .should('contain', `/patient/${ testNewPatientId }/form/${ testForm.id }`);
+
+    cy
+      .wait('@routePatient')
+      .wait('@routeWorkspacePatient')
+      .wait('@routeForm')
+      .wait('@routeLatestFormResponse')
+      .wait('@routeFormDefinition')
+      .wait('@routeFormFields');
   });
 });

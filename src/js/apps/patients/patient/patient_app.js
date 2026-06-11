@@ -1,4 +1,4 @@
-import { partial, some, get } from 'underscore';
+import { partial, get, noop } from 'underscore';
 import Radio from 'backbone.radio';
 
 import handleErrors from 'js/utils/handle-errors';
@@ -13,7 +13,9 @@ import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 import { LayoutView, intl } from 'js/views/patients/patient/patient_views';
 
 export default SubRouterApp.extend({
-  eventRoutes() {
+  routeScope: ['patientId'],
+
+  routeActions() {
     return {
       'patient:dashboard': partial(this.startList, 'dashboard'),
       'patient:archive': partial(this.startList, 'archive'),
@@ -47,41 +49,53 @@ export default SubRouterApp.extend({
     this.getRegion().startPreloader();
   },
 
-  beforeStart({ currentRoute: { eventArgs: [patientId, actionId] } }) {
+  beforeStart() {
+    const [patientId, actionId] = this.getCurrentRoute().eventArgs;
+
     return [
       Radio.request('entities', 'fetch:patients:model', patientId),
-      actionId && Radio.request('entities', 'fetch:actions:model', actionId),
+      // the action is a non-aborting prefetch: it warms the cache for the initial
+      // route but its failure must never reject startup or override a newer route —
+      // dispatch (startPatientAction) is the source of truth and handles errors
+      actionId && Radio.request('entities', 'fetch:actions:model', actionId).catch(noop),
     ];
   },
 
-  /* istanbul ignore next: error handling */
-  onFail({ currentRoute: { eventArgs: [patientId] } }, error) {
+  /* istanbul ignore next: beforeStart error handling */
+  onFail(options, error) {
+    // the action prefetch is non-aborting, so a startup failure is the patient's;
+    // a 410 means the patient is gone
     if (get(error, ['response', 'status']) === 410) {
-      if (!some(error.responseData.errors, err => {
-        return get(err, ['source', 'parameter']) === 'actionId';
-      })) {
-        Radio.trigger('event-router', 'notFound');
-        this.stop();
-        return;
-      }
-
-      this.showActionNotFound();
+      Radio.trigger('event-router', 'notFound');
       this.stop();
-      Radio.trigger('event-router', 'patient:dashboard', patientId);
       return;
     }
 
     handleErrors(error);
   },
 
-  onStart({ currentRoute }, patient) {
+  // status-aware action failure handling for the on-demand dispatch fetch
+  failAction(error, patientId) {
+    /* istanbul ignore else: only the 410 path is exercised; others are generic */
+    if (get(error, ['response', 'status']) === 410) {
+      this.showActionNotFound();
+      this.stop();
+      Radio.trigger('event-router', 'patient:dashboard', patientId);
+      return;
+    }
+
+    /* istanbul ignore next: generic error handling */
+    handleErrors(error);
+  },
+
+  onStart(options, patient) {
     this.patient = patient;
 
     this.setView(new LayoutView({ model: patient }));
 
     this.showSidebar();
 
-    this.startRoute(currentRoute);
+    this.startCurrentRoute();
 
     this.showView();
   },
@@ -110,21 +124,44 @@ export default SubRouterApp.extend({
   },
 
   startPatientAction(list, patientId, actionId) {
-    this.action = Radio.request('entities', 'actions:model', actionId);
+    const action = Radio.request('entities', 'actions:model', actionId);
+    this.action = action;
 
     this.startList(list);
 
-    const sidebarApp = this.getChildApp('actionSidebar');
+    this.getChildApp('actionSidebar').stop();
 
-    sidebarApp.stop();
-
-    if (!this.action.isCached()) {
-      this.showActionNotFound();
+    if (action.isCached()) {
+      this.showActionSidebar(action, list, patientId);
       return;
     }
 
-    Radio.request('sidebar', 'start', sidebarApp, { action: this.action });
+    // not cached when its route coalesced into a still-loading PatientApp, the
+    // prefetch failed, or the action is absent from the list: fetch it on demand
+    // rather than reporting it missing
+    Radio.request('entities', 'fetch:actions:model', actionId)
+      .then(() => this.showActionSidebar(action, list, patientId))
+      .catch(error => {
+        // suppress when a newer action route superseded this one (or the app stopped)
+        if (this.action !== action) return;
 
+        this.failAction(error, patientId);
+      });
+  },
+
+  showActionSidebar(action, list, patientId) {
+    // a newer action route may have superseded this one while it loaded
+    if (this.action !== action) return;
+
+    /* istanbul ignore next: defensive — app stopped mid-fetch */
+    if (!this.isRunning()) return;
+
+    const sidebarApp = this.getChildApp('actionSidebar');
+
+    Radio.request('sidebar', 'start', sidebarApp, { action });
+
+    // re-dispatched routes must not accumulate close handlers on the singleton
+    this.stopListening(sidebarApp, 'close');
     this.listenTo(sidebarApp, 'close', () => {
       Radio.trigger('event-router', `patient:${ list }`, patientId);
     });
