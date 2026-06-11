@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import formatDate from 'helpers/format-date';
 import { testDate, testDateSubtract } from 'helpers/test-date';
 import { getResource, getRelationship, getErrors } from 'helpers/json-api';
+import { testTs } from 'helpers/test-timestamp';
 
 import { workspaceOne, getWorkspace } from 'support/api/workspaces';
 import { getWorkspacePatient } from 'support/api/workspace-patients';
@@ -88,7 +89,6 @@ context('patient sidebar', function() {
           'formWidget',
           'formModalWidget',
           'readOnlyFormModalWidget',
-          'reportFormModalWidget',
           'formModalWidgetSmall',
           'formModalWidgetLarge',
           'patientMRNIdentifier',
@@ -237,7 +237,7 @@ context('patient sidebar', function() {
       });
 
     cy
-      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
       .wait('@routeWorkspacePatient')
       .wait('@routePrograms')
@@ -412,6 +412,72 @@ context('patient sidebar', function() {
     cy
       .get('.modal--large')
       .should('not.exist');
+
+    cy
+      .get('@patientSidebar')
+      .find('.widgets__form-widget')
+      .contains('Test Modal Form')
+      .click()
+      .wait('@routeFormApp')
+      .wait('@routeFormDefinition');
+
+    cy
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
+          familyHistory: 'New typing',
+        });
+      });
+
+    cy
+      .get('.modal--large')
+      .find('.fa-shield-check')
+      .click();
+
+    cy.tick(60000);
+
+    cy
+      .get('.form__draft-menu')
+      .should('contain', 'Last saved a minute ago');
+
+    cy
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
+          familyHistory: 'More new typing',
+        });
+      });
+
+    cy
+      .get('.form__draft-menu')
+      .should('contain', 'Last saved a few seconds ago');
+
+    cy
+      .get('.form__draft-menu')
+      .find('.js-discard')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeFormApp');
+
+    cy
+      .get('.modal--large')
+      .find('.fa-shield-check')
+      .should('not.exist');
+
+    cy
+      .get('.modal--large')
+      .find('.js-submit')
+      .should('be.disabled');
+
+    cy
+      .get('.modal--large')
+      .find('.js-close')
+      .first()
+      .click();
 
     cy
       .get('.patient-sidebar')

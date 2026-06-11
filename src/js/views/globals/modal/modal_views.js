@@ -62,6 +62,7 @@ const ModalView = View.extend({
   regionClass: ReplaceElRegion,
   regions: {
     header: '[data-header-region]',
+    draftStatus: '[data-draft-status-region]',
     body: {
       el: '[data-body-region]',
       regionClass: PreloadRegion.extend({ timeout: 0 }),
