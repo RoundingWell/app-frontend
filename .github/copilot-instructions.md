@@ -10,7 +10,7 @@ Load a scoped overlay only when your change touches `scripts/**` or `packages/ca
 - Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
 - Route data access through `src/js/entities-service/**`.
 - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
-- Prefer this import order: third-party libraries, SCSS or CSS modules, shared utilities and base classes, entities and service modules, apps and controllers, views and components, then templates and final local style overrides.
+- Prefer this import order: third-party libraries, shared SCSS modules, shared utilities and i18n, base classes, entities and service modules, apps and controllers, behaviors and regions and components, views, then templates and view-local SCSS last.
 - Keep Handlebars spacing tight: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
 - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
 - Component specs live in `src/**/*.cy.js`.

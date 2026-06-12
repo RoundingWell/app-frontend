@@ -47,14 +47,16 @@ Load a scoped overlay only when the task touches:
 
 ## Template, Style, and Import Conventions
 
-- Prefer this import order when adding or reorganizing imports:
+- Prefer this import order when adding or reorganizing imports (canonical list; the worked example is in `src/js/README.md`):
   1. polyfills and third-party libraries
-  2. SCSS or CSS modules
-  3. shared utilities and base classes
-  4. entities and service modules
-  5. apps and controllers
-  6. views and components
-  7. templates and final local style overrides
+  2. shared SCSS modules
+  3. shared utilities and i18n
+  4. base classes
+  5. entities and service modules
+  6. apps and controllers
+  7. behaviors, regions, and components
+  8. views
+  9. templates, then view-local SCSS last
 - Handlebars spacing should stay tight and consistent: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
 - Use `{{{ }}}` only for trusted HTML.
 - Keep attribute order predictable in templates: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
@@ -83,21 +85,25 @@ Load a scoped overlay only when the task touches:
 ## Validation
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
-- Run targeted Cypress coverage commands when UI behavior changes:
-  - `npm run coverage:component`
-  - `npm run coverage:e2e`
-  - `npm run coverage`
+- Iterate with single specs; they are much faster than the full suites:
+  - Component: `npx cypress run --component --spec src/js/base/routerapp.cy.js`
+  - E2E: build and serve the test app once (`npm run build -- --mode test`, then `npx vite preview -m test` in the background to serve on port 8090), then `npx cypress run --spec test/integration/<area>/<spec>.js`
+  - Do not pass `--spec` through `npm run coverage:e2e`; npm appends it after the script's `exit`, so the full suite still runs unfiltered and the script then exits 1 (`exit: too many arguments`).
+- Before claiming UI behavior is validated, run the full suite relevant to the change:
+  - `npm run coverage:component` for component behavior
+  - `npm run coverage:e2e` for app flows
+  - `npm run coverage` runs both; do not stack it with the individual commands.
 - Never claim validation passed unless you actually ran the command.
 
 ## Common Commands
 
-- `npm run dev`
-- `npm run test`
+- `npm run dev` — blocking dev server; not a validation step.
+- `npm run test` — opens the interactive Cypress runner; never run it non-interactively (it hangs). Agents validate with the headless commands below instead.
 - `npm run lint`
-- `npm run coverage:component`
-- `npm run coverage:e2e`
-- `npm run coverage`
-- `npm run stop`
+- `npm run coverage:component` — headless, agent-safe.
+- `npm run coverage:e2e` — headless, agent-safe; builds and serves the test app itself.
+- `npm run coverage` — full suite, slow; headless.
+- `npm run stop` — kills vite and clears its cache.
 
 ## AI Docs Maintenance
 
