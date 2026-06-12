@@ -1,48 +1,49 @@
-import { partial, get, noop } from 'underscore';
+import { get, partial } from 'underscore';
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import handleErrors from 'js/utils/handle-errors';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
-import DashboardApp from 'js/apps/patients/patient/dashboard/dashboard_app';
-import ArchiveApp from 'js/apps/patients/patient/archive/archive_app';
+// These existing apps stand in for page-oriented replacements during the
+// migration. The PatientApp contract below is the intended workspace shape.
+import WorkflowPageApp from 'js/apps/patients/patient/dashboard/dashboard_app';
+import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
+import ActionApp from 'js/apps/patients/patient/action/action_app';
+import FormPageApp from 'js/apps/forms/form/form-patient_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
-import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
 
-import { LayoutView, intl } from 'js/views/patients/patient/patient_views';
+import { LayoutView } from 'js/views/patients/patient/patient_views';
 
 export default SubRouterApp.extend({
   routeScope: ['patientId'],
 
   routeActions() {
     return {
-      'patient:dashboard': partial(this.startList, 'dashboard'),
-      'patient:archive': partial(this.startList, 'archive'),
-      'patient:action': partial(this.startPatientAction, 'dashboard'),
-      'patient:action:archive': partial(this.startPatientAction, 'archive'),
+      'patient:workflow': partial(this.showWorkflow, 'active'),
+      'patient:workflow:closed': partial(this.showWorkflow, 'closed'),
+      'patient:action': this.showPatientAction,
+      'patient:flow': this.showFlow,
+      'patient:flow:action': this.showFlowAction,
+      'patient:form': this.showPatientForm,
+      'patient:form:action': this.showActionForm,
     };
   },
 
   childApps: {
-    dashboard: DashboardApp,
-    archive: ArchiveApp,
-    actionSidebar: ActionSiderbarApp,
-    patient: PatientSidebarApp,
+    workflow: WorkflowPageApp,
+    flow: FlowPageApp,
+    action: ActionApp,
+    form: FormPageApp,
+    patientSidebar: PatientSidebarApp,
   },
 
   currentAppOptions() {
     return {
       region: this.getRegion('content'),
-      patient: this.getOption('patient'),
+      patient: this.patient,
     };
-  },
-
-  onBeforeStartRoute() {
-    if (this.action) {
-      this.action.trigger('editing', false);
-      delete this.action;
-    }
   },
 
   onBeforeStart() {
@@ -50,21 +51,13 @@ export default SubRouterApp.extend({
   },
 
   beforeStart() {
-    const [patientId, actionId] = this.getCurrentRoute().eventArgs;
+    const [patientId] = this.getCurrentRoute().eventArgs;
 
-    return [
-      Radio.request('entities', 'fetch:patients:model', patientId),
-      // the action is a non-aborting prefetch: it warms the cache for the initial
-      // route but its failure must never reject startup or override a newer route —
-      // dispatch (startPatientAction) is the source of truth and handles errors
-      actionId && Radio.request('entities', 'fetch:actions:model', actionId).catch(noop),
-    ];
+    return Radio.request('entities', 'fetch:patients:model', patientId);
   },
 
   /* istanbul ignore next: beforeStart error handling */
   onFail(options, error) {
-    // the action prefetch is non-aborting, so a startup failure is the patient's;
-    // a 410 means the patient is gone
     if (get(error, ['response', 'status']) === 410) {
       Radio.trigger('event-router', 'notFound');
       this.stop();
@@ -74,101 +67,81 @@ export default SubRouterApp.extend({
     handleErrors(error);
   },
 
-  // status-aware action failure handling for the on-demand dispatch fetch
-  failAction(error, patientId) {
-    /* istanbul ignore else: only the 410 path is exercised; others are generic */
-    if (get(error, ['response', 'status']) === 410) {
-      this.showActionNotFound();
-      this.stop();
-      Radio.trigger('event-router', 'patient:dashboard', patientId);
-      return;
-    }
-
-    /* istanbul ignore next: generic error handling */
-    handleErrors(error);
-  },
-
   onStart(options, patient) {
     this.patient = patient;
+    this.contextTrail = new Backbone.Model();
 
-    this.setView(new LayoutView({ model: patient }));
+    this.setView(new LayoutView({
+      model: patient,
+      contextTrail: this.contextTrail,
+    }));
 
-    this.showSidebar();
-
+    this.showPatientSidebar();
     this.startCurrentRoute();
-
     this.showView();
   },
 
-  onStop() {
-    delete this._list;
-    delete this.action;
-  },
-
-  showActionNotFound() {
-    Radio.request('alert', 'show:error', intl.actionNotFound);
-  },
-
-  startList(list) {
-    if (this._list === list) return;
-
-    this._list = list;
-
-    this.startCurrent(list);
-
-    if (this.action) {
-      this.listenToOnce(this.getChildApp(list), 'start', () => {
-        this.action.trigger('editing', true);
-      });
-    }
-  },
-
-  startPatientAction(list, patientId, actionId) {
-    const action = Radio.request('entities', 'actions:model', actionId);
-    this.action = action;
-
-    this.startList(list);
-
-    this.getChildApp('actionSidebar').stop();
-
-    if (action.isCached()) {
-      this.showActionSidebar(action, list, patientId);
-      return;
-    }
-
-    // not cached when its route coalesced into a still-loading PatientApp, the
-    // prefetch failed, or the action is absent from the list: fetch it on demand
-    // rather than reporting it missing
-    Radio.request('entities', 'fetch:actions:model', actionId)
-      .then(() => this.showActionSidebar(action, list, patientId))
-      .catch(error => {
-        // suppress when a newer action route superseded this one (or the app stopped)
-        if (this.action !== action) return;
-
-        this.failAction(error, patientId);
-      });
-  },
-
-  showActionSidebar(action, list, patientId) {
-    // a newer action route may have superseded this one while it loaded
-    if (this.action !== action) return;
-
-    /* istanbul ignore next: defensive — app stopped mid-fetch */
-    if (!this.isRunning()) return;
-
-    const sidebarApp = this.getChildApp('actionSidebar');
-
-    Radio.request('sidebar', 'start', sidebarApp, { action });
-
-    // re-dispatched routes must not accumulate close handlers on the singleton
-    this.stopListening(sidebarApp, 'close');
-    this.listenTo(sidebarApp, 'close', () => {
-      Radio.trigger('event-router', `patient:${ list }`, patientId);
+  showWorkflow(mode) {
+    this.showPage('workflow', { mode }, {
+      page: 'workflow',
+      mode,
     });
   },
 
-  showSidebar() {
-    this.startChildApp('patient', {
+  showPatientAction(patientId, actionId) {
+    this.showPage('action', { actionId }, {
+      page: 'action',
+      actionId,
+    });
+  },
+
+  showFlow(patientId, flowId) {
+    this.showPage('flow', { flowId }, {
+      page: 'flow',
+      flowId,
+    });
+  },
+
+  showFlowAction(patientId, flowId, actionId) {
+    this.showPage('action', { actionId, flowId }, {
+      page: 'action',
+      flowId,
+      actionId,
+    });
+  },
+
+  showPatientForm(patientId, formId) {
+    this.showPage('form', { formId }, {
+      page: 'form',
+      formId,
+    });
+  },
+
+  showActionForm(patientId, formId, actionId) {
+    this.showPage('form', { formId, actionId }, {
+      page: 'form',
+      formId,
+      actionId,
+    });
+  },
+
+  showPage(appName, options, context) {
+    this.contextTrail.set(context);
+
+    const pageApp = this.getChildApp(appName);
+
+    this.stopListening(pageApp, 'context:change');
+    this.listenTo(pageApp, 'context:change', this.updateContextTrail);
+
+    this.startCurrent(appName, options);
+  },
+
+  updateContextTrail(context) {
+    this.contextTrail.set(context);
+  },
+
+  showPatientSidebar() {
+    this.startChildApp('patientSidebar', {
       region: this.getRegion('sidebar'),
       patient: this.patient,
     });
