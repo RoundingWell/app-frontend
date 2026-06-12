@@ -1,0 +1,19 @@
+docs/patient-workspace-architecture-spec.md
+  s_5a146704f00d9c::t_0f0cf4c85827de 1-1354
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8e35d184c858b3a45e90888d7dfeb76b56f90e21",
+  "prompts": {},
+  "sessions": {
+    "s_5a146704f00d9c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b99-b4a2-7582-bd31-5b23242fc748",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
