@@ -22,7 +22,7 @@ import intl from 'js/i18n';
 import App from 'js/base/app';
 
 // Entities and service modules
-import { FooEntity } from 'js/entities-service/entities/foo';
+import { Model as PatientModel } from 'js/entities-service/entities/patients';
 
 // Apps (typically alphabetically)
 import ChildApp from 'js/apps/foo/child_app';

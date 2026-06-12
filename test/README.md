@@ -95,7 +95,7 @@ Fixtures should be json files loaded in `test/fixtures/`.
 
 ## Composing APIs
 
-In Cypress, API routes are setup in `test/support/api/`. Each added file must be listed in `test/support/index.js`.
+In Cypress, API routes are setup in `test/support/api/`. Each added file must be imported in `test/support/e2e.js`.
 API's are organized by model and collection requests. Multiple versions of the same route might be added to support different scenarios. For instance both a check-in and a clinician response share the same API, but return different data depending on what is requested from the `id`. Each route follows the same format so that in practice the data can be mutated for a particular test scenario.
 
 ```js
