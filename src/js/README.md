@@ -3,6 +3,7 @@
 ## Import Order
 
 When importing dependencies we loosely follow some general rules and strictly follow others.
+The canonical ordering list lives in [`/AGENTS.md`](../../AGENTS.md); this is the worked example.
 ```js
 // 3rd party dependencies generally in order or "lowest-level" dependency
 import { extend } from 'underscore'; // underscore is a dependency of marionette so it goes first.
@@ -19,6 +20,9 @@ import intl from 'js/i18n';
 
 // Base classes
 import App from 'js/base/app';
+
+// Entities and service modules
+import { Model as PatientModel } from 'js/entities-service/entities/patients';
 
 // Apps (typically alphabetically)
 import ChildApp from 'js/apps/foo/child_app';

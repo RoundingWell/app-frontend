@@ -10,6 +10,7 @@ Load a scoped overlay only when the task touches:
 - `scripts/**` -> `scripts/AGENTS.md`
 - `packages/care-ops-five9/**` -> `packages/care-ops-five9/AGENTS.md`
 - routing infrastructure (`src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`) or application route definitions -> `src/js/base/routing.md`
+- data access, entities, or `src/js/entities-service/**` -> `src/js/entities-service/README.md`
 
 ## Instruction Priority
 
@@ -38,6 +39,25 @@ Load a scoped overlay only when the task touches:
 - Reuse existing utilities and workspace packages before adding dependencies.
 - Use i18n keys that match the repo's existing formatjs-style naming.
 
+## Intentional Choices — Do Not Propose Changing or Flag in Review
+
+These are deliberate, settled decisions. Do not suggest "modernizing" them in
+generated code, and do not flag them as issues, tech debt, or risks in review.
+
+- The Backbone + Marionette stack is the permanent direction. The team
+  maintains `backbone.marionette` and `backbone.radio` upstream. Never propose
+  a framework migration or describe the stack as legacy.
+- `backbone.radio` stays synchronous. Do not propose Promise normalization,
+  async middleware, or typed wrappers around Radio.
+- String-based Radio request names (e.g. `'fetch:actions:model'`) are
+  intentional: they keep test stubbing and console debugging trivial. Do not
+  propose typed or constant-based replacements.
+- Underscore is the default data-manipulation API, including where native
+  equivalents exist (see `src/js/README.md`). Do not flag underscore usage as
+  outdated or suggest native one-for-one rewrites.
+- JavaScript, not TypeScript, per the guardrails above. Do not flag missing
+  type annotations.
+
 ## Communication
 
 - Keep responses short and operational.
@@ -47,14 +67,16 @@ Load a scoped overlay only when the task touches:
 
 ## Template, Style, and Import Conventions
 
-- Prefer this import order when adding or reorganizing imports:
+- Prefer this import order when adding or reorganizing imports (canonical list; the worked example is in `src/js/README.md`):
   1. polyfills and third-party libraries
-  2. SCSS or CSS modules
-  3. shared utilities and base classes
-  4. entities and service modules
-  5. apps and controllers
-  6. views and components
-  7. templates and final local style overrides
+  2. shared SCSS modules
+  3. shared utilities and i18n
+  4. base classes
+  5. entities and service modules
+  6. apps and controllers
+  7. behaviors, regions, and components
+  8. views
+  9. templates, then view-local SCSS last
 - Handlebars spacing should stay tight and consistent: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
 - Use `{{{ }}}` only for trusted HTML.
 - Keep attribute order predictable in templates: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
@@ -80,24 +102,36 @@ Load a scoped overlay only when the task touches:
 - Review is most useful for non-trivial diffs, risky refactors, shared package changes, release or deploy changes, and behavior changes that may not be caught by lint.
 - Review is less useful for tiny mechanical edits, pure copy changes, or changes where tests and lint already provide the meaningful signal.
 
+## Commits and Pull Requests
+
+- Use conventional-commit subjects, `type(scope): summary` with the scope
+  optional — e.g. `feat`, `fix`, `chore`, `refactor`, `perf`, `docs`, `test`,
+  `build`, `ci`, `revert`.
+- Keep PR descriptions short and operational, consistent with the
+  Communication rules above.
+
 ## Validation
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
-- Run targeted Cypress coverage commands when UI behavior changes:
-  - `npm run coverage:component`
-  - `npm run coverage:e2e`
-  - `npm run coverage`
+- Iterate with single specs; they are much faster than the full suites:
+  - Component: `npx cypress run --component --spec src/js/base/routerapp.cy.js`
+  - E2E: build and serve the test app once (`npm run build -- --mode test`, then `npx vite preview -m test` in the background to serve on port 8090), then `npx cypress run --spec test/integration/<area>/<spec>.js`
+  - Do not pass `--spec` through `npm run coverage:e2e`; npm appends it after the script's `exit`, so the full suite still runs unfiltered and the script then exits 1 (`exit: too many arguments`).
+- Before claiming UI behavior is validated, run the full suite relevant to the change:
+  - `npm run coverage:component` for component behavior
+  - `npm run coverage:e2e` for app flows
+  - `npm run coverage` runs both; do not stack it with the individual commands.
 - Never claim validation passed unless you actually ran the command.
 
 ## Common Commands
 
-- `npm run dev`
-- `npm run test`
+- `npm run dev` — blocking dev server; not a validation step.
+- `npm run test` — opens the interactive Cypress runner; never run it non-interactively (it hangs). Agents validate with the headless commands below instead.
 - `npm run lint`
-- `npm run coverage:component`
-- `npm run coverage:e2e`
-- `npm run coverage`
-- `npm run stop`
+- `npm run coverage:component` — headless, agent-safe.
+- `npm run coverage:e2e` — headless, agent-safe; builds and serves the test app itself.
+- `npm run coverage` — full suite, slow; headless.
+- `npm run stop` — kills vite and clears its cache.
 
 ## AI Docs Maintenance
 
@@ -106,3 +140,4 @@ Load a scoped overlay only when the task touches:
 - Copilot prompt surfaces intentionally inline a small subset of rules that they must see locally, such as import order and review-output constraints.
 - Prefer deleting stale AI docs over maintaining low-signal indexes or checklists.
 - This repo intentionally does not maintain a dedicated AI-doc audit script. Keep AI docs accurate through same-patch updates, targeted repo inspection, AI review when warranted, and human review.
+- When an AI review comment is noise or an agent makes a repo-specific mistake these docs should have prevented, patch the doc that failed in the next related change rather than letting the failure repeat.
