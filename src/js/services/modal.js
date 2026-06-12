@@ -1,4 +1,6 @@
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import hbs from 'handlebars-inline-precompile';
 import App from 'js/base/app';
 
 import intl from 'js/i18n';
@@ -6,6 +8,7 @@ import intl from 'js/i18n';
 import FormsService from 'js/services/forms';
 
 import { ModalView, SidebarModalView, SmallModalView, IframeFormView } from 'js/views/globals/modal/modal_views';
+import { DraftStatusView } from 'js/views/forms/form/form_views';
 
 export default App.extend({
   channelName: 'modal',
@@ -58,6 +61,8 @@ export default App.extend({
       return;
     }
 
+    const draftModel = new Backbone.Model();
+
     const modal = this.showModal({
       className: 'modal--large',
       headingText: formName,
@@ -74,7 +79,42 @@ export default App.extend({
 
     modal.disableSubmit();
 
+    this.listenTo(draftModel, 'change:updated', (model, updated) => {
+      if (!updated) {
+        modal.getRegion('draftStatus').empty();
+        return;
+      }
+
+      if (modal.getRegion('draftStatus').hasView()) return;
+
+      const draftStatusView = new DraftStatusView({
+        model: draftModel,
+        viewOptions: {
+          className: 'button--icon flex flex-align-center u-margin--r-16',
+          template: hbs`{{far "shield-check"}}`,
+        },
+        position() {
+          const bounds = this.getView().getBounds();
+          return { ...bounds, outerHeight: bounds.outerHeight + 4 };
+        },
+      });
+
+      modal.showChildView('draftStatus', draftStatusView);
+
+      this.listenTo(draftStatusView, {
+        async 'discard:submission'() {
+          await Radio.request(`form${ form.id }`, 'clear:storedSubmission');
+
+          modal.getChildView('body').render();
+          modal.disableSubmit();
+        },
+      });
+    });
+
     this.listenTo(formService, {
+      'update:submission'(updated) {
+        draftModel.set('updated', updated);
+      },
       'success'() {
         modal.destroy();
       },
@@ -84,6 +124,13 @@ export default App.extend({
       'error'() {
         modal.disableSubmit(false);
       },
+    });
+
+    Radio.request(`form${ form.id }`, 'get:storedSubmission').then(({ updated }) => {
+      /* istanbul ignore if: difficult to force stale async render */
+      if (modal.isDestroyed()) return;
+
+      draftModel.set('updated', updated);
     });
 
     return modal;
