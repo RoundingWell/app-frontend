@@ -41,29 +41,26 @@ export default App.extend({
   },
 
   getUrl() {
-    if (this.url) return this.url;
-
     return fetcher('/api/websockets')
       .then(handleJSON)
       .then(({ data }) => {
         if (!data.is_enabled) return;
-        this.url = new URL(data.endpoint);
-        return this.url;
+        const { token, query_parameter: queryParameter } = data.authentication;
+
+        const url = new URL(data.endpoint);
+        url.searchParams.set(queryParameter, token);
+        return url;
       });
   },
 
   beforeStart() {
-    return [
-      Radio.request('auth', 'getToken'),
-      this.getUrl(),
-    ];
+    return this.getUrl();
   },
 
-  onStart({ data }, token) {
+  onStart({ data }, url) {
     /* istanbul ignore next: Essentially avoid offline */
-    if (!token || !this.url) return;
-    this.url.searchParams.set('auth', token);
-    this.ws = new WebSocket(this.url.toString());
+    if (!url) return;
+    this.ws = new WebSocket(url.toString());
     this.ws.addEventListener('open', this.onOpen.bind(this, data));
     this.ws.addEventListener('close', this.onClose.bind(this));
     this.ws.addEventListener('message', this.onMessage.bind(this));
