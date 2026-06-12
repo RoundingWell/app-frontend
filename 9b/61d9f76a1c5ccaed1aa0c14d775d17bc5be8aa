@@ -1,0 +1,29 @@
+src/js/README.md
+  s_d0fa04c7b6bebf::t_567b3c46d0ba1b 6
+  s_d0fa04c7b6bebf::t_f41c7edcef5bd7 24-26
+.github/copilot.yaml
+  s_d0fa04c7b6bebf::t_b330cc743e8171 35
+  s_d0fa04c7b6bebf::t_4a81372de9f856 12
+.github/copilot-instructions.md
+  s_d0fa04c7b6bebf::t_a7988c9ce9ab0e 13
+AGENTS.md
+  s_d0fa04c7b6bebf::t_a84b0524e4fd11 88-92
+  s_d0fa04c7b6bebf::t_244e8559bf01b8 100-101,103-106
+  s_d0fa04c7b6bebf::t_ad3bbcdb6a454d 50,52-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "9b61d9f76a1c5ccaed1aa0c14d775d17bc5be8aa",
+  "prompts": {},
+  "sessions": {
+    "s_d0fa04c7b6bebf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0cf2d24-0418-420b-a551-332ae9dc0192",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
