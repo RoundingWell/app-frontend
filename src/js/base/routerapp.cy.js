@@ -1,5 +1,3 @@
-import Radio from 'backbone.radio';
-
 import RouterApp from './routerapp';
 import SubRouterApp from './subrouterapp';
 
@@ -51,30 +49,15 @@ function trigger(app, event, ...args) {
 
 context('RouterApp', function() {
   let app;
-  let navSelect;
-  let sidebarStop;
-  let setLatestList;
-
-  beforeEach(function() {
-    navSelect = cy.stub();
-    sidebarStop = cy.stub();
-    setLatestList = cy.stub();
-
-    Radio.reply('workspace', 'current', () => ({ get: () => 'test-ws' }));
-    Radio.reply('nav', 'select', navSelect);
-    Radio.reply('sidebar', 'stop', sidebarStop);
-    Radio.reply('history', 'set:latestList', setLatestList);
-  });
 
   afterEach(function() {
     if (app) app.destroy();
     app = null;
-    Radio.reset();
   });
 
   describe('route triggers and aliases', function() {
     specify('prefixes the workspace slug onto non-root routes', function() {
-      app = new Router();
+      app = new Router({ workspaceSlug: 'test-ws' });
       expect(app.router.getDefaultRoute('patient:dashboard')).to.equal('test-ws/patient/dashboard/:id');
     });
 
@@ -89,7 +72,7 @@ context('RouterApp', function() {
           };
         },
       });
-      app = new AliasRouter();
+      app = new AliasRouter({ workspaceSlug: 'test-ws' });
 
       expect(app.router.getDefaultRoute('patient:dashboard')).to.equal('test-ws/patient/:id/workflow');
       expect(app.translateEvent('patient:dashboard', 'p1')).to.equal('test-ws/patient/p1/workflow');
@@ -97,20 +80,43 @@ context('RouterApp', function() {
       trigger(app, 'patient:dashboard', 'p1');
       expect(app.getCurrentRoute().definition.route).to.equal('patient/:id/workflow');
     });
+
+    specify('requires a workspace slug for non-root routes', function() {
+      expect(() => new Router()).to.throw('RouterApp requires workspaceSlug for non-root routes');
+    });
+
+    specify('does not require a workspace slug for root routes', function() {
+      const RootRouter = RouterApp.extend({
+        eventRoutes: {
+          root: {
+            action: 'showRoot',
+            route: '',
+            root: true,
+          },
+        },
+        showRoot() {},
+      });
+
+      app = new RootRouter();
+
+      expect(app.router.getDefaultRoute('root')).to.equal('');
+    });
   });
 
   describe('route context', function() {
     specify('sets the current route before before:appRoute and exposes the full context', function() {
       const CapturingRouter = Router.extend({
-        onBeforeAppRoute(routeContext) {
+        onBeforeAppRoute(router, routeContext) {
+          this.capturedRouter = router;
           this.captured = routeContext;
           this.currentDuringHook = this.getCurrentRoute();
         },
       });
-      app = new CapturingRouter();
+      app = new CapturingRouter({ workspaceSlug: 'test-ws' });
 
       trigger(app, 'patient:dashboard', 'p1');
 
+      expect(app.capturedRouter).to.equal(app);
       expect(app.captured.event).to.equal('patient:dashboard');
       expect(app.captured.eventArgs).to.deep.equal(['p1']);
       expect(app.captured.definition.action).to.equal('showPatient');
@@ -118,36 +124,32 @@ context('RouterApp', function() {
       expect(app.currentDuringHook).to.equal(app.captured);
     });
 
+    specify('passes the router before route context to appRoute events', function() {
+      app = new Router({ workspaceSlug: 'test-ws' });
+      const beforeAppRoute = cy.stub();
+      const appRoute = cy.stub();
+
+      app.on('before:appRoute', beforeAppRoute);
+      app.on('appRoute', appRoute);
+
+      trigger(app, 'patient:dashboard', 'p1');
+
+      const routeContext = app.getCurrentRoute();
+
+      expect(beforeAppRoute).to.have.been.calledWith(app, routeContext);
+      expect(appRoute).to.have.been.calledWith(app, routeContext);
+    });
+
     specify('getCurrentRouteMeta returns the definition meta', function() {
-      app = new Router();
+      app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'worklist', 'w1');
       expect(app.getCurrentRouteMeta()).to.deep.equal({ isList: true });
     });
   });
 
-  describe('latest-list meta', function() {
-    specify('records the latest list for meta.isList routes', function() {
-      app = new Router();
-      trigger(app, 'worklist', 'w1');
-      expect(setLatestList).to.have.been.calledWith('worklist', ['w1']);
-    });
-
-    specify('clears the latest list for meta.clearLatestList routes', function() {
-      app = new Router();
-      trigger(app, 'schedule');
-      expect(setLatestList).to.have.been.calledWith(false);
-    });
-
-    specify('leaves the latest list alone for plain routes', function() {
-      app = new Router();
-      trigger(app, 'patient:dashboard', 'p1');
-      expect(setLatestList).not.to.have.been.called;
-    });
-  });
-
   describe('scope identity', function() {
     specify('reuses the child and forwards the route for an equal scope', function() {
-      app = new Router();
+      app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'patient:dashboard', 'p1');
       const child = app.getCurrent();
 
@@ -159,7 +161,7 @@ context('RouterApp', function() {
     });
 
     specify('restarts the child for a different scope', function() {
-      app = new Router();
+      app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'patient:dashboard', 'p1');
       const child = app.getCurrent();
 
@@ -169,7 +171,7 @@ context('RouterApp', function() {
     });
 
     specify('startCurrent is unconditional even for an equal scope', function() {
-      app = new Router();
+      app = new Router({ workspaceSlug: 'test-ws' });
       app.startCurrent('patient', { patientId: 'p1' });
       const child = app.getCurrent();
       app.startCurrent('patient', { patientId: 'p1' });
@@ -180,7 +182,7 @@ context('RouterApp', function() {
 
   describe('child stop cleanup', function() {
     specify('clears current references when the child stops itself', function() {
-      app = new Router();
+      app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'patient:dashboard', 'p1');
       const child = app.getCurrent();
 
@@ -191,7 +193,7 @@ context('RouterApp', function() {
     });
 
     specify('keeps the current child when it restarts itself', function() {
-      app = new Router();
+      app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'patient:dashboard', 'p1');
       const child = app.getCurrent();
 

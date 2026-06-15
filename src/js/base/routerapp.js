@@ -1,6 +1,5 @@
 import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import EventRouter from 'backbone.eventrouter';
 import App from './app';
 
@@ -8,7 +7,9 @@ export default App.extend({
   // Set in router apps for nav selection
   routerAppName: '',
 
-  constructor: function() {
+  constructor: function(options = {}) {
+    this.workspaceSlug = options.workspaceSlug;
+
     this.initRouter();
 
     // if the app does not handle a given route, stop
@@ -51,10 +52,11 @@ export default App.extend({
   _prefixRoute(route, root) {
     if (root) return route;
 
-    const currentWorkspace = Radio.request('workspace', 'current');
-    const workspace = currentWorkspace.get('slug');
+    if (!this.workspaceSlug) {
+      throw new Error('RouterApp requires workspaceSlug for non-root routes');
+    }
 
-    return route ? `${ workspace }/${ route }` : workspace;
+    return route ? `${ this.workspaceSlug }/${ route }` : this.workspaceSlug;
   },
 
   getEventActions(eventRoutes, routeAction) {
@@ -96,12 +98,7 @@ export default App.extend({
       },
     };
 
-    this.triggerMethod('before:appRoute', this._currentRoute);
-
-    Radio.request('nav', 'select', this.routerAppName, event, args);
-    Radio.request('sidebar', 'stop');
-
-    this.setLatestList(this._currentRoute);
+    this.triggerMethod('before:appRoute', this, this._currentRoute);
 
     if (!isFunction(action)) {
       action = this[action];
@@ -109,20 +106,7 @@ export default App.extend({
 
     action.apply(this, args);
 
-    this.triggerMethod('appRoute', this._currentRoute);
-  },
-
-  setLatestList(routeContext) {
-    const { meta } = routeContext.definition;
-
-    if (meta.isList) {
-      Radio.request('history', 'set:latestList', routeContext.event, routeContext.eventArgs);
-      return;
-    }
-
-    if (!meta.clearLatestList) return;
-
-    Radio.request('history', 'set:latestList', false);
+    this.triggerMethod('appRoute', this, this._currentRoute);
   },
 
   // handler that ensures one running app

@@ -11,7 +11,18 @@ export default App.extend({
     'go:latestList': 'goLatestList',
   },
 
-  setLatestList(event,
+  setLatestList(routeContext) {
+    const { event, eventArgs, definition: { meta } } = routeContext;
+
+    if (meta.isList) {
+      this._setLatestList(event, eventArgs);
+      return;
+    }
+
+    if (meta.clearLatestList) this._setLatestList(false);
+  },
+
+  _setLatestList(event,
     /* istanbul ignore next */
     eventArgs = []) {
     this._latestList = event;

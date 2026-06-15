@@ -38,6 +38,8 @@ export default App.extend({
     ];
   },
   onStart(options, currentWorkspace, PatientsMainApp, DashboardsMainApp, CliniciansMainApp, ProgramsMainApp, FormsApp) {
+    this.workspaceSlug = currentWorkspace.get('slug');
+
     this.initRouter(PatientsMainApp);
     this.initRouter(DashboardsMainApp);
     this.initRouter(CliniciansMainApp);
@@ -64,9 +66,22 @@ export default App.extend({
 
     const RouterApp = RouterAppImport.default;
 
-    const router = new RouterApp({ region: this.getRegion('content') });
+    const router = new RouterApp({
+      region: this.getRegion('content'),
+      workspaceSlug: this.workspaceSlug,
+    });
+
+    this.listenTo(router, 'before:appRoute', this.onBeforeAppRoute);
+
     this.routers.push(router);
     return router;
+  },
+  onBeforeAppRoute(router, routeContext) {
+    const { event, eventArgs } = routeContext;
+
+    Radio.request('nav', 'select', router.routerAppName, event, eventArgs);
+    Radio.request('sidebar', 'stop');
+    Radio.request('history', 'set:latestList', routeContext);
   },
   initFormsApp(FormsApp) {
     const formsApp = this.initRouter(FormsApp);
