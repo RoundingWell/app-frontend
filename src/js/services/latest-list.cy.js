@@ -55,4 +55,16 @@ context('LatestListService', function() {
     expect(service._latestList).to.equal('worklist');
     expect(service._latestListArgs).to.deep.equal(['owned-by']);
   });
+
+  specify('routes back to the latest list', function() {
+    const eventRouter = Radio.channel('event-router');
+    const worklist = cy.stub();
+
+    service.listenTo(eventRouter, 'worklist', worklist);
+    service.setLatestList('worklist', ['owned-by']);
+
+    Radio.request('history', 'go:latestList');
+
+    expect(worklist).to.have.been.calledWith('owned-by');
+  });
 });

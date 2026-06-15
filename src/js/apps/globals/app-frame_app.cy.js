@@ -62,4 +62,34 @@ context('AppFrameApp', function() {
       workspaceSlug: 'test-ws',
     });
   });
+
+  specify('wires form app start and stop to nav visibility', function() {
+    const formsApp = Object.assign({}, Backbone.Events);
+    const RouterApp = function() {
+      return formsApp;
+    };
+
+    app.workspaceSlug = 'test-ws';
+    app.getRegion = cy.stub().withArgs('content').returns('content-region');
+    app.toggleNav = cy.stub();
+
+    app.initFormsApp({ default: RouterApp });
+
+    formsApp.trigger('start');
+    formsApp.trigger('stop');
+
+    expect(app.toggleNav).to.have.been.calledWith(false);
+    expect(app.toggleNav).to.have.been.calledWith(true);
+  });
+
+  specify('toggles the nav when running', function() {
+    const toggleNav = cy.stub();
+
+    app.isRunning = cy.stub().returns(true);
+    app.getView = cy.stub().returns({ toggleNav });
+
+    app.toggleNav(true);
+
+    expect(toggleNav).to.have.been.calledWith(true);
+  });
 });
