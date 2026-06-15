@@ -81,7 +81,7 @@ export default App.extend({
 
     Radio.request('nav', 'select', router.routerAppName, event, eventArgs);
     Radio.request('sidebar', 'stop');
-    Radio.request('history', 'apply:route', routeContext);
+    Radio.request('history', 'set:latestList', routeContext);
   },
   initFormsApp(FormsApp) {
     const formsApp = this.initRouter(FormsApp);

@@ -7,16 +7,16 @@ context('AppFrameApp', function() {
   let app;
   let navSelect;
   let sidebarStop;
-  let applyRoute;
+  let setLatestList;
 
   beforeEach(function() {
     navSelect = cy.stub();
     sidebarStop = cy.stub();
-    applyRoute = cy.stub();
+    setLatestList = cy.stub();
 
     Radio.reply('nav', 'select', navSelect);
     Radio.reply('sidebar', 'stop', sidebarStop);
-    Radio.reply('history', 'apply:route', applyRoute);
+    Radio.reply('history', 'set:latestList', setLatestList);
 
     app = new AppFrameApp();
   });
@@ -39,7 +39,7 @@ context('AppFrameApp', function() {
 
     expect(navSelect).to.have.been.calledWith('PatientsApp', 'worklist', ['owned-by']);
     expect(sidebarStop).to.have.been.calledOnce;
-    expect(applyRoute).to.have.been.calledWith(routeContext);
+    expect(setLatestList).to.have.been.calledWith(routeContext);
   });
 
   specify('passes the current workspace slug to area routers', function() {

@@ -15,7 +15,7 @@ context('LatestListService', function() {
   });
 
   specify('records list routes from route metadata', function() {
-    Radio.request('history', 'apply:route', {
+    Radio.request('history', 'set:latestList', {
       event: 'worklist',
       eventArgs: ['owned-by'],
       definition: {
@@ -28,9 +28,9 @@ context('LatestListService', function() {
   });
 
   specify('clears the latest list when requested by route metadata', function() {
-    service.setLatestList('worklist', ['owned-by']);
+    service._setLatestList('worklist', ['owned-by']);
 
-    Radio.request('history', 'apply:route', {
+    Radio.request('history', 'set:latestList', {
       event: 'schedule',
       eventArgs: [],
       definition: {
@@ -42,9 +42,9 @@ context('LatestListService', function() {
   });
 
   specify('leaves the latest list unchanged for plain routes', function() {
-    service.setLatestList('worklist', ['owned-by']);
+    service._setLatestList('worklist', ['owned-by']);
 
-    Radio.request('history', 'apply:route', {
+    Radio.request('history', 'set:latestList', {
       event: 'patient:dashboard',
       eventArgs: ['patient-id'],
       definition: {
@@ -61,7 +61,7 @@ context('LatestListService', function() {
     const worklist = cy.stub();
 
     service.listenTo(eventRouter, 'worklist', worklist);
-    service.setLatestList('worklist', ['owned-by']);
+    service._setLatestList('worklist', ['owned-by']);
 
     Radio.request('history', 'go:latestList');
 
