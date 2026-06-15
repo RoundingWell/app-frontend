@@ -6,9 +6,21 @@ export default App.extend({
   channelName: 'history',
 
   radioRequests: {
+    'apply:route': 'applyRoute',
     'set:latestList': 'setLatestList',
     'has:latestList': 'hasLatestList',
     'go:latestList': 'goLatestList',
+  },
+
+  applyRoute(routeContext) {
+    const { event, eventArgs, definition: { meta } } = routeContext;
+
+    if (meta.isList) {
+      this.setLatestList(event, eventArgs);
+      return;
+    }
+
+    if (meta.clearLatestList) this.setLatestList(false);
   },
 
   setLatestList(event,

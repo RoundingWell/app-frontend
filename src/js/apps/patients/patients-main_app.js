@@ -62,7 +62,7 @@ export default RouterApp.extend({
     },
   },
 
-  onBeforeAppRoute({ event, eventArgs: [patientId] }) {
+  onBeforeAppRoute(router, { event, eventArgs: [patientId] }) {
     // if routing to flow route, currentPatientId is set by flow_app's onStart()
     if (event.startsWith('flow')) return;
 

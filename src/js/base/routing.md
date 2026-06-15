@@ -9,8 +9,13 @@ definitions.
 - **RouterApp** (`src/js/base/routerapp.js`) — owns URL ↔ event mapping for a
   top-level area (Patients, Programs, Clinicians, Dashboards, Forms, Nav, Error).
   It registers routes with `backbone.eventrouter`, builds a normalized route
-  context on each match, selects the nav item, manages the single current child
-  app, and fires the `before:appRoute` / `appRoute` lifecycle hooks.
+  context on each match, manages the single current child app, and fires the
+  `before:appRoute` / `appRoute` lifecycle hooks.
+- **AppFrameApp** (`src/js/apps/globals/app-frame_app.js`) — owns the global app
+  shell and the area RouterApps it instantiates. It responds to area route
+  transitions by selecting the nav item, closing the transient sidebar, and
+  forwarding route metadata to the latest-list service. It also passes the
+  current workspace slug into area RouterApps when they are created.
 - **SubRouterApp** (`src/js/base/subrouterapp.js`) — a child app that dispatches a
   route to a local handler without owning any URLs. It carries declarative scope
   identity, retains the latest route while loading, and re-dispatches after its
@@ -35,7 +40,8 @@ eventRoutes: {
 Structural fields: `action`, `route`, `root`. Behavioral flags go under `meta`
 (`isList`, `clearLatestList`). `action` is a method name (resolved on the RouterApp)
 or a function; `route` is a string or a non-empty array of alias strings; non-root
-routes are prefixed with the workspace slug, so they must not begin with `/`.
+routes are prefixed with the `workspaceSlug` supplied by AppFrame, so they must not
+begin with `/`.
 
 ### Aliases
 
@@ -56,16 +62,23 @@ Each match is normalized before any hook runs:
 ```
 
 - `getCurrentRoute()` returns this object; `getCurrentRouteMeta()` returns its `meta`.
-- `before:appRoute` and `appRoute` receive the context object (not positional args).
+- `before:appRoute` and `appRoute` receive the RouterApp followed by the context
+  object: `(router, routeContext)`.
 - Action handlers still receive **positional** arguments (`showPatient(patientId)`).
 
-Side-effect order inside `routeAction` (deliberate — the current route is set first
-so it is observable in `before:appRoute`):
+Side-effect order during an area route transition (deliberate — the current route
+is set first so it is observable in `before:appRoute`):
 
 ```text
-set current route → before:appRoute → nav select → sidebar stop
-  → latest-list update → action handler → appRoute
+set current route → before:appRoute
+  → AppFrame selects nav, stops sidebar, applies latest-list metadata
+  → action handler → appRoute
 ```
+
+Router-specific `onBeforeAppRoute` / `onAppRoute` hooks use the same
+`(router, routeContext)` signature. Root/workspace routing in `NavApp` and global
+error routing are not coordinated by AppFrame because they are not area routers
+instantiated through `AppFrameApp.initRouter()`.
 
 ## Scope identity (which child is "the same")
 
@@ -158,6 +171,8 @@ Route dispatch stays synchronous — do not add another async layer.
   double slash).
 - Leaving `isList` / `clearLatestList` at the top level of a definition instead of
   under `meta` (silently stops updating the latest-list history).
+- Adding global shell effects directly to RouterApp. AppFrame owns nav selection,
+  transient-sidebar cleanup, and latest-list metadata handling for area routes.
 
 ## AI checklist for adding or changing a route
 
