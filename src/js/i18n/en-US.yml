@@ -118,6 +118,7 @@ careOptsFrontend:
           currentVersionButton: Back to Current Version
         draftStatusView:
           discardDraft: Discard draft...
+          tooltip: See draft status
           discardModal:
             bodyText: Discarding your unsubmitted work on this form will load the latest data for this patient, but you'll lose your unsubmitted work.
             headingText: Are you sure?

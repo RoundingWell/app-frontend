@@ -212,11 +212,38 @@ context('Patient Form', function() {
     cy
       .get('.form__controls')
       .find('.form__actions-icon:has(.fa-shield-check)')
+      .as('draftStatusButton')
+      .trigger('pointerover');
+
+    // visitOnClock installs fake timers — tick past the tooltip's setTimeout(0) delay
+    cy.tick(1);
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'See draft status');
+
+    cy
+      .get('@draftStatusButton')
       .click();
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
 
     cy
       .get('.form__draft-menu')
       .should('contain', 'Last saved a few seconds ago');
+
+    cy
+      .get('@draftStatusButton')
+      .trigger('pointerover');
+
+    // visitOnClock installs fake timers — tick past the tooltip's setTimeout(0) delay
+    cy.tick(1);
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
 
     cy
       .tick(15000);
@@ -246,8 +273,7 @@ context('Patient Form', function() {
       });
 
     cy
-      .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .get('@draftStatusButton')
       .click();
 
     cy

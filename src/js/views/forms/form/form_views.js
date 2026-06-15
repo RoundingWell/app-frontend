@@ -286,6 +286,31 @@ const DraftStatusView = Droplist.extend({
   initialize({ model }) {
     this.model = model;
   },
+  onShow() {
+    this._showTooltip();
+
+    this.listenTo(this.getState(), 'change:isActive', (state, isActive) => {
+      if (isActive) {
+        this._tooltip.destroy();
+        this.getView().$el.off('.tooltip');
+        return;
+      }
+
+      this._showTooltip();
+    });
+  },
+  _showTooltip() {
+    const view = this.getView();
+
+    view.$el.off('.tooltip');
+    this._tooltip = new Tooltip({
+      message: i18n.draftStatusView.tooltip,
+      uiView: view,
+      ui: view.$el,
+      orientation: 'vertical',
+      shouldDelay: true,
+    });
+  },
   showPicklist() {
     const menuView = new DraftMenuView({ model: this.model });
 
