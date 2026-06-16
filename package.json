@@ -107,7 +107,7 @@
     "stylelint-config-standard-scss": "^17.0.0",
     "stylelint-order": "^8.1.1",
     "stylelint-scss": "^7.0.0",
-    "vite": "^8.0.10",
+    "vite": "^8.0.16",
     "vite-plugin-pwa": "^1.0.0",
     "workbox-cacheable-response": "^7.3.0",
     "workbox-core": "^7.3.0",
