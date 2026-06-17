@@ -4,6 +4,7 @@ orbs:
   aws-cli: circleci/aws-cli@4.0
   cypress:   cypress-io/cypress@4
   coveralls: coveralls/coveralls@2
+  slack:     circleci/slack@6.1.3
 
 aliases:
   .node-image: &node-image cimg/node:24.15
@@ -119,6 +120,9 @@ jobs:
       upload_coverage:
         type: boolean
         default: true
+      notify_on_fail:
+        type: boolean
+        default: false
     executor: cypress-all-browsers
     parallelism: << parameters.parallelism >>
     steps:
@@ -180,6 +184,29 @@ jobs:
             - coveralls/upload:
                 fail_on_error: false
                 parallel: true
+
+      # Notify #frontend on failure (nightly only)
+      - when:
+          condition: << parameters.notify_on_fail >>
+          steps:
+            - slack/notify:
+                event: fail
+                # #frontend channel ID. Set here explicitly so nightly alerts
+                # do not inherit the deploy default channel.
+                channel: 'C02U318AW'
+                custom: |
+                  {
+                    "text": "Nightly Cypress failed: ${CIRCLE_JOB}",
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "🌙 Nightly Cypress failed: *${CIRCLE_JOB}* on `develop`\n<${CIRCLE_BUILD_URL}|View job>"
+                        }
+                      }
+                    ]
+                  }
 
   coveralls-finish:
     docker:
@@ -387,8 +414,11 @@ workflows:
     jobs:
       - run-cypress:
           name: Chrome nightly
+          context:
+            - slack-secrets
           parallelism: 1
           upload_coverage: false
+          notify_on_fail: true
           cypress_command: >
             npx cypress run
             --browser chrome
@@ -396,9 +426,12 @@ workflows:
 
       - run-cypress:
           name: Chrome nightly Component
+          context:
+            - slack-secrets
           parallelism: 1
           should_build: false
           upload_coverage: false
+          notify_on_fail: true
           cypress_command: >
             npx cypress run --component
             --browser chrome
@@ -406,8 +439,11 @@ workflows:
 
       - run-cypress:
           name: Firefox nightly
+          context:
+            - slack-secrets
           parallelism: 1
           upload_coverage: false
+          notify_on_fail: true
           cypress_command: >
             npx cypress run
             --browser firefox
@@ -415,9 +451,12 @@ workflows:
 
       - run-cypress:
           name: Firefox nightly Component
+          context:
+            - slack-secrets
           parallelism: 1
           should_build: false
           upload_coverage: false
+          notify_on_fail: true
           cypress_command: >
             npx cypress run --component
             --browser firefox
@@ -425,8 +464,11 @@ workflows:
 
       - run-cypress:
           name: Edge nightly
+          context:
+            - slack-secrets
           parallelism: 1
           upload_coverage: false
+          notify_on_fail: true
           cypress_command: >
             npx cypress run
             --browser edge
@@ -434,9 +476,12 @@ workflows:
 
       - run-cypress:
           name: Edge nightly Component
+          context:
+            - slack-secrets
           parallelism: 1
           should_build: false
           upload_coverage: false
+          notify_on_fail: true
           cypress_command: >
             npx cypress run --component
             --browser edge
