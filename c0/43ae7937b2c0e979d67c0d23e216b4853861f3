@@ -1,0 +1,32 @@
+src/js/utils/local-store.cy.js
+  s_470ea101676b4a::t_bb59eed4436250 15-17
+  s_0fed1f352e39b8::t_df20e35db8b5c5 112
+  s_0fed1f352e39b8::t_eb54f3ab388849 14,107-110
+  s_470ea101676b4a::t_680a455f453379 3-13,18-23
+  s_470ea101676b4a::t_cd4efc59eaf4e2 55,60,65
+  s_470ea101676b4a::t_d57456aca396e2 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "c043ae7937b2c0e979d67c0d23e216b4853861f3",
+  "prompts": {},
+  "sessions": {
+    "s_0fed1f352e39b8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed4c7-806a-7df1-9408-d72945a48415",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    },
+    "s_470ea101676b4a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "118a9120-1d88-41b7-8c32-1423d853a6e2",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
