@@ -2,14 +2,14 @@
 
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
-import { DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
+import { DescribeStackResourceCommand, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
 import { parseArgs } from 'node:util';
 import fsSync from 'node:fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { writeAppConfig } from './generate-appconfig.js';
-import { createAwsClients, fetchOrganizationSecret } from './lib/aws.js';
+import { createAwsClients } from './lib/aws.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +20,7 @@ const DEPLOYABLE_STATUSES = new Set([
 ]);
 const SHARED_RUNTIME_CACHE_CONTROL = 'no-cache';
 const PROD_WILDCARD_EXCLUDED_ORGANIZATIONS = new Set(['demonstration']);
+const CLOUDFRONT_DISTRIBUTION_LOGICAL_ID = 'CloudFrontDistribution';
 
 function isMainModule() {
   if (!process.argv[1]) {
@@ -70,7 +71,7 @@ export function shouldIncludeDeployTarget(stage, filterOrganization, organizatio
  * @param {CloudFormationClient} cfClient - CloudFormation client instance
  * @param {string} stage - Deployment stage (dev, qa, prod, sandbox)
  * @param {string} filterOrganization - Optional specific organization identifier to filter
- * @returns {Promise<Map>} Map of organization identifiers to bucket names
+ * @returns {Promise<Map>} Map of organization identifiers to deploy targets
  */
 async function listStageOrganizations(cfClient, stage, filterOrganization) {
   const organizationBuckets = new Map();
@@ -92,7 +93,7 @@ async function listStageOrganizations(cfClient, stage, filterOrganization) {
 
 /**
  * Resolve and add WebsiteBucket for organizations in a DescribeStacks page.
- * @param {Map<string, string>} organizationBuckets - Target map
+ * @param {Map<string, Object>} organizationBuckets - Target map
  * @param {Object} response - DescribeStacks response page
  * @param {string} stage - Deployment stage
  * @param {string} filterOrganization - Optional specific organization identifier to filter
@@ -119,7 +120,10 @@ export function addOrganizationsFromPage(organizationBuckets, response, stage, f
       );
     }
 
-    organizationBuckets.set(organizationIdentifier, bucketName);
+    organizationBuckets.set(organizationIdentifier, {
+      bucketName,
+      stackName: deploymentTarget.StackName,
+    });
   }
 }
 
@@ -267,32 +271,71 @@ async function invalidateCloudFront(cloudFrontClient, organization, distroId) {
   process.stdout.write(`CloudFront invalidation created for distribution ${ distroId } of ${ organization }\n`);
 }
 
+function isCloudFrontDistributionResourceMissing(error) {
+  return error?.name === 'ValidationError'
+    && String(error.message || '').includes(`Resource ${ CLOUDFRONT_DISTRIBUTION_LOGICAL_ID } does not exist for stack`);
+}
+
+/**
+ * Resolve the deploy target's CloudFront distribution from CloudFormation.
+ * @param {CloudFormationClient} cloudFormationClient - CloudFormation client instance
+ * @param {Object} options - Resolution options
+ * @param {string} options.stage - Deployment stage
+ * @param {string} options.stackName - CloudFormation stack name
+ * @returns {Promise<string|null>} CloudFront distribution id, or null for dev stacks without one
+ */
+export async function resolveInvalidationDistribution(cloudFormationClient, { stage, stackName }) {
+  let response;
+
+  try {
+    response = await cloudFormationClient.send(new DescribeStackResourceCommand({
+      StackName: stackName,
+      LogicalResourceId: CLOUDFRONT_DISTRIBUTION_LOGICAL_ID,
+    }));
+  } catch(error) {
+    if (stage === 'dev' && isCloudFrontDistributionResourceMissing(error)) {
+      return null;
+    }
+
+    throw error;
+  }
+
+  const distributionId = response.StackResourceDetail?.PhysicalResourceId;
+
+  if (!distributionId) {
+    throw new Error(`CloudFormation stack ${ stackName } resource ${ CLOUDFRONT_DISTRIBUTION_LOGICAL_ID } did not include a PhysicalResourceId`);
+  }
+
+  return distributionId;
+}
+
 /**
  * Deploy to a single organization.
  * @param {Object} clients - AWS clients
  * @param {string} stage - Deployment stage
  * @param {string} organization - Organization identifier
- * @param {string} bucketName - S3 bucket name
+ * @param {Object} deployTarget - Deploy target
+ * @param {string} deployTarget.bucketName - S3 bucket name
+ * @param {string} deployTarget.stackName - CloudFormation stack name
  * @param {string} distDir - Path to dist directory
  */
-async function deployToOrganization(clients, stage, organization, bucketName, distDir) {
+async function deployToOrganization(clients, stage, organization, deployTarget, distDir) {
   process.stdout.write(`\nDeploying ${ organization } (${ stage })\n`);
 
   await generateAppConfig(stage, organization);
 
-  process.stdout.write(`Uploading dist directory to ${ bucketName }...\n`);
-  await uploadDirectory(clients.s3, bucketName, distDir);
+  process.stdout.write(`Uploading dist directory to ${ deployTarget.bucketName }...\n`);
+  await uploadDirectory(clients.s3, deployTarget.bucketName, distDir);
 
-  try {
-    const secrets = await fetchOrganizationSecret(clients.secretsManager, stage, organization);
-    const distroId = secrets.DistroId || secrets.DistroID;
-    if (distroId) {
-      await invalidateCloudFront(clients.cloudFront, organization, distroId);
-    } else {
-      process.stdout.write('No CloudFront distribution found, skipping invalidation\n');
-    }
-  } catch(error) {
-    process.stderr.write(`Warning: Could not invalidate CloudFront: ${ error.message }\n`);
+  const distroId = await resolveInvalidationDistribution(clients.cloudFormation, {
+    stage,
+    stackName: deployTarget.stackName,
+  });
+
+  if (distroId) {
+    await invalidateCloudFront(clients.cloudFront, organization, distroId);
+  } else {
+    process.stdout.write(`No CloudFront distribution found for ${ deployTarget.stackName }, skipping invalidation\n`);
   }
 
   process.stdout.write(`Deployed ${ organization } (${ stage })\n`);
@@ -309,7 +352,7 @@ export function resolveDeployInputs(values) {
 
   if (!stage) {
     process.stderr.write('Error: --stage is required (or set DEPLOY_STAGE)\n');
-    process.stderr.write('Usage: npm run deploy -- --stage=prod [--organization=salvation]\n');
+    process.stderr.write('Usage: npm run deploy -- --stage=prod [--organization=<organization-id>]\n');
     process.stderr.write('   or: npm run deploy:dev (uses .env)\n');
     process.exit(1);
   }
@@ -358,7 +401,7 @@ export function readDeployMarkerStatus(statusFile) {
 
   try {
     payload = JSON.parse(fsSync.readFileSync(statusFile, 'utf8'));
-  } catch (error) {
+  } catch(error) {
     throw new Error(`Deploy marker status file is not valid JSON: ${ statusFile }. Delete it and retry. ${ error.message }`);
   }
 
@@ -372,23 +415,27 @@ export function readDeployMarkerStatus(statusFile) {
   };
 }
 
-export function readResolvedDeployTargets(targetsFile) {
-  if (!targetsFile) {
-    throw new Error('Resolved deploy targets file path is required.');
-  }
+function isResolvedDeployTargetEntry(entry) {
+  if (!Array.isArray(entry) || entry.length !== 2) return false;
+  if (typeof entry[0] !== 'string' || !entry[0]) return false;
 
-  if (!fsSync.existsSync(targetsFile)) {
-    throw new Error(`Resolved deploy targets file not found: ${ targetsFile }`);
-  }
+  const deployTarget = entry[1];
+  return Boolean(deployTarget)
+    && typeof deployTarget === 'object'
+    && !Array.isArray(deployTarget)
+    && typeof deployTarget.bucketName === 'string'
+    && typeof deployTarget.stackName === 'string';
+}
 
-  let payload;
-
+function readResolvedDeployTargetsPayload(targetsFile) {
   try {
-    payload = JSON.parse(fsSync.readFileSync(targetsFile, 'utf8'));
-  } catch {
-    throw new Error(`Resolved deploy targets file is not valid JSON: ${ targetsFile }`);
+    return JSON.parse(fsSync.readFileSync(targetsFile, 'utf8'));
+  } catch(error) {
+    throw new Error(`Resolved deploy targets file is not valid JSON: ${ targetsFile }. ${ error.message }`);
   }
+}
 
+function getResolvedDeployTargetEntries(payload, targetsFile) {
   if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
     throw new Error(`Resolved deploy targets payload must be a JSON object: ${ targetsFile }`);
   }
@@ -399,12 +446,24 @@ export function readResolvedDeployTargets(targetsFile) {
     throw new Error(`Resolved deploy targets payload must include an organizationBuckets array: ${ targetsFile }`);
   }
 
-  const hasInvalidEntry = organizationBuckets.some(entry => !Array.isArray(entry) || entry.length !== 2);
-
-  if (hasInvalidEntry) {
-    throw new Error(`Resolved deploy targets organizationBuckets must be an array of [key, value] entries: ${ targetsFile }`);
+  if (organizationBuckets.some(entry => !isResolvedDeployTargetEntry(entry))) {
+    throw new Error(`Resolved deploy targets organizationBuckets must be an array of [organization, { bucketName, stackName }] entries: ${ targetsFile }. Regenerate deploy targets with the current deploy script.`);
   }
 
+  return organizationBuckets;
+}
+
+export function readResolvedDeployTargets(targetsFile) {
+  if (!targetsFile) {
+    throw new Error('Resolved deploy targets file path is required.');
+  }
+
+  if (!fsSync.existsSync(targetsFile)) {
+    throw new Error(`Resolved deploy targets file not found: ${ targetsFile }`);
+  }
+
+  const payload = readResolvedDeployTargetsPayload(targetsFile);
+  const organizationBuckets = getResolvedDeployTargetEntries(payload, targetsFile);
   return new Map(organizationBuckets);
 }
 
@@ -417,6 +476,30 @@ export function writeResolvedDeployTargets(targetsFile, organizationBuckets) {
 
 export function formatFailedDeploymentsError(failedEnvironments) {
   return `Deployment failed for environments: ${ failedEnvironments.join(', ') }`;
+}
+
+export async function deployOrganizations({
+  clients,
+  stage,
+  organizationTargets,
+  distDir,
+  markerStatus,
+  statusFile,
+  deployOrganization = deployToOrganization,
+}) {
+  for (const [organization, deployTarget] of organizationTargets) {
+    const environment = `${ stage }:${ organization }`;
+
+    try {
+      await deployOrganization(clients, stage, organization, deployTarget, distDir);
+      markerStatus.successfulEnvironments.push(environment);
+      writeDeployMarkerStatus(statusFile, markerStatus);
+    } catch(error) {
+      markerStatus.failedEnvironments.push(environment);
+      writeDeployMarkerStatus(statusFile, markerStatus);
+      process.stderr.write(`Deployment failed for ${ environment }: ${ error.message }\n`);
+    }
+  }
 }
 
 /**
@@ -468,25 +551,20 @@ async function main() {
   writeDeployMarkerStatus(values['marker-status-file'], markerStatus);
 
   process.stdout.write(`Found ${ organizationBuckets.size } organizations to deploy:\n`);
-  organizationBuckets.forEach((bucketName, organization) => {
-    process.stdout.write(`  - ${ organization } -> ${ bucketName }\n`);
+  organizationBuckets.forEach((deployTarget, organization) => {
+    process.stdout.write(`  - ${ organization } -> ${ deployTarget.bucketName } (${ deployTarget.stackName })\n`);
   });
 
   const distDir = path.join(__dirname, '../dist');
 
-  for (const [organization, bucketName] of organizationBuckets) {
-    const environment = `${ stage }:${ organization }`;
-
-    try {
-      await deployToOrganization(clients, stage, organization, bucketName, distDir);
-      markerStatus.successfulEnvironments.push(environment);
-      writeDeployMarkerStatus(values['marker-status-file'], markerStatus);
-    } catch (error) {
-      markerStatus.failedEnvironments.push(environment);
-      writeDeployMarkerStatus(values['marker-status-file'], markerStatus);
-      process.stderr.write(`Deployment failed for ${ environment }: ${ error.message }\n`);
-    }
-  }
+  await deployOrganizations({
+    clients,
+    stage,
+    organizationTargets: organizationBuckets,
+    distDir,
+    markerStatus,
+    statusFile: values['marker-status-file'],
+  });
 
   if (markerStatus.failedEnvironments.length) {
     throw new Error(formatFailedDeploymentsError(markerStatus.failedEnvironments));
