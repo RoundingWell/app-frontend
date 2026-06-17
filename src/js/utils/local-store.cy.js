@@ -1,5 +1,26 @@
 import localStore from './local-store';
 
+// Firefox exposes `localStorage` as an exotic Storage object whose built-in
+// methods cannot be replaced on the instance, so `cy.stub(localStorage, 'setItem')`
+// is silently inert there. Swap the whole object instead so the stubs apply in
+// every browser.
+function useFakeStorage(overrides) {
+  const real = window.localStorage;
+  const fake = {
+    getItem: key => real.getItem(key),
+    setItem: (key, value) => real.setItem(key, value),
+    removeItem: key => real.removeItem(key),
+    key: index => real.key(index),
+    clear: () => real.clear(),
+    get length() {
+      return real.length;
+    },
+    ...overrides,
+  };
+
+  cy.stub(window, 'localStorage').value(fake);
+}
+
 context('localStore', function() {
   beforeEach(function() {
     localStorage.clear();
@@ -31,17 +52,17 @@ context('localStore', function() {
   });
 
   specify('set does not throw when storage is unavailable', function() {
-    cy.stub(localStorage, 'setItem').throws(new DOMException('blocked', 'SecurityError'));
+    useFakeStorage({ setItem: cy.stub().throws(new DOMException('blocked', 'SecurityError')) });
     expect(() => localStore.set('key', 'val')).not.to.throw();
   });
 
   specify('set rethrows QuotaExceededError', function() {
-    cy.stub(localStorage, 'setItem').throws(new DOMException('quota', 'QuotaExceededError'));
+    useFakeStorage({ setItem: cy.stub().throws(new DOMException('quota', 'QuotaExceededError')) });
     expect(() => localStore.set('key', 'val')).to.throw('quota');
   });
 
   specify('set rethrows unexpected errors', function() {
-    cy.stub(localStorage, 'setItem').throws(new Error('unexpected'));
+    useFakeStorage({ setItem: cy.stub().throws(new Error('unexpected')) });
     expect(() => localStore.set('key', 'val')).to.throw('unexpected');
   });
 
@@ -52,7 +73,7 @@ context('localStore', function() {
   });
 
   specify('remove does not throw when storage is unavailable', function() {
-    cy.stub(localStorage, 'removeItem').throws(new DOMException('blocked', 'SecurityError'));
+    useFakeStorage({ removeItem: cy.stub().throws(new DOMException('blocked', 'SecurityError')) });
     expect(() => localStore.remove('key')).not.to.throw();
   });
 
@@ -83,7 +104,11 @@ context('localStore', function() {
   });
 
   specify('each does not throw when storage is unavailable', function() {
-    cy.stub(localStorage, 'key').throws(new DOMException('blocked', 'SecurityError'));
+    localStorage.setItem('seed', JSON.stringify('value'));
+    const keyStub = cy.stub().throws(new DOMException('blocked', 'SecurityError'));
+
+    useFakeStorage({ key: keyStub });
     expect(() => localStore.each(() => {})).not.to.throw();
+    expect(keyStub.called).to.be.true;
   });
 });
