@@ -417,6 +417,7 @@ export function readDeployMarkerStatus(statusFile) {
 
 function isResolvedDeployTargetEntry(entry) {
   if (!Array.isArray(entry) || entry.length !== 2) return false;
+  if (typeof entry[0] !== 'string' || !entry[0]) return false;
 
   const deployTarget = entry[1];
   return Boolean(deployTarget)
@@ -429,8 +430,8 @@ function isResolvedDeployTargetEntry(entry) {
 function readResolvedDeployTargetsPayload(targetsFile) {
   try {
     return JSON.parse(fsSync.readFileSync(targetsFile, 'utf8'));
-  } catch {
-    throw new Error(`Resolved deploy targets file is not valid JSON: ${ targetsFile }`);
+  } catch(error) {
+    throw new Error(`Resolved deploy targets file is not valid JSON: ${ targetsFile }. ${ error.message }`);
   }
 }
 

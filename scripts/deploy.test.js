@@ -279,6 +279,15 @@ test('readResolvedDeployTargets rejects malformed snapshot payloads', () => {
     /Regenerate deploy targets/,
   );
 
+  fs.writeFileSync(targetsFile, JSON.stringify({
+    organizationBuckets: [[42, { bucketName: 'bucket-a', stackName: 'stack-a' }]],
+  }));
+
+  assert.throws(
+    () => readResolvedDeployTargets(targetsFile),
+    /Regenerate deploy targets/,
+  );
+
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
 

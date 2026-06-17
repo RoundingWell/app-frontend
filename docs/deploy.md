@@ -223,6 +223,6 @@ The AWS account must expose the deploy target to run successfully:
   - Local deploy: verify SSO login and `AWS_PROFILE`.
   - CircleCI deploy: verify the job assumed the expected `CircleCIRole` via `aws-cli/setup`.
 
-- `No CloudFront distribution found, skipping invalidation`
+- `No CloudFront distribution found for <stack>, skipping invalidation`
   - Dev deploys skip invalidation when the stack has no `CloudFrontDistribution` resource.
   - Non-dev deploys fail when CloudFront lookup or invalidation fails.
