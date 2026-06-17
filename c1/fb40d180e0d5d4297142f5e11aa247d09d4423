@@ -1,0 +1,25 @@
+src/js/entities-service/entities/actions.js
+  s_5bc9cc1ce7547e::t_6a62b4161dfa43 67,240
+src/js/entities-service/entities/program-actions.js
+  s_5bc9cc1ce7547e::t_c1b7528709b63a 45,55
+test/integration/patients/patient/dashboard.js
+  s_5bc9cc1ce7547e::t_3ae513dcb088d5 46,1037-1038,1095-1096,1136-1137
+test/integration/patients/patient/patient-flow.js
+  s_5bc9cc1ce7547e::t_748b31c3d13388 1081
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "c1fb40d180e0d5d4297142f5e11aa247d09d4423",
+  "prompts": {},
+  "sessions": {
+    "s_5bc9cc1ce7547e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed59c-909a-7bf3-8869-883000e2afbb",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}
