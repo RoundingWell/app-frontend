@@ -91,7 +91,7 @@ This discovers the deploy target in CloudFormation by tags:
 And then:
 1. Generates `dist/appconfig.json` from Secrets Manager secret `customer/<stage>/<organization-id>`
 2. Uploads `dist/` to the organization's WebsiteBucket
-3. Invalidates CloudFront if the secret contains `DistroId` or `DistroID`
+3. Resolves the stack's `CloudFrontDistribution` resource and invalidates CloudFront
 
 ## Local Deploy: All Organizations In A Stage
 
@@ -211,6 +211,7 @@ The AWS account must expose the deploy target to run successfully:
 - Secrets Manager must have a secret named `customer/<stage>/<organization>`
 - CloudFormation stack must have `stage` and `organization` tags
 - CloudFormation stack must have a `WebsiteBucket` output
+- Non-dev CloudFormation stacks must include a `CloudFrontDistribution` resource
 
 ## Troubleshooting
 
@@ -223,4 +224,5 @@ The AWS account must expose the deploy target to run successfully:
   - CircleCI deploy: verify the job assumed the expected `CircleCIRole` via `aws-cli/setup`.
 
 - `No CloudFront distribution found, skipping invalidation`
-  - Verify that `DistroId` (or `DistroID`) is defined in the organization secret.
+  - Dev deploys skip invalidation when the stack has no `CloudFrontDistribution` resource.
+  - Non-dev deploys fail when CloudFront lookup or invalidation fails.

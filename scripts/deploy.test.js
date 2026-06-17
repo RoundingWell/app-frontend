@@ -6,9 +6,11 @@ import test from 'node:test';
 import {
   addOrganizationsFromPage,
   buildDeployMarkerEnvironments,
+  deployOrganizations,
   formatFailedDeploymentsError,
   readDeployMarkerStatus,
   readResolvedDeployTargets,
+  resolveInvalidationDistribution,
   shouldIncludeDeployTarget,
   writeDeployMarkerStatus,
   writeResolvedDeployTargets,
@@ -32,34 +34,46 @@ function stack(name, organization, { stage = 'sandbox', websiteBucket } = {}) {
 
 test('addOrganizationsFromPage maps a website stack to its WebsiteBucket', () => {
   const organizationBuckets = new Map();
-  const response = { Stacks: [stack('careops-sandbox-vumc', 'vumc', { websiteBucket: 'vumc-bucket' })] };
+  const response = { Stacks: [stack('careops-sandbox-alpha', 'alpha', { websiteBucket: 'alpha-bucket' })] };
 
   addOrganizationsFromPage(organizationBuckets, response, 'sandbox', '');
 
-  assert.deepEqual([...organizationBuckets], [['vumc', 'vumc-bucket']]);
+  assert.deepEqual([...organizationBuckets], [[
+    'alpha',
+    {
+      bucketName: 'alpha-bucket',
+      stackName: 'careops-sandbox-alpha',
+    },
+  ]]);
 });
 
 test('addOrganizationsFromPage skips a sibling stack that shares the tags but has no WebsiteBucket output', () => {
   const organizationBuckets = new Map();
   const response = {
     Stacks: [
-      stack('adit-sandbox-vumc', 'vumc'),
-      stack('careops-sandbox-vumc', 'vumc', { websiteBucket: 'vumc-bucket' }),
+      stack('adit-sandbox-alpha', 'alpha'),
+      stack('careops-sandbox-alpha', 'alpha', { websiteBucket: 'alpha-bucket' }),
     ],
   };
 
-  // adit-sandbox-vumc matched stage=sandbox/organization=vumc but is not a website stack.
+  // adit-sandbox-alpha matched stage=sandbox/organization=alpha but is not a website stack.
   addOrganizationsFromPage(organizationBuckets, response, 'sandbox', '');
 
-  assert.deepEqual([...organizationBuckets], [['vumc', 'vumc-bucket']]);
+  assert.deepEqual([...organizationBuckets], [[
+    'alpha',
+    {
+      bucketName: 'alpha-bucket',
+      stackName: 'careops-sandbox-alpha',
+    },
+  ]]);
 });
 
 test('addOrganizationsFromPage throws when two website stacks claim the same organization', () => {
   const organizationBuckets = new Map();
   const response = {
     Stacks: [
-      stack('careops-sandbox-vumc', 'vumc', { websiteBucket: 'vumc-bucket' }),
-      stack('careops-sandbox-vumc-dupe', 'vumc', { websiteBucket: 'other-bucket' }),
+      stack('careops-sandbox-alpha', 'alpha', { websiteBucket: 'alpha-bucket' }),
+      stack('careops-sandbox-alpha-dupe', 'alpha', { websiteBucket: 'other-bucket' }),
     ],
   };
 
@@ -209,8 +223,8 @@ test('writeResolvedDeployTargets persists the resolved deploy target snapshot', 
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-targets-'));
   const targetsFile = path.join(tempDir, 'targets.json');
   const organizationBuckets = new Map([
-    ['qa2', 'bucket-a'],
-    ['quality-assurance', 'bucket-b'],
+    ['qa2', { bucketName: 'bucket-a', stackName: 'stack-a' }],
+    ['quality-assurance', { bucketName: 'bucket-b', stackName: 'stack-b' }],
   ]);
 
   writeResolvedDeployTargets(targetsFile, organizationBuckets);
@@ -246,8 +260,153 @@ test('readResolvedDeployTargets rejects malformed snapshot payloads', () => {
 
   assert.throws(
     () => readResolvedDeployTargets(targetsFile),
-    /organizationBuckets must be an array of \[key, value\] entries/,
+    /organizationBuckets must be an array of \[organization, \{ bucketName, stackName \}\] entries/,
   );
+
+  fs.writeFileSync(targetsFile, JSON.stringify({ organizationBuckets: [['qa2', 'bucket-a']] }));
+
+  assert.throws(
+    () => readResolvedDeployTargets(targetsFile),
+    /Regenerate deploy targets/,
+  );
+
+  fs.writeFileSync(targetsFile, JSON.stringify({
+    organizationBuckets: [['qa2', { bucketName: 'bucket-a' }]],
+  }));
+
+  assert.throws(
+    () => readResolvedDeployTargets(targetsFile),
+    /Regenerate deploy targets/,
+  );
+
+  fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+function cloudFormationClient(responseOrError) {
+  return {
+    async send(command) {
+      assert.equal(command.input.StackName, 'careops-sandbox-alpha');
+      assert.equal(command.input.LogicalResourceId, 'CloudFrontDistribution');
+
+      if (responseOrError instanceof Error) {
+        throw responseOrError;
+      }
+
+      return responseOrError;
+    },
+  };
+}
+
+function validationError(message) {
+  const error = new Error(message);
+  error.name = 'ValidationError';
+  return error;
+}
+
+test('resolveInvalidationDistribution returns the CloudFront physical resource id', async() => {
+  const distributionId = await resolveInvalidationDistribution(
+    cloudFormationClient({
+      StackResourceDetail: {
+        PhysicalResourceId: 'E123456789',
+      },
+    }),
+    { stage: 'sandbox', stackName: 'careops-sandbox-alpha' },
+  );
+
+  assert.equal(distributionId, 'E123456789');
+});
+
+test('resolveInvalidationDistribution skips missing CloudFront resources only for dev', async() => {
+  const error = validationError('Resource CloudFrontDistribution does not exist for stack careops-sandbox-alpha');
+  const distributionId = await resolveInvalidationDistribution(
+    cloudFormationClient(error),
+    { stage: 'dev', stackName: 'careops-sandbox-alpha' },
+  );
+
+  assert.equal(distributionId, null);
+});
+
+test('resolveInvalidationDistribution throws for dev stack-not-found errors', async() => {
+  const error = validationError('Stack with id careops-sandbox-alpha does not exist');
+
+  await assert.rejects(
+    () => resolveInvalidationDistribution(
+      cloudFormationClient(error),
+      { stage: 'dev', stackName: 'careops-sandbox-alpha' },
+    ),
+    /Stack with id careops-sandbox-alpha does not exist/,
+  );
+});
+
+test('resolveInvalidationDistribution throws for dev permission errors', async() => {
+  const error = new Error('User is not authorized to perform: cloudformation:DescribeStackResource');
+  error.name = 'AccessDenied';
+
+  await assert.rejects(
+    () => resolveInvalidationDistribution(
+      cloudFormationClient(error),
+      { stage: 'dev', stackName: 'careops-sandbox-alpha' },
+    ),
+    /not authorized/,
+  );
+});
+
+test('resolveInvalidationDistribution throws for missing CloudFront resources outside dev', async() => {
+  const error = validationError('Resource CloudFrontDistribution does not exist for stack careops-sandbox-alpha');
+
+  await assert.rejects(
+    () => resolveInvalidationDistribution(
+      cloudFormationClient(error),
+      { stage: 'sandbox', stackName: 'careops-sandbox-alpha' },
+    ),
+    /Resource CloudFrontDistribution does not exist/,
+  );
+});
+
+test('resolveInvalidationDistribution throws when CloudFormation omits the physical resource id', async() => {
+  await assert.rejects(
+    () => resolveInvalidationDistribution(
+      cloudFormationClient({ StackResourceDetail: {} }),
+      { stage: 'sandbox', stackName: 'careops-sandbox-alpha' },
+    ),
+    /did not include a PhysicalResourceId/,
+  );
+});
+
+test('deployOrganizations records failed environments and continues deploying remaining targets', async() => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-organizations-'));
+  const statusFile = path.join(tempDir, 'status.json');
+  const markerStatus = {
+    failedEnvironments: [],
+    successfulEnvironments: [],
+  };
+  const deployedOrganizations = [];
+
+  await deployOrganizations({
+    clients: {},
+    stage: 'sandbox',
+    organizationTargets: new Map([
+      ['alpha', { bucketName: 'bucket-a', stackName: 'stack-a' }],
+      ['beta', { bucketName: 'bucket-b', stackName: 'stack-b' }],
+    ]),
+    distDir: '/tmp/dist',
+    markerStatus,
+    statusFile,
+    async deployOrganization(clients, stage, organization) {
+      deployedOrganizations.push(organization);
+
+      if (organization === 'alpha') {
+        throw new Error('Invalidation failed');
+      }
+    },
+  });
+
+  assert.deepEqual(deployedOrganizations, ['alpha', 'beta']);
+  assert.deepEqual(markerStatus, {
+    failedEnvironments: ['sandbox:alpha'],
+    successfulEnvironments: ['sandbox:beta'],
+  });
+  assert.deepEqual(JSON.parse(fs.readFileSync(statusFile, 'utf8')), markerStatus);
 
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
