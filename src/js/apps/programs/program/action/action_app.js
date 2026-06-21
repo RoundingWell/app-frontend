@@ -6,7 +6,7 @@ import { PROGRAM_BEHAVIORS } from 'js/static';
 
 import App from 'js/base/app';
 
-import ActionSidebarApp from 'js/apps/programs/sidebar/action-sidebar_app';
+import ActionSidebarApp from 'js/apps/programs/sidebar/action/action-sidebar_app';
 
 export default App.extend({
   childApps: {

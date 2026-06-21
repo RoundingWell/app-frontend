@@ -1,7 +1,7 @@
 import RouterApp from 'js/base/routerapp';
 
-import DashboardsAllApp from 'js/apps/dashboards/dashboards-all_app';
-import DashboardApp from 'js/apps/dashboards/dashboard_app';
+import DashboardsAllApp from 'js/apps/dashboards/dashboards-all/dashboards-all_app';
+import DashboardApp from 'js/apps/dashboards/dashboard/dashboard_app';
 
 export default RouterApp.extend({
   routerAppName: 'DashboardsApp',

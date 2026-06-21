@@ -13,7 +13,7 @@ import { View } from 'marionette';
 
 import { Application } from 'js/app';
 
-import { RootView } from 'js/views/globals/root_views';
+import { RootView } from 'js/apps/globals/app-frame/root_views';
 
 Cypress.on('run:start', () => {
   // Consider doing a check to ensure your adapter only runs in Component Testing mode.

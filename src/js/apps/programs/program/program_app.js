@@ -7,11 +7,11 @@ import { PROGRAM_BEHAVIORS } from 'js/static';
 
 import WorkflowsApp from 'js/apps/programs/program/workflows/workflows_app';
 import ActionApp from 'js/apps/programs/program/action/action_app';
-import ProgramSidebarApp from 'js/apps/programs/sidebar/program-sidebar_app';
-import FlowSidebarApp from 'js/apps/programs/sidebar/flow-sidebar_app';
+import ProgramSidebarApp from 'js/apps/programs/sidebar/program/program-sidebar_app';
+import FlowSidebarApp from 'js/apps/programs/sidebar/flow/flow-sidebar_app';
 
-import { LayoutView } from 'js/views/programs/program/program_views';
-import { SidebarView } from 'js/views/programs/program/sidebar/sidebar-views';
+import { LayoutView } from 'js/apps/programs/program/program_views';
+import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
 
 export default SubRouterApp.extend({
   routeScope: ['programId'],

@@ -11,14 +11,14 @@ import { ACTION_INCLUDE } from 'js/entities-service/actions';
 
 import StateModel from './flow_state';
 
-import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
+import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
-import FlowSiderbarApp from 'js/apps/patients/sidebar/flow-sidebar_app';
-import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
+import FlowSiderbarApp from 'js/apps/patients/sidebar/flow/flow-sidebar_app';
+import ActionSiderbarApp from 'js/apps/patients/sidebar/action/action-sidebar_app';
 
-import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView, i18n } from 'js/views/patients/patient/flow/flow_views';
-import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
-import { AddButtonView } from 'js/views/patients/shared/add-workflow/add-workflow_views';
+import { LayoutView, ContextTrailView, HeaderView, ListView, SelectAllView, i18n } from 'js/apps/patients/patient/flow/flow_views';
+import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
+import { AddButtonView } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
 export default SubRouterApp.extend({
   StateModel,

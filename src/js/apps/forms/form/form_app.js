@@ -8,8 +8,8 @@ import App from 'js/base/app';
 import intl from 'js/i18n';
 
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
-import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
-import WidgetsHeaderApp from 'js/apps/forms/widgets/widgets_header_app';
+import ActionSiderbarApp from 'js/apps/patients/sidebar/action/action-sidebar_app';
+import WidgetsHeaderApp from 'js/apps/forms/form/widgets/widgets_header_app';
 
 import FormsService from 'js/services/forms';
 
@@ -24,7 +24,7 @@ import {
   UpdateView,
   HistoryView,
   DraftStatusView,
-} from 'js/views/forms/form/form_views';
+} from 'js/apps/forms/form/form_views';
 
 export default App.extend({
   childApps: {

@@ -7,7 +7,7 @@ import App from 'js/base/app';
 import { ACTION_INCLUDE } from 'js/entities-service/actions';
 import { FLOW_INCLUDE } from 'js/entities-service/flows';
 
-import { LayoutView, ListView } from 'js/views/patients/patient/archive/archive_views';
+import { LayoutView, ListView } from 'js/apps/patients/patient/archive/archive_views';
 
 export default App.extend({
   onBeforeStart({ patient }) {
