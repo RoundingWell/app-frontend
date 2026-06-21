@@ -1,0 +1,391 @@
+src/js/apps/patients/patient/flow/flow_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-413
+vite.config.js
+  s_dd6683eb15cd0c::t_9e90618a458776 176
+src/js/services/alert.js
+  s_dd6683eb15cd0c::t_9e90618a458776 5
+src/js/apps/patients/patient/archive/archive_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 10
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-287
+src/js/apps/globals/nav/patient-modal/patient-modal_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-263
+src/js/apps/patients/sidebar/action/action-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-88
+src/js/apps/programs/shared/components/behavior_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-84
+src/js/apps/programs/shared/actions_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-39
+src/js/apps/programs/sidebar/action/action-sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-1038
+src/js/components/workspaces-manager/index.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-116
+src/js/utils/handle-errors.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-30
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 8
+src/js/apps/patients/sidebar/patient/patient-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-51
+src/js/apps/patients/sidebar/action/action-sidebar-activity-views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-288
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-407
+src/js/apps/patients/worklist/worklist_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-349
+src/js/apps/forms/form/action.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-2925
+src/js/services/sidebar.js
+  s_dd6683eb15cd0c::t_9e90618a458776 3
+src/js/utils/sorting.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-109
+src/js/apps/patients/patient/dashboard/dashboard_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 12
+src/js/apps/globals/error/error_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-26
+src/js/apps/programs/shared/flows_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-37
+src/js/utils/platform.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-18
+src/js/apps/dashboards/dashboards-all/dashboards-all_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-108
+src/js/apps/patients/shared/widgets/widgets.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-150
+src/js/services/settings.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-53
+src/js/components/datepicker/datepicker.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-328
+src/js/apps/patients/sidebar/bulk-edit/bulk-edit-flows_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-105
+src/js/components/tooltip/tooltip.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-206
+src/js/app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 32,34-35,134
+src/js/apps/forms/form/form_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 11-12,27
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-116
+src/js/services/widgets.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-51
+src/js/apps/forms/form/form_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-468
+src/js/utils/local-store.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-114
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-735
+src/js/auth/prelogin/prelogin_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-68
+src/js/apps/patients/patient/patient_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 11,13
+src/js/apps/patients/shared/components/date-filter/date-filter_state.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-90
+src/js/apps/programs/programs-main_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 3
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-123
+src/js/apps/programs/program/program_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-63
+src/js/apps/patients/sidebar/flow/flow-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-193
+src/js/apps/globals/search/search_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-30
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-84
+src/js/apps/patients/shared/widgets/widgets_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-54
+cypress.config.mjs
+  s_dd6683eb15cd0c::t_9e90618a458776 28,41
+src/js/apps/forms/form/widgets/widgets_header_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-25
+src/js/apps/patients/shared/components/dialer_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-99
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-1395
+src/js/apps/programs/shared/components/form_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-87
+src/js/apps/programs/sidebar/flow/flow-sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-609
+src/js/auth/workos.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-526
+src/js/services/alert.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-124
+src/js/services/dialer.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-598
+src/js/apps/patients/sidebar/action/action-sidebar-attachments-views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-150
+src/js/apps/patients/shared/components/duration_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-60
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_dd6683eb15cd0c::t_6c48e2714abd03 7
+  s_dd6683eb15cd0c::t_9e90618a458776 1-6,8-36
+src/js/apps/patients/sidebar/flow/flow-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-73
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-161
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-277
+src/js/apps/patients/schedule/schedule_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 11-13,15-16,18,20-22
+src/js/base/fetch.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-81
+src/js/apps/patients/patient/dashboard/dashboard.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-2114
+src/js/components/team/index.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-72
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-152
+src/js/services/modal/modal_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-157
+test/support/component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 16
+src/js/apps/patients/patient/flow/flow_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 14,16-17,19-21
+src/js/apps/programs/program/sidebar/sidebar-views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-65
+src/js/apps/patients/sidebar/filters/filter-sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-1229
+src/js/apps/patients/patient/patient_views.js
+  s_dd6683eb15cd0c::t_6c48e2714abd03 1-67
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-1070
+src/js/apps/programs/sidebar/program/program-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-48
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-33
+src/js/apps/patients/shared/flows_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-65
+src/js/behaviors/iframe-form.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-88
+src/js/components/picklist/picklist.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-239
+src/js/components/team/team-component.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-131
+src/js/apps/globals/app-frame/root_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-349
+src/js/base/cache/idb.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-240
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_dd6683eb15cd0c::t_14dd4a5a78f595 6
+  s_dd6683eb15cd0c::t_9e90618a458776 1-5,7-126
+src/js/apps/patients/sidebar/filters/filters-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-255
+src/js/apps/patients/sidebar/action/action-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-278
+src/js/services/dialer.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-152
+src/js/apps/dashboards/dashboards-all/dashboards-all_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-46
+src/js/services/sidebar/sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-28
+src/js/apps/dashboards/dashboard/dashboard_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-35
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-8,10-101
+  s_dd6683eb15cd0c::t_14dd4a5a78f595 9
+src/js/apps/globals/error/error_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-67
+src/js/apps/patients/sidebar/action/action-sidebar-action_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-289
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-124
+src/js/apps/patients/sidebar/action/action-sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-3035
+src/js/apps/globals/nav/nav_app.js
+  s_dd6683eb15cd0c::t_14dd4a5a78f595 9
+  s_dd6683eb15cd0c::t_9e90618a458776 1-8,10-454
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 5
+src/js/apps/patients/shared/components/owner_component.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-330
+src/js/apps/programs/program/flow/flow_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 7-8,10-11
+src/js/components/list-search/index.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-26
+src/js/apps/dashboards/dashboard/dashboard_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-65
+src/js/apps/patients/shared/components/check_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-34
+src/js/apps/patients/patient/archive/archive_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-291
+src/js/apps/patients/shared/read-only_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-98
+src/js/apps/patients/sidebar/action/action-sidebar-forms_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-133
+src/js/apps/programs/program/action/action_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 9
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-161
+src/js/apps/patients/shared/components/owner_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-171
+src/js/apps/patients/shared/components/time_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-92
+src/js/apps/programs/sidebar/program/programs-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-234
+src/js/formservice.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-225
+src/js/apps/forms/form/form.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-479
+src/js/apps/patients/worklist/flow_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-139
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-526
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-1935
+src/js/apps/globals/search/patient-search_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-323
+src/js/apps/patients/sidebar/flow/flow-sidebar-activity-views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-84
+src/js/apps/patients/shared/bulk-edit/bulk-edit_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-456
+src/js/apps/patients/worklist/worklist_sort.js
+  s_dd6683eb15cd0c::t_9e90618a458776 6
+src/js/components/dateselect/date-select.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-163
+src/js/apps/patients/sidebar/patient/patient-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-46
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-979
+src/js/base/cache/response-cache.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-140
+src/js/apps/patients/shared/components/due_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-98
+src/js/apps/dashboards/dashboard/dashboard.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-93
+src/js/auth.js
+  s_dd6683eb15cd0c::t_9e90618a458776 18
+src/js/base/cache/entity-cache.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-128
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-3018
+src/js/components/optionlist/optionlist.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-108
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-5174
+src/js/apps/programs/programs-all/programs-all_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-85
+src/js/services/latest-list.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-70
+src/js/services/forms.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-44
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-509
+src/js/apps/patients/patient/archive/archive.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-1158
+src/js/services/modal.js
+  s_dd6683eb15cd0c::t_9e90618a458776 10-11
+src/js/apps/patients/sidebar/filters/filters-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-96
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-211
+src/js/apps/patients/shared/components/state_component.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-107
+src/js/apps/patients/shared/list_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-80
+src/js/apps/patients/patient/dashboard/dashboard_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-297
+src/js/apps/patients/shared/add-workflow/add-workflow_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-85
+src/js/apps/globals/app-frame/app-frame_app.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-95
+src/js/apps/clinicians/clinicians-main_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 3
+src/js/components/list-search/list-search_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-58
+src/js/apps/forms/form/widgets/widget_header_view.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-28
+src/js/apps/patients/schedule/schedule_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-441
+src/js/apps/patients/worklist/worklist_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 11-14,16-18,22-24
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-279
+src/js/apps/forms/form/patient.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-1009
+src/js/apps/globals/error/error.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-153
+src/js/apps/patients/worklist/action_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-214
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-326
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-213
+src/js/base/helpers.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-336
+src/js/components/droplist/droplist.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-195
+src/js/apps/patients/patient/dashboard/add-workflow_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 7
+src/js/apps/forms/form/form-patient_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 11,21
+src/js/apps/programs/program/program_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 10-11,13-14
+src/js/apps/patients/shared/actions_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-73
+src/js/apps/dashboards/dashboards-main_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 3-4
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-322
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-222
+src/js/apps/patients/sidebar/action/action-sidebar-dialer_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-40
+src/js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-162
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-87
+src/js/apps/programs/sidebar/flow/flow-sidebar_app.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-84
+src/js/auth.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-64
+src/js/apps/programs/shared/components/dueday_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-73
+src/js/services/alert/alert-box_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-81
+src/js/services/ws.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-693
+src/js/services/form-drafts.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-113
+src/js/services/modal/modal.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-226
+src/js/utils/formatting/formatting.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-119
+src/js/apps/clinicians/shared/clinicians_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-105
+src/js/apps/programs/program/flow/flow_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-252
+src/js/apps/clinicians/shared/components/role_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-49
+src/js/apps/patients/sidebar/flow/flow-sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-855
+src/js/apps/programs/shared/components/tags-manager_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-143
+src/js/base/subrouterapp.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-163
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-510
+src/js/apps/programs/sidebar/program/program-sidebar.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-370
+src/js/base/routerapp.component.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-207
+src/js/apps/programs/program/program.e2e.cy.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-227
+src/js/apps/patients/shared/comments_views.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-110
+src/js/apps/patients/shared/components/state_component.js
+  s_dd6683eb15cd0c::t_9e90618a458776 1-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "a62506dac940d41b38e48275370b808099ec9c93",
+  "prompts": {},
+  "sessions": {
+    "s_dd6683eb15cd0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eec43-b45a-77b2-bb2d-9a20794178b0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
