@@ -24,8 +24,8 @@ Load a scoped overlay only when the task touches:
 
 - Stack: Backbone, Marionette, Handlebars, SCSS, Vite, Cypress, npm workspaces.
 - Core app code lives in `src/js/**`; styles live in `src/scss/**`; shared packages live in `packages/**`.
-- Component Cypress specs live in `src/**/*.cy.js`.
-- E2E Cypress specs live in `test/integration/**/*.js`.
+- Component Cypress specs live beside their owners as `src/**/*.component.cy.js`.
+- E2E Cypress specs live beside their owners as `src/**/*.e2e.cy.js`.
 - Fixtures and Cypress support files live in `test/fixtures/**` and `test/support/**`.
 - Repo aliases map `js/*` to `src/js/*` in `jsconfig.json` and `vite.config.js`.
 
@@ -33,6 +33,8 @@ Load a scoped overlay only when the task touches:
 
 - Stay in JavaScript. Do not introduce TypeScript or a new framework.
 - Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
+- Colocate app-specific views, templates, SCSS, state, and Cypress specs under `src/js/apps/<domain>/<app>/**`.
+- Keep domain-shared UI under `src/js/apps/<domain>/shared/**` and cross-domain reusable UI under `src/js/components/**`.
 - Route data access through `src/js/entities-service/**` instead of introducing ad hoc fetch logic elsewhere.
 - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
 - Keep feature flags easy to remove. Prefer guard-clause style branching.
@@ -114,8 +116,8 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Iterate with single specs; they are much faster than the full suites:
-  - Component: `npx cypress run --component --spec src/js/base/routerapp.cy.js`
-  - E2E: build and serve the test app once (`npm run build -- --mode test`, then `npx vite preview -m test` in the background to serve on port 8090), then `npx cypress run --spec test/integration/<area>/<spec>.js`
+  - Component: `npx cypress run --component --spec src/js/base/routerapp.component.cy.js`
+  - E2E: build and serve the test app once (`npm run build -- --mode test`, then `npx vite preview -m test` in the background to serve on port 8090), then `npx cypress run --spec src/js/apps/<domain>/<app>/<spec>.e2e.cy.js`
   - Do not pass `--spec` through `npm run coverage:e2e`; npm appends it after the script's `exit`, so the full suite still runs unfiltered and the script then exits 1 (`exit: too many arguments`).
 - Before claiming UI behavior is validated, run the full suite relevant to the change:
   - `npm run coverage:component` for component behavior

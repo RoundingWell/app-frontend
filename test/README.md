@@ -17,10 +17,17 @@ Our current usage of cypress stubs all server data so these are not end-to-end t
 
 ## Organization
 
-Tests should be organized by parts of the app and feature.
-ie:
-`test/integration/clinicians`
-`test/integration/patients/patient`
+Cypress specs live beside the source they exercise:
+
+- `*.component.cy.js` runs with Cypress component testing and is not recorded.
+- `*.e2e.cy.js` runs against the built app and is recorded in branch CI.
+
+App-owned specs live under the owning `src/js/apps/<domain>/<app>/**` directory.
+Service, component, utility, and other cross-cutting specs live beside their production module.
+For cross-domain E2E flows, use the primary entry route and behavior under assertion as the owner.
+
+Keep the `.cy.js` ending for both test types because ESLint test rules and NYC coverage exclusions depend on it.
+Fixtures, Cypress support, plugins, and reports remain under `test/`.
 
 ## Writing Tests
 

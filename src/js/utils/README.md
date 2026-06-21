@@ -7,8 +7,8 @@ Utility methods and interfaces to 3rd party utility libraries.
 
 A "unit" will be defined as a `.js` file.
 So each js file we test will have its own test file.
-Utility component specs should live next to the utility module as `*.cy.js`.
-For example, `src/js/utils/sorting.js` is covered by `src/js/utils/sorting.cy.js`.
+Utility component specs should live next to the utility module as `*.component.cy.js`.
+For example, `src/js/utils/sorting.js` is covered by `src/js/utils/sorting.component.cy.js`.
 
 ## When Writing a Test
 

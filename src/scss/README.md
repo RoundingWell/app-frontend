@@ -138,7 +138,7 @@ All of the core sass are partials and imported in the `provider-core.scss`.
 ### `domain/`
 
 Domain sass includes styles specific to the RoundingWell product that are used in multiple locations.
-Most domain specific styles are defined in the sass modules in `../js/views` folders.
+Most app-specific styles are colocated with their rendering modules under `../js/apps`.
 These are generally modules that are reused (or likely will be) by multiple js files in the app.
 
 ### `modules/`
@@ -146,9 +146,9 @@ These are generally modules that are reused (or likely will be) by multiple js f
 Modules sass includes styles that are generic and could be used to create any application that are not specific to the business of RoundingWell.
 These are generally modules that are reused (or likely will be) by multiple js files in the app.
 
-### Sass in `../js/views`
+### Colocated app Sass
 
-Styles that are specific to a certain set of views are defined in scss files in the same folder as the `_views.js` file.
+Styles that are specific to a certain set of views are defined in SCSS files in the same app folder as the `_views.js` file.
 This allows us to easily understand when styles can be removed. No style in one of these files should be used outside of
 the related js/hbs files. If a style should be reused it should move to `domain/` or `modules/` appropriately.
 

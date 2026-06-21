@@ -11,7 +11,7 @@ definitions.
   It registers routes with `backbone.eventrouter`, builds a normalized route
   context on each match, manages the single current child app, and fires the
   `before:appRoute` / `appRoute` lifecycle hooks.
-- **AppFrameApp** (`src/js/apps/globals/app-frame_app.js`) — owns the global app
+- **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns the global app
   shell and the area RouterApps it instantiates. It responds to area route
   transitions by selecting the nav item, closing the transient sidebar, and
   forwarding route metadata to the latest-list service. It also passes the
@@ -184,5 +184,5 @@ Route dispatch stays synchronous — do not add another async layer.
    `routeActions`, read route data via `getCurrentRoute()`, and call
    `startCurrentRoute()` in `onStart()`.
 4. Do not change existing URLs unless that is the explicit task.
-5. Add/extend specs in `src/js/base/*.cy.js` for base-class behavior and run targeted
+5. Add/extend specs in `src/js/base/*.component.cy.js` for base-class behavior and run targeted
    `npm run coverage:e2e` specs for the affected area, plus `npm run lint`.
