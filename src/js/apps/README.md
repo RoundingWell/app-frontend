@@ -8,6 +8,7 @@ An app directory owns its orchestration, views, templates, local state, SCSS, an
 - Keep UI-free `*-main_app.js` router/composition files at the domain root.
 - Put each leaf app in a matching directory, such as `patients/worklist/` or `dashboards/dashboard/`.
 - Put UI shared only within a domain under `apps/<domain>/shared/`.
+- Put styles shared only within a domain under the same `apps/<domain>/shared/` owner.
 - Put reusable cross-domain UI under `src/js/components/`.
 - Keep data access under `src/js/entities-service/`; colocation does not change that boundary.
 - UI owned exclusively by a service or auth module lives beside that owner rather than under `apps/`.

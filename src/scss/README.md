@@ -137,9 +137,9 @@ All of the core sass are partials and imported in the `provider-core.scss`.
 
 ### `domain/`
 
-Domain sass includes styles specific to the RoundingWell product that are used in multiple locations.
-Most app-specific styles are colocated with their rendering modules under `../js/apps`.
-These are generally modules that are reused (or likely will be) by multiple js files in the app.
+Domain Sass includes product-specific styles intentionally shared across multiple app domains.
+Styles shared only within one domain belong under that domain's `../js/apps/<domain>/shared` directory.
+Styles owned by one app belong directly beside that app.
 
 ### `modules/`
 
