@@ -2,7 +2,7 @@ import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
 import 'scss/modules/sidebar.scss';
-import 'scss/domain/action-state.scss';
+import './action-state.scss';
 import './patient-readonly.scss';
 
 const ReadOnlyStateView = View.extend({

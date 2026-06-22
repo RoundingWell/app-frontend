@@ -22,7 +22,7 @@ import ActionItemTemplate from './action-item.hbs';
 import FlowItemTemplate from './flow-item.hbs';
 import LayoutTemplate from './layout.hbs';
 
-import 'scss/domain/program-action-state.scss';
+import 'js/apps/programs/shared/program-action-state.scss';
 import 'scss/domain/action-icons.scss';
 import './workflows.scss';
 

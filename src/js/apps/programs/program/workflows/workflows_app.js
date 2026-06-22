@@ -7,7 +7,7 @@ import intl from 'js/i18n';
 
 import { LayoutView, ListView, AddActionDroplist } from 'js/apps/programs/program/workflows/workflows_views';
 
-import 'scss/domain/workflows.scss';
+import './workflow-actions.scss';
 
 export default App.extend({
   viewTriggers: {

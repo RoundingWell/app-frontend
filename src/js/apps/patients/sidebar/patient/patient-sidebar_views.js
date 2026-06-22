@@ -5,7 +5,7 @@ import PreloadRegion from 'js/regions/preload_region';
 
 import { WidgetCollectionView } from 'js/apps/patients/shared/widgets/widgets_views';
 
-import 'scss/domain/patient-sidebar.scss';
+import 'js/apps/patients/shared/patient-sidebar.scss';
 import './patient-sidebar.scss';
 
 const sidebarOptions = {

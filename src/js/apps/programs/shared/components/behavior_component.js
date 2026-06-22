@@ -9,7 +9,7 @@ import intl from 'js/i18n';
 
 import Droplist from 'js/components/droplist';
 
-import 'scss/domain/program-action-state.scss';
+import 'js/apps/programs/shared/program-action-state.scss';
 
 const i18n = intl.programs.shared.components.behaviorComponent;
 

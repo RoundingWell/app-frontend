@@ -9,7 +9,7 @@ import intl from 'js/i18n';
 
 import Droplist from 'js/components/droplist';
 
-import 'scss/domain/action-state.scss';
+import 'js/apps/patients/shared/action-state.scss';
 
 const i18n = intl.patients.shared.components.stateComponent;
 
