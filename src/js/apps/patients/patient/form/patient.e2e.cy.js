@@ -76,39 +76,8 @@ context('Patient Form', function() {
       .should('have.attr', 'src', '/forms/formio/index.html');
 
     cy
-      .get('.js-expand-button')
-      .as('expandButton')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', 'Decrease Width');
-
-    cy
-      .get('@expandButton')
-      .trigger('mouseout')
-      .click();
-
-    cy
-      .get('@expandButton')
-      .find('.icon')
-      .should('have.class', 'fa-up-right-and-down-left-from-center');
-
-    cy
-      .get('@expandButton')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', 'Decrease Width');
-
-    cy
-      .get('@expandButton')
-      .trigger('mouseout');
-
-    cy
-      .get('.sidebar')
-      .should('not.exist');
+      .get('.patient__sidebar')
+      .should('exist');
 
     cy
       .iframeStub()
@@ -154,13 +123,13 @@ context('Patient Form', function() {
       .wait('@routeFormResponse');
 
     cy
-      .get('.form__context-trail')
-      .find('.js-dashboard')
+      .get('.patient__context-trail')
+      .find('.js-patient')
       .click();
 
     cy
       .url()
-      .should('contain', `/dashboard/${ testPatient.id }`);
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
 
     cy
       .go('back');
@@ -208,6 +177,11 @@ context('Patient Form', function() {
         expect(draft, 'draft storage').to.exist;
         expect(draft.submission.fields.foo).to.equal('bar');
       });
+
+    cy
+      .get('.form__controls')
+      .find('.js-expand-button')
+      .should('exist');
 
     cy
       .get('.form__controls')
@@ -543,68 +517,6 @@ context('Patient Form', function() {
       });
   });
 
-  specify('store expanded state in localStorage', function() {
-    localStorage.setItem(`form-state_${ currentClinician.id }`, JSON.stringify({ isExpanded: false }));
-
-    cy
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routeForm(fx => {
-        fx.data = testReadOnlyForm;
-
-        return fx;
-      })
-      .routeFormDefinition()
-      .routeFormFields()
-      .routeLatestFormResponse()
-      .visit(`/patient/${ testPatient.id }/form/${ testReadOnlyForm.id }`)
-      .wait('@routePatient')
-      .wait('@routeForm')
-      .wait('@routeFormDefinition')
-      .wait('@routeFormFields');
-
-    cy
-      .get('.form__sidebar')
-      .should('exist');
-
-    cy
-      .get('.js-expand-button')
-      .as('expandButton')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', 'Increase Width');
-
-    cy
-      .get('@expandButton')
-      .find('.icon')
-      .should('have.class', 'fa-up-right-and-down-left-from-center');
-
-    cy
-      .get('@expandButton')
-      .trigger('mouseout')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-state_${ currentClinician.id }`));
-
-        expect(storage.isExpanded).to.be.true;
-      });
-
-    cy
-      .get('@expandButton')
-      .trigger('mouseout')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-state_${ currentClinician.id }`));
-
-        expect(storage.isExpanded).to.be.false;
-      });
-  });
-
   specify('form header widgets', function() {
     const dob = testDateSubtract(10, 'years');
 
@@ -828,7 +740,7 @@ context('Patient Form', function() {
 
     cy
       .location('pathname', { timeout: 10000 })
-      .should('contain', `/patient/dashboard/${ testPatient.id }`);
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
   specify('submit and go back button - form response error', function() {
@@ -984,7 +896,11 @@ context('Patient Form', function() {
       .routeFormDefinition()
       .routeFormFields()
       .routeLatestFormResponse()
-      .routePatient()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
       .visit(`/patient/${ testPatient.id }/form/${ testSubmitHiddenForm.id }`)
       .wait('@routePatient')
       .wait('@routeForm')
@@ -1002,8 +918,6 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('button')
-      .contains('Submit')
-      .should('not.exist');
+      .should('not.contain', 'Submit');
   });
 });
