@@ -1,0 +1,70 @@
+---
+careOptsFrontend:
+  clinicians:
+    clinicianModal:
+      clinicianModalTemplate:
+        email: Email
+        name: Name
+        role: Role
+        team: Team
+        workspaces: Workspaces
+      clinicianModalViews:
+        clinicianModal:
+          email: clinician@organization.com
+          headingText: Add Clinician
+          name: Clinician First Last Name
+    cliniciansAllViews:
+      emptyView: No Clinicians
+      emptyFindInListView:
+        noResults: No results match your Find in List search
+      itemView:
+        newClinician: New Clinician
+        noLastActive: Never
+        noWorkspaces: None
+      layoutView:
+        addClinicianButton: Clinician
+        attributesHeader: State, Role, Team
+        clinicianHeader: Clinician
+        lastActiveHeader: Last Sign In
+        title: Clinicians
+        workspacesHeader: Workspaces
+      notFound: The Clinician you requested does not exist.
+    shared:
+      clinicianViews:
+        stateComponent:
+          active: Active
+          disabled: Disabled
+          headingText: Update State
+          pending: Pending
+        workspacesComponent:
+          removeModal:
+            bodyText: Any flow or action owned by this clinician in { workspace } will be set to their team, which is { team }. Are you sure you want to proceed?
+            headingText: Remove From Workspace?
+            submitText: Remove From Workspace
+      components:
+        roleComponent:
+          defaultText: Select Role...
+          headingText: Update Role
+    sidebar:
+      clinicianSidebarTemplate:
+        workspaces: Workspaces
+        role: Role
+        state: State
+        team: Team
+      clinicianSidebarViews:
+        disabledSaveView:
+          saveBtn: Save
+        emailView:
+          placeholder: clinician@organization.com
+        headingText: Clinician
+        infoView:
+          workspaceTeamInfo: Team & Workspaces must be assigned in order for this clinician to have access to members.
+        nameView:
+          placeholder: New Clinician
+        saveView:
+          cancelBtn: Cancel
+          saveBtn: Save
+        worklistView:
+          worklistBtn: Owned By { name } Worklist
+          workspaceName: "{ name } Workspace"
+          workspacesInfo: To view Owned By worklists for this user in their other workspaces, switch to a different workspace and navigate to the user's account.
