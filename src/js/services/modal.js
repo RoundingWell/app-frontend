@@ -6,6 +6,7 @@ import App from 'js/base/app';
 import intl from 'js/i18n';
 
 import FormsService from 'js/services/forms';
+import { addError } from 'js/datadog';
 
 import { ModalView, SidebarModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
 import { DraftStatusView } from 'js/apps/patients/patient/form/form_views';
@@ -53,6 +54,11 @@ export default App.extend({
     return view;
   },
   showForm(patient, formName, form, size) {
+    if (size === 'large') {
+      this.routeLargeFormRequest(patient, form, formName);
+      return;
+    }
+
     const formService = new FormsService({ patient, form });
     const bodyView = new IframeFormView({ model: form, size });
 
@@ -134,6 +140,15 @@ export default App.extend({
     });
 
     return modal;
+  },
+  routeLargeFormRequest(patient, form, formName) {
+    Radio.trigger('event-router', 'patient:form', patient.id, form.id);
+
+    addError(new Error('Large form modal request routed to patient form'), {
+      patientId: patient.id,
+      formId: form.id,
+      formName,
+    });
   },
   showViewOnlyForm(formService, bodyView, formName) {
     this.showModal({

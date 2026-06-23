@@ -61,6 +61,11 @@ context('patient sidebar', function() {
       .routeFormFields()
       .routeForm()
       .routeForm(fx => {
+        fx.data = testForm;
+
+        return fx;
+      }, testForm.id)
+      .routeForm(fx => {
         fx.data = testScriptReducerForm;
 
         return fx;
@@ -562,15 +567,7 @@ context('patient sidebar', function() {
 
     cy
       .get('.modal--large')
-      .find('.js-close')
-      .last()
-      .click();
-
-    cy
-      .get('@patientSidebar')
-      .find('.widgets__form-widget')
-      .contains('Test Form')
-      .click();
+      .should('not.exist');
 
     cy
       .url()
@@ -704,7 +701,7 @@ context('patient sidebar', function() {
 
     cy
       .url()
-      .should('contain', `/patient/dashboard/${ testPatient.id }`);
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
   specify('view patient modal', function() {
