@@ -1,7 +1,7 @@
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
-import './flow-sidebar.scss';
+import './patient-flow.scss';
 
 const ProgramStartedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "programStarted")) name = name team = team program = program}}
@@ -34,7 +34,7 @@ const StateUpdatedTemplate = hbs`
 `;
 
 const ActivityView = View.extend({
-  className: 'patient-flow-sidebar__activity-item',
+  className: 'patient-flow__activity-item',
   getTemplate() {
     const type = this.model.get('event_type');
 
@@ -61,7 +61,7 @@ const ActivityView = View.extend({
     const program = this.model.getProgram();
     const team = this.model.getTeam();
     const state = this.model.getState();
-    const sourceI18n = `patients.sidebar.flow.activityViews.${ this.model.get('source') }`;
+    const sourceI18n = `patients.patient.flow.flowViews.activity.${ this.model.get('source') }`;
 
     return {
       name: this._getModelName(editor),

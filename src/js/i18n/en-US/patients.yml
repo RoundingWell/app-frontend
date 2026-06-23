@@ -158,12 +158,36 @@ careOptsFrontend:
             label: Last submitted { date }
           updateView:
             buttonText: Update
-      flowViews:
-        actionNotFound: The Action you requested does not exist.
-        addActionHeadingText: Add Action
-        bulkEditFailure: Something went wrong. Please try again.
-        contextBackBtn: Back to List
-        emptyView: No Actions
+      flow:
+        flowViews:
+          actionNotFound: The Action you requested does not exist.
+          addActionHeadingText: Add Action
+          activity:
+            api:
+              clinicianAssigned: '<strong>{ name }</strong> ({ team }) changed the Owner to { to_name }'
+              detailsUpdated: '<strong>{ name }</strong> ({ team }) updated the details of this flow'
+              nameUpdated: '<strong>{ name }</strong> ({ team }) updated the name of this flow from { from_name } to { to_name }'
+              programStarted: '<strong>{ name }</strong> ({ team }) added this flow from the { program } program'
+              stateUpdated: '<strong>{ name }</strong> ({ team }) changed State to { to_state }'
+              teamAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_team }'
+            system:
+              clinicianAssigned: '<strong>Owner</strong> ({ team }) changed to { to_name }'
+              detailsUpdated: '<strong>Flow details</strong> updated'
+              nameUpdated: '<strong>Flow name</strong> updated from { from_name } to { to_name }'
+              programStarted: '<strong>Flow</strong> added from the { program } program'
+              stateUpdated: '<strong>Flow state</strong> changed to { to_state }'
+              teamAssigned: '<strong>Owner</strong> changed to { to_team }'
+          activityHeadingText: Activity Log
+          bulkEditFailure: Something went wrong. Please try again.
+          contextBackBtn: Back to List
+          deleteModal:
+            bodyText: Are you sure you want to delete this flow? All actions on this flow will also be deleted. This cannot be undone.
+            headingText: Confirm Delete
+            submitText: Delete Flow
+          emptyView: No Actions
+          menu:
+            delete: Delete Flow
+            headingText: Flow Menu
       patientViews:
         contextBackBtn: Back to List
       sidebar:
@@ -355,42 +379,6 @@ careOptsFrontend:
             clearFilters: Clear Filters
           statesFiltersView:
             headingText: State
-      flow:
-        activityViews:
-          api:
-            clinicianAssigned: '<strong>{ name }</strong> ({ team }) changed the Owner to { to_name }'
-            detailsUpdated: '<strong>{ name }</strong> ({ team }) updated the details of this flow'
-            nameUpdated: '<strong>{ name }</strong> ({ team }) updated the name of this flow from { from_name } to { to_name }'
-            programStarted: '<strong>{ name }</strong> ({ team }) added this flow from the { program } program'
-            stateUpdated: '<strong>{ name }</strong> ({ team }) changed State to { to_state }'
-            teamAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_team }'
-          system:
-            clinicianAssigned: '<strong>Owner</strong> ({ team }) changed to { to_name }'
-            detailsUpdated: '<strong>Flow details</strong> updated'
-            nameUpdated: '<strong>Flow name</strong> updated from { from_name } to { to_name }'
-            programStarted: '<strong>Flow</strong> added from the { program } program'
-            stateUpdated: '<strong>Flow state</strong> changed to { to_state }'
-            teamAssigned: '<strong>Owner</strong> changed to { to_team }'
-        flowSidebarTemplate:
-          activityHeadingText: Activity Log
-          noDetails: No details
-          ownerLabel: Owner
-          stateLabel: State
-        flowSidebarViews:
-          deleteModal:
-            bodyText: Are you sure you want to delete this flow? All actions on this flow will also be deleted. This cannot be undone.
-            headingText: Confirm Delete
-            submitText: Delete Flow
-          headingText: Flow
-          layoutView:
-            delete: Delete Flow
-            headingText: Flow Menu
-          permissionView:
-            label: Permissions
-            info: You are not able to change settings on this flow.
-          timestampsView:
-            createdAt: Added
-            updatedAt: Updated
     widgets:
       widgets:
         dob: "{ dob } &ndash; (Age { age, number })"
