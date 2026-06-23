@@ -1,0 +1,47 @@
+---
+careOptsFrontend:
+  forms:
+    form:
+      formApp:
+        deleteSuccess: The Action was deleted successfully.
+        notFound: The Action you requested does not exist.
+      formViews:
+        contextTrailView:
+          backBtn: Go Back
+          backDashboard: Back to Dashboard
+        formActionsView:
+          currentVersion: Back to Current Version
+          decreaseWidth: Decrease Width
+          hideActionSidebar: Hide Action Sidebar
+          increaseWidth: Increase Width
+          responseHistory: See Form Response History
+          showActionSidebar: Show Action Sidebar
+        historyDroplistView:
+          nameText: '• By { name }'
+        historyView:
+          currentVersionButton: Back to Current Version
+        draftStatusView:
+          discardDraft: Discard draft...
+          tooltip: See draft status
+          discardModal:
+            bodyText: Discarding your unsubmitted work on this form will load the latest data for this patient, but you'll lose your unsubmitted work.
+            headingText: Are you sure?
+            submitText: Discard My Work
+          storedWork: Your draft is saved automatically.
+          updatedAt: Last saved { updated }
+        readOnlyView:
+          buttonText: Read Only
+        lockedSubmitView:
+          permissionMessage: You don’t have permission to edit or submit this form.
+        saveView:
+          droplistLabel: Your Submit Button Preference
+          save:
+            buttonText: Submit
+            droplistItemText: Submit Form
+          saveAndGoBack:
+            buttonText: Submit + Go Back
+            droplistItemText: Submit Form + Go Back
+        statusView:
+          label: Last submitted { date }
+        updateView:
+          buttonText: Update
