@@ -14,17 +14,17 @@ import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateTimeView, ReadOnly
 
 import ActionDetailsTemplate from './action-details.hbs';
 
-import './action-sidebar.scss';
+import './action.scss';
 
 const NameView = View.extend({
-  template: hbs`<div class="action-sidebar__name" data-testid="action-sidebar-name">{{ name }}</div>`,
+  template: hbs`<div class="patient-action__name" data-testid="patient-action-name">{{ name }}</div>`,
 });
 
 const SaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
   template: hbs`
-    <button class="button--green js-save">{{ @intl.patients.sidebar.action.actionSidebarActionViews.saveView.saveBtn }}</button>
-    <button class="button--text u-margin--r-4 js-cancel">{{ @intl.patients.sidebar.action.actionSidebarActionViews.saveView.cancelBtn }}</button>
+    <button class="button--green js-save">{{ @intl.patients.patient.action.detailsViews.saveView.saveBtn }}</button>
+    <button class="button--text u-margin--r-4 js-cancel">{{ @intl.patients.patient.action.detailsViews.saveView.cancelBtn }}</button>
   `,
   triggers: {
     'click .js-cancel': 'cancel',
@@ -51,20 +51,20 @@ const DetailsView = View.extend({
 const ReadOnlyActionView = View.extend({
   template: hbs`
     <div class="pos--relative">
-      <div class="action-sidebar__name" data-testid="action-sidebar-name">{{ name }}</div>
+      <div class="patient-action__name" data-testid="patient-action-name">{{ name }}</div>
     </div>
     <div class="u-margin--t-8">
-    {{ details }}{{#unless details}}<span class="sidebar--no-results">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.noDetails }}</span>{{/unless}}
+    {{ details }}{{#unless details}}<span class="patient-action__no-results">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.noDetails }}</span>{{/unless}}
     </div>
-    <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.dueDayLabel }}</h4><div class="flex flex-grow" data-due-datetime-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.durationLabel }}</h4><div class="flex-grow" data-duration-region></div></div>
+    <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
+    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
+    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.dueDayLabel }}</h4><div class="flex flex-grow" data-due-datetime-region></div></div>
+    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.durationLabel }}</h4><div class="flex-grow" data-duration-region></div></div>
     {{#unless canEdit}}
     <div class="flex u-margin--t-8">
-      <h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.permissionLabel }}</h4>
-      <div class="flex flex--grow action-sidebar__info">
-        {{far "ban"}}<span class="u-margin--l-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.readOnlyActionView.permissionInfo }}</span>
+      <h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.permissionLabel }}</h4>
+      <div class="flex flex--grow patient-action__info">
+        {{far "ban"}}<span class="u-margin--l-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.permissionInfo }}</span>
       </div>
     </div>
     {{/unless}}
@@ -113,15 +113,15 @@ const ActionView = View.extend({
     <div data-name-region></div>
     <div class="u-margin--t-8" data-details-region></div>
     <div data-save-region></div>
-    <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.actionView.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.actionView.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.actionView.dueDayLabel }}</h4>
+    <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
+    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
+    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.dueDayLabel }}</h4>
       <div class="flex flex-grow">{{~ remove_whitespace ~}}
         <div class="flex-grow" data-due-date-region></div>{{~ remove_whitespace ~}}
         <div class="flex-grow" data-due-time-region></div>{{~ remove_whitespace ~}}
       </div>
     </div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarActionViews.actionView.durationLabel }}</h4><div class="flex-grow" data-duration-region></div></div>
+    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.durationLabel }}</h4><div class="flex-grow" data-duration-region></div></div>
   `,
   regions: {
     name: '[data-name-region]',

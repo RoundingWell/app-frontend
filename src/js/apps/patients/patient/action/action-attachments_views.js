@@ -10,11 +10,11 @@ import intl from 'js/i18n';
 import 'scss/modules/sidebar.scss';
 import 'scss/modules/loader.scss';
 
-import './action-sidebar.scss';
+import './action.scss';
 
 const EmptyView = View.extend({
-  className: 'action-sidebar__no-results',
-  template: hbs`{{ @intl.patients.sidebar.action.actionSidebarAttachmentsViews.emptyView }}`,
+  className: 'patient-action__no-results',
+  template: hbs`{{ @intl.patients.patient.action.attachmentsViews.emptyView }}`,
 });
 
 const AttachmentView = View.extend({
@@ -24,20 +24,20 @@ const AttachmentView = View.extend({
     'change:_download': 'render',
   },
   downloadTemplate: hbs`
-    <a class="action-sidebar__attachment-filename" target="_blank" href="{{_view}}">{{filename}}</a>
+    <a class="patient-action__attachment-filename" target="_blank" href="{{_view}}">{{filename}}</a>
     <div class="flex">
-      <a class="action-sidebar__attachment-action flex-grow" target="_blank" href="{{_download}}" download>
-        {{far "download"}} <span>{{ @intl.patients.sidebar.action.actionSidebarAttachmentsViews.attachmentView.downloadText }}</span>
+      <a class="patient-action__attachment-action flex-grow" target="_blank" href="{{_download}}" download>
+        {{far "download"}} <span>{{ @intl.patients.patient.action.attachmentsViews.attachmentView.downloadText }}</span>
       </a>
       {{#if canRemoveAttachments}}
-        <a class="action-sidebar__attachment-action js-remove">
-          {{far "trash-can"}} <span>{{ @intl.patients.sidebar.action.actionSidebarAttachmentsViews.attachmentView.removeText }}</span>
+        <a class="patient-action__attachment-action js-remove">
+          {{far "trash-can"}} <span>{{ @intl.patients.patient.action.attachmentsViews.attachmentView.removeText }}</span>
         </a>
       {{/if}}
     </div>
   `,
   uploadTemplate: hbs`
-    <div class="action-sidebar__attachment-filename">{{filename}}</div>
+    <div class="patient-action__attachment-filename">{{filename}}</div>
     <div class="loader__bar u-margin--t-8 js-progress-bar">
       <div class="loader__bar-progress js-progress"></div>
     </div>
@@ -60,9 +60,9 @@ const AttachmentView = View.extend({
   },
   onClickRemove() {
     const modal = Radio.request('modal', 'show:small', {
-      bodyText: intl.patients.sidebar.action.actionSidebarAttachmentsViews.removeModal.bodyText,
-      headingText: intl.patients.sidebar.action.actionSidebarAttachmentsViews.removeModal.headingText,
-      submitText: intl.patients.sidebar.action.actionSidebarAttachmentsViews.removeModal.submitText,
+      bodyText: intl.patients.patient.action.attachmentsViews.removeModal.bodyText,
+      headingText: intl.patients.patient.action.attachmentsViews.removeModal.headingText,
+      submitText: intl.patients.patient.action.attachmentsViews.removeModal.submitText,
       buttonClass: 'button--red',
       onSubmit: () => {
         modal.destroy();
@@ -92,13 +92,13 @@ const AttachmentsView = CollectionView.extend({
   template: hbs`
     <div class="sidebar__attachments">
       <h3 class="sidebar__heading">
-        {{far "paperclip"}}<span class="u-margin--l-8">{{ @intl.patients.sidebar.action.actionSidebarAttachmentsViews.attachmentsViews.attachmentsHeadingText }}</span>
+        {{far "paperclip"}}<span class="u-margin--l-8">{{ @intl.patients.patient.action.attachmentsViews.attachmentsViews.attachmentsHeadingText }}</span>
       </h3>
       <div data-attachments-files-region></div>
       {{#if canUploadAttachments}}
         <form>
-          <input type="file" id="upload-attachment" accept=".pdf" class="action-sidebar__attachment-file js-file">
-          <label for="upload-attachment" class="button-primary u-margin--t-16 js-add">{{far "paperclip"}}<span>{{ @intl.patients.sidebar.action.actionSidebarAttachmentsViews.attachmentsViews.addAttachment }}</span></label>
+          <input type="file" id="upload-attachment" accept=".pdf" class="patient-action__attachment-file js-file">
+          <label for="upload-attachment" class="button-primary u-margin--t-16 js-add">{{far "paperclip"}}<span>{{ @intl.patients.patient.action.attachmentsViews.attachmentsViews.addAttachment }}</span></label>
         </form>
       {{/if}}
     </div>

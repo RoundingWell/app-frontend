@@ -1,23 +1,42 @@
-import { extend } from 'underscore';
+import { get } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
+import hbs from 'handlebars-inline-precompile';
+import { View } from 'marionette';
 
 import App from 'js/base/app';
+import handleErrors from 'js/utils/handle-errors';
 
 import intl from 'js/i18n';
 
-import { SidebarMixin } from 'js/services/sidebar';
-
-import { SidebarView, MenuView, HeadingView, FooterView } from 'js/apps/patients/sidebar/action/action-sidebar_views';
-import { ActionView, ReadOnlyActionView } from 'js/apps/patients/sidebar/action/action-sidebar-action_views';
-import { DialerView } from 'js/apps/patients/sidebar/action/action-sidebar-dialer_views';
-import { FormLayoutView } from 'js/apps/patients/sidebar/action/action-sidebar-forms_views';
+import { ContentView, MenuView, HeadingView, FooterView } from 'js/apps/patients/patient/action/action_views';
+import { ActionView, ReadOnlyActionView } from 'js/apps/patients/patient/action/action-details_views';
+import { DialerView } from 'js/apps/patients/patient/action/action-dialer_views';
+import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_views';
 import { CommentFormView } from 'js/apps/patients/shared/comments_views';
-import { ActivitiesView, TimestampsView } from 'js/apps/patients/sidebar/action/action-sidebar-activity-views';
-import { AttachmentsView } from 'js/apps/patients/sidebar/action/action-sidebar-attachments-views';
+import { ActivitiesView, TimestampsView } from 'js/apps/patients/patient/action/action-activity_views';
+import { AttachmentsView } from 'js/apps/patients/patient/action/action-attachments_views';
 
-export default App.extend(extend({
+const LayoutView = View.extend({
+  className: 'patient-action flex-region',
+  template: hbs`
+    <div class="patient-action__header">
+      <div data-heading-region></div>
+      <div data-menu-region></div>
+    </div>
+    <div class="patient-action__content" data-content-region></div>
+    <div class="patient-action__footer" data-footer-region></div>
+  `,
+  regions: {
+    heading: '[data-heading-region]',
+    menu: '[data-menu-region]',
+    content: '[data-content-region]',
+    footer: '[data-footer-region]',
+  },
+});
+
+export default App.extend({
   setAccess() {
     const canEdit = !this.action.isFlowDone() && this.action.canEdit();
     const canDelete = this.action.canDelete();
@@ -29,20 +48,62 @@ export default App.extend(extend({
     'change:canDelete': 'onStateChangeCanDelete',
   },
   onStateChangeCanEdit() {
+    if (!this.hasContentView()) return;
+
     this.showAction();
     this.showDialer();
   },
   onStateChangeCanDelete() {
+    if (!this.hasLayoutRegion('menu')) return;
+
     this.showMenu();
   },
-  onBeforeStart({ action, isShowingForm }) {
-    this.action = action;
-    this.isShowingForm = isShowingForm;
-    this.setAccess();
+  hasLayoutRegion(name) {
+    const layout = this.getView();
 
-    this.action.trigger('editing', true);
-    const flow = this.action.getFlow();
-    if (flow) this.listenTo(flow, 'change:_state', this.setAccess);
+    return this.isRunning()
+      && layout
+      && !layout.isDestroyed()
+      && layout.getRegion(name);
+  },
+  hasContentView() {
+    const contentRegion = this.hasLayoutRegion('content');
+
+    return contentRegion && contentRegion.hasView();
+  },
+  onBeforeStart() {
+    this.getRegion().startPreloader();
+  },
+  beforeStart({ actionId, flowId }) {
+    return [
+      Radio.request('entities', 'fetch:actions:model', actionId),
+      flowId && Radio.request('entities', 'fetch:flows:model', flowId),
+      Radio.request('entities', 'fetch:actionEvents:collection', actionId),
+      Radio.request('entities', 'fetch:comments:collection:byAction', actionId),
+      Radio.request('entities', 'fetch:files:collection:byAction', actionId),
+    ];
+  },
+  /* istanbul ignore next: page-level action error handling */
+  onFail(options, error) {
+    if (get(error, ['response', 'status']) === 410) {
+      Radio.request('alert', 'show:error', intl.patients.patient.action.actionApp.notFound);
+      this.stop();
+      return;
+    }
+
+    handleErrors(error);
+  },
+  onStart(options, action, flow, activity, comments, attachments) {
+    this.patient = options.patient;
+    this.flow = flow || null;
+    this.action = action;
+    this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
+    this.comments = comments;
+    this.attachments = attachments;
+
+    this.setAccess();
+    this.currentFlow = this.flow || this.action.getFlow();
+    if (this.currentFlow) this.listenTo(this.currentFlow, 'change:_state', this.setAccess);
 
     this.listenTo(action, {
       'change:_owner': this.onChangeOwner,
@@ -51,30 +112,33 @@ export default App.extend(extend({
       'ws:add:attachment': this.onWsAddAttachment,
     });
 
+    this.showView(new LayoutView());
+
     this.showChildView('heading', new HeadingView({ model: this.action }));
     this.showContent();
     this.showChildView('footer', new FooterView());
-
     this.showMenu();
+    this.showActivity();
+    this.showNewCommentForm();
+    this.showAttachments();
+
+    this.triggerMethod('context:change', {
+      page: 'action',
+      actionId: this.action.id,
+      actionName: this.action.get('name'),
+      flowId: this.flow && this.flow.id,
+      flowName: this.getFlowName(),
+    });
+
+    this.subscribe();
   },
   onBeforeStop() {
-    const flow = this.action.getFlow();
-    if (flow) this.stopListening(flow);
-    this.stopListening(this.action);
-    this.action.trigger('editing', false);
+    if (!this.action) return;
 
-    this.removeSubscriptions();
-  },
-  beforeStart() {
-    return [
-      Radio.request('entities', 'fetch:actionEvents:collection', this.action.id),
-      Radio.request('entities', 'fetch:comments:collection:byAction', this.action.id),
-      Radio.request('entities', 'fetch:files:collection:byAction', this.action.id),
-    ];
+    this.unsubscribe();
   },
   onChangeOwner() {
     this.setAccess();
-    /* istanbul ignore else : Covers edge case when owner changes prior to beforeStart */
     if (this.isRunning()) this.showAttachments();
   },
   onWsAddComment(model) {
@@ -88,29 +152,15 @@ export default App.extend(extend({
 
     Radio.request('ws', 'add', model);
 
-    // to cover the scenario where the AttachmentsView hasn't been shown yet
     if (this.attachments.length === 1) this.showAttachments();
   },
-  onStart(options, activity, comments, attachments) {
-    this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
-    this.comments = comments;
-    this.attachments = attachments;
-
-    this.showActivity();
-    this.showNewCommentForm();
-    this.showAttachments();
-
-    this.addSubscriptions();
-  },
   showContent() {
-    const sidebarView = new SidebarView({ model: this.action });
+    const actionView = new ContentView({ model: this.action });
 
-    this.showChildView('content', sidebarView);
+    this.showChildView('content', actionView);
     this.showAction();
     this.showForm();
     this.showDialer();
-
-    sidebarView.getRegion('activity').startPreloader();
   },
   showAction() {
     if (!this.getState('canEdit')) {
@@ -148,14 +198,27 @@ export default App.extend(extend({
       });
   },
   onDestroy() {
-    this.triggerMethod('close', this);
+    if (!this.isRunning()) return;
+
+    this.navigateAfterDelete();
+  },
+  navigateAfterDelete() {
+    if (this.flow) {
+      Radio.trigger('event-router', 'patient:flow', this.patient.id, this.flow.id);
+      return;
+    }
+
+    Radio.trigger('event-router', 'patient:workflow', this.patient.id);
+  },
+  getFlowName() {
+    return this.flow && this.flow.get('name');
   },
   showForm() {
     if (!this.action.getForm() && !this.action.hasSharing()) return;
 
     const formView = this.showContentView('form', new FormLayoutView({
       model: this.action,
-      isShowingForm: this.isShowingForm,
+      isShowingForm: this.getOption('isShowingForm'),
     }));
 
     this.listenTo(formView, {
@@ -163,7 +226,7 @@ export default App.extend(extend({
     });
   },
   onClickForm(form) {
-    Radio.trigger('event-router', 'form:patientAction', this.action.id, form.id);
+    Radio.trigger('event-router', 'patient:form:action', this.patient.id, form.id, this.action.id);
   },
   showDialer() {
     if (!Radio.request('settings', 'get', 'dialer')) return;
@@ -255,7 +318,7 @@ export default App.extend(extend({
         Radio.request('ws', 'add', uploadedAttachment);
       },
       'upload:failed': () => {
-        Radio.request('alert', 'show:error', intl.patients.sidebar.actionSidebarApp.uploadError);
+        Radio.request('alert', 'show:error', intl.patients.patient.action.actionApp.uploadError);
       },
     });
   },
@@ -266,13 +329,32 @@ export default App.extend(extend({
 
     Radio.request('ws', 'unsubscribe', model);
   },
-  addSubscriptions() {
-    Radio.request('ws', 'add', [...this.comments.models, ...this.attachments.models]);
+  getSubscriptionResources() {
+    return [
+      this.action,
+      this.currentFlow,
+      ...this.comments.models,
+      ...this.attachments.models,
+    ].filter(Boolean);
   },
-  removeSubscriptions() {
-    // for when the sidebar is closed prior to beforeStart being able to finish
-    if (!this.isRunning()) return;
+  subscribe() {
+    Radio.request('ws', 'subscribe', this.getSubscriptionResources());
+  },
+  unsubscribe() {
+    if (!this.comments || !this.attachments) return;
 
-    Radio.request('ws', 'unsubscribe', [...this.comments.models, ...this.attachments.models]);
+    Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());
   },
-}, SidebarMixin));
+  showContentView(name, view, options) {
+    const contentView = this.getView().getChildView('content');
+    const region = contentView.getRegion(name);
+    region.show(view, options);
+    return view;
+  },
+  showFooterView(name, view, options) {
+    const footerView = this.getView().getChildView('footer');
+    const region = footerView.getRegion(name);
+    region.show(view, options);
+    return view;
+  },
+});
