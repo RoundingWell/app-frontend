@@ -15,7 +15,7 @@ import { clearDrafts, pruneOtherDrafts } from 'js/services/form-drafts';
 
 import 'scss/app-root.scss';
 
-import { LoginPromptView } from 'js/views/globals/prelogin/prelogin_views';
+import { LoginPromptView } from 'js/auth/prelogin/prelogin_views';
 
 let authAgent;
 let cachedUserId;

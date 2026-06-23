@@ -2,7 +2,7 @@ import { delay, each, extend, omit } from 'underscore';
 
 import App from 'js/base/app';
 
-import { AlertView, AlertsView } from 'js/views/globals/alert-box/alert-box_views';
+import { AlertView, AlertsView } from 'js/services/alert/alert-box_views';
 
 // in ms
 const ALERT_TIMEOUT = 4000;

@@ -4,11 +4,11 @@ import SubRouterApp from 'js/base/subrouterapp';
 
 import ActionApp from 'js/apps/programs/program/action/action_app';
 
-import ProgramSidebarApp from 'js/apps/programs/sidebar/program-sidebar_app';
-import FlowSidebarApp from 'js/apps/programs/sidebar/flow-sidebar_app';
+import ProgramSidebarApp from 'js/apps/programs/sidebar/program/program-sidebar_app';
+import FlowSidebarApp from 'js/apps/programs/sidebar/flow/flow-sidebar_app';
 
-import { LayoutView, ContextTrailView, HeaderView, AddActionView, ListView } from 'js/views/programs/program/flow/flow_views';
-import { SidebarView } from 'js/views/programs/program/sidebar/sidebar-views';
+import { LayoutView, ContextTrailView, HeaderView, AddActionView, ListView } from 'js/apps/programs/program/flow/flow_views';
+import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
 
 export default SubRouterApp.extend({
   routerAppName: 'ProgramFlowApp',

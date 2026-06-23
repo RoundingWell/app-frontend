@@ -1,6 +1,6 @@
 import RouterApp from 'js/base/routerapp';
 
-import ProgramsAllApp from 'js/apps/programs/programs-all_app';
+import ProgramsAllApp from 'js/apps/programs/programs-all/programs-all_app';
 import ProgramApp from 'js/apps/programs/program/program_app';
 import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
 

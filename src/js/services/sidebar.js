@@ -1,6 +1,6 @@
 import App from 'js/base/app';
 
-import { LayoutView } from 'js/views/globals/sidebar/sidebar_views';
+import { LayoutView } from 'js/services/sidebar/sidebar_views';
 
 export const SidebarMixin = {
   showContentView(name, view, options) {

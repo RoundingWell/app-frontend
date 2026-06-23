@@ -29,10 +29,10 @@ import ModalService from 'js/services/modal';
 import WSService from 'js/services/ws';
 import DialerService from 'js/services/dialer';
 
-import ErrorApp from 'js/apps/globals/error_app';
+import ErrorApp from 'js/apps/globals/error/error_app';
 
-import { RootView } from 'js/views/globals/root_views';
-import { PreloaderView } from 'js/views/globals/prelogin/prelogin_views';
+import { RootView } from 'js/apps/globals/app-frame/root_views';
+import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
 
 const $document = $(document);
 
@@ -131,7 +131,7 @@ const Application = App.extend({
   beforeStart() {
     return [
       Radio.request('bootstrap', 'fetch'),
-      import('js/apps/globals/app-frame_app'),
+      import('js/apps/globals/app-frame/app-frame_app'),
     ];
   },
 

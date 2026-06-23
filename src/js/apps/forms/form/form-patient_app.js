@@ -8,7 +8,7 @@ import App from 'js/base/app';
 import FormsService from 'js/services/forms';
 
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
-import WidgetsHeaderApp from 'js/apps/forms/widgets/widgets_header_app';
+import WidgetsHeaderApp from 'js/apps/forms/form/widgets/widgets_header_app';
 
 import {
   LayoutView,
@@ -18,7 +18,7 @@ import {
   ReadOnlyView,
   SaveView,
   DraftStatusView,
-} from 'js/views/forms/form/form_views';
+} from 'js/apps/forms/form/form_views';
 
 export default App.extend({
   childApps: {

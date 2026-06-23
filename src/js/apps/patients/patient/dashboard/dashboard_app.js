@@ -9,7 +9,7 @@ import { FLOW_INCLUDE } from 'js/entities-service/flows';
 
 import AddWorkflowApp from './add-workflow_app';
 
-import { LayoutView, ListView } from 'js/views/patients/patient/dashboard/dashboard_views';
+import { LayoutView, ListView } from 'js/apps/patients/patient/dashboard/dashboard_views';
 
 export default App.extend({
   childApps: {

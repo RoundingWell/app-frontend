@@ -4,7 +4,7 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { AddButtonView, i18n, itemClasses } from 'js/views/patients/shared/add-workflow/add-workflow_views';
+import { AddButtonView, i18n, itemClasses } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
 export default App.extend({
   beforeStart() {

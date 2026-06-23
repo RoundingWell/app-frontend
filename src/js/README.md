@@ -25,7 +25,7 @@ import App from 'js/base/app';
 import { Model as PatientModel } from 'js/entities-service/entities/patients';
 
 // Apps (typically alphabetically)
-import ChildApp from 'js/apps/foo/child_app';
+import ChildApp from 'js/apps/foo/child/child_app';
 import LocalDepApp from './local_app';
 
 // Other Mn classes in no particular order (there's usually not many)
@@ -34,7 +34,7 @@ import FooRegion from 'js/regions/foo';
 import FooComponent from 'js/components/foo';
 
 // Views (typically alphabetically)
-import { FooView, BarCollectionView }  from 'js/view/foo-bar/foo-bar_views';
+import { FooView, BarCollectionView } from 'js/apps/foo/child/child_views';
 import { LocalDepView } from './local_views';
 
 // Large Templates (small templates are typically inlined with hbs``)
@@ -53,7 +53,7 @@ The aliases can be found here: https://github.com/RoundingWell/app-frontend/blob
 These aliases allow for any js file, no matter its location within the js directory to import like so:
 
 ```javascript
-import { FooView } from 'js/views/some/foo_views';
+import { FooView } from 'js/apps/foo/foo_views';
 ```
 
 ## Underscore

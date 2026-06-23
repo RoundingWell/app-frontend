@@ -173,7 +173,7 @@ export default defineConfig(({ mode }) => {
       modulePreloadEntryPlugin([
         '/src/js/auth.js',
         '/src/js/app.js',
-        '/src/js/apps/globals/app-frame_app.js',
+        '/src/js/apps/globals/app-frame/app-frame_app.js',
         '/packages/care-ops-auth/AuthProvider.js',
         '/packages/care-ops-auth/providers/workos.js',
       ]),

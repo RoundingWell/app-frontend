@@ -1,6 +1,6 @@
 import RouterApp from 'js/base/routerapp';
 
-import CliniciansAllApp from 'js/apps/clinicians/clinicians-all_app';
+import CliniciansAllApp from 'js/apps/clinicians/clinicians-all/clinicians-all_app';
 
 export default RouterApp.extend({
   routerAppName: 'CliniciansApp',

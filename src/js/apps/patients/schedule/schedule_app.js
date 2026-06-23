@@ -8,18 +8,18 @@ import intl, { renderTemplate } from 'js/i18n';
 import StateModel from './schedule_state';
 import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
-import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit-actions_app';
-import FiltersSidebarApp from 'js/apps/patients/sidebar/filters-sidebar_app';
-import PatientSidebarApp from 'js/apps/patients/sidebar/patient-sidebar_app';
+import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app';
+import FiltersSidebarApp from 'js/apps/patients/sidebar/filters/filters-sidebar_app';
+import PatientSidebarApp from 'js/apps/patients/sidebar/patient/patient-sidebar_app';
 
-import DateFilterComponent from 'js/views/patients/shared/components/date-filter';
-import SearchComponent from 'js/views/shared/components/list-search';
+import DateFilterComponent from 'js/apps/patients/shared/components/date-filter';
+import SearchComponent from 'js/components/list-search';
 
-import { CountView } from 'js/views/patients/shared/list_views';
+import { CountView } from 'js/apps/patients/shared/list_views';
 
-import { LayoutView, ScheduleTitleView, TableHeaderView, SelectAllView, ScheduleListView, AllFiltersButtonView } from 'js/views/patients/schedule/schedule_views';
-import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/views/patients/shared/bulk-edit/bulk-edit_views';
-import { sidebarOptions } from 'js/views/patients/sidebar/patient/patient-sidebar_views';
+import { LayoutView, ScheduleTitleView, TableHeaderView, SelectAllView, ScheduleListView, AllFiltersButtonView } from 'js/apps/patients/schedule/schedule_views';
+import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
+import { sidebarOptions } from 'js/apps/patients/sidebar/patient/patient-sidebar_views';
 
 const FiltersApp = App.extend({
   StateModel: FiltersStateModel,

@@ -12,8 +12,8 @@ pull_request_review:
         - Prefer this import order: third-party libraries, shared SCSS modules, shared utilities and i18n, base classes, entities and service modules, apps and controllers, behaviors, regions, and components, views, then templates and view-local SCSS last.
         - Keep Handlebars spacing tight: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
         - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
-        - Component specs live in `src/**/*.cy.js`.
-        - E2E specs live in `test/integration/**/*.js`.
+        - Component specs live beside their owners as `src/**/*.component.cy.js`.
+        - E2E specs live beside their owners as `src/**/*.e2e.cy.js`.
         - Fixtures live in `test/fixtures/**`.
         - Treat `scripts/**` and `packages/care-ops-five9/sdk/**` as sensitive areas and flag manual edits that bypass their helper scripts.
         - Put findings first.
@@ -36,8 +36,8 @@ code_generation:
         - Prefer this import order: third-party libraries, shared SCSS modules, shared utilities and i18n, base classes, entities and service modules, apps and controllers, behaviors, regions, and components, views, then templates and view-local SCSS last.
         - Keep Handlebars spacing tight: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
         - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
-        - Component specs live in `src/**/*.cy.js`.
-        - E2E specs live in `test/integration/**/*.js`.
+        - Component specs live beside their owners as `src/**/*.component.cy.js`.
+        - E2E specs live beside their owners as `src/**/*.e2e.cy.js`.
         - Fixtures live in `test/fixtures/**`.
         - Treat `scripts/**` and `packages/care-ops-five9/sdk/**` as sensitive areas.
         - Keep suggestions short and operational. Put actions before rationale.
@@ -51,8 +51,8 @@ chat:
         `/AGENTS.md` is the canonical source for repo-wide AI guidance.
         Key facts:
         - This is a Marionette.js and Backbone.js frontend built with Vite.
-        - Component specs live in `src/**/*.cy.js`.
-        - E2E specs live in `test/integration/**/*.js`.
+        - Component specs live beside their owners as `src/**/*.component.cy.js`.
+        - E2E specs live beside their owners as `src/**/*.e2e.cy.js`.
         - Fixtures live in `test/fixtures/**`.
         - Networking logic belongs in `src/js/entities-service/**`.
         - Sensitive areas include `scripts/**` and `packages/care-ops-five9/sdk/**`.

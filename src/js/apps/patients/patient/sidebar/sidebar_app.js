@@ -2,7 +2,7 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { SidebarView } from 'js/views/patients/patient/sidebar/sidebar_views';
+import { SidebarView } from 'js/apps/patients/patient/sidebar/sidebar_views';
 
 export default App.extend({
   viewEvents: {

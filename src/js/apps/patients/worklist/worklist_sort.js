@@ -3,7 +3,7 @@ import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import { alphaSort, numSort } from 'js/utils/sorting';
-import { i18n } from 'js/views/patients/worklist/worklist_views';
+import { i18n } from 'js/apps/patients/worklist/worklist_views';
 
 // Casts values to String for alpha sort
 function getEntityFieldValue(entity, fieldName, keys) {

@@ -8,9 +8,9 @@ import SubRouterApp from 'js/base/subrouterapp';
 import DashboardApp from 'js/apps/patients/patient/dashboard/dashboard_app';
 import ArchiveApp from 'js/apps/patients/patient/archive/archive_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
-import ActionSiderbarApp from 'js/apps/patients/sidebar/action-sidebar_app';
+import ActionSiderbarApp from 'js/apps/patients/sidebar/action/action-sidebar_app';
 
-import { LayoutView, intl } from 'js/views/patients/patient/patient_views';
+import { LayoutView, intl } from 'js/apps/patients/patient/patient_views';
 
 export default SubRouterApp.extend({
   routeScope: ['patientId'],

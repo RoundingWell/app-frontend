@@ -9,12 +9,13 @@ Load a scoped overlay only when your change touches `scripts/**` or `packages/ca
 - JavaScript only. Do not generate TypeScript.
 - Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
 - Route data access through `src/js/entities-service/**`.
+- Colocate app-owned views, templates, SCSS, state, and Cypress specs under the owning `src/js/apps/**` directory.
 - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
 - Prefer this import order: third-party libraries, shared SCSS modules, shared utilities and i18n, base classes, entities and service modules, apps and controllers, behaviors, regions, and components, views, then templates and view-local SCSS last.
 - Keep Handlebars spacing tight: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
 - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
-- Component specs live in `src/**/*.cy.js`.
-- E2E specs live in `test/integration/**/*.js`.
+- Component specs live beside their owners as `src/**/*.component.cy.js`.
+- E2E specs live beside their owners as `src/**/*.e2e.cy.js`.
 - Fixtures live in `test/fixtures/**`.
 - Treat `scripts/**` and `packages/care-ops-five9/sdk/**` as sensitive areas and use their scoped overlays.
 
