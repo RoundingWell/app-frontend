@@ -5,7 +5,7 @@ const PatientStub = SubRouterApp.extend({
   routeScope: ['patientId'],
   routeActions() {
     return {
-      'patient:dashboard': 'show',
+      'patient:workflow': 'show',
       'patient:action': 'show',
     };
   },
@@ -30,7 +30,7 @@ const Router = RouterApp.extend({
   },
   eventRoutes() {
     return {
-      'patient:dashboard': { action: 'showPatient', route: 'patient/dashboard/:id' },
+      'patient:workflow': { action: 'showPatient', route: 'patient/:id/workflow' },
       'patient:action': { action: 'showPatient', route: 'patient/:id/action/:aid' },
       'worklist': { action: 'showWorklist', route: 'worklist/:id', meta: { isList: true } },
       'schedule': { action: 'showSchedule', route: 'schedule', meta: { clearLatestList: true } },
@@ -58,14 +58,14 @@ context('RouterApp', function() {
   describe('route triggers and aliases', function() {
     specify('prefixes the workspace slug onto non-root routes', function() {
       app = new Router({ workspaceSlug: 'test-ws' });
-      expect(app.router.getDefaultRoute('patient:dashboard')).to.equal('test-ws/patient/dashboard/:id');
+      expect(app.router.getDefaultRoute('patient:workflow')).to.equal('test-ws/patient/:id/workflow');
     });
 
     specify('registers every alias and treats the first as canonical', function() {
       const AliasRouter = Router.extend({
         eventRoutes() {
           return {
-            'patient:dashboard': {
+            'patient:workflow': {
               action: 'showPatient',
               route: ['patient/:id/workflow', 'patient/dashboard/:id'],
             },
@@ -74,10 +74,10 @@ context('RouterApp', function() {
       });
       app = new AliasRouter({ workspaceSlug: 'test-ws' });
 
-      expect(app.router.getDefaultRoute('patient:dashboard')).to.equal('test-ws/patient/:id/workflow');
-      expect(app.translateEvent('patient:dashboard', 'p1')).to.equal('test-ws/patient/p1/workflow');
+      expect(app.router.getDefaultRoute('patient:workflow')).to.equal('test-ws/patient/:id/workflow');
+      expect(app.translateEvent('patient:workflow', 'p1')).to.equal('test-ws/patient/p1/workflow');
 
-      trigger(app, 'patient:dashboard', 'p1');
+      trigger(app, 'patient:workflow', 'p1');
       expect(app.getCurrentRoute().definition.route).to.equal('patient/:id/workflow');
     });
 
@@ -114,13 +114,13 @@ context('RouterApp', function() {
       });
       app = new CapturingRouter({ workspaceSlug: 'test-ws' });
 
-      trigger(app, 'patient:dashboard', 'p1');
+      trigger(app, 'patient:workflow', 'p1');
 
       expect(app.capturedRouter).to.equal(app);
-      expect(app.captured.event).to.equal('patient:dashboard');
+      expect(app.captured.event).to.equal('patient:workflow');
       expect(app.captured.eventArgs).to.deep.equal(['p1']);
       expect(app.captured.definition.action).to.equal('showPatient');
-      expect(app.captured.definition.route).to.equal('patient/dashboard/:id');
+      expect(app.captured.definition.route).to.equal('patient/:id/workflow');
       expect(app.currentDuringHook).to.equal(app.captured);
     });
 
@@ -132,7 +132,7 @@ context('RouterApp', function() {
       app.on('before:appRoute', beforeAppRoute);
       app.on('appRoute', appRoute);
 
-      trigger(app, 'patient:dashboard', 'p1');
+      trigger(app, 'patient:workflow', 'p1');
 
       const routeContext = app.getCurrentRoute();
 
@@ -150,22 +150,22 @@ context('RouterApp', function() {
   describe('scope identity', function() {
     specify('reuses the child and forwards the route for an equal scope', function() {
       app = new Router({ workspaceSlug: 'test-ws' });
-      trigger(app, 'patient:dashboard', 'p1');
+      trigger(app, 'patient:workflow', 'p1');
       const child = app.getCurrent();
 
       trigger(app, 'patient:action', 'p1', 'a1');
 
       expect(app.getCurrent()).to.equal(child);
       expect(child.startCount).to.equal(1);
-      expect(child.routes).to.deep.equal(['patient:dashboard', 'patient:action']);
+      expect(child.routes).to.deep.equal(['patient:workflow', 'patient:action']);
     });
 
     specify('restarts the child for a different scope', function() {
       app = new Router({ workspaceSlug: 'test-ws' });
-      trigger(app, 'patient:dashboard', 'p1');
+      trigger(app, 'patient:workflow', 'p1');
       const child = app.getCurrent();
 
-      trigger(app, 'patient:dashboard', 'p2');
+      trigger(app, 'patient:workflow', 'p2');
 
       expect(child.startCount).to.equal(2);
     });
@@ -183,7 +183,7 @@ context('RouterApp', function() {
   describe('child stop cleanup', function() {
     specify('clears current references when the child stops itself', function() {
       app = new Router({ workspaceSlug: 'test-ws' });
-      trigger(app, 'patient:dashboard', 'p1');
+      trigger(app, 'patient:workflow', 'p1');
       const child = app.getCurrent();
 
       child.stop();
@@ -194,7 +194,7 @@ context('RouterApp', function() {
 
     specify('keeps the current child when it restarts itself', function() {
       app = new Router({ workspaceSlug: 'test-ws' });
-      trigger(app, 'patient:dashboard', 'p1');
+      trigger(app, 'patient:workflow', 'p1');
       const child = app.getCurrent();
 
       // a Toolkit restart() emits stop+start; the child remains current

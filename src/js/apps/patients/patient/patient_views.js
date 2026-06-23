@@ -18,10 +18,26 @@ const ContextTrailView = View.extend({
         {{fas "chevron-left"}}{{ @intl.patients.patient.patientViews.contextBackBtn }}
       </a>
       {{fas "chevron-right"}}
-    {{/if}}{{ first_name }} {{ last_name }}
+    {{/if}}
+    <a class="js-patient patient__context-link">{{ first_name }} {{ last_name }}</a>
+    {{#if flowName}}
+      {{fas "chevron-right"}}
+      <a class="js-flow patient__context-link">{{ flowName }}</a>
+    {{/if}}
+    {{#if actionName}}
+      {{fas "chevron-right"}}
+      <a class="js-action patient__context-link">{{ actionName }}</a>
+    {{/if}}
+    {{#if formName}}
+      {{fas "chevron-right"}}
+      {{ formName }}
+    {{/if}}
   `,
   triggers: {
     'click .js-back': 'click:back',
+    'click .js-patient': 'click:patient',
+    'click .js-flow': 'click:flow',
+    'click .js-action': 'click:action',
   },
   modelEvents: {
     'change:first_name change:last_name': 'render',
@@ -29,9 +45,29 @@ const ContextTrailView = View.extend({
   onClickBack() {
     Radio.request('history', 'go:latestList');
   },
+  initialize({ contextTrail }) {
+    this.contextTrail = contextTrail;
+    this.listenTo(contextTrail, 'change:context', this.render);
+  },
+  onClickPatient() {
+    Radio.trigger('event-router', 'patient:workflow', this.model.id);
+  },
+  onClickFlow() {
+    const { flowId } = this.contextTrail.get('context');
+    Radio.trigger('event-router', 'patient:flow', this.model.id, flowId);
+  },
+  onClickAction() {
+    const { flowId, actionId } = this.contextTrail.get('context');
+    const event = flowId ? 'patient:flow:action' : 'patient:action';
+    const args = flowId ?
+      [this.model.id, flowId, actionId] :
+      [this.model.id, actionId];
+    Radio.trigger('event-router', event, ...args);
+  },
   templateContext() {
     return {
       hasLatestList: Radio.request('history', 'has:latestList'),
+      ...this.contextTrail.get('context'),
     };
   },
 });
@@ -58,7 +94,10 @@ const LayoutView = View.extend({
     },
   },
   onRender() {
-    this.showChildView('contextTrail', new ContextTrailView({ model: this.model }));
+    this.showChildView('contextTrail', new ContextTrailView({
+      model: this.model,
+      contextTrail: this.getOption('contextTrail'),
+    }));
   },
 });
 

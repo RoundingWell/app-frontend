@@ -89,6 +89,8 @@ context('patient flow page', function() {
       .wait('@routeFlow')
       .wait('@routePatientByFlow');
 
+    cy.url().as('flowUrl');
+
     cy
       .get('.patient-flow__context-trail')
       .should('contain', 'Test Flow')
@@ -101,6 +103,10 @@ context('patient flow page', function() {
 
     cy
       .go('back');
+
+    cy.get('@flowUrl').then(flowUrl => {
+      cy.url().should('equal', flowUrl);
+    });
 
     cy
       .get('.patient-flow__context-trail')
