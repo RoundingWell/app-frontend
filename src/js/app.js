@@ -26,6 +26,7 @@ import BootstrapService from 'js/services/bootstrap';
 import HistoryService from 'js/services/history';
 import LastestListService from 'js/services/latest-list';
 import ModalService from 'js/services/modal';
+import PatientModalService from 'js/services/patient-modal';
 import WSService from 'js/services/ws';
 import DialerService from 'js/services/dialer';
 
@@ -81,6 +82,7 @@ const Application = App.extend({
       modalSmallRegion: this.getRegion('modalSmall'),
       modalSidebarRegion: this.getRegion('modalSidebar'),
     });
+    new PatientModalService();
     new DialerService({ region: this.getRegion('overlay') });
   },
 
@@ -149,7 +151,8 @@ const Application = App.extend({
       return;
     }
 
-    this.emptyRegion('preloader');
+    this.getRegion('preloader').empty();
+
     const appFrameApp = this.addChildApp('appFrame', AppFrameApp);
 
     this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
@@ -161,10 +164,6 @@ const Application = App.extend({
     Backbone.history.start({ pushState: true });
 
     new HistoryService();
-  },
-
-  emptyRegion(name) {
-    return this.getRegion(name).empty();
   },
 });
 

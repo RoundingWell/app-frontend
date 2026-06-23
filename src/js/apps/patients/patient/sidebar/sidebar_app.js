@@ -33,7 +33,7 @@ export default App.extend({
     }));
   },
   showPatientModal() {
-    Radio.request('nav', 'patient', this.patient);
+    Radio.request('patient-modal', 'show', this.patient);
   },
   toggleActiveStatus() {
     this.patient.toggleActiveStatus();
