@@ -137,7 +137,6 @@ const IframeFormView = View.extend({
     const size = this.getOption('size');
 
     if (size === 'small') return 'modal__form-iframe--small';
-    if (size === 'large') return 'modal__form-iframe--large';
 
     return 'modal__form-iframe';
   },

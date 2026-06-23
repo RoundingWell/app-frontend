@@ -136,7 +136,7 @@ For displaying a standalone form in a widget area. Example:
 ```
 
 `is_modal` will display the form in a modal instead of the form page.
-`modal_size` can be `small` or `large` to override the default size
+`modal_size` can be `small` to override the default size.
 
 ## Custom Widgets (DEPRECATED)
 
