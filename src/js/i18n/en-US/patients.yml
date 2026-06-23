@@ -2,17 +2,12 @@
 careOptsFrontend:
   patients:
     patient:
-      archive:
-        archiveViews:
+      workflow:
+        workflowViews:
           archiveBtn: Archive
           dashboardBtn: Dashboard
-          emptyView: No Archive
-      dashboard:
-        dashboardViews:
-          archiveBtn: Archive
-          emptyView: No Workflows
-          addActionBtn: Action
-          dashboardBtn: Dashboard
+          doneEmptyView: No Archive
+          notDoneEmptyView: No Workflows
           newAction: New Action
           actionLoading: Loading...
       form:
