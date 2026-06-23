@@ -107,8 +107,8 @@ export {
 export default mountIconSymbols;
 `;
 
-context('action sidebar', function() {
-  specify('display action sidebar', function() {
+context('patient action page', function() {
+  specify('display patient action', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
     const currentClinician = getCurrentClinician();
@@ -399,20 +399,18 @@ context('action sidebar', function() {
       })
       .routePatientFlows()
       .visitOnClock(`/patient/${ testPatient.id }/action/${ testAction.id }`, { now: testTime, functionNames: ['Date'] })
-      .wait('@routePatientActions')
-      .wait('@routePatientFlows')
       .wait('@routeAction')
       .wait('@routeActionActivity')
       .wait('@routePatient')
       .tick(350); // since this test uses visitOnClock, we need this for the sidebar animation
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-save-region]')
       .should('be.empty');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-details-region] .js-input')
       .clear();
 
@@ -424,7 +422,7 @@ context('action sidebar', function() {
       .as('routePatchAction');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-save-region]')
       .contains('Save')
       .click();
@@ -442,34 +440,34 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-save-region]')
       .should('be.empty');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-details-region] .js-input')
       .type('cancel this text');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-save-region]')
       .contains('Cancel')
       // Need force because Cypress does not recognize the element is typeable
       .type('{enter}', { force: true });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-details-region] .js-input')
       .should('have.value', '');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-save-region]')
       .should('be.empty');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-state-region]')
       .contains('To Do')
       .click();
@@ -487,7 +485,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-owner-region]')
       .contains('Clinician McTester')
       .click();
@@ -506,7 +504,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-owner-region]')
       .contains('Nurse')
       .click();
@@ -525,7 +523,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .contains('6:01 AM')
       .click();
@@ -539,14 +537,14 @@ context('action sidebar', function() {
       .wait('@routePatchAction');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .should('contain', 'Time')
       .find('.is-overdue')
       .should('not.exist');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .click();
 
@@ -563,7 +561,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-date-region]')
       .contains(formatDate(testDateSubtract(2), 'LONG'))
       .children()
@@ -583,12 +581,12 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .find('.is-overdue');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .click();
 
@@ -605,13 +603,13 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .find('.is-overdue')
       .should('not.exist');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .click();
 
@@ -628,7 +626,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-due-date-region]')
       .contains(formatDate(testDate(), 'LONG'))
       .children()
@@ -649,7 +647,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-duration-region]')
       .contains('5')
       .click();
@@ -667,7 +665,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-duration-region]')
       .contains('Select Duration')
       .click();
@@ -685,7 +683,7 @@ context('action sidebar', function() {
       });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-state-region]')
       .contains('In Progress')
       .click();
@@ -697,7 +695,7 @@ context('action sidebar', function() {
       .click();
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-form-sharing-region]')
       .should('contain', 'Share Form');
 
@@ -714,12 +712,12 @@ context('action sidebar', function() {
       .should('contain', formatDate(testTs(), 'AT_TIME'));
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-dialer-region]')
       .should('be.empty');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-region]')
       .should('be.empty');
 
@@ -762,17 +760,6 @@ context('action sidebar', function() {
       .should('contain', 'Form sharing (Nurse) cancelled');
 
     cy
-      .get('.sidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('.sidebar')
-      .should('not.exist');
-
-    cy.go('back');
-
-    cy
       .intercept('DELETE', `/api/actions/${ testAction.id }`, {
         statusCode: 204,
         body: {},
@@ -780,7 +767,7 @@ context('action sidebar', function() {
       .as('routeDeleteFlowAction');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('.js-menu')
       .click();
 
@@ -794,30 +781,6 @@ context('action sidebar', function() {
     cy
       .url()
       .should('not.contain', '/action/');
-
-    // the action is deleted, so the on-demand fetch on navigating back returns 410
-    cy
-      .intercept('GET', `/api/actions/${ testAction.id }*`, {
-        statusCode: 410,
-        body: {
-          errors: getErrors({
-            status: '410',
-            title: 'Not Found',
-            detail: 'Cannot find action',
-            source: { parameter: 'actionId' },
-          }),
-        },
-      })
-      .as('routeDeletedAction');
-
-    cy.go('back');
-
-    cy
-      .wait('@routeDeletedAction');
-
-    cy
-      .get('.alert-box')
-      .should('contain', 'The Action you requested does not exist');
   });
 
   specify('action phone dialer', function() {
@@ -893,7 +856,7 @@ context('action sidebar', function() {
       .as('routePatchFlow');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-dialer-region] button')
       .as('actionDialerButton')
       .click()
@@ -934,7 +897,7 @@ context('action sidebar', function() {
       .click();
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-state-region] button')
       .click();
 
@@ -949,7 +912,7 @@ context('action sidebar', function() {
       .should('be.disabled');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-state-region] button')
       .click();
 
@@ -1048,7 +1011,7 @@ context('action sidebar', function() {
       .wait('@routeActionFiles');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-files-region]')
       .children()
       .as('attachmentItems')
@@ -1204,7 +1167,7 @@ context('action sidebar', function() {
 
     cy
       .wait('@routeGetFile')
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-files-region]')
       .children()
       .first()
@@ -1288,8 +1251,6 @@ context('action sidebar', function() {
         return fx;
       })
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
-      .wait('@routePatientActions')
-      .wait('@routePatientFlows')
       .wait('@routeAction')
       .wait('@routeActionFiles');
 
@@ -1365,7 +1326,7 @@ context('action sidebar', function() {
       .should('exist');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-files-region]')
       .first()
       .contains('Remove')
@@ -1419,13 +1380,13 @@ context('action sidebar', function() {
       .wait('@routeActionFiles');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-files-region]')
       .children()
       .should('have.length', 1);
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-region]')
       .find('.js-add')
       .should('not.exist');
@@ -1468,13 +1429,13 @@ context('action sidebar', function() {
       .wait('@routeActionFiles');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-files-region]')
       .children()
       .should('have.length', 1);
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-region]')
       .find('.js-add')
       .should('not.exist');
@@ -1680,7 +1641,7 @@ context('action sidebar', function() {
       .should('have.length', 2);
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-comment-region]')
       .as('commentRegion')
       .find('[data-post-region] .js-post')
@@ -1791,14 +1752,12 @@ context('action sidebar', function() {
         return fx;
       })
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
-      .wait('@routePatientActions')
-      .wait('@routePatientFlows')
       .wait('@routeAction')
       .wait('@routeActionFiles')
       .wait('@routeActionComments');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-comment-region]')
       .as('postCommentRegion')
       .find('.js-input')
@@ -1983,16 +1942,16 @@ context('action sidebar', function() {
       .wait('@routeAction');
 
     cy
-      .get('.action-sidebar__name')
+      .get('.patient-action__name')
       .should('contain', 'Program Action Name');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-region]')
       .contains('No Attachments');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-region]')
       .find('.js-add')
       .should('exist');
@@ -2015,7 +1974,7 @@ context('action sidebar', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/${ testAction.id }/form/${ testForm.id }`);
+      .should('contain', `patient/${ testAction.relationships.patient.data.id }/form/${ testForm.id }/action/${ testAction.id }`);
 
     cy
       .go('back');
@@ -2044,7 +2003,6 @@ context('action sidebar', function() {
       .should('contain', 'The Action you requested does not exist.');
 
     cy
-      .wait('@routePatientFlows')
       .get('.list-page__list');
   });
 
@@ -2133,8 +2091,6 @@ context('action sidebar', function() {
       })
       .visit(`/patient/${ testPatient.id }/action/${ testOutreachAction.id }`)
       .wait('@routeSharedIcons')
-      .wait('@routePatientActions')
-      .wait('@routePatientFlows')
       .wait('@routeAction');
 
     cy
@@ -2150,12 +2106,12 @@ context('action sidebar', function() {
       .as('routePatchAction');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-form-region]')
       .contains('Test Form');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-form-sharing-region]')
       .should('contain', 'Share Form')
       .should('contain', 'Test Patient')
@@ -2170,7 +2126,7 @@ context('action sidebar', function() {
       .click();
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-form-sharing-region]')
       .should('contain', 'Form Sharing Canceled')
       .find('.fa-octagon-minus')
@@ -2183,7 +2139,7 @@ context('action sidebar', function() {
       .click();
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-form-sharing-region]')
       .should('contain', 'Recipient Opted Out')
       .find('.fa-octagon-minus')
@@ -2219,13 +2175,13 @@ context('action sidebar', function() {
       .routePatientByAction();
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .contains('View Response')
       .click();
 
     cy
       .url()
-      .should('contain', `patient-action/${ testAction.id }/form/${ testForm.id }`);
+      .should('contain', `patient/${ testAction.relationships.patient.data.id }/form/${ testForm.id }/action/${ testAction.id }`);
 
     cy
       .go('back');
@@ -2333,11 +2289,12 @@ context('action sidebar', function() {
 
     cy
       .get('[data-action-region]')
-      .should('contain', 'No details')
-      .and('contain', 'No Duration');
+      .should('contain', 'No Duration')
+      .find('.patient-action__no-results')
+      .should('contain', 'No details');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-files-region]')
       .children()
       .should('have.length', 1)
@@ -2345,13 +2302,13 @@ context('action sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-attachments-region]')
       .find('.js-add')
       .should('not.exist');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-action-region]')
       .should('contain', 'Permissions')
       .and('contain', 'You are not able to change settings on this action.');
@@ -2426,9 +2383,7 @@ context('action sidebar', function() {
       .routeActionFiles()
       .visit(`/patient/1/action/${ otherTeamAction }`)
       .wait('@routeAction')
-      .wait('@routePatient')
-      .wait('@routePatientActions')
-      .wait('@routePatientFlows');
+      .wait('@routePatient');
 
     cy
       .get('[data-action-region]')
@@ -2510,13 +2465,11 @@ context('action sidebar', function() {
       .routeActionFiles()
       .visit(`/patient/1/action/${ authoredByCurrentUserAction.id }`)
       .wait('@routeAction')
-      .wait('@routePatient')
-      .wait('@routePatientActions')
-      .wait('@routePatientFlows');
+      .wait('@routePatient');
 
     cy
-      .get('.app-frame__sidebar')
-      .as('flowSidebar')
+      .get('.patient-action')
+      .as('actionPage')
       .find('[data-menu-region]')
       .should('not.be.empty');
 
@@ -2535,8 +2488,8 @@ context('action sidebar', function() {
       .wait('@routeAction');
 
     cy
-      .get('.app-frame__sidebar')
-      .as('flowSidebar')
+      .get('.patient-action')
+      .as('actionPage')
       .find('[data-menu-region]')
       .should('be.empty');
   });
@@ -2635,7 +2588,7 @@ context('action sidebar', function() {
       .and('contain', '5 mins');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-action-region] .sidebar__label')
       .should('contain', 'Permissions');
   });
@@ -2795,7 +2748,7 @@ context('action sidebar', function() {
       .wait('@routeActionActivity');
 
     cy
-      .get('.action-sidebar__name')
+      .get('.patient-action__name')
       .should('contain', 'Coalesced Action');
   });
 
@@ -2878,7 +2831,7 @@ context('action sidebar', function() {
       .wait('@routeStaleAction');
 
     cy
-      .get('.action-sidebar__name')
+      .get('.patient-action__name')
       .should('contain', 'Current Action');
 
     cy
@@ -2965,7 +2918,7 @@ context('action sidebar', function() {
 
     // the stale fetch resolved last, but its sidebar is suppressed
     cy
-      .get('.action-sidebar__name')
+      .get('.patient-action__name')
       .should('contain', 'Current Action');
 
     cy

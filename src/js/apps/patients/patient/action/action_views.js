@@ -10,10 +10,10 @@ import PreloadRegion from 'js/regions/preload_region';
 
 import Optionlist from 'js/components/optionlist';
 
-import './action-sidebar.scss';
+import './action.scss';
 
 const HeadingView = View.extend({
-  template: hbs`{{formatMessage (intlGet "patients.sidebar.action.actionSidebarViews.headingView.headingText") outreach=outreach}}`,
+  template: hbs`{{formatMessage (intlGet "patients.patient.action.actionViews.headingView.headingText") outreach=outreach}}`,
 });
 
 const FooterView = View.extend({
@@ -41,8 +41,8 @@ const MenuView = View.extend({
     const optionlist = new Optionlist({
       ui: this.$el,
       uiView: this,
-      headingText: intl.patients.sidebar.action.actionSidebarViews.menuView.menuOptions.headingText,
-      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.sidebar.action.actionSidebarViews.menuView.menuOptions.delete }}</span>`,
+      headingText: intl.patients.patient.action.actionViews.menuView.menuOptions.headingText,
+      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.patient.action.actionViews.menuView.menuOptions.delete }}</span>`,
       lists: [{ collection: menuOptions }],
       align: 'right',
       popWidth: 248,
@@ -56,14 +56,14 @@ const MenuView = View.extend({
   },
 });
 
-const SidebarView = View.extend({
+const ContentView = View.extend({
   className: 'flex-grow',
   template: hbs`
     <div data-action-region></div>
     <div data-dialer-region></div>
     <div data-form-region></div>
     <div data-attachments-region></div>
-    <div class="action-sidebar__activity" data-activity-region></div>
+    <div class="patient-action__activity" data-activity-region></div>
   `,
   regions: {
     action: '[data-action-region]',
@@ -81,7 +81,7 @@ const SidebarView = View.extend({
 });
 
 export {
-  SidebarView,
+  ContentView,
   HeadingView,
   MenuView,
   FooterView,
