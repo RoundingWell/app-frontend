@@ -1,27 +1,36 @@
 import { animate } from 'animejs';
-
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView, Behavior } from 'marionette';
 
+import { alphaSort } from 'js/utils/sorting';
+
+import 'scss/modules/buttons.scss';
 import 'scss/modules/progress-bar.scss';
 import 'scss/modules/table-list.scss';
 
-import { alphaSort } from 'js/utils/sorting';
 import PreloadRegion from 'js/regions/preload_region';
 
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 
 import ActionItemTemplate from './action-item.hbs';
+import DoneLayoutTemplate from './done-layout.hbs';
 import FlowItemTemplate from './flow-item.hbs';
+import LayoutTemplate from './layout.hbs';
 
+import 'js/apps/patients/shared/action-state.scss';
 import 'scss/domain/action-icons.scss';
 import '../patient.scss';
 
-const EmptyView = View.extend({
+const NotDoneEmptyView = View.extend({
   className: 'table-list__empty-list',
-  template: hbs`<h2>{{ @intl.patients.patient.archive.archiveViews.emptyView }}</h2>`,
+  template: hbs`<h2>{{ @intl.patients.patient.workflow.workflowViews.notDoneEmptyView }}</h2>`,
+});
+
+const DoneEmptyView = View.extend({
+  className: 'table-list__empty-list',
+  template: hbs`<h2>{{ @intl.patients.patient.workflow.workflowViews.doneEmptyView }}</h2>`,
 });
 
 const RowBehavior = Behavior.extend({
@@ -37,12 +46,16 @@ const RowBehavior = Behavior.extend({
   },
 });
 
-const DoneBehavior = Behavior.extend({
+const StatusBehavior = Behavior.extend({
   modelEvents: {
     'change:_state': 'onChangeState',
   },
   onChangeState() {
-    if (!this.view.model.isDone()) {
+    const isVisible = this.view.getOption('status') === 'done' ?
+      this.view.model.isDone() :
+      !this.view.model.isDone();
+
+    if (!isVisible) {
       animate(this.el, {
         delay: 300,
         opacity: { to: 0, duration: 500 },
@@ -65,7 +78,7 @@ const DoneBehavior = Behavior.extend({
 
 const ActionItemView = View.extend({
   className: 'table-list__item',
-  behaviors: [RowBehavior, DoneBehavior],
+  behaviors: [RowBehavior, StatusBehavior],
   regions: {
     details: '[data-details-region]',
     state: '[data-state-region]',
@@ -87,7 +100,7 @@ const ActionItemView = View.extend({
     'click .js-no-click': 'prevent-row-click',
   },
   onClick() {
-    Radio.trigger('event-router', 'patient:action:archive', this.model.getPatient().id, this.model.id);
+    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
   onRender() {
     this.canEdit = this.model.canEdit();
@@ -95,7 +108,7 @@ const ActionItemView = View.extend({
     this.showDetailsTooltip();
     this.showState();
     this.showOwner();
-    this.showDueDay();
+    this.showDueDate();
     this.showDueTime();
     this.showForm();
   },
@@ -106,8 +119,7 @@ const ActionItemView = View.extend({
   },
   showState() {
     if (!this.canEdit) {
-      const readOnlyStateView = new ReadOnlyStateView({ model: this.model, isCompact: true });
-      this.showChildView('state', readOnlyStateView);
+      this.showChildView('state', new ReadOnlyStateView({ model: this.model, isCompact: true }));
       return;
     }
 
@@ -121,50 +133,68 @@ const ActionItemView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model, isCompact: true });
-      this.showChildView('owner', readOnlyOwnerView);
+      this.showChildView('owner', new ReadOnlyOwnerView({ model: this.model, isCompact: true }));
       return;
     }
 
     const program = this.model.getProgram();
+    const isDisabled = this.getOption('status') === 'done';
     const ownerComponent = new OwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled: true },
+      state: { isDisabled },
     });
+
+    if (!isDisabled) {
+      this.listenTo(ownerComponent, 'change:owner', owner => {
+        this.model.saveOwner(owner);
+      });
+    }
 
     this.showChildView('owner', ownerComponent);
   },
-  showDueDay() {
+  showDueDate() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyDueDateView({ model: this.model });
-      this.showChildView('dueDate', readOnlyOwnerView);
+      this.showChildView('dueDate', new ReadOnlyDueDateView({ model: this.model }));
       return;
     }
 
+    const isDisabled = this.getOption('status') === 'done';
     const dueDateComponent = new DueComponent({
       date: this.model.get('due_date'),
       isCompact: true,
-      state: { isDisabled: true },
+      state: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
+
+    if (!isDisabled) {
+      this.listenTo(dueDateComponent, 'change:due', date => {
+        this.model.saveDueDate(date);
+      });
+    }
 
     this.showChildView('dueDate', dueDateComponent);
   },
   showDueTime() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyDueTimeView({ model: this.model });
-      this.showChildView('dueTime', readOnlyOwnerView);
+      this.showChildView('dueTime', new ReadOnlyDueTimeView({ model: this.model }));
       return;
     }
 
+    const isDisabled = this.getOption('status') === 'done' || !this.model.get('due_date');
     const dueTimeComponent = new TimeComponent({
       time: this.model.get('due_time'),
       isCompact: true,
-      state: { isDisabled: true },
+      state: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
+
+    if (!isDisabled) {
+      this.listenTo(dueTimeComponent, 'change:time', time => {
+        this.model.saveDueTime(time);
+      });
+    }
 
     this.showChildView('dueTime', dueTimeComponent);
   },
@@ -180,29 +210,34 @@ const FlowItemView = View.extend({
   modelEvents: {
     'change:_owner': 'render',
   },
-  behaviors: [RowBehavior, DoneBehavior],
+  behaviors: [RowBehavior, StatusBehavior],
   regions: {
     state: '[data-state-region]',
     owner: '[data-owner-region]',
   },
   template: FlowItemTemplate,
+  templateContext() {
+    return {
+      isDone: this.getOption('status') === 'done',
+      stateOptions: this.model.getState().get('options'),
+    };
+  },
   triggers: {
     'click': 'click',
     'click .js-no-click': 'prevent-row-click',
   },
   onClick() {
-    Radio.trigger('event-router', 'flow', this.model.id);
+    Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
   onRender() {
     this.canEdit = this.model.canEdit();
 
-    this.showState();
+    if (this.getOption('status') === 'done') this.showState();
     this.showOwner();
   },
   showState() {
     if (!this.canEdit) {
-      const readOnlyStateView = new ReadOnlyStateView({ model: this.model, isCompact: true });
-      this.showChildView('state', readOnlyStateView);
+      this.showChildView('state', new ReadOnlyStateView({ model: this.model, isCompact: true }));
       return;
     }
 
@@ -216,18 +251,24 @@ const FlowItemView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model, isCompact: true });
-      this.showChildView('owner', readOnlyOwnerView);
+      this.showChildView('owner', new ReadOnlyOwnerView({ model: this.model, isCompact: true }));
       return;
     }
 
     const program = this.model.getProgram();
+    const isDisabled = this.getOption('status') === 'done';
     const ownerComponent = new OwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled: true },
+      state: { isDisabled },
     });
+
+    if (!isDisabled) {
+      this.listenTo(ownerComponent, 'change:owner', owner => {
+        this.model.saveOwner(owner);
+      });
+    }
 
     this.showChildView('owner', ownerComponent);
   },
@@ -238,50 +279,72 @@ const ListView = CollectionView.extend({
     'change:visible': 'filter',
   },
   className: 'table-list__list list-page__list',
+  initialize({ status }) {
+    this.status = status;
+    this.emptyView = status === 'done' ? DoneEmptyView : NotDoneEmptyView;
+  },
   childView(item) {
-    if (item.type === 'flows') {
-      return FlowItemView;
-    }
+    if (item.type === 'flows') return FlowItemView;
 
     return ActionItemView;
   },
-  emptyView: EmptyView,
+  childViewOptions() {
+    return { status: this.status };
+  },
   viewComparator({ model: modelA }, { model: modelB }) {
     return alphaSort('desc', modelA.get('updated_at'), modelB.get('updated_at'));
   },
   viewFilter({ model }) {
-    return model.type === 'patient-events' || model.isDone();
+    if (this.status === 'done') return model.isDone();
+
+    return !model.isDone();
   },
 });
 
 const LayoutView = View.extend({
   className: 'flex-region',
-  regions: {
-    content: {
-      el: '[data-content-region]',
-      regionClass: PreloadRegion,
-      replaceElement: true,
-    },
+  regions() {
+    const regions = {
+      content: {
+        el: '[data-content-region]',
+        regionClass: PreloadRegion,
+        replaceElement: true,
+      },
+    };
+
+    if (this.getOption('status') === 'notDone') {
+      regions.addWorkflow = '[data-add-workflow-region]';
+    }
+
+    return regions;
   },
-  template: hbs`
-    <div class="patient__tabs">
-      <button class="patient__tab js-dashboard">
-        {{~ @intl.patients.patient.archive.archiveViews.dashboardBtn ~}}
-      </button>
-      <span class="patient__tab--selected">
-        {{~ @intl.patients.patient.archive.archiveViews.archiveBtn ~}}
-      </span>
-    </div>
-    <div class="table-list patient__table-list">
-      <div class="table-list__header list-page__list-header"></div>
-      <div class="table-list__list list-page__list" data-content-region></div>
-    </div>
-  `,
+  ui: {
+    loading: '.js-loading',
+  },
+  getTemplate() {
+    if (this.getOption('status') === 'done') return DoneLayoutTemplate;
+
+    return LayoutTemplate;
+  },
   triggers: {
+    'click .js-archive': 'click:archive',
     'click .js-dashboard': 'click:dashboard',
   },
+  onClickArchive() {
+    Radio.trigger('event-router', 'patient:workflow:closed', this.model.id);
+  },
   onClickDashboard() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.id);
+    Radio.trigger('event-router', 'patient:workflow', this.model.id);
+  },
+  onRender() {
+    if (this.getOption('status') === 'done') return;
+
+    animate(this.ui.loading[0], {
+      opacity: { from: 0.5, duration: 400 },
+      loop: Infinity,
+      ease: 'inOutSine',
+      alternate: true,
+    });
   },
 });
 
