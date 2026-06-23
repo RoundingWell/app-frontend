@@ -1,25 +1,8 @@
-import { bind, contains } from 'underscore';
-import Radio from 'backbone.radio';
+import { bind } from 'underscore';
 
 import RouterApp from 'js/base/routerapp';
 
-import getRootRoute from 'js/utils/root-route';
-
 import { ErrorView } from 'js/apps/globals/error/error_views';
-
-const legacyRoots = [
-  'worklist',
-  'patient',
-  'patient-action',
-  'flow',
-  'schedule',
-  'clinicians',
-  'dashboards',
-  'form',
-  'program',
-  'programs',
-  'program-flow',
-];
 
 export default RouterApp.extend({
   eventRoutes: {
@@ -48,13 +31,6 @@ export default RouterApp.extend({
   },
 
   handleUnknown() {
-    const rootRoute = getRootRoute();
-    if (contains(legacyRoots, rootRoute)) {
-      const workspace = Radio.request('workspace', 'current');
-      this.replaceUrl(`/${ workspace.get('slug') }${ location.pathname }`);
-      return;
-    }
-
     this.start();
     this.show404();
   },

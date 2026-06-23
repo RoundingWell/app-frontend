@@ -40,9 +40,6 @@ const AppView = View.extend({
     },
     sidebar: '[data-app-sidebar-region]',
   },
-  toggleNav(shouldShow) {
-    this.ui.nav.toggleClass('is-hidden', !shouldShow);
-  },
 });
 
 const TopRegionView = View.extend({
