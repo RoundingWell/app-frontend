@@ -15,6 +15,44 @@ careOptsFrontend:
           dashboardBtn: Dashboard
           newAction: New Action
           actionLoading: Loading...
+      form:
+        formApp:
+          deleteSuccess: The Action was deleted successfully.
+          formNotFound: The Form you requested does not exist.
+          notFound: The Action you requested does not exist.
+        formViews:
+          draftStatusView:
+            discardDraft: Discard draft...
+            discardModal:
+              bodyText: Discarding your unsubmitted work on this form will load the latest data for this patient, but you'll lose your unsubmitted work.
+              headingText: Are you sure?
+              submitText: Discard My Work
+            storedWork: Your draft is saved automatically.
+            tooltip: See draft status
+            updatedAt: Last saved { updated }
+          formActionsView:
+            currentVersion: Back to Current Version
+            responseHistory: See Form Response History
+          historyDroplistView:
+            nameText: '• By { name }'
+          historyView:
+            currentVersionButton: Back to Current Version
+          lockedSubmitView:
+            permissionMessage: You don’t have permission to edit or submit this form.
+          readOnlyView:
+            buttonText: Read Only
+          saveView:
+            droplistLabel: Your Submit Button Preference
+            save:
+              buttonText: Submit
+              droplistItemText: Submit Form
+            saveAndGoBack:
+              buttonText: Submit + Go Back
+              droplistItemText: Submit Form + Go Back
+          statusView:
+            label: Last submitted { date }
+          updateView:
+            buttonText: Update
       flowViews:
         actionNotFound: The Action you requested does not exist.
         addActionHeadingText: Add Action
