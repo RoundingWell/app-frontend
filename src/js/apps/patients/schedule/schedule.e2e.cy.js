@@ -298,7 +298,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/${ testActions[0].id }/form/${ testForm.id }`)
+      .should('contain', `patient/${ testPatient1.id }/form/${ testForm.id }/action/${ testActions[0].id }`)
       .wait('@routeFormActionFields')
       .go('back');
 

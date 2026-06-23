@@ -61,7 +61,7 @@ const PatientButtonItemView = View.extend({
     'click': 'click',
   },
   onClick() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.id);
+    Radio.trigger('event-router', 'patient:workflow', this.model.id);
   },
 });
 

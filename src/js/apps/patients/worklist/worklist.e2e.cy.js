@@ -1236,7 +1236,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/${ testActions[2].id }/form/${ testForm.id }`);
+      .should('contain', `patient/${ testPatient1.id }/form/${ testForm.id }/action/${ testActions[2].id }`);
 
     cy
       .wait('@routeFormActionFields')

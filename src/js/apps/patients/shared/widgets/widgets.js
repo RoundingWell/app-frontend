@@ -142,7 +142,7 @@ const widgets = {
         Radio.request('modal', 'show:form', this.model, this.getOption('form_name'), this.form, this.getOption('modal_size'));
         return;
       }
-      Radio.trigger('event-router', 'form:patient', this.model.id, this.getOption('form_id'));
+      Radio.trigger('event-router', 'patient:form', this.model.id, this.getOption('form_id'));
     },
   }),
 };

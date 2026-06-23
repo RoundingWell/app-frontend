@@ -45,7 +45,7 @@ context('LatestListService', function() {
     service._setLatestList('worklist', ['owned-by']);
 
     Radio.request('history', 'set:latestList', {
-      event: 'patient:dashboard',
+      event: 'patient:workflow',
       eventArgs: ['patient-id'],
       definition: {
         meta: {},
