@@ -12,9 +12,9 @@ import { ACTION_INCLUDE } from 'js/entities-service/actions';
 import StateModel from './flow_state';
 
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app';
+import ActivityApp from 'js/apps/patients/patient/flow/flow-activity_app';
 
 import { LayoutView, HeaderView, ListView, MenuView, SelectAllView, i18n } from 'js/apps/patients/patient/flow/flow_views';
-import { ActivitiesView } from 'js/apps/patients/patient/flow/flow-activity-views';
 import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 import { AddButtonView } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
@@ -22,6 +22,7 @@ export default App.extend({
   StateModel,
   routerAppName: 'FlowApp',
   childApps: {
+    activity: ActivityApp,
     bulkEditActions: BulkEditActionsApp,
   },
   stateEvents: {
@@ -39,7 +40,6 @@ export default App.extend({
     return [
       Radio.request('entities', 'fetch:flows:model', flowId),
       Radio.request('entities', 'fetch:actions:collection:byFlow', flowId),
-      Radio.request('entities', 'fetch:flowEvents:collection', flowId),
     ];
   },
   /* istanbul ignore next: error handling */
@@ -52,7 +52,7 @@ export default App.extend({
 
     handleErrors(error);
   },
-  onStart({ patient }, flow, actions, activity) {
+  onStart({ patient }, flow, actions) {
     this.flow = flow;
     this.actions = actions;
     this.editableCollection = actions.clone();
@@ -76,7 +76,7 @@ export default App.extend({
     this.showHeader();
     this.showMenu();
     this.showActionList();
-    this.showActivity(activity);
+    this.startActivity();
 
     this.listenTo(this.actions, {
       'add': this.onAddAction,
@@ -147,11 +147,11 @@ export default App.extend({
       },
     }, intl.patients.patient.flow.flowViews.deleteModal));
   },
-  showActivity(activity) {
-    this.showChildView('activity', new ActivitiesView({
-      collection: activity,
-      model: this.flow,
-    }));
+  startActivity() {
+    this.startChildApp('activity', {
+      region: this.getRegion('activity'),
+      flow: this.flow,
+    });
   },
 
   getAddOpts(programFlow) {

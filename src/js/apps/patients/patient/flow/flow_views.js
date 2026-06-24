@@ -371,7 +371,10 @@ const LayoutView = View.extend({
       el: '[data-menu-region]',
       replaceElement: true,
     },
-    activity: '[data-activity-region]',
+    activity: {
+      el: '[data-activity-region]',
+      regionClass: PreloadRegion,
+    },
     actionList: {
       el: '[data-action-list-region]',
       regionClass: PreloadRegion,
