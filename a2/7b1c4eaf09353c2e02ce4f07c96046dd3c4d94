@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_09e8292bb4bcb3::t_829d52f522098c 85-86,88,720,725,736,743,746,758,762,771,774,803,812-813,929,1254,1346,1353,1360,1367,1392,1399,1406,1413,1438,1445,1452,1459,1586,1589,1622,1693,1709,1724,1739,1751,1767,1783,1785,1896,1929,2254,2309,2346,2353,2360,2375,2382,2389,2491,2498,2505,2512,2519,2526,2533,2644,2796,2801,2806,2824,2843,2924,2962,2976,2999,3015,3028,3084
+src/js/apps/patients/patient/flow/flow_views.js
+  s_09e8292bb4bcb3::t_829d52f522098c 8,125,130,312,354
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_09e8292bb4bcb3::t_829d52f522098c 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "a27b1c4eaf09353c2e02ce4f07c96046dd3c4d94",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
