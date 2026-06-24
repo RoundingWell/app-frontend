@@ -6,7 +6,7 @@ import { testDate, testDateSubtract } from 'helpers/test-date';
 import { getResource, getRelationship, getErrors } from 'helpers/json-api';
 import { testTs } from 'helpers/test-timestamp';
 
-import { workspaceOne, getWorkspace } from 'support/api/workspaces';
+import { workspaceOne } from 'support/api/workspaces';
 import { getWorkspacePatient } from 'support/api/workspace-patients';
 import { getPatient } from 'support/api/patients';
 import { getCurrentClinician } from 'support/api/clinicians';
@@ -15,6 +15,101 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
+  specify('renders and toggles backend sidebar sections', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSidebars(fx => {
+        const addSidebar = _.partial(getResource, _, 'sidebars');
+
+        fx.data = [
+          addSidebar({
+            id: 'demographics',
+            slug: 'demographics',
+            name: 'Demographics',
+            sequence: 1,
+            widgets: ['sex'],
+          }),
+          addSidebar({
+            id: 'care-team',
+            slug: 'care-team',
+            name: 'Care & Support',
+            sequence: 0,
+            widgets: ['sex'],
+          }),
+        ];
+
+        return fx;
+      })
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar__card-toggle')
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'Care & Support');
+
+    cy
+      .contains('.patient-sidebar__card-toggle', 'Care & Support')
+      .as('careToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Care & Support section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('be.visible');
+      });
+
+    cy
+      .get('@careToggle')
+      .focus()
+      .typeEnter()
+      .should('have.attr', 'aria-expanded', 'false')
+      .and('have.attr', 'aria-label', 'Expand Care & Support section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('not.be.visible');
+      });
+
+    cy
+      .get('@careToggle')
+      .typeEnter()
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Care & Support section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('be.visible');
+      });
+
+    cy
+      .contains('.patient-sidebar__card-toggle', 'Demographics')
+      .should('have.attr', 'aria-expanded', 'true')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false')
+      .and('have.attr', 'aria-label', 'Expand Demographics section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('not.be.visible');
+      });
+  });
+
+  specify('renders an empty patient sidebar definition', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSidebars(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar')
+      .should('be.visible')
+      .find('.patient-sidebar__card')
+      .should('not.exist');
+  });
+
   specify('display patient data', function() {
     const dob = testDateSubtract(10, 'years');
 
@@ -83,8 +178,8 @@ context('patient sidebar', function() {
 
         return fx;
       })
-      .routeSettings('widgets_patient_sidebar', {
-        widgets: [
+      .routeSidebars(fx => {
+        fx.data[0].attributes.widgets = [
           'dob',
           'sex',
           'status',
@@ -102,7 +197,9 @@ context('patient sidebar', function() {
           'hbsEmptyWidget',
           'hbsNoRegionWidget',
           'hbsEmptyTemplateWidget',
-        ],
+        ];
+
+        return fx;
       })
       .routeWidgets(fx => {
         const addWidget = _.partial(getResource, _, 'widgets');
@@ -621,19 +718,11 @@ context('patient sidebar', function() {
       .should('not.contain', 'Workspace Two');
   });
 
-  specify('workspace specific widgets setting', function() {
+  specify('renders widgets from the sidebar definition', function() {
     cy
       .routesForPatientDashboard()
-      .routeWorkspaces(fx => {
-        fx.data[0] = getWorkspace({
-          attributes: {
-            settings: {
-              widgets_patient_sidebar: {
-                widgets: ['divider'],
-              },
-            },
-          },
-        }, { id: workspaceOne.id });
+      .routeSidebars(fx => {
+        fx.data[0].attributes.widgets = ['divider'];
 
         return fx;
       });

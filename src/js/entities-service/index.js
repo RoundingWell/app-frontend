@@ -38,6 +38,8 @@ import './roles';
 
 import './settings';
 
+import './sidebars';
+
 import './states';
 
 import './tags';

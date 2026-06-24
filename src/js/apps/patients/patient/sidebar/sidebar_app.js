@@ -14,13 +14,13 @@ export default App.extend({
   onBeforeStart({ patient }) {
     this.showView(new SidebarView({ model: patient }));
 
-    this.widgets = Radio.request('widgets', 'sidebarWidgets');
+    this.sidebars = Radio.request('sidebars', 'patient');
 
-    this.getRegion('widgets').startPreloader();
+    this.getRegion('sidebars').startPreloader();
   },
   beforeStart({ patient }) {
     const workspacePatient = Radio.request('entities', 'fetch:workspacePatients:byPatient', patient.id);
-    const values = this.widgets.invoke('fetchValues', patient.id);
+    const values = this.getWidgetValueRequests(patient.id);
 
     return [workspacePatient, ...values];
   },
@@ -29,8 +29,14 @@ export default App.extend({
 
     this.showView(new SidebarView({
       model: this.patient,
-      collection: this.widgets,
+      collection: this.sidebars,
     }));
+  },
+  getWidgetValueRequests(patientId) {
+    return this.sidebars.reduce((requests, sidebar) => {
+      requests.push(...sidebar.getWidgets().invoke('fetchValues', patientId));
+      return requests;
+    }, []);
   },
   showPatientModal() {
     Radio.request('patient-modal', 'show', this.patient);
