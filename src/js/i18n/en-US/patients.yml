@@ -162,6 +162,7 @@ careOptsFrontend:
         flowViews:
           actionNotFound: The Action you requested does not exist.
           addActionHeadingText: Add Action
+          notFound: The Flow you requested does not exist.
           activity:
             api:
               clinicianAssigned: '<strong>{ name }</strong> ({ team }) changed the Owner to { to_name }'

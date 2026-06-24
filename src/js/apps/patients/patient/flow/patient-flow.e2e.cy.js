@@ -1191,6 +1191,16 @@ context('patient flow page', function() {
   });
 
   specify('failed flow', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
     const errors = getErrors({
       status: '410',
       title: 'Not Found',
@@ -1199,17 +1209,32 @@ context('patient flow page', function() {
 
     cy
       .routesForPatientAction()
-      .routePatientByFlow()
-      .routeFlowActions()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
       .intercept('GET', `/api/flows/${ testFlow.id }**`, {
         statusCode: 410,
         body: { errors },
       })
-      .visit(`/flow/${ testFlow.id }`);
+      .as('routeGoneFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }`)
+      .wait('@routeGoneFlow');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Flow you requested does not exist.');
 
     cy
       .url()
-      .should('contain', '/404');
+      .should('contain', `/patient/${ testPatient.id }/workflow`)
+      .should('not.contain', '/flow/');
   });
 
   specify('empty view', function() {

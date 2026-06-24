@@ -2078,8 +2078,20 @@ context('patient action page', function() {
   });
 
   specify('deleted action', function() {
+    const testPatient = getPatient({ id: '1' });
+
     cy
       .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
       .intercept('GET', '/api/actions/1*', {
         statusCode: 410,
         body: {
@@ -2100,7 +2112,9 @@ context('patient action page', function() {
       .should('contain', 'The Action you requested does not exist.');
 
     cy
-      .get('.list-page__list');
+      .url()
+      .should('contain', '/patient/1/workflow')
+      .should('not.contain', '/action/');
   });
 
   specify('outreach', function() {
@@ -3079,7 +3093,87 @@ context('patient action page', function() {
 
     cy
       .url()
-      .should('contain', `/patient/dashboard/${ testPatient.id }`)
+      .should('contain', `/patient/${ testPatient.id }/workflow`)
+      .should('not.contain', '/action/');
+  });
+
+  specify('redirects to the flow when an on-demand flow action is gone', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship(workspaceOne),
+      },
+    });
+
+    const testFlow = getFlow({
+      attributes: {
+        name: 'Test Flow',
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = testFlow;
+        fx.included = [];
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [];
+        fx.included = [];
+
+        return fx;
+      })
+      .routeFlowActivity()
+      .intercept('GET', '/api/actions/deleted-action*', {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find action',
+            source: { parameter: 'actionId' },
+          }),
+        },
+      })
+      .as('routeGoneAction');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient');
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:flow:action', testPatient.id, testFlow.id, 'deleted-action');
+    });
+
+    cy
+      .wait('@routeGoneAction');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }`)
       .should('not.contain', '/action/');
   });
 });

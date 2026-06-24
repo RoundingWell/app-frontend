@@ -51,20 +51,40 @@ export default App.extend({
     this.getRegion().startPreloader();
   },
   beforeStart({ actionId, flowId }) {
-    return [
+    const actionRequest = this.fetchRouteResource('action',
       Radio.request('entities', 'fetch:actions:model', actionId),
-      flowId && Radio.request('entities', 'fetch:flows:model', flowId),
-    ];
+    );
+
+    if (!flowId) return actionRequest;
+
+    const flowRequest = this.fetchRouteResource('flow',
+      Radio.request('entities', 'fetch:flows:model', flowId),
+    );
+
+    return [actionRequest, flowRequest];
+  },
+  fetchRouteResource(resource, request) {
+    return request.catch(error => Promise.reject({ resource, error }));
   },
   /* istanbul ignore next: page-level action error handling */
-  onFail(options, error) {
+  onFail(options, failure) {
+    const error = get(failure, 'error', failure);
+
     if (get(error, ['response', 'status']) === 410) {
       Radio.request('alert', 'show:error', intl.patients.patient.action.actionApp.notFound);
-      this.stop();
+      this.navigateAfterGone(options, get(failure, 'resource'));
       return;
     }
 
     handleErrors(error);
+  },
+  navigateAfterGone({ patient, flowId }, resource) {
+    if (flowId && resource === 'action') {
+      Radio.trigger('event-router', 'patient:flow', patient.id, flowId);
+      return;
+    }
+
+    Radio.trigger('event-router', 'patient:workflow', patient.id);
   },
   onStart(options, action, flow) {
     this.patient = options.patient;
