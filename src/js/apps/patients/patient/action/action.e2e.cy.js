@@ -1066,6 +1066,39 @@ context('patient action page', function() {
 
     cy
       .intercept('DELETE', '/api/files/*', {
+        statusCode: 422,
+        body: {
+          errors: getErrors({
+            status: '422',
+            title: 'Unprocessable Entity',
+            detail: 'Unable to remove file',
+          }),
+        },
+      })
+      .as('routeDeleteFileFailure');
+
+    cy
+      .get('@attachmentItems')
+      .first()
+      .find('.js-remove')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeDeleteFileFailure');
+
+    cy
+      .get('.patient-action')
+      .find('[data-attachments-files-region]')
+      .children()
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'HRA v2.pdf');
+
+    cy
+      .intercept('DELETE', '/api/files/*', {
         statusCode: 204,
         body: {},
       })
@@ -1613,10 +1646,16 @@ context('patient action page', function() {
 
     cy
       .intercept('DELETE', '/api/comments/*', {
-        statusCode: 204,
-        body: {},
+        statusCode: 422,
+        body: {
+          errors: getErrors({
+            status: '422',
+            title: 'Unprocessable Entity',
+            detail: 'Unable to remove comment',
+          }),
+        },
       })
-      .as('routeDeleteComment');
+      .as('routeDeleteCommentFailure');
 
     cy
       .get('@activityComment')
@@ -1633,6 +1672,29 @@ context('patient action page', function() {
       .should('contain', 'Are you sure you want to delete this comment?')
       .find('.js-submit')
       .click()
+      .wait('@routeDeleteCommentFailure');
+
+    cy
+      .get('[data-activity-region]')
+      .find('[data-comment-activity-region] .js-input')
+      .should('have.value', 'An edited comment');
+
+    cy
+      .intercept('DELETE', '/api/comments/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteComment');
+
+    cy
+      .get('[data-activity-region]')
+      .find('[data-comment-activity-region] .js-delete')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
       .wait('@routeDeleteComment');
 
     cy
@@ -1642,7 +1704,7 @@ context('patient action page', function() {
 
     cy
       .get('.patient-action')
-      .find('[data-comment-region]')
+      .find('[data-comment-form-region]')
       .as('commentRegion')
       .find('[data-post-region] .js-post')
       .should('be.disabled');
@@ -1682,6 +1744,36 @@ context('patient action page', function() {
 
     cy
       .intercept('POST', '/api/actions/*/relationships/comments', {
+        statusCode: 422,
+        body: {
+          errors: getErrors({
+            status: '422',
+            title: 'Unprocessable Entity',
+            detail: 'Unable to post comment',
+          }),
+        },
+      })
+      .as('routePostCommentFailure');
+
+    cy
+      .get('@commentRegion')
+      .find('.js-post')
+      .should('contain', 'Post')
+      .click()
+      .wait('@routePostCommentFailure');
+
+    cy
+      .get('@commentRegion')
+      .find('.js-input')
+      .should('have.value', 'Test comment\nmore comment');
+
+    cy
+      .get('[data-activity-region]')
+      .find('.comment__item')
+      .should('have.length', 2);
+
+    cy
+      .intercept('POST', '/api/actions/*/relationships/comments', {
         statusCode: 204,
         body: {},
       })
@@ -1690,7 +1782,6 @@ context('patient action page', function() {
     cy
       .get('@commentRegion')
       .find('.js-post')
-      .should('contain', 'Post')
       .click();
 
     cy
@@ -1758,7 +1849,7 @@ context('patient action page', function() {
 
     cy
       .get('.patient-action')
-      .find('[data-comment-region]')
+      .find('[data-comment-form-region]')
       .as('postCommentRegion')
       .find('.js-input')
       .type('Test comment');
@@ -1772,6 +1863,9 @@ context('patient action page', function() {
               message: 'Test comment',
               edited_at: null,
               created_at: testTs(),
+            },
+            relationships: {
+              clinician: getRelationship(getCurrentClinician()),
             },
           }),
         },
@@ -1805,6 +1899,9 @@ context('patient action page', function() {
               message: 'Another test comment',
               edited_at: null,
               created_at: testTs(),
+            },
+            relationships: {
+              clinician: getRelationship(getCurrentClinician()),
             },
           }),
         },

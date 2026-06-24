@@ -174,7 +174,6 @@ const CommentView = View.extend({
   },
   onDeleteComment() {
     this.triggerMethod('remove:comment', this.model);
-    this.model.destroy();
   },
 });
 
@@ -282,7 +281,21 @@ const TimestampsView = View.extend({
   },
 });
 
+const LayoutView = View.extend({
+  template: hbs`
+    <div data-activities-region></div>
+    <div class="u-margin--t-16" data-comment-form-region></div>
+    <div class="u-margin--t-16" data-timestamps-region></div>
+  `,
+  regions: {
+    activities: '[data-activities-region]',
+    comment: '[data-comment-form-region]',
+    timestamps: '[data-timestamps-region]',
+  },
+});
+
 export {
+  LayoutView,
   ActivitiesView,
   TimestampsView,
 };

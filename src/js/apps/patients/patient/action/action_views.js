@@ -16,18 +16,6 @@ const HeadingView = View.extend({
   template: hbs`{{formatMessage (intlGet "patients.patient.action.actionViews.headingView.headingText") outreach=outreach}}`,
 });
 
-const FooterView = View.extend({
-  className: 'flex-grow',
-  template: hbs`
-    <div class="u-margin--t-16" data-comment-region></div>
-    <div data-timestamps-region></div>
-  `,
-  regions: {
-    timestamps: '[data-timestamps-region]',
-    comment: '[data-comment-region]',
-  },
-});
-
 const MenuView = View.extend({
   tagName: 'button',
   className: 'button--icon js-menu',
@@ -56,9 +44,13 @@ const MenuView = View.extend({
   },
 });
 
-const ContentView = View.extend({
-  className: 'flex-grow',
+const LayoutView = View.extend({
+  className: 'patient-action flex-region',
   template: hbs`
+    <div class="patient-action__header">
+      <div data-heading-region></div>
+      <div data-menu-region></div>
+    </div>
     <div data-action-region></div>
     <div data-dialer-region></div>
     <div data-form-region></div>
@@ -66,6 +58,8 @@ const ContentView = View.extend({
     <div class="patient-action__activity" data-activity-region></div>
   `,
   regions: {
+    heading: '[data-heading-region]',
+    menu: '[data-menu-region]',
     action: '[data-action-region]',
     dialer: '[data-dialer-region]',
     form: {
@@ -76,13 +70,15 @@ const ContentView = View.extend({
       el: '[data-activity-region]',
       regionClass: PreloadRegion,
     },
-    attachments: '[data-attachments-region]',
+    attachments: {
+      el: '[data-attachments-region]',
+      regionClass: PreloadRegion,
+    },
   },
 });
 
 export {
-  ContentView,
+  LayoutView,
   HeadingView,
   MenuView,
-  FooterView,
 };
