@@ -45,8 +45,8 @@ export default App.extend({
   /* istanbul ignore next: error handling */
   onFail(options, error) {
     if (get(error, ['response', 'status']) === 410) {
-      Radio.trigger('event-router', 'notFound');
-      this.stop();
+      Radio.request('alert', 'show:error', i18n.notFound);
+      Radio.trigger('event-router', 'patient:workflow', options.patient.id);
       return;
     }
 
