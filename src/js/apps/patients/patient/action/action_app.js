@@ -1,42 +1,23 @@
 import { get } from 'underscore';
-import Backbone from 'backbone';
 import Radio from 'backbone.radio';
-import dayjs from 'dayjs';
-import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
 
 import App from 'js/base/app';
 import handleErrors from 'js/utils/handle-errors';
 
 import intl from 'js/i18n';
 
-import { ContentView, MenuView, HeadingView, FooterView } from 'js/apps/patients/patient/action/action_views';
+import { LayoutView, MenuView, HeadingView } from 'js/apps/patients/patient/action/action_views';
 import { ActionView, ReadOnlyActionView } from 'js/apps/patients/patient/action/action-details_views';
 import { DialerView } from 'js/apps/patients/patient/action/action-dialer_views';
 import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_views';
-import { CommentFormView } from 'js/apps/patients/shared/comments_views';
-import { ActivitiesView, TimestampsView } from 'js/apps/patients/patient/action/action-activity_views';
-import { AttachmentsView } from 'js/apps/patients/patient/action/action-attachments_views';
-
-const LayoutView = View.extend({
-  className: 'patient-action flex-region',
-  template: hbs`
-    <div class="patient-action__header">
-      <div data-heading-region></div>
-      <div data-menu-region></div>
-    </div>
-    <div class="patient-action__content" data-content-region></div>
-    <div class="patient-action__footer" data-footer-region></div>
-  `,
-  regions: {
-    heading: '[data-heading-region]',
-    menu: '[data-menu-region]',
-    content: '[data-content-region]',
-    footer: '[data-footer-region]',
-  },
-});
+import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
+import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 
 export default App.extend({
+  childApps: {
+    activity: ActivityApp,
+    attachments: AttachmentsApp,
+  },
   setAccess() {
     const canEdit = !this.action.isFlowDone() && this.action.canEdit();
     const canDelete = this.action.canDelete();
@@ -48,7 +29,7 @@ export default App.extend({
     'change:canDelete': 'onStateChangeCanDelete',
   },
   onStateChangeCanEdit() {
-    if (!this.hasContentView()) return;
+    if (!this.hasLayoutRegion('action')) return;
 
     this.showAction();
     this.showDialer();
@@ -66,11 +47,6 @@ export default App.extend({
       && !layout.isDestroyed()
       && layout.getRegion(name);
   },
-  hasContentView() {
-    const contentRegion = this.hasLayoutRegion('content');
-
-    return contentRegion && contentRegion.hasView();
-  },
   onBeforeStart() {
     this.getRegion().startPreloader();
   },
@@ -78,9 +54,6 @@ export default App.extend({
     return [
       Radio.request('entities', 'fetch:actions:model', actionId),
       flowId && Radio.request('entities', 'fetch:flows:model', flowId),
-      Radio.request('entities', 'fetch:actionEvents:collection', actionId),
-      Radio.request('entities', 'fetch:comments:collection:byAction', actionId),
-      Radio.request('entities', 'fetch:files:collection:byAction', actionId),
     ];
   },
   /* istanbul ignore next: page-level action error handling */
@@ -93,13 +66,10 @@ export default App.extend({
 
     handleErrors(error);
   },
-  onStart(options, action, flow, activity, comments, attachments) {
+  onStart(options, action, flow) {
     this.patient = options.patient;
     this.flow = flow || null;
     this.action = action;
-    this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
-    this.comments = comments;
-    this.attachments = attachments;
 
     this.setAccess();
     this.currentFlow = this.flow || this.action.getFlow();
@@ -108,19 +78,15 @@ export default App.extend({
     this.listenTo(action, {
       'change:_owner': this.onChangeOwner,
       'destroy': this.onDestroy,
-      'ws:add:comment': this.onWsAddComment,
-      'ws:add:attachment': this.onWsAddAttachment,
     });
 
     this.showView(new LayoutView());
 
     this.showChildView('heading', new HeadingView({ model: this.action }));
     this.showContent();
-    this.showChildView('footer', new FooterView());
     this.showMenu();
-    this.showActivity();
-    this.showNewCommentForm();
-    this.showAttachments();
+    this.startActivity();
+    this.startAttachments();
 
     this.triggerMethod('context:change', {
       page: 'action',
@@ -139,25 +105,8 @@ export default App.extend({
   },
   onChangeOwner() {
     this.setAccess();
-    if (this.isRunning()) this.showAttachments();
-  },
-  onWsAddComment(model) {
-    this.activityCollection.add(model);
-    this.comments.add(model);
-
-    Radio.request('ws', 'add', model);
-  },
-  onWsAddAttachment(model) {
-    this.attachments.add(model);
-
-    Radio.request('ws', 'add', model);
-
-    if (this.attachments.length === 1) this.showAttachments();
   },
   showContent() {
-    const actionView = new ContentView({ model: this.action });
-
-    this.showChildView('content', actionView);
     this.showAction();
     this.showForm();
     this.showDialer();
@@ -236,124 +185,32 @@ export default App.extend({
       canEdit: this.getState('canEdit'),
     }));
   },
-  showActivity() {
-    const activitiesView = new ActivitiesView({
-      collection: this.activityCollection,
-      model: this.action,
-    });
-    const createdEvent = this.activityCollection.find({ event_type: 'ActionCreated' });
-
-    this.listenTo(activitiesView, {
-      'remove:comment': this.onRemoveComment,
-    });
-
-    this.showContentView('activity', activitiesView);
-    this.showFooterView('timestamps', new TimestampsView({ model: this.action, createdEvent }));
-  },
-  showNewCommentForm() {
-    const clinician = Radio.request('bootstrap', 'currentUser');
-
-    const newCommentFormView = this.showFooterView('comment', new CommentFormView({
-      model: Radio.request('entities', 'comments:model', {
-        _action: this.action.getResource(),
-        _clinician: clinician.getResource(),
-      }),
-    }));
-
-    this.listenTo(newCommentFormView, {
-      'post:comment': this.onPostNewComment,
-      'cancel:comment': this.onCancelNewComment,
-    });
-  },
-  onPostNewComment({ model }) {
-    model.set({ created_at: dayjs.utc().format() });
-
-    model.save().then(() => {
-      this.action.addComment(model);
-      Radio.request('ws', 'add', model);
-    });
-
-    this.activityCollection.add(model);
-    this.comments.add(model);
-
-    this.showNewCommentForm();
-  },
-  onCancelNewComment() {
-    this.showNewCommentForm();
-  },
-  onRemoveComment(model) {
-    this.action.removeComment(model);
-
-    Radio.request('ws', 'unsubscribe', model);
-  },
-  showAttachments() {
-    const canUploadAttachments = !!Radio.request('settings', 'get', 'upload_attachments') && this.action.hasAllowedUploads();
-
-    if (!canUploadAttachments && !this.attachments.length) return;
-
-    const attachmentsView = new AttachmentsView({
-      collection: this.attachments,
-      canUploadAttachments,
-      canRemoveAttachments: this.action.canEdit(),
-    });
-
-    this.listenTo(attachmentsView, {
-      'add:attachment': this.onAddAttachment,
-      'remove:attachment': this.onRemoveAttachment,
-    });
-
-    this.showContentView('attachments', attachmentsView);
-  },
-  onAddAttachment(file) {
-    const attachment = this.attachments.add({
-      _actions: [this.action.getResource()],
-      _patient: this.action.getPatient().getResource(),
-      created_at: dayjs.utc().format(),
-    });
-    attachment.upload(file);
-
-    this.listenTo(attachment, {
-      'upload:success': uploadedAttachment => {
-        this.action.addFile(uploadedAttachment);
-        Radio.request('ws', 'add', uploadedAttachment);
-      },
-      'upload:failed': () => {
-        Radio.request('alert', 'show:error', intl.patients.patient.action.actionApp.uploadError);
-      },
-    });
-  },
-  onRemoveAttachment(model) {
-    model.destroy();
-
-    this.action.removeFile(model);
-
-    Radio.request('ws', 'unsubscribe', model);
-  },
   getSubscriptionResources() {
     return [
       this.action,
       this.currentFlow,
-      ...this.comments.models,
-      ...this.attachments.models,
     ].filter(Boolean);
   },
   subscribe() {
     Radio.request('ws', 'subscribe', this.getSubscriptionResources());
   },
   unsubscribe() {
-    if (!this.comments || !this.attachments) return;
-
     Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());
   },
-  showContentView(name, view, options) {
-    const contentView = this.getView().getChildView('content');
-    const region = contentView.getRegion(name);
-    region.show(view, options);
-    return view;
+  startActivity() {
+    this.startChildApp('activity', {
+      region: this.getRegion('activity'),
+      action: this.action,
+    });
   },
-  showFooterView(name, view, options) {
-    const footerView = this.getView().getChildView('footer');
-    const region = footerView.getRegion(name);
+  startAttachments() {
+    this.startChildApp('attachments', {
+      region: this.getRegion('attachments'),
+      action: this.action,
+    });
+  },
+  showContentView(name, view, options) {
+    const region = this.getRegion(name);
     region.show(view, options);
     return view;
   },
