@@ -1,0 +1,21 @@
+src/js/apps/programs/program/workflows/flow-item.hbs
+  s_09e8292bb4bcb3::t_cdd8eaa0ef0ae3 14,17
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_09e8292bb4bcb3::t_2df76c36533c69 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "7f8581455e07daf8942f98ed5876dd7e5688d50e",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
