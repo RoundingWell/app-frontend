@@ -75,6 +75,15 @@ commands:
           role_arn: ${AWS_ROLE_ARN}
           role_session_name: app-frontend-${CIRCLE_BUILD_NUM}
 
+  install-curl-if-missing:
+    steps:
+      - run:
+          name: Install curl (if missing)
+          command: |
+            if ! command -v curl >/dev/null; then
+              apt-get update -y && apt-get install --no-install-recommends -y curl
+            fi
+
 # ------------------------------------------------------------
 # EXECUTOR  –  Node 24 LTS image with Chrome 147, FF 150, Edge 147
 # ------------------------------------------------------------
@@ -129,6 +138,13 @@ jobs:
       # Checkout
       - checkout
 
+      # Install curl up front so the on-fail Slack notify can run even when
+      # an earlier setup, build, or Cypress step fails.
+      - when:
+          condition: << parameters.notify_on_fail >>
+          steps:
+            - install-curl-if-missing
+
       # Install & start virtual display
       - run:
           name: Install & start Xvfb
@@ -172,12 +188,7 @@ jobs:
       - when:
           condition: << parameters.upload_coverage >>
           steps:
-            - run:
-                name: Install curl (if missing)
-                command: |
-                  if ! command -v curl >/dev/null; then
-                    apt-get update -y && apt-get install --no-install-recommends -y curl
-                  fi
+            - install-curl-if-missing
 
             - run: npm run coverage:report:ci || true
 
