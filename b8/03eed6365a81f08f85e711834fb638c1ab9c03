@@ -1,0 +1,19 @@
+.circleci/config.yml
+  s_367b56d6303fa0::t_fe0966bee351ad 132-143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "b803eed6365a81f08f85e711834fb638c1ab9c03",
+  "prompts": {},
+  "sessions": {
+    "s_367b56d6303fa0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f143d-e5f5-7c41-b1b5-02564a867e12",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}
