@@ -1,0 +1,30 @@
+.circleci/config.yml
+  s_3e1030f43ca60f::t_e30a273a12e6e9 146
+  s_367b56d6303fa0::t_fe0966bee351ad 141-145,147
+  s_3e1030f43ca60f::t_e88eb1d9742db4 191
+  s_3e1030f43ca60f::t_196b2415421fbf 78-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "9c6e93c3b5cb5fbbe7a4e31156b3ccc5857dc18c",
+  "prompts": {},
+  "sessions": {
+    "s_367b56d6303fa0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f143d-e5f5-7c41-b1b5-02564a867e12",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    },
+    "s_3e1030f43ca60f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59ce727e-dcc6-47dc-ab0c-374600d5d0d9",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}
