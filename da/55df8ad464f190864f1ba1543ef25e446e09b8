@@ -1,0 +1,19 @@
+.circleci/config.yml
+  s_3e1030f43ca60f::t_2babbf8d0b69b4 166-177
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "da55df8ad464f190864f1ba1543ef25e446e09b8",
+  "prompts": {},
+  "sessions": {
+    "s_3e1030f43ca60f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59ce727e-dcc6-47dc-ab0c-374600d5d0d9",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
