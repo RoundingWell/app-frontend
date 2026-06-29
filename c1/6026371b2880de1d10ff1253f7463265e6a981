@@ -1,0 +1,47 @@
+src/js/apps/patients/patient/archive/archive_app.js
+  s_d36d4594f0bc56::t_8c840516f0236f 36-40
+src/js/apps/patients/patient/dashboard/dashboard_app.js
+  s_d36d4594f0bc56::t_8c840516f0236f 50-54,99
+src/js/views/patients/patient/workflow/workflow_views.js
+  s_9d69b09c9c3d76::t_cf60c3f25b0983 1-387
+src/js/apps/patients/patient/workflow/workflow_app.js
+  s_9d69b09c9c3d76::t_cf60c3f25b0983 1-111
+src/js/views/patients/patient/workflow/action-item.hbs
+  s_9d69b09c9c3d76::t_cf60c3f25b0983 1-28
+src/js/views/patients/patient/workflow/flow-item.hbs
+  s_9d69b09c9c3d76::t_cf60c3f25b0983 1-12
+src/js/apps/patients/patient/form/form-patient_app.js
+  s_d36d4594f0bc56::t_8c840516f0236f 1-231
+src/js/apps/patients/patient/patient_app.js
+  s_9d69b09c9c3d76::t_cf60c3f25b0983 9,84,87-88
+  s_d36d4594f0bc56::t_8c840516f0236f 12,15,22-28,33-37,43-44,97,101,105,112,114,116-117,119-120,122-123
+  s_9d69b09c9c3d76::t_b46bb4054f48a9 83
+  s_d36d4594f0bc56::t_e4922f1a57ffc3 95-96
+  s_d36d4594f0bc56::t_51d500d4f521d1 99-100
+  s_d36d4594f0bc56::t_025907d812fedc 103-104
+  s_d36d4594f0bc56::t_9d915cd5b5e263 111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "c16026371b2880de1d10ff1253f7463265e6a981",
+  "prompts": {},
+  "sessions": {
+    "s_9d69b09c9c3d76": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee325-2abd-7ac3-8e19-2658889cb04b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_d36d4594f0bc56": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ede36-1a88-7b82-8396-3728c92c6027",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
