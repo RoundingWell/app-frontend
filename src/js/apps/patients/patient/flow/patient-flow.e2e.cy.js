@@ -1039,7 +1039,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .intercept('POST', '/api/flows/**/relationships/actions', {
+      .intercept('POST', '/api/actions', {
         statusCode: 201,
         body: {
           data: conditionalAction,
@@ -1078,6 +1078,8 @@ context('patient flow page', function() {
       .its('request.body')
       .should(({ data }) => {
         expect(data.attributes.name).to.equal('Conditional');
+        expect(data.relationships.patient.data.id).to.equal(testFlow.relationships.patient.data.id);
+        expect(data.relationships.flow.data.id).to.equal(testFlow.id);
         expect(data.relationships['program-action'].data.id).to.equal(testProgramAction.id);
       });
 

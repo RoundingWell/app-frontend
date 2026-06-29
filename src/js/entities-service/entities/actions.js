@@ -64,17 +64,7 @@ const _Model = BaseModel.extend({
       this.destroy({ isDeleted: true });
     },
   },
-  urlRoot() {
-    if (this.isNew()) {
-      const flow = this.getFlow();
-      const patient = this.getPatient();
-      return flow ?
-        `/api/flows/${ flow.id }/relationships/actions` :
-        `/api/patients/${ patient.id }/relationships/actions`;
-    }
-
-    return '/api/actions';
-  },
+  urlRoot: '/api/actions',
   type: TYPE,
   getForm() {
     return this.getRelationship('_form');
@@ -247,6 +237,7 @@ const _Model = BaseModel.extend({
     if (this.isNew()) attrs = extend({}, this.attributes, attrs);
 
     const relationships = {
+      'patient': this.toRelation(attrs._patient),
       'flow': this.toRelation(attrs._flow),
       'form': this.toRelation(attrs._form),
       'owner': this.toRelation(attrs._owner),

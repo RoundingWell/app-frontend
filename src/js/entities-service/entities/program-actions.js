@@ -42,6 +42,7 @@ const _Model = BaseModel.extend({
     const states = currentWorkspace.getStates();
 
     const defaultInitialState = first(states.filter({ status: STATE_STATUS.QUEUED }));
+    const actionPatient = patient || flow.getPatient();
 
     const attrs = {
       name: this.get('name'),
@@ -51,8 +52,8 @@ const _Model = BaseModel.extend({
         type: 'clinicians',
       },
       _program_action: this.getResource(),
+      _patient: actionPatient.getResource(),
     };
-    if (patient) attrs._patient = patient.getResource();
     if (flow) attrs._flow = flow.getResource();
     attrs._program = this.getProgram().getResource();
 

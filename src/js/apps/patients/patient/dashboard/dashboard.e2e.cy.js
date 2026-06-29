@@ -43,7 +43,7 @@ context('patient dashboard page', function() {
     });
 
     cy
-      .intercept('POST', `/api/patients/${ testPatient.id }/relationships/actions*`, {
+      .intercept('POST', '/api/actions', {
         statusCode: 201,
         body: {
           data: actionData,
@@ -1034,6 +1034,8 @@ context('patient dashboard page', function() {
         expect(data.relationships.state.data.id).to.equal(stateTodo.id);
         expect(data.relationships.owner.data.id).to.equal(teamCoordinator.id);
         expect(data.relationships.owner.data.type).to.equal(teamCoordinator.type);
+        expect(data.relationships.patient.data.id).to.equal(testPatient.id);
+        expect(data.relationships['program-action'].data.id).to.equal(testProgramActions[0].id);
       });
 
     cy
@@ -1090,6 +1092,8 @@ context('patient dashboard page', function() {
         expect(data.relationships.state.data.id).to.equal(stateTodo.id);
         expect(data.relationships.owner.data.id).to.be.equal(currentClinican.id);
         expect(data.relationships.owner.data.type).to.be.equal(currentClinican.type);
+        expect(data.relationships.patient.data.id).to.equal(testPatient.id);
+        expect(data.relationships['program-action'].data.id).to.equal(testProgramActions[1].id);
       });
 
     cy
@@ -1129,6 +1133,8 @@ context('patient dashboard page', function() {
       .should(({ data }) => {
         expect(data.attributes.name).to.equal('Two of Two');
         expect(data.attributes.due_date).to.be.undefined;
+        expect(data.relationships.patient.data.id).to.equal(testPatient.id);
+        expect(data.relationships['program-action'].data.id).to.equal(testProgramActions[2].id);
       });
 
     cy
