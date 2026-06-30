@@ -6,6 +6,7 @@ import test from 'node:test';
 import {
   addOrganizationsFromPage,
   buildDeployMarkerEnvironments,
+  cacheControlFor,
   deployOrganizations,
   formatFailedDeploymentsError,
   readDeployMarkerStatus,
@@ -418,4 +419,42 @@ test('deployOrganizations records failed environments and continues deploying re
   assert.deepEqual(JSON.parse(fs.readFileSync(statusFile, 'utf8')), markerStatus);
 
   fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+const IMMUTABLE = 'public, max-age=31536000, immutable';
+const REVALIDATE = 'no-cache';
+
+test('cacheControlFor marks content-hashed bundles immutable', () => {
+  // Date-prefixed entry/chunk JS, including hashes that contain - or _.
+  assert.equal(cacheControlFor('20260630-app-2ThoSfMB.js'), IMMUTABLE);
+  assert.equal(cacheControlFor('20260630-sorting-Bb-sFHyu.js'), IMMUTABLE);
+  assert.equal(cacheControlFor('20260630-app-frame_app-Bgxn_W94.js'), IMMUTABLE);
+  // Hashed CSS lives under assets/ with no date prefix.
+  assert.equal(cacheControlFor('assets/app-CL4oI3p2.css'), IMMUTABLE);
+  assert.equal(cacheControlFor('/assets/sidebar-D3caASSO.css'), IMMUTABLE);
+});
+
+test('cacheControlFor keeps the rollout shell revalidating', () => {
+  assert.equal(cacheControlFor('index.html'), REVALIDATE);
+  assert.equal(cacheControlFor('sw.js'), REVALIDATE);
+  assert.equal(cacheControlFor('appconfig.json'), REVALIDATE);
+  assert.equal(cacheControlFor('/index.html'), REVALIDATE);
+});
+
+test('cacheControlFor revalidates stable-named static assets', () => {
+  assert.equal(cacheControlFor('favicon.ico'), REVALIDATE);
+  assert.equal(cacheControlFor('android-chrome-512x512.png'), REVALIDATE);
+  assert.equal(cacheControlFor('site.webmanifest'), REVALIDATE);
+  assert.equal(cacheControlFor('rwell-logo.svg'), REVALIDATE);
+  assert.equal(cacheControlFor('images/roundingwell-logo.svg'), REVALIDATE);
+});
+
+test('cacheControlFor leaves shared runtime modules revalidating', () => {
+  // Shared-runtime assets are intentionally never marked immutable.
+  assert.equal(cacheControlFor('shared/config.js'), REVALIDATE);
+  assert.equal(cacheControlFor('/shared/datadog.js'), REVALIDATE);
+});
+
+test('cacheControlFor does not mark sourcemaps immutable', () => {
+  assert.equal(cacheControlFor('20260630-app-2ThoSfMB.js.map'), REVALIDATE);
 });

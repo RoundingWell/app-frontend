@@ -18,7 +18,15 @@ const DEPLOYABLE_STATUSES = new Set([
   'UPDATE_COMPLETE',
   'UPDATE_ROLLBACK_COMPLETE',
 ]);
-const SHARED_RUNTIME_CACHE_CONTROL = 'no-cache';
+// Content-hashed bundles never change for a given URL, so they can be cached
+// forever. The rollout shell (index.html, sw.js, appconfig.json) and every
+// stable-named asset must revalidate so a deploy is never masked by a stale
+// browser/CDN copy.
+const IMMUTABLE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+const REVALIDATE_CACHE_CONTROL = 'no-cache';
+// Vite emits `<name>-<hash>.<ext>` (hashes may contain - or _), date-prefixed
+// for entry/chunk JS and under assets/ for CSS. Match that trailing hash only.
+const HASHED_ASSET_PATTERN = /-[a-zA-Z0-9_-]{8,}\.(?:js|css)$/;
 const PROD_WILDCARD_EXCLUDED_ORGANIZATIONS = new Set(['demonstration']);
 const CLOUDFRONT_DISTRIBUTION_LOGICAL_ID = 'CloudFrontDistribution';
 
@@ -187,6 +195,23 @@ function isSharedRuntimeAsset(assetPath) {
 }
 
 /**
+ * Resolve the Cache-Control header for an upload key. Content-hashed bundles
+ * are immutable; everything else (shell, shared runtime, stable static assets)
+ * must revalidate.
+ * @param {string} key - The S3 key (path)
+ * @returns {string} Cache-Control header value
+ */
+export function cacheControlFor(key) {
+  const assetPath = key.replace(/^\//, '');
+
+  if (isSharedRuntimeAsset(assetPath)) return REVALIDATE_CACHE_CONTROL;
+
+  return HASHED_ASSET_PATTERN.test(assetPath) ?
+    IMMUTABLE_CACHE_CONTROL :
+    REVALIDATE_CACHE_CONTROL;
+}
+
+/**
  * Upload a single file to S3.
  * @param {S3Client} s3Client - S3 client instance
  * @param {string} bucketName - The S3 bucket name
@@ -196,14 +221,14 @@ function isSharedRuntimeAsset(assetPath) {
 async function uploadFile(s3Client, bucketName, filePath, key) {
   const fileContent = await fs.readFile(filePath);
   const contentType = getContentType(filePath);
-  const cacheControl = isSharedRuntimeAsset(key) ? SHARED_RUNTIME_CACHE_CONTROL : undefined;
+  const cacheControl = cacheControlFor(key);
 
   const command = new PutObjectCommand({
     Bucket: bucketName,
     Key: key,
     Body: fileContent,
     ContentType: contentType,
-    ...(cacheControl && { CacheControl: cacheControl }),
+    CacheControl: cacheControl,
   });
 
   await s3Client.send(command);
