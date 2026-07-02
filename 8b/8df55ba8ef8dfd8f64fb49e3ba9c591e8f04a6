@@ -1,0 +1,137 @@
+src/js/apps/globals/nav/app-nav/app-nav.scss
+  s_1bf45839d4ebf2::t_345e07efc9e3e0 2
+  s_1bf45839d4ebf2::t_c6dcac0b924227 192-194,196,209,216-217,220-221,228,230,251-253,262,321
+  s_09e8292bb4bcb3::t_8ed92cf261dacf 231-233,235-236,239-250
+  s_09e8292bb4bcb3::t_d20bfb72046003 335-338,341-351
+  s_1bf45839d4ebf2::t_687d3f44394b6d 164
+  s_1bf45839d4ebf2::t_ccdb990c11ab4e 186,189,328
+  s_1bf45839d4ebf2::t_0af28631e7d645 18
+  s_1bf45839d4ebf2::t_50f4965eaf1e59 4-7,9,11,43,136-137,204,206-207,218,222,255-256,261,263,319,322
+  s_1bf45839d4ebf2::t_5373dc0b4e6393 130-131,133,138-139,160,313-316
+  s_1bf45839d4ebf2::t_735ec184c4d666 16-17,20,223,273,297,299,301,306-309
+  s_1bf45839d4ebf2::t_ae3f30bf07fe56 10,155-156
+  s_1bf45839d4ebf2::t_2fc57fc2f51086 208
+  s_1bf45839d4ebf2::t_33e02052b8931d 14,23,26-28,31-35,45,153-154,157-159,162-163,224,310,324,326-327,329-334,339-340
+  s_1bf45839d4ebf2::t_c039260f27e83d 3
+  s_1bf45839d4ebf2::t_a83ab9ba5ae2a2 129
+  s_1bf45839d4ebf2::t_15a0d1d7e2f6b7 198
+  s_1bf45839d4ebf2::t_1bacdc60a5a69d 274-275
+  s_1bf45839d4ebf2::t_64c6a275b6d2a1 225
+  s_5bc9cc1ce7547e::t_01fd517a9b9910 15
+  s_1bf45839d4ebf2::t_bda9027e7ce8ae 219,270-271
+  s_1bf45839d4ebf2::t_363c203aca4c02 46-50
+  s_1bf45839d4ebf2::t_923cb1bba19e85 29-30,36-42,44
+  s_1bf45839d4ebf2::t_d1cca32786eeee 195
+  s_1bf45839d4ebf2::t_dde3de9f26c7fb 202
+  s_1bf45839d4ebf2::t_f78a80430ecdad 311
+  s_1bf45839d4ebf2::t_fa31c1f877d847 132,266,276,281,286,291,320
+  s_1bf45839d4ebf2::t_0bc77b0efab76a 205
+  s_1bf45839d4ebf2::t_1f98328b4e198e 21,305
+  s_1bf45839d4ebf2::t_3594805042aa3e 187,197
+  s_1bf45839d4ebf2::t_e0380cb821b604 8,135,161,188,203
+  s_1bf45839d4ebf2::t_4cb238d82b36d8 200,254
+  s_ddcbbefeb5f845::t_15b6106446b9ca 174
+src/js/apps/globals/nav/nav_app.js
+  s_1bf45839d4ebf2::t_559bf223373c25 283,308,324,332
+  s_9bbdacebb067ff::t_39c449d520eb2d 187
+  s_09e8292bb4bcb3::t_63b52f09acf004 211-213
+  s_1bf45839d4ebf2::t_923cb1bba19e85 277,279-282,284-285,290-291,363
+  s_1bf45839d4ebf2::t_bfb13d613b579f 304,311
+  s_09e8292bb4bcb3::t_96c6d572ca0240 239-242
+  s_09e8292bb4bcb3::t_bb39c01dfbf056 260,264,266,272,278,286,288
+  s_09e8292bb4bcb3::t_44d61a6f1bfd40 243-247,249
+  s_9bbdacebb067ff::t_b967fb5d22fa18 259,334
+  s_1bf45839d4ebf2::t_be666c8e89dfca 338-339,341-350
+  s_09e8292bb4bcb3::t_4299c80d7e7ffd 361
+  s_09e8292bb4bcb3::t_362df3fda027f0 314-316
+  s_1bf45839d4ebf2::t_2f380a28a42e3a 196-200,251-252,254-257,261-263,265,267-269,274,276,292,294,296,303,305-306,309-310,312,317-322,325-328,330,333,335,337,352,354-357,359-360,362,364,380-382,384-387
+  s_09e8292bb4bcb3::t_dad1aee2394ea4 353,358
+  s_1bf45839d4ebf2::t_363c203aca4c02 295,297-298,307,323,331
+  s_09e8292bb4bcb3::t_e4ef6390d033b8 369-374
+  s_09e8292bb4bcb3::t_f3d7560cb45585 10
+  s_09e8292bb4bcb3::t_386ddc7feeff20 1
+  s_09e8292bb4bcb3::t_013fcaf9628438 248,250,253,258,375-377,383
+  s_1bf45839d4ebf2::t_63bf5fa40f2935 55-56,64,73-74
+  s_09e8292bb4bcb3::t_e838e4691803ba 293,299,336,340
+  s_09e8292bb4bcb3::t_9a789ed1855c6c 329
+  s_1bf45839d4ebf2::t_51da911246ef95 14
+  s_1bf45839d4ebf2::t_83b9ccad459915 351,462-468
+  s_1bf45839d4ebf2::t_815b724fcbf6b3 270-271,273,275,287,289,300-302,313
+  s_1bf45839d4ebf2::t_569b4bbabcea5c 13,388-389
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_1bf45839d4ebf2::t_d1cca32786eeee 308
+  s_1bf45839d4ebf2::t_8aa8593fd4b97d 46,50,118,123,126,165-166,170-174,218-227,235-236,238,242,244-245,247-254,256-261,263-264,266-267,269-270,272-275,277-281,283-287,295-297,300-301,313-315,326-331,349-350,360-362,371-374,376
+  s_1bf45839d4ebf2::t_78c72f7b1a9f41 231,347
+  s_09e8292bb4bcb3::t_227b4ac957d8e4 189,193-194,196-199
+  s_1bf45839d4ebf2::t_78c52b459ac669 239-240
+  s_1bf45839d4ebf2::t_8524adc0959413 246,255,262,265,268,271,276,282,288,375
+  s_1bf45839d4ebf2::t_362a43bc85bd5e 44,51-53,55-57,121
+  s_1bf45839d4ebf2::t_f6c7594f4d41c6 182-188,190-192,195,200
+  s_1bf45839d4ebf2::t_09a1c56d21a0e4 13-14,17,19,22-25,205,243
+  s_1bf45839d4ebf2::t_c2fedc6c097a2f 26-32,47,124
+  s_1bf45839d4ebf2::t_be666c8e89dfca 45,122
+  s_1bf45839d4ebf2::t_4f37a19001ae1a 15-16,18,20-21
+  s_1bf45839d4ebf2::t_923cb1bba19e85 237
+  s_1bf45839d4ebf2::t_f87d994b106d78 298-299
+src/js/apps/globals/app-frame/app-frame.scss
+  s_9bbdacebb067ff::t_219d3e3b27b6ea 51
+  s_1bf45839d4ebf2::t_147e47c3c25ada 2,4,13,16,18,23-28,30-32
+  s_1bf45839d4ebf2::t_d1cca32786eeee 3
+  s_09e8292bb4bcb3::t_a5b5d1e761db0a 71-73
+  s_1bf45839d4ebf2::t_e9334ac8e69a0a 29
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_1bf45839d4ebf2::t_60b53444818a51 349
+  s_1bf45839d4ebf2::t_4f664d33f5eeb0 350
+src/js/apps/globals/nav/nav_state.js
+  s_09e8292bb4bcb3::t_af2e8bf2018c83 1-51
+src/js/i18n/en-US/globals.yml
+  s_1bf45839d4ebf2::t_155fe5e89cc801 17-18,26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "8b8df55ba8ef8dfd8f64fb49e3ba9c591e8f04a6",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    },
+    "s_1bf45839d4ebf2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f18e0-4c13-78a0-80de-dcff52a401d4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_5bc9cc1ce7547e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed59c-909a-7bf3-8869-883000e2afbb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_9bbdacebb067ff": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f179d-c3b2-7ad0-b571-02aa3cd725b8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_ddcbbefeb5f845": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019efddd-0c32-7661-a277-166740bde329",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
