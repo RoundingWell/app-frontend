@@ -112,6 +112,19 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - Keep PR descriptions short and operational, consistent with the
   Communication rules above.
 
+### AI Review PRs
+
+- Open AI-authored PRs as ready for review, not as drafts.
+- Apply the `ci:defer-cypress` label when opening an AI-authored PR. The label
+  keeps the required CircleCI workflow pending at `Cypress deferred - approve
+  to run` while normal review and revision continue.
+- Do not apply the label to ordinary human-authored PRs. Their Cypress jobs run
+  automatically on every revision as usual.
+- When review feedback is resolved, approve the CircleCI hold to run the full
+  E2E, component, and coverage jobs for the current commit.
+- Never merge while Cypress is held or without a passing Cypress result for the
+  current commit. A new commit requires a new approval and Cypress result.
+
 ## Validation
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.

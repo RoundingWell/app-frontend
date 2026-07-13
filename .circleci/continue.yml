@@ -1,0 +1,559 @@
+version: 2.1
+
+parameters:
+  defer_cypress:
+    type: boolean
+    default: false
+
+orbs:
+  aws-cli: circleci/aws-cli@4.0
+  cypress:   cypress-io/cypress@4
+  coveralls: coveralls/coveralls@2
+  slack:     circleci/slack@6.1.3
+
+aliases:
+  .node-image: &node-image cimg/node:24.15
+
+  .tag-filter: &tag-filter
+    filters:
+      tags:
+        only: /.*/
+
+  when-release: &when-release
+    and:
+      - matches:
+          pattern: '^v[0-9]{6}\.[0-9]+$'
+          value: << pipeline.git.tag >>
+
+commands:
+  verify-node-version:
+    steps:
+      - run:
+          name: Verify Node version matches .nvmrc
+          command: |
+            expected="$(tr -d '[:space:]' < .nvmrc | sed 's/^v//')"
+            expected_major_minor="$(echo "$expected" | cut -d. -f1,2)"
+            image_version="$(node -v)"
+            image_version="${image_version#v}"
+            if [[ "$image_version" != "$expected_major_minor".* ]]; then
+              echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${image_version}"
+              exit 1
+            fi
+
+  setup-fa-auth:
+    steps:
+      - run:
+          name: Configure npm registry auth
+          command: |
+            cat > ~/.npmrc \<< EOF
+            # Pro Font Awesome registry
+            @fortawesome:registry=https://npm.fontawesome.com/
+            //npm.fontawesome.com/:_authToken=${FONTAWESOME}
+            EOF
+            echo "📦 Created ~/.npmrc"
+
+  restore-npm-cache:
+    steps:
+      - restore_cache:
+          keys:
+            - npm-cache-v1-{{ checksum "package-lock.json" }}
+            - npm-cache-v1-
+
+  save-npm-cache:
+    steps:
+      - save_cache:
+          key: npm-cache-v1-{{ checksum "package-lock.json" }}
+          paths:
+            - ~/.npm
+
+  install-dependencies:
+    steps:
+      - verify-node-version
+      - setup-fa-auth
+      - run:
+          name: Install dependencies
+          command: npm ci --prefer-offline --no-audit
+
+  setup-aws-oidc:
+    steps:
+      - aws-cli/setup:
+          role_arn: ${AWS_ROLE_ARN}
+          role_session_name: app-frontend-${CIRCLE_BUILD_NUM}
+
+  install-curl-if-missing:
+    steps:
+      - run:
+          name: Install curl (if missing)
+          command: |
+            if ! command -v curl >/dev/null; then
+              apt-get update -y && apt-get install --no-install-recommends -y curl
+            fi
+
+# ------------------------------------------------------------
+# EXECUTOR  –  Node 24 LTS image with Chrome 147, FF 150, Edge 147
+# ------------------------------------------------------------
+executors:
+  cypress-all-browsers:
+    docker:
+      - image: cypress/browsers:node-24.15.0-chrome-147.0.7727.137-1-ff-150.0.1-edge-147.0.3912.86-1
+    environment:
+      DISPLAY: :99
+      CYPRESS_DISPLAY: :99
+      CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
+      CYPRESS_watchForFileChanges: false
+
+# ------------------------------------------------------------
+# JOBS
+# ------------------------------------------------------------
+jobs:
+  lint:
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - restore-npm-cache
+      - install-dependencies
+      - save-npm-cache
+      - run:
+          name: ESLint
+          command: npm run eslint
+      - run:
+          name: Stylelint
+          command: npm run stylelint
+
+  run-cypress:
+    parameters:
+      cypress_command:
+        type: string
+      should_build:
+        type: boolean
+        default: true
+      parallelism:
+        type: integer
+        default: 12
+      upload_coverage:
+        type: boolean
+        default: true
+      notify_on_fail:
+        type: boolean
+        default: false
+    executor: cypress-all-browsers
+    parallelism: << parameters.parallelism >>
+    steps:
+      # Checkout
+      - checkout
+
+      # Install curl up front so the on-fail Slack notify can run even when
+      # an earlier setup, build, or Cypress step fails.
+      - when:
+          condition: << parameters.notify_on_fail >>
+          steps:
+            - install-curl-if-missing
+
+      # Install & start virtual display
+      - run:
+          name: Install & start Xvfb
+          command: |
+            # launch 24-bit virtual display :99
+            Xvfb :99 -screen 0 1024x768x24 -nolisten tcp &
+            # wait until the X socket appears (max 10 s)
+            for i in {1..20}; do
+              if xdpyinfo -display :99 >/dev/null 2>&1; then
+                echo "🟢 Xvfb :99 is up"
+                break
+              fi
+              echo "⌛ waiting for Xvfb…"
+              sleep 0.5
+            done
+      - restore-npm-cache
+      - verify-node-version
+      - setup-fa-auth
+      - cypress/install:
+          skip-checkout: true
+          install-browsers: false
+          install-command: npm ci --prefer-offline --no-audit
+
+      # Build app
+      - when:
+          condition: << parameters.should_build >>
+          steps:
+            - run: npm run build -- --mode test
+
+            - run:
+                name: Start Server
+                command: npx vite preview -m test
+                background: true
+
+      # Run Cypress
+      - run:
+          name: Cypress tests
+          command: << parameters.cypress_command >>
+
+      # Coverage upload (PR / push only)
+      - when:
+          condition: << parameters.upload_coverage >>
+          steps:
+            - install-curl-if-missing
+
+            - run: npm run coverage:report:ci || true
+
+            - coveralls/upload:
+                fail_on_error: false
+                parallel: true
+
+      # Notify #frontend on failure (nightly only)
+      - when:
+          condition: << parameters.notify_on_fail >>
+          steps:
+            - slack/notify:
+                event: fail
+                # #frontend channel ID. Set here explicitly so nightly alerts
+                # do not inherit the deploy default channel.
+                channel: 'C02U318AW'
+                custom: |
+                  {
+                    "text": "Nightly Cypress failed: ${CIRCLE_JOB}",
+                    "blocks": [
+                      {
+                        "type": "section",
+                        "text": {
+                          "type": "mrkdwn",
+                          "text": "🌙 Nightly Cypress failed: *${CIRCLE_JOB}* on `develop`\n<${CIRCLE_BUILD_URL}|View job>"
+                        }
+                      }
+                    ]
+                  }
+
+  coveralls-finish:
+    docker:
+      - image: *node-image
+    steps:
+      - coveralls/upload:
+          parallel_finished: true
+
+  build:
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - restore-npm-cache
+      - install-dependencies
+      - save-npm-cache
+      - run:
+          name: Npm build
+          command: npm run build
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dist
+
+  publish-build-artifact:
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore-npm-cache
+      - install-dependencies
+      - run:
+          name: Package build artifact
+          command: |
+            set -euo pipefail
+            tag="<< pipeline.git.tag >>"
+            if [ -z "$tag" ]; then
+              echo "No pipeline.git.tag; refusing to publish artifact"
+              exit 1
+            fi
+
+            tar -C dist -czf /tmp/dist.tar.gz .
+            sha256sum /tmp/dist.tar.gz > /tmp/dist.tar.gz.sha256
+      - run:
+          name: CircleCI Release Marker Plan
+          command: |
+            set -euo pipefail
+            circleci run release plan "release-<< pipeline.git.tag >>" \
+              --environment-name="release" \
+              --component-name="app-frontend" \
+              --target-version="<< pipeline.git.tag >>"
+      - run:
+          name: Upload sourcemaps to Datadog
+          command: |
+            set -euo pipefail
+
+            if [ -z "${DATADOG_API_KEY:-}" ]; then
+              echo "DATADOG_API_KEY is required to upload sourcemaps"
+              exit 1
+            fi
+
+            if ! find dist -type f -name '*.js.map' | grep -q .; then
+              echo "No *.js.map files found in dist; failing release artifact publish"
+              exit 1
+            fi
+
+            site_arg=()
+            if [ -n "${DATADOG_SITE:-}" ]; then
+              site_arg+=(--datadog-site="${DATADOG_SITE}")
+            fi
+
+            npx --yes @datadog/datadog-ci@5.8.0 sourcemaps upload dist \
+              --service="app-frontend" \
+              --release-version="<< pipeline.git.tag >>" \
+              --minified-path-prefix="${DATADOG_MINIFIED_PATH_PREFIX:-/}" \
+              "${site_arg[@]}"
+      - setup-aws-oidc
+      - run:
+          name: Upload build artifact once per tag
+          command: |
+            set -euo pipefail
+            npm run artifact:publish -- \
+              --bucket=rw-frontend-artifacts-dev \
+              --prefix=app-frontend \
+              --tag="<< pipeline.git.tag >>" \
+              --artifact=/tmp/dist.tar.gz
+      - run:
+          name: CircleCI Release Marker Success
+          when: on_success
+          command: |
+            set -euo pipefail
+            circleci run release update "release-<< pipeline.git.tag >>" --status=SUCCESS
+      - run:
+          name: CircleCI Release Marker Failure
+          when: on_fail
+          command: |
+            set -euo pipefail
+            circleci run release update "release-<< pipeline.git.tag >>" --status=FAILED
+      - run:
+          name: Sync Linear release
+          when: on_success
+          command: |
+            set -uo pipefail
+            # set -e is suspended on the left side of `||`, so chain commands
+            # with `&&` to short-circuit on the first failure and let the
+            # group's exit code reflect the actual outcome.
+            { ./scripts/download-linear-release.sh \
+                && git fetch --force --tags origin \
+                && /tmp/linear-release sync \
+                     --release-version="<< pipeline.git.tag >>" \
+                && /tmp/linear-release update \
+                     --release-version="<< pipeline.git.tag >>" \
+                     --stage="Started"
+            } || echo "Linear release sync failed; artifact published. Sync manually if needed."
+
+# ------------------------------------------------------------
+# WORKFLOWS
+# ------------------------------------------------------------
+workflows:
+  test-build:
+    when:
+      not:
+        equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+    jobs:
+      - lint:
+          name: Lint
+      - run-cypress:
+          filters:
+            branches:
+              only: develop
+            tags:
+              ignore: /.*/
+          name: E2E develop
+          parallelism: 1
+          cypress_command: >
+            npx cypress run
+
+      - run-cypress:
+          filters: |
+            pipeline.git.branch
+            and pipeline.git.branch != "develop"
+            and not pipeline.parameters.defer_cypress
+          name: E2E
+          cypress_command: >
+            npx cypress run
+            --parallel --record
+            --group care-ops-e2e
+
+      - run-cypress:
+          filters:
+            branches:
+              only: develop
+            tags:
+              ignore: /.*/
+          name: Component develop
+          parallelism: 1
+          should_build: false
+          cypress_command: >
+            npx cypress run --component
+
+      - run-cypress:
+          filters: |
+            pipeline.git.branch
+            and pipeline.git.branch != "develop"
+            and not pipeline.parameters.defer_cypress
+          name: Component
+          parallelism: 1
+          should_build: false
+          cypress_command: >
+            npx cypress run --component
+
+      - cypress-approval:
+          type: approval
+          name: Cypress deferred - approve to run
+          requires:
+            - Lint
+          filters: |
+            pipeline.git.branch
+            and pipeline.git.branch != "develop"
+            and pipeline.parameters.defer_cypress
+
+      - run-cypress:
+          name: E2E after approval
+          requires:
+            - Cypress deferred - approve to run
+          filters: |
+            pipeline.git.branch
+            and pipeline.git.branch != "develop"
+            and pipeline.parameters.defer_cypress
+          cypress_command: >
+            npx cypress run
+            --parallel --record
+            --group care-ops-e2e
+
+      - run-cypress:
+          name: Component after approval
+          requires:
+            - Cypress deferred - approve to run
+          filters: |
+            pipeline.git.branch
+            and pipeline.git.branch != "develop"
+            and pipeline.parameters.defer_cypress
+          parallelism: 1
+          should_build: false
+          cypress_command: >
+            npx cypress run --component
+
+      - coveralls-finish:
+          filters:
+            branches:
+              only: develop
+            tags:
+              ignore: /.*/
+          name: Coveralls develop
+          requires:
+            - E2E develop
+            - Component develop
+
+      - coveralls-finish:
+          filters: |
+            pipeline.git.branch
+            and pipeline.git.branch != "develop"
+            and not pipeline.parameters.defer_cypress
+          name: Coveralls
+          requires:
+            - E2E
+            - Component
+
+      - coveralls-finish:
+          name: Coveralls after approval
+          requires:
+            - E2E after approval
+            - Component after approval
+          filters: |
+            pipeline.git.branch
+            and pipeline.git.branch != "develop"
+            and pipeline.parameters.defer_cypress
+
+  test-nightly:
+    # Dynamic configuration requires this cron to be configured as a CircleCI
+    # schedule trigger named nightly-cypress for develop at 0 11 * * *.
+    when:
+      equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
+    jobs:
+      - run-cypress:
+          name: Chrome nightly
+          context:
+            - slack-secrets
+          parallelism: 1
+          upload_coverage: false
+          notify_on_fail: true
+          cypress_command: >
+            npx cypress run
+            --browser chrome
+            --config retries=4
+
+      - run-cypress:
+          name: Chrome nightly Component
+          context:
+            - slack-secrets
+          parallelism: 1
+          should_build: false
+          upload_coverage: false
+          notify_on_fail: true
+          cypress_command: >
+            npx cypress run --component
+            --browser chrome
+            --config retries=4
+
+      - run-cypress:
+          name: Firefox nightly
+          context:
+            - slack-secrets
+          parallelism: 1
+          upload_coverage: false
+          notify_on_fail: true
+          cypress_command: >
+            npx cypress run
+            --browser firefox
+            --config retries=4
+
+      - run-cypress:
+          name: Firefox nightly Component
+          context:
+            - slack-secrets
+          parallelism: 1
+          should_build: false
+          upload_coverage: false
+          notify_on_fail: true
+          cypress_command: >
+            npx cypress run --component
+            --browser firefox
+            --config retries=4
+
+      - run-cypress:
+          name: Edge nightly
+          context:
+            - slack-secrets
+          parallelism: 1
+          upload_coverage: false
+          notify_on_fail: true
+          cypress_command: >
+            npx cypress run
+            --browser edge
+            --config retries=4
+
+      - run-cypress:
+          name: Edge nightly Component
+          context:
+            - slack-secrets
+          parallelism: 1
+          should_build: false
+          upload_coverage: false
+          notify_on_fail: true
+          cypress_command: >
+            npx cypress run --component
+            --browser edge
+            --config retries=4
+
+  release-artifact:
+    when: *when-release
+    jobs:
+      - build:
+          <<: *tag-filter
+      - publish-build-artifact:
+          <<: *tag-filter
+          name: publish release artifact
+          context:
+            - aws-dev
+            - linear-secrets
+          requires:
+            - build
