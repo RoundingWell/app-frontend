@@ -163,8 +163,11 @@ function getContentType(filePath) {
   return contentTypes[ext] || 'application/octet-stream';
 }
 
-function shouldSkipUploadEntry(entryName) {
-  return entryName.startsWith('.');
+function shouldSkipUploadEntry(entry) {
+  // Keep sourcemaps in release artifacts for Datadog, but never publish them
+  // to a customer-facing website bucket.
+  return entry.name.startsWith('.') ||
+    (!entry.isDirectory() && path.extname(entry.name).toLowerCase() === '.map');
 }
 
 const FINAL_UPLOAD_ORDER = new Map([
@@ -186,7 +189,7 @@ function compareUploadEntries(a, b, prefix = '') {
 
 export function sortUploadEntries(entries, prefix = '') {
   return [...entries]
-    .filter(entry => !shouldSkipUploadEntry(entry.name))
+    .filter(entry => !shouldSkipUploadEntry(entry))
     .sort((a, b) => compareUploadEntries(a, b, prefix));
 }
 
@@ -235,13 +238,13 @@ async function uploadFile(s3Client, bucketName, filePath, key) {
 }
 
 /**
- * Upload entire directory to S3 recursively.
+ * Upload public deployment files to S3 recursively, excluding dot entries and sourcemaps.
  * @param {S3Client} s3Client - S3 client instance
  * @param {string} bucketName - The S3 bucket name
  * @param {string} dirPath - The local directory path
  * @param {string} prefix - The S3 key prefix
  */
-async function uploadDirectory(s3Client, bucketName, dirPath, prefix = '') {
+export async function uploadDirectory(s3Client, bucketName, dirPath, prefix = '') {
   const entries = sortUploadEntries(
     await fs.readdir(dirPath, { withFileTypes: true }),
     prefix,
