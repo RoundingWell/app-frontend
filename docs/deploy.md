@@ -108,7 +108,8 @@ This pages CloudFormation results, filters by the `stage=<stage>` tag, and deplo
 Release artifact publishing runs only for version tags matching:
 - `vYYMMDD.N`
 
-The tag pipeline in [`.circleci/config.yml`](../.circleci/config.yml):
+The `release-artifact` workflow in
+[`.circleci/workflows.yml`](../.circleci/workflows.yml):
 1. Builds `dist/`
 2. Uploads sourcemaps to Datadog
 3. Packages `dist/` as `/tmp/dist.tar.gz`
@@ -178,7 +179,7 @@ Additional CircleCI secrets for the QA2 E2E dispatch step:
 
 CircleCI context for the Linear release steps:
 - `linear-secrets` context, providing `LINEAR_ACCESS_KEY` (Linear release pipeline access key)
-- attached to the `release-artifact` workflow in [`.circleci/config.yml`](../.circleci/config.yml) (sync + `Started` stage on tag build), and to the `deploy-qa` and `deploy-prod` workflows in [`.circleci/deploy.yml`](../.circleci/deploy.yml). The `deploy-dev` workflow does not have access to the Linear secret.
+- attached to the `release-artifact` workflow in [`.circleci/workflows.yml`](../.circleci/workflows.yml) (sync + `Started` stage on tag build), and to the `deploy-qa` and `deploy-prod` workflows in [`.circleci/deploy.yml`](../.circleci/deploy.yml). The `deploy-dev` workflow does not have access to the Linear secret.
 - the Linear release pipeline is configured as **scheduled**; stages used: built-in `Started`, custom `QA` (frozen) and `Sandbox`, and built-in terminal `Released`. CI also calls `complete` after a successful prod deploy.
 
 For QA deploys that include `qa2`, [`.circleci/deploy.yml`](../.circleci/deploy.yml) resolves the release SHA, passes the release tag, SHA, and a CircleCI run URL to [`scripts/dispatch-qa2-e2e.js`](../scripts/dispatch-qa2-e2e.js), and that script uses the GitHub App credentials above plus the `app-tests` installation id to mint a short-lived installation token before posting `repository_dispatch` with this payload:
