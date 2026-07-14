@@ -124,6 +124,8 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
   E2E, component, and coverage jobs for the current commit.
 - Never merge while Cypress is held or without a passing Cypress result for the
   current commit. A new commit requires a new approval and Cypress result.
+- Read [`.circleci/README.md`](.circleci/README.md) before changing CircleCI
+  pipeline definitions, config paths, or schedule triggers.
 
 ## Validation
 

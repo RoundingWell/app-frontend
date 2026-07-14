@@ -464,8 +464,8 @@ workflows:
             and pipeline.parameters.defer_cypress
 
   test-nightly:
-    # Dynamic configuration requires this cron to be configured as a CircleCI
-    # schedule trigger named nightly-cypress for develop at 0 11 * * *.
+    # The dedicated nightly-cypress pipeline schedules this workflow for
+    # develop at 0 11 * * *.
     when:
       equal: [ scheduled_pipeline, << pipeline.trigger_source >> ]
     jobs:

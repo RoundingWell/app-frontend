@@ -14,7 +14,7 @@ jobs:
           name: Detect Cypress deferral label
           command: bash .circleci/detect-cypress-defer.sh /tmp/pipeline-parameters.json
       - continuation/continue:
-          configuration_path: .circleci/continue.yml
+          configuration_path: .circleci/workflows.yml
           parameters: /tmp/pipeline-parameters.json
 
 workflows:
