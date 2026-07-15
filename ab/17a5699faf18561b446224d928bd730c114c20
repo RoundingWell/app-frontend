@@ -1,0 +1,63 @@
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_a90413db91afe6::t_cf5839d95c4ccd 19
+src/js/apps/programs/program/flow/program-flow.scss
+  s_5cb787676df08f::t_cf4bfb728aa3a4 22
+src/js/apps/programs/programs-all/programs-all_views.js
+  s_5cb787676df08f::t_63169b1993c282 10,14,19,21-31,58,73
+src/js/apps/programs/program/workflows/layout.hbs
+  s_5cb787676df08f::t_63169b1993c282 7
+src/js/apps/programs/program/flow/flow_views.js
+  s_5cb787676df08f::t_63169b1993c282 14,112,122,206,224-225
+src/js/apps/programs/program/program.e2e.cy.js
+  s_5cb787676df08f::t_32c52f85e07da3 38,198,211
+src/js/apps/programs/sidebar/action/action-sidebar.e2e.cy.js
+  s_5cb787676df08f::t_32c52f85e07da3 210-211,269-270,297-298
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_5cb787676df08f::t_32c52f85e07da3 97-98,103-104,109-110,113,117-118,123,128,146,164-165,172,190,201,208,213,219,226,269-270,386,505
+src/js/apps/programs/program/program_app.js
+  s_a90413db91afe6::t_cf5839d95c4ccd 43
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_5cb787676df08f::t_63169b1993c282 1-25
+src/js/apps/programs/program/program.scss
+  s_5cb787676df08f::t_cf4bfb728aa3a4 22
+src/js/apps/programs/sidebar/program/program-sidebar.e2e.cy.js
+  s_5cb787676df08f::t_32c52f85e07da3 161
+src/js/apps/programs/program/flow/action-item.hbs
+  s_5cb787676df08f::t_63169b1993c282 1-26
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_5cb787676df08f::t_32c52f85e07da3 398,405,410,416,418,482,634,640,664,666
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_5cb787676df08f::t_32c52f85e07da3 56,60,68,76
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_a90413db91afe6::t_cf5839d95c4ccd 18
+src/js/apps/programs/program/workflows/flow-item.hbs
+  s_5cb787676df08f::t_63169b1993c282 1-25
+src/js/apps/programs/shared/components/tags-manager_component.js
+  s_5cb787676df08f::t_6db99b97080e1f 19
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_5cb787676df08f::t_63169b1993c282 9,30,51,121,160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "ab17a5699faf18561b446224d928bd730c114c20",
+  "prompts": {},
+  "sessions": {
+    "s_5cb787676df08f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f380a-6030-7862-907a-777090f3c585",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_a90413db91afe6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6630-fbeb-7391-bc7d-23f1504cadd6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
