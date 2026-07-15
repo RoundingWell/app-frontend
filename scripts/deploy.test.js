@@ -13,6 +13,7 @@ import {
   readResolvedDeployTargets,
   resolveInvalidationDistribution,
   shouldIncludeDeployTarget,
+  uploadDirectory,
   writeDeployMarkerStatus,
   writeResolvedDeployTargets,
 } from './deploy.js';
@@ -417,6 +418,36 @@ test('deployOrganizations records failed environments and continues deploying re
     successfulEnvironments: ['sandbox:beta'],
   });
   assert.deepEqual(JSON.parse(fs.readFileSync(statusFile, 'utf8')), markerStatus);
+
+  fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
+test('uploadDirectory excludes source maps at every directory depth', async() => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'deploy-upload-'));
+  const uploadedKeys = [];
+  const s3Client = {
+    async send(command) {
+      uploadedKeys.push(command.input.Key);
+    },
+  };
+
+  fs.mkdirSync(path.join(tempDir, 'assets', 'chunks'), { recursive: true });
+  fs.writeFileSync(path.join(tempDir, 'index.html'), 'app');
+  fs.writeFileSync(path.join(tempDir, 'app.js'), 'app');
+  fs.writeFileSync(path.join(tempDir, 'app.js.map'), 'map');
+  fs.writeFileSync(path.join(tempDir, 'assets', 'app.css'), 'styles');
+  fs.writeFileSync(path.join(tempDir, 'assets', 'app.css.map'), 'map');
+  fs.writeFileSync(path.join(tempDir, 'assets', 'chunks', 'feature.js'), 'feature');
+  fs.writeFileSync(path.join(tempDir, 'assets', 'chunks', 'feature.js.map'), 'map');
+
+  await uploadDirectory(s3Client, 'website-bucket', tempDir);
+
+  assert.deepEqual(uploadedKeys, [
+    'assets/chunks/feature.js',
+    'assets/app.css',
+    'app.js',
+    'index.html',
+  ]);
 
   fs.rmSync(tempDir, { recursive: true, force: true });
 });
