@@ -1,0 +1,104 @@
+test/support/api/flows.js
+  s_7dbf3a376c8ddb::t_a487deca56a7ab 2
+test/support/api/programs.js
+  s_7dbf3a376c8ddb::t_7e0c4b3ee19fe4 2
+test/fixtures/config/filters.js
+  s_7dbf3a376c8ddb::t_fc4c05e99a9fa1 5
+test/support/api/events.js
+  s_7dbf3a376c8ddb::t_a5233ba323e1e0 3
+test/fixtures/config/programs.js
+  s_7dbf3a376c8ddb::t_1ed0f3d8f65650 6
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_7dbf3a376c8ddb::t_e02d0ef4d76e28 3,786
+src/js/apps/patients/sidebar/action/action-sidebar.e2e.cy.js
+  s_7dbf3a376c8ddb::t_b94a45239cf704 2
+test/support/api/program-actions.js
+  s_7dbf3a376c8ddb::t_0ddc2edcf49667 2
+test/support/api/filters.js
+  s_7dbf3a376c8ddb::t_15f08dd658329c 2
+src/js/services/ws.js
+  s_7dbf3a376c8ddb::t_4685c0b1579555 4
+test/support/api/dashboards.js
+  s_7dbf3a376c8ddb::t_e5c5dc79ccb2cc 2
+test/support/api/files.js
+  s_7dbf3a376c8ddb::t_60496fc64df7b5 2
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_7dbf3a376c8ddb::t_f38749a7bb8c29 1
+src/js/base/uuid.component.cy.js
+  s_7dbf3a376c8ddb::t_4685c0b1579555 1-7,9-16,19-24,26-38,42-43
+  s_7dbf3a376c8ddb::t_7c2b763652d3ec 8,17-18,25,39-41
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_7dbf3a376c8ddb::t_acaf86e9ea2dba 3
+test/support/api/actions.js
+  s_7dbf3a376c8ddb::t_01b6c7053ea63f 2
+test/support/api/patients.js
+  s_7dbf3a376c8ddb::t_97a0efee866240 2
+test/fixtures/config/program-flows.js
+  s_7dbf3a376c8ddb::t_6489925bf043f3 6
+test/fixtures/config/patients.js
+  s_7dbf3a376c8ddb::t_5f14e4ddec3b96 5
+test/helpers/json-api.js
+  s_7dbf3a376c8ddb::t_0c1e7f42d29593 2
+src/js/apps/dashboards/dashboard/dashboard.e2e.cy.js
+  s_7dbf3a376c8ddb::t_617075b2260989 1
+test/support/api/form-responses.js
+  s_7dbf3a376c8ddb::t_544e20b370ea10 3
+test/fixtures/config/patient-fields.js
+  s_7dbf3a376c8ddb::t_acb6222037961b 5
+test/fixtures/config/dashboards.js
+  s_7dbf3a376c8ddb::t_1823f8469cf529 4
+test/support/api/comments.js
+  s_7dbf3a376c8ddb::t_3aa4457f4c88d0 2
+src/js/apps/patients/patient/dashboard/dashboard.e2e.cy.js
+  s_7dbf3a376c8ddb::t_a3ef890a917bce 3
+src/js/apps/programs/sidebar/action/action-sidebar.e2e.cy.js
+  s_7dbf3a376c8ddb::t_c2e5f12861dec1 1
+test/support/api/clinicians.js
+  s_7dbf3a376c8ddb::t_a1cbab16a87cbe 2
+test/support/api/program-flows.js
+  s_7dbf3a376c8ddb::t_6caafa95321437 2
+test/support/api/forms.js
+  s_7dbf3a376c8ddb::t_85e3d4d09a2b1c 2
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_7dbf3a376c8ddb::t_813b1a353ec77b 2
+test/fixtures/config/patient-search.js
+  s_7dbf3a376c8ddb::t_292cc4ae1324f0 5
+test/fixtures/config/flows.js
+  s_7dbf3a376c8ddb::t_f028f64a672c05 6
+test/fixtures/config/program-actions.js
+  s_7dbf3a376c8ddb::t_e1b41f15a25461 6
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_7dbf3a376c8ddb::t_befd8298cc3495 2
+src/js/services/ws.component.cy.js
+  s_7dbf3a376c8ddb::t_4685c0b1579555 3,283
+src/js/base/uuid.js
+  s_7dbf3a376c8ddb::t_4685c0b1579555 3
+test/fixtures/config/actions.js
+  s_7dbf3a376c8ddb::t_76773e2fc1f349 30
+test/fixtures/config/workspaces.js
+  s_7dbf3a376c8ddb::t_addfcd40e35fcf 5
+test/fixtures/config/comments.js
+  s_7dbf3a376c8ddb::t_1b369041b6d5c7 6
+test/fixtures/config/forms.js
+  s_7dbf3a376c8ddb::t_5d7ec7ed263b07 6
+src/js/apps/forms/form/action.e2e.cy.js
+  s_7dbf3a376c8ddb::t_6561c2b2098994 2
+src/js/entities-service/clinicians.js
+  s_7dbf3a376c8ddb::t_4685c0b1579555 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "4c01da914477d348de8299b3b3811d70e7b689fd",
+  "prompts": {},
+  "sessions": {
+    "s_7dbf3a376c8ddb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f701f-1d8a-7f63-b262-f7a2a49545fa",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
