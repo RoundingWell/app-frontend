@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 
 import { getRelationship, getErrors } from 'helpers/json-api';
 

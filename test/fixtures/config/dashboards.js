@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 export default () => {
-  const id = faker.string.uuid();
+  const id = faker.string.uuid({ version: 7 });
 
   return {
     id,

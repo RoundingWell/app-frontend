@@ -1,6 +1,6 @@
 import { clone, isString } from 'underscore';
 import Backbone from 'backbone';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 
 // NOTE: Assumes idAttribute is _always_ id
 Backbone.Model.prototype.sync = function(method, model, options) {

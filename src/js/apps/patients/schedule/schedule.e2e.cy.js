@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
-import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
+import { v7 as uuidv7, v5 as uuidv5 } from 'uuid';
 
 import formatDate from 'helpers/format-date';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -783,7 +783,7 @@ context('schedule page', function() {
       },
       actionsSelected: {
         [testActions[0].id]: true,
-        [uuidv4()]: true,
+        [uuidv7()]: true,
       },
     }));
 

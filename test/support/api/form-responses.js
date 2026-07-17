@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 import { getResource, getRelationship, mergeJsonApi } from 'helpers/json-api';
 
 import fxTestFormResponse from 'fixtures/test/form-response';

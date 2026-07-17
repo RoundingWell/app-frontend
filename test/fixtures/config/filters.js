@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 export default () => {
   return {
-    id: faker.string.uuid(),
+    id: faker.string.uuid({ version: 7 }),
     name: faker.lorem.word(),
     description: faker.lorem.sentence(),
     slug: faker.lorem.slug(),
