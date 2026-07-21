@@ -21,7 +21,7 @@ const Entity = BaseEntity.extend({
   },
   fetchFlowsByPatient({ patientId, filter }) {
     const data = { filter };
-    const url = `/api/patients/${ patientId }/relationships/flows`;
+    const url = `/api/patients/${ patientId }/flows`;
 
     return this.fetchCollection({ url, data });
   },

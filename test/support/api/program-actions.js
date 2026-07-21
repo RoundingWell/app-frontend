@@ -50,7 +50,7 @@ Cypress.Commands.add('routeProgramActions', (mutator = _.identity) => {
   });
 
   cy
-    .intercept('GET', '/api/programs/**/relationships/actions*', {
+    .intercept('GET', '/api/programs/**/actions*', {
       body: mutator({ data, included: [] }),
     })
     .as('routeProgramActions');

@@ -13,7 +13,7 @@ const Entity = BaseEntity.extend({
     'fetch:programFlows:collection': 'fetchProgramFlows',
   },
   fetchProgramFlowsByProgram({ programId }) {
-    const url = `/api/programs/${ programId }/relationships/flows`;
+    const url = `/api/programs/${ programId }/flows`;
 
     return this.fetchCollection({ url });
   },

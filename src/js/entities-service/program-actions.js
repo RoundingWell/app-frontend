@@ -14,7 +14,7 @@ const Entity = BaseEntity.extend({
     'fetch:programActions:collection:byProgramFlow': 'fetchProgramActionsByFlow',
   },
   fetchProgramActionsByProgram({ programId }) {
-    const url = `/api/programs/${ programId }/relationships/actions`;
+    const url = `/api/programs/${ programId }/actions`;
 
     return this.fetchCollection({ url });
   },

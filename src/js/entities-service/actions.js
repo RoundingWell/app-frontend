@@ -32,13 +32,13 @@ const Entity = BaseEntity.extend({
   },
   fetchActionsByPatient({ patientId, filter }) {
     const data = { filter };
-    const url = `/api/patients/${ patientId }/relationships/actions`;
+    const url = `/api/patients/${ patientId }/actions`;
 
     return this.fetchCollection({ url, data });
   },
   fetchActionsByFlow(flowId) {
     const data = { include: ACTION_INCLUDE };
-    const url = `/api/flows/${ flowId }/relationships/actions`;
+    const url = `/api/flows/${ flowId }/actions`;
 
     return this.fetchCollection({ url, data });
   },
