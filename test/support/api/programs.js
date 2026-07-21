@@ -93,7 +93,7 @@ Cypress.Commands.add('routeWorkspacePrograms', (mutator = _.identity) => {
   const data = getPrograms();
 
   cy
-    .intercept('GET', '/api/workspaces/**/relationships/programs*', {
+    .intercept('GET', '/api/workspaces/**/programs*', {
       body: mutator({ data, included: [] }),
     })
     .as('routeWorkspacePrograms');

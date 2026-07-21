@@ -125,7 +125,7 @@ Cypress.Commands.add('routePatientFlows', (mutator = routePatientFlows) => {
   const included = [];
 
   cy
-    .intercept('GET', '/api/patients/**/relationships/flows*', {
+    .intercept('GET', '/api/patients/**/flows*', {
       body: mutator({ data, included }),
     })
     .as('routePatientFlows');
