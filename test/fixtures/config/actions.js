@@ -27,7 +27,7 @@ export default () => {
   }));
 
   return {
-    id: faker.string.uuid(),
+    id: faker.string.uuid({ version: 7 }),
     name: `${ faker.company.buzzVerb() } ${ faker.company.catchPhraseNoun() }`,
     details: faker.lorem.sentences(),
     due_date: due.format('YYYY-MM-DD'),

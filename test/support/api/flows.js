@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 import { getResource, getRelationship, mergeJsonApi } from 'helpers/json-api';
 
 import fxFlows from 'fixtures/collections/flows';

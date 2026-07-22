@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import dayjs from 'dayjs';
-import { v4 as uuid, NIL as NIL_UUID } from 'uuid';
+import { v7 as uuid, NIL as NIL_UUID } from 'uuid';
 
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';

@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
+import { version } from 'uuid';
 
 import 'js/entities-service/entities/flows';
 
@@ -279,6 +280,7 @@ context('WS Service', function() {
       .should('be.calledWith', testData([notifications[0]]))
 
       .then(() => {
+        expect(version(service.subscriptionVersion)).to.equal(7);
         channel.request('add', notifications[1], { shouldPersist: true });
       })
       .get('@wsHandleMessage')

@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 
 // NOTE: Set this to true to check for invalid types and relationships
 const DEBUG = false;

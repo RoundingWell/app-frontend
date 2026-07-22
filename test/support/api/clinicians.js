@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import { v4 as uuid, v5 as uuidv5 } from 'uuid';
+import { v7 as uuid, v5 as uuidv5 } from 'uuid';
 import { RWELL_NS } from 'js/static';
 import { testTs } from 'helpers/test-timestamp';
 import { getResource, getRelationship, mergeJsonApi } from 'helpers/json-api';

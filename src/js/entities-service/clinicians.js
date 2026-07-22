@@ -1,5 +1,5 @@
 import { setUser, startRum } from 'js/datadog';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 import Radio from 'backbone.radio';
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model, Collection } from './entities/clinicians';

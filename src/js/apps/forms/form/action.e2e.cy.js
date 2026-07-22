@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 
 import formatDate from 'helpers/format-date';
 import { testDate, testDateSubtract } from 'helpers/test-date';

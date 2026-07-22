@@ -1,7 +1,7 @@
 import { each, map, values, isArray, isEmpty } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
-import { v4 as uuid } from 'uuid';
+import { v7 as uuid } from 'uuid';
 
 import App from 'js/base/app';
 import fetcher, { handleJSON } from 'js/base/fetch';
