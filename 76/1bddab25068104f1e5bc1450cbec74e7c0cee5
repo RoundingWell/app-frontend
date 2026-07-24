@@ -1,0 +1,21 @@
+src/js/behaviors/form-frame-proto.js
+  s_97851b2b544b0c::t_9ba055a809797a 151,169-171
+  s_97851b2b544b0c::t_2d6719be428be5 24,78,172,293-298,348-351
+  s_97851b2b544b0c::t_7f9844d4fcb4cc 352
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "761bddab25068104f1e5bc1450cbec74e7c0cee5",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
