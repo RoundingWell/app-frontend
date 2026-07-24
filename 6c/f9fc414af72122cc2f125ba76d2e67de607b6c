@@ -1,0 +1,19 @@
+packages/care-ops-forms/index.js
+  s_97851b2b544b0c::t_2fb769193ef237 23,55-59,312-317,348-351
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6cf9fc414af72122cc2f125ba76d2e67de607b6c",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
