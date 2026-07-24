@@ -1,0 +1,21 @@
+packages/care-ops-forms/index.js
+  s_97851b2b544b0c::t_f5aa50dfa796a4 336,339,366-370,381
+src/js/behaviors/form-auto-height.js
+  s_97851b2b544b0c::t_f5aa50dfa796a4 49,61,107-117,234-235,237-245
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "40054b5ca9863cb66ad70875a1769ccfd944839f",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
