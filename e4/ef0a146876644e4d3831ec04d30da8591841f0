@@ -1,0 +1,24 @@
+src/js/behaviors/form-auto-height.js
+  s_97851b2b544b0c::t_22f1ae03534a4c 205-208,210-211
+  s_97851b2b544b0c::t_f5c387f8c4d218 15,31,194,198,201-204,209,260
+  s_97851b2b544b0c::t_677312b9709708 199-200
+src/js/apps/patients/patient/action/action.scss
+  s_97851b2b544b0c::t_22f1ae03534a4c 278-279,287,299-301
+  s_97851b2b544b0c::t_637dfa37f0389d 302-303
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e4ef0a146876644e4d3831ec04d30da8591841f0",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
