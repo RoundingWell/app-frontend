@@ -1,0 +1,25 @@
+packages/care-ops-forms/index.js
+  s_e9c4ebfa58429b::t_5f0f12ddcdede2 14,22-41,105-106
+src/js/apps/patients/patient/form/form_app.js
+  s_e9c4ebfa58429b::t_e7f42d89b324fc 47,72,77,79,190-191,201,227,231-235,261-262
+src/js/apps/patients/patient/form/form_views.js
+  s_e9c4ebfa58429b::t_fabe37de63f0bf 16,136,141-145,155-157
+src/js/behaviors/form-viewport.js
+  s_e9c4ebfa58429b::t_602543907ad0dc 1-138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "c241baf0020916702f5e127d01f13d99ecef2b7d",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
