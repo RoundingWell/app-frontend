@@ -1,0 +1,35 @@
+src/js/i18n/en-US/globals.yml
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 1-103
+src/js/i18n/en-US/shared.yml
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 1-32
+src/js/i18n/en-US/programs.yml
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 1-182
+src/js/i18n/en-US/patients.yml
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 1-509
+src/js/i18n/README.md
+  s_e9c4ebfa58429b::t_1ad67945678fbc 15-16,18-22
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 7-14,17,23-25,114,118-120,124-127
+src/js/i18n/en-US/clinicians.yml
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 1-70
+src/js/i18n/index.js
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 7-12,17-28
+  s_e9c4ebfa58429b::t_b308ecbde3d347 29
+src/js/i18n/en-US/dashboards.yml
+  s_e9c4ebfa58429b::t_4307d9e9ca0422 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "3968aa66a4a84f1734ae994ed0b1471cd028c64a",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
