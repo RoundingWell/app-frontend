@@ -1,0 +1,57 @@
+.stylelintrc
+  s_e9c4ebfa58429b::t_4cc37e4236ab34 7,10
+packages/care-ops-fontawesome/manifest.json
+  s_e9c4ebfa58429b::t_c91791e9bedaf7 7,21,45,55,62-64
+src/js/auth/prelogin/prelogin_views.js
+  s_e9c4ebfa58429b::t_9e2df3e0804016 61
+src/js/components/datepicker/datepicker.scss
+  s_e9c4ebfa58429b::t_fe9f057d11e547 4,11,15,17-34,36-37,43,47,53,60-83,85-113,117-118,121,123-124,126-130,132-133
+src/js/components/droplist/index.js
+  s_e9c4ebfa58429b::t_5802e7eed4a05f 42-43,66-67,69-72,117-119
+src/js/components/list-search/list-search-component.scss
+  s_e9c4ebfa58429b::t_afa59bc020fad9 3,13,16,25,33-37,39
+src/js/components/picklist/picklist.scss
+  s_e9c4ebfa58429b::t_4f21815ffc1fa5 2,9,14-15,20,24,32-33,37,43-44,54,74,103-105,107-108,113-126,135
+src/js/regions/preload_region.component.cy.js
+  s_e9c4ebfa58429b::t_b4c023ad1fd520 1-80
+src/js/regions/preload_region.js
+  s_e9c4ebfa58429b::t_3c2f932f69fda2 8-26,31-34,36-40,43-44,50-54
+src/scss/README.md
+  s_e9c4ebfa58429b::t_fef1ac79113bff 3,21,33,35-36,42,70,81,83-85,87-88,110-111,145-146
+src/scss/core/_tokens.scss
+  s_e9c4ebfa58429b::t_0316bf3820681c 1-37
+src/scss/modules/buttons.scss
+  s_e9c4ebfa58429b::t_7a364a7ac33cbc 4-7,9-10,12,14,16,24,92-97,99-101,107-109,111-114,134-168,326-338,351,355-360,375,379
+src/scss/modules/card-list.scss
+  s_e9c4ebfa58429b::t_8fa2a504347ec3 1-440
+src/scss/modules/forms.scss
+  s_e9c4ebfa58429b::t_1c2d0f325f13a9 18,51
+src/scss/modules/list-pages.scss
+  s_e9c4ebfa58429b::t_fd5a128c8f0451 2-4,6,8-35,37-111,120-121,125-126,129-135,139-146,161,169-172,177-178,180,189,213-284
+src/scss/modules/loader.scss
+  s_e9c4ebfa58429b::t_9796fec29af951 27-30,32-33,36-39,42-92,94-134,136,138-140,143-144,146,148-150,152-170
+src/scss/modules/workflow-page.scss
+  s_e9c4ebfa58429b::t_a59998a5e4eaf3 1-79
+src/scss/provider-core.scss
+  s_e9c4ebfa58429b::t_95e3f6cd9023c5 3
+src/scss/provider-variables.scss
+  s_e9c4ebfa58429b::t_2725f1c57af055 32
+test/helpers/state-colors.js
+  s_e9c4ebfa58429b::t_d91707a82c2c99 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "7a264ea4ab04a0baaf66db255efdd2a181d2ba83",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
