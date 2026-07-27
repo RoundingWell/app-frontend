@@ -1,0 +1,103 @@
+---
+careOptsFrontend:
+  globals:
+    alertBox:
+      alertBoxTemplate:
+        dismissBtn: Dismiss
+        undoBtn: Undo
+    appNav:
+      appNavViews:
+        adminNav:
+          clinicians: Clinicians
+          programs: Programs
+        adminToolsDroplist:
+          adminTools: Admin Tools
+        appNavView:
+          addPatient: Add Patient
+          minimizeMenu: Minimize Menu
+        dashboardsNav:
+          dashboards: Dashboards
+        mainNavDroplist:
+          help: Help & Support
+          organizationHeading: Your Organization
+          signOut: Sign Out
+          workspacesHeading: Your Workspaces
+        patientsAppNav:
+          doneLastThirty: Done < 30 Days
+          newPastDay: New < 1 Day
+          ownedBy: Owned By
+          schedule: Schedule
+          searchTitle: Search
+          sharedBy: Shared By
+          updatedPastThree: Updated < 3 Days
+          worklistsTitle: Worklists
+    error:
+      errorTemplate:
+        backBtn: Back to Your Workspace
+        errorHeader: Uh-oh.
+        errorInfo: "Error code: { status }."
+        errorMessage: Something went wrong.
+        notFoundInfo: This page doesn't exist.
+        notFoundMessage: Something went wrong.
+    modal:
+      modalViews:
+        modalView:
+          cancelText: Cancel
+          savingInfoText: Applying your changes.
+          savingSubmitText: Saving...
+          submitText: Save
+        viewOnlyForm:
+          doneText: Done
+    patientModal:
+      patientModalTemplate:
+        addPatient: Add Patient
+        dateOfBirth: Date of Birth
+        firstName: First Name
+        lastName: Last Name
+        patientAccount: Patient Account
+        sex: Sex
+        workspaces: Workspaces
+      patientModalViews:
+        errorView:
+          errors:
+            invalidDate: Date of birth cannot be in the future
+          searchBtn: Search
+        patientModal:
+          add:
+            headingText: Add Patient
+          edit:
+            headingText: Patient Account
+          firstName: First Name
+          lastName: Last Name
+          patientAccountManaged: Patient account managed by data integration.
+          view:
+            headingText: Patient Account
+            infoText: Patient account managed by data integration.
+            submitText: Done
+        sexDroplist:
+          defaultText: Choose One...
+          female: Female
+          male: Male
+          other: Other
+    search:
+      patientSearchViews:
+        dialogView:
+          placeholderText: Search for patients
+        emptyView:
+          addPatient: Add Patient
+          exampleDobLabel: Date of Birth
+          exampleDob: "For example: MM/DD/YYYY"
+          exampleId: "For example:"
+          noResults: No results match your query.
+          searchBy: Or search for patients by
+          searching: Searching...
+          searchTip: Search by first name, last name with 3 or more characters.
+          shortcut: "Keyboard Shortcut: /"
+        headerView:
+          dob: DOB
+          patient: Patient
+          results: Results
+          workspaceStatus: Status
+        picklistItemView:
+          labelDob: Birth Date
+          labelName: Name
