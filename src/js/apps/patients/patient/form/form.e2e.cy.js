@@ -9,6 +9,7 @@ import { getFormFields } from 'support/api/form-fields';
 import { getForm, testForm } from 'support/api/forms';
 
 const testPatient = getPatient();
+const routePatientId = 'patient-id';
 
 function getTestPatientField(name, value) {
   return getPatientField({
@@ -82,17 +83,17 @@ context('Noncontext Form', function() {
       .routeFormActionFields()
       .routeLatestFormResponse()
       .routeActionActivity()
-      .routePatientByAction(fx => {
+      .routePatient(fx => {
         fx.data = getPatient({
           attributes: { first_name: 'Testin' },
         });
 
         return fx;
       })
-      .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
+      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
-      .wait('@routePatientByAction')
+      .wait('@routePatient')
       .wait('@routeFormDefinition');
 
     cy
@@ -139,17 +140,17 @@ context('Noncontext Form', function() {
       .routeFormActionFields()
       .routeLatestFormResponse()
       .routeActionActivity()
-      .routePatientByAction(fx => {
+      .routePatient(fx => {
         fx.data = getPatient({
           attributes: { first_name: 'Testin' },
         });
 
         return fx;
       })
-      .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
+      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
-      .wait('@routePatientByAction')
+      .wait('@routePatient')
       .wait('@routeFormDefinition');
 
     cy
@@ -206,11 +207,11 @@ context('Noncontext Form', function() {
       .routeFormActionFields()
       .routeLatestFormResponse()
       .routeActionActivity()
-      .routePatientByAction()
-      .visit(`/patient-action/${ testAction.id }/form/${ testForm.id }`)
+      .routePatient()
+      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
-      .wait('@routePatientByAction')
+      .wait('@routePatient')
       .wait('@routeFormDefinition');
 
     cy
@@ -443,7 +444,7 @@ context('Noncontext Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .get('.js-dashboard')
+      .get('.patient__context-trail .js-patient')
       .click();
 
     cy

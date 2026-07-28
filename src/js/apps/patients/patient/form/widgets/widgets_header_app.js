@@ -2,7 +2,7 @@ import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
 
-import { FormWidgetsHeaderView } from 'js/apps/forms/form/widgets/widget_header_view';
+import { FormWidgetsHeaderView } from './widget_header_view';
 
 export default App.extend({
   beforeStart({ patient, form }) {

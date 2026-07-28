@@ -8,7 +8,7 @@ import intl from 'js/i18n';
 import FormsService from 'js/services/forms';
 
 import { ModalView, SidebarModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
-import { DraftStatusView } from 'js/apps/forms/form/form_views';
+import { DraftStatusView } from 'js/apps/patients/patient/form/form_views';
 
 export default App.extend({
   channelName: 'modal',

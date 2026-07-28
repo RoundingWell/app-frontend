@@ -97,7 +97,7 @@ const MainNavDroplist = Droplist.extend({
 const AdminToolsDroplist = Droplist.extend({
   popWidth: '248px',
   position() {
-    const isMinimized = this.getOption('state').get('isMinimized');
+    const isMinimized = this.getState('isMinimized');
 
     return {
       top: window.innerHeight - 16,
@@ -110,7 +110,7 @@ const AdminToolsDroplist = Droplist.extend({
     template: hbs`{{fas "ellipsis"}}{{#unless isMinimized}}<span class="u-text--overflow">{{ @intl.globals.appNav.appNavViews.adminToolsDroplist.adminTools }}</span>{{/unless}}`,
     templateContext() {
       return {
-        isMinimized: this.getOption('state').get('isMinimized'),
+        isMinimized: this.getOption('state').isMinimized,
       };
     },
   },
@@ -166,7 +166,7 @@ const BottomNavView = View.extend({
   `,
   templateContext() {
     return {
-      canPatientCreate: this.getOption('canPatientCreate'),
+      canPatientCreate: this.model.get('canPatientCreate'),
     };
   },
 });
@@ -202,9 +202,6 @@ const AppNavView = View.extend({
   onToggleMinimized() {
     this.$el.toggleClass('minimized', this.model.get('isMinimized'));
   },
-  removeSelected() {
-    this.$('.is-selected').removeClass('is-selected');
-  },
 });
 
 const NavItemView = View.extend({
@@ -226,17 +223,18 @@ const NavItemView = View.extend({
   triggers: {
     'click': 'click',
   },
-  modelEvents: {
-    'selected': 'onSelected',
-  },
   initialize({ state }) {
     this.state = state;
+    this.listenTo(this.state, 'change:selectedNav', this.updateSelected);
+  },
+  onRender() {
+    this.updateSelected();
   },
   onClick() {
     Radio.trigger('event-router', this.model.get('event'), ...this.model.get('eventArgs'));
   },
-  onSelected() {
-    this.$el.addClass('is-selected');
+  updateSelected() {
+    this.$el.toggleClass('is-selected', this.state.get('selectedNav') === this.model);
   },
 });
 

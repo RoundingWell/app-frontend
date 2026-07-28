@@ -6,7 +6,6 @@ import { setRenderer } from 'marionette';
 
 import cliniciansEnUs from './en-US/clinicians.yml';
 import dashboardsEnUs from './en-US/dashboards.yml';
-import formsEnUs from './en-US/forms.yml';
 import globalsEnUs from './en-US/globals.yml';
 import patientsEnUs from './en-US/patients.yml';
 import programsEnUs from './en-US/programs.yml';
@@ -20,7 +19,6 @@ const localEnUs = {
   [localeKey]: composeLocale([
     cliniciansEnUs[localeKey],
     dashboardsEnUs[localeKey],
-    formsEnUs[localeKey],
     globalsEnUs[localeKey],
     patientsEnUs[localeKey],
     programsEnUs[localeKey],

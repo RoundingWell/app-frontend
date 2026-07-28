@@ -8,13 +8,15 @@ under [`src/js/i18n/en-US`](https://github.com/RoundingWell/app-frontend/tree/de
 
 Locale files are divided by stable production ownership:
 
-- `clinicians.yml`, `dashboards.yml`, `forms.yml`, `globals.yml`, `patients.yml`, and
-  `programs.yml` correspond to the app ownership roots.
+- `clinicians.yml`, `dashboards.yml`, `globals.yml`, `patients.yml`, and `programs.yml`
+  correspond to the app ownership roots.
 - `shared.yml` contains cross-domain UI infrastructure, including the existing
   `components`, `regions`, and `shared` key namespaces. It also retains the root-level
   `locales` metadata used by the runtime and PhraseApp upload.
 - Every top-level namespace under `careOptsFrontend` must belong to exactly one file. The
   locale composer rejects duplicate namespaces instead of silently replacing one tree.
+- Patient form translations live in `patients.yml` with the rest of the patient-owned
+  interface.
 
 File placement and key paths follow stable product ownership, but do not need to mirror
 every physical directory segment. Moving a module alone does not justify renaming its
