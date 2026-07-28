@@ -31,6 +31,8 @@ src/js/services/latest-list.component.cy.js
   s_e9c4ebfa58429b::t_fb3f5998a308ed 48
 src/js/apps/patients/patients-main_app.js
   s_e9c4ebfa58429b::t_f564704d5ef4ba 1,4-5,31-38,40-43,45,47-50,54-57,63,65,67-69,72,76,79-88,93,96-97,101-102,120,123-170
+src/js/apps/patients/patient/flow/flow_views.js
+  s_e9c4ebfa58429b::t_09d85d8ffb2115 1,8,15,28-41,56-59,69,87,94,107-116,122,125,152,157,181,237-241,343,374,382-386,388,414-417,425-426,434
 ---
 {
   "schema_version": "authorship/3.0.0",
