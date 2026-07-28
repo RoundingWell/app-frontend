@@ -4,6 +4,12 @@ src/js/apps/patients/shared/widgets/README.md
   s_e9c4ebfa58429b::t_ef24b0655a3271 139
 src/js/services/modal.js
   s_e9c4ebfa58429b::t_26c7df4b469f91 9,47-51,134-142
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_e9c4ebfa58429b::t_3f84a73f52a62d 24,29,34,39,48,57,66,71,80,85,90,95,100,105,108-125,127,227-232,264,267,269,280-282,314-315
+src/js/apps/patients/patient/action/action-details_views.js
+  s_e9c4ebfa58429b::t_3f84a73f52a62d 14,21-27,31,33-34,60-65,67-68,72-73,80,85,88,93,104,108,111-118,132-137,139-140,142-144,155,211,272,287,300,308-315
+src/js/apps/patients/patient/action/action_app.js
+  s_e9c4ebfa58429b::t_3f84a73f52a62d 51,94,140-141,143-146,150-153,221,226,247-256,276-280
 ---
 {
   "schema_version": "authorship/3.0.0",
