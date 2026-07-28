@@ -1,0 +1,50 @@
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_e9c4ebfa58429b::t_cab4d129455e25 92-93,107-109
+  s_e9c4ebfa58429b::t_a9898a1f495604 110
+packages/care-ops-five9/five9_views.js
+  s_e9c4ebfa58429b::t_dc4a9329931851 64
+packages/care-ops-ringcentral/ringcentral_views.js
+  s_e9c4ebfa58429b::t_7e5f8dbde53057 47
+src/js/apps/patients/patient/patient_app.js
+  s_e9c4ebfa58429b::t_f363ca381048bc 1-2,9-12,15,22-24,26-27,29,34-38,44-45,54,56,72,74-77,80,84-89,92-93,100-102,104-106,110,116,119,121,123,126,132-133,158-165,168-172,174,177-179,181-182,184-185,187-188,190-197,200-201
+src/js/apps/patients/patient/patient_views.js
+  s_e9c4ebfa58429b::t_c273b74044da78 21-34,38-40,48-66,70,98-101
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_e9c4ebfa58429b::t_99305f069a48bf 42
+src/js/apps/patients/schedule/schedule_views.js
+  s_e9c4ebfa58429b::t_e88ecdd6e080dc 260-261,263,264-265,269,274
+src/js/apps/patients/shared/actions_views.js
+  s_e9c4ebfa58429b::t_a17ebac86c8652 28-34
+src/js/apps/patients/shared/widgets/widgets.js
+  s_e9c4ebfa58429b::t_215f05c17c77ba 145
+src/js/apps/patients/worklist/action_views.js
+  s_e9c4ebfa58429b::t_f0ebada6991ec4 73,78
+src/js/apps/patients/worklist/flow_views.js
+  s_e9c4ebfa58429b::t_6e730a6d923bb9 60
+src/js/base/routerapp.component.cy.js
+  s_e9c4ebfa58429b::t_55a9472af2685d 8,33,61,68,77-78,80,117,120,123,135,153,160,165,168,186,197
+src/js/base/routing.md
+  s_e9c4ebfa58429b::t_d2031f3134f5e4 31,33-36,61,140-141
+src/js/base/subrouterapp.component.cy.js
+  s_e9c4ebfa58429b::t_0cec9e8b4337de 20,59
+src/js/services/latest-list.component.cy.js
+  s_e9c4ebfa58429b::t_fb3f5998a308ed 48
+src/js/apps/patients/patients-main_app.js
+  s_e9c4ebfa58429b::t_f564704d5ef4ba 1,4-5,31-38,40-43,45,47-50,54-57,63,65,67-69,72,76,79-88,93,96-97,101-102,120,123-170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "50e7f88e778ebbb6ca0de8eb0d0182e4a0d29f52",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
