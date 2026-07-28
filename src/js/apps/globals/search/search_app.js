@@ -14,11 +14,11 @@ export default App.extend({
 
     this.listenTo(patientSearchModal, {
       'search:select'(result) {
-        Radio.trigger('event-router', 'patient:dashboard', result.get('_patient').id);
+        Radio.trigger('event-router', 'patient:workflow', result.get('_patient').id);
         patientSearchModal.destroy();
       },
       'click:addPatient'() {
-        this.triggerMethod('click:addPatient');
+        Radio.request('patient-modal', 'show');
       },
       'destroy'() {
         this.stop();

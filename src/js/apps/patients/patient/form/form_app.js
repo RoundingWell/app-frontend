@@ -7,9 +7,7 @@ import App from 'js/base/app';
 
 import intl from 'js/i18n';
 
-import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
-import ActionSiderbarApp from 'js/apps/patients/sidebar/action/action-sidebar_app';
-import WidgetsHeaderApp from 'js/apps/forms/form/widgets/widgets_header_app';
+import WidgetsHeaderApp from './widgets/widgets_header_app';
 
 import FormsService from 'js/services/forms';
 
@@ -24,29 +22,21 @@ import {
   UpdateView,
   HistoryView,
   DraftStatusView,
-} from 'js/apps/forms/form/form_views';
+} from './form_views';
 
 export default App.extend({
   childApps: {
-    patient: {
-      AppClass: PatientSidebarApp,
-      regionName: 'sidebar',
-      getOptions: ['patient'],
-    },
     widgetHeader: {
       AppClass: WidgetsHeaderApp,
       regionName: 'widgets',
       getOptions: ['patient', 'form'],
     },
-    actionSidebar: ActionSiderbarApp,
   },
   initFormState() {
     const storedState = localStore.get(`form-state_${ this.currentUser.id }`);
 
     this.setState(extend({
       responseId: null,
-      isActionSidebar: true,
-      isExpanded: true,
       shouldShowHistory: false,
       saveButtonType: 'save',
     }, storedState));
@@ -58,61 +48,96 @@ export default App.extend({
 
     this.initFormState();
   },
-  beforeStart({ patientActionId }) {
-    this.patientActionId = patientActionId || this.patientActionId;
+  beforeStart({ patient, formId, actionId }) {
+    if (!actionId) {
+      return [
+        Radio.request('entities', 'fetch:forms:model', formId),
+        null,
+        Radio.request('entities', 'fetch:formResponses:byMe', { patientId: patient.id, formId }),
+      ];
+    }
 
     return [
-      Radio.request('entities', 'fetch:forms:byAction', this.patientActionId),
-      Radio.request('entities', 'fetch:actions:withResponses', this.patientActionId),
-      Radio.request('entities', 'fetch:patients:model:byAction', this.patientActionId),
-      Radio.request('entities', 'fetch:formResponses:byMe', { actionId: this.patientActionId }),
+      Radio.request('entities', 'fetch:forms:byAction', actionId),
+      Radio.request('entities', 'fetch:actions:withResponses', actionId),
+      Radio.request('entities', 'fetch:formResponses:byMe', { actionId }),
     ];
   },
-  onFail() {
-    Radio.request('alert', 'show:error', intl.forms.form.formApp.notFound);
+  onFail({ actionId } = {}) {
+    const message = actionId ?
+      intl.patients.patient.form.formApp.notFound :
+      intl.patients.patient.form.formApp.formNotFound;
+
+    Radio.request('alert', 'show:error', message);
     Radio.trigger('event-router', 'default');
   },
   onBeforeStop() {
     this.removeChildApp('formsService');
   },
-  onStart(options, form, action, patient, latestResponse) {
-    this.form = form;
-    this.patient = patient;
-    this.action = action;
-    this.responses = action.getFormResponses();
-    this.latestResponse = latestResponse;
-    this.isReadOnly = form.isReadOnly();
-    this.isLocked = action.isLocked() || !action.canSubmit();
-    this.isSubmitHidden = form.isSubmitHidden();
-
-    this.listenTo(action, 'destroy', function() {
-      Radio.request('alert', 'show:success', intl.forms.form.formApp.deleteSuccess);
-      Radio.trigger('event-router', 'default');
-    });
-
+  onStart({ patient }, form, action, latestResponse) {
+    this.setFormContext({ patient, form, action, latestResponse });
+    this.listenToActionDestroy();
     this.startFormService();
-
-    this.setView(new LayoutView({ model: this.form, patient, action }));
-
+    this.setView(new LayoutView({ model: this.form }));
+    this.triggerContextChange();
     this.startChildApp('widgetHeader');
-
     this.showStateActions();
-
-    this.showSidebar();
-
-    // Note: triggers onChangeResponseId to showContent
-    this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id') });
-
+    this.showInitialForm();
     this.showView();
   },
-  startFormService() {
-    const formService = this.addChildApp('formsService', FormsService, {
-      patient: this.patient,
-      action: this.action,
-      form: this.form,
-      responses: this.responses,
-      latestResponse: this.latestResponse,
+  setFormContext({ patient, form, action, latestResponse }) {
+    this.form = form;
+    this.patient = patient;
+    this.action = action || null;
+    this.responses = action && action.getFormResponses();
+    this.latestResponse = latestResponse;
+    this.isReadOnly = form.isReadOnly();
+    this.isLocked = action ? action.isLocked() || !action.canSubmit() : false;
+    this.isSubmitHidden = form.isSubmitHidden();
+  },
+  listenToActionDestroy() {
+    if (!this.action) return;
+
+    this.listenTo(this.action, 'destroy', function() {
+      Radio.request('alert', 'show:success', intl.patients.patient.form.formApp.deleteSuccess);
+      Radio.trigger('event-router', 'default');
     });
+  },
+  triggerContextChange() {
+    const flow = this.action && this.action.getFlow();
+    this.trigger('context:change', {
+      page: 'form',
+      formId: this.form.id,
+      formName: this.form.get('name'),
+      actionId: this.action && this.action.id,
+      actionName: this.action && this.action.get('name'),
+      flowId: flow && flow.id,
+      flowName: flow && flow.get('name'),
+    });
+  },
+  showInitialForm() {
+    if (this.action) {
+      this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id') });
+      this.onChangeResponseId();
+      return;
+    }
+
+    this.showFormActions();
+    this.showContent();
+  },
+  startFormService() {
+    const serviceOptions = {
+      patient: this.patient,
+      form: this.form,
+      latestResponse: this.latestResponse,
+    };
+
+    if (this.action) {
+      serviceOptions.action = this.action;
+      serviceOptions.responses = this.responses;
+    }
+
+    const formService = this.addChildApp('formsService', FormsService, serviceOptions);
 
     if (!this.isReadOnly && !this.isLocked) this.bindEvents(formService, this.serviceEvents);
   },
@@ -131,26 +156,33 @@ export default App.extend({
   onFormServiceSuccess(response) {
     if (this.shouldSaveAndGoBack()) {
       Radio.request('history', 'go:back', () => {
-        const flow = this.action.getFlow();
+        const flow = this.action && this.action.getFlow();
         if (flow) {
-          Radio.trigger('event-router', 'flow', flow.id);
+          Radio.trigger('event-router', 'patient:flow', this.patient.id, flow.id);
           return;
         }
 
-        Radio.trigger('event-router', 'patient:dashboard', this.patient.id);
+        Radio.trigger('event-router', 'patient:workflow', this.patient.id);
       });
 
       return;
     }
 
-    this.responses.unshift(response);
-    this.setState({ responseId: response.id });
+    if (this.action) {
+      this.responses.unshift(response);
+      this.setState({ responseId: response.id });
+      return;
+    }
+
+    this.showForm(response.id);
+    this.showChildView('status', new StatusView({ model: response }));
+    this.showFormActions();
   },
   onFormServiceError(errors) {
-    const status = parseInt(errors[0].status, 10);
+    const status = parseInt(get(errors, [0, 'status']), 10);
 
     if (status === 403) {
-      Radio.request('alert', 'show:error', intl.forms.form.formViews.lockedSubmitView.permissionMessage);
+      Radio.request('alert', 'show:error', intl.patients.patient.form.formViews.lockedSubmitView.permissionMessage);
     }
 
     this.showFormSave();
@@ -162,18 +194,20 @@ export default App.extend({
     this.setState({ updated });
   },
   onFormServiceRefresh() {
-    this.restart();
+    this.restart({
+      patient: this.patient,
+      formId: this.form.id,
+      actionId: this.action && this.action.id,
+    });
   },
   stateEvents: {
     'change': 'onChangeState',
-    'change:isExpanded': 'showSidebar',
-    'change:isActionSidebar': 'showSidebar',
     'change:shouldShowHistory': 'showFormActions',
     'change:responseId': 'onChangeResponseId',
     'change:updated': 'onChangeDraftStatus',
   },
   onChangeState(state) {
-    localStore.set(`form-state_${ this.currentUser.id }`, state.pick('isExpanded', 'saveButtonType'));
+    localStore.set(`form-state_${ this.currentUser.id }`, state.pick('saveButtonType'));
   },
   onChangeResponseId() {
     this.showFormActions();
@@ -182,34 +216,22 @@ export default App.extend({
   showStateActions() {
     const formStateActions = new FormStateActionsView({
       model: this.getState(),
-      action: this.action,
-      responses: this.responses.filterSubmissions(),
+      responses: this.responses && this.responses.filterSubmissions(),
     });
 
     this.listenTo(formStateActions, {
-      'click:sidebarButton': this.onClickSidebarButton,
-      'click:expandButton': this.onClickExpandButton,
       'click:historyButton': this.onClickHistoryButton,
     });
 
     this.showChildView('stateActions', formStateActions);
   },
-  onClickSidebarButton() {
-    if (this.getState('isExpanded')) {
-      this.setState({ isActionSidebar: true, isExpanded: false });
-      return;
-    }
-
-    this.toggleState('isActionSidebar');
-  },
-  onClickExpandButton() {
-    this.toggleState('isExpanded');
-  },
   onClickHistoryButton() {
+    if (!this.responses) return;
+
     this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id'), shouldShowHistory: !this.getState('shouldShowHistory') });
   },
   showContent() {
-    if (!this.isReadOnly && !this.isLocked && !this.getState('responseId')) this.loadDraftStatus();
+    if (!this.isReadOnly && !this.isLocked && (!this.action || !this.getState('responseId'))) this.loadDraftStatus();
     this.showForm();
   },
   async loadDraftStatus() {
@@ -220,48 +242,16 @@ export default App.extend({
 
     this.setState({ updated });
   },
-  showForm() {
+  showForm(responseId = this.getState('responseId')) {
     this.showChildView('form', new IframeView({
       model: this.form,
-      responseId: this.getState('responseId'),
+      responseId,
     }));
   },
-  showSidebar() {
-    const isActionSidebar = this.getState('isActionSidebar');
-    const isExpanded = this.getState('isExpanded');
-
-    if (!isActionSidebar || isExpanded) {
-      this.stopChildApp('actionSidebar');
-    }
-
-    if (isExpanded) {
-      this.stopChildApp('patient');
-      this.getRegion('sidebar').empty();
-      return;
-    }
-
-    if (isActionSidebar) {
-      this.showActionSidebar();
-    }
-
-    this.startChildApp('patient');
-  },
-  showActionSidebar() {
-    const sidebarApp = this.getChildApp('actionSidebar');
-
-    Radio.request('sidebar', 'start', sidebarApp, { action: this.action, isShowingForm: true });
-
-    this.listenTo(sidebarApp, 'close', () => {
-      sidebarApp.stop();
-
-      this.setState('isActionSidebar', false);
-    });
-  },
   showFormActions() {
-    // If there's a submission this always shows
-    this.showFormStatus();
+    if (this.action) this.showFormStatus();
 
-    if (this.getState('shouldShowHistory')) {
+    if (this.action && this.getState('shouldShowHistory')) {
       this.showFormHistory();
       return;
     }
@@ -276,7 +266,7 @@ export default App.extend({
       return;
     }
 
-    if (this.getState('responseId')) {
+    if (this.action && this.getState('responseId')) {
       this.showFormUpdate();
       return;
     }
@@ -290,6 +280,8 @@ export default App.extend({
     this.showChildView('formAction', new LockedSubmitView());
   },
   showFormStatus() {
+    if (!this.responses) return;
+
     if (!this.responses.getFirstSubmission()) return;
 
     this.showChildView('status', new StatusView({
@@ -297,6 +289,8 @@ export default App.extend({
     }));
   },
   showFormHistory() {
+    if (!this.responses) return;
+
     const selected = this.responses.get(this.getState('responseId'));
 
     const historyView = this.showChildView('formAction', new HistoryView({ selected, collection: this.responses.filterSubmissions() }));

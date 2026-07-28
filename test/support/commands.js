@@ -85,7 +85,6 @@ Cypress.Commands.overwrite('visit', (originalFn, url = '/', options = {}) => {
     .wait(waits);
 });
 
-// Adds a wait and tick for the app load defer
 Cypress.Commands.add('visitOnClock', (url, options = {}) => {
   if (_.isObject(url)) {
     options = url;
