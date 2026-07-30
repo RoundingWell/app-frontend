@@ -35,14 +35,10 @@ const DoneEmptyView = View.extend({
 
 const RowBehavior = Behavior.extend({
   modelEvents: {
-    'editing': 'onEditing',
     'change': 'onChange',
   },
   onChange() {
     this.view.render();
-  },
-  onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
   },
 });
 
