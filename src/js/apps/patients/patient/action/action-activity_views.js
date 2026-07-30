@@ -17,7 +17,7 @@ import { CommentFormView } from 'js/apps/patients/shared/comments_views';
 import 'scss/modules/comments.scss';
 import 'scss/modules/sidebar.scss';
 
-import './action-sidebar.scss';
+import './action.scss';
 
 const CreatedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "created")) name = name team = team}}
@@ -131,9 +131,9 @@ const CommentView = View.extend({
         <div class="comment__title">
           <span class="comment__author-name">{{ name }}</span>
           <span class="comment__timestamp" data-testid="action-comment-timestamp">{{ formatDateTime created_at "AT_TIME" }}</span>
-          {{#if canEdit}}<span class="js-edit comment__edit">{{far "pen"}} {{ @intl.patients.sidebar.action.activityViews.commentView.edit }}</span>{{/if}}
+          {{#if canEdit}}<span class="js-edit comment__edit">{{far "pen"}} {{ @intl.patients.patient.action.activityViews.commentView.edit }}</span>{{/if}}
         </div>
-        <div class="comment__message">{{ message }}{{#if edited_at}}<span class="comment__edited"> {{ @intl.patients.sidebar.action.activityViews.commentView.edited }} </span>{{/if}}</div>
+        <div class="comment__message">{{ message }}{{#if edited_at}}<span class="comment__edited"> {{ @intl.patients.patient.action.activityViews.commentView.edited }} </span>{{/if}}</div>
       </div>
     </div>
   `,
@@ -151,7 +151,7 @@ const CommentView = View.extend({
     const edited = this.model.get('edited_at');
     if (!edited) return;
 
-    const template = hbs`{{formatHTMLMessage (intlGet "patients.sidebar.action.activityViews.commentView.editTooltip")  edited = (formatDateTime edited "TIME") }}`;
+    const template = hbs`{{formatHTMLMessage (intlGet "patients.patient.action.activityViews.commentView.editTooltip")  edited = (formatDateTime edited "TIME") }}`;
 
     new Tooltip({
       messageHtml: renderTemplate(template, { edited }),
@@ -174,12 +174,11 @@ const CommentView = View.extend({
   },
   onDeleteComment() {
     this.triggerMethod('remove:comment', this.model);
-    this.model.destroy();
   },
 });
 
 const ActivityView = View.extend({
-  className: 'action-sidebar__activity-item',
+  className: 'patient-action__activity-item',
   getTemplate() {
     const type = this.model.get('event_type');
     const Templates = {
@@ -219,7 +218,7 @@ const ActivityView = View.extend({
     const form = this.model.getForm();
     const team = this.model.getTeam();
     const state = this.model.getState();
-    const sourceI18n = `patients.sidebar.action.activityViews.${ this.model.get('source') }`;
+    const sourceI18n = `patients.patient.action.activityViews.${ this.model.get('source') }`;
 
     return {
       recipient: recipient ? `${ recipient.get('first_name') } ${ recipient.get('last_name') }` : null,
@@ -241,7 +240,7 @@ const ActivitiesView = CollectionView.extend({
   className: 'u-margin--t-24',
   template: hbs`
     <h3 class="sidebar__heading">
-      {{far "timeline-arrow"}}<span class="u-margin--l-8">{{ @intl.patients.sidebar.action.activityViews.activityHeadingText }}</span>
+      {{far "timeline-arrow"}}<span class="u-margin--l-8">{{ @intl.patients.patient.action.activityViews.activityHeadingText }}</span>
     </h3>
     <div class="u-margin--t-16 sidebar__activity" data-activities-region></div>
   `,
@@ -269,8 +268,8 @@ const ActivitiesView = CollectionView.extend({
 const TimestampsView = View.extend({
   className: 'sidebar__footer flex',
   template: hbs`
-    <div class="sidebar__footer-left"><h4 class="sidebar__label">{{ @intl.patients.sidebar.action.activityViews.createdAt }}</h4><div>{{formatDateTime createdAt "AT_TIME"}}</div></div>
-    <div><h4 class="sidebar__label">{{ @intl.patients.sidebar.action.activityViews.updatedAt }}</h4><div>{{formatDateTime updated_at "AT_TIME"}}</div></div>
+    <div class="sidebar__footer-left"><h4 class="sidebar__label">{{ @intl.patients.patient.action.activityViews.createdAt }}</h4><div>{{formatDateTime createdAt "AT_TIME"}}</div></div>
+    <div><h4 class="sidebar__label">{{ @intl.patients.patient.action.activityViews.updatedAt }}</h4><div>{{formatDateTime updated_at "AT_TIME"}}</div></div>
   `,
   templateContext() {
     return {
@@ -282,7 +281,21 @@ const TimestampsView = View.extend({
   },
 });
 
+const LayoutView = View.extend({
+  template: hbs`
+    <div data-activities-region></div>
+    <div class="u-margin--t-16" data-comment-form-region></div>
+    <div class="u-margin--t-16" data-timestamps-region></div>
+  `,
+  regions: {
+    activities: '[data-activities-region]',
+    comment: '[data-comment-form-region]',
+    timestamps: '[data-timestamps-region]',
+  },
+});
+
 export {
+  LayoutView,
   ActivitiesView,
   TimestampsView,
 };

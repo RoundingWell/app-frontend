@@ -10,7 +10,7 @@ import { ACTION_SHARING } from 'js/static';
 
 import FormSharingTemplate from './form-sharing.hbs';
 
-import './action-sidebar.scss';
+import './action.scss';
 
 const FormView = View.extend({
   attributes() {
@@ -19,7 +19,7 @@ const FormView = View.extend({
     };
   },
   tagName: 'button',
-  className: 'button-secondary w-100 action-sidebar__button',
+  className: 'button-secondary w-100 patient-action__button',
   template: hbs`{{far "square-poll-horizontal"}}<span>{{ name }}</span>`,
   triggers: {
     'click': 'click',
@@ -80,7 +80,7 @@ const FormSharingView = View.extend({
 const FormLayoutView = View.extend({
   template: hbs`
     <div class="flex{{#if hasForm}} u-margin--t-8{{/if}}">
-      {{#if hasForm}}<h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.actionSidebarFormsViews.formLayoutView.formLabel }}</h4>{{/if}}
+      {{#if hasForm}}<h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.formsViews.formLayoutView.formLabel }}</h4>{{/if}}
       <div class="flex-grow" data-form-region></div>
     </div>
     <div class="flex">

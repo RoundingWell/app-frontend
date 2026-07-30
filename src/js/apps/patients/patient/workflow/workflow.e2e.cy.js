@@ -24,7 +24,7 @@ import { getFile } from 'support/api/files';
 
 import { ACTION_OUTREACH } from 'js/static';
 
-context('patient dashboard page', function() {
+context('patient workflow page', function() {
   const testPatient = getPatient();
 
   function createActionPostRoute(name) {
@@ -177,6 +177,10 @@ context('patient dashboard page', function() {
       .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTime, functionNames: ['Date'] })
       .wait('@routePatient')
       .wait('@routePatientFlows');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow`);
 
     cy
       .wait('@routePatientActions')
@@ -518,7 +522,7 @@ context('patient dashboard page', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/${ testAction.id }/form/${ testForm.id }`);
+      .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }/action/${ testAction.id }`);
   });
 
   specify('add action and flow', function() {
@@ -1060,7 +1064,7 @@ context('patient dashboard page', function() {
 
     cy
       .get('.sidebar')
-      .find('.action-sidebar__name')
+      .find('.patient-action__name')
       .should('contain', 'One of One');
 
     cy
@@ -1107,7 +1111,7 @@ context('patient dashboard page', function() {
 
     cy
       .get('.sidebar')
-      .find('.action-sidebar__name')
+      .find('.patient-action__name')
       .should('contain', 'One of Two');
 
     cy
@@ -1148,7 +1152,7 @@ context('patient dashboard page', function() {
 
     cy
       .get('.sidebar')
-      .find('.action-sidebar__name')
+      .find('.patient-action__name')
       .should('contain', 'Two of Two');
 
     const testFlow = getFlow({

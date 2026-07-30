@@ -1,15 +1,15 @@
-.action-sidebar__name {
+.patient-action__name {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
   padding: 8px 0;
 }
 
-.action-sidebar__button {
+.patient-action__button {
   color: color(blue);
 }
 
-.action-sidebar__sharing-state {
+.patient-action__sharing-state {
   border: 1px solid #FFF;
   padding: 4px 16px 8px;
 
@@ -22,7 +22,7 @@
   }
 }
 
-.action-sidebar__info {
+.patient-action__info {
   background-color: #{$highlighted};
   border: 1px solid #{$highlighted};
   border-radius: 4px;
@@ -33,7 +33,7 @@
   padding: 8px 16px;
 }
 
-.action-sidebar__no-results {
+.patient-action__no-results {
   color: #{$black-80};
   font-size: 16px;
   font-weight: 600;
@@ -41,22 +41,22 @@
   text-align: center;
 }
 
-.action-sidebar__activity {
+.patient-action__activity {
   .loader {
     margin-top: 100px;
   }
 }
 
-.action-sidebar__attachment-file {
+.patient-action__attachment-file {
   display: none;
 }
 
-.action-sidebar__attachment-filename {
+.patient-action__attachment-filename {
   color: color(blue);
   font-weight: 600;
 }
 
-.action-sidebar__attachment-action {
+.patient-action__attachment-action {
   color: #{$black-60};
   cursor: pointer;
   font-size: 12px;
@@ -71,7 +71,7 @@
   }
 }
 
-.action-sidebar__activity-item {
+.patient-action__activity-item {
   line-height: 14px;
   margin-bottom: 8px;
 }

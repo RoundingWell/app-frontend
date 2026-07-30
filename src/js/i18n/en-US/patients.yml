@@ -2,17 +2,122 @@
 careOptsFrontend:
   patients:
     patient:
-      archive:
-        archiveViews:
+      action:
+        actionApp:
+          notFound: The Action you requested does not exist.
+          uploadError: File failed to upload
+        detailsTemplate:
+          placeholder: Add Details
+        detailsViews:
+          actionView:
+            dueDayLabel: Due
+            durationLabel: Duration
+            ownerLabel: Owner
+            stateLabel: State
+          readOnlyActionView:
+            dueDayLabel: Due
+            durationLabel: Duration
+            noDetails: No details
+            ownerLabel: Owner
+            permissionLabel: Permissions
+            permissionInfo: You are not able to change settings on this action.
+            stateLabel: State
+          saveView:
+            cancelBtn: Cancel
+            saveBtn: Save
+        attachmentsViews:
+          attachmentsViews:
+            addAttachment: Add an Attachment...
+            attachmentsHeadingText: Attachments
+          attachmentView:
+            downloadText: Download
+            removeText: Remove
+          emptyView: No Attachments
+          removeModal:
+            bodyText: Are you sure you want to remove this attachment?
+            headingText: Confirm Remove
+            submitText: Remove Attachment
+        formsViews:
+          formLayoutView:
+            formLabel: Form
+        actionViews:
+          headingView:
+            headingText: |
+              {outreach, select,
+                disabled {Action}
+                other {Outreach Action}
+              }
+          menuView:
+            menuOptions:
+              delete: Delete Action
+              headingText: Action Menu
+        activityViews:
+          api:
+            actionCopiedFromProgram: '<strong>{ name }</strong> ({ team }) added this action from the { program } program'
+            clinicianAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_name }'
+            created: '<strong>{ name }</strong> ({ team }) added this action'
+            detailsUpdated: '<strong>{ name }</strong> ({ team }) updated the details of this action'
+            dueDateCleared: '<strong>{ name }</strong> ({ team }) cleared the due date'
+            dueDateUpdated: '<strong>{ name }</strong> ({ team }) changed the due date to { date }'
+            dueTimeCleared: '<strong>{ name }</strong> ({ team }) cleared the due time'
+            dueTimeUpdated: '<strong>{ name }</strong> ({ team }) changed the due time to { time }'
+            durationCleared: '<strong>{ name }</strong> ({ team }) cleared duration'
+            durationUpdated: '<strong>{ name }</strong> ({ team }) updated the duration to { duration }'
+            formRecipientResponded: '<strong>{ recipient }</strong> completed the form { form }'
+            formResponded: '<strong>{ name }</strong> ({ team }) worked on the form { form }'
+            formUpdated: '<strong>{ name }</strong> ({ team }) added the form { form }'
+            nameUpdated: '<strong>{ name }</strong> ({ team }) updated the name of this action from { from_name } to { to_name }'
+            sharingCanceled: '<strong>{ name }</strong> ({ team }) cancelled form sharing'
+            sharingSent: 'Form shared with <strong>{ recipient }</strong>. Waiting for response.'
+            stateUpdated: '<strong>{ name }</strong> ({ team }) changed the state to { to_state }'
+            teamAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_team }'
+          system:
+            actionCopiedFromProgram: '<strong>Action</strong> added from the { program } program'
+            clinicianAssigned: '<strong>Owner</strong> changed to { to_name }'
+            detailsUpdated: '<strong>Action details</strong> updated'
+            dueDateCleared: '<strong>Due Date</strong> cleared'
+            dueDateUpdated: '<strong>Due Date</strong> changed to { date }'
+            dueTimeCleared: '<strong>Due Time</strong> cleared'
+            dueTimeUpdated: '<strong>Due Time</strong> changed to { time }'
+            durationCleared: '<strong>Duration</strong> cleared'
+            durationUpdated: '<strong>Duration</strong> updated to { duration }'
+            formRecipientResponded: '<strong>Form</strong> { form } completed'
+            formResponded: '<strong>Form</strong> { form } worked on'
+            formUpdated: '<strong>Form</strong> { form } added'
+            nameUpdated: '<strong>Action name</strong> updated from { from_name } to { to_name }'
+            sharingCanceled: '<strong>Form sharing</strong> ({ team }) cancelled'
+            sharingSent: 'Form shared with <strong>{ recipient }</strong>. Waiting for response.'
+            stateUpdated: '<strong>State</strong> changed to { to_state }'
+            teamAssigned: '<strong>Owner</strong> changed to { to_team }'
+          activityHeadingText: Activity Log
+          commentView:
+            edit: Edit
+            editTooltip: 'Last edited on { edited }'
+            edited: (Edited)
+          createdAt: Added
+          updatedAt: Updated
+        dialerView:
+          label: Dialer
+        formSharingTemplate:
+          buttonResponseText: View Response
+          label: Share Form
+          recipientLabel: Recipient
+          stateText: |
+            {sharing, select,
+              responded {Response Saved}
+              canceled {Form Sharing Canceled}
+              error_no_phone {Missing Mobile Phone}
+              error_opt_out {Recipient Opted Out}
+              error_sms_failed {Mobile Phone SMS Failed}
+              other {Waiting for Response}
+            }
+          stateLabel: Share State
+      workflow:
+        workflowViews:
           archiveBtn: Archive
           dashboardBtn: Dashboard
-          emptyView: No Archive
-      dashboard:
-        dashboardViews:
-          archiveBtn: Archive
-          emptyView: No Workflows
-          addActionBtn: Action
-          dashboardBtn: Dashboard
+          doneEmptyView: No Archive
+          notDoneEmptyView: No Workflows
           newAction: New Action
           actionLoading: Loading...
       form:
@@ -53,14 +158,37 @@ careOptsFrontend:
             label: Last submitted { date }
           updateView:
             buttonText: Update
-      flowViews:
-        actionNotFound: The Action you requested does not exist.
-        addActionHeadingText: Add Action
-        bulkEditFailure: Something went wrong. Please try again.
-        contextBackBtn: Back to List
-        emptyView: No Actions
+      flow:
+        flowViews:
+          actionNotFound: The Action you requested does not exist.
+          addActionHeadingText: Add Action
+          activity:
+            api:
+              clinicianAssigned: '<strong>{ name }</strong> ({ team }) changed the Owner to { to_name }'
+              detailsUpdated: '<strong>{ name }</strong> ({ team }) updated the details of this flow'
+              nameUpdated: '<strong>{ name }</strong> ({ team }) updated the name of this flow from { from_name } to { to_name }'
+              programStarted: '<strong>{ name }</strong> ({ team }) added this flow from the { program } program'
+              stateUpdated: '<strong>{ name }</strong> ({ team }) changed State to { to_state }'
+              teamAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_team }'
+            system:
+              clinicianAssigned: '<strong>Owner</strong> ({ team }) changed to { to_name }'
+              detailsUpdated: '<strong>Flow details</strong> updated'
+              nameUpdated: '<strong>Flow name</strong> updated from { from_name } to { to_name }'
+              programStarted: '<strong>Flow</strong> added from the { program } program'
+              stateUpdated: '<strong>Flow state</strong> changed to { to_state }'
+              teamAssigned: '<strong>Owner</strong> changed to { to_team }'
+          activityHeadingText: Activity Log
+          bulkEditFailure: Something went wrong. Please try again.
+          contextBackBtn: Back to List
+          deleteModal:
+            bodyText: Are you sure you want to delete this flow? All actions on this flow will also be deleted. This cannot be undone.
+            headingText: Confirm Delete
+            submitText: Delete Flow
+          emptyView: No Actions
+          menu:
+            delete: Delete Flow
+            headingText: Flow Menu
       patientViews:
-        actionNotFound: The Action you requested does not exist.
         contextBackBtn: Back to List
       sidebar:
         sidebarApp:
@@ -235,115 +363,6 @@ careOptsFrontend:
           mins: "{min, plural, one {# min} other {# mins}}"
           noDuration: No Duration
     sidebar:
-      action:
-        actionDetailsTemplate:
-          placeholder: Add Details
-        actionSidebarActionViews:
-          actionView:
-            dueDayLabel: Due
-            durationLabel: Duration
-            ownerLabel: Owner
-            stateLabel: State
-          readOnlyActionView:
-            dueDayLabel: Due
-            durationLabel: Duration
-            noDetails: No details
-            ownerLabel: Owner
-            permissionLabel: Permissions
-            permissionInfo: You are not able to change settings on this action.
-            stateLabel: State
-          saveView:
-            cancelBtn: Cancel
-            saveBtn: Save
-        actionSidebarAttachmentsViews:
-          attachmentsViews:
-            addAttachment: Add an Attachment...
-            attachmentsHeadingText: Attachments
-          attachmentView:
-            downloadText: Download
-            removeText: Remove
-          emptyView: No Attachments
-          removeModal:
-            bodyText: Are you sure you want to remove this attachment?
-            headingText: Confirm Remove
-            submitText: Remove Attachment
-        actionSidebarFormsViews:
-          formLayoutView:
-            formLabel: Form
-        actionSidebarViews:
-          headingView:
-            headingText: |
-              {outreach, select,
-                disabled {Action}
-                other {Outreach Action}
-              }
-          menuView:
-            menuOptions:
-              delete: Delete Action
-              headingText: Action Menu
-        activityViews:
-          api:
-            actionCopiedFromProgram: '<strong>{ name }</strong> ({ team }) added this action from the { program } program'
-            clinicianAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_name }'
-            created: '<strong>{ name }</strong> ({ team }) added this action'
-            detailsUpdated: '<strong>{ name }</strong> ({ team }) updated the details of this action'
-            dueDateCleared: '<strong>{ name }</strong> ({ team }) cleared the due date'
-            dueDateUpdated: '<strong>{ name }</strong> ({ team }) changed the due date to { date }'
-            dueTimeCleared: '<strong>{ name }</strong> ({ team }) cleared the due time'
-            dueTimeUpdated: '<strong>{ name }</strong> ({ team }) changed the due time to { time }'
-            durationCleared: '<strong>{ name }</strong> ({ team }) cleared duration'
-            durationUpdated: '<strong>{ name }</strong> ({ team }) updated the duration to { duration }'
-            formRecipientResponded: '<strong>{ recipient }</strong> completed the form { form }'
-            formResponded: '<strong>{ name }</strong> ({ team }) worked on the form { form }'
-            formUpdated: '<strong>{ name }</strong> ({ team }) added the form { form }'
-            nameUpdated: '<strong>{ name }</strong> ({ team }) updated the name of this action from { from_name } to { to_name }'
-            sharingCanceled: '<strong>{ name }</strong> ({ team }) cancelled form sharing'
-            sharingSent: 'Form shared with <strong>{ recipient }</strong>. Waiting for response.'
-            stateUpdated: '<strong>{ name }</strong> ({ team }) changed the state to { to_state }'
-            teamAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_team }'
-          system:
-            actionCopiedFromProgram: '<strong>Action</strong> added from the { program } program'
-            clinicianAssigned: '<strong>Owner</strong> changed to { to_name }'
-            detailsUpdated: '<strong>Action details</strong> updated'
-            dueDateCleared: '<strong>Due Date</strong> cleared'
-            dueDateUpdated: '<strong>Due Date</strong> changed to { date }'
-            dueTimeCleared: '<strong>Due Time</strong> cleared'
-            dueTimeUpdated: '<strong>Due Time</strong> changed to { time }'
-            durationCleared: '<strong>Duration</strong> cleared'
-            durationUpdated: '<strong>Duration</strong> updated to { duration }'
-            formRecipientResponded: '<strong>Form</strong> { form } completed'
-            formResponded: '<strong>Form</strong> { form } worked on'
-            formUpdated: '<strong>Form</strong> { form } added'
-            nameUpdated: '<strong>Action name</strong> updated from { from_name } to { to_name }'
-            sharingCanceled: '<strong>Form sharing</strong> ({ team }) cancelled'
-            sharingSent: 'Form shared with <strong>{ recipient }</strong>. Waiting for response.'
-            stateUpdated: '<strong>State</strong> changed to { to_state }'
-            teamAssigned: '<strong>Owner</strong> changed to { to_team }'
-          activityHeadingText: Activity Log
-          commentView:
-            edit: Edit
-            editTooltip: 'Last edited on { edited }'
-            edited: (Edited)
-          createdAt: Added
-          updatedAt: Updated
-        dialerView:
-          label: Dialer
-        formSharingTemplate:
-          buttonResponseText: View Response
-          label: Share Form
-          recipientLabel: Recipient
-          stateText: |
-            {sharing, select,
-              responded {Response Saved}
-              canceled {Form Sharing Canceled}
-              error_no_phone {Missing Mobile Phone}
-              error_opt_out {Recipient Opted Out}
-              error_sms_failed {Mobile Phone SMS Failed}
-              other {Waiting for Response}
-            }
-          stateLabel: Share State
-      actionSidebarApp:
-        uploadError: File failed to upload
       filters:
         filtersSidebarViews:
           customFilterDropList:
@@ -360,42 +379,6 @@ careOptsFrontend:
             clearFilters: Clear Filters
           statesFiltersView:
             headingText: State
-      flow:
-        activityViews:
-          api:
-            clinicianAssigned: '<strong>{ name }</strong> ({ team }) changed the Owner to { to_name }'
-            detailsUpdated: '<strong>{ name }</strong> ({ team }) updated the details of this flow'
-            nameUpdated: '<strong>{ name }</strong> ({ team }) updated the name of this flow from { from_name } to { to_name }'
-            programStarted: '<strong>{ name }</strong> ({ team }) added this flow from the { program } program'
-            stateUpdated: '<strong>{ name }</strong> ({ team }) changed State to { to_state }'
-            teamAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_team }'
-          system:
-            clinicianAssigned: '<strong>Owner</strong> ({ team }) changed to { to_name }'
-            detailsUpdated: '<strong>Flow details</strong> updated'
-            nameUpdated: '<strong>Flow name</strong> updated from { from_name } to { to_name }'
-            programStarted: '<strong>Flow</strong> added from the { program } program'
-            stateUpdated: '<strong>Flow state</strong> changed to { to_state }'
-            teamAssigned: '<strong>Owner</strong> changed to { to_team }'
-        flowSidebarTemplate:
-          activityHeadingText: Activity Log
-          noDetails: No details
-          ownerLabel: Owner
-          stateLabel: State
-        flowSidebarViews:
-          deleteModal:
-            bodyText: Are you sure you want to delete this flow? All actions on this flow will also be deleted. This cannot be undone.
-            headingText: Confirm Delete
-            submitText: Delete Flow
-          headingText: Flow
-          layoutView:
-            delete: Delete Flow
-            headingText: Flow Menu
-          permissionView:
-            label: Permissions
-            info: You are not able to change settings on this flow.
-          timestampsView:
-            createdAt: Added
-            updatedAt: Updated
     widgets:
       widgets:
         dob: "{ dob } &ndash; (Age { age, number })"

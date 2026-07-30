@@ -1,4 +1,5 @@
 import { debounce } from 'underscore';
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
@@ -8,6 +9,7 @@ import 'scss/modules/table-list.scss';
 
 import intl from 'js/i18n';
 import PreloadRegion from 'js/regions/preload_region';
+import Optionlist from 'js/components/optionlist';
 
 import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/apps/patients/shared/flows_views';
@@ -20,40 +22,7 @@ import 'scss/domain/action-icons.scss';
 import '../patient.scss';
 import './patient-flow.scss';
 
-export const i18n = intl.patients.patient.flowViews;
-
-const ContextTrailView = View.extend({
-  initialize() {
-    this.patient = this.model.getPatient();
-  },
-  className: 'patient-flow__context-trail',
-  template: hbs`
-    {{#if hasLatestList}}
-      <a class="js-back patient-flow__context-link">
-        {{fas "chevron-left"}}{{ @intl.patients.patient.flowViews.contextBackBtn }}
-      </a>
-      {{fas "chevron-right"}}
-    {{/if}}
-    <a class="js-patient patient-flow__context-link">{{ firstName }} {{ lastName }}</a>{{fas "chevron-right"}}{{ name }}
-  `,
-  triggers: {
-    'click .js-back': 'click:back',
-    'click .js-patient': 'click:patient',
-  },
-  onClickBack() {
-    Radio.request('history', 'go:latestList');
-  },
-  onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.patient.id);
-  },
-  templateContext() {
-    return {
-      hasLatestList: Radio.request('history', 'has:latestList'),
-      firstName: this.patient.get('first_name'),
-      lastName: this.patient.get('last_name'),
-    };
-  },
-});
+export const i18n = intl.patients.patient.flow.flowViews;
 
 const HeaderView = View.extend({
   className: 'patient-flow__header',
@@ -69,9 +38,6 @@ const HeaderView = View.extend({
   regions: {
     state: '[data-state-region]',
     owner: '[data-owner-region]',
-  },
-  triggers: {
-    'click': 'edit',
   },
   ui: {
     progress: '.js-progress',
@@ -129,9 +95,39 @@ const HeaderView = View.extend({
   },
 });
 
+const MenuView = View.extend({
+  tagName: 'button',
+  className: 'button--icon js-menu',
+  attributes: {
+    'aria-label': i18n.menu.headingText,
+    'type': 'button',
+  },
+  template: hbs`{{far "ellipsis"}}`,
+  triggers: {
+    'click': 'click',
+  },
+  onClick() {
+    const optionlist = new Optionlist({
+      ui: this.$el,
+      uiView: this,
+      headingText: i18n.menu.headingText,
+      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.patient.flow.flowViews.menu.delete }}</span>`,
+      lists: [{ collection: new Backbone.Collection([{}]) }],
+      align: 'right',
+      popWidth: 248,
+    });
+
+    this.listenTo(optionlist, 'select', () => {
+      this.triggerMethod('delete');
+    });
+
+    optionlist.show();
+  },
+});
+
 const EmptyView = View.extend({
   className: 'table-list__empty-list',
-  template: hbs`<h2>{{ @intl.patients.patient.flowViews.emptyView }}</h2>`,
+  template: hbs`<h2>{{ @intl.patients.patient.flow.flowViews.emptyView }}</h2>`,
 });
 
 const ActionItemView = View.extend({
@@ -177,7 +173,7 @@ const ActionItemView = View.extend({
     'click .js-no-click': 'prevent-row-click',
   },
   onClick() {
-    Radio.trigger('event-router', 'flow:action', this.model.getFlow().id, this.model.id);
+    Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id);
   },
   onEditing(isEditing) {
     this.isEditing = isEditing;
@@ -351,8 +347,10 @@ const LayoutView = View.extend({
   className: 'patient-flow__frame',
   template: hbs`
     <div class="patient-flow__layout">
-      <div data-context-trail-region></div>
-      <div class="patient-flow__header-container" data-header-region></div>
+      <div class="patient-flow__header-container">
+        <div data-header-region></div>
+        <div data-menu-region></div>
+      </div>
       <div class="patient-flow__actions">
         <div data-select-all-region></div>
         <div data-tools-region></div>
@@ -361,16 +359,22 @@ const LayoutView = View.extend({
         <div class="table-list__header list-page__list-header"></div>
         <div class="table-list__list list-page__list" data-action-list-region></div>
       </div>
+      <div class="patient-flow__activity">
+        <h3>{{ @intl.patients.patient.flow.flowViews.activityHeadingText }}</h3>
+        <div data-activity-region></div>
+      </div>
     </div>
-    <div class="patient-flow__sidebar" data-sidebar-region></div>
   `,
   regions: {
-    contextTrail: {
-      el: '[data-context-trail-region]',
+    header: '[data-header-region]',
+    menu: {
+      el: '[data-menu-region]',
       replaceElement: true,
     },
-    header: '[data-header-region]',
-    sidebar: '[data-sidebar-region]',
+    activity: {
+      el: '[data-activity-region]',
+      regionClass: PreloadRegion,
+    },
     actionList: {
       el: '[data-action-list-region]',
       regionClass: PreloadRegion,
@@ -406,8 +410,8 @@ const SelectAllView = View.extend({
 
 export {
   LayoutView,
-  ContextTrailView,
   HeaderView,
   ListView,
+  MenuView,
   SelectAllView,
 };
