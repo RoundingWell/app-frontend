@@ -98,6 +98,17 @@ context('patient workflow page', function() {
       },
     });
 
+    const doneFlow = getFlow({
+      attributes: {
+        name: 'Done Flow',
+        updated_at: testTsSubtract(5),
+      },
+      relationships: {
+        state: getRelationship(stateDone),
+        patient: getRelationship(testPatient),
+      },
+    });
+
     cy
       .routesForPatientAction()
       .routePatient(fx => {
@@ -136,7 +147,7 @@ context('patient workflow page', function() {
           }),
           getAction({
             attributes: {
-              name: 'Not In List',
+              name: 'Done Action',
               updated_at: testTsSubtract(5),
             },
             relationships: {
@@ -161,16 +172,7 @@ context('patient workflow page', function() {
             },
           }),
           testFlow,
-          getFlow({
-            attributes: {
-              name: 'Not In List',
-              updated_at: testTsSubtract(5),
-            },
-            relationships: {
-              state: getRelationship(stateDone),
-              patient: getRelationship(testPatient),
-            },
-          }),
+          doneFlow,
         ];
 
         return fx;
@@ -212,6 +214,13 @@ context('patient workflow page', function() {
         body: {},
       })
       .as('routePatchFlow');
+
+    cy
+      .intercept('PATCH', `/api/flows/${ doneFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchDoneFlow');
 
     cy
       .get('.list-page__list')
@@ -360,12 +369,31 @@ context('patient workflow page', function() {
     cy
       .get('.patient__tabs')
       .find('.js-archive')
+      .click()
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows');
+
+    cy
+      .contains('.table-list__item', 'Done Flow')
+      .find('[data-state-region]')
       .click();
+
+    cy
+      .get('.picklist')
+      .contains('In Progress')
+      .click();
+
+    cy
+      .wait('@routePatchDoneFlow')
+      .its('request.body.data.relationships.state.data.id')
+      .should('equal', stateInProgress.id);
 
     cy
       .get('.patient__tabs')
       .find('.js-dashboard')
-      .click();
+      .click()
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows');
 
     cy
       .get('.list-page__list')
@@ -418,6 +446,18 @@ context('patient workflow page', function() {
       .eq(2)
       .find('.fa-comment')
       .should('not.exist');
+
+    cy
+      .get('.list-page__list')
+      .contains('.table-list__item', testAction.attributes.name)
+      .click('top')
+      .wait('@routeAction');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/action/${ testAction.id }`);
+
+    cy.go('back');
 
     // dirty hack to make sure the form button isn't offscreen
     cy
@@ -1909,6 +1949,16 @@ context('patient workflow page', function() {
               owner: getRelationship(teamCoordinator),
             },
           }),
+          getFlow({
+            attributes: {
+              name: 'Done Flow',
+              updated_at: testTsSubtract(7),
+            },
+            relationships: {
+              state: getRelationship(stateDone),
+              owner: getRelationship(teamCoordinator),
+            },
+          }),
         ];
 
         return fx;
@@ -1942,6 +1992,22 @@ context('patient workflow page', function() {
       .get('@listItems')
       .eq(3)
       .find('[data-owner-region]')
+      .find('button')
+      .should('not.exist');
+
+    cy
+      .get('.patient__tabs')
+      .find('.js-archive')
+      .click()
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows');
+
+    cy
+      .contains('.table-list__item', 'Done Flow')
+      .find('[data-state-region]')
+      .find('.fa-circle-check')
+      .should('exist')
+      .parents('[data-state-region]')
       .find('button')
       .should('not.exist');
   });

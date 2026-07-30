@@ -171,10 +171,16 @@ context('patient flow page', function() {
 
     cy
       .intercept('DELETE', `/api/flows/${ testPageFlow.id }`, {
-        statusCode: 204,
-        body: {},
+        statusCode: 403,
+        body: {
+          errors: getErrors({
+            status: '403',
+            title: 'Forbidden',
+            detail: 'Insufficient permissions to delete flow',
+          }),
+        },
       })
-      .as('routeDeleteFlow');
+      .as('routeDeleteFlowFailure');
 
     cy
       .get('.patient-flow__header-container .js-menu')
@@ -193,6 +199,34 @@ context('patient flow page', function() {
       .click();
 
     cy
+      .wait('@routeDeleteFlowFailure');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'Insufficient permissions to delete flow')
+      .find('.js-dismiss')
+      .click();
+
+    cy
+      .intercept('DELETE', `/api/flows/${ testPageFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteFlow');
+
+    cy
+      .get('.patient-flow__header-container .js-menu')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Delete Flow')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
       .wait('@routeDeleteFlow');
 
     cy
@@ -282,6 +316,18 @@ context('patient flow page', function() {
       .get('.patient-action')
       .find('[data-action-region] [data-testid="patient-action-name"]')
       .should('contain', 'Test Action');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        const subscribedResources = _.flatten(stub.getCalls()
+          .map(call => call.args[0].data.resources));
+
+        expect(subscribedResources).to.deep.include({
+          id: testFlowAction.id,
+          type: testFlowAction.type,
+        });
+      });
 
     cy.sendWs({
       category: 'NameChanged',
@@ -810,7 +856,49 @@ context('patient flow page', function() {
         expect($action.find('[data-owner-region] button')).not.to.be.disabled;
         expect($action.find('[data-due-date-region] button')).not.to.be.disabled;
         expect($action.find('[data-due-time-region] button')).not.to.be.disabled;
-      })
+      });
+
+    cy
+      .get('@lastAction')
+      .find('[data-owner-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Nurse')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('@lastAction')
+      .find('[data-due-date-region]')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .find('.js-next')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .find('.datepicker__days li')
+      .contains('1')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('@lastAction')
+      .find('[data-due-time-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('11:15 AM')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('@lastAction')
       .find('.patient__action-icon')
       .click()
       .wait('@routeAction');
@@ -1275,6 +1363,83 @@ context('patient flow page', function() {
       .should('contain', 'Error code: 500.');
   });
 
+  specify('legacy flow unexpected client error', function() {
+    const flowId = uuid();
+    const errorStub = cy.stub();
+
+    cy.on('uncaught:exception', error => {
+      errorStub(error);
+
+      return false;
+    });
+
+    cy
+      .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Unexpected Client Error',
+            detail: 'Cannot load flow',
+          }),
+        },
+      })
+      .as('routeFailedFlow')
+      .visit(`/flow/${ flowId }`)
+      .wait('@routeFailedFlow');
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.firstCall.args[0].message).to.contain('Error Status: 404');
+      });
+  });
+
+  specify('ignores a legacy flow resolver after leaving patient routes', function() {
+    const testPatient = getPatient();
+    const delayedFlow = getFlow({
+      relationships: {
+        patient: getRelationship(testPatient),
+      },
+    });
+    let replyToFlow;
+
+    cy
+      .intercept('GET', new RegExp(`/api/flows/${ delayedFlow.id }\\?`), req => new Cypress.Promise(resolve => {
+        replyToFlow = () => {
+          req.reply({ body: { data: delayedFlow, included: [testPatient] } });
+          resolve();
+        };
+      }))
+      .as('routeDelayedFlow')
+      .visit(`/flow/${ delayedFlow.id }`);
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replyToFlow).to.be.a('function');
+      });
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'notFound');
+    });
+
+    cy
+      .get('.error-page')
+      .should('contain', 'This page doesn\'t exist.');
+
+    cy.then(() => replyToFlow());
+
+    cy
+      .wait('@routeDelayedFlow');
+
+    cy
+      .url()
+      .should('contain', '/404')
+      .should('not.contain', `/patient/${ testPatient.id }/flow/${ delayedFlow.id }`);
+  });
+
   specify('flow server error', function() {
     const testPatient = getPatient();
     const flowId = uuid();
@@ -1284,6 +1449,11 @@ context('patient flow page', function() {
     cy
       .routePatient(fx => {
         fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [];
 
         return fx;
       })
@@ -1304,6 +1474,50 @@ context('patient flow page', function() {
     cy
       .get('.error-page')
       .should('contain', 'Error code: 500.');
+  });
+
+  specify('flow unexpected client error', function() {
+    const testPatient = getPatient();
+    const flowId = uuid();
+    const errorStub = cy.stub();
+
+    cy.on('uncaught:exception', error => {
+      errorStub(error);
+
+      return false;
+    });
+
+    cy
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Unexpected Client Error',
+            detail: 'Cannot load flow',
+          }),
+        },
+      })
+      .as('routeFailedFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ flowId }`)
+      .wait('@routeFailedFlow');
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.firstCall.args[0].message).to.contain('Error Status: 404');
+      });
   });
 
   specify('empty view', function() {
@@ -1709,6 +1923,95 @@ context('patient flow page', function() {
       .should('not.exist');
   });
 
+  specify('flow with work:authored:delete permission', function() {
+    const testPatient = getPatient();
+    const currentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleTeamEmployee),
+        team: getRelationship(teamCoordinator),
+      },
+    });
+    const authoredFlow = getFlow({
+      relationships: {
+        author: getRelationship(currentClinician),
+        owner: getRelationship(teamCoordinator),
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
+
+    cy
+      .routeCurrentClinician(fx => {
+        fx.data = currentClinician;
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = authoredFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions()
+      .visit(`/patient/${ testPatient.id }/flow/${ authoredFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('.patient-flow__header-container .js-menu')
+      .should('exist');
+  });
+
+  specify('flow not authored by a user with work:authored:delete permission', function() {
+    const testPatient = getPatient();
+    const currentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleTeamEmployee),
+        team: getRelationship(teamCoordinator),
+      },
+    });
+    const otherClinician = getClinician();
+    const otherAuthoredFlow = getFlow({
+      relationships: {
+        author: getRelationship(otherClinician),
+        owner: getRelationship(teamCoordinator),
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
+
+    cy
+      .routeCurrentClinician(fx => {
+        fx.data = currentClinician;
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = otherAuthoredFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions()
+      .visit(`/patient/${ testPatient.id }/flow/${ otherAuthoredFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('.patient-flow__header-container .js-menu')
+      .should('not.exist');
+  });
+
   specify('flow progress bar', function() {
     cy
       .routesForPatientAction()
@@ -1856,6 +2159,126 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__progress')
       .should('have.value', 2);
+  });
+
+  specify('completing a flow when all actions are done', function() {
+    const testPatient = getPatient();
+    const completableFlow = getFlow({
+      meta: {
+        progress: {
+          complete: 2,
+          total: 2,
+        },
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
+
+    cy
+      .routeFlow(fx => {
+        fx.data = completableFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = getActions({
+          relationships: {
+            state: getRelationship(stateDone),
+            flow: getRelationship(completableFlow),
+          },
+        }, { sample: 2 });
+
+        return fx;
+      })
+      .intercept('PATCH', `/api/flows/${ completableFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchCompletableFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ completableFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('[data-header-region] [data-state-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Done')
+      .click();
+
+    cy
+      .wait('@routePatchCompletableFlow')
+      .its('request.body.data.relationships.state.data.id')
+      .should('equal', stateDone.id);
+  });
+
+  specify('requiring all actions to be done before completing a flow', function() {
+    const testPatient = getPatient();
+    const incompleteFlow = getFlow({
+      meta: {
+        progress: {
+          complete: 0,
+          total: 1,
+        },
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
+
+    cy
+      .routeSettings('require_done_flow', true)
+      .routeFlow(fx => {
+        fx.data = incompleteFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = getActions({
+          relationships: {
+            state: getRelationship(stateTodo),
+            flow: getRelationship(incompleteFlow),
+          },
+        }, { sample: 1 });
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/flow/${ incompleteFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('[data-header-region] [data-state-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Done')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .should('contain', 'Flow Actions Must Be Done')
+      .and('contain', 'You must set all actions to a Done state before setting this flow to a Done state.');
   });
 
   specify('bulk edit actions', function() {

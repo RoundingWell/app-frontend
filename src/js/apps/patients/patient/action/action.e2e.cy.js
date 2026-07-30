@@ -2120,6 +2120,45 @@ context('patient action page', function() {
       .should('contain', 'Error code: 500.');
   });
 
+  specify('action unexpected client error', function() {
+    const testPatient = getPatient({ id: '1' });
+    const errorStub = cy.stub();
+
+    cy.on('uncaught:exception', error => {
+      errorStub(error);
+
+      return false;
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .intercept('GET', '/api/actions/1*', {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Unexpected Client Error',
+            detail: 'Cannot load action',
+          }),
+        },
+      })
+      .as('routeAction')
+      .visit('/patient/1/action/1')
+      .wait('@routeAction');
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.firstCall.args[0].message).to.contain('Error Status: 404');
+      });
+  });
+
   specify('outreach', function() {
     const testPatient = getPatient({
       attributes: {
@@ -2683,7 +2722,7 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-action-region] .patient-action__info')
-      .should('exist');
+      .should('contain', 'You are not able to change settings on this action.');
   });
 
   specify('flow action with work:team:manage permission', function() {
@@ -2870,7 +2909,7 @@ context('patient action page', function() {
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 
@@ -2894,6 +2933,8 @@ context('patient action page', function() {
       },
     });
 
+    let replyToStaleAction;
+
     cy
       .routesForPatientDashboard()
       .routePatient(fx => {
@@ -2909,18 +2950,22 @@ context('patient action page', function() {
       .routeActionActivity()
       .routeActionComments()
       .routeActionFiles()
-      .intercept('GET', `/api/actions/${ staleAction.id }*`, {
-        statusCode: 410,
-        delay: 500,
-        body: {
-          errors: getErrors({
-            status: '410',
-            title: 'Not Found',
-            detail: 'Cannot find action',
-            source: { parameter: 'actionId' },
-          }),
-        },
-      })
+      .intercept('GET', `/api/actions/${ staleAction.id }*`, req => new Cypress.Promise(resolve => {
+        replyToStaleAction = () => {
+          req.reply({
+            statusCode: 410,
+            body: {
+              errors: getErrors({
+                status: '410',
+                title: 'Not Found',
+                detail: 'Cannot find action',
+                source: { parameter: 'actionId' },
+              }),
+            },
+          });
+          resolve();
+        };
+      }))
       .as('routeStaleAction')
       .intercept('GET', `/api/actions/${ currentAction.id }*`, {
         body: { data: currentAction, included: [] },
@@ -2933,17 +2978,29 @@ context('patient action page', function() {
 
     cy.window().then(win => {
       win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
+    });
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replyToStaleAction).to.be.a('function');
+      });
+
+    cy.window().then(win => {
       win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
     });
 
     cy
       .wait('@routeCurrentAction')
-      .wait('@routeActionActivity')
-      .wait('@routeStaleAction');
+      .wait('@routeActionActivity');
 
     cy
       .get('.patient-action__name')
       .should('contain', 'Current Action');
+
+    cy.then(() => replyToStaleAction());
+
+    cy.wait('@routeStaleAction');
 
     cy
       .get('.alert-box__body')
@@ -2961,7 +3018,7 @@ context('patient action page', function() {
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 
@@ -2988,6 +3045,8 @@ context('patient action page', function() {
       },
     });
 
+    let replyToStaleAction;
+
     cy
       .routesForPatientDashboard()
       .routePatient(fx => {
@@ -3004,10 +3063,12 @@ context('patient action page', function() {
       .routeActionComments()
       .routeActionFiles()
       // the stale fetch succeeds, but resolves after the newer route
-      .intercept('GET', `/api/actions/${ staleAction.id }*`, {
-        body: { data: staleAction, included: [] },
-        delay: 500,
-      })
+      .intercept('GET', `/api/actions/${ staleAction.id }*`, req => new Cypress.Promise(resolve => {
+        replyToStaleAction = () => {
+          req.reply({ body: { data: staleAction, included: [] } });
+          resolve();
+        };
+      }))
       .as('routeStaleAction')
       .intercept('GET', `/api/actions/${ currentAction.id }*`, {
         body: { data: currentAction, included: [] },
@@ -3020,12 +3081,27 @@ context('patient action page', function() {
 
     cy.window().then(win => {
       win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
     });
 
     cy
-      .wait('@routeCurrentAction')
-      .wait('@routeStaleAction');
+      .wrap(null)
+      .should(() => {
+        expect(replyToStaleAction).to.be.a('function');
+      });
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
+    });
+
+    cy.wait('@routeCurrentAction');
+
+    cy
+      .get('.patient-action__name')
+      .should('contain', 'Current Action');
+
+    cy.then(() => replyToStaleAction());
+
+    cy.wait('@routeStaleAction');
 
     // the stale fetch resolved last, but its sidebar is suppressed
     cy
