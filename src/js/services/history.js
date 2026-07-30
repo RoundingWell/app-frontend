@@ -50,7 +50,7 @@ export default App.extend({
     this.getChannel().trigger('change:route', this._prevHistory[0]);
   },
   goBack(handleEmptyHistory) {
-    if (handleEmptyHistory && this._prevHistory.length < 2) {
+    if (this._prevHistory.length < 2) {
       handleEmptyHistory();
       return;
     }

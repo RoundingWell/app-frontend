@@ -63,7 +63,7 @@ export default App.extend({
       Radio.request('entities', 'fetch:formResponses:byMe', { actionId }),
     ];
   },
-  onFail({ actionId } = {}) {
+  onFail({ actionId }) {
     const message = actionId ?
       intl.patients.patient.form.formApp.notFound :
       intl.patients.patient.form.formApp.formNotFound;
@@ -226,8 +226,6 @@ export default App.extend({
     this.showChildView('stateActions', formStateActions);
   },
   onClickHistoryButton() {
-    if (!this.responses) return;
-
     this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id'), shouldShowHistory: !this.getState('shouldShowHistory') });
   },
   showContent() {
@@ -280,8 +278,6 @@ export default App.extend({
     this.showChildView('formAction', new LockedSubmitView());
   },
   showFormStatus() {
-    if (!this.responses) return;
-
     if (!this.responses.getFirstSubmission()) return;
 
     this.showChildView('status', new StatusView({
@@ -289,8 +285,6 @@ export default App.extend({
     }));
   },
   showFormHistory() {
-    if (!this.responses) return;
-
     const selected = this.responses.get(this.getState('responseId'));
 
     const historyView = this.showChildView('formAction', new HistoryView({ selected, collection: this.responses.filterSubmissions() }));
