@@ -121,7 +121,7 @@ context('worklist page', function() {
       .routeActions()
       .routeFlow()
       .routeFlowActions()
-      .routePatientByFlow()
+      .routeFlowActivity()
       .visit('/worklist/owned-by')
       .wait('@routeActions');
 
@@ -283,7 +283,7 @@ context('worklist page', function() {
       .get('@firstRow')
       .click('top')
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
+      .wait('@routePatient')
       .wait('@routeFlowActions');
 
     cy
@@ -301,7 +301,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ testPatient1.id }`)
+      .should('contain', `patient/${ testPatient1.id }/workflow`)
       .wait('@routePatient');
 
     cy
@@ -910,15 +910,13 @@ context('worklist page', function() {
 
     cy
       .routeFlow()
-      .routeFlowActions()
-      .routePatientByFlow();
+      .routeFlowActions();
 
     cy
       .get('@firstRow')
       .click('top')
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
+      .wait('@routePatient');
 
     cy
       .url()
@@ -948,11 +946,6 @@ context('worklist page', function() {
       .should('contain', `/patient/${ testPatient1.id }/action/${ testActions[2].id }`);
 
     cy
-      .get('.patient__layout')
-      .find('.patient__tab--selected')
-      .contains('Dashboard');
-
-    cy
       .go('back')
       .wait('@routeActions');
 
@@ -967,7 +960,7 @@ context('worklist page', function() {
 
     cy
       .location('pathname', { timeout: 10000 })
-      .should('contain', `/patient/dashboard/${ testPatient1.id }`);
+      .should('contain', `/patient/${ testPatient1.id }/workflow`);
 
     cy
       .go('back')
@@ -980,8 +973,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }`)
-      .wait('@routeFlowActions');
+      .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }`);
 
     cy
       .go('back')
@@ -997,12 +989,7 @@ context('worklist page', function() {
       .get('@secondRow')
       .next()
       .click('top')
-      .wait('@routePatientActions');
-
-    cy
-      .get('.patient__layout')
-      .find('.patient__tab--selected')
-      .contains('Archive');
+      .wait('@routeAction');
 
     cy
       .go('back')
@@ -1236,7 +1223,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/${ testActions[2].id }/form/${ testForm.id }`);
+      .should('contain', `patient/${ testPatient1.id }/form/${ testForm.id }/action/${ testActions[2].id }`);
 
     cy
       .wait('@routeFormActionFields')
@@ -4486,7 +4473,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ testPatient.id }`);
+      .should('contain', `patient/${ testPatient.id }/workflow`);
 
     cy
       .get('.patient-sidebar')
@@ -4509,7 +4496,7 @@ context('worklist page', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ testPatient.id }`);
+      .should('contain', `patient/${ testPatient.id }/workflow`);
 
     cy
       .get('.patient-sidebar')

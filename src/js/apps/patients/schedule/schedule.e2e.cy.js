@@ -232,7 +232,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient/archive/${ testPatient1.id }/action/${ testActions[3].id }`)
+      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[3].id }`)
       .go('back');
 
     cy
@@ -283,7 +283,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ testPatient1.id }`)
+      .should('contain', `patient/${ testPatient1.id }/workflow`)
       .go('back');
 
     cy
@@ -298,7 +298,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient-action/${ testActions[0].id }/form/${ testForm.id }`)
+      .should('contain', `patient/${ testPatient1.id }/form/${ testForm.id }/action/${ testActions[0].id }`)
       .wait('@routeFormActionFields')
       .go('back');
 

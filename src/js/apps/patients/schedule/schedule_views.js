@@ -259,19 +259,20 @@ const DayItemView = View.extend({
     this.showChildView('check', checkComponent);
   },
   onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.getPatient().id);
+    Radio.trigger('event-router', 'patient:workflow', this.model.getPatient().id);
   },
   onClickForm() {
-    Radio.trigger('event-router', 'form:patientAction', this.model.id, this.model.getForm().id);
+    Radio.trigger(
+      'event-router',
+      'patient:form:action',
+      this.model.getPatient().id,
+      this.model.getForm().id,
+      this.model.id,
+    );
   },
   onClick() {
     if (this.flow) {
-      Radio.trigger('event-router', 'flow:action', this.flow.id, this.model.id);
-      return;
-    }
-
-    if (this.model.isDone()) {
-      Radio.trigger('event-router', 'patient:action:archive', this.model.getPatient().id, this.model.id);
+      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id);
       return;
     }
 

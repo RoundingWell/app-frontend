@@ -32,6 +32,38 @@ context('Patient Form', function() {
       .routeWorkspacePatient();
   });
 
+  specify('deleted form', function() {
+    cy
+      .routesForDefault()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeLatestFormResponse()
+      .intercept('GET', `/api/forms/${ testForm.id }*`, {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find form',
+          }),
+        },
+      })
+      .as('routeGoneForm')
+      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }`)
+      .wait('@routeGoneForm');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Form you requested does not exist.');
+
+    cy
+      .url()
+      .should('not.contain', `/patient/${ testPatient.id }/form/${ testForm.id }`);
+  });
+
   specify('submitting the form', function() {
     const testNewFormResponse = getFormResponse();
 
@@ -177,11 +209,6 @@ context('Patient Form', function() {
         expect(draft, 'draft storage').to.exist;
         expect(draft.submission.fields.foo).to.equal('bar');
       });
-
-    cy
-      .get('.form__controls')
-      .find('.js-expand-button')
-      .should('exist');
 
     cy
       .get('.form__controls')
@@ -640,9 +667,17 @@ context('Patient Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ testPatient.id }/form/${ testForm.id }`, { now: testTs() })
-      .wait('@routeForm')
+      .visitOnClock(`/patient/dashboard/${ testPatient.id }`, { now: testTs() })
       .wait('@routePatient')
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows');
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:form', testPatient.id, testForm.id);
+    });
+
+    cy
+      .wait('@routeForm')
       .wait('@routeFormDefinition')
       .wait('@routeWorkspacePatient')
       .wait('@routeFormFields');
@@ -740,7 +775,7 @@ context('Patient Form', function() {
 
     cy
       .location('pathname', { timeout: 10000 })
-      .should('contain', `/patient/${ testPatient.id }/workflow`);
+      .should('equal', `/one/patient/dashboard/${ testPatient.id }`);
   });
 
   specify('submit and go back button - form response error', function() {

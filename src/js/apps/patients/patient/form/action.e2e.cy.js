@@ -79,6 +79,65 @@ context('Patient Action Form', function() {
       .should('not.contain', `/patient/${ routePatientId }/form/${ testForm.id }/action/${ deletedActionId }`);
   });
 
+  specify('action deleted while its form is open', function() {
+    const testPatient = getPatient();
+    const testAction = getAction({
+      relationships: {
+        'form': getRelationship(testForm),
+        'form-responses': getRelationship([]),
+        'patient': getRelationship(testPatient),
+      },
+    });
+
+    cy
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routeFormByAction(fx => {
+        fx.data = testForm;
+
+        return fx;
+      })
+      .routeLatestFormResponse()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
+
+    cy.window().then(win => {
+      const action = win.Radio.request('entities', 'get:store', {
+        type: testAction.type,
+        id: testAction.id,
+      });
+
+      action.handleMessage({
+        category: 'ResourceDeleted',
+        resource: {
+          type: testAction.type,
+          id: testAction.id,
+        },
+        payload: {},
+      });
+    });
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Action was deleted successfully.');
+
+    cy
+      .url()
+      .should('not.contain', `/form/${ testForm.id }/action/${ testAction.id }`);
+  });
+
   specify('update a form', function() {
     const testFormResponse = getFormResponse();
 
@@ -1431,9 +1490,10 @@ context('Patient Action Form', function() {
     });
 
     cy
-      .routesForPatientDashboard()
+      .routesForPatientAction()
       .routeAction(fx => {
         fx.data = testAction;
+        fx.included.push(testFlow);
 
         return fx;
       })
@@ -1455,9 +1515,16 @@ context('Patient Action Form', function() {
       .routePatientByFlow()
       .routeFlow()
       .routeFlowActions()
-      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }/action/${ testAction.id }`)
+      .routeFlowActivity()
+      .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routePatient');
+
+    cy
+      .get('.patient-action__button')
+      .click()
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
 
     cy
       .get('.js-history-button')
@@ -1470,6 +1537,19 @@ context('Patient Action Form', function() {
     cy
       .get('iframe')
       .should('have.attr', 'src', '/forms/formio/index.html');
+
+    cy
+      .get('.patient__context-trail .js-action')
+      .click();
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`);
+
+    cy
+      .go('back')
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
 
     cy
       .get('.patient__context-trail .js-flow')
@@ -1523,6 +1603,19 @@ context('Patient Action Form', function() {
     cy
       .url()
       .should('contain', `/patient/${ testPatient.id }/workflow`);
+
+    cy
+      .go('back')
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
+
+    cy
+      .get('.patient__context-trail .js-action')
+      .click();
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/action/${ testAction.id }`);
   });
 
   specify('form header widgets', function() {

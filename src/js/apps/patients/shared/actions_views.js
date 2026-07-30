@@ -25,7 +25,13 @@ const FormButton = View.extend({
     'click': 'click',
   },
   onClick() {
-    Radio.trigger('event-router', 'form:patientAction', this.model.id, this.model.getForm().id);
+    Radio.trigger(
+      'event-router',
+      'patient:form:action',
+      this.model.getPatient().id,
+      this.model.getForm().id,
+      this.model.id,
+    );
   },
 });
 
