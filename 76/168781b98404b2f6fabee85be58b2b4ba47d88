@@ -12,6 +12,8 @@ src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
   s_e9c4ebfa58429b::t_9fb7bf73a2bf1d 317
   s_e9c4ebfa58429b::t_41f7c51ee7740e 493
   s_e9c4ebfa58429b::t_a9241f83f17db7 2112-2113
+  s_e9c4ebfa58429b::t_748dd48ca78c18 480,487-488
+  s_e9c4ebfa58429b::t_cad06eddca72dd 549,2100,2107
 src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
   s_e9c4ebfa58429b::t_626949e617aff9 1297-1301
   s_e9c4ebfa58429b::t_d831fe91fa9329 650-670,677-692
