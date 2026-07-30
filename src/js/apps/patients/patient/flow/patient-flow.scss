@@ -48,20 +48,15 @@
 }
 
 .patient-flow__header-container {
+  align-items: flex-start;
+  display: flex;
+  justify-content: space-between;
   padding: 0 24px;
 }
 
 .patient-flow__header {
-  cursor: pointer;
+  flex: 1;
   padding: 8px 0 16px;
-
-  &:hover:not(.is-selected) {
-    background-color: color(light_blue, light);
-  }
-
-  &.is-selected {
-    background-color: #{$greyed};
-  }
 }
 
 .patient-flow__name {
@@ -108,4 +103,15 @@
 
 .patient-flow__progress {
   width: 144px;
+}
+
+.patient-flow__activity {
+  border-top: 1px solid #{$black-90};
+  margin: 24px;
+  padding-top: 24px;
+}
+
+.patient-flow__activity-item {
+  line-height: 14px;
+  margin-top: 8px;
 }

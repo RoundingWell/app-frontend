@@ -9,24 +9,28 @@ import { FLOW_INCLUDE } from 'js/entities-service/flows';
 
 import AddWorkflowApp from './add-workflow_app';
 
-import { LayoutView, ListView } from 'js/apps/patients/patient/dashboard/dashboard_views';
+import { LayoutView, ListView } from './workflow_views';
 
 export default App.extend({
   childApps: {
     addWorkflow: AddWorkflowApp,
   },
 
-  onBeforeStart({ patient }) {
+  onBeforeStart({ patient, status }) {
     const currentWorkspace = Radio.request('workspace', 'current');
-    const { notDone } = currentWorkspace.getStates().groupByDone();
-    this.states = notDone.getFilterIds();
+    const stateGroup = currentWorkspace.getStates().groupByDone()[status];
 
     this.currentUser = Radio.request('bootstrap', 'currentUser');
     this.patient = patient;
+    this.status = status;
+    this.states = stateGroup.getFilterIds();
 
-    this.showView(new LayoutView({ model: patient }));
+    this.showView(new LayoutView({
+      model: patient,
+      status,
+    }));
 
-    if (!this.currentUser.can('work:own')) {
+    if (status === 'notDone' && !this.currentUser.can('work:own')) {
       this.getRegion('addWorkflow').empty();
     }
 
@@ -47,10 +51,19 @@ export default App.extend({
 
     this.subscribe();
 
-    this.showChildView('content', new ListView({ collection: this.collection }));
+    this.trigger('context:change', {
+      page: 'workflow',
+      status: this.status,
+    });
+
+    this.showChildView('content', new ListView({
+      collection: this.collection,
+      status: this.status,
+    }));
 
     this.startAddWorkflow();
   },
+
   subscribe() {
     const filters = {
       states: this.states,
@@ -63,15 +76,16 @@ export default App.extend({
     Radio.request('ws', 'manage:add', this, this.collection, 'flows', { include: FLOW_INCLUDE });
     Radio.request('ws', 'manage:add', this, this.collection, 'patient-actions', { include: ACTION_INCLUDE });
   },
-  startAddWorkflow() {
-    if (!this.currentUser.can('work:own')) return;
 
-    const addworkflow = this.startChildApp('addWorkflow', {
+  startAddWorkflow() {
+    if (this.status === 'done' || !this.currentUser.can('work:own')) return;
+
+    const addWorkflow = this.startChildApp('addWorkflow', {
       region: this.getRegion('addWorkflow'),
       patient: this.patient,
     });
 
-    this.listenTo(addworkflow, {
+    this.listenTo(addWorkflow, {
       'add:programAction': this.onAddProgramAction,
       'add:programFlow': this.onAddProgramFlow,
     });
@@ -91,9 +105,7 @@ export default App.extend({
     const flow = programFlow.createFlow(this.patient);
 
     flow.saveAll().then(() => {
-      Radio.trigger('event-router', 'flow', flow.id);
+      Radio.trigger('event-router', 'patient:flow', this.patient.id, flow.id);
     });
-
-    return;
   },
 });

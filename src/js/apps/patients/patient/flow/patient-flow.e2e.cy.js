@@ -19,6 +19,7 @@ import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { workspaceOne } from 'support/api/workspaces';
 import { getComment } from 'support/api/comments';
 import { getFile } from 'support/api/files';
+import { getActivity } from 'support/api/events';
 
 const tomorrow = testDateAdd(1);
 
@@ -43,7 +44,8 @@ context('patient flow page', function() {
 
   beforeEach(function() {
     cy
-      .routesForPatientDashboard();
+      .routesForPatientDashboard()
+      .routeFlowActivity();
   });
 
   specify('context trail', function() {
@@ -108,6 +110,84 @@ context('patient flow page', function() {
     cy
       .url()
       .should('contain', '/worklist/owned-by');
+  });
+
+  specify('activity and flow menu', function() {
+    const testPatient = getPatient();
+    const testPageFlow = getFlow({
+      attributes: {
+        name: 'Test Flow',
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routeFlow(fx => {
+        fx.data = testPageFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions()
+      .routeFlowActivity(fx => {
+        fx.data = [
+          getActivity({
+            event_type: 'FlowNameUpdated',
+            source: 'system',
+            previous: 'Previous Flow',
+            value: 'Test Flow',
+          }),
+        ];
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/flow/${ testPageFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions')
+      .wait('@routeFlowActivity');
+
+    cy
+      .get('.patient-flow__activity')
+      .should('contain', 'Activity Log')
+      .and('contain', 'Flow name updated from Previous Flow to Test Flow');
+
+    cy
+      .intercept('DELETE', `/api/flows/${ testPageFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteFlow');
+
+    cy
+      .get('.patient-flow__header-container .js-menu')
+      .should('have.attr', 'aria-label', 'Flow Menu')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Delete Flow')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .should('contain', 'Confirm Delete')
+      .find('.js-submit')
+      .click();
+
+    cy
+      .wait('@routeDeleteFlow');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
   specify('patient flow action sidebar', function() {
@@ -186,7 +266,7 @@ context('patient flow page', function() {
 
     cy
       .get('.sidebar')
-      .find('[data-action-region] [data-testid="action-sidebar-name"]')
+      .find('[data-action-region] [data-testid="patient-action-name"]')
       .should('contain', 'Test Action');
 
     cy.sendWs({
@@ -204,7 +284,7 @@ context('patient flow page', function() {
 
     cy
       .get('.sidebar')
-      .find('[data-action-region] [data-testid="action-sidebar-name"]', { timeout: 10000 })
+      .find('[data-action-region] [data-testid="patient-action-name"]', { timeout: 10000 })
       .should('contain', 'New Websocket Name');
 
     cy
@@ -2625,11 +2705,6 @@ context('patient flow page', function() {
       .wait('@routeFlowActions');
 
     cy
-      .get('[data-header-region]')
-      .click('top')
-      .tick(300);
-
-    cy
       .get('@wsHandleMessage')
       .should('have.been.calledOnce')
       .then(stub => {
@@ -2663,19 +2738,6 @@ context('patient flow page', function() {
       .find('.patient-flow__name')
       .contains('New Flow Name');
 
-    cy
-      .get('.app-frame__sidebar')
-      .as('flowSidebar')
-      .find('[data-name-region]')
-      .should('contain', 'New Flow Name');
-
-    cy
-      .get('.app-frame__sidebar')
-      .find('.sidebar__footer')
-      .contains('Updated')
-      .next()
-      .should('contain', formatDate(testTs(), 'AT_TIME'));
-
     cy.sendWs({
       category: 'DetailsChanged',
       resource: {
@@ -2693,11 +2755,6 @@ context('patient flow page', function() {
       .get('[data-header-region]')
       .find('.patient-flow__details')
       .contains('New flow details');
-
-    cy
-      .get('@flowSidebar')
-      .find('[data-details-region]')
-      .should('contain', 'New flow details');
 
     cy.sendWs({
       category: 'NameChanged',
@@ -2805,11 +2862,6 @@ context('patient flow page', function() {
       .should('contain', 'CO');
 
     cy
-      .get('@flowSidebar')
-      .find('[data-owner-region]')
-      .should('contain', 'Coordinator');
-
-    cy
       .get('.patient-flow__progress')
       .should('have.value', 0);
 
@@ -2856,11 +2908,6 @@ context('patient flow page', function() {
     cy
       .get('[data-header-region]')
       .find('[data-state-region] .fa-circle-check');
-
-    cy
-      .get('@flowSidebar')
-      .find('[data-state-region]')
-      .should('contain', 'Done');
 
     cy.sendWs({
       category: 'AttachmentAdded',

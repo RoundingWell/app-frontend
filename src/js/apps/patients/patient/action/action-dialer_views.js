@@ -6,12 +6,12 @@ import 'scss/modules/sidebar.scss';
 
 import DialerComponent from 'js/apps/patients/shared/components/dialer_component.js';
 
-import './action-sidebar.scss';
+import './action.scss';
 
 const DialerView = View.extend({
   className: 'flex u-margin--t-8',
   template: hbs`
-    <h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.sidebar.action.dialerView.label }}</h4>
+    <h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.dialerView.label }}</h4>
     <div class="flex-grow" data-dialer-button-region></div>
   `,
   regions: {
