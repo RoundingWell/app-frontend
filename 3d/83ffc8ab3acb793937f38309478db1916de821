@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_e9c4ebfa58429b::t_4a56f59909181e 2765
+  s_e9c4ebfa58429b::t_01faf8d102a12a 2948
+  s_e9c4ebfa58429b::t_06cf56e7606fc8 2972-2973,2989-3004,3017-3025,3031,3037-3040,3057,3084-3085,3102-3107,3120-3128,3132-3133,3135-3140
+src/js/apps/patients/patient/patient_app.component.cy.js
+  s_e9c4ebfa58429b::t_4a56f59909181e 24-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "3d83ffc8ab3acb793937f38309478db1916de821",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
