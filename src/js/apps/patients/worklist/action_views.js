@@ -66,19 +66,14 @@ const ActionItemView = View.extend({
   },
   onClick() {
     if (this.flow) {
-      Radio.trigger('event-router', 'flow:action', this.flow.id, this.model.id);
-      return;
-    }
-
-    if (this.model.isDone()) {
-      Radio.trigger('event-router', 'patient:action:archive', this.model.getPatient().id, this.model.id);
+      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id);
       return;
     }
 
     Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
   onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.getPatient().id);
+    Radio.trigger('event-router', 'patient:workflow', this.model.getPatient().id);
   },
   onRender() {
     this.showForm();

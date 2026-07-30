@@ -27,12 +27,8 @@ export const i18n = intl.patients.patient.flow.flowViews;
 const HeaderView = View.extend({
   className: 'patient-flow__header',
   modelEvents: {
-    'editing': 'onEditing',
     'change': 'render',
     'change:_progress': 'onChangeFlowProgress',
-  },
-  onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
   },
   template: HeaderTemplate,
   regions: {
@@ -134,7 +130,6 @@ const ActionItemView = View.extend({
   className: 'table-list__item',
   modelEvents: {
     'change': 'render',
-    'editing': 'onEditing',
   },
   initialize({ state }) {
     this.state = state;
@@ -175,15 +170,6 @@ const ActionItemView = View.extend({
   onClick() {
     Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id);
   },
-  onEditing(isEditing) {
-    this.isEditing = isEditing;
-
-    const isSelected = this.state.isSelected(this.model);
-
-    if (isSelected) return;
-
-    this.$el.toggleClass('is-selected', isEditing);
-  },
   onRender() {
     const canEdit = this.canEdit;
     this.canEdit = !this.flow.isDone() && this.model.canEdit();
@@ -202,8 +188,6 @@ const ActionItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    if (this.isEditing) return;
-
     this.$el.toggleClass('is-selected', isSelected);
   },
   showCheck() {

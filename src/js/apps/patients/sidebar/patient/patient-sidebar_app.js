@@ -38,7 +38,7 @@ export default App.extend(extend({
     layoutView.getRegion('widgets').startPreloader();
 
     this.listenTo(layoutView, 'click:patient', () => {
-      Radio.trigger('event-router', 'patient:dashboard', this.patient.id);
+      Radio.trigger('event-router', 'patient:workflow', this.patient.id);
     });
 
     this.showChildView('content', layoutView);

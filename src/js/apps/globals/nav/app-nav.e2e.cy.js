@@ -682,7 +682,7 @@ context('App Nav', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ testNewPatientId }`);
+      .should('contain', `patient/${ testNewPatientId }/workflow`);
   });
 
   specify('add patient failure', function() {

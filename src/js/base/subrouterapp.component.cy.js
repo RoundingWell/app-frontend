@@ -17,7 +17,7 @@ const BaseApp = SubRouterApp.extend({
   routeScope: ['patientId'],
   routeActions() {
     return {
-      'patient:dashboard': 'showDashboard',
+      'patient:workflow': 'showDashboard',
       'patient:action': 'showAction',
     };
   },
@@ -56,7 +56,7 @@ const LoadingApp = BaseApp.extend({
   },
 });
 
-const dashboard = { event: 'patient:dashboard', eventArgs: ['p1'], definition: {} };
+const dashboard = { event: 'patient:workflow', eventArgs: ['p1'], definition: {} };
 const action = { event: 'patient:action', eventArgs: ['p1', 'a1'], definition: {} };
 
 context('SubRouterApp', function() {

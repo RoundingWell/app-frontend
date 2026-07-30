@@ -53,10 +53,10 @@ const FlowItemView = View.extend({
     });
   },
   onClick() {
-    Radio.trigger('event-router', 'flow', this.model.id);
+    Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
   onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.model.getPatient().id);
+    Radio.trigger('event-router', 'patient:workflow', this.model.getPatient().id);
   },
   onRender() {
     const canEdit = this.canEdit;

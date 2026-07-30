@@ -24,8 +24,7 @@ context('Global Error Page', function() {
       .should('not.exist');
   });
 
-  // NOTE: 'legacy' means the workspace name isn't included in the URL
-  specify('404 not found - legacy routes', function() {
+  specify('404 not found - root routes', function() {
     cy
       .visit('/route-does-not-exist', { isRoot: true });
 
@@ -38,20 +37,6 @@ context('Global Error Page', function() {
       .get('.error-page')
       .contains('Back to Your Workspace')
       .click();
-
-    cy
-      .get('.error-page')
-      .should('not.exist');
-  });
-
-  // NOTE: 'legacy' means the workspace name isn't included in the URL
-  specify('handle legacy routes', function() {
-    cy
-      .visit('/worklist/owned-by', { isRoot: true });
-
-    cy
-      .url()
-      .should('contain', 'one/worklist/owned-by');
 
     cy
       .get('.error-page')

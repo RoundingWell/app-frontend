@@ -927,19 +927,15 @@ context('patient action page', function() {
       .should('not.be.disabled');
 
     cy
-      .get('[data-header-region]')
+      .get('.patient-action')
       .find('[data-state-region]')
       .click();
 
     cy
       .get('.picklist')
       .contains('Complete')
-      .click();
-
-    cy
-      .get('.modal--small')
-      .find('.js-submit')
-      .click();
+      .click()
+      .wait('@routePatchAction');
 
     cy
       .get('@actionDialerButton')
@@ -1288,11 +1284,6 @@ context('patient action page', function() {
       .wait('@routeActionFiles');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-paperclip')
-      .should('not.exist');
-
-    cy
       .intercept('PUT', '/api/actions/**/relationships/files?urls=upload', req => {
         req.reply({
           statusCode: 201,
@@ -1354,11 +1345,6 @@ context('patient action page', function() {
       }, { force: true });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-paperclip')
-      .should('exist');
-
-    cy
       .get('.patient-action')
       .find('[data-attachments-files-region]')
       .first()
@@ -1370,11 +1356,6 @@ context('patient action page', function() {
       .find('.js-submit')
       .click()
       .wait('@routeDeleteFile');
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-paperclip')
-      .should('not.exist');
   });
 
   specify('action attachments - uploads not allowed on program action', function() {
@@ -1595,7 +1576,7 @@ context('patient action page', function() {
 
     cy
       .get('[data-activity-region]')
-      .find('.js-post')
+      .find('[data-comment-activity-region] .js-post')
       .should('contain', 'Save')
       .should('be.disabled');
 
@@ -1605,12 +1586,14 @@ context('patient action page', function() {
       .click();
 
     cy
-      .get('@activityComment')
+      .get('[data-activity-region]')
+      .contains('.comment__item', 'Least Recent Message from Clinician McTester')
       .should('contain', 'Least Recent Message from Clinician McTester')
       .should('not.contain', '(Edited)');
 
     cy
-      .get('@activityComment')
+      .get('[data-activity-region]')
+      .contains('.comment__item', 'Least Recent Message from Clinician McTester')
       .find('.js-edit')
       .click();
 
@@ -1623,13 +1606,13 @@ context('patient action page', function() {
 
     cy
       .get('[data-activity-region]')
-      .find('.js-input')
+      .find('[data-comment-activity-region] .js-input')
       .clear()
       .type('An edited comment');
 
     cy
       .get('[data-activity-region]')
-      .find('.js-post')
+      .find('[data-comment-activity-region] .js-post')
       .click();
 
     cy
@@ -1640,7 +1623,8 @@ context('patient action page', function() {
       });
 
     cy
-      .get('@activityComment')
+      .get('[data-activity-region]')
+      .contains('.comment__item', 'An edited comment')
       .should('contain', 'An edited comment')
       .find('.comment__edited');
 
@@ -1658,7 +1642,8 @@ context('patient action page', function() {
       .as('routeDeleteCommentFailure');
 
     cy
-      .get('@activityComment')
+      .get('[data-activity-region]')
+      .contains('.comment__item', 'An edited comment')
       .find('.js-edit')
       .click();
 
@@ -1705,6 +1690,7 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-comment-form-region]')
+      .last()
       .as('commentRegion')
       .find('[data-post-region] .js-post')
       .should('be.disabled');
@@ -1850,6 +1836,7 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-comment-form-region]')
+      .last()
       .as('postCommentRegion')
       .find('.js-input')
       .type('Test comment');
@@ -1877,13 +1864,6 @@ context('patient action page', function() {
       .find('.js-post')
       .click()
       .wait('@routePostComment');
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-comment')
-      .should('exist')
-      .next()
-      .should('contain', '1');
 
     cy
       .get('@postCommentRegion')
@@ -1915,13 +1895,6 @@ context('patient action page', function() {
       .wait('@routePostComment');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-comment')
-      .should('exist')
-      .next()
-      .should('contain', '2');
-
-    cy
       .intercept('DELETE', '/api/comments/*', {
         statusCode: 204,
         body: {},
@@ -1947,13 +1920,6 @@ context('patient action page', function() {
       .wait('@routeDeleteComment');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-comment')
-      .should('exist')
-      .next()
-      .should('contain', '1');
-
-    cy
       .get('[data-activity-region]')
       .find('.comment__item')
       .first()
@@ -1970,14 +1936,11 @@ context('patient action page', function() {
       .find('.js-submit')
       .click()
       .wait('@routeDeleteComment');
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-comment')
-      .should('not.exist');
   });
 
   specify('display action from program action', function() {
+    const testPatient = getPatient();
+
     const testProgram = getProgram({
       attributes: {
         name: 'Test Program',
@@ -1996,6 +1959,7 @@ context('patient action page', function() {
       },
       relationships: {
         'form': getRelationship(testForm),
+        'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
       },
     });
@@ -2034,6 +1998,7 @@ context('patient action page', function() {
       })
       .routeFormByAction()
       .routeFormDefinition()
+      .routeFormActionFields()
       .routeLatestFormResponse()
       .visit(`/patient/1/action/${ testAction.id }`)
       .wait('@routeAction');
@@ -2054,15 +2019,22 @@ context('patient action page', function() {
       .should('exist');
 
     cy
-      .get('[data-activity-region]')
+      .get('.patient-action:visible')
+      .should('have.length', 1)
+      .find('[data-activity-region]')
       .find('[data-activities-region]')
+      .last()
       .should('contain', 'Clinician McTester (Nurse) added this action from the Test Program program')
       .children()
       .its('length')
       .should('equal', 5);
 
     cy
-      .routePatientByAction();
+      .routePatientByAction(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      });
 
     cy
       .get('[data-form-region] button')
@@ -2071,15 +2043,27 @@ context('patient action page', function() {
 
     cy
       .url()
-      .should('contain', `patient/${ testAction.relationships.patient.data.id }/form/${ testForm.id }/action/${ testAction.id }`);
+      .should('contain', `/form/${ testForm.id }/action/${ testAction.id }`);
 
     cy
       .go('back');
   });
 
   specify('deleted action', function() {
+    const testPatient = getPatient({ id: '1' });
+
     cy
       .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
       .intercept('GET', '/api/actions/1*', {
         statusCode: 410,
         body: {
@@ -2100,7 +2084,79 @@ context('patient action page', function() {
       .should('contain', 'The Action you requested does not exist.');
 
     cy
-      .get('.list-page__list');
+      .url()
+      .should('contain', '/patient/1/workflow')
+      .should('not.contain', '/action/');
+  });
+
+  specify('action server error', function() {
+    const testPatient = getPatient({ id: '1' });
+
+    cy.on('uncaught:exception', () => false);
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .intercept('GET', '/api/actions/1*', {
+        statusCode: 500,
+        body: {
+          errors: getErrors({
+            status: '500',
+            title: 'Server Error',
+            detail: 'Cannot load action',
+          }),
+        },
+      })
+      .as('routeAction')
+      .visit('/patient/1/action/1')
+      .wait('@routeAction');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 500.');
+  });
+
+  specify('action unexpected client error', function() {
+    const testPatient = getPatient({ id: '1' });
+    const errorStub = cy.stub();
+
+    cy.on('uncaught:exception', error => {
+      errorStub(error);
+
+      return false;
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .intercept('GET', '/api/actions/1*', {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Unexpected Client Error',
+            detail: 'Cannot load action',
+          }),
+        },
+      })
+      .as('routeAction')
+      .visit('/patient/1/action/1')
+      .wait('@routeAction');
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.firstCall.args[0].message).to.contain('Error Status: 404');
+      });
   });
 
   specify('outreach', function() {
@@ -2217,10 +2273,13 @@ context('patient action page', function() {
       .should('exist');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .contains('Canceled Outreach Action')
-      .click();
+      .routeAction(fx => {
+        fx.data = testCanceledOutreachAction;
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/action/${ testCanceledOutreachAction.id }`)
+      .wait('@routeAction');
 
     cy
       .get('.patient-action')
@@ -2230,10 +2289,13 @@ context('patient action page', function() {
       .should('exist');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .contains('Error Outreach Action')
-      .click();
+      .routeAction(fx => {
+        fx.data = testErrorOutreachAction;
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/action/${ testErrorOutreachAction.id }`)
+      .wait('@routeAction');
 
     cy
       .get('.patient-action')
@@ -2244,6 +2306,8 @@ context('patient action page', function() {
   });
 
   specify('outreach form', function() {
+    const testPatient = getPatient();
+
     const testAction = getAction({
       attributes: {
         outreach: 'patient',
@@ -2251,6 +2315,7 @@ context('patient action page', function() {
       },
       relationships: {
         form: getRelationship(testForm),
+        patient: getRelationship(testPatient),
         state: getRelationship(stateDone),
       },
     });
@@ -2264,12 +2329,17 @@ context('patient action page', function() {
       })
       .routeFormByAction()
       .routeFormDefinition()
+      .routeFormActionFields()
       .routeLatestFormResponse()
       .visit(`/patient/1/action/${ testAction.id }`)
       .wait('@routeAction');
 
     cy
-      .routePatientByAction();
+      .routePatientByAction(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      });
 
     cy
       .get('.patient-action')
@@ -2278,7 +2348,7 @@ context('patient action page', function() {
 
     cy
       .url()
-      .should('contain', `patient/${ testAction.relationships.patient.data.id }/form/${ testForm.id }/action/${ testAction.id }`);
+      .should('contain', `/form/${ testForm.id }/action/${ testAction.id }`);
 
     cy
       .go('back');
@@ -2478,7 +2548,7 @@ context('patient action page', function() {
         return fx;
       })
       .routeActionFiles()
-      .visit(`/patient/1/action/${ otherTeamAction }`)
+      .visit(`/patient/1/action/${ otherTeamAction.id }`)
       .wait('@routeAction')
       .wait('@routePatient');
 
@@ -2495,10 +2565,7 @@ context('patient action page', function() {
       });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .last()
-      .click('top')
+      .visit(`/patient/1/action/${ nonTeamMemberAction.id }`)
       .wait('@routeAction');
 
     cy
@@ -2578,10 +2645,7 @@ context('patient action page', function() {
       });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .contains('Not authored by Current User')
-      .click()
+      .visit(`/patient/1/action/${ notAuthoredByCurrentUserAction.id }`)
       .wait('@routeAction');
 
     cy
@@ -2649,35 +2713,6 @@ context('patient action page', function() {
       .wait('@routeFlow');
 
     cy
-      .intercept('PATCH', `/api/flows/${ testFlow.id }`, {
-        statusCode: 204,
-        body: {},
-      })
-      .as('routePatchFlow');
-
-    cy
-      .intercept('PATCH', `/api/actions/${ testAction.id }`, {
-        statusCode: 204,
-        body: {},
-      })
-      .as('routePatchAction');
-
-    cy
-      .get('[data-header-region]')
-      .find('[data-state-region]')
-      .click();
-
-    cy
-      .get('.picklist')
-      .contains('Complete')
-      .click();
-
-    cy
-      .get('.modal--small')
-      .find('.js-submit')
-      .click();
-
-    cy
       .get('[data-action-region]')
       .should('contain', 'Test Details')
       .and('contain', formatDate(testDateSubtract(2), 'SHORT'))
@@ -2686,8 +2721,8 @@ context('patient action page', function() {
 
     cy
       .get('.patient-action')
-      .find('[data-action-region] .sidebar__label')
-      .should('contain', 'Permissions');
+      .find('[data-action-region] .patient-action__info')
+      .should('contain', 'You are not able to change settings on this action.');
   });
 
   specify('flow action with work:team:manage permission', function() {
@@ -2759,9 +2794,15 @@ context('patient action page', function() {
 
         return fx;
       })
+      .routeAction(fx => {
+        fx.data = ownedByAnotherTeamAction;
+
+        return fx;
+      })
       .routePatientByFlow()
       .visit(`/flow/${ testFlow.id }/action/${ ownedByAnotherTeamAction.id }`)
-      .wait('@routeFlow');
+      .wait('@routeFlow')
+      .wait('@routeAction');
 
     cy
       .get('[data-action-region]')
@@ -2769,10 +2810,22 @@ context('patient action page', function() {
       .and('contain', 'You are not able to change settings on this action.');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .last()
-      .click('top');
+      .routeAction(fx => {
+        fx.data = ownedByNonTeamMemberAction;
+
+        return fx;
+      })
+      .window()
+      .then(win => {
+        win.Radio.trigger(
+          'event-router',
+          'patient:flow:action',
+          testFlow.relationships.patient.data.id,
+          testFlow.id,
+          ownedByNonTeamMemberAction.id,
+        );
+      })
+      .wait('@routeAction');
 
     cy
       .get('[data-action-region]')
@@ -2856,7 +2909,7 @@ context('patient action page', function() {
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 
@@ -2880,6 +2933,8 @@ context('patient action page', function() {
       },
     });
 
+    let replyToStaleAction;
+
     cy
       .routesForPatientDashboard()
       .routePatient(fx => {
@@ -2895,18 +2950,22 @@ context('patient action page', function() {
       .routeActionActivity()
       .routeActionComments()
       .routeActionFiles()
-      .intercept('GET', `/api/actions/${ staleAction.id }*`, {
-        statusCode: 410,
-        delay: 500,
-        body: {
-          errors: getErrors({
-            status: '410',
-            title: 'Not Found',
-            detail: 'Cannot find action',
-            source: { parameter: 'actionId' },
-          }),
-        },
-      })
+      .intercept('GET', `/api/actions/${ staleAction.id }*`, req => new Cypress.Promise(resolve => {
+        replyToStaleAction = () => {
+          req.reply({
+            statusCode: 410,
+            body: {
+              errors: getErrors({
+                status: '410',
+                title: 'Not Found',
+                detail: 'Cannot find action',
+                source: { parameter: 'actionId' },
+              }),
+            },
+          });
+          resolve();
+        };
+      }))
       .as('routeStaleAction')
       .intercept('GET', `/api/actions/${ currentAction.id }*`, {
         body: { data: currentAction, included: [] },
@@ -2919,17 +2978,29 @@ context('patient action page', function() {
 
     cy.window().then(win => {
       win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
+    });
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replyToStaleAction).to.be.a('function');
+      });
+
+    cy.window().then(win => {
       win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
     });
 
     cy
       .wait('@routeCurrentAction')
-      .wait('@routeActionActivity')
-      .wait('@routeStaleAction');
+      .wait('@routeActionActivity');
 
     cy
       .get('.patient-action__name')
       .should('contain', 'Current Action');
+
+    cy.then(() => replyToStaleAction());
+
+    cy.wait('@routeStaleAction');
 
     cy
       .get('.alert-box__body')
@@ -2947,7 +3018,7 @@ context('patient action page', function() {
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 
@@ -2974,6 +3045,8 @@ context('patient action page', function() {
       },
     });
 
+    let replyToStaleAction;
+
     cy
       .routesForPatientDashboard()
       .routePatient(fx => {
@@ -2990,10 +3063,12 @@ context('patient action page', function() {
       .routeActionComments()
       .routeActionFiles()
       // the stale fetch succeeds, but resolves after the newer route
-      .intercept('GET', `/api/actions/${ staleAction.id }*`, {
-        body: { data: staleAction, included: [] },
-        delay: 500,
-      })
+      .intercept('GET', `/api/actions/${ staleAction.id }*`, req => new Cypress.Promise(resolve => {
+        replyToStaleAction = () => {
+          req.reply({ body: { data: staleAction, included: [] } });
+          resolve();
+        };
+      }))
       .as('routeStaleAction')
       .intercept('GET', `/api/actions/${ currentAction.id }*`, {
         body: { data: currentAction, included: [] },
@@ -3006,12 +3081,27 @@ context('patient action page', function() {
 
     cy.window().then(win => {
       win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
     });
 
     cy
-      .wait('@routeCurrentAction')
-      .wait('@routeStaleAction');
+      .wrap(null)
+      .should(() => {
+        expect(replyToStaleAction).to.be.a('function');
+      });
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
+    });
+
+    cy.wait('@routeCurrentAction');
+
+    cy
+      .get('.patient-action__name')
+      .should('contain', 'Current Action');
+
+    cy.then(() => replyToStaleAction());
+
+    cy.wait('@routeStaleAction');
 
     // the stale fetch resolved last, but its sidebar is suppressed
     cy
@@ -3033,7 +3123,7 @@ context('patient action page', function() {
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 
@@ -3079,7 +3169,154 @@ context('patient action page', function() {
 
     cy
       .url()
-      .should('contain', `/patient/dashboard/${ testPatient.id }`)
+      .should('contain', `/patient/${ testPatient.id }/workflow`)
       .should('not.contain', '/action/');
+  });
+
+  specify('redirects to the flow when an on-demand flow action is gone', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship([workspaceOne]),
+      },
+    });
+
+    const testFlow = getFlow({
+      attributes: {
+        name: 'Test Flow',
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = testFlow;
+        fx.included = [];
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [];
+        fx.included = [];
+
+        return fx;
+      })
+      .routeFlowActivity()
+      .intercept('GET', '/api/actions/deleted-action*', {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find action',
+            source: { parameter: 'actionId' },
+          }),
+        },
+      })
+      .as('routeGoneAction');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient');
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'patient:flow:action', testPatient.id, testFlow.id, 'deleted-action');
+    });
+
+    cy
+      .wait('@routeGoneAction');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }`)
+      .should('not.contain', '/action/');
+  });
+
+  specify('redirects to the workflow when an action route flow is gone', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship([workspaceOne]),
+      },
+    });
+
+    const testFlow = getFlow({
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    const testAction = getAction({
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .intercept('GET', `/api/flows/${ testFlow.id }*`, {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find flow',
+            source: { parameter: 'flowId' },
+          }),
+        },
+      })
+      .as('routeGoneFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeGoneFlow');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Flow you requested does not exist.');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/workflow`)
+      .should('not.contain', '/flow/');
   });
 });
