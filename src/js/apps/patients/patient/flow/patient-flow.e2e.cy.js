@@ -206,7 +206,7 @@ context('patient flow page', function() {
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 
@@ -1197,7 +1197,7 @@ context('patient flow page', function() {
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 

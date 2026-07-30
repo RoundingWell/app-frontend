@@ -136,7 +136,7 @@ For displaying a standalone form in a widget area. Example:
 ```
 
 `is_modal` will display the form in a modal instead of the form page.
-`modal_size` can be `small` to override the default size.
+`modal_size` can be `small` to override the default size. Using `large` navigates to the patient form page instead of opening a modal, including for read-only forms.
 
 ## Custom Widgets (DEPRECATED)
 

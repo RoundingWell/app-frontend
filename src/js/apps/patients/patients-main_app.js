@@ -117,24 +117,23 @@ export default RouterApp.extend({
     this.startCurrent('schedule');
   },
 
-  showPatient(...eventArgs) {
-    const [patientId] = eventArgs;
+  showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
     this.startRoute('patient', { patientId });
   },
 
   redirectPatientFlow(flowId) {
-    this.resolveFlowPatient('patient:flow', flowId);
+    return this.resolveFlowPatient('patient:flow', flowId);
   },
 
   redirectPatientFlowAction(flowId, actionId) {
-    this.resolveFlowPatient('patient:flow:action', flowId, actionId);
+    return this.resolveFlowPatient('patient:flow:action', flowId, actionId);
   },
 
   resolveFlowPatient(event, flowId, actionId) {
     const sourceRoute = this.getCurrentRoute();
 
-    Radio.request('entities', 'fetch:flows:model', flowId)
+    return Radio.request('entities', 'fetch:flows:model', flowId)
       .then(flow => {
         const patientId = flow.getPatient().id;
         const routeArgs = actionId ?
@@ -148,20 +147,21 @@ export default RouterApp.extend({
 
   redirectResolvedRoute(sourceRoute, event, ...eventArgs) {
     // Ignore a resolver that completed after the user navigated elsewhere.
-    if (this.getCurrentRoute() !== sourceRoute) return;
+    if (!this.isRunning() || this.getCurrentRoute() !== sourceRoute) return;
 
+    // Replace the legacy URL without dispatching, then route the canonical event.
     this.replaceRoute(event, ...eventArgs);
     Radio.trigger('event-router', event, ...eventArgs);
   },
 
   failResolvedRoute(sourceRoute, error) {
-    if (this.getCurrentRoute() !== sourceRoute) return;
+    if (!this.isRunning() || this.getCurrentRoute() !== sourceRoute) return;
 
     if (get(error, ['response', 'status']) === 410) {
       Radio.trigger('event-router', 'notFound');
       return;
     }
 
-    handleErrors(error);
+    return handleErrors(error);
   },
 });

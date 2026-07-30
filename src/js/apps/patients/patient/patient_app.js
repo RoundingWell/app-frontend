@@ -139,6 +139,7 @@ export default SubRouterApp.extend({
 
   getOptimisticFlowId({ flowId, actionId }, previous) {
     if (flowId) return flowId;
+    if (!actionId) return;
     if (actionId !== previous.actionId) return;
 
     return previous.flowId;

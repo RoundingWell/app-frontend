@@ -276,11 +276,6 @@ const DayItemView = View.extend({
       return;
     }
 
-    if (this.model.isDone()) {
-      Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
-      return;
-    }
-
     Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
   showDetailsTooltip() {

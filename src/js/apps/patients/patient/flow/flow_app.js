@@ -42,7 +42,6 @@ export default App.extend({
       Radio.request('entities', 'fetch:actions:collection:byFlow', flowId),
     ];
   },
-  /* istanbul ignore next: error handling */
   onFail(options, error) {
     if (get(error, ['response', 'status']) === 410) {
       Radio.request('alert', 'show:error', i18n.notFound);
