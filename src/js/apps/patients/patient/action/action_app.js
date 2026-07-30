@@ -66,13 +66,17 @@ export default App.extend({
   fetchRouteResource(resource, request) {
     return request.catch(error => Promise.reject({ resource, error }));
   },
-  /* istanbul ignore next: page-level action error handling */
   onFail(options, failure) {
     const error = get(failure, 'error', failure);
+    const resource = get(failure, 'resource');
 
     if (get(error, ['response', 'status']) === 410) {
-      Radio.request('alert', 'show:error', intl.patients.patient.action.actionApp.notFound);
-      this.navigateAfterGone(options, get(failure, 'resource'));
+      const message = resource === 'flow' ?
+        intl.patients.patient.flow.flowViews.notFound :
+        intl.patients.patient.action.actionApp.notFound;
+
+      Radio.request('alert', 'show:error', message);
+      this.navigateAfterGone(options, resource);
       return;
     }
 

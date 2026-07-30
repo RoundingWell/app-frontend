@@ -6,7 +6,7 @@ import App from 'js/base/app';
 import intl from 'js/i18n';
 
 import FormsService from 'js/services/forms';
-import { addError } from 'js/datadog';
+import { addAction } from 'js/datadog';
 
 import { ModalView, SidebarModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
 import { DraftStatusView } from 'js/apps/patients/patient/form/form_views';
@@ -144,7 +144,7 @@ export default App.extend({
   routeLargeFormRequest(patient, form, formName) {
     Radio.trigger('event-router', 'patient:form', patient.id, form.id);
 
-    addError(new Error('Large form modal request routed to patient form'), {
+    addAction('Large form modal request routed to patient form', {
       patientId: patient.id,
       formId: form.id,
       formName,

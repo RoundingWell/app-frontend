@@ -3176,4 +3176,71 @@ context('patient action page', function() {
       .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }`)
       .should('not.contain', '/action/');
   });
+
+  specify('redirects to the workflow when an action route flow is gone', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship([workspaceOne]),
+      },
+    });
+
+    const testFlow = getFlow({
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    const testAction = getAction({
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .intercept('GET', `/api/flows/${ testFlow.id }*`, {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find flow',
+            source: { parameter: 'flowId' },
+          }),
+        },
+      })
+      .as('routeGoneFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeGoneFlow');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Flow you requested does not exist.');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/workflow`)
+      .should('not.contain', '/flow/');
+  });
 });
