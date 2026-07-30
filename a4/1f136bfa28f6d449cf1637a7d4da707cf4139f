@@ -1,0 +1,37 @@
+src/js/apps/globals/error/error.e2e.cy.js
+  s_e9c4ebfa58429b::t_1af6d128fa5b96 27
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_e9c4ebfa58429b::t_10628280b5f12a 685
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  s_e9c4ebfa58429b::t_48bf439c261200 163
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_e9c4ebfa58429b::t_059b2b3296a8e7 930,937-938,1579,1589-1590,1595-1596,1609,1615,1626-1627,1645-1646,1693,1839,1942-1943,1962,2001,2022-2024,2026,2033-2037,2046,2092-2122,2237-2243,2253-2259,2270-2271,2279,2293,2299-2303,2312,2512,2529,2609,2685-2686,2758-2762,2765-2766,2774-2789,3050,3107
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_e9c4ebfa58429b::t_89b6c2e716e8eb 73-77,94,99,106,116,203,251-252,257,268-273,275-276,282,300,305,324,329,348,366,371,602,606,619,621,623-624,627,662,716,815-816,819,831,833,836,855,861,871,892,917,926-927,1061,1095,1120-1125,1178,1211-1212,1230-1308,1320,1328,1360,1415,1564,1568,1639,1669,1702,1730,1762,1926,1949,1979,2000,2024,2036,2040,2044,2048,2053,2057,2269,2333,2338-2340,2344,2348,2354-2358,2490,2493,2645,2648,2723,2735
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_e9c4ebfa58429b::t_39acd0f51400f1 1432,1435,1457-1458,1462-1467
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_e9c4ebfa58429b::t_e49ab8cf9d4c81 54-58,188,276-277,296-297,317-318,337-338,349-350,1000,1004,1009-1012,1045,1049,1054-1057,1084,1088-1091,1113,1133
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_e9c4ebfa58429b::t_6f3bbbcfdc606f 235,286
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_e9c4ebfa58429b::t_c9f51f33a4b434 124,286,304,913,919,963,976,992,4476,4499
+src/js/services/dialer.e2e.cy.js
+  s_e9c4ebfa58429b::t_7885c8eb202cae 144,248,397,501
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "a41f136bfa28f6d449cf1637a7d4da707cf4139f",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
