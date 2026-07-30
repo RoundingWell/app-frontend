@@ -1429,9 +1429,10 @@ context('Patient Action Form', function() {
     });
 
     cy
-      .routesForPatientDashboard()
+      .routesForPatientAction()
       .routeAction(fx => {
         fx.data = testAction;
+        fx.included.push(testFlow);
 
         return fx;
       })
@@ -1453,9 +1454,16 @@ context('Patient Action Form', function() {
       .routePatientByFlow()
       .routeFlow()
       .routeFlowActions()
-      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }/action/${ testAction.id }`)
+      .routeFlowActivity()
+      .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routePatient');
+
+    cy
+      .get('.patient-action__button')
+      .click()
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
 
     cy
       .get('.js-history-button')

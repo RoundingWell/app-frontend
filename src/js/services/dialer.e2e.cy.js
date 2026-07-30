@@ -128,11 +128,6 @@ context('Dialer Service', function() {
 
         return fx;
       })
-      .routePatientByFlow(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
       .routePatientFlows(fx => {
         fx.data = [testFlow];
 
@@ -146,8 +141,7 @@ context('Dialer Service', function() {
       .routeDashboards()
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
-      .wait('@routeFlowActions')
+      .wait('@routePatient')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
       .wait('@routeActionFiles');
@@ -251,9 +245,8 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.patient-flow__context-trail .js-patient')
+      .get('.patient__context-trail .js-patient')
       .click()
-      .wait('@routePatient')
       .wait('@routePatientActions')
       .wait('@routePatientFlows');
 
@@ -388,11 +381,6 @@ context('Dialer Service', function() {
 
         return fx;
       })
-      .routePatientByFlow(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
       .routePatientFlows(fx => {
         fx.data = [testFlow];
 
@@ -406,8 +394,7 @@ context('Dialer Service', function() {
       .routeDashboards()
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
-      .wait('@routeFlowActions')
+      .wait('@routePatient')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
       .wait('@routeActionFiles');
@@ -511,9 +498,8 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.patient-flow__context-trail .js-patient')
+      .get('.patient__context-trail .js-patient')
       .click()
-      .wait('@routePatient')
       .wait('@routePatientActions')
       .wait('@routePatientFlows');
 
