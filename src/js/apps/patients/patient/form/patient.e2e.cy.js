@@ -180,11 +180,6 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.js-expand-button')
-      .should('exist');
-
-    cy
-      .get('.form__controls')
       .find('.form__actions-icon:has(.fa-shield-check)')
       .as('draftStatusButton')
       .trigger('pointerover');

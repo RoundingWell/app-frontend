@@ -232,7 +232,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient/archive/${ testPatient1.id }/action/${ testActions[3].id }`)
+      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[3].id }`)
       .go('back');
 
     cy
@@ -283,7 +283,7 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ testPatient1.id }`)
+      .should('contain', `patient/${ testPatient1.id }/workflow`)
       .go('back');
 
     cy

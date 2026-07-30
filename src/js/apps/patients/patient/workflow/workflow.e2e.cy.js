@@ -51,6 +51,11 @@ context('patient workflow page', function() {
       })
       .as('routePostAction');
 
+    cy.routeAction(fx => {
+      fx.data = actionData;
+      return fx;
+    });
+
     return actionData.id;
   }
 
@@ -180,7 +185,7 @@ context('patient workflow page', function() {
 
     cy
       .location('pathname')
-      .should('equal', `/one/patient/${ testPatient.id }/workflow`);
+      .should('equal', `/one/patient/dashboard/${ testPatient.id }`);
 
     cy
       .wait('@routePatientActions')
@@ -268,13 +273,8 @@ context('patient workflow page', function() {
 
     cy
       .get('.list-page__list')
-      .contains('First In List')
-      .click()
-      .tick(350); // this test uses visitOnClock, so needed for the sidebar animation
-
-    cy
-      .get('.list-page__list')
-      .find('.is-selected')
+      .find('.table-list__item')
+      .first()
       .find('[data-state-region]')
       .find('.fa-circle-exclamation')
       .click();
@@ -293,7 +293,8 @@ context('patient workflow page', function() {
 
     cy
       .get('.list-page__list')
-      .find('.is-selected')
+      .find('.table-list__item')
+      .first()
       .find('[data-owner-region]')
       .should('contain', 'CO')
       .click();
@@ -313,7 +314,8 @@ context('patient workflow page', function() {
 
     cy
       .get('.list-page__list')
-      .find('.is-selected')
+      .find('.table-list__item')
+      .first()
       .find('[data-due-date-region]')
       .click();
 
@@ -332,7 +334,8 @@ context('patient workflow page', function() {
 
     cy
       .get('.list-page__list')
-      .find('.is-selected')
+      .find('.table-list__item')
+      .first()
       .find('[data-due-time-region]')
       .click();
 
@@ -343,7 +346,8 @@ context('patient workflow page', function() {
 
     cy
       .get('.list-page__list')
-      .find('.is-selected')
+      .find('.table-list__item')
+      .first()
       .find('[data-due-time-region] .is-overdue');
 
     cy
@@ -362,17 +366,6 @@ context('patient workflow page', function() {
       .get('.patient__tabs')
       .find('.js-dashboard')
       .click();
-
-    cy
-      .get('.list-page__list')
-      .find('.is-selected')
-      .should('not.exist');
-
-    cy
-      .get('.list-page__list')
-      .contains('First In List')
-      .click()
-      .tick(350); // this test uses visitOnClock, so needed for the sidebar animation
 
     cy
       .get('.list-page__list')
@@ -402,60 +395,6 @@ context('patient workflow page', function() {
         expect(data.relationships.owner.data.id).to.equal(teamNurse.id);
         expect(data.relationships.owner.data.type).to.equal(teamNurse.type);
       });
-
-    cy
-      .routeFlow()
-      .routeFlowActions()
-      .routePatientByFlow();
-
-    cy
-      .get('@flowItem')
-      .click('top')
-      .wait('@routeFlow')
-      .wait('@routePatientByFlow')
-      .wait('@routeFlowActions');
-
-    cy
-      .url()
-      .should('contain', `flow/${ testFlow.id }`);
-
-    cy
-      .go('back');
-
-    cy
-      .get('.list-page__list')
-      .find('.is-selected')
-      .find('[data-state-region]')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .contains('Done')
-      .click()
-      .tick(800); // the length of the animation
-
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.relationships.state.data.id).to.equal(stateDone.id);
-      });
-
-    cy
-      .get('.list-page__list')
-      .find('.table-list__item')
-      .should('have.lengthOf', 4);
-
-    cy
-      .get('.sidebar')
-      .find('.fa-circle-check')
-      .click();
-
-    cy
-      .get('.picklist')
-      .contains('To Do')
-      .click();
 
     cy
       .get('.list-page__list')
@@ -1058,21 +997,19 @@ context('patient workflow page', function() {
       .should('contain', `patient/${ testPatient.id }/action/${ testOne }`);
 
     cy
-      .get('.list-page__list')
-      .find('.is-selected')
+      .get('.patient-action')
       .should('contain', 'One of One');
 
     cy
-      .get('.sidebar')
-      .find('.patient-action__name')
-      .should('contain', 'One of One');
-
-    cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('.js-menu')
       .should('not.exist');
 
     cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows')
       .get('[data-add-workflow-region]')
       .contains('Add')
       .click();
@@ -1105,21 +1042,19 @@ context('patient workflow page', function() {
       .should('contain', `patient/${ testPatient.id }/action/${ testTwo }`);
 
     cy
-      .get('.list-page__list')
-      .find('.is-selected')
+      .get('.patient-action')
       .should('contain', 'One of Two');
 
     cy
-      .get('.sidebar')
-      .find('.patient-action__name')
-      .should('contain', 'One of Two');
-
-    cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('.js-menu')
       .should('not.exist');
 
     cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows')
       .get('[data-add-workflow-region]')
       .contains('Add')
       .click();
@@ -1146,14 +1081,14 @@ context('patient workflow page', function() {
       .should('contain', `patient/${ testPatient.id }/action/${ testThree }`);
 
     cy
-      .get('.list-page__list')
-      .find('.is-selected')
+      .get('.patient-action')
       .should('contain', 'Two of Two');
 
     cy
-      .get('.sidebar')
-      .find('.patient-action__name')
-      .should('contain', 'Two of Two');
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows');
 
     const testFlow = getFlow({
       attributes: { updated_at: testTs() },
@@ -1175,8 +1110,7 @@ context('patient workflow page', function() {
 
     cy
       .routeFlow()
-      .routeFlowActions()
-      .routePatientByFlow();
+      .routeFlowActions();
 
     cy
       .get('.picklist')
@@ -1197,12 +1131,7 @@ context('patient workflow page', function() {
       .should('contain', `flow/${ testFlow.id }`);
 
     cy
-      .get('.patient-flow__header')
-      .find('.patient-flow__name')
-      .click();
-
-    cy
-      .get('.sidebar')
+      .get('.patient-flow__header-container')
       .find('.js-menu')
       .should('not.exist');
   });
