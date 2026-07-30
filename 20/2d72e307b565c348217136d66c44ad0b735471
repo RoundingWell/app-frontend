@@ -1,0 +1,51 @@
+src/js/services/sidebars.js
+  s_e9c4ebfa58429b::t_48005e1445e541 1-14
+src/js/services/bootstrap.js
+  s_e9c4ebfa58429b::t_bc0111ff4609af 10,74,78,86-87
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_e9c4ebfa58429b::t_682ac7143a888c 32,37-83
+src/js/entities-service/index.js
+  s_e9c4ebfa58429b::t_361bd213118de2 41-42
+test/fixtures/test/sidebars.json
+  s_e9c4ebfa58429b::t_49b837fb3fa186 1-15
+test/support/api/sidebars.js
+  s_e9c4ebfa58429b::t_c9524160f609f8 1-20
+src/js/entities-service/sidebars.js
+  s_e9c4ebfa58429b::t_d4b87e6f84d8e2 1-15
+test/support/e2e.js
+  s_e9c4ebfa58429b::t_4fa6fdc424354a 42
+src/js/entities-service/entities/sidebars.js
+  s_e9c4ebfa58429b::t_1769801adfd874 1-27
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_e9c4ebfa58429b::t_d906d139acd753 23-24
+  s_e9c4ebfa58429b::t_2029cae9541580 3,7,22,25-26,36-104,111,115-116,125
+test/support/defaults.js
+  s_e9c4ebfa58429b::t_a383ae7949e1eb 59
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_e9c4ebfa58429b::t_22168e80de4226 17,19,23,32,35-40
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_e9c4ebfa58429b::t_b98c6efe1ffdfa 18-34,36-49,51-52,54-55,57-66,68-101,170,189,191,713
+  s_e9c4ebfa58429b::t_73b774167edfab 190
+  s_e9c4ebfa58429b::t_2de044b8f5b7c5 9,710
+  s_e9c4ebfa58429b::t_b12cc69c6a06a5 714
+  s_e9c4ebfa58429b::t_15ce651763f16c 171
+  s_e9c4ebfa58429b::t_e25b6bf3904c30 35,50,53,56,67
+src/js/i18n/en-US/patients.yml
+  s_e9c4ebfa58429b::t_b98c6efe1ffdfa 202-204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "202d72e307b565c348217136d66c44ad0b735471",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
