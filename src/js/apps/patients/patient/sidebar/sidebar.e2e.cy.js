@@ -572,6 +572,22 @@ context('patient sidebar', function() {
     cy
       .url()
       .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
+
+    cy.go('back');
+
+    cy
+      .url()
+      .should('contain', `patient/dashboard/${ testPatient.id }`);
+
+    cy
+      .get('@patientSidebar')
+      .find('.widgets__form-widget')
+      .contains('Test Form')
+      .click();
+
+    cy
+      .url()
+      .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
   });
 
   specify('patient workspaces', function() {
