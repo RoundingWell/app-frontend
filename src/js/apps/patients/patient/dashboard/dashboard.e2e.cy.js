@@ -1156,7 +1156,7 @@ context('patient dashboard page', function() {
     });
 
     cy
-      .intercept('POST', `/api/patients/${ testPatient.id }/relationships/flows*`, {
+      .intercept('POST', '/api/flows*', {
         statusCode: 201,
         body: {
           data: testFlow,
@@ -1183,6 +1183,7 @@ context('patient dashboard page', function() {
       .wait('@routePostFlow')
       .its('request.body')
       .should(({ data }) => {
+        expect(data.relationships.patient.data.id).to.equal(testPatient.id);
         expect(data.relationships.state.data.id).to.equal(stateTodo.id);
         expect(data.relationships['program-flow'].data.id).to.be.equal(testProgramFlows[0].id);
       });
