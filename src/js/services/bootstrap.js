@@ -7,6 +7,7 @@ import getWorkspaceRoute from 'js/utils/root-route';
 
 import App from 'js/base/app';
 
+import SidebarsService from './sidebars';
 import SettingsService from './settings';
 import WidgetsService from './widgets';
 import WorkspaceService from './workspace';
@@ -70,16 +71,19 @@ export default App.extend({
       Radio.request('entities', 'fetch:teams:collection'),
       Radio.request('entities', 'fetch:workspaces:collection'),
       Radio.request('entities', 'fetch:settings:collection'),
+      Radio.request('entities', 'fetch:sidebars:collection'),
       Radio.request('entities', 'fetch:widgets:collection'),
     ];
   },
-  onStart(options, currentUser, roles, teams, workspaces, settings, widgets) {
+  onStart(options, currentUser, roles, teams, workspaces, settings, sidebars, widgets) {
     this.currentUser = currentUser;
     this.roles = roles;
     this.teams = teams;
     this.workspaces = workspaces;
 
     new SettingsService({ settings });
+
+    new SidebarsService({ sidebars });
 
     new WidgetsService({ widgets });
 
