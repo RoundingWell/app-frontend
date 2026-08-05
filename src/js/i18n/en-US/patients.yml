@@ -199,6 +199,9 @@ careOptsFrontend:
             bodyText: Are you sure you want to archive this patient? The patient will no longer be accessible in this workspace.
             headingText: Confirm Archive Patient
             submitText: Archive Patient
+          sidebarSectionView:
+            collapseSectionLabel: Collapse { section } section
+            expandSectionLabel: Expand { section } section
           menuOptions:
             activate: Activate Patient
             archive: Archive Patient

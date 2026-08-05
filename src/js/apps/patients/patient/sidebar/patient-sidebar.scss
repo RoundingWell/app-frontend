@@ -29,8 +29,55 @@
   top: 16px;
 }
 
-.patient-sidebar__widgets {
+.patient-sidebar__sidebars {
   .loader {
     margin-top: 60px;
+  }
+}
+
+.patient-sidebar__card {
+  background: #{$white};
+  border: 1px solid #{$black-90};
+  border-radius: 8px;
+  margin-top: 16px;
+  padding: 16px;
+}
+
+.patient-sidebar__card-heading {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.patient-sidebar__card-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  justify-content: space-between;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+
+  &:focus-visible {
+    outline: 2px solid color(blue);
+    outline-offset: 4px;
+  }
+}
+
+.patient-sidebar__card-toggle-icon {
+  transition: transform 0.15s linear;
+}
+
+.patient-sidebar__card.is-collapsed {
+  .patient-sidebar__card-heading {
+    margin-bottom: 0;
+  }
+
+  .patient-sidebar__card-toggle-icon {
+    transform: rotate(-90deg);
   }
 }
