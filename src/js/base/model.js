@@ -89,9 +89,9 @@ export default Backbone.Model.extend(extend({
     }, {});
   },
   removeFEOnly(attrs) {
-    // Removes id and frontend _fields for POST/PATCHes
+    // Removes JSON:API identity and frontend _fields for POST/PATCHes
     return pick(attrs, function(value, key) {
-      return key !== 'id' && /^[^_]/.test(key);
+      return key !== 'id' && key !== 'type' && /^[^_]/.test(key);
     });
   },
   toJSONApi(attributes = this.attributes) {

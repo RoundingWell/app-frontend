@@ -428,6 +428,8 @@ context('Patient Action Form', function() {
       .its('request.body')
       .should(({ data }) => {
         expect(data.id).to.equal(formResponse.id);
+        expect(data.type).to.equal('form-responses');
+        expect(data.attributes).not.to.have.any.keys('id', 'type');
         expect(data.attributes.status).to.equal(FORM_RESPONSE_STATUS.DRAFT);
         expect(data.attributes.response.data.fields.foo).to.equal('baz');
       });
