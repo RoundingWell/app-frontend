@@ -37,7 +37,6 @@ const _Model = BaseModel.extend({
     return this.getRelationship('_program');
   },
   createAction({ patient, flow }) {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
     const currentWorkspace = Radio.request('workspace', 'current');
     const states = currentWorkspace.getStates();
 
@@ -47,10 +46,6 @@ const _Model = BaseModel.extend({
     const attrs = {
       name: this.get('name'),
       _state: defaultInitialState.getResource(),
-      _owner: this.get('_owner') || {
-        id: currentUser.id,
-        type: 'clinicians',
-      },
       _program_action: this.getResource(),
       _patient: actionPatient.getResource(),
     };
