@@ -1,13 +1,18 @@
 index.html
   s_68eb4121d9a9bc::t_f6299ffe17608c 18
+  s_68eb4121d9a9bc::t_c2bdcc71b9e7f4 18
 public/fonts/Figtree/LICENSE
   s_68eb4121d9a9bc::t_b2ebfd7b2528c8 1-93
+  s_68eb4121d9a9bc::t_fc128086132a6f 1-93
 src/js/auth/prelogin/prelogin.scss
   s_68eb4121d9a9bc::t_f4d6b0cfe7896e 3,31,78
+  s_68eb4121d9a9bc::t_c5a7060791918d 3,31,78
 src/scss/core/_fonts.scss
   s_68eb4121d9a9bc::t_7e801a22f8b375 2-4,8,10-12,17,19-21,26,28-30,35,37-39
+  s_68eb4121d9a9bc::t_cad3b18907c798 2-4,8,10-12,17,19-21,26,28-30,35,37-39
 src/scss/core/_typography.scss
   s_68eb4121d9a9bc::t_59d50f71638cd4 8
+  s_68eb4121d9a9bc::t_a549a446b10c0e 8
 ---
 {
   "schema_version": "authorship/3.0.0",
