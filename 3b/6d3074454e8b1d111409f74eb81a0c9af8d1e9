@@ -1,0 +1,29 @@
+index.html
+  s_68eb4121d9a9bc::t_c2bdcc71b9e7f4 18
+public/fonts/Figtree/LICENSE
+  s_68eb4121d9a9bc::t_fc128086132a6f 1-93
+src/js/auth/prelogin/prelogin.scss
+  s_68eb4121d9a9bc::t_c5a7060791918d 3,31,78
+src/scss/core/_fonts.scss
+  s_68eb4121d9a9bc::t_cad3b18907c798 2-4,8,10-12,17,19-21,26,28-30,35,37-39
+src/scss/core/_tokens.scss
+  s_68eb4121d9a9bc::t_a16634b785b6d3 6,23,25
+src/scss/core/_typography.scss
+  s_68eb4121d9a9bc::t_a549a446b10c0e 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3b6d3074454e8b1d111409f74eb81a0c9af8d1e9",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
