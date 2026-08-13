@@ -125,6 +125,7 @@ src/js/apps/patients/patient/workflow/done-layout.hbs
   s_ed28f1881feec6::t_ecb2c657cc23b4 1-12
 src/js/apps/patients/patient/patient_app.js
   s_ed28f1881feec6::t_ecb2c657cc23b4 50,73,75,78-85,146,148,160-164,173-204
+  s_ed28f1881feec6::t_f911c026b6b980 205
 src/js/apps/patients/patient/sidebar/sidebar_app.js
   s_ed28f1881feec6::t_ecb2c657cc23b4 9-10,16-23,35,39-40,43-48,51-55
 src/js/apps/patients/patient/sidebar/patient-sidebar.scss
