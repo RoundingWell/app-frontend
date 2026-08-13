@@ -1,0 +1,19 @@
+src/js/apps/patients/patient/patient_app.js
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 106,119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "4d5fe2900de72caf510dcabab5ff644b65968a4d",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
