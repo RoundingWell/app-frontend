@@ -2,8 +2,11 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import 'scss/modules/table-list.scss';
+import 'scss/modules/card-list.scss';
 import 'scss/modules/progress-bar.scss';
+
+import intl from 'js/i18n';
+import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckComponent, FlowStateComponent, OwnerComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView } from 'js/apps/patients/shared/read-only_views';
@@ -11,17 +14,23 @@ import { ReadOnlyStateView, ReadOnlyOwnerView } from 'js/apps/patients/shared/re
 import FlowItemTemplate from './flow-item.hbs';
 
 import 'js/apps/patients/shared/action-state.scss';
+import 'scss/domain/work-card.scss';
+import 'scss/domain/flow-card.scss';
 import './worklist-list.scss';
 
-const FlowTooltipTemplate = hbs`{{formatMessage (intlGet "patients.worklist.flowViews.flowListTooltips") title=worklistId team=owner}}`;
-
 const FlowEmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
+  attributes: {
+    role: 'listitem',
+  },
   template: hbs`<h2>{{ @intl.patients.worklist.flowViews.flowEmptyView }}</h2>`,
 });
 
 const FlowItemView = View.extend({
-  className: 'table-list__item work-list__item',
+  className: 'work-card flow-card worklist-list__item worklist-list__flow-item',
+  attributes: {
+    role: 'listitem',
+  },
   template: FlowItemTemplate,
   regions: {
     check: '[data-check-region]',
@@ -40,12 +49,18 @@ const FlowItemView = View.extend({
   },
   triggers: {
     'click': 'click',
-    'click .js-patient-sidebar-button': 'click:patientSidebarButton',
-    'click .js-patient': 'click:patient',
-    'click .js-no-click': 'prevent-row-click',
   },
-  initialize({ state }) {
+  events: {
+    'click .js-no-click': stopEventPropagation,
+    'click .js-patient': 'onClickPatient',
+    'click .js-primary': 'onClickPrimary',
+  },
+  ui: {
+    patient: '.js-patient',
+  },
+  initialize({ state, selectedPatientId }) {
     this.state = state;
+    this.selectedPatientId = selectedPatientId;
 
     this.listenTo(state, {
       'select:multiple': this.showCheck,
@@ -53,12 +68,21 @@ const FlowItemView = View.extend({
     });
   },
   onClick() {
+    this.navigateToFlow();
+  },
+  navigateToFlow() {
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
-  onClickPatient() {
-    Radio.trigger('event-router', 'patient:workflow', this.model.getPatient().id);
+  onClickPatient(event) {
+    event.stopPropagation();
+    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+  },
+  onClickPrimary(event) {
+    event.stopPropagation();
+    this.navigateToFlow();
   },
   onRender() {
+    this.setPatientSelected(this.selectedPatientId);
     const canEdit = this.canEdit;
     this.canEdit = this.model.canEdit();
 
@@ -74,12 +98,23 @@ const FlowItemView = View.extend({
   toggleSelected(isSelected) {
     this.$el.toggleClass('is-selected', isSelected);
   },
+  setPatientSelected(patientId) {
+    this.selectedPatientId = patientId;
+    const isSelected = this.model.getPatient().id === patientId;
+    this.ui.patient
+      .toggleClass('patient-list__patient--selected', isSelected)
+      .attr('aria-expanded', String(isSelected));
+  },
   showCheck() {
     if (!this.canEdit) return;
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({ state: { isSelected } });
+    const checkComponent = new CheckComponent({
+      deselectLabel: intl.patients.shared.actionsViews.deselectFlow,
+      selectLabel: intl.patients.shared.actionsViews.selectFlow,
+      state: { isSelected },
+    });
 
     this.listenTo(checkComponent, {
       'select'(domEvent) {
@@ -92,7 +127,7 @@ const FlowItemView = View.extend({
   },
   showState() {
     if (!this.model.isDone() || !this.canEdit) {
-      const readOnlyStateView = new ReadOnlyStateView({ model: this.model, isCompact: true });
+      const readOnlyStateView = new ReadOnlyStateView({ model: this.model });
       this.showChildView('state', readOnlyStateView);
       return;
     }
@@ -110,7 +145,7 @@ const FlowItemView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model, isCompact: true });
+      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model });
       this.showChildView('owner', readOnlyOwnerView);
       return;
     }
@@ -133,7 +168,6 @@ const FlowItemView = View.extend({
 });
 
 export {
-  FlowTooltipTemplate,
   FlowEmptyView,
   FlowItemView,
 };
