@@ -15,7 +15,7 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
-  specify('renders and toggles backend sidebar sections', function() {
+  specify('expands and collapses sidebar sections accessibly', function() {
     cy
       .routesForPatientDashboard()
       .routeSidebars(fx => {
@@ -26,14 +26,14 @@ context('patient sidebar', function() {
             id: 'demographics',
             slug: 'demographics',
             name: 'Demographics',
-            sequence: 1,
+            sequence: 0,
             widgets: ['sex'],
           }),
           addSidebar({
             id: 'care-team',
             slug: 'care-team',
             name: 'Care & Support',
-            sequence: 0,
+            sequence: 1,
             widgets: ['sex'],
           }),
         ];
@@ -44,10 +44,14 @@ context('patient sidebar', function() {
       .wait('@routePatient');
 
     cy
-      .get('.patient-sidebar__card-toggle')
-      .should('have.length', 2)
-      .first()
-      .should('contain', 'Care & Support');
+      .contains('.patient-sidebar__card-toggle', 'Demographics')
+      .as('demographicsToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Demographics section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('be.visible');
+      });
 
     cy
       .contains('.patient-sidebar__card-toggle', 'Care & Support')
@@ -60,9 +64,34 @@ context('patient sidebar', function() {
       });
 
     cy
+      .get('@demographicsToggle')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false')
+      .and('have.attr', 'aria-label', 'Expand Demographics section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('not.be.visible');
+      });
+
+    cy
+      .get('@demographicsToggle')
+      .focus()
+      .should('be.focused')
+      .typeEnter();
+
+    cy
+      .get('@demographicsToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Demographics section');
+
+    cy
       .get('@careToggle')
       .focus()
-      .typeEnter()
+      .should('be.focused')
+      .typeEnter();
+
+    cy
+      .get('@careToggle')
       .should('have.attr', 'aria-expanded', 'false')
       .and('have.attr', 'aria-label', 'Expand Care & Support section')
       .invoke('attr', 'aria-controls')
@@ -80,34 +109,39 @@ context('patient sidebar', function() {
         cy.get(`#${ regionId }`).should('be.visible');
       });
 
+    cy.viewport(720, 720);
+
     cy
-      .contains('.patient-sidebar__card-toggle', 'Demographics')
-      .should('have.attr', 'aria-expanded', 'true')
-      .click()
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
       .should('have.attr', 'aria-expanded', 'false')
-      .and('have.attr', 'aria-label', 'Expand Demographics section')
-      .invoke('attr', 'aria-controls')
-      .then(regionId => {
-        cy.get(`#${ regionId }`).should('not.be.visible');
-      });
-  });
-
-  specify('renders an empty patient sidebar definition', function() {
-    cy
-      .routesForPatientDashboard()
-      .routeSidebars(fx => {
-        fx.data = [];
-
-        return fx;
-      })
-      .visit('/patient/dashboard/1')
-      .wait('@routePatient');
+      .click();
 
     cy
-      .get('.patient-sidebar')
-      .should('be.visible')
-      .find('.patient-sidebar__card')
-      .should('not.exist');
+      .get('.patient__sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .type('{esc}');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .should('be.focused')
+      .and('have.attr', 'aria-expanded', 'false');
+
+    cy.viewport(721, 720);
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
   });
 
   specify('display patient data', function() {
@@ -422,7 +456,7 @@ context('patient sidebar', function() {
       .find('.patient-sidebar__section')
       .contains('Template - Empty Widget Value')
       .next()
-      .find('.widgets-value')
+      .find('.widgets__value')
       .hasBeforeContent('–');
 
     cy
@@ -687,6 +721,98 @@ context('patient sidebar', function() {
       .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
   });
 
+  specify('renders patient sidebar when widget values fail', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+        sex: 'f',
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routeSidebars(fx => {
+        fx.data[0].attributes.widgets = [
+          'sex',
+          'failingWidget',
+          'unknownWidget',
+        ];
+
+        return fx;
+      })
+      .routeWidgets(fx => {
+        const addWidget = _.partial(getResource, _, 'widgets');
+
+        fx.data = fx.data.concat([
+          addWidget({
+            slug: 'failingWidget',
+            category: 'widget',
+            definition: {
+              template: 'Widget value: {{ sex }}',
+              display_name: 'Failing Widget',
+            },
+            values: {
+              sex: '@patient.sex',
+            },
+          }),
+          addWidget({
+            slug: 'unknownWidget',
+            category: 'customWidget',
+            definition: {
+              template: 'Custom widget value',
+              display_name: 'Unknown Widget',
+            },
+          }),
+        ]);
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      });
+
+    cy
+      .intercept('GET', '/api/widgets/failingWidget/values*', {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Not Found',
+            detail: 'Widget values failed',
+          }),
+        },
+      })
+      .as('routeFailingWidgetValues');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .wait('@routeFailingWidgetValues');
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.patient-sidebar__section')
+      .should('have.length', 3);
+
+    cy
+      .get('.patient-sidebar__section')
+      .first()
+      .should('contain', 'Sex')
+      .should('contain', 'Female');
+
+    cy
+      .get('.patient-sidebar__section')
+      .eq(2)
+      .should('contain', 'Unknown Widget')
+      .should('contain', 'Custom widget value');
+  });
+
   specify('patient workspaces', function() {
     cy
       .routesForPatientDashboard()
@@ -765,6 +891,7 @@ context('patient sidebar', function() {
     cy
       .get('.patient__sidebar')
       .find('.js-menu')
+      .should('have.class', 'button--menu')
       .click();
 
     cy
