@@ -1,6 +1,6 @@
 # Sass Guide
 
-Most of our styles are linted for formating during the vite build and issues will show in the console when running `npm run lint` or in ci.
+Styles are linted by `npm run lint` and in CI.
 
 ## JavaScript Selectors
 
@@ -18,7 +18,7 @@ _Examples:_
 
 ## State Selector
 
-Shared by Sass and JavaScript and/or Handlebars. Should never be styled directly; only styled as an adjoining.
+Shared by Sass and JavaScript and/or Handlebars. Prefer an explicit BEM modifier for component styling and keep state classes as behavior hooks. When a state class must carry styles, scope it to its owning block rather than styling it globally.
 
 `.is-*`
 `.has-*`
@@ -30,16 +30,16 @@ _Examples:_
 ```sass
 .btn {
   background-color: red;
+}
 
-  &.is-active {
-    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.25);
-  }
+.btn--active {
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.25);
 }
 ```
 
 ## BEM Style Selector
 
-Block, Element, Modifier. Used only in Sass. All modular and such. Favor multiple classes over @extends or it gets all wacky.
+Block, Element, Modifier. Write complete, flat class names so markup classes can be searched verbatim in SCSS. Do not construct elements or modifiers with `&__` or `&--`. Keep selectors shallow and prefer a new BEM class over increasing specificity.
 
 _Examples:_
 * `.list`
@@ -67,33 +67,29 @@ _Examples:_
 
 ## Sass
 
-Rule sets should be ordered as follows:
+### Spacing and geometry
+
+Use 4px multiples for layout sizes, spacing, and offsets. Borders may use 1px or 0.5px. The established type and icon scales are intentional exceptions; document any other optical or geometry exception beside the declaration.
+
+Within a rule set, declarations should be ordered as follows:
 
 * @extend
-* @include without @content
 * properties
-* @include with @content
-* nested rule sets
 
 
 ```sass
 .element {
   $scoped-variable: whatever;
   @extend .other-element;
-  @include mixin($argument);
   property: value;
+}
 
-  @include breakpoint($size) {
-    /* styles here */
-  }
+.element:hover {
+  /* styles here */
+}
 
-  &:pseudo {
-    /* styles here */
-  }
-
-  .nested {
-    /* styles here */
-  }
+.element__child {
+  /* styles here */
 }
 ```
 
@@ -115,12 +111,8 @@ Rule sets should be ordered as follows:
 // Fourth Level
 ```
 
-## Using @extend and @mixin
-`@extend` should only be used in a single file. `@mixin` should be used when working across different partials.
-
-* http://csswizardry.com/2014/11/when-to-use-extend-when-to-use-a-mixin/
-* http://jedmao.ghost.io/2014/12/09/stop-using-sass-extend-to-reduce-bloat/
-* https://tech.bellycard.com/blog/sass-mixins-vs-extends-the-data/
+## Using @extend
+`@extend` should only be used within a single file.
 
 ## Sass Compiling
 
@@ -152,15 +144,16 @@ Styles that are specific to a certain set of views are defined in SCSS files in 
 This allows us to easily understand when styles can be removed. No style in one of these files should be used outside of
 the related js/hbs files. If a style should be reused it should move to `domain/` or `modules/` appropriately.
 
+### Module ownership
+
+A stylesheet may style only classes owned by its BEM block. Do not reach into another block with a descendant or compound selector. Compose module classes in the markup, add an owning modifier, or expose CSS custom properties when one module needs to configure another.
+
+The shared `.icon` class is the explicit exception: an owning block may scope icon size, color, and alignment to its own elements.
+
 ### `provider-variables.scss`
 
-Because of the way vite compiles the sass, globally defined variables need to be defined in this file.
-It contains mostly font size, padding, and color variables.
-
-## Legacy Styles
-
-Ideally when a group of styles is deprecated it is moved into a module named with `___-legacy.scss` in the filename.
-These styles are open season for refactoring and should not be reused.
+Because of the way Vite compiles Sass, globally defined Sass variables need to be defined in this file.
+It contains the legacy color maps and color variables. New V6 theme values are CSS custom properties in `core/_tokens.scss`.
 
 ## Icons
 
