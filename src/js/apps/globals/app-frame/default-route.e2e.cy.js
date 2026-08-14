@@ -22,6 +22,15 @@ context('default routes', function() {
       .wait('@routePatient');
 
     cy
+      .url()
+      .should('contain', 'one/worklist/owned-by');
+
+    cy
+      .get('.patient-sidebar__name')
+      .click()
+      .wait('@routePatient');
+
+    cy
       .get('.patient__context-trail')
       .contains('Back to List')
       .click();
@@ -29,6 +38,35 @@ context('default routes', function() {
     cy
       .url()
       .should('contain', 'one/worklist/owned-by');
+  });
+
+  specify('closes the patient sidebar before routing to another list', function() {
+    cy
+      .routesForDefault()
+      .routesForPatientDashboard()
+      .visit();
+
+    cy
+      .get('.js-patient')
+      .first()
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('be.visible');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .click();
+
+    cy
+      .url()
+      .should('contain', 'one/worklist/shared-by');
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
   });
 
   specify('current clinician has no workspaces', function() {

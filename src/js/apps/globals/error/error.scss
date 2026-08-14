@@ -1,5 +1,5 @@
 .error-page {
-  background-color: #F9F9F9;
+  background-color: var(--color-page-bg);
   height: 100%;
   position: relative;
   z-index: var(--z-error);
@@ -38,4 +38,3 @@
     border-top: 1px solid #{$black-80};
   }
 }
-

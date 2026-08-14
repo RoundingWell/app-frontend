@@ -2,16 +2,52 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
+import intl from 'js/i18n';
+
 import Droplist from 'js/components/droplist';
 
-import intl from 'js/i18n';
+import BottomNavTemplate from './bottom-nav.hbs';
+import LayoutTemplate from './layout.hbs';
+import WorkspaceButtonTemplate from './workspace-button.hbs';
+import WorkspaceMenuTemplate from './workspace-menu.hbs';
 
 import './app-nav.scss';
 
 const i18n = intl.globals.appNav.appNavViews;
 
+function getAppNavModeClassNames(isMinimized, isFullNavVisible) {
+  if (!isMinimized) return ['app-nav--expanded', 'is-full-nav-visible'];
+
+  if (isFullNavVisible) {
+    return ['is-minimized', 'app-nav--minimized', 'is-overlay-expanded', 'app-nav--overlay-expanded', 'is-full-nav-visible'];
+  }
+
+  return ['is-minimized', 'app-nav--minimized', 'app-nav--rail'];
+}
+
+function getAppNavClassName(model) {
+  const isFullNavVisible = model.get('isFullNavVisible');
+  const isMinimized = model.get('isMinimized');
+  const isNarrow = model.get('isNarrow');
+  const classes = ['app-nav', ...getAppNavModeClassNames(isMinimized, isFullNavVisible)];
+
+  if (isNarrow) {
+    classes.push('is-narrow');
+    if (isFullNavVisible) classes.push('app-nav--narrow-overlay-expanded');
+  }
+
+  return classes.join(' ');
+}
+
+function getNavMenuButtonAttributes(label) {
+  return {
+    'aria-label': label,
+    'type': 'button',
+  };
+}
+
 const MainNavDroplist = Droplist.extend({
-  popWidth: '248px',
+  popWidth: 248,
   position() {
     const { outerHeight } = this.getView().getBounds();
 
@@ -21,22 +57,12 @@ const MainNavDroplist = Droplist.extend({
     };
   },
   viewOptions: {
-    tagName: 'div',
-    className() {
-      if (this.getOption('state').isMinimized) return 'app-nav__header minimized';
-      return 'app-nav__header';
+    tagName: 'button',
+    className: 'app-nav__header js-nav-menu',
+    attributes() {
+      return getNavMenuButtonAttributes(i18n.mainNavDroplist.workspaceMenu);
     },
-    template: hbs`
-      {{#if isMinimized}}
-        <img class="app-nav__header-logo" src="/rwell-logo.svg" />
-      {{else}}
-        <div class="u-text--overflow">
-          <h2 class="app-nav__header-title u-text--overflow">{{ workspaceName }}</h2>
-          <span class="app-nav__header-arrow">{{far "angle-down"}}</span>
-        </div>
-        <div class="u-text--overflow">{{ userName }}</div>
-      {{/if}}
-    `,
+    template: WorkspaceButtonTemplate,
     templateContext() {
       const currentUser = Radio.request('bootstrap', 'currentUser');
       const currentWorkspace = Radio.request('workspace', 'current');
@@ -44,31 +70,13 @@ const MainNavDroplist = Droplist.extend({
       return {
         userName: currentUser.get('name'),
         workspaceName: currentWorkspace.get('name'),
-        isMinimized: this.getOption('state').isMinimized,
       };
     },
   },
   picklistOptions() {
     return {
       className: 'picklist app-nav__picklist',
-      template: hbs`
-        <div class="app-nav__picklist-heading">{{ @intl.globals.appNav.appNavViews.mainNavDroplist.organizationHeading }}</div>
-        <div class="app-nav__picklist-workspace-name js-picklist-item">{{ headingText }}</div>
-        <div class="flex-region picklist__scroll">
-          <div class="app-nav__picklist-heading">{{ @intl.globals.appNav.appNavViews.mainNavDroplist.workspacesHeading }}</div>
-          <ul class="js-picklist-scroll"></ul>
-          <div class="app-nav__picklist-bottom">
-            {{#if infoText}}
-            <a class="picklist__item app-nav__picklist-item js-picklist-item" href="{{ infoText }}" target="_blank">
-              {{far "life-ring"}}<span>{{ @intl.globals.appNav.appNavViews.mainNavDroplist.help }}</span>
-            </a>
-            {{/if}}
-            <a class="picklist__item app-nav__picklist-item js-picklist-item" href="/logout">
-              {{fas "right-from-bracket"}}<span>{{ @intl.globals.appNav.appNavViews.mainNavDroplist.signOut }}</span>
-            </a>
-          </div>
-        </div>
-      `,
+      template: WorkspaceMenuTemplate,
       headingText() {
         const currentOrg = Radio.request('bootstrap', 'organization');
 
@@ -90,29 +98,19 @@ const MainNavDroplist = Droplist.extend({
 
     if (model.id === currentWorkspace.id) return;
 
-    model.get('onSelect')();
+    Radio.trigger('event-router', model.get('event'));
   },
 });
 
 const AdminToolsDroplist = Droplist.extend({
-  popWidth: '248px',
-  position() {
-    const isMinimized = this.getState('isMinimized');
-
-    return {
-      top: window.innerHeight - 16,
-      left: !isMinimized ? 164 : 52,
-    };
-  },
+  popWidth: 248,
   viewOptions: {
-    tagName: 'div',
-    className: 'flex flex-align-center app-nav__bottom-button',
-    template: hbs`{{fas "ellipsis"}}{{#unless isMinimized}}<span class="u-text--overflow">{{ @intl.globals.appNav.appNavViews.adminToolsDroplist.adminTools }}</span>{{/unless}}`,
-    templateContext() {
-      return {
-        isMinimized: this.getOption('state').isMinimized,
-      };
+    tagName: 'button',
+    className: 'flex flex-align-center app-nav__bottom-button js-nav-menu',
+    attributes() {
+      return getNavMenuButtonAttributes(i18n.adminToolsDroplist.adminTools);
     },
+    template: hbs`{{fas "ellipsis"}}<span class="app-nav__label u-text--overflow">{{ @intl.globals.appNav.appNavViews.adminToolsDroplist.adminTools }}</span>`,
   },
   picklistOptions() {
     return {
@@ -132,7 +130,7 @@ const AdminToolsDroplist = Droplist.extend({
     'picklist:item:select': 'onSelect',
   },
   onSelect({ model }) {
-    model.get('onSelect')();
+    Radio.trigger('event-router', model.get('event'));
   },
 });
 
@@ -148,33 +146,55 @@ const BottomNavView = View.extend({
       replaceElement: true,
     },
   },
-  template: hbs`
-    <div data-nav-dashboards-region></div>
-    {{#if canPatientCreate}}
-      <div class="flex flex-align-center app-nav__bottom-button js-add-patient">
-        {{fas "circle-plus"}}{{#unless isMinimized}}<span class="u-text--overflow">{{ @intl.globals.appNav.appNavViews.appNavView.addPatient }}</span>{{/unless}}
-      </div>
-    {{/if}}
-    <div data-nav-admin-tools-region></div>
-    <div class="flex flex-align-center app-nav__bottom-button js-minimize-menu">
-      {{#if isMinimized}}
-        {{fas "square-caret-right"}}
-      {{else}}
-        {{fas "square-caret-left"}}<span class="u-text--overflow">{{ @intl.globals.appNav.appNavViews.appNavView.minimizeMenu }}</span>
-      {{/if}}
-    </div>
-  `,
+  template: BottomNavTemplate,
   templateContext() {
     return {
       canPatientCreate: this.model.get('canPatientCreate'),
     };
   },
+  ui: {
+    addPatient: '.js-add-patient',
+    minimizeMenu: '.js-minimize-menu',
+  },
+  events: {
+    'click @ui.addPatient': 'onClickAddPatient',
+    'click @ui.minimizeMenu': 'onClickMinimizeMenu',
+  },
+  modelEvents: {
+    'change:isFullNavVisible': 'updateMinimizeMenuLabel',
+    'change:isMinimized': 'updateMinimizeMenuLabel',
+    'change:isNarrow': 'updateMinimizeMenuLabel',
+  },
+  onRender() {
+    this.updateMinimizeMenuLabel();
+  },
+  onClickAddPatient() {
+    this.trigger('click:addPatient');
+  },
+  onClickMinimizeMenu() {
+    this.trigger('click:minimizeMenu');
+  },
+  getMinimizeMenuLabel() {
+    const isMinimized = this.model.get('isMinimized');
+    const isFullNavVisible = this.model.get('isFullNavVisible');
+
+    // On a narrow nav the expanded drawer can't be pinned open, so the button
+    // acts as a close rather than "keep open".
+    if (isMinimized && isFullNavVisible) {
+      return this.model.get('isNarrow') ? i18n.appNavView.closeMenu : i18n.appNavView.keepMenuOpen;
+    }
+    if (isMinimized) return i18n.appNavView.expandMenu;
+
+    return i18n.appNavView.minimizeMenu;
+  },
+  updateMinimizeMenuLabel() {
+    this.ui.minimizeMenu.attr('aria-label', this.getMinimizeMenuLabel());
+  },
 });
 
 const AppNavView = View.extend({
   className() {
-    if (this.model.get('isMinimized')) return 'app-nav minimized';
-    return 'app-nav';
+    return getAppNavClassName(this.model);
   },
   regions: {
     navMain: {
@@ -187,39 +207,57 @@ const AppNavView = View.extend({
       replaceElement: true,
     },
   },
-  triggers: {
-    'click .js-add-patient': 'click:addPatient',
-    'click .js-minimize-menu': 'click:minimizeMenu',
+  events: {
+    'focusin': 'onFocusIn',
+    'focusout': 'onFocusOut',
+    'pointerenter': 'onPointerEnter',
+    'pointerleave': 'onPointerLeave',
   },
-  template: hbs`
-    <div data-nav-main-region></div>
-    <div data-nav-content-region></div>
-    <div data-bottom-nav-content-region></div>
-  `,
+  template: LayoutTemplate,
   modelEvents: {
-    'change:isMinimized': 'onToggleMinimized',
+    'change:isFullNavVisible': 'updateDisplayState',
+    'change:isMinimized': 'updateDisplayState',
+    'change:isNarrow': 'updateDisplayState',
   },
-  onToggleMinimized() {
-    this.$el.toggleClass('minimized', this.model.get('isMinimized'));
+  onRender() {
+    this.updateDisplayState();
+  },
+  updateDisplayState() {
+    this.$el.attr('class', getAppNavClassName(this.model));
+  },
+  onPointerEnter(evt) {
+    this.trigger('pointer:enter', evt);
+  },
+  onPointerLeave(evt) {
+    this.trigger('pointer:leave', evt);
+  },
+  onFocusIn(evt) {
+    this.trigger('focus:in', evt);
+  },
+  onFocusOut(evt) {
+    if (this.el.contains(evt.relatedTarget)) return;
+
+    this.trigger('focus:out', evt);
   },
 });
 
 const NavItemView = View.extend({
-  tagName: 'a',
+  tagName: 'button',
   className: 'flex app-nav__link',
+  attributes() {
+    return {
+      'aria-label': this.model.get('text'),
+      'type': 'button',
+    };
+  },
   template: hbs`
-    <div class="flex flex-align-center app-nav__link-icons">
+    <span class="flex flex-align-center app-nav__link-icons">
       {{#each icons}}
         {{fa this.type this.icon classes=this.classes~}}
       {{/each}}
-    </div>
-    {{#unless isMinimized}}<div class="u-margin--l-16 u-text--overflow">{{formatMessage text}}</div>{{/unless}}
+    </span>
+    <span class="app-nav__label u-text--overflow">{{formatMessage text}}</span>
   `,
-  templateContext() {
-    return {
-      isMinimized: this.state.get('isMinimized'),
-    };
-  },
   triggers: {
     'click': 'click',
   },
@@ -248,13 +286,11 @@ const AppNavCollectionView = CollectionView.extend({
 });
 
 const PatientsAppNav = View.extend({
+  className: 'app-nav__content',
   template: hbs`
-    <h3 class="flex app-nav__search js-search">
-      {{fas "magnifying-glass"}}{{#unless isMinimized}}<span class="u-text--overflow">{{ @intl.globals.appNav.appNavViews.patientsAppNav.searchTitle }}</span>{{/unless}}
-    </h3>
-    {{#unless isMinimized}}
-      <h3 class="app-nav__title">{{ @intl.globals.appNav.appNavViews.patientsAppNav.worklistsTitle }}</h3>
-    {{/unless}}
+    <button class="flex app-nav__search js-search" type="button" aria-label="{{ @intl.globals.appNav.appNavViews.patientsAppNav.searchTitle }}">
+      {{fas "magnifying-glass"}}<span class="app-nav__label u-text--overflow">{{ @intl.globals.appNav.appNavViews.patientsAppNav.searchTitle }}</span>
+    </button>
     <div data-worklists-region></div>
   `,
   regions: {

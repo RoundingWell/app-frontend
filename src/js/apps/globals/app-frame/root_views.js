@@ -1,16 +1,18 @@
-import { extend, noop, partial } from 'underscore';
+import { extend, partial } from 'underscore';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView, Region } from 'marionette';
 
-import px from 'js/utils/formatting/px';
-
 import 'scss/modules/fill-window.scss';
+
+import px from 'js/utils/formatting/px';
 
 import PreloadRegion from 'js/regions/preload_region';
 import TopRegionBehavior from 'js/behaviors/top-region';
 
 import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
+
+import LayoutTemplate from './layout.hbs';
 
 import './app-frame.scss';
 import './tooltip.scss';
@@ -24,11 +26,7 @@ function preventRegionClose() {
 
 const AppView = View.extend({
   className: 'app-frame',
-  template: hbs`
-    <div class="app-frame__nav js-nav" data-nav-region></div>
-    <div class="app-frame__content flex-region" data-content-region></div>
-    <div class="app-frame__sidebar" data-app-sidebar-region></div>
-  `,
+  template: LayoutTemplate,
   ui: {
     nav: '.js-nav',
   },
@@ -40,11 +38,21 @@ const AppView = View.extend({
     },
     sidebar: '[data-app-sidebar-region]',
   },
+  setNavMinimized(isMinimized) {
+    this.getUI('nav').toggleClass('is-minimized', isMinimized);
+  },
+});
+
+const FillWindowContentRegion = Region.extend({
+  replaceElement: true,
+  onBeforeShow(region, view) {
+    view.$el.addClass('fill-window__content');
+  },
 });
 
 const TopRegionView = View.extend({
   behaviors: [TopRegionBehavior],
-  regionClass: Region.extend({ replaceElement: true }),
+  regionClass: FillWindowContentRegion,
   template: hbs`<div data-region></div>`,
   regions: {
     region: '[data-region]',
@@ -74,7 +82,7 @@ const PreloaderRegionView = TopRegionView.extend({
 });
 
 const ModalRegionView = TopRegionView.extend({
-  className: 'fill-window--dark',
+  className: 'fill-window fill-window--dark',
   behaviors: [{
     behaviorClass: TopRegionBehavior,
     className: 'is-shown',
@@ -142,7 +150,7 @@ const PopRegionView = TopRegionView.extend({
     view.$el.addClass('app-frame__pop-region');
     const popOptions = extend({}, popDefaults, options);
     this.ignoreEl = options.ignoreEl;
-    this.listenTo(userActivityCh, 'window:resize', this.empty);
+    this.listenTo(userActivityCh, 'window:resize', partial(this.onWindowResize, popOptions));
     this.listenTo(historyCh, 'change:route', this.empty);
     this.listenTo(view, 'render render:children', partial(this.setLocation, popOptions));
     this.setLocation(popOptions);
@@ -152,6 +160,16 @@ const PopRegionView = TopRegionView.extend({
     this.stopListening(userActivityCh);
     this.stopListening(historyCh);
     this.stopListening(view);
+  },
+  onWindowResize(popOptions) {
+    const view = this.region.currentView;
+
+    if (view && view.Dom.hasEl(view.el, document.activeElement)) {
+      this.setLocation(popOptions);
+      return;
+    }
+
+    this.empty();
   },
   setLocation(popOptions) {
     const view = this.region.currentView;
@@ -313,7 +331,6 @@ const RootView = CollectionView.extend({
     // Add lowest layer (z-index) to highest
     this.addChildView(this.appView);
     this.addRegionView('tooltip', new TooltipRegionView({ $body }));
-    this.addRegionView('modalSidebar', new ModalRegionView({ $body, setLocation: noop }));
     this.addRegionView('modal', new ModalRegionView({ $body }));
     this.addRegionView('modalSmall', new ModalRegionView({ $body }));
     this.addRegionView('modalLoading', new ModalRegionView({ $body, contains: preventRegionClose }));
