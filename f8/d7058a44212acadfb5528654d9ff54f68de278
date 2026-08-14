@@ -1,0 +1,19 @@
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_2326781df73def::t_3cd99919653941 565,999,1033
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f8d7058a44212acadfb5528654d9ff54f68de278",
+  "prompts": {},
+  "sessions": {
+    "s_2326781df73def": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffef4-6532-7662-9084-64d1a2c60264",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
