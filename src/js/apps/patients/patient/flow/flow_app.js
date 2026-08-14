@@ -14,8 +14,8 @@ import StateModel from './flow_state';
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app';
 import ActivityApp from 'js/apps/patients/patient/flow/flow-activity_app';
 
-import { LayoutView, HeaderView, ListView, MenuView, SelectAllView, i18n } from 'js/apps/patients/patient/flow/flow_views';
-import { BulkEditButtonView, BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
+import { FlowLoadingView, LayoutView, HeaderView, ListView, MenuView, ProgressView, SelectAllView, i18n } from 'js/apps/patients/patient/flow/flow_views';
+import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 import { AddButtonView } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
 export default App.extend({
@@ -34,7 +34,7 @@ export default App.extend({
   onBeforeStart() {
     this.resetStateDefaults();
 
-    this.getRegion().startPreloader();
+    this.getRegion().show(new FlowLoadingView());
   },
   beforeStart({ flowId }) {
     return [
@@ -119,6 +119,7 @@ export default App.extend({
   },
   showHeader() {
     this.showChildView('header', new HeaderView({ model: this.flow }));
+    this.showChildView('progress', new ProgressView({ model: this.flow }));
   },
   showMenu() {
     if (!this.flow.canDelete()) {
@@ -133,7 +134,7 @@ export default App.extend({
   },
   onDelete() {
     const modal = Radio.request('modal', 'show:small', extend({
-      buttonClass: 'button--red',
+      buttonClass: 'button button--danger',
       onSubmit: () => {
         this.flow.destroy({ wait: true })
           .then(() => {
@@ -180,38 +181,36 @@ export default App.extend({
 
   toggleBulkSelect() {
     this.selected = this.getState().getSelected(this.editableCollection);
+    this.getView().setEditing(!!this.selected.length);
 
     this.showSelectAll();
 
     if (this.selected.length) {
-      this.showBulkEditButtonView();
+      this.showBulkEdit();
       return;
     }
 
+    this.stopChildApp('bulkEditActions');
     this.showAdd();
-  },
-  showBulkEditButtonView() {
-    const bulkEditButtonView = new BulkEditButtonView({
-      tagName: 'span',
-      collection: this.selected,
-    });
-
-    this.listenTo(bulkEditButtonView, {
-      'click:cancel': this.onClickBulkCancel,
-      'click:edit': this.onClickBulkEdit,
-    });
-
-    this.showChildView('tools', bulkEditButtonView);
   },
   onClickBulkCancel() {
     this.getState().clearSelected();
   },
-  onClickBulkEdit() {
-    const app = this.startChildApp('bulkEditActions', {
+  showBulkEdit() {
+    const app = this.getChildApp('bulkEditActions');
+
+    if (app.isRunning()) {
+      app.updateCollection(this.selected);
+      return;
+    }
+
+    this.startChildApp('bulkEditActions', {
+      region: this.getRegion('tools'),
       state: { collection: this.selected },
     });
 
     this.listenTo(app, {
+      'cancel': this.onClickBulkCancel,
       'applyOwner'(owner) {
         this.selected.applyOwner(owner);
       },
