@@ -15,7 +15,7 @@ export default App.extend({
   },
   onBeforeStart() {
     this.showView(new LayoutView());
-    this.getRegion('list').startPreloader();
+    this.getRegion('list').startPreloader({ variant: 'generic' });
   },
   beforeStart() {
     return Radio.request('entities', 'fetch:programs:collection');

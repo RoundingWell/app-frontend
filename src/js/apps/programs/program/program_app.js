@@ -40,7 +40,7 @@ export default SubRouterApp.extend({
   },
 
   onBeforeStart() {
-    this.getRegion().startPreloader();
+    this.getRegion().startPreloader({ variant: 'generic' });
   },
 
   beforeStart({ programId }) {

@@ -1,23 +1,31 @@
-<div class="table-list__icon--large program-flow__action-icon">
-  {{#if options.icon}}
-    <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
-  {{else}}
-    {{far icon}}
-  {{/if}}
+<div class="work-card__surface">
+  <div class="work-card__main">
+    <div class="work-card__heading">
+      {{#if options.icon}}
+        <span class="work-card__state">
+          <span class="action-icon action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
+        </span>
+      {{else}}{{#if icon}}
+        <span class="work-card__state">
+          {{far icon}}
+        </span>
+      {{/if}}{{/if}}
+      <span class="work-card__title">
+        {{ name }}
+        {{~#unless name}}<em>{{ @intl.programs.program.flow.actionItemTemplate.newProgramFlowAction }}</em>{{/unless~}}
+      </span>
+    </div>
+  </div>
+  <div class="work-card__aside">
+    <div class="work-card__controls action-card__controls program-flow__action-controls js-no-click">
+      <span class="work-card__control" data-behavior-region></span>
+      <span class="work-card__control" data-owner-region></span>
+      <span class="work-card__control" data-due-region></span>
+      {{#if hasForm}}<span class="work-card__control"><button class="button button--compact" type="button" disabled>{{far "square-poll-horizontal"}}</button></span>{{/if}}
+    </div>
+    <div class="work-card__meta action-card__meta">
+      <span>{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
+      <span class="program-flow__sort-handle js-sort js-no-click">{{fas "grip-vertical"}}</span>
+    </div>
+  </div>
 </div>
-<div class="u-text--overflow-two-lines">
-  {{ name }}
-  {{~#unless name}}<em>{{ @intl.programs.program.flow.actionItemTemplate.newProgramFlowAction }}</em>{{/unless~}}
-</div>
-<div class="table-list__meta">
-  <span data-behavior-region></span>
-  <span data-owner-region></span>
-  <span data-due-region></span>
-  <span>
-    {{#if hasForm}}
-      <button class="button-secondary--compact" disabled>{{far "square-poll-horizontal"}}</button>
-    {{/if }}
-  </span>
-</div>
-<div class="program-flow__action-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>
-<div class="program-flow__sort-handle js-sort">{{fas "grip-vertical"}}</div>

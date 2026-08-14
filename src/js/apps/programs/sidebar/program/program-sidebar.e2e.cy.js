@@ -158,7 +158,7 @@ context('program sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.table-list__item')
+      .get('.card-list__item')
       .first()
       .should('contain', 'Test Program Name')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
@@ -246,7 +246,7 @@ context('program sidebar', function() {
       .click();
 
     cy
-      .get('.program__sidebar')
+      .get('.program-page__sidebar')
       .find('.program-sidebar__published')
       .should('contain', 'On');
 
@@ -278,7 +278,7 @@ context('program sidebar', function() {
       .click();
 
     cy
-      .get('.program__sidebar')
+      .get('.program-page__sidebar')
       .find('.program-sidebar__published')
       .should('contain', 'Off');
 

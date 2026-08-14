@@ -44,7 +44,7 @@ export default Droplist.extend({
     const day = selected ? selected.id : null;
 
     return {
-      className: isCompact ? 'button-secondary--compact' : 'button-secondary w-100',
+      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
       template: this.getTemplate(day, isCompact),
     };
   },

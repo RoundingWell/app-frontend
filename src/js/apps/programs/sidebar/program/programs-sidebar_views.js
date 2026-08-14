@@ -17,7 +17,7 @@ import ProgramDetailsTemplate from './program-details.hbs';
 import ProgramNameTemplate from './program-name.hbs';
 import ProgramSidebarTemplate from './program-sidebar.hbs';
 
-import './programs-sidebar.scss';
+import 'js/apps/programs/shared/program-editor-sidebar.scss';
 
 const { ENTER_KEY } = keyCodes;
 
@@ -27,14 +27,14 @@ export const headingText = i18n.headingText;
 
 const DisabledSaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
-  template: hbs`<button class="button--green" disabled>{{ @intl.programs.sidebar.program.programsSidebarViews.disabledSaveView.saveBtn }}</button>`,
+  template: hbs`<button class="button button--positive" type="button" disabled>{{ @intl.programs.sidebar.program.programsSidebarViews.disabledSaveView.saveBtn }}</button>`,
 });
 
 const SaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
   template: hbs`
-    <button class="button--green js-save">{{ @intl.programs.sidebar.program.programsSidebarViews.saveView.saveBtn }}</button>
-    <button class="button--text u-margin--r-4 js-cancel">{{ @intl.programs.sidebar.program.programsSidebarViews.saveView.cancelBtn }}</button>
+    <button class="button button--positive js-save" type="button">{{ @intl.programs.sidebar.program.programsSidebarViews.saveView.saveBtn }}</button>
+    <button class="button button--text u-margin--r-4 js-cancel" type="button">{{ @intl.programs.sidebar.program.programsSidebarViews.saveView.cancelBtn }}</button>
   `,
   triggers: {
     'click .js-cancel': 'cancel',
@@ -76,7 +76,7 @@ const NameView = View.extend({
 });
 
 const DetailsView = View.extend({
-  className: 'pos--relative',
+  className: 'textarea-flex',
   template: ProgramDetailsTemplate,
   behaviors: [InputWatcherBehavior],
   ui: {
@@ -93,7 +93,7 @@ const DetailsView = View.extend({
 
 const ToggleView = View.extend({
   template: hbs`
-    <button class="programs-sidebar__toggle button-secondary {{#if status}}is-on{{/if}} js-toggle" {{#if isDisabled}}disabled{{/if}}>
+    <button class="button button--secondary program-editor-sidebar__toggle {{#if status}}is-on{{/if}} js-toggle" type="button" {{#if isDisabled}}disabled{{/if}}>
       {{#if status}}{{fas "toggle-on"}}{{else}}{{far "toggle-off"}}{{/if}}
       {{formatMessage (intlGet "programs.shared.components.toggleComponent.toggle") status=status}}
     </button>

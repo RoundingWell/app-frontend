@@ -2,6 +2,7 @@ import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
 import { CollectionView, View } from 'marionette';
 
+import 'scss/modules/buttons.scss';
 import 'scss/modules/list-manager.scss';
 
 import trim from 'js/utils/formatting/trim';
@@ -16,7 +17,7 @@ const i18n = intl.programs.shared.components.tagsManagerComponent;
 const TagsItemView = View.extend({
   tagName: 'li',
   className: 'list-manager__item tags-manager__item',
-  template: hbs`{{far "tag"}}<span>{{text}}</span><button class="button--icon list-manager__remove js-remove">{{far "trash-can"}}</button>`,
+  template: hbs`{{far "tag"}}<span>{{ text }}</span><button class="button button--icon list-manager__remove js-remove" type="button">{{far "trash-can"}}</button>`,
   triggers: {
     'click .js-remove': 'remove',
   },
@@ -25,6 +26,9 @@ const TagsItemView = View.extend({
 const TagsAddView = View.extend({
   tagName: 'button',
   className: 'picklist__item js-picklist-item tags-manager__add',
+  attributes: {
+    type: 'button',
+  },
   modelEvents: {
     'change:query': 'render',
   },
@@ -56,7 +60,7 @@ const TagsDropList = Droplist.extend({
     return this.getView().$el.outerWidth();
   },
   viewOptions: {
-    className: 'button-secondary list-manager__droplist',
+    className: 'button button--secondary list-manager__droplist',
     template: hbs`{{far "tag"}}<span>{{ @intl.programs.shared.components.tagsManagerComponent.tagsDroplist.addTag }}</span>`,
   },
   picklistOptions: {

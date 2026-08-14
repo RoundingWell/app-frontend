@@ -1,5 +1,5 @@
-<div class="pos--relative">
-  <textarea class="input-primary textarea-flex__input js-input{{#if error}} has-error{{/if}}"{{#if isNew}} placeholder="{{ @intl.programs.sidebar.program.programNameTemplate.placeholder }}"{{/if}}>{{ name }}</textarea>
-  <div class="textarea-flex__container input-primary js-spacer">{{ name }} </div>
+<div class="textarea-flex">
+  <textarea class="form-input form-input--primary textarea-flex__input js-input{{#if error}} has-error{{/if}}"{{#if isNew}} placeholder="{{ @intl.programs.sidebar.program.programNameTemplate.placeholder }}"{{/if}}>{{ name }}</textarea>
+  <div class="textarea-flex__mirror form-input form-input--primary js-spacer" aria-hidden="true">{{ name }} </div>
 </div>
 {{#if error}}<div class="form-error u-margin--b-4">{{ error }}</div>{{/if}}
