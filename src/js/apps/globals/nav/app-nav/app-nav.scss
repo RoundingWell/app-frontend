@@ -1,29 +1,44 @@
-$menu-hover-color: #375467;
+$nav-compact-logo-width: 30px;
+$nav-header-height: 74px;
+$nav-header-padding: 8px 16px 10px;
+$nav-icon-width: 20px;
+$nav-row-gap: 12px;
+$nav-row-height: 36px;
+$nav-row-margin: 2px 8px 4px;
+$nav-row-padding: 6px 12.5px;
+$nav-row-width: calc(100% - 16px);
 
 .app-nav {
-  color: #{$black-90};
+  background-color: $bkg-color;
+  color: rgb(255 255 255 / 60%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   height: 100%;
-  min-height: 652px;
+  min-height: 0;
+  overflow: hidden auto;
   position: relative;
-  transition: width 250ms ease-in-out 0s;
-  width: 200px;
+  width: var(--app-nav-width);
 
-  &.minimized {
-    min-height: 588px;
-    width: 56px;
+  // A minimized nav is a floating rail: the container reserves the rail width
+  // and this element is absolute, so expand/collapse is a pure width swap.
+  &--minimized {
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: var(--app-nav-rail-width);
+    z-index: var(--z-positioned);
+  }
+
+  &--overlay-expanded {
+    box-shadow: 4px 0 16px rgb(0 0 0 / 18%);
+    width: var(--app-nav-width);
   }
 }
 
 .app-nav__picklist {
   border-radius: 4px;
   margin-top: -4px;
-}
-
-.app-nav__picklist .fa-arrow-up-right-from-square {
-  color: #{$black-60};
-  font-size: 12px;
-  margin-left: 4px;
-  vertical-align: 0;
 }
 
 .app-nav__picklist-heading {
@@ -43,8 +58,8 @@ $menu-hover-color: #375467;
   margin-bottom: 8px;
   padding: 0 16px 12px;
 
-  &.is-highlighted:not(&.is-disabled),
-  &:hover:not(&.is-disabled) {
+  &.is-highlighted:not(.is-disabled),
+  &:hover:not(.is-disabled) {
     background-color: #{$white};
     color: #{$black-20};
   }
@@ -59,8 +74,8 @@ $menu-hover-color: #375467;
     color: #{$black-20};
   }
 
-  &.is-highlighted:not(&.is-disabled),
-  &:hover:not(&.is-disabled),
+  &.is-highlighted:not(.is-disabled),
+  &:hover:not(.is-disabled),
   &.is-selected {
     background-color: color(grey);
     color: #{$black-20};
@@ -89,18 +104,21 @@ $menu-hover-color: #375467;
 }
 
 .app-nav__header {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  box-sizing: border-box;
+  color: inherit;
   cursor: pointer;
-  padding: 12px 16px;
+  display: grid;
+  height: $nav-header-height;
+  padding: $nav-header-padding;
+  text-align: left;
+  width: 100%;
 
   &:hover, &.is-active {
-    background-color: #{$menu-hover-color};
+    background-color: var(--color-nav-hover);
     color: #{$white};
-  }
-
-  &.minimized {
-    display: flex;
-    justify-content: center;
-    padding: 12px 24px;
   }
 }
 
@@ -110,8 +128,20 @@ $menu-hover-color: #375467;
   width: 36px;
 }
 
-.app-nav__header-button {
-  white-space: nowrap;
+.app-nav__header-logo--compact {
+  display: none;
+  flex: 0 0 $nav-compact-logo-width;
+  width: $nav-compact-logo-width;
+}
+
+.app-nav__header-details {
+  display: block;
+  line-height: 20px;
+  min-width: 0;
+
+  > span {
+    display: block;
+  }
 }
 
 .app-nav__header-title {
@@ -119,6 +149,7 @@ $menu-hover-color: #375467;
   display: inline-block;
   font-size: 16px;
   font-weight: 700;
+  line-height: 20px;
   max-width: 140px;
   vertical-align: bottom;
 }
@@ -130,115 +161,194 @@ $menu-hover-color: #375467;
   vertical-align: -0.125em;
 }
 
-.app-nav__title {
-  font-weight: 700;
-  margin-top: 20px;
-  opacity: 0.5;
-  padding: 4px 16px 8px;
+.app-nav__label {
+  flex: 1 1 auto;
+  line-height: 20px;
+  min-width: 0;
+}
+
+.app-nav__search,
+.app-nav__link,
+.app-nav__bottom-button {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: inherit;
+  column-gap: $nav-row-gap;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-weight: 600;
+  grid-template-columns: $nav-icon-width minmax(0, 1fr);
+  height: $nav-row-height;
+  margin: $nav-row-margin;
+  opacity: 0.64;
+  padding: $nav-row-padding;
+  text-align: left;
+  width: $nav-row-width;
+
+  &:hover, &.is-active, &.is-selected {
+    background-color: var(--color-nav-hover);
+    color: #{$white};
+    opacity: 1;
+  }
 }
 
 .app-nav__search {
-  cursor: pointer;
-  font-weight: 600;
-  margin-top: 20px;
-  opacity: 0.5;
-  padding: 12px 16px;
-
   .icon {
-    font-size: 20px;
-    margin-right: 16px;
+    flex: 0 0 $nav-icon-width;
+    font-size: 18px;
+    text-align: center;
     vertical-align: -0.0825em;
-    width: 1em;
-  }
-
-  &:hover, &.is-active {
-    background-color: #{$menu-hover-color};
-    color: #{$white};
-    opacity: 1;
+    width: $nav-icon-width;
   }
 }
 
 .app-nav__link {
-  cursor: pointer;
-  font-weight: 600;
-  opacity: 0.5;
-  padding: 12px 16px;
   position: relative;
+}
 
-  &:hover, &.is-selected {
-    background-color: #{$menu-hover-color};
-    color: #{$white};
-    opacity: 1;
-
-    &::before {
-      background-color: color(light_blue);
-      bottom: 0;
-      content: '';
-      left: 0;
-      position: absolute;
-      top: 0;
-      width: 4px;
-    }
+.app-nav--rail {
+  .app-nav__header {
+    justify-items: center;
+    padding: 12px;
   }
 
-  &.is-active {
-    background-color: #{$menu-hover-color};
-    color: #{$white};
-    opacity: 1;
+  .app-nav__header-details {
+    display: none;
+  }
+
+  .app-nav__header-logo--compact {
+    display: block;
+  }
+
+  .app-nav__label {
+    display: none;
+  }
+
+  .app-nav__minimize-icon--expand {
+    display: inline;
+  }
+
+  .app-nav__search,
+  .app-nav__link,
+  .app-nav__bottom-button {
+    grid-template-columns: $nav-icon-width;
+    justify-content: center;
+    margin: $nav-row-margin;
+    width: $nav-row-width;
   }
 }
 
 .app-nav__link-icons {
-  width: 20px;
+  flex: 0 0 $nav-icon-width;
+  justify-content: center;
+  width: $nav-icon-width;
+}
 
-  .icon {
-    font-size: 20px;
-    width: 1em;
-  }
+.app-nav__link-icon {
+  font-size: 18px;
+  width: 1em;
+}
 
-  .icon.fa-angle-left {
-    font-size: 16px;
-    width: 8px;
-  }
+.app-nav__link-icon--compact {
+  font-size: 16px;
+}
 
-  .icon.fa-0 {
-    font-size: 16px;
-    width: 10px;
-  }
+.app-nav__link-icon--back {
+  font-size: 14px;
+  width: 8px;
+}
 
-  .icon.fa-1 {
-    font-size: 16px;
-    width: 14px;
-  }
+.app-nav__link-icon--zero {
+  font-size: 14px;
+  width: 10px;
+}
 
-  .icon.fa-3 {
-    font-size: 16px;
-    width: 13px;
-  }
+.app-nav__link-icon--one {
+  font-size: 14px;
+  width: 14px;
+}
+
+.app-nav__link-icon--three {
+  font-size: 14px;
+  width: 13px;
 }
 
 .app-nav__bottom {
+  background-color: $bkg-color;
   bottom: 0;
+  margin-top: auto;
   padding-bottom: 16px;
-  position: absolute;
+  position: sticky;
   width: 100%;
 }
 
-.app-nav__bottom-button {
-  cursor: pointer;
-  font-weight: 600;
-  opacity: 0.5;
-  padding: 12px 16px;
+@media (height <= 620px) {
+  .app-nav__bottom {
+    margin-top: 0;
+    position: static;
+  }
+}
 
+.app-nav__bottom-button {
   .icon {
-    font-size: 20px;
-    margin-right: 16px;
-    width: 1em;
+    flex: 0 0 $nav-icon-width;
+    font-size: 18px;
+    text-align: center;
+    width: $nav-icon-width;
+  }
+}
+
+.app-nav__minimize-icon {
+  display: none;
+  flex: 0 0 auto;
+}
+
+.app-nav__label--keep-open,
+.app-nav__label--close {
+  display: none;
+}
+
+// The collapse affordance shows whenever the nav is visually open — either the
+// full nav or a minimized nav expanded by an overlay.
+.app-nav--expanded .app-nav__minimize-icon--collapse {
+  display: inline;
+}
+
+.app-nav--overlay-expanded {
+  .app-nav__minimize-icon--collapse {
+    display: inline;
   }
 
-  &:hover, &.is-active {
-    background-color: $menu-hover-color;
-    color: #{$white};
-    opacity: 1;
+  .app-nav__label--keep-open {
+    display: inline;
+  }
+
+  .app-nav__label--minimize {
+    display: none;
+  }
+}
+
+// On a narrow viewport the nav is minimized by the breakpoint, so "keep open"
+// can't pin it open — clicking the expanded drawer's button just closes it.
+// Swap the collapse caret + "keep open" for a close affordance.
+.app-nav--narrow-overlay-expanded {
+  .app-nav__minimize-icon--collapse {
+    display: none;
+  }
+
+  .app-nav__minimize-icon--close {
+    display: inline;
+  }
+
+  .app-nav__label--keep-open {
+    display: none;
+  }
+
+  .app-nav__label--close {
+    display: inline;
   }
 }
