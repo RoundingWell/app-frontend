@@ -30,6 +30,7 @@ const StateModel = Backbone.Model.extend({
       actionsSelected: {},
       searchQuery: '',
       worklist: null,
+      filtersSidebarCollapsed: false,
     };
   },
   getFiltersState() {
@@ -61,6 +62,9 @@ const StateModel = Backbone.Model.extend({
   },
   onChange() {
     localStore.set(this.getStoreKey(), omit(this.attributes, 'filtersCount', 'lastSelectedIndex', 'searchQuery'));
+  },
+  setFiltersSidebarCollapsed(isCollapsed) {
+    return this.set('filtersSidebarCollapsed', isCollapsed);
   },
   setSearchQuery(searchQuery = '') {
     return this.set({

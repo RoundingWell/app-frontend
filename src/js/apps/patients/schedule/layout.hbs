@@ -1,16 +1,22 @@
-<div class="list-page__header">
-  <div class="flex list-page__title">
-    <div data-title-region></div>
-    <div class="schedule__list-search" data-search-region></div>
+<div class="list-page__main">
+  <div class="list-page__header">
+    <div class="list-page__header-top">
+      <div class="list-page__title">
+        <div data-title-region></div>
+      </div>
+      <div class="list-page__topbar">
+        <div data-date-filter-region></div>
+        <div class="patient-list-page__find-controls">
+          <div class="list-page__search patient-list-page__find-search" data-search-region></div>
+          <div class="patient-list-page__filter-controls" data-filters-region></div>
+        </div>
+      </div>
+    </div>
+    <div data-selection-bar-region></div>
   </div>
-  <div class="list-page__filters flex">
-    <div class="flex u-margin--r-24" data-select-all-region></div>
-    <div class="flex flex-align-center w-100" data-filters-region></div>
-    <div class="schedule__count" data-count-region></div>
-    <div class="flex u-text--nowrap" data-date-filter-region></div>
-  </div>
+  <div data-list-region></div>
 </div>
-<div class="table-list schedule__table-list">
-  <div class="table-list__header" data-table-region></div>
-  <div class="table-list__body list-page__list" data-list-region></div>
+<div class="patient-list-page__sidebar js-filters-sidebar" id="schedule-list-sidebar">
+  <button class="button button--icon patient-list-page__drawer-close js-close-sidebar-drawer" type="button" aria-label="{{ @intl.patients.schedule.scheduleViews.layoutView.closeSidebar }}">{{far "xmark"}}</button>
+  <div class="patient-list-page__sidebar-content" data-filters-sidebar-region></div>
 </div>
