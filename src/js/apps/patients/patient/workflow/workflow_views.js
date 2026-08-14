@@ -3,11 +3,14 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView, Behavior } from 'marionette';
 
-import { alphaSort } from 'js/utils/sorting';
-
 import 'scss/modules/buttons.scss';
+import 'scss/modules/loader.scss';
 import 'scss/modules/progress-bar.scss';
-import 'scss/modules/table-list.scss';
+import 'scss/modules/card-list.scss';
+import 'scss/modules/skeleton.scss';
+
+import { alphaSort } from 'js/utils/sorting';
+import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import PreloadRegion from 'js/regions/preload_region';
 
@@ -18,19 +21,43 @@ import ActionItemTemplate from './action-item.hbs';
 import DoneLayoutTemplate from './done-layout.hbs';
 import FlowItemTemplate from './flow-item.hbs';
 import LayoutTemplate from './layout.hbs';
+import LoadingTemplate from './loading.hbs';
 
 import 'js/apps/patients/shared/action-state.scss';
-import 'scss/domain/action-icons.scss';
+import 'scss/domain/work-card.scss';
+import 'scss/domain/action-card.scss';
+import 'scss/domain/flow-card.scss';
+import 'scss/domain/patient-list.scss';
 import '../patient.scss';
+import './workflow-page.scss';
 
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 const NotDoneEmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
+  attributes: {
+    role: 'listitem',
+  },
   template: hbs`<h2>{{ @intl.patients.patient.workflow.workflowViews.notDoneEmptyView }}</h2>`,
 });
 
 const DoneEmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
+  attributes: {
+    role: 'listitem',
+  },
   template: hbs`<h2>{{ @intl.patients.patient.workflow.workflowViews.doneEmptyView }}</h2>`,
+});
+
+const WorkflowLoadingView = View.extend({
+  className: 'loader workflow-page__loader',
+  attributes: {
+    'aria-busy': 'true',
+    'role': 'status',
+  },
+  template: LoadingTemplate,
+  templateContext() {
+    return { items: new Array(2).fill(null) };
+  },
 });
 
 const RowBehavior = Behavior.extend({
@@ -73,7 +100,10 @@ const StatusBehavior = Behavior.extend({
 });
 
 const ActionItemView = View.extend({
-  className: 'table-list__item',
+  className: 'work-card action-card',
+  attributes: {
+    role: 'listitem',
+  },
   behaviors: [RowBehavior, StatusBehavior],
   regions: {
     details: '[data-details-region]',
@@ -86,17 +116,23 @@ const ActionItemView = View.extend({
   template: ActionItemTemplate,
   templateContext() {
     return {
-      icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
-      hasAttachments: this.model.hasAttachments(),
+      attachmentCount: this.model.getFiles().length,
       commentCount: this.model.commentCount(),
     };
   },
   triggers: {
     'click': 'click',
-    'click .js-no-click': 'prevent-row-click',
+  },
+  events: {
+    'click .js-no-click': stopEventPropagation,
+    'click .js-primary': 'onClickPrimary',
   },
   onClick() {
     Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
+  },
+  onClickPrimary(event) {
+    event.stopPropagation();
+    this.onClick();
   },
   onRender() {
     this.canEdit = this.model.canEdit();
@@ -115,7 +151,7 @@ const ActionItemView = View.extend({
   },
   showState() {
     if (!this.canEdit) {
-      this.showChildView('state', new ReadOnlyStateView({ model: this.model, isCompact: true }));
+      this.showChildView('state', new ReadOnlyStateView({ model: this.model }));
       return;
     }
 
@@ -129,7 +165,7 @@ const ActionItemView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      this.showChildView('owner', new ReadOnlyOwnerView({ model: this.model, isCompact: true }));
+      this.showChildView('owner', new ReadOnlyOwnerView({ model: this.model }));
       return;
     }
 
@@ -202,9 +238,9 @@ const ActionItemView = View.extend({
 });
 
 const FlowItemView = View.extend({
-  className: 'table-list__item',
-  modelEvents: {
-    'change:_owner': 'render',
+  className: 'work-card flow-card',
+  attributes: {
+    role: 'listitem',
   },
   behaviors: [RowBehavior, StatusBehavior],
   regions: {
@@ -212,28 +248,29 @@ const FlowItemView = View.extend({
     owner: '[data-owner-region]',
   },
   template: FlowItemTemplate,
-  templateContext() {
-    return {
-      isDone: this.getOption('status') === 'done',
-      stateOptions: this.model.getState().get('options'),
-    };
-  },
   triggers: {
     'click': 'click',
-    'click .js-no-click': 'prevent-row-click',
+  },
+  events: {
+    'click .js-no-click': stopEventPropagation,
+    'click .js-primary': 'onClickPrimary',
   },
   onClick() {
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
+  onClickPrimary(event) {
+    event.stopPropagation();
+    this.onClick();
+  },
   onRender() {
     this.canEdit = this.model.canEdit();
 
-    if (this.getOption('status') === 'done') this.showState();
+    this.showState();
     this.showOwner();
   },
   showState() {
-    if (!this.canEdit) {
-      this.showChildView('state', new ReadOnlyStateView({ model: this.model, isCompact: true }));
+    if (this.getOption('status') !== 'done' || !this.canEdit) {
+      this.showChildView('state', new ReadOnlyStateView({ model: this.model }));
       return;
     }
 
@@ -247,7 +284,7 @@ const FlowItemView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      this.showChildView('owner', new ReadOnlyOwnerView({ model: this.model, isCompact: true }));
+      this.showChildView('owner', new ReadOnlyOwnerView({ model: this.model }));
       return;
     }
 
@@ -274,7 +311,10 @@ const ListView = CollectionView.extend({
   childViewEvents: {
     'change:visible': 'filter',
   },
-  className: 'table-list__list list-page__list',
+  className: 'card-list workflow-page__list',
+  attributes: {
+    role: 'list',
+  },
   initialize({ status }) {
     this.status = status;
     this.emptyView = status === 'done' ? DoneEmptyView : NotDoneEmptyView;
@@ -298,7 +338,7 @@ const ListView = CollectionView.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'flex-region',
+  className: 'patient__content patient__content--scroll flex-region',
   regions() {
     const regions = {
       content: {
@@ -333,18 +373,32 @@ const LayoutView = View.extend({
     Radio.trigger('event-router', 'patient:workflow', this.model.id);
   },
   onRender() {
-    if (this.getOption('status') === 'done') return;
+    if (this.getOption('status') === 'done' || window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
 
-    animate(this.ui.loading[0], {
+    this.listenToOnce(this.getRegion('content'), 'before:empty', this.stopLoadingAnimation);
+    this.loadingAnimation = animate(this.ui.loading[0], {
       opacity: { from: 0.5, duration: 400 },
       loop: Infinity,
       ease: 'inOutSine',
       alternate: true,
     });
   },
+  onBeforeRender() {
+    this.stopLoadingAnimation();
+  },
+  onBeforeDestroy() {
+    this.stopLoadingAnimation();
+  },
+  stopLoadingAnimation() {
+    if (!this.loadingAnimation) return;
+
+    this.loadingAnimation.cancel();
+    this.loadingAnimation = null;
+  },
 });
 
 export {
   ListView,
   LayoutView,
+  WorkflowLoadingView,
 };
