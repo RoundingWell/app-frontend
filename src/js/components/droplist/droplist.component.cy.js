@@ -145,6 +145,50 @@ context('Droplist', function() {
       .should('not.exist');
   });
 
+  specify('selectlist remains open when its focused input resizes the viewport', function() {
+    cy
+      .mount(rootView => {
+        Droplist.setPopRegion(rootView.getRegion('pop'));
+
+        return new Droplist({
+          picklistOptions: {
+            isSelectlist: true,
+          },
+          collection,
+        });
+      })
+      .as('root');
+
+    cy
+      .get('@root')
+      .contains('Choose One...')
+      .click();
+
+    cy
+      .get('.picklist__input')
+      .should('be.focused');
+
+    cy
+      .window()
+      .trigger('resize');
+
+    cy
+      .get('.picklist')
+      .should('exist');
+
+    cy
+      .get('.picklist__input')
+      .blur();
+
+    cy
+      .window()
+      .trigger('resize');
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+  });
+
   specify('isCheckable', function() {
     const headingText = 'Test Options';
 
