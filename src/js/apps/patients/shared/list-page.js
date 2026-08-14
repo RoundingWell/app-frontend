@@ -1,4 +1,4 @@
-import { result, some } from 'underscore';
+import { result } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
@@ -25,15 +25,6 @@ const ListPageSelectionBarView = View.extend({
     selectAll: '[data-select-all-region]',
     bulkEdit: '[data-bulk-edit-region]',
     count: '[data-count-region]',
-  },
-  modelEvents: {
-    'change:actionsSelected change:flowsSelected change:listType': 'updateBulkEditingState',
-  },
-  onRender() {
-    this.updateBulkEditingState();
-  },
-  updateBulkEditingState() {
-    this.$el.toggleClass('is-bulk-editing', some(this.model.getSelectedList()));
   },
 });
 

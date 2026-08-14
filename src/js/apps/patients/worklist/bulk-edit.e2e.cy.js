@@ -23,7 +23,7 @@ context('Worklist bulk editing', function() {
               name: 'First In List',
               due_date: testDateAdd(5),
               created_at: testTsSubtract(1),
-              due_time: null,
+              due_time: '07:00:00',
             },
             relationships: {
               state: getRelationship(stateTodo),
@@ -62,6 +62,17 @@ context('Worklist bulk editing', function() {
               state: getRelationship(stateTodo),
             },
           }),
+          getAction({
+            attributes: {
+              name: 'No Time Due',
+              due_date: testDateAdd(6),
+              created_at: testTsSubtract(4),
+              due_time: null,
+            },
+            relationships: {
+              state: getRelationship(stateTodo),
+            },
+          }),
         ];
 
         return fx;
@@ -74,37 +85,32 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .eq(1)
       .find('.js-select')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .eq(2)
       .find('.js-select')
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('.modal--sidebar')
-      .as('sidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-due-date-region]')
-      .should('contain', formatDate(testDateAdd(3), 'LONG'));
+      .should('contain', formatDate(testDateAdd(3), 'SHORT'));
 
     cy
-      .get('@sidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .should('contain', '7:00 AM');
 
     cy
-      .get('.modal--sidebar')
-      .as('sidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-due-date-region]')
       .click();
 
@@ -114,43 +120,37 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@sidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region] button')
       .should('be.disabled');
 
     cy
-      .get('@sidebar')
-      .find('.js-close')
-      .first()
+      .get('@bulkEditToolbar')
+      .find('.js-cancel')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .eq(2)
       .find('.js-select')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .eq(3)
       .find('.js-select')
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('@sidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region] button')
       .should('be.disabled');
 
     cy
-      .get('.modal--sidebar')
-      .as('sidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-due-date-region]')
       .click();
 
@@ -160,7 +160,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@sidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .click();
 
@@ -171,7 +171,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@sidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .click();
 
@@ -181,29 +181,47 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@sidebar')
-      .find('.js-close')
-      .first()
+      .get('@bulkEditToolbar')
+      .find('.js-cancel')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
-      .eq(1)
+      .contains('.action-card', 'First In List')
       .find('.js-select')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
-      .first()
+      .contains('.action-card', 'Second In List')
       .find('.js-select')
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline')
+      .find('[data-due-time-region] button')
+      .should('not.be.disabled');
+
+    cy
+      .get('.bulk-edit-inline .js-cancel')
       .click();
+
+    cy
+      .get('.app-frame__content')
+      .contains('.action-card', 'Last In List')
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('.app-frame__content')
+      .contains('.action-card', 'No Time Due')
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('.bulk-edit-inline')
+      .find('[data-due-time-region] button')
+      .should('be.disabled');
   });
 
   specify('bulk flows editing', function() {
@@ -251,6 +269,8 @@ context('Worklist bulk editing', function() {
       }),
     ];
 
+    cy.viewport(1000, 720);
+
     cy
       .routesForDefault()
       .routeFlows(fx => {
@@ -272,9 +292,52 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .first()
       .as('firstRow')
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
+      .find('[data-state-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('In Progress')
+      .click();
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card, .flow-card')
+      .eq(1)
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Flows');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-state-region]')
+      .should('contain', 'In Progress');
+
+    cy
+      .get('.patient-list-page__summary')
+      .should('not.be.visible');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('.js-cancel')
+      .click();
+
+    cy
+      .get('@firstRow')
       .find('.js-select')
       .click();
 
@@ -283,15 +346,15 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
+      .find('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 3 Flows');
 
     cy
-      .get('.modal--sidebar')
-      .as('bulkEditSidebar')
-      .find('.modal__header--sidebar')
-      .should('contain', 'Edit 3 Flows');
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region] button')
+      .should('contain', 'Flows only');
 
     cy
       .intercept('PATCH', '/api/flows/*', {
@@ -301,8 +364,8 @@ context('Worklist bulk editing', function() {
       .as('patchFlow');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait(['@patchFlow', '@patchFlow', '@patchFlow']);
 
@@ -316,27 +379,22 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .should('contain', 'Multiple States...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region]')
       .should('contain', 'Multiple Owners...');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-apply-owner')
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .click();
 
@@ -347,7 +405,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .click();
 
@@ -364,7 +422,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region]')
       .click();
 
@@ -384,8 +442,14 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-apply-owner')
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Flows + actions')
       .click();
 
     cy
@@ -424,29 +488,28 @@ context('Worklist bulk editing', function() {
       .as('patchOwner3');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-apply-owner-region] button')
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-footer-region] button')
-      .should('not.have.class', 'js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .should('be.disabled');
 
     cy
@@ -500,34 +563,28 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item .fa-circle-check')
+      .find('.action-card .fa-circle-check, .flow-card .fa-circle-check')
       .should('have.length', 3);
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .last()
       .find('.js-select')
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .as('filterRegion')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .contains('Done');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region]')
-      .contains('Nurse');
+      .contains('NUR');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .click();
 
@@ -538,8 +595,8 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click();
   });
 
@@ -622,9 +679,48 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .first()
       .as('firstRow')
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('.bulk-edit-inline')
+      .as('actionBulkEditToolbar')
+      .find('[data-state-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('In Progress')
+      .click();
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card, .flow-card')
+      .eq(1)
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('@actionBulkEditToolbar')
+      .find('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Actions');
+
+    cy
+      .get('@actionBulkEditToolbar')
+      .find('[data-state-region]')
+      .should('contain', 'In Progress');
+
+    cy
+      .get('@actionBulkEditToolbar')
+      .find('.js-cancel')
+      .click();
+
+    cy
+      .get('@firstRow')
       .find('.js-select')
       .click();
 
@@ -633,14 +729,9 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('.modal--sidebar')
-      .as('bulkEditSidebar')
-      .find('.js-submit')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait(['@patchAction', '@patchAction', '@patchAction', '@patchAction']);
 
@@ -654,37 +745,32 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('@bulkEditSidebar')
-      .find('.sidebar__heading')
+      .get('@bulkEditToolbar')
+      .find('.bulk-edit-inline__heading')
       .should('contain', 'Edit 4 Actions');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .should('contain', 'Multiple States...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region]')
       .should('contain', 'Multiple Owners...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .should('contain', 'Multiple Dates...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .should('contain', 'Multiple Times...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-duration-region]')
       .should('contain', 'Multiple Durations...');
 
@@ -719,7 +805,7 @@ context('Worklist bulk editing', function() {
       .as('patchAction4');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .click();
 
@@ -730,7 +816,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region]')
       .click();
 
@@ -740,7 +826,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .click();
 
@@ -756,7 +842,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .click();
 
@@ -767,17 +853,17 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .find('.is-overdue');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .find('.is-overdue');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .click();
 
@@ -787,19 +873,19 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .find('.is-overdue')
       .should('not.exist');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .find('.is-overdue')
       .should('not.exist');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-duration-region]')
       .click();
 
@@ -810,49 +896,64 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-apply-owner')
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region]')
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('.picklist')
+      .find('.picklist__heading')
+      .should('contain', 'Apply owner to');
+
+    cy
+      .get('.picklist')
+      .find('.picklist__input')
+      .should('not.exist');
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Actions + flows')
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
       .find('[data-state-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-duration-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-apply-owner-region] button')
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-footer-region] button')
-      .should('not.have.class', 'js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .should('be.disabled');
 
     cy
@@ -915,19 +1016,14 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item .fa-circle-exclamation')
+      .find('.action-card .fa-circle-exclamation, .flow-card .fa-circle-exclamation')
       .should('have.length', 4);
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .first()
       .find('.js-select')
-      .click();
-
-    cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
       .click();
 
     cy
@@ -936,11 +1032,11 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('[data-owner-region]')
-      .should('contain', 'Nurse');
+      .should('contain', 'NUR');
 
     cy
       .get('[data-due-date-region]')
-      .should('contain', formatDate(tomorrow, 'LONG'));
+      .should('contain', formatDate(tomorrow, 'SHORT'));
 
     cy
       .get('[data-due-time-region]')
@@ -958,7 +1054,7 @@ context('Worklist bulk editing', function() {
       .as('failedPatchAction');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .click();
 
@@ -969,7 +1065,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .click();
 
@@ -979,13 +1075,25 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click();
+
+    cy
+      .wait('@failedPatchAction')
+      .its('request.body.data.attributes')
+      .should(attributes => {
+        expect(attributes.due_date).to.equal(null);
+        expect(attributes.due_time).to.equal(null);
+      });
 
     cy
       .get('.alert-box')
       .should('contain', 'Something went wrong. Please try again.');
+
+    cy
+      .get('@failedPatchAction.all')
+      .should('have.length', 1);
   });
 
   specify('bulk flow editing completed', function() {
@@ -1022,7 +1130,7 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .first()
       .as('firstRow')
       .find('.js-select');
@@ -1032,16 +1140,11 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar');
 
     cy
-      .get('.modal--sidebar')
-      .as('bulkEditSidebar');
-
-    cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .click();
 
@@ -1058,7 +1161,7 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region] button')
       .should('be.disabled');
   });
@@ -1090,7 +1193,7 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .first()
       .as('firstRow')
       .find('.js-select');
@@ -1100,28 +1203,23 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('.modal--sidebar')
-      .as('bulkEditSidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-owner-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region] button')
       .should('be.disabled');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-duration-region] button')
       .should('be.disabled');
   });
@@ -1212,7 +1310,7 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .first()
       .as('firstRow')
       .find('.js-select')
@@ -1220,7 +1318,7 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .last()
       .as('lastRow')
       .find('.js-select')
@@ -1232,8 +1330,7 @@ context('Worklist bulk editing', function() {
       .find('button');
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Flows');
 
     cy
@@ -1248,14 +1345,12 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .should('contain', 'Edit 2 Flow')
-      .click();
+      .get('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Flow');
 
     cy
-      .get('.modal--sidebar')
-      .as('sidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-state-region]')
       .click();
 
@@ -1266,8 +1361,8 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@sidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait(['@patchFlow', '@patchFlow']);
 
@@ -1280,14 +1375,12 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .should('contain', 'Edit 2 Flows')
-      .click();
+      .get('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Flows');
 
     cy
-      .get('.modal--sidebar')
-      .as('sidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-owner-region]')
       .click();
 
@@ -1298,8 +1391,8 @@ context('Worklist bulk editing', function() {
       .click();
 
     cy
-      .get('@sidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait(['@patchFlow', '@patchFlow']);
 
@@ -1380,7 +1473,7 @@ context('Worklist bulk editing', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card, .flow-card')
       .as('listItems')
       .first()
       .find('.js-select')

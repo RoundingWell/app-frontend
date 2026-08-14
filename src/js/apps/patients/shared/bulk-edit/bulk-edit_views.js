@@ -1,19 +1,22 @@
-import { get, some } from 'underscore';
+import { extend, get, some } from 'underscore';
 import dayjs from 'dayjs';
+import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
 import { View } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+
 import intl from 'js/i18n';
 
-import 'scss/modules/buttons.scss';
-import 'scss/modules/modals.scss';
-import 'scss/modules/sidebar.scss';
+import Droplist from 'js/components/droplist';
 
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, DurationComponent } from 'js/apps/patients/shared/actions_views';
 
-import BulkEditActionBodyTemplate from './bulk-edit-action-body.hbs';
-import BulkEditFlowBodyTemplate from './bulk-edit-flow-body.hbs';
+import BulkEditActionsInlineTemplate from './actions-inline.hbs';
+import BulkEditFlowsInlineTemplate from './flows-inline.hbs';
+
+import './bulk-edit.scss';
 
 const i18n = intl.patients.shared.bulkEdit.bulkEditViews;
 
@@ -24,6 +27,65 @@ function getIsOverdue(date, time) {
 
   return dueDateTime.isBefore(dayjs(), 'day') || dueDateTime.isBefore(dayjs(), 'minute');
 }
+
+const BulkStateTemplate = hbs`<span class="action-state action-state--{{ options.color }}">{{fa options.iconType options.icon}}<span>{{ name }}</span></span>`;
+
+const BulkEditOwnerComponent = OwnerComponent.extend({
+  viewOptions() {
+    const options = OwnerComponent.prototype.viewOptions.call(this);
+
+    return extend({}, options, {
+      className: `${ options.className } bulk-edit-inline__owner-button`,
+    });
+  },
+});
+
+const OwnerScopeComponent = Droplist.extend({
+  align: 'right',
+  popWidth: 184,
+  viewOptions: {
+    className: 'button button--compact bulk-edit-inline__owner-scope',
+    template: hbs`<span class="button__value">{{ text }}</span>{{far "angle-down"}}`,
+  },
+  picklistOptions: {
+    headingText: i18n.bulkEditButtonView.ownerScopeLabel,
+    isCheckable: true,
+  },
+  initialize({ bulkEditModel, isForFlows }) {
+    const labels = i18n.bulkEditButtonView;
+    const options = isForFlows ?
+      [
+        { id: 'flows-only', text: labels.flowsOnly, applyOwner: false },
+        { id: 'flows-and-actions', text: labels.flowsAndActions, applyOwner: true },
+      ] :
+      [
+        { id: 'actions-only', text: labels.actionsOnly, applyOwner: false },
+        { id: 'actions-and-flows', text: labels.actionsAndFlows, applyOwner: true },
+      ];
+
+    this.bulkEditModel = bulkEditModel;
+    this.collection = new Backbone.Collection(options);
+
+    this.syncSelected();
+    this.syncDisabled();
+
+    this.listenTo(this.bulkEditModel, 'change:applyOwner', this.syncSelected);
+    this.listenTo(this.bulkEditModel, 'change:ownerMulti change:isSaving', this.syncDisabled);
+  },
+  syncSelected() {
+    const applyOwner = this.bulkEditModel.get('applyOwner') === true;
+
+    this.setState('selected', this.collection.findWhere({
+      applyOwner,
+    }));
+  },
+  syncDisabled() {
+    this.setState('isDisabled', this.bulkEditModel.get('ownerMulti') || this.bulkEditModel.get('isSaving'));
+  },
+  onChangeSelected(selected) {
+    this.bulkEditModel.set('applyOwner', selected.get('applyOwner'));
+  },
+});
 
 const FlowsStateComponent = StateComponent.extend({
   onPicklistSelect({ model }) {
@@ -53,7 +115,7 @@ const FlowsStateComponent = StateComponent.extend({
         headingText: i18n.flowsStateComponent.requireDoneModal.headingText,
         submitText: i18n.flowsStateComponent.requireDoneModal.submitText,
         cancelText: false,
-        buttonClass: 'button--blue',
+        buttonClass: 'button button--primary',
       });
       return;
     }
@@ -74,56 +136,6 @@ const FlowsStateComponent = StateComponent.extend({
   },
 });
 
-const BulkEditButtonView = View.extend({
-  template: hbs`
-    <button class="button--blue js-bulk-edit">
-      {{#if isFlowList}}
-        {{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editFlows") itemCount=items.length}}
-      {{else}}
-        {{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editActions") itemCount=items.length}}
-      {{/if}}
-    </button>
-    <span class="button--text js-cancel">{{@intl.patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.cancel}}</span>
-  `,
-  templateContext() {
-    return {
-      isFlowList: this.getOption('isFlowType'),
-    };
-  },
-  triggers: {
-    'click .js-cancel': 'click:cancel',
-    'click .js-bulk-edit': 'click:edit',
-  },
-});
-
-const BulkEditActionsHeaderView = View.extend({
-  className: 'modal__header--sidebar',
-  template: hbs`
-    <div class="flex">
-      <div class="flex-grow">
-      <h3 class="sidebar__heading">{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditActionsHeaderView.headingText") itemCount=items.length}}</h3>
-      </div>
-      <div>
-        <button class="button--icon js-close">{{fas "xmark"}}</button>
-      </div>
-    </div>
-  `,
-});
-
-const BulkEditFlowsHeaderView = View.extend({
-  className: 'modal__header--sidebar',
-  template: hbs`
-    <div class="flex">
-      <div class="flex-grow">
-        <h3 class="sidebar__heading">{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditFlowsHeaderView.headingText") itemCount=items.length}}</h3>
-      </div>
-      <div>
-        <button class="button--icon js-close">{{fas "xmark"}}</button>
-      </div>
-    </div>
-  `,
-});
-
 const BulkEditActionsBodyView = View.extend({
   modelEvents: {
     'change:stateMulti': 'showState',
@@ -134,15 +146,13 @@ const BulkEditActionsBodyView = View.extend({
     'change:durationMulti': 'showDuration',
     'change:isSaving': 'render',
   },
-  className: 'modal__content--sidebar',
-  template: BulkEditActionBodyTemplate,
   regions: {
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     dueDate: '[data-due-date-region]',
     dueTime: '[data-due-time-region]',
     duration: '[data-duration-region]',
-    applyOwner: '[data-apply-owner-region]',
+    ownerScope: '[data-owner-scope-region]',
   },
   onRender() {
     this.isSaving = this.model.get('isSaving');
@@ -151,44 +161,52 @@ const BulkEditActionsBodyView = View.extend({
     this.showOwner();
     this.showDueDateTime();
     this.showDuration();
-    this.showApplyOwner();
+    this.showOwnerScope();
   },
   getStateComponent() {
     const isDisabled = this.isSaving;
 
     if (this.model.get('stateMulti')) {
       return new StateComponent({
+        isCompact: true,
         viewOptions: {
           attributes: {
             disabled: isDisabled,
+            type: 'button',
           },
-          className: 'button-secondary w-100',
+          className: 'button button--compact',
           template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
         },
       });
     }
 
     return new StateComponent({
+      isCompact: true,
       stateId: get(this.model.get('state'), 'id'),
       state: { isDisabled },
+      viewOptions: {
+        className: 'button button--compact',
+        template: BulkStateTemplate,
+      },
     });
   },
   getOwnerComponent() {
     const isDisabled = this.model.someComplete() || this.isSaving;
 
     if (this.model.get('ownerMulti')) {
-      return new OwnerComponent({
+      return new BulkEditOwnerComponent({
         viewOptions: {
           attributes: {
             disabled: isDisabled,
           },
-          className: 'button-secondary w-100',
+          className: 'owner-component owner-component--compact button button--compact bulk-edit-inline__owner-button',
           template: hbs`{{far "circle-user"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkOwnerDefaultText }}</span>`,
         },
       });
     }
 
-    return new OwnerComponent({
+    return new BulkEditOwnerComponent({
+      isCompact: true,
       owner: this.model.get('owner'),
       workspaces: this.model.get('workspaces'),
       state: { isDisabled },
@@ -203,9 +221,10 @@ const BulkEditActionsBodyView = View.extend({
         viewOptions: {
           attributes: {
             disabled: isDisabled,
+            type: 'button',
           },
           tagName: 'button',
-          className: 'button-secondary w-100 due-component',
+          className: 'button button--compact due-component',
           triggers: {
             'click': 'click',
           },
@@ -220,6 +239,7 @@ const BulkEditActionsBodyView = View.extend({
       date: this.model.get('date'),
       state: { isDisabled },
       isOverdue,
+      isCompact: true,
     });
   },
   getDueTimeComponent() {
@@ -227,22 +247,25 @@ const BulkEditActionsBodyView = View.extend({
       return new TimeComponent({
         viewOptions: {
           attributes: {
-            disabled: this.model.get('dateMulti') || this.model.someComplete() || this.isSaving,
+            disabled: this.model.get('hasMissingDueDate') || this.model.someComplete() || this.isSaving,
           },
-          className: 'button-secondary time-component w-100',
+          className: 'button button--compact time-component',
           template: hbs`{{far "clock"}} <span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDueTimeDefaultText }}</span>`,
         },
       });
     }
 
     const time = this.model.get('time');
-    const isDisabled = (this.model.get('dateMulti') && !time) || !this.model.get('date') || this.model.someComplete() || this.isSaving;
+    const hasNoDueDates = this.model.get('hasMissingDueDate')
+      || (!this.model.get('dateMulti') && !this.model.get('date'));
+    const isDisabled = hasNoDueDates || this.model.someComplete() || this.isSaving;
     const isOverdue = getIsOverdue(this.model.get('date'), time);
 
     return new TimeComponent({
       time,
       state: { isDisabled },
       isOverdue,
+      isCompact: true,
     });
   },
   getDurationComponent() {
@@ -250,8 +273,9 @@ const BulkEditActionsBodyView = View.extend({
 
     if (this.model.get('durationMulti')) {
       return new DurationComponent({
+        isCompact: true,
         viewOptions: {
-          className: 'button-secondary w-100',
+          className: 'button button--compact',
           attributes: {
             disabled: isDisabled,
           },
@@ -262,6 +286,7 @@ const BulkEditActionsBodyView = View.extend({
 
     return new DurationComponent({
       duration: this.model.get('duration'),
+      isCompact: true,
       state: { isDisabled },
     });
   },
@@ -314,43 +339,26 @@ const BulkEditActionsBodyView = View.extend({
 
     this.showChildView('duration', durationComponent);
   },
-  showApplyOwner() {
-    this.showChildView('applyOwner', new ApplyOwnerView({
-      model: this.model,
+  showOwnerScope() {
+    this.showChildView('ownerScope', new OwnerScopeComponent({
+      bulkEditModel: this.model,
       isForFlows: false,
     }));
   },
 });
 
-const ApplyOwnerView = View.extend({
-  modelEvents: {
-    'change:applyOwner': 'render',
-    'change:ownerMulti': 'render',
-  },
-  className: 'u-margin--l-16',
-  template: hbs`
-    <button class="button--checkbox js-apply-owner"{{#if isDisabled}} disabled{{/if}}>
-      {{#if applyOwner}}{{fas "square-check"}}{{else}}{{fal "square"}}{{/if~}}
-      {{#if isForFlows}}
-        <span>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditFlowBodyTemplate.applyOwnerLabel }}</span>
-      {{else}}
-        <span>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditActionBodyTemplate.applyOwnerLabel }}</span>
-      {{/if}}
-    </button>`,
+const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
+  className: 'bulk-edit-inline bulk-edit-inline--actions',
+  template: BulkEditActionsInlineTemplate,
   triggers: {
-    'click .js-apply-owner': 'click:select',
-  },
-  initialize({ isForFlows }) {
-    this.isForFlows = isForFlows;
+    'click .js-cancel': 'cancel',
+    'click .js-save': 'save',
   },
   templateContext() {
     return {
-      isDisabled: this.model.get('ownerMulti') || this.model.get('isSaving'),
-      isForFlows: this.isForFlows,
+      itemCount: this.collection.length,
+      isSaving: this.model.get('isSaving'),
     };
-  },
-  onClickSelect() {
-    this.model.set('applyOwner', !this.model.get('applyOwner'));
   },
 });
 
@@ -360,56 +368,61 @@ const BulkEditFlowsBodyView = View.extend({
     'change:ownerMulti': 'showOwner',
     'change:isSaving': 'render',
   },
-  className: 'modal__content--sidebar',
-  template: BulkEditFlowBodyTemplate,
   regions: {
     state: '[data-state-region]',
     owner: '[data-owner-region]',
-    applyOwner: '[data-apply-owner-region]',
+    ownerScope: '[data-owner-scope-region]',
   },
   onRender() {
     this.isSaving = this.model.get('isSaving');
 
     this.showState();
     this.showOwner();
-    this.showApplyOwner();
+    this.showOwnerScope();
   },
   getStateComponent() {
     const isDisabled = this.isSaving;
 
     if (this.model.get('stateMulti')) {
       return new FlowsStateComponent({
+        isCompact: true,
         flows: this.collection,
         viewOptions: {
           attributes: {
             disabled: isDisabled,
           },
-          className: 'button-secondary w-100',
+          className: 'button button--compact',
           template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
         },
       });
     }
 
     return new FlowsStateComponent({
+      isCompact: true,
       flows: this.collection,
       stateId: get(this.model.get('state'), 'id'),
       state: { isDisabled },
+      viewOptions: {
+        className: 'button button--compact',
+        template: BulkStateTemplate,
+      },
     });
   },
   getOwnerComponent() {
     const isDisabled = this.model.someComplete() || this.isSaving;
 
     if (this.model.get('ownerMulti')) {
-      return new OwnerComponent({
+      return new BulkEditOwnerComponent({
         viewOptions: {
-          className: 'button-secondary w-100',
+          className: 'owner-component owner-component--compact button button--compact bulk-edit-inline__owner-button',
           template: hbs`{{far "circle-user"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkOwnerDefaultText }}</span>`,
         },
         state: { isDisabled },
       });
     }
 
-    return new OwnerComponent({
+    return new BulkEditOwnerComponent({
+      isCompact: true,
       owner: this.model.get('owner'),
       workspaces: this.model.get('workspaces'),
       state: { isDisabled },
@@ -433,11 +446,26 @@ const BulkEditFlowsBodyView = View.extend({
 
     this.showChildView('owner', ownerComponent);
   },
-  showApplyOwner() {
-    this.showChildView('applyOwner', new ApplyOwnerView({
-      model: this.model,
+  showOwnerScope() {
+    this.showChildView('ownerScope', new OwnerScopeComponent({
+      bulkEditModel: this.model,
       isForFlows: true,
     }));
+  },
+});
+
+const BulkEditFlowsInlineView = BulkEditFlowsBodyView.extend({
+  className: 'bulk-edit-inline bulk-edit-inline--flows',
+  template: BulkEditFlowsInlineTemplate,
+  triggers: {
+    'click .js-cancel': 'cancel',
+    'click .js-save': 'save',
+  },
+  templateContext() {
+    return {
+      itemCount: this.collection.length,
+      isSaving: this.model.get('isSaving'),
+    };
   },
 });
 
@@ -446,11 +474,8 @@ const BulkEditFlowsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.sha
 const BulkEditActionsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditActionsSuccess") itemCount=itemCount}}`;
 
 export {
-  BulkEditButtonView,
-  BulkEditActionsHeaderView,
-  BulkEditFlowsHeaderView,
-  BulkEditActionsBodyView,
-  BulkEditFlowsBodyView,
+  BulkEditActionsInlineView,
+  BulkEditFlowsInlineView,
   BulkEditFlowsSuccessTemplate,
   BulkEditActionsSuccessTemplate,
 };

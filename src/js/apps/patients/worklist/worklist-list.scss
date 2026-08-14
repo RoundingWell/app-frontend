@@ -1,119 +1,441 @@
-.worklist__type-toggle {
-  margin-left: auto;
+.worklist-list-page {
+  --date-filter-nav-background: #{$white};
+  --date-filter-nav-border-color: transparent;
+  --date-filter-nav-border-width: 0;
+  --date-filter-nav-box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  --list-page-title-icon-margin-right: var(--space-2);
+  --list-page-topbar-columns: minmax(0, 1fr) auto;
+  --patient-list-page-expanded-filters-padding: var(--space-3) var(--space-4);
+  --patient-list-page-default-filters-padding: var(--space-3) var(--space-1);
+  --patient-list-page-header-secondary-height: 48px;
+  --patient-list-page-responsive-filters-padding: var(--space-3) var(--space-1);
 }
 
-.worklist__table-list {
-  grid-template-columns:
-    48px
-    48px
-    minmax(104px, 0.8fr)
-    32px
-    minmax(104px, 1.4fr)
-    minmax(max-content, 2fr)
-    minmax(88px, auto);
+.worklist-list__list,
+.worklist-list__skeleton {
+  --card-list-padding: 0 var(--space-6) var(--space-6);
+  --list-page-list-width: var(--content-expanded-width);
+
+  width: var(--content-expanded-width);
 }
 
-.worklist-list__patient-name:hover {
-  color: color(blue);
-}
+.worklist-list__check {
+  --button-checkbox-justify-content: flex-start;
 
-.work-list__item:hover {
-  .fa-square {
-    color: #{$black-20};
-  }
-}
-
-.worklist-list__action-icon {
-  color: color(blue);
-
-  .icon {
-    font-size: 20px;
-    width: 20px;
-  }
-}
-
-.worklist-list__flow-icon .icon {
-  color: #{$black-60};
-  font-size: 20px;
-}
-
-.worklist-list__details-icon {
-  color: #{$black-60};
-  margin-right: 8px;
-  width: 16px;
-}
-
-.worklist__action-display-icon {
-  color: #{$black-60};
-  margin-left: 8px;
-}
-
-.worklist__action-display-icon-text {
-  margin: 0 8px 0 4px;
-}
-
-.worklist-list__action-ts {
-  font-size: 12px;
-}
-
-.worklist-list__overline {
-  color: #{$black-60};
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.worklist-list__count {
   align-items: center;
-  color: #{$black-60};
   display: flex;
-  font-size: 12px;
-  line-height: 1.2;
-  margin-right: 24px;
-  white-space: nowrap;
+  flex: 0 0 32px;
 }
 
-.worklist-list__filter-date:not(:empty) {
-  margin-right: 16px;
-}
-
-.worklist-list__filter-sort .fa-arrow-down-arrow-up {
+.worklist-list__sort-icon {
   margin-right: 8px;
 }
 
 .worklist-list__toggle {
-  margin-left: auto;
   white-space: nowrap;
-}
-
-.worklist-list__flow-progress {
-  width: 72px;
-}
-
-.worklist-list__filters {
-  align-items: center;
-  display: flex;
-}
-
-.worklist-list__work-name-header {
-  grid-column: 2 / 4;
-}
-
-.worklist-list__header-span-2 {
-  grid-column: span 2;
-}
-
-.worklist-list__action-attr-header {
-  margin-left: 32px;
-}
-
-.worklist-list__all-filters:not(:empty) {
-  margin-right: 24px;
-}
-
-.worklist-list__filter:not(:empty) {
-  margin-right: 8px;
 }
 
 .worklist-list__search-helper {
   display: none;
+}
+
+.worklist-list__title-glyph--back {
+  /* Font Awesome's angle glyph has asymmetric side bearing. */
+  margin-right: 2px;
+  width: 8px;
+}
+
+.worklist-list__title-glyph--zero {
+  width: 16px;
+}
+
+.worklist-list__title-glyph--one {
+  width: 14px;
+}
+
+.worklist-list__title-glyph--three {
+  width: 12px;
+}
+
+.worklist-list__patient-context {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02px;
+  line-height: 16px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.worklist-list__underline {
+  color: inherit;
+}
+
+.worklist-list__patient--action,
+.worklist-list__patient-context--action {
+  text-transform: uppercase;
+}
+
+.worklist-list__flow-context {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06px;
+  line-height: inherit;
+  padding: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &:hover {
+    color: color(blue);
+  }
+}
+
+.worklist-list__sidebar-controls {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 1px 1px rgb(0 0 17 / 6%);
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.worklist-list__type-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.worklist-list__sidebar-button {
+  align-items: center;
+  background: var(--color-chip-background);
+  border-color: var(--color-chip-border);
+  border-radius: 16px;
+  border-width: 0.5px;
+  display: inline-flex;
+  flex: 1 1 0;
+  font-size: 14px;
+  font-weight: 600;
+  height: 32px;
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  text-align: center;
+  width: 100%;
+}
+
+.worklist-list__sidebar-button:hover:enabled {
+  background-color: #{$black-95};
+  border-color: #{$black-80};
+}
+
+.worklist-list__sidebar-button:active:enabled,
+.worklist-list__sidebar-button:focus {
+  background-color: #{$black-90};
+  border-color: #{$black-90};
+}
+
+.worklist-list__sidebar-button[aria-pressed='true'] {
+  background: var(--color-control-background);
+  border-color: transparent;
+  color: #{$black-20};
+}
+
+.worklist-list__filter-sort {
+  --button-justify-content: center;
+  --button-width: 100%;
+}
+
+.worklist-list__owner-toggle-button {
+  color: color(blue);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.worklist-list__owner-toggle-button:hover:enabled {
+  background-color: color(light_blue, light);
+  border-color: color(light_blue);
+  color: color(light_blue);
+}
+
+.worklist-list__owner-toggle-button:active:enabled,
+.worklist-list__owner-toggle-button:focus {
+  background-color: color(light_blue);
+  border-color: color(light_blue);
+  color: #{$white};
+}
+
+.worklist-list__owner-toggle-icon {
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.worklist-list__skeleton {
+  pointer-events: none;
+}
+
+.worklist-list__skeleton,
+.worklist-list__count-skeleton {
+  animation-delay: 0ms;
+}
+
+.worklist-list__count-skeleton {
+  width: 64px;
+}
+
+.worklist-list__count-skeleton-shape {
+  height: 16px;
+  width: 100%;
+}
+
+.worklist-list__skeleton-item {
+  align-items: stretch;
+  cursor: default;
+  display: flex;
+  gap: var(--space-4);
+}
+
+.worklist-list__skeleton-item:nth-child(2) {
+  opacity: 0.72;
+}
+
+.worklist-list__skeleton-item:nth-child(3) {
+  opacity: 0.42;
+}
+
+.worklist-list__skeleton-check {
+  border-radius: var(--space-1);
+  height: 16px;
+  width: 16px;
+}
+
+.worklist-list__skeleton-check-column {
+  align-items: center;
+  display: flex;
+  flex: 0 0 32px;
+}
+
+.worklist-list__skeleton-card {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 38%, 420px);
+  min-height: 80px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.worklist-list__skeleton-main {
+  align-items: center;
+  display: flex;
+  min-width: 0;
+  padding: var(--space-2) var(--space-4);
+}
+
+.worklist-list__skeleton-identity {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  min-width: 0;
+  width: 100%;
+}
+
+.worklist-list__skeleton-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.worklist-list__skeleton-context-line {
+  height: 8px;
+  width: min(280px, 42%);
+}
+
+.worklist-list__skeleton-context {
+  height: 16px;
+}
+
+.worklist-list__skeleton-primary {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  min-height: 20px;
+  min-width: 0;
+}
+
+.worklist-list__skeleton-patient {
+  flex: 0 0 104px;
+  height: 12px;
+}
+
+.worklist-list__skeleton-state {
+  border-radius: 50%;
+  display: block;
+  height: 28px;
+  width: 28px;
+}
+
+.worklist-list__skeleton-title {
+  align-self: center;
+  flex: 0 1 58%;
+  height: 12px;
+  min-width: 96px;
+}
+
+.worklist-list__skeleton-inline-icon {
+  flex: 0 0 12px;
+  height: 12px;
+  width: 12px;
+}
+
+.worklist-list__skeleton-chips,
+.worklist-list__skeleton-dates {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.worklist-list__skeleton-chips {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.worklist-list__skeleton-chips--flow {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.worklist-list__skeleton-aside {
+  background: var(--color-surface-muted);
+  border: 0.5px solid var(--color-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  justify-content: flex-start;
+  margin: var(--space-1) var(--space-1) var(--space-1) 0;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+}
+
+.worklist-list__skeleton-chip {
+  border-radius: 16px;
+  height: 28px;
+  width: 96px;
+}
+
+.worklist-list__skeleton-chip--end {
+  width: 120px;
+}
+
+.worklist-list__skeleton-chip--flow {
+  width: 100%;
+}
+
+.worklist-list__skeleton-chip--flow.worklist-list__skeleton-chip--end {
+  justify-self: end;
+  max-width: 132px;
+}
+
+.worklist-list__skeleton-date {
+  height: 8px;
+  width: 72px;
+}
+
+.worklist-list__skeleton-dates {
+  min-height: 16px;
+}
+
+@container (width <= 720px) {
+  .worklist-list__check,
+  .worklist-list__skeleton-check-column {
+    align-self: flex-start;
+    height: 64px;
+  }
+
+  .worklist-list__skeleton-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .worklist-list__skeleton-main {
+    min-height: 64px;
+  }
+
+  .worklist-list__skeleton-aside {
+    border: 0;
+    border-top: 0.5px solid var(--color-border-subtle);
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr) auto;
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+  }
+}
+
+@container (width <= 560px) {
+  .worklist-list__skeleton-aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+}
+
+.worklist-list__list.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+  user-select: none;
+}
+
+.worklist-list__list.is-loading::before {
+  animation: skeleton-loading-wave 1.4s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--color-control-background) 25%, var(--color-page-bg) 50%, var(--color-control-background) 75%);
+  background-size: 200% 100%;
+  content: '';
+  height: var(--space-1);
+  left: var(--space-6);
+  position: absolute;
+  right: var(--space-6);
+  top: 0;
+  z-index: 1;
+}
+
+.worklist-list__updating {
+  color: var(--color-text-subtle);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.worklist-list__error {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 var(--space-6) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+}
+
+@media (width > 720px) {
+  .worklist-list-page {
+    --list-page-header-border-bottom: 0;
+  }
+
+}
+
+@media (width <= 1024px) {
+  .worklist-list-page .patient-list-page__filters:has(.patient-list-page__bulk-edit:not(:empty)) {
+    --patient-list-page-responsive-filters-padding: var(--patient-list-page-expanded-filters-padding);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .worklist-list__list.is-loading::before {
+    animation: none;
+  }
 }
