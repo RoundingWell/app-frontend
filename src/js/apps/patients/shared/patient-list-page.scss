@@ -233,6 +233,13 @@
     overflow-y: auto;
   }
 
+  .patient-list-page__sidebar-content > .patient-sidebar--list {
+    --patient-sidebar-height: auto;
+
+    overflow-y: visible;
+    scrollbar-gutter: auto;
+  }
+
   .patient-list-page__drawer-close {
     align-items: center;
     display: flex;
