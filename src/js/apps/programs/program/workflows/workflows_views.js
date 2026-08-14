@@ -3,10 +3,10 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView, Behavior } from 'marionette';
 
-import { alphaSort } from 'js/utils/sorting';
-
 import 'scss/modules/buttons.scss';
-import 'scss/modules/table-list.scss';
+import 'scss/modules/card-list.scss';
+
+import { alphaSort } from 'js/utils/sorting';
 
 import { PROGRAM_BEHAVIORS } from 'js/static';
 import intl from 'js/i18n';
@@ -23,11 +23,14 @@ import FlowItemTemplate from './flow-item.hbs';
 import LayoutTemplate from './layout.hbs';
 
 import 'js/apps/programs/shared/program-action-state.scss';
+import 'scss/domain/work-card.scss';
+import 'scss/domain/action-card.scss';
+import 'scss/domain/flow-card.scss';
 import 'scss/domain/action-icons.scss';
 import './workflows.scss';
 
 const EmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
   template: hbs`<h2>{{ @intl.programs.program.workflows.workflowsViews.emptyView }}</h2>`,
 });
 
@@ -48,7 +51,7 @@ const RowBehavior = Behavior.extend({
 });
 
 const ActionItemView = View.extend({
-  className: 'table-list__item',
+  className: 'work-card action-card',
   behaviors: [RowBehavior],
   regions: {
     behavior: '[data-behavior-region]',
@@ -118,7 +121,7 @@ const ActionItemView = View.extend({
 });
 
 const FlowItemView = View.extend({
-  className: 'table-list__item',
+  className: 'work-card flow-card',
   behaviors: [RowBehavior],
   regions: {
     owner: '[data-owner-region]',
@@ -157,7 +160,7 @@ const FlowItemView = View.extend({
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list__list list-page__list',
+  className: 'card-list workflows__list',
   childView(item) {
     if (item.type === 'program-flows') {
       return FlowItemView;
@@ -193,7 +196,7 @@ const AddActionDroplist = Droplist.extend({
     };
   },
   viewOptions: {
-    className: 'button-primary',
+    className: 'button button--outline',
     template: hbs`{{far "circle-plus"}}<span>{{ @intl.programs.program.workflows.workflowsViews.addAction }}</span>{{far "angle-down" classes="workflows__arrow"}}`,
   },
   picklistEvents: {

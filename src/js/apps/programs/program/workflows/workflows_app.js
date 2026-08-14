@@ -16,7 +16,7 @@ export default App.extend({
   onBeforeStart({ program }) {
     this.program = program;
     this.showView(new LayoutView({ model: program }));
-    this.getRegion('content').startPreloader();
+    this.getRegion('content').startPreloader({ variant: 'generic' });
   },
   beforeStart({ program }) {
     return [
@@ -36,7 +36,7 @@ export default App.extend({
         icon: {
           type: 'far',
           icon: 'file-lines',
-          classes: 'workflows--add-action',
+          classes: 'workflows__add-action-icon',
         },
         text: intl.programs.program.workflows.workflowsApp.newAction,
       },
@@ -47,7 +47,7 @@ export default App.extend({
         icon: {
           type: 'fas',
           icon: 'folder',
-          classes: 'workflows--add-flow',
+          classes: 'workflows__add-flow-icon',
         },
         text: intl.programs.program.workflows.workflowsApp.newFlow,
       },

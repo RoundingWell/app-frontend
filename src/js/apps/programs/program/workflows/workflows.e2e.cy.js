@@ -94,38 +94,38 @@ context('program workflows page', function() {
       .as('routePatchAction');
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card, .flow-card')
       .first()
       .should('contain', 'First In List');
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card, .flow-card')
       .eq(1)
       .should('contain', 'Second In List');
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card, .flow-card')
       .eq(2)
       .should('contain', 'Third In List')
-      .find('.table-list__icon--large')
+      .find('.work-card__state')
       .find('.action-icon--red .fa-caret-down');
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card, .flow-card')
       .last()
       .should('contain', 'Fourth In List');
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .contains('First In List')
       .click();
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .find('.is-selected')
       .find('[data-behavior-region]')
       .click();
@@ -143,7 +143,7 @@ context('program workflows page', function() {
       });
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .find('.is-selected')
       .find('[data-owner-region]')
       .click();
@@ -161,15 +161,15 @@ context('program workflows page', function() {
       });
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card, .flow-card')
       .last()
       .find('[data-owner-region]')
       .find('button')
       .should('not.have.text');
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .find('.is-selected')
       .find('[data-due-region]')
       .click();
@@ -187,7 +187,7 @@ context('program workflows page', function() {
       });
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .find('.is-selected')
       .find('[data-due-region]')
       .click();
@@ -198,32 +198,32 @@ context('program workflows page', function() {
       .click();
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .find('.is-selected')
       .find('[data-due-region]')
       .find('button')
       .should('not.have.text');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card, .flow-card')
       .first()
       .find('.fa-share-from-square');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card, .flow-card')
       .first()
       .next()
       .find('.fa-file-lines');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card, .flow-card')
       .first()
       .find('.fa-square-poll-horizontal')
       .parent()
       .should('be.disabled');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card, .flow-card')
       .first()
       .next()
       .find('.fa-square-poll-horizontal')
@@ -266,8 +266,8 @@ context('program workflows page', function() {
       .wait('@routeProgramFlows');
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card, .flow-card')
       .first()
       .as('flowItem');
 
@@ -344,7 +344,7 @@ context('program workflows page', function() {
       .wait('@routeTags');
 
     cy
-      .get('.program__layout')
+      .get('.program-page__layout')
       .find('.is-selected')
       .should('contain', 'New Program Action')
       .as('newAction');
@@ -383,7 +383,7 @@ context('program workflows page', function() {
       .click();
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .should('not.contain', 'New Program Action')
       .find('.is-selected')
       .should('not.exist');
@@ -423,7 +423,7 @@ context('program workflows page', function() {
       .wait('@routeTags');
 
     cy
-      .get('.program__layout')
+      .get('.program-page__layout')
       .find('.is-selected')
       .should('contain', 'New Program Flow')
       .as('newFlow');
@@ -502,7 +502,7 @@ context('program workflows page', function() {
       .click();
 
     cy
-      .get('.table-list__list')
+      .get('.card-list')
       .should('not.contain', 'New Program Flow')
       .find('.is-selected')
       .should('not.exist');

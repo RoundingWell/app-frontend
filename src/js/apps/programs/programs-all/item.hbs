@@ -1,0 +1,12 @@
+<div class="card-list__item-surface">
+  <div class="card-list__item-main">
+    <span class="card-list__item-title" data-testid="program-list-name">{{ name }}</span>
+    <span class="card-list__item-meta">
+      <span class="programs-list__published{{#if published}} is-published{{/if}}">
+        {{#if published}}{{fas "toggle-on"}}{{else}}{{far "toggle-off"}}{{/if}}
+        {{formatMessage (intlGet "programs.programsAllViews.itemView.published") published=published}}
+      </span>
+      <span>{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
+    </span>
+  </div>
+</div>

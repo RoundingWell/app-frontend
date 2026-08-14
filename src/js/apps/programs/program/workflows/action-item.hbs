@@ -1,24 +1,28 @@
-<div>
-  <span class="table-list__icon--large workflows__action-icon">
-    {{#if options.icon}}
-      <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
-    {{else}}
-      {{far icon}}
-    {{/if}}
-  </span>
-  <span>
-    {{ name }}
-    {{~#unless name}}<em>{{ @intl.programs.program.workflows.actionItemTemplate.newProgramAction }}</em>{{/unless~}}
-  </span>
+<div class="work-card__surface">
+  <div class="work-card__main">
+    <div class="work-card__heading">
+      <span class="work-card__state">
+        {{#if options.icon}}
+          <span class="action-icon action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
+        {{else}}
+          {{far icon}}
+        {{/if}}
+      </span>
+      <span class="work-card__title">
+        {{ name }}
+        {{~#unless name}}<em>{{ @intl.programs.program.workflows.actionItemTemplate.newProgramAction }}</em>{{/unless~}}
+      </span>
+    </div>
+  </div>
+  <div class="work-card__aside">
+    <div class="work-card__controls action-card__controls workflows__action-controls js-no-click">
+      <span class="work-card__control" data-behavior-region></span>
+      <span class="work-card__control" data-owner-region></span>
+      <span class="work-card__control" data-due-region></span>
+      {{#if hasForm}}<span class="work-card__control"><button class="button button--compact" type="button" disabled>{{far "square-poll-horizontal"}}</button></span>{{/if}}
+    </div>
+    <div class="work-card__meta action-card__meta">
+      <span>{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
+    </div>
+  </div>
 </div>
-<div class="table-list__meta">
-  <span data-behavior-region></span>
-  <span data-owner-region></span>
-  <span data-due-region></span>
-  <span>
-    {{#if hasForm}}
-      <button class="button-secondary--compact" disabled>{{far "square-poll-horizontal"}}</button>
-    {{/if }}
-  </span>
-</div>
-<div class="workflows__item-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>
