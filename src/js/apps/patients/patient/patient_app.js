@@ -14,6 +14,11 @@ import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
 
 import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
+const EXPANDED_FORM_ROUTES = new Set([
+  'patient:action:form',
+  'patient:flow:action:form',
+]);
+
 export default SubRouterApp.extend({
   routeScope: ['patientId'],
 
@@ -22,10 +27,11 @@ export default SubRouterApp.extend({
       'patient:workflow': this.showWorkflow,
       'patient:workflow:closed': this.showClosedWorkflow,
       'patient:action': this.showPatientAction,
+      'patient:action:form': this.showPatientActionForm,
       'patient:flow': this.showFlow,
       'patient:flow:action': this.showFlowAction,
+      'patient:flow:action:form': this.showFlowActionForm,
       'patient:form': this.showPatientForm,
-      'patient:form:action': this.showActionForm,
     };
   },
 
@@ -39,6 +45,7 @@ export default SubRouterApp.extend({
 
   currentAppOptions() {
     return {
+      layoutState: this.layoutState,
       region: this.getRegion('content'),
       patient: this.patient,
       patientId: this.patient.id,
@@ -46,7 +53,11 @@ export default SubRouterApp.extend({
   },
 
   onBeforeStart() {
-    this.getRegion().startPreloader();
+    this.getRegion().startPreloader({ variant: 'generic' });
+  },
+
+  onBeforeStop() {
+    Radio.request('nav', 'setMinimized', false);
   },
 
   beforeStart() {
@@ -69,15 +80,34 @@ export default SubRouterApp.extend({
   onStart(options, patient) {
     this.patient = patient;
     this.contextTrail = new Backbone.Model();
+    const formExpanded = EXPANDED_FORM_ROUTES.has(this.getCurrentRoute().event);
 
-    this.setView(new LayoutView({
+    this.layoutState = new Backbone.Model({
+      formExpanded,
+      sidebarHidden: formExpanded,
+    });
+    this.listenTo(this.layoutState, 'change:formExpanded', this.renderFormExpandedState);
+    this.sidebarHiddenBeforeDrawer = formExpanded;
+
+    const layout = new LayoutView({
       model: patient,
       contextTrail: this.contextTrail,
-    }));
+      layoutState: this.layoutState,
+    });
 
+    if (layout.isSidebarFixed()) this.sidebarHiddenBeforeDrawer = false;
+
+    this.listenTo(layout, {
+      'change:sidebar-layout': this.onChangeSidebarLayout,
+      'click:sidebarButton': this.togglePatientSidebar,
+      'close:sidebar-drawer': this.closePatientSidebarDrawer,
+    });
+    this.setView(layout);
+
+    this.showView();
+    this.renderFormExpandedState();
     this.showPatientSidebar();
     this.startCurrentRoute();
-    this.showView();
   },
 
   showWorkflow() {
@@ -92,6 +122,10 @@ export default SubRouterApp.extend({
     this.startContent('action', { actionId });
   },
 
+  showPatientActionForm(patientId, actionId) {
+    this.startContent('action', { actionId, formExpanded: true });
+  },
+
   showFlow(patientId, flowId) {
     this.startContent('flow', { flowId });
   },
@@ -100,25 +134,94 @@ export default SubRouterApp.extend({
     this.startContent('action', { flowId, actionId });
   },
 
+  showFlowActionForm(patientId, flowId, actionId) {
+    this.startContent('action', { flowId, actionId, formExpanded: true });
+  },
+
   showPatientForm(patientId, formId) {
     this.startContent('form', { formId });
   },
 
-  showActionForm(patientId, formId, actionId) {
-    this.startContent('form', { formId, actionId });
-  },
-
   startContent(appName, options) {
+    const formExpanded = !!options.formExpanded;
+    const previousPageApp = this.getCurrent();
+
+    if (previousPageApp) {
+      this.stopListening(previousPageApp, 'context:change');
+    }
+
+    this.setSidebarHidden(formExpanded);
+    this.setFormExpanded(formExpanded);
     this.contextTrail.set('context', this.getOptimisticContext(appName, options));
 
     const pageApp = this.getChildApp(appName);
 
-    this.stopListening(pageApp, 'context:change');
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
+
+    if (this.updateCurrentContent(appName, options)) return;
 
     this.startCurrent(appName, options);
   },
+  updateCurrentContent(appName, options) {
+    const current = this.getCurrent();
+    const actionApp = this.getChildApp('action');
 
+    if (appName !== 'action' || current !== actionApp || !current.isRunning()) return false;
+    if (!current.matchesRoute(options)) return false;
+
+    return true;
+  },
+  setSidebarHidden(isHidden) {
+    const layout = this.getView();
+
+    if (layout.isSidebarFixed()) {
+      this.sidebarHiddenBeforeDrawer = false;
+    } else if (!this._isTogglingPatientSidebar) {
+      this.sidebarHiddenBeforeDrawer = isHidden;
+    }
+
+    const shouldHide = !layout.isSidebarFixed()
+      && (layout.isSidebarDrawer() && !this._isTogglingPatientSidebar ? true : isHidden);
+
+    this.layoutState.set('sidebarHidden', shouldHide);
+  },
+  setFormExpanded(isExpanded) {
+    this.layoutState.set('formExpanded', isExpanded);
+  },
+  renderFormExpandedState() {
+    Radio.request('nav', 'setMinimized', this.layoutState.get('formExpanded'));
+  },
+  togglePatientSidebar() {
+    if (this.getView().isSidebarFixed()) return;
+
+    const isHidden = !this.getView().isSidebarHidden();
+    this._isTogglingPatientSidebar = true;
+    this.setCurrentPatientSidebarHidden(isHidden);
+    this._isTogglingPatientSidebar = false;
+  },
+  setCurrentPatientSidebarHidden(isHidden) {
+    this.setSidebarHidden(isHidden);
+  },
+  onChangeSidebarLayout({ isSidebarDrawer, isSidebarFixed, wasSidebarDrawer }) {
+    if (isSidebarFixed) {
+      this.sidebarHiddenBeforeDrawer = false;
+      this.layoutState.set('sidebarHidden', false);
+      return;
+    }
+
+    if (isSidebarDrawer) {
+      this.layoutState.set('sidebarHidden', true);
+      return;
+    }
+
+    if (wasSidebarDrawer) this.setCurrentPatientSidebarHidden(this.sidebarHiddenBeforeDrawer);
+  },
+  closePatientSidebarDrawer() {
+    this._isTogglingPatientSidebar = true;
+    this.setCurrentPatientSidebarHidden(true);
+    this._isTogglingPatientSidebar = false;
+    this.getView().focusSidebarToggle();
+  },
   getOptimisticContext(page, options) {
     const previous = this.contextTrail.get('context') || {};
     const context = { page };

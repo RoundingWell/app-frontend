@@ -257,7 +257,7 @@ context('worklist page', function() {
       .should('not.have.class', 'is-filters-collapsed');
   });
 
-  specify('wide patient sidebar cards', function() {
+  specify('patient sidebar cards and scrolling', function() {
     const testFlow = getFlow({
       relationships: {
         owner: getRelationship(teamCoordinator),
@@ -319,6 +319,18 @@ context('worklist page', function() {
         expect(firstCard.width).to.equal(260);
         expect(secondCard.width).to.equal(260);
         expect(secondCard.left).to.be.greaterThan(firstCard.right);
+      });
+
+    cy.viewport(1280, 400);
+
+    cy
+      .get('.patient-sidebar')
+      .should(([sidebar]) => {
+        expect(sidebar.scrollHeight).to.be.greaterThan(sidebar.clientHeight);
+
+        sidebar.scrollTop = sidebar.scrollHeight;
+
+        expect(sidebar.scrollTop).to.be.greaterThan(0);
       });
   });
 
