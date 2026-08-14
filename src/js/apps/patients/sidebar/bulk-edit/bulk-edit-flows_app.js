@@ -1,9 +1,8 @@
 import { pick } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
-import { BulkEditFlowsBodyView, BulkEditFlowsHeaderView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
+import { BulkEditFlowsInlineView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 
 const StateModel = Backbone.Model.extend({
   initialize({ collection }) {
@@ -68,29 +67,23 @@ const StateModel = Backbone.Model.extend({
 export default App.extend({
   StateModel,
   onStart() {
-    const headerView = new BulkEditFlowsHeaderView({
-      collection: this.getState('collection'),
-    });
-
-    const bodyView = new BulkEditFlowsBodyView({
+    const view = new BulkEditFlowsInlineView({
       model: this.getState(),
       collection: this.getState('collection'),
     });
 
-    this.modal = Radio.request('modal', 'show:sidebar', {
-      headerView,
-      bodyView,
-      onSubmit: this.onSubmit.bind(this),
+    this.listenTo(view, {
+      'cancel': this.onClickCancel,
+      'save': this.onSubmit,
     });
 
-    this.listenTo(this.modal, {
-      'destroy': this.stop,
-    });
+    this.showView(view);
+  },
+  onClickCancel() {
+    this.trigger('cancel');
   },
   onSubmit() {
     this.setState({ isSaving: true });
-
-    this.modal.showSavingFooter();
 
     const applyOwner = !!this.getState('applyOwner');
     if (applyOwner) {
@@ -100,6 +93,6 @@ export default App.extend({
     this.triggerMethod('save', this.getState().getData());
   },
   onStop() {
-    this.modal.destroy();
+    this.getRegion().empty();
   },
 });

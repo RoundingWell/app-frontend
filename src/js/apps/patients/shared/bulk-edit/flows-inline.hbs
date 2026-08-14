@@ -1,0 +1,14 @@
+<div class="bulk-edit-inline__header">
+  <span class="bulk-edit-inline__heading">{{formatMessage (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editFlows") itemCount=itemCount}}</span>
+  <div class="bulk-edit-inline__actions">
+    <button class="button button--text js-cancel" type="button"{{#if isSaving}} disabled{{/if}}>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.cancel }}</button>
+    <button class="button button--positive bulk-edit-inline__save js-save" type="button"{{#if isSaving}} disabled{{/if}}>{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.save }}</button>
+  </div>
+</div>
+<div class="bulk-edit-inline__controls">
+  <div class="bulk-edit-inline__control" data-state-region></div>
+  <div class="button-group bulk-edit-inline__owner">
+    <div data-owner-region></div>
+    <div data-owner-scope-region></div>
+  </div>
+</div>
