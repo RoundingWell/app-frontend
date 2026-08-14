@@ -1,0 +1,6 @@
+<div class="patient-sidebar__header">
+  <div class="flex-grow u-text--overflow" data-name-region></div>
+  {{#unless isListSidebar}}<button class="button button--icon button--menu patient-sidebar__menu js-menu" type="button" title="{{ @intl.patients.patient.sidebar.sidebarViews.menuOptions.headingText }}" aria-label="{{ @intl.patients.patient.sidebar.sidebarViews.menuOptions.headingText }}">{{far "ellipsis"}}</button>{{/unless}}
+  {{#if isClosable}}<button class="button button--icon patient-sidebar__close js-close" type="button" aria-label="{{ @intl.patients.patient.sidebar.sidebarViews.closeBtn }}">{{far "xmark"}}</button>{{/if}}
+</div>
+<div class="patient-sidebar__sidebars" data-sidebars-region></div>

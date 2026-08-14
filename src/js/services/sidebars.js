@@ -1,3 +1,5 @@
+import Radio from 'backbone.radio';
+
 import App from 'js/base/app';
 
 export default App.extend({
@@ -9,6 +11,8 @@ export default App.extend({
     this.sidebars = sidebars;
   },
   getPatientSidebars() {
-    return this.sidebars;
+    const sidebars = this.sidebars.filter(sidebar => sidebar.getWidgets().length);
+
+    return Radio.request('entities', 'sidebars:collection', sidebars);
   },
 });
