@@ -1,4 +1,4 @@
-import { get } from 'underscore';
+import { extend, get } from 'underscore';
 import Radio from 'backbone.radio';
 
 import intl, { renderTemplate } from 'js/i18n';
@@ -10,24 +10,24 @@ import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
 import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app';
 import BulkEditFlowsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-flows_app';
-import FiltersSidebarApp from 'js/apps/patients/sidebar/filters/filters-sidebar_app';
-import PatientSidebarApp from 'js/apps/patients/sidebar/patient/patient-sidebar_app';
+import { ListFiltersPanelApp } from 'js/apps/patients/shared/list-filters/list-filters_app';
+import ListPatientSidebarApp from 'js/apps/patients/shared/list-patient-sidebar_app';
 
 import DateFilterComponent from 'js/apps/patients/shared/components/date-filter';
 import SearchComponent from 'js/components/list-search';
 import { CountView } from 'js/apps/patients/shared/list_views';
+import { ListPageAppMixin } from 'js/apps/patients/shared/list-page';
 
 import { getSortOptions } from './worklist_sort';
 
-import { ListView, SelectAllView, LayoutView, ListTitleView, TableHeaderView, SortDroplist, TypeToggleView, AllFiltersButtonView } from 'js/apps/patients/worklist/worklist_views';
-import { BulkEditButtonView, BulkEditFlowsSuccessTemplate, BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
-import { sidebarOptions } from 'js/apps/patients/sidebar/patient/patient-sidebar_views';
+import { CountLoadingView, ListErrorView, ListLoadingView, ListUpdatingView, ListView, SelectAllView, LayoutView, ListTitleView, SidebarControlsView, SortDroplist, TypeToggleView, NoOwnerToggleView, AllFiltersButtonView } from 'js/apps/patients/worklist/worklist_views';
+import { BulkEditFlowsSuccessTemplate, BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 
 const FiltersApp = App.extend({
   StateModel: FiltersStateModel,
 });
 
-export default App.extend({
+const WorklistApp = App.extend({
   StateModel,
   childApps: {
     filters: {
@@ -37,10 +37,13 @@ export default App.extend({
     bulkEditActions: BulkEditActionsApp,
     bulkEditFlows: BulkEditFlowsApp,
     filtersSidebar: {
-      AppClass: FiltersSidebarApp,
+      AppClass: ListFiltersPanelApp,
       restartWithParent: false,
     },
-    patientSidebar: PatientSidebarApp,
+    patientSidebar: {
+      AppClass: ListPatientSidebarApp,
+      restartWithParent: false,
+    },
   },
   stateEvents: {
     'change:listType change:clinicianId change:teamId change:noOwner': 'restart',
@@ -66,7 +69,11 @@ export default App.extend({
   onChangeStateSort() {
     if (!this.isRunning()) return;
 
-    this.getChildView('list').setComparator(this.getComparator());
+    const listView = this.getChildView('list');
+
+    if (!listView?.setComparator) return;
+
+    listView.setComparator(this.getComparator());
   },
   onChangeSelected() {
     this.toggleBulkSelect();
@@ -94,7 +101,13 @@ export default App.extend({
   },
   onBeforeStop() {
     this.collection = null;
-    if (!this.isRestarting()) this.stopChildApp('filters');
+    if (!this.isRestarting()) {
+      this.isPatientSidebarOpen = false;
+      this.patientSidebarPatientId = null;
+      this.stopChildApp('filters');
+      this.stopChildApp('filtersSidebar');
+      this.stopChildApp('patientSidebar');
+    }
   },
   onBeforeStart({ worklistId, clinicianId }) {
     if (this.isRestarting()) {
@@ -102,30 +115,68 @@ export default App.extend({
 
       filtersApp.setState(this.getState().getFiltersState());
 
-      this.getRegion('count').empty();
-
+      this.showFiltersButtonView();
       this.showTypeViews();
-      this.getRegion('list').startPreloader();
+      this.showListUpdating();
 
       return;
     }
+
+    this.isRefreshingList = false;
 
     this.worklistId = worklistId;
     this.clinicianId = clinicianId;
     this.initListState();
 
-    this.setView(new LayoutView());
+    this.setListPageView(new LayoutView({ model: this.getState() }));
 
     this.showDisabledSelectAll();
     this.showSearchView();
     this.showFiltersButtonView();
+    this.mountFiltersSidebar();
 
     this.showTypeViews();
-    this.getRegion('list').startPreloader();
+    this.showListLoading();
 
     this.showView();
   },
+  showListLoading() {
+    const loadingView = new ListLoadingView({ isFlowList: this.getState().isFlowType() });
+
+    this.showSelectionBarChildView('count', new CountLoadingView());
+    this.showChildView('list', loadingView);
+    this.getRegion('listStatus').empty();
+  },
+  showListUpdating() {
+    const listView = this.getChildView('list');
+
+    if (!listView || !listView.setLoading) {
+      this.isRefreshingList = false;
+      this.showListLoading();
+      return;
+    }
+
+    this.isRefreshingList = true;
+    listView.setLoading(true);
+    this.getRegion('listStatus').empty();
+    this.showSelectionBarChildView('count', new ListUpdatingView({ isFlowList: this.getState().isFlowType() }));
+  },
+  showListError(isRefresh) {
+    const errorView = new ListErrorView({ isRefresh });
+
+    this.listenTo(errorView, 'retry', this.restart);
+
+    if (isRefresh) {
+      this.showChildView('listStatus', errorView);
+      return;
+    }
+
+    this.getRegion('listStatus').empty();
+    this.showChildView('list', errorView);
+  },
   beforeStart() {
+    if (this.isPatientSidebarOpen) this.listenToPatientSidebar();
+
     const isFlowType = this.getState().isFlowType();
     const entityRequest = isFlowType ? 'fetch:flows:collection' : 'fetch:actions:collection';
 
@@ -147,6 +198,8 @@ export default App.extend({
     return Radio.request('entities', entityRequest, { data: this.query });
   },
   onStart(options, collection) {
+    this.isRefreshingList = false;
+    this.getRegion('listStatus').empty();
     this.setWorklist(collection.getMeta('worklist'));
 
     this.collection = collection;
@@ -167,7 +220,18 @@ export default App.extend({
   onFail(options, error) {
     if (get(error, ['response', 'status']) === 400) {
       this.filterState.setDefaultFilterStates();
+      return;
     }
+
+    const listView = this.getChildView('list');
+
+    if (this.isRefreshingList && listView && listView.setLoading) {
+      listView.setLoading(false);
+      this.getSelectionBarRegion('count').empty();
+    }
+
+    this.showListError(this.isRefreshingList);
+    this.isRefreshingList = false;
   },
   setWorklist(worklist) {
     this.getState().setWorklist(worklist);
@@ -185,15 +249,21 @@ export default App.extend({
   // NOTE: Shows views dependent on getState().getType()
   showTypeViews() {
     this.showListTitle();
-    this.showTypeToggleView();
     this.showDateFilter();
+    this.showSidebarControls();
+  },
+  showSidebarControls() {
+    if (this.isPatientSidebarOpen) return;
+
+    this.showTypeToggleView();
+    this.showNoOwnerToggleView();
     this.showSortDroplist();
-    this.showTableHeaders();
   },
   showList() {
     const collectionView = new ListView({
       collection: this.collection,
       editableCollection: this.editableCollection,
+      selectedPatientId: this.patientSidebarPatientId,
       state: this.getState(),
       viewComparator: this.getComparator(),
     });
@@ -206,14 +276,7 @@ export default App.extend({
       'change:canEdit'() {
         this.editableCollection.reset(this._getListEditable(collectionView));
       },
-      'click:patientSidebarButton'({ model }) {
-        const patient = model.getPatient();
-        const patientSidebar = this.getChildApp('patientSidebar');
-
-        patientSidebar.stop();
-
-        Radio.request('sidebar', 'start', patientSidebar, { patient }, sidebarOptions);
-      },
+      'click:patient': this.showPatientSidebar,
     });
 
     this.showChildView('list', collectionView);
@@ -230,56 +293,99 @@ export default App.extend({
   },
   showFiltersButtonView() {
     const filtersButtonView = new AllFiltersButtonView({
+      layoutState: this.layoutView.getLayoutState(),
       model: this.getFiltersState(),
     });
 
-    this.listenTo(filtersButtonView, 'click', this.showFiltersSidebar);
+    this.listenTo(filtersButtonView, 'click', this.onClickFiltersButton);
 
     this.showChildView('filters', filtersButtonView);
   },
-  showFiltersSidebar() {
+  mountFiltersSidebar() {
     const filtersState = this.getFiltersState();
 
-    const sidebarApp = this.getChildApp('filtersSidebar');
+    this.sidebarControlsView = new SidebarControlsView();
 
-    Radio.request('sidebar', 'start', sidebarApp, { filtersState });
+    this.startChildApp('filtersSidebar', {
+      region: this.getRegion('filtersSidebar'),
+      filtersState,
+      collapsedState: this.getState(),
+      isDrawer: this.layoutView.isFiltersDrawer(),
+      controlsView: this.sidebarControlsView,
+    });
+
+    this.showSidebarControls();
   },
-  toggleBulkSelect() {
-    this.selected = this.getState().getSelected(this.editableCollection);
-
-    this.showSelectAll();
-
-    if (this.selected.length) {
-      this.showBulkEditButtonView();
+  showPatientSidebar(patient, triggerElement) {
+    if (this.isPatientSidebarOpen && this.patientSidebarPatientId === patient.id) {
+      this.closePatientSidebar();
       return;
     }
 
-    this.showFiltersButtonView();
+    this.isPatientSidebarOpen = true;
+    this.patientSidebarPatientId = patient.id;
+    this.patientSidebarTrigger = triggerElement;
+    this.getChildView('list').setPatientSelected(patient.id);
+    this.stopChildApp('filtersSidebar');
+    this.stopChildApp('patientSidebar');
+    this.setSidebarLayoutCollapsed(false);
+
+    const patientSidebar = this.startChildApp('patientSidebar', {
+      region: this.getRegion('filtersSidebar'),
+      patient,
+    });
+
+    this.focusPatientSidebar(patientSidebar);
+    this.listenToPatientSidebar();
   },
-  showBulkEditButtonView() {
-    const bulkEditButtonView = new BulkEditButtonView({
-      isFlowType: this.getState().isFlowType(),
-      collection: this.selected,
-    });
+  listenToPatientSidebar() {
+    const patientSidebar = this.getChildApp('patientSidebar');
 
-    this.listenTo(bulkEditButtonView, {
-      'click:cancel': this.onClickBulkCancel,
-      'click:edit': this.onClickBulkEdit,
-    });
+    this.stopListening(patientSidebar, 'close');
+    this.listenTo(patientSidebar, 'close', this.closePatientSidebar);
+  },
+  showFiltersSidebar() {
+    this.isPatientSidebarOpen = false;
+    this.patientSidebarPatientId = null;
+    this.getChildView('list').setPatientSelected(null);
+    this.stopChildApp('patientSidebar');
+    this.mountFiltersSidebar();
+    this.restoreFiltersSidebarLayout();
+  },
+  toggleBulkSelect() {
+    this.selected = this.getState().getSelected(this.editableCollection);
+    this.showSelectAll();
 
-    this.showChildView('filters', bulkEditButtonView);
+    if (this.selected.length) {
+      this.showFiltersButtonView();
+      this.showBulkEdit();
+      return;
+    }
+
+    this.stopBulkEdit();
+    this.showFiltersButtonView();
   },
   onClickBulkCancel() {
     this.getState().clearSelected();
   },
-  onClickBulkEdit() {
+  stopBulkEdit() {
     const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
+    this.stopChildApp(appName);
+  },
+  showBulkEdit() {
+    const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
+    const app = this.getChildApp(appName);
 
-    const app = this.startChildApp(appName, {
+    this.stopListening(app);
+    app.stop();
+
+    this.startChildApp(appName, {
+      region: this.getSelectionBarRegion('bulkEdit'),
       state: { collection: this.selected },
     });
 
     this.listenTo(app, {
+      'cancel': this.onClickBulkCancel,
       'applyOwner'(owner) {
         this.selected.applyOwner(owner);
       },
@@ -309,7 +415,10 @@ export default App.extend({
     Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));
   },
   showDisabledSelectAll() {
-    this.showChildView('selectAll', new SelectAllView({ isDisabled: true }));
+    this.showSelectionBarChildView('selectAll', new SelectAllView({
+      isDisabled: true,
+      itemType: this.getState().isFlowType() ? 'flows' : 'actions',
+    }));
   },
   showSelectAll() {
     if (!this.editableCollection.length) {
@@ -320,11 +429,12 @@ export default App.extend({
     const selectAllView = new SelectAllView({
       isSelectAll: this.selected.length === this.editableCollection.length,
       isSelectNone: !this.selected.length,
+      itemType: this.getState().isFlowType() ? 'flows' : 'actions',
     });
 
     this.listenTo(selectAllView, 'click', this.onClickBulkSelect);
 
-    this.showChildView('selectAll', selectAllView);
+    this.showSelectionBarChildView('selectAll', selectAllView);
   },
   onClickBulkSelect() {
     if (this.selected.length === this.editableCollection.length) {
@@ -357,7 +467,7 @@ export default App.extend({
       filteredCollection: this.filteredCollection,
     });
 
-    this.showChildView('count', countView);
+    this.showSelectionBarChildView('count', countView);
   },
   showDateFilter() {
     if (this.getState().getStaticDateFilter()) return;
@@ -387,14 +497,7 @@ export default App.extend({
       this.getState().setSort(selected.id);
     });
 
-    this.showChildView('sort', sortSelect);
-  },
-  showTableHeaders() {
-    const tableHeadersView = new TableHeaderView({
-      isFlowList: this.getState().isFlowType(),
-    });
-
-    this.showChildView('table', tableHeadersView);
+    this.sidebarControlsView.showChildView('sort', sortSelect);
   },
   showListTitle() {
     const listTitleView = new ListTitleView({ model: this.getState() });
@@ -407,12 +510,23 @@ export default App.extend({
           this.setState({ clinicianId: id, teamId: null });
         }
       },
-      'toggle:noOwner'() {
-        this.toggleState('noOwner');
-      },
     });
 
     this.showChildView('title', listTitleView);
+  },
+  showNoOwnerToggleView() {
+    const currentClinician = Radio.request('bootstrap', 'currentUser');
+    if (this.getState().id !== 'shared-by' || !currentClinician.can('app:worklist:clinician_filter')) return;
+
+    const ownerToggleView = new NoOwnerToggleView({
+      model: this.getState(),
+    });
+
+    this.listenTo(ownerToggleView, 'click', () => {
+      this.toggleState('noOwner');
+    });
+
+    this.sidebarControlsView.showChildView('ownerToggle', ownerToggleView);
   },
   showTypeToggleView() {
     const typeToggleView = new TypeToggleView({
@@ -423,7 +537,7 @@ export default App.extend({
       this.getState().setType(listType);
     });
 
-    this.showChildView('toggle', typeToggleView);
+    this.sidebarControlsView.showChildView('toggle', typeToggleView);
   },
   showSearchView() {
     const searchComponent = new SearchComponent({
@@ -439,3 +553,7 @@ export default App.extend({
     this.showChildView('search', searchComponent);
   },
 });
+
+extend(WorklistApp.prototype, ListPageAppMixin);
+
+export default WorklistApp;
