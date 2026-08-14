@@ -1,0 +1,19 @@
+<div class="schedule-list__check js-no-click" data-check-region></div>
+<div class="schedule-list__day-card js-action-surface">
+  {{#if due_time}}
+    <time class="schedule-list__due-time {{#if isOverdue}}is-overdue{{/if}}" datetime="{{ due_time }}">{{formatDateTime due_time "TIME" inputFormat="HH:mm:ss"}}</time>
+  {{else}}
+    <span class="schedule-list__no-time schedule-list__due-time">{{ @intl.patients.schedule.scheduleViews.dayItemView.noTime }}</span>
+  {{/if}}
+  <button class="patient-list__patient schedule-list__patient js-patient" type="button" aria-expanded="false" aria-controls="schedule-list-sidebar">{{ patient.first_name }} {{ patient.last_name }}&#8203;</button>
+  <span class="action-icon action-icon--{{ stateOptions.color }} schedule-list__action-state" role="img" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.stateLabel") state=state}}">
+    {{fa stateOptions.iconType stateOptions.icon}}
+  </span>
+  <div class="schedule-list__action">
+    <button class="schedule-list__action-name js-action" type="button">{{ name }}&#8203;</button>
+    <div class="schedule-list__details js-no-click" data-details-region></div>
+    {{#if form}}<button class="button button--icon action-form-button schedule-list__action-form-button js-form" type="button" aria-label="{{ @intl.patients.schedule.scheduleViews.dayItemView.openForm }}">{{#if hasOutreach}}{{far "share-from-square"}}{{else}}{{far "square-poll-horizontal"}}{{/if}}</button>{{/if}}
+  </div>
+  {{#if commentCount}}<span class="schedule-list__comments" role="img" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span>{{ commentCount }}</span></span>{{/if}}
+  <span class="schedule-list__search-helper">{{ state }} {{ flow }}</span>
+</div>
