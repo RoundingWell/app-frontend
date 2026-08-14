@@ -1,138 +1,260 @@
 .patient__frame {
-  display: flex;
+  --patient-frame-control-offset-top: 9px;
+
+  background: var(--color-page-bg);
+  display: grid;
   flex: 1;
-  height: 100vh;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 .patient__layout {
+  background: var(--color-page-bg);
   display: flex;
   flex: 1;
   flex-direction: column;
-  min-width: 744px;
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  min-width: 0;
   width: 100%;
+}
+
+.patient__content {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+.patient__content--scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--dialer-clearance, var(--space-8));
+  scroll-padding-bottom: var(--space-2);
+  scroll-padding-top: calc(50px + var(--space-2));
+  scrollbar-gutter: stable both-edges;
+}
+
+.patient-detail-page {
+  --color-page-bg: var(--color-surface-subtle);
+
+  background: var(--color-page-bg);
+}
+
+.patient-detail-page__title {
+  align-items: center;
+  display: flex;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 28px;
+  margin: 0;
+}
+
+.patient-detail-page__header {
+  align-items: flex-start;
+  display: flex;
+  gap: 8px;
+}
+
+.patient-detail-page__header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.patient-detail-page__menu {
+  margin-top: 22px;
+}
+
+.patient-detail-page__notice {
+  background-color: #{$highlighted};
+  border: 1px solid #{$highlighted};
+  border-radius: 4px;
+  color: #{$black-20};
+  font-size: 12px;
+  line-height: 16px;
+  max-width: 256px;
+  padding: 8px 16px;
+}
+
+.patient-detail-page__eyebrow {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 16px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.patient-detail-page__activity-heading {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+  margin: 0 0 8px;
+}
+
+.patient__sidebar-toggle {
+  align-items: center;
+  background: var(--color-control-background);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 24px;
+  top: var(--patient-frame-control-offset-top);
+  width: 40px;
+  z-index: calc(var(--z-positioned) + 1);
+
+  &.is-selected {
+    background: var(--color-control-background);
+  }
 }
 
 .patient__sidebar {
   display: flex;
   flex: initial;
+  grid-column: 2;
+  grid-row: 2;
   min-height: 0;
 }
 
-.patient__context-trail {
-  background: #{$white};
-  color: #{$black-20};
-  line-height: 1;
-
-  // NOTE: Margin added for alignment with sidebar icon & patient name.
-  margin-bottom: 6px;
-  padding: 16px 24px;
-  position: sticky;
-  top: 0;
-  z-index: var(--z-positioned);
-
-  .icon {
-    color: #{$black-60};
-    font-size: 12px;
-    margin-right: 8px;
-    vertical-align: -0.0825em;
+.patient__frame--sidebar-hidden {
+  .patient__sidebar {
+    display: none;
   }
 }
 
-.patient__context-link {
-  color: #{$black-60};
-  cursor: pointer;
-  font-weight: 600;
-  margin-right: 8px;
+.patient__frame--form-expanded {
+  --patient-sidebar-sidebars-padding-left: var(--space-4);
+  --patient-sidebar-width: 304px;
+}
 
-  &:hover {
-    color: color(blue);
+@media (width <= 720px) {
+  .patient__frame {
+    grid-template-columns: minmax(0, 1fr);
   }
+
+  .patient__sidebar {
+    --patient-sidebar-height: 100%;
+    --patient-sidebar-sidebars-padding-left: var(--space-4);
+    --patient-sidebar-width: 100%;
+
+    background: var(--color-page-bg);
+    box-shadow: -8px 8px 24px rgb(0 0 0 / 16%);
+    grid-column: 1;
+    height: 100%;
+    justify-self: end;
+    max-width: 100%;
+    overflow: hidden;
+    width: 310px;
+    z-index: var(--z-positioned);
+  }
+
 }
 
-.patient__tabs {
-  padding: 0 24px;
-}
-
-.patient__tab,
-.patient__tab--selected {
-  display: inline-block;
-  font-size: 24px;
-  line-height: 1;
-  margin-right: 4px;
-  padding: 0 16px 16px;
-}
-
-.patient__tab--selected {
-  color: color(blue);
-  position: relative;
-
-  &::before {
-    background: color(blue);
-    border-radius: 2px 2px 0 0;
-    bottom: 0;
-    content: ' ';
-    display: block;
-    height: 2px;
-    left: 0;
-    position: absolute;
+@media (width <= 560px) {
+  .patient__sidebar {
     width: 100%;
   }
 }
 
-.patient__tab {
-  color: #{$black-60};
+.patient__context-trail {
+  align-items: center;
+  background: var(--color-page-bg);
+  color: #{$black-20};
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  line-height: 20px;
+  margin: 0 72px 2px 0;
+  min-height: 50px;
+  padding: 15px 0 15px 24px;
+  position: relative;
+  z-index: var(--z-positioned);
+
+  // The trail can wrap. Anchor its divider to its actual bottom instead of
+  // assuming the single-line 50px minimum height.
+  &::after {
+    border-bottom: 1px solid var(--color-divider);
+    bottom: 0;
+    content: '';
+    left: 24px;
+    pointer-events: none;
+    position: absolute;
+    right: -48px;
+  }
+
+  .icon {
+    color: inherit;
+    font-size: 12px;
+    margin-right: 0;
+    vertical-align: -0.0825em;
+  }
+}
+
+.patient__frame--form-expanded .patient__context-trail {
+  margin-right: 304px;
+}
+
+.patient__frame--form-expanded .patient__context-trail::after {
+  right: -280px;
+}
+
+.patient__context-segment {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.patient__context-link {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
+  line-height: 20px;
+  padding: 0;
+  text-align: left;
 
   &:hover {
     color: color(blue);
   }
 }
 
-.patient__actions-container {
-  padding: 0 24px;
+.patient__context-current {
+  color: #{$black-20};
+  font-weight: 500;
+  line-height: 20px;
 }
 
-.patient__actions {
-  border-top: 1px solid #{$black-90};
-  padding: 16px 0;
+.patient__context-link--hierarchy {
+  font-weight: 500;
 }
 
-.patient__table-list {
-  grid-template-columns:
-    60px
-    minmax(100px, 40%)
-    minmax(max-content, auto)
-    minmax(max-content, 84px);
+.patient__context-link--back,
+.patient__context-segment > .icon {
+  color: var(--color-text-secondary);
 }
 
-.patient__action-ts {
-  font-size: 12px;
-  text-align: right;
+.patient__context-patient {
+  text-transform: uppercase;
 }
 
-.patient__action-icon {
-  color: color(blue);
-}
-
-.patient__flow-icon .icon {
-  color: #{$black-60};
-}
-
-.patient__action-display-icon {
-  color: #{$black-60};
-  margin-left: 8px;
-}
-
-.patient__action-display-icon-text {
-  margin: 0 8px 0 4px;
-}
-
-.patient__flow-status {
-  border: 1px solid transparent;
-  display: inline-block;
-  padding: 0 8px;
-  vertical-align: middle;
-}
-
-.patient__flow-progress {
-  width: 72px;
+.patient__context-link .icon {
+  margin-right: 8px;
 }
