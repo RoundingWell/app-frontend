@@ -3,20 +3,27 @@ import { View, CollectionView } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
 import dayjs from 'dayjs';
 
+import 'scss/modules/buttons.scss';
+
 import Tooltip from 'js/components/tooltip';
 import Picklist from 'js/components/picklist';
-import './date-filter.scss';
 
 import { RELATIVE_DATE_RANGES } from 'js/static';
+
+import './date-filter.scss';
 
 const relativeRanges = new Backbone.Collection(RELATIVE_DATE_RANGES);
 
 const TypeView = View.extend({
   tagName: 'button',
-  className: 'button-filter button__group flex-grow',
+  className: 'button date-filter__type flex-grow',
+  attributes: {
+    type: 'button',
+  },
   template: hbs`{{formatMessage (intlGet "patients.shared.components.dateFilterComponent.dateTypes") type=id }}`,
   onRender() {
-    this.$el.toggleClass('button--blue', this.getOption('selected') === this.model.id);
+    const isSelected = this.getOption('selected') === this.model.id;
+    this.$el.attr('aria-pressed', String(isSelected));
   },
   triggers: {
     'click': 'click',
@@ -27,7 +34,7 @@ const FilterTypeView = CollectionView.extend({
   modelEvents: {
     'change:dateType': 'render',
   },
-  className: 'flex',
+  className: 'date-filter__types',
   childView: TypeView,
   childViewTriggers: {
     'click': 'click',
@@ -42,28 +49,29 @@ const FilterTypeView = CollectionView.extend({
   },
 });
 
-const DateTemplate = hbs`{{formatDateTime selectedDate "MM/DD/YYYY"}}{{far "angle-down"}}`;
+const DateTemplate = hbs`{{formatDateTime selectedDate "MM/DD/YYYY"}}`;
 
-const MonthTemplate = hbs`{{formatDateTime selectedMonth "MMM YYYY"}}{{far "angle-down"}}`;
+const MonthTemplate = hbs`{{formatDateTime selectedMonth "MMM YYYY"}}`;
 
-const WeekTemplate = hbs`{{formatDateTime selectedWeek "MM/DD/YYYY"}} - {{formatDateTime selectedEndWeek "MM/DD/YYYY"}}{{far "angle-down"}}`;
+const WeekTemplate = hbs`{{formatDateTime selectedWeek "MM/DD/YYYY"}} - {{formatDateTime selectedEndWeek "MM/DD/YYYY"}}`;
 
-const RelativeTemplate = hbs`{{formatMessage (intlGet "patients.shared.components.dateFilterComponent.relativeDate") relativeTo=relativeDate }}{{far "angle-down"}}`;
+const RelativeTemplate = hbs`{{formatMessage (intlGet "patients.shared.components.dateFilterComponent.relativeDate") relativeTo=relativeDate }}`;
 
-const DefaultTemplate = hbs`{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.defaultTemplate.thisMonth }}{{far "angle-down"}}`;
+const DefaultTemplate = hbs`{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.defaultTemplate.thisMonth }}`;
 
 const ControllerView = View.extend({
+  className: 'date-filter__controls',
   template: hbs`
-    {{#unless hidePrevNextButtons}}
-      <button class="button-secondary--compact u-margin--r-8 js-prev">{{far "angle-left"}}</button>{{~ remove_whitespace ~}}
-    {{/unless}}
-    <button class="button-filter js-date">
+    <button class="button date-filter__date-button js-date" type="button">
       {{far "calendar-days"}}{{~ remove_whitespace ~}}
       {{formatMessage (intlGet "patients.shared.components.dateFilterComponent.dateTypes") type=dateType }}{{~ remove_whitespace ~}}:
       <span data-date-picker-label-region></span>
     </button>{{~ remove_whitespace ~}}
     {{#unless hidePrevNextButtons}}
-      <button class="button-secondary--compact u-margin--l-8 js-next">{{far "angle-right"}}</button>
+      <span class="date-filter__navigation">
+        <button class="button button--compact date-filter__nav-button date-filter__nav-button--prev js-prev" type="button">{{far "angle-left"}}</button>{{~ remove_whitespace ~}}
+        <button class="button button--compact date-filter__nav-button date-filter__nav-button--next js-next" type="button">{{far "angle-right"}}</button>
+      </span>
     {{/unless}}
   `,
   regions: {
@@ -102,13 +110,13 @@ const ControllerView = View.extend({
       },
     });
 
-    if (this.model.get('relativeDate') === 'alltime') return;
+    if (this.getOption('showPrevNextButtons') === false || this.model.get('relativeDate') === 'alltime') return;
 
     this.getTooltips();
   },
   templateContext() {
     return {
-      hidePrevNextButtons: this.model.get('relativeDate') === 'alltime',
+      hidePrevNextButtons: this.getOption('showPrevNextButtons') === false || this.model.get('relativeDate') === 'alltime',
     };
   },
   getTooltips() {
@@ -173,9 +181,9 @@ const ControllerView = View.extend({
 
 const ActionsView = View.extend({
   template: hbs`
-    <button class="datepicker__button js-today">{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.actionView.today }}</button>{{~ remove_whitespace ~}}
-    <button class="datepicker__button js-current-week">{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.actionView.week }}</button>{{~ remove_whitespace ~}}
-    <button class="datepicker__button js-current-month">{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.actionView.month }}</button>
+    <button class="datepicker__button js-today" type="button">{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.actionView.today }}</button>{{~ remove_whitespace ~}}
+    <button class="datepicker__button js-current-week" type="button">{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.actionView.week }}</button>{{~ remove_whitespace ~}}
+    <button class="datepicker__button js-current-month" type="button">{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.actionView.month }}</button>
   `,
   triggers: {
     'click .js-current-week': 'click:currentWeek',
@@ -199,6 +207,7 @@ const LayoutView = View.extend({
 
 const DateRanges = Picklist.extend({
   className: 'date-filter__ranges',
+  itemClassName: 'date-filter__range',
   itemTemplate: hbs`{{formatMessage (intlGet "patients.shared.components.dateFilterComponent.relativeDate") relativeTo=id}}{{#if isSelected}}{{fas "check"}}{{/if}}`,
   itemTemplateContext() {
     return {

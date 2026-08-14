@@ -3,9 +3,9 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { Component } from 'marionette.toolkit';
 
-import intl from 'js/i18n';
-
 import 'scss/modules/buttons.scss';
+
+import intl from 'js/i18n';
 
 import Optionlist from 'js/components/optionlist';
 
@@ -57,8 +57,9 @@ export default Component.extend({
       tagName: 'button',
       attributes: {
         disabled: isDisabled,
+        type: 'button',
       },
-      className: 'button-secondary w-100 patient-action__button',
+      className: 'button button--secondary dialer-component__button',
       template: hbs`{{far "phone"}}<span>{{ @intl.patients.shared.components.dialerComponent.defaultText }}</span>`,
       triggers: {
         'click': 'click',
@@ -79,8 +80,8 @@ export default Component.extend({
         <span class="dialer-component__phone-icon">{{far "phone"}}</span>
         {{formatPhoneNumber number}}
         <span class="dialer-component__phone-label">
-          <span class="dialer-component__phone-label-default">{{label}}</span>
-          <span class="dialer-component__phone-label-call">
+          <span class="picklist__default-content dialer-component__phone-label-default">{{label}}</span>
+          <span class="picklist__highlight-content dialer-component__phone-label-call">
             {{ @intl.patients.shared.components.dialerComponent.callLabel }}{{far "arrow-up-right-from-square"}}
           </span>
         </span>

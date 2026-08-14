@@ -1,17 +1,21 @@
 .patient-readonly {
-  border: solid 1px transparent;
+  background: var(--patient-readonly-background, transparent);
+  border: solid var(--patient-readonly-border-width, 1px) var(--patient-readonly-border-color, transparent);
+  border-radius: var(--patient-readonly-border-radius, 0);
   cursor: not-allowed;
   display: inline-block;
-  font-size: 14px;
+  font-size: var(--patient-readonly-font-size, 14px);
   font-weight: 600;
   line-height: 16px;
+  min-height: var(--patient-readonly-min-height, auto);
   overflow: hidden;
-  padding: 8px 16px;
+  padding: var(--patient-readonly-padding, 8px 16px);
   position: relative;
   text-align: left;
   text-overflow: ellipsis;
   vertical-align: middle;
   white-space: nowrap;
+  width: var(--patient-readonly-width, auto);
 
   &.is-overdue {
     color: color(red);
@@ -19,16 +23,22 @@
 }
 
 .patient-readonly--compact {
-  @extend .patient-readonly;
-
-  font-size: 12px;
-  line-height: 14px;
-  padding: 8px;
+  align-items: center;
+  display: inline-flex;
+  font-size: var(--patient-readonly-font-size, 12px);
+  font-weight: 600;
+  height: 28px;
+  line-height: 20px;
+  padding: var(--patient-readonly-padding, 0 8px);
   text-align: center;
 }
 
 .patient-readonly__status {
-  padding: 0 8px;
+  align-items: var(--patient-readonly-status-align-items, normal);
+  justify-content: var(--patient-readonly-status-justify-content, normal);
+  min-height: var(--patient-readonly-status-min-height, auto);
+  padding: var(--patient-readonly-status-padding, 0 8px);
+  width: var(--patient-readonly-status-width, auto);
 }
 
 .patient-readonly__owner {

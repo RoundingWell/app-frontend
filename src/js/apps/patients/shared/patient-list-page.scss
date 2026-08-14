@@ -1,0 +1,267 @@
+.patient-list-page {
+  --patient-list-page-expanded-filters-min-height: 64px;
+  --patient-list-page-expanded-filters-padding: var(--space-4) var(--space-2);
+  --patient-list-page-header-secondary-height: 64px;
+  --patient-list-page-sidebar-column: var(--patient-list-page-sidebar-width);
+  --patient-list-page-sidebar-display: block;
+  --patient-list-page-sidebar-width: 288px;
+  --list-page-display: grid;
+  --list-page-header-rows: var(--list-page-header-top-height) minmax(var(--patient-list-page-header-secondary-height), auto);
+
+  grid-template-columns: minmax(0, 1fr) var(--patient-list-page-sidebar-column);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.patient-list-page:where(.is-filters-collapsed) {
+  --patient-list-page-sidebar-column: 0;
+  --patient-list-page-sidebar-display: none;
+}
+
+.patient-list-page__all-filters-button {
+  align-items: center;
+  background: var(--color-control-background);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  color: #{$black-20};
+  display: inline-flex;
+  font-size: 0;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  width: 40px;
+}
+
+.patient-list-page__all-filters-button:where([aria-expanded='true']) {
+  background: var(--color-control-background);
+  color: #{$black-20};
+}
+
+.patient-list-page__all-filters-button:where([aria-expanded='false']:has(.patient-list-page__active-filter-dot)) {
+  background: var(--color-surface);
+  color: #{$black-20};
+}
+
+.patient-list-page__all-filters-icon {
+  display: inline-flex;
+}
+
+.patient-list-page__all-filters-glyph {
+  display: block;
+  font-size: 16px;
+  height: 16px;
+  margin: 0;
+  width: 16px;
+}
+
+.patient-list-page__active-filter-dot {
+  background: color(blue);
+  border-radius: 50%;
+  height: 8px;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 8px;
+}
+
+.patient-list-page__all-filters-button:where([aria-expanded='true']) .patient-list-page__active-filter-dot {
+  display: none;
+}
+
+.patient-list-page__filters {
+  --patient-list-page-filters-align-items: center;
+  --patient-list-page-filters-min-height: var(--patient-list-page-header-secondary-height);
+  --patient-list-page-filters-padding: var(--patient-list-page-default-filters-padding, 0);
+  --patient-list-page-selection-min-height: 0;
+
+  align-items: var(--patient-list-page-filters-align-items);
+  box-sizing: border-box;
+  display: flex;
+  margin-bottom: 0;
+  min-height: var(--patient-list-page-filters-min-height);
+  padding-block: var(--patient-list-page-filters-padding);
+}
+
+.patient-list-page__filters:where(.is-bulk-editing) {
+  --patient-list-page-filters-align-items: flex-start;
+  --patient-list-page-filters-min-height: var(--patient-list-page-expanded-filters-min-height);
+  --patient-list-page-filters-padding: var(--patient-list-page-expanded-filters-padding);
+  --patient-list-page-selection-min-height: 32px;
+}
+
+.patient-list-page__selection {
+  --button-checkbox-justify-content: flex-start;
+
+  align-items: center;
+  display: flex;
+  margin-right: var(--space-4);
+  min-height: var(--patient-list-page-selection-min-height);
+}
+
+.patient-list-page__bulk-edit:not(:empty) {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.patient-list-page__summary {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 8px;
+  min-width: 0;
+}
+
+.patient-list-page__filters:where(.is-bulk-editing) .patient-list-page__summary {
+  display: none;
+}
+
+.patient-list-page__count {
+  align-items: center;
+  color: var(--color-text);
+  display: flex;
+  font-size: 14px;
+  line-height: 1.2;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.patient-list-page__filter-controls {
+  align-items: center;
+  display: flex;
+  width: auto;
+}
+
+.patient-list-page__find-controls {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: minmax(0, 1fr) auto;
+  width: calc(var(--patient-list-page-sidebar-width) - var(--space-6));
+}
+
+.patient-list-page__find-search {
+  --list-search-width: 100%;
+
+  min-width: 0;
+  width: 100%;
+}
+
+.patient-list-page__sidebar {
+  border-left: 0;
+  display: var(--patient-list-page-sidebar-display);
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--patient-list-page-sidebar-padding-top, var(--list-page-header-top-height)) 24px 0 0;
+  position: relative;
+}
+
+.patient-list-page__sidebar-content {
+  height: 100%;
+  min-height: 0;
+}
+
+.patient-list-page__drawer-close {
+  display: none;
+}
+
+@media (width >= 1600px) {
+  .patient-list-page {
+    --patient-list-page-sidebar-width: 580px;
+  }
+}
+
+@media (width <= 1024px) {
+  .patient-list-page {
+    --list-page-header-rows: var(--list-page-header-top-height) auto;
+  }
+
+  .patient-list-page__filters {
+    padding-block: var(--patient-list-page-responsive-filters-padding, var(--space-4));
+  }
+
+  .patient-list-page__summary {
+    flex-wrap: wrap;
+  }
+}
+
+@media (width > 720px) {
+  .patient-list-page .list-page__header-top {
+    width: calc(100% + var(--patient-list-page-sidebar-column));
+  }
+}
+
+@media (width <= 720px) {
+  .patient-list-page {
+    --list-page-header-rows: auto auto;
+  }
+}
+
+@media (640px < width <= 720px) {
+  .patient-list-page {
+    --list-page-topbar-flex-wrap: wrap;
+  }
+
+  .patient-list-page__find-controls {
+    flex: 1 0 100%;
+    width: 100%;
+  }
+}
+
+@media (width <= 640px) {
+  .patient-list-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .patient-list-page__sidebar {
+    background: var(--color-page-bg);
+    box-shadow: -8px 8px 24px rgb(0 0 0 / 16%);
+    display: var(--patient-list-page-sidebar-display);
+    height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 340px;
+    z-index: 3;
+  }
+
+  .patient-list-page__sidebar-content {
+    overflow-y: auto;
+  }
+
+  .patient-list-page__drawer-close {
+    align-items: center;
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    position: absolute;
+    right: var(--space-4);
+    top: var(--space-2);
+    width: 32px;
+    z-index: 1;
+  }
+}
+
+@media (width <= 560px) {
+  .patient-list-page__filters {
+    flex-wrap: wrap;
+    padding-block: var(--space-3);
+  }
+
+  .patient-list-page__sidebar {
+    width: 100%;
+  }
+
+  .patient-list-page__find-controls {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+.patient-list-page__drawer-close:where([hidden]) {
+  display: none;
+}
