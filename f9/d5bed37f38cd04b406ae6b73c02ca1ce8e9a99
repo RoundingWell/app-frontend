@@ -1,0 +1,28 @@
+.github/copilot.yaml
+  s_2326781df73def::t_72120f2947cb8b 12,36
+src/js/README.md
+  s_2326781df73def::t_72120f2947cb8b 40,43-46,51-57
+  s_2326781df73def::t_f574f58da2aabe 58
+.github/copilot-instructions.md
+  s_2326781df73def::t_72120f2947cb8b 14
+src/scss/README.md
+  s_2326781df73def::t_72120f2947cb8b 147-152
+AGENTS.md
+  s_2326781df73def::t_72120f2947cb8b 81-83,135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f9d5bed37f38cd04b406ae6b73c02ca1ce8e9a99",
+  "prompts": {},
+  "sessions": {
+    "s_2326781df73def": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffef4-6532-7662-9084-64d1a2c60264",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
