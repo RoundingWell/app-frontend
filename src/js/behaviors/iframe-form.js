@@ -28,6 +28,10 @@ export default Behavior.extend({
       /* istanbul ignore next: security check */
       if (origin !== window.origin || originalEvent.source !== iframeWindow || !data || !data.message) return;
 
+      if (data.message === 'form:interact') {
+        Radio.trigger('user-activity', 'iframe:focus', this.ui.iframe[0]);
+      }
+
       this.channel.request(data.message, data.args, data.requestId);
     };
 

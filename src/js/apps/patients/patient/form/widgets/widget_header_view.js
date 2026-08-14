@@ -1,8 +1,6 @@
 import { View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
 
-import 'scss/modules/widgets.scss';
-
 import { WidgetCollectionView } from 'js/apps/patients/shared/widgets/widgets_views';
 
 import './form-widgets.scss';

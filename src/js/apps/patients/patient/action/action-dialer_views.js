@@ -2,18 +2,13 @@ import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
-import 'scss/modules/sidebar.scss';
 
 import DialerComponent from 'js/apps/patients/shared/components/dialer_component.js';
 
 import './action.scss';
 
 const DialerView = View.extend({
-  className: 'flex u-margin--t-8',
-  template: hbs`
-    <h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.dialerView.label }}</h4>
-    <div class="flex-grow" data-dialer-button-region></div>
-  `,
+  template: hbs`<div data-dialer-button-region></div>`,
   regions: {
     dialerButton: '[data-dialer-button-region]',
   },
