@@ -1,0 +1,48 @@
+<span class="loader__text">{{ @intl.regions.preload.loading }}</span>
+<div class="patient-flow__layout patient-flow-loading__skeleton skeleton-loading">
+  <header class="patient-detail-page__header patient-flow__header-container patient-flow-loading__header" aria-hidden="true">
+    <div class="patient-detail-page__header-content patient-flow__header">
+      <div class="patient-detail-page__title patient-flow__name patient-flow-loading__name">
+        <span class="patient-flow__name-icon"><span class="skeleton-loading__shape patient-flow-loading__name-icon"></span></span>
+        <span class="skeleton-loading__shape patient-flow-loading__name-text"></span>
+      </div>
+      <div class="button-group patient-flow__chips patient-flow-loading__chips">
+        <span class="skeleton-loading__shape patient-flow-loading__chip"></span>
+        <span class="skeleton-loading__shape patient-flow-loading__chip patient-flow-loading__chip--owner"></span>
+      </div>
+    </div>
+  </header>
+  <div class="patient-flow__actions patient-flow-loading__actions" aria-hidden="true">
+    <div class="patient-flow__actions-start"></div>
+    <span class="skeleton-loading__shape patient-flow__progress patient-flow-loading__progress"></span>
+  </div>
+  <div class="card-list patient-flow__list patient-flow-loading__list" aria-hidden="true">
+    {{#each items}}
+      <div class="work-card action-card patient-flow__action-item patient-flow-loading__item">
+        <div class="patient-flow__action-check"></div>
+        <div class="work-card__surface">
+          <div class="work-card__main">
+            <div class="work-card__heading">
+              <span class="skeleton-loading__shape patient-flow-loading__state"></span>
+              <span class="skeleton-loading__shape patient-flow-loading__action-title"></span>
+            </div>
+          </div>
+          <div class="work-card__aside">
+            <div class="work-card__controls action-card__controls patient-flow-loading__controls">
+              <span class="skeleton-loading__shape patient-flow-loading__control"></span>
+              <span class="skeleton-loading__shape patient-flow-loading__control patient-flow-loading__control--date"></span>
+            </div>
+            <span class="skeleton-loading__shape patient-flow-loading__meta"></span>
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+  <div class="patient-detail-page__activity patient-flow__activity patient-flow-loading__activity">
+    <h3 class="patient-detail-page__activity-heading">{{ @intl.patients.patient.flow.flowViews.activityHeadingText }}</h3>
+    <div class="patient-flow-loading__activity-items" aria-hidden="true">
+      <span class="skeleton-loading__shape patient-flow-loading__activity-item"></span>
+      <span class="skeleton-loading__shape patient-flow-loading__activity-item patient-flow-loading__activity-item--short"></span>
+    </div>
+  </div>
+</div>

@@ -94,6 +94,7 @@ context('Dialer Service', function() {
 
     cy
       .routesForPatientAction()
+      .routeFlowActivity()
       .routeCurrentClinician(fx => {
         fx.data = currentClinician;
 
@@ -128,6 +129,11 @@ context('Dialer Service', function() {
 
         return fx;
       })
+      .routePatientByFlow(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
       .routePatientFlows(fx => {
         fx.data = [testFlow];
 
@@ -141,7 +147,6 @@ context('Dialer Service', function() {
       .routeDashboards()
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow')
-      .wait('@routePatient')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
       .wait('@routeActionFiles');
@@ -196,7 +201,7 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.patient__tabs')
+      .get('.workflow-page__tabs')
       .find('.js-archive')
       .click()
       .wait('@routePatientFlows')
@@ -207,7 +212,7 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.patient__tabs')
+      .get('.workflow-page__tabs')
       .find('.js-dashboard')
       .click()
       .wait('@routePatientFlows')
@@ -223,7 +228,7 @@ context('Dialer Service', function() {
       .should('have.length', 1);
 
     cy
-      .get('.table-list__item')
+      .get('.flow-card')
       .contains('Test Flow')
       .click()
       .wait('@routeFlow');
@@ -247,6 +252,7 @@ context('Dialer Service', function() {
     cy
       .get('.patient__context-trail .js-patient')
       .click()
+      .wait('@routePatient')
       .wait('@routePatientActions')
       .wait('@routePatientFlows');
 
@@ -255,7 +261,7 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.table-list__item')
+      .get('.flow-card')
       .contains('Test Flow')
       .click();
 
@@ -347,6 +353,7 @@ context('Dialer Service', function() {
 
     cy
       .routesForPatientAction()
+      .routeFlowActivity()
       .routeCurrentClinician(fx => {
         fx.data = currentClinician;
 
@@ -381,6 +388,11 @@ context('Dialer Service', function() {
 
         return fx;
       })
+      .routePatientByFlow(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
       .routePatientFlows(fx => {
         fx.data = [testFlow];
 
@@ -394,7 +406,6 @@ context('Dialer Service', function() {
       .routeDashboards()
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow')
-      .wait('@routePatient')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
       .wait('@routeActionFiles');
@@ -449,7 +460,7 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.patient__tabs')
+      .get('.workflow-page__tabs')
       .find('.js-archive')
       .click()
       .wait('@routePatientFlows')
@@ -460,7 +471,7 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.patient__tabs')
+      .get('.workflow-page__tabs')
       .find('.js-dashboard')
       .click()
       .wait('@routePatientFlows')
@@ -476,7 +487,7 @@ context('Dialer Service', function() {
       .should('have.length', 1);
 
     cy
-      .get('.table-list__item')
+      .get('.flow-card')
       .contains('Test Flow')
       .click()
       .wait('@routeFlow');
@@ -500,6 +511,7 @@ context('Dialer Service', function() {
     cy
       .get('.patient__context-trail .js-patient')
       .click()
+      .wait('@routePatient')
       .wait('@routePatientActions')
       .wait('@routePatientFlows');
 
@@ -508,7 +520,7 @@ context('Dialer Service', function() {
       .should('have.length', 0);
 
     cy
-      .get('.table-list__item')
+      .get('.flow-card')
       .contains('Test Flow')
       .click();
 

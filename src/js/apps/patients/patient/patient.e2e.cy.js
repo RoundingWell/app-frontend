@@ -70,6 +70,7 @@ context('patient page', function() {
 
   specify('patient routing', function() {
     cy
+      .viewport(1920, 900)
       .routesForPatientDashboard()
       .routePatient(fx => {
         fx.data = testPatient;
@@ -83,6 +84,12 @@ context('patient page', function() {
       .get('.patient__layout')
       .find('.workflow-page__tab.is-selected')
       .contains('Open');
+
+    cy
+      .get('.workflow-page')
+      .should($page => {
+        expect($page[0].getBoundingClientRect().width).to.equal(1200);
+      });
 
     cy
       .get('.patient__layout')

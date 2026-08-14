@@ -1,0 +1,23 @@
+<span class="loader__text">{{ @intl.regions.preload.loading }}</span>
+<div class="workflow-page__loader-skeleton skeleton-loading">
+  {{#each items}}
+    <div class="workflow-page__loader-item" aria-hidden="true">
+      <span class="workflow-page__loader-main">
+        <span class="workflow-page__loader-identity">
+          <span class="workflow-page__loader-icon skeleton-loading__shape"></span>
+          <span class="workflow-page__loader-title skeleton-loading__shape"></span>
+        </span>
+      </span>
+      <span class="workflow-page__loader-side">
+        <span class="workflow-page__loader-chips">
+          <span class="workflow-page__loader-chip skeleton-loading__shape"></span>
+          <span class="workflow-page__loader-progress skeleton-loading__shape"></span>
+        </span>
+        <span class="workflow-page__loader-secondary">
+          <span class="workflow-page__loader-detail skeleton-loading__shape"></span>
+          <span class="workflow-page__loader-dates skeleton-loading__shape"></span>
+        </span>
+      </span>
+    </div>
+  {{/each}}
+</div>
