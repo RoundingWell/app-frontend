@@ -4,6 +4,11 @@ import { Component } from 'marionette.toolkit';
 import 'scss/modules/buttons.scss';
 
 export default Component.extend({
+  initialize() {
+    if (!this.getOption('selectLabel') || !this.getOption('deselectLabel')) {
+      throw new TypeError('CheckComponent requires selectLabel and deselectLabel');
+    }
+  },
   stateEvents: {
     'change:isSelected': 'onStateChangeIsSelected',
   },
@@ -12,11 +17,20 @@ export default Component.extend({
   },
   viewOptions() {
     const isSelected = this.getState('isSelected');
-    const template = isSelected ? hbs`{{fas "square-check"}}` : hbs`{{fal "square"}}`;
+    const ariaLabel = isSelected ? this.getOption('deselectLabel') : this.getOption('selectLabel');
+    const template = isSelected ?
+      hbs`{{fas "square-check" classes="button__checkbox-icon button__checkbox-icon--selected"}}` :
+      hbs`{{fal "square" classes="button__checkbox-icon button__checkbox-icon--empty"}}`;
 
     return {
       tagName: 'button',
-      className: 'button--checkbox js-select',
+      className: 'button button--checkbox js-select',
+      attributes: {
+        'aria-checked': String(isSelected),
+        'aria-label': ariaLabel,
+        'role': 'checkbox',
+        'type': 'button',
+      },
       template,
       triggers: {
         'click': 'click',

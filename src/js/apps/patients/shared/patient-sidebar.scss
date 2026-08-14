@@ -1,27 +1,21 @@
 .patient-sidebar__section {
+  --widgets-first-heading-margin-top: 0;
+  --widgets-heading-margin-top: var(--space-3);
+  --widgets-item-gap: 0;
+
   flex: none;
-  margin-top: 16px;
-  max-width: 256px;
+  margin-top: var(--space-3);
   overflow: hidden;
 
   &:empty {
     display: none;
   }
 
+  &:first-child {
+    margin-top: 0;
+  }
+
   &:last-of-type {
     padding-bottom: 32px;
-  }
-
-  /* NOTE: context-specific widget styles */
-  .widgets__item + .widgets__item {
-    margin-top: 4px;
-  }
-
-  .widgets__heading {
-    margin-top: 8px;
-
-    &:first-child {
-      margin-top: 0;
-    }
   }
 }

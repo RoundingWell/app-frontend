@@ -4,9 +4,9 @@ import { View } from 'marionette';
 
 import OwnerDroplist from 'js/apps/patients/shared/components/owner_component';
 
-import './list.scss';
+import './list-views.scss';
 
-const TitleOwnerFilterTemplate = hbs`<span class="list__title-filter-name">{{ name }}</span>{{far "angle-down"}}`;
+const TitleOwnerFilterTemplate = hbs`<span class="patient-list__title-filter-name">{{ name }}</span>{{far "angle-down" classes="patient-list__title-filter-icon"}}`;
 
 const ListCountTemplate = hbs`
   <strong>
@@ -19,15 +19,11 @@ const ListCountTemplate = hbs`
 `;
 
 const MaximumCountTemplate = hbs`
-  <div>{{formatMessage (intlGet "patients.shared.listViews.countView.maximumListCount") maximumCount=maximumCount totalInDb=totalInDb isFlowList=isFlowList}}</div>
-  <div>{{ @intl.patients.shared.listViews.countView.narrowFilters }}</div>
+  <span>{{formatMessage (intlGet "patients.shared.listViews.countView.maximumListCount") maximumCount=maximumCount totalInDb=totalInDb isFlowList=isFlowList}} {{ @intl.patients.shared.listViews.countView.narrowFilters }}</span>
 `;
 
 const MaximumCountNarrowedTemplate = hbs`
-  <div>
-    {{formatMessage (intlGet "patients.shared.listViews.countView.maximumListCountNarrowed") itemCount=count maximumCount=maximumCount isFlowList=isFlowList}}
-  </div>
-  <div>{{ @intl.patients.shared.listViews.countView.narrowFilters }}</div>
+  <span>{{formatMessage (intlGet "patients.shared.listViews.countView.maximumListCountNarrowed") itemCount=count maximumCount=maximumCount isFlowList=isFlowList}} {{ @intl.patients.shared.listViews.countView.narrowFilters }}</span>
 `;
 
 const CountView = View.extend({
@@ -69,7 +65,7 @@ const TitleOwnerDroplist = OwnerDroplist.extend({
   align: 'right',
   popWidth: null,
   viewOptions: {
-    className: 'list__title-filter-button',
+    className: 'patient-list__title-filter-button',
     template: TitleOwnerFilterTemplate,
   },
 });
