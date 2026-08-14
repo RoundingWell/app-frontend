@@ -363,7 +363,7 @@ careOptsFrontend:
             queued: Queued
             started: Started
         timeComponent:
-          defaultText: Set Time...
+          defaultText: Select Time...
           clear: Clear Time
           placeholderText: Time
           headingText: Set Time
