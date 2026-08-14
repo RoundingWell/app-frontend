@@ -78,7 +78,9 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
   6. apps and controllers
   7. behaviors, regions, and components
   8. views
-  9. templates, then view-local SCSS last
+  9. templates
+  10. app-shared SCSS, shared domain SCSS, then view-local SCSS last
+- Keep shared SCSS modules before every JavaScript dependency that may transitively import styles. Keep explicit domain SCSS after those JavaScript dependencies so domain rules win without added specificity.
 - Handlebars spacing should stay tight and consistent: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
 - Use `{{{ }}}` only for trusted HTML.
 - Keep attribute order predictable in templates: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
@@ -130,6 +132,7 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 ## Validation
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
+- Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.
 - Iterate with single specs; they are much faster than the full suites:
   - Component: `npx cypress run --component --spec src/js/base/routerapp.component.cy.js`
   - E2E: build and serve the test app once (`npm run build -- --mode test`, then `npx vite preview -m test` in the background to serve on port 8090), then `npx cypress run --spec src/js/apps/<domain>/<app>/<spec>.e2e.cy.js`
