@@ -1,9 +1,117 @@
-.bulk-edit {
-  min-width: 464px;
+.bulk-edit-inline {
+  display: grid;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
 }
 
-.bulk-edit--is-multi {
-  color: #{$black-60};
-  font-style: italic;
-  font-weight: bold;
+.bulk-edit-inline__header {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 32px;
+  min-width: 0;
+}
+
+.bulk-edit-inline__controls {
+  align-items: center;
+  border-top: 1px solid var(--color-divider);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  padding-top: var(--space-4);
+}
+
+.bulk-edit-inline__cancel {
+  --button-align-items: center;
+  --button-display: inline-flex;
+  --button-min-height: 32px;
+  --button-padding: 0 16px;
+}
+
+.bulk-edit-inline__save {
+  --button-border-radius: 4px;
+
+  flex: none;
+  min-height: 32px;
+  min-width: 64px;
+  padding: 5px 16px;
+  white-space: nowrap;
+}
+
+.bulk-edit-inline__heading {
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bulk-edit-inline__control {
+  flex: 1 1 160px;
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.bulk-edit-inline__control > .button {
+  width: 100%;
+}
+
+.bulk-edit-inline__owner {
+  display: grid;
+  flex: 1.8 1 280px;
+  grid-template-columns: minmax(0, 1fr) minmax(112px, 144px);
+  min-width: 0;
+  width: 100%;
+}
+
+.bulk-edit-inline__owner-button {
+  --button-width: 100%;
+  --owner-component-max-width: 100%;
+
+  border-radius: 16px 0 0 16px;
+  border-right-width: 0;
+  min-width: 0;
+}
+
+.bulk-edit-inline__owner-scope {
+  --button-width: 100%;
+
+  border-radius: 0 16px 16px 0;
+  min-width: 0;
+}
+
+.bulk-edit-inline__due {
+  --due-component-border-right-width: 0;
+  --due-component-right-radius: 0;
+  --time-component-left-radius: 0;
+
+  display: grid;
+  flex: 1.4 1 240px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  width: 100%;
+}
+
+.bulk-edit-inline__due > * {
+  min-width: 0;
+}
+
+.bulk-edit-inline__due .button {
+  width: 100%;
+}
+
+.bulk-edit-inline__actions {
+  align-items: center;
+  display: flex;
+  flex: none;
+  gap: 8px;
+  margin-left: auto;
 }

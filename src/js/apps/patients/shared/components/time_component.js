@@ -47,7 +47,7 @@ export default Droplist.extend({
       return CustomTimeTemplate;
     }
 
-    if (!time && isCompact) {
+    if (!time && isCompact && !this.getOption('showLabel')) {
       return NoTimeCompactTemplate;
     }
 
@@ -63,7 +63,7 @@ export default Droplist.extend({
       template: this.getTemplate(time, isCompact),
       templateContext: {
         time: this.getOption('time'),
-        defaultHtml: `<span>${ i18n.placeholderText }</span>`,
+        defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
       },
     };
   },

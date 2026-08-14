@@ -42,6 +42,7 @@ export default Component.extend({
   },
   viewOptions() {
     const isCompact = this.getOption('isCompact');
+    const showLabel = this.getOption('showLabel');
     const selected = this.getState('selected');
     const isDisabled = this.getState('isDisabled');
 
@@ -63,7 +64,7 @@ export default Component.extend({
       },
       template: DueTemplate,
       templateContext: {
-        defaultHtml: isCompact ? '' : `<span>${ i18n.defaultText }</span>`,
+        defaultHtml: !isCompact || showLabel ? `<span>${ i18n.defaultText }</span>` : '',
         dateFormat: isCompact ? 'SHORT' : 'LONG',
         date: selected,
         isOverdue: !isDisabled && this.getOption('isOverdue'),
