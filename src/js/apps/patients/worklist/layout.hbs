@@ -1,20 +1,23 @@
-<div class="list-page__header">
-  <div class="flex list-page__title">
-    <div data-title-region></div>
-    <div class="worklist-list__toggle" data-toggle-region></div>
-    <div class="u-margin--l-16" data-search-region></div>
-  </div>
-  <div class="list-page__filters flex">
-    <div class="flex u-margin--r-24" data-select-all-region></div>
-    <div class="flex flex-align-center w-100" data-filters-region></div>
-    <div class="flex">
-      <span class="worklist-list__count" data-count-region></span>
-      <span class="worklist-list__filter-date u-text--nowrap" data-date-filter-region></span>
-      <span class="worklist-list__filter-sort" data-sort-region></span>
+<div class="list-page__main">
+  <div class="list-page__header">
+    <div class="list-page__header-top">
+      <div class="list-page__title">
+        <div data-title-region></div>
+      </div>
+      <div class="list-page__topbar">
+        <div data-date-filter-region></div>
+        <div class="patient-list-page__find-controls">
+          <div class="list-page__search patient-list-page__find-search" data-search-region></div>
+          <div class="patient-list-page__filter-controls" data-filters-region></div>
+        </div>
+      </div>
     </div>
+    <div data-selection-bar-region></div>
   </div>
+  <div class="list-page__status" data-list-status-region></div>
+  <div data-list-region></div>
 </div>
-<div class="table-list worklist__table-list">
-  <div class="table-list__header list-page__list-header" data-table-region></div>
-  <div class="table-list__list list-page__list" data-list-region></div>
+<div class="patient-list-page__sidebar js-filters-sidebar" id="worklist-list-sidebar">
+  <button class="button button--icon patient-list-page__drawer-close js-close-sidebar-drawer" type="button" aria-label="{{ @intl.patients.worklist.worklistViews.layoutView.closeSidebar }}">{{far "xmark"}}</button>
+  <div class="patient-list-page__sidebar-content" data-filters-sidebar-region></div>
 </div>
