@@ -1,9 +1,3 @@
-.programs-list__table-list {
-  grid-template-columns:
-    minmax(min-content, 2fr)
-    minmax(120px, 1fr)
-    minmax(160px, 1fr);
-}
 
 .programs-list__published {
   color: #{$black};
@@ -16,8 +10,4 @@
   .icon {
     margin-right: 4px;
   }
-}
-
-.programs-list__updated-ts {
-  font-size: 12px;
 }

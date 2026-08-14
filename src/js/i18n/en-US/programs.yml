@@ -10,6 +10,7 @@ careOptsFrontend:
           newProgramFlowAction: New Flow Action
         flowViews:
           addActionBtn: Action
+          addDetailsBtn: Add Details
           contextBackBtn: Back to List
           emptyView: No Actions
       programViews:
@@ -55,9 +56,6 @@ careOptsFrontend:
           }
       layoutView:
         title: Programs
-        programHeader: Program
-        stateHeader: Program State
-        updatedHeader: Updated
     shared:
       actionsView:
         ownerComponent:

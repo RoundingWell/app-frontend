@@ -119,7 +119,7 @@ context('program action sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.program__layout')
+      .get('.program-page__layout')
       .get('[data-add-region]')
       .contains('Add')
       .click();
@@ -207,8 +207,8 @@ context('program action sidebar', function() {
       });
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card')
       .contains('Test Name');
 
     cy
@@ -266,8 +266,8 @@ context('program action sidebar', function() {
       .should('contain', 'Insufficient permissions to delete action');
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card')
       .contains('Test Name');
 
     cy
@@ -294,8 +294,8 @@ context('program action sidebar', function() {
       .should('contain', `api/program-actions/${ testProgramAction.id }`);
 
     cy
-      .get('.table-list__list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card')
       .contains('Test Name')
       .should('not.exist');
 

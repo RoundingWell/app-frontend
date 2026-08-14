@@ -86,7 +86,7 @@ context('program flow sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.program__layout')
+      .get('.program-page__layout')
       .get('[data-add-region]')
       .contains('Add')
       .click();
