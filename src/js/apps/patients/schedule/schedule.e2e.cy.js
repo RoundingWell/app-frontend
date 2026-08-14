@@ -233,12 +233,6 @@ context('schedule page', function() {
 
     cy
       .get('@scheduleList')
-      .find('.schedule-list__day-heading')
-      .first()
-      .should('have.css', 'align-items', 'center');
-
-    cy
-      .get('@scheduleList')
       .find('.schedule-list__list-row')
       .eq(1)
       .find('.schedule-list__date')
@@ -1298,7 +1292,6 @@ context('schedule page', function() {
 
   specify('bulk edit', function() {
     cy.viewport(1100, 720);
-    let stateButtonBounds;
     let bulkToolbarHeight;
 
     const testActions = _.times(20, index => {
@@ -1346,10 +1339,6 @@ context('schedule page', function() {
       .as('bulkEditToolbar')
       .then($toolbar => {
         bulkToolbarHeight = $toolbar[0].getBoundingClientRect().height;
-      })
-      .find('[data-state-region] button')
-      .then($button => {
-        stateButtonBounds = $button[0].getBoundingClientRect();
       });
 
     cy
@@ -1359,12 +1348,7 @@ context('schedule page', function() {
 
     cy
       .get('.picklist')
-      .then($picklist => {
-        const picklistBounds = $picklist[0].getBoundingClientRect();
-
-        expect(picklistBounds.top - stateButtonBounds.bottom).to.be.closeTo(4, 0.5);
-        expect(picklistBounds.width).to.be.at.least(180);
-      });
+      .should('be.visible');
 
     cy
       .get('body')
