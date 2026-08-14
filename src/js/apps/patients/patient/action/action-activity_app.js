@@ -4,12 +4,11 @@ import dayjs from 'dayjs';
 
 import App from 'js/base/app';
 
-import { CommentFormView } from 'js/apps/patients/shared/comments_views';
-import { LayoutView, ActivitiesView, TimestampsView } from 'js/apps/patients/patient/action/action-activity_views';
+import { ActionActivityLoadingView, ActionCommentFormView, LayoutView, ActivitiesView } from 'js/apps/patients/patient/action/action-activity_views';
 
 export default App.extend({
   onBeforeStart() {
-    this.getRegion().startPreloader();
+    this.getRegion().show(new ActionActivityLoadingView());
   },
   beforeStart({ action }) {
     return [
@@ -45,19 +44,16 @@ export default App.extend({
       collection: this.activityCollection,
       model: this.action,
     });
-    const createdEvent = this.activityCollection.find({ event_type: 'ActionCreated' });
-
     this.listenTo(activitiesView, {
       'remove:comment': this.onRemoveComment,
     });
 
     this.showChildView('activities', activitiesView);
-    this.showChildView('timestamps', new TimestampsView({ model: this.action, createdEvent }));
   },
   showNewCommentForm() {
     const clinician = Radio.request('bootstrap', 'currentUser');
 
-    const newCommentFormView = new CommentFormView({
+    const newCommentFormView = new ActionCommentFormView({
       model: Radio.request('entities', 'comments:model', {
         _action: this.action.getResource(),
         _clinician: clinician.getResource(),
