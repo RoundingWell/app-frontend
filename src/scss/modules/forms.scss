@@ -1,65 +1,45 @@
-::placeholder {
-  color: #{$black-60};
-}
-
-.input-primary {
+.form-input {
   border: 1px solid #{$black-90};
   border-radius: 4px;
+
+  &::placeholder {
+    color: #{$black-60};
+  }
+
+  &:hover:enabled {
+    border-color: #{$black-60};
+  }
+
+  &:focus {
+    border-color: color(blue);
+    box-shadow: 0 0 8px rgb(color(blue, 'dark'), 0.3);
+  }
+
+  &.is-disabled,
+  &[disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &.has-error {
+    border-color: #{$error-color};
+  }
+}
+
+.form-input--primary {
   font-size: 16px;
   font-weight: 600;
   padding: 8px 16px;
-
-  &:hover:enabled {
-    border: 1px solid #{$black-60};
-  }
-
-  &:focus {
-    border: 1px solid color(blue);
-    box-shadow: 0 0 8px rgb(2 112 191 / 30%);
-  }
-
-  &.is-disabled,
-  &[disabled] {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  &.has-error {
-    border-color: #{$error-color};
-  }
 }
 
-.input-primary--small {
-  @extend .input-primary;
-
-  font-size: 14px;
-  padding: 4px 8px;
-}
-
-.input-secondary {
-  border: 1px solid #{$black-90};
-  border-radius: 4px;
+.form-input--secondary {
   font-size: 14px;
   padding: 8px 16px;
+}
 
-  &:hover {
-    border: 1px solid #{$black-60};
-  }
-
-  &:focus {
-    border: 1px solid color(blue);
-    box-shadow: 0 0 8px rgb(2 112 191 / 30%);
-  }
-
-  &.is-disabled,
-  &[disabled] {
-    cursor: not-allowed;
-    opacity: 0.5;
-  }
-
-  &.has-error {
-    border-color: #{$error-color};
-  }
+.form-input--small {
+  font-size: 14px;
+  padding: 4px 8px;
 }
 
 .form-error {
