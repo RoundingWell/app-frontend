@@ -1,117 +1,324 @@
 .patient-flow__frame {
+  --patient-flow-card-offset: calc(32px + var(--space-4));
+  --patient-flow-content-width: min(1200px, calc(100% - var(--space-6) - var(--space-6)));
+
   display: flex;
   flex: 1;
-  height: 100vh;
+  height: auto;
+}
+
+.patient-flow__loader {
+  justify-content: flex-start;
+}
+
+.patient-flow-loading__header,
+.patient-flow-loading__actions,
+.patient-flow-loading__item {
+  pointer-events: none;
+}
+
+.patient-flow-loading__name-icon {
+  border-radius: 4px;
+  height: 24px;
+  width: 24px;
+}
+
+.patient-flow-loading__name-text {
+  height: 22px;
+  width: min(60%, 360px);
+}
+
+.patient-flow-loading__chip {
+  border-radius: 16px;
+  height: 28px;
+  width: 88px;
+}
+
+.patient-flow-loading__chip--owner {
+  width: 104px;
+}
+
+.patient-flow-loading__progress {
+  border-radius: 8px;
+  height: 24px;
+}
+
+.patient-flow-loading__item:last-child {
+  opacity: 0.55;
+}
+
+.patient-flow-loading__state {
+  border-radius: 50%;
+  flex: 0 0 28px;
+  height: 28px;
+  width: 28px;
+}
+
+.patient-flow-loading__action-title {
+  height: 12px;
+  width: min(58%, 260px);
+}
+
+.patient-flow-loading__control {
+  border-radius: 16px;
+  height: 28px;
+  width: 100%;
+}
+
+.patient-flow-loading__control--date {
+  justify-self: end;
+  max-width: 120px;
+}
+
+.patient-flow-loading__meta {
+  height: 10px;
+  width: min(72%, 220px);
+}
+
+.patient-flow-loading__activity-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.patient-flow-loading__activity-item {
+  height: 12px;
+  width: min(78%, 520px);
+}
+
+.patient-flow-loading__activity-item--short {
+  opacity: 0.55;
+  width: min(58%, 380px);
 }
 
 .patient-flow__layout {
   display: flex;
   flex: 1;
   flex-direction: column;
-  min-width: 744px;
+  min-width: 0;
   width: 100%;
 }
 
-.patient-flow__sidebar {
-  display: flex;
-  flex: initial;
-  min-height: 0;
-  width: 256px;
-}
-
-.patient-flow__context-trail {
-  background: #{$white};
-  color: #{$black-20};
-  line-height: 1;
-  padding: 16px 24px;
-  position: sticky;
-  top: 0;
-  z-index: var(--z-positioned);
-
-  .icon {
-    color: #{$black-60};
-    font-size: 12px;
-    margin-right: 8px;
-    vertical-align: -0.0825em;
-  }
-}
-
-.patient-flow__context-link {
-  color: #{$black-60};
-  cursor: pointer;
-  font-weight: 600;
-  margin-right: 8px;
-
-  &:hover {
-    color: color(blue);
-  }
-}
-
 .patient-flow__header-container {
-  align-items: flex-start;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 24px;
+  box-sizing: border-box;
+  flex: none;
+  margin-inline: auto;
+  padding: 0 0 0 var(--patient-flow-card-offset);
+  width: var(--patient-flow-content-width);
 }
 
 .patient-flow__header {
   flex: 1;
-  padding: 8px 0 16px;
+  min-width: 0;
+  padding: 24px 0 32px;
+}
+
+.patient-flow__chips {
+  --button-align-items: center;
+  --button-background: var(--color-surface);
+  --button-border-color: var(--color-chip-border);
+  --button-border-radius: 16px;
+  --button-border-width: 0.5px;
+  --button-box-shadow: 0 1px 0 rgb(77 77 77 / 15%);
+  --button-display: inline-flex;
+  --button-font-size: 12px;
+  --button-font-weight: 500;
+  --button-height: 28px;
+  --button-line-height: 20px;
+  --button-min-height: 28px;
+  --button-padding: 0 var(--space-3);
+  --button-width: auto;
+  --patient-readonly-border-width: 0.5px;
+  --patient-readonly-background: var(--color-surface);
+  --patient-readonly-box-shadow: 0 1px 0 rgb(77 77 77 / 15%);
+  --patient-readonly-padding: 0 var(--space-3);
+
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+  min-height: 28px;
 }
 
 .patient-flow__name {
-  font-size: 24px;
-  margin-bottom: 16px;
+  padding-left: 40px;
+  padding-right: 40px;
+  position: relative;
+}
+
+.patient-flow__name-icon {
+  left: 0;
+  position: absolute;
 
   .icon {
-    color: #{$black-60};
-    font-size: 20px;
-    margin-right: 8px;
-    vertical-align: bottom;
+    color: var(--color-text);
+    font-size: 24px;
   }
 }
 
 .patient-flow__details {
-  color: #{$black-60};
-  display: inline-block;
+  color: var(--color-text);
   font-size: 14px;
-  margin-right: 16px;
-  vertical-align: top;
+  line-height: 20px;
+  margin: 8px 0 0 40px;
+}
 
-  /* 48 + 32 + 16 icon */
-  width: calc(40% + 96px);
+.patient-flow__details:empty {
+  display: none;
 }
 
 .patient-flow__meta {
-  margin-right: 8px;
+  margin-right: 0;
+}
+
+.patient-flow__permission {
+  margin-top: 16px;
 }
 
 .patient-flow__actions {
-  border-top: 1px solid #{$black-90};
-  margin: 0 24px;
+  align-items: center;
+  display: flex;
+  flex: none;
+  justify-content: space-between;
+  margin: 0 auto;
+  min-height: 64px;
   padding: 16px 0;
+  position: relative;
+  width: var(--patient-flow-content-width);
+
 }
 
-.patient-flow__table-list {
-  grid-template-columns:
-    48px
-    32px
-    minmax(100px, 40%)
-    minmax(max-content, auto)
-    minmax(max-content, 84px);
+.patient-flow__actions::before {
+  border-top: 1px solid var(--color-divider);
+  content: '';
+  left: var(--patient-flow-card-offset);
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.patient-flow__actions:where(.is-editing) {
+  align-items: flex-start;
+}
+
+.patient-flow__actions:where(.is-editing) .patient-flow__actions-start {
+  align-items: flex-start;
+}
+
+.patient-flow__actions:where(.is-editing) .patient-flow__progress {
+  display: none;
+}
+
+.patient-flow__actions-start {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  gap: var(--space-4);
+  min-width: 0;
+  width: 100%;
+}
+
+.patient-flow__select-all {
+  flex: 0 0 32px;
 }
 
 .patient-flow__progress {
-  width: 144px;
+  border-radius: 8px;
+  flex: 0 1 132px;
+  width: 132px;
+}
+
+.patient-flow__list {
+  --card-list-padding: 0;
+
+  flex: none;
+  height: auto;
+  margin-inline: auto;
+  overflow: visible;
+  width: var(--patient-flow-content-width);
+}
+
+.patient-flow__action-item {
+  --work-card-gap: var(--space-4);
+}
+
+.patient-flow__action-check {
+  align-items: center;
+  display: flex;
+  flex: 0 0 32px;
+  height: 80px;
+  justify-content: center;
+  width: 32px;
+}
+
+@container (width <= 720px) {
+  .patient-flow__action-check {
+    height: 64px;
+  }
+}
+
+.patient-flow__action-secondary {
+  gap: 8px;
+}
+
+.patient-flow__action-secondary .icon,
+.patient-flow__action-details .icon,
+.patient-flow__action-form .icon {
+  font-size: 14px;
+}
+
+.patient-flow__action-details .icon,
+.patient-flow__action-form .icon {
+  width: 14px;
+}
+
+.patient-flow__action-details,
+.patient-flow__action-form {
+  height: 20px;
+  width: 20px;
 }
 
 .patient-flow__activity {
-  border-top: 1px solid #{$black-90};
-  margin: 24px;
-  padding-top: 24px;
+  --loader-min-height: 64px;
+
+  box-sizing: border-box;
+  flex: none;
+  margin: 24px auto 0;
+  padding: 24px 0 var(--space-8) var(--patient-flow-card-offset);
+  position: relative;
+  width: var(--patient-flow-content-width);
+}
+
+.patient-flow__activity::before {
+  border-top: 1px solid var(--color-divider);
+  content: '';
+  left: var(--patient-flow-card-offset);
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .patient-flow__activity-item {
-  line-height: 14px;
-  margin-top: 8px;
+  color: var(--color-text);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 24px;
+  padding-left: 28px;
+  position: relative;
+
+  > .icon {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    left: 0;
+    position: absolute;
+    top: 4px;
+  }
+}
+
+.patient-flow__activity-date {
+  color: var(--color-text-secondary);
+
+  &::before {
+    content: " • ";
+  }
 }

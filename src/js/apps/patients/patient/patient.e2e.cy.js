@@ -1,4 +1,5 @@
 import { getPatient } from 'support/api/patients';
+import { getCurrentClinician } from 'support/api/clinicians';
 
 context('patient page', function() {
   const testPatient = getPatient({
@@ -163,11 +164,12 @@ context('patient page', function() {
     cy
       .get('.patient__sidebar-toggle')
       .should('be.visible')
-      .and('have.attr', 'aria-expanded', 'true');
+      .and('have.attr', 'aria-expanded', 'false');
   });
 
   specify('patient routing', function() {
     cy
+      .viewport(1920, 900)
       .routesForPatientDashboard()
       .routePatient(fx => {
         fx.data = testPatient;
@@ -181,6 +183,12 @@ context('patient page', function() {
       .get('.patient__layout')
       .find('.workflow-page__tab.is-selected')
       .contains('Open');
+
+    cy
+      .get('.workflow-page')
+      .should($page => {
+        expect($page[0].getBoundingClientRect().width).to.equal(1200);
+      });
 
     cy
       .get('.patient__layout')
@@ -201,5 +209,57 @@ context('patient page', function() {
       .get('.patient__layout')
       .find('.workflow-page__tab.is-selected')
       .contains('Open');
+  });
+
+  specify('remembers the patient sidebar across patients and reloads', function() {
+    const otherPatient = getPatient();
+    const currentClinician = getCurrentClinician();
+    const preferenceKey = `isPatientSidebarHidden_${ currentClinician.id }`;
+
+    cy
+      .viewport(1280, 720)
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .get('.patient__sidebar-toggle')
+      .click();
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy.window().then(win => {
+      expect(JSON.parse(win.localStorage.getItem(preferenceKey))).to.be.true;
+    });
+
+    cy
+      .routePatient(fx => {
+        fx.data = otherPatient;
+
+        return fx;
+      })
+      .visit(`/patient/dashboard/${ otherPatient.id }`)
+      .wait('@routePatient')
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .reload()
+      .wait('@routePatient')
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .click();
+
+    cy.window().then(win => {
+      expect(JSON.parse(win.localStorage.getItem(preferenceKey))).to.be.false;
+    });
   });
 });
