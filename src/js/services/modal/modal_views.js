@@ -8,8 +8,6 @@ import 'scss/modules/modals.scss';
 
 import intl from 'js/i18n';
 
-import { animSidebar } from 'js/anim';
-
 import PreloadRegion from 'js/regions/preload_region';
 
 import IframeFormBehavior from 'js/behaviors/iframe-form';
@@ -52,8 +50,9 @@ const SavingFooterView = View.extend({
 
 const ModalView = View.extend({
   className: 'modal',
-  buttonClass: 'button--green',
+  buttonClass: 'button button--positive',
   bodyClass: 'modal__content',
+  headerClass: 'modal__header',
   headerIconType: 'far',
   cancelText: i18n.modalView.cancelText,
   submitText: i18n.modalView.submitText,
@@ -65,7 +64,7 @@ const ModalView = View.extend({
     draftStatus: '[data-draft-status-region]',
     body: {
       el: '[data-body-region]',
-      regionClass: PreloadRegion.extend({ timeout: 0 }),
+      regionClass: PreloadRegion,
     },
     footer: {
       el: '[data-footer-region]',
@@ -112,23 +111,14 @@ const ModalView = View.extend({
     this.ui.submit.prop('disabled', disable);
   },
   startPreloader() {
-    this.getRegion('body').startPreloader();
-  },
-});
-
-const SidebarModalView = ModalView.extend({
-  className: 'modal--sidebar',
-  bodyClass: 'modal__content--sidebar',
-  headerClass: 'modal__header--sidebar',
-  onAttach() {
-    animSidebar(this.el);
+    this.getRegion('body').startPreloader({ variant: 'generic' });
   },
 });
 
 const SmallModalView = ModalView.extend({
-  className: 'modal--small',
-  bodyClass: 'modal__content--small',
-  headerClass: 'modal__header--small',
+  className: 'modal modal--small',
+  bodyClass: 'modal__content modal__content--small',
+  headerClass: 'modal__header modal__header--small',
 });
 
 const IframeFormView = View.extend({
@@ -136,7 +126,7 @@ const IframeFormView = View.extend({
   className() {
     const size = this.getOption('size');
 
-    if (size === 'small') return 'modal__form-iframe--small';
+    if (size === 'small') return 'modal__form-iframe modal__form-iframe--small';
 
     return 'modal__form-iframe';
   },
@@ -150,7 +140,6 @@ const IframeFormView = View.extend({
 
 export {
   ModalView,
-  SidebarModalView,
   SmallModalView,
   IframeFormView,
 };

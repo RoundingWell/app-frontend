@@ -1,10 +1,19 @@
 import { View } from 'marionette';
-import { isNull } from 'underscore';
+import { compact, isNull } from 'underscore';
 import dayjs from 'dayjs';
 
 import DateSelectTemplate from './date-select.hbs';
 
 const LayoutView = View.extend({
+  className() {
+    const state = this.getOption('state');
+
+    return compact([
+      'date-select',
+      this.getOption('rootClassName'),
+      state.year && !state.selectedDate ? 'is-partial' : null,
+    ]).join(' ');
+  },
   template: DateSelectTemplate,
   regions: {
     selectRegion: {

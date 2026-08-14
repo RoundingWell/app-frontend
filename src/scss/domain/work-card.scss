@@ -1,0 +1,238 @@
+@use './work-card-breakpoints' as work-card;
+
+.work-card {
+  --work-card-background: var(--color-surface);
+  --work-card-aside-background: var(--color-surface-muted);
+
+  align-items: stretch;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  gap: var(--work-card-gap, var(--space-4));
+}
+
+.work-card:hover:not(.is-selected) {
+  --work-card-background: var(--color-surface-hover);
+  --work-card-aside-background: var(--color-surface-hover);
+}
+
+.work-card.is-selected {
+  --work-card-background: var(--color-selection-background);
+  --work-card-aside-background: var(--color-selection-background);
+}
+
+.work-card__surface {
+  background: var(--work-card-background);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 38%, 420px);
+  min-height: 80px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.work-card__main {
+  align-items: center;
+  display: flex;
+  justify-content: flex-start;
+  min-width: 0;
+  padding: var(--space-2) var(--space-4);
+}
+
+.work-card__heading {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  min-width: 0;
+  width: 100%;
+}
+
+.work-card__state {
+  --button-align-items: center;
+  --button-border-width: 0.5px;
+  --button-display: inline-flex;
+  --button-justify-content: center;
+  --button-min-height: 28px;
+  --button-padding: 0;
+  --button-width: 28px;
+
+  align-items: center;
+  display: flex;
+  flex: 0 0 28px;
+  justify-content: center;
+}
+
+.work-card__copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.work-card__state + .work-card__copy,
+.work-card__state + .work-card__title {
+  margin-left: var(--space-1);
+}
+
+.work-card__title-row {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  line-height: 20px;
+  min-width: 0;
+}
+
+.work-card__subject {
+  color: var(--color-text-secondary);
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.work-card__separator {
+  color: var(--color-text-secondary);
+  flex: 0 0 auto;
+}
+
+.work-card__title {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  flex: 0 1 auto;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 24px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.work-card__title:focus-visible {
+  border-radius: 2px;
+  outline: 2px solid var(--color-interactive);
+  outline-offset: 2px;
+}
+
+.work-card__context {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-start;
+  margin: var(--space-2) 0 0;
+  min-width: 0;
+}
+
+.work-card__aside {
+  background: var(--work-card-aside-background);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 0 8px 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  justify-content: flex-start;
+  margin: var(--space-1) var(--space-1) var(--space-1) 0;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4) var(--space-2);
+}
+
+.work-card__controls {
+  --button-border-width: 0.5px;
+  --owner-component-max-width: 100%;
+
+  display: grid;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.work-card__control {
+  min-width: 0;
+}
+
+.work-card__controls .icon,
+.work-card__meta .icon {
+  font-size: 14px;
+  width: 14px;
+}
+
+.work-card__meta {
+  align-items: center;
+  color: var(--color-text-secondary);
+  display: flex;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 500;
+  gap: var(--space-1);
+  justify-content: flex-start;
+  letter-spacing: 0.02px;
+  line-height: 16px;
+}
+
+.work-card__timestamps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+@container (width <= #{work-card.$stack}) {
+  .work-card__surface {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .work-card__main {
+    min-height: 64px;
+  }
+
+  .work-card__aside {
+    border: 0;
+    border-radius: 0;
+    border-top: 0.5px solid var(--color-border-subtle);
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: minmax(0, 1fr) auto;
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .work-card__meta {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+@container (width <= #{work-card.$compact}) {
+  .work-card__aside {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .work-card__controls,
+  .work-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .work-card__title-row {
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 var(--space-2);
+  }
+
+  .work-card__title {
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .work-card__timestamps {
+    gap: var(--space-3);
+  }
+}
