@@ -1,30 +1,75 @@
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import trim from 'js/utils/formatting/trim';
-
-import InputWatcherBehavior from 'js/behaviors/input-watcher';
-
 import 'scss/modules/buttons.scss';
 import 'scss/modules/textarea-flex.scss';
 import 'scss/modules/sidebar.scss';
 
+import trim from 'js/utils/formatting/trim';
+
+import InputWatcherBehavior from 'js/behaviors/input-watcher';
+
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, DurationComponent } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateTimeView, ReadOnlyDurationView } from 'js/apps/patients/shared/read-only_views';
+import { DialerView } from 'js/apps/patients/patient/action/action-dialer_views';
 
 import ActionDetailsTemplate from './action-details.hbs';
+import ActionEditTemplate from './action-edit.hbs';
+import ReadOnlyTemplate from './read-only.hbs';
 
+import 'scss/domain/action-icons.scss';
 import './action.scss';
 
+const getActionIcon = model => {
+  if (model.hasOutreach()) {
+    return {
+      icon: 'share-from-square',
+      iconType: 'far',
+    };
+  }
+
+  const options = model.get('options');
+
+  return options?.icon ? options : null;
+};
+
+const getActionContentClassName = model => {
+  const iconClass = getActionIcon(model) ? ' patient-action__content--with-icon' : '';
+
+  return `patient-action__content${ iconClass }`;
+};
+
 const NameView = View.extend({
-  template: hbs`<div class="patient-action__name" data-testid="patient-action-name">{{ name }}</div>`,
+  tagName: 'h1',
+  className() {
+    const iconClass = getActionIcon(this.model) ? ' patient-action__title--with-icon' : '';
+
+    return `patient-detail-page__title patient-action__title${ iconClass }`;
+  },
+  template: hbs`
+    {{#if icon}}
+      <span class="patient-action__title-icon">
+        {{#if icon.color}}
+          <span class="action-icon action-icon--{{ icon.color }}">{{fa icon.iconType icon.icon}}</span>
+        {{else}}
+          {{fa icon.iconType icon.icon}}
+        {{/if}}
+      </span>
+    {{/if}}
+    <span class="patient-action__name" data-testid="patient-action-name">{{ name }}</span>
+  `,
+  templateContext() {
+    return {
+      icon: getActionIcon(this.model),
+    };
+  },
 });
 
 const SaveView = View.extend({
-  className: 'u-margin--t-8 sidebar__save',
+  className: 'patient-action__details-actions',
   template: hbs`
-    <button class="button--green js-save">{{ @intl.patients.patient.action.detailsViews.saveView.saveBtn }}</button>
-    <button class="button--text u-margin--r-4 js-cancel">{{ @intl.patients.patient.action.detailsViews.saveView.cancelBtn }}</button>
+    <button class="button button--text js-cancel" type="button">{{ @intl.patients.patient.action.detailsViews.saveView.cancelBtn }}</button>
+    <button class="button button--positive js-save" type="button">{{ @intl.patients.patient.action.detailsViews.saveView.saveBtn }}</button>
   `,
   triggers: {
     'click .js-cancel': 'cancel',
@@ -33,7 +78,7 @@ const SaveView = View.extend({
 });
 
 const DetailsView = View.extend({
-  className: 'pos--relative',
+  className: 'textarea-flex',
   template: ActionDetailsTemplate,
   behaviors: [InputWatcherBehavior],
   ui: {
@@ -49,40 +94,28 @@ const DetailsView = View.extend({
 });
 
 const ReadOnlyActionView = View.extend({
-  template: hbs`
-    <div class="pos--relative">
-      <div class="patient-action__name" data-testid="patient-action-name">{{ name }}</div>
-    </div>
-    <div class="u-margin--t-8">
-    {{ details }}{{#unless details}}<span class="patient-action__no-results">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.noDetails }}</span>{{/unless}}
-    </div>
-    <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.dueDayLabel }}</h4><div class="flex flex-grow" data-due-datetime-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.durationLabel }}</h4><div class="flex-grow" data-duration-region></div></div>
-    {{#unless canEdit}}
-    <div class="flex u-margin--t-8">
-      <h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.permissionLabel }}</h4>
-      <div class="flex flex--grow patient-action__info">
-        {{far "ban"}}<span class="u-margin--l-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.permissionInfo }}</span>
-      </div>
-    </div>
-    {{/unless}}
-  `,
+  className() {
+    return getActionContentClassName(this.model);
+  },
+  template: ReadOnlyTemplate,
   regions: {
+    name: '[data-name-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
     dueDateTime: '[data-due-datetime-region]',
     duration: '[data-duration-region]',
+    dialer: '[data-dialer-region]',
   },
   onRender() {
+    this.showChildView('name', new NameView({ model: this.model }));
     this.showState();
     this.showOwner();
     this.showDueDateTime();
     this.showDuration();
+    this.showDialer();
   },
   showState() {
-    const readOnlyStateView = new ReadOnlyStateView({ model: this.model });
+    const readOnlyStateView = new ReadOnlyStateView({ model: this.model, showLabel: true });
     this.showChildView('state', readOnlyStateView);
   },
   showOwner() {
@@ -97,6 +130,14 @@ const ReadOnlyActionView = View.extend({
     const readOnlyDurationView = new ReadOnlyDurationView({ model: this.model });
     this.showChildView('duration', readOnlyDurationView);
   },
+  showDialer() {
+    if (!this.getOption('hasDialer')) return;
+
+    this.showChildView('dialer', new DialerView({
+      model: this.model,
+      canEdit: false,
+    }));
+  },
   templateContext() {
     return {
       canEdit: this.model.canEdit(),
@@ -105,24 +146,14 @@ const ReadOnlyActionView = View.extend({
 });
 
 const ActionView = View.extend({
+  className() {
+    return getActionContentClassName(this.model);
+  },
   childViewTriggers: {
     'save': 'save',
     'cancel': 'cancel',
   },
-  template: hbs`
-    <div data-name-region></div>
-    <div class="u-margin--t-8" data-details-region></div>
-    <div data-save-region></div>
-    <div class="flex u-margin--t-16"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.stateLabel }}</h4><div class="flex-grow" data-state-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.ownerLabel }}</h4><div class="flex-grow" data-owner-region></div></div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.dueDayLabel }}</h4>
-      <div class="flex flex-grow">{{~ remove_whitespace ~}}
-        <div class="flex-grow" data-due-date-region></div>{{~ remove_whitespace ~}}
-        <div class="flex-grow" data-due-time-region></div>{{~ remove_whitespace ~}}
-      </div>
-    </div>
-    <div class="flex u-margin--t-8"><h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.detailsViews.actionView.durationLabel }}</h4><div class="flex-grow" data-duration-region></div></div>
-  `,
+  template: ActionEditTemplate,
   regions: {
     name: '[data-name-region]',
     details: '[data-details-region]',
@@ -132,6 +163,7 @@ const ActionView = View.extend({
     dueDate: '[data-due-date-region]',
     dueTime: '[data-due-time-region]',
     duration: '[data-duration-region]',
+    dialer: '[data-dialer-region]',
   },
   modelEvents: {
     'change:name': 'onChangeName',
@@ -187,6 +219,7 @@ const ActionView = View.extend({
     this.showDueDate();
     this.showDueTime();
     this.showDuration();
+    this.showDialer();
   },
   onSave() {
     this.stopEditingDetails();
@@ -220,7 +253,7 @@ const ActionView = View.extend({
     this.showChildView('details', new DetailsView({ model: this.clonedAction }));
   },
   showState() {
-    const stateComponent = new StateComponent({ stateId: this.model.getState().id });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true, showLabel: true });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -234,6 +267,7 @@ const ActionView = View.extend({
     const ownerComponent = new OwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
+      isCompact: true,
       state: { isDisabled },
     });
 
@@ -247,6 +281,7 @@ const ActionView = View.extend({
     const isDisabled = this.model.isDone();
     const dueDateComponent = new DueComponent({
       date: this.model.get('due_date'),
+      isCompact: true,
       state: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
@@ -261,6 +296,7 @@ const ActionView = View.extend({
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
     const dueTimeComponent = new TimeComponent({
       time: this.model.get('due_time'),
+      isCompact: true,
       isOverdue: this.model.isOverdue(),
       state: { isDisabled },
     });
@@ -273,13 +309,26 @@ const ActionView = View.extend({
   },
   showDuration() {
     const isDisabled = this.model.isDone();
-    const durationComponent = new DurationComponent({ duration: this.model.get('duration'), state: { isDisabled } });
+    const durationComponent = new DurationComponent({
+      duration: this.model.get('duration'),
+      hideDefaultText: true,
+      isCompact: true,
+      state: { isDisabled },
+    });
 
     this.listenTo(durationComponent, 'change:duration', duration => {
       this.model.save({ duration });
     });
 
     this.showChildView('duration', durationComponent);
+  },
+  showDialer() {
+    if (!this.getOption('hasDialer')) return;
+
+    this.showChildView('dialer', new DialerView({
+      model: this.model,
+      canEdit: true,
+    }));
   },
 });
 

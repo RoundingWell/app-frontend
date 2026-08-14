@@ -6,17 +6,18 @@ import handleErrors from 'js/utils/handle-errors';
 
 import intl from 'js/i18n';
 
-import { LayoutView, MenuView, HeadingView } from 'js/apps/patients/patient/action/action_views';
+import { ActionLoadingView, LayoutView, MenuView } from 'js/apps/patients/patient/action/action_views';
 import { ActionView, ReadOnlyActionView } from 'js/apps/patients/patient/action/action-details_views';
-import { DialerView } from 'js/apps/patients/patient/action/action-dialer_views';
 import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_views';
 import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
+import FormApp from 'js/apps/patients/patient/form/form_app';
 
 export default App.extend({
   childApps: {
     activity: ActivityApp,
     attachments: AttachmentsApp,
+    form: FormApp,
   },
   setAccess() {
     const canEdit = !this.action.isFlowDone() && this.action.canEdit();
@@ -32,7 +33,6 @@ export default App.extend({
     if (!this.hasLayoutRegion('action')) return;
 
     this.showAction();
-    this.showDialer();
   },
   onStateChangeCanDelete() {
     if (!this.hasLayoutRegion('menu')) return;
@@ -48,7 +48,7 @@ export default App.extend({
       && layout.getRegion(name);
   },
   onBeforeStart() {
-    this.getRegion().startPreloader();
+    this.getRegion().show(new ActionLoadingView());
   },
   beforeStart({ actionId, flowId }) {
     const actionRequest = this.fetchRouteResource('action',
@@ -94,6 +94,10 @@ export default App.extend({
     this.patient = options.patient;
     this.flow = flow || null;
     this.action = action;
+    this.layoutState = options.layoutState;
+    if (!this.action.hasForm()) {
+      this.layoutState.set({ formExpanded: false, sidebarHidden: false });
+    }
 
     this.setAccess();
     this.currentFlow = this.flow || this.action.getFlow();
@@ -101,17 +105,24 @@ export default App.extend({
 
     this.listenTo(action, {
       'change:_owner': this.onChangeOwner,
+      'change:name': this.updateContext,
       'destroy': this.onDestroy,
     });
+    this.listenTo(this.layoutState, 'change:formExpanded', this.renderFormExpandedState);
 
     this.showView(new LayoutView());
+    this.renderFormExpandedState();
 
-    this.showChildView('heading', new HeadingView({ model: this.action }));
     this.showContent();
     this.showMenu();
     this.startActivity();
     this.startAttachments();
 
+    this.updateContext();
+
+    this.subscribe();
+  },
+  updateContext() {
     this.triggerMethod('context:change', {
       page: 'action',
       actionId: this.action.id,
@@ -119,12 +130,8 @@ export default App.extend({
       flowId: this.flow && this.flow.id,
       flowName: this.getFlowName(),
     });
-
-    this.subscribe();
   },
   onBeforeStop() {
-    if (!this.action) return;
-
     this.unsubscribe();
   },
   onChangeOwner() {
@@ -133,15 +140,22 @@ export default App.extend({
   showContent() {
     this.showAction();
     this.showForm();
-    this.showDialer();
   },
   showAction() {
+    const hasDialer = !!Radio.request('settings', 'get', 'dialer');
+
     if (!this.getState('canEdit')) {
-      this.showContentView('action', new ReadOnlyActionView({ model: this.action }));
+      this.showContentView('action', new ReadOnlyActionView({
+        model: this.action,
+        hasDialer,
+      }));
       return;
     }
 
-    const actionView = new ActionView({ model: this.action });
+    const actionView = new ActionView({
+      model: this.action,
+      hasDialer,
+    });
 
     this.listenTo(actionView, {
       'save': this.onSave,
@@ -153,16 +167,16 @@ export default App.extend({
     this.action.save({ details: model.get('details') });
   },
   showMenu() {
+    const menuRegion = this.getRegion('menu');
+
     if (!this.getState('canDelete')) {
-      this.getRegion('menu').empty();
+      menuRegion.empty();
       return;
     }
 
-    const menuView = new MenuView({ model: this.action });
-
+    const menuView = new MenuView();
     this.listenTo(menuView, 'delete', this.onDelete);
-
-    this.showChildView('menu', menuView);
+    this.showContentView('menu', menuView);
   },
   onDelete() {
     this.action.destroy({ wait: true })
@@ -187,27 +201,68 @@ export default App.extend({
     return this.flow && this.flow.get('name');
   },
   showForm() {
-    if (!this.action.getForm() && !this.action.hasSharing()) return;
+    const hasForm = this.action.hasForm();
+
+    if (!hasForm && !this.action.hasSharing()) return;
 
     const formView = this.showContentView('form', new FormLayoutView({
       model: this.action,
-      isShowingForm: this.getOption('isShowingForm'),
     }));
 
     this.listenTo(formView, {
       'click:form': this.onClickForm,
     });
-  },
-  onClickForm(form) {
-    Radio.trigger('event-router', 'patient:form:action', this.patient.id, form.id, this.action.id);
-  },
-  showDialer() {
-    if (!Radio.request('settings', 'get', 'dialer')) return;
 
-    this.showContentView('dialer', new DialerView({
-      model: this.action,
-      canEdit: this.getState('canEdit'),
-    }));
+    if (hasForm) this.startEmbeddedForm(formView);
+  },
+  startEmbeddedForm(formView) {
+    const formApp = this.startChildApp('form', {
+      region: formView.getRegion('form'),
+      patient: this.patient,
+      actionId: this.action.id,
+      layoutState: this.layoutState,
+      viewportView: this.getView(),
+    });
+
+    this.listenTo(formApp, {
+      'toggle:expanded': this.onToggleFormExpanded,
+    });
+  },
+  matchesRoute({ actionId, flowId }) {
+    const currentFlowId = this.flow && this.flow.id;
+
+    return this.action.id === actionId && currentFlowId === (flowId || null);
+  },
+  onToggleFormExpanded() {
+    const isExpanded = !this.layoutState.get('formExpanded');
+    const event = this.getActionRouteEvent(isExpanded);
+    const args = this.getActionRouteArgs();
+
+    Radio.trigger('event-router', event, ...args);
+  },
+  getActionRouteEvent(isExpanded) {
+    if (this.flow) return isExpanded ? 'patient:flow:action:form' : 'patient:flow:action';
+
+    return isExpanded ? 'patient:action:form' : 'patient:action';
+  },
+  getActionRouteArgs() {
+    if (this.flow) return [this.patient.id, this.flow.id, this.action.id];
+
+    return [this.patient.id, this.action.id];
+  },
+  renderFormExpandedState() {
+    const isExpanded = this.layoutState.get('formExpanded');
+    const layout = this.getView();
+
+    layout.$el.toggleClass('patient-action--form-expanded', isExpanded);
+  },
+  onClickForm() {
+    if (this.flow) {
+      Radio.trigger('event-router', 'patient:flow:action', this.patient.id, this.flow.id, this.action.id);
+      return;
+    }
+
+    Radio.trigger('event-router', 'patient:action', this.patient.id, this.action.id);
   },
   getSubscriptionResources() {
     return [

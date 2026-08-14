@@ -8,6 +8,7 @@ import { getRelationship, getErrors } from 'helpers/json-api';
 
 import { getAction } from 'support/api/actions';
 import { getCurrentClinician, getClinician } from 'support/api/clinicians';
+import { getFile } from 'support/api/files';
 import { getFormFields } from 'support/api/form-fields';
 import { getFormResponse } from 'support/api/form-responses';
 import { getPatient } from 'support/api/patients';
@@ -26,6 +27,9 @@ context('Patient Action Form', function() {
     cy
       .clearFormDrafts()
       .routeWorkspacePatient()
+      .routeActionActivity()
+      .routeActionComments()
+      .routeActionFiles()
       .routesForDefault();
   });
 
@@ -66,7 +70,7 @@ context('Patient Action Form', function() {
       .routePatient()
       .routeFormByAction()
       .routeLatestFormResponse()
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ deletedActionId }`)
+      .visit(`/patient/${ routePatientId }/action/${ deletedActionId }`)
       .wait('@routePatient')
       .wait('@routeActionError');
 
@@ -76,7 +80,41 @@ context('Patient Action Form', function() {
 
     cy
       .url()
-      .should('not.contain', `/patient/${ routePatientId }/form/${ testForm.id }/action/${ deletedActionId }`);
+      .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`);
+  });
+
+  specify('action form cannot load', function() {
+    const testAction = getAction({
+      relationships: { form: getRelationship(testForm) },
+    });
+    const errors = getErrors({
+      status: '404',
+      title: 'Not Found',
+      detail: 'Cannot find form',
+    });
+
+    cy
+      .routeAction(fx => {
+        fx.data = testAction;
+        return fx;
+      })
+      .routePatient()
+      .intercept('GET', '/api/actions/*/form', {
+        statusCode: 404,
+        body: { errors },
+      })
+      .as('routeFormByActionError')
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routeFormByActionError');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .location('pathname')
+      .should('not.contain', `/action/${ testAction.id }`);
   });
 
   specify('action deleted while its form is open', function() {
@@ -108,7 +146,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }/form`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routeFormDefinition');
@@ -130,12 +168,8 @@ context('Patient Action Form', function() {
     });
 
     cy
-      .get('.alert-box__body')
-      .should('contain', 'The Action was deleted successfully.');
-
-    cy
       .url()
-      .should('not.contain', `/form/${ testForm.id }/action/${ testAction.id }`);
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
   specify('update a form', function() {
@@ -173,15 +207,15 @@ context('Patient Action Form', function() {
           data: testFormResponse,
         };
       })
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
       .wait('@routePatient')
       .wait('@routeFormDefinition');
 
     cy
-      .get('[data-draft-status-region]')
-      .should('be.empty');
+      .get('.form__submission-status')
+      .should('contain', formatDate(testFormResponse.attributes.updated_at, 'AT_TIME'));
 
     cy
       .get('.form__controls')
@@ -226,7 +260,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`, { now: testTs() })
+      .visitOnClock(`/patient/${ routePatientId }/action/${ testAction.id }`, { now: testTs() })
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -254,7 +288,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .as('draftStatusButton')
       .trigger('pointerover');
 
@@ -369,7 +403,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`, { now: testTs() })
+      .visitOnClock(`/patient/${ routePatientId }/action/${ testAction.id }`, { now: testTs() })
       .wait('@routeAction')
       .wait('@routePatient')
       .wait('@routeFormByAction')
@@ -377,7 +411,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -440,7 +474,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`, { now: testTs() })
+      .visitOnClock(`/patient/${ routePatientId }/action/${ testAction.id }`, { now: testTs() })
       .wait('@routeAction')
       .wait('@routePatient')
       .wait('@routeFormByAction')
@@ -455,7 +489,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -554,7 +588,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`, { now: testTs() })
+      .visitOnClock(`/patient/${ routePatientId }/action/${ testAction.id }`, { now: testTs() })
       .wait('@routeAction')
       .wait('@routePatient')
       .wait('@routeLatestFormResponse');
@@ -568,7 +602,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -609,7 +643,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -680,7 +714,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -766,7 +800,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ routePatientId }/form/${ testPrefillForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -855,7 +889,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ routePatientId }/form/${ testPrefillActionTagForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -923,7 +957,7 @@ context('Patient Action Form', function() {
       })
       .routeActionActivity()
       .routePatient()
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -955,7 +989,7 @@ context('Patient Action Form', function() {
       });
   });
 
-  specify('submitting the form', function() {
+  specify('submitting the form and returning to workflows', function() {
     const testUpdatedAt = testTs();
 
     const testPatient = getPatient({
@@ -1078,7 +1112,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -1106,48 +1140,13 @@ context('Patient Action Form', function() {
       .should('contain', 'Testin Mctester');
 
     cy
-      .get('.patient__sidebar')
-      .should('exist');
-
-    cy
-      .get('.js-history-button')
-      .as('historyBtn')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', 'See Form Response History');
-
-    cy
-      .get('@historyBtn')
-      .click();
-
-    cy
-      .get('@historyBtn')
-      .click();
-
-    cy
-      .get('@historyBtn')
-      .click();
-
-    cy
       .get('.form__controls')
       .as('metaRegion');
 
     cy
-      .get('@historyBtn')
-      .should('have.class', 'is-selected')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', 'Back to Current Version');
-
-    cy
       .get('@metaRegion')
-      .find('.button-filter')
+      .find('.form__submission-status')
       .should('contain', formatDate(testUpdatedAt, 'AT_TIME'))
-      .should('contain', 'By Clinician McTester')
       .click();
 
     cy
@@ -1173,6 +1172,11 @@ context('Patient Action Form', function() {
     cy
       .get('iframe')
       .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testFormResponses[2].id }`);
+
+    cy
+      .get('@metaRegion')
+      .find('.form__submission-status')
+      .should('contain', formatDate(testUpdatedAt, 'AT_TIME'));
 
     cy
       .get('@metaRegion')
@@ -1228,21 +1232,8 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .get('iframe')
-      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testNewFormResponse.id }`);
-
-    cy
-      .wait('@routeFormResponse');
-
-    cy
-      .get('.form__controls')
-      .find('button')
-      .contains('Update')
-      .click();
-
-    cy
-      .get('.patient__sidebar')
-      .should('exist');
+      .location('pathname', { timeout: 10000 })
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
   specify('action locked form', function() {
@@ -1284,15 +1275,15 @@ context('Patient Action Form', function() {
           data: testFormResponse,
         };
       })
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routeFormResponse')
       .wait('@routeFormDefinition');
 
     cy
-      .get('[data-draft-status-region]')
-      .should('be.empty');
+      .get('.form__submission-status')
+      .should('contain', formatDate(testTs(), 'LONG'));
 
     cy
       .get('.form__controls')
@@ -1307,20 +1298,6 @@ context('Patient Action Form', function() {
 
         expect(response.args.value.formSubmission.fields.foo).to.equal('bar');
       });
-
-    cy
-      .get('.form__frame')
-      .should('contain', 'Last submitted')
-      .and('contain', formatDate(testTs(), 'LONG'));
-
-    cy
-      .get('.js-history-button')
-      .click();
-
-    // NOTE: History functionality tested elsewhere
-    cy
-      .get('.js-current')
-      .should('exist');
   });
 
   specify('read only form', function() {
@@ -1356,7 +1333,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ routePatientId }/form/${ testReadOnlyForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routePatient')
       .wait('@routeFormByAction')
@@ -1439,8 +1416,8 @@ context('Patient Action Form', function() {
       .wait('@routeActions');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.action-card, .flow-card')
       .first()
       .find('[data-form-region]')
       .click()
@@ -1453,8 +1430,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__frame')
-      .should('contain', 'Last submitted')
-      .and('contain', formatDate(updatedAt, 'AT_TIME'))
+      .should('contain', formatDate(updatedAt, 'AT_TIME'))
       .find('button')
       .contains('Update')
       .click();
@@ -1516,38 +1492,35 @@ context('Patient Action Form', function() {
       .routeFlowActivity()
       .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeAction')
-      .wait('@routePatient');
-
-    cy
-      .get('.patient-action__button')
-      .click()
+      .wait('@routePatient')
       .wait('@routeFormByAction')
       .wait('@routeFormDefinition');
-
-    cy
-      .get('.js-history-button')
-      .should('not.exist');
-
-    cy
-      .get('.form__content')
-      .should('not.contain', 'Last submitted');
 
     cy
       .get('iframe')
       .should('have.attr', 'src', '/forms/formio/index.html');
 
     cy
-      .get('.patient__context-trail .js-action')
-      .click();
+      .get('.patient__context-trail [aria-current="page"]')
+      .should('contain', testAction.attributes.name);
 
     cy
       .url()
       .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`);
 
     cy
-      .go('back')
-      .wait('@routeFormByAction')
-      .wait('@routeFormDefinition');
+      .get('.js-expand-button')
+      .click();
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }/form`);
+
+    cy
+      .get('.js-expand-button')
+      .click()
+      .url()
+      .should('not.contain', `/action/${ testAction.id }/form`);
 
     cy
       .get('.patient__context-trail .js-flow')
@@ -1590,7 +1563,7 @@ context('Patient Action Form', function() {
       .routeFormResponse()
       .routeLatestFormResponse()
       .routeFormActionFields()
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routePatient');
 
@@ -1608,15 +1581,17 @@ context('Patient Action Form', function() {
       .wait('@routeFormDefinition');
 
     cy
-      .get('.patient__context-trail .js-action')
-      .click();
+      .get('.patient__context-trail [aria-current="page"]')
+      .should('contain', testAction.attributes.name);
 
     cy
       .url()
-      .should('contain', `/patient/${ testPatient.id }/action/${ testAction.id }`);
+      .should('contain', `/patient/${ routePatientId }/action/${ testAction.id }`);
   });
 
   specify('form header widgets', function() {
+    cy.viewport(900, 720);
+
     const dob = testDateSubtract(10, 'years');
 
     const testWidgetsForm = getForm({
@@ -1677,7 +1652,7 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .visit(`/patient/${ routePatientId }/form/${ testWidgetsForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeFormDefinition')
       .wait('@routePatient')
@@ -1699,13 +1674,108 @@ context('Patient Action Form', function() {
       .should('contain', 'Active');
   });
 
-  specify('submit and go back button', function() {
-    localStorage.setItem(`form-state_${ currentClinician.id }`, JSON.stringify({ saveButtonType: 'saveAndGoBack' }));
+  specify('embedded form keeps action content reachable', function() {
+    cy.viewport(900, 720);
+
+    const testAction = getAction({
+      relationships: {
+        'form': getRelationship(testForm),
+        'form-responses': getRelationship([]),
+      },
+    });
+    const testFile = getFile();
+
+    cy
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routePatient()
+      .routeFormByAction(fx => {
+        fx.data = testForm;
+
+        return fx;
+      })
+      .routeLatestFormResponse()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeActionFiles(fx => {
+        fx.data = [testFile];
+
+        return fx;
+      })
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routePatient')
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition')
+      .wait('@routeActionFiles')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('[data-form-viewport-frame]')
+      .should('be.visible')
+      .parents('[data-form-viewport-scroll-container]')
+      .should('exist');
+
+    cy.viewport(900, 900);
+
+    cy
+      .get('[data-form-viewport-frame]')
+      .should('be.visible');
+
+    cy.window().then(win => {
+      const nativeMatchMedia = win.matchMedia.bind(win);
+      const pane = win.document.querySelector('[data-form-viewport-scroll-container]');
+
+      cy.spy(pane, 'scrollTo').as('formPaneScroll');
+      cy.stub(win, 'matchMedia').callsFake(query => {
+        if (query === '(prefers-reduced-motion: reduce)') return { matches: true };
+
+        return nativeMatchMedia(query);
+      });
+    });
+
+    cy
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('form:interact');
+      });
+
+    cy
+      .get('@formPaneScroll')
+      .should('have.been.calledWithMatch', {
+        behavior: 'auto',
+      });
+
+    cy
+      .get('.patient-action__attachments-content')
+      .scrollIntoView()
+      .should('be.visible')
+      .find('.patient-action__attachment')
+      .should('be.visible');
+
+    cy
+      .get('.patient-action__activity')
+      .scrollIntoView()
+      .should('be.visible')
+      .and('contain', 'Activity');
+
+    cy
+      .get('.form__frame')
+      .scrollIntoView()
+      .should('be.visible');
+  });
+
+  specify('action form submit preference and stay on response', function() {
+    localStorage.setItem(`form-state_${ currentClinician.id }`, JSON.stringify({
+      saveButtonType: 'saveAndGoBack',
+    }));
 
     const testPatient = getPatient();
-
     const testFlow = getFlow();
-
+    const testFormResponse = getFormResponse();
     const testAction = getAction({
       relationships: {
         'form': getRelationship(testForm),
@@ -1738,18 +1808,21 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visitOnClock(`/patient/${ routePatientId }/flow/${ testFlow.id }/action/${ testAction.id }/form`)
       .wait('@routeAction')
+      .wait('@routeFlow')
       .wait('@routeFormByAction')
       .wait('@routePatient')
       .wait('@routeWorkspacePatient')
       .wait('@routeFormDefinition');
 
+    cy.location('pathname').as('formPath');
+
     cy
       .intercept('POST', '/api/form-responses', {
         statusCode: 201,
         delay: 100,
-        body: { data: getFormResponse() },
+        body: { data: testFormResponse },
       })
       .as('routePostResponse');
 
@@ -1761,54 +1834,17 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.button__drop-list-select')
+      .find('.form__submit-choice')
       .should('not.be.disabled')
       .click();
 
     cy
       .get('.picklist')
+      .should('contain', 'Your Submit Button Preference')
       .find('.js-picklist-item')
       .should('have.length', 2)
       .first()
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-state_${ currentClinician.id }`));
-
-        expect(storage.saveButtonType).to.equal('save');
-      });
-
-    cy
-      .get('.form__controls')
-      .find('.js-save-button')
-      .should('contain', 'Submit')
-      .should('not.contain', 'Go Back');
-
-    cy
-      .get('.form__controls')
-      .find('.button__drop-list-select')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .should('have.length', 2)
-      .eq(1)
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-state_${ currentClinician.id }`));
-
-        expect(storage.saveButtonType).to.equal('saveAndGoBack');
-      });
-
-    cy
-      .get('.form__controls')
-      .find('.button__drop-list-select')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .should('have.length', 2);
+      .should('contain', 'Submit Form + Go Back');
 
     cy
       .iframeStub()
@@ -1819,6 +1855,31 @@ context('Patient Action Form', function() {
     cy
       .get('.picklist')
       .should('not.exist');
+
+    cy
+      .get('.form__controls')
+      .find('.form__submit-choice')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .eq(1)
+      .should('contain', 'Submit Form')
+      .click()
+      .then(() => {
+        const storedState = JSON.parse(localStorage.getItem(`form-state_${ currentClinician.id }`));
+
+        expect(storedState).to.deep.equal({
+          saveButtonType: 'save',
+        });
+      });
+
+    cy
+      .get('.form__controls')
+      .find('.js-save-button')
+      .should('contain', 'Submit')
+      .should('not.contain', 'Go Back');
 
     cy
       .iframeStub()
@@ -1849,14 +1910,20 @@ context('Patient Action Form', function() {
         expect(data.attributes.response.data.storyTime).to.equal('Once upon a time...');
       });
 
+    cy.get('@formPath').then(formPath => {
+      cy.location('pathname').should('equal', formPath);
+    });
+
     cy
-      .location('pathname', { timeout: 10000 })
-      .should('contain', `/flow/${ testFlow.id }`);
+      .get('iframe')
+      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testFormResponse.id }`);
+
+    cy
+      .get('.form__controls')
+      .contains('Update');
   });
 
-  specify('submit and go back button - action without a flow', function() {
-    localStorage.setItem(`form-state_${ currentClinician.id }`, JSON.stringify({ saveButtonType: 'saveAndGoBack' }));
-
+  specify('submit and go back - action without a flow', function() {
     const testPatient = getPatient();
 
     const testAction = getAction({
@@ -1887,7 +1954,7 @@ context('Patient Action Form', function() {
       .routeFormActionFields()
       .routeLatestFormResponse()
       .routeActionActivity()
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visitOnClock(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -1901,6 +1968,16 @@ context('Patient Action Form', function() {
         body: { data: getFormResponse() },
       })
       .as('routePostResponse');
+
+    cy
+      .get('.form__controls')
+      .find('.js-save-button')
+      .should('contain', 'Submit + Go Back');
+
+    cy
+      .get('.form__controls')
+      .find('.form__submit-choice')
+      .should('exist');
 
     cy
       .iframeStub()
@@ -1924,7 +2001,85 @@ context('Patient Action Form', function() {
       .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
-  specify('submit and go back button - form response error', function() {
+  specify('submit and go back - action in a flow', function() {
+    const testPatient = getPatient();
+    const testFlow = getFlow({
+      relationships: { patient: getRelationship(testPatient) },
+    });
+    const testAction = getAction({
+      relationships: {
+        'flow': getRelationship(testFlow),
+        'form': getRelationship(testForm),
+        'patient': getRelationship(testPatient),
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = testFlow;
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [testAction];
+        return fx;
+      })
+      .routeFlowActivity()
+      .routeAction(fx => {
+        fx.data = testAction;
+        return fx;
+      })
+      .routePatientByFlow()
+      .routeFormByAction(fx => {
+        fx.data = testForm;
+        return fx;
+      })
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
+      .routeActionActivity()
+      .visitOnClock(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeFlow')
+      .wait('@routeAction')
+      .wait('@routeFormByAction')
+      .wait('@routeFormDefinition');
+
+    cy
+      .intercept('POST', '/api/form-responses', {
+        statusCode: 201,
+        delay: 100,
+        body: { data: getFormResponse() },
+      })
+      .as('routePostResponse');
+
+    cy
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('update:storedSubmission', {
+          familyHistory: 'Here is some typing',
+          storyTime: 'Once upon a time...',
+        });
+      });
+
+    cy
+      .get('.form__controls')
+      .find('.js-save-button')
+      .should('contain', 'Submit + Go Back')
+      .should('be.enabled')
+      .click();
+
+    cy.wait('@routePostResponse');
+
+    cy
+      .location('pathname', { timeout: 10000 })
+      .should('equal', `/one/patient/${ testPatient.id }/flow/${ testFlow.id }`);
+  });
+
+  specify('submit and go back - form response error', function() {
     const testAction = getAction({
       relationships: {
         'form': getRelationship(testForm),
@@ -1948,7 +2103,7 @@ context('Patient Action Form', function() {
       .routeFormActionFields()
       .routeActionActivity()
       .routePatient()
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -1977,17 +2132,6 @@ context('Patient Action Form', function() {
           storyTime: 'New typing',
         });
       });
-
-    cy
-      .get('.form__controls')
-      .find('.button__drop-list-select')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .eq(1)
-      .click();
 
     cy
       .get('.form__controls')
@@ -2029,7 +2173,7 @@ context('Patient Action Form', function() {
       .routeLatestFormResponse()
       .routeFormDefinition()
       .routeFormActionFields()
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`, { now: testTs() })
+      .visitOnClock(`/patient/${ routePatientId }/action/${ testAction.id }`, { now: testTs() })
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routeFormDefinition');
@@ -2059,7 +2203,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -2135,8 +2279,18 @@ context('Patient Action Form', function() {
   });
 
   specify('hidden submit button', function() {
+    const testAction = getAction({
+      relationships: {
+        'form': getRelationship(testSubmitHiddenForm),
+      },
+    });
+
     cy
-      .routeAction()
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
       .routeFormByAction(fx => {
         fx.data = testSubmitHiddenForm;
 
@@ -2146,7 +2300,7 @@ context('Patient Action Form', function() {
       .routeFormDefinition()
       .routeFormActionFields()
       .routePatient()
-      .visit(`/patient/${ routePatientId }/form/${ testSubmitHiddenForm.id }/action/1`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -2201,7 +2355,7 @@ context('Patient Action Form', function() {
       .routeFormActionFields()
       .routeActionActivity()
       .routePatient()
-      .visit(`/patient/${ routePatientId }/form/${ testSubmitHiddenForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
       .wait('@routePatient')
@@ -2314,8 +2468,8 @@ context('Patient Action Form', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.workflow-page__list')
+      .find('.action-card, .flow-card')
       .as('listItems')
       .first()
       .find('[data-form-region] button')
@@ -2355,8 +2509,8 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.workflow-page__list')
+      .find('.action-card, .flow-card')
       .as('listItems')
       .last()
       .find('[data-form-region] button')
@@ -2491,8 +2645,8 @@ context('Patient Action Form', function() {
       .wait('@routePatientFlows');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.workflow-page__list')
+      .find('.action-card, .flow-card')
       .as('listItems')
       .first()
       .find('[data-form-region] button')
@@ -2532,8 +2686,8 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.workflow-page__list')
+      .find('.action-card, .flow-card')
       .as('listItems')
       .eq(1)
       .find('[data-form-region] button')
@@ -2573,8 +2727,8 @@ context('Patient Action Form', function() {
       });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.workflow-page__list')
+      .find('.action-card, .flow-card')
       .as('listItems')
       .last()
       .find('[data-form-region] button')
@@ -2603,19 +2757,22 @@ context('Patient Action Form', function() {
   specify('report form', function() {
     const createdAt = testTs();
 
-    const testAction = getAction({
-      attributes: {
-        created_at: createdAt,
-        tags: ['prefill-latest-response'],
-      },
-    });
-
     const testReportForm = getForm({
       attributes: {
         options: {
           is_report: true,
           prefill_action_tag: 'foo-tag',
         },
+      },
+    });
+
+    const testAction = getAction({
+      attributes: {
+        created_at: createdAt,
+        tags: ['prefill-latest-response'],
+      },
+      relationships: {
+        'form': getRelationship(testReportForm),
       },
     });
 
@@ -2635,7 +2792,7 @@ context('Patient Action Form', function() {
       .routeFormActionFields()
       .routePatient()
       .routeLatestFormSubmission()
-      .visit(`/patient/${ routePatientId }/form/${ testReportForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routePatient')
@@ -2682,7 +2839,7 @@ context('Patient Action Form', function() {
       .routeFormDefinition()
       .routeFormActionFields()
       .routePatient()
-      .visitOnClock(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`, { now: testTs() })
+      .visitOnClock(`/patient/${ routePatientId }/action/${ testAction.id }`, { now: testTs() })
       .wait('@routeAction')
       .wait('@routeFormByAction')
       .wait('@routeLatestFormResponse')
