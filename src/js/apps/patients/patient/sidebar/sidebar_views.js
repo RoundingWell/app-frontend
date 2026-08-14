@@ -3,16 +3,22 @@ import Backbone from 'backbone';
 import { View, CollectionView } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/loader.scss';
+import 'scss/modules/sidebar.scss';
+import 'scss/modules/skeleton.scss';
+
 import { PATIENT_STATUS } from 'js/static';
 import intl, { renderTemplate } from 'js/i18n';
 
 import PreloadRegion from 'js/regions/preload_region';
 
-import 'scss/modules/widgets.scss';
-
 import Optionlist from 'js/components/optionlist';
 
 import { WidgetCollectionView } from 'js/apps/patients/shared/widgets/widgets_views';
+
+import LoadingTemplate from './loading.hbs';
+import SidebarTemplate from './sidebar.hbs';
 
 import 'js/apps/patients/shared/patient-sidebar.scss';
 import './patient-sidebar.scss';
@@ -25,9 +31,18 @@ const sectionLabelTemplates = {
 };
 
 const NameView = View.extend({
-  tagName: 'h1',
+  tagName: 'button',
   className: 'patient-sidebar__name',
-  template: hbs`{{ first_name }} {{ last_name }}`,
+  template: hbs`
+    <span class="patient-sidebar__name-text">{{ first_name }} {{ last_name }}</span>
+    <span class="patient-sidebar__name-chevron" aria-hidden="true">{{fas "chevron-right"}}</span>
+  `,
+  attributes: {
+    type: 'button',
+  },
+  triggers: {
+    'click': 'click:patient',
+  },
   modelEvents: {
     'change': 'render',
   },
@@ -93,6 +108,7 @@ const SidebarSectionView = View.extend({
 });
 
 const SidebarsView = CollectionView.extend({
+  className: 'patient-sidebar__cards',
   childView: SidebarSectionView,
   childViewOptions() {
     return {
@@ -102,14 +118,24 @@ const SidebarsView = CollectionView.extend({
   viewComparator: false,
 });
 
+const SidebarLoadingView = View.extend({
+  className: 'loader patient-sidebar__loader',
+  attributes: {
+    'aria-busy': 'true',
+    'role': 'status',
+  },
+  template: LoadingTemplate,
+  templateContext() {
+    return { sections: new Array(4).fill(null) };
+  },
+});
+
 const SidebarView = View.extend({
-  className: 'patient-sidebar flex-region',
-  template: hbs`
-    <div data-name-region></div>
-    <span class="patient-sidebar__icon">{{far "address-card"}}</span>
-    <button class="button--icon patient-sidebar__menu js-menu">{{far "ellipsis"}}</button>
-    <div class="patient-sidebar__sidebars" data-sidebars-region></div>
-  `,
+  className() {
+    const listSidebarClass = this.getOption('isListSidebar') ? ' patient-sidebar--list' : '';
+    return `patient-sidebar flex-region${ listSidebarClass }`;
+  },
+  template: SidebarTemplate,
   regions: {
     name: '[data-name-region]',
     sidebars: {
@@ -122,16 +148,32 @@ const SidebarView = View.extend({
       model: this.model,
     }));
 
+    if (!this.collection) return;
+
     this.showChildView('sidebars', new SidebarsView({
       model: this.model,
       collection: this.collection,
     }));
   },
+  templateContext() {
+    return {
+      isClosable: this.getOption('isClosable'),
+      isListSidebar: this.getOption('isListSidebar'),
+    };
+  },
+  childViewTriggers: {
+    'click:patient': 'click:patient',
+  },
   triggers: {
     'click @ui.menu': 'click:menu',
+    'click @ui.close': 'click:close',
   },
   ui: {
+    close: '.js-close',
     menu: '.js-menu',
+  },
+  focusClose() {
+    this.ui.close.trigger('focus');
   },
   onClickMenu() {
     const workspacePatient = this.model.getWorkspacePatient();
@@ -183,7 +225,7 @@ const SidebarView = View.extend({
       bodyText: i18n.archiveModal.bodyText,
       headingText: i18n.archiveModal.headingText,
       submitText: i18n.archiveModal.submitText,
-      buttonClass: 'button--red',
+      buttonClass: 'button button--danger',
       onSubmit: () => {
         modal.destroy();
         this.triggerMethod('click:archivedStatus');
@@ -194,4 +236,5 @@ const SidebarView = View.extend({
 
 export {
   SidebarView,
+  SidebarLoadingView,
 };
