@@ -1,4 +1,6 @@
 .modal {
+  --loader-min-height: 120px;
+
   background-color: #{$white};
   border-radius: 8px;
   box-shadow: 0 4px 8px 0 rgb(0 0 0 / 50%);
@@ -7,29 +9,42 @@
 }
 
 .modal--small {
-  @extend .modal;
+  --loader-min-height: 88px;
 
   border-radius: 4px;
   width: 352px;
 }
 
 .modal--large {
-  @extend .modal;
-
   min-width: 700px;
   width: auto;
 }
 
-.modal--sidebar {
-  background: #{$white};
+.modal--form {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  min-height: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 464px;
+
+  .modal__body {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .modal__footer,
+  .modal__header {
+    flex: none;
+  }
+}
+
+.modal--form-small {
+  height: min(560px, 65dvh);
+  max-width: 80vw;
+  width: 640px;
+}
+
+.modal--form-large {
+  height: min(800px, 80dvh);
+  max-width: 85vw;
+  width: 1120px;
 }
 
 .modal__header {
@@ -57,10 +72,6 @@
   }
 }
 
-.modal__header--sidebar {
-  padding: 16px 24px;
-}
-
 .modal__header-icon {
   align-items: center;
   display: flex;
@@ -80,10 +91,6 @@
 
 .modal__content--small {
   padding: 8px 24px;
-}
-
-.modal__content--sidebar {
-  padding: 16px 24px 0;
 }
 
 .modal__footer {
@@ -116,19 +123,14 @@
 }
 
 .modal__form-iframe {
-  height: 50vh;
+  height: 100%;
+  min-height: 0;
 
   iframe {
     display: block;
     height: 100%;
     width: 100%;
   }
-}
-
-.modal__form-iframe--small {
-  @extend .modal__form-iframe;
-
-  height: 35vh;
 }
 
 .modal__form-label {
@@ -144,3 +146,17 @@
   min-width: 248px;
 }
 
+@media (width <= 720px) {
+  .modal {
+    border-radius: 0;
+    max-height: 100%;
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .modal--form {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}

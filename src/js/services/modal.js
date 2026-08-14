@@ -1,14 +1,17 @@
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
+
+import 'scss/modules/buttons.scss';
+import 'scss/modules/modals.scss';
+
 import App from 'js/base/app';
 
 import intl from 'js/i18n';
 
 import FormsService from 'js/services/forms';
-import { addAction } from 'js/datadog';
 
-import { ModalView, SidebarModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
+import { ModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
 import { DraftStatusView } from 'js/apps/patients/patient/form/form_views';
 
 export default App.extend({
@@ -17,13 +20,11 @@ export default App.extend({
     'show': 'showModal',
     'show:small': 'showSmall',
     'show:custom': 'showCustom',
-    'show:sidebar': 'showSidebar',
     'show:form': 'showForm',
   },
-  initialize({ modalRegion, modalSmallRegion, modalSidebarRegion }) {
+  initialize({ modalRegion, modalSmallRegion }) {
     this.modalRegion = modalRegion;
     this.modalSmallRegion = modalSmallRegion;
-    this.modalSidebarRegion = modalSidebarRegion;
   },
   showModal(options) {
     const ConfirmModal = ModalView.extend(options);
@@ -45,32 +46,21 @@ export default App.extend({
     this.modalRegion.show(view);
     return view;
   },
-  showSidebar(options) {
-    const SidebarModal = SidebarModalView.extend(options);
-    const view = new SidebarModal();
-
-    this.modalSidebarRegion.show(view);
-
-    return view;
-  },
   showForm(patient, formName, form, size) {
-    if (size === 'large') {
-      this.routeLargeFormRequest(patient, form, formName);
-      return;
-    }
-
+    const modalSize = size === 'small' ? 'small' : 'large';
+    const className = `modal modal--form modal--form-${ modalSize }`;
     const formService = new FormsService({ patient, form });
-    const bodyView = new IframeFormView({ model: form, size });
+    const bodyView = new IframeFormView({ model: form });
 
     if (form.isReadOnly()) {
-      this.showViewOnlyForm(formService, bodyView, formName);
+      this.showViewOnlyForm(formService, bodyView, formName, className);
       return;
     }
 
     const draftModel = new Backbone.Model();
 
     const modal = this.showModal({
-      className: 'modal--large',
+      className,
       headingText: formName,
       headerIcon: 'square-poll-horizontal',
       bodyView,
@@ -96,7 +86,7 @@ export default App.extend({
       const draftStatusView = new DraftStatusView({
         model: draftModel,
         viewOptions: {
-          className: 'button--icon flex flex-align-center u-margin--r-16',
+          className: 'button button--icon flex flex-align-center u-margin--r-16',
           template: hbs`{{far "shield-check"}}`,
         },
         position() {
@@ -141,18 +131,9 @@ export default App.extend({
 
     return modal;
   },
-  routeLargeFormRequest(patient, form, formName) {
-    Radio.trigger('event-router', 'patient:form', patient.id, form.id);
-
-    addAction('Large form modal request routed to patient form', {
-      patientId: patient.id,
-      formId: form.id,
-      formName,
-    });
-  },
-  showViewOnlyForm(formService, bodyView, formName) {
+  showViewOnlyForm(formService, bodyView, formName, className) {
     this.showModal({
-      className: 'modal--large',
+      className,
       headingText: formName,
       submitText: intl.globals.modal.modalViews.viewOnlyForm.doneText,
       cancelText: false,

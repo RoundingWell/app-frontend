@@ -1,0 +1,43 @@
+.skeleton-loading {
+  animation: skeleton-loading-reveal 1ms linear 500ms forwards;
+  opacity: 0;
+}
+
+.skeleton-loading--generic {
+  animation-delay: 700ms;
+}
+
+.skeleton-loading--immediate {
+  animation-delay: 0ms;
+}
+
+.skeleton-loading__shape {
+  animation: skeleton-loading-wave 1.4s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--color-control-background) 25%, var(--color-page-bg) 50%, var(--color-control-background) 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  display: block;
+}
+
+@keyframes skeleton-loading-reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes skeleton-loading-wave {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-loading__shape {
+    animation: none;
+    background: var(--color-control-background);
+  }
+}

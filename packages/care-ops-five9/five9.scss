@@ -5,6 +5,14 @@ $five9-call-active-hover: color(green, dark);
 $five9-call-ended: color(red);
 $five9-call-ended-hover: color(red, dark);
 
+body:has(.five9-wrapper) {
+  --dialer-clearance: calc(36px + var(--space-6));
+}
+
+body:has(.five9-wrapper.is-open) {
+  --dialer-clearance: calc(min(80vh, 760px) + var(--space-6));
+}
+
 .five9-wrapper {
   border-radius: 8px 8px 0 0;
   bottom: 0;

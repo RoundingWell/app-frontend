@@ -11,7 +11,7 @@ import Datepicker from './index';
 context('Datepicker', function() {
   const TestView = View.extend({
     template: hbs`
-      <button class="button--blue u-margin--t-16 u-margin--l-16">
+      <button class="button button--primary u-margin--t-16 u-margin--l-16">
         {{#if date}}
           {{formatDateTime date "LONG"}}
         {{/if}}
