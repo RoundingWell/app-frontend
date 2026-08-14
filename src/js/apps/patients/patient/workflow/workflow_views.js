@@ -12,9 +12,7 @@ import 'scss/modules/skeleton.scss';
 import { alphaSort } from 'js/utils/sorting';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
-import PreloadRegion from 'js/regions/preload_region';
-
-import { StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { StateComponent, CardOwnerComponent, CardDueComponent, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 
 import ActionItemTemplate from './action-item.hbs';
@@ -174,7 +172,7 @@ const ActionItemView = View.extend({
 
     const program = this.model.getProgram();
     const isDisabled = this.getOption('status') === 'done';
-    const ownerComponent = new OwnerComponent({
+    const ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
@@ -196,7 +194,7 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.getOption('status') === 'done';
-    const dueDateComponent = new DueComponent({
+    const dueDateComponent = new CardDueComponent({
       date: this.model.get('due_date'),
       isCompact: true,
       state: { isDisabled },
@@ -218,7 +216,7 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.getOption('status') === 'done' || !this.model.get('due_date');
-    const dueTimeComponent = new TimeComponent({
+    const dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
       isCompact: true,
       state: { isDisabled },
@@ -296,7 +294,7 @@ const FlowItemView = View.extend({
 
     const program = this.model.getProgram();
     const isDisabled = this.getOption('status') === 'done';
-    const ownerComponent = new OwnerComponent({
+    const ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
@@ -349,7 +347,6 @@ const LayoutView = View.extend({
     const regions = {
       content: {
         el: '[data-content-region]',
-        regionClass: PreloadRegion,
         replaceElement: true,
       },
     };

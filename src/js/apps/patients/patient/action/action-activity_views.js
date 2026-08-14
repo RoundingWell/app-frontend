@@ -5,6 +5,13 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/forms.scss';
+import 'scss/modules/loader.scss';
+import 'scss/modules/sidebar.scss';
+import 'scss/modules/skeleton.scss';
+import 'scss/modules/textarea-flex.scss';
+
 import { alphaSort } from 'js/utils/sorting';
 
 import { ACTION_SHARING } from 'js/static';
@@ -12,31 +19,28 @@ import { renderTemplate } from 'js/i18n';
 
 import Tooltip from 'js/components/tooltip';
 
-import { CommentFormView } from 'js/apps/patients/shared/comments_views';
-
-import 'scss/modules/comments.scss';
-import 'scss/modules/sidebar.scss';
+import { CommentFormView, PostCommentView } from 'js/apps/patients/shared/comments_views';
 
 import './action.scss';
 
 const CreatedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "created")) name = name team = team}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const ClinicianAssignedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "clinicianAssigned")) name = name team = team to_name = to_clinician}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const ActionCopiedFromProgramActionTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "actionCopiedFromProgram")) name = name team = team program = program source = source}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const DetailsUpdatedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "detailsUpdated")) name = name team = team}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const DueDateUpdatedTemplate = hbs`
@@ -45,7 +49,7 @@ const DueDateUpdatedTemplate = hbs`
   {{else}}
   {{formatHTMLMessage (intlGet (getI18nSource "dueDateUpdated")) name = name team = team date = (formatDateTime value "LONG")}}
   {{/unless}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const DueTimeUpdatedTemplate = hbs`
@@ -54,7 +58,7 @@ const DueTimeUpdatedTemplate = hbs`
   {{else}}
   {{formatHTMLMessage (intlGet (getI18nSource "dueTimeUpdated")) name = name team = team time = (formatDateTime value "LT" inputFormat="HH:mm:ss")}}
   {{/unless}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const DurationUpdatedTemplate = hbs`
@@ -63,12 +67,12 @@ const DurationUpdatedTemplate = hbs`
   {{else}}
   {{formatHTMLMessage (intlGet (getI18nSource "durationUpdated")) name = name team = team duration = value}}
   {{/unless}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const FormUpdatedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "formUpdated")) name = name team = team form = form}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const FormRespondedTemplate = hbs`
@@ -77,36 +81,100 @@ const FormRespondedTemplate = hbs`
   {{ else }}
     {{formatHTMLMessage (intlGet (getI18nSource "formRecipientResponded")) recipient = recipient form = form}}
   {{/if}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const NameUpdatedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "nameUpdated")) name = name team = team to_name = value from_name = previous}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const TeamAssignedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "teamAssigned")) name = name team = team to_team = to_team}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const StateUpdatedTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "stateUpdated")) name = name team = team to_state = to_state}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const SharingCanceledTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "sharingCanceled")) name = name team = team}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const SharingSentTemplate = hbs`
   {{formatHTMLMessage (intlGet (getI18nSource "sharingSent")) recipient = recipient form = form}}
-  <div>{{formatDateTime date "AT_TIME"}}</div>
+  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
+const ActivityIconTemplate = hbs`{{far icon}}`;
+
+const ACTIVITY_ICONS = {
+  ActionClinicianAssigned: 'circle-user',
+  ActionTeamAssigned: 'circle-user',
+  ActionCreated: 'file-lines',
+  ActionCopiedFromProgramAction: 'file-lines',
+  ActionDetailsUpdated: 'pen-to-square',
+  ActionDueDateUpdated: 'calendar-days',
+  ActionDueTimeUpdated: 'clock',
+  ActionDurationUpdated: 'stopwatch',
+  ActionFormUpdated: 'square-poll-horizontal',
+  ActionFormResponded: 'square-poll-horizontal',
+  ActionNameUpdated: 'pen-to-square',
+  ActionStateUpdated: 'circle-exclamation',
+  ActionSharingUpdated: 'share-from-square',
+};
+const ACTIVITY_TYPES = Object.keys(ACTIVITY_ICONS);
+
+const ActionActivityLoadingView = View.extend({
+  className: 'patient-action__activity-layout patient-action__activity-loading skeleton-loading',
+  attributes: {
+    'aria-busy': 'true',
+    'role': 'status',
+  },
+  template: hbs`
+    <span class="loader__text">{{ @intl.regions.preload.loading }}</span>
+    <h3 class="patient-detail-page__activity-heading">{{ @intl.patients.patient.action.activityViews.activityHeadingText }}</h3>
+    <div class="patient-action-loading__activity-items" aria-hidden="true">
+      <span class="skeleton-loading__shape patient-action-loading__activity-item"></span>
+      <span class="skeleton-loading__shape patient-action-loading__activity-item patient-action-loading__activity-item--short"></span>
+    </div>
+  `,
+});
+
+const ActionCommentActionsView = PostCommentView.extend({
+  className: 'patient-action__comment-actions',
+  template: hbs`
+    <button class="button button--positive patient-action__comment-post js-post" type="button" {{#if isDisabled}}disabled{{/if}}>
+      {{ @intl.patients.shared.commentsViews.postCommentView.postBtn }}
+    </button>
+    {{#unless shouldHideCancel}}<button class="button button--text u-margin--r-4 js-cancel" type="button">{{ @intl.patients.shared.commentsViews.postCommentView.cancelBtn }}</button>{{/unless}}
+  `,
+});
+
+const ActionCommentFormView = CommentFormView.extend({
+  className: 'patient-action__comment-composer',
+  template: hbs`
+    <div class="patient-action__comment-input-wrap textarea-flex">
+      <textarea class="form-input form-input--secondary textarea-flex__input patient-action__comment-input js-input" placeholder="{{ @intl.patients.shared.commentsViews.commentFormView.placeholder }}">{{ message }}</textarea>
+      <div class="textarea-flex__mirror form-input form-input--secondary patient-action__comment-input js-spacer" aria-hidden="true">{{ message }}</div>
+    </div>
+    <div data-post-region></div>
+  `,
+  showPostView() {
+    const shouldHideCancel = this.model.isNew() && !this.model.get('message');
+
+    this.showChildView('post', new ActionCommentActionsView({
+      model: this.model,
+      shouldHideCancel,
+    }));
+  },
+});
+
 const CommentView = View.extend({
-  className: 'u-margin--b-16',
+  className: 'patient-action__comment',
   ui: {
     edit: '.js-edit',
   },
@@ -199,12 +267,14 @@ const ActivityView = View.extend({
     if (type === 'ActionSharingUpdated') {
       const sharing = this.model.get('value');
       if (sharing === ACTION_SHARING.SENT) return SharingSentTemplate;
-      if (sharing === ACTION_SHARING.CANCELED) return SharingCanceledTemplate;
+      return SharingCanceledTemplate;
     }
 
-    if (!Templates[type]) return hbs``;
-
     return Templates[type];
+  },
+  onRender() {
+    const icon = ACTIVITY_ICONS[this.model.get('event_type')];
+    this.$el.prepend(renderTemplate(ActivityIconTemplate, { icon }));
   },
   _getModelName(model) {
     return model ? model.get('name') : null;
@@ -237,12 +307,12 @@ const ActivityView = View.extend({
 });
 
 const ActivitiesView = CollectionView.extend({
-  className: 'u-margin--t-24',
+  className: 'patient-action__activity-list patient-detail-page__activity-list',
   template: hbs`
-    <h3 class="sidebar__heading">
-      {{far "timeline-arrow"}}<span class="u-margin--l-8">{{ @intl.patients.patient.action.activityViews.activityHeadingText }}</span>
+    <h3 class="sidebar__heading patient-detail-page__activity-heading">
+      {{ @intl.patients.patient.action.activityViews.activityHeadingText }}
     </h3>
-    <div class="u-margin--t-16 sidebar__activity" data-activities-region></div>
+    <div class="patient-action__activity-items" data-activities-region></div>
   `,
   childViewContainer: '[data-activities-region]',
   childView(model) {
@@ -252,7 +322,12 @@ const ActivitiesView = CollectionView.extend({
     'remove:comment': 'remove:comment',
   },
   viewFilter({ model }) {
+    if (model.type !== 'events') return true;
+    if (!ACTIVITY_TYPES.includes(model.get('event_type'))) return false;
     if (model.get('event_type') === 'ActionCreated' && model.get('source') === 'system') return false;
+    if (model.get('event_type') === 'ActionSharingUpdated') {
+      return [ACTION_SHARING.SENT, ACTION_SHARING.CANCELED].includes(model.get('value'));
+    }
     return true;
   },
   viewComparator(viewA, viewB) {
@@ -265,37 +340,21 @@ const ActivitiesView = CollectionView.extend({
   },
 });
 
-const TimestampsView = View.extend({
-  className: 'sidebar__footer flex',
-  template: hbs`
-    <div class="sidebar__footer-left"><h4 class="sidebar__label">{{ @intl.patients.patient.action.activityViews.createdAt }}</h4><div>{{formatDateTime createdAt "AT_TIME"}}</div></div>
-    <div><h4 class="sidebar__label">{{ @intl.patients.patient.action.activityViews.updatedAt }}</h4><div>{{formatDateTime updated_at "AT_TIME"}}</div></div>
-  `,
-  templateContext() {
-    return {
-      createdAt: this.getOption('createdEvent').get('date'),
-    };
-  },
-  modelEvents: {
-    'change:updated_at': 'render',
-  },
-});
-
 const LayoutView = View.extend({
+  className: 'patient-action__activity-layout',
   template: hbs`
     <div data-activities-region></div>
-    <div class="u-margin--t-16" data-comment-form-region></div>
-    <div class="u-margin--t-16" data-timestamps-region></div>
+    <div class="patient-action__comment-form" data-comment-form-region></div>
   `,
   regions: {
     activities: '[data-activities-region]',
     comment: '[data-comment-form-region]',
-    timestamps: '[data-timestamps-region]',
   },
 });
 
 export {
+  ActionActivityLoadingView,
+  ActionCommentFormView,
   LayoutView,
   ActivitiesView,
-  TimestampsView,
 };

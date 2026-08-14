@@ -1,10 +1,7 @@
 .time-component {
-  border-left: 1px solid var(--color-chip-border);
-  border-radius: var(--time-component-left-radius, 16px) 16px 16px var(--time-component-left-radius, 16px);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 20px;
-  padding: 0 8px;
+  --button-border-radius: var(--time-component-left-radius, 16px) 16px 16px var(--time-component-left-radius, 16px);
+
+  border-left: var(--button-border-width, 1px) solid var(--color-chip-border);
 
   &:hover {
     border-left-color: #{$black-90};
@@ -13,4 +10,11 @@
   &.is-overdue {
     color: color(red);
   }
+}
+
+.button--secondary.time-component {
+  --button-font-size: 12px;
+  --button-font-weight: 600;
+  --button-line-height: 20px;
+  --button-padding: 0 8px;
 }

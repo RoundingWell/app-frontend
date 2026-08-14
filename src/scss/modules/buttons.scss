@@ -68,7 +68,7 @@
 
 .button--secondary {
   color: #{$black-20};
-  line-height: 16px;
+  line-height: var(--button-line-height, 16px);
   text-align: left;
 
   &:hover:enabled {

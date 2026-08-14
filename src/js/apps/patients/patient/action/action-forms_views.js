@@ -1,30 +1,14 @@
-import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
-import 'scss/modules/forms.scss';
-import 'scss/modules/textarea-flex.scss';
 import 'scss/modules/sidebar.scss';
 
 import { ACTION_SHARING } from 'js/static';
 
+import FormLayoutTemplate from './form-layout.hbs';
 import FormSharingTemplate from './form-sharing.hbs';
 
 import './action.scss';
-
-const FormView = View.extend({
-  attributes() {
-    return {
-      disabled: !!this.getOption('isShowingForm'),
-    };
-  },
-  tagName: 'button',
-  className: 'button-secondary w-100 patient-action__button',
-  template: hbs`{{far "square-poll-horizontal"}}<span>{{ name }}</span>`,
-  triggers: {
-    'click': 'click',
-  },
-});
 
 function getSharingOpts(sharing) {
   switch (sharing) {
@@ -78,42 +62,14 @@ const FormSharingView = View.extend({
 });
 
 const FormLayoutView = View.extend({
-  template: hbs`
-    <div class="flex{{#if hasForm}} u-margin--t-8{{/if}}">
-      {{#if hasForm}}<h4 class="sidebar__label u-margin--t-8">{{ @intl.patients.patient.action.formsViews.formLayoutView.formLabel }}</h4>{{/if}}
-      <div class="flex-grow" data-form-region></div>
-    </div>
-    <div class="flex">
-      <div class="flex-grow" data-form-sharing-region></div>
-    </div>
-  `,
-  templateContext() {
-    return {
-      hasForm: !!this.model.getForm(),
-    };
-  },
+  className: 'patient-action__form',
+  template: FormLayoutTemplate,
   regions: {
     form: '[data-form-region]',
     formSharing: '[data-form-sharing-region]',
   },
   onRender() {
-    this.showForm();
     this.showFormSharing();
-  },
-  showForm() {
-    const form = this.model.getForm();
-    if (!form) return;
-
-    const formView = new FormView({
-      model: form,
-      isShowingForm: this.getOption('isShowingForm'),
-    });
-
-    this.listenTo(formView, 'click', () => {
-      this.triggerMethod('click:form', form);
-    });
-
-    this.showChildView('form', formView);
   },
   showFormSharing() {
     if (!this.model.hasSharing()) return;

@@ -5,10 +5,5 @@
 }
 
 .owner-component--compact {
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 20px;
   max-width: var(--owner-component-max-width, 160px);
-  padding: 0 8px;
 }
