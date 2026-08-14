@@ -47,6 +47,7 @@ const DateFilterPickerComponent = Datepicker.extend({
 
 export default Component.extend({
   dateTypes,
+  showPrevNextButtons: true,
   StateModel,
   stateEvents: {
     'change': 'show',
@@ -55,6 +56,7 @@ export default Component.extend({
   viewOptions() {
     return {
       model: this.getState(),
+      showPrevNextButtons: this.getOption('showPrevNextButtons'),
     };
   },
   viewEvents: {

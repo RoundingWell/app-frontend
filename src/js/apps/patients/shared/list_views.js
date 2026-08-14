@@ -4,9 +4,9 @@ import { View } from 'marionette';
 
 import OwnerDroplist from 'js/apps/patients/shared/components/owner_component';
 
-import './list.scss';
+import './list-views.scss';
 
-const TitleOwnerFilterTemplate = hbs`<span class="list__title-filter-name">{{ name }}</span>{{far "angle-down"}}`;
+const TitleOwnerFilterTemplate = hbs`<span class="patient-list__title-filter-name">{{ name }}</span>{{far "angle-down" classes="patient-list__title-filter-icon"}}`;
 
 const ListCountTemplate = hbs`
   <strong>
@@ -69,7 +69,7 @@ const TitleOwnerDroplist = OwnerDroplist.extend({
   align: 'right',
   popWidth: null,
   viewOptions: {
-    className: 'list__title-filter-button',
+    className: 'patient-list__title-filter-button',
     template: TitleOwnerFilterTemplate,
   },
 });

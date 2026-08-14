@@ -9,7 +9,34 @@ import { getFilter } from 'support/api/filters';
 
 const STATE_VERSION = 'v6';
 
-context('filter sidebar', function() {
+function getCustomFilterButton(label) {
+  return cy
+    .contains('.list-filters__custom-filter-label', label)
+    .parents('.list-filters__custom-filter')
+    .find('[data-filter-button]');
+}
+
+function getActiveFiltersDot() {
+  return cy.get('[data-filters-region] .patient-list-page__active-filter-dot');
+}
+
+function expandFiltersSidebar() {
+  cy.get('.list-page').then($layout => {
+    if ($layout.hasClass('is-filters-collapsed')) {
+      cy.wrap($layout).find('[data-filters-region] button').click();
+    }
+  });
+}
+
+function expandFilterSection(region) {
+  cy.get(`${ region } .list-filters__section`).then($section => {
+    if ($section.hasClass('is-collapsed')) {
+      cy.wrap($section).find('.list-filters__section-button').click();
+    }
+  });
+}
+
+context('list filters', function() {
   const currentClinician = getCurrentClinician();
   const testStates = [stateTodo, stateInProgress, stateDone, stateUnableToComplete];
 
@@ -109,11 +136,9 @@ context('filter sidebar', function() {
       .click()
       .wait('@routeFlows');
 
+    expandFiltersSidebar();
+
     cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click()
       .wait('@routeFilterError')
       .then(interception => {
         // Verify the error response
@@ -132,16 +157,12 @@ context('filter sidebar', function() {
       .click()
       .wait('@routeActions');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
+    getActiveFiltersDot().should('exist');
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.list-filters')
       .as('filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '1');
 
     cy
@@ -152,26 +173,55 @@ context('filter sidebar', function() {
     cy
       .get('@filtersSidebar')
       .find('[data-filter-button]')
-      .should('have.length', 2)
-      .first()
-      .get('.sidebar__label')
-      .should('contain', 'Insurance Plans')
-      .get('[data-filter-button]')
+      .should('have.length', 2);
+
+    cy
+      .get('@filtersSidebar')
+      .find('.list-filters__section-heading')
+      .click();
+
+    cy
+      .get('@filtersSidebar')
+      .find('.list-filters__custom-filters-list')
+      .should('not.be.visible');
+
+    cy
+      .get('@filtersSidebar')
+      .find('.list-filters__section-heading')
+      .click();
+
+    cy
+      .get('@filtersSidebar')
+      .find('.list-filters__custom-filters-list')
+      .should('be.visible');
+
+    expandFilterSection('[data-states-filters-region]');
+    expandFilterSection('[data-flow-states-filters-region]');
+
+    cy.viewport(1280, 500);
+
+    cy
+      .get('.list-filters')
+      .as('filtersSidebar')
+      .find('.worklist-list__sidebar-controls')
+      .should('be.visible');
+
+    cy
+      .get('@filtersSidebar')
+      .scrollTo('bottom')
+      .should($sidebar => {
+        expect($sidebar[0].scrollTop).to.be.greaterThan(0);
+      });
+
+    cy.viewport(1280, 720);
+
+    getCustomFilterButton('Insurance Plans')
       .should('contain', 'Medicare');
 
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .eq(1)
-      .get('.sidebar__label')
-      .should('contain', 'Team')
-      .get('[data-filter-button]')
+    getCustomFilterButton('Team')
       .should('contain', 'All');
 
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
+    getCustomFilterButton('Insurance Plans')
       .click();
 
     cy
@@ -208,15 +258,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('not.contain', 'filter[@insurance]');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '1');
+    getActiveFiltersDot().should('not.exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('not.contain', '1');
 
     cy
@@ -224,10 +270,7 @@ context('filter sidebar', function() {
       .find('.js-clear-filters')
       .should('be.disabled');
 
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
+    getCustomFilterButton('Insurance Plans')
       .click();
 
     cy
@@ -244,15 +287,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', 'filter[@insurance]=BCBS PPO 100');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '1');
 
     cy
@@ -269,22 +308,18 @@ context('filter sidebar', function() {
       .its('search')
       .should('not.contain', 'filter[@insurance]');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '1');
+    getActiveFiltersDot().should('not.exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('not.contain', '1');
 
     cy
       .get('@filtersSidebar')
       .find('[data-states-filters-region]')
-      .get('.sidebar__heading')
-      .should('contain', 'States');
+      .find('.list-filters__section-button')
+      .should('contain', 'Action States');
 
     cy
       .get('@filtersSidebar')
@@ -306,11 +341,15 @@ context('filter sidebar', function() {
       .should('contain', 'Done')
       .should('contain', 'Unable to Complete');
 
+    expandFilterSection('[data-states-filters-region]');
+
     cy
       .get('@filtersSidebar')
       .find('[data-states-filters-region]')
       .find('[data-check-region]')
       .first()
+      .find('.js-select')
+      .should('have.attr', 'aria-label', 'Deselect To Do filter')
       .click()
       .then(() => {
         const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
@@ -331,6 +370,8 @@ context('filter sidebar', function() {
       .should('contain', 'Done')
       .should('contain', 'Unable to Complete');
 
+    expandFilterSection('[data-flow-states-filters-region]');
+
     cy
       .get('@filtersSidebar')
       .find('[data-flow-states-filters-region]')
@@ -348,15 +389,11 @@ context('filter sidebar', function() {
       .should('contain', `filter[flow_states]=${ stateInProgress.id }`)
       .should('not.contain', `filter[flow_states]=${ stateTodo.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '2');
 
     cy
@@ -387,15 +424,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[states]=${ NIL_UUID }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '2');
 
     cy
@@ -426,15 +459,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[flow_states]=${ NIL_UUID }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '2');
 
     cy
@@ -465,15 +494,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[states]=${ stateInProgress.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '2');
 
     cy
@@ -503,15 +528,11 @@ context('filter sidebar', function() {
       .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`)
       .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '2');
+    getActiveFiltersDot().should('not.exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('not.contain', '2');
 
     cy
@@ -526,63 +547,30 @@ context('filter sidebar', function() {
       .find('.fa-square')
       .should('have.length', 2);
 
-    cy
-      .get('@filtersSidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('not.exist');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
-
-    cy
-      .get('[data-select-all-region]')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('not.exist');
-
-    cy
-      .get('[data-filters-region]')
-      .find('.js-cancel')
-      .click();
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('exist');
+    expandFiltersSidebar();
 
     cy
       .intercept('GET', '/api/filters/**').as('filterReRequest');
 
     cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
+      .get('[data-filters-region]')
       .find('button')
       .click();
 
     cy
-      .get('@filtersSidebar')
-      .should('exist');
+      .get('.list-page')
+      .should('have.class', 'is-filters-collapsed');
 
-    // if the filters sidebar is already open, it should not reload on filters button click
+    cy
+      .get('[data-filters-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.list-page')
+      .should('not.have.class', 'is-filters-collapsed');
+
+    // Toggling the mounted filters sidebar should not reload its filter data.
     cy
       .get('@filterReRequest.all')
       .should('have.length', 0);
@@ -614,14 +602,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
+    expandFiltersSidebar();
+    expandFilterSection('[data-states-filters-region]');
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.list-filters')
       .as('filtersSidebar')
       .find('[data-states-filters-region]')
       .find('.fa-square-check')
@@ -657,15 +642,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[states]=${ stateUnableToComplete.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '1');
 
     cy
@@ -694,15 +675,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[states]=${ stateDone.id },${ stateUnableToComplete.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '1');
+    getActiveFiltersDot().should('not.exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('not.contain', '1');
 
     cy
@@ -770,23 +747,17 @@ context('filter sidebar', function() {
       .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`)
       .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
+    getActiveFiltersDot().should('exist');
+
+    expandFiltersSidebar();
 
     cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click()
       .wait('@routeFilterinsurance');
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.list-filters')
       .as('filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '1');
 
     cy
@@ -797,26 +768,15 @@ context('filter sidebar', function() {
     cy
       .get('@filtersSidebar')
       .find('[data-filter-button]')
-      .should('have.length', 2)
-      .first()
-      .get('.sidebar__label')
-      .should('contain', 'Insurance Plans')
-      .get('[data-filter-button]')
+      .should('have.length', 2);
+
+    getCustomFilterButton('Insurance Plans')
       .should('contain', 'Medicare');
 
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .eq(1)
-      .get('.sidebar__label')
-      .should('contain', 'Team')
-      .get('[data-filter-button]')
+    getCustomFilterButton('Team')
       .should('contain', 'All');
 
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
+    getCustomFilterButton('Insurance Plans')
       .click();
 
     cy
@@ -838,15 +798,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('not.contain', 'filter[@insurance]');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '1');
+    getActiveFiltersDot().should('not.exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('not.contain', '1');
 
     cy
@@ -854,10 +810,7 @@ context('filter sidebar', function() {
       .find('.js-clear-filters')
       .should('be.disabled');
 
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
+    getCustomFilterButton('Insurance Plans')
       .click();
 
     cy
@@ -874,15 +827,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', 'filter[@insurance]=BCBS PPO 100');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '1');
 
     cy
@@ -899,15 +848,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('not.contain', 'filter[@insurance]');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('not.contain', '1');
+    getActiveFiltersDot().should('not.exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('not.contain', '1');
 
     cy
@@ -915,6 +860,9 @@ context('filter sidebar', function() {
       .find('[data-states-filters-region]')
       .find('.fa-square-check')
       .should('have.length', 2);
+
+    expandFilterSection('[data-states-filters-region]');
+    expandFilterSection('[data-flow-states-filters-region]');
 
     cy
       .get('@filtersSidebar')
@@ -933,15 +881,11 @@ context('filter sidebar', function() {
       .should('contain', `filter[states]=${ stateInProgress.id }`)
       .should('not.contain', `filter[states]=${ stateTodo.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '1');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '1');
 
     cy
@@ -961,15 +905,11 @@ context('filter sidebar', function() {
       .should('contain', `filter[flow_states]=${ stateInProgress.id }`)
       .should('not.contain', `filter[flow_states]=${ stateTodo.id }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '2');
 
     cy
@@ -988,15 +928,11 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[states]=${ NIL_UUID }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '2');
 
     cy
@@ -1015,21 +951,14 @@ context('filter sidebar', function() {
       .its('search')
       .should('contain', `filter[flow_states]=${ NIL_UUID }`);
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '2');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '2');
 
-    cy
-      .get('@filtersSidebar')
-      .find('[data-filter-button]')
-      .first()
+    getCustomFilterButton('Insurance Plans')
       .click();
 
     cy
@@ -1038,15 +967,11 @@ context('filter sidebar', function() {
       .click()
       .wait('@routeActions');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .should('contain', '3');
+    getActiveFiltersDot().should('exist');
 
     cy
       .get('@filtersSidebar')
-      .find('.sidebar__heading')
+      .find('.list-filters__heading')
       .should('contain', '3');
 
     cy
@@ -1065,97 +990,30 @@ context('filter sidebar', function() {
       .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`)
       .should('not.contain', 'filter[@insurance]');
 
+    getActiveFiltersDot().should('not.exist');
+
     cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
+      .get('@filtersSidebar')
+      .find('.list-filters__heading')
       .should('not.contain', '3');
 
-    cy
-      .get('@filtersSidebar')
-      .find('.sidebar__heading')
-      .should('not.contain', '3');
+    expandFiltersSidebar();
 
     cy
-      .get('@filtersSidebar')
-      .find('.js-close')
+      .get('[data-filters-region] button')
       .click();
 
     cy
-      .get('@filtersSidebar')
-      .should('not.exist');
+      .get('.list-page')
+      .should('have.class', 'is-filters-collapsed');
 
     cy
-      .intercept('GET', '/api/filters/team/**', {
-        delay: 1000,
-        body: {
-          data: getFilter({
-            attributes: {
-              name: 'Team',
-              slug: 'team',
-              values: [
-                { value: 'Coordinator', total: 2 },
-                { value: 'Nurse', total: 1 },
-              ],
-            },
-          }),
-          included: [],
-        },
-      })
-      .as('delayedRouteFilterTeam');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
+      .get('[data-filters-region] button')
       .click();
 
     cy
-      .get('.app-frame__sidebar .sidebar')
-      .as('filtersSidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .wait('@delayedRouteFilterTeam');
-
-    cy
-      .get('@filtersSidebar')
-      .should('not.exist');
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
-
-    cy
-      .get('[data-select-all-region]')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('not.exist');
-
-    cy
-      .get('[data-filters-region]')
-      .find('.js-cancel')
-      .click();
-
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
-
-    cy
-      .get('@filtersSidebar')
-      .should('exist');
+      .get('.list-page')
+      .should('not.have.class', 'is-filters-collapsed');
   });
 
   specify('states sorted by sequence value', function() {
@@ -1209,15 +1067,12 @@ context('filter sidebar', function() {
       .click()
       .wait('@routeFlows');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
+    expandFiltersSidebar();
+    expandFilterSection('[data-states-filters-region]');
 
     cy
-      .get('.app-frame__sidebar .sidebar')
-      .find('[data-states-filters-region] .sidebar__section')
+      .get('.list-filters')
+      .find('[data-states-filters-region] .list-filters__section')
       .children()
       .eq(1)
       .should('contain', 'First In Sequence')

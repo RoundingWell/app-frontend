@@ -1,9 +1,17 @@
-.due-component .is-overdue {
+.due-component__value {
+  align-items: center;
+  display: inline-flex;
+}
+
+.due-component__value--overdue {
   color: color(red);
 }
 
 .due-component {
-  border-radius: 4px 0 0 4px;
-  padding-right: 8px;
+  border-radius: 16px var(--due-component-right-radius, 16px) var(--due-component-right-radius, 16px) 16px;
+  border-right-width: var(--due-component-border-right-width, 1px);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 20px;
+  padding: 0 8px;
 }
-

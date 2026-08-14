@@ -12,7 +12,7 @@ import './owner-component.scss';
 
 const i18n = intl.patients.shared.components.ownerComponent;
 
-const OwnerItemTemplate = hbs`<div>{{matchText name query}} <span class="owner-component__team">{{matchText abbr query}}</span></div>`;
+const OwnerItemTemplate = hbs`<div class="owner-component">{{matchText name query}} <span class="owner-component__team">{{matchText abbr query}}</span></div>`;
 
 const CLASS_OPTIONS = [
   'isCompact',
@@ -102,7 +102,7 @@ export default Droplist.extend({
       const isTeam = selected.type === 'teams';
 
       return {
-        className: 'owner-component--compact button-secondary--compact',
+        className: 'owner-component owner-component--compact button button--compact',
         templateContext: {
           attr: isTeam ? 'abbr' : 'name',
           icon,
@@ -111,7 +111,7 @@ export default Droplist.extend({
     }
 
     return {
-      className: 'button-secondary w-100',
+      className: 'owner-component button button--secondary w-100',
       templateContext: {
         attr: 'name',
         icon,
