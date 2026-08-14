@@ -2,12 +2,11 @@ import dayjs from 'dayjs';
 import { v7 as uuid } from 'uuid';
 
 import formatDate from 'helpers/format-date';
-import { testTs, testTsSubtract, testTsAdd } from 'helpers/test-timestamp';
+import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateSubtract } from 'helpers/test-date';
 import { getRelationship, getErrors } from 'helpers/json-api';
 import { getActivity } from 'support/api/events';
-import { getAction } from 'support/api/actions';
-import stateColors from 'helpers/state-colors';
+import { getAction, longActionName } from 'support/api/actions';
 
 import { workspaceOne } from 'support/api/workspaces';
 import { getClinician, getCurrentClinician } from 'support/api/clinicians';
@@ -23,91 +22,7 @@ import { getFlow } from 'support/api/flows';
 import { getFile } from 'support/api/files';
 import { getPatientField } from 'support/api/patient-fields';
 
-const sharedIconScript = `const symbols = [{
-  id: 'far-fa-octagon-minus',
-  prefix: 'far',
-  iconName: 'octagon-minus',
-  width: 16,
-  height: 16,
-  paths: ['M1 1h14v14H1z'],
-}];
-const attribute = 'data-care-ops-fontawesome-shared-symbols';
-const svgNamespace = 'http://www.w3.org/2000/svg';
-
-function setAttributes(element, attributes) {
-  for (const [name, value] of Object.entries(attributes)) {
-    element.setAttribute(name, String(value));
-  }
-}
-
-function createSymbolsSvg(targetDocument) {
-  const svg = targetDocument.createElementNS(svgNamespace, 'svg');
-
-  svg.style.display = 'none';
-
-  for (const symbolDefinition of symbols) {
-    const symbol = targetDocument.createElementNS(svgNamespace, 'symbol');
-
-    setAttributes(symbol, {
-      'aria-hidden': 'true',
-      'data-icon': symbolDefinition.iconName,
-      'data-prefix': symbolDefinition.prefix,
-      'id': symbolDefinition.id,
-      'overflow': 'visible',
-      'role': 'img',
-      'viewBox': \`0 0 \${ symbolDefinition.width } \${ symbolDefinition.height }\`,
-    });
-
-    for (const pathData of symbolDefinition.paths) {
-      const path = targetDocument.createElementNS(svgNamespace, 'path');
-
-      setAttributes(path, {
-        d: pathData,
-        fill: 'currentColor',
-      });
-      symbol.appendChild(path);
-    }
-
-    svg.appendChild(symbol);
-  }
-
-  return svg;
-}
-
-function mountIconSymbols(options = {}) {
-  const targetDocument = options.document || globalThis.document;
-
-  if (!targetDocument?.body) return null;
-
-  const existingContainer = targetDocument.querySelector(\`[\${ attribute }]\`);
-
-  if (existingContainer) return existingContainer;
-
-  const container = targetDocument.createElement('div');
-
-  container.setAttribute(attribute, '');
-  container.style.display = 'none';
-  container.appendChild(createSymbolsSvg(targetDocument));
-  targetDocument.body.insertBefore(container, targetDocument.body.firstChild);
-
-  return container;
-}
-
-if (globalThis.document?.body) {
-  mountIconSymbols();
-} else if (globalThis.document) {
-  globalThis.document.addEventListener('DOMContentLoaded', () => mountIconSymbols(), { once: true });
-}
-
-export {
-  mountIconSymbols,
-  symbols,
-};
-
-export default mountIconSymbols;
-`;
-
-context('patient action page', function() {
+context('patient action page', { scrollBehavior: 'center' }, function() {
   specify('display patient action', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
@@ -133,7 +48,7 @@ context('patient action page', function() {
 
     const testAction = getAction({
       attributes: {
-        name: 'Name',
+        name: longActionName,
         details: 'Details',
         duration: 5,
         due_date: testDateSubtract(2),
@@ -388,6 +303,10 @@ context('patient action page', function() {
           }, {
             recipient: getRelationship(testPatient),
           }),
+          getActivity({
+            event_type: 'UnsupportedActionEvent',
+            source: 'system',
+          }),
         ];
 
         return fx;
@@ -404,6 +323,48 @@ context('patient action page', function() {
       .wait('@routePatient')
       .tick(350); // since this test uses visitOnClock, we need this for the sidebar animation
 
+    cy.viewport(1048, 785);
+
+    cy
+      .get('.patient-action__menu')
+      .should('have.class', 'button--menu');
+
+    cy
+      .get('.patient__context-trail')
+      .contains(testAction.attributes.name)
+      .should('have.class', 'patient__context-current')
+      .and('not.have.class', 'patient__context-link');
+
+    cy
+      .get('.patient-action__chips')
+      .should('be.visible');
+
+    cy.viewport(1920, 900);
+
+    cy
+      .get('.patient-action__header')
+      .should($header => {
+        expect($header[0].getBoundingClientRect().width).to.equal(1200);
+      });
+
+    cy.viewport(1280, 720);
+
+    cy
+      .get('.patient-action')
+      .find('[data-save-region]')
+      .should('be.empty');
+
+    cy
+      .get('.patient-action')
+      .find('[data-details-region] .js-input')
+      .focus()
+      .parents('.textarea-flex')
+      .should('have.class', 'is-editing')
+      .find('.js-input')
+      .blur()
+      .parents('.textarea-flex')
+      .should('not.have.class', 'is-editing');
+
     cy
       .get('.patient-action')
       .find('[data-save-region]')
@@ -413,6 +374,10 @@ context('patient action page', function() {
       .get('.patient-action')
       .find('[data-details-region] .js-input')
       .clear();
+
+    cy
+      .get('.patient-action__details-actions')
+      .should('be.visible');
 
     cy
       .intercept('PATCH', `/api/actions/${ testAction.id }`, {
@@ -447,7 +412,16 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-details-region] .js-input')
-      .type('cancel this text');
+      .focus()
+      .should('have.css', 'overflow-y', 'auto')
+      .parents('.textarea-flex')
+      .should('have.class', 'is-editing')
+      .find('.js-input')
+      .type('First line{enter}Second line')
+      .should('have.value', 'First line\nSecond line')
+      .blur()
+      .parents('.textarea-flex')
+      .should('have.class', 'is-editing');
 
     cy
       .get('.patient-action')
@@ -506,7 +480,7 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-owner-region]')
-      .contains('Nurse')
+      .contains('NUR')
       .click();
 
     cy
@@ -539,7 +513,8 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-due-time-region]')
-      .should('contain', 'Time')
+      .find('button')
+      .should('exist')
       .find('.is-overdue')
       .should('not.exist');
 
@@ -563,9 +538,7 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-due-date-region]')
-      .contains(formatDate(testDateSubtract(2), 'LONG'))
-      .children()
-      .should('have.css', 'color', stateColors.error)
+      .contains(formatDate(testDateSubtract(2), 'SHORT'))
       .click();
 
     cy
@@ -628,9 +601,7 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-due-date-region]')
-      .contains(formatDate(testDate(), 'LONG'))
-      .children()
-      .should('not.have.css', 'color', stateColors.error)
+      .contains(formatDate(testDate(), 'SHORT'))
       .click();
 
     cy
@@ -667,7 +638,8 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-duration-region]')
-      .contains('Select Duration')
+      .find('button')
+      .should('not.contain', 'Select Duration')
       .click();
 
     cy
@@ -698,18 +670,6 @@ context('patient action page', function() {
       .get('.patient-action')
       .find('[data-form-sharing-region]')
       .should('contain', 'Share Form');
-
-    cy
-      .get('.sidebar__footer')
-      .contains('Added')
-      .next()
-      .should('contain', formatDate(testTs(), 'AT_TIME'));
-
-    cy
-      .get('.sidebar__footer')
-      .contains('Updated')
-      .next()
-      .should('contain', formatDate(testTs(), 'AT_TIME'));
 
     cy
       .get('.patient-action')
@@ -760,6 +720,12 @@ context('patient action page', function() {
       .should('contain', 'Form sharing (Nurse) cancelled');
 
     cy
+      .get('[data-activity-region] .patient-action__activity-item')
+      .each($item => {
+        expect($item.text().trim()).not.to.equal('');
+      });
+
+    cy
       .intercept('DELETE', `/api/actions/${ testAction.id }`, {
         statusCode: 204,
         body: {},
@@ -767,8 +733,7 @@ context('patient action page', function() {
       .as('routeDeleteFlowAction');
 
     cy
-      .get('.patient-action')
-      .find('.js-menu')
+      .get('.patient-action__menu')
       .click();
 
     cy
@@ -908,7 +873,8 @@ context('patient action page', function() {
       .wait('@routePatchAction');
 
     cy
-      .get('@actionDialerButton')
+      .get('.patient-action')
+      .find('[data-dialer-region] button')
       .should('be.disabled');
 
     cy
@@ -1014,6 +980,11 @@ context('patient action page', function() {
       .should('have.length', 2);
 
     cy
+      .get('.patient-action__attachment-control.js-add')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Add an Attachment...');
+
+    cy
       .get('@attachmentItems')
       .first()
       .contains('HRA v2.pdf')
@@ -1029,8 +1000,9 @@ context('patient action page', function() {
     cy
       .get('@attachmentItems')
       .first()
-      .contains('Download')
+      .find('.js-download')
       .as('attachmentDownload')
+      .should('have.attr', 'aria-label', 'Download')
       .should('have.attr', 'href')
       .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA%20v2.pdf`);
 
@@ -1046,7 +1018,8 @@ context('patient action page', function() {
     cy
       .get('@attachmentItems')
       .first()
-      .contains('Remove')
+      .find('.js-remove')
+      .should('have.attr', 'aria-label', 'Remove')
       .click();
 
     cy
@@ -1103,7 +1076,7 @@ context('patient action page', function() {
     cy
       .get('@attachmentItems')
       .first()
-      .contains('Remove')
+      .find('.js-remove')
       .click();
 
     cy
@@ -1348,7 +1321,7 @@ context('patient action page', function() {
       .get('.patient-action')
       .find('[data-attachments-files-region]')
       .first()
-      .contains('Remove')
+      .find('.js-remove')
       .click();
 
     cy
@@ -1402,6 +1375,51 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-attachments-region]')
+      .find('.js-add')
+      .should('not.exist');
+  });
+
+  specify('action attachments - uploads not allowed without edit permission', function() {
+    const testFile = getFile();
+    const testProgramAction = getProgramAction({
+      attributes: {
+        allowed_uploads: ['pdf'],
+      },
+    });
+    const testAction = getAction({
+      relationships: {
+        'files': getRelationship([testFile]),
+        'owner': getRelationship(teamNurse),
+        'program-action': getRelationship(testProgramAction),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeSettings('upload_attachments', true)
+      .routeCurrentClinician(fx => {
+        fx.data = getCurrentClinician({
+          relationships: {
+            role: getRelationship(roleNoFilterEmployee),
+          },
+        });
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+        fx.included.push(testProgramAction);
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [testFile];
+        return fx;
+      })
+      .visit(`/patient/1/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('[data-attachments-region]')
       .find('.js-add')
       .should('not.exist');
   });
@@ -1760,6 +1778,7 @@ context('patient action page', function() {
 
     cy
       .intercept('POST', '/api/actions/*/relationships/comments', {
+        delay: 100,
         statusCode: 204,
         body: {},
       })
@@ -1771,11 +1790,20 @@ context('patient action page', function() {
       .click();
 
     cy
+      .get('@commentRegion')
+      .find('.js-post')
+      .should('be.disabled');
+
+    cy
       .wait('@routePostComment')
       .its('request.body')
       .should(({ data }) => {
         expect(data.attributes.message).to.equal('Test comment\nmore comment');
       });
+
+    cy
+      .get('@routePostComment.all')
+      .should('have.length', 1);
 
     cy
       .get('[data-activity-region]')
@@ -1939,8 +1967,6 @@ context('patient action page', function() {
   });
 
   specify('display action from program action', function() {
-    const testPatient = getPatient();
-
     const testProgram = getProgram({
       attributes: {
         name: 'Test Program',
@@ -1956,10 +1982,14 @@ context('patient action page', function() {
     const testAction = getAction({
       attributes: {
         name: 'Program Action Name',
+        options: {
+          color: 'red',
+          icon: 'caret-down',
+          iconType: 'fas',
+        },
       },
       relationships: {
         'form': getRelationship(testForm),
-        'patient': getRelationship(testPatient),
         'program-action': getRelationship(testProgramAction),
       },
     });
@@ -1997,8 +2027,10 @@ context('patient action page', function() {
         return fx;
       })
       .routeFormByAction()
+      .routeForm()
       .routeFormDefinition()
       .routeFormActionFields()
+      .routeFormFields()
       .routeLatestFormResponse()
       .visit(`/patient/1/action/${ testAction.id }`)
       .wait('@routeAction');
@@ -2008,45 +2040,241 @@ context('patient action page', function() {
       .should('contain', 'Program Action Name');
 
     cy
+      .get('.patient-action__title-icon')
+      .find('.action-icon--red')
+      .find('.fa-caret-down');
+
+    cy
       .get('.patient-action')
       .find('[data-attachments-region]')
-      .contains('No Attachments');
+      .find('[data-attachments-files-region]')
+      .should('be.empty');
 
     cy
       .get('.patient-action')
       .find('[data-attachments-region]')
       .find('.js-add')
+      .should('exist')
+      .and('have.attr', 'aria-label', 'Add an Attachment...');
+
+    cy
+      .get('.patient-action')
+      .find('.form__frame--embedded')
+      .should('contain', 'Test Form');
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.patient-action__name')
+      .should('be.visible');
+
+    cy
+      .get('[data-activity-region]')
+      .find('[data-activities-region]')
+      .children()
+      .its('length')
+      .as('activityCount');
+
+    cy
+      .get('.js-expand-button')
+      .click();
+
+    cy
+      .wait('@routeAction');
+
+    cy
+      .url()
+      .should('contain', `/action/${ testAction.id }/form`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--form-expanded');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar')
+      .should('not.be.visible');
+
+    cy
+      .get('.patient-action__details')
+      .should('not.be.visible');
+
+    cy
+      .get('.form__title')
+      .should('not.be.visible');
+
+    cy
+      .get('.form__actions-icon--expand')
+      .should('be.visible')
+      .find('.fa-down-left-and-up-right-to-center')
       .should('exist');
 
     cy
-      .get('.patient-action:visible')
-      .should('have.length', 1)
-      .find('[data-activity-region]')
-      .find('[data-activities-region]')
-      .last()
-      .should('contain', 'Clinician McTester (Nurse) added this action from the Test Program program')
-      .children()
-      .its('length')
-      .should('equal', 5);
+      .get('.tooltip')
+      .should('not.exist');
 
     cy
-      .routePatientByAction(fx => {
-        fx.data = testPatient;
+      .get('.js-sidebar-button')
+      .should('have.attr', 'aria-expanded', 'false')
+      .click();
 
-        return fx;
+    cy
+      .get('.patient__frame')
+      .should('not.have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.js-sidebar-button')
+      .should('have.attr', 'aria-expanded', 'true');
+
+    cy
+      .get('.form__content')
+      .find('iframe')
+      .should('be.visible');
+
+    cy.viewport(720, 720);
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .click();
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
+
+    cy.viewport(1280, 720);
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.js-expand-button')
+      .click();
+
+    cy
+      .wait('@routeAction');
+
+    cy
+      .url()
+      .should('contain', `/action/${ testAction.id }`)
+      .should('not.contain', `/action/${ testAction.id }/form`);
+
+    cy
+      .get('.patient__frame')
+      .should('not.have.class', 'patient__frame--sidebar-hidden')
+      .and('not.have.class', 'patient__frame--form-expanded');
+
+    cy
+      .get('@activityCount')
+      .then(activityCount => {
+        cy
+          .get('[data-activity-region]')
+          .find('[data-activities-region]')
+          .should('contain', 'Clinician McTester (Nurse) added this action from the Test Program program')
+          .children()
+          .its('length')
+          .should('equal', activityCount);
       });
 
+    cy.getRadio(Radio => {
+      Radio.trigger('event-router', 'patient:form', '1', testForm.id);
+    });
+
     cy
-      .get('[data-form-region] button')
-      .should('contain', 'Test Form')
+      .wait('@routeForm')
+      .url()
+      .should('contain', `/patient/1/form/${ testForm.id }`);
+
+    cy.getRadio(Radio => {
+      Radio.trigger('event-router', 'patient:action', '1', testAction.id);
+    });
+
+    cy
+      .get('.patient-action .js-expand-button')
+      .should('have.attr', 'aria-label', 'Increase Width')
       .click();
 
     cy
       .url()
-      .should('contain', `/form/${ testForm.id }/action/${ testAction.id }`);
+      .should('contain', `/action/${ testAction.id }/form`);
 
     cy
-      .go('back');
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    cy
+      .get('.patient-action .js-expand-button')
+      .should('have.attr', 'aria-label', 'Decrease Width')
+      .click();
+
+    cy
+      .url()
+      .should('contain', `/action/${ testAction.id }`)
+      .and('not.contain', `/action/${ testAction.id }/form`);
+
+    cy
+      .intercept('GET', '/api/actions/*', {
+        delay: 1000,
+        body: { data: testAction, included: [] },
+      })
+      .as('routeDelayedExpandedAction')
+      .visit(`/patient/1/action/${ testAction.id }/form`)
+      .wait('@routePatient');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--form-expanded')
+      .and('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar')
+      .should('not.be.visible');
+
+    cy
+      .wait('@routeDelayedExpandedAction');
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.js-sidebar-button')
+      .should('have.attr', 'aria-expanded', 'false');
+
+    cy
+      .get('[data-worklists-region] .app-nav__link')
+      .first()
+      .click();
+
+    cy
+      .url()
+      .should('contain', '/worklist/owned-by');
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-minimized')
+      .should('have.class', 'is-full-nav-visible');
   });
 
   specify('deleted action', function() {
@@ -2095,7 +2323,7 @@ context('patient action page', function() {
     cy.on('uncaught:exception', () => false);
 
     cy
-      .routesForPatientDashboard()
+      .routesForPatientAction()
       .routePatient(fx => {
         fx.data = testPatient;
 
@@ -2159,169 +2387,26 @@ context('patient action page', function() {
       });
   });
 
-  specify('outreach', function() {
-    const testPatient = getPatient({
-      attributes: {
-        first_name: 'Test',
-        last_name: 'Patient',
-      },
-      relationships: {
-        workspaces: getRelationship(workspaceOne),
-      },
-    });
-
-    const testOutreachAction = getAction({
-      attributes: {
-        name: 'Outreach Action',
-        outreach: 'patient',
-        sharing: 'pending',
-        updated_at: testTsAdd(2),
-      },
-      relationships: {
-        form: getRelationship(testForm),
-        state: getRelationship(stateTodo),
-        patient: getRelationship(testPatient),
-      },
-    });
-
-    const testCanceledOutreachAction = getAction({
-      attributes: {
-        name: 'Canceled Outreach Action',
-        outreach: 'patient',
-        sharing: 'canceled',
-        updated_at: testTsAdd(1),
-      },
-      relationships: {
-        form: getRelationship(testForm),
-        state: getRelationship(stateTodo),
-        patient: getRelationship(testPatient),
-      },
-    });
-
-    const testErrorOutreachAction = getAction({
-      attributes: {
-        name: 'Error Outreach Action',
-        outreach: 'patient',
-        sharing: 'error_opt_out',
-        updated_at: testTsAdd(0),
-      },
-      relationships: {
-        form: getRelationship(testForm),
-        state: getRelationship(stateTodo),
-        patient: getRelationship(testPatient),
-      },
-    });
-
-    cy
-      .intercept('GET', '/icons/icons.js', {
-        statusCode: 200,
-        headers: { 'content-type': 'application/javascript' },
-        body: sharedIconScript,
-      })
-      .as('routeSharedIcons');
-
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testOutreachAction;
-
-        return fx;
-      })
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routePatientActions(fx => {
-        fx.data = [testOutreachAction, testCanceledOutreachAction, testErrorOutreachAction];
-
-        return fx;
-      })
-      .routePatientFlows(fx => {
-        fx.data = [];
-
-        return fx;
-      })
-      .visit(`/patient/${ testPatient.id }/action/${ testOutreachAction.id }`)
-      .wait('@routeSharedIcons')
-      .wait('@routeAction');
-
-    cy
-      .get('[data-care-ops-fontawesome-shared-symbols]')
-      .find('#far-fa-octagon-minus')
-      .should('have.attr', 'overflow', 'visible');
-
-    cy
-      .intercept('PATCH', `/api/actions/${ testOutreachAction.id }`, {
-        statusCode: 204,
-        body: {},
-      })
-      .as('routePatchAction');
-
-    cy
-      .get('.patient-action')
-      .find('[data-form-region]')
-      .contains('Test Form');
-
-    cy
-      .get('.patient-action')
-      .find('[data-form-sharing-region]')
-      .should('contain', 'Share Form')
-      .should('contain', 'Test Patient')
-      .should('contain', 'Waiting for Response')
-      .find('.fa-circle-dot')
-      .should('exist');
-
-    cy
-      .routeAction(fx => {
-        fx.data = testCanceledOutreachAction;
-
-        return fx;
-      })
-      .visit(`/patient/${ testPatient.id }/action/${ testCanceledOutreachAction.id }`)
-      .wait('@routeAction');
-
-    cy
-      .get('.patient-action')
-      .find('[data-form-sharing-region]')
-      .should('contain', 'Form Sharing Canceled')
-      .find('.fa-octagon-minus')
-      .should('exist');
-
-    cy
-      .routeAction(fx => {
-        fx.data = testErrorOutreachAction;
-
-        return fx;
-      })
-      .visit(`/patient/${ testPatient.id }/action/${ testErrorOutreachAction.id }`)
-      .wait('@routeAction');
-
-    cy
-      .get('.patient-action')
-      .find('[data-form-sharing-region]')
-      .should('contain', 'Recipient Opted Out')
-      .find('.fa-octagon-minus')
-      .should('exist');
-  });
-
   specify('outreach form', function() {
-    const testPatient = getPatient();
-
+    const testFlow = getFlow();
     const testAction = getAction({
       attributes: {
         outreach: 'patient',
         sharing: 'responded',
       },
       relationships: {
+        flow: getRelationship(testFlow),
         form: getRelationship(testForm),
-        patient: getRelationship(testPatient),
         state: getRelationship(stateDone),
       },
     });
 
     cy
       .routesForPatientAction()
+      .routeFlow(fx => {
+        fx.data = testFlow;
+        return fx;
+      })
       .routeAction(fx => {
         fx.data = testAction;
 
@@ -2331,27 +2416,224 @@ context('patient action page', function() {
       .routeFormDefinition()
       .routeFormActionFields()
       .routeLatestFormResponse()
+      .routePatientByFlow()
+      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action')
+      .find('.form__frame--embedded')
+      .should('contain', 'Test Form');
+
+    cy
+      .get('.patient-action__title-icon')
+      .find('.fa-share-from-square');
+
+    cy
+      .get('.patient-action__form')
+      .find('.js-response')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('contain', `/flow/${ testFlow.id }/action/${ testAction.id }`);
+  });
+
+  specify('outreach form outside a flow', function() {
+    const testAction = getAction({
+      attributes: {
+        outreach: 'patient',
+        sharing: 'responded',
+      },
+      relationships: {
+        form: getRelationship(testForm),
+        state: getRelationship(stateDone),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeAction(fx => {
+        fx.data = testAction;
+        return fx;
+      })
+      .routeFormByAction()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
+      .visit(`/patient/1/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .get('.patient-action__form .js-response')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('contain', `/action/${ testAction.id }`);
+  });
+
+  specify('outreach pending sharing state', function() {
+    const testAction = getAction({
+      attributes: { sharing: 'pending' },
+      relationships: { form: getRelationship(testForm) },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeAction(fx => {
+        fx.data = testAction;
+        return fx;
+      })
+      .routeFormByAction()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
+      .visit(`/patient/1/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .get('.patient-action__sharing-state')
+      .should('contain', 'Waiting for Response')
+      .find('.fa-circle-dot')
+      .should('exist');
+  });
+
+  specify('outreach canceled sharing state', function() {
+    const testAction = getAction({
+      attributes: { sharing: 'canceled' },
+      relationships: { form: getRelationship(testForm) },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeAction(fx => {
+        fx.data = testAction;
+        return fx;
+      })
+      .routeFormByAction()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
+      .visit(`/patient/1/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .get('.patient-action__sharing-state')
+      .should('contain', 'Form Sharing Canceled')
+      .find('.fa-octagon-minus')
+      .should('exist');
+  });
+
+  specify('live comments and attachments', function() {
+    const currentClinician = getCurrentClinician();
+    const commentId = uuid();
+    const fileId = uuid();
+    const testAction = getAction({
+      relationships: {
+        comments: getRelationship([]),
+        files: getRelationship([]),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeAction(fx => {
+        fx.data = testAction;
+        return fx;
+      })
+      .routeActionComments(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [];
+        return fx;
+      })
       .visit(`/patient/1/action/${ testAction.id }`)
       .wait('@routeAction');
 
     cy
-      .routePatientByAction(fx => {
-        fx.data = testPatient;
+      .get('@wsHandleMessage')
+      .should('have.been.called');
 
-        return fx;
-      });
-
-    cy
-      .get('.patient-action')
-      .contains('View Response')
-      .click();
-
-    cy
-      .url()
-      .should('contain', `/form/${ testForm.id }/action/${ testAction.id }`);
+    cy.sendWs({
+      category: 'ActionCommentAdded',
+      author: currentClinician.id,
+      resource: { type: testAction.type, id: testAction.id },
+      payload: {
+        comment: { type: 'comments', id: commentId },
+        attributes: { message: 'Comment delivered live' },
+      },
+    });
 
     cy
-      .go('back');
+      .get('[data-activity-region]')
+      .should('contain', 'Comment delivered live');
+
+    cy.sendWs({
+      category: 'CommentEdited',
+      resource: { type: 'comments', id: commentId },
+      payload: {
+        attributes: { message: 'Comment updated live' },
+      },
+    });
+
+    cy
+      .get('[data-activity-region]')
+      .should('contain', 'Comment updated live')
+      .and('contain', '(Edited)');
+
+    cy.sendWs({
+      category: 'AttachmentAdded',
+      resource: { type: testAction.type, id: testAction.id },
+      payload: {
+        file: { type: 'files', id: fileId },
+        attributes: {
+          path: 'patient/live-file.pdf',
+          urls: {
+            view: '/files/live-file/view',
+            download: '/files/live-file/download',
+          },
+        },
+      },
+    });
+
+    cy
+      .get('[data-attachments-region]')
+      .should('contain', 'live-file.pdf');
+
+    cy.sendWs({
+      category: 'FileReplaced',
+      resource: { type: 'files', id: fileId },
+      payload: {
+        attributes: {
+          path: 'patient/replaced-live-file.pdf',
+          urls: {
+            view: '/files/replaced-live-file/view',
+            download: '/files/replaced-live-file/download',
+          },
+        },
+      },
+    });
+
+    cy
+      .get('[data-attachments-region]')
+      .contains('a', 'replaced-live-file.pdf')
+      .should('have.attr', 'href', '/files/replaced-live-file/view');
+
+    cy.sendWs({
+      category: 'AttachmentAdded',
+      resource: { type: testAction.type, id: testAction.id },
+      payload: {
+        file: { type: 'files', id: uuid() },
+        attributes: {
+          path: 'patient/second-live-file.pdf',
+          urls: {
+            view: '/files/second-live-file/view',
+            download: '/files/second-live-file/download',
+          },
+        },
+      },
+    });
+
+    cy
+      .get('[data-attachments-region]')
+      .should('contain', 'second-live-file.pdf');
   });
 
   specify('action with work:owned:manage permission', function() {
@@ -2383,6 +2665,7 @@ context('patient action page', function() {
       .routesForPatientAction()
       // NOTE: Tests upload attachments with canEdit permissions
       .routeSettings('upload_attachments', true)
+      .routeSettings('dialer', 'five9')
       .routeCurrentClinician(fx => {
         fx.data = getCurrentClinician({
           relationships: {
@@ -2403,6 +2686,10 @@ context('patient action page', function() {
 
         return fx;
       })
+      .routeFormByAction()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
       .visit(`/patient/1/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeActionFiles');
@@ -2415,8 +2702,7 @@ context('patient action page', function() {
       .as('routePatchAction');
 
     cy
-      .get('[data-menu-region]')
-      .find('.js-menu')
+      .get('.patient-action__menu')
       .should('exist');
 
     cy
@@ -2426,7 +2712,7 @@ context('patient action page', function() {
     cy
       .get('[data-action-region]')
       .find('button')
-      .should('have.length', 5);
+      .should('have.length', 6);
 
     cy
       .get('[data-action-region]')
@@ -2440,14 +2726,14 @@ context('patient action page', function() {
       .wait('@routePatchAction');
 
     cy
-      .get('[data-menu-region]')
-      .find('.js-menu')
+      .get('.patient-action__menu')
       .should('not.exist');
 
     cy
       .get('[data-action-region]')
       .find('button')
-      .should('not.exist');
+      .should('have.length', 1)
+      .and('have.class', 'dialer-component__button');
 
     cy
       .get('[data-action-region]')
@@ -2459,6 +2745,11 @@ context('patient action page', function() {
       .should('contain', 'No Duration')
       .find('.patient-action__no-results')
       .should('contain', 'No details');
+
+    cy
+      .get('[data-action-region]')
+      .find('[data-dialer-region] button')
+      .should('exist');
 
     cy
       .get('.patient-action')
@@ -2477,8 +2768,7 @@ context('patient action page', function() {
     cy
       .get('.patient-action')
       .find('[data-action-region]')
-      .should('contain', 'Permissions')
-      .and('contain', 'You are not able to change settings on this action.');
+      .should('contain', 'You are not able to change settings on this action.');
   });
 
   specify('action with work:team:manage permission', function() {
@@ -2554,8 +2844,7 @@ context('patient action page', function() {
 
     cy
       .get('[data-action-region]')
-      .should('contain', 'Permissions')
-      .and('contain', 'You are not able to change settings on this action.');
+      .should('contain', 'You are not able to change settings on this action.');
 
     cy
       .routeAction(fx => {
@@ -2570,8 +2859,7 @@ context('patient action page', function() {
 
     cy
       .get('[data-action-region]')
-      .should('contain', 'Permissions')
-      .and('contain', 'You are not able to change settings on this action.');
+      .should('contain', 'You are not able to change settings on this action.');
   });
 
   specify('action with work:authored:delete permission', function() {
@@ -2632,10 +2920,8 @@ context('patient action page', function() {
       .wait('@routePatient');
 
     cy
-      .get('.patient-action')
-      .as('actionPage')
-      .find('[data-menu-region]')
-      .should('not.be.empty');
+      .get('.patient-action__menu')
+      .should('exist');
 
     cy
       .routeAction(fx => {
@@ -2649,10 +2935,8 @@ context('patient action page', function() {
       .wait('@routeAction');
 
     cy
-      .get('.patient-action')
-      .as('actionPage')
-      .find('[data-menu-region]')
-      .should('be.empty');
+      .get('.patient-action__menu')
+      .should('not.exist');
   });
 
   specify('flow action with work:owned:manage permission', function() {
@@ -2711,6 +2995,20 @@ context('patient action page', function() {
       .routePatientByFlow()
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow');
+
+    cy
+      .intercept('PATCH', `/api/flows/${ testFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchFlow');
+
+    cy
+      .intercept('PATCH', `/api/actions/${ testAction.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchAction');
 
     cy
       .get('[data-action-region]')
@@ -2796,7 +3094,6 @@ context('patient action page', function() {
       })
       .routeAction(fx => {
         fx.data = ownedByAnotherTeamAction;
-
         return fx;
       })
       .routePatientByFlow()
@@ -2806,13 +3103,11 @@ context('patient action page', function() {
 
     cy
       .get('[data-action-region]')
-      .should('contain', 'Permissions')
-      .and('contain', 'You are not able to change settings on this action.');
+      .should('contain', 'You are not able to change settings on this action.');
 
     cy
       .routeAction(fx => {
         fx.data = ownedByNonTeamMemberAction;
-
         return fx;
       })
       .window()
@@ -2829,8 +3124,7 @@ context('patient action page', function() {
 
     cy
       .get('[data-action-region]')
-      .should('contain', 'Permissions')
-      .and('contain', 'You are not able to change settings on this action.');
+      .should('contain', 'You are not able to change settings on this action.');
   });
 
   // A patient action route can coalesce into a still-loading PatientApp (scope is the
