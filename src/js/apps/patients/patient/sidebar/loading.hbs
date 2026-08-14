@@ -1,0 +1,15 @@
+<span class="loader__text">{{ @intl.regions.preload.loading }}</span>
+<div class="loader__skeleton patient-sidebar__loader-skeleton skeleton-loading">
+  <div class="patient-sidebar__card patient-sidebar__loader-card" aria-hidden="true">
+    <div class="patient-sidebar__loader-heading">
+      <span class="patient-sidebar__loader-heading-text skeleton-loading__shape"></span>
+      <span class="patient-sidebar__loader-heading-icon skeleton-loading__shape"></span>
+    </div>
+    {{#each sections}}
+      <div class="patient-sidebar__loader-section">
+        <span class="patient-sidebar__loader-label skeleton-loading__shape"></span>
+        <span class="patient-sidebar__loader-value skeleton-loading__shape"></span>
+      </div>
+    {{/each}}
+  </div>
+</div>
