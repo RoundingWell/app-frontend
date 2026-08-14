@@ -1962,6 +1962,22 @@ context('worklist page', function() {
       })
       .get('.worklist-list__action-item')
       .first()
+      .find('.js-attachments')
+      .click()
+      .wait('@routeAction')
+      .wait('@routeDelayedActionFiles');
+
+    cy
+      .get('[data-attachments-region]')
+      .should('be.focused');
+
+    cy
+      .go('back')
+      .wait('@routeActions');
+
+    cy
+      .get('.worklist-list__action-item')
+      .first()
       .find('.js-comments')
       .click()
       .wait('@routeAction')

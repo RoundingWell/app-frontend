@@ -34,6 +34,7 @@ context('Iframe Form Behavior', function() {
   afterEach(function() {
     Radio.channel('form1').reset();
     Radio.channel('form2').reset();
+    Radio.channel('user-activity').reset();
   });
 
   specify('routes postMessage events only to the matching iframe channel', function() {
@@ -83,6 +84,31 @@ context('Iframe Form Behavior', function() {
       expect(requests).to.deep.equal([
         ['form2', { patientId: 'patient-2' }, 'req_2'],
       ]);
+    });
+  });
+
+  specify('reports iframe interactions as user activity', function() {
+    const focusedIframes = [];
+
+    Radio.channel('user-activity').on('iframe:focus', iframe => focusedIframes.push(iframe));
+
+    cy
+      .mount(() => new ParentView())
+      .get('iframe')
+      .should('have.length', 2);
+
+    cy.window().then(win => {
+      const [firstIframe] = win.document.querySelectorAll('iframe');
+
+      $(win).trigger($.Event('message', {
+        originalEvent: {
+          data: { message: 'form:interact' },
+          origin: win.origin,
+          source: firstIframe.contentWindow,
+        },
+      }));
+
+      expect(focusedIframes).to.deep.equal([firstIframe]);
     });
   });
 });

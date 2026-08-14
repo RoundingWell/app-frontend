@@ -18,7 +18,7 @@
   <div class="work-card__aside">
     <div class="work-card__controls flow-card__controls worklist-list__chips">
       <span class="work-card__control worklist-list__search-helper">&#8203;{{ state }}&#8203;</span>
-      <span class="work-card__control flow-card__owner js-no-click"><span data-owner-region></span><span class="worklist-list__search-helper">&#8203;{{ owner }}&#8203;</span></span>
+      <span class="work-card__control flow-card__owner"><span data-owner-region></span><span class="worklist-list__search-helper">&#8203;{{ owner }}&#8203;</span></span>
       <span class="work-card__control flow-card__status patient-list__flow-progress">
         <progress class="progress-bar" value="{{ _progress.complete }}" max="{{ _progress.total }}" aria-label="{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}"></progress>
         <span class="patient-list__flow-progress-label">{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}</span>

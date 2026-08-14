@@ -8,13 +8,10 @@ import intl from 'js/i18n';
 import { AttachmentsView } from 'js/apps/patients/patient/action/action-attachments_views';
 
 export default App.extend({
-  onBeforeStart() {
-    this.getRegion().startPreloader();
-  },
   beforeStart({ action }) {
     return Radio.request('entities', 'fetch:files:collection:byAction', action.id);
   },
-  onStart({ action }, attachments) {
+  onStart({ action, focusOnLoad }, attachments) {
     this.action = action;
     this.attachments = attachments;
 
@@ -25,6 +22,11 @@ export default App.extend({
 
     this.showAttachments();
     this.subscribe();
+
+    if (focusOnLoad) this.focus();
+  },
+  focus() {
+    this.getRegion().focus();
   },
   onBeforeStop() {
     if (!this.attachments) return;

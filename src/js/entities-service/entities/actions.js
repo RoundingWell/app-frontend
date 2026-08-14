@@ -69,6 +69,9 @@ const _Model = BaseModel.extend({
   getForm() {
     return this.getRelationship('_form');
   },
+  hasForm() {
+    return !!this.getForm();
+  },
   getFormResponses() {
     return Radio.request('entities', 'formResponses:collection', this.get('_form_responses'));
   },
@@ -151,9 +154,6 @@ const _Model = BaseModel.extend({
   },
   commentCount() {
     return this.getComments().length;
-  },
-  hasAttachments() {
-    return !!this.getFiles().length;
   },
   hasAllowedUploads() {
     if (!this.canEdit()) return false;

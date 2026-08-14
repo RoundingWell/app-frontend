@@ -7,7 +7,7 @@
   </div>
   <div class="work-card__aside">
     <div class="work-card__controls flow-card__controls">
-      <span class="work-card__control flow-card__owner js-no-click" data-owner-region></span>
+      <span class="work-card__control flow-card__owner" data-owner-region></span>
       <span class="work-card__control flow-card__status patient-list__flow-progress">
         <progress class="progress-bar patient__flow-progress" value="{{ _progress.complete }}" max="{{ _progress.total }}" aria-label="{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}"></progress>
         <span class="patient-list__flow-progress-label">{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}</span>

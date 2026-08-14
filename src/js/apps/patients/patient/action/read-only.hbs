@@ -1,0 +1,19 @@
+<div data-name-region></div>
+<div class="patient-action__details-copy">
+{{ details }}{{#unless details}}<span class="patient-action__no-results">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.noDetails }}</span>{{/unless}}
+</div>
+<div class="button-group patient-action__chips">
+  <div data-state-region></div>
+  <div data-owner-region></div>
+  <div class="button-group button-group--joined patient-action__due" data-due-datetime-region></div>
+  <div data-duration-region></div>
+  <div class="patient-action__dialer" data-dialer-region></div>
+  <div data-counts-region></div>
+</div>
+{{#unless canEdit}}
+<div class="patient-action__permission">
+  <div class="patient-detail-page__notice patient-action__info">
+    {{far "ban"}}<span class="u-margin--l-8">{{ @intl.patients.patient.action.detailsViews.readOnlyActionView.permissionInfo }}</span>
+  </div>
+</div>
+{{/unless}}

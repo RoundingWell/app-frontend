@@ -8,7 +8,8 @@ import 'scss/modules/progress-bar.scss';
 import intl from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
-import { CheckComponent, FlowStateComponent, OwnerComponent } from 'js/apps/patients/shared/flows_views';
+import { CardOwnerComponent } from 'js/apps/patients/shared/actions_views';
+import { CheckComponent, FlowStateComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView } from 'js/apps/patients/shared/read-only_views';
 
 import FlowItemTemplate from './flow-item.hbs';
@@ -152,7 +153,7 @@ const FlowItemView = View.extend({
 
     const isDisabled = this.model.isDone();
     const program = this.model.getProgram();
-    this.ownerComponent = new OwnerComponent({
+    this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,

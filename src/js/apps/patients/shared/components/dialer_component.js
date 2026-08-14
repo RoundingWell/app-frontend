@@ -59,7 +59,7 @@ export default Component.extend({
         disabled: isDisabled,
         type: 'button',
       },
-      className: 'button button--secondary dialer-component__button',
+      className: 'button button--compact dialer-component__button',
       template: hbs`{{far "phone"}}<span>{{ @intl.patients.shared.components.dialerComponent.defaultText }}</span>`,
       triggers: {
         'click': 'click',

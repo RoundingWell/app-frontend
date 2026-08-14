@@ -1,3 +1,4 @@
+import { extend, result } from 'underscore';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
@@ -19,6 +20,22 @@ import TimeComponent from './components/time_component';
 import DurationComponent from './components/duration_component';
 
 import './actions.scss';
+
+function createCardControl(Component) {
+  return Component.extend({
+    viewOptions() {
+      const options = Component.prototype.viewOptions.call(this);
+
+      return extend({}, options, {
+        className: `${ result(options, 'className') } js-no-click`,
+      });
+    },
+  });
+}
+
+const CardOwnerComponent = createCardControl(OwnerComponent);
+const CardDueComponent = createCardControl(DueComponent);
+const CardTimeComponent = createCardControl(TimeComponent);
 
 const FormButton = View.extend({
   className: 'button button--icon action-form-button',
@@ -105,6 +122,9 @@ export {
   OwnerComponent,
   DueComponent,
   TimeComponent,
+  CardOwnerComponent,
+  CardDueComponent,
+  CardTimeComponent,
   DurationComponent,
   FormButton,
   DetailsTooltip,

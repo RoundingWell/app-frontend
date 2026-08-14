@@ -8,10 +8,14 @@
 }
 
 .due-component {
-  border-radius: 16px var(--due-component-right-radius, 16px) var(--due-component-right-radius, 16px) 16px;
-  border-right-width: var(--due-component-border-right-width, 1px);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 20px;
-  padding: 0 8px;
+  --button-border-radius: 16px var(--due-component-right-radius, 16px) var(--due-component-right-radius, 16px) 16px;
+
+  border-right-width: var(--due-component-border-right-width, var(--button-border-width, 1px));
+}
+
+.button--secondary.due-component {
+  --button-font-size: 12px;
+  --button-font-weight: 600;
+  --button-line-height: 20px;
+  --button-padding: 0 8px;
 }

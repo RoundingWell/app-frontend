@@ -7,39 +7,25 @@ import { alphaSort } from 'js/utils/sorting';
 
 import intl from 'js/i18n';
 
-import 'scss/modules/sidebar.scss';
-import 'scss/modules/loader.scss';
-
 import './action.scss';
 
-const EmptyView = View.extend({
-  className: 'patient-action__no-results',
-  template: hbs`{{ @intl.patients.patient.action.attachmentsViews.emptyView }}`,
-});
-
 const AttachmentView = View.extend({
-  className: 'u-margin--t-16',
+  className: 'patient-action__attachment',
   modelEvents: {
     'change:_progress': 'onChangeProgress',
     'change:_download': 'render',
   },
   downloadTemplate: hbs`
-    <a class="patient-action__attachment-filename" target="_blank" href="{{_view}}">{{filename}}</a>
-    <div class="flex">
-      <a class="patient-action__attachment-action flex-grow" target="_blank" href="{{_download}}" download>
-        {{far "download"}} <span>{{ @intl.patients.patient.action.attachmentsViews.attachmentView.downloadText }}</span>
-      </a>
-      {{#if canRemoveAttachments}}
-        <a class="patient-action__attachment-action js-remove">
-          {{far "trash-can"}} <span>{{ @intl.patients.patient.action.attachmentsViews.attachmentView.removeText }}</span>
-        </a>
-      {{/if}}
-    </div>
+    <a class="patient-action__attachment-filename" href="{{_view}}" title="{{ filename }}" target="_blank">{{ filename }}</a>
+    <a class="patient-action__attachment-action js-download" href="{{_download}}" title="{{ @intl.patients.patient.action.attachmentsViews.attachmentView.downloadText }}" aria-label="{{ @intl.patients.patient.action.attachmentsViews.attachmentView.downloadText }}" target="_blank" download>{{far "download"}}</a>
+    {{#if canRemoveAttachments}}
+      <button class="patient-action__attachment-action js-remove" type="button" title="{{ @intl.patients.patient.action.attachmentsViews.attachmentView.removeText }}" aria-label="{{ @intl.patients.patient.action.attachmentsViews.attachmentView.removeText }}">{{far "trash-can"}}</button>
+    {{/if}}
   `,
   uploadTemplate: hbs`
-    <div class="patient-action__attachment-filename">{{filename}}</div>
-    <div class="loader__bar u-margin--t-8 js-progress-bar">
-      <div class="loader__bar-progress js-progress"></div>
+    <div class="patient-action__attachment-filename">{{ filename }}</div>
+    <div class="patient-action__attachment-progress js-progress-bar">
+      <div class="patient-action__attachment-progress-value js-progress"></div>
     </div>
   `,
   ui: {
@@ -63,7 +49,7 @@ const AttachmentView = View.extend({
       bodyText: intl.patients.patient.action.attachmentsViews.removeModal.bodyText,
       headingText: intl.patients.patient.action.attachmentsViews.removeModal.headingText,
       submitText: intl.patients.patient.action.attachmentsViews.removeModal.submitText,
-      buttonClass: 'button--red',
+      buttonClass: 'button button--danger',
       onSubmit: () => {
         modal.destroy();
         this.triggerMethod('remove:attachment', this.model);
@@ -85,23 +71,20 @@ const AttachmentView = View.extend({
 });
 
 const AttachmentsView = CollectionView.extend({
-  className: 'u-margin--t-24',
+  className: 'patient-action__attachments-content',
   collectionEvents: {
     'changeId': 'filter',
   },
   template: hbs`
-    <div class="sidebar__attachments">
-      <h3 class="sidebar__heading">
-        {{far "paperclip"}}<span class="u-margin--l-8">{{ @intl.patients.patient.action.attachmentsViews.attachmentsViews.attachmentsHeadingText }}</span>
-      </h3>
-      <div data-attachments-files-region></div>
-      {{#if canUploadAttachments}}
-        <form>
-          <input type="file" id="upload-attachment" accept=".pdf" class="patient-action__attachment-file js-file">
-          <label for="upload-attachment" class="button-primary u-margin--t-16 js-add">{{far "paperclip"}}<span>{{ @intl.patients.patient.action.attachmentsViews.attachmentsViews.addAttachment }}</span></label>
-        </form>
-      {{/if}}
-    </div>
+    {{#if canUploadAttachments}}
+      <form class="patient-action__attachment-form">
+        <input class="patient-action__attachment-file js-file" id="upload-attachment" type="file" accept=".pdf">
+        <button class="patient-action__attachment-control js-add" type="button" title="{{ @intl.patients.patient.action.attachmentsViews.attachmentsViews.addAttachment }}" aria-label="{{ @intl.patients.patient.action.attachmentsViews.attachmentsViews.addAttachment }}">{{far "paperclip"}}</button>
+      </form>
+    {{else}}
+      <span class="patient-action__attachment-icon">{{far "paperclip"}}</span>
+    {{/if}}
+    <div class="patient-action__attachment-files" data-attachments-files-region></div>
   `,
   templateContext() {
     return {
@@ -115,7 +98,6 @@ const AttachmentsView = CollectionView.extend({
       canRemoveAttachments: this.getOption('canRemoveAttachments'),
     };
   },
-  emptyView: EmptyView,
   viewComparator(viewA, viewB) {
     return alphaSort('desc', viewA.model.get('created_at'), viewB.model.get('created_at'));
   },
@@ -134,6 +116,7 @@ const AttachmentsView = CollectionView.extend({
   onClickAdd() {
     // NOTE: Clears previous selection if reuploading
     this.ui.file[0].value = '';
+    this.ui.file[0].click();
   },
   onChangeFile() {
     const file = this.ui.file[0].files[0];

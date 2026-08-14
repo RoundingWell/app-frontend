@@ -8,7 +8,7 @@ import 'scss/modules/card-list.scss';
 import intl from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
-import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { CheckComponent, StateComponent, CardOwnerComponent, CardDueComponent, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 import ActionItemTemplate from './action-item.hbs';
 
@@ -184,7 +184,7 @@ const ActionItemView = View.extend({
 
     const isDisabled = this.model.isDone();
     const program = this.model.getProgram();
-    this.ownerComponent = new OwnerComponent({
+    this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
@@ -205,7 +205,7 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.model.isDone();
-    this.dueDateComponent = new DueComponent({
+    this.dueDateComponent = new CardDueComponent({
       date: this.model.get('due_date'),
       isCompact: true,
       state: { isDisabled },
@@ -226,7 +226,7 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
-    this.dueTimeComponent = new TimeComponent({
+    this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
       isCompact: true,
       state: { isDisabled },
