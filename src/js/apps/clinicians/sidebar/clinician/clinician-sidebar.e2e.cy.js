@@ -196,11 +196,10 @@ context('clinician sidebar', function() {
       });
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .first()
-      .children()
-      .eq(1)
+      .find('.card-list__item-meta')
       .as('clinicianListItemWorkspaces')
       .should('not.contain', 'Workspace One');
 
@@ -247,8 +246,8 @@ context('clinician sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .first()
       .should('contain', 'Test Clinician')
       .should('have.not.class', 'is-selected');
@@ -361,7 +360,7 @@ context('clinician sidebar', function() {
 
     cy
       .get('.sidebar')
-      .find('.sidebar__info');
+      .find('.clinician-sidebar__info');
   });
 
   specify('never active clinician', function() {

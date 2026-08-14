@@ -32,8 +32,8 @@ context('dashboards all list', function() {
       .wait('@routeDashboards');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .first()
       .should('contain', 'Daily Dashboard')
       .next()
@@ -60,8 +60,7 @@ context('dashboards all list', function() {
       .wait('@routeDashboards');
 
     cy
-      .get('.table-list')
-      .find('.table-list__empty-list')
+      .get('.card-list__empty')
       .contains('No Dashboards');
   });
 
@@ -104,9 +103,9 @@ context('dashboards all list', function() {
       .should('have.class', 'is-applied');
 
     cy
-      .get('.table-list')
+      .get('.card-list')
       .as('dashboardList')
-      .find('.table-list__empty-list')
+      .find('.card-list__empty')
       .should('contain', 'No results match your Find in List search');
 
     cy
@@ -122,7 +121,7 @@ context('dashboards all list', function() {
 
     cy
       .get('@dashboardList')
-      .find('.table-list__item')
+      .find('.card-list__item')
       .should('have.length', 2);
 
     cy
@@ -136,7 +135,7 @@ context('dashboards all list', function() {
 
     cy
       .get('@dashboardList')
-      .find('.table-list__item')
+      .find('.card-list__item')
       .should('have.length', 1)
       .first()
       .should('contain', 'Daily Dashboards')
@@ -153,7 +152,7 @@ context('dashboards all list', function() {
 
     cy
       .get('@dashboardList')
-      .find('.table-list__item')
+      .find('.card-list__item')
       .should('have.length', 1)
       .first()
       .should('contain', 'Daily Dashboards');
