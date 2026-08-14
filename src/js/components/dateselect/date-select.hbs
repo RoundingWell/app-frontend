@@ -1,5 +1,5 @@
 <div data-select-region></div>
 {{#if date}}
-<button class="button-secondary  date-select__date{{#unless isDisabled}} button__group{{/unless}}{{#if hasError}} has-error{{/if}}" tabindex="-1" {{#if isDisabled}}disabled{{/if}}>{{far "calendar-days"}}<span>{{date}}</span></button>{{~ remove_whitespace ~}}
-{{#unless isDisabled}}<button class="button-secondary--compact button__group js-cancel">{{far "circle-xmark"}}</button>{{/unless}}
+<button class="button button--secondary date-select__date{{#unless isDisabled}} date-select__joined-item{{/unless}}{{#if hasError}} has-error{{/if}}" type="button" tabindex="-1" {{#if isDisabled}}disabled{{/if}}>{{far "calendar-days"}}<span>{{date}}</span></button>{{~ remove_whitespace ~}}
+{{#unless isDisabled}}<button class="button button--secondary date-select__joined-item date-select__cancel js-cancel" type="button" aria-label="{{ @intl.components.dateSelect.clearText }}">{{far "circle-xmark"}}</button>{{/unless}}
 {{/if}}

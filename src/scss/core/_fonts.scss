@@ -1,83 +1,20 @@
 /**
-* @license
-* MyFonts Webfont Build ID 3749741, 2019-04-19T09:58:56-0400
-*
-* The fonts listed in this notice are subject to the End User License
-* Agreement(s) entered into by the website owner. All other parties are
-* explicitly restricted from using the Licensed Webfonts(s).
-*
-* You may obtain a valid license at the URLs below.
-*
-* Webfont: ProximaSoft-BoldIt by Mark Simonson
-* URL: https://www.myfonts.com/fonts/marksimonson/proxima-soft/bold-italic/
-*
-* Webfont: ProximaSoft-Bold by Mark Simonson
-* URL: https://www.myfonts.com/fonts/marksimonson/proxima-soft/bold/
-*
-* Webfont: ProximaSoft-Semibold by Mark Simonson
-* URL: https://www.myfonts.com/fonts/marksimonson/proxima-soft/semibold/
-*
-* Webfont: ProximaSoft-SemiboldIt by Mark Simonson
-* URL: https://www.myfonts.com/fonts/marksimonson/proxima-soft/semibold-italic/
-*
-* Webfont: ProximaSoft-Regular by Mark Simonson
-* URL: https://www.myfonts.com/fonts/marksimonson/proxima-soft/regular/
-*
-* Webfont: ProximaSoft-RegularIt by Mark Simonson
-* URL: https://www.myfonts.com/fonts/marksimonson/proxima-soft/italic/
-*
-*
-* License: https://www.myfonts.com/viewlicense?type=web&buildid=3749741
-* Licensed pageviews: 1,000,000
-* Webfonts copyright: Copyright (c) Mark Simonson, 2016. All rights reserved.
-*
-* © 2019 MyFonts Inc
-*/
+ * Figtree variable fonts from upstream commit 032dfa7f.
+ * Licensed under the SIL Open Font License, Version 1.1.
+ */
 
 @font-face {
   font-display: swap;
-  font-family: ProximaSoft;
+  font-family: Figtree;
   font-style: normal;
-  font-weight: normal;
-  src: url('/fonts/ProximaSoft/3955CC_4_0.woff2') format('woff2');
+  font-weight: 300 900;
+  src: url('/fonts/Figtree/figtree-wght-normal.woff2') format('woff2-variations');
 }
 
 @font-face {
   font-display: swap;
-  font-family: ProximaSoft;
+  font-family: Figtree;
   font-style: italic;
-  font-weight: normal;
-  src: url('/fonts/ProximaSoft/3955CC_5_0.woff2') format('woff2');
-}
-
-@font-face {
-  font-display: swap;
-  font-family: ProximaSoft;
-  font-style: normal;
-  font-weight: 600;
-  src: url('/fonts/ProximaSoft/3955CC_2_0.woff2') format('woff2');
-}
-
-@font-face {
-  font-display: swap;
-  font-family: ProximaSoft;
-  font-style: italic;
-  font-weight: 600;
-  src: url('/fonts/ProximaSoft/3955CC_3_0.woff2') format('woff2');
-}
-
-@font-face {
-  font-display: swap;
-  font-family: ProximaSoft;
-  font-style: normal;
-  font-weight: bold;
-  src: url('/fonts/ProximaSoft/3955CC_1_0.woff2') format('woff2');
-}
-
-@font-face {
-  font-display: swap;
-  font-family: ProximaSoft;
-  font-style: italic;
-  font-weight: bold;
-  src: url('/fonts/ProximaSoft/3955CC_0_0.woff2') format('woff2');
+  font-weight: 300 900;
+  src: url('/fonts/Figtree/figtree-wght-italic.woff2') format('woff2-variations');
 }

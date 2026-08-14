@@ -3,6 +3,9 @@ import Sortable from 'sortablejs';
 
 export default Behavior.extend({
   options: {
+    draggableClass: 'is-draggable',
+    draggingClass: 'is-dragging',
+    ghostClass: 'sortable-ghost',
     handle: '.js-sort',
     item: '.js-draggable',
   },
@@ -18,7 +21,7 @@ export default Behavior.extend({
   },
   updateDisabled() {
     const shouldDisabled = this.shouldDisable();
-    this.view.$el.toggleClass('is-draggable', !shouldDisabled);
+    this.view.$el.toggleClass(this.getOption('draggableClass'), !shouldDisabled);
     this.sortable.option('disabled', shouldDisabled);
   },
   onRender() {
@@ -29,6 +32,7 @@ export default Behavior.extend({
       handle: this.getOption('handle'),
       item: this.getOption('item'),
       direction: 'vertical',
+      ghostClass: this.getOption('ghostClass'),
       onEnd: this.onEnd.bind(this),
       onStart: this.onStart.bind(this),
     });
@@ -40,7 +44,7 @@ export default Behavior.extend({
   },
   onEnd({ oldIndex, newIndex }) {
     const movedModel = this.view.collection.models[oldIndex];
-    this.view.$el.removeClass('is-dragging');
+    this.view.$el.removeClass(this.getOption('draggingClass'));
 
     this.view.collection.models.splice(oldIndex, 1);
     this.view.collection.models.splice(newIndex, 0, movedModel);
@@ -50,7 +54,7 @@ export default Behavior.extend({
   onStart({ oldIndex }) {
     const movedModel = this.view.collection.models[oldIndex];
 
-    this.view.$el.addClass('is-dragging');
+    this.view.$el.addClass(this.getOption('draggingClass'));
     this.view.triggerMethod('drag:start', movedModel);
   },
 });

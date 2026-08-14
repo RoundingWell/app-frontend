@@ -1,0 +1,76 @@
+@use './work-card-breakpoints' as work-card;
+
+.action-card__tool {
+  align-items: center;
+  align-self: center;
+  display: flex;
+  height: 24px;
+}
+
+.action-card__tool:empty,
+.action-card__tool:has(> :empty) {
+  display: none;
+}
+
+.action-card__controls {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.action-card__due {
+  --due-component-border-right-width: 0;
+  --due-component-right-radius: 0;
+  --time-component-left-radius: 0;
+
+  display: flex;
+  justify-self: end;
+  margin-left: auto;
+  min-width: max-content;
+}
+
+.action-card__count .icon {
+  font-size: 14px;
+  width: 14px;
+}
+
+.action-card__counts {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.action-card__count {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@container (width <= #{work-card.$stack}) {
+  .action-card__controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .action-card__due {
+    justify-self: auto;
+    margin-left: 0;
+  }
+
+  .action-card__owner {
+    --button-width: max-content;
+
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: fit-content;
+  }
+
+  .action-card__meta {
+    column-gap: var(--space-2);
+  }
+}
+
+@container (width <= #{work-card.$compact}) {
+  .action-card__counts {
+    margin-left: 0;
+  }
+}

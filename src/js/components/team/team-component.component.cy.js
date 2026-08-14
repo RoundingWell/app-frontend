@@ -53,7 +53,8 @@ context('Team Component', function() {
 
     cy
       .get('@root')
-      .find('.button-secondary--compact')
+      .find('.button.button--compact')
+      .should('be.visible')
       .click();
 
     cy
@@ -63,7 +64,7 @@ context('Team Component', function() {
 
     cy
       .get('@root')
-      .find('.button-secondary--compact')
+      .find('.button.button--compact')
       .contains('PHS');
   });
 
@@ -89,7 +90,7 @@ context('Team Component', function() {
 
     cy
       .get('@root')
-      .find('.button-secondary')
+      .find('.button.button--secondary')
       .contains('Coordinator')
       .click();
 
@@ -115,7 +116,7 @@ context('Team Component', function() {
 
     cy
       .get('@root')
-      .find('.button-secondary')
+      .find('.button.button--secondary')
       .contains('Physician')
       .click();
 

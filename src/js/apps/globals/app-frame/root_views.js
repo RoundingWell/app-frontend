@@ -122,6 +122,7 @@ const ModalRegionView = TopRegionView.extend({
 const popDefaults = {
   align: 'left',
   direction: 'down',
+  gap: 4,
   left: 0,
   outerHeight: 0,
   outerWidth: 0,
@@ -182,19 +183,19 @@ const PopRegionView = TopRegionView.extend({
     return left;
   },
   /* istanbul ignore next: difficult to test in context */
-  setDirection(height, { top, direction, windowPadding, outerHeight }) {
+  setDirection(height, { top, direction, gap, windowPadding, outerHeight }) {
     const bodyHeight = this.$body.height();
 
     if (direction === 'down') {
-      if (top + outerHeight + height + windowPadding > bodyHeight) {
+      if (top + outerHeight + gap + height + windowPadding > bodyHeight) {
         direction = 'forceUp';
-        return this.setDirection(height, { top, direction, windowPadding, outerHeight });
+        return this.setDirection(height, { top, direction, gap, windowPadding, outerHeight });
       }
 
-      return outerHeight + top;
+      return outerHeight + gap + top;
     }
 
-    top -= height;
+    top -= height + gap;
     if (top >= windowPadding) return top;
 
     if (direction === 'forceUp') {
@@ -202,7 +203,7 @@ const PopRegionView = TopRegionView.extend({
     }
 
     direction = 'down';
-    return this.setDirection(height, { top, direction, windowPadding, outerHeight });
+    return this.setDirection(height, { top, direction, gap, windowPadding, outerHeight });
   },
 });
 
