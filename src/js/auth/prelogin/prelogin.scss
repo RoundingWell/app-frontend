@@ -1,20 +1,6 @@
 // NOTE: Not using sass to prevent overriding form.io with base sass reset :-/
 
-@font-face {
-  font-display: swap;
-  font-family: ProximaSoft;
-  font-style: normal;
-  font-weight: normal;
-  src: url('/fonts/ProximaSoft/3955CC_4_0.woff2') format('woff2');
-}
-
-@font-face {
-  font-display: swap;
-  font-family: ProximaSoft;
-  font-style: normal;
-  font-weight: bold;
-  src: url('/fonts/ProximaSoft/3955CC_1_0.woff2') format('woff2');
-}
+@use '../../../scss/core/fonts';
 
 body {
   margin: 0;
@@ -42,7 +28,7 @@ body {
   color: #{$black-20};
   display: flex;
   flex-direction: column;
-  font-family: ProximaSoft, 'Droid Sans', 'helvetica neue', arial, sans-serif;
+  font-family: Figtree, 'Droid Sans', 'helvetica neue', arial, sans-serif;
   font-size: 14px;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
@@ -89,7 +75,7 @@ body {
   color: #{$white};
   cursor: pointer;
   display: inline-block;
-  font-family: ProximaSoft, 'Droid Sans', 'helvetica neue', arial, sans-serif;
+  font-family: Figtree, 'Droid Sans', 'helvetica neue', arial, sans-serif;
   font-size: 16px;
   font-weight: 700;
   line-height: 1;
