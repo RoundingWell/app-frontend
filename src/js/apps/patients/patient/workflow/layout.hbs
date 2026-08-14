@@ -1,22 +1,21 @@
-<div class="patient__tabs">
-  <span class="patient__tab--selected">
-    {{~ @intl.patients.patient.workflow.workflowViews.dashboardBtn ~}}
-  </span>
-  <button class="patient__tab js-archive">
-    {{~ @intl.patients.patient.workflow.workflowViews.archiveBtn ~}}
-  </button>
-</div>
-<div class="patient__actions-container">
-  <div class="patient__actions" data-add-workflow-region>
-    <span class="button-primary">
-      <span class="js-loading">
-        {{far "circle-plus"}}
-        <span>{{ @intl.patients.patient.workflow.workflowViews.actionLoading }}</span>
+<div class="workflow-page">
+  <div class="workflow-page__toolbar">
+    <div class="workflow-page__tabs" role="tablist" aria-label="{{ @intl.patients.patient.workflow.workflowViews.tabsLabel }}">
+      <button class="workflow-page__tab is-selected js-dashboard" type="button" role="tab" aria-selected="true">
+        {{~ @intl.patients.patient.workflow.workflowViews.dashboardBtn ~}}
+      </button>
+      <button class="workflow-page__tab js-archive" type="button" role="tab" aria-selected="false">
+        {{~ @intl.patients.patient.workflow.workflowViews.archiveBtn ~}}
+      </button>
+    </div>
+    <div class="workflow-page__actions" data-add-workflow-region>
+      <span class="button button--outline button--pill add-workflow__button">
+        <span class="js-loading">
+          {{far "circle-plus"}}
+          <span>{{ @intl.patients.patient.workflow.workflowViews.actionLoading }}</span>
+        </span>
       </span>
-    </span>
+    </div>
   </div>
-</div>
-<div class="table-list patient__table-list">
-  <div class="table-list__header list-page__list-header"></div>
-  <div class="table-list__list list-page__list" data-content-region></div>
+  <div data-content-region></div>
 </div>
