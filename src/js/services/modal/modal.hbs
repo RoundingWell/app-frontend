@@ -1,8 +1,8 @@
-<div class="modal__header {{ headerClass }}" data-header-region>
+<div class="{{ headerClass }}" data-header-region>
   {{#if headerIcon}}<span class="modal__header-icon">{{fa headerIconType headerIcon}}</span>{{/if}}
   <div class="flex-grow">{{ headingText }}</div>
   <div data-draft-status-region></div>
-  <button class="button--icon flex flex-align-center js-close">{{far "xmark"}}</button>
+  <button class="button button--icon flex flex-align-center js-close">{{far "xmark"}}</button>
 </div>
 
 <div class="modal__body" data-body-region>
@@ -12,7 +12,7 @@
 <div class="modal__footer" data-footer-region>
   <div class="modal__footer-actions">
     <button type="submit" class="{{ buttonClass }} js-submit">{{ submitText }}</button>
-    {{#if cancelText}}<button class="button--text js-close">{{ cancelText }}</button>{{/if}}
+    {{#if cancelText}}<button class="button button--text js-close">{{ cancelText }}</button>{{/if}}
   </div>
   <div data-info-region class="modal__footer-info">{{ infoText }}</div>
 </div>

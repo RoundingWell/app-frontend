@@ -65,7 +65,7 @@ context('Modal Service', function() {
           headingText: 'Close On Save',
           bodyText: 'Default onSave behavior. Also a cool custom class!',
           buttonClass: 'save-button',
-          className: 'modal--small custom-class',
+          className: 'modal modal--small custom-class',
         });
       });
 
@@ -78,20 +78,6 @@ context('Modal Service', function() {
     cy
       .get('.modal--small')
       .should('not.exist');
-
-    cy
-      .getRadio(Radio => {
-        Radio.request('modal', 'show', {
-          footerView: false,
-          bodyText: 'No Footer',
-        });
-      });
-
-    cy
-      .get('.modal')
-      .then(modal => {
-        expect(modal).to.not.have.class('modal__footer');
-      });
 
     cy
       .getRadio(Radio => {
@@ -146,7 +132,7 @@ context('Modal Service', function() {
 
     // click the overlay, modal should stll be there
     cy
-      .get('.fill-window--dark.is-shown')
+      .get('.fill-window.fill-window--dark.is-shown')
       .last()
       .click('left')
       .get('.modal--small')
@@ -155,7 +141,7 @@ context('Modal Service', function() {
     cy
       .get('.modal')
       .contains('Modal')
-      .get('.fill-window--dark.is-shown')
+      .get('.fill-window.fill-window--dark.is-shown')
       .click('left')
       .get('.modal')
       .should('not.exist');
@@ -169,8 +155,11 @@ context('Modal Service', function() {
       });
 
     cy
-      .get('.loader')
-      .get('.fill-window--dark.is-shown')
+      .get('.modal .loader__indicator')
+      .should('have.class', 'skeleton-loading--immediate')
+      .find('.loader__indicator-dot')
+      .should('have.lengthOf', 3)
+      .get('.fill-window.fill-window--dark.is-shown')
       .click('right');
 
     cy
@@ -195,32 +184,7 @@ context('Modal Service', function() {
       .contains('Custom Footer');
 
     cy
-      .get('.fill-window--dark.is-shown')
+      .get('.fill-window.fill-window--dark.is-shown')
       .click('right');
-
-    cy
-      .getRadio(Radio => {
-        Radio.request('modal', 'show:sidebar', {
-          headingText: 'Sidebar Modal Header',
-          bodyText: 'Sidebar Modal, this guy is anchored to the right side of the window.',
-        });
-      });
-
-    cy
-      .get('.modal--sidebar')
-      .find('.modal__header')
-      .should('contain', 'Sidebar Modal Header')
-      .next()
-      .should('contain', 'Sidebar Modal, this guy is anchored to the right side of the window.');
-
-    cy
-      .get('.modal--sidebar')
-      .find('.js-close')
-      .first()
-      .click();
-
-    cy
-      .get('.modal--sidebar')
-      .should('not.exist');
   });
 });

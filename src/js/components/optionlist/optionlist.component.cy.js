@@ -7,7 +7,7 @@ import Optionlist from './index';
 
 context('Optionlist', function() {
   const TestView = View.extend({
-    template: hbs`<button class="button--blue u-margin--t-16 u-margin--l-16">Test Menu</button>`,
+    template: hbs`<button class="button button--primary u-margin--t-16 u-margin--l-16">Test Menu</button>`,
     ui: {
       button: 'button',
     },

@@ -43,7 +43,7 @@ export default Droplist.extend({
 
     if (this.getOption('isCompact')) {
       return {
-        className: 'button-secondary--compact',
+        className: 'button button--compact',
         templateContext: {
           defaultText,
           attr: 'abbr',
@@ -53,7 +53,7 @@ export default Droplist.extend({
     }
 
     return {
-      className: 'button-secondary w-100',
+      className: 'button button--secondary w-100',
       templateContext: {
         defaultText,
         attr: 'name',

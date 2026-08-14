@@ -10,7 +10,7 @@ import './list-search-component.scss';
 const InputTemplate = hbs`
   <span class="list-search__search-icon">{{far "magnifying-glass"}}</span>
   <input
-    class="list-search__input input-primary--small js-input w-100"
+    class="list-search__input form-input form-input--primary form-input--small js-input w-100"
     type="text"
     placeholder="{{@intl.shared.components.listSearch.listSearchViews.placeholder}}"
     value="{{query}}"

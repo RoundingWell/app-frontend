@@ -29,7 +29,7 @@ $colors: (
     dark: #138F51
   ),
   red: (
-    base: #E45245,
+    base: #E65140,
     light: #FF5A47,
     dark: #CC4839
   ),
@@ -68,12 +68,9 @@ $black-90: #E6E6E6;
 $black-95: #F2F2F2;
 $black-98: #FAFAFA;
 
-
 // -------------------------------------
 //   State Colors
 // -------------------------------------
-// NOTE: Update cypress.json
-
 $error-color: color(red);
 $info-color: color(blue);
 $success-color: color(green);
