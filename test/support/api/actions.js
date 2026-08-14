@@ -14,6 +14,8 @@ import { programOne } from './programs';
 
 const TYPE = 'patient-actions';
 
+export const longActionName = new Array(9).fill('Really Long Action name').join(' ');
+
 export function getAction(data, { depth = 0 } = {}) {
   if (depth++ > 2) return;
 
