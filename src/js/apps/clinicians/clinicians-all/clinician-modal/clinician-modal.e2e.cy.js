@@ -85,7 +85,7 @@ context('clinicians modal', function() {
 
     cy
       .get('@modal')
-      .get('[data-workspaces-region] .list-manager__droplist')
+      .find('[data-workspaces-region] .list-manager__droplist')
       .click();
 
     cy
@@ -100,7 +100,7 @@ context('clinicians modal', function() {
 
     cy
       .get('@modal')
-      .get('[data-workspaces-region] .list-manager__droplist')
+      .find('[data-workspaces-region] .list-manager__droplist')
       .click();
 
     cy
@@ -118,7 +118,7 @@ context('clinicians modal', function() {
 
     cy
       .get('@modal')
-      .get('[data-workspaces-region] .list-manager__droplist')
+      .find('[data-workspaces-region] .list-manager__droplist')
       .click();
 
     cy
@@ -138,7 +138,7 @@ context('clinicians modal', function() {
 
     cy
       .get('@modal')
-      .get('[data-workspaces-region] .list-manager__droplist')
+      .find('[data-workspaces-region] .list-manager__droplist')
       .click();
 
     cy
@@ -152,8 +152,12 @@ context('clinicians modal', function() {
         statusCode: 201,
         body: {
           data: {
-            enabled: true,
-            last_active_at: '2021-10-18T04:25:22.961Z',
+            id: getClinicianId('test.clinician@roundingwell.com'),
+            type: 'clinicians',
+            attributes: {
+              enabled: true,
+              last_active_at: '2021-10-18T04:25:22.961Z',
+            },
           },
         },
       })
@@ -175,6 +179,10 @@ context('clinicians modal', function() {
         expect(data.relationships.team.data.id).to.equal(teamNurse.id);
         expect(data.relationships.workspaces.data[0].id).to.equal(workspaceOne.id);
       });
+
+    cy
+      .get('.sidebar .js-close')
+      .click();
 
     cy
       .get('.js-add-clinician')
@@ -231,7 +239,7 @@ context('clinicians modal', function() {
 
     cy
       .get('@modal')
-      .get('[data-workspaces-region] .list-manager__droplist')
+      .find('[data-workspaces-region] .list-manager__droplist')
       .click();
 
     cy

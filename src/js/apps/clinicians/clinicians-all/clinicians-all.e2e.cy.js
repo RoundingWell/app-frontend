@@ -9,6 +9,8 @@ import { workspaceOne, workspaceTwo } from 'support/api/workspaces';
 
 context('clinicians list', function() {
   specify('display clinicians list', function() {
+    cy.viewport(2200, 900);
+
     const testClinicians = [
       getClinician({
         attributes: {
@@ -38,36 +40,24 @@ context('clinicians list', function() {
       .wait('@routeClinicians');
 
     cy
-      .get('.table-list__header')
-      .children()
-      .first()
-      .should('contain', 'Clinician')
-      .next()
-      .should('contain', 'Workspaces')
-      .next()
-      .should('contain', 'Role, Team')
-      .next()
-      .should('contain', 'Last Sign In');
+      .get('.js-add-clinician')
+      .should('be.visible');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .last()
       .should('contain', 'Baron Baronson');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
-      .first()
-      .children()
+      .get('.card-list')
+      .find('.card-list__item')
       .first()
       .should('contain', 'Aaron Aaronson')
-      .next()
       .should('contain', 'Workspace One, Workspace Two')
-      .next()
+      .find('.card-list__item-controls')
       .find('.clinician-state--active')
-      .parents('.table-list__meta')
-      .next()
+      .parents('.card-list__item-controls')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
     cy
@@ -76,18 +66,14 @@ context('clinicians list', function() {
       .click();
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .eq(1)
-      .children()
-      .first()
       .should('contain', 'Baron Baronson')
-      .next()
       .should('contain', 'Workspace One, Workspace Two')
-      .next()
+      .find('.card-list__item-controls')
       .find('.clinician-state--pending')
-      .parents('.table-list__meta')
-      .next()
+      .parents('.card-list__item-controls')
       .contains('Never');
 
     cy
@@ -111,8 +97,8 @@ context('clinicians list', function() {
       });
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .find('[data-team-region]')
       .contains('CO')
       .click();
@@ -131,8 +117,8 @@ context('clinicians list', function() {
       });
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .first()
       .as('firstItem');
 
@@ -180,8 +166,7 @@ context('clinicians list', function() {
 
     cy
       .get('@firstItem')
-      .contains('Aaron Aaronson')
-      .parent()
+      .should('contain', 'Aaron Aaronson')
       .should('have.class', 'is-selected');
   });
 
@@ -196,7 +181,7 @@ context('clinicians list', function() {
       .wait('@routeClinicians');
 
     cy
-      .get('.table-list__empty-list')
+      .get('.card-list__empty')
       .contains('No Clinicians');
   });
 
@@ -243,13 +228,16 @@ context('clinicians list', function() {
     cy
       .get('.list-page__list')
       .as('cliniciansList')
-      .find('.table-list__empty-list')
+      .find('.card-list__empty')
       .should('contain', 'No results match your Find in List search');
 
     cy
       .get('@listSearch')
       .next()
       .should('have.class', 'js-clear')
+      .should('have.prop', 'tagName', 'BUTTON')
+      .should('have.attr', 'type', 'button')
+      .should('have.attr', 'aria-label', 'Clear Search')
       .click();
 
     cy
@@ -259,7 +247,7 @@ context('clinicians list', function() {
 
     cy
       .get('@cliniciansList')
-      .find('.table-list__item')
+      .find('.card-list__item')
       .should('have.length', 2);
 
     cy
@@ -273,7 +261,7 @@ context('clinicians list', function() {
 
     cy
       .get('@cliniciansList')
-      .find('.table-list__item')
+      .find('.card-list__item')
       .should('have.length', 1)
       .first()
       .should('contain', 'Aaron Aaronson');
@@ -285,7 +273,7 @@ context('clinicians list', function() {
 
     cy
       .get('@cliniciansList')
-      .find('.table-list__item')
+      .find('.card-list__item')
       .should('have.length', 1)
       .first()
       .should('contain', 'Workspace One');
@@ -297,7 +285,7 @@ context('clinicians list', function() {
 
     cy
       .get('@cliniciansList')
-      .find('.table-list__item')
+      .find('.card-list__item')
       .should('have.length', 1)
       .first()
       .should('contain', 'Employee');
