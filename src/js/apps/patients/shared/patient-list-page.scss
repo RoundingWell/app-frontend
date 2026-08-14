@@ -83,7 +83,7 @@
   padding-block: var(--patient-list-page-filters-padding);
 }
 
-.patient-list-page__filters:where(.is-bulk-editing) {
+.patient-list-page__filters:has(.patient-list-page__bulk-edit:not(:empty)) {
   --patient-list-page-filters-align-items: flex-start;
   --patient-list-page-filters-min-height: var(--patient-list-page-expanded-filters-min-height);
   --patient-list-page-filters-padding: var(--patient-list-page-expanded-filters-padding);
@@ -114,7 +114,7 @@
   min-width: 0;
 }
 
-.patient-list-page__filters:where(.is-bulk-editing) .patient-list-page__summary {
+.patient-list-page__filters:has(.patient-list-page__bulk-edit:not(:empty)) .patient-list-page__summary {
   display: none;
 }
 
@@ -231,6 +231,13 @@
 
   .patient-list-page__sidebar-content {
     overflow-y: auto;
+  }
+
+  .patient-list-page__sidebar-content > .patient-sidebar--list {
+    --patient-sidebar-height: auto;
+
+    overflow-y: visible;
+    scrollbar-gutter: auto;
   }
 
   .patient-list-page__drawer-close {

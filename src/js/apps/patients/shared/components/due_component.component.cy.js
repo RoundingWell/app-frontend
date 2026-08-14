@@ -5,6 +5,20 @@ import Datepicker from 'js/components/datepicker';
 import DueComponent from './due_component';
 
 context('Due Component', function() {
+  specify('labels an empty compact control when requested', function() {
+    cy
+      .mount(rootView => {
+        Datepicker.setRegion(rootView.getRegion('pop'));
+
+        return new DueComponent({
+          date: null,
+          isCompact: true,
+          showLabel: true,
+        });
+      })
+      .contains('Select Date...');
+  });
+
   specify('selects a due date', function() {
     const onChange = cy.stub();
 

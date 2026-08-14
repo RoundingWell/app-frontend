@@ -4016,6 +4016,10 @@ context('worklist page', function() {
       .should('contain', 'Edit 3 Flows');
 
     cy
+      .get('.patient-list-page__summary')
+      .should('not.be.visible');
+
+    cy
       .get('[data-select-all-region]')
       .find('button')
       .click();

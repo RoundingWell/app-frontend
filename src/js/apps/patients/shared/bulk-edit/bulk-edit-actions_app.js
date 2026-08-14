@@ -1,9 +1,8 @@
 import { pick } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 
-import App from 'js/base/app';
-import { BulkEditActionsBodyView, BulkEditActionsHeaderView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
+import BulkEditInlineApp from 'js/apps/patients/shared/bulk-edit/inline_app';
+import { BulkEditActionsInlineView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 
 const StateModel = Backbone.Model.extend({
   initialize({ collection }) {
@@ -13,6 +12,16 @@ const StateModel = Backbone.Model.extend({
     this.initBulkDueDate(collection, initModel);
     this.initBulkDueTime(collection, initModel);
     this.initBulkDuration(collection, initModel);
+  },
+  updateCollection(collection) {
+    const initModel = collection.at(0);
+
+    this.set('collection', collection);
+    if (!this.get('stateChanged')) this.initBulkState(collection, initModel);
+    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel);
+    if (!this.get('dateChanged')) this.initBulkDueDate(collection, initModel);
+    if (!this.get('timeChanged')) this.initBulkDueTime(collection, initModel);
+    if (!this.get('durationChanged')) this.initBulkDuration(collection, initModel);
   },
   initBulkState(collection, initModel) {
     const state = initModel.getState().getResource();
@@ -45,10 +54,12 @@ const StateModel = Backbone.Model.extend({
     const dateMulti = collection.some(item => {
       return item.get('due_date') !== date;
     });
+    const hasMissingDueDate = collection.some(item => !item.get('due_date'));
 
     this.set({
       dateMulti,
       date: dateMulti ? null : date,
+      hasMissingDueDate,
     });
   },
   initBulkDueTime(collection, initModel) {
@@ -81,9 +92,17 @@ const StateModel = Backbone.Model.extend({
   },
   setDueDate(date) {
     if (!date) {
-      return this.set({ date: null, time: null, dateMulti: false, timeMulti: false });
+      return this.set({
+        date: null,
+        time: null,
+        dateMulti: false,
+        timeMulti: false,
+        dateChanged: true,
+        timeChanged: true,
+        hasMissingDueDate: true,
+      });
     }
-    return this.set({ date: date.format('YYYY-MM-DD'), dateMulti: false, dateChanged: true });
+    return this.set({ date: date.format('YYYY-MM-DD'), dateMulti: false, dateChanged: true, hasMissingDueDate: false });
   },
   setDueTime(time) {
     return this.set({ time: time || null, timeMulti: false, timeChanged: true });
@@ -122,41 +141,7 @@ const StateModel = Backbone.Model.extend({
   },
 });
 
-export default App.extend({
+export default BulkEditInlineApp.extend({
   StateModel,
-  onStart() {
-    const headerView = new BulkEditActionsHeaderView({
-      collection: this.getState('collection'),
-    });
-
-    const bodyView = new BulkEditActionsBodyView({
-      model: this.getState(),
-      collection: this.getState('collection'),
-    });
-
-    this.modal = Radio.request('modal', 'show:sidebar', {
-      headerView,
-      bodyView,
-      onSubmit: this.onSubmit.bind(this),
-    });
-
-    this.listenTo(this.modal, {
-      'destroy': this.stop,
-    });
-  },
-  onSubmit() {
-    this.setState({ isSaving: true });
-
-    this.modal.showSavingFooter();
-
-    const applyOwner = !!this.getState('applyOwner');
-    if (applyOwner) {
-      this.triggerMethod('applyOwner', this.getState('owner'));
-    }
-
-    this.triggerMethod('save', this.getState().getData());
-  },
-  onStop() {
-    this.modal.destroy();
-  },
+  ViewClass: BulkEditActionsInlineView,
 });

@@ -79,4 +79,13 @@ context('Time Component', function() {
       .find('[aria-haspopup="listbox"]')
       .should('have.attr', 'aria-expanded', 'false');
   });
+
+  specify('labels an empty compact control when requested', function() {
+    mountTime({
+      isCompact: true,
+      showLabel: true,
+      time: null,
+    })
+      .contains('Select Time...');
+  });
 });
