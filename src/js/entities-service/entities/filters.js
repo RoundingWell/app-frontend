@@ -36,12 +36,12 @@ const Collection = BaseCollection.extend({
   invokeFetch({ entityType, worklist }) {
     /* istanbul ignore next: Loading before the list requires a slow test */
     if (!worklist) return;
+
     return this.map(filter => {
       filter.set({ entityType, worklist });
       return filter.fetch();
     });
   },
-
 });
 
 export {

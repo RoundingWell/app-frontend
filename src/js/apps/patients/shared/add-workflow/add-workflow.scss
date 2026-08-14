@@ -1,3 +1,8 @@
+.add-workflow__button {
+  --button-border-width: 0.5px;
+  --button-padding: 5px var(--space-2);
+}
+
 .add-workflow__picklist-icon {
   color: color(blue);
 }

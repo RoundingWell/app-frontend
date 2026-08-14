@@ -29,7 +29,7 @@ const AddWorkflowOptlist = Optionlist.extend({
         icon: {
           icon: customIcon.icon,
           type: customIcon.iconType,
-          classes: `action-icon--${ customIcon.color }`,
+          classes: `action-icon action-icon--${ customIcon.color }`,
         },
       };
     }
@@ -46,9 +46,17 @@ const AddWorkflowOptlist = Optionlist.extend({
 
 const AddButtonView = View.extend({
   tagName: 'button',
-  className: 'button-primary',
+  className: 'button button--outline button--pill add-workflow__button',
+  attributes: {
+    type: 'button',
+  },
   headingText: i18n.addWorkflowOptlist.headingText,
-  template: hbs`{{far "circle-plus"}}<span>{{ @intl.patients.shared.addWorkflow.addWorkflowViews.addButtonView.label }}</span>{{far "angle-down"}}`,
+  template: hbs`{{far "circle-plus"}}<span>{{ label }}</span>`,
+  templateContext() {
+    return {
+      label: this.getOption('label') || i18n.addButtonView.label,
+    };
+  },
   triggers: {
     'click': 'click',
   },
