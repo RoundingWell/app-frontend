@@ -1,0 +1,7 @@
+<time class="schedule-list__day-heading schedule-list__list-cell u-text--nowrap" datetime="{{ date }}">
+  <span class="schedule-list__date {{#if isToday}}is-today{{/if}}">{{formatDateTime date "D"}}</span>
+  <span class="schedule-list__month-day {{#if isToday}}is-today{{/if}}">{{formatDateTime date "MMM, ddd"}}</span>
+</time>
+<div class="schedule-list__day-list-container schedule-list__list-cell">
+  <div class="schedule-list__day-list" role="list" data-actions-region></div>
+</div>
