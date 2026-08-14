@@ -14,6 +14,9 @@ careOptsFrontend:
           adminTools: Admin Tools
         appNavView:
           addPatient: Add Patient
+          closeMenu: Close Menu
+          expandMenu: Expand Menu
+          keepMenuOpen: Keep Menu Open
           minimizeMenu: Minimize Menu
         dashboardsNav:
           dashboards: Dashboards
@@ -21,6 +24,7 @@ careOptsFrontend:
           help: Help & Support
           organizationHeading: Your Organization
           signOut: Sign Out
+          workspaceMenu: Workspace Menu
           workspacesHeading: Your Workspaces
         patientsAppNav:
           doneLastThirty: Done < 30 Days
@@ -30,7 +34,6 @@ careOptsFrontend:
           searchTitle: Search
           sharedBy: Shared By
           updatedPastThree: Updated < 3 Days
-          worklistsTitle: Worklists
     error:
       errorTemplate:
         backBtn: Back to Your Workspace

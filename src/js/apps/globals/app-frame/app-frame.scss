@@ -1,19 +1,30 @@
 .app-frame {
+  --app-nav-rail-width: 61px;
+  --app-nav-width: 200px;
+
   display: flex;
   height: 100%;
-  min-width: 1200px;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
 .app-frame__nav {
   background-color: $bkg-color;
+  flex: 0 0 var(--app-nav-width);
   height: 100%;
   min-height: 0;
+  position: relative;
   user-select: none;
+  width: var(--app-nav-width);
 
   &.is-hidden {
     display: none;
+  }
+
+  &.is-minimized {
+    flex-basis: var(--app-nav-rail-width);
+    width: var(--app-nav-rail-width);
+    z-index: var(--z-positioned);
   }
 }
 
@@ -28,14 +39,14 @@
 }
 
 .app-frame__content {
-  min-width: 440px;
+  background-color: var(--color-page-bg);
   opacity: 0;
   overflow: hidden auto;
 
   &:not(:empty) {
     animation: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) 0s reveal-content forwards;
-    background-color: #{$white};
   }
+
 }
 
 .app-frame__sidebar {
