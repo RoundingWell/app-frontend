@@ -1,15 +1,21 @@
 import { pick } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 
-import App from 'js/base/app';
-import { BulkEditFlowsBodyView, BulkEditFlowsHeaderView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
+import BulkEditInlineApp from 'js/apps/patients/shared/bulk-edit/inline_app';
+import { BulkEditFlowsInlineView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 
 const StateModel = Backbone.Model.extend({
   initialize({ collection }) {
     const initModel = collection.at(0);
     this.initBulkState(collection, initModel);
     this.initBulkOwner(collection, initModel);
+  },
+  updateCollection(collection) {
+    const initModel = collection.at(0);
+
+    this.set('collection', collection);
+    if (!this.get('stateChanged')) this.initBulkState(collection, initModel);
+    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel);
   },
   initBulkState(collection, initModel) {
     const state = initModel.getState().getResource();
@@ -65,41 +71,7 @@ const StateModel = Backbone.Model.extend({
   },
 });
 
-export default App.extend({
+export default BulkEditInlineApp.extend({
   StateModel,
-  onStart() {
-    const headerView = new BulkEditFlowsHeaderView({
-      collection: this.getState('collection'),
-    });
-
-    const bodyView = new BulkEditFlowsBodyView({
-      model: this.getState(),
-      collection: this.getState('collection'),
-    });
-
-    this.modal = Radio.request('modal', 'show:sidebar', {
-      headerView,
-      bodyView,
-      onSubmit: this.onSubmit.bind(this),
-    });
-
-    this.listenTo(this.modal, {
-      'destroy': this.stop,
-    });
-  },
-  onSubmit() {
-    this.setState({ isSaving: true });
-
-    this.modal.showSavingFooter();
-
-    const applyOwner = !!this.getState('applyOwner');
-    if (applyOwner) {
-      this.triggerMethod('applyOwner', this.getState('owner'));
-    }
-
-    this.triggerMethod('save', this.getState().getData());
-  },
-  onStop() {
-    this.modal.destroy();
-  },
+  ViewClass: BulkEditFlowsInlineView,
 });

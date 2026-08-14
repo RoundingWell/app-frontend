@@ -363,7 +363,7 @@ careOptsFrontend:
             queued: Queued
             started: Started
         timeComponent:
-          defaultText: Set Time...
+          defaultText: Select Time...
           clear: Clear Time
           placeholderText: Time
           headingText: Set Time
@@ -396,6 +396,7 @@ careOptsFrontend:
           allFiltersLabel: All Filters
           heading: Filters
         loadingView:
+          empty: No custom filters available.
           error: Custom filters could not be loaded.
           heading: Custom Filters
           loading: Loading custom filters
