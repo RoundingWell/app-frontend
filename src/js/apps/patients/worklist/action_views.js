@@ -2,25 +2,34 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import 'scss/modules/table-list.scss';
+import 'scss/modules/buttons.scss';
+import 'scss/modules/card-list.scss';
+
+import intl from 'js/i18n';
+import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 
 import ActionItemTemplate from './action-item.hbs';
 
-import 'scss/domain/action-icons.scss';
+import 'scss/domain/work-card.scss';
+import 'scss/domain/action-card.scss';
 import './worklist-list.scss';
 
-const ActionTooltipTemplate = hbs`{{formatMessage (intlGet "patients.worklist.actionViews.actionListTooltips") title=worklistId team=owner}}`;
-
 const ActionEmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
+  attributes: {
+    role: 'listitem',
+  },
   template: hbs`<h2>{{ @intl.patients.worklist.actionViews.actionEmptyView }}</h2>`,
 });
 
 const ActionItemView = View.extend({
-  className: 'table-list__item work-list__item',
+  className: 'work-card action-card worklist-list__item worklist-list__action-item',
+  attributes: {
+    role: 'listitem',
+  },
   template: ActionItemTemplate,
   regions: {
     check: '[data-check-region]',
@@ -41,14 +50,14 @@ const ActionItemView = View.extend({
       flowName: this.flow && this.flow.get('name'),
       patient: this.model.getPatient().attributes,
       owner: this.model.getOwner().get('name'),
-      icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
-      hasAttachments: this.model.hasAttachments(),
+      attachmentCount: this.model.getFiles().length,
       commentCount: this.model.commentCount(),
     };
   },
-  initialize({ state }) {
+  initialize({ state, selectedPatientId }) {
     this.state = state;
     this.flow = this.model.getFlow();
+    this.selectedPatientId = selectedPatientId;
 
     this.listenTo(state, {
       'select:multiple': this.showCheck,
@@ -60,9 +69,15 @@ const ActionItemView = View.extend({
   },
   triggers: {
     'click': 'click',
-    'click .js-patient-sidebar-button': 'click:patientSidebarButton',
-    'click .js-patient': 'click:patient',
-    'click .js-no-click': 'prevent-row-click',
+  },
+  events: {
+    'click .js-no-click': stopEventPropagation,
+    'click .js-patient': 'onClickPatient',
+    'click .js-flow': 'onClickFlow',
+    'click .js-primary': 'onClickPrimary',
+  },
+  ui: {
+    patient: '.js-patient',
   },
   onClick() {
     if (this.flow) {
@@ -72,10 +87,20 @@ const ActionItemView = View.extend({
 
     Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
-  onClickPatient() {
-    Radio.trigger('event-router', 'patient:workflow', this.model.getPatient().id);
+  onClickPatient(event) {
+    event.stopPropagation();
+    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+  },
+  onClickFlow(event) {
+    event.stopPropagation();
+    Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.flow.id);
+  },
+  onClickPrimary(event) {
+    event.stopPropagation();
+    this.onClick();
   },
   onRender() {
+    this.setPatientSelected(this.selectedPatientId);
     this.showForm();
     this.showDetailsTooltip();
 
@@ -96,11 +121,22 @@ const ActionItemView = View.extend({
   toggleSelected(isSelected) {
     this.$el.toggleClass('is-selected', isSelected);
   },
+  setPatientSelected(patientId) {
+    this.selectedPatientId = patientId;
+    const isSelected = this.model.getPatient().id === patientId;
+    this.ui.patient
+      .toggleClass('patient-list__patient--selected', isSelected)
+      .attr('aria-expanded', String(isSelected));
+  },
   showCheck() {
     if (!this.canEdit) return;
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({ state: { isSelected } });
+    const checkComponent = new CheckComponent({
+      deselectLabel: intl.patients.shared.actionsViews.deselectAction,
+      selectLabel: intl.patients.shared.actionsViews.selectAction,
+      state: { isSelected },
+    });
 
     this.listenTo(checkComponent, {
       'select'(domEvent) {
@@ -113,7 +149,7 @@ const ActionItemView = View.extend({
   },
   showState() {
     if (!this.canEdit) {
-      const readOnlyStateView = new ReadOnlyStateView({ model: this.model, isCompact: true });
+      const readOnlyStateView = new ReadOnlyStateView({ model: this.model });
       this.showChildView('state', readOnlyStateView);
       return;
     }
@@ -128,7 +164,7 @@ const ActionItemView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model, isCompact: true });
+      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model });
       this.showChildView('owner', readOnlyOwnerView);
       return;
     }
@@ -203,7 +239,6 @@ const ActionItemView = View.extend({
 });
 
 export {
-  ActionTooltipTemplate,
   ActionEmptyView,
   ActionItemView,
 };
