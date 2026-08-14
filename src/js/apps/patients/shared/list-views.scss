@@ -1,0 +1,23 @@
+.patient-list__title-filter-button {
+  align-items: center;
+  color: color(blue);
+  display: flex;
+  font-weight: inherit;
+  margin-left: var(--space-1);
+  min-width: 0;
+}
+
+.patient-list__title-filter-icon {
+  color: color(blue);
+  font-size: 12px;
+  margin-left: 8px;
+  vertical-align: -0.0825em;
+  width: 1em;
+}
+
+.patient-list__title-filter-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

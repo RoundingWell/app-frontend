@@ -7,6 +7,8 @@ import hbs from 'handlebars-inline-precompile';
 
 import Handlebars from 'handlebars/dist/cjs/handlebars';
 
+import 'scss/modules/buttons.scss';
+
 import './widgets.scss';
 
 function getWrapperTemplate(definition) {
@@ -15,6 +17,22 @@ function getWrapperTemplate(definition) {
   if (!template) return;
 
   return { wrapperTemplate: Handlebars.compile(template) };
+}
+
+function getTemplate(definition) {
+  const template = get(definition, 'template');
+
+  if (isFunction(template)) return template;
+
+  return Handlebars.compile(template || '');
+}
+
+function getWidgetDefinition(widget, definition) {
+  if (widget) return widget;
+
+  return {
+    template: getTemplate(definition),
+  };
 }
 
 function getValues(slug, patientId) {
@@ -28,17 +46,18 @@ export function buildWidget(widgetModel, patient) {
   const values = getValues(widgetModel.get('slug'), patient.id);
   const definition = widgetModel.get('definition');
   const wrapperTemplate = getWrapperTemplate(definition);
+  const widgetDefinition = getWidgetDefinition(widget, definition);
 
   if (isFunction(widget)) return new widget(extend({ model: patient, values }, definition, wrapperTemplate));
 
-  return new View(extend({ model: patient, values }, definition, wrapperTemplate, widget));
+  return new View(extend({ model: patient, values }, definition, wrapperTemplate, widgetDefinition));
 }
 
 // NOTE: These widgets are documented in ./README.md
 
 const widgets = {
   widget: View.extend({
-    className: 'widgets-value',
+    className: 'widgets__value',
     initialize() {
       this.template = Handlebars.compile(this.template);
     },
@@ -93,7 +112,7 @@ const widgets = {
     },
   },
   patientIdentifiers: {
-    className: 'widgets-value',
+    className: 'widgets__value',
     template: hbs`{{ displayValue }}{{#unless displayValue}}{{{ defaultHtml }}}{{/unless}}`,
     templateContext() {
       const defaultHtml = this.getOption('default_html');
@@ -109,11 +128,12 @@ const widgets = {
     },
   },
   formWidget: View.extend({
-    className: 'button-primary widgets__form-widget',
+    className: 'button button--outline widgets__form-widget',
     tagName: 'button',
     attributes() {
       return {
         disabled: this.getOption('is_modal'),
+        type: 'button',
       };
     },
     template: hbs`

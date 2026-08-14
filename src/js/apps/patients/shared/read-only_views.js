@@ -7,17 +7,12 @@ import './patient-readonly.scss';
 
 const ReadOnlyStateView = View.extend({
   tagName: 'span',
-  className() {
-    if (this.getOption('isCompact')) return 'patient-readonly--compact patient-readonly__status js-no-click';
-    return 'patient-readonly w-100 js-no-click';
-  },
-  template: hbs`<span class="action--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon}}{{#unless isCompact}}<span class="u-margin--l-8">{{ stateName }}</span>{{/unless}}</span>{{~ remove_whitespace ~}}`,
+  className: 'patient-readonly patient-readonly--compact patient-readonly__status js-no-click',
+  template: hbs`<span class="action-state action-state--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon}}{{#unless isIconOnly}}<span class="u-margin--l-8">{{ stateName }}</span>{{/unless}}</span>{{~ remove_whitespace ~}}`,
   templateContext() {
     const state = this.model.getState();
-    const isCompact = this.getOption('isCompact');
-
     return {
-      isCompact,
+      isIconOnly: !this.getOption('showLabel'),
       stateOptions: state.get('options'),
       stateName: state.get('name'),
     };
@@ -26,10 +21,7 @@ const ReadOnlyStateView = View.extend({
 
 const ReadOnlyOwnerView = View.extend({
   tagName: 'span',
-  className() {
-    if (this.getOption('isCompact')) return 'patient-readonly--compact patient-readonly__owner js-no-click';
-    return 'patient-readonly patient-readonly__owner w-100 js-no-click';
-  },
+  className: 'patient-readonly patient-readonly--compact patient-readonly__owner js-no-click',
   template: hbs`{{far "circle-user" classes="u-margin--r-8"}}<span>{{ owner }}</span>`,
   templateContext() {
     const owner = this.model.getOwner();
@@ -41,7 +33,7 @@ const ReadOnlyOwnerView = View.extend({
 
 const ReadOnlyDueDateView = View.extend({
   tagName: 'span',
-  className: 'patient-readonly--compact js-no-click',
+  className: 'patient-readonly patient-readonly--compact js-no-click',
   template: hbs`
     <span{{#if isOverdue}} class="is-overdue"{{/if}}>
       {{far "calendar-days"}}{{#if due_date}}<span class="u-margin--l-8">{{formatDateTime due_date "SHORT" inputFormat="YYYY-MM-DD"}}</span>{{/if}}
@@ -56,16 +48,16 @@ const ReadOnlyDueDateView = View.extend({
 
 const ReadOnlyDueTimeView = View.extend({
   tagName: 'span',
-  className: 'patient-readonly--compact patient-readonly__time js-no-click',
+  className: 'patient-readonly patient-readonly--compact patient-readonly__time js-no-click',
   template: hbs`{{far "clock"}}{{#if due_time}}<span class="u-margin--l-8">{{formatDateTime due_time "LT" inputFormat="HH:mm:ss"}}</span>{{/if}}`,
 });
 
 const ReadOnlyDueDateTimeView = View.extend({
   template: hbs`
-    <span class="patient-readonly{{#if isOverdue}} is-overdue{{/if}}">
+    <span class="patient-readonly patient-readonly--compact{{#if isOverdue}} is-overdue{{/if}}">
       {{far "calendar-days"}}{{#if due_date}}<span class="u-margin--l-8">{{formatDateTime due_date "SHORT" inputFormat="YYYY-MM-DD"}}</span>{{/if}}
     </span>
-    <span class="patient-readonly patient-readonly__time {{#if isOverdue}} is-overdue{{/if}}">
+    <span class="patient-readonly patient-readonly--compact patient-readonly__time{{#if isOverdue}} is-overdue{{/if}}">
       {{far "clock"}}{{#if due_time}}<span class="u-margin--l-8">{{formatDateTime due_time "LT" inputFormat="HH:mm:ss"}}</span>{{/if}}
     </span>
   `,
@@ -78,7 +70,7 @@ const ReadOnlyDueDateTimeView = View.extend({
 
 const ReadOnlyDurationView = View.extend({
   tagName: 'span',
-  className: 'patient-readonly w-100',
+  className: 'patient-readonly patient-readonly--compact',
   template: hbs`{{far "stopwatch"}}
     {{#if duration}}
       <span class="u-margin--l-8">{{formatMessage (intlGet "patients.shared.readOnlyViews.readOnlyDurationView.mins") min=duration}}</span>
