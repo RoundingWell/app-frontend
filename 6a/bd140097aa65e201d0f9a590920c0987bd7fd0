@@ -1,0 +1,139 @@
+AGENTS.md
+  s_2326781df73def::t_72120f2947cb8b 81-83,135
+.github/copilot-instructions.md
+  s_2326781df73def::t_72120f2947cb8b 14
+src/scss/README.md
+  s_2326781df73def::t_72120f2947cb8b 147,149,151-152
+  s_68eb4121d9a9bc::t_c6723950c4bec3 70
+  s_68eb4121d9a9bc::t_cdb6401950eb15 72
+  s_2326781df73def::t_314d6e05088912 3,21,33,35-36,42,71,73-74,85,87-89,91-92,114-115,153,155-156
+.github/copilot.yaml
+  s_2326781df73def::t_72120f2947cb8b 12,36
+src/js/README.md
+  s_2326781df73def::t_72120f2947cb8b 40,43-46,51-57
+  s_2326781df73def::t_4c40ed5e2a577d 58
+src/scss/domain/flow-card.scss
+  s_2326781df73def::t_cad56a631fe3bd 1
+  s_2326781df73def::t_edbf6b5f708696 33
+src/scss/domain/action-card.scss
+  s_2326781df73def::t_cad56a631fe3bd 1
+  s_2326781df73def::t_edbf6b5f708696 47
+src/scss/domain/_work-card-breakpoints.scss
+  s_2326781df73def::t_edbf6b5f708696 1-2
+src/scss/domain/work-card.scss
+  s_2326781df73def::t_9f0fbcdf6716f0 2-182,184-208,210-236,238
+  s_2326781df73def::t_baee00af3041a5 237
+  s_2326781df73def::t_edbf6b5f708696 1,183,209
+src/js/apps/globals/nav/nav_app.js
+  s_2326781df73def::t_2a7f4746bd6ae4 173-174,176-178,180-182,184-186,188,190-194,198-199,201-202,204,332
+src/js/apps/globals/nav/nav_state.js
+  s_2326781df73def::t_2a7f4746bd6ae4 3-19,43-62,67-70
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_2326781df73def::t_3b705f078102fe 923-941
+src/js/apps/globals/nav/nav_state.component.cy.js
+  s_2326781df73def::t_3b705f078102fe 1-32
+src/js/apps/programs/program/flow/action-item.hbs
+  s_2326781df73def::t_8431d44fcd94ee 1-4,11,17,19-22,24
+  s_2326781df73def::t_4786e996b46b05 18
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_2326781df73def::t_8431d44fcd94ee 1-4,11,17,19-22,24
+  s_2326781df73def::t_4786e996b46b05 18
+src/js/apps/programs/program/workflows/flow-item.hbs
+  s_2326781df73def::t_8431d44fcd94ee 1-5,11,13,24,26
+  s_2326781df73def::t_4786e996b46b05 12
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_2326781df73def::t_f6fa0edbdb0cab 424
+src/js/apps/programs/program/flow/flow_views.js
+  s_2326781df73def::t_23ca704976479b 19,128
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_2326781df73def::t_f6fa0edbdb0cab 113
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_2326781df73def::t_23ca704976479b 26,54,124
+src/js/apps/patients/shared/list-page.js
+  s_2326781df73def::t_2a7f4746bd6ae4 214-216,230-231,233-235
+src/js/apps/patients/shared/list-page.component.cy.js
+  s_2326781df73def::t_3b705f078102fe 1-32
+src/js/apps/patients/worklist/flow_views.js
+  s_2326781df73def::t_23ca704976479b 17,31
+src/js/apps/patients/worklist/worklist_views.js
+  s_2326781df73def::t_23ca704976479b 28
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_2326781df73def::t_f6fa0edbdb0cab 157
+  s_2326781df73def::t_e09fd4d8d0e848 233
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_2326781df73def::t_f6fa0edbdb0cab 479,1278,1333,1581,4631
+  s_2326781df73def::t_6cc168eb3ff8d7 396,507,860,1267,1285-1286,1292-1293,1322,1329,1383,1540,1970
+  s_2326781df73def::t_e2c223c11e0bc4 1395-1397,1402,1407
+  s_2326781df73def::t_fe7c13169455a6 1384,1399
+  s_2326781df73def::t_18c44a95183df2 1398,1404-1405
+  s_2326781df73def::t_64eddc169a6f6c 1521
+  s_2326781df73def::t_c8ccc1196ae93a 1378
+  s_2326781df73def::t_c4ee1c7fd171a9 1400-1401
+  s_2326781df73def::t_4a9884e172a989 1403
+  s_2326781df73def::t_e0cd5071a6810a 1406
+  s_2326781df73def::t_cc038f3e9ee460 1408-1410
+src/js/apps/patients/worklist/action_views.js
+  s_2326781df73def::t_23ca704976479b 16,30
+  s_2326781df73def::t_cb3a02e342ff50 77,95-97
+  s_2326781df73def::t_631253eeae80d0 98
+src/js/apps/patients/worklist/flow-item.hbs
+  s_2326781df73def::t_8431d44fcd94ee 2-10,12,18,20-22,27
+  s_2326781df73def::t_4786e996b46b05 19
+src/js/apps/patients/worklist/action-item.hbs
+  s_2326781df73def::t_8431d44fcd94ee 2-10,15,21,28,30-32,34-35
+  s_2326781df73def::t_4786e996b46b05 29
+  s_2326781df73def::t_cb3a02e342ff50 17
+src/js/apps/patients/patient/patient_app.js
+  s_2326781df73def::t_2a7f4746bd6ae4 59-62
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_2326781df73def::t_8431d44fcd94ee 2-6,14,16-17,19-20
+  s_2326781df73def::t_4786e996b46b05 15
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_2326781df73def::t_88021d9016a72b 239
+src/js/apps/patients/patient/workflow/action-item.hbs
+  s_2326781df73def::t_4786e996b46b05 14
+  s_2326781df73def::t_8431d44fcd94ee 1-5,13,15-16,18-19
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_2326781df73def::t_f6fa0edbdb0cab 251,254,283,292,301,341,343-344,529,1370,1666
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_2326781df73def::t_4786e996b46b05 9
+  s_2326781df73def::t_8431d44fcd94ee 1-5,8,10-11,16-17
+src/js/apps/patients/patient/flow/loading.hbs
+  s_2326781df73def::t_4786e996b46b05 31
+  s_2326781df73def::t_8431d44fcd94ee 23-25,30
+  s_2326781df73def::t_88021d9016a72b 21
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_2326781df73def::t_23ca704976479b 27,103,241
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_2326781df73def::t_f6fa0edbdb0cab 608,616,628,639,725,2189-2190,3070
+src/js/apps/patients/patient/flow/flow_views.js
+  s_2326781df73def::t_23ca704976479b 27,185
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_2326781df73def::t_3b705f078102fe 2215-2228
+src/js/apps/patients/worklist/worklist-list.scss
+  s_2326781df73def::t_cb3a02e342ff50 76-78,80-81,85-86,89-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "6abd140097aa65e201d0f9a590920c0987bd7fd0",
+  "prompts": {},
+  "sessions": {
+    "s_2326781df73def": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffef4-6532-7662-9084-64d1a2c60264",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
