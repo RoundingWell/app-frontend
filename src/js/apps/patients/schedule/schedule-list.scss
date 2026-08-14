@@ -1,185 +1,275 @@
-.schedule__list-search {
-  margin-left: auto;
+.schedule-list-page {
+  --list-page-title-icon-margin-right: var(--space-2);
+  --list-page-topbar-columns: minmax(0, 1fr) auto;
 }
 
-.schedule__table-list {
-  grid-template-columns:
-    minmax(max-content, 0.4fr)
-    minmax(max-content, 0.6fr)
-    32px
-    0.7fr
-    2fr
-    32px
-    68px;
-}
-
-.schedule__count {
-  align-items: center;
-  color: #{$black-60};
-  display: flex;
-  font-size: 12px;
-  line-height: 1.2;
-  margin-right: 24px;
-  white-space: nowrap;
-}
-
-.schedule__list-header {
-  column-gap: 8px;
-}
-
-.schedule-list__header-span-2 {
-  grid-column: span 2;
-}
-
-.schedule-list__list {
-  column-gap: 0;
+.schedule-list-page .patient-list-page__selection {
+  --button-checkbox-justify-content: center;
 }
 
 .schedule-list__list-row {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: 0 var(--space-6) var(--space-5);
 }
 
 .schedule-list__list-cell {
-  border-bottom: 1px solid #{$black-90};
-  padding: 8px 0;
+  padding: 0;
+}
+
+.schedule-list__day-heading {
+  align-items: center;
+  display: flex;
+  min-height: 40px;
 }
 
 .schedule-list__date {
   border-radius: 20px;
   display: inline-block;
   font-size: 24px;
-  height: 40px;
-  line-height: 40px;
+  height: 36px;
+  line-height: 36px;
   margin-right: 4px;
   text-align: center;
+  transform: translateX(-4px);
   width: 40px;
 
   &.is-today {
     background: color(blue);
     color: #{$white};
+    height: 40px;
+    line-height: 40px;
   }
 }
 
 .schedule-list__month-day {
-  color: #{$black-60};
+  color: var(--color-text-secondary);
   padding: 0 24px 0 4px;
+
+  &.is-today {
+    color: color(blue);
+  }
 }
 
 .schedule-list__day-list {
-  align-items: center;
-  column-gap: 8px;
   display: grid;
-  grid-column: 2 / 8;
-  grid-template-columns: subgrid;
+  gap: var(--space-2);
+  grid-template-columns: 100px 160px 20px minmax(160px, 1fr) minmax(24px, auto) 44px;
+  padding-left: 40px;
+}
+
+.schedule-list__day-list-container {
+  container-name: schedule-day-list;
+  container-type: inline-size;
 }
 
 .schedule-list__day-list-row {
+  --schedule-list-day-card-background: var(--color-surface);
+
   cursor: pointer;
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
-  padding: 4px;
+  position: relative;
+}
 
-  &.is-selected {
-    background: #{$greyed};
+.schedule-list__day-list-row:hover:not(.is-selected) {
+  --schedule-list-day-card-background: var(--color-surface-hover);
+}
+
+.schedule-list__day-list-row.is-selected {
+  --schedule-list-day-card-background: var(--color-selection-background);
+}
+
+.schedule-list__day-card {
+  align-items: center;
+  background: var(--schedule-list-day-card-background);
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  box-sizing: border-box;
+  column-gap: var(--space-2);
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-4);
+}
+
+.schedule-list__patient {
+  grid-column: 2;
+  justify-self: start;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.schedule-list__action {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
+  grid-column: 4;
+  min-width: 0;
+}
+
+.schedule-list__details {
+  align-items: center;
+  display: flex;
+  flex: none;
+  height: 24px;
+
+  &:empty {
+    display: none;
   }
 
-  &:hover {
-    .schedule-list__patient-sidebar-icon {
-      color: #{$black-20};
-    }
+  .icon {
+    font-size: 14px;
+    width: 14px;
   }
+}
 
-  &:hover:not(.is-selected) {
-    background-color: color(light_blue, light);
+.schedule-list__details-tooltip {
+  justify-content: flex-start;
+}
+
+.schedule-list__action-name {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  flex: 0 1 auto;
+  font: inherit;
+  line-height: inherit;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+
+  &:hover,
+  &:focus-visible {
+    color: color(blue);
+  }
+}
+
+.schedule-list__action-state {
+  align-items: center;
+  display: inline-flex;
+  grid-column: 3;
+  justify-content: center;
+  width: 20px;
+}
+
+.schedule-list__comments {
+  align-items: center;
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  font-size: 12px;
+  gap: var(--space-1);
+  grid-column: 6;
+  justify-self: end;
+  white-space: nowrap;
+
+  .icon {
+    font-size: 14px;
+    width: 14px;
   }
 }
 
 .schedule-list__due-time {
-  display: flex;
+  grid-column: 1;
+  white-space: nowrap;
 
   &.is-overdue {
     color: color(red);
   }
 }
 
+.schedule-list__patient,
+.schedule-list__action-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .schedule-list__check {
-  margin-right: 8px;
-  width: 20px;
-}
-
-.schedule-list__action-meta {
+  align-items: center;
   display: flex;
-}
-
-.schedule-list__action-details {
-  color: #{$black-60};
-  padding: 0 16px 0 0;
-  text-align: center;
-}
-
-.schedule-list__action-form {
-  padding: 0;
-}
-
-.schedule-list__patient-sidebar-icon {
-  color: #{$black-60};
-}
-
-.schedule-list__action-state {
-  margin-right: 12px;
+  height: 100%;
+  justify-content: center;
+  left: -40px;
+  margin: 0;
+  position: absolute;
+  width: 32px;
 }
 
 .schedule-list__no-time {
-  color: #{$black-60};
+  color: var(--color-text-secondary);
 }
 
-.action-tooltip__flow {
-  font-size: 12px;
-}
-
-.action-tooltip__flow-icon {
-  color: #{$black-60};
-  line-height: 16px;
-  padding-right: 8px;
-  vertical-align: text-bottom;
-
-  .icon {
-    font-size: 12px;
-    line-height: 12px;
-  }
-
-  .fa-square-poll-horizontal {
-    width: 16px;
-  }
-}
-
-.action-tooltip__action-icon {
-  color: #{$black-60};
-  display: table-cell;
-  padding-right: 8px;
-  text-align: center;
-  width: 16px;
-}
-
-.action-tooltip__action-name {
-  display: table-cell;
-}
-
-.action-tooltip__action-details {
-  font-size: 12px;
-  margin: 8px 0 0 20px;
-}
-
-.schedule-list__patient-name,
-.schedule-list__action-form-icon {
-  cursor: pointer;
-
-  &:hover {
-    color: color(blue);
-  }
+.schedule-list__action-form-button {
+  flex: none;
 }
 
 .schedule-list__search-helper {
   display: none;
+}
+
+.schedule-list__empty {
+  color: var(--color-text-subtle);
+  font-size: 16px;
+  font-weight: 600;
+  padding: var(--space-5);
+  text-align: center;
+}
+
+@container schedule-day-list (width <= 640px) {
+  .schedule-list__day-list {
+    grid-template-columns: 72px 20px minmax(0, 1fr) auto 32px;
+  }
+
+  .schedule-list__day-card {
+    grid-template-columns: subgrid;
+    grid-template-rows: repeat(2, 32px);
+    min-height: 68px;
+    row-gap: 0;
+  }
+
+  .schedule-list__patient {
+    grid-column: 1 / 4;
+    grid-row: 1;
+  }
+
+  .schedule-list__comments {
+    grid-column: 5;
+    grid-row: 1;
+  }
+
+  .schedule-list__due-time {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .schedule-list__action-state {
+    grid-column: 2;
+    grid-row: 2;
+    margin-left: var(--space-2);
+  }
+
+  .schedule-list__action {
+    grid-column: 3 / 6;
+    grid-row: 2;
+  }
+}
+
+@media (width <= 560px) {
+  .schedule-list__list-row {
+    padding-inline: var(--space-4);
+  }
+
+  .schedule-list__day-list {
+    padding-left: 40px;
+  }
+
 }

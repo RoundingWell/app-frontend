@@ -232,12 +232,6 @@ const ScheduleApp = App.extend({
     this.focusPatientSidebar(patientSidebar);
     this.listenToPatientSidebar();
   },
-  listenToPatientSidebar() {
-    const patientSidebar = this.getChildApp('patientSidebar');
-
-    this.stopListening(patientSidebar, 'close');
-    this.listenTo(patientSidebar, 'close', this.closePatientSidebar);
-  },
   showFiltersSidebar() {
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
