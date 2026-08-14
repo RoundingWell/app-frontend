@@ -25,7 +25,7 @@ import FlowSidebarTemplate from './flow-sidebar.hbs';
 import FlowNameTemplate from './flow-name.hbs';
 import FlowDetailsTemplate from './flow-details.hbs';
 
-import './flow-sidebar.scss';
+import 'js/apps/programs/shared/program-editor-sidebar.scss';
 
 const i18n = intl.programs.sidebar.flow.flowSidebarViews;
 
@@ -35,14 +35,14 @@ const { ENTER_KEY } = keyCodes;
 
 const DisabledSaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
-  template: hbs`<button class="button--green" disabled>{{ @intl.programs.sidebar.flow.flowSidebarViews.disabledSaveView.saveBtn }}</button>`,
+  template: hbs`<button class="button button--positive" type="button" disabled>{{ @intl.programs.sidebar.flow.flowSidebarViews.disabledSaveView.saveBtn }}</button>`,
 });
 
 const SaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
   template: hbs`
-    <button class="button--green js-save">{{ @intl.programs.sidebar.flow.flowSidebarViews.saveView.saveBtn }}</button>
-    <button class="button--text u-margin--r-4 js-cancel">{{ @intl.programs.sidebar.flow.flowSidebarViews.saveView.cancelBtn }}</button>
+    <button class="button button--positive js-save" type="button">{{ @intl.programs.sidebar.flow.flowSidebarViews.saveView.saveBtn }}</button>
+    <button class="button button--text u-margin--r-4 js-cancel" type="button">{{ @intl.programs.sidebar.flow.flowSidebarViews.saveView.cancelBtn }}</button>
   `,
   triggers: {
     'click .js-cancel': 'cancel',
@@ -51,7 +51,7 @@ const SaveView = View.extend({
 });
 
 const NameView = View.extend({
-  className: 'pos--relative',
+  className: 'textarea-flex',
   template: FlowNameTemplate,
   behaviors: [InputWatcherBehavior],
   ui: {
@@ -84,7 +84,7 @@ const NameView = View.extend({
 });
 
 const DetailsView = View.extend({
-  className: 'pos--relative',
+  className: 'textarea-flex',
   template: FlowDetailsTemplate,
   behaviors: [InputWatcherBehavior],
   ui: {
@@ -101,7 +101,7 @@ const DetailsView = View.extend({
 
 const ToggleView = View.extend({
   template: hbs`
-    <button class="program-flow-sidebar__toggle button-secondary {{#if status}}is-on{{/if}} js-toggle" {{#if isDisabled}}disabled{{/if}}>
+    <button class="button button--secondary program-editor-sidebar__toggle {{#if status}}is-on{{/if}} js-toggle" type="button" {{#if isDisabled}}disabled{{/if}}>
       {{#if status}}{{fas "toggle-on"}}{{else}}{{far "toggle-off"}}{{/if}}
       {{formatMessage (intlGet "programs.shared.components.toggleComponent.toggle") status=status}}
     </button>
@@ -127,7 +127,11 @@ const TimestampsView = View.extend({
 
 const MenuView = View.extend({
   tagName: 'button',
-  className: 'button--icon js-menu',
+  className: 'button button--icon button--menu js-menu',
+  attributes: {
+    'aria-label': intl.programs.sidebar.flow.flowSidebarViews.menuView.headingText,
+    'type': 'button',
+  },
   template: hbs`{{far "ellipsis"}}`,
   triggers: {
     'click': 'click',
@@ -315,7 +319,7 @@ const SidebarView = View.extend({
 });
 
 function getDeleteModal(opts) {
-  return extend({ buttonClass: 'button--red' }, i18n.deleteModal, opts);
+  return extend({ buttonClass: 'button button--danger' }, i18n.deleteModal, opts);
 }
 
 export {
