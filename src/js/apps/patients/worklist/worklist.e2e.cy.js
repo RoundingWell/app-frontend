@@ -332,6 +332,27 @@ context('worklist page', function() {
 
         expect(sidebar.scrollTop).to.be.greaterThan(0);
       });
+
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+
+    cy.viewport(390, 400);
+
+    cy
+      .get('.worklist-list__item')
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .get('.patient-list-page__sidebar-content')
+      .should(([sidebarContent]) => {
+        expect(sidebarContent.scrollHeight).to.be.greaterThan(sidebarContent.clientHeight);
+
+        sidebarContent.scrollTop = sidebarContent.scrollHeight;
+
+        expect(sidebarContent.scrollTop).to.be.greaterThan(0);
+      });
   });
 
   specify('keeps patient sidebar mounted while list refreshes', function() {
