@@ -45,6 +45,29 @@ context('patient page', function() {
       .should('contain', 'worklist/owned-by');
   });
 
+  specify('starts with the patient sidebar closed in drawer mode', function() {
+    cy
+      .viewport(720, 720)
+      .routesForPatientDashboard()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .type('{esc}');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+  });
+
   specify('patient routing', function() {
     cy
       .routesForPatientDashboard()
@@ -58,8 +81,8 @@ context('patient page', function() {
 
     cy
       .get('.patient__layout')
-      .find('.patient__tab--selected')
-      .contains('Dashboard');
+      .find('.workflow-page__tab.is-selected')
+      .contains('Open');
 
     cy
       .get('.patient__layout')
@@ -68,8 +91,8 @@ context('patient page', function() {
 
     cy
       .get('.patient__layout')
-      .find('.patient__tab--selected')
-      .contains('Archive');
+      .find('.workflow-page__tab.is-selected')
+      .contains('Closed');
 
     cy
       .get('.patient__layout')
@@ -78,7 +101,7 @@ context('patient page', function() {
 
     cy
       .get('.patient__layout')
-      .find('.patient__tab--selected')
-      .contains('Dashboard');
+      .find('.workflow-page__tab.is-selected')
+      .contains('Open');
   });
 });
