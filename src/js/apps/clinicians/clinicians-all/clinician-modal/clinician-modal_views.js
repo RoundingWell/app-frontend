@@ -4,6 +4,7 @@ import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 import { mixinState } from 'marionette.toolkit';
 
+import 'scss/modules/forms.scss';
 import 'scss/modules/modals.scss';
 
 import intl from 'js/i18n';
@@ -29,7 +30,7 @@ const InputView = View.extend({
   },
   className: 'pos--relative',
   template: hbs`
-    <input class="input-primary w-100 js-input {{#if hasError}}has-error{{/if}}" placeholder="{{ placeholder }}" value="{{ value }}" />
+    <input class="form-input form-input--primary w-100 js-input {{#if hasError}}has-error{{/if}}" placeholder="{{ placeholder }}" value="{{ value }}" />
   `,
   templateContext() {
     const errors = this.getOption('state').get('errors');

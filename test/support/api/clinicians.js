@@ -12,7 +12,7 @@ import { roleManager, roleEmployee } from './roles';
 
 const TYPE = 'clinicians';
 
-const fxCurrentClinician = _.first(fxTestClinicians);
+export const fxCurrentClinician = _.first(fxTestClinicians);
 const fxClinicians = _.rest(fxTestClinicians);
 
 export function getClinicianId(email) {
