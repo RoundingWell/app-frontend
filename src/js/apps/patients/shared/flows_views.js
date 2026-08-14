@@ -37,7 +37,7 @@ const FlowStateComponent = StateComponent.extend({
         headingText: i18n.requireDoneModal.headingText,
         submitText: i18n.requireDoneModal.submitText,
         cancelText: false,
-        buttonClass: 'button--blue',
+        buttonClass: 'button button--primary',
       });
       return;
     }

@@ -56,6 +56,10 @@ export default RouterApp.extend({
         'patient/archive/:patientId/action/:actionId',
       ],
     },
+    'patient:action:form': {
+      action: 'showPatient',
+      route: 'patient/:patientId/action/:actionId/form',
+    },
     'patient:flow': {
       action: 'showPatient',
       route: 'patient/:patientId/flow/:flowId',
@@ -64,13 +68,13 @@ export default RouterApp.extend({
       action: 'showPatient',
       route: 'patient/:patientId/flow/:flowId/action/:actionId',
     },
+    'patient:flow:action:form': {
+      action: 'showPatient',
+      route: 'patient/:patientId/flow/:flowId/action/:actionId/form',
+    },
     'patient:form': {
       action: 'showPatient',
       route: 'patient/:patientId/form/:formId',
-    },
-    'patient:form:action': {
-      action: 'showPatient',
-      route: 'patient/:patientId/form/:formId/action/:actionId',
     },
     'legacy:patient:flow': {
       action: 'redirectPatientFlow',
