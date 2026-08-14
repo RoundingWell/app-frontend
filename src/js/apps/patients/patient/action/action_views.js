@@ -2,36 +2,51 @@ import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/loader.scss';
 import 'scss/modules/sidebar.scss';
+import 'scss/modules/skeleton.scss';
 
 import intl from 'js/i18n';
 
 import PreloadRegion from 'js/regions/preload_region';
-
 import Optionlist from 'js/components/optionlist';
+
+import LayoutTemplate from './layout.hbs';
+import LoadingTemplate from './loading.hbs';
 
 import './action.scss';
 
-const HeadingView = View.extend({
-  template: hbs`{{formatMessage (intlGet "patients.patient.action.actionViews.headingView.headingText") outreach=outreach}}`,
+const i18n = intl.patients.patient.action.actionViews;
+
+const ActionLoadingView = View.extend({
+  className: 'loader patient__content patient-detail-page patient-action patient-action__loader',
+  attributes: {
+    'aria-busy': 'true',
+    'role': 'status',
+  },
+  template: LoadingTemplate,
 });
 
 const MenuView = View.extend({
   tagName: 'button',
-  className: 'button--icon js-menu',
+  className: 'button button--icon button--menu patient-detail-page__menu patient-action__menu js-menu',
+  attributes: {
+    'aria-label': i18n.menuView.menuOptions.headingText,
+    'title': i18n.menuView.menuOptions.headingText,
+    'type': 'button',
+  },
   template: hbs`{{far "ellipsis"}}`,
   triggers: {
     'click': 'click',
   },
   onClick() {
-    const menuOptions = new Backbone.Collection([{}]);
-
     const optionlist = new Optionlist({
       ui: this.$el,
       uiView: this,
-      headingText: intl.patients.patient.action.actionViews.menuView.menuOptions.headingText,
+      headingText: i18n.menuView.menuOptions.headingText,
       itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.patient.action.actionViews.menuView.menuOptions.delete }}</span>`,
-      lists: [{ collection: menuOptions }],
+      lists: [{ collection: new Backbone.Collection([{}]) }],
       align: 'right',
       popWidth: 248,
     });
@@ -45,23 +60,17 @@ const MenuView = View.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'patient-action flex-region',
-  template: hbs`
-    <div class="patient-action__header">
-      <div data-heading-region></div>
-      <div data-menu-region></div>
-    </div>
-    <div data-action-region></div>
-    <div data-dialer-region></div>
-    <div data-form-region></div>
-    <div data-attachments-region></div>
-    <div class="patient-action__activity" data-activity-region></div>
-  `,
+  className: 'patient__content patient__content--scroll patient-detail-page patient-action flex-region',
+  attributes: {
+    'data-form-viewport-scroll-container': '',
+  },
+  template: LayoutTemplate,
   regions: {
-    heading: '[data-heading-region]',
-    menu: '[data-menu-region]',
+    menu: {
+      el: '[data-menu-region]',
+      replaceElement: true,
+    },
     action: '[data-action-region]',
-    dialer: '[data-dialer-region]',
     form: {
       el: '[data-form-region]',
       replaceElement: true,
@@ -78,7 +87,7 @@ const LayoutView = View.extend({
 });
 
 export {
+  ActionLoadingView,
   LayoutView,
-  HeadingView,
   MenuView,
 };

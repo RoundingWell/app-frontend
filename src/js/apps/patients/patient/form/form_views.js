@@ -7,79 +7,77 @@ import 'scss/modules/buttons.scss';
 
 import intl from 'js/i18n';
 
-const i18n = intl.patients.patient.form.formViews;
-
 import Droplist from 'js/components/droplist';
 import Tooltip from 'js/components/tooltip';
 
 import IframeFormBehavior from 'js/behaviors/iframe-form';
+import FormViewportBehavior from 'js/behaviors/form-viewport';
+
+import LayoutTemplate from './layout.hbs';
+
 import './form.scss';
 
-const FormStateActionsView = View.extend({
+const i18n = intl.patients.patient.form.formViews;
+
+const FormExpandActionView = View.extend({
   className: 'flex',
   template: hbs`
-    {{#if hasHistory}}<button class="js-history-button form__actions-icon{{#if shouldShowHistory}} is-selected{{/if}}">{{far "clock-rotate-left"}}</button>{{/if}}
+    <button class="button button--icon form__control js-expand-button form__actions-icon form__actions-icon--expand{{#if isExpanded}} is-selected{{/if}}" type="button" aria-label="{{ expandLabel }}">
+      {{#if isExpanded}}{{fas "down-left-and-up-right-to-center"}}{{else}}{{fas "up-right-and-down-left-from-center"}}{{/if}}
+    </button>
   `,
   templateContext() {
+    const isExpanded = this.model.get('formExpanded');
+
     return {
-      hasHistory: this.responses && !!this.responses.length,
+      expandLabel: isExpanded ? i18n.formActionsView.decreaseWidth : i18n.formActionsView.increaseWidth,
+      isExpanded,
     };
   },
-  onRender() {
-    this.renderHistoryTooltip();
+  onBeforeRender() {
+    this.destroyTooltips();
   },
-  initialize({ responses }) {
-    this.responses = responses;
-
-    if (responses) this.listenTo(responses, 'update', this.render);
+  onRender() {
+    this.renderExpandTooltip();
+  },
+  onBeforeDestroy() {
+    this.destroyTooltips();
   },
   modelEvents: {
-    'change:shouldShowHistory': 'render',
+    'change:formExpanded': 'render',
   },
   ui: {
-    historyButton: '.js-history-button',
+    expandButton: '.js-expand-button',
   },
   triggers: {
-    'click @ui.historyButton': 'click:historyButton',
+    'click @ui.expandButton': 'click:expandButton',
   },
-  renderHistoryTooltip() {
-    if (!this.responses) return;
+  onClickExpandButton() {
+    this.expandTooltip.hideTooltip();
+  },
+  destroyTooltips() {
+    if (!this.expandTooltip) return;
 
-    const shouldShowHistory = this.model.get('shouldShowHistory');
-    const message = shouldShowHistory ? i18n.formActionsView.currentVersion : i18n.formActionsView.responseHistory;
+    this.expandTooltip.destroy();
+    this.expandTooltip = null;
+  },
+  renderExpandTooltip() {
+    const message = this.model.get('formExpanded') ? i18n.formActionsView.decreaseWidth : i18n.formActionsView.increaseWidth;
 
-    new Tooltip({
+    this.expandTooltip = new Tooltip({
       message,
       uiView: this,
-      ui: this.ui.historyButton,
+      ui: this.ui.expandButton,
     });
   },
 });
 
 const LayoutView = View.extend({
-  className: 'form__frame',
-  template: hbs`
-    <div class="form__layout">
-      <div class="flex">
-        <div class="overflow--hidden flex-grow">
-          <div class="form__title">
-            <span class="form__title-icon">{{far "square-poll-horizontal"}}</span>
-            <span class="u-text--overflow">{{ name }}</span>
-          </div>
-        </div>
-        <div class="flex-grow">
-          <div data-status-region>&nbsp;</div>
-          <div class="form__controls">
-            <div data-state-actions-region></div>
-            <div data-draft-status-region></div>
-            <div data-form-action-region></div>
-          </div>
-        </div>
-      </div>
-      <div data-widgets-header-region></div>
-      <div data-form-region></div>
-    </div>
-  `,
+  className: 'patient__content form__frame',
+  attributes: {
+    'data-form-viewport-frame': '',
+  },
+  template: LayoutTemplate,
   regionClass: Region.extend({ replaceElement: true }),
   regions: {
     form: '[data-form-region]',
@@ -88,22 +86,39 @@ const LayoutView = View.extend({
       el: '[data-form-action-region]',
       replaceElement: true,
     },
-    stateActions: '[data-state-actions-region]',
+    expandAction: '[data-expand-action-region]',
     status: '[data-status-region]',
     widgets: '[data-widgets-header-region]',
+  },
+  onRender() {
+    this.$el.toggleClass('form__frame--embedded', !!this.getOption('isActionForm'));
+    this.setExpanded(this.getOption('isExpanded'));
+  },
+  templateContext() {
+    return { isActionForm: !!this.getOption('isActionForm') };
+  },
+  setExpanded(isExpanded) {
+    this.$el.toggleClass('form__frame--expanded', !!isExpanded);
   },
 });
 
 const IframeView = View.extend({
-  behaviors: [IframeFormBehavior],
+  behaviors() {
+    if (!this.getOption('isActionForm')) return [IframeFormBehavior];
+
+    return [IframeFormBehavior, FormViewportBehavior];
+  },
   className: 'form__content',
-  template: hbs`<iframe src="{{ url }}"></iframe>`,
+  template: hbs`<iframe src="{{ url }}" data-form-viewport-iframe></iframe>`,
   templateContext() {
     return {
       url: this.model.getFormUrl({
         responseId: this.getOption('responseId'),
       }),
     };
+  },
+  setExpanded(isExpanded) {
+    this.trigger('change:expanded', !!isExpanded);
   },
 });
 
@@ -113,14 +128,14 @@ const StatusView = View.extend({
 });
 
 const ReadOnlyView = View.extend({
-  className: 'form__form-action',
+  className: 'form__control form__form-action',
   template: hbs`
-    <button class="button--grey" disabled=true>{{ @intl.patients.patient.form.formViews.readOnlyView.buttonText }}</button>
+    <button class="button button--muted" type="button" disabled>{{ @intl.patients.patient.form.formViews.readOnlyView.buttonText }}</button>
   `,
 });
 
 const LockedSubmitView = View.extend({
-  className: 'form__submit-status',
+  className: 'form__control form__submit-status',
   template: hbs`
     <div class="form__submit-status-icon">
       {{far "lock-keyhole"}}
@@ -131,42 +146,12 @@ const LockedSubmitView = View.extend({
   `,
 });
 
-const SaveButtonTypeDroplist = Droplist.extend({
-  align: 'right',
-  initialize({ model }) {
-    this.collection = new Backbone.Collection([
-      {
-        text: i18n.saveView.save.droplistItemText,
-        value: 'save',
-      },
-      {
-        text: i18n.saveView.saveAndGoBack.droplistItemText,
-        value: 'saveAndGoBack',
-      },
-    ]);
-
-    const currentSaveButtonType = model.get('saveButtonType');
-
-    this.setState('selected', this.collection.find({ value: currentSaveButtonType }));
-  },
-  viewOptions: {
-    className: 'button--green button__drop-list-select',
-    template: hbs`{{fas "caret-down"}}`,
-  },
-  picklistOptions() {
-    return {
-      headingText: i18n.saveView.droplistLabel,
-      isCheckable: true,
-    };
-  },
-});
-
 const DraftMenuView = View.extend({
   className: 'form__draft-menu',
   template: hbs`
     <div class="form__draft-menu-info">{{ @intl.patients.patient.form.formViews.draftStatusView.storedWork }}</div>
     <div class="form__draft-menu-saved">{{formatHTMLMessage (intlGet "patients.patient.form.formViews.draftStatusView.updatedAt") updated=(formatDateTime updated "AGO_OR_TODAY")}}</div>
-    <button class="form__draft-menu-discard-button js-discard">{{ @intl.patients.patient.form.formViews.draftStatusView.discardDraft }}</button>
+    <button class="form__draft-menu-discard-button js-discard" type="button">{{ @intl.patients.patient.form.formViews.draftStatusView.discardDraft }}</button>
   `,
   modelEvents: {
     'change:updated': 'render',
@@ -190,8 +175,8 @@ const DraftMenuView = View.extend({
 const DraftStatusView = Droplist.extend({
   align: 'right',
   viewOptions: {
-    className: 'form__actions-icon u-margin--l-16 u-margin--r-0',
-    template: hbs`{{far "shield-check"}}`,
+    className: 'button button--icon form__control form__actions-icon form__actions-icon--draft',
+    template: hbs`{{far "cloud-check"}}`,
   },
   initialize({ model }) {
     this.model = model;
@@ -238,7 +223,7 @@ const DraftStatusView = Droplist.extend({
       bodyText: i18n.draftStatusView.discardModal.bodyText,
       headingText: i18n.draftStatusView.discardModal.headingText,
       submitText: i18n.draftStatusView.discardModal.submitText,
-      buttonClass: 'button--red',
+      buttonClass: 'button button--danger',
       onSubmit: () => {
         modal.destroy();
         this.triggerMethod('discard:submission');
@@ -247,8 +232,38 @@ const DraftStatusView = Droplist.extend({
   },
 });
 
+const SaveButtonTypeDroplist = Droplist.extend({
+  align: 'right',
+  initialize({ model }) {
+    this.collection = new Backbone.Collection([
+      {
+        text: i18n.saveView.saveAndGoBack.droplistItemText,
+        value: 'saveAndGoBack',
+      },
+      {
+        text: i18n.saveView.save.droplistItemText,
+        value: 'save',
+      },
+    ]);
+
+    this.setState('selected', this.collection.find({
+      value: model.get('saveButtonType'),
+    }));
+  },
+  viewOptions: {
+    className: 'button button--positive form__submit-choice',
+    template: hbs`{{fas "caret-down"}}`,
+  },
+  picklistOptions() {
+    return {
+      headingText: i18n.saveView.droplistLabel,
+      isCheckable: true,
+    };
+  },
+});
+
 const SaveView = View.extend({
-  className: 'form__form-action',
+  className: 'form__control form__form-action',
   regions: {
     saveType: {
       el: '[data-save-type-region]',
@@ -259,29 +274,29 @@ const SaveView = View.extend({
     'change:saveButtonType': 'render',
   },
   templateContext() {
+    const canChooseSaveType = this.getOption('canChooseSaveType');
     const saveButtonType = this.model.get('saveButtonType');
 
     return {
+      canChooseSaveType,
       isDisabled: this.getOption('isDisabled'),
-      showSaveButton: saveButtonType === 'save',
-      showSaveGoBackButton: saveButtonType === 'saveAndGoBack',
+      saveButtonText: canChooseSaveType ?
+        i18n.saveView[saveButtonType].buttonText :
+        i18n.saveView.save.buttonText,
     };
   },
   template: hbs`
-    <button class="button--green button__drop-list-action js-save-button" {{#if isDisabled}}disabled{{/if}}>
-      {{#if showSaveButton}}
-        {{ @intl.patients.patient.form.formViews.saveView.save.buttonText }}
-      {{/if}}
-      {{#if showSaveGoBackButton}}
-        {{ @intl.patients.patient.form.formViews.saveView.saveAndGoBack.buttonText }}
-      {{/if}}
+    <button class="button button--positive form__action-button js-save-button{{#if canChooseSaveType}} form__submit-button{{/if}}" type="button" {{#if isDisabled}}disabled{{/if}}>
+      {{ saveButtonText }}
     </button>
-    <button data-save-type-region></button>
+    {{#if canChooseSaveType}}<button type="button" data-save-type-region></button>{{/if}}
   `,
   triggers: {
     'click .js-save-button': 'click:save',
   },
   onRender() {
+    if (!this.getOption('canChooseSaveType')) return;
+
     const saveButtonTypeDroplist = this.showChildView('saveType', new SaveButtonTypeDroplist({
       model: this.model,
       state: {
@@ -298,27 +313,23 @@ const SaveView = View.extend({
 });
 
 const UpdateView = View.extend({
-  className: 'form__form-action',
+  className: 'form__control form__form-action',
   template: hbs`
-    <button class="button--green">{{ @intl.patients.patient.form.formViews.updateView.buttonText }}</button>
+    <button class="button button--positive form__action-button" type="button">{{ @intl.patients.patient.form.formViews.updateView.buttonText }}</button>
   `,
   triggers: {
     'click': 'click',
   },
 });
 
-const HistoryDroplist = Droplist.extend({
+const SubmissionStatusDroplist = Droplist.extend({
+  align: 'right',
   viewOptions() {
     return {
-      className: 'button-filter',
+      className: 'button form__submission-status',
       template: hbs`
-        {{far "clock-rotate-left"}}{{formatDateTime updated_at "AT_TIME"}} {{formatMessage (intlGet "patients.patient.form.formViews.historyDroplistView.nameText") name=name}}{{far "angle-down"}}
+        {{far "cloud-check"}}{{formatDateTime updated_at "AT_TIME"}}{{far "angle-down" classes="form__submission-status-arrow"}}
       `,
-      templateContext() {
-        return {
-          name: this.model.getEditorName(),
-        };
-      },
     };
   },
   picklistOptions() {
@@ -336,43 +347,25 @@ const HistoryDroplist = Droplist.extend({
 });
 
 const HistoryView = View.extend({
-  className: 'form__form-action',
+  className: 'form__control form__form-action',
   template: hbs`
-    <div data-versions-region></div>
-    <button class="button--blue js-current u-margin--l-8">{{ @intl.patients.patient.form.formViews.historyView.currentVersionButton }}</button>
+    <button class="button button--primary js-current" type="button">{{ @intl.patients.patient.form.formViews.historyView.currentVersionButton }}</button>
   `,
-  regions: {
-    versions: {
-      el: '[data-versions-region]',
-      replaceElement: true,
-    },
-  },
   triggers: {
     'click .js-current': 'click:current',
-  },
-  initialize({ selected, collection }) {
-    const responseDroplist = this.showChildView('versions', new HistoryDroplist({
-      collection,
-      state: { selected },
-    }));
-
-    this.listenTo(responseDroplist, {
-      'change:selected'(response) {
-        this.triggerMethod('change:response', response);
-      },
-    });
   },
 });
 
 export {
   LayoutView,
   IframeView,
-  FormStateActionsView,
+  FormExpandActionView,
   StatusView,
   ReadOnlyView,
   LockedSubmitView,
   SaveView,
   UpdateView,
+  SubmissionStatusDroplist,
   HistoryView,
   DraftStatusView,
 };

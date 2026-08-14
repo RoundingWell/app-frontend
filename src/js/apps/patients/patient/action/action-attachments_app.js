@@ -8,9 +8,6 @@ import intl from 'js/i18n';
 import { AttachmentsView } from 'js/apps/patients/patient/action/action-attachments_views';
 
 export default App.extend({
-  onBeforeStart() {
-    this.getRegion().startPreloader();
-  },
   beforeStart({ action }) {
     return Radio.request('entities', 'fetch:files:collection:byAction', action.id);
   },

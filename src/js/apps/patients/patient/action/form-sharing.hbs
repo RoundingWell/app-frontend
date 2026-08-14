@@ -2,19 +2,19 @@
   <h3 class="sidebar__heading flex-grow">{{far "share-from-square" classes="u-margin--r-8"}}{{ @intl.patients.patient.action.formSharingTemplate.label }}</h3>
 </div>
 <div class="flex u-margin--t-16">
-  <h4 class="sidebar__label--inset u-margin--t-8">{{ @intl.patients.patient.action.formSharingTemplate.recipientLabel }}</h4>
-  <div class="flex-grow"><button class="button-secondary w-100" disabled>{{far "user-plus"}}<span>{{ patient.first_name }} {{ patient.last_name }}</span></button></div>
+  <h4 class="sidebar__label sidebar__label--inset u-margin--t-8">{{ @intl.patients.patient.action.formSharingTemplate.recipientLabel }}</h4>
+  <div class="flex-grow"><button class="button button--secondary w-100" type="button" disabled>{{far "user-plus"}}<span>{{ patient.first_name }} {{ patient.last_name }}</span></button></div>
 </div>
 <div class="flex u-margin--t-8">
-  <h4 class="sidebar__label--inset u-margin--t-8">{{ @intl.patients.patient.action.formSharingTemplate.stateLabel }}</h4>
+  <h4 class="sidebar__label sidebar__label--inset u-margin--t-8">{{ @intl.patients.patient.action.formSharingTemplate.stateLabel }}</h4>
   <div class="flex-grow patient-action__sharing-state">
-    <span class="action--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon~}}
+    <span class="action-state action-state--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon~}}
       <span>{{formatMessage (intlGet "patients.patient.action.formSharingTemplate.stateText") sharing=sharing}}</span>
     </span>
   </div>
 </div>
 {{~#if isResponded}}
 <div class="u-margin--t-8 u-text-align--right">
-  <button class="button--link js-response">{{ @intl.patients.patient.action.formSharingTemplate.buttonResponseText }}</button>
+  <button class="button button--link js-response" type="button">{{ @intl.patients.patient.action.formSharingTemplate.buttonResponseText }}</button>
 </div>
 {{/if~}}
