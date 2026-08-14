@@ -1,9 +1,89 @@
-.bulk-edit {
-  min-width: 464px;
+.bulk-edit-inline {
+  display: grid;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
 }
 
-.bulk-edit--is-multi {
-  color: #{$black-60};
-  font-style: italic;
-  font-weight: bold;
+.bulk-edit-inline__header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.bulk-edit-inline__controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.bulk-edit-inline__cancel {
+  --button-align-items: center;
+  --button-display: inline-flex;
+  --button-min-height: 32px;
+  --button-padding: 0 16px;
+}
+
+.bulk-edit-inline__save {
+  --button-border-radius: 4px;
+
+  flex: none;
+  min-height: 32px;
+  min-width: 64px;
+  padding: 5px 16px;
+  white-space: nowrap;
+}
+
+.bulk-edit-inline__heading {
+  color: var(--color-text);
+  flex: none;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.bulk-edit-inline__control {
+  flex: none;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.bulk-edit-inline__owner {
+  display: flex;
+  flex: none;
+  min-width: 0;
+}
+
+.bulk-edit-inline__owner-button {
+  border-radius: 16px 0 0 16px;
+  border-right-width: 0;
+}
+
+.bulk-edit-inline__owner-scope {
+  border-radius: 0 16px 16px 0;
+  max-width: 144px;
+}
+
+.bulk-edit-inline__due {
+  --due-component-border-right-width: 0;
+  --due-component-right-radius: 0;
+  --time-component-left-radius: 0;
+
+  display: flex;
+  flex: none;
+}
+
+.bulk-edit-inline__actions {
+  align-items: center;
+  display: flex;
+  flex: none;
+  gap: 8px;
+  margin-left: auto;
 }
