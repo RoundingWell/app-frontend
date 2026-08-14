@@ -5,9 +5,10 @@
   position: fixed;
   z-index: var(--z-overlay);
 
-  > * {
-    pointer-events: all;
-  }
+}
+
+.fill-window__content {
+  pointer-events: all;
 }
 
 @keyframes darken {
@@ -21,8 +22,6 @@
 }
 
 .fill-window--dark {
-  @extend .fill-window;
-
   &.is-shown {
     animation: darken 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
     pointer-events: all;

@@ -1,0 +1,19 @@
+<span class="loader__text">{{ @intl.regions.preload.loading }}</span>
+{{#if isGeneric}}
+  <div class="loader__indicator {{ skeletonClass }}" aria-hidden="true">
+    <span class="loader__indicator-dot"></span>
+    <span class="loader__indicator-dot"></span>
+    <span class="loader__indicator-dot"></span>
+  </div>
+{{else}}
+  <div class="loader__skeleton {{ skeletonClass }}">
+    {{#each items}}
+      <div class="loader__skeleton-item" aria-hidden="true">
+        <span class="loader__skeleton-icon skeleton-loading__shape"></span>
+        <span class="loader__skeleton-title skeleton-loading__shape"></span>
+        <span class="loader__skeleton-line skeleton-loading__shape"></span>
+        <span class="loader__skeleton-line loader__skeleton-line--short skeleton-loading__shape"></span>
+      </div>
+    {{/each}}
+  </div>
+{{/if}}

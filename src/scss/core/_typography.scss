@@ -5,7 +5,8 @@
 
 body {
   color: #{$black-20};
-  font-family: ProximaSoft, 'Droid Sans', 'helvetica neue', arial, sans-serif;
+  font-family: Figtree, 'Droid Sans', 'helvetica neue', arial, sans-serif;
+  font-feature-settings: 'ss02' 1;
   font-size: 14px;
   line-height: 20px;
 }

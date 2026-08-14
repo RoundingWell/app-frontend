@@ -1,0 +1,43 @@
+:root {
+  /* Surfaces */
+  --color-page-bg: #F8F8F9;
+  --color-surface: #FFF;
+  --color-surface-subtle: #FBFBFC;
+  --color-surface-muted: #F3F3F4;
+  --color-surface-hover: #F2F9FD;
+  --color-surface-selected: #EDF0F2;
+  --color-selection-background: #EFF6FF;
+  --color-chip-background: #FCFCFD;
+  --color-control-background: #EEEEF0;
+  --color-nav-hover: #375467;
+
+  /* Borders */
+  --color-border: #E6E6E6;
+  --color-border-subtle: #E5E5E6;
+  --color-border-strong: #D8D8D8;
+  --color-chip-border: #D6D6D7;
+  --color-divider: #E3E3E3;
+
+  /* Text */
+  --color-text: #333;
+  --color-text-medium: #666;
+  --color-text-secondary: #767676;
+  --color-text-subtle: #999;
+  --color-interactive: #0582DA;
+
+  /* Elevation */
+  --shadow-card: 0 1px 0 rgb(77 77 77 / 20%);
+
+  /* Spacing scale, in multiples of 4px */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Content measures */
+  --content-detail-gutter: clamp(48px, 8vw, 80px);
+  --content-detail-width: min(1040px, calc(100% - var(--content-detail-gutter)));
+}

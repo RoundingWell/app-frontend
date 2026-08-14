@@ -1,5 +1,6 @@
 // Core Styles
 // These are the core styles shared between mobile and desktop
+@forward 'core/tokens';
 @forward 'core/reset';
 @forward 'core/base';
 @forward 'core/flex';

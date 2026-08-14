@@ -1,5 +1,7 @@
 .list-search__container {
+  max-width: 100%;
   position: relative;
+  width: var(--list-search-width, 212px);
 
   &.is-applied {
     .icon {
@@ -9,9 +11,10 @@
 }
 
 .list-search__search-icon {
-  left: 16px;
+  left: 12px;
   line-height: 24px;
   position: absolute;
+  top: 4px;
 }
 
 .list-search__clear-icon {
@@ -20,6 +23,7 @@
   line-height: 24px;
   position: absolute;
   right: 8px;
+  top: 4px;
 
   &.is-hidden {
     display: none;
@@ -27,9 +31,13 @@
 }
 
 .list-search__input {
-  border-radius: 18px;
+  background: var(--color-surface);
+  border: 1px solid transparent;
+  border-radius: 16px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  height: 32px;
   line-height: 24px;
-  padding: 4px 32px 4px 40px;
+  padding: 4px 32px 4px 36px;
 
   .is-applied & {
     background-color: color(blue);

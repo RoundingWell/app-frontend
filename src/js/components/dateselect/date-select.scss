@@ -1,3 +1,12 @@
+.date-select {
+  display: flex;
+}
+
+.date-select.is-partial {
+  max-width: 100%;
+  width: max-content;
+}
+
 .date-select__button {
   flex-grow: 1;
   padding-left: 16px;
@@ -8,6 +17,26 @@
   cursor: default;
   flex-grow: 1;
   pointer-events: none;
+}
+
+.date-select__joined-item {
+  --button-border-radius: 0;
+
+  + .date-select__joined-item:not(:hover) {
+    border-left-color: transparent;
+  }
+
+  &:first-of-type {
+    --button-border-radius: 18px 0 0 18px;
+  }
+
+  &:last-of-type {
+    --button-border-radius: 0 18px 18px 0;
+  }
+}
+
+.date-select__cancel {
+  flex: none;
 }
 
 .date-select__button + .date-select__date {

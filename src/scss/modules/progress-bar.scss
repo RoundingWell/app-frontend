@@ -1,28 +1,30 @@
 .progress-bar {
-  background: #{$black-90};
+  background: var(--progress-bar-track-color, #{$black-90});
   border: 0;
-  border-radius: 16px;
-  display: inline-block;
-  height: 16px;
+  border-radius: var(--progress-bar-border-radius, 16px);
+  display: var(--progress-bar-display, inline-block);
+  height: var(--progress-bar-height, 16px);
   vertical-align: middle;
+  width: var(--progress-bar-width, auto);
 }
 
 .progress-bar::-webkit-progress-bar {
-  background: transparent;
+  background: var(--progress-bar-track-color, #{$black-90});
+  border-radius: var(--progress-bar-border-radius, 16px);
 }
 
 .progress-bar::-moz-progress-bar {
-  background: color(green);
-  border-radius: 16px;
+  background: var(--progress-bar-fill-color, #{color(green)});
+  border-radius: var(--progress-bar-border-radius, 16px);
 }
 
 .progress-bar::-webkit-progress-value {
-  background: color(green);
-  border-radius: 16px;
+  background: var(--progress-bar-fill-color, #{color(green)});
+  border-radius: var(--progress-bar-border-radius, 16px);
 }
 
 .progress-bar::-ms-fill {
-  background: color(green);
+  background: var(--progress-bar-fill-color, #{color(green)});
   border: 0;
-  border-radius: 16px;
+  border-radius: var(--progress-bar-border-radius, 16px);
 }

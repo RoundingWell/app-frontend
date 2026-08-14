@@ -1,0 +1,38 @@
+@use './work-card-breakpoints' as work-card;
+
+.flow-card__title {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--space-2);
+}
+
+.flow-card__title .icon {
+  color: #{$black-20};
+  flex: none;
+  font-size: 16px;
+  width: 16px;
+}
+
+.flow-card__controls {
+  align-items: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.flow-card__owner {
+  display: flex;
+  justify-content: flex-start;
+  justify-self: start;
+}
+
+.flow-card__status {
+  justify-self: end;
+  margin-left: auto;
+  min-width: max-content;
+}
+
+@container (width <= #{work-card.$compact}) {
+  .flow-card__status {
+    justify-self: auto;
+    margin-left: 0;
+  }
+}
