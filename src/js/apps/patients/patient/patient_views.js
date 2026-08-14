@@ -1,43 +1,33 @@
 import Radio from 'backbone.radio';
-import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
+
+import 'scss/modules/buttons.scss';
 
 import i18n from 'js/i18n';
 
 import PreloadRegion from 'js/regions/preload_region';
 
+import ContextTrailTemplate from './context-trail.hbs';
+import LayoutTemplate from './layout.hbs';
+
 import './patient.scss';
 
 export const intl = i18n.patients.patient.patientViews;
 
+const PATIENT_SIDEBAR_DRAWER_QUERY = '(width <= 720px)';
+const PATIENT_SIDEBAR_FIXED_QUERY = '(width >= 2240px)';
+
 const ContextTrailView = View.extend({
+  tagName: 'nav',
   className: 'patient__context-trail',
-  template: hbs`
-    {{#if hasLatestList}}
-      <a class="js-back patient__context-link">
-        {{fas "chevron-left"}}{{ @intl.patients.patient.patientViews.contextBackBtn }}
-      </a>
-      {{fas "chevron-right"}}
-    {{/if}}
-    <a class="js-patient patient__context-link">{{ first_name }} {{ last_name }}</a>
-    {{#if flowName}}
-      {{fas "chevron-right"}}
-      <a class="js-flow patient__context-link">{{ flowName }}</a>
-    {{/if}}
-    {{#if actionName}}
-      {{fas "chevron-right"}}
-      <a class="js-action patient__context-link">{{ actionName }}</a>
-    {{/if}}
-    {{#if formName}}
-      {{fas "chevron-right"}}
-      {{ formName }}
-    {{/if}}
-  `,
+  attributes: {
+    'aria-label': intl.contextTrailLabel,
+  },
+  template: ContextTrailTemplate,
   triggers: {
     'click .js-back': 'click:back',
     'click .js-patient': 'click:patient',
     'click .js-flow': 'click:flow',
-    'click .js-action': 'click:action',
   },
   modelEvents: {
     'change:first_name change:last_name': 'render',
@@ -56,31 +46,34 @@ const ContextTrailView = View.extend({
     const { flowId } = this.contextTrail.get('context');
     Radio.trigger('event-router', 'patient:flow', this.model.id, flowId);
   },
-  onClickAction() {
-    const { flowId, actionId } = this.contextTrail.get('context');
-    const event = flowId ? 'patient:flow:action' : 'patient:action';
-    const args = flowId ?
-      [this.model.id, flowId, actionId] :
-      [this.model.id, actionId];
-    Radio.trigger('event-router', event, ...args);
-  },
   templateContext() {
+    const context = this.contextTrail.get('context') || {};
+    const { flowName, actionName, formName } = context;
+
     return {
       hasLatestList: Radio.request('history', 'has:latestList'),
-      ...this.contextTrail.get('context'),
+      isPatientCurrent: !flowName && !actionName && !formName,
+      isFlowCurrent: !!flowName && !actionName && !formName,
+      ...context,
     };
   },
 });
 
 const LayoutView = View.extend({
-  className: 'patient__frame',
-  template: hbs`
-    <div class="patient__layout">
-        <div data-context-trail-region></div>
-        <div data-content-region></div>
-    </div>
-    <div class="patient__sidebar" data-sidebar-region></div>
-  `,
+  className() {
+    const layoutState = this.getOption('layoutState');
+    const isSidebarHidden = !this.isSidebarFixed()
+      && (layoutState.get('sidebarHidden') || this.isSidebarDrawer());
+    const stateClasses = [
+      isSidebarHidden && 'patient__frame--sidebar-hidden',
+    ].filter(Boolean).join(' ');
+
+    return `patient__frame${ stateClasses ? ` ${ stateClasses }` : '' }`;
+  },
+  events: {
+    'keydown': 'onPatientFrameKeydown',
+  },
+  template: LayoutTemplate,
   regions: {
     contextTrail: {
       el: '[data-context-trail-region]',
@@ -93,11 +86,90 @@ const LayoutView = View.extend({
       replaceElement: true,
     },
   },
+  initialize() {
+    this.layoutState = this.getOption('layoutState');
+    this._isSidebarDrawer = this.isSidebarDrawer();
+    this._isSidebarFixed = this.isSidebarFixed();
+
+    if (this._isSidebarFixed) {
+      this.layoutState.set('sidebarHidden', false, { silent: true });
+    } else if (this._isSidebarDrawer) {
+      this.layoutState.set('sidebarHidden', true, { silent: true });
+    }
+
+    this.listenTo(this.layoutState, {
+      'change:formExpanded': this.renderFormExpandedState,
+      'change:sidebarHidden': this.renderSidebarState,
+    });
+    this.listenTo(Radio.channel('user-activity'), 'window:resize', this.onPatientWindowResize);
+  },
   onRender() {
+    this.renderSidebarState();
+    this.renderFormExpandedState();
     this.showChildView('contextTrail', new ContextTrailView({
       model: this.model,
       contextTrail: this.getOption('contextTrail'),
     }));
+  },
+  renderSidebarState() {
+    const isHidden = this.isSidebarHidden();
+
+    this.$el.toggleClass('patient__frame--sidebar-hidden', isHidden);
+    this.ui.sidebarButton
+      .prop('hidden', this.isSidebarFixed())
+      .toggleClass('is-selected', !isHidden)
+      .attr('aria-expanded', String(!isHidden));
+  },
+  isSidebarHidden() {
+    return !this.isSidebarFixed() && this.layoutState.get('sidebarHidden');
+  },
+  isSidebarDrawer() {
+    return window.matchMedia(PATIENT_SIDEBAR_DRAWER_QUERY).matches;
+  },
+  isSidebarFixed() {
+    return window.matchMedia(PATIENT_SIDEBAR_FIXED_QUERY).matches;
+  },
+  focusSidebarToggle() {
+    this.ui.sidebarButton.trigger('focus');
+  },
+  onPatientFrameKeydown(event) {
+    if (event.key !== 'Escape' || !this.isSidebarDrawer() || this.isSidebarHidden()) return;
+
+    event.preventDefault();
+    this.triggerMethod('close:sidebar-drawer');
+  },
+  onPatientWindowResize() {
+    const isSidebarDrawer = this.isSidebarDrawer();
+    const isSidebarFixed = this.isSidebarFixed();
+
+    if (isSidebarDrawer === this._isSidebarDrawer && isSidebarFixed === this._isSidebarFixed) return;
+
+    const wasSidebarDrawer = this._isSidebarDrawer;
+    this._isSidebarDrawer = isSidebarDrawer;
+    this._isSidebarFixed = isSidebarFixed;
+    this.triggerMethod('change:sidebar-layout', {
+      isSidebarDrawer,
+      isSidebarFixed,
+      wasSidebarDrawer,
+    });
+    this.renderSidebarState();
+  },
+  triggers: {
+    'click @ui.sidebarButton': 'click:sidebarButton',
+  },
+  ui: {
+    sidebarButton: '.js-sidebar-button',
+  },
+  renderFormExpandedState() {
+    this.$el.toggleClass('patient__frame--form-expanded', this.layoutState.get('formExpanded'));
+  },
+  templateContext() {
+    const sidebarHidden = this.layoutState.get('sidebarHidden');
+
+    return {
+      sidebarExpanded: String(!sidebarHidden),
+      sidebarHidden,
+    };
   },
 });
 

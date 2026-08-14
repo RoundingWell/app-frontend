@@ -55,6 +55,69 @@ function expandFiltersSidebar() {
   });
 }
 
+function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
+  const testAction = getAction({
+    relationships: {
+      patient: getRelationship(testPatient1),
+      state: getRelationship(stateTodo),
+    },
+  });
+  const testFlow = getFlow({
+    relationships: {
+      owner: getRelationship(teamCoordinator),
+      patient: getRelationship(testPatient1),
+      state: getRelationship(stateTodo),
+    },
+  });
+
+  cy
+    .routesForPatientAction()
+    .routeFlows(fx => {
+      fx.data = [testFlow];
+      fx.included.push(testPatient1);
+      return fx;
+    })
+    .routePatient(fx => {
+      fx.data = testPatient1;
+      return fx;
+    })
+    .routeSidebars(fx => {
+      const [sidebar] = fx.data;
+
+      fx.data.push(...Array.from({ length: sidebarCount - 1 }, (_value, index) => ({
+        ...sidebar,
+        id: `test-sidebar-${ index }`,
+        attributes: {
+          ...sidebar.attributes,
+          name: `Test Sidebar ${ index + 2 }`,
+          sequence: index + 1,
+        },
+      })));
+
+      return fx;
+    })
+    .routeActions(fx => {
+      fx.data = [testAction];
+      fx.included.push(testPatient1);
+      return fx;
+    })
+    .visit('/worklist/owned-by')
+    .wait('@routeActions');
+
+  if (listType === 'flows') {
+    cy
+      .get('.worklist-list__toggle')
+      .contains('Flows')
+      .click()
+      .wait('@routeFlows');
+  }
+
+  cy
+    .get('.worklist-list__item')
+    .contains('Test Patient')
+    .click();
+}
+
 context('worklist page', function() {
   specify('toggle filters sidebar', function() {
     localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
@@ -257,68 +320,43 @@ context('worklist page', function() {
       .should('not.have.class', 'is-filters-collapsed');
   });
 
-  specify('wide patient sidebar cards', function() {
-    const testFlow = getFlow({
-      relationships: {
-        owner: getRelationship(teamCoordinator),
-        patient: getRelationship(testPatient1),
-        state: getRelationship(stateTodo),
-      },
-    });
+  specify('patient sidebar desktop cards', function() {
+    cy.viewport(1820, 900);
 
-    cy.viewport(1800, 900);
+    openPatientSidebar(4);
 
     cy
-      .routesForPatientAction()
-      .routeFlows(fx => {
-        fx.data = [testFlow];
-        fx.included.push(testPatient1);
-        return fx;
-      })
-      .routePatient(fx => {
-        fx.data = testPatient1;
-        return fx;
-      })
-      .routeSidebars(fx => {
-        const [sidebar] = fx.data;
-
-        fx.data.push({
-          ...sidebar,
-          id: 'care-support',
-          attributes: {
-            ...sidebar.attributes,
-            name: 'Care & Support',
-            sequence: 1,
-          },
-        });
-
-        return fx;
-      })
-      .routeActions()
-      .visit('/worklist/owned-by')
-      .wait('@routeActions');
-
-    cy
-      .get('.worklist-list__toggle')
-      .contains('Flows')
-      .click()
-      .wait('@routeFlows');
-
-    cy
-      .get('.worklist-list__item')
-      .contains('Test Patient')
-      .click();
+      .window()
+      .should(win => {
+        expect(win.matchMedia('(width >= 1800px)').matches).to.be.true;
+      });
 
     cy
       .get('.patient-sidebar__card')
-      .should('have.length', 2)
+      .should('have.length', 4)
       .then($cards => {
-        const firstCard = $cards[0].getBoundingClientRect();
-        const secondCard = $cards[1].getBoundingClientRect();
+        const cards = [...$cards].map(card => card.getBoundingClientRect());
+        const [firstCard] = cards;
 
         expect(firstCard.width).to.equal(260);
-        expect(secondCard.width).to.equal(260);
-        expect(secondCard.left).to.be.greaterThan(firstCard.right);
+        expect(cards.every(card => card.width === 260)).to.be.true;
+        expect(Math.max(...cards.map(card => card.left))).to.be.greaterThan(firstCard.right);
+      });
+  });
+
+  specify('patient sidebar mobile scrolling', function() {
+    cy.viewport(390, 400);
+
+    openPatientSidebar(4, 'actions');
+
+    cy
+      .get('.patient-list-page__sidebar-content')
+      .should(([sidebarContent]) => {
+        expect(sidebarContent.scrollHeight).to.be.greaterThan(sidebarContent.clientHeight);
+
+        sidebarContent.scrollTop = sidebarContent.scrollHeight;
+
+        expect(sidebarContent.scrollTop).to.be.greaterThan(0);
       });
   });
 
@@ -1519,8 +1557,12 @@ context('worklist page', function() {
       .wait('@routeFormByAction');
 
     cy
-      .url()
-      .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/flow/${ testFlow.id }/action/${ testActions[0].id }`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     cy
       .visit('/worklist/owned-by')
@@ -1888,12 +1930,59 @@ context('worklist page', function() {
       .wait('@routeFormByAction');
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[2].id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/action/${ testActions[2].id }`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     cy
       .wait('@routeFormActionFields')
-      .go('back');
+      .go('back')
+      .wait('@routeActions');
+
+    cy
+      .intercept('GET', '/api/actions/*/form', {
+        delay: 200,
+        body: { data: testForm, included: [] },
+      })
+      .as('routeDelayedFormByAction')
+      .intercept('GET', '/api/actions/**/files?urls=download,view', {
+        delay: 100,
+        body: { data: [getFile()], included: [] },
+      })
+      .as('routeDelayedActionFiles');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testActions[0];
+
+        return fx;
+      })
+      .get('.worklist-list__action-item')
+      .first()
+      .find('.js-comments')
+      .click()
+      .wait('@routeAction')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('[data-activity-region]')
+      .should('be.focused');
+
+    cy
+      .get('.patient-action')
+      .should(([viewport]) => {
+        const activity = viewport.querySelector('[data-activity-region]').getBoundingClientRect();
+        const bounds = viewport.getBoundingClientRect();
+
+        expect(viewport.scrollTop).to.be.greaterThan(0);
+        expect(activity.top).to.be.at.least(bounds.top);
+        expect(activity.top).to.be.lessThan(bounds.bottom);
+      })
+      .wait('@routeDelayedActionFiles')
+      .wait('@routeDelayedFormByAction');
   });
 
   specify('action list - socket notifications', function() {

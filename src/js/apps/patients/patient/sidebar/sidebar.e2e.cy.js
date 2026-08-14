@@ -15,7 +15,50 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
-  specify('renders and toggles backend sidebar sections', function() {
+  specify('scopes sections to the current workspace widgets', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: ['sex'],
+      })
+      .routeSidebars(fx => {
+        const addSidebar = _.partial(getResource, _, 'sidebars');
+
+        fx.data = [
+          addSidebar({
+            id: 'demographics',
+            slug: 'demographics',
+            name: 'Demographics',
+            sequence: 0,
+            widgets: ['dob', 'sex'],
+          }),
+          addSidebar({
+            id: 'status',
+            slug: 'status',
+            name: 'Status',
+            sequence: 1,
+            widgets: ['status'],
+          }),
+        ];
+
+        return fx;
+      })
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar__card')
+      .should('have.length', 1)
+      .and('contain', 'Demographics')
+      .and('contain', 'Sex')
+      .and('not.contain', 'Date of Birth');
+
+    cy
+      .contains('.patient-sidebar__card-toggle', 'Status')
+      .should('not.exist');
+  });
+
+  specify('expands and collapses sidebar sections accessibly', function() {
     cy
       .routesForPatientDashboard()
       .routeSidebars(fx => {
@@ -26,14 +69,14 @@ context('patient sidebar', function() {
             id: 'demographics',
             slug: 'demographics',
             name: 'Demographics',
-            sequence: 1,
+            sequence: 0,
             widgets: ['sex'],
           }),
           addSidebar({
             id: 'care-team',
             slug: 'care-team',
             name: 'Care & Support',
-            sequence: 0,
+            sequence: 1,
             widgets: ['sex'],
           }),
         ];
@@ -44,10 +87,19 @@ context('patient sidebar', function() {
       .wait('@routePatient');
 
     cy
-      .get('.patient-sidebar__card-toggle')
-      .should('have.length', 2)
-      .first()
-      .should('contain', 'Care & Support');
+      .contains('.patient-sidebar__card-toggle', 'Demographics')
+      .as('demographicsToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Demographics section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('be.visible');
+      });
+
+    cy
+      .get('@demographicsToggle')
+      .find('.patient-sidebar__card-toggle-icon use')
+      .should('have.attr', 'href', '#far-fa-angle-right');
 
     cy
       .contains('.patient-sidebar__card-toggle', 'Care & Support')
@@ -60,9 +112,34 @@ context('patient sidebar', function() {
       });
 
     cy
+      .get('@demographicsToggle')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false')
+      .and('have.attr', 'aria-label', 'Expand Demographics section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('not.be.visible');
+      });
+
+    cy
+      .get('@demographicsToggle')
+      .focus()
+      .should('be.focused')
+      .typeEnter();
+
+    cy
+      .get('@demographicsToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Demographics section');
+
+    cy
       .get('@careToggle')
       .focus()
-      .typeEnter()
+      .should('be.focused')
+      .typeEnter();
+
+    cy
+      .get('@careToggle')
       .should('have.attr', 'aria-expanded', 'false')
       .and('have.attr', 'aria-label', 'Expand Care & Support section')
       .invoke('attr', 'aria-controls')
@@ -80,34 +157,39 @@ context('patient sidebar', function() {
         cy.get(`#${ regionId }`).should('be.visible');
       });
 
+    cy.viewport(720, 720);
+
     cy
-      .contains('.patient-sidebar__card-toggle', 'Demographics')
-      .should('have.attr', 'aria-expanded', 'true')
-      .click()
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
       .should('have.attr', 'aria-expanded', 'false')
-      .and('have.attr', 'aria-label', 'Expand Demographics section')
-      .invoke('attr', 'aria-controls')
-      .then(regionId => {
-        cy.get(`#${ regionId }`).should('not.be.visible');
-      });
-  });
-
-  specify('renders an empty patient sidebar definition', function() {
-    cy
-      .routesForPatientDashboard()
-      .routeSidebars(fx => {
-        fx.data = [];
-
-        return fx;
-      })
-      .visit('/patient/dashboard/1')
-      .wait('@routePatient');
+      .click();
 
     cy
-      .get('.patient-sidebar')
-      .should('be.visible')
-      .find('.patient-sidebar__card')
-      .should('not.exist');
+      .get('.patient__sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .type('{esc}');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .should('be.focused')
+      .and('have.attr', 'aria-expanded', 'false');
+
+    cy.viewport(721, 720);
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
   });
 
   specify('display patient data', function() {
@@ -148,9 +230,31 @@ context('patient sidebar', function() {
         },
       },
     });
+    const sidebarWidgetSlugs = [
+      'dob',
+      'sex',
+      'status',
+      'divider',
+      'workspaces',
+      'divider',
+      'formWidget',
+      'formModalWidget',
+      'readOnlyFormModalWidget',
+      'formModalWidgetSmall',
+      'formModalWidgetLarge',
+      'patientMRNIdentifier',
+      'patientSSNIdentifier',
+      'hbsWidget',
+      'hbsEmptyWidget',
+      'hbsNoRegionWidget',
+      'hbsEmptyTemplateWidget',
+    ];
 
     cy
       .routesForPatientDashboard()
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: sidebarWidgetSlugs,
+      })
       .routeFormDefinition()
       .routeLatestFormResponse()
       .routeFormFields()
@@ -179,25 +283,7 @@ context('patient sidebar', function() {
         return fx;
       })
       .routeSidebars(fx => {
-        fx.data[0].attributes.widgets = [
-          'dob',
-          'sex',
-          'status',
-          'divider',
-          'workspaces',
-          'divider',
-          'formWidget',
-          'formModalWidget',
-          'readOnlyFormModalWidget',
-          'formModalWidgetSmall',
-          'formModalWidgetLarge',
-          'patientMRNIdentifier',
-          'patientSSNIdentifier',
-          'hbsWidget',
-          'hbsEmptyWidget',
-          'hbsNoRegionWidget',
-          'hbsEmptyTemplateWidget',
-        ];
+        fx.data[0].attributes.widgets = sidebarWidgetSlugs;
 
         return fx;
       })
@@ -232,6 +318,7 @@ context('patient sidebar', function() {
               form_id: testReadOnlyForm.id,
               form_name: 'Test Modal Read Only Form',
               is_modal: true,
+              modal_size: 'regular',
             },
           }),
           addWidget({
@@ -422,7 +509,7 @@ context('patient sidebar', function() {
       .find('.patient-sidebar__section')
       .contains('Template - Empty Widget Value')
       .next()
-      .find('.widgets-value')
+      .find('.widgets__value')
       .hasBeforeContent('–');
 
     cy
@@ -445,7 +532,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled');
 
@@ -486,13 +573,13 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled')
       .wait('@postFormResponse');
@@ -505,14 +592,14 @@ context('patient sidebar', function() {
       .as('postFormResponse');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click()
       .wait('@postFormResponse');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .should('not.exist');
 
     cy
@@ -532,7 +619,7 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('button:has(.fa-shield-check)')
       .as('draftStatusButton')
       .trigger('pointerover');
@@ -601,12 +688,12 @@ context('patient sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-close')
       .first()
       .click();
@@ -629,17 +716,17 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.modal__footer-actions .js-close')
       .should('not.exist');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.modal__footer-actions .js-submit')
       .should('contain', 'Done');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-close')
       .first()
       .click();
@@ -651,7 +738,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-small')
       .find('.js-close')
       .first()
       .click();
@@ -663,18 +750,13 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
-      .should('not.exist');
+      .get('.modal--form-large')
+      .should('exist')
+      .find('.js-close')
+      .first()
+      .click();
 
-    cy
-      .url()
-      .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
-
-    cy.go('back');
-
-    cy
-      .url()
-      .should('contain', `patient/dashboard/${ testPatient.id }`);
+    cy.url().should('contain', `patient/dashboard/${ testPatient.id }`);
 
     cy
       .get('@patientSidebar')
@@ -685,6 +767,102 @@ context('patient sidebar', function() {
     cy
       .url()
       .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
+  });
+
+  specify('renders patient sidebar when widget values fail', function() {
+    const sidebarWidgetSlugs = [
+      'sex',
+      'failingWidget',
+      'unknownWidget',
+    ];
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+        sex: 'f',
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: sidebarWidgetSlugs,
+      })
+      .routeSidebars(fx => {
+        fx.data[0].attributes.widgets = sidebarWidgetSlugs;
+
+        return fx;
+      })
+      .routeWidgets(fx => {
+        const addWidget = _.partial(getResource, _, 'widgets');
+
+        fx.data = fx.data.concat([
+          addWidget({
+            slug: 'failingWidget',
+            category: 'widget',
+            definition: {
+              template: 'Widget value: {{ sex }}',
+              display_name: 'Failing Widget',
+            },
+            values: {
+              sex: '@patient.sex',
+            },
+          }),
+          addWidget({
+            slug: 'unknownWidget',
+            category: 'customWidget',
+            definition: {
+              template: 'Custom widget value',
+              display_name: 'Unknown Widget',
+            },
+          }),
+        ]);
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      });
+
+    cy
+      .intercept('GET', '/api/widgets/failingWidget/values*', {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Not Found',
+            detail: 'Widget values failed',
+          }),
+        },
+      })
+      .as('routeFailingWidgetValues');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .wait('@routeFailingWidgetValues');
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.patient-sidebar__section')
+      .should('have.length', 3);
+
+    cy
+      .get('.patient-sidebar__section')
+      .first()
+      .should('contain', 'Sex')
+      .should('contain', 'Female');
+
+    cy
+      .get('.patient-sidebar__section')
+      .eq(2)
+      .should('contain', 'Unknown Widget')
+      .should('contain', 'Custom widget value');
   });
 
   specify('patient workspaces', function() {
@@ -765,6 +943,7 @@ context('patient sidebar', function() {
     cy
       .get('.patient__sidebar')
       .find('.js-menu')
+      .should('have.class', 'button--menu')
       .click();
 
     cy
