@@ -8,7 +8,6 @@ careOptsFrontend:
         noResults: No results match your Find in List search
       emptyView: No Dashboards
       layoutView:
-        nameHeader: Name
         title: Dashboards
     dashboardViews:
       contextTrailView:

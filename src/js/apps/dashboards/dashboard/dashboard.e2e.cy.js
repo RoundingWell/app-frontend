@@ -49,8 +49,8 @@ context('dashboard', function() {
       .should('contain', 'dashboards');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.card-list__item')
       .first()
       .click();
 

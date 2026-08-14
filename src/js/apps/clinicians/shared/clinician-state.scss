@@ -12,11 +12,3 @@
   color: color(green);
   font-weight: bold;
 }
-
-.is-highlighted {
-  .clinician-state--disabled,
-  .clinician-state--pending,
-  .clinician-state--active {
-    color: #{$white};
-  }
-}
