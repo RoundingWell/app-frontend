@@ -8,8 +8,8 @@ import App from 'js/base/app';
 import StateModel from './worklist_state';
 import FiltersStateModel from 'js/apps/patients/shared/filters_state';
 
-import BulkEditActionsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app';
-import BulkEditFlowsApp from 'js/apps/patients/sidebar/bulk-edit/bulk-edit-flows_app';
+import BulkEditActionsApp from 'js/apps/patients/shared/bulk-edit/bulk-edit-actions_app';
+import BulkEditFlowsApp from 'js/apps/patients/shared/bulk-edit/bulk-edit-flows_app';
 import { ListFiltersPanelApp } from 'js/apps/patients/shared/list-filters/list-filters_app';
 import ListPatientSidebarApp from 'js/apps/patients/shared/list-patient-sidebar_app';
 
@@ -335,12 +335,6 @@ const WorklistApp = App.extend({
 
     this.focusPatientSidebar(patientSidebar);
     this.listenToPatientSidebar();
-  },
-  listenToPatientSidebar() {
-    const patientSidebar = this.getChildApp('patientSidebar');
-
-    this.stopListening(patientSidebar, 'close');
-    this.listenTo(patientSidebar, 'close', this.closePatientSidebar);
   },
   showFiltersSidebar() {
     this.isPatientSidebarOpen = false;

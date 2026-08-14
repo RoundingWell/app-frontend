@@ -1,24 +1,34 @@
-<div class="table-list__item-check js-no-click"><span data-check-region></span></div>
-<div>
-  <button class="button-secondary--compact js-patient-sidebar-button">
-    {{far "address-card"}}&#8203;
-  </button>
-</div>
-<div class="js-patient">
-  {{#if patient.segment}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ patient.segment }}&#8203;</div>{{/if}}
-  <span class="u-text--overflow-two-lines worklist-list__patient-name">{{ patient.first_name }} {{ patient.last_name }}&#8203;</span>
-</div>
-<div class="worklist-list__flow-icon">{{fas "folder"}}</div>
-<div>
-  {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}
-  <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>
-</div>
-<div class="table-list__meta">
-  <span><span data-state-region></span>&#8203;<span class="worklist-list__search-helper">{{ state }}</span>&#8203;</span>
-  <span><span data-owner-region></span>&#8203;<span class="worklist-list__search-helper">{{ owner }}</span>&#8203;</span>
-  <progress class="progress-bar worklist-list__flow-progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>&#8203;
-</div>
-<div class="worklist-list__action-ts">
-  <div class="worklist-list__overline">{{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</div>
-  <div>{{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</div>
+<div class="worklist-list__check js-no-click"><span data-check-region></span></div>
+<div class="work-card__surface">
+  <div class="work-card__main">
+    <div class="work-card__heading">
+      <span class="work-card__state patient-list__state worklist-list__state js-no-click" data-state-region></span>
+      <div class="work-card__copy">
+        <div class="work-card__title-row">
+          <button class="work-card__subject patient-list__patient patient-list__patient--primary worklist-list__patient js-patient" type="button" aria-expanded="false" aria-controls="worklist-list-sidebar">{{ patient.first_name }} {{ patient.last_name }}</button>
+          <span class="work-card__separator">·</span>
+          <button class="work-card__title flow-card__title js-primary" type="button">{{far "folder-open"}}<span class="flow-card__title-label">{{ name }}&#8203;</span></button>
+        </div>
+        {{#if patient.segment}}<div class="work-card__context">
+          <span class="worklist-list__patient-context"><span class="worklist-list__underline">{{ patient.segment }}</span>&#8203;</span>
+        </div>{{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="work-card__aside">
+    <div class="work-card__controls flow-card__controls worklist-list__chips">
+      <span class="work-card__control worklist-list__search-helper">&#8203;{{ state }}&#8203;</span>
+      <span class="work-card__control flow-card__owner js-no-click"><span data-owner-region></span><span class="worklist-list__search-helper">&#8203;{{ owner }}&#8203;</span></span>
+      <span class="work-card__control flow-card__status patient-list__flow-progress">
+        <progress class="progress-bar" value="{{ _progress.complete }}" max="{{ _progress.total }}" aria-label="{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}"></progress>
+        <span class="patient-list__flow-progress-label">{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}</span>
+      </span>
+    </div>
+    <div class="work-card__meta">
+      <span class="work-card__timestamps">
+        <span>{{ @intl.patients.worklist.actionViews.added }} {{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</span>
+        <span>{{ @intl.patients.worklist.actionViews.updated }} {{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</span>
+      </span>
+    </div>
+  </div>
 </div>
