@@ -2,15 +2,22 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/card-list.scss';
+
 import PreloadRegion from 'js/regions/preload_region';
+import SortableList from 'js/behaviors/sortable-list';
 
 import { OwnerComponent as FlowOwnerComponent, FlowBehaviorComponent } from 'js/apps/programs/shared/flows_views';
 import { DueDayComponent, OwnerComponent, BehaviorComponent } from 'js/apps/programs/shared/actions_views';
-import SortableList from 'js/behaviors/sortable-list';
 
 import ActionItemTemplate from './action-item.hbs';
 import HeaderTemplate from './header.hbs';
+import LayoutTemplate from './layout.hbs';
 
+import 'js/apps/programs/shared/program-page.scss';
+import 'scss/domain/work-card.scss';
+import 'scss/domain/action-card.scss';
 import 'scss/domain/action-icons.scss';
 import './program-flow.scss';
 
@@ -23,15 +30,15 @@ const ContextTrailView = View.extend({
 
     this.listenTo(this.program, 'change:name', this.render);
   },
-  className: 'program-flow__context-trail',
+  className: 'program-page__context-trail program-page__context-trail--compact',
   template: hbs`
     {{#if hasLatestList}}
-      <a class="js-back program-flow__context-link">
+      <button class="js-back program-page__context-link" type="button">
         {{fas "chevron-left"}}{{ @intl.programs.program.flow.flowViews.contextBackBtn }}
-      </a>
+      </button>
       {{fas "chevron-right"}}
     {{/if}}
-    <a class="js-program program-flow__context-link">{{ programName }}</a>{{fas "chevron-right"}}{{ name }}
+    <button class="js-program program-page__context-link" type="button">{{ programName }}</button>{{fas "chevron-right"}}{{ name }}
   `,
   triggers: {
     'click .js-back': 'click:back',
@@ -98,7 +105,7 @@ const HeaderView = View.extend({
 const AddActionView = View.extend({
   className: 'program-flow__actions',
   template: hbs`
-    <button class="button-primary js-add-action">
+    <button class="button button--outline js-add-action" type="button">
       {{far "circle-plus"}}<span>{{ @intl.programs.program.flow.flowViews.addActionBtn }}</span>
     </button>
   `,
@@ -108,7 +115,7 @@ const AddActionView = View.extend({
 });
 
 const EmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
   template: hbs`<h2>{{ @intl.programs.program.flow.flowViews.emptyView }}</h2>`,
 });
 
@@ -118,7 +125,7 @@ const ActionItemView = View.extend({
     'editing': 'onEditing',
   },
   className() {
-    const className = 'table-list__item program-flow__action-item js-draggable';
+    const className = 'work-card action-card program-flow__action-item js-draggable';
     if (this.model.isNew()) return `${ className } is-selected`;
 
     return className;
@@ -127,7 +134,7 @@ const ActionItemView = View.extend({
   templateContext() {
     return {
       hasForm: this.model.getForm(),
-      icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
+      icon: this.model.hasOutreach() ? 'share-from-square' : null,
     };
   },
   regions: {
@@ -194,6 +201,9 @@ const ListView = CollectionView.extend({
   behaviors: [
     {
       behaviorClass: SortableList,
+      draggableClass: 'program-flow__list--draggable',
+      draggingClass: 'program-flow__list--dragging',
+      ghostClass: 'program-flow__action-item--ghost',
       shouldDisable() {
         return this.view.collection.length < 2 || this.view.collection.last().isNew();
       },
@@ -202,7 +212,7 @@ const ListView = CollectionView.extend({
   collectionEvents: {
     'change:id': 'onChangeId',
   },
-  className: 'table-list__list list-page__list program-flow__list',
+  className: 'card-list program-flow__list',
   childView: ActionItemView,
   emptyView: EmptyView,
   onDragEnd() {
@@ -214,19 +224,8 @@ const ListView = CollectionView.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'program-flow__frame',
-  template: hbs`
-    <div class="program-flow__layout">
-      <div data-context-trail-region></div>
-      <div data-header-region></div>
-      <div data-add-action-region></div>
-      <div class="table-list program-flow__table-list">
-        <div class="table-list__header list-page__list-header"></div>
-        <div class="table-list__list" data-action-list-region></div>
-      </div>
-    </div>
-    <div class="program-flow__sidebar" data-sidebar-region></div>
-  `,
+  className: 'program-page__frame',
+  template: LayoutTemplate,
   regions: {
     contextTrail: {
       el: '[data-context-trail-region]',

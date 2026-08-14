@@ -1,17 +1,16 @@
-.program__frame {
+.program-page__frame {
   display: flex;
   flex: 1;
 }
 
-.program__layout {
+.program-page__layout {
   display: flex;
   flex: 1;
   flex-direction: column;
-  min-width: 744px;
   width: 100%;
 }
 
-.program__sidebar {
+.program-page__sidebar {
   display: flex;
   flex: initial;
   max-width: 400px;
@@ -19,8 +18,8 @@
   min-width: 256px;
 }
 
-.program__context-trail {
-  background: #{$white};
+.program-page__context-trail {
+  background: var(--color-page-bg);
   color: #{$black-20};
   line-height: 1;
   padding: 16px 24px;
@@ -36,11 +35,19 @@
   }
 }
 
-.program__context-link {
+.program-page__context-trail--compact {
+  padding-bottom: 8px;
+}
+
+.program-page__context-link {
+  background: transparent;
+  border: 0;
   color: #{$black-60};
   cursor: pointer;
+  font: inherit;
   font-weight: 600;
   margin-right: 8px;
+  padding: 0;
 
   &:hover {
     color: color(blue);

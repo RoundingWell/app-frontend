@@ -4,6 +4,8 @@ import { getProgram } from 'support/api/programs';
 
 context('program all list', function() {
   specify('display programs list', function() {
+    cy.viewport(2200, 900);
+
     const firstProgram = getProgram({
       attributes: {
         name: 'First in List',
@@ -53,11 +55,15 @@ context('program all list', function() {
       .wait('@routePrograms');
 
     cy
-      .get('.table-list__item', { timeout: 10000 })
+      .get('.js-add')
+      .should('be.visible');
+
+    cy
+      .get('.card-list__item', { timeout: 10000 })
       .should('have.length', 3);
 
     cy
-      .get('.table-list__item')
+      .get('.card-list__item')
       .first()
       .within(() => {
         cy.get('[data-testid="program-list-name"]').should('contain', 'First in List');
@@ -65,7 +71,7 @@ context('program all list', function() {
       });
 
     cy
-      .get('.table-list__item')
+      .get('.card-list__item')
       .eq(1)
       .within(() => {
         cy.get('[data-testid="program-list-name"]').should('contain', 'Second in List, Not Published');
@@ -73,7 +79,7 @@ context('program all list', function() {
       });
 
     cy
-      .get('.table-list__item')
+      .get('.card-list__item')
       .first()
       .click()
       .wait('@routeProgram')
