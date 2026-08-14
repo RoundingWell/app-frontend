@@ -11,7 +11,7 @@ Load a scoped overlay only when your change touches `scripts/**` or `packages/ca
 - Route data access through `src/js/entities-service/**`.
 - Colocate app-owned views, templates, SCSS, state, and Cypress specs under the owning `src/js/apps/**` directory.
 - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
-- Prefer this import order: third-party libraries, shared SCSS modules, shared utilities and i18n, base classes, entities and service modules, apps and controllers, behaviors, regions, and components, views, then templates and view-local SCSS last.
+- Prefer this import order: third-party libraries, shared SCSS modules, all JavaScript dependencies, templates, app-shared SCSS, shared domain SCSS, then view-local SCSS last. Shared modules must load before JavaScript dependencies that may import styles; domain SCSS must load after them.
 - Keep Handlebars spacing tight: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
 - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
 - Component specs live beside their owners as `src/**/*.component.cy.js`.

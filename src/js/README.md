@@ -37,12 +37,24 @@ import FooComponent from 'js/components/foo';
 import { FooView, BarCollectionView } from 'js/apps/foo/child/child_views';
 import { LocalDepView } from './local_views';
 
-// Large Templates (small templates are typically inlined with hbs``)
+// Structural templates; leaf templates are typically inlined with hbs``
 import FooTemplate from './foo.hbs';
+
+// App-shared and cross-app domain css come after dependencies that may import styles
+import 'js/apps/foo/shared/foo.scss';
+import 'scss/domain/foo.scss';
 
 // Local css
 import './for-this-view.scss';
 ```
+
+## Handlebars Templates
+
+Keep a template inline when it is a leaf fragment that makes the view easier to understand beside its behavior. Typical examples include button contents, icons, labels, status values, empty messages, and small picklist items with shallow conditional rendering.
+
+Use a colocated `.hbs` file when the template defines structure that is meaningful independently of the view behavior. Page and application layouts, list rows, result items, loading skeletons, multi-region views, editor bodies, and members of an existing template family generally belong in files.
+
+Template length is only a signal. Long attributes and translation keys do not make a cohesive leaf fragment structural, while a short template that defines a page's region topology may still deserve a file. Do not introduce a shared or configurable template merely because two views currently have similar markup; extracting a template file is separation, not abstraction.
 
 
 ## Import Aliases
