@@ -12,9 +12,9 @@ import './dashboard.scss';
 const ContextTrailView = View.extend({
   className: 'dashboard__context-trail',
   template: hbs`
-    <a class="js-back dashboard__context-link">
+    <button class="js-back dashboard__context-link" type="button">
       {{fas "chevron-left"}}{{ @intl.dashboards.dashboardViews.contextTrailView.contextBackBtn }}
-    </a>
+    </button>
     {{fas "chevron-right"}}{{ name }}
   `,
   triggers: {

@@ -8,7 +8,6 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  min-width: 744px;
   padding: 16px 24px 0;
   width: 100%;
 }
@@ -29,10 +28,14 @@
 }
 
 .dashboard__context-link {
+  background: transparent;
+  border: 0;
   color: #{$black-60};
   cursor: pointer;
+  font: inherit;
   font-weight: 600;
   margin-right: 8px;
+  padding: 0;
 
   &:hover {
     color: color(blue);
@@ -49,8 +52,4 @@
     height: 100%;
     width: 100%;
   }
-}
-
-.dashboards__table-list {
-  grid-template-columns: 1fr;
 }

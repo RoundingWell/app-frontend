@@ -28,7 +28,7 @@ export default Droplist.extend({
     const isCompact = this.getOption('isCompact');
 
     return {
-      className: isCompact ? 'button-secondary' : 'button-secondary w-100',
+      className: isCompact ? 'button button--secondary' : 'button button--secondary w-100',
       templateContext: {
         attr: 'label',
         defaultText: i18n.defaultText,

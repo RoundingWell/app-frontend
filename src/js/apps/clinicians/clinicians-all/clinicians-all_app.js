@@ -30,7 +30,7 @@ export default SubRouterApp.extend({
   },
   onBeforeStart() {
     this.showView(new LayoutView());
-    this.getRegion('list').startPreloader();
+    this.getRegion('list').startPreloader({ variant: 'generic' });
 
     this.setState({ searchQuery: this.currentSearchQuery });
 
