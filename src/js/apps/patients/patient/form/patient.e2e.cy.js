@@ -64,7 +64,7 @@ context('Patient Form', function() {
       .should('not.contain', `/patient/${ testPatient.id }/form/${ testForm.id }`);
   });
 
-  specify('submitting the form', function() {
+  specify('submitting the form and returning to workflows', function() {
     const testNewFormResponse = getFormResponse();
 
     cy
@@ -135,7 +135,6 @@ context('Patient Form', function() {
       .click();
 
     cy
-      .routeFormResponse()
       .wait('@routePostResponse')
       .its('request.body')
       .should(({ data }) => {
@@ -148,23 +147,8 @@ context('Patient Form', function() {
       });
 
     cy
-      .get('iframe')
-      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testNewFormResponse.id }`);
-
-    cy
-      .wait('@routeFormResponse');
-
-    cy
-      .get('.patient__context-trail')
-      .find('.js-patient')
-      .click();
-
-    cy
-      .url()
+      .location('pathname', { timeout: 10000 })
       .should('contain', `/patient/${ testPatient.id }/workflow`);
-
-    cy
-      .go('back');
   });
 
   specify('storing stored submission', function() {
@@ -212,7 +196,7 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .as('draftStatusButton')
       .trigger('pointerover');
 
@@ -324,7 +308,7 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -383,7 +367,7 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -440,7 +424,7 @@ context('Patient Form', function() {
 
     cy
       .get('.form__controls')
-      .find('.form__actions-icon:has(.fa-shield-check)')
+      .find('.form__actions-icon:has(.fa-cloud-check)')
       .click();
 
     cy
@@ -635,9 +619,7 @@ context('Patient Form', function() {
       .should('contain', 'Sex: f');
   });
 
-  specify('submit and go back button', function() {
-    localStorage.setItem(`form-state_${ currentClinician.id }`, JSON.stringify({ saveButtonType: 'saveAndGoBack' }));
-
+  specify('submit always goes back', function() {
     cy
       .routesForPatientDashboard()
       .routeForm(fx => {
@@ -703,48 +685,13 @@ context('Patient Form', function() {
       .get('.form__controls')
       .find('.js-save-button')
       .should('not.be.disabled')
-      .should('contain', 'Submit + Go Back');
-
-    cy
-      .get('.form__controls')
-      .find('.button__drop-list-select')
-      .should('not.be.disabled')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .should('have.length', 2)
-      .first()
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-state_${ currentClinician.id }`));
-
-        expect(storage.saveButtonType).to.equal('save');
-      });
-
-    cy
-      .get('.form__controls')
-      .find('.js-save-button')
       .should('contain', 'Submit')
       .should('not.contain', 'Go Back');
 
     cy
       .get('.form__controls')
-      .find('.button__drop-list-select')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .should('have.length', 2)
-      .eq(1)
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`form-state_${ currentClinician.id }`));
-
-        expect(storage.saveButtonType).to.equal('saveAndGoBack');
-      });
+      .find('.form__submit-choice')
+      .should('not.exist');
 
     cy
       .get('.form__controls')
@@ -754,11 +701,6 @@ context('Patient Form', function() {
     cy
       .get('.form__controls')
       .find('.js-save-button')
-      .should('be.disabled');
-
-    cy
-      .get('.form__controls')
-      .find('.button__drop-list-select')
       .should('be.disabled');
 
     cy
@@ -778,7 +720,7 @@ context('Patient Form', function() {
       .should('equal', `/one/patient/dashboard/${ testPatient.id }`);
   });
 
-  specify('submit and go back button - form response error', function() {
+  specify('submit and go back - form response error', function() {
     cy
       .routeForm(fx => {
         fx.data = testForm;
@@ -822,18 +764,6 @@ context('Patient Form', function() {
           storyTime: 'New typing',
         });
       });
-
-    cy
-      .get('.form__controls')
-      .find('.button__drop-list-select')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .should('have.length', 2)
-      .eq(1)
-      .click();
 
     cy
       .get('.form__controls')

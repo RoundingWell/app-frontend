@@ -28,8 +28,13 @@ const PostCommentView = View.extend({
   `,
   templateContext() {
     const shouldHideCancel = this.getOption('shouldHideCancel');
-    const isDisabled = !this.model.isValid() || !this.model.hasChanged('message');
     const isNew = this.model.isNew();
+    const hasMessageChange = isNew ?
+      !!this.model.get('message') :
+      this.model.hasChanged('message');
+    const isDisabled = this.model.isSubmitting
+      || !this.model.isValid()
+      || !hasMessageChange;
 
     return {
       shouldHideCancel,
@@ -48,6 +53,7 @@ const PostCommentView = View.extend({
 const CommentFormView = View.extend({
   behaviors: [InputWatcherBehavior],
   modelEvents: {
+    'change:isSubmitting': 'showPostView',
     'change:message': 'showPostView',
   },
   ui: {

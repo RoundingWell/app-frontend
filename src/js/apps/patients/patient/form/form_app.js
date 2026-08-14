@@ -1,11 +1,10 @@
-import { extend, get } from 'underscore';
+import { get } from 'underscore';
 import Radio from 'backbone.radio';
-
-import localStore from 'js/utils/local-store';
 
 import App from 'js/base/app';
 
 import intl from 'js/i18n';
+import localStore from 'js/utils/local-store';
 
 import WidgetsHeaderApp from './widgets/widgets_header_app';
 
@@ -14,12 +13,12 @@ import FormsService from 'js/services/forms';
 import {
   LayoutView,
   IframeView,
-  FormStateActionsView,
-  StatusView,
+  FormExpandActionView,
   ReadOnlyView,
   LockedSubmitView,
   SaveView,
   UpdateView,
+  SubmissionStatusDroplist,
   HistoryView,
   DraftStatusView,
 } from './form_views';
@@ -32,21 +31,20 @@ export default App.extend({
       getOptions: ['patient', 'form'],
     },
   },
-  initFormState() {
-    const storedState = localStore.get(`form-state_${ this.currentUser.id }`);
+  initFormState({ actionId }) {
+    const storedState = actionId && localStore.get(`form-state_${ this.currentUser.id }`);
 
-    this.setState(extend({
+    this.setState({
       responseId: null,
-      shouldShowHistory: false,
-      saveButtonType: 'save',
-    }, storedState));
+      saveButtonType: get(storedState, 'saveButtonType', 'saveAndGoBack'),
+    });
   },
-  onBeforeStart() {
-    this.getRegion().startPreloader();
-
+  onBeforeStart(options) {
     this.currentUser = Radio.request('bootstrap', 'currentUser');
-
-    this.initFormState();
+    this.layoutState = options.layoutState;
+    if (options.actionId) this.listenTo(this.layoutState, 'change:formExpanded', this.renderExpandedState);
+    if (!options.actionId) this.getRegion().startPreloader({ variant: 'generic' });
+    this.initFormState(options);
   },
   beforeStart({ patient, formId, actionId }) {
     if (!actionId) {
@@ -74,14 +72,19 @@ export default App.extend({
   onBeforeStop() {
     this.removeChildApp('formsService');
   },
-  onStart({ patient }, form, action, latestResponse) {
+  onStart({ patient, viewportView }, form, action, latestResponse) {
+    this.viewportView = viewportView;
     this.setFormContext({ patient, form, action, latestResponse });
-    this.listenToActionDestroy();
     this.startFormService();
-    this.setView(new LayoutView({ model: this.form }));
-    this.triggerContextChange();
+    this.setView(new LayoutView({
+      model: this.form,
+      isActionForm: !!this.action,
+      isExpanded: !!this.action && this.layoutState.get('formExpanded'),
+      viewportView,
+    }));
+    if (!this.action) this.triggerContextChange();
     this.startChildApp('widgetHeader');
-    this.showStateActions();
+    if (this.action) this.showExpandAction();
     this.showInitialForm();
     this.showView();
   },
@@ -95,30 +98,16 @@ export default App.extend({
     this.isLocked = action ? action.isLocked() || !action.canSubmit() : false;
     this.isSubmitHidden = form.isSubmitHidden();
   },
-  listenToActionDestroy() {
-    if (!this.action) return;
-
-    this.listenTo(this.action, 'destroy', function() {
-      Radio.request('alert', 'show:success', intl.patients.patient.form.formApp.deleteSuccess);
-      Radio.trigger('event-router', 'default');
-    });
-  },
   triggerContextChange() {
-    const flow = this.action && this.action.getFlow();
     this.trigger('context:change', {
       page: 'form',
       formId: this.form.id,
       formName: this.form.get('name'),
-      actionId: this.action && this.action.id,
-      actionName: this.action && this.action.get('name'),
-      flowId: flow && flow.id,
-      flowName: flow && flow.get('name'),
     });
   },
   showInitialForm() {
     if (this.action) {
       this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id') });
-      this.onChangeResponseId();
       return;
     }
 
@@ -148,13 +137,13 @@ export default App.extend({
     'update:submission': 'onFormServiceUpdateSubmission',
     'refresh': 'onFormServiceRefresh',
   },
-  shouldSaveAndGoBack() {
-    const saveButtonType = this.getState('saveButtonType');
+  shouldSubmitAndGoBack() {
+    if (!this.action) return !this.isSubmitHidden;
 
-    return (saveButtonType === 'saveAndGoBack' && !this.isSubmitHidden);
+    return this.getState('saveButtonType') === 'saveAndGoBack' && !this.isSubmitHidden;
   },
   onFormServiceSuccess(response) {
-    if (this.shouldSaveAndGoBack()) {
+    if (this.shouldSubmitAndGoBack()) {
       Radio.request('history', 'go:back', () => {
         const flow = this.action && this.action.getFlow();
         if (flow) {
@@ -168,15 +157,8 @@ export default App.extend({
       return;
     }
 
-    if (this.action) {
-      this.responses.unshift(response);
-      this.setState({ responseId: response.id });
-      return;
-    }
-
-    this.showForm(response.id);
-    this.showChildView('status', new StatusView({ model: response }));
-    this.showFormActions();
+    this.responses.unshift(response);
+    this.setState({ responseId: response.id });
   },
   onFormServiceError(errors) {
     const status = parseInt(get(errors, [0, 'status']), 10);
@@ -198,35 +180,43 @@ export default App.extend({
       patient: this.patient,
       formId: this.form.id,
       actionId: this.action && this.action.id,
+      layoutState: this.layoutState,
+      viewportView: this.viewportView,
     });
   },
   stateEvents: {
-    'change': 'onChangeState',
-    'change:shouldShowHistory': 'showFormActions',
     'change:responseId': 'onChangeResponseId',
+    'change:saveButtonType': 'onChangeSaveButtonType',
     'change:updated': 'onChangeDraftStatus',
   },
-  onChangeState(state) {
-    localStore.set(`form-state_${ this.currentUser.id }`, state.pick('saveButtonType'));
+  onChangeSaveButtonType() {
+    localStore.set(`form-state_${ this.currentUser.id }`, {
+      saveButtonType: this.getState('saveButtonType'),
+    });
   },
   onChangeResponseId() {
     this.showFormActions();
     this.showContent();
   },
-  showStateActions() {
-    const formStateActions = new FormStateActionsView({
-      model: this.getState(),
-      responses: this.responses && this.responses.filterSubmissions(),
+  showExpandAction() {
+    const formExpandAction = new FormExpandActionView({ model: this.layoutState });
+
+    this.listenTo(formExpandAction, {
+      'click:expandButton': this.onClickExpandButton,
     });
 
-    this.listenTo(formStateActions, {
-      'click:historyButton': this.onClickHistoryButton,
-    });
-
-    this.showChildView('stateActions', formStateActions);
+    this.showChildView('expandAction', formExpandAction);
   },
-  onClickHistoryButton() {
-    this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id'), shouldShowHistory: !this.getState('shouldShowHistory') });
+  onClickExpandButton() {
+    this.trigger('toggle:expanded');
+  },
+  renderExpandedState() {
+    const isExpanded = this.layoutState.get('formExpanded');
+    const layout = this.getView();
+
+    if (!layout) return;
+
+    layout.setExpanded(isExpanded);
   },
   showContent() {
     if (!this.isReadOnly && !this.isLocked && (!this.action || !this.getState('responseId'))) this.loadDraftStatus();
@@ -241,15 +231,18 @@ export default App.extend({
     this.setState({ updated });
   },
   showForm(responseId = this.getState('responseId')) {
-    this.showChildView('form', new IframeView({
+    const formView = new IframeView({
       model: this.form,
       responseId,
-    }));
+    });
+
+    this.showChildView('form', formView);
+    this.getView().trigger('change:form:view');
   },
   showFormActions() {
-    if (this.action) this.showFormStatus();
+    if (this.action) this.showSubmissionStatus();
 
-    if (this.action && this.getState('shouldShowHistory')) {
+    if (this.isShowingHistoricalResponse()) {
       this.showFormHistory();
       return;
     }
@@ -271,30 +264,40 @@ export default App.extend({
 
     this.showFormSaveDisabled();
   },
+  isShowingHistoricalResponse() {
+    if (!this.action || !this.getState('responseId')) return false;
+
+    return this.getState('responseId') !== get(this.responses.getFirstSubmission(), 'id');
+  },
   showReadOnly() {
     this.showChildView('formAction', new ReadOnlyView());
   },
   showLockedSubmit() {
     this.showChildView('formAction', new LockedSubmitView());
   },
-  showFormStatus() {
-    if (!this.responses.getFirstSubmission()) return;
+  showSubmissionStatus() {
+    const selected = this.responses.get(this.getState('responseId'));
+    if (!selected) {
+      this.getRegion('draftStatus').empty();
+      return;
+    }
 
-    this.showChildView('status', new StatusView({
-      model: this.responses.getFirstSubmission(),
-    }));
+    const submissionStatus = new SubmissionStatusDroplist({
+      collection: this.responses.filterSubmissions(),
+      state: { selected },
+    });
+
+    this.showChildView('draftStatus', submissionStatus);
+    this.listenTo(submissionStatus, 'change:selected', response => {
+      this.setState({ responseId: response.id });
+    });
   },
   showFormHistory() {
-    const selected = this.responses.get(this.getState('responseId'));
-
-    const historyView = this.showChildView('formAction', new HistoryView({ selected, collection: this.responses.filterSubmissions() }));
+    const historyView = this.showChildView('formAction', new HistoryView());
 
     this.listenTo(historyView, {
-      'change:response'(response) {
-        this.setState({ responseId: response.id });
-      },
       'click:current'() {
-        this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id'), shouldShowHistory: false });
+        this.setState({ responseId: get(this.responses.getFirstSubmission(), 'id') });
       },
     });
   },
@@ -333,6 +336,7 @@ export default App.extend({
     }
 
     this.showChildView('formAction', new SaveView({
+      canChooseSaveType: !!this.action,
       isDisabled: true,
       model: this.getState(),
     }));
@@ -341,6 +345,7 @@ export default App.extend({
     if (this.isSubmitHidden) return;
 
     const saveView = this.showChildView('formAction', new SaveView({
+      canChooseSaveType: !!this.action,
       model: this.getState(),
     }));
 
@@ -349,8 +354,8 @@ export default App.extend({
         Radio.request(`form${ this.form.id }`, 'send', 'form:submit');
         this.showFormSaveDisabled();
       },
-      'select:button:type'(selectedSaveButtonType) {
-        this.setState({ saveButtonType: selectedSaveButtonType });
+      'select:button:type'(saveButtonType) {
+        this.setState({ saveButtonType });
       },
     });
   },
