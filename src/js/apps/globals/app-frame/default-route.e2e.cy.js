@@ -22,6 +22,15 @@ context('default routes', function() {
       .wait('@routePatient');
 
     cy
+      .url()
+      .should('contain', 'one/worklist/owned-by');
+
+    cy
+      .get('.patient-sidebar__name')
+      .click()
+      .wait('@routePatient');
+
+    cy
       .get('.patient__context-trail')
       .contains('Back to List')
       .click();

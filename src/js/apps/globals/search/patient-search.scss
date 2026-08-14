@@ -102,7 +102,6 @@
     background-color: color(blue);
     color: #{$white};
 
-    .patient-search__picklist-item,
     .patient-search__picklist-item-meta,
     .patient-search__picklist-item-result-label {
       color: #{$white};
@@ -130,6 +129,7 @@
   flex: 1;
   margin-right: 8px;
   min-width: 0;
+  text-transform: uppercase;
 }
 
 .patient-search__picklist-item-meta {
@@ -165,6 +165,20 @@
   margin: 0 8px;
   padding: 16px 0;
   text-align: center;
+}
+
+.patient-search__add {
+  background: transparent;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+
+  &:hover,
+  &:focus {
+    color: color(blue, dark);
+  }
 }
 
 .patient-search__tip {
@@ -203,4 +217,14 @@
   right: 0;
   text-align: center;
   width: 100%;
+}
+
+@media (width <= 720px) {
+  .patient-search__modal {
+    height: 100%;
+  }
+
+  .patient-search__picklist {
+    height: 100vh;
+  }
 }

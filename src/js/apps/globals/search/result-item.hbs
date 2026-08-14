@@ -1,0 +1,28 @@
+<div class="patient-search__picklist-item-name-icon">
+  {{far "address-card"}}
+</div>
+<div class="patient-search__picklist-item-name-text">
+  <span class="u-text--overflow">{{matchText name search includeSubstrings=true}}{{~ remove_whitespace ~}}</span>
+</div>
+<div class="patient-search__picklist-item-meta">
+  <div class="patient-search__picklist-item-dob u-text--overflow">
+    {{#if isDobMatch}}
+      <strong>{{formatDateTime birth_date "MM/DD/YYYY"}}</strong>
+    {{else}}
+      {{formatDateTime birth_date "MM/DD/YYYY"}}
+    {{/if}}
+  </div>
+  <div class="patient-search__picklist-item-status u-text--overflow">
+    {{status}}
+  </div>
+  <div class="patient-search__picklist-item-result-value u-text--overflow">
+    {{#if shouldShowMatch}}
+      {{matchText match.value search includeSubstrings=true}}
+    {{/if}}
+  </div>
+  <div class="patient-search__picklist-item-result-label u-text--overflow">
+    {{#if shouldShowMatch}}
+      {{match.label}}
+    {{/if}}
+  </div>
+</div>

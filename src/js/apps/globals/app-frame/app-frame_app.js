@@ -19,8 +19,16 @@ export default App.extend({
 
     this.listenTo(workspaceCh, 'change:workspace', this.restart);
 
-    new NavApp({ region: this.getRegion('nav') });
+    this.navApp = new NavApp({ region: this.getRegion('nav') });
+    const navState = this.navApp.getState();
+
+    this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
+    this.onChangeNavMinimized(navState, navState.get('isMinimized'));
+
     new SidebarService({ region: this.getRegion('sidebar') });
+  },
+  onChangeNavMinimized(state, isMinimized) {
+    this.getView().setNavMinimized(isMinimized);
   },
   beforeStart() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -64,6 +72,8 @@ export default App.extend({
   onStop() {
     invoke(this.routers, 'destroy');
     this.routers = [];
+
+    if (!this.isRestarting()) this.navApp.destroy();
   },
   initRouter(module) {
     const RouterApp = module?.default;

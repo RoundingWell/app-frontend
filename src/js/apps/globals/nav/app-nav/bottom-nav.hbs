@@ -1,0 +1,15 @@
+<div data-nav-dashboards-region></div>
+{{#if canPatientCreate}}
+  <button class="flex flex-align-center app-nav__bottom-button js-add-patient" type="button" aria-label="{{ @intl.globals.appNav.appNavViews.appNavView.addPatient }}">
+    {{far "circle-plus"}}<span class="app-nav__label u-text--overflow">{{ @intl.globals.appNav.appNavViews.appNavView.addPatient }}</span>
+  </button>
+{{/if}}
+<div data-nav-admin-tools-region></div>
+<button class="flex flex-align-center app-nav__bottom-button js-minimize-menu" type="button" aria-label="{{ @intl.globals.appNav.appNavViews.appNavView.expandMenu }}">
+  <span class="app-nav__minimize-icon app-nav__minimize-icon--expand">{{far "square-caret-right"}}</span>
+  <span class="app-nav__minimize-icon app-nav__minimize-icon--collapse">{{far "square-caret-left"}}</span>
+  <span class="app-nav__minimize-icon app-nav__minimize-icon--close">{{fas "xmark"}}</span>
+  <span class="app-nav__label app-nav__label--minimize u-text--overflow">{{ @intl.globals.appNav.appNavViews.appNavView.minimizeMenu }}</span>
+  <span class="app-nav__label app-nav__label--keep-open u-text--overflow">{{ @intl.globals.appNav.appNavViews.appNavView.keepMenuOpen }}</span>
+  <span class="app-nav__label app-nav__label--close u-text--overflow">{{ @intl.globals.appNav.appNavViews.appNavView.closeMenu }}</span>
+</button>
