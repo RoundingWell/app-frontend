@@ -37,10 +37,10 @@ export default Droplist.extend({
     const isOverdue = time && this.getOption('isOverdue') ? 'is-overdue' : '';
 
     if (isCompact) {
-      return `button-secondary--compact time-component ${ isOverdue }`;
+      return `button button--compact time-component ${ isOverdue }`;
     }
 
-    return `button-secondary time-component w-100 ${ isOverdue }`;
+    return `button button--secondary time-component w-100 ${ isOverdue }`;
   },
   getTemplate(time, isCompact) {
     if (!time && this.getOption('time')) {

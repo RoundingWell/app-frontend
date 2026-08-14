@@ -1,35 +1,29 @@
-.action--red {
+.action-state {
+  align-items: center;
+  display: inline-flex;
+  font-weight: 600;
+}
+
+.action-state--red {
   color: color(red);
-  font-weight: bold;
 }
 
-.action--black {
+.action-state--black {
   color: #{$black-20};
-  font-weight: bold;
 }
 
-.action--green {
+.action-state--green {
   color: color(green);
-  font-weight: bold;
 }
 
-.action--orange {
+.action-state--orange {
   color: color(orange);
-  font-weight: bold;
 }
 
-.action--purple {
+.action-state--purple {
   color: color(purple);
-  font-weight: bold;
 }
 
-.action--grey {
+.action-state--grey {
   color: #{$black-60};
-  font-weight: bold;
-}
-
-.is-highlighted {
-  .action--red, .action--black, .action--green, .action--orange, .action--grey {
-    color: #{$white};
-  }
 }
