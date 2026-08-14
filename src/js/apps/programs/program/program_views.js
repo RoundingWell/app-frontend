@@ -4,18 +4,20 @@ import { View } from 'marionette';
 
 import PreloadRegion from 'js/regions/preload_region';
 
-import './program.scss';
+import LayoutTemplate from './layout.hbs';
+
+import 'js/apps/programs/shared/program-page.scss';
 
 const ContextTrailView = View.extend({
   modelEvents: {
     'change:name': 'render',
   },
-  className: 'program__context-trail',
+  className: 'program-page__context-trail',
   template: hbs`
     {{#if hasLatestList}}
-      <a class="js-back program__context-link">
+      <button class="js-back program-page__context-link" type="button">
         {{fas "chevron-left"}}{{ @intl.programs.program.programViews.contextBackBtn }}
-      </a>
+      </button>
       {{fas "chevron-right"}}
     {{/if}}{{ name }}
   `,
@@ -33,14 +35,8 @@ const ContextTrailView = View.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'program__frame',
-  template: hbs`
-    <div class="program__layout">
-        <div data-context-trail-region></div>
-        <div data-content-region></div>
-    </div>
-    <div class="program__sidebar" data-sidebar-region></div>
-  `,
+  className: 'program-page__frame',
+  template: LayoutTemplate,
   regions: {
     contextTrail: {
       el: '[data-context-trail-region]',

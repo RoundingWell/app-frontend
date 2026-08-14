@@ -24,20 +24,21 @@ import ActionSidebarTemplate from './action-sidebar.hbs';
 import ActionNameTemplate from './action-name.hbs';
 import ActionDetailsTemplate from './action-details.hbs';
 
+import 'js/apps/programs/shared/program-editor-sidebar.scss';
 import './action-sidebar.scss';
 
 const { ENTER_KEY } = keyCodes;
 
 const DisabledSaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
-  template: hbs`<button class="button--green" disabled>{{ @intl.programs.sidebar.action.actionSidebarViews.disabledSaveView.saveBtn }}</button>`,
+  template: hbs`<button class="button button--positive" type="button" disabled>{{ @intl.programs.sidebar.action.actionSidebarViews.disabledSaveView.saveBtn }}</button>`,
 });
 
 const SaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
   template: hbs`
-    <button class="button--green js-save">{{ @intl.programs.sidebar.action.actionSidebarViews.saveView.saveBtn }}</button>
-    <button class="button--text u-margin--r-4 js-cancel">{{ @intl.programs.sidebar.action.actionSidebarViews.saveView.cancelBtn }}</button>
+    <button class="button button--positive js-save" type="button">{{ @intl.programs.sidebar.action.actionSidebarViews.saveView.saveBtn }}</button>
+    <button class="button button--text u-margin--r-4 js-cancel" type="button">{{ @intl.programs.sidebar.action.actionSidebarViews.saveView.cancelBtn }}</button>
   `,
   triggers: {
     'click .js-cancel': 'cancel',
@@ -46,7 +47,7 @@ const SaveView = View.extend({
 });
 
 const NameView = View.extend({
-  className: 'pos--relative',
+  className: 'textarea-flex',
   template: ActionNameTemplate,
   behaviors: [InputWatcherBehavior],
   ui: {
@@ -79,7 +80,7 @@ const NameView = View.extend({
 });
 
 const DetailsView = View.extend({
-  className: 'pos--relative',
+  className: 'textarea-flex',
   template: ActionDetailsTemplate,
   behaviors: [InputWatcherBehavior],
   ui: {
@@ -96,7 +97,7 @@ const DetailsView = View.extend({
 
 const ToggleView = View.extend({
   template: hbs`
-    <button class="program-action-sidebar__toggle button-secondary {{#if status}}is-on{{/if}} js-toggle" {{#if isDisabled}}disabled{{/if}}>
+    <button class="button button--secondary program-editor-sidebar__toggle {{#if status}}is-on{{/if}} js-toggle" type="button" {{#if isDisabled}}disabled{{/if}}>
       {{#if status}}{{fas "toggle-on"}}{{else}}{{far "toggle-off"}}{{/if}}
       {{formatMessage (intlGet "programs.shared.components.toggleComponent.toggle") status=status}}
     </button>
@@ -136,12 +137,12 @@ const FormSharingView = View.extend({
       <h3 class="sidebar__heading flex-grow">{{far "share-from-square" classes="u-margin--r-8"}}{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.label }}</h3>
     </div>
     <div class="flex u-margin--t-16">
-      <h4 class="sidebar__label--inset u-margin--t-8">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.recipientLabel }}</h4>
-      <div class="flex-grow"><button class="button-secondary w-100" disabled>{{far "user-plus"}} {{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.recipientDefault }}</button></div>
+      <h4 class="sidebar__label sidebar__label--inset u-margin--t-8">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.recipientLabel }}</h4>
+      <div class="flex-grow"><button class="button button--secondary w-100" type="button" disabled>{{far "user-plus"}} {{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.recipientDefault }}</button></div>
     </div>
     <div class="flex u-margin--t-8">
-      <h4 class="sidebar__label--inset u-margin--t-8">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.whenLabel }}</h4>
-      <div class="flex-grow"><button class="button-secondary w-100" disabled>{{far "stopwatch"}} {{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.whenDefault }}</button></div>
+      <h4 class="sidebar__label sidebar__label--inset u-margin--t-8">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.whenLabel }}</h4>
+      <div class="flex-grow"><button class="button button--secondary w-100" type="button" disabled>{{far "stopwatch"}} {{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.whenDefault }}</button></div>
     </div>
   `,
 });
@@ -149,14 +150,14 @@ const FormSharingView = View.extend({
 const UploadsEnabledView = View.extend({
   template: hbs`
     {{#if isUploadsEnabled}}
-      <div class="flex sidebar__attachments">
+      <div class="flex program-action-sidebar__attachments">
         <h3 class="flex-grow sidebar__heading">
           {{far "paperclip"}}<span class="u-margin--l-8">{{ @intl.programs.sidebar.action.actionSidebarViews.uploadsEnabledView.attachmentsHeadingText }}</span>
         </h3>
-        <button class="button--link js-disable">{{ @intl.programs.sidebar.action.actionSidebarViews.uploadsEnabledView.disableButtonText }}</button>
+        <button class="button button--link js-disable" type="button">{{ @intl.programs.sidebar.action.actionSidebarViews.uploadsEnabledView.disableButtonText }}</button>
       </div>
     {{else}}
-      <button {{#if isButtonDisabled}}disabled{{/if}} class="button--blue w-100 js-enable">
+      <button class="button button--primary w-100 js-enable" type="button" {{#if isButtonDisabled}}disabled{{/if}}>
         {{far "paperclip"}} {{ @intl.programs.sidebar.action.actionSidebarViews.uploadsEnabledView.enableButtonText }}
       </button>
     {{/if}}
@@ -175,7 +176,11 @@ const UploadsEnabledView = View.extend({
 
 const MenuView = View.extend({
   tagName: 'button',
-  className: 'button--icon js-menu',
+  className: 'button button--icon button--menu js-menu',
+  attributes: {
+    'aria-label': intl.programs.sidebar.action.actionSidebarViews.menuView.headingText,
+    'type': 'button',
+  },
   template: hbs`{{far "ellipsis"}}`,
   triggers: {
     'click': 'click',

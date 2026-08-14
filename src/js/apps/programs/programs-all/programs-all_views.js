@@ -2,29 +2,27 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/list-pages.scss';
+import 'scss/modules/card-list.scss';
+
 import { alphaSort } from 'js/utils/sorting';
 
 import PreloadRegion from 'js/regions/preload_region';
 
-import 'scss/modules/list-pages.scss';
-import 'scss/modules/table-list.scss';
+import ItemTemplate from './item.hbs';
+import LayoutTemplate from './layout.hbs';
+
 import './programs-list.scss';
 
 const EmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
   template: hbs`<h2>{{ @intl.programs.programsAllViews.emptyView }}</h2>`,
 });
 
 const ItemView = View.extend({
-  className: 'table-list__item',
-  template: hbs`
-    <div data-testid="program-list-name">{{ name }}</div>
-    <div class="programs-list__published{{#if published}} is-published{{/if}}">
-      {{#if published}}{{fas "toggle-on"}}{{else}}{{far "toggle-off"}}{{/if}}
-      {{formatMessage (intlGet "programs.programsAllViews.itemView.published") published=published}}
-    </div>
-    <div class="programs-list__updated-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>
-  `,
+  className: 'card-list__item',
+  template: ItemTemplate,
   templateContext() {
     return {
       published: !!this.model.get('published_at'),
@@ -39,25 +37,8 @@ const ItemView = View.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'flex-region',
-  template: hbs`
-    <div class="list-page__header">
-      <div class="flex list-page__title">
-        <div class="flex list-page__title-filter">
-          <span class="list-page__title-icon">{{far "screwdriver-wrench"}}</span>{{ @intl.programs.programsAllViews.layoutView.title }}
-        </div>
-      </div>
-      <button class="u-margin--b-16 button-primary js-add">{{far "circle-plus"}}<span>{{ @intl.programs.programsAllViews.addProgramBtn }}</span></button>
-    </div>
-    <div class="table-list programs-list__table-list">
-      <div class="table-list__header list-page__list-header">
-        <div>{{ @intl.programs.programsAllViews.layoutView.programHeader }}</div>
-        <div>{{ @intl.programs.programsAllViews.layoutView.stateHeader }}</div>
-        <div>{{ @intl.programs.programsAllViews.layoutView.updatedHeader }}</div>
-      </div>
-      <div class="table-list__list" data-list-region></div>
-    </div>
-  `,
+  className: 'flex-region list-page',
+  template: LayoutTemplate,
   regions: {
     list: {
       el: '[data-list-region]',
@@ -71,7 +52,7 @@ const LayoutView = View.extend({
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list__list list-page__list',
+  className: 'card-list list-page__list',
   childView: ItemView,
   emptyView: EmptyView,
   viewComparator(viewA, viewB) {

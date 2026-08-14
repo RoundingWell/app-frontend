@@ -1,28 +1,11 @@
-.program-action--draft {
-  color: #{$black-20};
-  font-weight: bold;
-}
-
-.program-action--automated,
-.program-action--standard,
-.program-action--conditional {
+.program-action-state--automated,
+.program-action-state--standard,
+.program-action-state--conditional {
   color: color(green);
   font-weight: bold;
 }
 
-.is-highlighted {
-  .program-action--draft,
-  .program-action--automated,
-  .program-action--conditional,
-  .program-action--standard {
-    color: #{$white};
-  }
-}
-
-
-.is-disabled {
-  .program-action--automated,
-  .program-action--standard {
-    color: #{$black-80};
-  }
+.program-action-state--disabled.program-action-state--automated,
+.program-action-state--disabled.program-action-state--standard {
+  color: #{$black-80};
 }
