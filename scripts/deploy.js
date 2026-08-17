@@ -140,7 +140,7 @@ export function addOrganizationsFromPage(organizationBuckets, response, stage, f
  * @param {string} filePath - The file path
  * @returns {string} Content type
  */
-function getContentType(filePath) {
+export function getContentType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
   const contentTypes = {
     '.html': 'text/html',
@@ -152,6 +152,7 @@ function getContentType(filePath) {
     '.jpeg': 'image/jpeg',
     '.gif': 'image/gif',
     '.svg': 'image/svg+xml',
+    '.webp': 'image/webp',
     '.ico': 'image/x-icon',
     '.woff': 'font/woff',
     '.woff2': 'font/woff2',

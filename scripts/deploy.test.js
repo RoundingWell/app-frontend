@@ -9,6 +9,7 @@ import {
   cacheControlFor,
   deployOrganizations,
   formatFailedDeploymentsError,
+  getContentType,
   readDeployMarkerStatus,
   readResolvedDeployTargets,
   resolveInvalidationDistribution,
@@ -17,6 +18,10 @@ import {
   writeDeployMarkerStatus,
   writeResolvedDeployTargets,
 } from './deploy.js';
+
+test('getContentType serves WebP guide assets as images', () => {
+  assert.equal(getContentType('images/whats-new/worklist.webp'), 'image/webp');
+});
 
 function stack(name, organization, { stage = 'sandbox', websiteBucket } = {}) {
   const outputs = websiteBucket ?
