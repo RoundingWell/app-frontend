@@ -9,6 +9,7 @@ import GuideTemplate from './guide.hbs';
 import './whats-new.scss';
 
 const WHATS_NEW_VERSION = 'v6-redesign';
+const WHATS_NEW_ASSET_VERSION = 'v6-redesign-editorial';
 
 const AnnouncementView = View.extend({
   className: 'app-nav__announcement',
@@ -26,6 +27,9 @@ const AnnouncementView = View.extend({
 const GuideView = View.extend({
   className: 'modal__content whats-new-guide',
   template: GuideTemplate,
+  templateContext: {
+    assetVersion: WHATS_NEW_ASSET_VERSION,
+  },
 });
 
 function showWhatsNewGuide() {

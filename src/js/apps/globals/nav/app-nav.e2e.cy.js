@@ -270,7 +270,11 @@ context('App Nav', function() {
       .get('.whats-new-modal')
       .should('contain', 'What\'s new in RoundingWell')
       .find('.whats-new-guide__figure img')
-      .should('have.length', 2);
+      .should($images => {
+        expect($images).to.have.length(2);
+        expect($images[0]).to.have.property('naturalWidth', 1240);
+        expect($images[1]).to.have.property('naturalWidth', 1240);
+      });
 
     cy.viewport(1280, 400);
 

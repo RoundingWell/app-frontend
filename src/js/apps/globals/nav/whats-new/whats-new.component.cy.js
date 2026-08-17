@@ -45,14 +45,14 @@ context('What\'s New views', function() {
       .get('.whats-new-guide__figure img')
       .should('have.length', 2)
       .first()
-      .should('have.attr', 'src', '/images/whats-new/worklist.webp')
+      .should('have.attr', 'src', '/images/whats-new/worklist.webp?v=v6-redesign-editorial')
       .and('have.attr', 'width', '1240')
       .and('have.attr', 'height', '560');
 
     cy
       .get('.whats-new-guide__figure img')
       .eq(1)
-      .should('have.attr', 'src', '/images/whats-new/action.webp')
+      .should('have.attr', 'src', '/images/whats-new/action.webp?v=v6-redesign-editorial')
       .and('have.attr', 'width', '1240')
       .and('have.attr', 'height', '520');
 
