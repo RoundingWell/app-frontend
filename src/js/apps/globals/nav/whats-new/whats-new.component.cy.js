@@ -38,22 +38,26 @@ context('What\'s New views', function() {
       });
   });
 
-  specify('renders the guide with two stable assets and callouts', function() {
+  specify('renders the guide with two stable release assets', function() {
     cy.mount(() => new GuideView());
 
     cy
       .get('.whats-new-guide__figure img')
       .should('have.length', 2)
       .first()
-      .should('have.attr', 'src', '/images/whats-new/worklist.webp');
+      .should('have.attr', 'src', '/images/whats-new/worklist.webp')
+      .and('have.attr', 'width', '1240')
+      .and('have.attr', 'height', '560');
 
     cy
       .get('.whats-new-guide__figure img')
       .eq(1)
-      .should('have.attr', 'src', '/images/whats-new/action.webp');
+      .should('have.attr', 'src', '/images/whats-new/action.webp')
+      .and('have.attr', 'width', '1240')
+      .and('have.attr', 'height', '520');
 
     cy
-      .get('.whats-new-guide__highlight')
+      .get('.whats-new-guide__section')
       .should('have.length', 3);
 
     cy

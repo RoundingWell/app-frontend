@@ -98,15 +98,9 @@ $nav-row-width: calc(100% - 16px);
 }
 
 .app-nav__picklist-bottom {
-  border-top: 1px solid #{$black-90};
-  margin-top: 8px;
-  padding-top: 8px;
-}
-
-.app-nav__picklist .picklist__group + .picklist__group {
-  border-top: 1px solid #{$black-90};
-  margin-top: 8px;
-  padding-top: 8px;
+  border-top: 0;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .app-nav__header {

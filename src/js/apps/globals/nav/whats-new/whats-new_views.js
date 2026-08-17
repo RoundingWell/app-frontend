@@ -24,6 +24,7 @@ const AnnouncementView = View.extend({
 });
 
 const GuideView = View.extend({
+  className: 'modal__content whats-new-guide',
   template: GuideTemplate,
 });
 

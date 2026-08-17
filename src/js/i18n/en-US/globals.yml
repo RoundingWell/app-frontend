@@ -41,17 +41,17 @@ careOptsFrontend:
             message: RoundingWell has a new design.
             seeChanges: See what's changed.
           guide:
-            actionDescription: Patient context, action details, status, ownership, due dates, and activity now stay together in one focused workspace.
-            actionHeading: Keep action context together
+            actionDescription: Patient context, status, ownership, due dates, notes, and activity now stay together, so you can understand and update an action without bouncing between panels.
+            actionHeading: One focused place for every action
             actionImageAlt: Redesigned action page with patient context and action activity
-            actionImageLabel: Action workspace
+            actionLabel: Action pages
             done: Done
-            filtersDescription: Worklist cards and filters sit side by side on wide screens, with the same controls available from All Filters when space is tighter.
-            filtersHeading: Scan and filter work in one place
-            filtersImageAlt: Redesigned worklist with expanded navigation and filters
-            filtersImageLabel: Filters
+            filtersDescription: Scan actions and flows in the center, adjust filters beside them, and keep navigation close without losing the work in front of you.
+            filtersHeading: Your worklist, at a glance
+            filtersImageAlt: Redesigned worklist with action cards and filters
             heading: What's new in RoundingWell
-            intro: The new design keeps your daily work visible and puts patient and action context closer to the task at hand.
+            intro: The new RoundingWell brings the tools you use most into clearer, calmer workspaces without changing how your work is organized.
+            introHeading: A clearer way to move through daily work
             movedHeading: What moved where
             movedNavDescription: Search, worklists, and Schedule are grouped at the top. Dashboards, Add Patient, and Admin Tools are at the bottom.
             movedNavLabel: Navigation
@@ -59,7 +59,8 @@ careOptsFrontend:
             movedPatientLabel: Patient details
             movedSupportDescription: Open Workspace Menu for workspace switching, What's New, Help & Support, and Sign Out.
             movedSupportLabel: Workspace menu
-            navImageLabel: Daily navigation
+            redesignLabel: New design
+            worklistLabel: Worklists
     error:
       errorTemplate:
         backBtn: Back to Your Workspace

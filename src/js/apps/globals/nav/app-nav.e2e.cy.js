@@ -272,6 +272,28 @@ context('App Nav', function() {
       .find('.whats-new-guide__figure img')
       .should('have.length', 2);
 
+    cy.viewport(1280, 400);
+
+    cy
+      .get('.whats-new-modal')
+      .should($modal => {
+        const bounds = $modal[0].getBoundingClientRect();
+
+        expect(bounds.top).to.be.at.least(0);
+        expect(bounds.bottom).to.be.at.most(400);
+      })
+      .contains('button', 'Done')
+      .should('be.visible');
+
+    cy
+      .get('.whats-new-modal .modal__body')
+      .should($body => {
+        expect($body[0].scrollHeight).to.be.greaterThan($body[0].clientHeight);
+      })
+      .scrollTo('bottom')
+      .contains('What moved where')
+      .should('be.visible');
+
     cy
       .get('.app-nav__announcement')
       .should('exist');
@@ -280,6 +302,8 @@ context('App Nav', function() {
       .get('.whats-new-modal')
       .contains('button', 'Done')
       .click();
+
+    cy.viewport(1280, 600);
 
     cy
       .get('.app-nav__announcement')
@@ -309,7 +333,13 @@ context('App Nav', function() {
       .should('be.visible')
       .then($whatsNew => {
         cy
+          .get('.picklist__group')
+          .first()
+          .should('have.css', 'border-bottom-width', '1px');
+
+        cy
           .get('.app-nav__picklist-bottom')
+          .should('have.css', 'border-top-width', '0px')
           .contains('Help & Support')
           .then($help => {
             expect($whatsNew[0].compareDocumentPosition($help[0]))
