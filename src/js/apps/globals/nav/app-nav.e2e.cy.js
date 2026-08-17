@@ -12,6 +12,7 @@ import { teamCoordinator } from 'support/api/teams';
 import { testForm } from 'support/api/forms';
 
 const navMinimizedKey = `isNavMenuMinimized_${ fxCurrentClinician.id }`;
+const whatsNewDismissedKey = `whatsNewDismissed_v6-redesign_${ fxCurrentClinician.id }`;
 
 function expectNavMenuLabel(label, assertion = 'be.visible') {
   cy
@@ -240,6 +241,92 @@ context('App Nav', function() {
       .should('not.have.class', 'is-selected');
   });
 
+  specify('shows and remembers the redesign announcement', function() {
+    cy
+      .viewport(1280, 600)
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav__announcement')
+      .should('be.visible')
+      .should('contain', 'RoundingWell has a new design.')
+      .then($announcement => {
+        cy
+          .get('.app-nav__bottom')
+          .contains('.app-nav__link', 'Dashboards')
+          .then($dashboards => {
+            expect($announcement[0].compareDocumentPosition($dashboards[0]))
+              .to.equal(Node.DOCUMENT_POSITION_FOLLOWING);
+          });
+      });
+
+    cy
+      .get('.app-nav__announcement')
+      .contains('button', 'See what\'s changed.')
+      .click();
+
+    cy
+      .get('.whats-new-modal')
+      .should('contain', 'What\'s new in RoundingWell')
+      .find('.whats-new-guide__figure img')
+      .should('have.length', 2);
+
+    cy
+      .get('.app-nav__announcement')
+      .should('exist');
+
+    cy
+      .get('.whats-new-modal')
+      .contains('button', 'Done')
+      .click();
+
+    cy
+      .get('.app-nav__announcement')
+      .find('[aria-label="Dismiss redesign announcement"]')
+      .click()
+      .then(() => {
+        expect(JSON.parse(localStorage.getItem(whatsNewDismissedKey))).to.be.true;
+      });
+
+    cy
+      .get('.app-nav__announcement')
+      .should('not.exist');
+
+    cy.reload();
+
+    cy
+      .get('.app-nav__announcement')
+      .should('not.exist');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('.js-picklist-item', 'What\'s New')
+      .should('be.visible')
+      .then($whatsNew => {
+        cy
+          .get('.app-nav__picklist-bottom')
+          .contains('Help & Support')
+          .then($help => {
+            expect($whatsNew[0].compareDocumentPosition($help[0]))
+              .to.equal(Node.DOCUMENT_POSITION_FOLLOWING);
+          });
+      });
+
+    cy
+      .get('.picklist')
+      .contains('.js-picklist-item', 'What\'s New')
+      .click();
+
+    cy
+      .get('.whats-new-modal')
+      .should('contain', 'What moved where');
+  });
+
   specify('switch workspaces', function() {
     cy
       .routeActions()
@@ -361,6 +448,10 @@ context('App Nav', function() {
     cy
       .get('.app-nav__header')
       .find('.app-nav__header-details')
+      .should('not.be.visible');
+
+    cy
+      .get('.app-nav__announcement')
       .should('not.be.visible');
 
     cy
@@ -563,6 +654,10 @@ context('App Nav', function() {
       .get('.app-nav')
       .should('have.class', 'is-overlay-expanded')
       .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav__announcement')
+      .should('be.visible');
 
     cy
       .get('.app-nav__bottom')

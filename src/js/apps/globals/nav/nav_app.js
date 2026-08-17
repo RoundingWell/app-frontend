@@ -9,6 +9,7 @@ import RouterApp from 'js/base/routerapp';
 import SearchApp from 'js/apps/globals/search/search_app';
 import StateModel from 'js/apps/globals/nav/nav_state';
 import { AppNavView, AppNavCollectionView, MainNavDroplist, PatientsAppNav, BottomNavView, NavItemView, AdminToolsDroplist, i18n } from 'js/apps/globals/nav/app-nav/app-nav_views';
+import { AnnouncementView, WHATS_NEW_VERSION, showWhatsNewGuide } from 'js/apps/globals/nav/whats-new/whats-new_views';
 
 // Viewport width at/below which the nav auto-collapses to the rail.
 const NAV_COLLAPSE_QUERY = '(max-width: 900px)';
@@ -23,6 +24,13 @@ const dashboardsNav = new Backbone.Model({
   event: 'dashboards:all',
   eventArgs: [],
 });
+
+const whatsNewMenu = new Backbone.Collection([{
+  id: 'WhatsNew',
+  text: i18n.mainNavDroplist.whatsNew,
+  icon: { type: 'far', icon: 'circle-info' },
+  event: 'whats-new',
+}]);
 
 const adminNavMenu = new Backbone.Collection([
   {
@@ -316,6 +324,11 @@ export default RouterApp.extend({
 
     return `isNavMenuMinimized_${ currentUser.id }`;
   },
+  getWhatsNewDismissedKey() {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+
+    return `whatsNewDismissed_${ WHATS_NEW_VERSION }_${ currentUser.id }`;
+  },
   onBodyDown(evt) {
     if (!this.getState('isTouchDrawerOpen')) return;
 
@@ -396,10 +409,15 @@ export default RouterApp.extend({
 
     this.mainNavDroplist = new MainNavDroplist({
       collection: workspacesMenu,
+      lists: [
+        { collection: workspacesMenu },
+        { collection: whatsNewMenu },
+      ],
       state: {
         selected: workspacesMenu.get(currentWorkspace.id),
       },
     });
+    this.listenTo(this.mainNavDroplist, 'show:whatsNew', this.showWhatsNew);
     this.listenTo(this.mainNavDroplist.getState(), 'change:isActive', this.onNavDroplistActiveChange);
     this.showChildView('navMain', this.mainNavDroplist);
   },
@@ -442,10 +460,30 @@ export default RouterApp.extend({
       'touch:open': this.onTouchOpen,
     });
 
+    this.showWhatsNewAnnouncement();
     this.showDashboardsNav();
     this.showAdminTools();
 
     this.showChildView('bottomNavContent', this.bottomNavView);
+  },
+  showWhatsNewAnnouncement() {
+    if (localStore.get(this.getWhatsNewDismissedKey())) return;
+
+    const announcementView = new AnnouncementView();
+
+    this.listenTo(announcementView, {
+      'dismiss': this.onDismissWhatsNewAnnouncement,
+      'show:guide': this.showWhatsNew,
+    });
+
+    this.bottomNavView.showChildView('announcement', announcementView);
+  },
+  onDismissWhatsNewAnnouncement(view) {
+    localStore.set(this.getWhatsNewDismissedKey(), true);
+    view.destroy();
+  },
+  showWhatsNew() {
+    showWhatsNewGuide();
   },
   showDashboardsNav() {
     const currentUser = Radio.request('bootstrap', 'currentUser');

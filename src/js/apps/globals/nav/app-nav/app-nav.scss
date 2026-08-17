@@ -103,6 +103,12 @@ $nav-row-width: calc(100% - 16px);
   padding-top: 8px;
 }
 
+.app-nav__picklist .picklist__group + .picklist__group {
+  border-top: 1px solid #{$black-90};
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
 .app-nav__header {
   align-items: center;
   background: transparent;
@@ -240,6 +246,10 @@ $nav-row-width: calc(100% - 16px);
     margin: $nav-row-margin;
     width: $nav-row-width;
   }
+}
+
+.app-nav--rail .app-nav__announcement {
+  display: none;
 }
 
 .app-nav__link-icons {
