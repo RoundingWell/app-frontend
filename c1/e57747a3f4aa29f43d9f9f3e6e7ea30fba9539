@@ -1,0 +1,19 @@
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_8300066960e1ec::t_67f3c05c0a4b86 588-589
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c1e57747a3f4aa29f43d9f9f3e6e7ea30fba9539",
+  "prompts": {},
+  "sessions": {
+    "s_8300066960e1ec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01569-89c2-7c60-b8b5-827eeffa78fe",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
