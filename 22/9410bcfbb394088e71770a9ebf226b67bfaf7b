@@ -1,0 +1,19 @@
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_cccabf1a82e34f::t_993f50bc259863 590-592
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "229410bcfbb394088e71770a9ebf226b67bfaf7b",
+  "prompts": {},
+  "sessions": {
+    "s_cccabf1a82e34f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0165c-d4e4-7da3-af4e-ef9163b2253c",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
