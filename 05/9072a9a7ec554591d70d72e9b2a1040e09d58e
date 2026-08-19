@@ -1,0 +1,22 @@
+src/js/components/dateselect/dateselect_views.js
+  s_c7f14869965768::t_0c68f76d223bc1 12-13
+src/scss/modules/buttons.scss
+  s_c7f14869965768::t_0c68f76d223bc1 121-124
+  s_c7f14869965768::t_7f80d327fef51c 44-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "059072a9a7ec554591d70d72e9b2a1040e09d58e",
+  "prompts": {},
+  "sessions": {
+    "s_c7f14869965768": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a53-c578-7091-b7b7-2fef102ad653",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
