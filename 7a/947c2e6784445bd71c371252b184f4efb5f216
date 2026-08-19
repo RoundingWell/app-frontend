@@ -1,0 +1,35 @@
+AGENTS.md
+  s_70d6b69a3b5d9e::t_0db20d12b5242d 136-137
+  s_70d6b69a3b5d9e::t_9e1996c792a296 81-83,135
+src/js/apps/patients/shared/patient-list-page.scss
+  s_70d6b69a3b5d9e::t_d4e62efe6b9e9b 240-246
+.github/copilot-instructions.md
+  s_70d6b69a3b5d9e::t_0db20d12b5242d 20,35
+  s_70d6b69a3b5d9e::t_abf48472bf6aff 14
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_70d6b69a3b5d9e::t_4aaabe5b711d7a 348-350,352,354
+  s_70d6b69a3b5d9e::t_d00b4f7e9b8f9e 335,340,346-347,351,353,355
+  s_70d6b69a3b5d9e::t_44996c05716905 336-339,341-345
+.github/copilot.yaml
+  s_70d6b69a3b5d9e::t_43d7b0265b86d9 12,36
+src/js/README.md
+  s_70d6b69a3b5d9e::t_6e91f3b8c01168 40,43-46,51-58
+src/scss/README.md
+  s_70d6b69a3b5d9e::t_bdcc2e3ba782b0 3,21,33,35-36,42,70-74,85,87-89,91-92,114-115,147,149,151-153,155-156
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7a947c2e6784445bd71c371252b184f4efb5f216",
+  "prompts": {},
+  "sessions": {
+    "s_70d6b69a3b5d9e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01688-306f-7b13-91d4-20c3ecb71cfa",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
