@@ -1,0 +1,57 @@
+src/js/apps/patients/shared/bulk-edit/bulk-edit_views.js
+  s_70d6b69a3b5d9e::t_ae96a677af0ce9 250,259-260
+  s_70d6b69a3b5d9e::t_1e0c667a48808b 171,184,351,388,401,458
+src/js/apps/patients/worklist/worklist_app.js
+  s_70d6b69a3b5d9e::t_202624c4312743 379-382
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_70d6b69a3b5d9e::t_24dc23bd307fee 4269-4271
+  s_70d6b69a3b5d9e::t_bc8d3cf18a2c42 4268
+src/js/apps/patients/shared/bulk-edit/bulk-edit.scss
+  s_70d6b69a3b5d9e::t_1e0c667a48808b 11-14,20-21,23,25,50-52,59-63,67-68,70,74-75,78,82-83,85,93-109,119,121-122,127-138
+  s_70d6b69a3b5d9e::t_b7ff6e4aba9604 120,123-126
+src/js/apps/patients/schedule/schedule_app.js
+  s_70d6b69a3b5d9e::t_202624c4312743 262-265
+src/js/apps/patients/shared/list-page.js
+  s_70d6b69a3b5d9e::t_1e0c667a48808b 1
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_70d6b69a3b5d9e::t_b7ff6e4aba9604 1384-1403
+  s_70d6b69a3b5d9e::t_24dc23bd307fee 1842-1844
+  s_70d6b69a3b5d9e::t_95386182c535b9 1370-1371,1375-1381,1418-1420
+  s_70d6b69a3b5d9e::t_4c8d2c39fd43fc 1366
+  s_70d6b69a3b5d9e::t_a5537d5dfc2b5f 1374,1382-1383
+  s_70d6b69a3b5d9e::t_ad88c17475d6e2 230-238,1302,1344-1351,1354,1359,1367-1369,1372-1373,1404-1417,1421-1430
+  s_70d6b69a3b5d9e::t_8b2528a9f9cb38 1301,1352-1353,1355-1358,1360-1365
+  s_70d6b69a3b5d9e::t_fa8cb7b8d4e643 1431
+  s_70d6b69a3b5d9e::t_b533181ba210f5 1845
+src/js/apps/patients/worklist/worklist-list.scss
+  s_70d6b69a3b5d9e::t_1e0c667a48808b 432
+src/js/apps/patients/shared/patient-list-page.scss
+  s_70d6b69a3b5d9e::t_1e0c667a48808b 90,108-109,123
+src/js/apps/patients/sidebar/bulk-edit/bulk-edit-flows_app.js
+  s_70d6b69a3b5d9e::t_202624c4312743 13-19,89-93
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_70d6b69a3b5d9e::t_ae96a677af0ce9 334-343,718-723,725
+  s_70d6b69a3b5d9e::t_a475215c70fb69 323,688-717,724
+  s_70d6b69a3b5d9e::t_ad88c17475d6e2 65-75,204-224,301-322,324-332
+  s_70d6b69a3b5d9e::t_ca641cc1a0c6be 333
+  s_70d6b69a3b5d9e::t_f670bb9d282ec7 726
+src/js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app.js
+  s_70d6b69a3b5d9e::t_ae96a677af0ce9 57,62,95,97
+  s_70d6b69a3b5d9e::t_202624c4312743 16-25,151-155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5c0cadbc844d32063e55ef8d19bd3fa36779ae55",
+  "prompts": {},
+  "sessions": {
+    "s_70d6b69a3b5d9e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01688-306f-7b13-91d4-20c3ecb71cfa",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
