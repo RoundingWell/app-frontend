@@ -96,6 +96,7 @@ const DetailsView = View.extend({
     this.hasDetailsChange = true;
   },
   onFocusInput() {
+    this.hasDetailsChange = false;
     this.$el.addClass('is-editing');
   },
   onFocusoutInput() {
