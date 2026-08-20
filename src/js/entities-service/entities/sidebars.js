@@ -1,5 +1,6 @@
 import Radio from 'backbone.radio';
 import Store from 'backbone.store';
+import { contains, filter } from 'underscore';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
@@ -9,7 +10,10 @@ const TYPE = 'sidebars';
 const _Model = BaseModel.extend({
   type: TYPE,
   getWidgets() {
-    return Radio.request('widgets', 'build', this.get('widgets'));
+    const sidebarWidgetSlugs = Radio.request('widgets', 'sidebarWidgets').pluck('slug');
+    const widgetSlugs = filter(this.get('widgets'), slug => contains(sidebarWidgetSlugs, slug));
+
+    return Radio.request('widgets', 'build', widgetSlugs);
   },
 });
 

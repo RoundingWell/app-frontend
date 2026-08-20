@@ -54,7 +54,7 @@ const SidebarSectionView = View.extend({
     <h2 class="patient-sidebar__card-heading">
       <button class="patient-sidebar__card-toggle js-toggle-section" type="button" aria-label="{{ toggleLabel }}" aria-expanded="{{ isExpanded }}" aria-controls="{{ widgetsRegionId }}">
         <span>{{ name }}</span>
-        <span class="patient-sidebar__card-toggle-icon">{{far "chevron-down"}}</span>
+        <span class="patient-sidebar__card-toggle-icon">{{far "angle-right"}}</span>
       </button>
     </h2>
     <div id="{{ widgetsRegionId }}" data-widgets-region></div>
