@@ -9,14 +9,34 @@
 }
 
 .patient-search__close {
+  align-items: center;
+  display: flex;
+  height: 44px;
+  justify-content: center;
   position: absolute;
   right: 16px;
-  top: 24px;
+  top: 12px;
+  width: 44px;
   z-index: var(--z-positioned);
 
   .icon {
     font-size: 20px;
   }
+}
+
+.patient-search__close--mobile {
+  display: none;
+}
+
+.patient-search__clear {
+  align-items: center;
+  display: flex;
+  height: 44px;
+  justify-content: center;
+  position: absolute;
+  right: 60px;
+  top: 12px;
+  width: 44px;
 }
 
 .patient-search__input {
@@ -27,11 +47,15 @@
 
   // height = line-height: 1.2
   height: 28px;
-  padding-right: 24px;
+  padding-right: 88px;
   width: 100%;
 
   &:focus {
     box-shadow: none;
+  }
+
+  &::-webkit-search-cancel-button {
+    appearance: none;
   }
 }
 
@@ -39,6 +63,7 @@
   border-bottom: 1px solid #{$black-90};
   margin: 0 8px;
   padding-left: 16px;
+  position: relative;
 }
 
 .patient-search__picklist-header {
@@ -79,26 +104,25 @@
   width: 100px;
 }
 
+.patient-search__result {
+  list-style: none;
+}
+
 .patient-search__picklist-item {
   align-items: center;
+  background: transparent;
+  border: 0;
   color: #{$black-20};
   cursor: pointer;
-  display: flex;
+  display: grid;
   font-size: 14px;
-  justify-content: space-between;
+  grid-template-columns: 28px minmax(0, 1fr);
   padding: 4px 20px;
+  text-align: left;
+  touch-action: manipulation;
+  width: 100%;
 
-  &.is-inactive {
-    color: #{$black-60};
-    font-style: italic;
-
-    .patient-search__picklist-item-result-label {
-      font-style: normal;
-    }
-  }
-
-  &.is-highlighted,
-  &:hover {
+  &.is-highlighted {
     background-color: color(blue);
     color: #{$white};
 
@@ -109,53 +133,69 @@
   }
 }
 
-.patient-search__picklist-item-meta:empty::before {
+.patient-search__picklist-item.is-inactive {
   color: #{$black-60};
+  font-style: italic;
 
-  // &ndash;
-  content: '–';
+  .patient-search__picklist-item-result-label {
+    font-style: normal;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .patient-search__picklist-item:hover {
+    background-color: color(blue);
+    color: #{$white};
+
+    .patient-search__picklist-item-meta,
+    .patient-search__picklist-item-result-label {
+      color: #{$white};
+    }
+  }
 }
 
 .patient-search__picklist-item-name-icon {
   align-items: center;
   display: flex;
   justify-content: center;
-  margin-right: 16px;
   width: 28px;
 }
 
 .patient-search__picklist-item-name-text {
-  display: flex;
-  flex: 1;
   margin-right: 8px;
   min-width: 0;
   text-transform: uppercase;
 }
 
 .patient-search__picklist-item-meta {
-  display: flex;
-  flex: 1;
+  align-items: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(4, 100px);
+  min-width: 0;
 }
 
-.patient-search__picklist-item-dob {
-  width: 100px;
+.patient-search__picklist-item-dob,
+.patient-search__picklist-item-result-label,
+.patient-search__picklist-item-result-value,
+.patient-search__picklist-item-status {
+  margin-left: 12px;
+  min-width: 0;
 }
 
 .patient-search__picklist-item-status {
-  margin-left: 12px;
   text-transform: capitalize;
-  width: 100px;
-}
-
-.patient-search__picklist-item-result-value {
-  margin-left: 12px;
-  width: 100px;
 }
 
 .patient-search__picklist-item-result-label {
   color: #{$black-60};
-  margin-left: 12px;
-  width: 100px;
+}
+
+.patient-search__picklist-item-result {
+  display: contents;
+}
+
+.patient-search__mobile-label {
+  display: none;
 }
 
 .patient-search__no-results {
@@ -209,6 +249,10 @@
   padding: 4px 12px;
 }
 
+.patient-search__search-by-example {
+  display: inline-block;
+}
+
 .patient-search__shortcut {
   bottom: 0;
   left: 0;
@@ -221,10 +265,169 @@
 
 @media (width <= 720px) {
   .patient-search__modal {
-    height: 100%;
+    height: 100dvh;
   }
 
   .patient-search__picklist {
-    height: 100vh;
+    height: 100dvh;
+    min-height: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .patient-search__modal .modal__header.patient-search__header {
+    flex: none;
+    margin: 0;
+    padding:
+      max(16px, env(safe-area-inset-top))
+      max(60px, calc(52px + env(safe-area-inset-right)))
+      12px
+      max(60px, calc(52px + env(safe-area-inset-left)));
+  }
+
+  .patient-search__close--desktop {
+    display: none;
+  }
+
+  .patient-search__close--mobile {
+    display: flex;
+    left: max(8px, env(safe-area-inset-left));
+    right: auto;
+    top: max(16px, env(safe-area-inset-top));
+  }
+
+  .patient-search__clear {
+    right: max(8px, env(safe-area-inset-right));
+    top: max(8px, env(safe-area-inset-top));
+  }
+
+  .patient-search__header .modal__header-icon {
+    display: none;
+  }
+
+  .patient-search__input {
+    font-size: 20px;
+    height: 44px;
+    padding: 8px 48px 8px 0;
+  }
+
+  .patient-search__picklist-header {
+    display: none;
+  }
+
+  .patient-search__picklist-item {
+    align-items: start;
+    border-bottom: 1px solid var(--color-border);
+    column-gap: 12px;
+    min-height: 76px;
+    padding: 14px max(16px, env(safe-area-inset-right)) 14px max(16px, env(safe-area-inset-left));
+
+    &.is-highlighted {
+      background-color: var(--color-surface-selected);
+      color: var(--color-text);
+
+      .patient-search__picklist-item-meta,
+      .patient-search__picklist-item-result-label {
+        color: inherit;
+      }
+    }
+  }
+
+  .patient-search__picklist-item-name-icon {
+    flex: 0 0 32px;
+    grid-row: 1 / span 3;
+    height: 32px;
+    width: 32px;
+  }
+
+  .patient-search__picklist-item-meta {
+    display: grid;
+    gap: 6px 12px;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .patient-search__picklist-item-name-text {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+    margin: 0;
+    text-transform: none;
+  }
+
+  .patient-search__picklist-item-dob {
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+
+  .patient-search__picklist-item-status {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+
+  .patient-search__picklist-item-status .patient-search__mobile-label {
+    display: none;
+  }
+
+  .patient-search__status-value {
+    background: var(--color-surface-hover);
+    border-radius: 999px;
+    display: inline-block;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+    padding: 0 8px;
+  }
+
+  .patient-search__picklist-item-result {
+    display: flex;
+    flex-direction: column;
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .patient-search__picklist-item-result-value {
+    font-size: 14px;
+    line-height: 18px;
+    margin: 0;
+  }
+
+  .patient-search__picklist-item-result-label {
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .patient-search__mobile-label {
+    display: inline;
+    font-size: 11px;
+    font-style: normal;
+    font-weight: 600;
+    margin-right: 6px;
+    text-transform: uppercase;
+  }
+
+  .patient-search__tip,
+  .patient-search__search-by {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .patient-search__shortcut {
+    display: none;
+  }
+}
+
+@media (width <= 360px) {
+  .patient-search__search-by .qa-search-option {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .patient-search__search-by-example {
+    padding-left: 12px;
   }
 }

@@ -5,6 +5,114 @@ import { getRelationship, getResource } from 'helpers/json-api';
 import { getPatient } from 'support/api/patients';
 
 context('Patient Quick Search', function() {
+  specify('fills a mobile viewport and restores focus for pointer and keyboard users', function() {
+    cy.viewport(390, 844);
+
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('manual_patient_creation', false)
+      .routeActions()
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .get('.app-nav__mobile-menu')
+      .click();
+
+    cy
+      .get('.app-frame__nav')
+      .find('.js-search')
+      .as('search')
+      .click();
+
+    cy
+      .get('.patient-search__modal')
+      .should('have.attr', 'role', 'dialog')
+      .and('have.attr', 'aria-modal', 'true')
+      .then($modal => {
+        const bounds = $modal[0].getBoundingClientRect();
+
+        expect(bounds.left).to.equal(0);
+        expect(bounds.top).to.equal(0);
+        expect(bounds.width).to.equal(390);
+        expect(bounds.height).to.equal(844);
+      })
+      .find('.patient-search__input')
+      .should('have.attr', 'type', 'search')
+      .and('have.attr', 'aria-label', 'Search for patients')
+      .and('be.focused');
+
+    cy.document().then(document => {
+      expect(document.documentElement.scrollWidth).to.be.at.most(390);
+    });
+
+    cy
+      .get('.patient-search__close:visible')
+      .should('have.length', 1);
+
+    cy
+      .get('.patient-search__input')
+      .type('Te');
+
+    cy
+      .get('.patient-search__clear')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Clear search')
+      .click();
+
+    cy
+      .get('.patient-search__input')
+      .should('have.value', '')
+      .and('be.focused');
+
+    cy
+      .get('.patient-search__modal')
+      .should('exist');
+
+    cy
+      .get('.patient-search__close--mobile')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Back')
+      .find('.fa-arrow-left')
+      .find('use')
+      .should('have.attr', 'href', '#fas-fa-arrow-left')
+      .closest('.patient-search__close--mobile')
+      .click();
+
+    cy
+      .get('[data-care-ops-fontawesome-symbols] #fas-fa-arrow-left')
+      .should('exist');
+
+    cy
+      .get('.app-nav__mobile-menu')
+      .should('be.focused');
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-phone-menu-open');
+
+    cy
+      .get('.app-nav__mobile-menu')
+      .click();
+
+    cy
+      .get('@search')
+      .should('be.focused')
+      .trigger('keydown', { key: 'Enter' })
+      .trigger('click');
+
+    cy
+      .get('.patient-search__input')
+      .should('be.focused')
+      .type('{esc}');
+
+    cy.get('@search').should('be.focused');
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-phone-menu-open');
+  });
+
   specify('Modal & default searching functionality', function() {
     const patients = _.times(10, index => {
       return getPatient({
@@ -135,10 +243,10 @@ context('Patient Quick Search', function() {
     cy
       .get('@searchModal')
       .find('.js-picklist-item')
-      .first()
-      .should('not.have.class', 'is-inactive')
-      .next()
-      .should('have.class', 'is-inactive');
+      .then($results => {
+        expect($results.eq(0)).not.to.have.class('is-inactive');
+        expect($results.eq(1)).to.have.class('is-inactive');
+      });
 
     cy
       .get('@searchModal')
@@ -152,10 +260,16 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item strong')
       .contains('2')
       .parents('.js-picklist-item')
-      .find('.patient-search__picklist-item-meta')
-      .should('contain', 'active')
-      .should('not.contain', 'Patient')
-      .should('not.contain', 'Name')
+      .as('matchedPatient')
+      .should('contain', 'active');
+
+    cy
+      .get('@matchedPatient')
+      .find('.patient-search__picklist-item-result')
+      .should('not.exist');
+
+    cy
+      .get('@matchedPatient')
       .click();
 
     cy
@@ -202,7 +316,7 @@ context('Patient Quick Search', function() {
 
     cy
       .get('@searchModal')
-      .find('.js-close')
+      .find('.patient-search__close--desktop')
       .click();
 
     cy
@@ -363,6 +477,8 @@ context('Patient Quick Search', function() {
   });
 
   specify('Search by patient field', function() {
+    cy.viewport(390, 844);
+
     const testPatient = getPatient({
       attributes: {
         status: 'active',
@@ -409,6 +525,10 @@ context('Patient Quick Search', function() {
       .wait('@routeActions');
 
     cy
+      .get('.app-nav__mobile-menu')
+      .click();
+
+    cy
       .get('.app-frame__nav')
       .find('.js-search')
       .as('search')
@@ -425,7 +545,32 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item strong')
       .should('contain', '65132')
       .parents('.js-picklist-item')
-      .should('contain', 'Phone Number');
+      .should('contain', 'Phone Number')
+      .and('contain', 'DOB')
+      .and('contain', 'Status')
+      .and('have.attr', 'type', 'button')
+      .then($result => {
+        const bounds = $result[0].getBoundingClientRect();
+
+        expect(bounds.left).to.be.at.least(0);
+        expect(bounds.right).to.be.at.most(390);
+      });
+
+    cy.viewport(320, 568);
+
+    cy
+      .get('.js-picklist-item')
+      .first()
+      .then($result => {
+        const bounds = $result[0].getBoundingClientRect();
+
+        expect(bounds.left).to.be.at.least(0);
+        expect(bounds.right).to.be.at.most(320);
+      });
+
+    cy.document().then(document => {
+      expect(document.documentElement.scrollWidth).to.be.at.most(320);
+    });
 
     cy.intercept({
       method: 'GET',
@@ -454,18 +599,14 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item')
       .first()
       .find('.patient-search__picklist-item-result-value')
-      .should($el => {
-        expect($el.text().trim()).to.be.empty;
-      });
+      .should('not.exist');
 
     cy
       .get('.patient-search__modal')
       .find('.js-picklist-item')
       .first()
       .find('.patient-search__picklist-item-result-label')
-      .should($el => {
-        expect($el.text().trim()).to.be.empty;
-      });
+      .should('not.exist');
   });
 
   specify('No Results with Patient Add', function() {

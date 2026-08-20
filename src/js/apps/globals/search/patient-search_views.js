@@ -10,6 +10,7 @@ import intl from 'js/i18n';
 
 import Component from 'js/base/component';
 
+import DialogFocusBehavior from 'js/behaviors/dialog-focus';
 import InputFocusBehavior from 'js/behaviors/input-focus';
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
 import PicklistBehavior from 'js/behaviors/picklist-transport';
@@ -50,19 +51,13 @@ const EmptyView = View.extend({
 
 const PicklistItem = View.extend({
   tagName: 'li',
-  className() {
-    const className = 'js-picklist-item patient-search__picklist-item';
-
-    if (this.model.get('status') !== 'active') return `${ className } is-inactive`;
-
-    return className;
-  },
+  className: 'patient-search__result',
   initialize({ state }) {
     this.state = state;
     this.listenTo(this.state, 'change:search', this.render);
   },
   triggers: {
-    'click': 'select',
+    'click .js-picklist-item': 'select',
   },
   onSelect() {
     this.state.set({ selected: this.model });
@@ -74,6 +69,7 @@ const PicklistItem = View.extend({
       search: this.state.get('search'),
       shouldShowMatch: this.shouldShowMatch(),
       isDobMatch: this.isDobMatch(),
+      isInactive: this.model.get('status') !== 'active',
     };
   },
   shouldShowMatch() {
@@ -121,7 +117,7 @@ const DialogView = View.extend({
     'search': 'onSearchComplete',
   },
   modelEvents: {
-    'change:search': 'showHeader',
+    'change:search': 'onSearchChange',
   },
   behaviors: [
     {
@@ -134,10 +130,16 @@ const DialogView = View.extend({
   triggers: {
     'focus @ui.input': 'focus',
     'click @ui.add': 'add',
+    'click @ui.close': 'close',
+  },
+  events: {
+    'click @ui.clear': 'onClear',
   },
   ui: {
     input: '.js-input',
     add: '.js-add',
+    clear: '.js-clear',
+    close: '.js-close',
   },
   regionClass: Region.extend({ replaceElement: true }),
   regions: {
@@ -148,10 +150,22 @@ const DialogView = View.extend({
   onRender() {
     this.showHeader();
     this.showList();
+    this.updateClearButton();
   },
   onSearchComplete() {
     this.showHeader();
     this.showList();
+  },
+  onSearchChange() {
+    this.showHeader();
+    this.updateClearButton();
+  },
+  onClear() {
+    this.ui.input.val('').focus();
+    this.triggerMethod('watch:change', '');
+  },
+  updateClearButton() {
+    this.ui.clear.prop('hidden', !this.model.get('search'));
   },
   showHeader() {
     if (!this.collection.length) {
@@ -193,9 +207,16 @@ const PatientSearchPicklist = Component.extend({
 });
 
 const PatientSearchModal = View.extend({
+  behaviors: [DialogFocusBehavior],
   className: 'modal patient-search__modal',
+  attributes: {
+    'aria-label': intl.globals.search.patientSearchViews.dialogView.placeholderText,
+    'aria-modal': 'true',
+    'role': 'dialog',
+    'tabindex': '-1',
+  },
   template: hbs`
-    <a href="#" class="button button--icon patient-search__close js-close">{{far "xmark"}}</a>
+    <button class="button button--icon patient-search__close patient-search__close--desktop js-close" type="button" aria-label="{{ closeText }}">{{far "xmark"}}</button>
     <div data-picklist-region></div>
   `,
   triggers: {
@@ -208,6 +229,11 @@ const PatientSearchModal = View.extend({
     },
   },
   serializeCollection: noop,
+  templateContext() {
+    return {
+      closeText: intl.globals.modal.modalViews.modalView.closeText,
+    };
+  },
   onRender() {
     const collection = this.collection;
     const search = this.getOption('prefillText');

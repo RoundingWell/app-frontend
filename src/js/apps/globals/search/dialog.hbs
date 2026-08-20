@@ -1,6 +1,8 @@
 <div class="modal__header patient-search__header">
+  <button class="button button--icon patient-search__close patient-search__close--mobile js-close" type="button" aria-label="{{ @intl.globals.search.patientSearchViews.dialogView.backText }}">{{fas "arrow-left"}}</button>
   <span class="modal__header-icon">{{far "magnifying-glass"}}</span>
-  <input class="js-input patient-search__input" type="text" value="{{ search }}" placeholder="{{ @intl.globals.search.patientSearchViews.dialogView.placeholderText }}">
+  <input class="js-input patient-search__input" type="search" value="{{ search }}" placeholder="{{ @intl.globals.search.patientSearchViews.dialogView.placeholderText }}" aria-label="{{ @intl.globals.search.patientSearchViews.dialogView.placeholderText }}" autocomplete="off" enterkeyhint="search" spellcheck="false">
+  <button class="button button--icon patient-search__clear js-clear" type="button" aria-label="{{ @intl.globals.search.patientSearchViews.dialogView.clearText }}"{{#unless search}} hidden{{/unless}}>{{far "xmark"}}</button>
 </div>
 <div class="flex-region picklist__scroll js-picklist-scroll">
   <div data-header-region></div>
