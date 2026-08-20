@@ -144,13 +144,13 @@
   transition: transform 0.15s linear;
 }
 
+.patient-sidebar__card-toggle[aria-expanded='true'] .patient-sidebar__card-toggle-icon {
+  transform: rotate(90deg);
+}
+
 .patient-sidebar__card.is-collapsed {
   .patient-sidebar__card-heading {
     margin-bottom: 0;
-  }
-
-  .patient-sidebar__card-toggle-icon {
-    transform: rotate(-90deg);
   }
 }
 

@@ -15,6 +15,49 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
+  specify('scopes sections to the current workspace widgets', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: ['sex'],
+      })
+      .routeSidebars(fx => {
+        const addSidebar = _.partial(getResource, _, 'sidebars');
+
+        fx.data = [
+          addSidebar({
+            id: 'demographics',
+            slug: 'demographics',
+            name: 'Demographics',
+            sequence: 0,
+            widgets: ['dob', 'sex'],
+          }),
+          addSidebar({
+            id: 'status',
+            slug: 'status',
+            name: 'Status',
+            sequence: 1,
+            widgets: ['status'],
+          }),
+        ];
+
+        return fx;
+      })
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar__card')
+      .should('have.length', 1)
+      .and('contain', 'Demographics')
+      .and('contain', 'Sex')
+      .and('not.contain', 'Date of Birth');
+
+    cy
+      .contains('.patient-sidebar__card-toggle', 'Status')
+      .should('not.exist');
+  });
+
   specify('expands and collapses sidebar sections accessibly', function() {
     cy
       .routesForPatientDashboard()
@@ -52,6 +95,11 @@ context('patient sidebar', function() {
       .then(regionId => {
         cy.get(`#${ regionId }`).should('be.visible');
       });
+
+    cy
+      .get('@demographicsToggle')
+      .find('.patient-sidebar__card-toggle-icon use')
+      .should('have.attr', 'href', '#far-fa-angle-right');
 
     cy
       .contains('.patient-sidebar__card-toggle', 'Care & Support')
@@ -182,9 +230,31 @@ context('patient sidebar', function() {
         },
       },
     });
+    const sidebarWidgetSlugs = [
+      'dob',
+      'sex',
+      'status',
+      'divider',
+      'workspaces',
+      'divider',
+      'formWidget',
+      'formModalWidget',
+      'readOnlyFormModalWidget',
+      'formModalWidgetSmall',
+      'formModalWidgetLarge',
+      'patientMRNIdentifier',
+      'patientSSNIdentifier',
+      'hbsWidget',
+      'hbsEmptyWidget',
+      'hbsNoRegionWidget',
+      'hbsEmptyTemplateWidget',
+    ];
 
     cy
       .routesForPatientDashboard()
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: sidebarWidgetSlugs,
+      })
       .routeFormDefinition()
       .routeLatestFormResponse()
       .routeFormFields()
@@ -213,25 +283,7 @@ context('patient sidebar', function() {
         return fx;
       })
       .routeSidebars(fx => {
-        fx.data[0].attributes.widgets = [
-          'dob',
-          'sex',
-          'status',
-          'divider',
-          'workspaces',
-          'divider',
-          'formWidget',
-          'formModalWidget',
-          'readOnlyFormModalWidget',
-          'formModalWidgetSmall',
-          'formModalWidgetLarge',
-          'patientMRNIdentifier',
-          'patientSSNIdentifier',
-          'hbsWidget',
-          'hbsEmptyWidget',
-          'hbsNoRegionWidget',
-          'hbsEmptyTemplateWidget',
-        ];
+        fx.data[0].attributes.widgets = sidebarWidgetSlugs;
 
         return fx;
       })
@@ -722,6 +774,11 @@ context('patient sidebar', function() {
   });
 
   specify('renders patient sidebar when widget values fail', function() {
+    const sidebarWidgetSlugs = [
+      'sex',
+      'failingWidget',
+      'unknownWidget',
+    ];
     const testPatient = getPatient({
       attributes: {
         first_name: 'Test',
@@ -732,12 +789,11 @@ context('patient sidebar', function() {
 
     cy
       .routesForPatientDashboard()
+      .routeSettings('widgets_patient_sidebar', {
+        widgets: sidebarWidgetSlugs,
+      })
       .routeSidebars(fx => {
-        fx.data[0].attributes.widgets = [
-          'sex',
-          'failingWidget',
-          'unknownWidget',
-        ];
+        fx.data[0].attributes.widgets = sidebarWidgetSlugs;
 
         return fx;
       })
