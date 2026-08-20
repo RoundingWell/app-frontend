@@ -3,6 +3,7 @@ import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import localStore from 'js/utils/local-store';
+import { PHONE_QUERY } from 'js/utils/responsive';
 
 import RouterApp from 'js/base/routerapp';
 
@@ -139,12 +140,15 @@ export default RouterApp.extend({
     search: SearchApp,
   },
   radioRequests: {
-    search: 'showSearch',
-    setMinimized: 'setTemporarilyMinimized',
-    select: 'selectNav',
+    'capture:focus:return': 'captureFocusReturn',
+    'restore:focus': 'restoreFocus',
+    'search': 'showSearch',
+    'setMinimized': 'setTemporarilyMinimized',
+    'select': 'selectNav',
   },
   stateEvents: {
     'change:currentApp': 'onChangeCurrentApp',
+    'change:isPhone change:isTouchDrawerOpen': 'syncPhoneCloseRequest',
   },
   viewEvents: {
     'focus:in': 'onFocusIn',
@@ -162,15 +166,24 @@ export default RouterApp.extend({
     });
 
     this._narrowQuery = window.matchMedia(NAV_COLLAPSE_QUERY);
+    this._phoneQuery = window.matchMedia(PHONE_QUERY);
     this._onNarrowQueryChange = () => {
       this.setState('isNarrow', this._narrowQuery.matches);
     };
+    this._onPhoneQueryChange = () => {
+      this.setState({
+        isPhone: this._phoneQuery.matches,
+        isTouchDrawerOpen: false,
+      });
+    };
 
     this.listenTo(Radio.channel('user-activity'), 'body:down', this.onBodyDown);
+    this.listenTo(Radio.channel('user-activity'), 'document:keydown', this.onDocumentKeydown);
     this.listenTo(Radio.channel('hotkey'), 'close', () => this.getState().closeOverlay());
   },
   onBeforeStart() {
     this._narrowQuery.addEventListener('change', this._onNarrowQueryChange);
+    this._phoneQuery.addEventListener('change', this._onPhoneQueryChange);
 
     const isRestarting = this.isRestarting();
     let userMinimized = this.getState('userMinimized');
@@ -200,6 +213,7 @@ export default RouterApp.extend({
       isFocusWithin: false,
       isHovering: false,
       isNarrow: this._narrowQuery.matches,
+      isPhone: this._phoneQuery.matches,
       isNavDroplistOpen: false,
       isTouchDrawerOpen: false,
       temporaryMinimized: false,
@@ -208,11 +222,14 @@ export default RouterApp.extend({
   },
   onStop() {
     this._narrowQuery.removeEventListener('change', this._onNarrowQueryChange);
+    this._phoneQuery.removeEventListener('change', this._onPhoneQueryChange);
+    Radio.request('close-request', 'unregister', this);
   },
   onStart() {
     // Rebuild the shell every start so it's bound to the current state — a
     // restart otherwise leaves a preserved view wired to a stale model.
     this.setView(new AppNavView({ model: this.getState() }));
+    this.listenTo(this.getView(), 'mobile:menu:toggle', this.onMobileMenuToggle);
 
     this.updateCanPatientCreate();
     this.showMainNavDroplist();
@@ -298,6 +315,8 @@ export default RouterApp.extend({
     this.setState('isHovering', false);
   },
   onFocusIn() {
+    if (this.suppressFocusExpansion) return;
+    if (this.getState('isPhone')) return;
     if (!this.getState('isMinimized')) return;
 
     this.setState('isFocusWithin', true);
@@ -308,6 +327,9 @@ export default RouterApp.extend({
   onTouchOpen() {
     this.setState('isTouchDrawerOpen', true);
   },
+  onMobileMenuToggle() {
+    this.toggleState('isTouchDrawerOpen');
+  },
   closeTouchDrawer() {
     this.setState('isTouchDrawerOpen', false);
   },
@@ -317,12 +339,56 @@ export default RouterApp.extend({
     return `isNavMenuMinimized_${ currentUser.id }`;
   },
   onBodyDown(evt) {
+    const navView = this.getView();
+    const pointerControl = navView?.el.contains(evt.target) ?
+      evt.target.closest('button, a[href], [tabindex]') :
+      null;
+
+    this.pointerActivatedNavControl = pointerControl;
+    if (pointerControl) {
+      // The marker only describes the current activation; synthetic and later
+      // activations must fall back to the actual focused element.
+      defer(() => {
+        if (this.pointerActivatedNavControl === pointerControl) this.pointerActivatedNavControl = null;
+      });
+    }
+
     if (!this.getState('isTouchDrawerOpen')) return;
 
-    const view = this.getView();
-    if (view && (view.el === evt.target || view.Dom.hasEl(view.el, evt.target))) return;
+    if (navView && (navView.el === evt.target || navView.Dom.hasEl(navView.el, evt.target))) return;
 
     this.closeTouchDrawer();
+  },
+  onDocumentKeydown() {
+    this.pointerActivatedNavControl = null;
+  },
+  captureFocusReturn(fallbackElement) {
+    const pointerControl = this.pointerActivatedNavControl;
+    this.pointerActivatedNavControl = null;
+    const element = pointerControl || fallbackElement;
+    const navView = this.getView();
+
+    if (!element || !navView?.el.contains(element)) return;
+
+    return {
+      element,
+      suppressExpansion: Boolean(pointerControl),
+      restore: () => this.restoreFocus(element, Boolean(pointerControl)),
+    };
+  },
+  restoreFocus(element, suppressExpansion) {
+    const navView = this.getView();
+    const isClosedPhoneDrawerControl = this.getState('isPhone')
+      && !this.getState('isTouchDrawerOpen')
+      && navView?.ui.drawer[0]?.contains(element);
+    const focusElement = isClosedPhoneDrawerControl ? navView.ui.mobileMenu[0] : element;
+
+    this.suppressFocusExpansion = suppressExpansion;
+    try {
+      focusElement.focus();
+    } finally {
+      this.suppressFocusExpansion = false;
+    }
   },
   onClickAddPatient() {
     Radio.request('patient-modal', 'show');
@@ -352,6 +418,16 @@ export default RouterApp.extend({
     }
 
     localStore.set(this.getNavMenuMinimizedKey(), this.getState('userMinimized'));
+  },
+  syncPhoneCloseRequest() {
+    const shouldRegister = this.getState('isPhone') && this.getState('isTouchDrawerOpen');
+
+    if (shouldRegister) {
+      Radio.request('close-request', 'register', this, () => this.closeTouchDrawer());
+      return;
+    }
+
+    Radio.request('close-request', 'unregister', this);
   },
   onNavDroplistActiveChange() {
     this.setState('isNavDroplistOpen', this.hasActiveNavDroplist());

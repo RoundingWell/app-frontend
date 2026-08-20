@@ -9,12 +9,20 @@ import './error.scss';
 
 const ErrorView = View.extend({
   className: 'error-page',
+  attributes: {
+    'aria-labelledby': 'global-error-title',
+    'role': 'main',
+    'tabindex': '-1',
+  },
   template: ErrorTemplate,
   triggers: {
     'click .js-back': 'click:back',
   },
   onClickBack() {
     Radio.trigger('event-router', 'default');
+  },
+  onAttach() {
+    this.el.focus({ preventScroll: true });
   },
   templateContext() {
     return this.options;

@@ -1,40 +1,81 @@
 .error-page {
-  background-color: var(--color-page-bg);
+  align-items: center;
+  background:
+    radial-gradient(circle at 50% 47%, rgb(5 130 218 / 16%) 0, rgb(5 130 218 / 5%) 24%, transparent 55%),
+    $bkg-color;
+  box-sizing: border-box;
+  color: #{$white};
+  display: flex;
   height: 100%;
+  justify-content: center;
+  min-height: 100%;
+  overflow: auto;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
   position: relative;
+  width: 100%;
   z-index: var(--z-error);
 }
 
-.error-page__contains {
-  height: 100%;
-}
-
-.error-page__wrap {
-  margin: 0 auto;
-  position: relative;
+.error-page__content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 420px;
   text-align: center;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 260px;
+  width: 100%;
 }
 
-.error-page__dialog {
-  background-color: #{$white};
-  border: 1px solid #{$black-80};
-  border-radius: 6px;
+.error-page__mark {
+  height: 40px;
+  margin-bottom: 32px;
+  opacity: 0.92;
+  width: 40px;
 }
 
 .error-page__heading {
   font-size: 24px;
-  font-weight: 700;
-  line-height: 1;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 32px;
+  margin: 0;
 }
 
-.error-page__section {
-  padding: 16px;
+.error-page__message {
+  color: rgb(255 255 255 / 68%);
+  font-size: 15px;
+  line-height: 22px;
+  margin: 10px 0 28px;
+  max-width: 340px;
+}
 
-  + .error-page__section {
-    border-top: 1px solid #{$black-80};
+.error-page__message p {
+  margin: 0;
+}
+
+.error-page__recovery {
+  --button-background: #{$white};
+  --button-border-color: #{$white};
+  --button-border-radius: 8px;
+  --button-font-size: 15px;
+  --button-min-height: 44px;
+  --button-padding: 11px 24px;
+
+  color: $bkg-color;
+  min-width: 192px;
+}
+
+@media (width <= 480px) {
+  .error-page__heading {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
+  .error-page__message {
+    font-size: 14px;
+    line-height: 21px;
   }
 }

@@ -5,6 +5,7 @@ const LAYOUT_INPUTS = [
   'isFocusWithin',
   'isHovering',
   'isNarrow',
+  'isPhone',
   'isNavDroplistOpen',
   'isTouchDrawerOpen',
   'temporaryMinimized',
@@ -14,17 +15,12 @@ const LAYOUT_INPUTS = [
 const LAYOUT_EVENTS = LAYOUT_INPUTS.map(attribute => `change:${ attribute }`).join(' ');
 
 function getLayout(attributes) {
-  const isMinimized = Boolean(
-    attributes.userMinimized
-    || attributes.temporaryMinimized
-    || attributes.isNarrow,
-  );
-  const hasOverlayReason = Boolean(
-    attributes.isHovering
-    || attributes.isFocusWithin
-    || attributes.isTouchDrawerOpen
-    || attributes.isNavDroplistOpen,
-  );
+  const isMinimized = ['userMinimized', 'temporaryMinimized', 'isNarrow']
+    .some(attribute => attributes[attribute]);
+  const desktopOverlayInputs = ['isHovering', 'isFocusWithin', 'isTouchDrawerOpen', 'isNavDroplistOpen'];
+  const hasOverlayReason = attributes.isPhone ?
+    attributes.isTouchDrawerOpen :
+    desktopOverlayInputs.some(attribute => attributes[attribute]);
 
   return {
     isFullNavVisible: !isMinimized || hasOverlayReason,
@@ -50,6 +46,7 @@ const StateModel = Backbone.Model.extend({
     isFocusWithin: false,
     isHovering: false,
     isNarrow: false,
+    isPhone: false,
     isNavDroplistOpen: false,
     isTouchDrawerOpen: false,
     temporaryMinimized: false,

@@ -382,6 +382,18 @@ context('App Nav', function() {
       .type('{esc}');
 
     cy
+      .get('.app-nav__header')
+      .should('be.focused');
+
+    cy
+      .get('.app-frame__content')
+      .click('topRight');
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
       .get('[data-nav-content-region]')
       .find('.js-search')
       .contains('.app-nav__label', 'Search')
@@ -391,8 +403,13 @@ context('App Nav', function() {
 
     cy
       .get('.patient-search__modal')
-      .find('.js-close')
+      .find('.patient-search__close:visible')
       .click();
+
+    cy
+      .get('[data-nav-content-region] .js-search')
+      .should('be.focused')
+      .blur();
 
     cy
       .get('[data-nav-content-region]')
@@ -603,6 +620,11 @@ context('App Nav', function() {
       .type('{esc}');
 
     cy
+      .get('.app-nav__header')
+      .should('be.focused')
+      .blur();
+
+    cy
       .get('.app-nav')
       .should('have.class', 'is-minimized')
       .should('not.have.class', 'is-full-nav-visible');
@@ -663,7 +685,7 @@ context('App Nav', function() {
 
     cy
       .get('.patient-search__modal')
-      .find('.js-close')
+      .find('.patient-search__close:visible')
       .click();
 
     cy
@@ -701,15 +723,28 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
+      .should('match', 'nav')
+      .and('have.attr', 'id', 'app-navigation')
+      .and('have.attr', 'aria-label', 'Primary navigation')
       .should('have.class', 'is-narrow')
       .should('have.class', 'is-minimized')
       .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav__search, .app-nav__link, .app-nav__bottom-button')
+      .should($controls => {
+        [...$controls].forEach(control => {
+          expect(control.getBoundingClientRect().height).to.be.at.least(44);
+        });
+      });
 
     cy
       .get('.app-nav__bottom')
       .find('.js-minimize-menu')
       .as('minimizeMenuButton')
       .should('have.attr', 'aria-label', 'Expand Menu')
+      .and('have.attr', 'aria-controls', 'app-navigation')
+      .and('have.attr', 'aria-expanded', 'false')
       .trigger('pointerdown', { pointerType: 'mouse' })
       .trigger('click');
 
@@ -720,6 +755,7 @@ context('App Nav', function() {
 
     cy
       .get('@minimizeMenuButton')
+      .should('have.attr', 'aria-expanded', 'true')
       .click();
 
     cy
@@ -764,6 +800,133 @@ context('App Nav', function() {
       .should('not.have.class', 'is-full-nav-visible');
   });
 
+  specify('phone nav uses a top bar and temporary menu sheet', function() {
+    cy
+      .viewport(390, 844)
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-phone')
+      .should('not.have.class', 'is-phone-menu-open');
+
+    cy
+      .get('.app-nav__mobile-menu')
+      .as('mobileMenu')
+      .should('be.visible')
+      .and('have.attr', 'aria-controls', 'app-navigation-drawer')
+      .and('have.attr', 'aria-expanded', 'false')
+      .find('.app-nav__mobile-logo')
+      .should('have.attr', 'src', '/rwell-logo.svg')
+      .and('have.attr', 'alt', '');
+
+    cy
+      .get('.app-nav__header')
+      .should('be.visible')
+      .and('contain', 'Workspace One')
+      .click();
+
+    cy
+      .get('.app-nav__picklist')
+      .should($picklist => {
+        const bounds = $picklist[0].getBoundingClientRect();
+        const triggerBounds = Cypress.$('.app-nav__header')[0].getBoundingClientRect();
+
+        expect(bounds.left).to.be.at.least(0);
+        expect(bounds.right).to.be.at.most(390);
+        expect(triggerBounds.right - bounds.right).to.be.within(0, 5);
+      });
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.app-nav__header')
+      .should('be.focused');
+
+    cy
+      .get('.app-nav__drawer')
+      .should('have.attr', 'aria-hidden', 'true');
+
+    cy
+      .get('.js-minimize-menu')
+      .should('not.be.visible');
+
+    cy
+      .get('@mobileMenu')
+      .click()
+      .should('have.attr', 'aria-expanded', 'true');
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-phone-menu-open');
+
+    cy
+      .get('.app-nav__drawer')
+      .should('be.visible')
+      .and('have.attr', 'aria-hidden', 'false');
+
+    cy
+      .get('[data-nav-content-region] .js-search')
+      .should('be.focused');
+
+    cy
+      .get('.app-nav__drawer button:visible')
+      .last()
+      .focus()
+      .trigger('keydown', { key: 'Tab' });
+
+    cy
+      .get('@mobileMenu')
+      .should('be.focused')
+      .trigger('keydown', { key: 'Tab', shiftKey: true });
+
+    cy
+      .get('.app-nav__drawer button:visible')
+      .last()
+      .should('be.focused');
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-phone-menu-open');
+
+    cy
+      .get('@mobileMenu')
+      .should('have.attr', 'aria-expanded', 'false')
+      .and('be.focused')
+      .click();
+
+    cy
+      .get('[data-worklists-region] .app-nav__link')
+      .eq(1)
+      .click();
+
+    cy
+      .url()
+      .should('contain', '/schedule');
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-phone-menu-open');
+
+    cy
+      .get('.app-frame__nav, .app-frame__content')
+      .then($regions => {
+        const navBounds = $regions[0].getBoundingClientRect();
+        const contentBounds = $regions[1].getBoundingClientRect();
+
+        expect(navBounds.width).to.equal(390);
+        expect(contentBounds.top).to.equal(navBounds.bottom);
+        expect(contentBounds.bottom).to.equal(844);
+      });
+  });
+
   specify('transient nav app events are covered through e2e', function() {
     cy
       .routePrograms()
@@ -785,7 +948,7 @@ context('App Nav', function() {
 
     cy
       .get('.patient-search__modal')
-      .find('.js-close')
+      .find('.patient-search__close:visible')
       .click();
 
     cy
@@ -1322,7 +1485,7 @@ context('App Nav', function() {
 
     cy
       .get('.patient-search__modal')
-      .find('.js-close .icon')
+      .find('.patient-search__close:visible .icon')
       .click();
 
     cy

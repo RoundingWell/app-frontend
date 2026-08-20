@@ -121,4 +121,26 @@ context('Alert Service', function() {
       .find('.alert-box')
       .should('not.exist');
   });
+
+  specify('mobile alerts stay reachable and announce their priority', function() {
+    cy.viewport(320, 480);
+
+    cy
+      .get('@root')
+      .then(() => {
+        Radio.request('alert', 'show:error', 'Something needs attention');
+      })
+      .find('.alert-box')
+      .should('have.attr', 'role', 'alert')
+      .then($alert => {
+        const bounds = $alert[0].getBoundingClientRect();
+
+        expect(bounds.left).to.be.at.least(0);
+        expect(bounds.right).to.be.at.most(320);
+      })
+      .find('.js-dismiss')
+      .should($button => {
+        expect($button[0].getBoundingClientRect().height).to.be.at.least(44);
+      });
+  });
 });

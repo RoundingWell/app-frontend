@@ -30,5 +30,5 @@
     "background_color": "#0582da",
     "display": "standalone",
     "start_url": "/",
-    "orientation": "landscape"
+    "orientation": "any"
 }

@@ -1,8 +1,11 @@
+import { defer } from 'underscore';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
 import intl from 'js/i18n';
+import { trapFocus } from 'js/utils/accessibility/focus-trap';
+import { PHONE_QUERY } from 'js/utils/responsive';
 
 import Droplist from 'js/components/droplist';
 
@@ -29,11 +32,17 @@ function getAppNavClassName(model) {
   const isFullNavVisible = model.get('isFullNavVisible');
   const isMinimized = model.get('isMinimized');
   const isNarrow = model.get('isNarrow');
+  const isPhone = model.get('isPhone');
   const classes = ['app-nav', ...getAppNavModeClassNames(isMinimized, isFullNavVisible)];
 
   if (isNarrow) {
     classes.push('is-narrow');
     if (isFullNavVisible) classes.push('app-nav--narrow-overlay-expanded');
+  }
+
+  if (isPhone) {
+    classes.push('is-phone');
+    if (model.get('isTouchDrawerOpen')) classes.push('is-phone-menu-open');
   }
 
   return classes.join(' ');
@@ -49,10 +58,20 @@ function getNavMenuButtonAttributes(label) {
 const MainNavDroplist = Droplist.extend({
   popWidth: 248,
   position() {
-    const { outerHeight } = this.getView().getBounds();
+    const bounds = this.getView().getBounds();
+
+    if (window.matchMedia(PHONE_QUERY).matches) {
+      return {
+        align: 'right',
+        left: bounds.left,
+        outerHeight: bounds.outerHeight,
+        outerWidth: bounds.outerWidth,
+        top: bounds.top,
+      };
+    }
 
     return {
-      top: outerHeight,
+      top: bounds.outerHeight,
       left: 16,
     };
   },
@@ -208,13 +227,23 @@ const BottomNavView = View.extend({
     return i18n.appNavView.minimizeMenu;
   },
   updateMinimizeMenuLabel() {
-    this.ui.minimizeMenu.attr('aria-label', this.getMinimizeMenuLabel());
+    const isExpanded = !this.model.get('isMinimized') || this.model.get('isFullNavVisible');
+
+    this.ui.minimizeMenu
+      .attr('aria-controls', 'app-navigation')
+      .attr('aria-expanded', String(isExpanded))
+      .attr('aria-label', this.getMinimizeMenuLabel());
   },
 });
 
 const AppNavView = View.extend({
+  tagName: 'nav',
   className() {
     return getAppNavClassName(this.model);
+  },
+  attributes: {
+    'aria-label': i18n.appNavView.primaryNavigation,
+    'id': 'app-navigation',
   },
   regions: {
     navMain: {
@@ -227,9 +256,15 @@ const AppNavView = View.extend({
       replaceElement: true,
     },
   },
+  ui: {
+    drawer: '.js-app-nav-drawer',
+    mobileMenu: '.js-mobile-menu',
+  },
   events: {
+    'click @ui.mobileMenu': 'onClickMobileMenu',
     'focusin': 'onFocusIn',
     'focusout': 'onFocusOut',
+    'keydown': 'onKeydown',
     'pointerenter': 'onPointerEnter',
     'pointerleave': 'onPointerLeave',
   },
@@ -238,12 +273,45 @@ const AppNavView = View.extend({
     'change:isFullNavVisible': 'updateDisplayState',
     'change:isMinimized': 'updateDisplayState',
     'change:isNarrow': 'updateDisplayState',
+    'change:isPhone': 'updateDisplayState',
+    'change:isTouchDrawerOpen': 'updateDisplayState',
   },
   onRender() {
     this.updateDisplayState();
   },
   updateDisplayState() {
     this.$el.attr('class', getAppNavClassName(this.model));
+    this.updatePhoneDrawerState();
+  },
+  updatePhoneDrawerState() {
+    const isPhone = this.model.get('isPhone');
+    const isOpen = isPhone && this.model.get('isTouchDrawerOpen');
+    const wasOpen = this.ui.mobileMenu.attr('aria-expanded') === 'true';
+
+    this.ui.mobileMenu.attr({
+      'aria-expanded': String(isOpen),
+      'aria-label': isOpen ? i18n.appNavView.closeMenu : i18n.appNavView.openMenu,
+    });
+    this.ui.drawer
+      .attr('aria-hidden', isPhone ? String(!isOpen) : null)
+      .prop('inert', isPhone && !isOpen);
+
+    this.updatePhoneDrawerFocus(isOpen, wasOpen);
+  },
+  updatePhoneDrawerFocus(isOpen, wasOpen) {
+    if (isOpen && !wasOpen) {
+      defer(() => this.ui.drawer.find('.js-search').trigger('focus'));
+    } else if (!isOpen && wasOpen && this.el.contains(document.activeElement)) {
+      defer(() => this.ui.mobileMenu.trigger('focus'));
+    }
+  },
+  onClickMobileMenu() {
+    this.trigger('mobile:menu:toggle');
+  },
+  onKeydown(event) {
+    if (!this.model.get('isPhone') || !this.model.get('isTouchDrawerOpen') || event.key !== 'Tab') return;
+
+    trapFocus(event, this.el);
   },
   onPointerEnter(evt) {
     this.trigger('pointer:enter', evt);
@@ -292,7 +360,11 @@ const NavItemView = View.extend({
     Radio.trigger('event-router', this.model.get('event'), ...this.model.get('eventArgs'));
   },
   updateSelected() {
-    this.$el.toggleClass('is-selected', this.state.get('selectedNav') === this.model);
+    const isSelected = this.state.get('selectedNav') === this.model;
+
+    this.$el
+      .toggleClass('is-selected', isSelected)
+      .attr('aria-current', isSelected ? 'page' : null);
   },
 });
 

@@ -25,6 +25,9 @@ const AlertView = View.extend({
   initialize(options) {
     this.mergeOptions(options, OPTIONS);
   },
+  onRender() {
+    this.$el.attr('role', this.alertType === 'error' ? 'alert' : 'status');
+  },
   onAttach() {
     animate(this.el, {
       translateY: [-10, 0],

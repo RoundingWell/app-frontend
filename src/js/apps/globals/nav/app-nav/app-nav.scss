@@ -36,6 +36,20 @@ $nav-row-width: calc(100% - 16px);
   }
 }
 
+.app-nav__mobile-menu {
+  display: none;
+}
+
+.app-nav__mobile-logo {
+  display: block;
+  height: 28px;
+  width: 28px;
+}
+
+.app-nav__drawer {
+  display: contents;
+}
+
 .app-nav__picklist {
   border-radius: 4px;
   margin-top: -4px;
@@ -281,7 +295,7 @@ $nav-row-width: calc(100% - 16px);
   background-color: $bkg-color;
   bottom: 0;
   margin-top: auto;
-  padding-bottom: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
   position: sticky;
   width: 100%;
 }
@@ -350,5 +364,143 @@ $nav-row-width: calc(100% - 16px);
 
   .app-nav__label--close {
     display: inline;
+  }
+}
+
+.app-nav.is-narrow {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top);
+
+  .app-nav__search,
+  .app-nav__link,
+  .app-nav__bottom-button {
+    height: 44px;
+  }
+}
+
+@media (width <= 640px) {
+  .app-nav.is-phone {
+    box-sizing: border-box;
+    display: grid;
+    gap: 0;
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-rows: 56px;
+    height: calc(56px + env(safe-area-inset-top));
+    overflow: visible;
+    padding-top: env(safe-area-inset-top);
+    position: relative;
+    width: 100%;
+
+    &.app-nav--minimized {
+      inset: 0;
+      position: absolute;
+      width: 100%;
+    }
+
+    &.app-nav--overlay-expanded {
+      box-shadow: none;
+      width: 100%;
+    }
+
+    .app-nav__mobile-menu {
+      align-items: center;
+      align-self: stretch;
+      background: transparent;
+      border: 0;
+      color: #{$white};
+      cursor: pointer;
+      display: flex;
+      font-size: 20px;
+      grid-column: 1;
+      grid-row: 1;
+      justify-content: center;
+      padding: 0 0 0 4px;
+      width: 44px;
+    }
+
+    .app-nav__header {
+      align-items: center;
+      display: flex;
+      grid-column: 2;
+      grid-row: 1;
+      height: 56px;
+      justify-self: end;
+      max-width: 100%;
+      padding: 8px 16px;
+      width: auto;
+    }
+
+    .app-nav__header-logo,
+    .app-nav__header-logo--compact {
+      display: none;
+    }
+
+    .app-nav__header-details {
+      display: block;
+      max-width: 100%;
+
+      > span:last-child {
+        display: none;
+      }
+    }
+
+    .app-nav__header-title {
+      max-width: min(220px, calc(100vw - 128px));
+    }
+
+    .app-nav__drawer {
+      background: $bkg-color;
+      bottom: 0;
+      box-shadow: 0 12px 24px rgb(0 0 0 / 22%);
+      display: flex;
+      flex-direction: column;
+      grid-column: 1 / -1;
+      left: 0;
+      opacity: 0;
+      overflow: hidden auto;
+      padding-top: 8px;
+      pointer-events: none;
+      position: fixed;
+      top: calc(56px + env(safe-area-inset-top));
+      transform: translateY(-8px);
+      transition: opacity 0.15s linear, transform 0.15s ease-out, visibility 0s linear 0.15s;
+      visibility: hidden;
+      width: 100%;
+    }
+
+    .app-nav__search,
+    .app-nav__link,
+    .app-nav__bottom-button {
+      grid-template-columns: $nav-icon-width minmax(0, 1fr);
+      margin-inline: 12px;
+      width: calc(100% - 24px);
+    }
+
+    .app-nav__label {
+      display: block;
+    }
+
+    .app-nav__bottom {
+      margin-top: auto;
+      position: static;
+    }
+
+    .js-minimize-menu {
+      display: none;
+    }
+  }
+
+  .app-nav.is-phone.is-phone-menu-open .app-nav__drawer {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition-delay: 0s;
+    visibility: visible;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-nav__drawer {
+    transition-duration: 0s;
   }
 }
