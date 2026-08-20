@@ -14,8 +14,11 @@ careOptsFrontend:
       defaultText: Choose One...
     picklist:
       clearText: Clear Selection
+      closeText: Close options
+      headingText: Select an option
       loadingText: Loading...
       noResultsText: No results found
+      searchText: Search options
   regions:
     preload:
       loading: Loading...

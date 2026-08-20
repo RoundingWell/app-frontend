@@ -1,4 +1,4 @@
-import { extend, result } from 'underscore';
+import { defer, extend, result } from 'underscore';
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
@@ -6,6 +6,7 @@ import { View } from 'marionette';
 import 'scss/modules/buttons.scss';
 
 import intl from 'js/i18n';
+import { getAdjacentFocusableElement } from 'js/utils/accessibility/focus-trap';
 import Component from 'js/base/component';
 
 import Picklist from 'js/components/picklist';
@@ -15,11 +16,13 @@ import Picklist from 'js/components/picklist';
 const CLASS_OPTIONS = [
   'align',
   'collection',
+  'isSelectlist',
   'lists',
   'picklistEvents',
   'picklistOptions',
   'popRegion',
   'popWidth',
+  'presentation',
   'position',
   'viewOptions',
 ];
@@ -130,12 +133,14 @@ export default Component.extend({
     this.triggerMethod('change:selected', selected);
   },
   showPicklist() {
+    const resolvedPicklistOptions = result(this, 'picklistOptions');
+    const isSelectlist = this.isSelectlist || resolvedPicklistOptions.isSelectlist;
     const picklist = new Picklist(extend({
       lists: this.lists || [{ collection: this.collection }],
       state: { selected: this.getState('selected') },
-    }, result(this, 'picklistOptions')));
+    }, resolvedPicklistOptions, { isSelectlist }));
 
-    this.popRegion.show(picklist, this.popRegionOptions());
+    this.popRegion.show(picklist, this.popRegionOptions(resolvedPicklistOptions));
 
     this.bindEvents(picklist.getView(), this._picklistEvents);
     this.bindEvents(picklist.getView(), result(this, 'picklistEvents'));
@@ -143,11 +148,12 @@ export default Component.extend({
   position() {
     return this.getView().getBounds();
   },
-  popRegionOptions() {
+  popRegionOptions(resolvedPicklistOptions = result(this, 'picklistOptions')) {
     return extend({
       ignoreEl: this.getView().el,
       popWidth: result(this, 'popWidth'),
       align: this.align,
+      presentation: this.presentation || (this.isSelectlist || resolvedPicklistOptions.isSelectlist ? 'fullscreen' : 'anchored'),
     }, result(this, 'position'));
   },
   _picklistEvents: {
@@ -155,7 +161,15 @@ export default Component.extend({
     'picklist:item:select': 'onPicklistSelect',
     'destroy': 'onPicklistDestroy',
   },
-  onPicklistClose() {
+  onPicklistClose(dismissal) {
+    this.restoreFocusOnDestroy = dismissal?.reason !== 'tab';
+    if (!this.restoreFocusOnDestroy) {
+      this.focusAfterDestroy = getAdjacentFocusableElement(this.getView().el, {
+        exclude: this.popRegion.currentView.el,
+        reverse: dismissal.reverse,
+      });
+    }
+
     this.popRegion.empty();
   },
   onPicklistSelect({ model }) {
@@ -163,7 +177,25 @@ export default Component.extend({
     this.setState('selected', model);
   },
   onPicklistDestroy() {
+    const focusAfterDestroy = this.focusAfterDestroy;
+    this.focusAfterDestroy = null;
+    const restoreFocus = this.restoreFocusOnDestroy !== false;
+    this.restoreFocusOnDestroy = true;
     this.toggleState('isActive', false);
+    if (!restoreFocus && !focusAfterDestroy) return;
+
+    defer(() => {
+      if (focusAfterDestroy?.isConnected) {
+        focusAfterDestroy.focus();
+        return;
+      }
+
+      const view = this.getView();
+
+      if (!view || view.isDestroyed() || !view.isAttached()) return;
+
+      view.$el.trigger('focus');
+    });
   },
 }, {
   setPopRegion(region) {

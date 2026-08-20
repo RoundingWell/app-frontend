@@ -1,4 +1,6 @@
 import Backbone from 'backbone';
+import hbs from 'handlebars-inline-precompile';
+import { View } from 'marionette';
 
 import Droplist from './index';
 
@@ -49,6 +51,7 @@ context('Droplist', function() {
 
     cy
       .get('.picklist')
+      .should('not.have.class', 'app-frame__pop-region--fullscreen')
       .find('.js-picklist-item')
       .first()
       .click();
@@ -102,6 +105,10 @@ context('Droplist', function() {
       })
       .as('root');
 
+    cy.get('@root').then($root => {
+      $root.after('<button class="qa-after-droplist" type="button">After options</button>');
+    });
+
     cy
       .get('@root')
       .contains('Choose One...')
@@ -109,6 +116,7 @@ context('Droplist', function() {
 
     cy
       .get('.picklist')
+      .should('not.have.class', 'app-frame__pop-region--fullscreen')
       .find('.js-picklist-item')
       .first()
       .click();
@@ -143,9 +151,206 @@ context('Droplist', function() {
     cy
       .get('.picklist')
       .should('not.exist');
+
+    cy
+      .get('@root')
+      .contains('Option 3')
+      .click();
+
+    cy
+      .get('.picklist__input')
+      .focus();
+
+    cy.press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .get('.qa-after-droplist')
+      .filter(':focus')
+      .should('have.length', 1);
   });
 
-  specify('selectlist remains open when its focused input resizes the viewport', function() {
+  specify('searchable lists use the mobile fullscreen presentation', function() {
+    cy.viewport(390, 720);
+
+    cy
+      .mount(rootView => {
+        Droplist.setPopRegion(rootView.getRegion('pop'));
+
+        return new Droplist({
+          picklistOptions: {
+            headingText: 'Test Options',
+            isSelectlist: true,
+          },
+          collection,
+        });
+      })
+      .as('root');
+
+    cy
+      .get('@root')
+      .contains('Choose One...')
+      .as('trigger')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('have.class', 'app-frame__pop-region--fullscreen')
+      .and('have.attr', 'role', 'dialog')
+      .and('have.attr', 'aria-modal', 'true')
+      .and('have.attr', 'aria-label', 'Test Options')
+      .then($picklist => {
+        const bounds = $picklist[0].getBoundingClientRect();
+
+        expect(bounds.top).to.equal(0);
+        expect(bounds.left).to.equal(0);
+        expect(bounds.width).to.equal(390);
+        expect(bounds.height).to.equal(720);
+      });
+
+    cy
+      .get('.picklist__mobile-header')
+      .should('be.visible')
+      .and('contain', 'Test Options');
+
+    cy
+      .get('.picklist__input')
+      .should('be.focused');
+
+    cy
+      .get('.picklist__scroll')
+      .should('have.attr', 'role', 'listbox')
+      .find('.js-picklist-item')
+      .first()
+      .should('have.attr', 'role', 'option');
+
+    cy
+      .get('.picklist__input')
+      .trigger('keydown', { key: 'Tab' });
+
+    cy
+      .get('.picklist__mobile-close')
+      .should('be.focused')
+      .trigger('keydown', { key: 'Tab', shiftKey: true });
+
+    cy
+      .get('.picklist__input')
+      .should('be.focused');
+
+    cy
+      .window()
+      .trigger('resize');
+
+    cy
+      .get('.picklist')
+      .should('exist')
+      .find('.js-picklist-item')
+      .first()
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('@root')
+      .contains('Option 1')
+      .should('be.focused')
+      .click();
+
+    cy
+      .get('.picklist__mobile-close')
+      .should('have.attr', 'aria-label', 'Close options')
+      .find('.fa-arrow-left')
+      .find('use')
+      .should('have.attr', 'href', '#fas-fa-arrow-left')
+      .closest('.picklist__mobile-close')
+      .click();
+
+    cy
+      .get('[data-care-ops-fontawesome-symbols] #fas-fa-arrow-left')
+      .should('exist');
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('@root')
+      .contains('Option 1')
+      .should('be.focused');
+  });
+
+  specify('Escape from search closes only the top fullscreen layer', function() {
+    let droplist;
+
+    cy.viewport(390, 720);
+
+    cy
+      .mount(rootView => {
+        rootView.getRegion('modal').show(new View({
+          className: 'qa-underlay',
+          template: hbs`<input type="text">`,
+        }));
+        Droplist.setPopRegion(rootView.getRegion('pop'));
+        droplist = new Droplist({
+          picklistOptions: {
+            headingText: 'Test Options',
+            isSelectlist: true,
+          },
+          collection,
+        });
+
+        return droplist;
+      })
+      .then(() => {
+        droplist.setState({ isActive: true });
+      });
+
+    cy
+      .get('.picklist__input')
+      .should('be.focused')
+      .type('{esc}');
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('.qa-underlay')
+      .should('exist');
+  });
+
+  specify('non-search lists remain anchored on mobile', function() {
+    cy.viewport(390, 720);
+
+    cy
+      .mount(rootView => {
+        Droplist.setPopRegion(rootView.getRegion('pop'));
+
+        return new Droplist({ collection });
+      })
+      .as('root');
+
+    cy
+      .get('@root')
+      .contains('Choose One...')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('not.have.class', 'app-frame__pop-region--fullscreen')
+      .then($picklist => {
+        expect($picklist[0].getBoundingClientRect().width).to.be.lessThan(390);
+      });
+
+    cy
+      .get('.picklist__mobile-header')
+      .should('not.be.visible');
+  });
+
+  specify('selectlist crosses the fullscreen breakpoint without losing its focused input', function() {
+    cy.viewport(721, 720);
+
     cy
       .mount(rootView => {
         Droplist.setPopRegion(rootView.getRegion('pop'));
@@ -169,12 +374,26 @@ context('Droplist', function() {
       .should('be.focused');
 
     cy
-      .window()
-      .trigger('resize');
+      .get('.picklist')
+      .should('not.have.class', 'app-frame__pop-region--fullscreen');
+
+    cy.viewport(720, 720);
 
     cy
       .get('.picklist')
-      .should('exist');
+      .should('have.class', 'app-frame__pop-region--fullscreen')
+      .and('have.attr', 'role', 'dialog');
+
+    cy.viewport(721, 720);
+
+    cy
+      .get('.picklist')
+      .should('not.have.class', 'app-frame__pop-region--fullscreen')
+      .then($picklist => {
+        expect($picklist[0].style.left).not.to.equal('');
+        expect($picklist[0].style.top).not.to.equal('');
+      })
+      .should('not.have.attr', 'role');
 
     cy
       .get('.picklist__input')

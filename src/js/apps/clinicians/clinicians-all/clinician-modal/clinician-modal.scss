@@ -1,0 +1,25 @@
+.clinician-modal__field {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.clinician-modal__control {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (width <= 720px) {
+  .clinician-modal__field {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .clinician-modal__field .modal__form-label {
+    margin-bottom: 8px;
+    width: auto;
+  }
+
+  .clinician-modal__field .form-input {
+    min-height: 44px;
+  }
+}

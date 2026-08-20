@@ -122,4 +122,28 @@ context('default routes', function() {
       .get('.prelogin__message')
       .contains('Hold up, your account is not set up yet. Please notify your manager or administrator to correct this issue.');
   });
+
+  specify('bootstrap failure offers recovery', function() {
+    cy
+      .intercept('GET', '/api/clinicians/me', {
+        statusCode: 500,
+        body: {
+          errors: getErrors({
+            status: '500',
+            title: 'Internal Server Error',
+            detail: 'Unable to load the current clinician',
+          }),
+        },
+      })
+      .as('routeClinicianFailure')
+      .visit({ noWait: true })
+      .wait('@routeClinicianFailure');
+
+    cy
+      .get('.startup__error')
+      .should('be.visible')
+      .and('contain', 'We couldn\'t load your workspace')
+      .find('.js-retry')
+      .should('be.visible');
+  });
 });

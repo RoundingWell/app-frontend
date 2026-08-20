@@ -33,7 +33,7 @@ import DialerService from 'js/services/dialer';
 import ErrorApp from 'js/apps/globals/error/error_app';
 
 import { RootView } from 'js/apps/globals/app-frame/root_views';
-import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
+import { NotSetupPromptView } from 'js/auth/prelogin/prelogin_views';
 
 const $document = $(document);
 
@@ -57,7 +57,7 @@ const Application = App.extend({
     this.startServices();
     this.setListeners();
     // Ensure Error is the first app initialized
-    new ErrorApp({ region: this.getRegion('error') });
+    this.errorApp = new ErrorApp({ region: this.getRegion('error') });
   },
 
   configComponents() {
@@ -124,8 +124,8 @@ const Application = App.extend({
       Radio.trigger('hotkey', 'search', evt);
     });
 
-    $document.on('keydown.app', null, 'esc', function(evt) {
-      Radio.trigger('hotkey', 'close', evt);
+    $document.on('keydown.app', function(evt) {
+      if (evt.key === 'Escape') Radio.trigger('hotkey', 'close', evt);
     });
   },
 
@@ -140,17 +140,21 @@ const Application = App.extend({
     addError(get(error, 'responseData', error));
 
     if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getRegion('preloader').show(new NotSetupPromptView());
+      return;
     }
+
+    this.errorApp.stop();
+    this.getRegion('preloader').currentView.showError();
   },
 
   onStart(options, currentUser, { default: AppFrameApp }) {
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getRegion('preloader').show(new NotSetupPromptView());
       return;
     }
 
-    this.getRegion('preloader').empty();
+    this.getRegion('preloader').currentView.dismiss();
 
     const appFrameApp = this.addChildApp('appFrame', AppFrameApp);
 

@@ -1,0 +1,237 @@
+@keyframes startup-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes startup-halo {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+}
+
+.startup {
+  align-items: center;
+  background-color: $bkg-color;
+  box-sizing: border-box;
+  color: #{$white};
+  display: flex;
+  font-family: Figtree, 'Droid Sans', 'helvetica neue', arial, sans-serif;
+  height: 100%;
+  justify-content: center;
+  min-height: 100%;
+  overflow: hidden;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
+  pointer-events: all;
+  transition: opacity 160ms cubic-bezier(0.4, 0, 1, 1);
+  width: 100%;
+}
+
+.startup.is-exiting {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.startup__ambient {
+  background:
+    radial-gradient(circle at 50% 47%, rgb(5 130 218 / 16%) 0, rgb(5 130 218 / 5%) 24%, transparent 55%),
+    radial-gradient(circle at 50% 50%, rgb(255 255 255 / 4%) 0, transparent 34%);
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transform: scale(0.92);
+  transition:
+    opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.startup.is-visible .startup__ambient {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.startup__loading {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  position: relative;
+  transform: translateY(6px) scale(0.98);
+  transition:
+    opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+}
+
+.startup__loading[hidden],
+.startup__error[hidden] {
+  display: none;
+}
+
+.startup.is-visible .startup__loading {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.startup__mark {
+  align-items: center;
+  display: flex;
+  height: 72px;
+  justify-content: center;
+  position: relative;
+  width: 72px;
+}
+
+.startup__orbit {
+  animation: startup-orbit 2.4s linear infinite;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 50%;
+  height: 70px;
+  position: absolute;
+  width: 70px;
+}
+
+.startup__orbit::before {
+  background: #{$white};
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgb(113 193 249 / 75%);
+  content: '';
+  height: 4px;
+  left: 8px;
+  opacity: 0.9;
+  position: absolute;
+  top: 8px;
+  width: 4px;
+}
+
+.startup__halo {
+  animation: startup-halo 2.4s ease-in-out infinite;
+  background: rgb(5 130 218 / 16%);
+  border-radius: 50%;
+  box-shadow: 0 0 24px rgb(5 130 218 / 18%);
+  height: 52px;
+  position: absolute;
+  width: 52px;
+}
+
+.startup__mark-image {
+  height: 34px;
+  opacity: 0.96;
+  position: relative;
+  width: 34px;
+}
+
+.startup__status-text {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.startup__error {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 420px;
+  opacity: 0;
+  position: relative;
+  text-align: center;
+  transform: translateY(8px);
+  transition:
+    opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  z-index: 1;
+}
+
+.startup.is-error .startup__error {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.startup__error-mark {
+  height: 40px;
+  margin-bottom: 32px;
+  opacity: 0.92;
+  width: 40px;
+}
+
+.startup__error-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 32px;
+  margin: 0;
+}
+
+.startup__error-message {
+  color: rgb(255 255 255 / 68%);
+  font-size: 15px;
+  line-height: 22px;
+  margin: 10px 0 28px;
+  max-width: 340px;
+}
+
+.startup__retry {
+  --button-background: #{$white};
+  --button-border-color: #{$white};
+  --button-border-radius: 8px;
+  --button-font-size: 15px;
+  --button-min-height: 44px;
+  --button-padding: 11px 24px;
+
+  color: $bkg-color;
+  min-width: 112px;
+}
+
+.startup__retrying-label,
+.startup.is-retrying .startup__retry-label {
+  display: none;
+}
+
+.startup.is-retrying .startup__retrying-label {
+  display: inline;
+}
+
+@media (width <= 480px) {
+  .startup__error-title {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
+  .startup__error-message {
+    font-size: 14px;
+    line-height: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup,
+  .startup__ambient,
+  .startup__loading,
+  .startup__error {
+    transition-duration: 1ms;
+  }
+
+  .startup__orbit,
+  .startup__halo {
+    animation: none;
+  }
+
+  .startup__orbit::before {
+    box-shadow: none;
+  }
+}

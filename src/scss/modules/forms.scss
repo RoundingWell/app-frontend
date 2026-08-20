@@ -42,6 +42,12 @@
   padding: 4px 8px;
 }
 
+@media (pointer: coarse) {
+  .form-input {
+    font-size: 16px;
+  }
+}
+
 .form-error {
   color: #{$error-color};
   font-size: 12px;

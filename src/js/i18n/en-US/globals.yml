@@ -18,6 +18,8 @@ careOptsFrontend:
           expandMenu: Expand Menu
           keepMenuOpen: Keep Menu Open
           minimizeMenu: Minimize Menu
+          openMenu: Open Menu
+          primaryNavigation: Primary navigation
         dashboardsNav:
           dashboards: Dashboards
         mainNavDroplist:
@@ -46,6 +48,7 @@ careOptsFrontend:
       modalViews:
         modalView:
           cancelText: Cancel
+          closeText: Close
           savingInfoText: Applying your changes.
           savingSubmitText: Saving...
           submitText: Save
@@ -85,6 +88,8 @@ careOptsFrontend:
     search:
       patientSearchViews:
         dialogView:
+          backText: Back
+          clearText: Clear search
           placeholderText: Search for patients
         emptyView:
           addPatient: Add Patient
@@ -104,3 +109,9 @@ careOptsFrontend:
         picklistItemView:
           labelDob: Birth Date
           labelName: Name
+    startup:
+      errorMessage: Check your connection, then try again.
+      errorTitle: We couldn't load your workspace
+      loading: Loading RoundingWell
+      retry: Retry
+      retrying: Retrying...

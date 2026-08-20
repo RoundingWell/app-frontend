@@ -1,4 +1,5 @@
 import { Behavior } from 'marionette';
+import Radio from 'backbone.radio';
 
 import keyCodes from 'js/utils/formatting/key-codes';
 
@@ -14,7 +15,7 @@ export default Behavior.extend({
         'transport:down': DOWN_KEY,
         'transport:up': UP_KEY,
         'select': ENTER_KEY,
-        'close': [ESCAPE_KEY, TAB_KEY],
+        'transport:close': [ESCAPE_KEY, TAB_KEY],
       },
     },
   ],
@@ -63,6 +64,20 @@ export default Behavior.extend({
     this.updateTransport($items, $highlighted);
 
     this.scrollTo($items);
+  },
+  onTransportClose(evt) {
+    if (evt.which === ESCAPE_KEY) {
+      evt.preventDefault();
+      evt.stopImmediatePropagation();
+
+      if (Radio.request('close-request', 'close:top')) return;
+    }
+
+    this.view.triggerMethod('close', {
+      event: evt,
+      reason: evt.which === TAB_KEY ? 'tab' : 'escape',
+      reverse: evt.shiftKey,
+    });
   },
 
   getItems() {

@@ -10,6 +10,7 @@ import intl from 'js/i18n';
 
 import PreloadRegion from 'js/regions/preload_region';
 
+import DialogFocusBehavior from 'js/behaviors/dialog-focus';
 import IframeFormBehavior from 'js/behaviors/iframe-form';
 import ModalTemplate from './modal.hbs';
 
@@ -49,12 +50,22 @@ const SavingFooterView = View.extend({
 });
 
 const ModalView = View.extend({
+  behaviors: [DialogFocusBehavior],
   className: 'modal',
+  attributes() {
+    return {
+      ...(this.headingText && { 'aria-label': this.headingText }),
+      'aria-modal': 'true',
+      'role': 'dialog',
+      'tabindex': '-1',
+    };
+  },
   buttonClass: 'button button--positive',
   bodyClass: 'modal__content',
   headerClass: 'modal__header',
   headerIconType: 'far',
   cancelText: i18n.modalView.cancelText,
+  closeText: i18n.modalView.closeText,
   submitText: i18n.modalView.submitText,
   savingSubmitText: i18n.modalView.savingSubmitText,
   savingInfoText: i18n.modalView.savingInfoText,
@@ -130,9 +141,10 @@ const IframeFormView = View.extend({
 
     return 'modal__form-iframe';
   },
-  template: hbs`<iframe src="{{ url }}"></iframe>`,
+  template: hbs`<iframe src="{{ url }}" title="{{ title }}"></iframe>`,
   templateContext() {
     return {
+      title: this.model.get('name'),
       url: this.model.getFormUrl({ modal: 1 }),
     };
   },

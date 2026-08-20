@@ -1,0 +1,21 @@
+<div class="startup__ambient" aria-hidden="true"></div>
+
+<div class="startup__loading js-loading">
+  <div class="startup__mark" aria-hidden="true">
+    <span class="startup__orbit"></span>
+    <span class="startup__halo"></span>
+    <img class="startup__mark-image" src="/rwell-logo.svg" alt="">
+  </div>
+
+  <span class="startup__status-text">{{ @intl.globals.startup.loading }}</span>
+</div>
+
+<div class="startup__error js-error" role="alert" hidden>
+  <img class="startup__error-mark" src="/rwell-logo.svg" alt="">
+  <h1 class="startup__error-title">{{ @intl.globals.startup.errorTitle }}</h1>
+  <p class="startup__error-message">{{ @intl.globals.startup.errorMessage }}</p>
+  <button class="button button--primary startup__retry js-retry" type="button">
+    <span class="startup__retry-label">{{ @intl.globals.startup.retry }}</span>
+    <span class="startup__retrying-label">{{ @intl.globals.startup.retrying }}</span>
+  </button>
+</div>

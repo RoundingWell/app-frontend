@@ -6,11 +6,13 @@ import { View, CollectionView, Region } from 'marionette';
 import 'scss/modules/fill-window.scss';
 
 import px from 'js/utils/formatting/px';
+import { trapFocus } from 'js/utils/accessibility/focus-trap';
 
 import PreloadRegion from 'js/regions/preload_region';
 import TopRegionBehavior from 'js/behaviors/top-region';
 
-import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
+import CloseRequestManager from './close-request';
+import { StartupView } from './startup_views';
 
 import LayoutTemplate from './layout.hbs';
 
@@ -77,7 +79,7 @@ const PreloaderRegionView = TopRegionView.extend({
   // NOTE: ensures preload can't close on user click
   contains: preventRegionClose,
   onRender() {
-    this.showChildView('region', new PreloaderView());
+    this.showChildView('region', new StartupView());
   },
 });
 
@@ -88,18 +90,17 @@ const ModalRegionView = TopRegionView.extend({
     className: 'is-shown',
   }],
   initialize(options) {
-    this.mergeOptions(options, ['$body', 'setLocation', 'contains']);
+    this.mergeOptions(options, ['$body', 'setLocation', 'contains', 'closeRequestManager']);
     this.region = this.getRegion('region');
-
-    const hotkeyCh = Radio.channel('hotkey');
-    this.listenTo(hotkeyCh, 'close', this.empty);
   },
   onRegionShow() {
+    this.closeRequestManager?.register(this, () => this.empty());
     this.listenTo(historyCh, 'change:route', this.empty);
     this.listenTo(userActivityCh, 'window:resize', this.setLocation);
     this.setLocation();
   },
   onRegionEmpty() {
+    this.closeRequestManager?.unregister(this);
     this.stopListening(userActivityCh);
   },
   setLocation() {
@@ -135,34 +136,47 @@ const popDefaults = {
   outerHeight: 0,
   outerWidth: 0,
   popWidth: null,
+  presentation: 'anchored',
   top: 0,
   windowPadding: 5,
 };
 
+const FULLSCREEN_POP_QUERY = '(width <= 720px)';
+
 const PopRegionView = TopRegionView.extend({
-  initialize({ $body }) {
+  events: {
+    keydown: 'onKeydown',
+  },
+  initialize({ $body, closeRequestManager }) {
     this.region = this.getRegion('region');
     this.$body = $body;
-    const hotkeyCh = Radio.channel('hotkey');
-    this.listenTo(hotkeyCh, 'close', this.empty);
+    this.closeRequestManager = closeRequestManager;
   },
   onRegionShow(region, view, options) {
     view.$el.addClass('app-frame__pop-region');
     const popOptions = extend({}, popDefaults, options);
-    this.ignoreEl = options.ignoreEl;
+    this.ignoreEl = popOptions.ignoreEl;
     this.listenTo(userActivityCh, 'window:resize', partial(this.onWindowResize, popOptions));
     this.listenTo(historyCh, 'change:route', this.empty);
     this.listenTo(view, 'render render:children', partial(this.setLocation, popOptions));
     this.setLocation(popOptions);
+    this.closeRequestManager.register(this, () => this.empty());
   },
   onRegionEmpty(region, view) {
-    view.$el.removeClass('app-frame__pop-region');
+    this.closeRequestManager.unregister(this);
+    this.isFullscreenPresentation = false;
+    view.$el.removeClass('app-frame__pop-region app-frame__pop-region--fullscreen');
     this.stopListening(userActivityCh);
     this.stopListening(historyCh);
     this.stopListening(view);
   },
   onWindowResize(popOptions) {
     const view = this.region.currentView;
+
+    if (view && this.isFullscreen(popOptions)) {
+      this.setLocation(popOptions);
+      return;
+    }
 
     if (view && view.Dom.hasEl(view.el, document.activeElement)) {
       this.setLocation(popOptions);
@@ -173,6 +187,23 @@ const PopRegionView = TopRegionView.extend({
   },
   setLocation(popOptions) {
     const view = this.region.currentView;
+    const isFullscreen = this.isFullscreen(popOptions);
+
+    view.$el.toggleClass('app-frame__pop-region--fullscreen', isFullscreen);
+    view.$el.attr({
+      'aria-modal': isFullscreen ? 'true' : null,
+      'role': isFullscreen ? 'dialog' : null,
+    });
+    this.isFullscreenPresentation = isFullscreen;
+
+    if (isFullscreen) {
+      view.$el.css({
+        left: '',
+        top: '',
+        width: '',
+      });
+      return;
+    }
 
     if (popOptions.popWidth) {
       view.$el.css({
@@ -189,6 +220,15 @@ const PopRegionView = TopRegionView.extend({
       top: px(top),
       left: px(left),
     });
+  },
+  onKeydown(event) {
+    if (!this.isFullscreenPresentation || event.key !== 'Tab' || !this.region.hasView()) return;
+
+    event.stopPropagation();
+    trapFocus(event, this.region.currentView.el);
+  },
+  isFullscreen({ presentation }) {
+    return presentation === 'fullscreen' && window.matchMedia(FULLSCREEN_POP_QUERY).matches;
   },
   setAlign(width, { left, align, windowPadding, outerWidth }) {
     if (align === 'right') left += outerWidth - width;
@@ -323,6 +363,7 @@ const RootView = CollectionView.extend({
     this.render();
     this.regions = [];
     const $body = this.$el;
+    this.closeRequestManager = new CloseRequestManager();
 
     Radio.reply('top-region', 'contains', this.contains, this);
 
@@ -331,11 +372,11 @@ const RootView = CollectionView.extend({
     // Add lowest layer (z-index) to highest
     this.addChildView(this.appView);
     this.addRegionView('tooltip', new TooltipRegionView({ $body }));
-    this.addRegionView('modal', new ModalRegionView({ $body }));
-    this.addRegionView('modalSmall', new ModalRegionView({ $body }));
+    this.addRegionView('modal', new ModalRegionView({ $body, closeRequestManager: this.closeRequestManager }));
+    this.addRegionView('modalSmall', new ModalRegionView({ $body, closeRequestManager: this.closeRequestManager }));
     this.addRegionView('modalLoading', new ModalRegionView({ $body, contains: preventRegionClose }));
     this.addRegionView('alert', new TopRegionView());
-    this.addRegionView('pop', new PopRegionView({ $body }));
+    this.addRegionView('pop', new PopRegionView({ $body, closeRequestManager: this.closeRequestManager }));
     this.addRegionView('overlay', new OverlayRegionView());
     this.addRegionView('preloader', new PreloaderRegionView());
     this.addRegionView('error', new TopRegionView());
@@ -356,6 +397,9 @@ const RootView = CollectionView.extend({
       const view = this.children.findByIndex(i);
       if (view.contains(target, testView)) return true;
     }
+  },
+  onBeforeDestroy() {
+    this.closeRequestManager.destroy();
   },
 });
 

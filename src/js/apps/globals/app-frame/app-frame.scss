@@ -68,3 +68,29 @@
   box-shadow: 0 0 10px rgb(0 0 0 / 25%);
   position: absolute;
 }
+
+@media (width <= 720px) {
+  .app-frame__pop-region--fullscreen {
+    height: 100dvh;
+    inset: 0;
+    width: 100%;
+  }
+}
+
+@media (width <= 640px) {
+  .app-frame {
+    flex-direction: column;
+  }
+
+  .app-frame__nav,
+  .app-frame__nav.is-minimized {
+    flex: 0 0 calc(56px + env(safe-area-inset-top));
+    height: calc(56px + env(safe-area-inset-top));
+    width: 100%;
+    z-index: var(--z-positioned);
+  }
+
+  .app-frame__content {
+    min-height: 0;
+  }
+}

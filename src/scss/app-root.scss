@@ -1,5 +1,9 @@
 html, body, .app-root { height: 100%; }
 
+@supports (height: 100dvh) {
+  html, body, .app-root { height: 100dvh; }
+}
+
 html, body {
   overflow: hidden;
   overscroll-behavior-y: contain;

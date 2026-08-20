@@ -9,6 +9,10 @@
   padding: 8px;
 }
 
+.picklist__mobile-header {
+  display: none;
+}
+
 .picklist__item {
   align-items: center;
   border-radius: 6px;
@@ -18,6 +22,7 @@
   font-size: 14px;
   list-style-type: none;
   padding: 7px 8px;
+  touch-action: manipulation;
 
   &.is-highlighted:not(&.is-disabled),
   &:hover:not(&.is-disabled) {
@@ -56,6 +61,13 @@
     margin-left: 16px;
     margin-right: 0;
   }
+}
+
+.picklist__clear {
+  background: transparent;
+  border: 0;
+  text-align: left;
+  width: 100%;
 }
 
 .picklist__item-content {
@@ -167,5 +179,72 @@
     left: 8px;
     position: absolute;
     top: 8px;
+  }
+}
+
+@media (width <= 720px) {
+  .app-frame__pop-region .picklist__item {
+    min-height: 44px;
+  }
+
+  .app-frame__pop-region--fullscreen.picklist {
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+    height: 100dvh;
+    max-height: 100dvh;
+    max-width: 100%;
+    min-width: 0;
+    padding:
+      env(safe-area-inset-top)
+      max(8px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom))
+      max(8px, env(safe-area-inset-left));
+    width: 100%;
+  }
+
+  .app-frame__pop-region--fullscreen .picklist__controls {
+    background: #{$white};
+    flex: none;
+    position: sticky;
+    top: 0;
+    z-index: var(--z-positioned);
+  }
+
+  .app-frame__pop-region--fullscreen .picklist__mobile-header {
+    align-items: center;
+    display: flex;
+    min-height: 52px;
+  }
+
+  .app-frame__pop-region--fullscreen .picklist__mobile-close {
+    flex: 0 0 44px;
+    height: 44px;
+    justify-content: center;
+    width: 44px;
+  }
+
+  .app-frame__pop-region--fullscreen .picklist__mobile-title {
+    color: var(--color-text);
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 24px;
+    min-width: 0;
+    padding-right: 44px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .app-frame__pop-region--fullscreen .picklist__desktop-heading {
+    display: none;
+  }
+
+  .app-frame__pop-region--fullscreen .picklist__input {
+    font-size: 16px;
+    min-height: 44px;
+  }
+
+  .app-frame__pop-region--fullscreen .picklist__scroll {
+    overscroll-behavior: contain;
   }
 }

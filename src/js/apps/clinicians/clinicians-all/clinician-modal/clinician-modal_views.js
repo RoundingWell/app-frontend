@@ -15,6 +15,8 @@ import { WorkspacesComponent, TeamComponent, RoleComponent } from 'js/apps/clini
 import InputFocusBehavior from 'js/behaviors/input-focus';
 import ClinicianModalTemplate from './clinician-modal.hbs';
 
+import './clinician-modal.scss';
+
 const i18n = intl.clinicians.clinicianModal.clinicianModalViews;
 
 const InputView = View.extend({

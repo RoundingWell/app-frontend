@@ -2,7 +2,7 @@
   {{#if headerIcon}}<span class="modal__header-icon">{{fa headerIconType headerIcon}}</span>{{/if}}
   <div class="flex-grow">{{ headingText }}</div>
   <div data-draft-status-region></div>
-  <button class="button button--icon flex flex-align-center js-close">{{far "xmark"}}</button>
+  <button class="button button--icon flex flex-align-center js-close" type="button" aria-label="{{ closeText }}">{{far "xmark"}}</button>
 </div>
 
 <div class="modal__body" data-body-region>

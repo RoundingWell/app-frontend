@@ -46,7 +46,7 @@ const CLASS_OPTIONS_ITEM = [
 
 const attr = 'text';
 const canClear = false;
-const isSelectList = false;
+const isSelectlist = false;
 
 const PicklistEmpty = View.extend({
   tagName: 'li',
@@ -87,6 +87,16 @@ const PicklistItem = View.extend({
 
     return classNames.join(' ');
   },
+  attributes() {
+    const isDisabled = this.model.get('isDisabled');
+    const isSelected = this.model === this.state.get('selected');
+
+    return {
+      'aria-disabled': String(Boolean(isDisabled)),
+      'aria-selected': String(isSelected),
+      'role': 'option',
+    };
+  },
   triggers: {
     'click': 'select',
   },
@@ -115,11 +125,14 @@ const PicklistItem = View.extend({
 });
 
 const Picklist = CollectionView.extend({
+  attributes: {
+    role: 'presentation',
+  },
   className: 'picklist__group',
   tagName: 'li',
   template: hbs`
     {{#if headingText}}<div class="picklist__heading">{{ headingText }}</div>{{/if}}
-    <ul></ul>
+    <ul role="presentation"></ul>
     {{#if infoText}}<div class="picklist__info">{{fas "circle-info"}}{{ infoText }}</div>{{/if}}
   `,
   serializeCollection: noop,
@@ -158,21 +171,32 @@ const Picklists = CollectionView.extend({
     PicklistBehavior,
   ],
   template: hbs`
-    <div>
-      {{#if headingText}}<div class="picklist__heading">{{ headingText }}</div>{{/if}}
-      {{#if isSelectlist}}<input type="text" class="js-input picklist__input form-input form-input--primary form-input--small" placeholder="{{ placeholderText }}" value="{{ query }}">{{/if}}
-      {{#if canClear}}<div><a class="picklist__item js-picklist-item js-clear">{{ clearText }}</a></div>{{/if}}
+    <div class="picklist__controls">
+      <div class="picklist__mobile-header">
+        <button class="button button--icon picklist__mobile-close js-close" type="button" aria-label="{{ @intl.components.picklist.closeText }}">{{fas "arrow-left"}}</button>
+        <div class="picklist__mobile-title">{{#if headingText}}{{ headingText }}{{else}}{{ @intl.components.picklist.headingText }}{{/if}}</div>
+      </div>
+      {{#if headingText}}<div class="picklist__heading picklist__desktop-heading u-margin--b-8">{{ headingText }}</div>{{/if}}
+      {{#if isSelectlist}}<input class="js-input picklist__input form-input form-input--primary form-input--small" type="search" value="{{ query }}" placeholder="{{ placeholderText }}" aria-label="{{#if placeholderText}}{{ placeholderText }}{{else}}{{ @intl.components.picklist.searchText }}{{/if}}" autocomplete="off" autocapitalize="none" spellcheck="false">{{/if}}
+      {{#if canClear}}<div><button class="picklist__item picklist__clear js-picklist-item js-clear" type="button">{{ clearText }}</button></div>{{/if}}
     </div>
-    <ul class="flex-region picklist__scroll js-picklist-scroll"></ul>
+    <ul class="flex-region picklist__scroll js-picklist-scroll" role="listbox"></ul>
     {{#if infoText}}<div class="picklist__info ">{{fas "circle-info"}}{{ infoText }}</div>{{/if}}
   `,
   triggers: {
     'focus @ui.input': 'focus',
     'click @ui.clear': 'clear',
+    'click @ui.close': 'close',
   },
   ui: {
     input: '.js-input',
     clear: '.js-clear',
+    close: '.js-close',
+  },
+  attributes() {
+    return {
+      'aria-label': this.getOption('headingText') || intl.components.picklist.headingText,
+    };
   },
   onClear() {
     this.triggerMethod('picklist:item:select', { model: null });
@@ -252,7 +276,7 @@ const Picklists = CollectionView.extend({
 export default Component.extend({
   attr,
   canClear,
-  isSelectList,
+  isSelectlist,
   childView: PicklistItem,
   className: 'picklist',
   childViewEventPrefix: 'picklist',

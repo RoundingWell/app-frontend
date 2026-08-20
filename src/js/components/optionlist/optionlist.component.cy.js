@@ -7,9 +7,12 @@ import Optionlist from './index';
 
 context('Optionlist', function() {
   const TestView = View.extend({
-    template: hbs`<button class="button button--primary u-margin--t-16 u-margin--l-16">Test Menu</button>`,
+    template: hbs`
+      <button class="button button--primary js-menu u-margin--t-16 u-margin--l-16">Test Menu</button>
+      <button class="button button--secondary js-after">After menu</button>
+    `,
     ui: {
-      button: 'button',
+      button: '.js-menu',
     },
     triggers: {
       'click button': 'click',
@@ -61,7 +64,10 @@ context('Optionlist', function() {
       .click()
       .then(picklistItem => {
         expect(picklistItem).to.not.exist;
-      });
+      })
+      .get('@root')
+      .contains('Test Menu')
+      .should('be.focused');
 
     cy
       .get('@root')
@@ -104,5 +110,15 @@ context('Optionlist', function() {
       .get('.picklist')
       .find('.picklist__item')
       .should('have.length', 1);
+
+    cy
+      .get('.picklist__input')
+      .focus()
+      .trigger('keydown', { key: 'Tab', keyCode: 9, which: 9 });
+
+    cy
+      .get('@root')
+      .find('.js-after')
+      .should('be.focused');
   });
 });

@@ -43,7 +43,7 @@ const NotSetupView = View.extend({
   template: NotSetupTemplate,
 });
 
-const PreloaderView = View.extend({
+const NotSetupPromptView = View.extend({
   className: 'fill-window',
   regions: {
     content: {
@@ -53,16 +53,11 @@ const PreloaderView = View.extend({
   },
   template: PreloginTemplate,
   onRender() {
-    if (this.getOption('notSetup')) {
-      this.showChildView('content', new NotSetupView());
-      return;
-    }
-
-    this.getRegion('content').startPreloader({ variant: 'generic' });
+    this.showChildView('content', new NotSetupView());
   },
 });
 
 export {
-  PreloaderView,
   LoginPromptView,
+  NotSetupPromptView,
 };

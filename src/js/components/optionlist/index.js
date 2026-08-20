@@ -1,4 +1,6 @@
-import { extend, result } from 'underscore';
+import { defer, extend, result } from 'underscore';
+
+import { getAdjacentFocusableElement } from 'js/utils/accessibility/focus-trap';
 
 import Picklist from 'js/components/picklist';
 
@@ -8,6 +10,7 @@ const CLASS_OPTIONS = [
   'align',
   'ignoreEl',
   'popWidth',
+  'presentation',
   'position',
   'uiView',
   'ui',
@@ -23,6 +26,7 @@ export default Picklist.extend({
   popWidth,
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
+    this.focusEl = this.ui && this.ui[0] ? this.ui[0] : this.uiView.el;
 
     this.listenTo(this.uiView, 'render destroy', this.destroy);
 
@@ -43,9 +47,18 @@ export default Picklist.extend({
       ignoreEl: this.ignoreEl || this.ui[0],
       popWidth: this.popWidth,
       align: this.align,
+      presentation: this.presentation || (this.isSelectlist ? 'fullscreen' : 'anchored'),
     }, result(this, 'position'));
   },
-  onClose() {
+  onClose(dismissal) {
+    this.restoreFocusOnDestroy = dismissal?.reason !== 'tab';
+    if (!this.restoreFocusOnDestroy) {
+      this.focusAfterDestroy = getAdjacentFocusableElement(this.focusEl, {
+        exclude: this.getView().el,
+        reverse: dismissal.reverse,
+      });
+    }
+
     this.destroy();
   },
   onPicklistSelect({ model }) {
@@ -54,5 +67,21 @@ export default Picklist.extend({
     this.triggerMethod('select', model);
 
     this.destroy();
+  },
+  onDestroy() {
+    const focusEl = this.focusEl;
+    const focusAfterDestroy = this.focusAfterDestroy;
+    if (this.restoreFocusOnDestroy === false && !focusAfterDestroy) return;
+
+    defer(() => {
+      if (focusAfterDestroy?.isConnected) {
+        focusAfterDestroy.focus();
+        return;
+      }
+
+      if (!focusEl || !focusEl.isConnected || focusEl.disabled) return;
+
+      focusEl.focus();
+    });
   },
 });
