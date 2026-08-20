@@ -32,14 +32,28 @@
   padding: 5px 12px;
 }
 
-.workflow-page__tab:hover {
-  background: #{$black-95};
-  color: var(--color-text);
+@media (hover: hover) and (pointer: fine) {
+  .workflow-page__tab:hover {
+    background: #{$black-95};
+    color: var(--color-text);
+  }
 }
 
 .workflow-page__tab.is-selected {
   background: var(--color-control-background);
   color: var(--color-text);
+}
+
+@media (width <= 720px) {
+  .workflow-page {
+    width: calc(100% - 24px);
+  }
+
+  .workflow-page__tab {
+    border-radius: 22px;
+    min-height: 44px;
+    padding-inline: 16px;
+  }
 }
 
 .workflow-page__actions {

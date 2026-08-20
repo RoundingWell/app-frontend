@@ -18,11 +18,15 @@ export default Behavior.extend({
     if (!this.viewportView) throw new Error('FormViewportBehavior requires a viewport view');
 
     this.channel = Radio.channel(`form${ this.view.model.id }`);
+    this.scheduleVisualViewportSizing = () => this.scheduleFrameSizing();
   },
   onAttach() {
     this.channel.reply('form:interact', this.onFormInteract, this);
     this.listenTo(userActivityCh, 'window:resize', this.scheduleFrameSizing);
     this.listenTo(this.view.getRegion('widgets'), 'show', this.onChangeWidgetsView);
+    this.visualViewport = window.visualViewport;
+    this.visualViewport?.addEventListener('resize', this.scheduleVisualViewportSizing);
+    this.visualViewport?.addEventListener('scroll', this.scheduleVisualViewportSizing);
     this.startResizeObserver();
     this.applyFrameSizing();
   },
@@ -30,6 +34,9 @@ export default Behavior.extend({
     this.channel.stopReplying('form:interact', this.onFormInteract, this);
     this.stopListening(userActivityCh, 'window:resize', this.scheduleFrameSizing);
     this.stopListening(this.view.getRegion('widgets'), 'show', this.onChangeWidgetsView);
+    this.visualViewport?.removeEventListener('resize', this.scheduleVisualViewportSizing);
+    this.visualViewport?.removeEventListener('scroll', this.scheduleVisualViewportSizing);
+    this.visualViewport = null;
     this.resizeObserver?.disconnect();
     this.clearScheduledSizing();
     this.clearFrameSizing();

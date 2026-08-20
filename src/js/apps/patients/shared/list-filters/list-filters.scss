@@ -268,3 +268,27 @@
 .list-filters__body:where([hidden]) {
   display: none;
 }
+
+@media (width <= 640px) {
+  .list-filters__clear-filters,
+  .list-filters__custom-filter-button,
+  .list-filters__section-button {
+    min-height: 44px;
+  }
+
+  .list-filters__custom-filter-label,
+  .list-filters__filter-count,
+  .list-filters__load-error {
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .list-filters__skeleton-control {
+    height: 44px;
+  }
+
+  .list-filters__state-filter .button--checkbox {
+    height: 44px;
+    width: 44px;
+  }
+}

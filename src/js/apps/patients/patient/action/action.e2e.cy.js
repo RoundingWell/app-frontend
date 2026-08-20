@@ -2170,6 +2170,36 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .find('iframe')
       .should('be.visible');
 
+    cy.viewport(390, 720);
+
+    cy
+      .get('.patient__context-trail')
+      .then($trail => {
+        const trailBounds = $trail[0].getBoundingClientRect();
+
+        cy
+          .get('.form__controls')
+          .should($controls => {
+            const controlsBounds = $controls[0].getBoundingClientRect();
+
+            expect(controlsBounds.top).to.be.at.least(trailBounds.bottom);
+          });
+      });
+
+    cy
+      .get('.form__controls')
+      .then($controls => {
+        const controlsBounds = $controls[0].getBoundingClientRect();
+
+        cy
+          .get('.form__content')
+          .should($content => {
+            const contentBounds = $content[0].getBoundingClientRect();
+
+            expect(contentBounds.top).to.be.at.least(controlsBounds.bottom);
+          });
+      });
+
     cy.viewport(720, 720);
 
     cy

@@ -13,8 +13,10 @@
   cursor: pointer;
 }
 
-.card-list__item:hover:not(.is-selected) {
-  --card-list-item-background: var(--color-surface-hover);
+@media (hover: hover) and (pointer: fine) {
+  .card-list__item:hover:not(.is-selected) {
+    --card-list-item-background: var(--color-surface-hover);
+  }
 }
 
 .card-list__item.is-selected {

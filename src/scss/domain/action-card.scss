@@ -59,6 +59,10 @@ button.action-card__count:focus {
 }
 
 @container (width <= #{work-card.$stack}) {
+  .action-card__tool {
+    height: 44px;
+  }
+
   .action-card__controls {
     display: flex;
     flex-wrap: wrap;

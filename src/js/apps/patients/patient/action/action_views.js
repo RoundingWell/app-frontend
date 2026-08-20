@@ -88,10 +88,17 @@ const LayoutView = View.extend({
     return this.el;
   },
   getViewportMetrics() {
+    const bounds = this.el.getBoundingClientRect();
+    const visualViewport = window.visualViewport;
+    const visibleTop = visualViewport ? Math.max(bounds.top, visualViewport.offsetTop) : bounds.top;
+    const visibleBottom = visualViewport ?
+      Math.min(bounds.bottom, visualViewport.offsetTop + visualViewport.height) :
+      bounds.bottom;
+
     return {
-      height: this.el.clientHeight,
+      height: Math.max(0, visibleBottom - visibleTop),
       scrollTop: this.el.scrollTop,
-      top: this.el.getBoundingClientRect().top,
+      top: visibleTop,
     };
   },
   scrollViewportTo(options) {

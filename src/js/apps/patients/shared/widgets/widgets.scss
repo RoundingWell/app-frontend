@@ -61,3 +61,9 @@
 .widgets__heading:first-child {
   margin-top: var(--widgets-first-heading-margin-top, var(--widgets-heading-margin-top, 0));
 }
+
+@media (width <= 720px) {
+  .widgets__form-widget {
+    height: 44px;
+  }
+}

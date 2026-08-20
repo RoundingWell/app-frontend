@@ -120,9 +120,10 @@ const IframeView = View.extend({
   ui: {
     iframe: 'iframe',
   },
-  template: hbs`<iframe src="{{ url }}" data-form-viewport-iframe></iframe>`,
+  template: hbs`<iframe src="{{ url }}" title="{{ title }}" data-form-viewport-iframe></iframe>`,
   templateContext() {
     return {
+      title: this.model.get('name'),
       url: this.model.getFormUrl({
         responseId: this.getOption('responseId'),
       }),

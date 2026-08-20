@@ -199,7 +199,7 @@ const CommentView = View.extend({
         <div class="comment__title">
           <span class="comment__author-name">{{ name }}</span>
           <span class="comment__timestamp" data-testid="action-comment-timestamp">{{ formatDateTime created_at "AT_TIME" }}</span>
-          {{#if canEdit}}<span class="js-edit comment__edit">{{far "pen"}} {{ @intl.patients.patient.action.activityViews.commentView.edit }}</span>{{/if}}
+          {{#if canEdit}}<button class="js-edit comment__edit" type="button">{{far "pen"}} {{ @intl.patients.patient.action.activityViews.commentView.edit }}</button>{{/if}}
         </div>
         <div class="comment__message">{{ message }}{{#if edited_at}}<span class="comment__edited"> {{ @intl.patients.patient.action.activityViews.commentView.edited }} </span>{{/if}}</div>
       </div>

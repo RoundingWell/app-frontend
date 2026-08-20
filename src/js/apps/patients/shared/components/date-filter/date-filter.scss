@@ -124,3 +124,16 @@
 .date-filter__date-button:focus {
   background-color: #{$black-90};
 }
+
+@media (width <= 640px) {
+  .date-filter__date-button,
+  .date-filter__nav-button,
+  .date-filter__range,
+  .date-filter__type {
+    min-height: 44px;
+  }
+
+  .date-filter__nav-button {
+    width: 44px;
+  }
+}

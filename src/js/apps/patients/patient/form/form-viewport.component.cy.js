@@ -250,4 +250,31 @@ context('Form Viewport Behavior', function() {
       expect(behavior.resizeObserver).to.equal(undefined);
     });
   });
+
+  specify('responds to the visual viewport while the mobile keyboard changes', function() {
+    let addEventListener;
+    let removeEventListener;
+
+    cy.window().then(win => {
+      addEventListener = cy.spy(win.visualViewport, 'addEventListener');
+      removeEventListener = cy.spy(win.visualViewport, 'removeEventListener');
+    });
+
+    cy.mount(() => new ViewportView());
+
+    cy.window().then(win => {
+      const [behavior] = formView._behaviors;
+      const scheduleFrameSizing = cy.spy(behavior, 'scheduleFrameSizing');
+
+      expect(addEventListener).to.have.been.calledWith('resize', behavior.scheduleVisualViewportSizing);
+      expect(addEventListener).to.have.been.calledWith('scroll', behavior.scheduleVisualViewportSizing);
+
+      win.visualViewport.dispatchEvent(new Event('resize'));
+      expect(scheduleFrameSizing).to.have.been.calledOnce;
+
+      formView.destroy();
+      expect(removeEventListener).to.have.been.calledWith('resize', behavior.scheduleVisualViewportSizing);
+      expect(removeEventListener).to.have.been.calledWith('scroll', behavior.scheduleVisualViewportSizing);
+    });
+  });
 });

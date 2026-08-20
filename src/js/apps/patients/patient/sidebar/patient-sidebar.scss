@@ -200,3 +200,33 @@
 .patient-sidebar__loader-value {
   width: 68%;
 }
+
+@media (width <= 720px) {
+  .patient-sidebar {
+    box-sizing: border-box;
+    padding-bottom: max(var(--dialer-clearance, calc(var(--space-8) + var(--space-4))), env(safe-area-inset-bottom));
+    padding-left: env(safe-area-inset-left);
+    padding-right: max(var(--space-6), env(safe-area-inset-right));
+  }
+
+  .patient-sidebar--list {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .patient-sidebar__header {
+    flex-basis: 44px;
+    min-height: 44px;
+  }
+
+  .patient-sidebar__name,
+  .patient-sidebar__card-toggle {
+    min-height: 44px;
+  }
+
+  .patient-sidebar__menu,
+  .patient-sidebar__close {
+    height: 44px;
+    width: 44px;
+  }
+}

@@ -20,6 +20,7 @@ const CLASS_OPTIONS = [
   'uiView',
   'ui',
 ];
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 const TooltipView = View.extend({
   attributes() {
@@ -43,10 +44,10 @@ export default Component.extend({
   ViewClass: TooltipView,
   className: 'tooltip',
   /* istanbul ignore next */
-  delay() {
+  delay(event) {
     if (_TEST_) return 0;
 
-    return this.shouldDelay ? 200 : 0;
+    return this.shouldDelay && event && event.type === 'pointerenter' ? 200 : 0;
   },
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
@@ -69,13 +70,21 @@ export default Component.extend({
     this.ui.on('focus.tooltip', bind(this.showTooltip, this));
 
     this.ui.on('blur.tooltip', bind(this.hideTooltip, this));
+
+    this.ui.on('keydown.tooltip', bind(this.onKeydown, this));
   },
-  showTooltip() {
+  showTooltip(event) {
     clearTimeout(this.delayTimeout);
 
-    const delay = result(this, 'delay');
+    const delay = this.delay(event);
 
     this.delayTimeout = _delay(bind(this.show, this), delay);
+  },
+  onKeydown(event) {
+    if (event.key !== 'Escape') return;
+
+    event.preventDefault();
+    this.hideTooltip();
   },
   hideTooltip() {
     clearTimeout(this.delayTimeout);
@@ -86,8 +95,10 @@ export default Component.extend({
     clearTimeout(this.delayTimeout);
   },
   onShow() {
+    const prefersReducedMotion = window.matchMedia?.(REDUCED_MOTION_QUERY)?.matches;
+
     animate(this.getView().el, {
-      opacity: { to: 1, duration: 500 },
+      opacity: { to: 1, duration: prefersReducedMotion ? 0 : 150 },
     });
   },
   viewOptions() {

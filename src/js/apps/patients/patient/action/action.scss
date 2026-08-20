@@ -554,8 +554,56 @@
   .patient-action__header,
   .patient-action__form,
   .patient-action__attachments,
-  .patient-action__activity {
+  .patient-action__activity-layout,
+  .patient-action-loading__activity,
+  .patient-action-loading__header {
     width: calc(100% - 32px);
   }
 
+}
+
+@media (width <= 720px) {
+  .patient-action__header,
+  .patient-action__form,
+  .patient-action__attachments,
+  .patient-action__activity-layout,
+  .patient-action-loading__activity,
+  .patient-action-loading__header {
+    width: calc(100% - 24px);
+  }
+
+  .patient-action__chips {
+    --button-border-radius: 22px;
+    --button-min-height: 44px;
+    --patient-readonly-border-radius: 22px;
+    --patient-readonly-min-height: 44px;
+  }
+
+  .patient-action__activity-items,
+  .patient-action__activity-item {
+    font-size: 13px;
+  }
+
+  .patient-action__attachment-form,
+  .patient-action__attachment-control,
+  .patient-action__attachment-icon {
+    flex-basis: 44px;
+    height: 44px;
+    width: 44px;
+  }
+
+  .patient-action__attachment {
+    min-height: 44px;
+  }
+
+  .patient-action__attachment-action {
+    flex-basis: 44px;
+    height: 44px;
+    width: 44px;
+  }
+
+  .patient-action__comment-post {
+    height: 44px;
+    min-height: 44px;
+  }
 }

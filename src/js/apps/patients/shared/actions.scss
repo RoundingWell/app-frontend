@@ -66,3 +66,17 @@
   font-size: 12px;
   margin: 8px 0 0 20px;
 }
+
+@media (width <= 640px) {
+  .action-details-tooltip,
+  .action-form-button {
+    height: 44px;
+    width: 44px;
+  }
+
+  .action-tooltip__flow,
+  .action-tooltip__action-details {
+    font-size: 14px;
+    line-height: 20px;
+  }
+}

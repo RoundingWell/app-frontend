@@ -46,12 +46,18 @@
 }
 
 .comment__edit {
+  background: transparent;
+  border: 0;
   color: color(blue);
   cursor: pointer;
   float: right;
+  font: inherit;
   font-size: 12px;
   font-weight: 600;
+  margin: -6px -8px -6px 0;
   margin-left: 8px;
+  min-height: 32px;
+  padding: 6px 8px;
 
   &:hover {
     opacity: 0.5;
@@ -59,6 +65,19 @@
 
   .icon {
     font-size: 12px;
+  }
+}
+
+@media (width <= 720px) {
+  .comment__edit {
+    margin-block: -12px;
+    min-height: 44px;
+    padding-block: 12px;
+  }
+
+  .comment__actions .button,
+  .comment__delete {
+    min-height: 44px;
   }
 }
 

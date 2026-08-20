@@ -72,7 +72,6 @@ export default Droplist.extend({
     clearText: i18n.clear,
     headingText: i18n.headingText,
     placeholderText: i18n.placeholderText,
-    isSelectlist: true,
     itemTemplateContext() {
       return {
         text: dayjs(this.model.id, timeFormat).format('LT'),

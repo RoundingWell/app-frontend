@@ -156,6 +156,19 @@
     z-index: var(--z-positioned);
   }
 
+  .patient__sidebar-toggle {
+    border-radius: 22px;
+    height: 44px;
+    right: max(8px, env(safe-area-inset-right));
+    width: 44px;
+  }
+
+  .patient__context-link {
+    align-items: center;
+    display: inline-flex;
+    min-height: 44px;
+  }
+
 }
 
 @media (width <= 560px) {
@@ -269,4 +282,18 @@
 
 .patient__context-link .icon {
   margin-right: 8px;
+}
+
+@media (width <= 720px) {
+  .patient__context-trail,
+  .patient__frame--form-expanded .patient__context-trail {
+    margin-right: 60px;
+    padding-left: var(--space-3);
+  }
+
+  .patient__context-trail::after,
+  .patient__frame--form-expanded .patient__context-trail::after {
+    left: var(--space-3);
+    right: -48px;
+  }
 }

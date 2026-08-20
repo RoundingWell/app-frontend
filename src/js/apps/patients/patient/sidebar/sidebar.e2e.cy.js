@@ -166,11 +166,25 @@ context('patient sidebar', function() {
     cy
       .get('.patient__sidebar-toggle')
       .should('have.attr', 'aria-expanded', 'false')
+      .and($button => {
+        const bounds = $button[0].getBoundingClientRect();
+
+        expect(bounds.height).to.be.at.least(44);
+        expect(bounds.width).to.be.at.least(44);
+      })
       .click();
 
     cy
       .get('.patient__sidebar')
       .should('be.visible');
+
+    cy
+      .get('.patient-sidebar__card-toggle')
+      .should($buttons => {
+        [...$buttons].forEach(button => {
+          expect(button.getBoundingClientRect().height).to.be.at.least(44);
+        });
+      });
 
     cy
       .get('.patient__sidebar-toggle')

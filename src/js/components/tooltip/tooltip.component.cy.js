@@ -118,6 +118,84 @@ context('Tooltip', function() {
     });
   });
 
+  specify('Delaying pointer hover but not touch or keyboard triggers', function() {
+    const TriggerTestTooltip = Tooltip.extend({
+      delay(event) {
+        return event && event.type === 'pointerenter' ? 100 : 0;
+      },
+    });
+    const TriggerTestView = View.extend({
+      template: hbs`<button type="button">Show details</button>`,
+      ui: {
+        button: 'button',
+      },
+      onRender() {
+        new TriggerTestTooltip({
+          message: 'More information',
+          uiView: this,
+          ui: this.ui.button,
+        });
+      },
+    });
+
+    cy.clock();
+
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new TriggerTestView();
+    });
+
+    cy
+      .contains('button', 'Show details')
+      .as('trigger')
+      .trigger('pointerover');
+
+    cy.get('.tooltip').should('not.exist');
+    cy.tick(99);
+    cy.get('.tooltip').should('not.exist');
+    cy.tick(1);
+    cy.get('.tooltip').should('contain', 'More information');
+
+    cy
+      .get('@trigger')
+      .trigger('mouseout')
+      .trigger('pointerdown', { pointerType: 'touch' });
+
+    cy.tick(0);
+    cy.get('.tooltip').should('contain', 'More information');
+
+    cy
+      .get('@trigger')
+      .trigger('mouseout')
+      .focus();
+
+    cy.tick(0);
+    cy.get('.tooltip').should('contain', 'More information');
+  });
+
+  specify('Dismissing with Escape without moving focus', function() {
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new ButtonView({ model: testCollection.first() });
+    });
+
+    cy
+      .contains('button', 'Top Left')
+      .focus()
+      .should('be.focused');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Top Left');
+
+    cy
+      .contains('button', 'Top Left')
+      .type('{esc}')
+      .should('be.focused');
+
+    cy.get('.tooltip').should('not.exist');
+  });
+
   specify('Manual trigger', function() {
     const ManualTestView = View.extend({
       tagName: 'button',
