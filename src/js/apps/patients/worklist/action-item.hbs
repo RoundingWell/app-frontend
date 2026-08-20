@@ -1,15 +1,19 @@
-<div class="worklist-list__check js-no-click"><span data-check-region></span></div>
-<div class="work-card__surface js-action-surface">
+<div class="patient-list-page__row-selection worklist-list__check js-no-click"><span data-check-region></span></div>
+<div class="work-card__surface">
   <div class="work-card__main">
     <div class="work-card__heading">
       <span class="work-card__state patient-list__state worklist-list__state js-no-click" data-state-region></span>
       <div class="work-card__copy">
         <div class="work-card__title-row">
-          <button class="work-card__subject patient-list__patient patient-list__patient--primary worklist-list__patient worklist-list__patient--action js-patient" type="button" aria-expanded="false" aria-controls="worklist-list-sidebar">{{ patient.first_name }} {{ patient.last_name }}</button>
-          <span class="work-card__separator">·</span>
-          <button class="work-card__title js-primary" type="button">{{ name }}&#8203;</button>
-          <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-details-region></span></span>
-          <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-form-region></span></span>
+          <div class="work-card__title-copy">
+            <button class="work-card__subject patient-list__patient patient-list__patient--primary worklist-list__patient worklist-list__patient--action js-patient" type="button" aria-expanded="false" aria-controls="worklist-list-sidebar">{{ patient.first_name }} {{ patient.last_name }}</button>
+            <span class="work-card__separator">·</span>
+            <button class="work-card__title js-primary" type="button">{{ name }}&#8203;</button>
+          </div>
+          <div class="work-card__tools">
+            <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-details-region></span></span>
+            <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-form-region></span></span>
+          </div>
         </div>
         {{#if flowName}}
         <div class="work-card__context">

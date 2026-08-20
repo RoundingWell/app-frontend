@@ -17,6 +17,7 @@ import ActivityApp from 'js/apps/patients/patient/flow/flow-activity_app';
 import { FlowLoadingView, LayoutView, HeaderView, ListView, MenuView, ProgressView, SelectAllView, i18n } from 'js/apps/patients/patient/flow/flow_views';
 import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 import { AddButtonView } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
+import { isPhoneViewport } from 'js/apps/patients/shared/selection-mode';
 
 export default App.extend({
   StateModel,
@@ -26,7 +27,7 @@ export default App.extend({
     bulkEditActions: BulkEditActionsApp,
   },
   stateEvents: {
-    'change:actionsSelected': 'onChangeSelected',
+    'change:actionsSelected change:isSelectionMode': 'onChangeSelected',
   },
   onChangeSelected() {
     this.toggleBulkSelect();
@@ -61,7 +62,8 @@ export default App.extend({
 
     this.subscribe();
 
-    this.showView(new LayoutView());
+    this.showView(new LayoutView({ model: this.getState() }));
+    this.listenTo(this.getView(), 'bulk:open', this.onOpenBulkEdit);
 
     this.trigger('context:change', {
       page: 'flow',
@@ -185,30 +187,59 @@ export default App.extend({
 
     this.showSelectAll();
 
-    if (this.selected.length) {
-      this.showBulkEdit();
+    const app = this.getChildApp('bulkEditActions');
+
+    if (!this.selected.length) {
+      app.stop();
+      this.showAdd();
       return;
     }
 
-    this.stopChildApp('bulkEditActions');
-    this.showAdd();
+    if (isPhoneViewport()) {
+      if (app.isRunning() && app.getPresentation() === 'modal') {
+        app.updateCollection(this.selected);
+      } else if (app.isRunning()) {
+        app.stop();
+      }
+      this.showAdd();
+      return;
+    }
+
+    this.showBulkEdit();
   },
   onClickBulkCancel() {
-    this.getState().clearSelected();
+    const app = this.getChildApp('bulkEditActions');
+    const isModal = app.getPresentation() === 'modal';
+
+    app.stop();
+    if (isModal) return;
+
+    this.getState().exitSelectionMode();
   },
-  showBulkEdit() {
+  onOpenBulkEdit() {
+    if (!isPhoneViewport() || !this.selected?.length) return;
+
+    this.showBulkEdit({ presentation: 'modal' });
+  },
+  showBulkEdit({ presentation = 'inline' } = {}) {
     const app = this.getChildApp('bulkEditActions');
 
     if (app.isRunning()) {
-      app.updateCollection(this.selected);
-      return;
+      if (app.getPresentation() === presentation) {
+        app.updateCollection(this.selected);
+        return;
+      }
+
+      app.stop();
     }
 
     this.startChildApp('bulkEditActions', {
+      presentation,
       region: this.getRegion('tools'),
       state: { collection: this.selected },
     });
 
+    this.stopListening(app);
     this.listenTo(app, {
       'cancel': this.onClickBulkCancel,
       'applyOwner'(owner) {
@@ -221,11 +252,11 @@ export default App.extend({
           .then(() => {
             this.showUpdateSuccess(itemCount);
             app.stop();
-            this.getState().clearSelected();
+            this.getState().exitSelectionMode();
           })
           .catch(() => {
             Radio.request('alert', 'show:error', i18n.bulkEditFailure);
-            this.getState().clearSelected();
+            this.getState().exitSelectionMode();
             this.restart({
               flowId: this.flow.id,
               patient: this.patient,

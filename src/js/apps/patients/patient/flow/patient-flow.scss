@@ -230,6 +230,13 @@
   width: 132px;
 }
 
+.patient-flow__selection-context,
+.patient-flow__selection-start,
+.patient-flow__selection-all-label,
+.patient-flow__bulk-edit-open {
+  display: none;
+}
+
 .patient-flow__list {
   --card-list-padding: 0;
 
@@ -256,6 +263,135 @@
 @container (width <= 720px) {
   .patient-flow__action-check {
     height: 64px;
+  }
+}
+
+@media (width <= 640px) {
+  .patient-flow__frame {
+    --patient-flow-card-offset: 0;
+    --patient-flow-content-width: calc(100% - var(--space-6));
+
+    box-sizing: border-box;
+  }
+
+  .patient-flow__actions {
+    background: var(--color-page-bg);
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    isolation: isolate;
+    padding-block: var(--space-2);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
+
+  .patient-flow__selection-all,
+  .patient-flow__actions.is-selection-mode .patient-flow__progress,
+  .patient-flow__actions.is-selection-mode .patient-flow__selection-start,
+  .patient-flow__selection-context {
+    display: none;
+  }
+
+  .patient-flow__selection-start {
+    align-items: center;
+    display: inline-flex;
+    flex: none;
+    grid-column: 3;
+    min-height: 44px;
+    padding-inline: var(--space-2);
+  }
+
+  .patient-flow__actions:has(.patient-flow__select-all:disabled) .patient-flow__selection-start {
+    display: none;
+  }
+
+  .patient-flow__actions.is-selection-mode .patient-flow__selection-context {
+    display: contents;
+  }
+
+  .patient-flow__actions.is-selection-mode .patient-flow__selection-cancel {
+    grid-column: 1;
+  }
+
+  .patient-flow__actions.is-selection-mode .patient-flow__selection-count {
+    align-items: center;
+    display: flex;
+    grid-column: 2;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .patient-flow__actions.is-selection-mode .patient-flow__actions-start {
+    flex: none;
+    grid-column: 3;
+    justify-self: end;
+    width: auto;
+  }
+
+  .patient-flow__actions.is-selection-mode .patient-flow__selection-all {
+    align-items: center;
+    display: flex;
+    gap: var(--space-1);
+  }
+
+  .patient-flow__actions.is-selection-mode .patient-flow__selection-all-label {
+    color: var(--color-text-secondary);
+    display: inline;
+    font-size: 14px;
+  }
+
+  .patient-flow__actions.is-selection-mode .patient-flow__actions-start > :not(.patient-flow__selection-all) {
+    display: none;
+  }
+
+  .patient-flow__selection-cancel,
+  .patient-flow__select-all {
+    min-height: 44px;
+  }
+
+  .patient-flow__select-all {
+    flex-basis: 44px;
+    width: 44px;
+  }
+
+  .patient-flow__selection-count {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .patient-flow__actions.is-selection-mode.has-selection .patient-flow__bulk-edit-open {
+    bottom: max(var(--space-4), env(safe-area-inset-bottom));
+    box-shadow: 0 4px 16px rgb(0 0 0 / 24%);
+    display: block;
+    left: max(var(--space-4), env(safe-area-inset-left));
+    min-height: 52px;
+    position: fixed;
+    right: max(var(--space-4), env(safe-area-inset-right));
+    width: auto;
+    z-index: 4;
+  }
+
+  .patient-flow__frame:has(.patient-flow__actions.is-selection-mode.has-selection) {
+    padding-bottom: calc(68px + max(var(--space-4), env(safe-area-inset-bottom)));
+  }
+
+  .patient-flow__action-item {
+    --work-card-gap: 0;
+
+    position: relative;
+  }
+
+  .patient-flow__action-check {
+    display: none;
+  }
+
+  .patient-flow__action-item.is-selection-mode .work-card__main {
+    padding-right: calc(44px + var(--space-4));
+  }
+
+  .patient-flow__header {
+    padding-block: var(--space-4) var(--space-6);
   }
 }
 
@@ -322,5 +458,24 @@
 
   &::before {
     content: " • ";
+  }
+}
+
+@container (width <= 720px) {
+  .patient-flow__select-all,
+  .patient-flow__action-check {
+    flex-basis: 44px;
+    width: 44px;
+  }
+
+  .patient-flow__action-check .button--checkbox,
+  .patient-flow__action-details,
+  .patient-flow__action-form {
+    height: 44px;
+    width: 44px;
+  }
+
+  .patient-flow__activity-item {
+    font-size: 13px;
   }
 }

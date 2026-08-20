@@ -137,6 +137,8 @@
 
 @media (width <= 720px) {
   .patient__frame {
+    --patient-frame-control-offset-top: var(--space-1);
+
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -287,8 +289,13 @@
 @media (width <= 720px) {
   .patient__context-trail,
   .patient__frame--form-expanded .patient__context-trail {
+    gap: 0 var(--space-2);
     margin-right: 60px;
-    padding-left: var(--space-3);
+    padding: var(--space-1) 0 var(--space-1) var(--space-3);
+  }
+
+  .patient__context-segment {
+    min-height: 44px;
   }
 
   .patient__context-trail::after,

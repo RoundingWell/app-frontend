@@ -1,14 +1,22 @@
-<div class="patient-flow__action-check js-no-click"><span data-check-region></span></div>
-<div class="work-card__surface js-action-surface">
+<div class="patient-list-page__row-selection patient-flow__action-check js-no-click"><span data-check-region></span></div>
+<div class="work-card__surface">
   <div class="work-card__main">
     <div class="work-card__heading">
       <span class="work-card__state patient-list__state js-no-click" data-state-region></span>
-      <button class="work-card__title js-primary" type="button">
-        {{ name }}
-        {{~#unless name}}<em>{{ @intl.patients.shared.actionCard.newAction }}</em>{{/unless~}}
-      </button>
-      <span class="action-card__tool js-no-click" data-details-region></span>
-      <span class="action-card__tool js-no-click" data-form-region></span>
+      <div class="work-card__copy">
+        <div class="work-card__title-row">
+          <div class="work-card__title-copy">
+            <button class="work-card__title js-primary" type="button">
+              {{ name }}
+              {{~#unless name}}<em>{{ @intl.patients.shared.actionCard.newAction }}</em>{{/unless~}}
+            </button>
+          </div>
+          <div class="work-card__tools">
+            <span class="action-card__tool js-no-click" data-details-region></span>
+            <span class="action-card__tool js-no-click" data-form-region></span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="work-card__aside">

@@ -4,11 +4,20 @@
     <div data-menu-region></div>
   </header>
   <div class="patient-flow__actions js-actions">
+    <div class="patient-flow__selection-context">
+      <button class="button button--text patient-flow__selection-cancel js-selection-cancel" type="button">{{ @intl.patients.shared.selectionMode.cancel }}</button>
+      <span class="patient-flow__selection-count js-selection-count" role="status"></span>
+    </div>
     <div class="patient-flow__actions-start">
-      <div data-select-all-region></div>
+      <div class="patient-flow__selection-all">
+        <span class="patient-flow__selection-all-label">{{ @intl.patients.shared.selectionMode.all }}</span>
+        <span data-select-all-region></span>
+      </div>
       <div data-tools-region></div>
     </div>
     <div data-progress-region></div>
+    <button class="button button--link patient-flow__selection-start js-selection-start" type="button">{{ @intl.patients.shared.selectionMode.start }}</button>
+    <button class="button button--primary patient-flow__bulk-edit-open js-bulk-edit-open" type="button">{{ @intl.patients.shared.selectionMode.edit }}</button>
   </div>
   <div data-action-list-region></div>
   <div class="patient-detail-page__activity patient-flow__activity">

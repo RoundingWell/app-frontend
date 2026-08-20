@@ -1208,16 +1208,194 @@ context('schedule page', function() {
       .should('be.visible');
 
     cy
+      .get('.list-page__header-top')
+      .should($header => {
+        const title = $header[0].querySelector('.list-page__title').getBoundingClientRect();
+        const filters = $header[0].querySelector('.patient-list-page__filter-controls').getBoundingClientRect();
+        const date = $header[0].querySelector('.patient-list-page__date-filter').getBoundingClientRect();
+        const search = $header[0].querySelector('.patient-list-page__find-search').getBoundingClientRect();
+
+        expect(filters.top).to.be.lessThan(title.bottom);
+        expect(filters.bottom).to.be.greaterThan(title.top);
+        expect(date.top).to.be.lessThan(search.bottom);
+        expect(date.bottom).to.be.greaterThan(search.top);
+        expect(date.top).to.be.at.least(title.bottom);
+      });
+
+    cy
+      .get('[data-date-filter-region] .date-filter__navigation')
+      .should('not.be.visible');
+
+    cy
+      .get('[data-date-filter-region] .date-filter__date-button')
+      .click();
+
+    cy
+      .get('.date-filter__pop-navigation')
+      .should('be.visible')
+      .find('.date-filter__nav-button')
+      .should('have.length', 2);
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
       .get('@rows')
       .first()
       .should('be.visible');
 
+    [320, 390].forEach(width => {
+      cy.viewport(width, 720);
+
+      cy
+        .get('@rows')
+        .first()
+        .find('.schedule-list__day-card')
+        .should($card => {
+          const bounds = $card[0].getBoundingClientRect();
+
+          expect(bounds.left).to.be.at.least(0);
+          expect(bounds.right).to.be.at.most(width);
+        });
+    });
+
+    cy
+      .get('@rows')
+      .first()
+      .find('.action-details-tooltip, .action-form-button, .schedule-list__action-state .button')
+      .should($controls => {
+        [...$controls].forEach(control => {
+          const bounds = control.getBoundingClientRect();
+
+          expect(bounds.height).to.be.at.least(44);
+          expect(bounds.width).to.be.at.least(44);
+        });
+      });
+
+    cy
+      .get('@rows')
+      .first()
+      .find('.schedule-list__check .button--checkbox')
+      .should('not.be.visible');
+
+    cy
+      .get('.patient-list-page__selection-start')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('@rows')
+      .find('.patient-list-page__row-selection .button--checkbox')
+      .should($controls => {
+        [...$controls].forEach(control => {
+          const bounds = control.getBoundingClientRect();
+
+          expect(bounds.height).to.be.at.least(44);
+          expect(bounds.width).to.be.at.least(44);
+        });
+      });
+
+    cy
+      .get('@rows')
+      .find('.patient-list-page__row-selection .button__checkbox-icon')
+      .should('be.visible');
+
+    cy
+      .get('@rows')
+      .first()
+      .should($row => {
+        const checkbox = $row[0].querySelector('.patient-list-page__row-selection .button__checkbox-icon');
+        const comments = $row[0].querySelector('.schedule-list__comments');
+
+        if (!comments) return;
+
+        expect(comments.getBoundingClientRect().right).to.be.at.most(checkbox.getBoundingClientRect().left);
+      });
+
+    cy
+      .get('@rows')
+      .first()
+      .find('.js-select')
+      .should($button => {
+        expect($button.attr('aria-label')).to.match(/^Select action .+ for .+$/);
+      });
+
+    cy
+      .get('@rows')
+      .first()
+      .click('center');
+
+    cy
+      .get('.schedule-list__day-list-row')
+      .first()
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('@rows')
+      .first()
+      .find('.patient-list-page__row-selection .js-select')
+      .should('have.attr', 'aria-checked', 'true')
+      .find('.button__checkbox-icon--selected')
+      .should('be.visible');
+
+    cy
+      .get('.patient-list-page__bulk-edit')
+      .should('be.empty');
+
+    cy
+      .get('.patient-list-page__bulk-edit-open')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.bulk-edit-modal')
+      .should('be.visible')
+      .and('have.attr', 'role', 'dialog')
+      .and('contain', 'Edit 1 Action');
+
+    cy
+      .focused()
+      .type('{esc}');
+
+    cy
+      .get('.bulk-edit-modal')
+      .should('not.exist');
+
+    cy
+      .get('.patient-list-page__bulk-edit-open')
+      .should('be.focused');
+
+    cy
+      .location('pathname')
+      .should('contain', '/schedule');
+
+    cy
+      .get('.patient-list-page__selection-cancel')
+      .click();
+
+    cy.document().then(document => {
+      expect(document.documentElement.scrollWidth).to.be.at.most(390);
+    });
+
     cy
       .get('[data-filters-region] button')
+      .should($button => {
+        const button = $button[0].getBoundingClientRect();
+
+        expect(button.height).to.be.at.least(44);
+        expect(button.width).to.be.at.least(44);
+      })
       .click();
 
     cy
       .get('.js-close-sidebar-drawer')
+      .should($button => {
+        const button = $button[0].getBoundingClientRect();
+
+        expect(button.height).to.be.at.least(44);
+        expect(button.width).to.be.at.least(44);
+      })
       .should('be.focused')
       .type('{esc}');
 
@@ -1286,7 +1464,9 @@ context('schedule page', function() {
       .find('.js-select')
       .should('have.attr', 'role', 'checkbox')
       .and('have.attr', 'aria-checked', 'false')
-      .and('have.attr', 'aria-label', 'Select action')
+      .should($button => {
+        expect($button.attr('aria-label')).to.match(/^Select action .+ for .+$/);
+      })
       .click();
 
     cy
@@ -1294,7 +1474,9 @@ context('schedule page', function() {
       .first()
       .find('.js-select')
       .should('have.attr', 'aria-checked', 'true')
-      .and('have.attr', 'aria-label', 'Deselect action')
+      .should($button => {
+        expect($button.attr('aria-label')).to.match(/^Deselect action .+ for .+$/);
+      })
       .click();
   });
 

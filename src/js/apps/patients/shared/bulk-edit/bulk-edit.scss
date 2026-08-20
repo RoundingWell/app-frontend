@@ -114,3 +114,50 @@
   gap: 8px;
   margin-left: auto;
 }
+
+.bulk-edit-modal {
+  display: flex;
+  gap: 0;
+  overflow: hidden;
+}
+
+.bulk-edit-modal > .bulk-edit-inline__header {
+  border-bottom: 1px solid var(--color-divider);
+  flex: none;
+  min-height: 64px;
+  padding: var(--space-3) var(--space-6);
+}
+
+.bulk-edit-modal > .bulk-edit-inline__controls {
+  align-content: flex-start;
+  border-top: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+@media (width <= 640px) {
+  .bulk-edit-modal > .bulk-edit-inline__header {
+    padding:
+      max(var(--space-3), env(safe-area-inset-top))
+      max(var(--space-4), env(safe-area-inset-right))
+      var(--space-3)
+      max(var(--space-4), env(safe-area-inset-left));
+  }
+
+  .bulk-edit-modal > .bulk-edit-inline__controls {
+    padding:
+      var(--space-5)
+      max(var(--space-4), env(safe-area-inset-right))
+      max(var(--space-5), env(safe-area-inset-bottom))
+      max(var(--space-4), env(safe-area-inset-left));
+  }
+
+  .bulk-edit-inline__cancel,
+  .bulk-edit-inline__control > .button,
+  .bulk-edit-inline__save {
+    --button-min-height: 44px;
+
+    min-height: 44px;
+  }
+}

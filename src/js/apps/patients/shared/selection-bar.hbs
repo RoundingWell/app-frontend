@@ -1,5 +1,14 @@
-<div class="patient-list-page__selection" data-select-all-region></div>
+<div class="patient-list-page__selection-context">
+  <button class="button button--text patient-list-page__selection-cancel js-selection-cancel" type="button">{{ @intl.patients.shared.selectionMode.cancel }}</button>
+  <span class="patient-list-page__selection-count js-selection-count" role="status"></span>
+</div>
+<div class="patient-list-page__selection">
+  <span class="patient-list-page__selection-all-label">{{ @intl.patients.shared.selectionMode.all }}</span>
+  <span data-select-all-region></span>
+</div>
 <div class="patient-list-page__bulk-edit" data-bulk-edit-region></div>
+<button class="button button--primary patient-list-page__bulk-edit-open js-bulk-edit-open" type="button">{{ @intl.patients.shared.selectionMode.edit }}</button>
 <div class="patient-list-page__summary">
   <div class="patient-list-page__count" data-count-region></div>
+  <button class="button button--link patient-list-page__selection-start js-selection-start" type="button">{{ @intl.patients.shared.selectionMode.start }}</button>
 </div>

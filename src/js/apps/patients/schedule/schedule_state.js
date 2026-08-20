@@ -27,6 +27,7 @@ const StateModel = Backbone.Model.extend({
         relativeDate: null,
       },
       lastSelectedIndex: null,
+      isSelectionMode: false,
       actionsSelected: {},
       searchQuery: '',
       worklist: null,
@@ -61,7 +62,7 @@ const StateModel = Backbone.Model.extend({
     localStore.remove(this.getStoreKey());
   },
   onChange() {
-    localStore.set(this.getStoreKey(), omit(this.attributes, 'filtersCount', 'lastSelectedIndex', 'searchQuery'));
+    localStore.set(this.getStoreKey(), omit(this.attributes, 'filtersCount', 'isSelectionMode', 'lastSelectedIndex', 'searchQuery'));
   },
   setFiltersSidebarCollapsed(isCollapsed) {
     return this.set('filtersSidebarCollapsed', isCollapsed);

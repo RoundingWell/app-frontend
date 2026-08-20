@@ -332,6 +332,7 @@ context('patient sidebar', function() {
               form_id: testReadOnlyForm.id,
               form_name: 'Test Modal Read Only Form',
               is_modal: true,
+              modal_size: 'regular',
             },
           }),
           addWidget({
@@ -545,7 +546,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled');
 
@@ -586,13 +587,13 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled')
       .wait('@postFormResponse');
@@ -605,14 +606,14 @@ context('patient sidebar', function() {
       .as('postFormResponse');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click()
       .wait('@postFormResponse');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .should('not.exist');
 
     cy
@@ -632,7 +633,7 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('button:has(.fa-shield-check)')
       .as('draftStatusButton')
       .trigger('pointerover');
@@ -701,12 +702,12 @@ context('patient sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-close')
       .first()
       .click();
@@ -729,17 +730,17 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.modal__footer-actions .js-close')
       .should('not.exist');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.modal__footer-actions .js-submit')
       .should('contain', 'Done');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-close')
       .first()
       .click();
@@ -751,7 +752,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-small')
       .find('.js-close')
       .first()
       .click();
@@ -763,18 +764,13 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
-      .should('not.exist');
+      .get('.modal--form-large')
+      .should('exist')
+      .find('.js-close')
+      .first()
+      .click();
 
-    cy
-      .url()
-      .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
-
-    cy.go('back');
-
-    cy
-      .url()
-      .should('contain', `patient/dashboard/${ testPatient.id }`);
+    cy.url().should('contain', `patient/dashboard/${ testPatient.id }`);
 
     cy
       .get('@patientSidebar')

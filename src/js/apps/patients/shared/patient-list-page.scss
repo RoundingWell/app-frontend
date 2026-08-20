@@ -99,6 +99,13 @@
   min-height: var(--patient-list-page-selection-min-height);
 }
 
+.patient-list-page__selection-context,
+.patient-list-page__selection-start,
+.patient-list-page__selection-all-label,
+.patient-list-page__bulk-edit-open {
+  display: none;
+}
+
 .patient-list-page__bulk-edit:not(:empty) {
   align-items: center;
   display: flex;
@@ -214,6 +221,65 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .patient-list-page .list-page__header-top {
+    gap: var(--space-1);
+    padding-block: var(--space-1);
+    position: relative;
+  }
+
+  .patient-list-page .list-page__title {
+    overflow: hidden;
+    padding-right: calc(44px + var(--space-2));
+  }
+
+  .patient-list-page .list-page__title > [data-title-region] {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .patient-list-page .list-page__title-content {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .patient-list-page .list-page__title-content > [data-owner-filter-region] {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .patient-list-page .list-page__topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) min(44vw, 152px);
+  }
+
+  .patient-list-page__filter-controls {
+    position: absolute;
+    right: 0;
+    top: var(--space-1);
+  }
+
+  .patient-list-page__date-filter {
+    max-width: 224px;
+    min-width: 0;
+  }
+
+  .patient-list-page__date-filter .date-filter__controls,
+  .patient-list-page__date-filter .date-filter__date-button {
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .patient-list-page__date-filter .date-filter__date-button {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .patient-list-page__find-search {
+    width: 100%;
+  }
+
   .patient-list-page__sidebar {
     background: var(--color-page-bg);
     box-shadow: -8px 8px 24px rgb(0 0 0 / 16%);
@@ -221,7 +287,11 @@
     height: 100%;
     max-width: 100%;
     overflow: hidden;
-    padding: var(--space-8) var(--space-6) var(--space-6);
+    padding:
+      max(var(--space-1), env(safe-area-inset-top))
+      max(var(--space-6), env(safe-area-inset-right))
+      max(var(--space-6), env(safe-area-inset-bottom))
+      max(var(--space-6), env(safe-area-inset-left));
     position: absolute;
     right: 0;
     top: 0;
@@ -243,20 +313,179 @@
   .patient-list-page__drawer-close {
     align-items: center;
     display: flex;
-    height: 32px;
+    height: 44px;
     justify-content: center;
     position: absolute;
-    right: var(--space-4);
-    top: var(--space-2);
-    width: 32px;
-    z-index: 1;
+    right: max(var(--space-2), env(safe-area-inset-right));
+    top: max(var(--space-1), env(safe-area-inset-top));
+    width: 44px;
+    z-index: 2;
+  }
+
+  .patient-list-page__all-filters-button {
+    border-radius: 22px;
+    height: 44px;
+    width: 44px;
+  }
+
+  .patient-list-page__selection .button--checkbox {
+    --button-checkbox-justify-content: center;
+
+    height: 44px;
+    width: 44px;
+  }
+
+  .is-selection-mode > .patient-list-page__row-selection {
+    --button-align-items: center;
+    --button-checkbox-justify-content: center;
+    --button-padding: 0;
+
+    align-items: center;
+    display: flex;
+    height: 44px;
+    inset: var(--space-2) var(--space-2) auto auto;
+    justify-content: center;
+    position: absolute;
+    width: 44px;
+    z-index: 2;
+  }
+
+  .patient-list-page__row-selection > [data-check-region] {
+    display: block;
+    height: 44px;
+    width: 44px;
+  }
+
+  .patient-list-page__row-selection .button--checkbox {
+    height: 44px;
+    width: 44px;
+  }
+
+  .patient-list-page__filters {
+    display: grid;
+    gap: var(--space-2);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .patient-list-page__selection,
+  .patient-list-page__bulk-edit {
+    display: none;
+  }
+
+  .patient-list-page__selection-context {
+    display: none;
+  }
+
+  .patient-list-page__selection-cancel {
+    min-height: 44px;
+  }
+
+  .patient-list-page__selection-count {
+    align-items: center;
+    color: var(--color-text);
+    display: flex;
+    font-size: 14px;
+    justify-content: center;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .patient-list-page__selection-start {
+    align-items: center;
+    display: inline-flex;
+    justify-self: end;
+    margin-left: auto;
+    min-height: 44px;
+    padding-inline: var(--space-2);
+  }
+
+  .patient-list-page__filters:has(.patient-list-page__selection .button--checkbox:disabled) .patient-list-page__selection-start {
+    display: none;
+  }
+
+  .patient-list-page__filters.is-selection-mode .patient-list-page__selection-context,
+  .patient-list-page__filters.is-selection-mode .patient-list-page__selection {
+    display: flex;
+  }
+
+  .patient-list-page__filters.is-selection-mode {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .patient-list-page__filters.is-selection-mode .patient-list-page__selection-context {
+    display: contents;
+  }
+
+  .patient-list-page__filters.is-selection-mode .patient-list-page__selection-cancel {
+    grid-column: 1;
+  }
+
+  .patient-list-page__filters.is-selection-mode .patient-list-page__selection-count {
+    grid-column: 2;
+  }
+
+  .patient-list-page__filters.is-selection-mode .patient-list-page__selection {
+    gap: var(--space-1);
+    grid-column: 3;
+    margin-left: auto;
+    margin-right: calc(-1 * var(--space-1));
+  }
+
+  .patient-list-page__filters.is-selection-mode .patient-list-page__selection-all-label {
+    align-items: center;
+    color: var(--color-text-secondary);
+    display: flex;
+    font-size: 14px;
+  }
+
+  .patient-list-page__filters.is-selection-mode .patient-list-page__summary {
+    display: none;
+  }
+
+  .patient-list-page__filters.is-selection-mode.has-selection .patient-list-page__bulk-edit-open {
+    bottom: max(var(--space-4), env(safe-area-inset-bottom));
+    box-shadow: 0 4px 16px rgb(0 0 0 / 24%);
+    display: block;
+    left: max(var(--space-4), env(safe-area-inset-left));
+    min-height: 52px;
+    position: fixed;
+    right: max(var(--space-4), env(safe-area-inset-right));
+    width: auto;
+    z-index: 4;
+  }
+
+  .patient-list-page__summary {
+    min-height: 44px;
+  }
+
+  .patient-list-page__find-controls {
+    align-items: center;
+    display: block;
+    width: 100%;
+  }
+
+  .patient-list-page__find-search .list-search__container,
+  .patient-list-page__find-search .list-search__input {
+    height: 44px;
+  }
+
+  .patient-list-page__find-search .list-search__input {
+    border-radius: 22px;
+    padding-block: 10px;
+  }
+
+  .patient-list-page__find-search :is(.list-search__search-icon, .list-search__clear-icon) {
+    top: 10px;
+  }
+
+  .list-page__main:has(.patient-list-page__filters.is-selection-mode.has-selection) {
+    padding-bottom: calc(68px + max(var(--space-4), env(safe-area-inset-bottom)));
   }
 }
 
 @media (width <= 560px) {
   .patient-list-page__filters {
-    flex-wrap: wrap;
-    padding-block: var(--space-3);
+    padding-block: var(--space-2);
   }
 
   .patient-list-page__sidebar {
@@ -264,7 +493,7 @@
   }
 
   .patient-list-page__find-controls {
-    grid-column: 1 / -1;
+    grid-column: auto;
     width: 100%;
   }
 }

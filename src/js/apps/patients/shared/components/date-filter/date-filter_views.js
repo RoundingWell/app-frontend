@@ -59,68 +59,25 @@ const RelativeTemplate = hbs`{{formatMessage (intlGet "patients.shared.component
 
 const DefaultTemplate = hbs`{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.defaultTemplate.thisMonth }}`;
 
-const ControllerView = View.extend({
-  className: 'date-filter__controls',
+const NavigationView = View.extend({
+  className: 'button-group button-group--joined date-filter__navigation',
   template: hbs`
-    <button class="button date-filter__date-button js-date" type="button">
-      {{far "calendar-days"}}{{~ remove_whitespace ~}}
-      {{formatMessage (intlGet "patients.shared.components.dateFilterComponent.dateTypes") type=dateType }}{{~ remove_whitespace ~}}:
-      <span data-date-picker-label-region></span>
-    </button>{{~ remove_whitespace ~}}
-    {{#unless hidePrevNextButtons}}
-      <span class="button-group button-group--joined date-filter__navigation">
-        <button class="button button--compact date-filter__nav-button date-filter__nav-button--prev js-prev" type="button">{{far "angle-left"}}</button>{{~ remove_whitespace ~}}
-        <button class="button button--compact date-filter__nav-button date-filter__nav-button--next js-next" type="button">{{far "angle-right"}}</button>
-      </span>
-    {{/unless}}
+    <button class="button button--compact date-filter__nav-button date-filter__nav-button--prev js-prev" type="button">{{far "angle-left"}}</button>{{~ remove_whitespace ~}}
+    <button class="button button--compact date-filter__nav-button date-filter__nav-button--next js-next" type="button">{{far "angle-right"}}</button>
   `,
-  regions: {
-    datepicker: {
-      el: '[data-date-picker-label-region]',
-      replaceElement: true,
-    },
-  },
   ui: {
     next: '.js-next',
     prev: '.js-prev',
-    date: '.js-date',
   },
   triggers: {
     'click @ui.prev': 'click:prev',
     'click @ui.next': 'click:next',
-    'click @ui.date': 'click:date',
-  },
-  getLabelTemplate() {
-    if (this.model.get('selectedDate')) return DateTemplate;
-    if (this.model.get('selectedMonth')) return MonthTemplate;
-    if (this.model.get('selectedWeek')) return WeekTemplate;
-    if (this.model.get('relativeDate')) return RelativeTemplate;
-    return DefaultTemplate;
   },
   onRender() {
-    this.showChildView('datepicker', {
-      tagName: 'span',
-      model: this.model,
-      template: this.getLabelTemplate(),
-      templateContext() {
-        if (!this.model.get('selectedWeek')) return {};
-        return {
-          selectedEndWeek: this.model.dayjs('selectedWeek').endOf('week'),
-        };
-      },
-    });
-
-    if (this.getOption('showPrevNextButtons') === false || this.model.get('relativeDate') === 'alltime') return;
-
-    this.getTooltips();
-  },
-  templateContext() {
-    return {
-      hidePrevNextButtons: this.getOption('showPrevNextButtons') === false || this.model.get('relativeDate') === 'alltime',
-    };
-  },
-  getTooltips() {
     const tooltipMessages = this.getTooltipMessages();
+
+    this.ui.prev.attr('aria-label', tooltipMessages.prevMessage);
+    this.ui.next.attr('aria-label', tooltipMessages.nextMessage);
 
     new Tooltip({
       message: tooltipMessages.prevMessage,
@@ -172,9 +129,75 @@ const ControllerView = View.extend({
   _getTooltipWeekMessage(ts) {
     const prevWeek = dayjs(ts).subtract(1, 'week');
     const nextWeek = dayjs(ts).add(1, 'week');
+
     return {
       prevMessage: `${ prevWeek.format('MM/DD/YYYY') } - ${ prevWeek.endOf('week').format('MM/DD/YYYY') }`,
       nextMessage: `${ nextWeek.format('MM/DD/YYYY') } - ${ nextWeek.endOf('week').format('MM/DD/YYYY') }`,
+    };
+  },
+});
+
+const ControllerView = View.extend({
+  className: 'date-filter__controls',
+  template: hbs`
+    <button class="button date-filter__date-button js-date" type="button">
+      {{far "calendar-days"}}{{~ remove_whitespace ~}}
+      {{formatMessage (intlGet "patients.shared.components.dateFilterComponent.dateTypes") type=dateType }}{{~ remove_whitespace ~}}:
+      <span data-date-picker-label-region></span>
+    </button>{{~ remove_whitespace ~}}
+    {{#unless hidePrevNextButtons}}
+      <span data-navigation-region></span>
+    {{/unless}}
+  `,
+  regions: {
+    datepicker: {
+      el: '[data-date-picker-label-region]',
+      replaceElement: true,
+    },
+    navigation: {
+      el: '[data-navigation-region]',
+      replaceElement: true,
+    },
+  },
+  ui: {
+    date: '.js-date',
+  },
+  triggers: {
+    'click @ui.date': 'click:date',
+  },
+  getLabelTemplate() {
+    if (this.model.get('selectedDate')) return DateTemplate;
+    if (this.model.get('selectedMonth')) return MonthTemplate;
+    if (this.model.get('selectedWeek')) return WeekTemplate;
+    if (this.model.get('relativeDate')) return RelativeTemplate;
+    return DefaultTemplate;
+  },
+  onRender() {
+    this.showChildView('datepicker', {
+      tagName: 'span',
+      model: this.model,
+      template: this.getLabelTemplate(),
+      templateContext() {
+        if (!this.model.get('selectedWeek')) return {};
+        return {
+          selectedEndWeek: this.model.dayjs('selectedWeek').endOf('week'),
+        };
+      },
+    });
+
+    if (this.getOption('showPrevNextButtons') === false || this.model.get('relativeDate') === 'alltime') return;
+
+    const navigationView = new NavigationView({ model: this.model });
+
+    this.listenTo(navigationView, {
+      'click:prev': () => this.triggerMethod('click:prev'),
+      'click:next': () => this.triggerMethod('click:next'),
+    });
+    this.showChildView('navigation', navigationView);
+  },
+  templateContext() {
+    return {
+      hidePrevNextButtons: this.getOption('showPrevNextButtons') === false || this.model.get('relativeDate') === 'alltime',
     };
   },
 });
@@ -198,10 +221,12 @@ const LayoutView = View.extend({
     <div class="date-filter__label">{{ @intl.patients.shared.components.dateFilterComponent.dateFilterViews.layoutView.dateLabel }}</div>
     <div class="date-filter__toggle" data-date-type-region></div>
     <div data-component-region></div>
+    <div class="date-filter__pop-navigation" data-navigation-region></div>
   `,
   regions: {
     dateType: '[data-date-type-region]',
     component: '[data-component-region]',
+    navigation: '[data-navigation-region]',
   },
 });
 
@@ -226,6 +251,7 @@ export {
   ActionsView,
   ControllerView,
   LayoutView,
+  NavigationView,
   FilterTypeView,
   DateRanges,
 };

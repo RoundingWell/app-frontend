@@ -5,6 +5,13 @@ import Radio from 'backbone.radio';
 // Note: Requires a `getType` method to be defined on the model returning the entity name
 
 export default {
+  enterSelectionMode() {
+    this.set('isSelectionMode', true);
+  },
+  exitSelectionMode() {
+    this.clearSelected();
+    this.set('isSelectionMode', false);
+  },
   setSelectedList(list, lastSelectedIndex) {
     return this.set({
       [`${ this.getType() }Selected`]: list,
@@ -34,8 +41,6 @@ export default {
   },
   clearSelected() {
     this.setSelectedList({}, null);
-
-    this.trigger('select:none');
   },
   selectRange(collection, selectedModel, shouldSelectMultiple) {
     const isSelected = this.isSelected(selectedModel);
@@ -70,7 +75,5 @@ export default {
     }, selectedList);
 
     this.setSelectedList(newSelectedList, newLastSelectedIndex);
-
-    this.trigger('select:multiple');
   },
 };

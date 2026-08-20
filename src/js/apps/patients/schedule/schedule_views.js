@@ -19,6 +19,7 @@ import { TitleOwnerDroplist } from 'js/apps/patients/shared/list_views';
 import { CheckComponent, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import SelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import { setActionEntryTarget } from 'js/apps/patients/patient/action/action-entry-target';
+import { getSelectionLabels, selectInSelectionMode, syncSelectionCheck, syncSelectionMode } from 'js/apps/patients/shared/selection-mode';
 
 import DayItemTemplate from './day-item.hbs';
 import DayListTemplate from './day-list.hbs';
@@ -158,6 +159,7 @@ const DayItemView = View.extend({
     'click .js-no-click': stopEventPropagation,
     'click .js-action': 'onClickAction',
     'click .js-patient': 'onClickPatient',
+    'click': 'onClick',
   },
   modelEvents: {
     'change': 'render',
@@ -168,8 +170,8 @@ const DayItemView = View.extend({
     this.selectedPatientId = selectedPatientId;
 
     this.listenTo(state, {
-      'select:multiple': this.showCheck,
-      'select:none': this.showCheck,
+      'change:actionsSelected': this.syncCheck,
+      'change:isSelectionMode': this.updateSelectionMode,
     });
   },
   onRender() {
@@ -179,6 +181,7 @@ const DayItemView = View.extend({
 
     this.showDetailsTooltip();
     this.showCheck();
+    this.updateSelectionMode();
 
     if (canEdit !== this.canEdit) {
       if (!this.canEdit) this.toggleSelected(false);
@@ -187,6 +190,12 @@ const DayItemView = View.extend({
   },
   toggleSelected(isSelected) {
     this.$el.toggleClass('is-selected', isSelected);
+  },
+  updateSelectionMode() {
+    syncSelectionMode(this);
+  },
+  syncCheck() {
+    syncSelectionCheck(this);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
@@ -200,32 +209,40 @@ const DayItemView = View.extend({
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
-      deselectLabel: intl.patients.schedule.scheduleViews.dayItemView.deselectAction,
-      selectLabel: intl.patients.schedule.scheduleViews.dayItemView.selectAction,
+    this.checkComponent = new CheckComponent({
+      ...getSelectionLabels(this.model, 'action'),
       state: { isSelected },
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(this.checkComponent, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', this.checkComponent);
   },
   onClickPatient(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
   },
   onClickAction(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     this.navigateToAction();
   },
-  onClickForm() {
+  onClickForm(event, domEvent) {
+    if (selectInSelectionMode(this, event, domEvent)) return;
+
     setActionEntryTarget(this.model.id, { formExpanded: true });
     this.navigateToAction();
+  },
+  onClick(event) {
+    selectInSelectionMode(this, event);
   },
   navigateToAction() {
     if (this.flow) {

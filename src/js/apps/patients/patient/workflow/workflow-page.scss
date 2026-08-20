@@ -49,6 +49,10 @@
     width: calc(100% - 24px);
   }
 
+  .workflow-page__toolbar {
+    min-height: 52px;
+  }
+
   .workflow-page__tab {
     border-radius: 22px;
     min-height: 44px;

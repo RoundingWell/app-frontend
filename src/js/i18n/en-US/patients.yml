@@ -239,11 +239,15 @@ careOptsFrontend:
         updated: "Updated"
       actionsViews:
         deselectAction: Deselect action
+        deselectActionContext: Deselect action {itemName} for {patientName}
         deselectFlow: Deselect flow
+        deselectFlowContext: Deselect flow {itemName} for {patientName}
         detailsTooltipLabel: View action details
         formButtonLabel: Open action form
         selectAction: Select action
+        selectActionContext: Select action {itemName} for {patientName}
         selectFlow: Select flow
+        selectFlowContext: Select flow {itemName} for {patientName}
       addWorkflow:
         addWorkflowViews:
           addActionHeadingText: Add Action
@@ -383,6 +387,12 @@ careOptsFrontend:
           maximumListCount: Showing {maximumCount} of {totalInDb, number} {isFlowList, select, true {Flows} false {Actions} other {}}.
           maximumListCountNarrowed: Showing {itemCount} of {maximumCount} {isFlowList, select, true {Flows} false {Actions} other {}}.
           narrowFilters: Try narrowing your filters.
+      selectionMode:
+        all: All
+        cancel: Cancel
+        edit: Edit selected
+        selected: "{itemCount, plural, =0 {Select items} one {# selected} other {# selected}}"
+        start: Select
       listFilters:
         customFilterDropList:
           defaultText: All

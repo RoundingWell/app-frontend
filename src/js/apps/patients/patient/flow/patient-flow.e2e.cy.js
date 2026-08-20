@@ -2189,13 +2189,85 @@ context('patient flow page', function() {
       .get('.patient-flow__list .action-card')
       .first()
       .find('.button.button--checkbox')
-      .should('have.attr', 'aria-label', 'Select action');
+      .should($button => {
+        expect($button.attr('aria-label')).to.match(/^Select action .+ for .+$/);
+      });
 
     cy.viewport(981, 997);
 
     cy
       .get('.patient-flow__menu')
       .should('be.visible');
+
+    cy.viewport(390, 720);
+
+    cy
+      .get('.patient-flow__list .action-card')
+      .first()
+      .find('.js-select')
+      .should('not.be.visible');
+
+    cy
+      .get('.patient-flow__selection-start')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.patient-flow__list .action-card')
+      .first()
+      .find('.patient-list-page__row-selection .js-select')
+      .should($button => {
+        expect($button.attr('aria-label')).to.match(/^Select action .+ for .+$/);
+      });
+
+    cy
+      .get('.patient-flow__list .action-card')
+      .first()
+      .click('center');
+
+    cy
+      .get('.patient-flow__list .action-card')
+      .first()
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('.patient-flow__list .action-card')
+      .first()
+      .find('.patient-list-page__row-selection .js-select')
+      .should('have.attr', 'aria-checked', 'true')
+      .find('.button__checkbox-icon--selected')
+      .should('be.visible');
+
+    cy
+      .get('.patient-flow__bulk-edit-open')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.bulk-edit-modal')
+      .should('be.visible')
+      .and('have.attr', 'role', 'dialog')
+      .and('contain', 'Edit 1 Action');
+
+    cy
+      .focused()
+      .type('{esc}');
+
+    cy
+      .get('.bulk-edit-modal')
+      .should('not.exist');
+
+    cy
+      .get('.patient-flow__bulk-edit-open')
+      .should('be.focused');
+
+    cy
+      .location('pathname')
+      .should('contain', `/flow/${ testFlow.id }`);
+
+    cy
+      .get('.patient-flow__selection-cancel')
+      .click();
 
     cy.viewport(1280, 720);
 
@@ -2226,7 +2298,7 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('.patient-flow__actions-start > .button.button--checkbox')
+      .get('.patient-flow__selection-all .button.button--checkbox')
       .as('selectAll')
       .click();
 
@@ -2280,15 +2352,15 @@ context('patient flow page', function() {
       .wait(['@routePatchAction', '@routePatchAction', '@routePatchAction']);
 
     cy
-      .get('.patient-flow__actions-start > .button.button--checkbox')
+      .get('.patient-flow__selection-all .button.button--checkbox')
       .click();
 
     cy
-      .get('.patient-flow__actions-start > .button.button--checkbox')
+      .get('.patient-flow__selection-all .button.button--checkbox')
       .click();
 
     cy
-      .get('.patient-flow__actions-start > .button.button--checkbox')
+      .get('.patient-flow__selection-all .button.button--checkbox')
       .click();
 
     cy
@@ -2297,7 +2369,7 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('.patient-flow__actions-start > .button.button--checkbox')
+      .get('.patient-flow__selection-all .button.button--checkbox')
       .click();
 
     cy

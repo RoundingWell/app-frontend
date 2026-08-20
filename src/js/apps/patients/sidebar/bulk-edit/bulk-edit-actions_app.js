@@ -2,7 +2,7 @@ import { pick } from 'underscore';
 import Backbone from 'backbone';
 
 import BulkEditInlineApp from 'js/apps/patients/shared/bulk-edit/inline_app';
-import { BulkEditActionsInlineView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
+import { BulkEditActionsInlineView, BulkEditActionsModalView } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 
 const StateModel = Backbone.Model.extend({
   initialize({ collection }) {
@@ -143,5 +143,6 @@ const StateModel = Backbone.Model.extend({
 
 export default BulkEditInlineApp.extend({
   StateModel,
+  ModalViewClass: BulkEditActionsModalView,
   ViewClass: BulkEditActionsInlineView,
 });

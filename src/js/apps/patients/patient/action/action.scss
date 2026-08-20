@@ -577,6 +577,27 @@
     --button-min-height: 44px;
     --patient-readonly-border-radius: 22px;
     --patient-readonly-min-height: 44px;
+
+    padding-top: var(--space-4);
+  }
+
+  .patient-action__title {
+    margin-top: var(--space-4);
+  }
+
+  .patient-action-loading__header {
+    padding-top: var(--space-4);
+  }
+
+  .patient-action-loading__chips,
+  .patient-action__attachments-content,
+  .patient-action__form-body {
+    margin-top: var(--space-4);
+  }
+
+  .patient-action-loading__activity,
+  .patient-action__activity {
+    margin-top: var(--space-6);
   }
 
   .patient-action__activity-items,

@@ -78,6 +78,10 @@
   display: inline-flex;
 }
 
+.date-filter__pop-navigation {
+  display: none;
+}
+
 .date-filter__nav-button {
   align-items: center;
   background: var(--date-filter-nav-background, var(--color-chip-background));
@@ -126,6 +130,10 @@
 }
 
 @media (width <= 640px) {
+  .date-filter__controls > .date-filter__navigation {
+    display: none;
+  }
+
   .date-filter__date-button,
   .date-filter__nav-button,
   .date-filter__range,
@@ -135,5 +143,12 @@
 
   .date-filter__nav-button {
     width: 44px;
+  }
+
+  .date-filter__pop-navigation:has(.date-filter__navigation) {
+    border-top: 1px solid var(--color-divider);
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-2);
   }
 }

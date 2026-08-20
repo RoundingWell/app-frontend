@@ -40,6 +40,7 @@ const StateModel = Backbone.Model.extend({
       teamId: this.currentClinician.getTeam().id,
       noOwner: false,
       lastSelectedIndex: null,
+      isSelectionMode: false,
       actionsSelected: {},
       flowsSelected: {},
       searchQuery: '',
@@ -76,7 +77,7 @@ const StateModel = Backbone.Model.extend({
     localStore.remove(this.getStoreKey(this.id));
   },
   onChange() {
-    localStore.set(this.getStoreKey(this.id), omit(this.attributes, 'lastSelectedIndex', 'searchQuery'));
+    localStore.set(this.getStoreKey(this.id), omit(this.attributes, 'isSelectionMode', 'lastSelectedIndex', 'searchQuery'));
   },
   setFiltersSidebarCollapsed(isCollapsed) {
     return this.set('filtersSidebarCollapsed', isCollapsed);

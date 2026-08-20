@@ -37,7 +37,7 @@ context('Modal Views', function() {
     cy.then(() => modal.destroy());
   });
 
-  specify('renders the small modal and both iframe size variants', function() {
+  specify('renders the small modal and form iframe', function() {
     const form = new Backbone.Model({ name: 'Example form' });
     const getFormUrl = cy.stub().returns('/forms/example');
     form.getFormUrl = getFormUrl;
@@ -46,19 +46,40 @@ context('Modal Views', function() {
 
     cy.get('.modal--small').last().find('.js-close').first().click();
 
-    cy.mount(() => new IframeFormView({ model: form, size: 'small' }));
+    cy.mount(() => new IframeFormView({ model: form }));
 
-    cy.get('.modal__form-iframe--small iframe')
+    cy.get('.modal__form-iframe iframe')
       .should('have.attr', 'src', '/forms/example')
       .and('have.attr', 'title', 'Example form')
       .then(() => {
         expect(getFormUrl).to.have.been.calledWith({ modal: 1 });
       });
+  });
 
-    cy.mount(() => new IframeFormView({ model: form }));
+  specify('caps form modals at their desktop sizes', function() {
+    cy.viewport(1600, 1000);
 
-    cy.get('.modal__form-iframe')
-      .should('not.have.class', 'modal__form-iframe--small');
+    cy.mount(() => new (ModalView.extend({
+      className: 'modal modal--form modal--form-small',
+      headingText: 'Small form',
+    }))());
+
+    cy.get('.modal--form-small').then($modal => {
+      const bounds = $modal[0].getBoundingClientRect();
+      expect(bounds.width).to.equal(640);
+      expect(bounds.height).to.equal(560);
+    });
+
+    cy.mount(() => new (ModalView.extend({
+      className: 'modal modal--form modal--form-large',
+      headingText: 'Large form',
+    }))());
+
+    cy.get('.modal--form-large').then($modal => {
+      const bounds = $modal[0].getBoundingClientRect();
+      expect(bounds.width).to.equal(1120);
+      expect(bounds.height).to.equal(800);
+    });
   });
 
   specify('identifies dialogs and keeps keyboard focus inside', function() {

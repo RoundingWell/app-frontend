@@ -439,6 +439,60 @@
   }
 }
 
+@media (width <= 640px) {
+  .worklist-list__list,
+  .worklist-list__skeleton {
+    --card-list-padding: 0 var(--space-3) var(--space-4);
+  }
+
+  .worklist-list__item {
+    --work-card-gap: 0;
+
+    position: relative;
+  }
+
+  .worklist-list__skeleton-item {
+    gap: 0;
+  }
+
+  .worklist-list__check,
+  .worklist-list__skeleton-check-column {
+    display: none;
+  }
+
+  .worklist-list__item.is-selection-mode .work-card__main {
+    padding-right: calc(44px + var(--space-4));
+  }
+
+  .worklist-list__action-tool {
+    height: 44px;
+  }
+
+  .worklist-list__patient-context {
+    font-size: 13px;
+    line-height: 18px;
+  }
+
+  .worklist-list__flow-context,
+  .worklist-list__item .patient-list__flow-progress {
+    font-size: 13px;
+  }
+
+  .worklist-list__flow-context,
+  .worklist-list__sidebar-button {
+    min-height: 44px;
+  }
+
+  .worklist-list__list.is-loading::before {
+    left: var(--space-3);
+    right: var(--space-3);
+  }
+
+  .worklist-list__error {
+    margin-inline: var(--space-3);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .worklist-list__list.is-loading::before {
     animation: none;

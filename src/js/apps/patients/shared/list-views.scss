@@ -4,7 +4,10 @@
   display: flex;
   font-weight: inherit;
   margin-left: var(--space-1);
+  max-width: 100%;
+  min-height: 44px;
   min-width: 0;
+  width: 100%;
 }
 
 .patient-list__title-filter-icon {

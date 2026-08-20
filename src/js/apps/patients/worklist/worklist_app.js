@@ -17,6 +17,7 @@ import DateFilterComponent from 'js/apps/patients/shared/components/date-filter'
 import SearchComponent from 'js/components/list-search';
 import { CountView } from 'js/apps/patients/shared/list_views';
 import { ListPageAppMixin } from 'js/apps/patients/shared/list-page';
+import { isPhoneViewport } from 'js/apps/patients/shared/selection-mode';
 
 import { getSortOptions } from './worklist_sort';
 
@@ -50,7 +51,7 @@ const WorklistApp = App.extend({
     'change:customFilters change:states change:flowStates': 'restart',
     'change:actionsDateFilters change:flowsDateFilters': 'restart',
     'change:actionsSortId change:flowsSortId': 'onChangeStateSort',
-    'change:actionsSelected change:flowsSelected': 'onChangeSelected',
+    'change:actionsSelected change:flowsSelected change:isSelectionMode': 'onChangeSelected',
     'change:searchQuery': 'onChangeSearchQuery',
   },
   startFiltersApp({ setDefaults } = {}) {
@@ -349,34 +350,67 @@ const WorklistApp = App.extend({
     this.selected = this.getState().getSelected(this.editableCollection);
     this.showSelectAll();
 
-    if (this.selected.length) {
-      this.showBulkEdit();
+    if (!this.selected.length) {
+      this.stopBulkEdit();
       return;
     }
 
-    this.stopBulkEdit();
+    const app = this.getBulkEditApp();
+
+    if (isPhoneViewport()) {
+      if (!app.isRunning()) return;
+      if (app.getPresentation() === 'modal') {
+        app.updateCollection(this.selected);
+      } else {
+        app.stop();
+      }
+      return;
+    }
+
+    this.showBulkEdit();
   },
   onClickBulkCancel() {
-    this.getState().clearSelected();
+    const app = this.getBulkEditApp();
+    const isModal = app.getPresentation() === 'modal';
+
+    app.stop();
+    if (isModal) return;
+
+    this.getState().exitSelectionMode();
+  },
+  onOpenBulkEdit() {
+    if (!isPhoneViewport() || !this.selected?.length) return;
+
+    this.showBulkEdit({ presentation: 'modal' });
+  },
+  getBulkEditApp() {
+    const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
+
+    return this.getChildApp(appName);
   },
   stopBulkEdit() {
-    const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
-    this.stopChildApp(appName);
+    this.getBulkEditApp().stop();
   },
-  showBulkEdit() {
+  showBulkEdit({ presentation = 'inline' } = {}) {
     const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
     const app = this.getChildApp(appName);
 
     if (app.isRunning()) {
-      app.updateCollection(this.selected);
-      return;
+      if (app.getPresentation() === presentation) {
+        app.updateCollection(this.selected);
+        return;
+      }
+
+      app.stop();
     }
 
     this.startChildApp(appName, {
+      presentation,
       region: this.getSelectionBarRegion('bulkEdit'),
       state: { collection: this.selected },
     });
 
+    this.stopListening(app);
     this.listenTo(app, {
       'cancel': this.onClickBulkCancel,
       'applyOwner'(owner) {
@@ -389,11 +423,11 @@ const WorklistApp = App.extend({
           .then(() => {
             this.showUpdateSuccess(itemCount);
             app.stop();
-            this.getState().clearSelected();
+            this.getState().exitSelectionMode();
           })
           .catch(() => {
             Radio.request('alert', 'show:error', intl.patients.worklist.worklistApp.bulkEditFailure);
-            this.getState().clearSelected();
+            this.getState().exitSelectionMode();
             this.restart();
           });
       },

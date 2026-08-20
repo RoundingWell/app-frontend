@@ -10,7 +10,7 @@ import 'scss/modules/loader.scss';
 import 'scss/modules/progress-bar.scss';
 import 'scss/modules/skeleton.scss';
 
-import intl from 'js/i18n';
+import intl, { renderTemplate } from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 import PreloadRegion from 'js/regions/preload_region';
 import Optionlist from 'js/components/optionlist';
@@ -19,6 +19,7 @@ import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeCompo
 import SharedSelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
+import { bindSelectionModeViewport, getSelectedCount, getSelectionLabels, selectInSelectionMode, syncSelectionCheck, syncSelectionMode, unbindSelectionModeViewport } from 'js/apps/patients/shared/selection-mode';
 import ActionItemTemplate from './action-item.hbs';
 import HeaderTemplate from './header.hbs';
 import LayoutTemplate from './layout.hbs';
@@ -50,6 +51,7 @@ const FlowFormButton = FormButton.extend({
 const FlowDetailsTooltip = DetailsTooltip.extend({
   className: 'button button--icon action-details-tooltip patient-flow__action-details',
 });
+const SelectionCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.selectionMode.selected") itemCount=itemCount}}`;
 
 export const i18n = intl.patients.patient.flow.flowViews;
 const FlowHeaderOwnerComponent = FlowOwnerComponent.extend({
@@ -193,8 +195,8 @@ const ActionItemView = View.extend({
     this.state = state;
 
     this.listenTo(state, {
-      'select:multiple': this.showCheck,
-      'select:none': this.showCheck,
+      'change:actionsSelected': this.syncCheck,
+      'change:isSelectionMode': this.updateSelectionMode,
     });
 
     this.flow = this.model.getFlow();
@@ -220,18 +222,24 @@ const ActionItemView = View.extend({
     dueTime: '[data-due-time-region]',
     form: '[data-form-region]',
   },
+  triggers: {
+    'click': 'click',
+  },
   events: {
-    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-primary': 'onClickPrimary',
+  },
+  onClick(event, domEvent) {
+    if (selectInSelectionMode(this, event, domEvent)) return;
+
+    this.navigateToAction();
   },
   navigateToAction() {
     Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id);
   },
-  onClickSurface() {
-    this.navigateToAction();
-  },
   onClickPrimary(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     this.navigateToAction();
   },
@@ -246,6 +254,7 @@ const ActionItemView = View.extend({
     this.showDueDate();
     this.showDueTime();
     this.showForm();
+    this.updateSelectionMode();
 
     if (canEdit !== this.canEdit) {
       if (!this.canEdit) this.toggleSelected(false);
@@ -255,25 +264,30 @@ const ActionItemView = View.extend({
   toggleSelected(isSelected) {
     this.$el.toggleClass('is-selected', isSelected);
   },
+  updateSelectionMode() {
+    syncSelectionMode(this);
+  },
+  syncCheck() {
+    syncSelectionCheck(this);
+  },
   showCheck() {
     if (!this.canEdit) return;
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
-      deselectLabel: intl.patients.shared.actionsViews.deselectAction,
-      selectLabel: intl.patients.shared.actionsViews.selectAction,
+    this.checkComponent = new CheckComponent({
+      ...getSelectionLabels(this.model, 'action'),
       state: { isSelected },
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(this.checkComponent, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', this.checkComponent);
   },
   showDetailsTooltip() {
     if (!this.model.get('details')) return;
@@ -432,9 +446,47 @@ const LayoutView = View.extend({
   },
   ui: {
     actions: '.js-actions',
+    bulkEditOpen: '.js-bulk-edit-open',
+    selectionCancel: '.js-selection-cancel',
+    selectionCount: '.js-selection-count',
+    selectionStart: '.js-selection-start',
+  },
+  events: {
+    'click @ui.selectionCancel': 'onClickSelectionCancel',
+    'click @ui.bulkEditOpen': 'onClickBulkEditOpen',
+    'click @ui.selectionStart': 'onClickSelectionStart',
+  },
+  modelEvents: {
+    'change:isSelectionMode change:actionsSelected': 'syncSelectionMode',
+  },
+  initialize() {
+    bindSelectionModeViewport(this);
+  },
+  onRender() {
+    this.syncSelectionMode();
+  },
+  onBeforeDestroy() {
+    unbindSelectionModeViewport(this);
   },
   setEditing(isEditing) {
     this.ui.actions.toggleClass('is-editing', isEditing);
+    this.ui.actions.toggleClass('has-selection', isEditing);
+  },
+  syncSelectionMode() {
+    const itemCount = getSelectedCount(this.model);
+
+    this.ui.actions.toggleClass('is-selection-mode', this.model.get('isSelectionMode'));
+    this.ui.selectionCount.text(renderTemplate(SelectionCountTemplate, { itemCount }));
+  },
+  onClickSelectionStart() {
+    this.model.enterSelectionMode();
+  },
+  onClickSelectionCancel() {
+    this.model.exitSelectionMode();
+    this.ui.selectionStart.trigger('focus');
+  },
+  onClickBulkEditOpen() {
+    this.triggerMethod('bulk:open');
   },
 });
 

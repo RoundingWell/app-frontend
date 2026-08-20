@@ -5,11 +5,11 @@ import { View } from 'marionette';
 import 'scss/modules/card-list.scss';
 import 'scss/modules/progress-bar.scss';
 
-import intl from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckComponent, FlowStateComponent, OwnerComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView } from 'js/apps/patients/shared/read-only_views';
+import { getSelectionLabels, selectInSelectionMode, syncSelectionCheck, syncSelectionMode } from 'js/apps/patients/shared/selection-mode';
 
 import FlowItemTemplate from './flow-item.hbs';
 
@@ -63,21 +63,27 @@ const FlowItemView = View.extend({
     this.selectedPatientId = selectedPatientId;
 
     this.listenTo(state, {
-      'select:multiple': this.showCheck,
-      'select:none': this.showCheck,
+      'change:flowsSelected': this.syncCheck,
+      'change:isSelectionMode': this.updateSelectionMode,
     });
   },
-  onClick() {
+  onClick(event, domEvent) {
+    if (selectInSelectionMode(this, event, domEvent)) return;
+
     this.navigateToFlow();
   },
   navigateToFlow() {
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
   onClickPatient(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
   },
   onClickPrimary(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     this.navigateToFlow();
   },
@@ -89,6 +95,7 @@ const FlowItemView = View.extend({
     this.showCheck();
     this.showState();
     this.showOwner();
+    this.updateSelectionMode();
 
     if (canEdit !== this.canEdit) {
       if (!this.canEdit) this.toggleSelected(false);
@@ -97,6 +104,12 @@ const FlowItemView = View.extend({
   },
   toggleSelected(isSelected) {
     this.$el.toggleClass('is-selected', isSelected);
+  },
+  updateSelectionMode() {
+    syncSelectionMode(this);
+  },
+  syncCheck() {
+    syncSelectionCheck(this);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
@@ -110,20 +123,19 @@ const FlowItemView = View.extend({
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
-      deselectLabel: intl.patients.shared.actionsViews.deselectFlow,
-      selectLabel: intl.patients.shared.actionsViews.selectFlow,
+    this.checkComponent = new CheckComponent({
+      ...getSelectionLabels(this.model, 'flow'),
       state: { isSelected },
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(this.checkComponent, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', this.checkComponent);
   },
   showState() {
     if (!this.model.isDone() || !this.canEdit) {

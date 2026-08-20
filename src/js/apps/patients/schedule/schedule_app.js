@@ -17,6 +17,7 @@ import SearchComponent from 'js/components/list-search';
 
 import { CountView } from 'js/apps/patients/shared/list_views';
 import { ListPageAppMixin } from 'js/apps/patients/shared/list-page';
+import { isPhoneViewport } from 'js/apps/patients/shared/selection-mode';
 
 import { LayoutView, ScheduleTitleView, SelectAllView, ScheduleListView, AllFiltersButtonView } from 'js/apps/patients/schedule/schedule_views';
 import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
@@ -44,7 +45,7 @@ const ScheduleApp = App.extend({
   },
   stateEvents: {
     'change:clinicianId change:dateFilters change:customFilters change:states change:flowStates': 'restart',
-    'change:actionsSelected': 'onChangeSelected',
+    'change:actionsSelected change:isSelectionMode': 'onChangeSelected',
     'change:searchQuery': 'onChangeSearchQuery',
   },
   startFiltersApp({ setDefaults } = {}) {
@@ -244,29 +245,58 @@ const ScheduleApp = App.extend({
     this.selected = this.getState().getSelected(this.editableCollection);
     this.showSelectAll();
 
-    if (this.selected.length) {
-      this.showBulkEdit();
+    const app = this.getChildApp('bulkEditActions');
+
+    if (!this.selected.length) {
+      app.stop();
       return;
     }
 
-    this.stopChildApp('bulkEditActions');
+    if (isPhoneViewport()) {
+      if (!app.isRunning()) return;
+      if (app.getPresentation() === 'modal') {
+        app.updateCollection(this.selected);
+      } else {
+        app.stop();
+      }
+      return;
+    }
+
+    this.showBulkEdit();
   },
   onClickBulkCancel() {
-    this.getState().clearSelected();
+    const app = this.getChildApp('bulkEditActions');
+    const isModal = app.getPresentation() === 'modal';
+
+    app.stop();
+    if (isModal) return;
+
+    this.getState().exitSelectionMode();
   },
-  showBulkEdit() {
+  onOpenBulkEdit() {
+    if (!isPhoneViewport() || !this.selected?.length) return;
+
+    this.showBulkEdit({ presentation: 'modal' });
+  },
+  showBulkEdit({ presentation = 'inline' } = {}) {
     const app = this.getChildApp('bulkEditActions');
 
     if (app.isRunning()) {
-      app.updateCollection(this.selected);
-      return;
+      if (app.getPresentation() === presentation) {
+        app.updateCollection(this.selected);
+        return;
+      }
+
+      app.stop();
     }
 
     this.startChildApp('bulkEditActions', {
+      presentation,
       region: this.getSelectionBarRegion('bulkEdit'),
       state: { collection: this.selected },
     });
 
+    this.stopListening(app);
     this.listenTo(app, {
       'cancel': this.onClickBulkCancel,
       'applyOwner'(owner) {
@@ -281,16 +311,16 @@ const ScheduleApp = App.extend({
             app.stop();
 
             if (saveData.due_date && this.selected.some(action => action.changed.due_date)) {
-              this.getState().clearSelected();
+              this.getState().exitSelectionMode();
               this.restart();
               return;
             }
 
-            this.getState().clearSelected();
+            this.getState().exitSelectionMode();
           })
           .catch(() => {
             Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.bulkEditFailure);
-            this.getState().clearSelected();
+            this.getState().exitSelectionMode();
             this.restart();
           });
       },

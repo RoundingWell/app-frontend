@@ -270,6 +270,20 @@
 }
 
 @media (width <= 640px) {
+  .list-filters--drawer .list-filters__heading-row {
+    background: var(--color-page-bg);
+    height: 44px;
+    margin-bottom: var(--space-2);
+    padding-right: calc(44px + var(--space-2));
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .list-filters--drawer .list-filters__heading {
+    margin-left: 0;
+  }
+
   .list-filters__clear-filters,
   .list-filters__custom-filter-button,
   .list-filters__section-button {

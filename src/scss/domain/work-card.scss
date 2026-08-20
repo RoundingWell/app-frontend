@@ -10,9 +10,11 @@
   gap: var(--work-card-gap, var(--space-4));
 }
 
-.work-card:not(.is-selected) .work-card__surface:hover {
-  --work-card-background: var(--color-surface-hover);
-  --work-card-aside-background: var(--color-surface-hover);
+@media (hover: hover) and (pointer: fine) {
+  .work-card:not(.is-selected) .work-card__surface:hover {
+    --work-card-background: var(--color-surface-hover);
+    --work-card-aside-background: var(--color-surface-hover);
+  }
 }
 
 .work-card.is-selected {
@@ -76,11 +78,31 @@
 }
 
 .work-card__title-row {
+  align-items: start;
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: minmax(0, 1fr) auto;
+  line-height: 20px;
+  min-width: 0;
+}
+
+.work-card__title-copy {
   align-items: center;
   display: flex;
   gap: var(--space-2);
-  line-height: 20px;
   min-width: 0;
+}
+
+.work-card__tools {
+  align-items: flex-start;
+  display: flex;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.work-card__tools:empty,
+.work-card__tools:not(:has(> .action-card__tool > :not(:empty))) {
+  display: none;
 }
 
 .work-card__subject {
@@ -222,6 +244,10 @@
   }
 
   .work-card__title-row {
+    gap: var(--space-2);
+  }
+
+  .work-card__title-copy {
     align-items: baseline;
     flex-wrap: wrap;
     gap: 0 var(--space-2);
@@ -234,5 +260,62 @@
 
   .work-card__timestamps {
     gap: var(--space-3);
+  }
+}
+
+@container (width <= 640px) {
+  .work-card__main {
+    padding: var(--space-3);
+  }
+
+  .work-card__heading {
+    align-items: flex-start;
+  }
+
+  .work-card__state {
+    --button-min-height: 44px;
+    --button-width: 44px;
+
+    flex-basis: 44px;
+  }
+
+  .work-card__state + .work-card__copy,
+  .work-card__state + .work-card__title {
+    margin-left: 0;
+  }
+
+  .work-card__title-row {
+    min-height: 44px;
+  }
+
+  .work-card__context {
+    margin-top: var(--space-1);
+  }
+
+  .work-card__subject,
+  .work-card__title {
+    font-size: 15px;
+  }
+
+  .work-card__subject {
+    align-items: center;
+    display: inline-flex;
+  }
+
+  .work-card__title:is(button, a) {
+    align-items: center;
+    display: inline-flex;
+    min-height: 44px;
+  }
+
+  .work-card__controls {
+    --button-font-size: 13px;
+    --button-height: 44px;
+    --button-min-height: 44px;
+  }
+
+  .work-card__meta {
+    font-size: 13px;
+    line-height: 18px;
   }
 }

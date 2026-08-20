@@ -6,9 +6,11 @@ import Radio from 'backbone.radio';
 import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
+import 'scss/modules/modals.scss';
 
 import intl from 'js/i18n';
 
+import DialogFocusBehavior from 'js/behaviors/dialog-focus';
 import Droplist from 'js/components/droplist';
 
 import { StateComponent, OwnerComponent, DueComponent, TimeComponent, DurationComponent } from 'js/apps/patients/shared/actions_views';
@@ -364,6 +366,17 @@ const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
   },
 });
 
+const BulkEditActionsModalView = BulkEditActionsInlineView.extend({
+  behaviors: [DialogFocusBehavior],
+  className: 'modal bulk-edit-modal bulk-edit-inline bulk-edit-inline--actions',
+  attributes: {
+    'aria-label': intl.patients.shared.selectionMode.edit,
+    'aria-modal': 'true',
+    'role': 'dialog',
+    'tabindex': '-1',
+  },
+});
+
 const BulkEditFlowsBodyView = View.extend({
   modelEvents: {
     'change:stateMulti': 'showState',
@@ -471,13 +484,26 @@ const BulkEditFlowsInlineView = BulkEditFlowsBodyView.extend({
   },
 });
 
+const BulkEditFlowsModalView = BulkEditFlowsInlineView.extend({
+  behaviors: [DialogFocusBehavior],
+  className: 'modal bulk-edit-modal bulk-edit-inline bulk-edit-inline--flows',
+  attributes: {
+    'aria-label': intl.patients.shared.selectionMode.edit,
+    'aria-modal': 'true',
+    'role': 'dialog',
+    'tabindex': '-1',
+  },
+});
+
 const BulkEditFlowsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditFlowsSuccess") itemCount=itemCount}}`;
 
 const BulkEditActionsSuccessTemplate = hbs`{{formatMessage  (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditActionsSuccess") itemCount=itemCount}}`;
 
 export {
   BulkEditActionsInlineView,
+  BulkEditActionsModalView,
   BulkEditFlowsInlineView,
+  BulkEditFlowsModalView,
   BulkEditFlowsSuccessTemplate,
   BulkEditActionsSuccessTemplate,
 };

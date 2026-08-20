@@ -8,6 +8,7 @@ const StateModel = Backbone.Model.extend({
   defaults() {
     return {
       lastSelectedIndex: null,
+      isSelectionMode: false,
       actionsSelected: {},
     };
   },

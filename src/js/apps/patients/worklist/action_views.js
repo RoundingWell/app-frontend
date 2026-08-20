@@ -5,12 +5,12 @@ import { View } from 'marionette';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
 
-import intl from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 import { setActionEntryTarget } from 'js/apps/patients/patient/action/action-entry-target';
+import { getSelectionLabels, selectInSelectionMode, syncSelectionCheck, syncSelectionMode } from 'js/apps/patients/shared/selection-mode';
 
 import ActionItemTemplate from './action-item.hbs';
 
@@ -61,15 +61,17 @@ const ActionItemView = View.extend({
     this.selectedPatientId = selectedPatientId;
 
     this.listenTo(state, {
-      'select:multiple': this.showCheck,
-      'select:none': this.showCheck,
+      'change:actionsSelected': this.syncCheck,
+      'change:isSelectionMode': this.updateSelectionMode,
     });
   },
   modelEvents: {
     'change': 'render',
   },
+  triggers: {
+    'click': 'click',
+  },
   events: {
-    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-patient': 'onClickPatient',
     'click .js-flow': 'onClickFlow',
@@ -80,6 +82,11 @@ const ActionItemView = View.extend({
   ui: {
     patient: '.js-patient',
   },
+  onClick(event, domEvent) {
+    if (selectInSelectionMode(this, event, domEvent)) return;
+
+    this.navigateToAction();
+  },
   navigateToAction() {
     if (this.flow) {
       Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id);
@@ -88,18 +95,21 @@ const ActionItemView = View.extend({
 
     Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
-  onClickSurface() {
-    this.navigateToAction();
-  },
   onClickPatient(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
   },
   onClickFlow(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.flow.id);
   },
   onClickPrimary(event) {
+    if (selectInSelectionMode(this, event)) return;
+
     event.stopPropagation();
     this.navigateToAction();
   },
@@ -128,6 +138,7 @@ const ActionItemView = View.extend({
     this.showOwner();
     this.showDueDate();
     this.showDueTime();
+    this.updateSelectionMode();
 
     if (canEdit !== this.canEdit) {
       if (!this.canEdit) this.toggleSelected(false);
@@ -136,6 +147,12 @@ const ActionItemView = View.extend({
   },
   toggleSelected(isSelected) {
     this.$el.toggleClass('is-selected', isSelected);
+  },
+  updateSelectionMode() {
+    syncSelectionMode(this);
+  },
+  syncCheck() {
+    syncSelectionCheck(this);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
@@ -148,20 +165,19 @@ const ActionItemView = View.extend({
     if (!this.canEdit) return;
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
-      deselectLabel: intl.patients.shared.actionsViews.deselectAction,
-      selectLabel: intl.patients.shared.actionsViews.selectAction,
+    this.checkComponent = new CheckComponent({
+      ...getSelectionLabels(this.model, 'action'),
       state: { isSelected },
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(this.checkComponent, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', this.checkComponent);
   },
   showState() {
     if (!this.canEdit) {

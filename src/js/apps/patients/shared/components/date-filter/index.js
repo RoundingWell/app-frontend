@@ -3,10 +3,11 @@ import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import collectionOf from 'js/utils/formatting/collection-of';
+import { PHONE_QUERY } from 'js/utils/responsive';
 import Component from 'js/base/component';
 import Datepicker from 'js/components/datepicker';
 
-import { ControllerView, ActionsView, FilterTypeView, LayoutView, DateRanges } from './date-filter_views';
+import { ControllerView, ActionsView, FilterTypeView, LayoutView, NavigationView, DateRanges } from './date-filter_views';
 import StateModel from './date-filter_state';
 
 import { RELATIVE_DATE_RANGES } from 'js/static';
@@ -85,6 +86,7 @@ export default Component.extend({
 
     this.showRanges();
     this.showDateTypes();
+    this.showNavigation();
 
     Radio.request('app', 'show:pop', this.popView, {
       popWidth: 256,
@@ -96,6 +98,25 @@ export default Component.extend({
       collection: this.dateTypes,
       model: this.dateTypeState,
     }));
+  },
+  showNavigation() {
+    const state = this.getState();
+
+    if (this.getOption('showPrevNextButtons') === false || state.get('relativeDate') === 'alltime' || !window.matchMedia(PHONE_QUERY).matches) return;
+
+    const navigationView = new NavigationView({ model: state });
+
+    this.listenTo(navigationView, {
+      'click:prev': () => {
+        state.incrementBackward();
+        this.popView.destroy();
+      },
+      'click:next': () => {
+        state.incrementForward();
+        this.popView.destroy();
+      },
+    });
+    this.popView.showChildView('navigation', navigationView);
   },
   showRanges() {
     const state = this.getState();

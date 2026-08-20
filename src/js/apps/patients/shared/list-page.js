@@ -7,16 +7,20 @@ import { View } from 'marionette';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
 
+import { renderTemplate } from 'js/i18n';
+import { PHONE_QUERY } from 'js/utils/responsive';
+import { bindSelectionModeViewport, getSelectedCount, unbindSelectionModeViewport } from 'js/apps/patients/shared/selection-mode';
+
 import SelectionBarTemplate from './selection-bar.hbs';
 
 import './patient-list-page.scss';
 
-const FILTER_DRAWER_QUERY = '(width <= 640px)';
 const FILTERS_SIDEBAR_FIXED_QUERY = '(width >= 2240px)';
 const LIST_PAGE_UI = {
   filtersDrawerClose: '.js-close-sidebar-drawer',
   filtersSidebar: '.js-filters-sidebar',
 };
+const SelectionCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.selectionMode.selected") itemCount=itemCount}}`;
 
 const ListPageSelectionBarView = View.extend({
   className: 'patient-list-page__filters',
@@ -25,6 +29,47 @@ const ListPageSelectionBarView = View.extend({
     selectAll: '[data-select-all-region]',
     bulkEdit: '[data-bulk-edit-region]',
     count: '[data-count-region]',
+  },
+  ui: {
+    cancel: '.js-selection-cancel',
+    bulkEditOpen: '.js-bulk-edit-open',
+    count: '.js-selection-count',
+    start: '.js-selection-start',
+  },
+  events: {
+    'click @ui.cancel': 'onClickCancel',
+    'click @ui.bulkEditOpen': 'onClickBulkEditOpen',
+    'click @ui.start': 'onClickStart',
+  },
+  modelEvents: {
+    'change:isSelectionMode change:actionsSelected change:flowsSelected': 'syncSelectionMode',
+  },
+  initialize() {
+    bindSelectionModeViewport(this);
+  },
+  onRender() {
+    this.syncSelectionMode();
+  },
+  onBeforeDestroy() {
+    unbindSelectionModeViewport(this);
+  },
+  syncSelectionMode() {
+    const isSelectionMode = this.model.get('isSelectionMode');
+    const itemCount = getSelectedCount(this.model);
+
+    this.$el.toggleClass('is-selection-mode', isSelectionMode);
+    this.$el.toggleClass('has-selection', itemCount > 0);
+    this.ui.count.text(renderTemplate(SelectionCountTemplate, { itemCount }));
+  },
+  onClickStart() {
+    this.model.enterSelectionMode();
+  },
+  onClickCancel() {
+    this.model.exitSelectionMode();
+    this.ui.start.trigger('focus');
+  },
+  onClickBulkEditOpen() {
+    this.triggerMethod('bulk:open');
   },
 });
 
@@ -55,7 +100,10 @@ const ListPageView = View.extend({
     this.listenTo(Radio.channel('user-activity'), 'window:resize', this.onListPageWindowResize);
   },
   onRender() {
-    this.showChildView('selectionBar', new ListPageSelectionBarView({ model: this.model }));
+    const selectionBar = new ListPageSelectionBarView({ model: this.model });
+
+    this.listenTo(selectionBar, 'bulk:open', () => this.triggerMethod('bulk:open'));
+    this.showChildView('selectionBar', selectionBar);
     this.renderFiltersSidebarState();
   },
   showSelectionBarChildView(regionName, view) {
@@ -89,7 +137,7 @@ const ListPageView = View.extend({
     return this.layoutState;
   },
   isFiltersDrawer() {
-    return window.matchMedia(FILTER_DRAWER_QUERY).matches;
+    return window.matchMedia(PHONE_QUERY).matches;
   },
   isFiltersSidebarFixed() {
     return window.matchMedia(FILTERS_SIDEBAR_FIXED_QUERY).matches;
@@ -177,6 +225,7 @@ const ListPageAppMixin = {
       'change:filters-drawer': this.onChangeFiltersDrawer,
       'change:filters-sidebar-fixed': this.onChangeFiltersSidebarFixed,
       'close:sidebar-drawer': this.onCloseSidebarDrawer,
+      'bulk:open': this.onOpenBulkEdit,
     });
     this.setView(layoutView);
 

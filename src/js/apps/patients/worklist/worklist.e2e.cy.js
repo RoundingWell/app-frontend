@@ -180,7 +180,9 @@ context('worklist page', function() {
       .get('.worklist-list__item')
       .first()
       .find('.js-select')
-      .should('have.attr', 'aria-label', 'Select action');
+      .should($button => {
+        expect($button.attr('aria-label')).to.match(/^Select action .+ for .+$/);
+      });
 
     cy
       .get('.js-close-sidebar-drawer')
@@ -196,6 +198,24 @@ context('worklist page', function() {
       .should('be.focused')
       .and('have.attr', 'aria-expanded', 'false');
 
+    cy.viewport(360, 720);
+
+    cy
+      .get('.list-page__title .patient-list__title-filter-name')
+      .invoke('text', 'A clinician name that must fit on a narrow phone');
+
+    cy.get('@filtersButton').then($filtersButton => {
+      cy
+        .get('.list-page__title .patient-list__title-filter-button')
+        .should($button => {
+          const button = $button[0].getBoundingClientRect();
+          const filtersButton = $filtersButton[0].getBoundingClientRect();
+
+          expect(button.height).to.be.at.least(44);
+          expect(button.right).to.be.at.most(filtersButton.left);
+        });
+    });
+
     cy.viewport(390, 720);
 
     cy
@@ -203,7 +223,32 @@ context('worklist page', function() {
       .should('be.visible');
 
     cy
+      .get('.list-page__header-top')
+      .should($header => {
+        const title = $header[0].querySelector('.list-page__title').getBoundingClientRect();
+        const filters = $header[0].querySelector('.patient-list-page__filter-controls').getBoundingClientRect();
+        const date = $header[0].querySelector('.patient-list-page__date-filter').getBoundingClientRect();
+        const search = $header[0].querySelector('.patient-list-page__find-search').getBoundingClientRect();
+
+        expect(filters.top).to.be.lessThan(title.bottom);
+        expect(filters.bottom).to.be.greaterThan(title.top);
+        expect(date.top).to.be.lessThan(search.bottom);
+        expect(date.bottom).to.be.greaterThan(search.top);
+        expect(date.top).to.be.at.least(title.bottom);
+      });
+
+    cy
+      .get('[data-date-filter-region] .date-filter__navigation')
+      .should('not.be.visible');
+
+    cy
       .get('@filtersButton')
+      .should($button => {
+        const button = $button[0].getBoundingClientRect();
+
+        expect(button.height).to.be.at.least(44);
+        expect(button.width).to.be.at.least(44);
+      })
       .click();
 
     cy
@@ -212,6 +257,12 @@ context('worklist page', function() {
 
     cy
       .get('.js-close-sidebar-drawer')
+      .should($button => {
+        const button = $button[0].getBoundingClientRect();
+
+        expect(button.height).to.be.at.least(44);
+        expect(button.width).to.be.at.least(44);
+      })
       .click();
 
     cy.viewport(1200, 720);
@@ -352,6 +403,15 @@ context('worklist page', function() {
         sidebarContent.scrollTop = sidebarContent.scrollHeight;
 
         expect(sidebarContent.scrollTop).to.be.greaterThan(0);
+      });
+
+    cy
+      .get('.patient-sidebar__close')
+      .should($button => {
+        const button = $button[0].getBoundingClientRect();
+
+        expect(button.height).to.be.at.least(44);
+        expect(button.width).to.be.at.least(44);
       });
   });
 
@@ -1911,6 +1971,177 @@ context('worklist page', function() {
     cy
       .get('.tooltip')
       .should('not.exist');
+
+    [320, 390].forEach(width => {
+      cy.viewport(width, 720);
+
+      cy
+        .get('@firstRow')
+        .find('.work-card__surface')
+        .should($surface => {
+          const bounds = $surface[0].getBoundingClientRect();
+          expect(bounds.left).to.be.at.least(0);
+          expect(bounds.right).to.be.at.most(width);
+        });
+    });
+
+    cy
+      .get('@firstRow')
+      .find('.action-details-tooltip, .action-form-button, .work-card__state button, .worklist-list__flow-context')
+      .should($controls => {
+        [...$controls].forEach(control => {
+          const bounds = control.getBoundingClientRect();
+          expect(bounds.width).to.be.at.least(44);
+          expect(bounds.height).to.be.at.least(44);
+        });
+      });
+
+    cy
+      .get('@firstRow')
+      .find('.js-select')
+      .should('not.be.visible');
+
+    cy
+      .get('.patient-list-page__selection-start')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy
+      .get('@firstRow')
+      .find('.patient-list-page__row-selection .js-select')
+      .should($controls => {
+        [...$controls].forEach(control => {
+          const bounds = control.getBoundingClientRect();
+          expect(bounds.width).to.be.at.least(44);
+          expect(bounds.height).to.be.at.least(44);
+        });
+      });
+
+    cy
+      .get('@firstRow')
+      .find('.patient-list-page__row-selection .js-select')
+      .should($button => {
+        expect($button.attr('aria-label')).to.match(/^Select action .+ for .+$/);
+      });
+
+    cy
+      .get('@firstRow')
+      .click('center');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('@firstRow')
+      .find('.patient-list-page__row-selection .js-select')
+      .should('have.attr', 'aria-checked', 'true')
+      .find('.button__checkbox-icon--selected')
+      .should('be.visible');
+
+    cy
+      .get('.patient-list-page__bulk-edit')
+      .should('be.empty');
+
+    cy
+      .get('.patient-list-page__bulk-edit-open')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.bulk-edit-modal')
+      .should('be.visible')
+      .and('have.attr', 'role', 'dialog')
+      .and('have.attr', 'aria-modal', 'true')
+      .and('contain', 'Edit 1 Action')
+      .then($modal => {
+        const bounds = $modal[0].getBoundingClientRect();
+
+        expect(bounds.left).to.equal(0);
+        expect(bounds.right).to.equal(390);
+        expect(bounds.top).to.equal(0);
+        expect(bounds.bottom).to.equal(720);
+      });
+
+    cy
+      .focused()
+      .type('{esc}');
+
+    cy
+      .get('.bulk-edit-modal')
+      .should('not.exist');
+
+    cy
+      .get('.patient-list-page__bulk-edit-open')
+      .should('be.focused');
+
+    cy
+      .location('pathname')
+      .should('contain', '/worklist/owned-by');
+
+    cy.viewport(641, 720);
+
+    cy
+      .get('.patient-list-page__filters')
+      .should('not.have.class', 'is-selection-mode');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .should('have.class', 'is-selected')
+      .find('.work-card__surface')
+      .should('not.have.attr', 'inert');
+
+    cy.viewport(390, 720);
+
+    cy
+      .get('.patient-list-page__filters')
+      .should('have.class', 'is-selection-mode');
+
+    cy
+      .get('.patient-list-page__selection-cancel')
+      .click();
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy
+      .get('@firstRow')
+      .find('.js-select')
+      .should('not.be.visible');
+
+    cy
+      .get('.app-frame__content')
+      .find('.worklist-list__item')
+      .last()
+      .find('.action-details-tooltip')
+      .click()
+      .should('be.focused');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Details gonna detail');
+
+    cy
+      .focused()
+      .type('{esc}')
+      .should('be.focused');
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
+
+    cy
+      .location('pathname')
+      .should('contain', '/worklist/owned-by');
+
+    cy.viewport(1280, 720);
 
     cy
       .routeAction(fx => {
