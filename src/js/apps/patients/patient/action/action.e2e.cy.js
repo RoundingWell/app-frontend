@@ -358,6 +358,14 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('.patient-action')
       .find('[data-details-region] .js-input')
       .focus()
+      .blur()
+      .parents('.textarea-flex')
+      .should('not.have.class', 'is-editing');
+
+    cy
+      .get('.patient-action')
+      .find('[data-details-region] .js-input')
+      .focus()
       .parents('.textarea-flex')
       .should('have.class', 'is-editing')
       .find('.js-input')
