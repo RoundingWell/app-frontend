@@ -42,7 +42,15 @@
 }
 
 .patient-readonly__owner {
-  width: 80px;
+  max-width: min(100%, var(--owner-component-max-width, 160px));
+  width: auto;
+}
+
+.patient-readonly__owner > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .patient-readonly__time {

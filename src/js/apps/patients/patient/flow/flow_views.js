@@ -220,19 +220,20 @@ const ActionItemView = View.extend({
     dueTime: '[data-due-time-region]',
     form: '[data-form-region]',
   },
-  triggers: {
-    'click': 'click',
-  },
   events: {
+    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-primary': 'onClickPrimary',
   },
-  onClick() {
+  navigateToAction() {
     Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id);
+  },
+  onClickSurface() {
+    this.navigateToAction();
   },
   onClickPrimary(event) {
     event.stopPropagation();
-    this.onClick();
+    this.navigateToAction();
   },
   onRender() {
     const canEdit = this.canEdit;

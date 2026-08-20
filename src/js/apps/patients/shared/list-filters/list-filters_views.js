@@ -125,12 +125,23 @@ const CustomFiltersLoadingView = View.extend({
   },
 });
 
+const CustomFiltersEmptyView = View.extend({
+  className: 'list-filters__empty',
+  template: hbs`{{#unless hasLoadError}}{{ @intl.patients.shared.listFilters.loadingView.empty }}{{/unless}}`,
+  templateContext() {
+    return {
+      hasLoadError: this.getOption('hasLoadError'),
+    };
+  },
+});
+
 const CustomFiltersView = CollectionView.extend({
   className: 'list-filters__custom-filters',
   attributes: {
     'aria-busy': 'false',
   },
   childView: CustomFilterView,
+  emptyView: CustomFiltersEmptyView,
   childViewContainer: '[data-custom-filters-list-region]',
   template: hbs`
     <button class="list-filters__section-button list-filters__section-heading js-toggle-section" type="button" aria-expanded="true">
@@ -156,6 +167,11 @@ const CustomFiltersView = CollectionView.extend({
   childViewOptions() {
     return {
       state: this.getOption('state'),
+    };
+  },
+  emptyViewOptions() {
+    return {
+      hasLoadError: this.hasLoadError,
     };
   },
   collectionEvents: {

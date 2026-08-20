@@ -1,5 +1,5 @@
 <div class="worklist-list__check js-no-click"><span data-check-region></span></div>
-<div class="work-card__surface">
+<div class="work-card__surface js-action-surface">
   <div class="work-card__main">
     <div class="work-card__heading">
       <span class="work-card__state patient-list__state worklist-list__state js-no-click" data-state-region></span>
@@ -36,11 +36,11 @@
         <span>{{ @intl.patients.worklist.actionViews.added }} {{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</span>
         <span>{{ @intl.patients.worklist.actionViews.updated }} {{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</span>
       </span>
-      {{#if attachmentCount}}<span class="action-card__counts">
-        <span class="action-card__count" role="img" aria-label="{{formatMessage (intlGet "patients.shared.attachmentsLabel") itemCount=attachmentCount}}">{{far "paperclip"}}<span> {{ attachmentCount }}</span></span>
-        {{#if commentCount}}<span class="action-card__count" role="img" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></span>{{/if}}
-      </span>{{else}}{{#if commentCount}}<span class="action-card__counts">
-        <span class="action-card__count" role="img" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></span>
+      {{#if attachmentCount}}<span class="action-card__counts js-no-click">
+        <button class="action-card__count js-attachments" type="button" aria-label="{{formatMessage (intlGet "patients.shared.attachmentsLabel") itemCount=attachmentCount}}">{{far "paperclip"}}<span> {{ attachmentCount }}</span></button>
+        {{#if commentCount}}<button class="action-card__count js-comments" type="button" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></button>{{/if}}
+      </span>{{else}}{{#if commentCount}}<span class="action-card__counts js-no-click">
+        <button class="action-card__count js-comments" type="button" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></button>
       </span>{{/if}}{{/if}}
     </div>
   </div>

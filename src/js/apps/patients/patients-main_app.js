@@ -56,10 +56,6 @@ export default RouterApp.extend({
         'patient/archive/:patientId/action/:actionId',
       ],
     },
-    'patient:action:form': {
-      action: 'showPatient',
-      route: 'patient/:patientId/action/:actionId/form',
-    },
     'patient:flow': {
       action: 'showPatient',
       route: 'patient/:patientId/flow/:flowId',
@@ -67,10 +63,6 @@ export default RouterApp.extend({
     'patient:flow:action': {
       action: 'showPatient',
       route: 'patient/:patientId/flow/:flowId/action/:actionId',
-    },
-    'patient:flow:action:form': {
-      action: 'showPatient',
-      route: 'patient/:patientId/flow/:flowId/action/:actionId/form',
     },
     'patient:form': {
       action: 'showPatient',

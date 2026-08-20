@@ -1552,8 +1552,12 @@ context('worklist page', function() {
       .wait('@routeFormByAction');
 
     cy
-      .url()
-      .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/flow/${ testFlow.id }/action/${ testActions[0].id }`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     cy
       .visit('/worklist/owned-by')
@@ -1921,12 +1925,34 @@ context('worklist page', function() {
       .wait('@routeFormByAction');
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[2].id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/action/${ testActions[2].id }`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     cy
       .wait('@routeFormActionFields')
-      .go('back');
+      .go('back')
+      .wait('@routeActions');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testActions[0];
+
+        return fx;
+      })
+      .get('.worklist-list__action-item')
+      .first()
+      .find('.js-comments')
+      .click()
+      .wait('@routeAction')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('[data-activity-region]')
+      .should('be.focused');
   });
 
   specify('action list - socket notifications', function() {

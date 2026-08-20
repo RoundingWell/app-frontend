@@ -3,6 +3,7 @@ import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import handleErrors from 'js/utils/handle-errors';
+import localStore from 'js/utils/local-store';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
@@ -14,11 +15,6 @@ import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
 
 import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
-const EXPANDED_FORM_ROUTES = new Set([
-  'patient:action:form',
-  'patient:flow:action:form',
-]);
-
 export default SubRouterApp.extend({
   routeScope: ['patientId'],
 
@@ -27,10 +23,8 @@ export default SubRouterApp.extend({
       'patient:workflow': this.showWorkflow,
       'patient:workflow:closed': this.showClosedWorkflow,
       'patient:action': this.showPatientAction,
-      'patient:action:form': this.showPatientActionForm,
       'patient:flow': this.showFlow,
       'patient:flow:action': this.showFlowAction,
-      'patient:flow:action:form': this.showFlowActionForm,
       'patient:form': this.showPatientForm,
     };
   },
@@ -80,22 +74,19 @@ export default SubRouterApp.extend({
   onStart(options, patient) {
     this.patient = patient;
     this.contextTrail = new Backbone.Model();
-    const formExpanded = EXPANDED_FORM_ROUTES.has(this.getCurrentRoute().event);
-
+    this.currentUser = Radio.request('bootstrap', 'currentUser');
+    this.sidebarPreferenceHidden = !!localStore.get(this.getSidebarPreferenceKey());
     this.layoutState = new Backbone.Model({
-      formExpanded,
-      sidebarHidden: formExpanded,
+      formExpanded: false,
+      sidebarHidden: this.sidebarPreferenceHidden,
     });
-    this.listenTo(this.layoutState, 'change:formExpanded', this.renderFormExpandedState);
-    this.sidebarHiddenBeforeDrawer = formExpanded;
+    this.listenTo(this.layoutState, 'change:formExpanded', this.onChangeFormExpanded);
 
     const layout = new LayoutView({
       model: patient,
       contextTrail: this.contextTrail,
       layoutState: this.layoutState,
     });
-
-    if (layout.isSidebarFixed()) this.sidebarHiddenBeforeDrawer = false;
 
     this.listenTo(layout, {
       'change:sidebar-layout': this.onChangeSidebarLayout,
@@ -122,10 +113,6 @@ export default SubRouterApp.extend({
     this.startContent('action', { actionId });
   },
 
-  showPatientActionForm(patientId, actionId) {
-    this.startContent('action', { actionId, formExpanded: true });
-  },
-
   showFlow(patientId, flowId) {
     this.startContent('flow', { flowId });
   },
@@ -134,24 +121,19 @@ export default SubRouterApp.extend({
     this.startContent('action', { flowId, actionId });
   },
 
-  showFlowActionForm(patientId, flowId, actionId) {
-    this.startContent('action', { flowId, actionId, formExpanded: true });
-  },
-
   showPatientForm(patientId, formId) {
     this.startContent('form', { formId });
   },
 
   startContent(appName, options) {
-    const formExpanded = !!options.formExpanded;
     const previousPageApp = this.getCurrent();
 
     if (previousPageApp) {
       this.stopListening(previousPageApp, 'context:change');
     }
 
-    this.setSidebarHidden(formExpanded);
-    this.setFormExpanded(formExpanded);
+    this.setFormExpanded(false);
+    this.setSidebarHidden(this.sidebarPreferenceHidden);
     this.contextTrail.set('context', this.getOptimisticContext(appName, options));
 
     const pageApp = this.getChildApp(appName);
@@ -174,12 +156,6 @@ export default SubRouterApp.extend({
   setSidebarHidden(isHidden) {
     const layout = this.getView();
 
-    if (layout.isSidebarFixed()) {
-      this.sidebarHiddenBeforeDrawer = false;
-    } else if (!this._isTogglingPatientSidebar) {
-      this.sidebarHiddenBeforeDrawer = isHidden;
-    }
-
     const shouldHide = !layout.isSidebarFixed()
       && (layout.isSidebarDrawer() && !this._isTogglingPatientSidebar ? true : isHidden);
 
@@ -188,6 +164,12 @@ export default SubRouterApp.extend({
   setFormExpanded(isExpanded) {
     this.layoutState.set('formExpanded', isExpanded);
   },
+  onChangeFormExpanded() {
+    const isExpanded = this.layoutState.get('formExpanded');
+
+    this.setSidebarHidden(isExpanded || this.sidebarPreferenceHidden);
+    this.renderFormExpandedState();
+  },
   renderFormExpandedState() {
     Radio.request('nav', 'setMinimized', this.layoutState.get('formExpanded'));
   },
@@ -195,16 +177,23 @@ export default SubRouterApp.extend({
     if (this.getView().isSidebarFixed()) return;
 
     const isHidden = !this.getView().isSidebarHidden();
+    this.setSidebarPreferenceHidden(isHidden);
     this._isTogglingPatientSidebar = true;
     this.setCurrentPatientSidebarHidden(isHidden);
     this._isTogglingPatientSidebar = false;
   },
+  getSidebarPreferenceKey() {
+    return `isPatientSidebarHidden_${ this.currentUser.id }`;
+  },
+  setSidebarPreferenceHidden(isHidden) {
+    this.sidebarPreferenceHidden = isHidden;
+    localStore.set(this.getSidebarPreferenceKey(), isHidden);
+  },
   setCurrentPatientSidebarHidden(isHidden) {
     this.setSidebarHidden(isHidden);
   },
-  onChangeSidebarLayout({ isSidebarDrawer, isSidebarFixed, wasSidebarDrawer }) {
+  onChangeSidebarLayout({ isSidebarDrawer, isSidebarFixed }) {
     if (isSidebarFixed) {
-      this.sidebarHiddenBeforeDrawer = false;
       this.layoutState.set('sidebarHidden', false);
       return;
     }
@@ -214,7 +203,7 @@ export default SubRouterApp.extend({
       return;
     }
 
-    if (wasSidebarDrawer) this.setCurrentPatientSidebarHidden(this.sidebarHiddenBeforeDrawer);
+    this.setCurrentPatientSidebarHidden(this.layoutState.get('formExpanded') || this.sidebarPreferenceHidden);
   },
   closePatientSidebarDrawer() {
     this._isTogglingPatientSidebar = true;

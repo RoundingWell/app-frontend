@@ -190,7 +190,7 @@
 
 .patient-action__chips {
   --button-align-items: center;
-  --button-background: transparent;
+  --button-background: var(--color-surface);
   --button-border-color: var(--color-chip-border);
   --button-border-radius: 16px;
   --button-border-width: 0.5px;
@@ -200,15 +200,15 @@
   --button-height: 28px;
   --button-line-height: 20px;
   --button-min-height: 28px;
-  --button-padding: 0 var(--space-2);
+  --button-padding: 0 var(--space-3);
   --button-width: auto;
-  --patient-readonly-background: transparent;
+  --patient-readonly-background: var(--color-surface);
   --patient-readonly-border-color: var(--color-chip-border);
   --patient-readonly-border-radius: 16px;
   --patient-readonly-border-width: 0.5px;
   --patient-readonly-font-size: 12px;
   --patient-readonly-min-height: 28px;
-  --patient-readonly-padding: 0 var(--space-2);
+  --patient-readonly-padding: 0 var(--space-3);
   --patient-readonly-width: auto;
 
   align-items: center;
@@ -220,12 +220,30 @@
   width: 100%;
 }
 
+.patient-action__chips :is(.button, .patient-readonly) {
+  box-shadow: 0 1px 0 rgb(77 77 77 / 15%);
+}
+
 .patient-action__chips .icon {
   font-size: 14px;
 }
 
 .patient-action__dialer {
+  flex: none;
+}
+
+.patient-action__counts {
+  display: flex;
+  gap: 8px;
   margin-left: auto;
+}
+
+.patient-action__counts:empty {
+  display: none;
+}
+
+.patient-action__count {
+  gap: var(--space-1);
 }
 
 .patient-action__due {
@@ -362,6 +380,10 @@
   cursor: pointer;
 }
 
+.patient-action__attachment-icon {
+  cursor: not-allowed;
+}
+
 .patient-action__attachment-control:hover,
 .patient-action__attachment-control:focus {
   border-color: var(--color-border-strong);
@@ -446,7 +468,7 @@
   color: var(--color-text);
   font-size: 12px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 20px;
   padding-left: 40px;
   position: relative;
 
@@ -456,7 +478,7 @@
     left: 0;
     position: absolute;
     text-align: center;
-    top: 4px;
+    top: 3px;
     width: 32px;
   }
 }

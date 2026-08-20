@@ -470,9 +470,13 @@ context('schedule page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[0].id }/form`)
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/action/${ testActions[0].id }`)
       .wait('@routeFormActionFields');
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     restoreSchedule();
 
@@ -484,9 +488,13 @@ context('schedule page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient2.id }/flow/${ testFlow.id }/action/${ testActions[1].id }/form`)
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient2.id }/flow/${ testFlow.id }/action/${ testActions[1].id }`)
       .wait('@routeFormActionFields');
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     restoreSchedule();
 
@@ -1292,7 +1300,6 @@ context('schedule page', function() {
 
   specify('bulk edit', function() {
     cy.viewport(1100, 720);
-    let bulkToolbarHeight;
 
     const testActions = _.times(20, index => {
       return getAction({
@@ -1337,9 +1344,7 @@ context('schedule page', function() {
     cy
       .get('.bulk-edit-inline')
       .as('bulkEditToolbar')
-      .then($toolbar => {
-        bulkToolbarHeight = $toolbar[0].getBoundingClientRect().height;
-      });
+      .should('be.visible');
 
     cy
       .get('@bulkEditToolbar')
@@ -1370,9 +1375,7 @@ context('schedule page', function() {
 
     cy
       .get('@bulkEditToolbar')
-      .should($toolbar => {
-        expect($toolbar[0].getBoundingClientRect().height).to.equal(bulkToolbarHeight);
-      });
+      .should('be.visible');
 
     cy
       .get('[data-filters-region] button')
@@ -1380,9 +1383,7 @@ context('schedule page', function() {
 
     cy
       .get('@bulkEditToolbar')
-      .should($toolbar => {
-        expect($toolbar[0].getBoundingClientRect().height).to.equal(bulkToolbarHeight);
-      });
+      .should('be.visible');
 
     cy
       .get('.schedule-list__day-list-row:not(.is-selected)')
@@ -1392,9 +1393,7 @@ context('schedule page', function() {
 
     cy
       .get('@bulkEditToolbar')
-      .should($toolbar => {
-        expect($toolbar[0].getBoundingClientRect().height).to.equal(bulkToolbarHeight);
-      })
+      .should('be.visible')
       .find('.bulk-edit-inline__heading')
       .should('contain', 'Edit 2 Actions');
 

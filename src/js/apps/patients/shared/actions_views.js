@@ -11,6 +11,8 @@ import Tooltip from 'js/components/tooltip';
 import trim from 'js/utils/formatting/trim';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
+import { setActionEntryTarget } from 'js/apps/patients/patient/action/action-entry-target';
+
 import CheckComponent from './components/check_component';
 import StateComponent from './components/state_component';
 import OwnerComponent from './components/owner_component';
@@ -33,11 +35,12 @@ const FormButton = View.extend({
   },
   onClick() {
     const flow = this.model.getFlow();
+    setActionEntryTarget(this.model.id, { formExpanded: true });
 
     if (flow) {
       Radio.trigger(
         'event-router',
-        'patient:flow:action:form',
+        'patient:flow:action',
         this.model.getPatient().id,
         flow.id,
         this.model.id,
@@ -47,7 +50,7 @@ const FormButton = View.extend({
 
     Radio.trigger(
       'event-router',
-      'patient:action:form',
+      'patient:action',
       this.model.getPatient().id,
       this.model.id,
     );

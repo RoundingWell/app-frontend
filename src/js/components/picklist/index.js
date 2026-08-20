@@ -159,7 +159,7 @@ const Picklists = CollectionView.extend({
   ],
   template: hbs`
     <div>
-      {{#if headingText}}<div class="picklist__heading u-margin--b-8">{{ headingText }}</div>{{/if}}
+      {{#if headingText}}<div class="picklist__heading">{{ headingText }}</div>{{/if}}
       {{#if isSelectlist}}<input type="text" class="js-input picklist__input form-input form-input--primary form-input--small" placeholder="{{ placeholderText }}" value="{{ query }}">{{/if}}
       {{#if canClear}}<div><a class="picklist__item js-picklist-item js-clear">{{ clearText }}</a></div>{{/if}}
     </div>

@@ -57,6 +57,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         sharing: true,
       },
       relationships: {
+        comments: getRelationship([getComment()]),
+        files: getRelationship([getFile()]),
         owner: getRelationship(currentClinician),
         state: getRelationship(stateTodo),
         patient: getRelationship(testPatient),
@@ -339,6 +341,24 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('.patient-action__chips')
       .should('be.visible');
 
+    cy
+      .get('.patient-action__counts .js-attachments')
+      .should('have.attr', 'aria-label', '1 attachment')
+      .click();
+
+    cy
+      .get('[data-attachments-region]')
+      .should('be.focused');
+
+    cy
+      .get('.patient-action__counts .js-comments')
+      .should('have.attr', 'aria-label', '1 comment')
+      .click();
+
+    cy
+      .get('[data-activity-region]')
+      .should('be.focused');
+
     cy.viewport(1920, 900);
 
     cy
@@ -353,14 +373,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('.patient-action')
       .find('[data-save-region]')
       .should('be.empty');
-
-    cy
-      .get('.patient-action')
-      .find('[data-details-region] .js-input')
-      .focus()
-      .blur()
-      .parents('.textarea-flex')
-      .should('not.have.class', 'is-editing');
 
     cy
       .get('.patient-action')
@@ -430,6 +442,14 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .blur()
       .parents('.textarea-flex')
       .should('have.class', 'is-editing');
+
+    cy
+      .get('.patient-action')
+      .find('[data-details-region] .js-input')
+      .focus()
+      .blur()
+      .parents('.textarea-flex')
+      .should('not.have.class', 'is-editing');
 
     cy
       .get('.patient-action')
@@ -2091,11 +2111,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .click();
 
     cy
-      .wait('@routeAction');
-
-    cy
-      .url()
-      .should('contain', `/action/${ testAction.id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/1/action/${ testAction.id }`);
 
     cy
       .get('.patient-action')
@@ -2178,12 +2195,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .click();
 
     cy
-      .wait('@routeAction');
-
-    cy
-      .url()
-      .should('contain', `/action/${ testAction.id }`)
-      .should('not.contain', `/action/${ testAction.id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/1/action/${ testAction.id }`);
 
     cy
       .get('.patient__frame')
@@ -2221,8 +2234,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `/action/${ testAction.id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/1/action/${ testAction.id }`);
 
     cy
       .get('.patient-action')
@@ -2234,42 +2247,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `/action/${ testAction.id }`)
-      .and('not.contain', `/action/${ testAction.id }/form`);
-
-    cy
-      .intercept('GET', '/api/actions/*', {
-        delay: 1000,
-        body: { data: testAction, included: [] },
-      })
-      .as('routeDelayedExpandedAction')
-      .visit(`/patient/1/action/${ testAction.id }/form`)
-      .wait('@routePatient');
-
-    cy
-      .get('.patient__frame')
-      .should('have.class', 'patient__frame--form-expanded')
-      .and('have.class', 'patient__frame--sidebar-hidden');
-
-    cy
-      .get('.patient__sidebar')
-      .should('not.be.visible');
-
-    cy
-      .wait('@routeDelayedExpandedAction');
-
-    cy
-      .get('.patient-action')
-      .should('have.class', 'patient-action--form-expanded');
-
-    cy
-      .get('.patient__frame')
-      .should('have.class', 'patient__frame--sidebar-hidden');
-
-    cy
-      .get('.js-sidebar-button')
-      .should('have.attr', 'aria-expanded', 'false');
+      .location('pathname')
+      .should('equal', `/one/patient/1/action/${ testAction.id }`);
 
     cy
       .get('[data-worklists-region] .app-nav__link')
@@ -2721,7 +2700,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .get('[data-action-region]')
       .find('button')
-      .should('have.length', 6);
+      .should('have.length', 7);
 
     cy
       .get('[data-action-region]')
@@ -2741,8 +2720,9 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .get('[data-action-region]')
       .find('button')
-      .should('have.length', 1)
-      .and('have.class', 'dialer-component__button');
+      .should('have.length', 2)
+      .filter('.dialer-component__button')
+      .should('have.length', 1);
 
     cy
       .get('[data-action-region]')

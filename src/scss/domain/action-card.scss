@@ -44,6 +44,20 @@
   white-space: nowrap;
 }
 
+button.action-card__count {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+button.action-card__count:hover,
+button.action-card__count:focus {
+  color: color(blue);
+}
+
 @container (width <= #{work-card.$stack}) {
   .action-card__controls {
     display: flex;

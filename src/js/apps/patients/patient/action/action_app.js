@@ -13,6 +13,8 @@ import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
 
+import { takeActionEntryTarget } from './action-entry-target';
+
 export default App.extend({
   childApps: {
     activity: ActivityApp,
@@ -95,8 +97,12 @@ export default App.extend({
     this.flow = flow || null;
     this.action = action;
     this.layoutState = options.layoutState;
+    const entryTarget = takeActionEntryTarget(this.action.id);
+    this.pendingSection = entryTarget?.section;
     if (!this.action.hasForm()) {
-      this.layoutState.set({ formExpanded: false, sidebarHidden: false });
+      this.layoutState.set('formExpanded', false);
+    } else if (entryTarget?.formExpanded) {
+      this.layoutState.set('formExpanded', true);
     }
 
     this.setAccess();
@@ -145,10 +151,13 @@ export default App.extend({
     const hasDialer = !!Radio.request('settings', 'get', 'dialer');
 
     if (!this.getState('canEdit')) {
-      this.showContentView('action', new ReadOnlyActionView({
+      const actionView = new ReadOnlyActionView({
         model: this.action,
         hasDialer,
-      }));
+      });
+
+      this.listenToActionSectionLinks(actionView);
+      this.showContentView('action', actionView);
       return;
     }
 
@@ -160,11 +169,38 @@ export default App.extend({
     this.listenTo(actionView, {
       'save': this.onSave,
     });
+    this.listenToActionSectionLinks(actionView);
 
     this.showContentView('action', actionView);
   },
   onSave({ model }) {
     this.action.save({ details: model.get('details') });
+  },
+  listenToActionSectionLinks(actionView) {
+    this.listenTo(actionView, {
+      'click:attachments': () => this.scrollToSection('attachments'),
+      'click:comments': () => this.scrollToSection('comments'),
+    });
+  },
+  scrollToSection(section) {
+    const selectors = {
+      attachments: '[data-attachments-region]',
+      comments: '[data-activity-region]',
+    };
+    const target = this.getView().el.querySelector(selectors[section]);
+
+    if (!target) return;
+
+    target.scrollIntoView({ block: 'start' });
+    target.focus({ preventScroll: true });
+  },
+  scrollToPendingSection(section, app) {
+    if (this.pendingSection !== section) return;
+
+    this.listenToOnce(app, 'start', () => {
+      this.pendingSection = null;
+      this.scrollToSection(section);
+    });
   },
   showMenu() {
     const menuRegion = this.getRegion('menu');
@@ -234,21 +270,7 @@ export default App.extend({
     return this.action.id === actionId && currentFlowId === (flowId || null);
   },
   onToggleFormExpanded() {
-    const isExpanded = !this.layoutState.get('formExpanded');
-    const event = this.getActionRouteEvent(isExpanded);
-    const args = this.getActionRouteArgs();
-
-    Radio.trigger('event-router', event, ...args);
-  },
-  getActionRouteEvent(isExpanded) {
-    if (this.flow) return isExpanded ? 'patient:flow:action:form' : 'patient:flow:action';
-
-    return isExpanded ? 'patient:action:form' : 'patient:action';
-  },
-  getActionRouteArgs() {
-    if (this.flow) return [this.patient.id, this.flow.id, this.action.id];
-
-    return [this.patient.id, this.action.id];
+    this.layoutState.set('formExpanded', !this.layoutState.get('formExpanded'));
   },
   renderFormExpandedState() {
     const isExpanded = this.layoutState.get('formExpanded');
@@ -277,16 +299,20 @@ export default App.extend({
     Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());
   },
   startActivity() {
-    this.startChildApp('activity', {
+    const app = this.startChildApp('activity', {
       region: this.getRegion('activity'),
       action: this.action,
     });
+
+    this.scrollToPendingSection('comments', app);
   },
   startAttachments() {
-    this.startChildApp('attachments', {
+    const app = this.startChildApp('attachments', {
       region: this.getRegion('attachments'),
       action: this.action,
     });
+
+    this.scrollToPendingSection('attachments', app);
   },
   showContentView(name, view, options) {
     const region = this.getRegion(name);

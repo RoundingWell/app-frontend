@@ -77,6 +77,31 @@ const SaveView = View.extend({
   },
 });
 
+const CountsView = View.extend({
+  className: 'patient-action__counts',
+  template: hbs`
+    {{#if attachmentCount}}
+      <button class="button button--compact patient-action__count js-attachments" type="button" aria-label="{{formatMessage (intlGet "patients.shared.attachmentsLabel") itemCount=attachmentCount}}">{{far "paperclip"}}<span>{{ attachmentCount }}</span></button>
+    {{/if}}
+    {{#if commentCount}}
+      <button class="button button--compact patient-action__count js-comments" type="button" aria-label="{{formatMessage (intlGet "patients.shared.actionCard.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span>{{ commentCount }}</span></button>
+    {{/if}}
+  `,
+  modelEvents: {
+    'change': 'render',
+  },
+  triggers: {
+    'click .js-attachments': 'click:attachments',
+    'click .js-comments': 'click:comments',
+  },
+  templateContext() {
+    return {
+      attachmentCount: this.model.getFiles().length,
+      commentCount: this.model.commentCount(),
+    };
+  },
+});
+
 const DetailsView = View.extend({
   className: 'textarea-flex',
   template: ActionDetailsTemplate,
@@ -124,6 +149,14 @@ const ReadOnlyActionView = View.extend({
     dueDateTime: '[data-due-datetime-region]',
     duration: '[data-duration-region]',
     dialer: '[data-dialer-region]',
+    counts: {
+      el: '[data-counts-region]',
+      replaceElement: true,
+    },
+  },
+  childViewTriggers: {
+    'click:attachments': 'click:attachments',
+    'click:comments': 'click:comments',
   },
   onRender() {
     this.showChildView('name', new NameView({ model: this.model }));
@@ -132,6 +165,7 @@ const ReadOnlyActionView = View.extend({
     this.showDueDateTime();
     this.showDuration();
     this.showDialer();
+    this.showCounts();
   },
   showState() {
     const readOnlyStateView = new ReadOnlyStateView({ model: this.model, showLabel: true });
@@ -157,6 +191,9 @@ const ReadOnlyActionView = View.extend({
       canEdit: false,
     }));
   },
+  showCounts() {
+    this.showChildView('counts', new CountsView({ model: this.model }));
+  },
   templateContext() {
     return {
       canEdit: this.model.canEdit(),
@@ -171,6 +208,8 @@ const ActionView = View.extend({
   childViewTriggers: {
     'save': 'save',
     'cancel': 'cancel',
+    'click:attachments': 'click:attachments',
+    'click:comments': 'click:comments',
   },
   template: ActionEditTemplate,
   regions: {
@@ -183,6 +222,10 @@ const ActionView = View.extend({
     dueTime: '[data-due-time-region]',
     duration: '[data-duration-region]',
     dialer: '[data-dialer-region]',
+    counts: {
+      el: '[data-counts-region]',
+      replaceElement: true,
+    },
   },
   modelEvents: {
     'change:name': 'onChangeName',
@@ -239,6 +282,7 @@ const ActionView = View.extend({
     this.showDueTime();
     this.showDuration();
     this.showDialer();
+    this.showCounts();
   },
   onSave() {
     this.stopEditingDetails();
@@ -348,6 +392,9 @@ const ActionView = View.extend({
       model: this.model,
       canEdit: true,
     }));
+  },
+  showCounts() {
+    this.showChildView('counts', new CountsView({ model: this.model }));
   },
 });
 

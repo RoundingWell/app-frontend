@@ -6,12 +6,11 @@
 
   align-items: stretch;
   color: var(--color-text);
-  cursor: pointer;
   display: flex;
   gap: var(--work-card-gap, var(--space-4));
 }
 
-.work-card:hover:not(.is-selected) {
+.work-card:not(.is-selected) .work-card__surface:hover {
   --work-card-background: var(--color-surface-hover);
   --work-card-aside-background: var(--color-surface-hover);
 }
@@ -26,6 +25,7 @@
   border: 0.5px solid var(--color-border-subtle);
   border-radius: 8px;
   box-shadow: var(--shadow-card);
+  cursor: pointer;
   display: grid;
   flex: 1 1 auto;
   grid-template-columns: minmax(0, 1fr) clamp(300px, 38%, 420px);

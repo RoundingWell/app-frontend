@@ -116,7 +116,7 @@
 
 .patient-flow__chips {
   --button-align-items: center;
-  --button-background: var(--color-chip-background);
+  --button-background: var(--color-surface);
   --button-border-color: var(--color-chip-border);
   --button-border-radius: 16px;
   --button-border-width: 0.5px;
@@ -126,14 +126,20 @@
   --button-height: 28px;
   --button-line-height: 20px;
   --button-min-height: 28px;
-  --button-padding: 0 var(--space-2);
+  --button-padding: 0 var(--space-3);
   --button-width: auto;
   --patient-readonly-border-width: 0.5px;
+  --patient-readonly-background: var(--color-surface);
+  --patient-readonly-padding: 0 var(--space-3);
 
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
   min-height: 28px;
+}
+
+.patient-flow__chips :is(.button, .patient-readonly) {
+  box-shadow: 0 1px 0 rgb(77 77 77 / 15%);
 }
 
 .patient-flow__name {
@@ -165,11 +171,6 @@
 
 .patient-flow__meta {
   margin-right: 0;
-}
-
-.patient-flow__owner {
-  max-width: none;
-  width: auto;
 }
 
 .patient-flow__permission {
