@@ -1,0 +1,31 @@
+packages/care-ops-fontawesome/manifest.json
+  s_534c2b6810f4ee::t_4ad0c1462a3767 7
+src/js/apps/globals/search/dialog.hbs
+  s_534c2b6810f4ee::t_c4945e4ad7eb99 2,4-5
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  s_534c2b6810f4ee::t_2c067850db97c0 8-115,246-249,263-272,319,480-481,527-530,548-573,602,609
+src/js/apps/globals/search/patient-search.scss
+  s_534c2b6810f4ee::t_dee21300600c36 12-15,18-19,27-41,50,56-59,66,107-110,113-114,117,119,121-123,125-127,129,131,134-143,145-146,171-174,177-179,182,185-186,191-198,252-255,268,272-431
+src/js/apps/globals/search/patient-search_views.js
+  s_534c2b6810f4ee::t_494e370590fa87 13,54,60,72,120,133-136,141-142,153,159-169,210,212-217,219,232-236
+src/js/apps/globals/search/result-item.hbs
+  s_534c2b6810f4ee::t_f63517a32e9553 1-20,22-29,31-32
+src/js/apps/globals/search/tip.hbs
+  s_534c2b6810f4ee::t_28e501ac49b553 6,11,17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "75cccc64ab44bd5d7c75bb07697138e922dc2566",
+  "prompts": {},
+  "sessions": {
+    "s_534c2b6810f4ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a23-001e-7b23-9454-44a54672d14d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
