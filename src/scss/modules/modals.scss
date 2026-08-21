@@ -20,6 +20,33 @@
   width: auto;
 }
 
+.modal--form {
+  display: flex;
+  flex-direction: column;
+
+  .modal__body {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .modal__footer,
+  .modal__header {
+    flex: none;
+  }
+}
+
+.modal--form-small {
+  height: min(560px, 65dvh);
+  max-width: 80vw;
+  width: 640px;
+}
+
+.modal--form-large {
+  height: min(800px, 80dvh);
+  max-width: 85vw;
+  width: 1120px;
+}
+
 .modal__header {
   align-items: center;
   color: #{$black-20};
@@ -96,17 +123,14 @@
 }
 
 .modal__form-iframe {
-  height: 50vh;
+  height: 100%;
+  min-height: 0;
 
   iframe {
     display: block;
     height: 100%;
     width: 100%;
   }
-}
-
-.modal__form-iframe--small {
-  height: 35vh;
 }
 
 .modal__form-label {
@@ -129,5 +153,10 @@
     max-width: 100%;
     min-width: 0;
     width: 100%;
+  }
+
+  .modal--form {
+    height: 100dvh;
+    max-height: 100dvh;
   }
 }

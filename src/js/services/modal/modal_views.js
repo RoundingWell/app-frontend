@@ -123,13 +123,7 @@ const SmallModalView = ModalView.extend({
 
 const IframeFormView = View.extend({
   behaviors: [IframeFormBehavior],
-  className() {
-    const size = this.getOption('size');
-
-    if (size === 'small') return 'modal__form-iframe modal__form-iframe--small';
-
-    return 'modal__form-iframe';
-  },
+  className: 'modal__form-iframe',
   template: hbs`<iframe src="{{ url }}"></iframe>`,
   templateContext() {
     return {

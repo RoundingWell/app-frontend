@@ -10,7 +10,6 @@ import App from 'js/base/app';
 import intl from 'js/i18n';
 
 import FormsService from 'js/services/forms';
-import { addAction } from 'js/datadog';
 
 import { ModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
 import { DraftStatusView } from 'js/apps/patients/patient/form/form_views';
@@ -48,23 +47,20 @@ export default App.extend({
     return view;
   },
   showForm(patient, formName, form, size) {
-    if (size === 'large') {
-      this.routeLargeFormRequest(patient, form, formName);
-      return;
-    }
-
+    const modalSize = size === 'small' ? 'small' : 'large';
+    const className = `modal modal--form modal--form-${ modalSize }`;
     const formService = new FormsService({ patient, form });
-    const bodyView = new IframeFormView({ model: form, size });
+    const bodyView = new IframeFormView({ model: form });
 
     if (form.isReadOnly()) {
-      this.showViewOnlyForm(formService, bodyView, formName);
+      this.showViewOnlyForm(formService, bodyView, formName, className);
       return;
     }
 
     const draftModel = new Backbone.Model();
 
     const modal = this.showModal({
-      className: 'modal modal--large',
+      className,
       headingText: formName,
       headerIcon: 'square-poll-horizontal',
       bodyView,
@@ -135,18 +131,9 @@ export default App.extend({
 
     return modal;
   },
-  routeLargeFormRequest(patient, form, formName) {
-    Radio.trigger('event-router', 'patient:form', patient.id, form.id);
-
-    addAction('Large form modal request routed to patient form', {
-      patientId: patient.id,
-      formId: form.id,
-      formName,
-    });
-  },
-  showViewOnlyForm(formService, bodyView, formName) {
+  showViewOnlyForm(formService, bodyView, formName, className) {
     this.showModal({
-      className: 'modal modal--large',
+      className,
       headingText: formName,
       submitText: intl.globals.modal.modalViews.viewOnlyForm.doneText,
       cancelText: false,
