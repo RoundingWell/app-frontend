@@ -54,6 +54,17 @@
   margin-bottom: 8px;
 }
 
+.list-filters__controls > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.list-filters__empty {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 16px;
+}
+
 .list-filters__heading {
   align-items: center;
   display: flex;

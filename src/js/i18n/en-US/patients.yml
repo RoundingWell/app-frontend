@@ -396,6 +396,7 @@ careOptsFrontend:
           allFiltersLabel: All Filters
           heading: Filters
         loadingView:
+          empty: No custom filters available.
           error: Custom filters could not be loaded.
           heading: Custom Filters
           loading: Loading custom filters

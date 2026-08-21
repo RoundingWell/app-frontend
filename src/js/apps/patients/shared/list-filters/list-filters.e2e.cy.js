@@ -40,6 +40,18 @@ context('list filters', function() {
   const currentClinician = getCurrentClinician();
   const testStates = [stateTodo, stateInProgress, stateDone, stateUnableToComplete];
 
+  specify('empty custom filters', function() {
+    cy
+      .routeActions()
+      .routeSettings('custom_filters', [])
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .get('.list-filters__custom-filters')
+      .should('contain', 'No custom filters available.');
+  });
+
   specify('worklist filtering', function() {
     // Handle uncaught exceptions from failed filter requests
     cy.on('uncaught:exception', () => {
@@ -204,7 +216,13 @@ context('list filters', function() {
       .get('.list-filters')
       .as('filtersSidebar')
       .find('.worklist-list__sidebar-controls')
-      .should('be.visible');
+      .should('be.visible')
+      .then($controls => {
+        const controls = $controls[0].getBoundingClientRect();
+        const sortButton = $controls.find('.worklist-list__filter-sort')[0].getBoundingClientRect();
+
+        expect(sortButton.right).to.be.at.most(controls.right);
+      });
 
     cy
       .get('@filtersSidebar')
