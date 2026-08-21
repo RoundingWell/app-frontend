@@ -24,6 +24,7 @@ src/js/apps/patients/worklist/worklist.e2e.cy.js
 src/js/apps/patients/patient/flow/action-item.hbs
   s_534c2b6810f4ee::t_8369819baf4ede 1
   s_534c2b6810f4ee::t_a60ecd7c269555 6-19
+  s_534c2b6810f4ee::t_c38cfbabbb69fa 2
 src/js/apps/patients/worklist/layout.hbs
   s_534c2b6810f4ee::t_cc394fe6736c59 8
 src/js/apps/patients/sidebar/bulk-edit/bulk-edit-flows_app.js
@@ -35,6 +36,7 @@ src/js/apps/patients/patient/workflow/workflow-page.scss
 src/scss/domain/work-card.scss
   s_534c2b6810f4ee::t_0f305aef39de78 13,15-17,81-89,96-103,105-107,247-250,265-321
   s_534c2b6810f4ee::t_3e31ec1e65ec3c 104
+  s_534c2b6810f4ee::t_f0240db19255d9 14
 src/js/apps/patients/worklist/worklist_state.js
   s_534c2b6810f4ee::t_68c0d9e15cc87d 43,80
 src/js/apps/patients/shared/patient-list-page.scss
@@ -123,10 +125,12 @@ src/js/apps/patients/patient/flow/flow_views.js
   s_534c2b6810f4ee::t_81e6ffc93e7d73 13,54,199,232-234,241-242,257,267-268,272,279,449-469,473-489
   s_534c2b6810f4ee::t_17ad06feb0a2bd 278,283,290
   s_534c2b6810f4ee::t_3e31ec1e65ec3c 22,198,269-271
+  s_534c2b6810f4ee::t_f0240db19255d9 225-227,236
 src/js/apps/patients/worklist/action_views.js
   s_534c2b6810f4ee::t_4d028b86b90d07 65,85-87,99-100,105-106,111-112,141,151-152,169
   s_534c2b6810f4ee::t_17ad06feb0a2bd 168,173,180
   s_534c2b6810f4ee::t_3e31ec1e65ec3c 13,64,153-156
+  s_534c2b6810f4ee::t_f0240db19255d9 71-73,88-89
 src/js/i18n/en-US/patients.yml
   s_534c2b6810f4ee::t_21715801a39331 242,244,248,250,390-395
 src/js/apps/patients/shared/selection-bar.hbs
@@ -137,6 +141,7 @@ src/js/apps/patients/shared/bulk-edit/inline_app.js
 src/js/apps/patients/worklist/action-item.hbs
   s_534c2b6810f4ee::t_8369819baf4ede 1
   s_534c2b6810f4ee::t_c9ecad754d0c73 8-16
+  s_534c2b6810f4ee::t_c38cfbabbb69fa 2
 src/js/apps/patients/shared/bulk-edit/bulk-edit.scss
   s_534c2b6810f4ee::t_cca51195e38429 117-163
 ---
