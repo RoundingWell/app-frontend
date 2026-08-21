@@ -10,7 +10,6 @@ import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
-
 import ActionItemTemplate from './action-item.hbs';
 
 import 'scss/domain/work-card.scss';
@@ -67,25 +66,28 @@ const ActionItemView = View.extend({
   modelEvents: {
     'change': 'render',
   },
-  triggers: {
-    'click': 'click',
-  },
   events: {
+    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-patient': 'onClickPatient',
     'click .js-flow': 'onClickFlow',
     'click .js-primary': 'onClickPrimary',
+    'click .js-attachments': 'onClickAttachments',
+    'click .js-comments': 'onClickComments',
   },
   ui: {
     patient: '.js-patient',
   },
-  onClick() {
+  navigateToAction(entryTarget) {
     if (this.flow) {
-      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id);
+      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id, entryTarget);
       return;
     }
 
-    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
+    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id, entryTarget);
+  },
+  onClickSurface() {
+    this.navigateToAction();
   },
   onClickPatient(event) {
     event.stopPropagation();
@@ -97,7 +99,18 @@ const ActionItemView = View.extend({
   },
   onClickPrimary(event) {
     event.stopPropagation();
-    this.onClick();
+    this.navigateToAction();
+  },
+  onClickAttachments(event) {
+    event.stopPropagation();
+    this.navigateToActionSection('attachments');
+  },
+  onClickComments(event) {
+    event.stopPropagation();
+    this.navigateToActionSection('comments');
+  },
+  navigateToActionSection(section) {
+    this.navigateToAction({ section });
   },
   onRender() {
     this.setPatientSelected(this.selectedPatientId);

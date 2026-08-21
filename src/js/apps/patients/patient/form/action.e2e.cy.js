@@ -146,10 +146,12 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }/form`)
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFormByAction')
-      .wait('@routeFormDefinition');
+      .wait('@routeFormDefinition')
+      .get('.js-expand-button')
+      .click();
 
     cy.window().then(win => {
       const action = win.Radio.request('entities', 'get:store', {
@@ -1519,19 +1521,23 @@ context('Patient Action Form', function() {
       .url()
       .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`);
 
+    cy.location('pathname').as('actionPath');
+
     cy
       .get('.js-expand-button')
       .click();
 
     cy
-      .url()
-      .should('contain', `/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`);
 
     cy
       .get('.js-expand-button')
-      .click()
-      .url()
-      .should('not.contain', `/action/${ testAction.id }/form`);
+      .click();
+
+    cy.get('@actionPath').then(actionPath => {
+      cy.location('pathname').should('equal', actionPath);
+    });
 
     cy
       .get('.patient__context-trail .js-flow')
@@ -1819,13 +1825,15 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ routePatientId }/flow/${ testFlow.id }/action/${ testAction.id }/form`)
+      .visitOnClock(`/patient/${ routePatientId }/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFlow')
       .wait('@routeFormByAction')
       .wait('@routePatient')
       .wait('@routeWorkspacePatient')
-      .wait('@routeFormDefinition');
+      .wait('@routeFormDefinition')
+      .get('.js-expand-button')
+      .click();
 
     cy.location('pathname').as('formPath');
 
@@ -2053,11 +2061,23 @@ context('Patient Action Form', function() {
       .routeFormActionFields()
       .routeLatestFormResponse()
       .routeActionActivity()
-      .visitOnClock(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .visitOnClock(`/patient/${ testPatient.id }/flow/${ testFlow.id }`)
       .wait('@routeFlow')
+      .get('.patient-flow__action-item')
+      .contains(testAction.attributes.name)
+      .click()
       .wait('@routeAction')
       .wait('@routeFormByAction')
-      .wait('@routeFormDefinition');
+      .wait('@routeFormDefinition')
+      .wait('@routeFormActionFields');
+
+    cy
+      .get('.js-expand-button')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testAction.id }`);
 
     cy
       .intercept('POST', '/api/form-responses', {

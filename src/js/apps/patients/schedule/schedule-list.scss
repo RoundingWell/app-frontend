@@ -67,14 +67,13 @@
 .schedule-list__day-list-row {
   --schedule-list-day-card-background: var(--color-surface);
 
-  cursor: pointer;
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
   position: relative;
 }
 
-.schedule-list__day-list-row:hover:not(.is-selected) {
+.schedule-list__day-list-row:not(.is-selected) .schedule-list__day-card:hover {
   --schedule-list-day-card-background: var(--color-surface-hover);
 }
 
@@ -90,6 +89,7 @@
   box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
   box-sizing: border-box;
   column-gap: var(--space-2);
+  cursor: pointer;
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;

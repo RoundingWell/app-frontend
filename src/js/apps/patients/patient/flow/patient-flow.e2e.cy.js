@@ -585,6 +585,18 @@ context('patient flow page', function() {
       .find('.action-card')
       .should('have.length', 3);
 
+    cy.location('pathname').then(pathname => {
+      cy
+        .get('@actionsList')
+        .find('.action-card')
+        .first()
+        .click(2, 40);
+
+      cy
+        .location('pathname')
+        .should('equal', pathname);
+    });
+
     cy.viewport(1600, 900);
 
     cy

@@ -65,6 +65,9 @@ const LayoutView = View.extend({
     'data-form-viewport-scroll-container': '',
   },
   template: LayoutTemplate,
+  initialize({ initialSection } = {}) {
+    this.initialSection = initialSection;
+  },
   regions: {
     menu: {
       el: '[data-menu-region]',
@@ -96,6 +99,21 @@ const LayoutView = View.extend({
   },
   scrollViewportTo(options) {
     this.el.scrollTo(options);
+  },
+  focusInitialSection() {
+    if (!this.initialSection) return;
+
+    this.focusSection(this.initialSection);
+  },
+  focusSection(section) {
+    const regionNames = {
+      attachments: 'attachments',
+      comments: 'activity',
+    };
+    const target = this.getRegion(regionNames[section]).el;
+
+    target.scrollIntoView({ block: 'start' });
+    target.focus({ preventScroll: true });
   },
 });
 

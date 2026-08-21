@@ -33,23 +33,26 @@ const FormButton = View.extend({
   },
   onClick() {
     const flow = this.model.getFlow();
+    const entryTarget = { formExpanded: true };
 
     if (flow) {
       Radio.trigger(
         'event-router',
-        'patient:flow:action:form',
+        'patient:flow:action',
         this.model.getPatient().id,
         flow.id,
         this.model.id,
+        entryTarget,
       );
       return;
     }
 
     Radio.trigger(
       'event-router',
-      'patient:action:form',
+      'patient:action',
       this.model.getPatient().id,
       this.model.id,
+      entryTarget,
     );
   },
 });

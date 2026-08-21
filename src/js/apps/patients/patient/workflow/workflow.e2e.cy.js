@@ -576,6 +576,11 @@ context('patient workflow page', function() {
       .should('contain', '1');
 
     cy
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
       .routeFormByAction()
       .routeFormDefinition()
       .routeLatestFormResponse()
@@ -590,8 +595,12 @@ context('patient workflow page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient.id }/action/${ testAction.id }/form`);
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/action/${ testAction.id }`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
   });
 
   specify('add action and flow', function() {

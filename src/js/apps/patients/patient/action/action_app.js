@@ -95,9 +95,8 @@ export default App.extend({
     this.flow = flow || null;
     this.action = action;
     this.layoutState = options.layoutState;
-    if (!this.action.hasForm()) {
-      this.layoutState.set({ formExpanded: false, sidebarHidden: false });
-    }
+    const { entryTarget } = options;
+    this.layoutState.set('formExpanded', this.action.hasForm() && !!entryTarget?.formExpanded);
 
     this.setAccess();
     this.currentFlow = this.flow || this.action.getFlow();
@@ -110,13 +109,16 @@ export default App.extend({
     });
     this.listenTo(this.layoutState, 'change:formExpanded', this.renderFormExpandedState);
 
-    this.showView(new LayoutView());
+    const layout = new LayoutView({ initialSection: entryTarget?.section });
+
+    this.showView(layout);
     this.renderFormExpandedState();
 
     this.showContent();
     this.showMenu();
     this.startActivity();
     this.startAttachments();
+    layout.focusInitialSection();
 
     this.updateContext();
 
@@ -145,10 +147,13 @@ export default App.extend({
     const hasDialer = !!Radio.request('settings', 'get', 'dialer');
 
     if (!this.getState('canEdit')) {
-      this.showContentView('action', new ReadOnlyActionView({
+      const actionView = new ReadOnlyActionView({
         model: this.action,
         hasDialer,
-      }));
+      });
+
+      this.listenToActionSectionLinks(actionView);
+      this.showContentView('action', actionView);
       return;
     }
 
@@ -160,11 +165,18 @@ export default App.extend({
     this.listenTo(actionView, {
       'save': this.onSave,
     });
+    this.listenToActionSectionLinks(actionView);
 
     this.showContentView('action', actionView);
   },
   onSave({ model }) {
     this.action.save({ details: model.get('details') });
+  },
+  listenToActionSectionLinks(actionView) {
+    this.listenTo(actionView, {
+      'click:attachments': () => this.getView().focusSection('attachments'),
+      'click:comments': () => this.getView().focusSection('comments'),
+    });
   },
   showMenu() {
     const menuRegion = this.getRegion('menu');
@@ -234,21 +246,7 @@ export default App.extend({
     return this.action.id === actionId && currentFlowId === (flowId || null);
   },
   onToggleFormExpanded() {
-    const isExpanded = !this.layoutState.get('formExpanded');
-    const event = this.getActionRouteEvent(isExpanded);
-    const args = this.getActionRouteArgs();
-
-    Radio.trigger('event-router', event, ...args);
-  },
-  getActionRouteEvent(isExpanded) {
-    if (this.flow) return isExpanded ? 'patient:flow:action:form' : 'patient:flow:action';
-
-    return isExpanded ? 'patient:action:form' : 'patient:action';
-  },
-  getActionRouteArgs() {
-    if (this.flow) return [this.patient.id, this.flow.id, this.action.id];
-
-    return [this.patient.id, this.action.id];
+    this.layoutState.set('formExpanded', !this.layoutState.get('formExpanded'));
   },
   renderFormExpandedState() {
     const isExpanded = this.layoutState.get('formExpanded');

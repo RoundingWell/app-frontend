@@ -18,7 +18,6 @@ import { ListPageFiltersButtonView, ListPageView } from 'js/apps/patients/shared
 import { TitleOwnerDroplist } from 'js/apps/patients/shared/list_views';
 import { CheckComponent, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import SelectAllView from 'js/apps/patients/shared/components/select-all_view';
-
 import DayItemTemplate from './day-item.hbs';
 import DayListTemplate from './day-list.hbs';
 import LayoutTemplate from './layout.hbs';
@@ -151,9 +150,9 @@ const DayItemView = View.extend({
   },
   triggers: {
     'click .js-form': 'click:form',
-    'click': 'click',
   },
   events: {
+    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-action': 'onClickAction',
     'click .js-patient': 'onClickPatient',
@@ -220,28 +219,21 @@ const DayItemView = View.extend({
   },
   onClickAction(event) {
     event.stopPropagation();
-    this.onClick();
+    this.navigateToAction();
   },
   onClickForm() {
-    if (this.flow) {
-      Radio.trigger('event-router', 'patient:flow:action:form', this.model.getPatient().id, this.flow.id, this.model.id);
-      return;
-    }
-
-    Radio.trigger(
-      'event-router',
-      'patient:action:form',
-      this.model.getPatient().id,
-      this.model.id,
-    );
+    this.navigateToAction({ formExpanded: true });
   },
-  onClick() {
+  onClickSurface() {
+    this.navigateToAction();
+  },
+  navigateToAction(entryTarget) {
     if (this.flow) {
-      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id);
+      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id, entryTarget);
       return;
     }
 
-    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
+    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id, entryTarget);
   },
   showDetailsTooltip() {
     if (!this.model.get('details')) return;

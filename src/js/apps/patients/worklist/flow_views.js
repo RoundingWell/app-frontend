@@ -68,6 +68,9 @@ const FlowItemView = View.extend({
     });
   },
   onClick() {
+    this.navigateToFlow();
+  },
+  navigateToFlow() {
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
   onClickPatient(event) {
@@ -76,7 +79,7 @@ const FlowItemView = View.extend({
   },
   onClickPrimary(event) {
     event.stopPropagation();
-    this.onClick();
+    this.navigateToFlow();
   },
   onRender() {
     this.setPatientSelected(this.selectedPatientId);

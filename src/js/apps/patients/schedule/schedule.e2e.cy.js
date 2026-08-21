@@ -470,9 +470,13 @@ context('schedule page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[0].id }/form`)
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/action/${ testActions[0].id }`)
       .wait('@routeFormActionFields');
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     restoreSchedule();
 
@@ -484,9 +488,13 @@ context('schedule page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient2.id }/flow/${ testFlow.id }/action/${ testActions[1].id }/form`)
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient2.id }/flow/${ testFlow.id }/action/${ testActions[1].id }`)
       .wait('@routeFormActionFields');
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     restoreSchedule();
 

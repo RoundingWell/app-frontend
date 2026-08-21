@@ -128,11 +128,14 @@ const ActionItemView = View.extend({
     'click .js-primary': 'onClickPrimary',
   },
   onClick() {
+    this.navigateToAction();
+  },
+  navigateToAction() {
     Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
   },
   onClickPrimary(event) {
     event.stopPropagation();
-    this.onClick();
+    this.navigateToAction();
   },
   onRender() {
     this.canEdit = this.model.canEdit();
@@ -256,11 +259,14 @@ const FlowItemView = View.extend({
     'click .js-primary': 'onClickPrimary',
   },
   onClick() {
+    this.navigateToFlow();
+  },
+  navigateToFlow() {
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
   onClickPrimary(event) {
     event.stopPropagation();
-    this.onClick();
+    this.navigateToFlow();
   },
   onRender() {
     this.canEdit = this.model.canEdit();
