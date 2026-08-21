@@ -96,7 +96,7 @@ const LayoutView = View.extend({
     widgets: '[data-widgets-header-region]',
   },
   ui: {
-    viewportInteract: '.form__header-title',
+    viewportInteract: '.js-viewport-interact',
   },
   triggers: {
     'click @ui.viewportInteract': 'form:interact',

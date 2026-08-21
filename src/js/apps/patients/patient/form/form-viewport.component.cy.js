@@ -32,7 +32,7 @@ const FormView = View.extend({
   behaviors: [FormViewportBehavior],
   template: hbs`
     <header data-form-viewport-header>
-      <div class="form__header-title">Title</div>
+      <div class="form__header-title js-viewport-interact">Title</div>
       <button type="button">Control</button>
     </header>
     <div data-widgets-header-region></div>
@@ -46,7 +46,7 @@ const FormView = View.extend({
     },
   },
   ui: {
-    viewportInteract: '.form__header-title',
+    viewportInteract: '.js-viewport-interact',
   },
   triggers: {
     'click @ui.viewportInteract': 'form:interact',
