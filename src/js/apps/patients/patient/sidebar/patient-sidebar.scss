@@ -66,6 +66,10 @@
   flex: none;
 }
 
+.patient-sidebar__menu {
+  border-radius: 16px;
+}
+
 .patient-sidebar--list {
   --patient-sidebar-header-margin-bottom: var(--space-1);
   --patient-sidebar-height: 100%;

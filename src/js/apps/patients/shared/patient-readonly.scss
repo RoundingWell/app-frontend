@@ -2,6 +2,7 @@
   background: var(--patient-readonly-background, transparent);
   border: solid var(--patient-readonly-border-width, 1px) var(--patient-readonly-border-color, transparent);
   border-radius: var(--patient-readonly-border-radius, 0);
+  box-shadow: var(--patient-readonly-box-shadow, none);
   cursor: not-allowed;
   display: inline-block;
   font-size: var(--patient-readonly-font-size, 14px);
@@ -42,7 +43,15 @@
 }
 
 .patient-readonly__owner {
-  width: 80px;
+  max-width: min(100%, var(--owner-component-max-width, 160px));
+  width: auto;
+}
+
+.patient-readonly__owner > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .patient-readonly__time {

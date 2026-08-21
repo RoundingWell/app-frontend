@@ -5,6 +5,7 @@
   background: var(--button-background, none);
   border: var(--button-border-width, 1px) solid var(--button-border-color, #{$black-90});
   border-radius: var(--button-border-radius, 4px);
+  box-shadow: var(--button-box-shadow, none);
   cursor: pointer;
   display: var(--button-display, inline-block);
   font-size: var(--button-font-size, 14px);
