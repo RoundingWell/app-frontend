@@ -13,6 +13,13 @@
   width: 16px;
 }
 
+.flow-card__title-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .flow-card__controls {
   align-items: center;
   grid-template-columns: repeat(2, minmax(0, 1fr));
