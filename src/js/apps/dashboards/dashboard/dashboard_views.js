@@ -9,6 +9,18 @@ import PreloadRegion from 'js/regions/preload_region';
 
 import './dashboard.scss';
 
+function isLightdashEmbedUrl(url) {
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url);
+
+    return parsed.hash.length > 1 && /^\/embed\/[^/]+$/.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
 const ContextTrailView = View.extend({
   className: 'dashboard__context-trail',
   template: hbs`
@@ -25,10 +37,20 @@ const ContextTrailView = View.extend({
   },
 });
 
+const lightdashIframeTemplate = hbs`<iframe src="{{ embed_url }}" title="{{ name }}" sandbox="allow-scripts allow-same-origin allow-forms allow-downloads"></iframe>`;
+
 const IframeView = View.extend({
   className: 'flex-grow',
-  template: false,
+  getTemplate() {
+    if (isLightdashEmbedUrl(this.model.get('embed_url'))) {
+      return lightdashIframeTemplate;
+    }
+
+    return false;
+  },
   initialize() {
+    if (isLightdashEmbedUrl(this.model.get('embed_url'))) return;
+
     embedDashboard({
       url: this.model.get('embed_url'),
       container: this.el,

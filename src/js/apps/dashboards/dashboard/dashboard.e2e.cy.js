@@ -90,4 +90,39 @@ context('dashboard', function() {
       .get('.alert-box__body')
       .should('contain', 'The Dashboard you requested does not exist.');
   });
+
+  specify('display lightdash dashboard', function() {
+    const projectUuid = '71de5075-9101-4620-8338-55bf3bdde5ef';
+    const embedUrl = `https://lightdash.example.com/embed/${ projectUuid }#header.payload.signature`;
+    const testDashboard = getDashboard({
+      attributes: {
+        name: 'Lightdash Organization Dashboard',
+        embed_url: embedUrl,
+      },
+    });
+
+    cy
+      .routeDashboards(fx => {
+        fx.data = [testDashboard];
+
+        return fx;
+      })
+      .routeDashboard(fx => {
+        fx.data = testDashboard;
+
+        return fx;
+      })
+      .intercept('GET', 'https://lightdash.example.com/embed/**', req => {
+        req.reply('<html><body>Lightdash Embed</body></html>');
+      })
+      .visit(`/dashboards/${ testDashboard.id }`)
+      .wait('@routeDashboard');
+
+    cy
+      .get('.dashboard__frame')
+      .find('.dashboard__iframe iframe')
+      .should('have.length', 1)
+      .and('have.attr', 'src', embedUrl)
+      .and('have.attr', 'sandbox', 'allow-scripts allow-same-origin allow-forms allow-downloads');
+  });
 });
