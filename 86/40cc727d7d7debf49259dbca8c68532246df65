@@ -1,0 +1,49 @@
+.github/copilot-instructions.md
+  s_d04385ebae28ca::t_0849fc08a5a945 14,20,35
+.github/copilot.yaml
+  s_d04385ebae28ca::t_25d68e696e66f5 12,36
+AGENTS.md
+  s_d04385ebae28ca::t_9fea3e2a1a2c92 81-83,135-137
+src/js/README.md
+  s_d04385ebae28ca::t_c6b166eacd0158 40,43-46,51-58
+src/js/apps/patients/shared/widgets/README.md
+  s_d04385ebae28ca::t_8293611d97ee3e 139
+src/js/components/picklist/index.js
+  s_d04385ebae28ca::t_483a5aff5736d1 162
+src/js/components/picklist/picklist.scss
+  s_d04385ebae28ca::t_4b92f6d7a033ba 120
+src/js/services/modal.js
+  s_d04385ebae28ca::t_0d8a07ef9e60e2 50-51,53,56,63,134,136
+src/js/services/modal/modal_views.component.cy.js
+  s_d04385ebae28ca::t_71da92b366fad5 36,45,47,52,54-60,62-77
+src/js/services/modal/modal_views.js
+  s_d04385ebae28ca::t_5a2a263bef4d5e 126
+src/scss/README.md
+  s_d04385ebae28ca::t_41d8e6fcab54a5 3,21,33,35-36,42,70-74,85,87-89,91-92,114-115,147,149,151-153,155-156
+src/scss/domain/action-card.scss
+  s_d04385ebae28ca::t_70fc8c37e76ade 47-60
+src/scss/domain/flow-card.scss
+  s_d04385ebae28ca::t_5bb165a907dfed 16-22
+src/scss/domain/work-card.scss
+  s_d04385ebae28ca::t_93b1b1d0a2c04a 13,28
+src/scss/modules/buttons.scss
+  s_d04385ebae28ca::t_d8d862ce703cf8 8
+src/scss/modules/modals.scss
+  s_d04385ebae28ca::t_8c697a78c797f3 23-49,126-127,157-161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "8640cc727d7d7debf49259dbca8c68532246df65",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
