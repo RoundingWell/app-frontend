@@ -15,28 +15,24 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
-  specify('scopes sections to the current workspace widgets', function() {
+  specify('uses the sidebar setting for panel membership and order', function() {
     cy
       .routesForPatientDashboard()
-      .routeSettings('widgets_patient_sidebar', {
-        widgets: ['sex'],
-      })
-      .routeSidebars(fx => {
-        const addSidebar = _.partial(getResource, _, 'sidebars');
+      .routeSettings('sidebar', ['status', 'demographics'])
+      .routePanels(fx => {
+        const addPanel = _.partial(getResource, _, 'panels');
 
         fx.data = [
-          addSidebar({
-            id: 'demographics',
+          addPanel({
+            id: 'demographics-panel',
             slug: 'demographics',
             name: 'Demographics',
-            sequence: 0,
             widgets: ['dob', 'sex'],
           }),
-          addSidebar({
-            id: 'status',
+          addPanel({
+            id: 'status-panel',
             slug: 'status',
             name: 'Status',
-            sequence: 1,
             widgets: ['status'],
           }),
         ];
@@ -48,35 +44,49 @@ context('patient sidebar', function() {
 
     cy
       .get('.patient-sidebar__card')
-      .should('have.length', 1)
-      .and('contain', 'Demographics')
+      .should('have.length', 2)
+      .first()
+      .find('.patient-sidebar__card-toggle')
+      .should('contain', 'Status');
+
+    cy.get('.patient-sidebar__card')
+      .eq(1)
+      .should('contain', 'Demographics')
       .and('contain', 'Sex')
-      .and('not.contain', 'Date of Birth');
+      .and('contain', 'Date of Birth');
+  });
+
+  specify('renders available panels when the sidebar setting references a missing panel', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('sidebar', ['missing-panel', 'demographics'])
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
 
     cy
-      .contains('.patient-sidebar__card-toggle', 'Status')
-      .should('not.exist');
+      .get('.patient-sidebar__card')
+      .should('have.length', 1)
+      .and('contain', 'Demographics');
   });
 
   specify('expands and collapses sidebar sections accessibly', function() {
     cy
       .routesForPatientDashboard()
-      .routeSidebars(fx => {
-        const addSidebar = _.partial(getResource, _, 'sidebars');
+      .routeSettings('sidebar', ['demographics', 'care-team'])
+      .routePanels(fx => {
+        const addPanel = _.partial(getResource, _, 'panels');
 
         fx.data = [
-          addSidebar({
-            id: 'demographics',
+          addPanel({
+            id: 'demographics-panel',
             slug: 'demographics',
             name: 'Demographics',
-            sequence: 0,
             widgets: ['sex'],
           }),
-          addSidebar({
-            id: 'care-team',
+          addPanel({
+            id: 'care-team-panel',
             slug: 'care-team',
             name: 'Care & Support',
-            sequence: 1,
             widgets: ['sex'],
           }),
         ];
@@ -230,7 +240,7 @@ context('patient sidebar', function() {
         },
       },
     });
-    const sidebarWidgetSlugs = [
+    const panelWidgetSlugs = [
       'dob',
       'sex',
       'status',
@@ -252,9 +262,6 @@ context('patient sidebar', function() {
 
     cy
       .routesForPatientDashboard()
-      .routeSettings('widgets_patient_sidebar', {
-        widgets: sidebarWidgetSlugs,
-      })
       .routeFormDefinition()
       .routeLatestFormResponse()
       .routeFormFields()
@@ -282,8 +289,8 @@ context('patient sidebar', function() {
 
         return fx;
       })
-      .routeSidebars(fx => {
-        fx.data[0].attributes.widgets = sidebarWidgetSlugs;
+      .routePanels(fx => {
+        fx.data[0].attributes.widgets = panelWidgetSlugs;
 
         return fx;
       })
@@ -770,7 +777,7 @@ context('patient sidebar', function() {
   });
 
   specify('renders patient sidebar when widget values fail', function() {
-    const sidebarWidgetSlugs = [
+    const panelWidgetSlugs = [
       'sex',
       'failingWidget',
       'unknownWidget',
@@ -785,11 +792,8 @@ context('patient sidebar', function() {
 
     cy
       .routesForPatientDashboard()
-      .routeSettings('widgets_patient_sidebar', {
-        widgets: sidebarWidgetSlugs,
-      })
-      .routeSidebars(fx => {
-        fx.data[0].attributes.widgets = sidebarWidgetSlugs;
+      .routePanels(fx => {
+        fx.data[0].attributes.widgets = panelWidgetSlugs;
 
         return fx;
       })
@@ -896,10 +900,10 @@ context('patient sidebar', function() {
       .should('not.contain', 'Workspace Two');
   });
 
-  specify('renders widgets from the sidebar definition', function() {
+  specify('renders widgets from the panel definition', function() {
     cy
       .routesForPatientDashboard()
-      .routeSidebars(fx => {
+      .routePanels(fx => {
         fx.data[0].attributes.widgets = ['divider'];
 
         return fx;

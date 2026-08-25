@@ -56,6 +56,10 @@ function expandFiltersSidebar() {
 }
 
 function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
+  const panelSlugs = ['demographics', ...Array.from(
+    { length: sidebarCount - 1 },
+    (_value, index) => `test-panel-${ index }`,
+  )];
   const testAction = getAction({
     relationships: {
       patient: getRelationship(testPatient1),
@@ -81,16 +85,17 @@ function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
       fx.data = testPatient1;
       return fx;
     })
-    .routeSidebars(fx => {
-      const [sidebar] = fx.data;
+    .routeSettings('sidebar', panelSlugs)
+    .routePanels(fx => {
+      const [panel] = fx.data;
 
       fx.data.push(...Array.from({ length: sidebarCount - 1 }, (_value, index) => ({
-        ...sidebar,
-        id: `test-sidebar-${ index }`,
+        ...panel,
+        id: `test-panel-${ index }`,
         attributes: {
-          ...sidebar.attributes,
+          ...panel.attributes,
+          slug: `test-panel-${ index }`,
           name: `Test Sidebar ${ index + 2 }`,
-          sequence: index + 1,
         },
       })));
 
@@ -120,6 +125,8 @@ function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
 
 context('worklist page', function() {
   specify('toggle filters sidebar', function() {
+    cy.viewport(2240, 900);
+
     localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
       actionsSortId: 'sortCreatedDesc',
@@ -139,6 +146,8 @@ context('worklist page', function() {
       .should('not.have.class', 'is-filters-collapsed')
       .find('.patient-list-page__sidebar')
       .should('be.visible');
+
+    cy.viewport(1200, 720);
 
     cy
       .get('.patient-list-page__all-filters-button')
@@ -379,7 +388,7 @@ context('worklist page', function() {
         fx.data = testPatient1;
         return fx;
       })
-      .routeSidebars()
+      .routePanels()
       .visit('/worklist/owned-by')
       .wait('@routeActions');
 
@@ -697,7 +706,8 @@ context('worklist page', function() {
       .get('.worklist-list__item')
       .first()
       .contains('Test Patient')
-      .should('have.class', 'patient-list__patient--selected');
+      .should('have.class', 'patient-list__patient--selected')
+      .and('have.css', 'color', 'rgb(51, 51, 51)');
 
     cy.viewport(640, 720);
 

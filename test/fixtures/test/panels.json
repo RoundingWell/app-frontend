@@ -3,7 +3,6 @@
     "id": "demographics",
     "slug": "demographics",
     "name": "Demographics",
-    "sequence": 0,
     "widgets": [
       "dob",
       "sex",

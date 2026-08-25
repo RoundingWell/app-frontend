@@ -5,9 +5,9 @@
       <span class="work-card__state patient-list__state worklist-list__state js-no-click" data-state-region></span>
       <div class="work-card__copy">
         <div class="work-card__title-row">
-          <button class="work-card__subject patient-list__patient patient-list__patient--primary worklist-list__patient js-patient" type="button" aria-expanded="false" aria-controls="worklist-list-sidebar">{{ patient.first_name }} {{ patient.last_name }}</button>
+          <button class="patient-list__patient patient-list__patient--primary worklist-list__patient js-patient" type="button" aria-expanded="false" aria-controls="worklist-list-sidebar">{{ patient.first_name }} {{ patient.last_name }}</button>
           <span class="work-card__separator">·</span>
-          <button class="work-card__title flow-card__title js-primary" type="button">{{far "folder-open"}}<span class="flow-card__title-label">{{ name }}&#8203;</span></button>
+          <button class="work-card__title flow-card__title js-primary" type="button">{{far "folder-closed"}}<span class="flow-card__title-label">{{ name }}&#8203;</span></button>
         </div>
         {{#if patient.segment}}<div class="work-card__context">
           <span class="worklist-list__patient-context"><span class="worklist-list__underline">{{ patient.segment }}</span>&#8203;</span>

@@ -12,8 +12,6 @@ import intl from 'js/i18n';
 import underscored from 'js/utils/formatting/underscored';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
-import PreloadRegion from 'js/regions/preload_region';
-
 import Droplist from 'js/components/droplist';
 
 import { ListPageFiltersButtonView, ListPageView } from 'js/apps/patients/shared/list-page';
@@ -45,7 +43,6 @@ const LayoutView = ListPageView.extend({
     filters: '[data-filters-region]',
     list: {
       el: '[data-list-region]',
-      regionClass: PreloadRegion,
       replaceElement: true,
     },
     selectionBar: '[data-selection-bar-region]',
@@ -55,10 +52,7 @@ const LayoutView = ListPageView.extend({
     },
     search: '[data-search-region]',
     listStatus: '[data-list-status-region]',
-    filtersSidebar: {
-      el: '[data-filters-sidebar-region]',
-      regionClass: PreloadRegion,
-    },
+    filtersSidebar: '[data-filters-sidebar-region]',
   },
   modelEvents: {
     'change:filtersSidebarCollapsed': 'onChangeFiltersSidebarCollapsed',
@@ -85,7 +79,7 @@ const TypeToggleView = View.extend({
   className: 'worklist-list__type-toggle',
   template: hbs`
     <button class="button worklist-list__sidebar-button js-toggle-actions" type="button" aria-pressed="{{ actionsPressed }}">{{far "file-lines"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.actionsButton }}</span></button>{{~ remove_whitespace ~}}
-    <button class="button worklist-list__sidebar-button js-toggle-flows" type="button" aria-pressed="{{ flowsPressed }}">{{far "folder"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.flowsButton }}</span></button>
+    <button class="button worklist-list__sidebar-button js-toggle-flows" type="button" aria-pressed="{{ flowsPressed }}">{{far "folder-closed"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.flowsButton }}</span></button>
   `,
   templateContext() {
     const isFlowList = this.getOption('isFlowList');

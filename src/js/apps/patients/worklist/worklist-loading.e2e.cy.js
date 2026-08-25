@@ -279,6 +279,25 @@ context('worklist loading states', function() {
       .should('contain', 'Cannot find patient');
   });
 
+  specify('closes the patient sidebar when its request loses the network', function() {
+    cy
+      .routesForPatientAction()
+      .intercept('GET', '/api/actions?*', { body: getActionsResponse() })
+      .as('routeActions')
+      .intercept('GET', '/api/patients/**?*', { forceNetworkError: true })
+      .as('routePatientNetworkError')
+      .visit('/worklist/owned-by')
+      .wait('@routeActions')
+      .get('.patient-list__patient')
+      .first()
+      .click()
+      .wait('@routePatientNetworkError');
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+  });
+
   specify('keeps the previous cards and offers retry when a refresh fails', function() {
     let shouldFail = false;
 

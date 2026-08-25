@@ -1,5 +1,7 @@
 import Radio from 'backbone.radio';
 
+import { addError } from 'js/datadog';
+
 import App from 'js/base/app';
 
 import PatientSidebarApp, { getPatientSidebarRequests } from 'js/apps/patients/patient/sidebar/sidebar_app';
@@ -59,6 +61,12 @@ export default App.extend({
   },
   onFail(options, error) {
     this.trigger('close');
-    Radio.request('alert', 'show:apiError', error.responseData);
+
+    if (error?.responseData) {
+      Radio.request('alert', 'show:apiError', error.responseData);
+      return;
+    }
+
+    addError(error);
   },
 });
