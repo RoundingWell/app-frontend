@@ -50,25 +50,26 @@ context('patient page', function() {
     cy
       .viewport(720, 720)
       .routesForPatientDashboard()
-      .routeSidebars(fx => {
-        const [sidebar] = fx.data;
+      .routeSettings('sidebar', ['demographics', 'care-plan', 'forms'])
+      .routePanels(fx => {
+        const [panel] = fx.data;
 
         fx.data.push({
-          ...sidebar,
-          id: 'second-sidebar',
+          ...panel,
+          id: 'care-plan-panel',
           attributes: {
-            ...sidebar.attributes,
+            ...panel.attributes,
+            slug: 'care-plan',
             name: 'Care Plan',
-            sequence: 1,
             widgets: ['dob'],
           },
         }, {
-          ...sidebar,
-          id: 'third-sidebar',
+          ...panel,
+          id: 'forms-panel',
           attributes: {
-            ...sidebar.attributes,
+            ...panel.attributes,
+            slug: 'forms',
             name: 'Forms',
-            sequence: 2,
             widgets: ['sex'],
           },
         });

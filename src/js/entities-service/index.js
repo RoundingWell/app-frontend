@@ -22,6 +22,8 @@ import './forms';
 
 import './form-responses';
 
+import './panels';
+
 import './patient-fields';
 
 import './patients';
@@ -37,8 +39,6 @@ import './programs';
 import './roles';
 
 import './settings';
-
-import './sidebars';
 
 import './states';
 

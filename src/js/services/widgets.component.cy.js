@@ -12,28 +12,13 @@ context('Widgets Service', function() {
   let service;
 
   beforeEach(function() {
-    const widgetsPatientSidebar = {
-      widgets: ['dob', 'sex'],
-    };
-
-    Radio.reply('settings', 'get', () => widgetsPatientSidebar);
-
     const widgets = new Widgets(fxTestWidgets);
 
     service = new WidgetsService({ widgets });
   });
 
   afterEach(function() {
-    Radio.reset('settings');
     service.destroy();
-  });
-
-  specify('sidebarWidgets', function() {
-    const widgets = Radio.request('widgets', 'sidebarWidgets');
-
-    expect(widgets.at(0).get('slug')).to.equal('dob');
-    expect(widgets.at(1).get('slug')).to.equal('sex');
-    expect(widgets.length).to.equal(2);
   });
 
   specify('build', function() {

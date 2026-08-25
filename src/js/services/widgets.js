@@ -1,4 +1,4 @@
-import { get, map, invoke, compact } from 'underscore';
+import { map, invoke, compact } from 'underscore';
 import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
@@ -6,7 +6,6 @@ import App from 'js/base/app';
 export default App.extend({
   channelName: 'widgets',
   radioRequests: {
-    'sidebarWidgets': 'getSidebarWidgets',
     'build': 'buildWidgets',
     'find': 'findWidget',
   },
@@ -15,11 +14,6 @@ export default App.extend({
   },
   findWidget(slug) {
     return this.widgets.find({ slug });
-  },
-  getSidebarWidgets() {
-    const setting = Radio.request('settings', 'get', 'widgets_patient_sidebar');
-
-    return this.buildWidgets(get(setting, 'widgets'));
   },
   buildWidgets(widgetSlugs) {
     const widgets = map(widgetSlugs, this.findWidget, this);

@@ -1,3 +1,4 @@
+import { filter, map } from 'underscore';
 import Radio from 'backbone.radio';
 
 import App from 'js/base/app';
@@ -7,12 +8,14 @@ export default App.extend({
   radioRequests: {
     'patient': 'getPatientSidebars',
   },
-  initialize({ sidebars }) {
-    this.sidebars = sidebars;
+  initialize({ panels }) {
+    this.panels = panels;
   },
   getPatientSidebars() {
-    const sidebars = this.sidebars.filter(sidebar => sidebar.getWidgets().length);
+    const sidebar = Radio.request('settings', 'get', 'sidebar') ?? this.panels.pluck('slug');
+    const panels = map(sidebar, slug => this.panels.findWhere({ slug }));
+    const visiblePanels = filter(panels, panel => panel.getWidgets().length);
 
-    return Radio.request('entities', 'sidebars:collection', sidebars);
+    return Radio.request('entities', 'panels:collection', visiblePanels);
   },
 });

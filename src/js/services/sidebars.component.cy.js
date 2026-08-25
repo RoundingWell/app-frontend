@@ -3,31 +3,35 @@ import Radio from 'backbone.radio';
 import SidebarsService from './sidebars';
 import WidgetsService from './widgets';
 
-import { Collection as Sidebars } from 'js/entities-service/entities/sidebars';
+import { Collection as Panels } from 'js/entities-service/entities/panels';
 import { Collection as Widgets } from 'js/entities-service/entities/widgets';
 
 import { fxTestWidgets } from 'support/api/widgets';
 
 context('Sidebars Service', function() {
+  let panels;
   let sidebarsService;
   let widgetsService;
 
   beforeEach(function() {
-    Radio.reply('settings', 'get', () => ({ widgets: ['dob', 'sex'] }));
-
     widgetsService = new WidgetsService({ widgets: new Widgets(fxTestWidgets) });
-    sidebarsService = new SidebarsService({
-      sidebars: new Sidebars([
-        {
-          id: 'demographics',
-          widgets: ['status', 'dob', 'sex', 'dob'],
-        },
-        {
-          id: 'status',
-          widgets: ['status'],
-        },
-      ]),
-    });
+    panels = new Panels([
+      {
+        id: 'demographics-panel',
+        slug: 'demographics',
+        widgets: ['status', 'dob', 'sex', 'dob'],
+      },
+      {
+        id: 'status-panel',
+        slug: 'status',
+        widgets: ['status'],
+      },
+      {
+        id: 'empty-panel',
+        slug: 'empty',
+        widgets: ['unknown'],
+      },
+    ]);
   });
 
   afterEach(function() {
@@ -36,10 +40,33 @@ context('Sidebars Service', function() {
     widgetsService.destroy();
   });
 
-  specify('scopes patient sidebars to the current workspace widgets', function() {
-    const sidebars = Radio.request('sidebars', 'patient');
+  function startService(sidebar) {
+    Radio.reply('settings', 'get', () => sidebar);
+    sidebarsService = new SidebarsService({ panels });
 
-    expect(sidebars.pluck('id')).to.deep.equal(['demographics']);
-    expect(sidebars.at(0).getWidgets().pluck('slug')).to.deep.equal(['dob', 'sex', 'dob']);
+    return Radio.request('sidebars', 'patient');
+  }
+
+  specify('uses the sidebar setting for panel membership and order', function() {
+    const sidebars = startService(['status', 'demographics']);
+
+    expect(sidebars.pluck('slug')).to.deep.equal(['status', 'demographics']);
+    expect(sidebars.at(1).getWidgets().pluck('slug')).to.deep.equal(['status', 'dob', 'sex', 'dob']);
+  });
+
+  specify('uses every non-empty panel in collection order when the setting is absent', function() {
+    const sidebars = startService();
+
+    expect(sidebars.pluck('slug')).to.deep.equal(['demographics', 'status']);
+  });
+
+  specify('uses an explicit empty sidebar instead of every panel', function() {
+    const sidebars = startService([]);
+
+    expect(sidebars).to.have.length(0);
+  });
+
+  specify('fails when the sidebar references an unknown panel', function() {
+    expect(() => startService(['unknown'])).to.throw();
   });
 });

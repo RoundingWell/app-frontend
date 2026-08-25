@@ -33,6 +33,7 @@
 .patient-list__patient--selected {
   background: var(--color-surface-selected);
   border-radius: var(--space-1);
+  color: var(--color-text);
   font-weight: 500;
   margin-inline: -4px;
   padding: 0 4px;
