@@ -90,4 +90,49 @@ context('dashboard', function() {
       .get('.alert-box__body')
       .should('contain', 'The Dashboard you requested does not exist.');
   });
+
+  specify('display superset dashboard', function() {
+    const embeddedUuid = uuid();
+    const testDashboard = getDashboard({
+      attributes: {
+        name: 'Superset POC Flows',
+        provider: 'superset',
+        embed_url: null,
+        embed_config: {
+          domain: 'https://superset.example.com',
+          dashboard_uuid: embeddedUuid,
+        },
+      },
+    });
+
+    cy
+      .routeDashboards(fx => {
+        fx.data = [testDashboard];
+
+        return fx;
+      })
+      .routeDashboard(fx => {
+        fx.data = testDashboard;
+
+        return fx;
+      })
+      .routeDashboardGuestToken()
+      .intercept('GET', 'https://superset.example.com/**', req => {
+        req.reply('<html><body>Superset Embed</body></html>');
+      })
+      .visit(`/dashboards/${ testDashboard.id }`)
+      .wait('@routeDashboard')
+      .wait('@routeDashboardGuestToken');
+
+    cy
+      .get('.dashboard__frame')
+      .find('.dashboard__context-trail')
+      .should('contain', 'Superset POC Flows');
+
+    cy
+      .get('.dashboard__frame')
+      .find('.dashboard__iframe iframe')
+      .should('have.attr', 'src')
+      .and('include', `https://superset.example.com/embedded/${ embeddedUuid }`);
+  });
 });

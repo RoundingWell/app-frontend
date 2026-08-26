@@ -1,0 +1,15 @@
+{
+  "name": "@roundingwell/care-ops-superset",
+  "version": "1.0.0",
+  "description": "Superset embedding wrapper for Care-Ops Frontend",
+  "author": "RoundingWell",
+  "license": "CC-BY-4.0",
+  "type": "module",
+  "private": true,
+  "main": "./index.js",
+  "exports": "./index.js",
+  "sideEffects": false,
+  "dependencies": {
+    "@superset-ui/embedded-sdk": "^0.1.3"
+  }
+}

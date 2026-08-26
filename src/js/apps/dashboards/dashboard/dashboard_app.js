@@ -3,7 +3,7 @@ import Radio from 'backbone.radio';
 import { getEmbeddingContext } from '@roundingwell/care-ops-quicksight';
 
 import App from 'js/base/app';
-import { LayoutView, ContextTrailView, IframeView } from 'js/apps/dashboards/dashboard/dashboard_views';
+import { LayoutView, ContextTrailView, IframeView, isSupersetDashboard } from 'js/apps/dashboards/dashboard/dashboard_views';
 
 import intl from 'js/i18n';
 
@@ -13,10 +13,14 @@ export default App.extend({
     this.getRegion('dashboard').startPreloader();
   },
   beforeStart({ dashboardId }) {
-    return [
-      Radio.request('entities', 'fetch:dashboards:model', dashboardId),
-      getEmbeddingContext(),
-    ];
+    return Radio.request('entities', 'fetch:dashboards:model', dashboardId)
+      .then(dashboard => {
+        if (isSupersetDashboard(dashboard)) {
+          return dashboard;
+        }
+
+        return getEmbeddingContext().then(() => dashboard);
+      });
   },
   onStart(options, dashboard) {
     this.showChildView('contextTrail', new ContextTrailView({
