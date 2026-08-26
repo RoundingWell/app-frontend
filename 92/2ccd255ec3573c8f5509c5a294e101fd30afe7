@@ -1,0 +1,104 @@
+src/js/services/sidebars.js
+  s_d04385ebae28ca::t_fa519557cfa309 1,16-17,19
+  s_d04385ebae28ca::t_225064f38cbfee 15
+  s_d04385ebae28ca::t_e18abee404e025 11-12
+src/js/services/sidebars.component.cy.js
+  s_d04385ebae28ca::t_4d0f544d8dedbb 6,12,18-34,43-50,52-56,58-66
+  s_d04385ebae28ca::t_225064f38cbfee 51,57,67,69-70
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_d04385ebae28ca::t_deca7e39976c67 55,58-59,61,68-69,71
+  s_d04385ebae28ca::t_c555cfbc2f5c47 53-54,62,72
+src/scss/domain/patient-list.scss
+  s_d04385ebae28ca::t_fa519557cfa309 36
+src/js/apps/patients/worklist/flow-item.hbs
+  s_d04385ebae28ca::t_fa519557cfa309 10
+src/js/apps/patients/worklist/worklist_views.js
+  s_d04385ebae28ca::t_fa519557cfa309 82
+  s_d04385ebae28ca::t_55978c80382ddf 55
+src/js/services/bootstrap.js
+  s_d04385ebae28ca::t_e18abee404e025 74,78,86
+packages/care-ops-fontawesome/manifest.json
+  s_d04385ebae28ca::t_fa519557cfa309 59
+test/support/e2e.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 42
+src/js/entities-service/index.js
+  s_d04385ebae28ca::t_e18abee404e025 25-26
+test/support/defaults.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 59
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_d04385ebae28ca::t_deca7e39976c67 59-62,88,90,93-94,96-97
+  s_d04385ebae28ca::t_c555cfbc2f5c47 89,388
+src/js/apps/patients/patient/action/action.scss
+  s_d04385ebae28ca::t_fa519557cfa309 240
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_d04385ebae28ca::t_fa519557cfa309 5
+src/js/services/widgets.js
+  s_d04385ebae28ca::t_e18abee404e025 1
+src/js/entities-service/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 3,9-11
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_d04385ebae28ca::t_225064f38cbfee 21
+  s_d04385ebae28ca::t_deca7e39976c67 890
+  s_d04385ebae28ca::t_1fd903115f3586 18,22-23,26-27,32-33,47-50,52-56,63-64,67-68,73-74,230,279-280,767,782-783,893
+  s_d04385ebae28ca::t_c555cfbc2f5c47 62
+src/js/entities-service/entities/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 7,12,19
+  s_d04385ebae28ca::t_9196a95426ee32 18
+test/support/api/panels.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 4,6,8-9,12,15,19
+test/fixtures/test/settings.json
+  s_d04385ebae28ca::t_52a79645dd9cb9 3-4
+src/js/i18n/en-US/shared.yml
+  s_d04385ebae28ca::t_8611293fa6e8ef 26
+src/js/components/list-search/list-search_views.js
+  s_d04385ebae28ca::t_8611293fa6e8ef 4,19
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_d04385ebae28ca::t_8611293fa6e8ef 238-240
+src/js/apps/globals/nav/nav_app.js
+  s_d04385ebae28ca::t_98785676afb321 308-312,336-337,343-344,349
+  s_d04385ebae28ca::t_4614419f21647d 341-342
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_d04385ebae28ca::t_98785676afb321 174
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_d04385ebae28ca::t_98785676afb321 709
+  s_d04385ebae28ca::t_4614419f21647d 660-662
+  s_d04385ebae28ca::t_e0a8a161b5ee87 845,854
+  s_d04385ebae28ca::t_dcddb7f9ed945f 855-856
+  s_d04385ebae28ca::t_e47a3094684499 757,864,866-870
+  s_d04385ebae28ca::t_8cbe3b8791f62e 794,796-797,800-801,804-808,810-811,843-844,846,858
+  s_d04385ebae28ca::t_200658930c49f1 842,872-875,883
+  s_d04385ebae28ca::t_2767e390c7486b 812,857,871
+src/js/i18n/en-US/globals.yml
+  s_d04385ebae28ca::t_8611293fa6e8ef 104-105
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  s_d04385ebae28ca::t_254ba48dfcf2bc 60
+  s_d04385ebae28ca::t_e0a8a161b5ee87 46
+  s_d04385ebae28ca::t_a4cb815806d417 43-45,47-51,53-59,61-71
+  s_d04385ebae28ca::t_18c8ec125df1f4 52
+src/js/apps/globals/search/patient-search_views.js
+  s_d04385ebae28ca::t_8611293fa6e8ef 198
+src/js/apps/patients/schedule/schedule_views.js
+  s_d04385ebae28ca::t_55978c80382ddf 49
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_d04385ebae28ca::t_a4cb815806d417 139
+src/js/apps/patients/patient/action/action-forms_views.js
+  s_d04385ebae28ca::t_55978c80382ddf 68
+src/js/apps/patients/patient/flow/flow_views.js
+  s_d04385ebae28ca::t_55978c80382ddf 420
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "922ccd255ec3573c8f5509c5a294e101fd30afe7",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
