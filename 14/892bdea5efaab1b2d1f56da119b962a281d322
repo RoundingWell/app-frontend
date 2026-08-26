@@ -1,0 +1,70 @@
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_d04385ebae28ca::t_225064f38cbfee 21
+  s_d04385ebae28ca::t_1fd903115f3586 18,22-23,26-27,32-33,47-50,52-56,63-64,67-68,73-74,230,279-280,767,782-783,893
+  s_d04385ebae28ca::t_c555cfbc2f5c47 62
+  s_d04385ebae28ca::t_deca7e39976c67 890
+test/support/api/panels.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 4,6,8-9,12,15,19
+src/js/services/widgets.js
+  s_d04385ebae28ca::t_e18abee404e025 1
+src/js/services/sidebars.js
+  s_d04385ebae28ca::t_fa519557cfa309 1,16-17,19
+  s_d04385ebae28ca::t_e18abee404e025 11-12
+  s_d04385ebae28ca::t_225064f38cbfee 15
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_d04385ebae28ca::t_c555cfbc2f5c47 53-54,62,71
+  s_d04385ebae28ca::t_deca7e39976c67 55,58-59,61,67-68,70
+test/support/e2e.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 42
+packages/care-ops-fontawesome/manifest.json
+  s_d04385ebae28ca::t_fa519557cfa309 59
+src/js/entities-service/entities/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 7,12,18
+src/js/apps/patients/worklist/action-item.hbs
+  s_d04385ebae28ca::t_6e60074603c0d1 8
+src/scss/domain/patient-list.scss
+  s_d04385ebae28ca::t_fa519557cfa309 36
+src/js/apps/patients/worklist/worklist_views.js
+  s_d04385ebae28ca::t_55978c80382ddf 55
+  s_d04385ebae28ca::t_fa519557cfa309 82
+test/support/defaults.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 59
+src/js/entities-service/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 3,9-11
+src/js/entities-service/index.js
+  s_d04385ebae28ca::t_e18abee404e025 25-26
+src/js/apps/patients/worklist/flow-item.hbs
+  s_d04385ebae28ca::t_fa519557cfa309 10
+  s_d04385ebae28ca::t_6e60074603c0d1 8
+src/js/apps/patients/patient/action/action.scss
+  s_d04385ebae28ca::t_fa519557cfa309 240
+src/js/services/bootstrap.js
+  s_d04385ebae28ca::t_e18abee404e025 74,78,86
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_d04385ebae28ca::t_6e60074603c0d1 705-706
+  s_d04385ebae28ca::t_deca7e39976c67 59-62,88,90,93-94,96-97
+  s_d04385ebae28ca::t_c555cfbc2f5c47 89,387
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_d04385ebae28ca::t_fa519557cfa309 5
+test/fixtures/test/settings.json
+  s_d04385ebae28ca::t_52a79645dd9cb9 3-4
+src/js/services/sidebars.component.cy.js
+  s_d04385ebae28ca::t_225064f38cbfee 51,57,67,69-70
+  s_d04385ebae28ca::t_4d0f544d8dedbb 6,12,18-34,43-50,52-56,58-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "14892bdea5efaab1b2d1f56da119b962a281d322",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
