@@ -1,0 +1,19 @@
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_d04385ebae28ca::t_8611293fa6e8ef 238-240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "75523d5e64ab4eb6936be88d15249198ad3eff53",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
