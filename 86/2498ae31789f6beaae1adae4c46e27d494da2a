@@ -127,6 +127,14 @@ test/support/api/actions.js
     }
   },
   "sessions": {
+    "s_422f705f89ada4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01021-963c-7ef2-aa6b-45016ce1d453",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
     "s_d04385ebae28ca": {
       "agent_id": {
         "tool": "codex",
