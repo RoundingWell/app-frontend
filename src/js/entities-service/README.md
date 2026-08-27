@@ -58,6 +58,10 @@ beforeStart() {
   action with `include=flow` also populates the flow model.
 - Saving relationships is explicit: `model.save(attrs, { relationships })` with
   values built by `toRelation(entity)`. Plain `save(attrs)` sends attributes only.
+- Models that save declare a top-level `WRITABLE_ATTRIBUTES` array and assign it
+  to `writableAttributes`. The JSON:API mixin filters request attributes through
+  that allowlist; include nullable writable fields, but exclude response-only
+  fields such as generated timestamps.
 
 ## Caching (opt-in, stale-while-revalidate)
 
@@ -76,7 +80,8 @@ entries expire after 7 days and per-user partitions are pruned on auth changes.
 ## Checklist: adding an entity
 
 1. `entities/<type>.js` — define and export `_Model`,
-   `Model = Store(_Model, TYPE)`, and `Collection`.
+   `Model = Store(_Model, TYPE)`, and `Collection`. If it saves, define its
+   `WRITABLE_ATTRIBUTES` from the backend request contract.
 2. `<type>.js` — service extending `js/base/entity-service` with `Entity` and
    `radioRequests` following the naming convention above.
 3. Register the service with an import in `index.js` (alphabetical).

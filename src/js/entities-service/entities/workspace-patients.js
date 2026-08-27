@@ -3,8 +3,12 @@ import Store from 'backbone.store';
 import BaseModel from 'js/base/model';
 
 const TYPE = 'workspace-patients';
+const WRITABLE_ATTRIBUTES = [
+  'status',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
   urlRoot: '/api/workspace-patients',
   saveAll(attrs) {

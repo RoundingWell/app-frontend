@@ -10,8 +10,25 @@ import collectionOf from 'js/utils/formatting/collection-of';
 import { ACTION_OUTREACH, STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-actions';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'details',
+  'days_until_due',
+  'weekdays_only',
+  'outreach',
+  'sequence',
+  'tags',
+  'sync',
+  'allowed_uploads',
+  'options',
+  'behavior',
+  'complexity',
+  'published_at',
+  'archived_at',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   urlRoot: '/api/program-actions',
   type: TYPE,
   validate({ name }) {

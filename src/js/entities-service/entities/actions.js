@@ -11,8 +11,16 @@ import { ACTION_OUTREACH, ACTION_SHARING } from 'js/static';
 import { addError } from 'js/datadog';
 
 const TYPE = 'patient-actions';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'details',
+  'due_date',
+  'due_time',
+  'duration',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   messages: {
     OwnerChanged({ owner, attributes }) {
       this.set({ _owner: owner, ...attributes });

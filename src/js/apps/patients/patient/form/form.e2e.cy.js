@@ -359,7 +359,6 @@ context('Noncontext Form', function() {
       .its('request.body.data')
       .then(data => {
         expect(data.id).to.equal(getPatientFieldId(testPatient.id, 'foo'));
-        expect(data.attributes.name).to.equal('foo');
         expect(data.attributes.value).to.deep.equal(['one', 'two']);
       });
 

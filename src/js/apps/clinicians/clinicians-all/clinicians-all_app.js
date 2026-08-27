@@ -90,7 +90,6 @@ export default SubRouterApp.extend({
   _getNewClinician() {
     return Radio.request('entities', 'clinicians:model', {
       enabled: true,
-      disabled_at: null,
     });
   },
   showAddModal() {

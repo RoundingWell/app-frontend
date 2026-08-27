@@ -6,8 +6,12 @@ import dayjs from 'dayjs';
 import trim from 'js/utils/formatting/trim';
 
 const TYPE = 'comments';
+const WRITABLE_ATTRIBUTES = [
+  'message',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
   messages: {
     CommentEdited({ attributes }) {

@@ -10,8 +10,19 @@ import collectionOf from 'js/utils/formatting/collection-of';
 import { STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-flows';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'details',
+  'tags',
+  'sync',
+  'behavior',
+  'complexity',
+  'published_at',
+  'archived_at',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   urlRoot() {
     if (this.isNew()) {
       const program = this.getProgram();

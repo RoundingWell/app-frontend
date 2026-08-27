@@ -9,8 +9,16 @@ import { RWELL_NS } from 'js/static';
 import trim from 'js/utils/formatting/trim';
 
 const TYPE = 'clinicians';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'email',
+  'credentials',
+  'settings',
+  'enabled',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
   urlRoot: '/api/clinicians',
   createId() {
