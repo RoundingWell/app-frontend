@@ -1,0 +1,203 @@
+test/support/api/panels.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 4,6,8-9,12,15,19
+src/js/entities-service/index.js
+  s_d04385ebae28ca::t_e18abee404e025 25-26
+src/js/services/bootstrap.js
+  s_d04385ebae28ca::t_e18abee404e025 74,78,86
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_d04385ebae28ca::t_c555cfbc2f5c47 89,387
+  s_d04385ebae28ca::t_6e60074603c0d1 705-706
+  s_d04385ebae28ca::t_deca7e39976c67 59-62,88,90,93-94,96-97
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_d04385ebae28ca::t_fa519557cfa309 5
+packages/care-ops-fontawesome/manifest.json
+  s_d04385ebae28ca::t_fa519557cfa309 60
+  s_2d91c07b8aa12c::t_d65b96c787b0bf 45
+src/js/entities-service/entities/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 7,12,18
+src/js/services/widgets.js
+  s_d04385ebae28ca::t_e18abee404e025 1
+src/js/apps/patients/worklist/worklist_views.js
+  s_d04385ebae28ca::t_55978c80382ddf 55
+  s_d04385ebae28ca::t_fa519557cfa309 82
+test/support/e2e.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 42
+src/scss/domain/patient-list.scss
+  s_d04385ebae28ca::t_fa519557cfa309 36
+test/fixtures/test/settings.json
+  s_d04385ebae28ca::t_52a79645dd9cb9 3-4
+src/js/apps/patients/patient/action/action.scss
+  s_d04385ebae28ca::t_fa519557cfa309 240
+src/js/services/sidebars.component.cy.js
+  s_be4fea30e16d1f::t_0f7356a857338f 69-78,80
+  s_d04385ebae28ca::t_4d0f544d8dedbb 6,12,18-34,43-50,52-56,58-66
+  s_d04385ebae28ca::t_225064f38cbfee 51,57,67
+  s_be4fea30e16d1f::t_5c4c652bd2293d 68
+src/js/entities-service/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 3,9-11
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_d04385ebae28ca::t_c555cfbc2f5c47 53-54,62,71
+  s_d04385ebae28ca::t_deca7e39976c67 55,58-59,61,67-68,70
+src/js/apps/patients/worklist/action-item.hbs
+  s_d04385ebae28ca::t_6e60074603c0d1 8
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_d04385ebae28ca::t_deca7e39976c67 903
+  s_be4fea30e16d1f::t_213b2b8b383af0 59,61-69
+  s_d04385ebae28ca::t_1fd903115f3586 18,22-23,26-27,32-33,47-54,56,76-77,80-81,86-87,243,292-293,780,795-796,906
+  s_d04385ebae28ca::t_225064f38cbfee 21
+  s_d04385ebae28ca::t_c555cfbc2f5c47 75
+  s_be4fea30e16d1f::t_15ea18bd62dc49 57
+src/js/apps/patients/worklist/flow-item.hbs
+  s_d04385ebae28ca::t_fa519557cfa309 10
+  s_d04385ebae28ca::t_6e60074603c0d1 8
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_be4fea30e16d1f::t_d6725b8dacb08d 3-4,64-72
+test/support/defaults.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 59
+src/js/services/sidebars.js
+  s_d04385ebae28ca::t_e18abee404e025 13-14
+  s_d04385ebae28ca::t_225064f38cbfee 18
+  s_d04385ebae28ca::t_fa519557cfa309 19,25
+  s_be4fea30e16d1f::t_d6725b8dacb08d 1,4-5,15,20-24,26-32,34-37
+src/js/entities-service/README.md
+  s_ccd396716f1975::t_e4b0652dc75215 61-64,83-84
+src/js/entities-service/entities/patient-fields.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 9-11
+  s_ccd396716f1975::t_70201fcd6be15a 14
+src/js/entities-service/entities/workspace-patients.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 6-8
+  s_ccd396716f1975::t_70201fcd6be15a 11
+src/js/entities-service/entities/comments.js
+  s_ccd396716f1975::t_70201fcd6be15a 14
+  s_ccd396716f1975::t_6e360c40ba9dc0 9-11
+src/js/entities-service/entities/patients.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 12-18
+  s_ccd396716f1975::t_70201fcd6be15a 21
+src/js/base/model.component.cy.js
+  s_ccd396716f1975::t_be31de9ea0e686 5,9-10
+  s_ccd396716f1975::t_03909b312aa4f7 3,6-8,11-15,54-56,59,61,70-73,75-80
+  s_ccd396716f1975::t_477e79e4543ed6 34
+  s_ccd396716f1975::t_72c0eb4a7165df 74
+  s_ccd396716f1975::t_799b16b2dabb28 81-82
+  s_ccd396716f1975::t_e4b0652dc75215 4,57-58,60,62-69
+src/js/entities-service/entities/actions.js
+  s_ccd396716f1975::t_70201fcd6be15a 23
+  s_ccd396716f1975::t_6e360c40ba9dc0 14-20
+src/js/entities-service/entities/program-flows.js
+  s_ccd396716f1975::t_70201fcd6be15a 25
+  s_ccd396716f1975::t_6e360c40ba9dc0 13-22
+src/js/entities-service/entities/files.js
+  s_ccd396716f1975::t_70201fcd6be15a 19
+  s_ccd396716f1975::t_6e360c40ba9dc0 8-10
+src/js/entities-service/entities/program-actions.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 13-28
+  s_ccd396716f1975::t_70201fcd6be15a 31
+src/js/entities-service/entities/artifacts.js
+  s_ccd396716f1975::t_e4b0652dc75215 5-9,12
+src/js/base/model.js
+  s_ccd396716f1975::t_830b6f8afa06c0 1
+src/js/entities-service/entities/form-responses.js
+  s_ccd396716f1975::t_70201fcd6be15a 17
+  s_ccd396716f1975::t_6e360c40ba9dc0 11-14
+src/js/base/jsonapi-mixin.js
+  s_ccd396716f1975::t_830b6f8afa06c0 54-72
+src/js/entities-service/entities/flows.js
+  s_ccd396716f1975::t_70201fcd6be15a 14
+  s_ccd396716f1975::t_6e360c40ba9dc0 8-11
+src/js/entities-service/entities/programs.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 10-15
+  s_ccd396716f1975::t_70201fcd6be15a 18
+src/js/entities-service/entities/clinicians.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 12-18
+  s_ccd396716f1975::t_70201fcd6be15a 21
+src/js/apps/globals/nav/nav_app.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 12,28-34,330-334,414-417,422,464,470-475,477-488
+  s_2d91c07b8aa12c::t_0f3107432a6b1a 476
+src/js/apps/globals/nav/app-nav/bottom-nav.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1
+src/js/apps/globals/nav/whats-new/whats-new.component.cy.js
+  s_2d91c07b8aa12c::t_8c44ac1f805509 1-23,25-27,39-57,59-60
+  s_2d91c07b8aa12c::t_c44608f1c351b6 29-30,32-33,35-38
+  s_2d91c07b8aa12c::t_43943d114fe92a 58
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 24,28,31,34
+src/js/apps/globals/nav/whats-new/whats-new.scss
+  s_2d91c07b8aa12c::t_235c8a0aa6cd67 41
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-2,6-8,10-12,14-16,18-25,27-28,31-33,35,38-39,42-55,57-62,64-65,68-72,74-98
+  s_2d91c07b8aa12c::t_d65a30918c79f6 26,29-30,37,56,67
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 13,34,36,73
+  s_2d91c07b8aa12c::t_6ce6fb0fac10fe 63,66
+  s_2d91c07b8aa12c::t_aad49ff32dbc14 3-4
+  s_2d91c07b8aa12c::t_01143bc504e1f7 17
+  s_2d91c07b8aa12c::t_c0031a0532ed70 9
+  s_2d91c07b8aa12c::t_702c72f63ef34c 5
+  s_2d91c07b8aa12c::t_15dff461a70e14 40
+src/js/apps/globals/nav/whats-new/announcement.hbs
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 6
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-3,5,7
+  s_2d91c07b8aa12c::t_15dff461a70e14 4
+src/js/apps/globals/nav/whats-new/design-update.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_2d91c07b8aa12c::t_683fafe8a87b46 458,663
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 245-246
+  s_2d91c07b8aa12c::t_aa3c21efbcec73 664
+  s_2d91c07b8aa12c::t_43943d114fe92a 251
+  s_2d91c07b8aa12c::t_d90ce5bd4f2684 294-332
+  s_2d91c07b8aa12c::t_8c44ac1f805509 15,237-244,247-250,252-293,456-457,459,661-662
+src/js/apps/globals/nav/app-nav/app-nav.scss
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 101-103
+src/js/apps/globals/nav/whats-new/whats-new_views.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-53
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 99-104,146-149
+src/js/i18n/en-US/globals.yml
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 27,38-39,41-42,45-46
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 40,43
+  s_2d91c07b8aa12c::t_00d4bc018cc3c2 44
+  s_2d91c07b8aa12c::t_43943d114fe92a 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "d2ded2b64ff5e01f7078ad0cf84df7dedb3a5e0c",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_2d91c07b8aa12c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a046dd-e987-7010-815b-e2ec94d7f5d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_be4fea30e16d1f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04363-37f0-7970-a822-e69f6cb3e605",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_ccd396716f1975": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04384-a61d-71c1-bf25-82b3d002659e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
