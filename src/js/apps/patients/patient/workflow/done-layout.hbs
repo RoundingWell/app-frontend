@@ -1,10 +1,10 @@
 <div class="workflow-page">
   <div class="workflow-page__toolbar">
-    <div class="workflow-page__tabs" role="tablist" aria-label="{{ @intl.patients.patient.workflow.workflowViews.tabsLabel }}">
-      <button class="workflow-page__tab js-dashboard" type="button" role="tab" aria-selected="false">
+    <div class="workflow-page__tabs" role="group" aria-label="{{ @intl.patients.patient.workflow.workflowViews.tabsLabel }}">
+      <button class="workflow-page__tab js-dashboard" type="button" aria-pressed="false">
         {{~ @intl.patients.patient.workflow.workflowViews.dashboardBtn ~}}
       </button>
-      <button class="workflow-page__tab is-selected js-archive" type="button" role="tab" aria-selected="true">
+      <button class="workflow-page__tab is-selected js-archive" type="button" aria-pressed="true">
         {{~ @intl.patients.patient.workflow.workflowViews.archiveBtn ~}}
       </button>
     </div>

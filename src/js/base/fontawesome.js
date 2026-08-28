@@ -7,7 +7,7 @@ function faHelper(prefix, iconName, { hash = {} }) {
   const svgId = `${ prefix }-fa-${ iconName }`;
   const svgClass = `fa-${ iconName }`;
   const svgClasses = hash.classes || '';
-  const svg = `<svg class="icon svg-inline--fa ${ svgClass } ${ svgClasses }"><use href="#${ svgId }"></use></svg>`;
+  const svg = `<svg class="icon svg-inline--fa ${ svgClass } ${ svgClasses }" aria-hidden="true" focusable="false"><use href="#${ svgId }"></use></svg>`;
 
   return new Handlebars.SafeString(svg);
 }

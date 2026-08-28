@@ -31,11 +31,13 @@ function initFormInteraction({ targetOrigin, targetWindow }) {
 
   formInteractionCleanup = () => {
     document.removeEventListener('click', handleInteraction, true);
+    document.removeEventListener('focusin', handleInteraction, true);
     window.removeEventListener('pagehide', handlePageHide);
     formInteractionCleanup = null;
   };
 
   document.addEventListener('click', handleInteraction, true);
+  document.addEventListener('focusin', handleInteraction, true);
   window.addEventListener('pagehide', handlePageHide);
 }
 
