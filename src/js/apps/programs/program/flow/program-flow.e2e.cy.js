@@ -497,6 +497,17 @@ context('program flow page', function() {
 
     cy
       .get('@actionList')
+      .find('.js-sort')
+      .first()
+      .click({ force: true });
+
+    cy
+      .location('pathname')
+      .should('contain', `/program-flow/${ testProgramFlowId }`)
+      .and('not.contain', '/action/');
+
+    cy
+      .get('@actionList')
       .contains('First In List')
       .click();
 

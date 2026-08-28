@@ -5,6 +5,8 @@ import { View, CollectionView } from 'marionette';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
 
+import stopEventPropagation from 'js/utils/stop-event-propagation';
+
 import PreloadRegion from 'js/regions/preload_region';
 import SortableList from 'js/behaviors/sortable-list';
 
@@ -144,6 +146,9 @@ const ActionItemView = View.extend({
   },
   triggers: {
     'click': 'click',
+  },
+  events: {
+    'click .js-no-click': stopEventPropagation,
   },
   onClick() {
     if (this.model.isNew()) {

@@ -7,6 +7,7 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
 
 import { alphaSort } from 'js/utils/sorting';
+import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { PROGRAM_BEHAVIORS } from 'js/static';
 import intl from 'js/i18n';
@@ -67,6 +68,9 @@ const ActionItemView = View.extend({
   },
   triggers: {
     'click': 'click',
+  },
+  events: {
+    'click .js-no-click': stopEventPropagation,
   },
   onClick() {
     if (this.model.isNew()) {
@@ -135,6 +139,9 @@ const FlowItemView = View.extend({
   },
   triggers: {
     'click': 'click',
+  },
+  events: {
+    'click .js-no-click': stopEventPropagation,
   },
   onClick() {
     if (this.model.isNew()) {

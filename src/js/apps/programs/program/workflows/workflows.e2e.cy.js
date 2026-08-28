@@ -128,6 +128,16 @@ context('program workflows page', function() {
       .should('contain', 'Fourth In List');
 
     cy
+      .get('.action-card')
+      .first()
+      .find('.workflows__action-controls')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/program/1');
+
+    cy
       .get('.card-list')
       .contains('First In List')
       .click();
@@ -279,6 +289,15 @@ context('program workflows page', function() {
         body: {},
       })
       .as('routePatchFlow');
+
+    cy
+      .get('@flowItem')
+      .find('.workflows__flow-status')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('contain', `/program/${ testProgram.id }`);
 
     cy
       .get('@flowItem')
