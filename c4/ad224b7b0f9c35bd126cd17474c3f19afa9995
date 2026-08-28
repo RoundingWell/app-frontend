@@ -1,0 +1,19 @@
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_2d91c07b8aa12c::t_cf8c335a685dee 138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "c4ad224b7b0f9c35bd126cd17474c3f19afa9995",
+  "prompts": {},
+  "sessions": {
+    "s_2d91c07b8aa12c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a046dd-e987-7010-815b-e2ec94d7f5d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
