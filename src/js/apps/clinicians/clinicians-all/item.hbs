@@ -7,10 +7,10 @@
         {{#each workspaces}}{{#unless @first}}, {{/unless}}{{ this.name }}{{/each}}&#8203;
       </span>
     </div>
-    <div class="card-list__item-controls js-no-click">
-      <span><span data-state-region></span>&#8203;</span>
-      <span><span data-role-region></span>&#8203;</span>
-      <span><span data-team-region></span>&#8203;</span>
+    <div class="card-list__item-controls">
+      <span class="js-no-click"><span data-state-region></span>&#8203;</span>
+      <span class="js-no-click"><span data-role-region></span>&#8203;</span>
+      <span class="js-no-click"><span data-team-region></span>&#8203;</span>
       <span>{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</span>
     </div>
   </div>

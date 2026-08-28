@@ -44,10 +44,6 @@
   height: 0;
 }
 
-.widgets__item + .widgets__item {
-  margin-top: var(--widgets-item-gap, 0);
-}
-
 .widgets__heading {
   color: var(--color-text-secondary);
   font-size: 11px;

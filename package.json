@@ -60,11 +60,8 @@
     "stop": "pkill -f vite || true && rimraf node_modules/.vite"
   },
   "browserslist": [
-    "last 2 Chrome major versions",
-    "last 2 Edge major versions",
-    "last 2 Firefox major versions",
-    "last 2 Safari major versions",
-    "last 2 ios_saf major versions"
+    ">1%",
+    "not op_mini all"
   ],
   "devDependencies": {
     "@aws-sdk/client-cloudformation": "^3.986.0",
