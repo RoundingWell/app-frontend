@@ -9,7 +9,7 @@ import { FLOW_INCLUDE } from 'js/entities-service/flows';
 
 import AddWorkflowApp from './add-workflow_app';
 
-import { LayoutView, ListView } from './workflow_views';
+import { LayoutView, ListView, WorkflowLoadingView } from './workflow_views';
 
 export default App.extend({
   childApps: {
@@ -34,7 +34,7 @@ export default App.extend({
       this.getRegion('addWorkflow').empty();
     }
 
-    this.getRegion('content').startPreloader();
+    this.showChildView('content', new WorkflowLoadingView());
   },
 
   beforeStart({ patient }) {

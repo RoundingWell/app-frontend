@@ -5,6 +5,8 @@ import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 import { mixinState } from 'marionette.toolkit';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/forms.scss';
 import 'scss/modules/modals.scss';
 
 import DateSelectComponent from 'js/components/dateselect';
@@ -34,7 +36,7 @@ const InputView = View.extend({
   },
   className: 'pos--relative',
   template: hbs`
-    <input class="input-primary w-100 js-input {{#if hasError}}has-error{{/if}}" placeholder="{{ placeholder }}" value="{{ value }}" {{#unless canEdit}}disabled{{/unless}} />
+    <input class="form-input form-input--primary w-100 js-input {{#if hasError}}has-error{{/if}}" placeholder="{{ placeholder }}" value="{{ value }}" {{#unless canEdit}}disabled{{/unless}} />
     {{#unless canEdit}}<span class="patient-modal__locked-icon">{{far "lock"}}</span>{{/unless}}
   `,
   templateContext() {
@@ -89,13 +91,12 @@ const SexDroplist = Droplist.extend({
     this.setState('selected', this.collection.find({ value: patientSex }));
   },
   viewOptions: {
-    className: 'button-secondary modal__form-component',
+    className: 'button button--secondary modal__form-component patient-modal__form-component',
     template: hbs`{{far "user"}}<span>{{ text }}{{#unless text}}{{ @intl.globals.patientModal.patientModalViews.sexDroplist.defaultText }}{{/unless}}</span>`,
   },
 });
 
 const BirthdateView = View.extend({
-  className: 'modal__form-component',
   template: hbs`<div data-date-select-region></div>`,
   regions: {
     dateSelect: {
@@ -114,7 +115,7 @@ const BirthdateView = View.extend({
         isDisabled: !this.model.canEdit(),
       },
       viewOptions: {
-        className: 'flex',
+        rootClassName: 'modal__form-component patient-modal__form-component',
       },
     });
 

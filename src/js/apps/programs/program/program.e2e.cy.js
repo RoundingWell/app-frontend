@@ -35,7 +35,7 @@ context('program page', function() {
       .visit('/programs');
 
     cy
-      .get('.table-list__item')
+      .get('.card-list__item')
       .contains('Test Program')
       .click();
 
@@ -44,7 +44,7 @@ context('program page', function() {
       .should('contain', `program/${ testProgram.id }`);
 
     cy
-      .get('.program__context-trail')
+      .get('.program-page__context-trail')
       .should('contain', 'Test Program')
       .contains('Back to List')
       .click();
@@ -113,7 +113,7 @@ context('program page', function() {
       .wait('@routePatchProgram');
 
     cy
-      .get('.program__context-trail')
+      .get('.program-page__context-trail')
       .should('contain', 'Testing');
   });
 
@@ -195,7 +195,7 @@ context('program page', function() {
       .visit(`/program/${ testProgram.id }`);
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .find('[data-behavior-region] button')
       .click();
@@ -208,7 +208,7 @@ context('program page', function() {
       .should('not.exist');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .contains('Test Action')
       .click();
 

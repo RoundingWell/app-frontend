@@ -9,8 +9,16 @@ import BaseModel from 'js/base/model';
 import { PATIENT_STATUS } from 'js/static';
 
 const TYPE = 'patients';
+const WRITABLE_ATTRIBUTES = [
+  'first_name',
+  'last_name',
+  'birth_date',
+  'sex',
+  'source',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
   url() {
     if (this.isNew()) return '/api/patients';

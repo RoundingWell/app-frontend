@@ -3,6 +3,8 @@ import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import dayjs from 'dayjs';
 
+import 'scss/modules/buttons.scss';
+
 import intl from 'js/i18n';
 
 import Component from 'js/base/component';
@@ -40,7 +42,7 @@ const SelectList = Droplist.extend({
     const buttonText = this.getOption('buttonText');
 
     return {
-      className: 'button-secondary date-select__button',
+      className: 'button button--secondary date-select__button',
       template: this.getOption('template'),
       templateContext: {
         buttonText,

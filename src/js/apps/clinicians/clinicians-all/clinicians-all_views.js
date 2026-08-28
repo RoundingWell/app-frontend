@@ -3,20 +3,24 @@ import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
 import { View, CollectionView, Behavior } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/card-list.scss';
+import 'scss/modules/list-pages.scss';
+
 import intl from 'js/i18n';
 
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
+import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import PreloadRegion from 'js/regions/preload_region';
 import { RoleComponent, TeamComponent, StateComponent } from 'js/apps/clinicians/shared/clinicians_views';
 
-import 'scss/modules/list-pages.scss';
-import 'scss/modules/table-list.scss';
+import ItemTemplate from './item.hbs';
+import LayoutTemplate from './layout.hbs';
 
 import './clinicians.scss';
 
 const notFound = intl.clinicians.cliniciansAllViews.notFound;
-
 const RowBehavior = Behavior.extend({
   modelEvents: {
     'editing': 'onEditing',
@@ -31,12 +35,12 @@ const RowBehavior = Behavior.extend({
 });
 
 const EmptyView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
   template: hbs`<h2>{{ @intl.clinicians.cliniciansAllViews.emptyView }}</h2>`,
 });
 
 const EmptyFindInListView = View.extend({
-  className: 'table-list__empty-list',
+  className: 'card-list__empty',
   template: hbs`<h2>{{ @intl.clinicians.cliniciansAllViews.emptyFindInListView.noResults }}</h2>`,
 });
 
@@ -44,7 +48,7 @@ const ItemView = View.extend({
   modelEvents: {
     'change:enabled': 'render',
   },
-  className: 'table-list__item',
+  className: 'card-list__item',
   behaviors: [RowBehavior],
   regions: {
     team: '[data-team-region]',
@@ -54,16 +58,10 @@ const ItemView = View.extend({
   triggers: {
     'click': 'click',
   },
-  template: hbs`
-    <div class="u-text--overflow">{{#unless name}}{{ @intl.clinicians.cliniciansAllViews.itemView.newClinician }}{{/unless}}{{ name }}&#8203;</div>
-    <div class="u-text--overflow-two-lines{{#unless workspaces}} table-list__cell--empty{{/unless}}">{{#each workspaces}}{{#unless @first}}, {{/unless}}{{ this.name }}{{/each}}{{#unless workspaces}}{{ @intl.clinicians.cliniciansAllViews.itemView.noWorkspaces }}{{/unless}}&#8203;</div>
-    <div class="table-list__meta">
-      <span><span data-state-region></span>&#8203;</span>
-      <span><span data-role-region></span>&#8203;</span>
-      <span><span data-team-region></span>&#8203;</span>
-    </div>
-    <div class="{{#unless last_active_at}} table-list__cell--empty{{/unless}}">{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</div>
-  `,
+  events: {
+    'click .js-no-click': stopEventPropagation,
+  },
+  template: ItemTemplate,
   templateContext() {
     return {
       workspaces: sortBy(map(this.model.getWorkspaces().models, 'attributes'), 'name'),
@@ -118,27 +116,8 @@ const ItemView = View.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'flex-region',
-  template: hbs`
-    <div class="list-page__header">
-      <div class="flex list-page__title">
-        <div class="flex list-page__title-filter">
-          <span class="list-page__title-icon">{{far "users-gear"}}</span>{{ @intl.clinicians.cliniciansAllViews.layoutView.title }}
-        </div>
-        <div class="clinicians__list-search" data-search-region></div>
-      </div>
-      <button class="u-margin--b-16 button-primary js-add-clinician">{{far "circle-plus"}}<span>{{ @intl.clinicians.cliniciansAllViews.layoutView.addClinicianButton }}</span></button>
-    </div>
-    <div class="table-list clinicians-list__table-list">
-      <div class="table-list__header list-page__list-header">
-        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.clinicianHeader }}</div>
-        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.workspacesHeader }}</div>
-        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.attributesHeader }}</div>
-        <div>{{ @intl.clinicians.cliniciansAllViews.layoutView.lastActiveHeader }}</div>
-      </div>
-      <div class="list-page__list" data-list-region></div>
-    </div>
-  `,
+  className: 'flex-region list-page',
+  template: LayoutTemplate,
   regions: {
     list: {
       el: '[data-list-region]',
@@ -158,7 +137,7 @@ const LayoutView = View.extend({
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list__list list-page__list',
+  className: 'card-list list-page__list',
   childView: ItemView,
   emptyView() {
     if (this.collection.length && this.state.get('searchQuery')) {

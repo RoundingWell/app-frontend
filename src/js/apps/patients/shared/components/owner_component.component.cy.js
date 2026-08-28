@@ -85,12 +85,6 @@ context('Owner Component', function() {
 
     cy
       .get('@root')
-      .find('.picklist')
-      .invoke('css', 'width')
-      .should('equal', '1280px');
-
-    cy
-      .get('@root')
       .find('.picklist .is-selected')
       .should('contain', 'Clinician McTester')
       .and('contain', 'NUR');
@@ -155,8 +149,7 @@ context('Owner Component', function() {
     cy
       .get('@root')
       .contains('NUR')
-      .invoke('css', 'width')
-      .should('equal', '80px');
+      .should('have.class', 'owner-component--compact');
   });
 
   specify('without Current User', function() {

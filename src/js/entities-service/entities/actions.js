@@ -11,8 +11,16 @@ import { ACTION_OUTREACH, ACTION_SHARING } from 'js/static';
 import { addError } from 'js/datadog';
 
 const TYPE = 'patient-actions';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'details',
+  'due_date',
+  'due_time',
+  'duration',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   messages: {
     OwnerChanged({ owner, attributes }) {
       this.set({ _owner: owner, ...attributes });
@@ -68,6 +76,9 @@ const _Model = BaseModel.extend({
   type: TYPE,
   getForm() {
     return this.getRelationship('_form');
+  },
+  hasForm() {
+    return !!this.getForm();
   },
   getFormResponses() {
     return Radio.request('entities', 'formResponses:collection', this.get('_form_responses'));
@@ -151,9 +162,6 @@ const _Model = BaseModel.extend({
   },
   commentCount() {
     return this.getComments().length;
-  },
-  hasAttachments() {
-    return !!this.getFiles().length;
   },
   hasAllowedUploads() {
     if (!this.canEdit()) return false;

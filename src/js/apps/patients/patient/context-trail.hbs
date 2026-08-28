@@ -1,0 +1,35 @@
+{{#if hasLatestList}}
+  <button class="js-back patient__context-link patient__context-link--back" type="button">
+    {{fas "chevron-left"}}{{ @intl.patients.patient.patientViews.contextBackBtn }}
+  </button>
+{{/if}}
+<span class="patient__context-segment">
+  {{#if hasLatestList}}{{fas "chevron-right"}}{{/if}}
+  {{#if isPatientCurrent}}
+    <span class="patient__context-current patient__context-link--hierarchy patient__context-patient" aria-current="page">{{ first_name }} {{ last_name }}</span>
+  {{else}}
+    <button class="js-patient patient__context-link patient__context-link--hierarchy patient__context-patient" type="button">{{ first_name }} {{ last_name }}</button>
+  {{/if}}
+</span>
+{{#if flowName}}
+  <span class="patient__context-segment">
+    {{fas "chevron-right"}}
+    {{#if isFlowCurrent}}
+      <span class="patient__context-current patient__context-link--hierarchy" aria-current="page">{{ flowName }}</span>
+    {{else}}
+      <button class="js-flow patient__context-link patient__context-link--hierarchy" type="button">{{ flowName }}</button>
+    {{/if}}
+  </span>
+{{/if}}
+{{#if actionName}}
+  <span class="patient__context-segment">
+    {{fas "chevron-right"}}
+    <span class="patient__context-current" aria-current="page">{{ actionName }}</span>
+  </span>
+{{/if}}
+{{#if formName}}
+  <span class="patient__context-segment">
+    {{fas "chevron-right"}}
+    <span class="patient__context-current" aria-current="page">{{ formName }}</span>
+  </span>
+{{/if}}

@@ -1,34 +1,27 @@
 .picklist {
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   max-height: 45vh;
   min-width: 140px;
   -webkit-overflow-scrolling: touch;
   overflow-y: hidden;
-  padding: 8px 0;
+  padding: 8px;
 }
 
 .picklist__item {
   align-items: center;
-  color: #{$black-20};
+  border-radius: 6px;
+  color: var(--color-text);
   cursor: pointer;
   display: flex;
   font-size: 14px;
   list-style-type: none;
-  padding: 4px 16px;
+  padding: 7px 8px;
 
   &.is-highlighted:not(&.is-disabled),
   &:hover:not(&.is-disabled) {
-    background-color: color(blue);
-    color: #{$white};
-
-    .picklist__alert,
-    .picklist__meta,
-    .picklist__meta-alt,
-    .icon {
-      color: #{$white};
-    }
+    background-color: var(--color-surface-hover);
   }
 
   &.is-hidden {
@@ -36,17 +29,19 @@
   }
 
   &.is-selected {
-    font-weight: bold;
+    background-color: var(--color-surface-selected);
+    font-weight: 500;
   }
 
   &.is-disabled {
-    color: #{$black-80};
+    color: var(--color-text-subtle);
     cursor: auto;
     font-weight: normal;
   }
 
   &.has-divider {
-    border-top: 1px solid #{$black-90};
+    border-radius: 0;
+    border-top: 1px solid var(--color-border);
     margin-top: 4px;
     padding-top: 8px;
   }
@@ -56,6 +51,7 @@
   }
 
   .icon.fa-check {
+    color: color(blue);
     font-size: 12px;
     margin-left: 16px;
     margin-right: 0;
@@ -71,11 +67,23 @@
   }
 }
 
+.picklist__highlight-content {
+  display: none;
+}
+
+.picklist__item.is-highlighted .picklist__default-content {
+  display: none;
+}
+
+.picklist__item.is-highlighted .picklist__highlight-content {
+  display: flex;
+}
+
 .picklist__message {
   color: #{$black-60};
   font-size: 14px;
   font-style: italic;
-  padding: 4px 16px;
+  padding: 4px 8px;
 }
 
 @keyframes picklist-pulse {
@@ -103,21 +111,32 @@
   }
 }
 
-.picklist__alert {
-  color: color(red);
-}
-
 .picklist__heading {
-  color: #{$black-60};
-  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06px;
   line-height: 16px;
-  padding: 0 16px;
+  padding: 2px 8px 4px;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .picklist__input {
-  margin: 0 8px 4px;
-  width: calc(100% - 16px);
+  background: var(--color-page-bg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  margin: 0 0 8px;
+  width: 100%;
+
+  &:focus {
+    background: #{$white};
+    border-color: color(blue);
+  }
+
+  &::placeholder {
+    color: var(--color-text-subtle);
+  }
 }
 
 .picklist__scroll {
@@ -126,7 +145,7 @@
 }
 
 .picklist__group:not(:last-of-type) {
-  border-bottom: #{$black-90} solid 1px;
+  border-bottom: var(--color-border) solid 1px;
   padding-bottom: 8px;
 }
 

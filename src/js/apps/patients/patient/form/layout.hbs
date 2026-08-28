@@ -1,0 +1,22 @@
+<div class="form__layout">
+  <div class="form__header" data-form-viewport-header>
+    <div class="overflow--hidden form__header-title js-viewport-interact">
+      <h1 class="form__title">
+        <span class="form__title-icon">{{far "square-poll-horizontal"}}</span>
+        <span class="u-text--overflow">{{ name }}</span>
+      </h1>
+    </div>
+    <div class="form__header-controls">
+      <div class="form__status" data-status-region>&nbsp;</div>
+      <div class="form__controls">
+        {{#if isActionForm}}
+          <div class="form__control-region" data-expand-action-region></div>
+        {{/if}}
+        <div class="form__control-region" data-draft-status-region></div>
+        <div class="form__control-region" data-form-action-region></div>
+      </div>
+    </div>
+  </div>
+  <div data-widgets-header-region></div>
+  <div data-form-region></div>
+</div>

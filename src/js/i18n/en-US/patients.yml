@@ -28,25 +28,14 @@ careOptsFrontend:
         attachmentsViews:
           attachmentsViews:
             addAttachment: Add an Attachment...
-            attachmentsHeadingText: Attachments
           attachmentView:
             downloadText: Download
             removeText: Remove
-          emptyView: No Attachments
           removeModal:
             bodyText: Are you sure you want to remove this attachment?
             headingText: Confirm Remove
             submitText: Remove Attachment
-        formsViews:
-          formLayoutView:
-            formLabel: Form
         actionViews:
-          headingView:
-            headingText: |
-              {outreach, select,
-                disabled {Action}
-                other {Outreach Action}
-              }
           menuView:
             menuOptions:
               delete: Delete Action
@@ -89,13 +78,11 @@ careOptsFrontend:
             sharingSent: 'Form shared with <strong>{ recipient }</strong>. Waiting for response.'
             stateUpdated: '<strong>State</strong> changed to { to_state }'
             teamAssigned: '<strong>Owner</strong> changed to { to_team }'
-          activityHeadingText: Activity Log
+          activityHeadingText: Activity
           commentView:
             edit: Edit
             editTooltip: 'Last edited on { edited }'
             edited: (Edited)
-          createdAt: Added
-          updatedAt: Updated
         dialerView:
           label: Dialer
         formSharingTemplate:
@@ -114,12 +101,12 @@ careOptsFrontend:
           stateLabel: Share State
       workflow:
         workflowViews:
-          archiveBtn: Archive
-          dashboardBtn: Dashboard
+          archiveBtn: Closed
+          dashboardBtn: Open
           doneEmptyView: No Archive
           notDoneEmptyView: No Workflows
-          newAction: New Action
           actionLoading: Loading...
+          tabsLabel: Workflow status
       form:
         formApp:
           deleteSuccess: The Action was deleted successfully.
@@ -136,8 +123,8 @@ careOptsFrontend:
             tooltip: See draft status
             updatedAt: Last saved { updated }
           formActionsView:
-            currentVersion: Back to Current Version
-            responseHistory: See Form Response History
+            decreaseWidth: Decrease Width
+            increaseWidth: Increase Width
           historyDroplistView:
             nameText: '• By { name }'
           historyView:
@@ -178,7 +165,7 @@ careOptsFrontend:
               programStarted: '<strong>Flow</strong> added from the { program } program'
               stateUpdated: '<strong>Flow state</strong> changed to { to_state }'
               teamAssigned: '<strong>Owner</strong> changed to { to_team }'
-          activityHeadingText: Activity Log
+          activityHeadingText: Activity
           bulkEditFailure: Something went wrong. Please try again.
           contextBackBtn: Back to List
           deleteModal:
@@ -189,12 +176,16 @@ careOptsFrontend:
           menu:
             delete: Delete Flow
             headingText: Flow Menu
+          permissionInfo: You are not able to change settings on this flow.
       patientViews:
         contextBackBtn: Back to List
+        contextTrailLabel: Patient navigation
+        sidebarToggle: Toggle Patient Sidebar
       sidebar:
         sidebarApp:
           patientUpdateSuccess: Patient account updated successfully
         sidebarViews:
+          closeBtn: Close Patient Sidebar
           archiveModal:
             bodyText: Are you sure you want to archive this patient? The patient will no longer be accessible in this workspace.
             headingText: Confirm Archive Patient
@@ -216,11 +207,18 @@ careOptsFrontend:
         allFiltersButtonView:
           allFiltersButton: All Filters
         dayItemView:
+          commentsLabel: "{itemCount, plural, one {# comment} other {# comments}}"
+          deselectAction: Deselect action
           noTime: No Time
+          openForm: Open form
+          selectAction: Select action
+          stateLabel: "State: {state}"
         emptyFindInListView:
           noResults: No results match your Find in List search
         emptyView:
           noScheduledActions: No Scheduled Actions
+        layoutView:
+          closeSidebar: Close sidebar
         scheduleTitleView:
           tooltip: Schedule Worklist displays all Actions with a due date for you (or someone else on your team).
         tableHeaderView:
@@ -232,6 +230,20 @@ careOptsFrontend:
           label: Schedule for
           title: Schedule for { owner }
     shared:
+      attachmentsLabel: "{itemCount, plural, one {# attachment} other {# attachments}}"
+      actionCard:
+        added: "Added"
+        attachmentsLabel: "{itemCount, plural, one {# attachment} other {# attachments}}"
+        commentsLabel: "{itemCount, plural, one {# comment} other {# comments}}"
+        newAction: New Action
+        updated: "Updated"
+      actionsViews:
+        deselectAction: Deselect action
+        deselectFlow: Deselect flow
+        detailsTooltipLabel: View action details
+        formButtonLabel: Open action form
+        selectAction: Select action
+        selectFlow: Select flow
       addWorkflow:
         addWorkflowViews:
           addActionHeadingText: Add Action
@@ -250,17 +262,21 @@ careOptsFrontend:
             headingText: "{itemCount, plural, one {Edit # Action} other {Edit # Actions}}"
           bulkEditActionsSuccess: "{itemCount, plural, one {# Action has been updated} other {# Actions have been updated}}"
           bulkEditActionBodyTemplate:
-            applyOwnerLabel: Apply Owner to Flows
             dueDateLabel: Due
             durationLabel: Duration
             ownerLabel: Owner
             stateLabel: State
           bulkEditButtonView:
+            actionsAndFlows: Actions + flows
+            actionsOnly: Actions only
             cancel: Cancel
             editActions: "{itemCount, plural, one {Edit # Action} other {Edit # Actions}}"
             editFlows: "{itemCount, plural, one {Edit # Flow} other {Edit # Flows}}"
+            flowsAndActions: Flows + actions
+            flowsOnly: Flows only
+            ownerScopeLabel: Apply owner to
+            save: Save
           bulkEditFlowBodyTemplate:
-            applyOwnerLabel: Apply Owner to Flow Actions
             ownerLabel: Owner
             stateLabel: State
           bulkEditFlowsHeaderView:
@@ -280,7 +296,7 @@ careOptsFrontend:
               submitText: OK
       commentsViews:
         commentFormView:
-          placeholder: Add a comment...
+          placeholder: Write an internal comment...
           deleteModal:
             bodyText: Are you sure you want to delete this comment?
             headingText: Confirm Delete
@@ -303,7 +319,7 @@ careOptsFrontend:
             defaultTemplate:
               thisMonth: This Month
             layoutView:
-              dateLabel: Filter by Date...
+              dateLabel: Filter by Date…
           dateTypeFilter:
             addButton: Added
             dueButton: Due
@@ -311,7 +327,7 @@ careOptsFrontend:
           dateTypes: "{type, select, created_at {Added} due_date {Due} updated_at {Updated} other {}}"
           relativeDate: "{relativeTo, select,
               alltime {All Time}
-              calendar {Select from calendar...}
+              calendar {Select from calendar…}
               thismonth {This Month}
               lastmonth {Last Month}
               thisweek {This Week}
@@ -321,7 +337,7 @@ careOptsFrontend:
               other {}}"
         dialerComponent:
           callLabel: Call
-          defaultText: Call Number...
+          defaultText: Call Number
           headingText: Phone Numbers
         dueComponent:
           defaultText: Select Date...
@@ -335,6 +351,11 @@ careOptsFrontend:
           headingText: Update Owner
           placeholderText: Owner...
           teamsHeadingText: Teams
+        selectAllView:
+          clearActions: Clear action selection
+          clearFlows: Clear flow selection
+          selectActions: Select all actions
+          selectFlows: Select all flows
         stateComponent:
           headingText: Update State
           statusLabels:
@@ -342,7 +363,7 @@ careOptsFrontend:
             queued: Queued
             started: Started
         timeComponent:
-          defaultText: Set Time...
+          defaultText: Select Time...
           clear: Clear Time
           placeholderText: Time
           headingText: Set Time
@@ -362,27 +383,34 @@ careOptsFrontend:
           maximumListCount: Showing {maximumCount} of {totalInDb, number} {isFlowList, select, true {Flows} false {Actions} other {}}.
           maximumListCountNarrowed: Showing {itemCount} of {maximumCount} {isFlowList, select, true {Flows} false {Actions} other {}}.
           narrowFilters: Try narrowing your filters.
+      listFilters:
+        customFilterDropList:
+          defaultText: All
+          headingText: Filter by
+        customFilterView:
+          defaultText: All
+          noResultsHeading: No Results
+        flowStatesFiltersView:
+          headingText: Flow States
+        headingView:
+          allFiltersLabel: All Filters
+          heading: Filters
+        loadingView:
+          empty: No custom filters available.
+          error: Custom filters could not be loaded.
+          heading: Custom Filters
+          loading: Loading custom filters
+          retry: Retry
+        menuView:
+          clearFilters: Clear
+        statesFiltersView:
+          deselectState: Deselect { state } filter
+          headingText: Action States
+          selectState: Select { state } filter
       readOnlyViews:
         readOnlyDurationView:
           mins: "{min, plural, one {# min} other {# mins}}"
           noDuration: No Duration
-    sidebar:
-      filters:
-        filtersSidebarViews:
-          customFilterDropList:
-            defaultText: All
-            headingText: Filter by
-          customFilterView:
-            defaultText: All
-            noResultsHeading: No Results
-          flowStatesFiltersView:
-            headingText: Show Actions from Flows with Flow States
-          headingView:
-            allFiltersLabel: All Filters
-          menuView:
-            clearFilters: Clear Filters
-          statesFiltersView:
-            headingText: State
     widgets:
       widgets:
         dob: "{ dob } &ndash; (Age { age, number })"
@@ -403,6 +431,8 @@ careOptsFrontend:
     worklist:
       actionViews:
         actionEmptyView: No Actions
+        added: "Added"
+        updated: "Updated"
         actionListTooltips: |
           {title, select,
             owned_by {This worklist includes Actions with the Owner set to you (or someone else on your team).}
@@ -441,6 +471,16 @@ careOptsFrontend:
           allFiltersButton: All Filters
         emptyFindInListView:
           noResults: No results match your Find in List search
+        layoutView:
+          closeSidebar: Close sidebar
+        loadingView:
+          loadError: The worklist could not be loaded.
+          loadingActions: Loading actions
+          loadingFlows: Loading flows
+          retry: Retry
+          updateError: The worklist could not be updated.
+          updatingActions: Updating actions
+          updatingFlows: Updating flows
         listTitleLabelView:
           listLabels: |
             {title, select,

@@ -13,26 +13,26 @@ import 'js/apps/programs/shared/program-action-state.scss';
 
 const i18n = intl.programs.shared.components.behaviorComponent;
 
-const ButtonCompactTemplate = hbs`<span class="{{ className }}">{{far icon}}</span>`;
+const ButtonCompactTemplate = hbs`<span class="program-action-state {{ className }}{{#if isDisabled}} program-action-state--disabled{{/if}}">{{far icon}}</span>`;
 
-const BehaviorTemplate = hbs`<span class="{{ className }}">{{far icon}}<span>{{ name }}</span></span>`;
+const BehaviorTemplate = hbs`<span class="program-action-state {{ className }}{{#if isDisabled}} program-action-state--disabled{{/if}}">{{far icon}}<span>{{ name }}</span></span>`;
 
 const BehaviorStates = [
   {
     icon: 'circle-play',
-    className: 'program-action--standard',
+    className: 'program-action-state--standard',
     name: i18n.standardText,
     behavior: PROGRAM_BEHAVIORS.STANDARD,
   },
   {
     icon: 'circle-pause',
-    className: 'program-action--conditional',
+    className: 'program-action-state--conditional',
     name: i18n.conditionalText,
     behavior: PROGRAM_BEHAVIORS.CONDITIONAL,
   },
   {
     icon: 'bolt',
-    className: 'program-action--automated',
+    className: 'program-action-state--automated',
     name: i18n.automatedText,
     behavior: PROGRAM_BEHAVIORS.AUTOMATED,
   },
@@ -71,8 +71,11 @@ export default Droplist.extend({
     const isCompact = this.getOption('isCompact');
 
     return {
-      className: isCompact ? 'button-secondary--compact' : 'button-secondary w-100',
+      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
       template: isCompact ? ButtonCompactTemplate : BehaviorTemplate,
+      templateContext: {
+        isDisabled: this.getState('isDisabled'),
+      },
     };
   },
   picklistOptions() {

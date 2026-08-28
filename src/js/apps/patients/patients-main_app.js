@@ -68,10 +68,6 @@ export default RouterApp.extend({
       action: 'showPatient',
       route: 'patient/:patientId/form/:formId',
     },
-    'patient:form:action': {
-      action: 'showPatient',
-      route: 'patient/:patientId/form/:formId/action/:actionId',
-    },
     'legacy:patient:flow': {
       action: 'redirectPatientFlow',
       route: [

@@ -2,6 +2,8 @@ import hbs from 'handlebars-inline-precompile';
 import Radio from 'backbone.radio';
 import Backbone from 'backbone';
 
+import 'scss/modules/buttons.scss';
+
 import RoleComponent from './components/role_component';
 import TeamComponent from 'js/components/team';
 import WorkspacesManagerComponent from 'js/components/workspaces-manager';
@@ -28,7 +30,7 @@ const WorkspacesComponent = WorkspacesManagerComponent.extend({
       }),
       headingText: i18n.workspacesComponent.removeModal.headingText,
       submitText: i18n.workspacesComponent.removeModal.submitText,
-      buttonClass: 'button--red',
+      buttonClass: 'button button--danger',
       onSubmit: () => {
         modal.destroy();
         WorkspacesManagerComponent.prototype.removeMemberWorkspace.call(this, workspace);
@@ -67,9 +69,9 @@ const DisabledState = {
   name: i18n.stateComponent.disabled,
 };
 
-const StateCompactTemplate = hbs`<span class="clinician-state--{{ state }}">{{fa icon.type icon.icon}}</span>`;
+const StateCompactTemplate = hbs`<span class="clinician-state clinician-state--{{ state }}">{{fa icon.type icon.icon}}</span>`;
 
-const StateTemplate = hbs`<span class="clinician-state--{{ state }}">{{fa icon.type icon.icon}}<span>{{ name }}</span></span>`;
+const StateTemplate = hbs`<span class="clinician-state clinician-state--{{ state }}">{{fa icon.type icon.icon}}<span>{{ name }}</span></span>`;
 
 const StateComponent = Droplist.extend({
   isCompact: false,
@@ -87,7 +89,7 @@ const StateComponent = Droplist.extend({
   viewOptions() {
     const isCompact = this.getOption('isCompact');
     return {
-      className: isCompact ? 'button-secondary--compact' : 'button-secondary w-100',
+      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
       template: isCompact ? StateCompactTemplate : StateTemplate,
     };
   },

@@ -10,7 +10,7 @@ import intl from 'js/i18n';
 export default App.extend({
   onBeforeStart() {
     this.showView(new LayoutView());
-    this.getRegion('dashboard').startPreloader();
+    this.getRegion('dashboard').startPreloader({ variant: 'generic' });
   },
   beforeStart({ dashboardId }) {
     return [

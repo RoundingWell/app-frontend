@@ -1,0 +1,14 @@
+<div class="app-nav__picklist-heading">{{ @intl.globals.appNav.appNavViews.mainNavDroplist.organizationHeading }}</div>
+<div class="app-nav__picklist-workspace-name js-picklist-item">{{ headingText }}</div>
+<div class="flex-region picklist__scroll">
+  <div class="app-nav__picklist-heading">{{ @intl.globals.appNav.appNavViews.mainNavDroplist.workspacesHeading }}</div>
+  <ul class="js-picklist-scroll"></ul>
+  {{#if infoText}}
+  <a class="picklist__item app-nav__picklist-item js-picklist-item" href="{{ infoText }}" target="_blank">
+    {{far "life-ring"}}<span>{{ @intl.globals.appNav.appNavViews.mainNavDroplist.help }}</span>
+  </a>
+  {{/if}}
+  <a class="picklist__item app-nav__picklist-item js-picklist-item" href="/logout">
+    {{fas "right-from-bracket"}}<span>{{ @intl.globals.appNav.appNavViews.mainNavDroplist.signOut }}</span>
+  </a>
+</div>

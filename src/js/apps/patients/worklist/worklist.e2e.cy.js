@@ -15,7 +15,6 @@ import { getPatientField } from 'support/api/patient-fields';
 import { getFlow, getFlows } from 'support/api/flows';
 import { getCurrentClinician, getClinician } from 'support/api/clinicians';
 import { stateTodo, stateInProgress, stateDone, stateUnableToComplete, stateThmgTransferred } from 'support/api/states';
-import { getWidget } from 'support/api/widgets';
 import { roleAdmin, roleEmployee, roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { workspaceOne } from 'support/api/workspaces';
@@ -29,7 +28,7 @@ const testPatient1 = getPatient({
   attributes: {
     first_name: 'Test',
     last_name: 'Patient',
-    segment: 'Overline',
+    segment: 'Cedarwood Rehabilitation & Healthcare Center',
   },
 });
 
@@ -42,7 +41,393 @@ const testPatient2 = getPatient({
 
 const STATE_VERSION = 'v6';
 
+function expandFiltersSidebar() {
+  cy.get('.list-page').then($layout => {
+    if ($layout.hasClass('is-filters-collapsed')) {
+      cy.wrap($layout).find('[data-filters-region] button').click();
+    }
+  });
+
+  cy.get('[data-states-filters-region] .list-filters__section').then($section => {
+    if ($section.hasClass('is-collapsed')) {
+      cy.wrap($section).find('.list-filters__section-button').click();
+    }
+  });
+}
+
+function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
+  const panelSlugs = ['demographics', ...Array.from(
+    { length: sidebarCount - 1 },
+    (_value, index) => `test-panel-${ index }`,
+  )];
+  const testAction = getAction({
+    relationships: {
+      patient: getRelationship(testPatient1),
+      state: getRelationship(stateTodo),
+    },
+  });
+  const testFlow = getFlow({
+    relationships: {
+      owner: getRelationship(teamCoordinator),
+      patient: getRelationship(testPatient1),
+      state: getRelationship(stateTodo),
+    },
+  });
+
+  cy
+    .routesForPatientAction()
+    .routeFlows(fx => {
+      fx.data = [testFlow];
+      fx.included.push(testPatient1);
+      return fx;
+    })
+    .routePatient(fx => {
+      fx.data = testPatient1;
+      return fx;
+    })
+    .routeSettings('sidebar', panelSlugs)
+    .routePanels(fx => {
+      const [panel] = fx.data;
+
+      fx.data.push(...Array.from({ length: sidebarCount - 1 }, (_value, index) => ({
+        ...panel,
+        id: `test-panel-${ index }`,
+        attributes: {
+          ...panel.attributes,
+          slug: `test-panel-${ index }`,
+          name: `Test Sidebar ${ index + 2 }`,
+        },
+      })));
+
+      return fx;
+    })
+    .routeActions(fx => {
+      fx.data = [testAction];
+      fx.included.push(testPatient1);
+      return fx;
+    })
+    .visit('/worklist/owned-by')
+    .wait('@routeActions');
+
+  if (listType === 'flows') {
+    cy
+      .get('.worklist-list__toggle')
+      .contains('Flows')
+      .click()
+      .wait('@routeFlows');
+  }
+
+  cy
+    .get('.worklist-list__item')
+    .contains('Test Patient')
+    .click();
+}
+
 context('worklist page', function() {
+  specify('toggle filters sidebar', function() {
+    cy.viewport(2240, 900);
+
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      id: 'owned-by',
+      actionsSortId: 'sortCreatedDesc',
+      flowsSortId: 'sortCreatedDesc',
+      clinicianId: currentClinician.id,
+      customFilters: { segment: 'active' },
+    }));
+
+    cy
+      .routeActions()
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .get('.list-page')
+      .as('layout')
+      .should('not.have.class', 'is-filters-collapsed')
+      .find('.patient-list-page__sidebar')
+      .should('be.visible');
+
+    cy.viewport(1200, 720);
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .as('filtersButton')
+      .should('have.attr', 'aria-expanded', 'true')
+      .find('.fa-bars-filter')
+      .should('be.visible');
+
+    cy
+      .get('@filtersButton')
+      .find('.patient-list-page__active-filter-dot')
+      .should('not.be.visible');
+
+    cy.get('@filtersButton').click();
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed')
+      .find('.patient-list-page__sidebar')
+      .should('not.be.visible');
+
+    cy
+      .get('@filtersButton')
+      .should('have.attr', 'aria-expanded', 'false')
+      .find('.patient-list-page__active-filter-dot')
+      .should('be.visible');
+
+    cy
+      .get('@filtersButton')
+      .click()
+      .should('have.attr', 'aria-expanded', 'true');
+
+    cy
+      .get('@layout')
+      .should('not.have.class', 'is-filters-collapsed')
+      .find('.patient-list-page__sidebar')
+      .should('be.visible');
+
+    cy.viewport(1043, 720);
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy
+      .get('@filtersButton')
+      .click();
+
+    cy.viewport(641, 720);
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy
+      .get('@filtersButton')
+      .click();
+
+    cy
+      .get('.list-search__input')
+      .click()
+      .type('patient')
+      .should('have.value', 'patient')
+      .clear();
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .should('not.be.visible');
+
+    cy
+      .get('@filtersButton')
+      .click();
+
+    cy.viewport(640, 720);
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized');
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy
+      .get('.list-page__list')
+      .should('be.visible');
+
+    cy.get('@filtersButton').click();
+
+    cy
+      .get('@layout')
+      .should('not.have.class', 'is-filters-collapsed')
+      .find('.patient-list-page__sidebar')
+      .should('be.visible')
+      .and('have.attr', 'aria-hidden', 'false');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .find('.js-select')
+      .should('have.attr', 'aria-label', 'Select action');
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .should('be.focused')
+      .type('{esc}');
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('@filtersButton')
+      .should('be.focused')
+      .and('have.attr', 'aria-expanded', 'false');
+
+    cy.viewport(390, 720);
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy
+      .get('@filtersButton')
+      .click();
+
+    cy
+      .get('.patient-list-page__sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .click();
+
+    cy.viewport(1200, 720);
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy.viewport(2200, 900);
+
+    cy
+      .get('.worklist-list__list')
+      .should($list => {
+        expect($list[0].getBoundingClientRect().width).to.equal(1440);
+      });
+
+    cy.viewport(2240, 900);
+
+    cy
+      .get('@layout')
+      .should('not.have.class', 'is-filters-collapsed');
+
+    cy
+      .get('@filtersButton')
+      .should('not.be.visible');
+
+    cy.viewport(2239, 900);
+
+    cy
+      .get('@filtersButton')
+      .should('be.visible')
+      .and('have.attr', 'aria-expanded', 'true')
+      .click();
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy.viewport(2240, 900);
+
+    cy
+      .get('@layout')
+      .should('not.have.class', 'is-filters-collapsed');
+  });
+
+  specify('patient sidebar desktop cards', function() {
+    cy.viewport(1820, 900);
+
+    openPatientSidebar(4);
+
+    cy
+      .window()
+      .should(win => {
+        expect(win.matchMedia('(width >= 1800px)').matches).to.be.true;
+      });
+
+    cy
+      .get('.patient-sidebar__card')
+      .should('have.length', 4)
+      .then($cards => {
+        const cards = [...$cards].map(card => card.getBoundingClientRect());
+        const [firstCard] = cards;
+
+        expect(firstCard.width).to.equal(260);
+        expect(cards.every(card => card.width === 260)).to.be.true;
+        expect(Math.max(...cards.map(card => card.left))).to.be.greaterThan(firstCard.right);
+      });
+  });
+
+  specify('patient sidebar mobile scrolling', function() {
+    cy.viewport(390, 400);
+
+    openPatientSidebar(4, 'actions');
+
+    cy
+      .get('.patient-list-page__sidebar-content')
+      .should(([sidebarContent]) => {
+        expect(sidebarContent.scrollHeight).to.be.greaterThan(sidebarContent.clientHeight);
+
+        sidebarContent.scrollTop = sidebarContent.scrollHeight;
+
+        expect(sidebarContent.scrollTop).to.be.greaterThan(0);
+      });
+  });
+
+  specify('keeps patient sidebar mounted while list refreshes', function() {
+    const testAction = getAction({
+      relationships: {
+        patient: getRelationship(testPatient1),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeActions(fx => {
+        fx.data = [testAction];
+        fx.included.push(testPatient1);
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient1;
+        return fx;
+      })
+      .routePanels()
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .get('.worklist-list__item')
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('[data-date-filter-region]')
+      .click();
+
+    cy
+      .get('.app-frame__pop-region')
+      .contains('Last Week')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.list-filters')
+      .should('not.exist');
+
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+  });
+
   specify('flow list', function() {
     const testFlows = [
       getFlow({
@@ -92,6 +477,10 @@ context('worklist page', function() {
         },
       }),
     ];
+    const getFirstRow = () => cy
+      .get('.app-frame__content')
+      .find('.worklist-list__item')
+      .first();
 
     localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
@@ -122,6 +511,7 @@ context('worklist page', function() {
       .routeFlow()
       .routeFlowActions()
       .routeFlowActivity()
+      .routePatientByFlow()
       .visit('/worklist/owned-by')
       .wait('@routeActions');
 
@@ -150,28 +540,36 @@ context('worklist page', function() {
       });
 
     cy
-      .get('[data-filters-region]')
-      .as('filterRegion')
-      .find('.js-bulk-edit')
+      .get('.worklist-list__item')
+      .first()
+      .find('.worklist-list__underline')
+      .should('contain', 'Cedarwood Rehabilitation & Healthcare Center');
+
+    cy
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 1 Flow');
 
     cy
       .get('[data-count-region]')
       .should('contain', '3 Flows');
 
-    cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
-      .first()
-      .as('firstRow')
-      .should('have.class', 'is-selected')
+    getFirstRow()
+      .should($row => {
+        expect($row).to.have.class('worklist-list__item');
+        expect($row).to.have.class('worklist-list__flow-item');
+        expect($row.find('.work-card__state[data-state-region]')).not.to.be.empty;
+      });
+
+    getFirstRow()
+      .should('have.class', 'is-selected');
+
+    getFirstRow()
       .find('.js-select')
       .click();
 
-    cy
-      .get('@firstRow')
+    getFirstRow()
       .find('.js-select')
-      .click('top');
+      .click('bottom');
 
     cy
       .get('[data-select-all-region] button:enabled')
@@ -179,64 +577,47 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 3);
 
     cy
       .get('[data-select-all-region] button:enabled')
       .click();
 
-    cy
-      .get('@firstRow')
+    getFirstRow()
       .find('.js-select')
-      .click('top');
+      .click('bottom');
 
     cy
       .get('[data-select-all-region] button:enabled')
       .click();
 
-    cy
-      .get('@firstRow')
+    getFirstRow()
       .find('.js-select')
-      .click('top');
+      .click('bottom');
 
     cy
-      .get('[data-select-all-region] button:enabled')
-      .should('not.be.checked')
-      .parent()
-      .next()
-      .find('button')
-      .should('contain', 'Edit 2 Flows')
-      .next()
+      .get('.bulk-edit-inline')
+      .should('contain', 'Edit 2 Flows');
+
+    cy
+      .get('.bulk-edit-inline')
+      .find('.js-cancel')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 0);
-
-    cy
-      .get('.table-list')
-      .find('.table-list__item')
-      .first()
-      .as('firstRow');
 
     cy
       .get('.worklist-list__toggle')
       .contains('Actions')
-      .should('not.have.class', 'button--blue')
+      .should('have.attr', 'aria-pressed', 'false')
       .should('contain', 'Actions')
       .next()
       .should('contain', 'Flows')
-      .should('have.class', 'button--blue');
-
-    cy
-      .get('.table-list__header')
-      .children()
-      .eq(1)
-      .should('contain', 'Flow')
-      .next()
-      .should('contain', 'State, Owner');
+      .should('have.attr', 'aria-pressed', 'true');
 
     cy
       .intercept('PATCH', `/api/flows/${ testFlows[0].id }`, {
@@ -245,23 +626,30 @@ context('worklist page', function() {
       })
       .as('routePatchFlow');
 
-    cy
-      .get('@firstRow')
-      .find('.worklist-list__flow-progress')
+    getFirstRow()
+      .find('progress.progress-bar')
       .should('have.value', 0);
 
-    cy
-      .get('@firstRow')
-      .find('.worklist-list__flow-progress')
+    getFirstRow()
+      .find('progress.progress-bar')
       .should('have.attr', 'max', '2');
 
-    cy
-      .get('@firstRow')
+    cy.viewport(1600, 900);
+
+    getFirstRow()
+      .should('contain', '0 / 2 Actions')
+      .should($row => {
+        expect($row.find('.patient-list__flow-progress').parent()).to.have.class('flow-card__controls');
+        expect($row.find('.work-card__meta progress')).to.have.lengthOf(0);
+      });
+
+    cy.viewport(1280, 720);
+
+    getFirstRow()
       .find('.fa-circle-exclamation')
       .should('not.match', 'button');
 
-    cy
-      .get('@firstRow')
+    getFirstRow()
       .find('[data-owner-region]')
       .should('contain', 'CO')
       .click();
@@ -279,11 +667,11 @@ context('worklist page', function() {
         expect(data.relationships.owner.data.type).to.equal(teamNurse.type);
       });
 
-    cy
-      .get('@firstRow')
-      .click('top')
+    getFirstRow()
+      .find('.work-card__title')
+      .focus()
+      .typeEnter()
       .wait('@routeFlow')
-      .wait('@routePatient')
       .wait('@routeFlowActions');
 
     cy
@@ -291,21 +679,201 @@ context('worklist page', function() {
       .should('contain', `flow/${ testFlows[0].id }`);
 
     cy
-      .go('back');
+      .visit('/worklist/owned-by')
+      .wait('@routeFlows');
 
     cy
-      .get('@firstRow')
-      .should('contain', 'Overline')
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .click();
+
+    cy.wait('@routePatient');
+
+    cy
+      .location('pathname')
+      .should('contain', '/worklist/owned-by');
+
+    cy
+      .get('.list-filters')
+      .should('not.exist');
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .should('have.class', 'patient-list__patient--selected')
+      .and('have.css', 'color', 'rgb(51, 51, 51)');
+
+    cy.viewport(640, 720);
+
+    cy
+      .get('.list-page')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-filters')
+      .should('not.be.visible');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .should('not.have.class', 'patient-list__patient--selected');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .as('patientSidebarTrigger')
+      .click();
+
+    cy
+      .wait('@routePatient')
+      .get('.patient-sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .should('have.attr', 'aria-expanded', 'false');
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .should('not.be.visible');
+
+    cy.viewport(1280, 768);
+
+    cy
+      .get('.list-page')
+      .should('not.have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.patient-sidebar')
+      .should('be.visible')
+      .find('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('@patientSidebarTrigger')
+      .should('be.focused');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
       .contains('Test Patient')
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/workflow`)
-      .wait('@routePatient');
+      .wait('@routePatient')
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
 
     cy
-      .go('back')
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .click();
+
+    cy
+      .get('.list-page')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('.list-page')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.list-filters')
+      .should('not.be.visible');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .click();
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .visit('/worklist/owned-by')
       .wait('@routeFlows');
 
     cy
@@ -447,15 +1015,17 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .as('firstRow')
       .should('contain', 'New Name Via Websocket');
 
     cy
       .get('@firstRow')
-      .find('.worklist-list__action-ts')
-      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
+      .find('.work-card__meta')
+      .should('contain', formatDate(testTs(), 'TIME_OR_DAY'))
+      .find('.work-card__timestamps > span')
+      .should('have.length', 2);
 
     cy.sendWs({
       category: 'StateChanged',
@@ -512,7 +1082,7 @@ context('worklist page', function() {
 
     cy
       .get('@firstRow')
-      .find('.worklist-list__flow-progress')
+      .find('progress.progress-bar')
       .should('have.value', 1)
       .should('have.attr', 'max', 3);
 
@@ -673,7 +1243,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 3);
   });
 
@@ -713,8 +1283,8 @@ context('worklist page', function() {
       .as('routePatchFlow');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.worklist-list__item')
       .first()
       .as('firstRow');
 
@@ -737,9 +1307,11 @@ context('worklist page', function() {
   });
 
   specify('action list', function() {
+    const longFlowName = 'Transitional Care Coordination Following Hospital Discharge';
+    const priorYear = dayjs(testDate()).subtract(1, 'year');
     const testFlow = getFlow({
       attributes: {
-        name: 'Test Flow',
+        name: longFlowName,
       },
       relationships: {
         state: getRelationship(stateInProgress),
@@ -763,6 +1335,7 @@ context('worklist page', function() {
         relationships: {
           state: getRelationship(stateTodo),
           flow: getRelationship(testFlow),
+          form: getRelationship(testForm),
           files: getRelationship([getFile()]),
           owner: getRelationship(teamCoordinator),
           patient: getRelationship(testPatient1),
@@ -775,13 +1348,14 @@ context('worklist page', function() {
           details: 'Details gonna detail',
           due_date: testDateAdd(5),
           due_time: null,
-          updated_at: testTsSubtract(2),
+          created_at: priorYear.format(),
+          updated_at: priorYear.add(1, 'day').format(),
           outreach: ACTION_OUTREACH.PATIENT,
         },
         relationships: {
           state: getRelationship(stateDone),
           owner: getRelationship(teamCoordinator),
-          patient: getRelationship(testPatient1),
+          patient: getRelationship(testPatient2),
         },
       }),
       getAction({
@@ -820,7 +1394,7 @@ context('worklist page', function() {
       .routeActions(fx => {
         fx.data = testActions;
 
-        fx.included.push(testPatient1, testFlow);
+        fx.included.push(testPatient1, testPatient2, testFlow);
 
         return fx;
       })
@@ -841,9 +1415,7 @@ context('worklist page', function() {
       .visitOnClock('/worklist/owned-by', { now: testTime, functionNames: ['Date'] });
 
     cy
-      .get('[data-filters-region]')
-      .as('filterRegion')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 1 Action');
 
     cy
@@ -852,30 +1424,53 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .as('firstRow')
       .should('have.class', 'is-selected')
-      .should('contain', 'Test Flow')
+      .should('contain', longFlowName)
       .should('contain', 'First In List')
-      .find('.worklist-list__action-icon')
-      .find('.action-icon--red .fa-caret-down');
+      .should('contain', 'Cedarwood Rehabilitation & Healthcare Center')
+      .find('.work-card__state[data-state-region]')
+      .find('.fa-circle-exclamation');
+
+    cy
+      .get('@firstRow')
+      .should('have.class', 'worklist-list__action-item');
+
+    cy.viewport(390, 720);
+
+    cy
+      .get('@firstRow')
+      .find('.worklist-list__patient-context')
+      .should('be.visible');
+
+    cy.viewport(1280, 720);
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .eq(1)
-      .should('contain', 'Second In List')
-      .find('.worklist-list__action-icon')
-      .find('.fa-file-lines');
+      .should('contain', 'Second In List');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Last In List')
-      .find('.worklist-list__action-icon')
-      .find('.fa-share-from-square');
+      .find('.work-card__state[data-state-region]')
+      .find('.fa-circle-check');
+
+    cy
+      .get('.app-frame__content')
+      .find('.worklist-list__item')
+      .last()
+      .find('.work-card__aside')
+      .find('.work-card__meta .u-text--nowrap')
+      .should('have.length', 2)
+      .each($date => {
+        expect($date.text()).to.contain(priorYear.year());
+      });
 
     cy
       .get('@firstRow')
@@ -893,37 +1488,94 @@ context('worklist page', function() {
       .get('.worklist-list__toggle')
       .contains('Actions')
       .should('contain', 'Actions')
-      .should('have.class', 'button--blue')
+      .should('have.attr', 'aria-pressed', 'true')
       .next()
-      .should('not.have.class', 'button--blue')
+      .should('have.attr', 'aria-pressed', 'false')
       .should('contain', 'Flows');
 
     cy
-      .get('.table-list__header')
-      .children()
-      .eq(1)
-      .should('contain', 'Action')
-      .next()
-      .should('contain', 'State, Owner, Due, Form')
-      .next()
-      .should('contain', 'Dates');
-
-    cy
       .routeFlow()
-      .routeFlowActions();
+      .routeFlowActions()
+      .routeFlowActivity()
+      .routePatientByFlow();
 
     cy
       .get('@firstRow')
-      .click('top')
-      .wait('@routeFlow')
-      .wait('@routePatient');
+      .find('.work-card__title')
+      .click()
+      .wait('@routeFlow');
 
     cy
       .url()
       .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }`);
 
     cy
-      .go('back')
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .find('.js-flow')
+      .click()
+      .wait('@routeFlow');
+
+    cy
+      .url()
+      .should('contain', `flow/${ testFlow.id }`)
+      .should('not.contain', `/action/${ testActions[0].id }`);
+
+    cy
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .intercept('GET', '/api/patients/**?*', {
+        delay: 1000,
+        body: { data: testPatient1, included: [] },
+      })
+      .as('routeLoadingPatient');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar__name')
+      .click();
+
+    cy
+      .location('pathname', { timeout: 10000 })
+      .should('contain', `/patient/${ testPatient1.id }/workflow`);
+
+    cy
+      .visit('/worklist/owned-by')
+      .wait('@routeActions')
+      .routePatient(fx => {
+        fx.data = testPatient1;
+
+        return fx;
+      });
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .find('[data-form-region] button')
+      .click()
+      .wait('@routeFormByAction');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/flow/${ testFlow.id }/action/${ testActions[0].id }`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    cy
+      .visit('/worklist/owned-by')
       .wait('@routeActions');
 
     cy
@@ -933,10 +1585,10 @@ context('worklist page', function() {
       });
 
     cy
-      .get('@firstRow')
-      .next()
+      .get('.worklist-list__item')
+      .eq(1)
       .as('secondRow')
-      .click('top');
+      .click('bottom');
 
     cy
       .wait('@routeAction');
@@ -946,13 +1598,35 @@ context('worklist page', function() {
       .should('contain', `/patient/${ testPatient1.id }/action/${ testActions[2].id }`);
 
     cy
-      .go('back')
+      .visit('/worklist/owned-by')
       .wait('@routeActions');
 
     cy
-      .get('@firstRow')
-      .should('contain', 'Overline')
+      .get('.worklist-list__item')
+      .first()
       .contains('Test Patient')
+      .click();
+
+    cy
+      .wait('@routePatient');
+
+    cy
+      .location('pathname')
+      .should('contain', '/worklist/owned-by');
+
+    cy
+      .get('.patient-sidebar__name')
+      .should('contain', 'Test Patient')
+      .find('.patient-sidebar__name-chevron use')
+      .should('have.attr', 'href', '#fas-fa-chevron-right');
+
+    cy
+      .get('.patient-sidebar')
+      .find('.js-menu')
+      .should('not.exist');
+
+    cy
+      .get('.patient-sidebar__name')
       .click();
 
     cy
@@ -963,20 +1637,20 @@ context('worklist page', function() {
       .should('contain', `/patient/${ testPatient1.id }/workflow`);
 
     cy
-      .go('back')
+      .visit('/worklist/owned-by')
       .wait('@routeActions');
 
     cy
-      .get('@firstRow')
-      .contains('Test Flow')
-      .click();
+      .get('.worklist-list__item')
+      .first()
+      .click('bottom');
 
     cy
       .url()
       .should('contain', `flow/${ testFlow.id }/action/${ testActions[0].id }`);
 
     cy
-      .go('back')
+      .visit('/worklist/owned-by')
       .wait('@routeActions');
 
     cy
@@ -986,14 +1660,29 @@ context('worklist page', function() {
       });
 
     cy
-      .get('@secondRow')
-      .next()
-      .click('top')
+      .get('.worklist-list__item')
+      .last()
+      .find('.work-card__title')
+      .click()
       .wait('@routeAction');
 
     cy
-      .go('back')
+      .location('pathname', { timeout: 10000 })
+      .should('contain', `/patient/${ testPatient2.id }/action/${ testActions[1].id }`);
+
+    cy
+      .visit('/worklist/owned-by')
       .wait('@routeActions');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .as('firstRow');
+
+    cy
+      .get('.worklist-list__item')
+      .eq(1)
+      .as('secondRow');
 
     cy
       .intercept('PATCH', `/api/actions/${ testActions[0].id }`, {
@@ -1006,6 +1695,16 @@ context('worklist page', function() {
       .get('@firstRow')
       .find('.fa-circle-exclamation')
       .click();
+
+    cy
+      .get('@firstRow')
+      .find('.action-details-tooltip')
+      .should('exist');
+
+    cy
+      .get('@firstRow')
+      .find('.work-card__title-row [data-form-region] button')
+      .should('have.class', 'action-form-button');
 
     cy
       .get('.picklist')
@@ -1136,7 +1835,9 @@ context('worklist page', function() {
     cy
       .get('@firstRow')
       .find('.fa-paperclip')
-      .should('exist');
+      .should('exist')
+      .next()
+      .should('contain', '1');
 
     cy
       .get('@secondRow')
@@ -1149,6 +1850,12 @@ context('worklist page', function() {
       .should('exist')
       .next()
       .should('contain', '1');
+
+    cy
+      .get('@firstRow')
+      .should($row => {
+        expect($row.find('.fa-paperclip').parent().index()).to.be.lessThan($row.find('.fa-comment').parent().index());
+      });
 
     cy
       .get('@secondRow')
@@ -1175,14 +1882,14 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .find('[data-form-region]')
       .should('be.empty');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .find('[data-details-region]')
       .trigger('pointerover');
@@ -1198,16 +1905,27 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .find('[data-details-region]')
       .trigger('pointerover');
 
     cy
       .get('.tooltip')
-      .should('contain', 'Test Flow')
+      .should('contain', longFlowName)
       .should('contain', 'First In List')
       .should('contain', 'Like the legend of the phoenix All ends with beginnings What keeps the planet spinning The force from the beginning Look We\'ve come too far...');
+
+    cy
+      .get('.app-frame__content')
+      .find('.worklist-list__item')
+      .first()
+      .find('[data-details-region]')
+      .trigger('mouseout');
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
 
     cy
       .routeAction(fx => {
@@ -1222,12 +1940,75 @@ context('worklist page', function() {
       .wait('@routeFormByAction');
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/form/${ testForm.id }/action/${ testActions[2].id }`);
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/action/${ testActions[2].id }`);
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
 
     cy
       .wait('@routeFormActionFields')
-      .go('back');
+      .go('back')
+      .wait('@routeActions');
+
+    cy
+      .intercept('GET', '/api/actions/*/form', {
+        delay: 200,
+        body: { data: testForm, included: [] },
+      })
+      .as('routeDelayedFormByAction')
+      .intercept('GET', '/api/actions/**/files?urls=download,view', {
+        delay: 100,
+        body: { data: [getFile()], included: [] },
+      })
+      .as('routeDelayedActionFiles');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testActions[0];
+
+        return fx;
+      })
+      .get('.worklist-list__action-item')
+      .first()
+      .find('.js-attachments')
+      .click()
+      .wait('@routeAction')
+      .wait('@routeDelayedActionFiles');
+
+    cy
+      .get('[data-attachments-region]')
+      .should('be.focused');
+
+    cy
+      .go('back')
+      .wait('@routeActions');
+
+    cy
+      .get('.worklist-list__action-item')
+      .first()
+      .find('.js-comments')
+      .click()
+      .wait('@routeAction')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('[data-activity-region]')
+      .should('be.focused');
+
+    cy
+      .get('.patient-action')
+      .should(([viewport]) => {
+        const activity = viewport.querySelector('[data-activity-region]').getBoundingClientRect();
+        const bounds = viewport.getBoundingClientRect();
+
+        expect(viewport.scrollTop).to.be.greaterThan(0);
+        expect(activity.top).to.be.at.least(bounds.top);
+        expect(activity.top).to.be.lessThan(bounds.bottom);
+      })
+      .wait('@routeDelayedActionFiles')
+      .wait('@routeDelayedFormByAction');
   });
 
   specify('action list - socket notifications', function() {
@@ -1373,14 +2154,14 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .as('firstRow')
       .should('contain', 'New Name Via Websocket');
 
     cy
       .get('@firstRow')
-      .find('.worklist-list__action-ts')
+      .find('.work-card__meta')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
     cy.sendWs({
@@ -1714,7 +2495,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 3);
   });
 
@@ -1765,7 +2546,7 @@ context('worklist page', function() {
       .should('contain', 'fields[flows]=name,state');
 
     cy
-      .get('.table-list__meta')
+      .get('.action-card__controls, .flow-card__controls')
       .find('button')
       .should('not.exist');
 
@@ -1841,10 +2622,12 @@ context('worklist page', function() {
     cy
       .get('[data-count-region]')
       .should('contain', 'Showing 50 of 1,000 Actions.')
-      .should('contain', 'Try narrowing your filters.');
+      .should('contain', 'Try narrowing your filters.')
+      .find('span')
+      .should('have.text', 'Showing 50 of 1,000 Actions. Try narrowing your filters.');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .as('listSearch')
       .type('First Action');
@@ -1895,7 +2678,7 @@ context('worklist page', function() {
       .should('contain', 'Try narrowing your filters.');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .as('listSearch')
       .type('First Flow');
@@ -2189,7 +2972,7 @@ context('worklist page', function() {
     cy
       .get('[data-owner-toggle-region]')
       .contains('No Owner')
-      .should('not.have.class', 'button--blue')
+      .should('have.attr', 'aria-pressed', 'false')
       .click();
 
     cy
@@ -2202,7 +2985,7 @@ context('worklist page', function() {
     cy
       .get('[data-owner-toggle-region]')
       .contains('No Owner')
-      .should('have.class', 'button--blue')
+      .should('have.attr', 'aria-pressed', 'true')
       .click();
 
     cy
@@ -2213,7 +2996,6 @@ context('worklist page', function() {
       .should('contain', `filter[teams]=${ teamNurse.id }`);
   });
 
-  // TODO: Move to component tests
   specify('date filtering', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
     const filterDate = testDateSubtract(1);
@@ -2250,12 +3032,25 @@ context('worklist page', function() {
     cy
       .get('[data-date-filter-region]')
       .should('contain', 'Added:')
-      .should('contain', 'This Month')
+      .should('contain', 'This Month');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-prev, .js-next')
+      .should('have.length', 2)
+      .and('be.visible');
+
+    cy
+      .get('[data-date-filter-region]')
       .click();
 
     cy
       .get('[data-date-type-region]')
       .should('not.contain', 'Due');
+
+    cy
+      .get('body')
+      .type('{esc}');
 
     cy
       .get('.worklist-list__toggle')
@@ -2267,58 +3062,6 @@ context('worklist page', function() {
       .get('[data-date-filter-region]')
       .should('contain', 'Added:')
       .should('contain', formatDate(filterDate, 'MM/DD/YYYY'))
-      .find('.js-prev')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDateSubtract(2), 'MM/DD/YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.be.equal(testDateSubtract(2));
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-        expect(storage.actionsDateFilters.selectedWeek).to.be.null;
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDateSubtract(2), 'MM/DD/YYYY'))
-      .find('.js-next')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(filterDate, 'MM/DD/YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-next')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.be.equal(filterDate);
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(filterDate, 'MM/DD/YYYY'))
-      .click();
-
-    cy
-      .get('[data-date-type-region]')
-      .contains('Updated')
       .click();
 
     cy
@@ -2328,75 +3071,33 @@ context('worklist page', function() {
       .then(() => {
         const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedWeek).to.be.null;
         expect(storage.actionsDateFilters.relativeDate).to.equal('lastweek');
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'Last Week')
-      .find('.js-next')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(dayjs(testDate()).startOf('week'), 'MM/DD/YYYY'))
-      .should('contain', formatDate(dayjs(testDate()).endOf('week'), 'MM/DD/YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'Last Week')
-      .find('.js-next')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedWeek, 'YYYY-MM-DD')).to.be.equal(dayjs(testDate()).startOf('week').format('YYYY-MM-DD'));
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
         expect(storage.actionsDateFilters.selectedMonth).to.be.null;
       })
       .wait('@routeActions');
 
     cy
       .get('[data-date-filter-region]')
-      .find('.js-next')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .contains(`Updated: ${ dayjs(testDate()).startOf('week').format('MM/DD/YYYY') } - ${ dayjs(testDate()).endOf('week').format('MM/DD/YYYY') }`)
+      .should('contain', 'Last Week')
       .click();
 
     cy
       .get('.app-frame__pop-region')
-      .contains('Select from calendar')
+      .contains('Updated')
       .click();
 
     cy
       .get('.app-frame__pop-region')
-      .find('.js-current-month')
+      .contains('This Month')
       .click()
       .then(() => {
         const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
 
+        expect(storage.actionsDateFilters.dateType).to.equal('updated_at');
+        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
         expect(storage.actionsDateFilters.relativeDate).to.equal('thismonth');
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-        expect(storage.actionsDateFilters.dateType).to.be.equal('updated_at');
-      });
-
-    cy
+      })
       .wait('@routeActions')
       .itsUrl()
       .its('search')
@@ -2406,248 +3107,11 @@ context('worklist page', function() {
       .get('[data-date-filter-region]')
       .should('contain', 'Updated:')
       .should('contain', 'This Month')
-      .find('.js-prev')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDateSubtract(1, 'month'), 'MMM YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDateSubtract(1, 'month'), 'MMM YYYY'));
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-      });
-
-    const lastMonth = testDateSubtract(1, 'month');
-    cy
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[updated_at]=${ dayjs(lastMonth).startOf('month').format() },${ dayjs(lastMonth).endOf('month').format() }`);
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(lastMonth, 'MMM YYYY'))
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('This Month')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'This Month')
-      .find('.js-next')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDateAdd(1, 'month'), 'MMM YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-next')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDateAdd(1, 'month'), 'MMM YYYY'));
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDateAdd(1, 'month'), 'MMM YYYY'))
       .click();
 
     cy
       .get('.app-frame__pop-region')
       .contains('Due')
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Today')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.actionsDateFilters.relativeDate).to.equal('today');
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-        expect(storage.actionsDateFilters.dateType).to.equal('due_date');
-      });
-
-    cy
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[due_date]=${ testDate() },${ testDate() }`);
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'Due:')
-      .should('contain', 'Today')
-      .find('.js-prev')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDateSubtract(1), 'MM/DD/YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(testDateSubtract(1));
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDateSubtract(1), 'MM/DD/YYYY'))
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Added')
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Today')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'Added:')
-      .should('contain', 'Today')
-      .find('.js-next')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDateAdd(1), 'MM/DD/YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-next')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(formatDate(testDateAdd(1), 'YYYY-MM-DD'));
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-        expect(storage.actionsDateFilters.dateType).to.equal('created_at');
-      });
-
-    cy
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[created_at]=${ dayjs(testDateAdd(1)).startOf('day').format() },${ dayjs(testDateAdd(1)).endOf('day').format() }`);
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDateAdd(1), 'MM/DD/YYYY'))
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Yesterday')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.actionsDateFilters.relativeDate).to.equal('yesterday');
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-      });
-
-    cy
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[created_at]=${ dayjs(testDateSubtract(1)).startOf('day').format() },${ dayjs(testDateSubtract(1)).endOf('day').format() }`);
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'Yesterday')
-      .find('.js-prev')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDateSubtract(2), 'MM/DD/YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(testDateSubtract(2));
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDateSubtract(2), 'MM/DD/YYYY'))
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Yesterday')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'Yesterday')
-      .find('.js-next')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDate(), 'MM/DD/YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-next')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(formatDate(storage.actionsDateFilters.selectedDate, 'YYYY-MM-DD')).to.equal(testDate());
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDate(), 'MM/DD/YYYY'))
       .click();
 
     cy
@@ -2656,134 +3120,23 @@ context('worklist page', function() {
       .click();
 
     cy
-      .get('.datepicker')
-      .find('.js-month')
+      .get('.app-frame__pop-region .js-current-week')
       .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(formatDate(storage.actionsDateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDate(), 'MMM YYYY'));
-      });
-
-    cy
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('contain', `filter[created_at]=${ dayjs(testDate()).startOf('month').format() },${ dayjs(testDate()).endOf('month').format() }`);
+      .should('contain', `filter[due_date]=${ dayjs(testDate()).startOf('week').format('YYYY-MM-DD') },${ dayjs(testDate()).endOf('week').format('YYYY-MM-DD') }`);
 
     cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDateSubtract(1, 'month'), 'MMM YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
+      .get('[data-date-filter-region] .js-prev')
       .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(formatDate(storage.actionsDateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDateSubtract(1, 'month'), 'MMM YYYY'));
-      })
-      .wait('@routeActions');
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[due_date]=${ dayjs(testDate()).subtract(1, 'week').startOf('week').format('YYYY-MM-DD') },${ dayjs(testDate()).subtract(1, 'week').endOf('week').format('YYYY-MM-DD') }`);
 
     cy
       .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDateSubtract(1, 'month'), 'MMM YYYY'))
-      .find('.js-next')
-      .trigger('pointerover');
-
-    cy
-      .get('.tooltip')
-      .should('contain', formatDate(testDate(), 'MMM YYYY'));
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-next')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDate(), 'MMM YYYY'))
-      .find('.js-next')
-      .click()
-      .then(() => {
-        const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
-
-        expect(storage.actionsDateFilters.relativeDate).to.be.null;
-        expect(storage.actionsDateFilters.selectedDate).to.be.null;
-        expect(formatDate(storage.actionsDateFilters.selectedMonth, 'MMM YYYY')).to.equal(formatDate(testDateAdd(1, 'month'), 'MMM YYYY'));
-      })
-      .wait('@routeActions');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', formatDate(testDateAdd(1, 'month'), 'MMM YYYY'))
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Select from calendar')
-      .click();
-
-    cy
-      .get('.datepicker')
-      .find('.js-prev')
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Updated')
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Updated')
-      .should('have.class', 'button--blue');
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Due')
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Due')
-      .should('have.class', 'button--blue');
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Added')
-      .click();
-
-    cy
-      .get('.app-frame__pop-region')
-      .contains('Added')
-      .should('have.class', 'button--blue');
-
-    cy
-      .get('.datepicker')
-      .find('.is-today')
-      .click()
-      .wait('@routeActions');
-
-    cy
-      .get('.datepicker')
-      .should('not.exist');
-
-    cy
-      .get('[data-date-filter-region]')
-      .should('contain', 'Added:')
-      .should('contain', formatDate(testDate(), 'MM/DD/YYYY'))
       .click();
 
     cy
@@ -2796,28 +3149,18 @@ context('worklist page', function() {
         expect(storage.actionsDateFilters.relativeDate).to.equal('alltime');
         expect(storage.actionsDateFilters.selectedDate).to.be.null;
         expect(storage.actionsDateFilters.selectedMonth).to.be.null;
-        expect(storage.actionsDateFilters.dateType).to.equal('created_at');
+        expect(storage.actionsDateFilters.dateType).to.equal('due_date');
       });
 
     cy
       .wait('@routeActions')
       .itsUrl()
       .its('search')
-      .should('not.contain', 'filter[created_at]');
+      .should('not.contain', 'filter[due_date]');
 
     cy
       .get('[data-date-filter-region]')
       .should('contain', 'All Time');
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-prev')
-      .should('not.exist');
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('.js-next')
-      .should('not.exist');
   });
 
   specify('restricted employee', function() {
@@ -2926,13 +3269,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Created Most Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Created Least Recent');
 
@@ -2945,13 +3288,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Created Least Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Created Most Recent');
 
@@ -2964,13 +3307,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Updated Least Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Updated Most Recent');
 
@@ -2983,13 +3326,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Updated Most Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Updated Least Recent');
 
@@ -3053,13 +3396,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'APatient AName');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'APatient BName');
 
@@ -3072,13 +3415,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'APatient BName');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'APatient AName');
   });
@@ -3159,13 +3502,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Patient Field B');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Patient Field None');
 
@@ -3178,13 +3521,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Patient Field None');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Patient Field B');
   });
@@ -3281,13 +3624,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Patient Field 2');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Patient Field None');
 
@@ -3300,13 +3643,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Patient Field None');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Patient Field 2');
   });
@@ -3433,13 +3776,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Created Least Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Created Most Recent');
 
@@ -3452,13 +3795,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Updated Least Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Updated Most Recent');
 
@@ -3471,13 +3814,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Updated Most Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Updated Least Recent');
 
@@ -3490,7 +3833,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Created Least Recent');
 
@@ -3503,7 +3846,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Created Most Recent');
 
@@ -3516,14 +3859,14 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .next()
       .should('contain', 'Due Time Most Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .next()
       .next()
@@ -3538,14 +3881,14 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .prev()
       .should('contain', 'Due Time Most Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .prev()
       .prev()
@@ -3560,13 +3903,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Created Least Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Updated Most Recent');
 
@@ -3579,19 +3922,19 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Updated Most Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Created Least Recent');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .contains('Updated Most Recent')
       .click()
@@ -3605,7 +3948,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .contains('Updated Most Recent');
 
@@ -3661,13 +4004,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'APatient AName');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'APatient BName');
 
@@ -3680,13 +4023,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'APatient BName');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'APatient AName');
   });
@@ -3764,13 +4107,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Patient Field B');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Field None');
 
@@ -3783,13 +4126,13 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .should('contain', 'Field None');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .should('contain', 'Patient Field B');
   });
@@ -3889,17 +4232,17 @@ context('worklist page', function() {
       .should('contain', '6 Flows');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .as('listSearch')
-      .should('have.attr', 'placeholder', 'Find in List...')
+      .should('have.attr', 'placeholder', 'Find in List…')
       .focus()
       .type('abcd')
       .next()
       .should('have.class', 'js-clear');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .list-search__container')
       .should('have.class', 'is-applied');
 
@@ -3910,7 +4253,7 @@ context('worklist page', function() {
     cy
       .get('.list-page__list')
       .as('flowList')
-      .find('.table-list__empty-list')
+      .find('.card-list__empty')
       .should('contain', 'No results match your Find in List search');
 
     cy
@@ -3919,7 +4262,7 @@ context('worklist page', function() {
       .click();
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .list-search__container')
       .should('not.have.class', 'is-applied');
 
@@ -3929,7 +4272,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 6);
 
     cy
@@ -3942,7 +4285,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 3);
 
     cy
@@ -3961,7 +4304,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 1);
 
     cy
@@ -3979,7 +4322,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 3);
 
     cy
@@ -3989,7 +4332,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item .fa-square-check')
+      .find('.worklist-list__item .fa-square-check')
       .should('have.length', 3);
 
     cy
@@ -3997,8 +4340,7 @@ context('worklist page', function() {
       .find('.fa-square-check');
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Flows');
 
     cy
@@ -4011,9 +4353,12 @@ context('worklist page', function() {
       .find('.fa-square-minus');
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Flows');
+
+    cy
+      .get('.patient-list-page__summary')
+      .should('not.be.visible');
 
     cy
       .get('[data-select-all-region]')
@@ -4022,7 +4367,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item .fa-square-check')
+      .find('.worklist-list__item .fa-square-check')
       .should('have.length', 6)
       .first()
       .click();
@@ -4040,9 +4385,13 @@ context('worklist page', function() {
       .find('.fa-square-check');
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Flows');
+
+    cy
+      .get('.bulk-edit-inline')
+      .find('.js-cancel')
+      .click();
 
     cy
       .get('@listSearch')
@@ -4061,7 +4410,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 1)
       .first()
       .should('contain', 'Test Flow');
@@ -4082,7 +4431,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .should('have.length', 1)
       .first()
       .should('contain', 'Flow - Coordinator');
@@ -4098,7 +4447,7 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .contains('Flow - Team/State Search');
 
     cy
@@ -4112,12 +4461,16 @@ context('worklist page', function() {
 
     cy
       .get('@flowList')
-      .find('.work-list__item')
+      .find('.worklist-list__item')
       .contains('Flow - Team/State Search');
 
     cy
       .get('[data-date-filter-region]')
-      .find('button.js-prev')
+      .click();
+
+    cy
+      .get('.app-frame__pop-region')
+      .contains('This Month')
       .click();
 
     cy
@@ -4149,7 +4502,7 @@ context('worklist page', function() {
       .should('have.attr', 'value', 'Nurse');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .list-search__container')
       .should('have.class', 'is-applied');
   });
@@ -4171,7 +4524,7 @@ context('worklist page', function() {
     cy
       .tick(60) // tick past debounce
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .as('firstTableListItem')
       .find('.js-select')
@@ -4179,7 +4532,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .as('lastTableListItem')
       .find('.js-select')
@@ -4187,16 +4540,15 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 3);
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Actions');
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -4212,16 +4564,15 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 3);
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Actions');
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -4242,11 +4593,11 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 1);
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -4256,7 +4607,7 @@ context('worklist page', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -4267,11 +4618,11 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 1);
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -4281,7 +4632,7 @@ context('worklist page', function() {
       .click();
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .as('listSearch')
       .focus()
@@ -4299,11 +4650,11 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 2);
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -4331,11 +4682,11 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 2);
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -4359,202 +4710,8 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.worklist-list__item.is-selected')
       .should('have.length', 2);
-  });
-
-  specify('patient sidebar', function() {
-    const testPatient = getPatient({
-      attributes: {
-        first_name: 'Test',
-        last_name: 'Patient',
-        sex: 'u',
-      },
-    });
-
-    const testFlow = getFlow({
-      attributes: {
-        name: 'Test Flow Item',
-      },
-      relationships: {
-        owner: getRelationship(teamCoordinator),
-        state: getRelationship(stateTodo),
-        patient: getRelationship(testPatient),
-      },
-    });
-
-    cy
-      .routesForPatientDashboard()
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routeFlows(fx => {
-        fx.data = [
-          testFlow,
-        ];
-
-        fx.included.push(testPatient);
-
-        return fx;
-      })
-      .routeActions(fx => {
-        fx.data = [
-          getAction({
-            relationships: {
-              owner: getRelationship(teamCoordinator),
-              state: getRelationship(stateTodo),
-              patient: getRelationship(testPatient),
-              flow: getRelationship(testFlow),
-            },
-          }),
-        ];
-
-        fx.included.push(testPatient);
-        fx.included.push(testFlow);
-
-        return fx;
-      })
-      .routeSettings('widgets_patient_sidebar', {
-        widgets: ['sex', 'hbsWidget'],
-      })
-      .routeWidgets(fx => {
-        fx.data = [
-          ...fx.data,
-          getWidget({
-            attributes: {
-              category: 'widget',
-              slug: 'hbsWidget',
-              definition: {
-                template: '{{testField}}',
-                display_name: 'Test Field Widget',
-              },
-              values: {
-                testField: '@patient.testField',
-              },
-            },
-          }),
-        ];
-
-        return fx;
-      })
-      .routeWidgetValues(fx => {
-        fx.values = {
-          testField: 'Test Field',
-        };
-
-        return fx;
-      })
-      .routeFlow()
-      .routeFlowActions()
-      .visit('/worklist/owned-by')
-      .wait('@routeWidgets')
-      .wait('@routeActions');
-
-    cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
-      .first()
-      .as('firstRow');
-
-    cy
-      .get('@firstRow')
-      .find('.js-patient-sidebar-button')
-      .click();
-
-    cy
-      .get('.app-frame__sidebar .worklist-patient-sidebar')
-      .as('patientSidebar')
-      .find('.worklist-patient-sidebar__patient-name')
-      .should('contain', 'Test Patient')
-      .click()
-      .wait('@routePrograms');
-
-    cy
-      .url()
-      .should('contain', `patient/${ testPatient.id }/workflow`);
-
-    cy
-      .get('.patient-sidebar')
-      .find('.patient-sidebar__name')
-      .should('contain', 'Test Patient');
-
-    cy
-      .go('back');
-
-    cy
-      .get('@firstRow')
-      .find('.js-patient-sidebar-button')
-      .click();
-
-    cy
-      .get('@patientSidebar')
-      .contains('View Patient Dashboard')
-      .click()
-      .wait('@routePrograms');
-
-    cy
-      .url()
-      .should('contain', `patient/${ testPatient.id }/workflow`);
-
-    cy
-      .get('.patient-sidebar')
-      .find('.patient-sidebar__name')
-      .should('contain', 'Test Patient');
-
-    cy
-      .go('back');
-
-    cy
-      .get('@firstRow')
-      .find('.js-patient-sidebar-button')
-      .click();
-
-    cy
-      .get('@patientSidebar')
-      .find('.patient-sidebar__section')
-      .first()
-      .should('contain', 'Sex')
-      .should('contain', 'Unknown/Other')
-      .next()
-      .should('contain', 'Test Field Widget')
-      .should('contain', 'Test Field');
-
-    cy
-      .get('@patientSidebar')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('@patientSidebar')
-      .should('not.exist');
-
-    cy
-      .get('.worklist-list__toggle')
-      .contains('Flows')
-      .click()
-      .wait('@routeFlows');
-
-    cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
-      .find('.js-patient-sidebar-button')
-      .click();
-
-    cy
-      .get('@patientSidebar')
-      .find('.worklist-patient-sidebar__patient-name')
-      .should('contain', 'Test Patient');
-
-    cy
-      .get('[data-date-filter-region]')
-      .find('button.js-prev')
-      .click();
-
-    cy
-      .get('@patientSidebar')
-      .should('not.exist');
   });
 
   specify('empty flows view', function() {
@@ -4579,7 +4736,7 @@ context('worklist page', function() {
       .should('be.empty');
 
     cy
-      .get('.table-list__empty-list')
+      .get('.card-list__empty')
       .contains('No Flows');
   });
 
@@ -4598,7 +4755,7 @@ context('worklist page', function() {
       .should('be.empty');
 
     cy
-      .get('.table-list__empty-list')
+      .get('.card-list__empty')
       .contains('No Actions');
   });
 
@@ -4662,23 +4819,22 @@ context('worklist page', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 1 Action');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
-      .find('.table-list__meta')
+      .find('.work-card__state, .action-card__controls')
       .find('button:enabled')
       .should('have.length', 4);
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
-      .find('.table-list__meta')
+      .find('.action-card__controls, .flow-card__controls')
       .find('button')
       .should('not.exist');
   });
@@ -4753,7 +4909,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .as('firstRow')
       .find('[data-owner-region]')
@@ -4894,21 +5050,21 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .find('[data-owner-region]')
       .find('button');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .eq(1)
       .find('[data-owner-region]')
       .find('button');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .eq(2)
       .find('[data-owner-region]')
       .find('button')
@@ -4916,7 +5072,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .find('[data-owner-region]')
       .find('button')
@@ -5003,14 +5159,14 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .first()
       .find('[data-owner-region]')
       .find('button');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .eq(1)
       .find('[data-owner-region]')
       .find('button')
@@ -5018,7 +5174,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.worklist-list__item')
       .last()
       .find('[data-owner-region]')
       .find('button')
@@ -5081,14 +5237,10 @@ context('worklist page', function() {
       })
       .as('routeActionsError');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
+    expandFiltersSidebar();
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.list-filters')
       .find('[data-states-filters-region]')
       .find('[data-check-region]')
       .eq(0)
@@ -5096,7 +5248,7 @@ context('worklist page', function() {
       .wait('@routeActionsError');
 
     cy
-      .get('.list-page__filters')
+      .get('.list-page')
       .find('[data-filters-region]')
       .find('button')
       .should('not.contain', '2')
@@ -5125,14 +5277,10 @@ context('worklist page', function() {
       })
       .as('routeActions');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
+    expandFiltersSidebar();
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.list-filters')
       .find('[data-states-filters-region]')
       .find('[data-check-region]')
       .eq(0)

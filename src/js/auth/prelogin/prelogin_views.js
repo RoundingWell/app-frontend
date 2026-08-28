@@ -1,8 +1,8 @@
 import { View } from 'marionette';
 
-import PreloadRegion from 'js/regions/preload_region';
-
 import 'scss/modules/fill-window.scss';
+
+import PreloadRegion from 'js/regions/preload_region';
 
 import PreloginTemplate from './prelogin.hbs';
 import LoginPromptTemplate from './login-prompt.hbs';
@@ -58,7 +58,7 @@ const PreloaderView = View.extend({
       return;
     }
 
-    this.getRegion('content').startPreloader();
+    this.getRegion('content').startPreloader({ variant: 'generic' });
   },
 });
 

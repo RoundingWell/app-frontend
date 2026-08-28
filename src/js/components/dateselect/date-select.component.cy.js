@@ -17,6 +17,11 @@ context('DateSelect', function() {
 
     cy
       .get('@root')
+      .find('.date-select')
+      .should('not.have.class', 'is-partial');
+
+    cy
+      .get('@root')
       .find('.date-select__button')
       .should('contain', 'Select Year...')
       .click();
@@ -26,6 +31,11 @@ context('DateSelect', function() {
       .find('.js-picklist-item')
       .contains(pastDate.year())
       .click();
+
+    cy
+      .get('@root')
+      .find('.date-select')
+      .should('have.class', 'is-partial');
 
     cy
       .get('@root')
@@ -73,6 +83,11 @@ context('DateSelect', function() {
 
     cy
       .get('@root')
+      .find('.date-select')
+      .should('not.have.class', 'is-partial');
+
+    cy
+      .get('@root')
       .find('.js-cancel')
       .click();
 
@@ -80,6 +95,11 @@ context('DateSelect', function() {
       .get('@root')
       .find('.date-select__date')
       .should('not.exist');
+
+    cy
+      .get('@root')
+      .find('.date-select')
+      .should('not.have.class', 'is-partial');
 
     cy
       .get('@root')
@@ -158,6 +178,7 @@ context('DateSelect', function() {
       .find('.date-select__date')
       .should('contain', pastDate.format('MMM DD, YYYY'))
       .next()
-      .should('have.class', 'js-cancel');
+      .should('have.class', 'js-cancel')
+      .and('have.attr', 'aria-label', 'Clear date');
   });
 });

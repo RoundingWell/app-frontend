@@ -36,11 +36,11 @@ const picklistOptions = {
 const popWidth = null;
 
 const viewOptions = {
-  className: 'button-secondary',
+  className: 'button button--secondary',
   template: hbs`
     {{~#if icon}}{{fa icon.type icon.icon classes=icon.classes}}{{/if}}
-    {{~#if (lookup this attr)}}<span>{{lookup this attr}}</span>{{else}}
-      {{~#if defaultText}}<span>{{ defaultText }}</span>{{/if~}}
+    {{~#if (lookup this attr)}}<span class="button__value">{{lookup this attr}}</span>{{else}}
+      {{~#if defaultText}}<span class="button__value">{{ defaultText }}</span>{{/if~}}
     {{/if}}`,
   templateContext() {
     return {
@@ -63,8 +63,13 @@ const ViewClass = View.extend({
     this.model = state.selected;
   },
   attributes() {
+    const state = this.getOption('state');
+
     return {
-      disabled: this.getOption('state').isDisabled,
+      'aria-expanded': String(state.isActive),
+      'aria-haspopup': 'listbox',
+      'disabled': state.isDisabled,
+      'type': 'button',
     };
   },
   tagName: 'button',
@@ -109,7 +114,9 @@ export default Component.extend({
   },
   onChangeIsActive(state, isActive) {
     const view = this.getView();
-    view.$el.toggleClass('is-active', isActive);
+    view.$el
+      .attr('aria-expanded', String(isActive))
+      .toggleClass('is-active', isActive);
 
     if (!isActive) return;
 

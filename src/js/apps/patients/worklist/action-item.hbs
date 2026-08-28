@@ -1,42 +1,47 @@
-<div class="table-list__item-check js-no-click"><span data-check-region></span></div>
-<div>
-  <button class="button-secondary--compact js-patient-sidebar-button">
-    {{far "address-card"}}&#8203;
-  </button>
+<div class="worklist-list__check js-no-click"><span data-check-region></span></div>
+<div class="work-card__surface js-action-surface">
+  <div class="work-card__main">
+    <div class="work-card__heading">
+      <span class="work-card__state patient-list__state worklist-list__state js-no-click" data-state-region></span>
+      <div class="work-card__copy">
+        <div class="work-card__title-row">
+          <button class="patient-list__patient patient-list__patient--primary worklist-list__patient worklist-list__patient--action js-patient" type="button" aria-expanded="false" aria-controls="worklist-list-sidebar">{{ patient.first_name }} {{ patient.last_name }}</button>
+          <span class="work-card__separator">·</span>
+          <button class="work-card__title js-primary" type="button">{{ name }}&#8203;</button>
+          <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-details-region></span></span>
+          <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-form-region></span></span>
+        </div>
+        {{#if flowName}}
+        <div class="work-card__context">
+          <span class="worklist-list__patient-context worklist-list__patient-context--action">
+            <button class="worklist-list__flow-context js-flow" type="button">{{ flowName }}</button>{{#if patient.segment}} · {{/if}}{{#if patient.segment}}<span class="worklist-list__underline">{{ patient.segment }}</span>{{/if}}&#8203;
+          </span>
+        </div>
+        {{else}}{{#if patient.segment}}
+        <div class="work-card__context">
+          <span class="worklist-list__patient-context worklist-list__patient-context--action"><span class="worklist-list__underline">{{ patient.segment }}</span>&#8203;</span>
+        </div>
+        {{/if}}{{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="work-card__aside">
+    <div class="work-card__controls action-card__controls worklist-list__chips worklist-list__chips--action">
+      <span class="work-card__control worklist-list__search-helper">&#8203;{{ state }}&#8203;</span>
+      <span class="work-card__control action-card__owner"><span data-owner-region></span><span class="worklist-list__search-helper">&#8203;{{ owner }}&#8203;</span></span>
+      <span class="work-card__control button-group button-group--joined action-card__due worklist-list__end-control"><span data-due-date-region></span>{{~ remove_whitespace ~}}<span data-due-time-region></span></span>
+    </div>
+    <div class="work-card__meta action-card__meta">
+      <span class="work-card__timestamps">
+        <span>{{ @intl.patients.worklist.actionViews.added }} {{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</span>
+        <span>{{ @intl.patients.worklist.actionViews.updated }} {{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</span>
+      </span>
+      {{#if attachmentCount}}<span class="action-card__counts js-no-click">
+        <button class="action-card__count js-attachments" type="button" aria-label="{{formatMessage (intlGet "patients.shared.attachmentsLabel") itemCount=attachmentCount}}">{{far "paperclip"}}<span> {{ attachmentCount }}</span></button>
+        {{#if commentCount}}<button class="action-card__count js-comments" type="button" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></button>{{/if}}
+      </span>{{else}}{{#if commentCount}}<span class="action-card__counts js-no-click">
+        <button class="action-card__count js-comments" type="button" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></button>
+      </span>{{/if}}{{/if}}
+    </div>
+  </div>
 </div>
-<div class="js-patient">
-  {{#if patient.segment}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ patient.segment }}&#8203;</div>{{/if}}
-  <span class="u-text--overflow-two-lines worklist-list__patient-name">{{ patient.first_name }} {{ patient.last_name }}&#8203;</span>
-</div>
-<div class="worklist-list__action-icon">
-  {{#if options.icon}}
-    <span class="action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
-  {{else}}
-    {{far icon}}
-  {{/if}}
-</div>
-<div>
-  {{#if flowName}}<div class="u-text--overflow-two-lines worklist-list__overline">{{ flowName }}&#8203;</div>{{/if}}
-  <span class="u-text--overflow-two-lines">{{ name }}&#8203;</span>
-</div>
-<div class="table-list__meta">
-  <span class="worklist-list__details-icon" data-details-region></span>
-  <span><span data-state-region></span><span class="worklist-list__search-helper">&#8203;{{ state }}&#8203;</span></span>
-  <span><span data-owner-region></span><span class="worklist-list__search-helper">&#8203;{{ owner }}&#8203;</span></span>
-  <span>
-    <span data-due-date-region></span>{{~ remove_whitespace ~}}
-    <span data-due-time-region></span>
-  </span>
-  <span><span data-form-region></span>&#8203;</span>
-  {{#if hasAttachments}}
-    <span class="worklist__action-display-icon">{{far "paperclip"}}</span>
-  {{/if}}
-  {{#if commentCount}}
-    <span class="worklist__action-display-icon">{{far "comment"}}<span class="worklist__action-display-icon-text">{{commentCount}}</span></span>
-  {{/if}}
-</div>
-<div class="worklist-list__action-ts">
-  <div class="worklist-list__overline">{{formatDateTime created_at "TIME_OR_DAY"}}&#8203;</div>
-  <div>{{formatDateTime updated_at "TIME_OR_DAY"}}&#8203;</div>
-</div>
-

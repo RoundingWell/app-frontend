@@ -71,11 +71,11 @@ export default App.extend({
       Radio.request('entities', 'fetch:teams:collection'),
       Radio.request('entities', 'fetch:workspaces:collection'),
       Radio.request('entities', 'fetch:settings:collection'),
-      Radio.request('entities', 'fetch:sidebars:collection'),
+      Radio.request('entities', 'fetch:panels:collection'),
       Radio.request('entities', 'fetch:widgets:collection'),
     ];
   },
-  onStart(options, currentUser, roles, teams, workspaces, settings, sidebars, widgets) {
+  onStart(options, currentUser, roles, teams, workspaces, settings, panels, widgets) {
     this.currentUser = currentUser;
     this.roles = roles;
     this.teams = teams;
@@ -83,7 +83,7 @@ export default App.extend({
 
     new SettingsService({ settings });
 
-    new SidebarsService({ sidebars });
+    new SidebarsService({ panels });
 
     new WidgetsService({ widgets });
 

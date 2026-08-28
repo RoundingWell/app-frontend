@@ -6,7 +6,8 @@ import formatDate from 'helpers/format-date';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
 import { getRelationship } from 'helpers/json-api';
 
-import { getAction, getActions } from 'support/api/actions';
+import { getAction, getActions, longActionName } from 'support/api/actions';
+import { getComment } from 'support/api/comments';
 import { getPatient } from 'support/api/patients';
 import { getFlow } from 'support/api/flows';
 import { stateTodo, stateInProgress, stateDone } from 'support/api/states';
@@ -44,6 +45,20 @@ const testFlow = getFlow({
 
 const STATE_VERSION = 'v6';
 
+function expandFiltersSidebar() {
+  cy.get('.list-page').then($layout => {
+    if ($layout.hasClass('is-filters-collapsed')) {
+      cy.wrap($layout).find('[data-filters-region] button').click();
+    }
+  });
+
+  cy.get('[data-states-filters-region] .list-filters__section').then($section => {
+    if ($section.hasClass('is-collapsed')) {
+      cy.wrap($section).find('.list-filters__section-button').click();
+    }
+  });
+}
+
 context('schedule page', function() {
   specify('display schedule', function() {
     const testActions = [
@@ -62,13 +77,13 @@ context('schedule page', function() {
       }),
       getAction({
         attributes: {
-          name: 'Outreach Planning: Review Referral, Medical Chart Review, Targeting Interventions, and other tasks',
+          name: longActionName,
           due_date: testDate(),
           due_time: '06:45:00',
         },
         relationships: {
           patient: getRelationship(testPatient2),
-          form: getRelationship(),
+          form: getRelationship(testForm),
           flow: getRelationship(testFlow),
           state: getRelationship(stateInProgress),
         },
@@ -100,6 +115,19 @@ context('schedule page', function() {
         },
       }),
     ];
+
+    const restoreSchedule = () => {
+      cy
+        .visit('/schedule')
+        .wait('@routeActions');
+
+      cy
+        .get('.schedule-list__list')
+        .as('scheduleList')
+        .find('.schedule-list__list-row .schedule-list__day-list')
+        .first()
+        .as('actionList');
+    };
 
     const testTime = dayjs().hour(12).minute(0).valueOf();
 
@@ -144,11 +172,12 @@ context('schedule page', function() {
 
         return fx;
       })
-      .routeAction(fx => {
-        fx.data = getAction(testActions[0]);
+      .intercept('GET', '/api/actions/*', req => {
+        const action = testActions.find(({ id }) => req.url.includes(id));
 
-        return fx;
+        req.reply({ body: { data: getAction(action), included: [] } });
       })
+      .as('routeAction')
       .routePatient(fx => {
         fx.data = testPatient1;
 
@@ -184,7 +213,7 @@ context('schedule page', function() {
       .should('contain', formatDate(testDate(), 'MMM YYYY'));
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .last()
@@ -198,7 +227,9 @@ context('schedule page', function() {
       .find('.schedule-list__date.is-today')
       .should('contain', formatDate(testDate(), 'D'))
       .next()
-      .should('contain', formatDate(testDate(), 'MMM, ddd'));
+      .should('contain', formatDate(testDate(), 'MMM, ddd'))
+      .and('have.class', 'is-today')
+      .and('have.css', 'color', 'rgb(5, 130, 218)');
 
     cy
       .get('@scheduleList')
@@ -215,7 +246,7 @@ context('schedule page', function() {
       .find('.schedule-list__day-list-row')
       .first()
       .should('contain', '6:45 AM')
-      .should('contain', 'Outreach Planning')
+      .should('contain', longActionName)
       .find('.is-overdue')
       .parents('.schedule-list__day-list-row')
       .next()
@@ -228,25 +259,19 @@ context('schedule page', function() {
       .eq(2)
       .should('contain', '2:00 PM')
       .should('contain', 'Third Action')
-      .click();
+      .find('.js-action-surface')
+      .click(5, 5);
 
     cy
       .url()
-      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[3].id }`)
-      .go('back');
+      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[3].id }`);
+
+    restoreSchedule();
 
     cy
-      .get('@actionList')
-      .find('.schedule-list__day-list-row')
-      .last()
-      .find('.js-patient-sidebar-button')
-      .click()
-      .wait('@routeWorkspacePatient');
-
-    cy
-      .get('.app-frame__sidebar .worklist-patient-sidebar')
-      .find('.worklist-patient-sidebar__patient-name')
-      .should('contain', 'Test Patient');
+      .get('.patient-list-page__all-filters-button')
+      .find('.fa-bars-filter')
+      .should('be.visible');
 
     cy
       .get('[data-owner-filter-region]')
@@ -257,10 +282,6 @@ context('schedule page', function() {
       .find('.picklist__group')
       .first()
       .click();
-
-    cy
-      .get('.app-frame__sidebar .sidebar')
-      .should('not.exist');
 
     cy
       .get('[data-owner-filter-region]')
@@ -282,9 +303,180 @@ context('schedule page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/workflow`)
-      .go('back');
+      .wait('@routePatient');
+
+    cy
+      .location('pathname')
+      .should('contain', '/schedule');
+
+    cy
+      .get('.list-filters')
+      .should('not.exist');
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('[data-owner-filter-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .first()
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.schedule-list__list-row .schedule-list__day-list')
+      .first()
+      .as('actionList');
+
+    cy.viewport(640, 720);
+
+    cy
+      .get('.list-filters')
+      .should('not.be.visible');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .click();
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.js-patient')
+      .click();
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy.viewport(1200, 720);
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.js-patient')
+      .click();
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.js-patient')
+      .should('have.class', 'patient-list__patient--selected');
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.js-patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .click();
+
+    cy
+      .get('.list-page')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.js-patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('.list-page')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.list-filters')
+      .should('not.be.visible');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .click();
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.js-patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.js-patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient')
+      .find('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    restoreSchedule();
 
     cy
       .get('@scheduleList')
@@ -293,14 +485,39 @@ context('schedule page', function() {
       .find('.schedule-list__date')
       .should('contain', formatDate(testDate(), 'D'))
       .parents('.schedule-list__list-row')
+      .contains('Last Action')
+      .parents('.schedule-list__day-list-row')
       .find('.js-form')
       .click();
 
     cy
-      .url()
-      .should('contain', `patient/${ testPatient1.id }/form/${ testForm.id }/action/${ testActions[0].id }`)
-      .wait('@routeFormActionFields')
-      .go('back');
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/action/${ testActions[0].id }`)
+      .wait('@routeFormActionFields');
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    restoreSchedule();
+
+    cy
+      .get('@actionList')
+      .contains(longActionName)
+      .parents('.schedule-list__day-list-row')
+      .find('.js-form')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient2.id }/flow/${ testFlow.id }/action/${ testActions[1].id }`)
+      .wait('@routeFormActionFields');
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    restoreSchedule();
 
     cy
       .get('@scheduleList')
@@ -312,8 +529,9 @@ context('schedule page', function() {
 
     cy
       .url()
-      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[0].id }`)
-      .go('back');
+      .should('contain', `patient/${ testPatient1.id }/action/${ testActions[0].id }`);
+
+    restoreSchedule();
 
     cy
       .routeAction(fx => {
@@ -327,18 +545,20 @@ context('schedule page', function() {
       .find('.schedule-list__day-list-row')
       .first()
       .find('.js-action')
-      .click();
+      .focus()
+      .typeEnter();
 
     cy
       .url()
-      .should('contain', `flow/${ testFlow.id }/action/${ testActions[1].id }`)
-      .go('back');
+      .should('contain', `flow/${ testFlow.id }/action/${ testActions[1].id }`);
+
+    restoreSchedule();
 
     cy
       .get('@actionList')
       .find('.schedule-list__day-list-row')
       .last()
-      .find('[data-details-region] div')
+      .find('[data-details-region] button')
       .trigger('pointerover');
 
     cy
@@ -398,10 +618,12 @@ context('schedule page', function() {
     cy
       .get('[data-count-region]')
       .should('contain', 'Showing 50 of 1,000 Actions.')
-      .should('contain', 'Try narrowing your filters.');
+      .should('contain', 'Try narrowing your filters.')
+      .find('span')
+      .should('have.text', 'Showing 50 of 1,000 Actions. Try narrowing your filters.');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .as('listSearch')
       .type('First Action');
@@ -761,7 +983,349 @@ context('schedule page', function() {
       .should('be.empty');
   });
 
+  specify('responsive card layout and accessible controls', function() {
+    cy.viewport(1200, 720);
+
+    const testActions = [
+      getAction({
+        attributes: {
+          name: 'Follow-up - 2nd Attempt',
+          details: 'Review the referral and prepare the next outreach step.',
+          due_date: testDate(),
+          due_time: '06:45:00',
+        },
+        relationships: {
+          comments: getRelationship([getComment()]),
+          patient: getRelationship(testPatient1),
+          flow: getRelationship(testFlow),
+          state: getRelationship(stateInProgress),
+        },
+      }),
+      getAction({
+        attributes: {
+          details: 'Confirm the final disposition before submitting the form.',
+          name: longActionName,
+          due_date: testDate(),
+          due_time: '10:00:00',
+        },
+        relationships: {
+          patient: getRelationship(testPatient2),
+          form: getRelationship(testForm),
+          flow: getRelationship(testFlow),
+          state: getRelationship(stateTodo),
+        },
+      }),
+    ];
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = testPatient1;
+
+        return fx;
+      })
+      .routeWorkspacePatient(fx => {
+        fx.data = getWorkspacePatient({
+          id: uuidv5(testPatient1.id, workspaceOne.id),
+        });
+
+        return fx;
+      })
+      .routeActions(fx => {
+        fx.data = testActions;
+        fx.included.push(testPatient1, testPatient2, testFlow);
+
+        return fx;
+      })
+      .visit('/schedule')
+      .wait('@routeActions');
+
+    cy
+      .get('.schedule-list-page')
+      .as('layout');
+
+    cy
+      .get('.schedule-list__day-list-row')
+      .should('have.length', 2);
+
+    cy
+      .get('[data-select-all-region] button')
+      .should('not.be.disabled');
+
+    cy
+      .get('[data-filters-region] button')
+      .should('have.attr', 'aria-expanded', 'true')
+      .then($button => {
+        $button.trigger('click');
+      });
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('[data-filters-region] button')
+      .as('filtersButton')
+      .should('have.attr', 'aria-expanded', 'false');
+
+    cy
+      .get('.schedule-list__day-list')
+      .find('.schedule-list__day-list-row')
+      .as('desktopRows')
+      .should('have.length', 2);
+
+    cy
+      .get('@desktopRows')
+      .first()
+      .find('.schedule-list__action-state')
+      .should('have.class', 'action-icon--black')
+      .and('have.attr', 'role', 'img')
+      .and('have.attr', 'aria-label', 'State: In Progress')
+      .find('.fa-circle-dot')
+      .should('exist');
+
+    cy
+      .get('@desktopRows')
+      .first()
+      .find('.schedule-list__comments')
+      .should('contain', '1')
+      .and('have.attr', 'role', 'img')
+      .and('have.attr', 'aria-label', '1 comment');
+
+    cy
+      .get('@desktopRows')
+      .last()
+      .find('.schedule-list__comments')
+      .should('not.exist');
+
+    cy.viewport(721, 720);
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized');
+
+    cy
+      .get('.schedule-list__day-list')
+      .as('dayList')
+      .find('.schedule-list__day-list-row')
+      .as('rows')
+      .should('have.length', 2);
+
+    cy
+      .get('[data-select-all-region] button')
+      .should('have.attr', 'role', 'checkbox')
+      .and('have.attr', 'aria-label', 'Select all actions');
+
+    cy
+      .get('@rows')
+      .last()
+      .find('.js-form')
+      .should('match', 'button')
+      .and('have.attr', 'aria-label', 'Open form');
+
+    cy
+      .get('.schedule-list__list-row')
+      .first()
+      .then($group => {
+        expect($group.find('.schedule-list__date')).to.have.class('is-today');
+      });
+
+    cy
+      .get('@rows')
+      .first()
+      .find('.action-details-tooltip')
+      .should('match', 'button')
+      .and('have.attr', 'aria-label', 'View action details')
+      .invoke('attr', 'aria-describedby')
+      .then(tooltipId => {
+        cy.get(`[aria-describedby="${ tooltipId }"]`).focus();
+        cy.get(`#${ tooltipId }`).should('have.attr', 'role', 'tooltip');
+      });
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Review the referral and prepare the next outreach step.');
+
+    cy.viewport(640, 720);
+
+    cy.window().should(win => {
+      expect(win.matchMedia('(width <= 640px)').matches).to.equal(true);
+    });
+
+    cy.get('[data-filters-region] button').click();
+
+    cy
+      .get('@layout')
+      .should('not.have.class', 'is-filters-collapsed')
+      .find('.patient-list-page__sidebar')
+      .should('be.visible')
+      .and('contain', 'Filters');
+
+    cy
+      .get('[data-filters-region] button')
+      .should('have.attr', 'aria-expanded', 'true');
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .click();
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy.viewport(1200, 720);
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy.viewport(1100, 720);
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy.viewport(1043, 720);
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy.viewport(641, 720);
+
+    cy
+      .get('[data-filters-region] button')
+      .click();
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .should('not.be.visible');
+
+    cy
+      .get('[data-filters-region] button')
+      .click();
+
+    cy.viewport(640, 720);
+
+    cy
+      .get('[data-filters-region] button')
+      .click();
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .should('be.visible')
+      .click();
+
+    cy.viewport(721, 720);
+
+    cy.viewport(390, 720);
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized');
+
+    cy
+      .get('.list-page__topbar')
+      .should('be.visible');
+
+    cy
+      .get('@rows')
+      .first()
+      .should('be.visible');
+
+    cy
+      .get('[data-filters-region] button')
+      .click();
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .should('be.focused')
+      .type('{esc}');
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy
+      .get('[data-filters-region] button')
+      .should('be.focused')
+      .and('have.attr', 'aria-expanded', 'false');
+
+    cy.viewport(640, 720);
+
+    cy.window().should(win => {
+      expect(win.matchMedia('(width <= 640px)').matches).to.equal(true);
+    });
+
+    cy
+      .get('@rows')
+      .first()
+      .find('.js-patient')
+      .as('patientSidebarTrigger')
+      .click();
+
+    cy
+      .wait('@routePatient')
+      .get('.patient-sidebar')
+      .should('be.visible');
+
+    cy
+      .get('[data-filters-region] button')
+      .should('have.attr', 'aria-expanded', 'false');
+
+    cy
+      .get('.js-close-sidebar-drawer')
+      .should('not.be.visible');
+
+    cy.viewport(1200, 720);
+
+    cy
+      .get('@layout')
+      .should('not.have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('@rows')
+      .first()
+      .find('.js-patient')
+      .should('not.have.class', 'patient-list__patient--selected');
+
+    cy
+      .get('@patientSidebarTrigger')
+      .should('be.focused');
+
+    cy
+      .get('.schedule-list__day-list-row')
+      .first()
+      .find('.js-select')
+      .should('have.attr', 'role', 'checkbox')
+      .and('have.attr', 'aria-checked', 'false')
+      .and('have.attr', 'aria-label', 'Select action')
+      .click();
+
+    cy
+      .get('.schedule-list__day-list-row')
+      .first()
+      .find('.js-select')
+      .should('have.attr', 'aria-checked', 'true')
+      .and('have.attr', 'aria-label', 'Deselect action')
+      .click();
+  });
+
   specify('bulk edit', function() {
+    cy.viewport(1100, 720);
+
     const testActions = _.times(20, index => {
       return getAction({
         relationships: {
@@ -799,13 +1363,82 @@ context('schedule page', function() {
       .wait('@routeActions');
 
     cy
-      .get('[data-filters-region]')
-      .as('filterRegion')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 1 Action');
 
     cy
-      .get('.table-list__list')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
+      .should('be.visible');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-state-region] button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('be.visible');
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .find('.js-tomorrow')
+      .click();
+
+    cy
+      .get('[data-filters-region] button')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .should('be.visible');
+
+    cy
+      .get('[data-filters-region] button')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .should('be.visible');
+
+    cy
+      .get('.schedule-list__day-list-row:not(.is-selected)')
+      .first()
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .should('be.visible')
+      .find('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Actions');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .should('contain', formatDate(testDateAdd(1), 'SHORT'));
+
+    cy
+      .get('.patient-list-page__summary')
+      .should('not.be.visible');
+
+    cy
+      .get('.schedule-list__day-list-row.is-selected')
+      .last()
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('.schedule-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 1)
       .first()
@@ -813,7 +1446,7 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 0);
 
@@ -834,23 +1467,22 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('.js-bulk-edit')
-      .next()
-      .should('contain', 'Cancel')
+      .get('.bulk-edit-inline')
+      .find('.js-cancel')
       .click();
 
     cy
-      .get('.js-bulk-edit')
+      .get('.bulk-edit-inline')
       .should('not.exist');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__list')
+      .find('.schedule-list__list')
       .find('.fa-square-check')
       .should('have.length', 0);
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 0);
 
@@ -864,24 +1496,19 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__list')
+      .find('.schedule-list__list')
       .find('.fa-square-check')
       .should('have.length', 20);
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .find('.schedule-list__list-row .is-selected')
       .should('have.length', 20);
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('.modal--sidebar')
-      .as('bulkEditSidebar')
-      .find('.sidebar__heading')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
+      .find('.bulk-edit-inline__heading')
       .should('contain', 'Edit 20 Actions');
 
     cy
@@ -899,7 +1526,7 @@ context('schedule page', function() {
       .as('patchAction');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .click();
 
@@ -909,8 +1536,8 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait('@patchAction')
       .wait('@routeActions');
@@ -921,7 +1548,7 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__list .fa-square')
+      .find('.schedule-list__list .fa-square')
       .should('have.length', 20);
 
     cy
@@ -929,12 +1556,7 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('@filterRegion')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region]')
       .click();
 
@@ -945,13 +1567,19 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-apply-owner')
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region]')
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Actions + flows')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait('@patchFlowOwner')
       .wait('@patchAction');
@@ -962,7 +1590,7 @@ context('schedule page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__list .fa-square')
+      .find('.schedule-list__list .fa-square')
       .should('have.length', 20);
 
     cy
@@ -994,13 +1622,8 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('@filterRegion')
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait('@patchActionFail');
 
@@ -1024,7 +1647,7 @@ context('schedule page', function() {
       .should('be.empty');
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .should('contain', 'No Scheduled Actions');
 
     cy
@@ -1118,17 +1741,17 @@ context('schedule page', function() {
       .should('contain', '20 Actions');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .as('listSearch')
-      .should('have.attr', 'placeholder', 'Find in List...')
+      .should('have.attr', 'placeholder', 'Find in List…')
       .focus()
       .type('abc')
       .next()
       .should('have.class', 'js-clear');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .list-search__container')
       .should('have.class', 'is-applied');
 
@@ -1139,7 +1762,7 @@ context('schedule page', function() {
     cy
       .get('.schedule-list__list')
       .as('scheduleList')
-      .find('.table-list__empty-list')
+      .find('.schedule-list__empty')
       .should('contain', 'No results match your Find in List search');
 
     cy
@@ -1148,7 +1771,7 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .list-search__container')
       .should('not.have.class', 'is-applied');
 
@@ -1208,8 +1831,7 @@ context('schedule page', function() {
       .find('.fa-square-check');
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 4 Actions');
 
     cy
@@ -1222,9 +1844,12 @@ context('schedule page', function() {
       .find('.fa-square-minus');
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 4 Actions');
+
+    cy
+      .get('.patient-list-page__summary')
+      .should('not.be.visible');
 
     cy
       .get('[data-select-all-region]')
@@ -1250,9 +1875,13 @@ context('schedule page', function() {
       .find('.fa-square-check');
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 4 Actions');
+
+    cy
+      .get('.bulk-edit-inline')
+      .find('.js-cancel')
+      .click();
 
     cy
       .get('@listSearch')
@@ -1343,7 +1972,7 @@ context('schedule page', function() {
       .should('have.attr', 'value', 'In Progress');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .list-search__container')
       .should('have.class', 'is-applied');
   });
@@ -1391,7 +2020,7 @@ context('schedule page', function() {
 
     cy
       .tick(60) // tick past debounce
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .first()
@@ -1417,13 +2046,11 @@ context('schedule page', function() {
       .should('have.length', 6);
 
     cy
-      .get('[data-filters-region]')
-      .as('filterRegion')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 6 Actions');
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -1443,13 +2070,11 @@ context('schedule page', function() {
       .should('have.length', 6);
 
     cy
-      .get('[data-filters-region]')
-      .as('filterRegion')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 6 Actions');
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -1474,7 +2099,7 @@ context('schedule page', function() {
       .should('have.length', 1);
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -1484,7 +2109,7 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -1499,7 +2124,7 @@ context('schedule page', function() {
       .should('have.length', 1);
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -1509,13 +2134,13 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .focus()
       .type('abcd');
 
     cy
-      .get('.list-page__header')
+      .get('.list-page')
       .find('[data-search-region] .js-input')
       .next()
       .click();
@@ -1535,7 +2160,7 @@ context('schedule page', function() {
       .should('have.length', 2);
 
     cy
-      .get('[data-filters-region]')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
@@ -1635,7 +2260,7 @@ context('schedule page', function() {
       .as('patchAction');
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .first()
@@ -1646,7 +2271,7 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .as('scheduleList')
       .find('.schedule-list__list-row')
       .last()
@@ -1657,14 +2282,12 @@ context('schedule page', function() {
       .click({ shiftKey: true });
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .should('contain', 'Edit 2 Actions')
-      .click();
+      .get('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Actions');
 
     cy
-      .get('.modal--sidebar')
-      .as('sidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-state-region]')
       .click();
 
@@ -1675,8 +2298,8 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('@sidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait(['@patchAction', '@patchAction']);
 
@@ -1689,14 +2312,12 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('[data-filters-region]')
-      .find('.js-bulk-edit')
-      .should('contain', 'Edit 2 Actions')
-      .click();
+      .get('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Actions');
 
     cy
-      .get('.modal--sidebar')
-      .as('sidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-owner-region]')
       .click();
 
@@ -1707,8 +2328,8 @@ context('schedule page', function() {
       .click();
 
     cy
-      .get('@sidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait(['@patchAction', '@patchAction']);
 
@@ -1781,7 +2402,7 @@ context('schedule page', function() {
       .visit('/schedule');
 
     cy
-      .get('.table-list__list')
+      .get('.schedule-list__list')
       .find('.schedule-list__list-row')
       .first()
       .find('.schedule-list__day-list-row')
@@ -1854,14 +2475,10 @@ context('schedule page', function() {
       })
       .as('routeActionsError');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
+    expandFiltersSidebar();
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.list-filters')
       .find('[data-states-filters-region]')
       .find('[data-check-region]')
       .eq(0)
@@ -1869,7 +2486,7 @@ context('schedule page', function() {
       .wait('@routeActionsError');
 
     cy
-      .get('.list-page__filters')
+      .get('.list-page')
       .find('[data-filters-region]')
       .find('button')
       .should('not.contain', '2')
@@ -1898,14 +2515,10 @@ context('schedule page', function() {
       })
       .as('routeActions');
 
-    cy
-      .get('.list-page__filters')
-      .find('[data-filters-region]')
-      .find('button')
-      .click();
+    expandFiltersSidebar();
 
     cy
-      .get('.app-frame__sidebar .sidebar')
+      .get('.list-filters')
       .find('[data-states-filters-region]')
       .find('[data-check-region]')
       .eq(0)

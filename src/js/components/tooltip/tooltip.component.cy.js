@@ -19,7 +19,7 @@ context('Tooltip', function() {
   ]);
 
   const ButtonView = View.extend({
-    template: hbs`<button class="button--blue" style="position:absolute; width:10%; height:10%; {{ style }}">{{ id }}</button>`,
+    template: hbs`<button class="button button--primary" style="position:absolute; width:10%; height:10%; {{ style }}">{{ id }}</button>`,
     ui: {
       'button': 'button',
     },
@@ -124,7 +124,7 @@ context('Tooltip', function() {
       attributes: {
         style: 'margin: 20px;',
       },
-      className: 'button--blue',
+      className: 'button button--primary',
       template: hbs`Click Me`,
       triggers: {
         'click': 'click',

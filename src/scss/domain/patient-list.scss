@@ -1,0 +1,76 @@
+.patient-list__state {
+  --patient-readonly-status-align-items: center;
+  --patient-readonly-status-justify-content: center;
+  --patient-readonly-status-min-height: 28px;
+  --patient-readonly-status-padding: 0;
+  --patient-readonly-status-width: 28px;
+}
+
+.patient-list__patient {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: inherit;
+  padding: 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.patient-list__patient--primary {
+  color: var(--color-text-secondary);
+  flex: 0 0 auto;
+  font-size: 14px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.patient-list__patient:hover {
+  color: var(--color-interactive);
+}
+
+.patient-list__patient--selected {
+  background: var(--color-surface-selected);
+  border-radius: var(--space-1);
+  color: var(--color-text);
+  font-weight: 500;
+  margin-inline: -4px;
+  padding: 0 4px;
+}
+
+.patient-list__flow-progress {
+  --progress-bar-border-radius: 16px;
+  --progress-bar-display: block;
+  --progress-bar-height: 24px;
+  --progress-bar-track-color: var(--color-surface);
+  --progress-bar-width: 100%;
+
+  color: var(--color-text-subtle);
+  display: block;
+  font-size: 11px;
+  height: 24px;
+  justify-self: end;
+  letter-spacing: 0.06px;
+  line-height: 16px;
+  max-width: 132px;
+  min-width: 0;
+  position: relative;
+  text-transform: uppercase;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.patient-list__flow-progress-label {
+  align-items: center;
+  color: var(--color-text);
+  display: flex;
+  font-weight: 600;
+  inset: 0;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0 8px;
+  pointer-events: none;
+  position: absolute;
+  text-overflow: ellipsis;
+}

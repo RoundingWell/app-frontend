@@ -1,10 +1,10 @@
-<h1 class="program-flow__name">{{fas "folder-open"}} {{ name }}</h1>
+<h1 class="program-flow__name">{{far "folder-open"}} {{ name }}</h1>
 <div>
   <p class="program-flow__details">
   {{#if details}}
     {{ details }}
   {{ else }}
-    <button class="program-flow__meta button-secondary">{{far "pen-to-square"}} Add Details</button>
+    <button class="program-flow__meta button button--secondary" type="button">{{far "pen-to-square"}} {{ @intl.programs.program.flow.flowViews.addDetailsBtn }}</button>
   {{/if}}
   </p>{{~ remove_whitespace ~}}
   <span class="program-flow__meta" data-behavior-region></span>{{~ remove_whitespace ~}}

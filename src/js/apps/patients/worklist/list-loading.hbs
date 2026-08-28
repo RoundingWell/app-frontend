@@ -1,0 +1,34 @@
+{{#each items}}
+  <div class="worklist-list__skeleton-item" aria-hidden="true">
+    <div class="worklist-list__skeleton-check-column">
+      <span class="skeleton-loading__shape worklist-list__skeleton-check"></span>
+    </div>
+    <div class="worklist-list__skeleton-card">
+      <div class="worklist-list__skeleton-main">
+        <div class="worklist-list__skeleton-identity">
+          <span class="skeleton-loading__shape worklist-list__skeleton-state"></span>
+          <div class="worklist-list__skeleton-copy">
+            <div class="worklist-list__skeleton-primary">
+              <span class="skeleton-loading__shape worklist-list__skeleton-patient"></span>
+              <span class="skeleton-loading__shape worklist-list__skeleton-title"></span>
+              {{#unless ../isFlowList}}<span class="skeleton-loading__shape worklist-list__skeleton-inline-icon"></span>{{/unless}}
+            </div>
+            <div class="worklist-list__skeleton-context">
+              <span class="skeleton-loading__shape worklist-list__skeleton-context-line"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="worklist-list__skeleton-aside">
+        <div class="worklist-list__skeleton-chips{{#if ../isFlowList}} worklist-list__skeleton-chips--flow{{/if}}">
+          <span class="skeleton-loading__shape worklist-list__skeleton-chip{{#if ../isFlowList}} worklist-list__skeleton-chip--flow{{/if}}"></span>
+          <span class="skeleton-loading__shape worklist-list__skeleton-chip worklist-list__skeleton-chip--end{{#if ../isFlowList}} worklist-list__skeleton-chip--flow{{/if}}"></span>
+        </div>
+        <div class="worklist-list__skeleton-dates">
+          <span class="skeleton-loading__shape worklist-list__skeleton-date"></span>
+          <span class="skeleton-loading__shape worklist-list__skeleton-date"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+{{/each}}

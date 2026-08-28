@@ -24,6 +24,9 @@ context('Noncontext Form', function() {
   beforeEach(function() {
     cy
       .routeWorkspacePatient()
+      .routeActionActivity()
+      .routeActionComments()
+      .routeActionFiles()
       .routesForDefault();
   });
 
@@ -90,7 +93,7 @@ context('Noncontext Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
       .wait('@routePatient')
@@ -147,7 +150,7 @@ context('Noncontext Form', function() {
 
         return fx;
       })
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
       .wait('@routePatient')
@@ -208,7 +211,7 @@ context('Noncontext Form', function() {
       .routeLatestFormResponse()
       .routeActionActivity()
       .routePatient()
-      .visit(`/patient/${ routePatientId }/form/${ testForm.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
       .wait('@routeFormByAction')
       .wait('@routeAction')
       .wait('@routePatient')
@@ -356,7 +359,6 @@ context('Noncontext Form', function() {
       .its('request.body.data')
       .then(data => {
         expect(data.id).to.equal(getPatientFieldId(testPatient.id, 'foo'));
-        expect(data.attributes.name).to.equal('foo');
         expect(data.attributes.value).to.deep.equal(['one', 'two']);
       });
 
@@ -460,8 +462,9 @@ context('Noncontext Form', function() {
         return fx;
       });
 
-    cy
-      .go('back');
+    cy.getRadio(Radio => {
+      Radio.trigger('event-router', 'patient:form', testPatient.id, testForm.id);
+    });
 
     cy
       .wait('@routeFormFields')

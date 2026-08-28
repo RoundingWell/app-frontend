@@ -1,9 +1,9 @@
 .dialer-component__phone-icon {
   color: color(blue);
+}
 
-  .picklist__item.is-highlighted & {
-    color: #{$white};
-  }
+.dialer-component__phone-number {
+  white-space: nowrap;
 }
 
 .dialer-component__phone-label {
@@ -14,23 +14,10 @@
 
   .dialer-component__phone-label-call {
     align-items: center;
-    display: none;
 
     .icon {
       font-size: 12px;
       margin: 0 0 2px 4px;
-    }
-  }
-
-  .picklist__item.is-highlighted & {
-    color: #{$white};
-
-    .dialer-component__phone-label-default {
-      display: none;
-    }
-
-    .dialer-component__phone-label-call {
-      display: flex;
     }
   }
 }

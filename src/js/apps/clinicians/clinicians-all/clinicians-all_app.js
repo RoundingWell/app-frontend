@@ -30,7 +30,7 @@ export default SubRouterApp.extend({
   },
   onBeforeStart() {
     this.showView(new LayoutView());
-    this.getRegion('list').startPreloader();
+    this.getRegion('list').startPreloader({ variant: 'generic' });
 
     this.setState({ searchQuery: this.currentSearchQuery });
 
@@ -90,7 +90,6 @@ export default SubRouterApp.extend({
   _getNewClinician() {
     return Radio.request('entities', 'clinicians:model', {
       enabled: true,
-      disabled_at: null,
     });
   },
   showAddModal() {

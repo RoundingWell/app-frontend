@@ -5,8 +5,13 @@ import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
 const TYPE = 'flows';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'details',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   messages: {
     OwnerChanged({ owner, attributes }) {
       this.set({ _owner: owner, ...attributes });

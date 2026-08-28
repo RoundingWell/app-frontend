@@ -51,6 +51,25 @@ export default {
 
     return this.parseRelationships(modelData, data.relationships);
   },
+  removeFEOnly(attrs) {
+    // Removes JSON:API identity and frontend _fields for POST/PATCHes
+    return pick(attrs, function(value, key) {
+      return key !== 'id' && key !== 'type' && /^[^_]/.test(key);
+    });
+  },
+  toJSONApi(attributes = this.attributes) {
+    attributes = this.removeFEOnly(attributes);
+
+    if (this.writableAttributes) {
+      attributes = pick(attributes, this.writableAttributes);
+    }
+
+    return {
+      id: this.id,
+      type: this.type,
+      attributes,
+    };
+  },
   toRelation(entity) {
     if (isUndefined(entity)) return;
 

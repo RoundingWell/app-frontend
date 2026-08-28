@@ -3,6 +3,7 @@ import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import handleErrors from 'js/utils/handle-errors';
+import localStore from 'js/utils/local-store';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
@@ -25,7 +26,6 @@ export default SubRouterApp.extend({
       'patient:flow': this.showFlow,
       'patient:flow:action': this.showFlowAction,
       'patient:form': this.showPatientForm,
-      'patient:form:action': this.showActionForm,
     };
   },
 
@@ -39,6 +39,7 @@ export default SubRouterApp.extend({
 
   currentAppOptions() {
     return {
+      layoutState: this.layoutState,
       region: this.getRegion('content'),
       patient: this.patient,
       patientId: this.patient.id,
@@ -46,7 +47,11 @@ export default SubRouterApp.extend({
   },
 
   onBeforeStart() {
-    this.getRegion().startPreloader();
+    this.getRegion().startPreloader({ variant: 'generic' });
+  },
+
+  onBeforeStop() {
+    Radio.request('nav', 'setMinimized', false);
   },
 
   beforeStart() {
@@ -69,15 +74,31 @@ export default SubRouterApp.extend({
   onStart(options, patient) {
     this.patient = patient;
     this.contextTrail = new Backbone.Model();
+    this.currentUser = Radio.request('bootstrap', 'currentUser');
+    this.sidebarPreferenceHidden = !!localStore.get(this.getSidebarPreferenceKey());
+    this.layoutState = new Backbone.Model({
+      formExpanded: false,
+      sidebarHidden: this.sidebarPreferenceHidden,
+    });
+    this.listenTo(this.layoutState, 'change:formExpanded', this.onChangeFormExpanded);
 
-    this.setView(new LayoutView({
+    const layout = new LayoutView({
       model: patient,
       contextTrail: this.contextTrail,
-    }));
+      layoutState: this.layoutState,
+    });
 
+    this.listenTo(layout, {
+      'change:sidebar-layout': this.onChangeSidebarLayout,
+      'click:sidebarButton': this.togglePatientSidebar,
+      'close:sidebar-drawer': this.closePatientSidebarDrawer,
+    });
+    this.setView(layout);
+
+    this.showView();
+    this.renderFormExpandedState();
     this.showPatientSidebar();
     this.startCurrentRoute();
-    this.showView();
   },
 
   showWorkflow() {
@@ -88,37 +109,95 @@ export default SubRouterApp.extend({
     this.startContent('workflow', { status: 'done' });
   },
 
-  showPatientAction(patientId, actionId) {
-    this.startContent('action', { actionId });
+  showPatientAction(patientId, actionId, entryTarget) {
+    this.startContent('action', { actionId, entryTarget });
   },
 
   showFlow(patientId, flowId) {
     this.startContent('flow', { flowId });
   },
 
-  showFlowAction(patientId, flowId, actionId) {
-    this.startContent('action', { flowId, actionId });
+  showFlowAction(patientId, flowId, actionId, entryTarget) {
+    this.startContent('action', { flowId, actionId, entryTarget });
   },
 
   showPatientForm(patientId, formId) {
     this.startContent('form', { formId });
   },
 
-  showActionForm(patientId, formId, actionId) {
-    this.startContent('form', { formId, actionId });
-  },
-
   startContent(appName, options) {
+    const previousPageApp = this.getCurrent();
+
+    if (previousPageApp) {
+      this.stopListening(previousPageApp, 'context:change');
+    }
+
+    this.setFormExpanded(false);
+    this.setSidebarHidden(this.sidebarPreferenceHidden);
     this.contextTrail.set('context', this.getOptimisticContext(appName, options));
 
     const pageApp = this.getChildApp(appName);
 
-    this.stopListening(pageApp, 'context:change');
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
 
     this.startCurrent(appName, options);
   },
+  setSidebarHidden(isHidden) {
+    const layout = this.getView();
 
+    const shouldHide = !layout.isSidebarFixed()
+      && (layout.isSidebarDrawer() && !this._isTogglingPatientSidebar ? true : isHidden);
+
+    this.layoutState.set('sidebarHidden', shouldHide);
+  },
+  setFormExpanded(isExpanded) {
+    this.layoutState.set('formExpanded', isExpanded);
+  },
+  onChangeFormExpanded() {
+    const isExpanded = this.layoutState.get('formExpanded');
+
+    this.setSidebarHidden(isExpanded || this.sidebarPreferenceHidden);
+    this.renderFormExpandedState();
+  },
+  renderFormExpandedState() {
+    Radio.request('nav', 'setMinimized', this.layoutState.get('formExpanded'));
+  },
+  togglePatientSidebar() {
+    const isHidden = !this.getView().isSidebarHidden();
+    this.setSidebarPreferenceHidden(isHidden);
+    this._isTogglingPatientSidebar = true;
+    this.setCurrentPatientSidebarHidden(isHidden);
+    this._isTogglingPatientSidebar = false;
+  },
+  getSidebarPreferenceKey() {
+    return `isPatientSidebarHidden_${ this.currentUser.id }`;
+  },
+  setSidebarPreferenceHidden(isHidden) {
+    this.sidebarPreferenceHidden = isHidden;
+    localStore.set(this.getSidebarPreferenceKey(), isHidden);
+  },
+  setCurrentPatientSidebarHidden(isHidden) {
+    this.setSidebarHidden(isHidden);
+  },
+  onChangeSidebarLayout({ isSidebarDrawer, isSidebarFixed }) {
+    if (isSidebarFixed) {
+      this.layoutState.set('sidebarHidden', false);
+      return;
+    }
+
+    if (isSidebarDrawer) {
+      this.layoutState.set('sidebarHidden', true);
+      return;
+    }
+
+    this.setCurrentPatientSidebarHidden(this.layoutState.get('formExpanded') || this.sidebarPreferenceHidden);
+  },
+  closePatientSidebarDrawer() {
+    this._isTogglingPatientSidebar = true;
+    this.setCurrentPatientSidebarHidden(true);
+    this._isTogglingPatientSidebar = false;
+    this.getView().focusSidebarToggle();
+  },
   getOptimisticContext(page, options) {
     const previous = this.contextTrail.get('context') || {};
     const context = { page };
@@ -128,21 +207,11 @@ export default SubRouterApp.extend({
       return context;
     }
 
-    const flowId = this.getOptimisticFlowId(options, previous);
-
-    this.addOptimisticResource(context, previous, 'flow', flowId);
+    this.addOptimisticResource(context, previous, 'flow', options.flowId);
     this.addOptimisticResource(context, previous, 'action', options.actionId);
     this.addOptimisticResource(context, previous, 'form', options.formId);
 
     return context;
-  },
-
-  getOptimisticFlowId({ flowId, actionId }, previous) {
-    if (flowId) return flowId;
-    if (!actionId) return;
-    if (actionId !== previous.actionId) return;
-
-    return previous.flowId;
   },
 
   addOptimisticResource(context, previous, resource, id) {

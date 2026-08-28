@@ -5,6 +5,9 @@ import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
 const TYPE = 'files';
+const WRITABLE_ATTRIBUTES = [
+  'path',
+];
 
 // Adds `-copy` to the filename before the extension
 function dedupeFile(fileName) {
@@ -13,6 +16,7 @@ function dedupeFile(fileName) {
 }
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   defaults: {
     path: '',
     _progress: 0,

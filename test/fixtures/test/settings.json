@@ -1,9 +1,7 @@
 [
   {
-    "id": "widgets_patient_sidebar",
-    "value": {
-      "widgets": ["dob", "sex", "status", "divider", "workspaces"]
-    }
+    "id": "sidebar",
+    "value": ["demographics"]
   },
   {
     "id": "require_done_flow",

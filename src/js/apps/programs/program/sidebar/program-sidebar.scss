@@ -1,24 +1,27 @@
 .program-sidebar {
   padding: 40px 24px 0;
+  width: 100%;
 }
 
 .program-sidebar__edit {
   color: color(blue);
 }
 
-.is-highlighted .program-sidebar__edit {
-  color: #{$white};
+.program-sidebar__header {
+  align-items: center;
+  display: flex;
+  gap: var(--space-2);
 }
 
 .program-sidebar__context-menu {
-  position: absolute;
-  right: 32px;
-  top: 8px;
+  flex: none;
 }
 
 .program-sidebar__name {
+  flex: 1;
   font-size: 24px;
   line-height: 1em;
+  min-width: 0;
 }
 
 .program-sidebar__published {

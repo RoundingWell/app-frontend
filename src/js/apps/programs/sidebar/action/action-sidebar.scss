@@ -1,5 +1,5 @@
-.program-action-sidebar__toggle {
-  &.is-on {
-    color: color(green);
-  }
+.program-action-sidebar__attachments {
+  border-bottom: 1px solid #{$black-90};
+  border-top: 1px solid #{$black-90};
+  padding: 16px 0;
 }
