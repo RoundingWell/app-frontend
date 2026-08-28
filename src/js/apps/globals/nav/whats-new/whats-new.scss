@@ -1,0 +1,98 @@
+.app-nav__announcement {
+  background:
+    radial-gradient(ellipse 55% 42% at 50% 108%, rgb(255 158 61) 0%, rgb(255 150 67 / 96%) 28%, transparent 72%),
+    radial-gradient(ellipse 100% 58% at 50% 108%, rgb(196 72 146 / 90%) 0%, rgb(196 72 146 / 72%) 28%, transparent 76%),
+    linear-gradient(160deg, rgb(7 18 38) 0%, rgb(9 22 43) 68%, rgb(17 29 52) 100%);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 18%);
+  box-sizing: border-box;
+  color: #{$white};
+  margin: 16px 8px 12px;
+  min-height: 184px;
+  padding: 16px 12px 18px;
+  position: relative;
+}
+
+.app-nav--rail .app-nav__announcement {
+  display: none;
+}
+
+.whats-new-announcement__badge {
+  border: 1px solid color(orange);
+  border-radius: 12px;
+  color: color(orange);
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 16px;
+  padding: 0 8px;
+}
+
+.whats-new-announcement__heading {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 22px;
+  margin-top: 12px;
+}
+
+.whats-new-announcement__message {
+  font-size: 13px;
+  line-height: 20px;
+  margin: 8px 0 18px;
+}
+
+.whats-new-announcement__action,
+.whats-new-announcement__dismiss {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.whats-new-announcement__action {
+  align-items: center;
+  column-gap: 4px;
+  display: inline-flex;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0;
+  text-align: left;
+  white-space: nowrap;
+
+  .icon {
+    flex: 0 0 auto;
+    font-size: 12px;
+  }
+}
+
+.whats-new-announcement__dismiss {
+  align-items: center;
+  color: #{$white};
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 32px;
+}
+
+.whats-new-announcement__action:hover,
+.whats-new-announcement__dismiss:hover {
+  color: #{$white};
+}
+
+.whats-new-update {
+  height: 100%;
+}
+
+.whats-new-update iframe {
+  border: 0;
+  display: block;
+  height: 100%;
+  width: 100%;
+}

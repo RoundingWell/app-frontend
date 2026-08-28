@@ -24,6 +24,7 @@ careOptsFrontend:
           help: Help & Support
           organizationHeading: Your Organization
           signOut: Sign Out
+          whatsNew: What's New
           workspaceMenu: Workspace Menu
           workspacesHeading: Your Workspaces
         patientsAppNav:
@@ -34,6 +35,16 @@ careOptsFrontend:
           searchTitle: Search
           sharedBy: Shared By
           updatedPastThree: Updated < 3 Days
+        whatsNew:
+          announcement:
+            action: See what's new
+            badge: NEW
+            dismiss: Dismiss design update announcement
+            heading: RW Design Update
+            message: Explore the refreshed RoundingWell experience.
+          modal:
+            done: Done
+            heading: What's New
     error:
       errorTemplate:
         backBtn: Back to Your Workspace

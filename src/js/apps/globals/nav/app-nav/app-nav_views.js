@@ -93,7 +93,19 @@ const MainNavDroplist = Droplist.extend({
   picklistEvents: {
     'picklist:item:select': 'onSelect',
   },
+  onPicklistSelect({ model }) {
+    this.popRegion.empty();
+
+    if (model.get('event') === 'whats-new') return;
+
+    this.setState('selected', model);
+  },
   onSelect({ model }) {
+    if (model.get('event') === 'whats-new') {
+      this.trigger('show:whatsNew');
+      return;
+    }
+
     const currentWorkspace = Radio.request('workspace', 'current');
 
     if (model.id === currentWorkspace.id) return;
@@ -137,6 +149,10 @@ const AdminToolsDroplist = Droplist.extend({
 const BottomNavView = View.extend({
   className: 'app-nav__bottom',
   regions: {
+    announcement: {
+      el: '[data-nav-announcement-region]',
+      replaceElement: true,
+    },
     dashboards: {
       el: '[data-nav-dashboards-region]',
       replaceElement: true,
