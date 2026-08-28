@@ -43,8 +43,8 @@ const ListFiltersApp = App.extend({
 
     this.showChildView('menu', menuView);
   },
-  fetchFilters() {
-    return this.filters.invokeFetch({
+  fetchFilters(filters) {
+    return filters.invokeFetch({
       entityType: this.filtersState.get('listType'),
       worklist: this.filtersState.get('worklist'),
     });
@@ -55,7 +55,8 @@ const ListFiltersApp = App.extend({
     this.showContentView('customFilters', loadingView);
   },
   loadCustomFilters() {
-    const requests = this.fetchFilters();
+    const filters = new this.filters.constructor(this.filters.toJSON());
+    const requests = this.fetchFilters(filters);
 
     if (!requests) return;
 
@@ -69,6 +70,10 @@ const ListFiltersApp = App.extend({
     Promise.allSettled(requests)
       .then(results => {
         if (!this.isRunning() || fetchId !== this.customFiltersFetchId) return;
+
+        filters.each(filter => {
+          this.filters.findWhere({ slug: filter.get('slug') }).set(filter.attributes);
+        });
 
         const hasLoadError = results.some(({ status }) => status === 'rejected');
 

@@ -164,8 +164,6 @@ const _Model = BaseModel.extend({
     return this.getComments().length;
   },
   hasAllowedUploads() {
-    if (!this.canEdit()) return false;
-
     const programAction = this.getProgramAction();
 
     return !!size(programAction.get('allowed_uploads'));

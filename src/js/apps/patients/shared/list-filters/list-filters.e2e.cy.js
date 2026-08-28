@@ -1099,4 +1099,62 @@ context('list filters', function() {
       .next()
       .should('contain', 'Third In Sequence');
   });
+
+  specify('latest custom filter request wins', function() {
+    const actionFilter = getFilter({
+      attributes: {
+        name: 'Action Team',
+        slug: 'team',
+        values: [{ value: 'Old Action Value', total: 1 }],
+      },
+    });
+    const flowFilter = getFilter({
+      attributes: {
+        name: 'Flow Team',
+        slug: 'team',
+        values: [{ value: 'Current Flow Value', total: 1 }],
+      },
+    });
+
+    cy
+      .routeActions()
+      .routeFlows()
+      .routeSettings('custom_filters', ['team'])
+      .intercept('GET', '/api/filters/team/actions*', {
+        delay: 1000,
+        body: { data: actionFilter, included: [] },
+      })
+      .as('routeDelayedActionFilter')
+      .intercept('GET', '/api/filters/team/flows*', {
+        body: { data: flowFilter, included: [] },
+      })
+      .as('routeFlowFilter')
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .get('.worklist-list__toggle')
+      .contains('Flows')
+      .click()
+      .wait('@routeFlows')
+      .wait('@routeFlowFilter');
+
+    expandFiltersSidebar();
+
+    cy
+      .get('.list-filters__custom-filters')
+      .should('contain', 'Flow Team');
+
+    cy
+      .wait('@routeDelayedActionFilter')
+      .get('.list-filters__custom-filters')
+      .should('contain', 'Flow Team');
+
+    getCustomFilterButton('Flow Team').click();
+
+    cy
+      .get('.picklist')
+      .should('contain', 'Current Flow Value')
+      .and('not.contain', 'Old Action Value');
+  });
 });

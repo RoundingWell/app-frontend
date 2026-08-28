@@ -14,11 +14,13 @@ export default App.extend({
   onStart({ action, focusOnLoad }, attachments) {
     this.action = action;
     this.attachments = attachments;
+    const flow = action.getFlow();
 
     this.listenTo(action, {
       'change:_owner': this.showAttachments,
       'ws:add:attachment': this.onWsAddAttachment,
     });
+    if (flow) this.listenTo(flow, 'change:_state', this.showAttachments);
 
     this.showAttachments();
     this.subscribe();
@@ -41,7 +43,8 @@ export default App.extend({
     if (this.attachments.length === 1) this.showAttachments();
   },
   showAttachments() {
-    const canUploadAttachments = !!Radio.request('settings', 'get', 'upload_attachments') && this.action.hasAllowedUploads();
+    const canEdit = !this.action.isFlowDone() && this.action.canEdit();
+    const canUploadAttachments = !!Radio.request('settings', 'get', 'upload_attachments') && canEdit && this.action.hasAllowedUploads();
 
     if (!canUploadAttachments && !this.attachments.length) {
       this.getRegion().empty();
@@ -51,7 +54,7 @@ export default App.extend({
     const attachmentsView = new AttachmentsView({
       collection: this.attachments,
       canUploadAttachments,
-      canRemoveAttachments: this.action.canEdit(),
+      canRemoveAttachments: canEdit,
     });
 
     this.listenTo(attachmentsView, {

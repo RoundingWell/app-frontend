@@ -1279,6 +1279,76 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('not.exist');
   });
 
+  specify('action attachments become read-only when the flow is done', function() {
+    const testFile = getFile();
+    const testProgramAction = getProgramAction({
+      attributes: { allowed_uploads: ['pdf'] },
+    });
+    const testFlow = getFlow({
+      relationships: { state: getRelationship(stateTodo) },
+    });
+    const testAction = getAction({
+      relationships: {
+        'files': getRelationship([testFile]),
+        'flow': getRelationship(testFlow),
+        'program-action': getRelationship(testProgramAction),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeSettings('upload_attachments', true)
+      .routeFlow(fx => {
+        fx.data = testFlow;
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+        fx.included.push(testProgramAction);
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [testFile];
+        return fx;
+      })
+      .routePatientByFlow()
+      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeFlow')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('[data-attachments-files-region]')
+      .children()
+      .should('have.length', 1)
+      .find('.js-remove')
+      .should('exist');
+
+    cy
+      .get('[data-attachments-region] .js-add')
+      .should('exist');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: { type: testFlow.type, id: testFlow.id },
+      payload: {
+        state: { type: stateDone.type, id: stateDone.id },
+        attributes: {},
+      },
+    });
+
+    cy
+      .get('[data-attachments-files-region] .js-remove')
+      .should('not.exist');
+
+    cy
+      .get('[data-attachments-region] .js-add')
+      .should('not.exist');
+  });
+
   specify('action attachments - uploads not allowed without edit permission', function() {
     const testFile = getFile();
     const testProgramAction = getProgramAction({
@@ -2229,6 +2299,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
   specify('socket comments and attachments', function() {
     const currentClinician = getCurrentClinician();
     const commentId = uuid();
+    const secondCommentId = uuid();
     const fileId = uuid();
     const testAction = getAction({
       relationships: {
@@ -2243,16 +2314,23 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         fx.data = testAction;
         return fx;
       })
-      .routeActionComments(fx => {
-        fx.data = [];
-        return fx;
-      })
       .routeActionFiles(fx => {
         fx.data = [];
         return fx;
       })
+      .intercept('GET', '/api/actions/**/comments', {
+        delay: 3000,
+        body: { data: [], included: [] },
+      })
+      .as('routeDelayedActionComments')
       .visit(`/patient/1/action/${ testAction.id }`)
       .wait('@routeAction');
+
+    cy
+      .get('.patient-action__title')
+      .should('exist')
+      .get('[data-activity-region] .patient-action-loading__activity-items')
+      .should('exist');
 
     cy
       .get('@wsHandleMessage')
@@ -2271,6 +2349,20 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .get('[data-activity-region]')
       .should('contain', 'Comment delivered live');
+
+    cy.sendWs({
+      category: 'ActionCommentAdded',
+      author: currentClinician.id,
+      resource: { type: testAction.type, id: testAction.id },
+      payload: {
+        comment: { type: 'comments', id: secondCommentId },
+        attributes: { message: 'Second comment delivered live' },
+      },
+    });
+
+    cy
+      .get('[data-activity-region]')
+      .should('contain', 'Second comment delivered live');
 
     cy.sendWs({
       category: 'CommentEdited',

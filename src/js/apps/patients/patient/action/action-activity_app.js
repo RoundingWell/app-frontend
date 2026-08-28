@@ -19,6 +19,7 @@ export default App.extend({
   onStart({ action, focusOnLoad }, activity, comments) {
     this.action = action;
     this.comments = comments;
+    this.comments.add(action.getComments().filter(comment => comment.has('message')));
     this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
 
     this.listenTo(action, 'ws:add:comment', this.onWsAddComment);
