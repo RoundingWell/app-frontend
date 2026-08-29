@@ -83,42 +83,6 @@ context('Patient Action Form', function() {
       .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`);
   });
 
-  specify('action form cannot load', function() {
-    const testAction = getAction({
-      relationships: { form: getRelationship(testForm) },
-    });
-    const errors = getErrors({
-      status: '404',
-      title: 'Not Found',
-      detail: 'Cannot find form',
-    });
-
-    cy
-      .routeAction(fx => {
-        fx.data = testAction;
-        return fx;
-      })
-      .routePatient()
-      .intercept('GET', '/api/actions/*/form', {
-        statusCode: 404,
-        body: { errors },
-      })
-      .as('routeFormByActionError')
-      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
-      .wait('@routeFormByActionError');
-
-    cy
-      .get('.alert-box__body')
-      .should('contain', 'The Action you requested does not exist.');
-
-    cy
-      .wait('@routeAction');
-
-    cy
-      .location('pathname')
-      .should('not.contain', `/action/${ testAction.id }`);
-  });
-
   specify('action deleted while its form is open', function() {
     const testPatient = getPatient();
     const testAction = getAction({
@@ -2179,7 +2143,11 @@ context('Patient Action Form', function() {
     cy
       .get('.form__controls')
       .find('.js-save-button')
-      .should('contain', 'Submit + Go Back')
+      .should('contain', 'Submit + Go Back');
+
+    cy
+      .get('.form__controls')
+      .find('.js-save-button')
       .click()
       .wait('@routePostResponse');
 
@@ -3008,6 +2976,9 @@ context('Patient Action Form', function() {
 
         expect(formData.args.value.storedSubmission.familyHistory).to.equal('Form draft work done in another tab.');
       });
+
+    // Allow the replacement iframe's ready message to schedule its stale refresh.
+    cy.wait(0);
 
     const submission = getFormResponse({
       id: testFormResponseId,

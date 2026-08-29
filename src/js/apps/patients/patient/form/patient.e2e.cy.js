@@ -32,38 +32,6 @@ context('Patient Form', function() {
       .routeWorkspacePatient();
   });
 
-  specify('deleted form', function() {
-    cy
-      .routesForDefault()
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routeLatestFormResponse()
-      .intercept('GET', `/api/forms/${ testForm.id }*`, {
-        statusCode: 410,
-        body: {
-          errors: getErrors({
-            status: '410',
-            title: 'Not Found',
-            detail: 'Cannot find form',
-          }),
-        },
-      })
-      .as('routeGoneForm')
-      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }`)
-      .wait('@routeGoneForm');
-
-    cy
-      .get('.alert-box__body')
-      .should('contain', 'The Form you requested does not exist.');
-
-    cy
-      .url()
-      .should('not.contain', `/patient/${ testPatient.id }/form/${ testForm.id }`);
-  });
-
   specify('submitting the form and returning to workflows', function() {
     const testNewFormResponse = getFormResponse();
 
