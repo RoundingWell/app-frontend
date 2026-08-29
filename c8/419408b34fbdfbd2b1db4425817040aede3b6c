@@ -2,10 +2,25 @@ src/js/apps/patients/shared/list-filters/list-filters.e2e.cy.js
   s_40e12f2c95ab47::t_1d0bd698296b23 1104,1124-1130,1145-1148
 src/js/apps/patients/shared/list-filters/list-filters_app.js
   s_40e12f2c95ab47::t_738f112e9997eb 51,53-60,62,69-72,90-96
+  s_40e12f2c95ab47::t_00d47b7a543cc5 54-58,60,69-70
+  s_40e12f2c95ab47::t_c864145b2d4115 71-72
 src/js/entities-service/entities/filters.js
   s_40e12f2c95ab47::t_abdb132c4fe265 36,42
+  s_40e12f2c95ab47::t_00d47b7a543cc5 36
 src/js/entities-service/filters.js
   s_40e12f2c95ab47::t_b244002fe5ebae 11,20-31
+  s_40e12f2c95ab47::t_00d47b7a543cc5 11,20-30
+  s_40e12f2c95ab47::t_188c6202058748 31
+src/js/base/fetch.js
+  s_40e12f2c95ab47::t_18c675b6bd988b 8-9,11,18,20,25,27,29-30,48-56,66-81,83-86,88-90,92-94,96-99,101
+  s_40e12f2c95ab47::t_431d02ece5f907 19,57,59-63,100,103-111,117,211
+  s_40e12f2c95ab47::t_fd5ef24b3acca2 58
+  s_40e12f2c95ab47::t_bed894d2c6cca1 82
+src/js/base/fetch.component.cy.js
+  s_40e12f2c95ab47::t_e271645b2b9847 81-115
+  s_40e12f2c95ab47::t_63a10c566738fc 118-145
+  s_40e12f2c95ab47::t_4ea58f70036b70 116-117,146-172,191-243
+  s_40e12f2c95ab47::t_bed894d2c6cca1 173-190
 ---
 {
   "schema_version": "authorship/3.0.0",
