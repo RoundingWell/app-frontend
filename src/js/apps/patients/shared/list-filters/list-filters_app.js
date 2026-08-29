@@ -8,7 +8,6 @@ const ListFiltersApp = App.extend({
   onStart({ filtersState }) {
     this.filtersState = filtersState;
     this.filters = Radio.request('entities', 'filters:customFilters');
-    this.customFiltersFetchId = 0;
     this.isCustomFiltersLoaded = false;
 
     this.showHeadingView();
@@ -43,39 +42,38 @@ const ListFiltersApp = App.extend({
 
     this.showChildView('menu', menuView);
   },
-  fetchFilters(filters) {
-    return filters.invokeFetch({
-      entityType: this.filtersState.get('listType'),
-      worklist: this.filtersState.get('worklist'),
-    });
-  },
   showCustomFiltersLoadingView() {
     const loadingView = new CustomFiltersLoadingView({ filterCount: Math.min(this.filters.length, 2) });
 
     this.showContentView('customFilters', loadingView);
   },
   loadCustomFilters() {
-    const filters = new this.filters.constructor(this.filters.toJSON());
-    const requests = this.fetchFilters(filters);
+    this.abortCustomFiltersFetch();
 
-    if (!requests) return;
+    const controller = new AbortController();
+    const request = Radio.request('entities', 'fetch:filters:customFilters', {
+      entityType: this.filtersState.get('listType'),
+      worklist: this.filtersState.get('worklist'),
+      signal: controller.signal,
+    });
 
-    const fetchId = ++this.customFiltersFetchId;
+    if (!request) return;
+
+    this.customFiltersController = controller;
     const currentView = this.getChildView('content').getRegion('customFilters').currentView;
 
     if (this.isCustomFiltersLoaded && currentView && currentView.setLoading) {
       currentView.setLoading(true);
     }
 
-    Promise.allSettled(requests)
-      .then(results => {
-        if (!this.isRunning() || fetchId !== this.customFiltersFetchId) return;
+    request
+      .then(({ filters, hasLoadError }) => {
+        if (!this.isRunning() || controller.signal.aborted) return;
+        this.customFiltersController = null;
 
         filters.each(filter => {
           this.filters.findWhere({ slug: filter.get('slug') }).set(filter.attributes);
         });
-
-        const hasLoadError = results.some(({ status }) => status === 'rejected');
 
         if (!this.isCustomFiltersLoaded) {
           this.isCustomFiltersLoaded = true;
@@ -88,6 +86,13 @@ const ListFiltersApp = App.extend({
         customFiltersView.setLoadError(hasLoadError);
         customFiltersView.setLoading(false);
       });
+  },
+  abortCustomFiltersFetch() {
+    if (this.customFiltersController) this.customFiltersController.abort();
+    this.customFiltersController = null;
+  },
+  onStop() {
+    this.abortCustomFiltersFetch();
   },
   retryCustomFilters() {
     this.isCustomFiltersLoaded = false;

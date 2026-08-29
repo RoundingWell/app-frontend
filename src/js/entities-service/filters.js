@@ -8,6 +8,7 @@ const Entity = BaseEntity.extend({
   radioRequests: {
     'filters:collection': 'getCollection',
     'filters:customFilters': 'getCustomFilters',
+    'fetch:filters:customFilters': 'fetchCustomFilters',
   },
   getCustomFilters() {
     const customFilters = Radio.request('settings', 'get', 'custom_filters');
@@ -15,6 +16,18 @@ const Entity = BaseEntity.extend({
     const filters = map(customFilters, slug => ({ slug }));
 
     return this.getCollection(filters);
+  },
+  fetchCustomFilters(options) {
+    const filters = this.getCustomFilters();
+    const requests = filters.fetchAll(options);
+
+    if (!requests) return;
+
+    return Promise.allSettled(requests)
+      .then(results => ({
+        filters,
+        hasLoadError: results.some(({ status }) => status === 'rejected'),
+      }));
   },
 });
 

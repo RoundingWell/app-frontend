@@ -1101,6 +1101,7 @@ context('list filters', function() {
   });
 
   specify('latest custom filter request wins', function() {
+    let releaseActionFilter;
     const actionFilter = getFilter({
       attributes: {
         name: 'Action Team',
@@ -1120,9 +1121,13 @@ context('list filters', function() {
       .routeActions()
       .routeFlows()
       .routeSettings('custom_filters', ['team'])
-      .intercept('GET', '/api/filters/team/actions*', {
-        delay: 1000,
-        body: { data: actionFilter, included: [] },
+      .intercept('GET', '/api/filters/team/actions*', req => {
+        return new Cypress.Promise(resolve => {
+          releaseActionFilter = () => {
+            req.reply({ body: { data: actionFilter, included: [] } });
+            resolve();
+          };
+        });
       })
       .as('routeDelayedActionFilter')
       .intercept('GET', '/api/filters/team/flows*', {
@@ -1137,7 +1142,10 @@ context('list filters', function() {
       .contains('Flows')
       .click()
       .wait('@routeFlows')
-      .wait('@routeFlowFilter');
+      .wait('@routeFlowFilter')
+      .then(() => {
+        releaseActionFilter();
+      });
 
     expandFiltersSidebar();
 
