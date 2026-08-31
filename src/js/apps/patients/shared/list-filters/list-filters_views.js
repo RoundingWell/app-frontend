@@ -382,7 +382,7 @@ const PanelView = View.extend({
     content: '[data-content-region]',
   },
   modelEvents: {
-    'change:filtersSidebarCollapsed': 'toggleCollapsed',
+    'change:sidebarCollapsed': 'toggleCollapsed',
   },
   ui: {
     body: '.js-filters-body',
@@ -394,7 +394,7 @@ const PanelView = View.extend({
     this.setDrawerMode(this.isDrawer);
   },
   toggleCollapsed() {
-    const isCollapsed = !this.isDrawer && this.model.get('filtersSidebarCollapsed');
+    const isCollapsed = !this.isDrawer && this.model.get('sidebarCollapsed');
     this.ui.body.prop('hidden', isCollapsed);
     this.$el.toggleClass('is-collapsed', isCollapsed);
   },

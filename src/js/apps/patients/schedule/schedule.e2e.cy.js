@@ -60,6 +60,42 @@ function expandFiltersSidebar() {
 }
 
 context('schedule page', function() {
+  specify('preserves filters sidebar across a hidden date refresh', function() {
+    cy.viewport(1200, 720);
+
+    cy
+      .routeActions()
+      .visit('/schedule')
+      .wait('@routeActions');
+
+    cy
+      .get('.patient-list-page__all-filters-button')
+      .as('filtersButton')
+      .should('have.attr', 'aria-expanded', 'true')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false');
+
+    cy
+      .get('[data-date-filter-region]')
+      .should('contain', 'This Month')
+      .click();
+
+    cy
+      .get('.app-frame__pop-region')
+      .contains('Last Month')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('@filtersButton')
+      .click()
+      .should('have.attr', 'aria-expanded', 'true');
+
+    cy
+      .get('.list-filters__body')
+      .should('be.visible');
+  });
+
   specify('display schedule', function() {
     const testActions = [
       getAction({

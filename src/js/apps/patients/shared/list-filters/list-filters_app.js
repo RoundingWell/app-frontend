@@ -145,7 +145,7 @@ const ListFiltersPanelApp = ListFiltersApp.extend({
   onStart(options) {
     this.showView(new PanelView({
       isDrawer: options.isDrawer,
-      model: options.collapsedState,
+      model: options.layoutState,
     }));
 
     if (options.controlsView) this.showChildView('controls', options.controlsView);

@@ -309,7 +309,7 @@ const WorklistApp = App.extend({
     this.startChildApp('filtersSidebar', {
       region: this.getRegion('filtersSidebar'),
       filtersState,
-      collapsedState: this.getState(),
+      layoutState: this.layoutView.getLayoutState(),
       isDrawer: this.layoutView.isFiltersDrawer(),
       controlsView: this.sidebarControlsView,
     });
