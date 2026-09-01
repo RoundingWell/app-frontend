@@ -1,22 +1,30 @@
-<div>
-  <span class="table-list__icon--large workflows__flow-icon">{{fas "folder"}}</span>
-  <span>
-    {{ name }}
-    {{~#unless name}}<em>{{ @intl.programs.program.workflows.flowItemTemplate.newProgramFlow }}</em>{{/unless~}}
-  </span>
+<div class="work-card__surface">
+  <div class="work-card__main">
+    <div class="work-card__heading">
+      <span class="work-card__state">{{far "folder"}}</span>
+      <span class="work-card__title flow-card__title">
+        {{ name }}
+        {{~#unless name}}<em>{{ @intl.programs.program.workflows.flowItemTemplate.newProgramFlow }}</em>{{/unless~}}
+      </span>
+    </div>
+  </div>
+  <div class="work-card__aside">
+    <div class="work-card__controls flow-card__controls workflows__flow-controls js-no-click">
+      <span class="work-card__control workflows__flow-status">
+        {{#if published}}
+          {{#if isAutomated}}
+            <span class="workflows__flow-state workflows__flow-state--automated">{{far "bolt"}}</span>
+          {{else}}
+            <span class="workflows__flow-state workflows__flow-state--published">{{far "circle-play"}}</span>
+          {{/if}}
+        {{else}}
+          <span class="workflows__flow-state workflows__flow-state--draft">{{far "pen-to-square"}}</span>
+        {{/if}}
+      </span>
+      <span class="work-card__control flow-card__owner" data-owner-region></span>
+    </div>
+    <div class="work-card__meta">
+      <span>{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
+    </div>
+  </div>
 </div>
-<div class="table-list__meta">
-  <span class="workflows__flow-status">
-    {{#if published}}
-      {{#if isAutomated}}
-        <span class="workflows-action--automated">{{far "bolt"}}</span>
-      {{ else }}
-        <span class="workflows-action--published">{{far "circle-play"}}</span>
-      {{/if}}
-    {{ else }}
-      <span class="workflows-action--draft">{{far "pen-to-square"}}</span>
-    {{/if}}
-  </span>
-  <span data-owner-region></span>
-</div>
-<div class="workflows__item-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>

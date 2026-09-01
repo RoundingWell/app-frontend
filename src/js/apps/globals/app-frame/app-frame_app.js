@@ -1,4 +1,4 @@
-import { partial, invoke, defer, some } from 'underscore';
+import { invoke, some } from 'underscore';
 import Radio from 'backbone.radio';
 import Backbone from 'backbone';
 
@@ -19,8 +19,16 @@ export default App.extend({
 
     this.listenTo(workspaceCh, 'change:workspace', this.restart);
 
-    new NavApp({ region: this.getRegion('nav') });
+    this.navApp = new NavApp({ region: this.getRegion('nav') });
+    const navState = this.navApp.getState();
+
+    this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
+    this.onChangeNavMinimized(navState, navState.get('isMinimized'));
+
     new SidebarService({ region: this.getRegion('sidebar') });
+  },
+  onChangeNavMinimized(state, isMinimized) {
+    this.getView().setNavMinimized(isMinimized);
   },
   beforeStart() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -31,40 +39,45 @@ export default App.extend({
     return [
       Radio.request('workspace', 'fetch'),
       import('js/apps/patients/patients-main_app'),
-      hasDashboards ? import('js/apps/dashboards/dashboards-main_app.js') : null,
-      hasClinicians ? import('js/apps/clinicians/clinicians-main_app.js') : null,
+      hasDashboards ?
+        import('js/apps/dashboards/dashboards-main_app.js') :
+        null,
+      hasClinicians ?
+        import('js/apps/clinicians/clinicians-main_app.js') :
+        null,
       hasPrograms ? import('js/apps/programs/programs-main_app.js') : null,
-      import('js/apps/forms/forms-main_app'),
     ];
   },
-  onStart(options, currentWorkspace, PatientsMainApp, DashboardsMainApp, CliniciansMainApp, ProgramsMainApp, FormsApp) {
+  onStart(
+    options,
+    currentWorkspace,
+    PatientsMainApp,
+    DashboardsMainApp,
+    CliniciansMainApp,
+    ProgramsMainApp,
+  ) {
     this.workspaceSlug = currentWorkspace.get('slug');
 
     this.initRouter(PatientsMainApp);
     this.initRouter(DashboardsMainApp);
     this.initRouter(CliniciansMainApp);
     this.initRouter(ProgramsMainApp);
-    this.initFormsApp(FormsApp);
 
-    new Promise(resolve => {
-      /* istanbul ignore next: Branch only for testing */
-      _TEST_ ? resolve() : defer(resolve);
-    }).then(() => {
-      Backbone.history.loadUrl();
+    Backbone.history.loadUrl();
 
-      if (!some(this.routers, router => router.isRunning())) {
-        Radio.trigger('event-router', 'notFound');
-      }
-    });
+    if (!some(this.routers, router => router.isRunning())) {
+      Radio.trigger('event-router', 'notFound');
+    }
   },
   onStop() {
     invoke(this.routers, 'destroy');
     this.routers = [];
-  },
-  initRouter(RouterAppImport) {
-    if (!RouterAppImport) return;
 
-    const RouterApp = RouterAppImport.default;
+    if (!this.isRestarting()) this.navApp.destroy();
+  },
+  initRouter(module) {
+    const RouterApp = module?.default;
+    if (!RouterApp) return;
 
     const router = new RouterApp({
       region: this.getRegion('content'),
@@ -82,20 +95,5 @@ export default App.extend({
     Radio.request('nav', 'select', router.routerAppName, event, eventArgs);
     Radio.request('sidebar', 'stop');
     Radio.request('history', 'set:latestList', routeContext);
-  },
-  initFormsApp(FormsApp) {
-    const formsApp = this.initRouter(FormsApp);
-
-    this.listenTo(formsApp, {
-      start: partial(this.toggleNav, false),
-      stop: partial(this.toggleNav, true),
-    });
-  },
-  toggleNav(shouldShow) {
-    // NOTE: stops the nav menu from showing when the form page is reloaded
-    /* istanbul ignore if: can't test reload */
-    if (!this.isRunning()) return;
-
-    this.getView().toggleNav(!!shouldShow);
   },
 });

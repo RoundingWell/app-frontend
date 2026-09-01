@@ -33,15 +33,15 @@ const Model = BaseModel.extend({
 
 const Collection = BaseCollection.extend({
   model: Model,
-  invokeFetch({ entityType, worklist }) {
+  fetchAll({ entityType, worklist, signal }) {
     /* istanbul ignore next: Loading before the list requires a slow test */
     if (!worklist) return;
+
     return this.map(filter => {
       filter.set({ entityType, worklist });
-      return filter.fetch();
+      return filter.fetch({ signal });
     });
   },
-
 });
 
 export {

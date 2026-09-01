@@ -13,7 +13,7 @@ import 'js/apps/patients/shared/action-state.scss';
 
 const i18n = intl.patients.shared.components.stateComponent;
 
-const StateTemplate = hbs`<span class="action--{{ options.color }}">{{fa options.iconType options.icon}}{{#unless isCompact}}<span>{{ name }}</span>{{/unless}}</span>`;
+const StateTemplate = hbs`<span class="action-state action-state--{{ options.color }}">{{fa options.iconType options.icon}}{{#unless isIconOnly}}<span>{{ name }}</span>{{/unless}}</span>`;
 
 const statuses = [STATE_STATUS.QUEUED, STATE_STATUS.STARTED, STATE_STATUS.DONE];
 
@@ -70,10 +70,10 @@ export default Droplist.extend({
     const isCompact = this.getOption('isCompact');
 
     return {
-      className: isCompact ? 'button-secondary--compact' : 'button-secondary w-100',
+      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
       template: StateTemplate,
       templateContext: {
-        isCompact,
+        isIconOnly: isCompact && !this.getOption('showLabel'),
       },
     };
   },

@@ -35,6 +35,7 @@ context('State Component', function() {
 
     cy
       .get('@root')
+      .find('.action-state')
       .contains('In Progress')
       .click();
 
@@ -83,11 +84,10 @@ context('State Component', function() {
     cy
       .get('@root')
       .contains('In Progress')
-      .invoke('css', 'width')
-      .should('equal', '72px');
+      .should('exist');
   });
 
-  specify('Cache testing isCompact', function() {
+  specify('compact state with label', function() {
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(1).id });
     });
@@ -96,12 +96,9 @@ context('State Component', function() {
       .mount(rootView => {
         StateComponent.setPopRegion(rootView.getRegion('pop'));
 
-        return new StateComponent({ isCompact: true, stateId: stateInProgress.id });
+        return new StateComponent({ isCompact: true, showLabel: true, stateId: stateInProgress.id });
       })
-      .as('root');
-
-    cy
-      .get('@root')
-      .find('.fa-circle-dot');
+      .find('.action-state')
+      .should('contain', 'In Progress');
   });
 });

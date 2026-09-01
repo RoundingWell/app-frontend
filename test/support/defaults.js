@@ -56,6 +56,7 @@ beforeEach(function() {
     .routeTeams()
     .routeSettings()
     .routeWorkspaces()
+    .routePanels()
     .routeWidgets()
     .routeWorkspaceClinicians()
     .routeWorkspacePrograms()

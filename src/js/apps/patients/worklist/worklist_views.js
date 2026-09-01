@@ -3,87 +3,90 @@ import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
-import intl, { renderTemplate } from 'js/i18n';
+import 'scss/modules/buttons.scss';
+import 'scss/modules/list-pages.scss';
+import 'scss/modules/card-list.scss';
+import 'scss/modules/skeleton.scss';
+
+import intl from 'js/i18n';
 import underscored from 'js/utils/formatting/underscored';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
-import 'scss/modules/buttons.scss';
-import 'scss/modules/list-pages.scss';
-import 'scss/modules/table-list.scss';
-
-import PreloadRegion from 'js/regions/preload_region';
-
 import Droplist from 'js/components/droplist';
-import Tooltip from 'js/components/tooltip';
 
+import { ListPageFiltersButtonView, ListPageView } from 'js/apps/patients/shared/list-page';
 import { TitleOwnerDroplist } from 'js/apps/patients/shared/list_views';
-import { ActionTooltipTemplate, ActionEmptyView, ActionItemView } from './action_views';
-import { FlowTooltipTemplate, FlowEmptyView, FlowItemView } from './flow_views';
+import SharedSelectAllView from 'js/apps/patients/shared/components/select-all_view';
+import { ActionEmptyView, ActionItemView } from './action_views';
+import { FlowEmptyView, FlowItemView } from './flow_views';
 import LayoutTemplate from './layout.hbs';
-import TableHeaderTemplate from './table-header.hbs';
+import ListLoadingTemplate from './list-loading.hbs';
+import SidebarControlsTemplate from './sidebar-controls.hbs';
 
+import 'scss/domain/work-card.scss';
+import 'scss/domain/action-card.scss';
+import 'scss/domain/flow-card.scss';
+import 'scss/domain/patient-list.scss';
 import './worklist-list.scss';
 
 const i18n = intl.patients.worklist.worklistViews;
 
-const LayoutView = View.extend({
-  className: 'flex-region',
+const SelectAllView = SharedSelectAllView.extend({
+  className: 'button button--checkbox worklist-list__select-all',
+});
+
+const LayoutView = ListPageView.extend({
+  className: 'flex-region list-page patient-list-page worklist-list-page',
   template: LayoutTemplate,
   regions: {
     dateFilter: '[data-date-filter-region]',
     filters: '[data-filters-region]',
-    toggle: '[data-toggle-region]',
-    sort: '[data-sort-region]',
-    table: {
-      el: '[data-table-region]',
-      replaceElement: true,
-    },
     list: {
       el: '[data-list-region]',
-      regionClass: PreloadRegion,
       replaceElement: true,
     },
-    selectAll: '[data-select-all-region]',
+    selectionBar: '[data-selection-bar-region]',
     title: {
       el: '[data-title-region]',
       replaceElement: true,
     },
     search: '[data-search-region]',
-    count: '[data-count-region]',
+    listStatus: '[data-list-status-region]',
+    filtersSidebar: '[data-filters-sidebar-region]',
+  },
+  modelEvents: {
+    'change:filtersSidebarCollapsed': 'onChangeFiltersSidebarCollapsed',
   },
   triggers: {
     'click @ui.select': 'click:select',
   },
-  ui: {
+  pageUi: {
     select: '.js-select',
   },
 });
 
-const SelectAllView = View.extend({
-  tagName: 'button',
-  className: 'button--checkbox',
-  attributes() {
-    if (this.getOption('isDisabled')) return { disabled: 'disabled' };
-  },
-  triggers: {
-    'click': 'click',
-  },
-  getTemplate() {
-    if (this.getOption('isSelectAll')) return hbs`{{fas "square-check"}}`;
-    if (this.getOption('isSelectNone') || this.getOption('isDisabled')) return hbs`{{fal "square"}}`;
-
-    return hbs`{{fas "square-minus"}}`;
+const SidebarControlsView = View.extend({
+  className: 'worklist-list__sidebar-controls',
+  template: SidebarControlsTemplate,
+  regions: {
+    sort: '[data-sort-region]',
+    toggle: '[data-toggle-region]',
+    ownerToggle: '[data-owner-toggle-region]',
   },
 });
 
 const TypeToggleView = View.extend({
+  className: 'worklist-list__type-toggle',
   template: hbs`
-    <button class="{{#unless isFlowList}}button--blue{{/unless}} button-filter button__group js-toggle-actions">{{far "file-lines"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.actionsButton }}</span></button>{{~ remove_whitespace ~}}
-    <button class="{{#if isFlowList}}button--blue{{/if}} button-filter button__group js-toggle-flows">{{fas "folder"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.flowsButton }}</span></button>
+    <button class="button worklist-list__sidebar-button js-toggle-actions" type="button" aria-pressed="{{ actionsPressed }}">{{far "file-lines"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.actionsButton }}</span></button>{{~ remove_whitespace ~}}
+    <button class="button worklist-list__sidebar-button js-toggle-flows" type="button" aria-pressed="{{ flowsPressed }}">{{far "folder-closed"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.flowsButton }}</span></button>
   `,
   templateContext() {
+    const isFlowList = this.getOption('isFlowList');
+
     return {
-      isFlowList: this.getOption('isFlowList'),
+      actionsPressed: String(!isFlowList),
+      flowsPressed: String(isFlowList),
     };
   },
   triggers: {
@@ -102,10 +105,10 @@ const TypeToggleView = View.extend({
 });
 
 const NoOwnerToggleView = View.extend({
-  className: 'u-margin--l-24 u-margin--r-16',
+  className: 'worklist-list__owner-toggle',
   template: hbs`
-    <button class="button-filter-toggle {{#if noOwner}}button--blue{{/if}}">
-      {{ @intl.patients.worklist.worklistViews.noOwnerToggleView.noOwner }}{{#if noOwner}}{{far "xmark"}}{{/if}}
+    <button class="button worklist-list__sidebar-button worklist-list__owner-toggle-button" type="button" aria-pressed="{{ noOwner }}">
+      {{ @intl.patients.worklist.worklistViews.noOwnerToggleView.noOwner }}{{#if noOwner}}{{far "xmark" classes="worklist-list__owner-toggle-icon"}}{{/if}}
     </button>
   `,
   triggers: {
@@ -114,11 +117,20 @@ const NoOwnerToggleView = View.extend({
 });
 
 const worklistIcons = {
-  'owned-by': ['list'],
-  'shared-by': ['arrow-right-arrow-left'],
-  'new-past-day': ['angle-left', '1'],
-  'updated-past-three-days': ['angle-left', '3'],
-  'done-last-thirty-days': ['3', '0'],
+  'owned-by': [{ icon: 'user', classes: 'list-page__title-glyph worklist-list__title-glyph' }],
+  'shared-by': [{ icon: 'users', classes: 'list-page__title-glyph worklist-list__title-glyph' }],
+  'new-past-day': [
+    { icon: 'angle-left', classes: 'list-page__title-glyph worklist-list__title-glyph worklist-list__title-glyph--back' },
+    { icon: '1', classes: 'list-page__title-glyph worklist-list__title-glyph worklist-list__title-glyph--one' },
+  ],
+  'updated-past-three-days': [
+    { icon: 'angle-left', classes: 'list-page__title-glyph worklist-list__title-glyph worklist-list__title-glyph--back' },
+    { icon: '3', classes: 'list-page__title-glyph worklist-list__title-glyph worklist-list__title-glyph--three' },
+  ],
+  'done-last-thirty-days': [
+    { icon: '3', classes: 'list-page__title-glyph worklist-list__title-glyph worklist-list__title-glyph--three' },
+    { icon: '0', classes: 'list-page__title-glyph worklist-list__title-glyph worklist-list__title-glyph--zero' },
+  ],
 };
 
 const TitleLabelView = View.extend({
@@ -141,23 +153,17 @@ const ListTitleView = View.extend({
   regions: {
     label: '[data-label-region]',
     owner: '[data-owner-filter-region]',
-    ownerToggle: '[data-owner-toggle-region]',
   },
-  className: 'flex list-page__title-filter',
+  className: 'flex list-page__title-content',
   template: hbs`
-    <span class="list-page__title-icon">
+    <span class="list-page__title-icon worklist-list__title-icon">
       {{#each icons}}
-        {{far this}}
+        {{far icon classes=classes}}
       {{/each}}
     </span>
     <div data-label-region></div>
     <div data-owner-filter-region></div>
-    <span class="list-page__header-icon js-title-info">{{far "circle-info"}}</span>
-    <div data-owner-toggle-region></div>
   `,
-  ui: {
-    tooltip: '.js-title-info',
-  },
   templateContext() {
     return {
       owner: this.owner.get('name'),
@@ -176,16 +182,6 @@ const ListTitleView = View.extend({
   onRender() {
     this.showLabel();
     this.showOwnerDroplist();
-    this.showOwnerToggle();
-
-    const tooltipTemplate = this.model.isFlowType() ? FlowTooltipTemplate : ActionTooltipTemplate;
-    new Tooltip({
-      message: renderTemplate(tooltipTemplate, this.templateContext()),
-      uiView: this,
-      ui: this.ui.tooltip,
-      orientation: 'vertical',
-      shouldDelay: true,
-    });
   },
   showLabel() {
     const titleLabelView = new TitleLabelView({
@@ -215,50 +211,88 @@ const ListTitleView = View.extend({
 
     this.showChildView('owner', ownerDroplistView);
   },
-  showOwnerToggle() {
-    if (this.shouldShowClinician || !this.canViewAssignedActions) return;
-
-    const ownerToggleView = new NoOwnerToggleView({
-      model: this.model,
-    });
-
-    this.listenTo(ownerToggleView, 'click', () => {
-      this.triggerMethod('toggle:noOwner');
-    });
-
-    this.showChildView('ownerToggle', ownerToggleView);
-  },
 });
 
-const AllFiltersButtonView = View.extend({
-  tagName: 'button',
-  className: 'button--link-large',
-  template: hbs`{{far "sliders"}}<span>{{ @intl.patients.worklist.worklistViews.allFiltersButtonView.allFiltersButton }}</span> {{#if filtersCount}}({{filtersCount}}){{/if}}`,
-  triggers: {
-    'click': 'click',
-  },
-  modelEvents: {
-    'change:filtersCount': 'render',
-  },
+const AllFiltersButtonView = ListPageFiltersButtonView.extend({
+  controlsId: 'worklist-list-sidebar',
+  label: i18n.allFiltersButtonView.allFiltersButton,
 });
 
-const TableHeaderView = View.extend({
-  className: 'table-list__header list-page__list-header',
-  template: TableHeaderTemplate,
+const EmptyFindInListView = View.extend({
+  className: 'card-list__empty',
+  template: hbs`<h2>{{ @intl.patients.worklist.worklistViews.emptyFindInListView.noResults }}</h2>`,
+});
+
+const CountLoadingView = View.extend({
+  className: 'worklist-list__count-skeleton skeleton-loading',
+  attributes: {
+    'aria-hidden': 'true',
+  },
+  template: hbs`<span class="skeleton-loading__shape worklist-list__count-skeleton-shape"></span>`,
+});
+
+const ListLoadingView = View.extend({
+  className: 'card-list worklist-list__skeleton skeleton-loading',
+  attributes() {
+    return {
+      'aria-busy': 'true',
+      'aria-label': this.getLoadingText(),
+      'role': 'status',
+    };
+  },
+  template: ListLoadingTemplate,
+  getLoadingText() {
+    return this.getOption('isFlowList') ? i18n.loadingView.loadingFlows : i18n.loadingView.loadingActions;
+  },
   templateContext() {
     return {
+      items: new Array(3).fill(null),
       isFlowList: this.getOption('isFlowList'),
     };
   },
 });
 
-const EmptyFindInListView = View.extend({
-  className: 'table-list__empty-list',
-  template: hbs`<h2>{{ @intl.patients.worklist.worklistViews.emptyFindInListView.noResults }}</h2>`,
+const ListUpdatingView = View.extend({
+  className: 'worklist-list__updating',
+  attributes: {
+    'aria-live': 'polite',
+    'role': 'status',
+  },
+  template: hbs`{{ loadingText }}`,
+  templateContext() {
+    const loadingViewI18n = i18n.loadingView;
+    const loadingText = this.getOption('isFlowList') ? loadingViewI18n.updatingFlows : loadingViewI18n.updatingActions;
+
+    return { loadingText };
+  },
+});
+
+const ListErrorView = View.extend({
+  className: 'worklist-list__error',
+  attributes: {
+    'role': 'alert',
+  },
+  template: hbs`
+    <span>{{ message }}</span>
+    <button class="button button--text js-retry" type="button">{{ @intl.patients.worklist.worklistViews.loadingView.retry }}</button>
+  `,
+  triggers: {
+    'click .js-retry': 'retry',
+  },
+  templateContext() {
+    const loadingViewI18n = i18n.loadingView;
+    const message = this.getOption('isRefresh') ? loadingViewI18n.updateError : loadingViewI18n.loadError;
+
+    return { message };
+  },
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list__list list-page__list',
+  className: 'card-list list-page__list worklist-list__list',
+  attributes: {
+    'role': 'list',
+    'aria-busy': 'false',
+  },
   childView() {
     return this.isFlowList ? FlowItemView : ActionItemView;
   },
@@ -272,13 +306,14 @@ const ListView = CollectionView.extend({
   childViewOptions() {
     return {
       state: this.state,
+      selectedPatientId: this.selectedPatientId,
     };
   },
   childViewTriggers: {
     'render': 'listItem:render',
     'change:canEdit': 'listItem:canEdit',
-    'click:patientSidebarButton': 'click:patientSidebarButton',
     'select': 'select',
+    'click:patient': 'click:patient',
   },
   onListItemRender(view) {
     view.searchString = view.$el.text();
@@ -287,10 +322,11 @@ const ListView = CollectionView.extend({
     // NOTE: debounced in initialize
     this.triggerMethod('change:canEdit');
   },
-  initialize({ state, editableCollection }) {
+  initialize({ state, editableCollection, selectedPatientId }) {
     this.state = state;
     this.editableCollection = editableCollection;
     this.isFlowList = state.isFlowType();
+    this.selectedPatientId = selectedPatientId;
 
     this.onListItemCanEdit = debounce(this.onListItemCanEdit, 60);
 
@@ -299,6 +335,10 @@ const ListView = CollectionView.extend({
   onAttach() {
     this.searchList(null, this.state.get('searchQuery'));
   },
+  setPatientSelected(patientId) {
+    this.selectedPatientId = patientId;
+    this.children.each(view => view.setPatientSelected(patientId));
+  },
   /* istanbul ignore next: future proof */
   onRenderChildren() {
     if (!this.isAttached()) return;
@@ -306,6 +346,11 @@ const ListView = CollectionView.extend({
   },
   onSelect(selectedView, isShiftKeyPressed) {
     this.state.selectRange(this.editableCollection, selectedView.model, isShiftKeyPressed);
+  },
+  setLoading(isLoading) {
+    this.$el
+      .attr('aria-busy', String(isLoading))
+      .toggleClass('is-loading', isLoading);
   },
   searchList(state, searchQuery) {
     if (!searchQuery) {
@@ -330,8 +375,8 @@ const SortDroplist = Droplist.extend({
     headingText: i18n.sortDroplist.headingText,
   },
   viewOptions: {
-    className: 'button-filter',
-    template: hbs`{{far "arrow-down-arrow-up"}}{{text}}{{far "angle-down"}}`,
+    className: 'button worklist-list__sidebar-button',
+    template: hbs`{{far "arrow-down-arrow-up" classes="worklist-list__sort-icon"}}{{ text }}`,
   },
 });
 
@@ -340,8 +385,12 @@ export {
   ListTitleView,
   AllFiltersButtonView,
   SelectAllView,
+  CountLoadingView,
+  ListErrorView,
+  ListLoadingView,
+  ListUpdatingView,
   ListView,
-  TableHeaderView,
+  SidebarControlsView,
   SortDroplist,
   TypeToggleView,
   i18n,

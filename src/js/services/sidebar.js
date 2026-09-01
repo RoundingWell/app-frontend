@@ -9,12 +9,6 @@ export const SidebarMixin = {
     region.show(view, options);
     return view;
   },
-  showFooterView(name, view, options) {
-    const footerView = this.getView().getChildView('footer');
-    const region = footerView.getRegion(name);
-    region.show(view, options);
-    return view;
-  },
 };
 
 export default App.extend({

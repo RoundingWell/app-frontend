@@ -74,7 +74,7 @@ context('program flow page', function() {
       .wait('@routeProgramByProgramFlow');
 
     cy
-      .get('.program-flow__context-trail')
+      .get('.program-page__context-trail')
       .contains('Test Program')
       .click();
 
@@ -106,7 +106,7 @@ context('program flow page', function() {
       .wait('@routeProgramByProgramFlow');
 
     cy
-      .get('.program-flow__context-trail')
+      .get('.program-page__context-trail')
       .contains('Back to List')
       .click();
 
@@ -152,7 +152,13 @@ context('program flow page', function() {
       .get('.program-sidebar')
       .should('contain', 'Test Program')
       .should('contain', 'No details given')
-      .should('contain', 'On');
+      .should('contain', 'On')
+      .find('.program-sidebar__header')
+      .should($header => {
+        const menu = $header.find('.program-sidebar__context-menu')[0];
+
+        expect(menu.classList.contains('button--menu')).to.be.true;
+      });
 
     cy
       .get('.js-menu')
@@ -177,7 +183,7 @@ context('program flow page', function() {
       .click();
 
     cy
-      .get('.program-flow__context-trail')
+      .get('.program-page__context-trail')
       .should('contain', 'Testing');
   });
 
@@ -234,7 +240,7 @@ context('program flow page', function() {
 
     cy
       .get('@flowHeader')
-      .find('.program-action--standard')
+      .find('.program-action-state--standard')
       .click();
 
     cy
@@ -252,7 +258,7 @@ context('program flow page', function() {
 
     cy
       .get('@flowHeader')
-      .find('.program-action--automated')
+      .find('.program-action-state--automated')
       .click();
 
     cy
@@ -319,6 +325,8 @@ context('program flow page', function() {
   });
 
   specify('flow actions list', function() {
+    cy.viewport(2200, 900);
+
     cy
       .routeForm(fx => {
         fx.data = testForm;
@@ -386,6 +394,12 @@ context('program flow page', function() {
       .wait('@routeProgramByProgramFlow');
 
     cy
+      .get('.program-flow__list')
+      .should($list => {
+        expect($list[0].getBoundingClientRect().width).to.equal(1440);
+      });
+
+    cy
       .intercept('PATCH', `api/program-flows/${ testProgramFlowId }/actions`, {
         statusCode: 204,
         body: {},
@@ -395,27 +409,21 @@ context('program flow page', function() {
     cy
       .get('.program-flow__list')
       .as('actionList')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
       .find('.program-flow__sort-handle')
       .trigger('pointerdown', { button: 0, force: true })
       .trigger('dragstart', { force: true });
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .find('.fa-share-from-square');
 
     cy
-      .get('.table-list__item')
-      .first()
-      .next()
-      .find('.fa-file-lines');
-
-    cy
-      .get('.table-list__item')
+      .get('.action-card')
       .last()
-      .find('.table-list__icon--large')
+      .find('.work-card__state')
       .find('.action-icon--red .fa-caret-down');
 
     cy
@@ -479,13 +487,24 @@ context('program flow page', function() {
     cy
       .get('.program-flow__list')
       .as('actionList')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
       .should('contain', 'Second In List')
       .next()
       .should('contain', 'First In List')
       .next()
       .should('contain', 'Third In List');
+
+    cy
+      .get('@actionList')
+      .find('.js-sort')
+      .first()
+      .click({ force: true });
+
+    cy
+      .location('pathname')
+      .should('contain', `/program-flow/${ testProgramFlowId }`)
+      .and('not.contain', '/action/');
 
     cy
       .get('@actionList')
@@ -513,7 +532,7 @@ context('program flow page', function() {
     cy
       .get('.sidebar')
       .as('actionSidebar')
-      .find('.program-action--automated');
+      .find('.program-action-state--automated');
 
     cy
       .get('@actionList')
@@ -631,13 +650,13 @@ context('program flow page', function() {
       });
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .find('.fa-square-poll-horizontal')
       .should('not.exist');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .next()
       .find('.fa-square-poll-horizontal')
@@ -661,9 +680,9 @@ context('program flow page', function() {
 
     cy
       .get('@actionList')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
-      .click('top');
+      .click('bottom');
 
     cy
       .get('@actionSidebar')

@@ -1,80 +1,84 @@
-import { debounce } from 'underscore';
+import { debounce, extend } from 'underscore';
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+import 'scss/modules/card-list.scss';
+import 'scss/modules/loader.scss';
 import 'scss/modules/progress-bar.scss';
-import 'scss/modules/table-list.scss';
+import 'scss/modules/skeleton.scss';
 
 import intl from 'js/i18n';
-import PreloadRegion from 'js/regions/preload_region';
+import stopEventPropagation from 'js/utils/stop-event-propagation';
+import Optionlist from 'js/components/optionlist';
 
-import { CheckComponent, StateComponent, OwnerComponent, DueComponent, TimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { CheckComponent, StateComponent, CardOwnerComponent, CardDueComponent, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import SharedSelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
-
-import HeaderTemplate from './header.hbs';
 import ActionItemTemplate from './action-item.hbs';
+import HeaderTemplate from './header.hbs';
+import LayoutTemplate from './layout.hbs';
+import LoadingTemplate from './loading.hbs';
 
-import 'scss/domain/action-icons.scss';
+import 'scss/domain/work-card.scss';
+import 'scss/domain/action-card.scss';
+import 'scss/domain/flow-card.scss';
+import 'scss/domain/patient-list.scss';
 import '../patient.scss';
 import './patient-flow.scss';
 
-export const i18n = intl.patients.patient.flowViews;
-
-const ContextTrailView = View.extend({
-  initialize() {
-    this.patient = this.model.getPatient();
+const FlowLoadingView = View.extend({
+  className: 'loader patient__content patient__content--scroll patient-detail-page patient-flow__frame patient-flow__loader',
+  attributes: {
+    'aria-busy': 'true',
+    'role': 'status',
   },
-  className: 'patient-flow__context-trail',
-  template: hbs`
-    {{#if hasLatestList}}
-      <a class="js-back patient-flow__context-link">
-        {{fas "chevron-left"}}{{ @intl.patients.patient.flowViews.contextBackBtn }}
-      </a>
-      {{fas "chevron-right"}}
-    {{/if}}
-    <a class="js-patient patient-flow__context-link">{{ firstName }} {{ lastName }}</a>{{fas "chevron-right"}}{{ name }}
-  `,
-  triggers: {
-    'click .js-back': 'click:back',
-    'click .js-patient': 'click:patient',
-  },
-  onClickBack() {
-    Radio.request('history', 'go:latestList');
-  },
-  onClickPatient() {
-    Radio.trigger('event-router', 'patient:dashboard', this.patient.id);
-  },
+  template: LoadingTemplate,
   templateContext() {
-    return {
-      hasLatestList: Radio.request('history', 'has:latestList'),
-      firstName: this.patient.get('first_name'),
-      lastName: this.patient.get('last_name'),
-    };
+    return { items: new Array(2).fill(null) };
   },
+});
+
+const FlowFormButton = FormButton.extend({
+  className: 'button button--icon action-form-button patient-flow__action-form',
+});
+
+const FlowDetailsTooltip = DetailsTooltip.extend({
+  className: 'button button--icon action-details-tooltip patient-flow__action-details',
+});
+
+export const i18n = intl.patients.patient.flow.flowViews;
+const FlowHeaderOwnerComponent = FlowOwnerComponent.extend({
+  viewOptions() {
+    const options = FlowOwnerComponent.prototype.viewOptions.call(this);
+
+    return extend({}, options, {
+      className: `${ options.className } patient-flow__owner`,
+    });
+  },
+});
+
+const FlowHeaderReadOnlyOwnerView = ReadOnlyOwnerView.extend({
+  className: 'patient-readonly patient-readonly--compact patient-readonly__owner patient-flow__owner js-no-click',
 });
 
 const HeaderView = View.extend({
   className: 'patient-flow__header',
   modelEvents: {
-    'editing': 'onEditing',
     'change': 'render',
-    'change:_progress': 'onChangeFlowProgress',
-  },
-  onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
   },
   template: HeaderTemplate,
   regions: {
     state: '[data-state-region]',
     owner: '[data-owner-region]',
   },
-  triggers: {
-    'click': 'edit',
-  },
-  ui: {
-    progress: '.js-progress',
+  templateContext() {
+    return {
+      canEdit: this.model.canEdit(),
+    };
   },
   onRender() {
     this.canEdit = this.model.canEdit();
@@ -84,7 +88,7 @@ const HeaderView = View.extend({
   },
   showState() {
     if (!this.canEdit) {
-      const readOnlyStateView = new ReadOnlyStateView({ model: this.model, isCompact: true });
+      const readOnlyStateView = new ReadOnlyStateView({ model: this.model, showLabel: true });
       this.showChildView('state', readOnlyStateView);
       return;
     }
@@ -93,6 +97,7 @@ const HeaderView = View.extend({
       flow: this.model,
       stateId: this.model.getState().id,
       isCompact: true,
+      showLabel: true,
     });
 
     this.listenTo(stateComponent, 'change:state', state => {
@@ -103,14 +108,14 @@ const HeaderView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model, isCompact: true });
+      const readOnlyOwnerView = new FlowHeaderReadOnlyOwnerView({ model: this.model, isCompact: true });
       this.showChildView('owner', readOnlyOwnerView);
       return;
     }
 
     const isDisabled = this.model.isDone();
     const program = this.model.getProgram();
-    const ownerComponent = new FlowOwnerComponent({
+    const ownerComponent = new FlowHeaderOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
@@ -123,22 +128,65 @@ const HeaderView = View.extend({
 
     this.showChildView('owner', ownerComponent);
   },
-  onChangeFlowProgress() {
-    const prog = this.model.get('_progress');
-    this.ui.progress.attr({ value: prog.complete, max: prog.total });
+});
+
+const ProgressView = View.extend({
+  className: 'patient-flow__progress patient-list__flow-progress',
+  template: hbs`
+    <progress class="progress-bar" value="{{ _progress.complete }}" max="{{ _progress.total }}" aria-label="{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}"></progress>
+    <span class="patient-list__flow-progress-label">{{ _progress.complete }} / {{formatMessage (intlGet "patients.shared.listViews.countView.actionsCount") itemCount=_progress.total}}</span>
+  `,
+  modelEvents: {
+    'change:_progress': 'render',
+  },
+});
+
+const MenuView = View.extend({
+  tagName: 'button',
+  className: 'button button--icon button--menu patient-detail-page__menu patient-flow__menu js-menu',
+  attributes: {
+    'aria-label': i18n.menu.headingText,
+    'title': i18n.menu.headingText,
+    'type': 'button',
+  },
+  template: hbs`{{far "ellipsis"}}`,
+  triggers: {
+    'click': 'click',
+  },
+  onClick() {
+    const optionlist = new Optionlist({
+      ui: this.$el,
+      uiView: this,
+      headingText: i18n.menu.headingText,
+      itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.patient.flow.flowViews.menu.delete }}</span>`,
+      lists: [{ collection: new Backbone.Collection([{}]) }],
+      align: 'right',
+      popWidth: 248,
+    });
+
+    this.listenTo(optionlist, 'select', () => {
+      this.triggerMethod('delete');
+    });
+
+    optionlist.show();
   },
 });
 
 const EmptyView = View.extend({
-  className: 'table-list__empty-list',
-  template: hbs`<h2>{{ @intl.patients.patient.flowViews.emptyView }}</h2>`,
+  className: 'card-list__empty',
+  attributes: {
+    role: 'listitem',
+  },
+  template: hbs`<h2>{{ @intl.patients.patient.flow.flowViews.emptyView }}</h2>`,
 });
 
 const ActionItemView = View.extend({
-  className: 'table-list__item',
+  className: 'work-card action-card patient-flow__action-item',
+  attributes: {
+    role: 'listitem',
+  },
   modelEvents: {
     'change': 'render',
-    'editing': 'onEditing',
   },
   initialize({ state }) {
     this.state = state;
@@ -158,8 +206,7 @@ const ActionItemView = View.extend({
   templateContext() {
     return {
       hasForm: this.model.getForm(),
-      icon: this.model.hasOutreach() ? 'share-from-square' : 'file-lines',
-      hasAttachments: this.model.hasAttachments(),
+      attachmentCount: this.model.getFiles().length,
       commentCount: this.model.commentCount(),
     };
   },
@@ -172,21 +219,30 @@ const ActionItemView = View.extend({
     dueTime: '[data-due-time-region]',
     form: '[data-form-region]',
   },
-  triggers: {
-    'click': 'click',
-    'click .js-no-click': 'prevent-row-click',
+  events: {
+    'click .js-action-surface': 'onClickSurface',
+    'click .js-no-click': stopEventPropagation,
+    'click .js-primary': 'onClickPrimary',
+    'click .js-attachments': 'onClickAttachments',
+    'click .js-comments': 'onClickComments',
   },
-  onClick() {
-    Radio.trigger('event-router', 'flow:action', this.model.getFlow().id, this.model.id);
+  navigateToAction(entryTarget) {
+    Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id, entryTarget);
   },
-  onEditing(isEditing) {
-    this.isEditing = isEditing;
-
-    const isSelected = this.state.isSelected(this.model);
-
-    if (isSelected) return;
-
-    this.$el.toggleClass('is-selected', isEditing);
+  onClickSurface() {
+    this.navigateToAction();
+  },
+  onClickPrimary(event) {
+    event.stopPropagation();
+    this.navigateToAction();
+  },
+  onClickAttachments(event) {
+    event.stopPropagation();
+    this.navigateToAction({ section: 'attachments' });
+  },
+  onClickComments(event) {
+    event.stopPropagation();
+    this.navigateToAction({ section: 'comments' });
   },
   onRender() {
     const canEdit = this.canEdit;
@@ -206,8 +262,6 @@ const ActionItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    if (this.isEditing) return;
-
     this.$el.toggleClass('is-selected', isSelected);
   },
   showCheck() {
@@ -215,7 +269,11 @@ const ActionItemView = View.extend({
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({ state: { isSelected } });
+    const checkComponent = new CheckComponent({
+      deselectLabel: intl.patients.shared.actionsViews.deselectAction,
+      selectLabel: intl.patients.shared.actionsViews.selectAction,
+      state: { isSelected },
+    });
 
     this.listenTo(checkComponent, {
       'select'(domEvent) {
@@ -229,11 +287,11 @@ const ActionItemView = View.extend({
   showDetailsTooltip() {
     if (!this.model.get('details')) return;
 
-    this.showChildView('details', new DetailsTooltip({ model: this.model }));
+    this.showChildView('details', new FlowDetailsTooltip({ model: this.model }));
   },
   showState() {
     if (!this.canEdit) {
-      const readOnlyStateView = new ReadOnlyStateView({ model: this.model, isCompact: true });
+      const readOnlyStateView = new ReadOnlyStateView({ model: this.model });
       this.showChildView('state', readOnlyStateView);
       return;
     }
@@ -248,14 +306,14 @@ const ActionItemView = View.extend({
   },
   showOwner() {
     if (!this.canEdit) {
-      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model, isCompact: true });
+      const readOnlyOwnerView = new ReadOnlyOwnerView({ model: this.model });
       this.showChildView('owner', readOnlyOwnerView);
       return;
     }
 
     const isDisabled = this.model.isDone();
     const program = this.model.getProgram();
-    this.ownerComponent = new OwnerComponent({
+    this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
@@ -276,7 +334,7 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.model.isDone();
-    this.dueDateComponent = new DueComponent({
+    this.dueDateComponent = new CardDueComponent({
       date: this.model.get('due_date'),
       isCompact: true,
       state: { isDisabled },
@@ -297,7 +355,7 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
-    this.dueTimeComponent = new TimeComponent({
+    this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
       isCompact: true, state: { isDisabled },
       isOverdue: this.model.isOverdue(),
@@ -312,12 +370,15 @@ const ActionItemView = View.extend({
   showForm() {
     if (!this.model.getForm()) return;
 
-    this.showChildView('form', new FormButton({ model: this.model }));
+    this.showChildView('form', new FlowFormButton({ model: this.model }));
   },
 });
 
 const ListView = CollectionView.extend({
-  className: 'table-list__list list-page__list patient-flow__list',
+  className: 'card-list patient-flow__list',
+  attributes: {
+    role: 'list',
+  },
   childView: ActionItemView,
   childViewOptions() {
     return {
@@ -348,36 +409,25 @@ const ListView = CollectionView.extend({
 });
 
 const LayoutView = View.extend({
-  className: 'patient-flow__frame',
-  template: hbs`
-    <div class="patient-flow__layout">
-      <div data-context-trail-region></div>
-      <div class="patient-flow__header-container" data-header-region></div>
-      <div class="patient-flow__actions">
-        <div data-select-all-region></div>
-        <div data-tools-region></div>
-      </div>
-      <div class="table-list patient-flow__table-list">
-        <div class="table-list__header list-page__list-header"></div>
-        <div class="table-list__list list-page__list" data-action-list-region></div>
-      </div>
-    </div>
-    <div class="patient-flow__sidebar" data-sidebar-region></div>
-  `,
+  className: 'patient__content patient__content--scroll patient-detail-page patient-flow__frame',
+  template: LayoutTemplate,
   regions: {
-    contextTrail: {
-      el: '[data-context-trail-region]',
+    header: '[data-header-region]',
+    menu: {
+      el: '[data-menu-region]',
       replaceElement: true,
     },
-    header: '[data-header-region]',
-    sidebar: '[data-sidebar-region]',
+    activity: '[data-activity-region]',
     actionList: {
       el: '[data-action-list-region]',
-      regionClass: PreloadRegion,
       replaceElement: true,
     },
     tools: {
       el: '[data-tools-region]',
+      replaceElement: true,
+    },
+    progress: {
+      el: '[data-progress-region]',
       replaceElement: true,
     },
     selectAll: {
@@ -385,29 +435,24 @@ const LayoutView = View.extend({
       replaceElement: true,
     },
   },
+  ui: {
+    actions: '.js-actions',
+  },
+  setEditing(isEditing) {
+    this.ui.actions.toggleClass('is-editing', isEditing);
+  },
 });
 
-const SelectAllView = View.extend({
-  tagName: 'button',
-  className: 'button--checkbox u-margin--r-16',
-  attributes() {
-    if (this.getOption('isDisabled')) return { disabled: 'disabled' };
-  },
-  triggers: {
-    'click': 'click',
-  },
-  getTemplate() {
-    if (this.getOption('isSelectAll')) return hbs`{{fas "square-check"}}`;
-    if (this.getOption('isSelectNone') || this.getOption('isDisabled')) return hbs`{{fal "square"}}`;
-
-    return hbs`{{fas "square-minus"}}`;
-  },
+const SelectAllView = SharedSelectAllView.extend({
+  className: 'button button--checkbox patient-flow__select-all',
 });
 
 export {
+  FlowLoadingView,
   LayoutView,
-  ContextTrailView,
   HeaderView,
   ListView,
+  MenuView,
+  ProgressView,
   SelectAllView,
 };

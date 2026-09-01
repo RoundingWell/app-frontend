@@ -7,17 +7,15 @@ import intl from 'js/i18n';
 
 import Droplist from 'js/components/droplist';
 
-import './form-component.scss';
-
 const i18n = intl.programs.shared.components.formComponent;
 
 const FormTemplate = hbs`
-  <button class="js-button button-secondary button__group flex-grow" {{#if isDisabled}}disabled{{/if}}>
+  <button class="js-button button button--secondary flex-grow" type="button" {{#if isDisabled}}disabled{{/if}}>
     {{far "square-poll-horizontal"}}<span>{{ name }}</span>
   </button>
 `;
 const NoFormTemplate = hbs`
-  <button class="js-button button-secondary w-100" {{#if isDisabled}}disabled{{/if}}>
+  <button class="js-button button button--secondary w-100" type="button" {{#if isDisabled}}disabled{{/if}}>
     {{far "square-poll-horizontal"}}<span>{{ @intl.programs.shared.components.formComponent.defaultText }}</span>
   </button>
 `;

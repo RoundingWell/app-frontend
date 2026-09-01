@@ -10,6 +10,7 @@ import './tooltip.scss';
 const CLASS_OPTIONS = [
   'className',
   'delay',
+  'id',
   'ignoreEl',
   'message',
   'messageHtml',
@@ -21,6 +22,14 @@ const CLASS_OPTIONS = [
 ];
 
 const TooltipView = View.extend({
+  attributes() {
+    const id = this.getOption('id');
+
+    return {
+      ...(id && { id }),
+      'role': 'tooltip',
+    };
+  },
   template: hbs`{{ message }}{{{ messageHtml }}}`,
   templateContext() {
     return {
@@ -56,6 +65,10 @@ export default Component.extend({
     this.ui.on('mouseleave.tooltip', bind(this.hideTooltip, this));
 
     this.ui.on('pointerdown.tooltip', bind(this.showTooltip, this));
+
+    this.ui.on('focus.tooltip', bind(this.showTooltip, this));
+
+    this.ui.on('blur.tooltip', bind(this.hideTooltip, this));
   },
   showTooltip() {
     clearTimeout(this.delayTimeout);
@@ -80,6 +93,7 @@ export default Component.extend({
   viewOptions() {
     return {
       className: result(this, 'className'),
+      id: result(this, 'id'),
       message: result(this, 'message'),
       messageHtml: result(this, 'messageHtml'),
     };

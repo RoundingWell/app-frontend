@@ -3,6 +3,8 @@ import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView, Region } from 'marionette';
 
+import LayoutTemplate from './layout.hbs';
+
 import './datepicker.scss';
 
 const LayoutView = View.extend({
@@ -13,14 +15,7 @@ const LayoutView = View.extend({
     monthPicker: '[data-month-picker-region]',
     actions: '[data-actions-region]',
   },
-  template: hbs`
-    <div data-month-picker-region></div>
-    <div class="datepicker__body">
-      {{#each dayOfWeek}}<div class="datepicker__day">{{formatDateTime this "dd"}}</div>{{/each}}
-      <div data-calendar-region></div>
-    </div>
-    <div data-actions-region></div>
-  `,
+  template: LayoutTemplate,
   templateContext() {
     const dayOfWeek = times(7, index => {
       return dayjs().weekday(index);

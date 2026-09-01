@@ -1,0 +1,7 @@
+<div class="patient-modal__field"><div class="patient-modal__field-label">{{ @intl.globals.patientModal.patientModalTemplate.firstName }}</div><div class="patient-modal__field-control" data-first-name-region></div></div>
+<div class="patient-modal__field"><div class="patient-modal__field-label">{{ @intl.globals.patientModal.patientModalTemplate.lastName }}</div><div class="patient-modal__field-control" data-last-name-region></div></div>
+<div class="patient-modal__field"><div class="patient-modal__field-label">{{ @intl.globals.patientModal.patientModalTemplate.dateOfBirth }}</div><div class="patient-modal__field-control" data-dob-region></div></div>
+<div class="patient-modal__field"><div class="patient-modal__field-label">{{ @intl.globals.patientModal.patientModalTemplate.sex }}</div><div class="patient-modal__field-control" data-sex-region></div></div>
+{{#unless isNew}}
+  <div class="patient-modal__field"><div class="patient-modal__field-label">{{ @intl.globals.patientModal.patientModalTemplate.workspaces }}</div><div class="patient-modal__field-control" data-workspaces-region></div></div>
+{{/unless}}

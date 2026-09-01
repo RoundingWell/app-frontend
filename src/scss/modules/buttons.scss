@@ -1,23 +1,27 @@
 // https://marvelapp.com/1h393fb6/screen/59639430
 
 .button {
-  background: none;
-  border: 1px solid #{$black-90};
-  border-radius: 4px;
+  align-items: var(--button-align-items, normal);
+  background: var(--button-background, none);
+  border: var(--button-border-width, 1px) solid var(--button-border-color, #{$black-90});
+  border-radius: var(--button-border-radius, 4px);
+  box-shadow: var(--button-box-shadow, none);
   cursor: pointer;
-  display: inline-block;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 16px;
+  display: var(--button-display, inline-block);
+  font-size: var(--button-font-size, 14px);
+  font-weight: var(--button-font-weight, 600);
+  justify-content: var(--button-justify-content, normal);
+  line-height: var(--button-line-height, 16px);
+  min-height: var(--button-min-height, auto);
   overflow: hidden;
-  padding: 8px 16px;
+  padding: var(--button-padding, 8px 16px);
   position: relative;
   text-decoration: none;
   text-overflow: ellipsis;
-  transition: background-color 0.15s;
-  transition-timing-function: linear;
+  transition: background-color 0.15s linear;
   vertical-align: middle;
   white-space: nowrap;
+  width: var(--button-width, auto);
 
   &.is-disabled,
   &[disabled] {
@@ -38,17 +42,14 @@
   }
 }
 
-.button--large {
-  @extend .button;
-
-  font-size: 16px;
-  padding: 8px 40px;
+.button[hidden] {
+  display: none;
 }
 
-.button-primary {
-  @extend .button;
-
-  color: color(light_blue);
+.button--outline {
+  background: var(--button-background, var(--color-surface));
+  border-color: var(--button-border-color, var(--color-chip-border));
+  color: color(blue);
   text-align: left;
 
   &:hover:enabled {
@@ -63,18 +64,11 @@
     border-color: color(light_blue);
     color: #{$white};
   }
-
-  .icon.fa-angle-down {
-    font-size: 12px;
-    vertical-align: -0.125em;
-  }
 }
 
-.button-secondary {
-  @extend .button;
-
+.button--secondary {
   color: #{$black-20};
-  line-height: 16px;
+  line-height: var(--button-line-height, 16px);
   text-align: left;
 
   &:hover:enabled {
@@ -89,71 +83,63 @@
   }
 }
 
-.button-secondary--compact {
-  @extend .button-secondary;
-
-  font-size: 12px;
-  line-height: 14px;
-  padding: 8px;
-}
-
-.button-filter {
-  @extend .button;
-
-  background: #{$white};
+.button--compact {
+  align-items: var(--button-align-items, center);
+  background: var(--button-background, var(--color-chip-background));
+  border-color: var(--button-border-color, var(--color-chip-border));
+  border-radius: var(--button-border-radius, 16px);
   color: #{$black-20};
-  font-size: 12px;
-  line-height: 1;
+  display: var(--button-display, inline-flex);
+  font-size: var(--button-font-size, 12px);
+  font-weight: var(--button-font-weight, 500);
+  height: var(--button-height, 28px);
+  line-height: var(--button-line-height, 20px);
+  min-height: var(--button-min-height, 28px);
+  padding: var(--button-padding, 0 8px);
+  text-align: left;
 
   &:hover:enabled {
-    background-color: #{$black-95};
-    border-color: #{$black-80};
+    background-color: #{$white};
+    border-color: #{$black-60};
   }
 
   &:active:enabled,
   &:focus {
     background-color: #{$black-90};
-    border-color: #{$black-90};
+    border-color: #{$black-60};
   }
 
-  .icon.fa-angle-down {
-    font-size: 12px;
-    margin-left: 8px;
-    margin-top: 4px;
+  .icon:first-child:not(:last-child) {
+    margin-right: var(--space-1);
   }
 }
 
-.button-filter-toggle {
-  @extend .button;
+.button-group {
+  align-items: center;
+  display: inline-flex;
+}
 
-  color: color(blue);
-  font-size: 12px;
-  line-height: 16px;
-
-  &:hover:enabled {
-    background-color: color(light_blue, light);
-    border-color: color(light_blue);
-    color: color(light_blue);
+.button-group--joined {
+  > .button:not(:first-child),
+  > :not(.button, :first-child) .button {
+    border-left-color: var(--button-group-divider-color, var(--color-chip-border));
   }
 
-  &:active:enabled,
-  &:focus {
-    background-color: color(light_blue);
-    border-color: color(light_blue);
-    color: #{$white};
-  }
-
-  .icon {
-    font-size: 12px;
-    margin-left: 8px;
+  > .button:not(:last-child),
+  > :not(.button, :last-child) .button {
+    border-right-width: 0;
   }
 }
 
-.button--blue {
-  @extend .button;
+.button--pill {
+  border-radius: var(--button-border-radius, 16px);
+  min-height: var(--button-min-height, 32px);
+  padding: var(--button-padding, 5px 12px);
+}
 
-  background-color: color(blue);
-  border-color: color(blue);
+.button--primary {
+  background: var(--button-background, #{color(blue)});
+  border-color: var(--button-border-color, #{color(blue)});
   color: #{$white};
   font-weight: 700;
 
@@ -169,11 +155,9 @@
   }
 }
 
-.button--red {
-  @extend .button;
-
-  background-color: color(red);
-  border-color: color(red);
+.button--danger {
+  background: var(--button-background, #{color(red)});
+  border-color: var(--button-border-color, #{color(red)});
   color: #{$white};
   font-weight: 700;
 
@@ -187,11 +171,9 @@
   }
 }
 
-.button--green {
-  @extend .button;
-
-  background-color: color(green);
-  border-color: color(green);
+.button--positive {
+  background: var(--button-background, #{color(green)});
+  border-color: var(--button-border-color, #{color(green)});
   color: #{$white};
   font-weight: 700;
 
@@ -205,18 +187,13 @@
   }
 }
 
-.button--grey {
-  @extend .button;
-
-  background-color: #{$black-20};
-  border-color: #{$black-20};
+.button--muted {
+  background: var(--button-background, #{$black-20});
+  border-color: var(--button-border-color, #{$black-20});
   color: #{$white};
   font-weight: 700;
 
-  &:hover:enabled {
-    background-color: #{$black-40};
-  }
-
+  &:hover:enabled,
   &:active:enabled,
   &:focus {
     background-color: #{$black-40};
@@ -224,9 +201,7 @@
 }
 
 .button--text {
-  @extend .button;
-
-  border-color: transparent;
+  border-color: var(--button-border-color, transparent);
   color: #{$black-60};
 
   &:hover,
@@ -236,12 +211,10 @@
 }
 
 .button--link {
-  @extend .button;
-
-  border-color: transparent;
+  border-color: var(--button-border-color, transparent);
   color: color(blue);
-  font-size: 12px;
-  padding: 2px 0;
+  font-size: var(--button-font-size, 12px);
+  padding: var(--button-padding, 2px 0);
 
   &:hover,
   &:focus {
@@ -254,14 +227,10 @@
   }
 }
 
-.button--link-large {
-  @extend .button--link;
-
-  font-size: 14px;
-}
-
 .button--icon {
+  border-width: var(--button-border-width, 0);
   color: #{$black-60};
+  padding: var(--button-padding, 0);
   transition: color 0.15s linear;
 
   &:hover,
@@ -269,74 +238,85 @@
   &.is-active {
     color: #{$black-20};
   }
+
+  &:focus-visible {
+    outline: 2px solid color(blue);
+    outline-offset: 2px;
+  }
+}
+
+.button--menu {
+  align-items: center;
+  background: transparent;
+  border-radius: 4px;
+  display: inline-flex;
+  flex: none;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+
+  &:hover {
+    background: var(--color-control-background);
+  }
 }
 
 .button--checkbox {
-  font-weight: 600;
+  align-items: var(--button-align-items, center);
+  border-width: var(--button-border-width, 0);
+  display: var(--button-display, inline-flex);
+  height: 32px;
+  justify-content: var(--button-checkbox-justify-content, center);
+  padding: var(--button-padding, 0);
+  width: 32px;
+
+  &:focus-visible {
+    outline: 2px solid color(blue);
+    outline-offset: 2px;
+  }
 
   &:disabled {
     cursor: default;
     opacity: 0.5;
   }
 
-  .icon {
-    color: #{$black-80};
+  .button__checkbox-icon {
+    height: 16px;
+    width: 16px;
   }
 
-  .icon:first-child:not(:last-child) {
+  .button__checkbox-icon:first-child:not(:last-child) {
     margin-right: 8px;
   }
 
-  &:hover:not(:disabled) .icon {
+  &:hover:not(:disabled) .button__checkbox-icon {
     color: $black-20;
   }
+}
 
-  .icon.fa-square-check,
-  .icon.fa-square-minus {
-    color: color(green);
+.button__checkbox-icon--empty {
+  border: 1.5px solid currentcolor;
+  border-radius: 2px;
+  box-sizing: border-box;
+  color: #{$black-80};
+
+  use {
+    display: none;
   }
+}
+
+.button__checkbox-icon--selected,
+.button__checkbox-icon--mixed {
+  color: color(blue);
+}
+
+.button__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .button__value--indeterminate {
   color: #{$black-60};
   font-style: italic;
   font-weight: bold;
-}
-
-.button__group {
-  border-radius: 0;
-
-  + .button__group:not(:hover) {
-    border-left-color: transparent;
-  }
-
-  &:first-child {
-    border-radius: 4px 0 0 4px;
-  }
-
-  &:last-child {
-    border-radius: 0 4px 4px 0;
-  }
-
-  &:first-child:last-child {
-    border-radius: 4px;
-  }
-}
-
-.button__drop-list-action {
-  border-bottom-right-radius: 0;
-  border-top-right-radius: 0;
-  margin-right: 1px;
-}
-
-.button__drop-list-select {
-  border-radius: 0 4px 4px 0;
-  padding: 0;
-  width: 24px;
-
-  .icon {
-    font-size: 12px;
-    vertical-align: -0.125em;
-    width: 1em;
-  }
 }

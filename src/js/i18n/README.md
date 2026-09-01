@@ -4,17 +4,28 @@
 
 For the provider app we use [FormatJS](https://formatjs.io/) directly through a small
 Handlebars adapter in `src/js/i18n/intl.js`. Our translation will be key based and found
-in the directory [`/assets/js/i18n`](https://github.com/RoundingWell/app-frontend/tree/develop/src/js/i18n).
+under [`src/js/i18n/en-US`](https://github.com/RoundingWell/app-frontend/tree/develop/src/js/i18n/en-US).
 
-The key naming strategy currently under consideration is:
-`view.directory.fileViews.viewName.stringContextName` where the first part is the
-the directory of the view file or template delimited by "." followed by a camelCased version
-of the file in that directory; followed by a camelCased version of the ViewClass (if for a view);
-followed by the camelCased string contextual name. We should attempt to describe what the string
-is _doing_ in context, not what the text necessarily _says_. IE perhaps the text string we are
-replacing is "Save". Rather than name the context name it could be saveLabel (or just label
-if the View name is particularly descriptive.) This way the key is not ambiguous as far as,
-"Is it for the button or the label?" etc.
+Locale files are divided by stable production ownership:
+
+- `clinicians.yml`, `dashboards.yml`, `globals.yml`, `patients.yml`, and `programs.yml`
+  correspond to the app ownership roots.
+- `shared.yml` contains cross-domain UI infrastructure, including the existing
+  `components`, `regions`, and `shared` key namespaces. It also retains the root-level
+  `locales` metadata used by the runtime and PhraseApp upload.
+- Every top-level namespace under `careOptsFrontend` must belong to exactly one file. The
+  locale composer rejects duplicate namespaces instead of silently replacing one tree.
+- Patient form translations live in `patients.yml` with the rest of the patient-owned
+  interface.
+
+File placement and key paths follow stable product ownership, but do not need to mirror
+every physical directory segment. Moving a module alone does not justify renaming its
+translation keys. When product ownership intentionally changes, move the translation key
+and all consumers together. New keys should use the nearest stable product namespace,
+followed by the module, view or template, and a contextual string name.
+
+Describe what the string is doing in context, not only what it says. For example, use
+`saveButtonText` rather than `save` when the shorter name would be ambiguous.
 
 Considering the following hypothetical locale example:
 ```json
@@ -103,14 +114,19 @@ Additionally we'll be using `format('l')` style localized formats whenever possi
 See "Localized Formats" at [day.js.org](https://day.js.org/docs/en/display/format#localized-formats)
 
 ## [PhraseApp](https://phraseapp.com)
-When uploading a new version of en-US.yml to PhraseApp:
+When uploading changed files from `src/js/i18n/en-US` to PhraseApp:
 1. Select "Symfony YAML (.yml)" as the format (*not the beta version)
 2. Select "Use existing local" and "en-US"
 
-Any time strings are changed or added to the YAML file, it must be uploaded to PhraseApp. **Important:** Whenever the file is uploaded to PhraseApp, the branch containing the changes must also be deployed to translate.roundingwell.com.
+Any file with changed or added strings must be uploaded to PhraseApp. **Important:**
+Whenever locale files are uploaded to PhraseApp, the branch containing the changes must
+also be deployed to translate.roundingwell.com.
 
 When existing strings have been modified, you'll need to tell PhraseApp to update all existing translations by checking "Update translations" when uploading the YAML file.
 
-Once the YAML file has been uploaded, PhraseApp should display that the English locale has 0 untranslated keys. If it says there are untranslated keys, review the YAML changes to ensure nothing is incorrect. It will also display any keys that have been removed. Delete those unused keys.
+Once the changed YAML files have been uploaded, PhraseApp should display that the English
+locale has 0 untranslated keys. If it says there are untranslated keys, review the YAML
+changes to ensure nothing is incorrect. It will also display any keys that have been
+removed. Delete those unused keys.
 
 Strings with complex logic such as the use of `select`s or nested logic may require extra clarification in the comments for that individual string. Go to Locales > en-US, and search for the string. Click the Comments tab to add further explanation.

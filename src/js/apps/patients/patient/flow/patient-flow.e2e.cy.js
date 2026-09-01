@@ -19,6 +19,7 @@ import { roleNoFilterEmployee, roleTeamEmployee } from 'support/api/roles';
 import { workspaceOne } from 'support/api/workspaces';
 import { getComment } from 'support/api/comments';
 import { getFile } from 'support/api/files';
+import { getActivity } from 'support/api/events';
 
 const tomorrow = testDateAdd(1);
 
@@ -43,7 +44,60 @@ context('patient flow page', function() {
 
   beforeEach(function() {
     cy
-      .routesForPatientDashboard();
+      .routesForPatientDashboard()
+      .routeFlowActivity();
+  });
+
+  specify('shows stable flow structure while loading', function() {
+    const patient = getPatient();
+    const flow = getFlow({
+      relationships: {
+        patient: getRelationship(patient),
+      },
+    });
+    const actions = getActions({
+      relationships: {
+        flow: getRelationship(flow),
+        patient: getRelationship(patient),
+      },
+    });
+
+    cy
+      .routePatient(fx => {
+        fx.data = patient;
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = flow;
+        fx.included = [patient];
+
+        return fx;
+      }, { delay: 1000 })
+      .intercept('GET', '/api/flows/**/actions*', {
+        delay: 1000,
+        body: { data: actions, included: [flow, patient] },
+      })
+      .as('routeDelayedFlowActions')
+      .visit(`/patient/${ patient.id }/flow/${ flow.id }`);
+
+    cy
+      .get('.patient-flow__loader')
+      .should('be.visible')
+      .and('have.attr', 'aria-busy', 'true')
+      .find('.patient-flow-loading__item')
+      .should('have.length', 2);
+
+    cy
+      .get('.patient-flow-loading__skeleton')
+      .should('contain', 'Activity')
+      .find('.add-workflow__button, .button--checkbox')
+      .should('not.exist');
+
+    cy
+      .wait(['@routeFlow', '@routeDelayedFlowActions'])
+      .get('.patient-flow__loader')
+      .should('not.exist');
   });
 
   specify('context trail', function() {
@@ -68,7 +122,10 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routePatientByFlow()
+      .routePatient(fx => {
+        fx.data = testPatient;
+        return fx;
+      })
       .routeFlowActions()
       .visit('/worklist/owned-by')
       .wait('@routeActions');
@@ -80,47 +137,167 @@ context('patient flow page', function() {
       .wait('@routeFlows');
 
     cy
-      .get('.table-list')
-      .find('.table-list__item')
+      .get('.card-list')
+      .find('.flow-card')
       .first()
-      .click('top')
-      .wait('@routeFlow')
-      .wait('@routePatientByFlow');
+      .click('bottom')
+      .wait('@routeFlow');
 
     cy
-      .get('.patient-flow__context-trail')
+      .get('.patient__context-trail')
       .should('contain', 'Test Flow')
-      .contains('Test Patient')
-      .click();
-
-    cy
-      .url()
-      .should('contain', `/patient/dashboard/${ testPatient.id }`);
-
-    cy
-      .go('back');
-
-    cy
-      .get('.patient-flow__context-trail')
       .contains('Back to List')
       .click();
 
     cy
       .url()
       .should('contain', '/worklist/owned-by');
+
+    cy
+      .get('.card-list')
+      .find('.flow-card')
+      .first()
+      .click('bottom')
+      .wait('@routeFlow');
+
+    cy.url().as('flowUrl');
+
+    cy
+      .get('.patient__context-trail')
+      .contains('Test Patient')
+      .click();
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
+
+    cy.go('back');
+
+    cy.get('@flowUrl').then(flowUrl => {
+      cy.url().should('equal', flowUrl);
+    });
   });
 
-  specify('patient flow action sidebar', function() {
-    const testFileId = uuid();
-    const testComment = getComment();
+  specify('activity and flow menu', function() {
+    const testPatient = getPatient();
+    const testPageFlow = getFlow({
+      attributes: {
+        name: 'Test Flow',
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
 
+    cy
+      .routeFlow(fx => {
+        fx.data = testPageFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions()
+      .routeFlowActivity(fx => {
+        fx.data = [
+          getActivity({
+            event_type: 'FlowNameUpdated',
+            source: 'system',
+            previous: 'Previous Flow',
+            value: 'Test Flow',
+          }),
+        ];
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/flow/${ testPageFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions')
+      .wait('@routeFlowActivity');
+
+    cy
+      .get('.patient-flow__activity')
+      .should('contain', 'Activity')
+      .and('contain', 'Flow name updated from Previous Flow to Test Flow');
+
+    cy
+      .intercept('DELETE', `/api/flows/${ testPageFlow.id }`, {
+        statusCode: 403,
+        body: {
+          errors: getErrors({
+            status: '403',
+            title: 'Forbidden',
+            detail: 'Insufficient permissions to delete flow',
+          }),
+        },
+      })
+      .as('routeDeleteFlowFailure');
+
+    cy
+      .get('.patient-flow__header-container .js-menu')
+      .should('have.attr', 'aria-label', 'Flow Menu')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Delete Flow')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .should('contain', 'Confirm Delete')
+      .find('.js-submit')
+      .click();
+
+    cy
+      .wait('@routeDeleteFlowFailure');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'Insufficient permissions to delete flow')
+      .find('.js-dismiss')
+      .click();
+
+    cy
+      .intercept('DELETE', `/api/flows/${ testPageFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routeDeleteFlow');
+
+    cy
+      .get('.patient-flow__header-container .js-menu')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Delete Flow')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click()
+      .wait('@routeDeleteFlow');
+
+    cy
+      .url()
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
+  });
+
+  specify('patient flow action page', function() {
     const testPatient = getPatient({
       attributes: {
         first_name: 'Test',
         last_name: 'Patient',
       },
       relationships: {
-        workspaces: getRelationship(workspaceOne),
+        workspaces: getRelationship([workspaceOne]),
       },
     });
 
@@ -150,6 +327,13 @@ context('patient flow page', function() {
       },
     });
 
+    const handleActionMessage = message => {
+      cy.getRadio(Radio => {
+        const action = Radio.request('entities', 'actions:model', testFlowAction.id);
+        action.handleMessage(message);
+      });
+    };
+
     cy
       .routesForPatientAction()
       .routeSettings('upload_attachments', false)
@@ -158,14 +342,12 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routeFlowActions(fx => {
-        fx.data = [testFlowAction];
-
+      .routeAction(fx => {
+        fx.data = testFlowAction;
         fx.included.push(testProgramAction, testFlow);
-
         return fx;
       })
-      .routePatientByFlow(fx => {
+      .routePatient(fx => {
         fx.data = testPatient;
 
         return fx;
@@ -176,20 +358,23 @@ context('patient flow page', function() {
         return fx;
       })
       .routeActionActivity()
-      .visitOnClock(`/flow/${ testFlow.id }/action/${ testFlowAction.id }`, { now: testTs() })
+      .routeFormByAction()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
+      .visitOnClock(`/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ testFlowAction.id }`, { now: testTs() })
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
-      .wait('@routeFlowActions')
+      .wait('@routeAction')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
       .wait('@routeActionFiles');
 
     cy
-      .get('.sidebar')
-      .find('[data-action-region] [data-testid="action-sidebar-name"]')
+      .get('.patient-action')
+      .find('[data-action-region] [data-testid="patient-action-name"]')
       .should('contain', 'Test Action');
 
-    cy.sendWs({
+    handleActionMessage({
       category: 'NameChanged',
       resource: {
         type: testFlowAction.type,
@@ -203,24 +388,17 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.sidebar')
-      .find('[data-action-region] [data-testid="action-sidebar-name"]', { timeout: 10000 })
+      .get('.patient-action')
+      .find('[data-action-region] [data-testid="patient-action-name"]', { timeout: 10000 })
       .should('contain', 'New Websocket Name');
 
     cy
-      .get('.sidebar')
-      .find('.sidebar__footer')
-      .contains('Updated')
-      .next()
-      .should('contain', formatDate(testTs(), 'AT_TIME'));
-
-    cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-details-region] .js-input')
       .clear()
       .type('User manually added details.');
 
-    cy.sendWs({
+    handleActionMessage({
       category: 'DetailsChanged',
       resource: {
         type: testFlowAction.type,
@@ -234,17 +412,17 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-details-region] .js-input')
       .should('have.value', 'User manually added details.');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-save-region]')
       .contains('Cancel')
       .click();
 
-    cy.sendWs({
+    handleActionMessage({
       category: 'DetailsChanged',
       resource: {
         type: testFlowAction.type,
@@ -258,11 +436,11 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-details-region] .js-input')
       .should('have.value', 'New websocket details.');
 
-    cy.sendWs({
+    handleActionMessage({
       category: 'ActionDurationChanged',
       resource: {
         type: testFlowAction.type,
@@ -276,247 +454,17 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-duration-region]')
       .should('contain', '20 mins');
 
     cy
-      .get('.sidebar')
+      .get('.patient-action')
       .find('[data-form-sharing-region]')
       .should('be.empty');
-
-    cy.sendWs({
-      category: 'ActionCommentAdded',
-      author: getCurrentClinician().id,
-      resource: {
-        type: testFlowAction.type,
-        id: testFlowAction.id,
-      },
-      payload: {
-        comment: {
-          type: testComment.type,
-          id: testComment.id,
-        },
-        attributes: {
-          message: 'New websocket comment.',
-        },
-      },
-    });
-
-    cy
-      .get('[data-activity-region]')
-      .find('.comment__item')
-      .last()
-      .as('socketComment')
-      .should('contain', 'Clinician McTester')
-      .should('contain', 'New websocket comment.');
-
-    cy
-      .get('@socketComment')
-      .find('[data-testid="action-comment-timestamp"]')
-      .should('contain', formatDate(testTs(), 'AT_TIME'));
-
-    cy
-      .get('@socketComment')
-      .find('.js-edit')
-      .click();
-
-    cy.sendWs({
-      category: 'CommentEdited',
-      resource: {
-        type: testComment.type,
-        id: testComment.id,
-      },
-      payload: {
-        attributes: {
-          message: 'Edited websocket comment v1.',
-        },
-      },
-    });
-
-    cy
-      .get('@socketComment')
-      .should('contain', 'Edited websocket comment v1.')
-      .should('contain', '(Edited)');
-
-    cy.sendWs({
-      category: 'CommentEdited',
-      resource: {
-        type: testComment.type,
-        id: testComment.id,
-      },
-      payload: {
-        attributes: {
-          message: 'Edited websocket comment v2.',
-        },
-      },
-    });
-
-    cy
-      .get('@socketComment')
-      .should('contain', 'Edited websocket comment v2.')
-      .should('contain', '(Edited)');
-
-    cy.sendWs({
-      category: 'CommentRemoved',
-      resource: {
-        type: testComment.type,
-        id: testComment.id,
-      },
-      payload: {},
-    });
-
-    cy
-      .get('[data-activity-region]')
-      .find('.comment__item')
-      .should('have.length', 3);
-
-    cy.sendWs({
-      category: 'AttachmentAdded',
-      resource: {
-        type: testFlowAction.type,
-        id: testFlowAction.id,
-      },
-      payload: {
-        clinician: {
-          type: 'clinicians',
-          id: uuid(),
-        },
-        file: {
-          type: 'files',
-          id: testFileId,
-        },
-        attributes: {
-          path: `patients/${ testPatient.id }/HRA.pdf`,
-          bucket: 'bucket_name',
-          urls: {
-            view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA.pdf`,
-            download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA.pdf`,
-          },
-        },
-      },
-    });
-
-    cy
-      .get('[data-attachments-files-region]')
-      .children()
-      .as('attachmentItems')
-      .should('have.length', 1);
-
-    cy
-      .get('@attachmentItems')
-      .first()
-      .as('attachmentItem')
-      .contains('HRA.pdf')
-      .should('have.attr', 'href')
-      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA.pdf`);
-
-    cy
-      .get('@attachmentItem')
-      .contains('Download')
-      .should('have.attr', 'href')
-      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA.pdf`);
-
-    cy.sendWs({
-      category: 'FileReplaced',
-      resource: {
-        type: 'files',
-        id: testFileId,
-      },
-      payload: {
-        attributes: {
-          path: `patients/${ testPatient.id }/HRA_v2.pdf`,
-          bucket: 'bucket_name',
-          urls: {
-            view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA_v2.pdf`,
-            download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA_v2.pdf`,
-          },
-        },
-      },
-    });
-
-    cy
-      .get('[data-attachments-files-region]')
-      .children()
-      .should('have.length', 1);
-
-    cy
-      .get('@attachmentItem')
-      .contains('HRA_v2.pdf')
-      .should('have.attr', 'href')
-      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/HRA_v2.pdf`);
-
-    cy
-      .get('@attachmentItem')
-      .contains('Download')
-      .should('have.attr', 'href')
-      .and('contain', `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/HRA_v2.pdf`);
-
-    cy.sendWs({
-      category: 'AttachmentAdded',
-      resource: {
-        type: testFlowAction.type,
-        id: testFlowAction.id,
-      },
-      payload: {
-        clinician: {
-          type: 'clinicians',
-          id: uuid(),
-        },
-        file: {
-          type: 'files',
-          id: uuid(),
-        },
-        attributes: {
-          path: `patients/${ testPatient.id }/Other_HRA.pdf`,
-          bucket: 'bucket_name',
-          urls: {
-            view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/view/Other_HRA.pdf`,
-            download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient.id }/download/Other_HRA.pdf`,
-          },
-        },
-      },
-    });
-
-    cy
-      .get('[data-attachments-files-region]')
-      .children()
-      .should('have.length', 2);
-
-    cy.sendWs({
-      category: 'FileRemoved',
-      resource: {
-        type: 'files',
-        id: testFileId,
-      },
-      payload: {},
-    });
-
-    cy
-      .get('[data-attachments-files-region]')
-      .children()
-      .should('have.length', 1);
-
-    cy
-      .get('@attachmentItems')
-      .contains('HRA_v2.pdf')
-      .should('not.exist');
-
-    cy.sendWs({
-      category: 'ResourceDeleted',
-      resource: {
-        type: testFlowAction.type,
-        id: testFlowAction.id,
-      },
-      payload: {},
-    });
-
-    cy
-      .get('.sidebar')
-      .should('not.exist');
   });
 
-  specify('done patient flow action sidebar', function() {
+  specify('done patient flow action page', function() {
     cy
       .routesForPatientAction()
       .routeFlow(fx => {
@@ -529,22 +477,82 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routeFlowActions(fx => {
-        fx.data = [testAction];
+      .routeActionActivity()
+      .visit(`/patient/1/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeFlow')
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action')
+      .should('not.contain', 'Permissions');
+  });
+
+  specify('flow action attachment and comment links', function() {
+    const linkedAction = getAction({
+      relationships: {
+        flow: getRelationship(testFlow),
+        state: getRelationship(stateTodo),
+        files: getRelationship([getFile()]),
+        comments: getRelationship([getComment()]),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeFlow(fx => {
+        fx.data = testFlow;
 
         return fx;
       })
       .routePatientByFlow()
-      .routeActionActivity()
-      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .routeFlowActions(fx => {
+        fx.data = [linkedAction];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = linkedAction;
+
+        return fx;
+      })
+      .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
-      .get('.sidebar')
-      .find('[data-action-region] .sidebar__label')
-      .should('not.contain', 'Permissions');
+      .get('.patient-flow__action-item .js-action-surface')
+      .click(5, 5)
+      .wait('@routeAction');
+
+    cy
+      .go('back')
+      .wait('@routeFlow')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('.patient-flow__action-item .js-attachments')
+      .click()
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('[data-attachments-region]')
+      .should('be.focused');
+
+    cy
+      .go('back')
+      .wait('@routeFlow')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('.patient-flow__action-item .js-comments')
+      .click()
+      .wait('@routeAction')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('[data-activity-region]')
+      .should('be.focused');
   });
 
   specify('flow actions list', function() {
@@ -632,18 +640,38 @@ context('patient flow page', function() {
       .routeActionActivity()
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
-    cy
-      .get('.list-page__list')
-      .as('actionsList')
-      .find('.table-list__item')
-      .should('have.length', 3);
+    cy.viewport(1920, 900);
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .should($list => {
+        expect($list[0].getBoundingClientRect().width).to.equal(1200);
+      });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
+      .should('have.length', 3);
+
+    cy.location('pathname').then(pathname => {
+      cy
+        .get('.patient-flow__list')
+        .find('.action-card')
+        .first()
+        .click(2, 40);
+
+      cy
+        .location('pathname')
+        .should('equal', pathname);
+    });
+
+    cy.viewport(1600, 900);
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
       .first()
       .find('[data-details-region]')
       .trigger('pointerover');
@@ -653,53 +681,56 @@ context('patient flow page', function() {
       .should('contain', 'Action details content.');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .eq(1)
       .find('[data-details-region]')
       .should('be.empty');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .first()
       .should($action => {
-        expect($action.find('.table-list__icon--large .action-icon--red .fa-caret-down')).to.exist;
-        expect($action.find('.fa-circle-exclamation')).to.exist;
+        expect($action.find('.work-card__state .fa-circle-exclamation')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('NUR');
         expect($action.find('[data-due-date-region] .is-overdue')).to.exist;
         expect($action.find('[data-form-region]')).not.to.be.empty;
         expect($action.find('.fa-paperclip')).to.exist;
+        expect($action.find('.fa-paperclip').next()).to.contain('1');
         expect($action.find('.fa-comment')).to.exist;
         expect($action.find('.fa-comment').next()).to.contain('1');
+        expect($action.find('.fa-paperclip').parent().index()).to.be.lessThan($action.find('.fa-comment').parent().index());
+        expect($action.find('.work-card__heading [data-form-region]')).to.have.lengthOf(1);
+        expect($action.find('.action-card__controls [data-form-region]')).to.have.lengthOf(0);
       });
 
+    cy.viewport(1280, 720);
+
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .first()
       .next()
       .should($action => {
-        expect($action.find('.table-list__icon--large .fa-file-lines')).to.exist;
-        expect($action.find('.fa-circle-dot')).to.exist;
+        expect($action.find('.work-card__state .fa-circle-dot')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('.fa-paperclip')).to.not.exist;
         expect($action.find('.fa-comment')).to.not.exist;
       });
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .last()
       .should($action => {
-        expect($action.find('.table-list__icon--large .fa-share-from-square')).to.exist;
-        expect($action.find('.fa-circle-check')).to.exist;
+        expect($action.find('.work-card__state .fa-circle-check')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('[data-owner-region] button')).to.be.disabled;
         expect($action.find('[data-due-date-region] button')).to.be.disabled;
         expect($action.find('[data-due-time-region] button')).to.be.disabled;
       })
-      .find('.fa-circle-check')
+      .find('[data-state-region] button')
       .click();
 
     cy
@@ -720,25 +751,74 @@ context('patient flow page', function() {
       });
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .last()
-      .as('lastAction')
       .should($action => {
         expect($action.find('.fa-circle-dot')).to.exist;
         expect($action.find('[data-owner-region] button')).not.to.be.disabled;
         expect($action.find('[data-due-date-region] button')).not.to.be.disabled;
         expect($action.find('[data-due-time-region] button')).not.to.be.disabled;
-      })
-      // Trigger the click on the table-list__item clicks the owner button
-      .find('.patient__action-icon')
+      });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
+      .last()
+      .find('[data-owner-region] button')
       .click();
 
     cy
-      .get('@lastAction')
-      .should('have.class', 'is-selected')
-      .find('[data-owner-region]')
+      .get('.picklist')
+      .contains('Nurse')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
+      .last()
+      .find('[data-due-date-region] button')
       .click();
+
+    cy
+      .get('.datepicker')
+      .find('.js-next')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .find('.datepicker__days li')
+      .contains('1')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
+      .last()
+      .find('[data-due-time-region] button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('11:15 AM')
+      .click()
+      .wait('@routePatchAction');
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
+      .last()
+      .find('.work-card__title')
+      .focus()
+      .typeEnter()
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action')
+      .find('[data-owner-region]')
+      .click({ scrollBehavior: 'center' });
 
     cy
       .get('.picklist')
@@ -748,14 +828,14 @@ context('patient flow page', function() {
       .wait('@routePatchAction');
 
     cy
-      .get('@lastAction')
+      .get('.patient-action')
       .find('[data-owner-region]')
       .contains('NUR');
 
     cy
-      .get('@lastAction')
+      .get('.patient-action')
       .find('[data-due-date-region]')
-      .click();
+      .click({ scrollBehavior: 'center' });
 
     cy
       .get('.datepicker')
@@ -772,15 +852,15 @@ context('patient flow page', function() {
           .click();
 
         cy
-          .get('.sidebar')
+          .get('.patient-action')
           .find('[data-due-date-region]')
           .should('contain', `${ dueMonth } ${ dueDay }`);
       });
 
     cy
-      .get('@lastAction')
+      .get('.patient-action')
       .find('[data-due-time-region]')
-      .click();
+      .click({ scrollBehavior: 'center' });
 
     cy
       .get('.picklist')
@@ -788,7 +868,7 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@lastAction')
+      .get('.patient-action')
       .find('[data-due-time-region]')
       .should('contain', '11:15 AM');
 
@@ -809,9 +889,8 @@ context('patient flow page', function() {
       .as('routeDeleteFlowActionFailure');
 
     cy
-      .get('.sidebar')
-      .find('.js-menu')
-      .click();
+      .get('.patient-action__menu')
+      .click({ scrollBehavior: 'center' });
 
     cy
       .get('.picklist')
@@ -834,31 +913,20 @@ context('patient flow page', function() {
       .as('routeDeleteFlowAction');
 
     cy
-      .get('.sidebar')
-      .find('.js-menu')
-      .click();
+      .get('.patient-action__menu')
+      .click({ scrollBehavior: 'center' });
 
     cy
       .get('.picklist')
       .find('.js-picklist-item')
       .contains('Delete Action')
       .click()
-      .wait('@routeDeleteFlowAction');
-
-    cy
-      .get('@actionsList')
-      .find('.table-list__item')
-      .should('have.length', 2);
+      .wait('@routeDeleteFlowAction')
+      .wait('@routeFlowActions');
 
     cy
       .url()
       .should('not.contain', '/action/');
-
-    cy.go('back');
-
-    cy
-      .get('.alert-box')
-      .should('contain', 'The Action you requested does not exist');
   });
 
   specify('add action', function() {
@@ -1022,7 +1090,6 @@ context('patient flow page', function() {
       .routeActionActivity()
       .visitOnClock(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
       .tick(60); // tick past debounce
 
@@ -1047,9 +1114,17 @@ context('patient flow page', function() {
       })
       .as('routePostAction');
 
+    cy.routeAction(fx => {
+      fx.data = conditionalAction;
+      return fx;
+    });
+
     cy
       .get('.patient-flow__actions')
-      .contains('Add')
+      .find('.add-workflow__button')
+      .find('span')
+      .should('have.text', 'Add')
+      .closest('button')
       .click();
 
     cy
@@ -1078,9 +1153,8 @@ context('patient flow page', function() {
       .its('request.body')
       .should(({ data }) => {
         expect(data.attributes.name).to.equal('Conditional');
-        expect(data.relationships.patient.data.id).to.equal(testFlow.relationships.patient.data.id);
-        expect(data.relationships.flow.data.id).to.equal(testFlow.id);
         expect(data.relationships['program-action'].data.id).to.equal(testProgramAction.id);
+        expect(data.relationships.owner).to.be.undefined;
       });
 
     cy
@@ -1099,12 +1173,21 @@ context('patient flow page', function() {
       .should('contain', `flow/${ testFlow.id }/action/${ conditionalAction.id }`);
 
     cy
-      .get('[data-content-region]')
-      .find('.is-selected')
+      .get('.patient-action')
       .contains('Conditional');
   });
 
   specify('failed flow', function() {
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+      },
+      relationships: {
+        workspaces: getRelationship([workspaceOne]),
+      },
+    });
+
     const errors = getErrors({
       status: '410',
       title: 'Not Found',
@@ -1113,17 +1196,238 @@ context('patient flow page', function() {
 
     cy
       .routesForPatientAction()
-      .routePatientByFlow()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
       .routeFlowActions()
-      .intercept('GET', `/api/flows/${ testFlow.id }**`, {
+      .intercept('GET', new RegExp(`/api/flows/${ testFlow.id }\\?`), {
         statusCode: 410,
         body: { errors },
       })
-      .visit(`/flow/${ testFlow.id }`);
+      .as('routeGoneFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }`)
+      .wait('@routeGoneFlow');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Flow you requested does not exist.');
 
     cy
       .url()
-      .should('contain', '/404');
+      .should('contain', `/patient/${ testPatient.id }/workflow`)
+      .should('not.contain', '/flow/');
+  });
+
+  specify('patient-less flow route not found', function() {
+    const flowId = uuid();
+
+    cy
+      .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
+        statusCode: 410,
+        body: {
+          errors: getErrors({
+            status: '410',
+            title: 'Not Found',
+            detail: 'Cannot find flow',
+          }),
+        },
+      })
+      .as('routeGoneFlow')
+      .visit(`/flow/${ flowId }`)
+      .wait('@routeGoneFlow');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'This page doesn\'t exist.');
+  });
+
+  specify('patient-less flow route server error', function() {
+    const flowId = uuid();
+
+    cy.on('uncaught:exception', () => false);
+
+    cy
+      .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
+        statusCode: 500,
+        body: {
+          errors: getErrors({
+            status: '500',
+            title: 'Server Error',
+            detail: 'Cannot load flow',
+          }),
+        },
+      })
+      .as('routeFailedFlow')
+      .visit(`/flow/${ flowId }`)
+      .wait('@routeFailedFlow');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 500.');
+  });
+
+  specify('patient-less flow route unexpected client error', function() {
+    const flowId = uuid();
+    const errorStub = cy.stub();
+
+    cy.on('uncaught:exception', error => {
+      errorStub(error);
+
+      return false;
+    });
+
+    cy
+      .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Unexpected Client Error',
+            detail: 'Cannot load flow',
+          }),
+        },
+      })
+      .as('routeFailedFlow')
+      .visit(`/flow/${ flowId }`)
+      .wait('@routeFailedFlow');
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.firstCall.args[0].message).to.contain('Error Status: 404');
+      });
+  });
+
+  specify('ignores a patient-less flow resolution after leaving patient routes', function() {
+    const testPatient = getPatient();
+    const delayedFlow = getFlow({
+      relationships: {
+        patient: getRelationship(testPatient),
+      },
+    });
+    let replyToFlow;
+
+    cy
+      .intercept('GET', new RegExp(`/api/flows/${ delayedFlow.id }\\?`), req => new Cypress.Promise(resolve => {
+        replyToFlow = () => {
+          req.reply({ body: { data: delayedFlow, included: [testPatient] } });
+          resolve();
+        };
+      }))
+      .as('routeDelayedFlow')
+      .visit(`/flow/${ delayedFlow.id }`);
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replyToFlow).to.be.a('function');
+      });
+
+    cy.window().then(win => {
+      win.Radio.trigger('event-router', 'notFound');
+    });
+
+    cy
+      .get('.error-page')
+      .should('contain', 'This page doesn\'t exist.');
+
+    cy.then(() => replyToFlow());
+
+    cy
+      .wait('@routeDelayedFlow');
+
+    cy
+      .url()
+      .should('contain', '/404')
+      .should('not.contain', `/patient/${ testPatient.id }/flow/${ delayedFlow.id }`);
+  });
+
+  specify('flow server error', function() {
+    const testPatient = getPatient();
+    const flowId = uuid();
+
+    cy.on('uncaught:exception', () => false);
+
+    cy
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
+        statusCode: 500,
+        body: {
+          errors: getErrors({
+            status: '500',
+            title: 'Server Error',
+            detail: 'Cannot load flow',
+          }),
+        },
+      })
+      .as('routeFailedFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ flowId }`)
+      .wait('@routeFailedFlow');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 500.');
+  });
+
+  specify('flow unexpected client error', function() {
+    const testPatient = getPatient();
+    const flowId = uuid();
+    const errorStub = cy.stub();
+
+    cy.on('uncaught:exception', error => {
+      errorStub(error);
+
+      return false;
+    });
+
+    cy
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Unexpected Client Error',
+            detail: 'Cannot load flow',
+          }),
+        },
+      })
+      .as('routeFailedFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ flowId }`)
+      .wait('@routeFailedFlow');
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(errorStub).to.be.calledOnce;
+        expect(errorStub.firstCall.args[0].message).to.contain('Error Status: 404');
+      });
   });
 
   specify('empty view', function() {
@@ -1145,11 +1449,10 @@ context('patient flow page', function() {
       })
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
-      .get('.table-list__empty-list')
+      .get('.card-list__empty')
       .contains('No Actions');
   });
 
@@ -1232,37 +1535,36 @@ context('patient flow page', function() {
       .as('routePatchFlow')
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
-      .get('.list-page__list')
-      .as('actionsList');
+      .get('.patient-flow__list')
+      .should('exist');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .first()
       .find('[data-owner-region]')
       .should('contain', 'NUR');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .eq(1)
       .find('[data-owner-region]')
       .should('contain', 'Other');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .eq(2)
       .find('[data-owner-region]')
       .should('contain', 'CO');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .last()
       .find('[data-owner-region]')
       .should('contain', 'NUR');
@@ -1286,29 +1588,29 @@ context('patient flow page', function() {
       });
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .first()
       .find('[data-owner-region]')
       .should('contain', 'McTester');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .eq(1)
       .find('[data-owner-region]')
       .should('contain', 'Other');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .eq(2)
       .find('[data-owner-region]')
       .should('contain', 'CO');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .last()
       .find('[data-owner-region]')
       .should('contain', 'NUR');
@@ -1332,29 +1634,29 @@ context('patient flow page', function() {
       });
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .first()
       .find('[data-owner-region]')
       .should('contain', 'McTester');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .eq(1)
       .find('[data-owner-region]')
       .should('contain', 'Other');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .eq(2)
       .find('[data-owner-region]')
       .should('contain', 'CO');
 
     cy
-      .get('@actionsList')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .last()
       .find('[data-owner-region]')
       .should('contain', 'NUR');
@@ -1385,7 +1687,6 @@ context('patient flow page', function() {
       .routeFlowActions()
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
@@ -1394,6 +1695,12 @@ context('patient flow page', function() {
       .should('contain', 'NU')
       .find('button')
       .should('not.exist');
+
+    cy
+      .get('.patient-flow__permission')
+      .should('contain', 'You are not able to change settings on this flow.')
+      .find('.fa-ban')
+      .should('exist');
   });
 
   specify('flow with work:team:manage permission', function() {
@@ -1480,13 +1787,12 @@ context('patient flow page', function() {
       });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.workflow-page__list')
+      .find('.flow-card')
       .as('listItems')
       .first()
-      .click('top')
+      .click('bottom')
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
@@ -1494,38 +1800,94 @@ context('patient flow page', function() {
       .find('[data-owner-region]')
       .find('button')
       .should('not.exist');
+  });
+
+  specify('flow with work:authored:delete permission', function() {
+    const testPatient = getPatient();
+    const currentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleTeamEmployee),
+        team: getRelationship(teamCoordinator),
+      },
+    });
+    const authoredFlow = getFlow({
+      relationships: {
+        author: getRelationship(currentClinician),
+        owner: getRelationship(teamCoordinator),
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
 
     cy
-      .go('back');
-
-    cy
-      .routeFlow(fx => {
-        fx.data = getFlow({
-          attributes: {
-            name: 'Owned by non team member',
-            updated_at: testTsSubtract(2),
-          },
-          relationships: {
-            state: getRelationship(stateInProgress),
-            owner: getRelationship(nonTeamMemberClinician),
-          },
-        });
+      .routeCurrentClinician(fx => {
+        fx.data = currentClinician;
 
         return fx;
-      });
+      })
+      .routeFlow(fx => {
+        fx.data = authoredFlow;
 
-    cy
-      .get('@listItems')
-      .last()
-      .click('top')
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions()
+      .visit(`/patient/${ testPatient.id }/flow/${ authoredFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
+      .wait('@routePatient')
       .wait('@routeFlowActions');
 
     cy
-      .get('[data-header-region]')
-      .find('[data-owner-region]')
-      .find('button')
+      .get('.patient-flow__header-container .js-menu')
+      .should('exist');
+  });
+
+  specify('flow not authored by a user with work:authored:delete permission', function() {
+    const testPatient = getPatient();
+    const currentClinician = getCurrentClinician({
+      relationships: {
+        role: getRelationship(roleTeamEmployee),
+        team: getRelationship(teamCoordinator),
+      },
+    });
+    const otherClinician = getClinician();
+    const otherAuthoredFlow = getFlow({
+      relationships: {
+        author: getRelationship(otherClinician),
+        owner: getRelationship(teamCoordinator),
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
+
+    cy
+      .routeCurrentClinician(fx => {
+        fx.data = currentClinician;
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = otherAuthoredFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions()
+      .visit(`/patient/${ testPatient.id }/flow/${ otherAuthoredFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('.patient-flow__header-container .js-menu')
       .should('not.exist');
   });
 
@@ -1579,16 +1941,15 @@ context('patient flow page', function() {
       })
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 0)
       .should('have.attr', 'max', '3');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .find('[data-state-region]')
       .click();
@@ -1597,14 +1958,15 @@ context('patient flow page', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .contains('Done')
-      .click();
+      .click()
+      .wait('@routePatchAction');
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 1);
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .find('[data-state-region]')
       .click();
@@ -1612,14 +1974,15 @@ context('patient flow page', function() {
     cy
       .get('.picklist')
       .contains('To Do')
-      .click();
+      .click()
+      .wait('@routePatchAction');
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 0);
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .find('[data-state-region]')
       .click();
@@ -1627,14 +1990,15 @@ context('patient flow page', function() {
     cy
       .get('.picklist')
       .contains('In Progress')
-      .click();
+      .click()
+      .wait('@routePatchAction');
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 0);
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .first()
       .find('[data-state-region]')
       .click();
@@ -1643,10 +2007,11 @@ context('patient flow page', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .contains('Done')
-      .click();
+      .click()
+      .wait('@routePatchAction');
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .last()
       .find('[data-state-region]')
       .click();
@@ -1655,14 +2020,15 @@ context('patient flow page', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .contains('Done')
-      .click();
+      .click()
+      .wait('@routePatchAction');
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 2);
 
     cy
-      .get('.table-list__item')
+      .get('.action-card')
       .last()
       .find('[data-state-region]')
       .click();
@@ -1671,31 +2037,132 @@ context('patient flow page', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .contains('Unable to Complete')
-      .click();
+      .click()
+      .wait('@routePatchAction');
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 2);
+  });
+
+  specify('completing a flow when all actions are done', function() {
+    const testPatient = getPatient();
+    const completableFlow = getFlow({
+      meta: {
+        progress: {
+          complete: 2,
+          total: 2,
+        },
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
 
     cy
-      .get('.table-list__item')
-      .first()
-      .click('top');
+      .routeFlow(fx => {
+        fx.data = completableFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = getActions({
+          relationships: {
+            state: getRelationship(stateDone),
+            flow: getRelationship(completableFlow),
+          },
+        }, { sample: 2 });
+
+        return fx;
+      })
+      .intercept('PATCH', `/api/flows/${ completableFlow.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchCompletableFlow')
+      .visit(`/patient/${ testPatient.id }/flow/${ completableFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions');
 
     cy
-      .get('.sidebar')
-      .find('.js-menu')
+      .get('[data-header-region] [data-state-region]')
       .click();
 
     cy
       .get('.picklist')
-      .contains('Delete Action')
+      .find('.js-picklist-item')
+      .contains('Done')
       .click();
 
     cy
-      .get('.patient-flow__progress')
-      .should('have.value', 1)
-      .and('have.attr', 'max', '2');
+      .wait('@routePatchCompletableFlow')
+      .its('request.body.data.relationships.state.data.id')
+      .should('equal', stateDone.id);
+  });
+
+  specify('requiring all actions to be done before completing a flow', function() {
+    const testPatient = getPatient();
+    const incompleteFlow = getFlow({
+      meta: {
+        progress: {
+          complete: 0,
+          total: 1,
+        },
+      },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
+
+    cy
+      .routeSettings('require_done_flow', true)
+      .routeFlow(fx => {
+        fx.data = incompleteFlow;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = getActions({
+          relationships: {
+            state: getRelationship(stateTodo),
+            flow: getRelationship(incompleteFlow),
+          },
+        }, { sample: 1 });
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/flow/${ incompleteFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routePatient')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('[data-header-region] [data-state-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Done')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .should('contain', 'Flow Actions Must Be Done')
+      .and('contain', 'You must set all actions to a Done state before setting this flow to a Done state.');
   });
 
   specify('bulk edit actions', function() {
@@ -1786,12 +2253,25 @@ context('patient flow page', function() {
       .routeActionComments()
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
+      .get('.patient-flow__list .action-card')
+      .first()
+      .find('.button.button--checkbox')
+      .should('have.attr', 'aria-label', 'Select action');
+
+    cy.viewport(981, 997);
+
+    cy
+      .get('.patient-flow__menu')
+      .should('be.visible');
+
+    cy.viewport(1280, 720);
+
+    cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
       .as('firstRow')
       .find('.js-select')
@@ -1816,44 +2296,7 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .routeAction(fx => {
-        fx.data = testFlowActions[0];
-
-        return fx;
-      });
-
-    cy
-      .get('@firstRow')
-      .find('.patient__action-icon')
-      .click();
-
-    cy
-      .get('@firstRow')
-      .find('.js-select')
-      .click();
-
-    cy
-      .get('@firstRow')
-      .should('have.class', 'is-selected');
-
-    cy
-      .get('@firstRow')
-      .find('.js-select')
-      .click();
-
-    cy
-      .get('[data-app-sidebar-region]')
-      .find('.js-close')
-      .click();
-
-    cy
-      .get('@firstRow')
-      .should('have.class', 'is-selected');
-
-    cy
-      .get('[data-header-region]')
-      .next()
-      .find('.button--checkbox')
+      .get('.patient-flow__actions-start > .button.button--checkbox')
       .as('selectAll')
       .click();
 
@@ -1874,9 +2317,7 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('[data-header-region]')
-      .next()
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline')
       .should('not.exist');
 
     cy
@@ -1899,81 +2340,63 @@ context('patient flow page', function() {
       .should('have.class', 'is-selected');
 
     cy
-      .get('[data-header-region]')
-      .next()
-      .find('.js-bulk-edit')
-      .click();
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar');
 
     cy
-      .get('.modal--sidebar')
-      .as('bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click()
       .wait(['@routePatchAction', '@routePatchAction', '@routePatchAction']);
 
     cy
-      .get('[data-header-region]')
-      .next()
-      .find('.button--checkbox')
+      .get('.patient-flow__actions-start > .button.button--checkbox')
       .click();
 
     cy
-      .get('[data-header-region]')
-      .next()
-      .find('.button--checkbox')
+      .get('.patient-flow__actions-start > .button.button--checkbox')
       .click();
 
     cy
-      .get('[data-header-region]')
-      .next()
-      .find('.button--checkbox')
+      .get('.patient-flow__actions-start > .button.button--checkbox')
       .click();
 
     cy
-      .get('[data-header-region]')
-      .next()
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
     cy
-      .get('[data-header-region]')
-      .next()
-      .find('.button--checkbox')
+      .get('.patient-flow__actions-start > .button.button--checkbox')
       .click();
 
     cy
-      .get('[data-header-region]')
-      .next()
-      .find('.js-bulk-edit')
-      .click();
-
-    cy
-      .get('@bulkEditSidebar')
-      .find('.sidebar__heading')
+      .get('@bulkEditToolbar')
+      .find('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Actions');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-state-region]')
       .should('contain', 'Multiple States...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-owner-region]')
       .should('contain', 'Multiple Owners...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .should('contain', 'Multiple Dates...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .should('contain', 'Multiple Times...');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-duration-region]')
       .should('contain', 'Multiple Durations...');
 
@@ -2002,8 +2425,8 @@ context('patient flow page', function() {
       .as('patchAction3');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-state-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-state-region] button')
       .click();
 
     cy
@@ -2013,8 +2436,8 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-owner-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-owner-region] button')
       .click();
 
     cy
@@ -2024,8 +2447,8 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-due-date-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region] button')
       .click();
 
     cy
@@ -2040,8 +2463,8 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-due-time-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region] button')
       .click();
 
     cy
@@ -2051,18 +2474,18 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .find('.is-overdue');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .find('.is-overdue');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-due-date-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region] button')
       .click();
 
     cy
@@ -2071,20 +2494,20 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-date-region]')
       .find('.is-overdue')
       .should('not.exist');
 
     cy
-      .get('@bulkEditSidebar')
+      .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .find('.is-overdue')
       .should('not.exist');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-duration-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-duration-region] button')
       .click();
 
     cy
@@ -2094,13 +2517,58 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-apply-owner')
+      .get('.app-frame__content')
+      .find('.action-card')
+      .last()
+      .find('.js-select')
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('[data-state-region]')
+      .should('contain', 'To Do');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-owner-region]')
+      .should('contain', 'NUR');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .should('contain', formatDate(tomorrow, 'SHORT'));
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region]')
+      .should('contain', '10:00 AM');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-duration-region]')
+      .should('contain', '5 mins');
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card')
+      .last()
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-owner-scope-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Actions + flows')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click();
 
     cy
@@ -2149,15 +2617,9 @@ context('patient flow page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
       .find('.js-select')
-      .click();
-
-    cy
-      .get('[data-header-region]')
-      .next()
-      .find('.js-bulk-edit')
       .click();
 
     cy
@@ -2168,8 +2630,8 @@ context('patient flow page', function() {
       .as('failedPatchAction');
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-due-time-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region] button')
       .click();
 
     cy
@@ -2179,8 +2641,8 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('[data-due-date-region]')
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region] button')
       .click();
 
     cy
@@ -2189,8 +2651,8 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click();
 
     cy
@@ -2199,12 +2661,11 @@ context('patient flow page', function() {
 
     cy
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .should('have.length', 3);
   });
 
@@ -2234,62 +2695,64 @@ context('patient flow page', function() {
       .routeActionActivity()
       .visitOnClock(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions')
       .wait('@routeWorkspacePatient');
 
     cy
       .tick(60) // tick past debounce
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
+      .should('have.length', 3);
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card')
       .first()
       .find('.js-select')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .last()
       .find('.js-select')
       .click({ shiftKey: true });
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.action-card.is-selected')
       .should('have.length', 3);
 
     cy
-      .get('.patient-flow__actions')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Actions');
 
     cy
-      .get('.patient-flow__actions')
+      .get('.bulk-edit-inline')
       .find('.js-cancel')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .last()
       .find('.js-select')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
       .find('.js-select')
       .click({ shiftKey: true });
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.action-card.is-selected')
       .should('have.length', 3);
 
     cy
-      .get('.patient-flow__actions')
-      .find('.js-bulk-edit')
+      .get('.bulk-edit-inline__heading')
       .should('contain', 'Edit 3 Actions');
   });
 
@@ -2374,7 +2837,6 @@ context('patient flow page', function() {
       .routePatientByFlow()
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
@@ -2386,60 +2848,66 @@ context('patient flow page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
       .find('.js-select')
       .click();
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
-      .find('button')
+      .find('button:not(.action-details-tooltip)')
+      .should('have.length', 7);
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card')
+      .first()
+      .find('.action-details-tooltip')
+      .should('exist');
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card')
+      .eq(1)
+      .find('button:not(.action-details-tooltip)')
+      .should('have.length', 1)
+      .and('have.class', 'js-primary');
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card')
+      .eq(2)
+      .find('button:not(.action-details-tooltip)')
+      .should('have.length', 2);
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card')
+      .last()
+      .find('button:not(.action-details-tooltip)')
       .should('have.length', 6);
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
-      .eq(1)
-      .find('button')
-      .should('have.length', 0);
-
-    cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
-      .eq(2)
-      .find('button')
-      .should('have.length', 1);
-
-    cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
-      .last()
-      .find('button')
-      .should('have.length', 5);
-
-    cy
-      .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .last()
       .find('.js-select')
       .click({ shiftKey: true });
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item.is-selected')
+      .find('.action-card.is-selected')
       .should('have.length', 2);
 
     cy
-      .get('.patient-flow__actions')
-      .find('.js-bulk-edit')
-      .should('contain', 'Edit 2 Actions')
-      .click();
+      .get('.bulk-edit-inline__heading')
+      .should('contain', 'Edit 2 Actions');
 
     cy
-      .get('.modal--sidebar')
-      .as('bulkEditSidebar')
+      .get('.bulk-edit-inline')
+      .as('bulkEditToolbar')
       .find('[data-owner-region]')
       .click();
 
@@ -2450,14 +2918,9 @@ context('patient flow page', function() {
       .click();
 
     cy
-      .get('@bulkEditSidebar')
-      .find('.js-submit')
+      .get('@bulkEditToolbar')
+      .find('.js-save')
       .click();
-
-    cy
-      .get('[data-header-region]')
-      .next()
-      .find('.button--checkbox:disabled');
 
     cy
       .get('.alert-box')
@@ -2534,12 +2997,11 @@ context('patient flow page', function() {
       .routePatientByFlow()
       .visit(`/flow/${ testFlow.id }`)
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .as('listItems')
       .first()
       .find('[data-owner-region]')
@@ -2621,13 +3083,7 @@ context('patient flow page', function() {
       .routeFlowActivity()
       .visitOnClock(`/flow/${ testSocketFlow.id }`, { now: testTs() })
       .wait('@routeFlow')
-      .wait('@routePatientByFlow')
       .wait('@routeFlowActions');
-
-    cy
-      .get('[data-header-region]')
-      .click('top')
-      .tick(300);
 
     cy
       .get('@wsHandleMessage')
@@ -2663,19 +3119,6 @@ context('patient flow page', function() {
       .find('.patient-flow__name')
       .contains('New Flow Name');
 
-    cy
-      .get('.app-frame__sidebar')
-      .as('flowSidebar')
-      .find('[data-name-region]')
-      .should('contain', 'New Flow Name');
-
-    cy
-      .get('.app-frame__sidebar')
-      .find('.sidebar__footer')
-      .contains('Updated')
-      .next()
-      .should('contain', formatDate(testTs(), 'AT_TIME'));
-
     cy.sendWs({
       category: 'DetailsChanged',
       resource: {
@@ -2692,12 +3135,8 @@ context('patient flow page', function() {
     cy
       .get('[data-header-region]')
       .find('.patient-flow__details')
+      .should('be.visible')
       .contains('New flow details');
-
-    cy
-      .get('@flowSidebar')
-      .find('[data-details-region]')
-      .should('contain', 'New flow details');
 
     cy.sendWs({
       category: 'NameChanged',
@@ -2713,18 +3152,18 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .contains('New Action Name');
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .patient__action-ts')
+      .get('.patient-flow__list')
+      .find('.action-card .work-card__meta span:last-child')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item [data-details-region]')
+      .get('.patient-flow__list')
+      .find('.action-card [data-details-region]')
       .should('be.empty');
 
     cy.sendWs({
@@ -2741,8 +3180,8 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item [data-details-region]')
+      .get('.patient-flow__list')
+      .find('.action-card [data-details-region]')
       .should('not.be.empty');
 
     cy.sendWs({
@@ -2760,15 +3199,15 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .should($action => {
         expect($action.find('[data-due-date-region]')).to.contain(formatDate(testDateAdd(1), 'SHORT'));
         expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
       });
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 0);
 
     cy.sendWs({
@@ -2805,12 +3244,7 @@ context('patient flow page', function() {
       .should('contain', 'CO');
 
     cy
-      .get('@flowSidebar')
-      .find('[data-owner-region]')
-      .should('contain', 'Coordinator');
-
-    cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 0);
 
     cy.sendWs({
@@ -2828,7 +3262,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.patient-flow__progress')
+      .get('.patient-flow__progress progress')
       .should('have.value', 1);
 
     cy.sendWs({
@@ -2846,8 +3280,8 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item')
+      .get('.patient-flow__list')
+      .find('.action-card')
       .should($action => {
         expect($action.find('.fa-circle-check')).to.exist;
         expect($action.find('[data-owner-region]')).to.contain('CO');
@@ -2856,11 +3290,6 @@ context('patient flow page', function() {
     cy
       .get('[data-header-region]')
       .find('[data-state-region] .fa-circle-check');
-
-    cy
-      .get('@flowSidebar')
-      .find('[data-state-region]')
-      .should('contain', 'Done');
 
     cy.sendWs({
       category: 'AttachmentAdded',
@@ -2889,9 +3318,11 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-paperclip')
-      .should('exist');
+      .get('.patient-flow__list')
+      .find('.action-card .fa-paperclip')
+      .should('exist')
+      .next()
+      .should('contain', '1');
 
     cy.sendWs({
       category: 'FileRemoved',
@@ -2903,8 +3334,8 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-paperclip')
+      .get('.patient-flow__list')
+      .find('.action-card .fa-paperclip')
       .should('not.exist');
 
     cy.sendWs({
@@ -2926,8 +3357,8 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-comment')
+      .get('.patient-flow__list')
+      .find('.action-card .fa-comment')
       .should('exist')
       .next()
       .should('contain', '1');
@@ -2942,8 +3373,8 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.list-page__list')
-      .find('.table-list__item .fa-comment')
+      .get('.patient-flow__list')
+      .find('.action-card .fa-comment')
       .should('not.exist');
 
     cy.sendWs({
@@ -2956,7 +3387,7 @@ context('patient flow page', function() {
     });
 
     cy
-      .get('.table-list__empty-list')
+      .get('.card-list__empty')
       .contains('No Actions');
 
     cy
@@ -3012,7 +3443,7 @@ context('patient flow page', function() {
 
     cy
       .get('.app-frame__content')
-      .find('.table-list__item')
+      .find('.action-card')
       .first()
       .should('contain', 'New Action - Created Elsewhere')
       .find('[data-state-region] .fa-circle-dot');

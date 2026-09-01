@@ -10,8 +10,25 @@ import collectionOf from 'js/utils/formatting/collection-of';
 import { ACTION_OUTREACH, STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-actions';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'details',
+  'days_until_due',
+  'weekdays_only',
+  'outreach',
+  'sequence',
+  'tags',
+  'sync',
+  'allowed_uploads',
+  'options',
+  'behavior',
+  'complexity',
+  'published_at',
+  'archived_at',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   urlRoot: '/api/program-actions',
   type: TYPE,
   validate({ name }) {
@@ -37,7 +54,6 @@ const _Model = BaseModel.extend({
     return this.getRelationship('_program');
   },
   createAction({ patient, flow }) {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
     const currentWorkspace = Radio.request('workspace', 'current');
     const states = currentWorkspace.getStates();
 
@@ -47,10 +63,6 @@ const _Model = BaseModel.extend({
     const attrs = {
       name: this.get('name'),
       _state: defaultInitialState.getResource(),
-      _owner: this.get('_owner') || {
-        id: currentUser.id,
-        type: 'clinicians',
-      },
       _program_action: this.getResource(),
       _patient: actionPatient.getResource(),
     };

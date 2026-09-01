@@ -1,6 +1,7 @@
 import { View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
 
+import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
 
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
@@ -10,12 +11,12 @@ import './list-search-component.scss';
 const InputTemplate = hbs`
   <span class="list-search__search-icon">{{far "magnifying-glass"}}</span>
   <input
-    class="list-search__input input-primary--small js-input w-100"
+    class="list-search__input form-input form-input--primary form-input--small js-input w-100"
     type="text"
     placeholder="{{@intl.shared.components.listSearch.listSearchViews.placeholder}}"
     value="{{query}}"
   />
-  <span class="list-search__clear-icon js-clear {{#unless query}}is-hidden{{/unless}}">{{fas "circle-xmark"}}</span>
+  <button class="button button--icon list-search__clear-icon js-clear {{#unless query}}is-hidden{{/unless}}" type="button" aria-label="{{ @intl.shared.components.listSearch.listSearchViews.clearSearch }}">{{fas "circle-xmark"}}</button>
 `;
 
 const SearchView = View.extend({

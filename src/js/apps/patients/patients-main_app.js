@@ -1,8 +1,10 @@
+import { get } from 'underscore';
 import Radio from 'backbone.radio';
+
+import handleErrors from 'js/utils/handle-errors';
 
 import RouterApp from 'js/base/routerapp';
 
-import FlowApp from 'js/apps/patients/patient/flow/flow_app';
 import PatientApp from 'js/apps/patients/patient/patient_app';
 import WorklistApp from 'js/apps/patients/worklist/worklist_app';
 import ScheduleApp from 'js/apps/patients/schedule/schedule_app';
@@ -11,7 +13,6 @@ export default RouterApp.extend({
   routerAppName: 'PatientsApp',
 
   childApps: {
-    flow: FlowApp,
     patient: PatientApp,
     ownedBy: WorklistApp,
     forTeam: WorklistApp,
@@ -27,59 +28,70 @@ export default RouterApp.extend({
       route: 'worklist/:id',
       meta: { isList: true },
     },
-    'patient:dashboard': {
-      action: 'showPatient',
-      route: 'patient/dashboard/:id',
-    },
-    'patient:archive': {
-      action: 'showPatient',
-      route: 'patient/archive/:id',
-    },
-    'patient:action': {
-      action: 'showPatient',
-      route: 'patient/:id/action/:id',
-    },
-    'patient:action:archive': {
-      action: 'showPatient',
-      route: 'patient/archive/:id/action/:id',
-    },
-    'flow': {
-      action: 'showFlow',
-      route: 'flow/:id',
-    },
-    'flow:details': {
-      action: 'showFlow',
-      route: 'flow/:id/details',
-    },
-    'flow:action': {
-      action: 'showFlow',
-      route: 'flow/:id/action/:id',
-    },
     'schedule': {
       action: 'showSchedule',
       route: 'schedule',
       meta: { isList: true },
     },
-  },
-
-  onBeforeAppRoute(router, { event, eventArgs: [patientId] }) {
-    // if routing to flow route, currentPatientId is set by flow_app's onStart()
-    if (event.startsWith('flow')) return;
-
-    // determines if dialer patient buttons are shown or hidden
-    const isPatientRoute = event.startsWith('patient');
-    Radio.trigger('dialer', 'change:currentPatientId', isPatientRoute ? patientId : null);
+    // Canonical patient-workspace routes. Every route starts the same PatientApp;
+    // PatientApp dispatches the page while its patient shell remains mounted.
+    'patient:workflow': {
+      action: 'showPatient',
+      route: [
+        'patient/:patientId/workflow',
+        'patient/dashboard/:patientId',
+      ],
+    },
+    'patient:workflow:closed': {
+      action: 'showPatient',
+      route: [
+        'patient/:patientId/workflow/closed',
+        'patient/archive/:patientId',
+      ],
+    },
+    'patient:action': {
+      action: 'showPatient',
+      route: [
+        'patient/:patientId/action/:actionId',
+        'patient/archive/:patientId/action/:actionId',
+      ],
+    },
+    'patient:flow': {
+      action: 'showPatient',
+      route: 'patient/:patientId/flow/:flowId',
+    },
+    'patient:flow:action': {
+      action: 'showPatient',
+      route: 'patient/:patientId/flow/:flowId/action/:actionId',
+    },
+    'patient:form': {
+      action: 'showPatient',
+      route: 'patient/:patientId/form/:formId',
+    },
+    'legacy:patient:flow': {
+      action: 'redirectPatientFlow',
+      route: [
+        'flow/:flowId',
+        'flow/:flowId/details',
+      ],
+    },
+    'legacy:patient:flow:action': {
+      action: 'redirectPatientFlowAction',
+      route: 'flow/:flowId/action/:actionId',
+    },
   },
 
   onStop() {
+    this.clearCurrentPatient();
+  },
+
+  clearCurrentPatient() {
     Radio.trigger('dialer', 'change:currentPatientId', null);
   },
 
-  showPatient(patientId) {
-    this.startRoute('patient', { patientId });
-  },
-
   showPatientsWorklist(worklistId, clinicianId) {
+    this.clearCurrentPatient();
+
     const worklistsById = {
       'owned-by': 'ownedBy',
       'shared-by': 'forTeam',
@@ -96,11 +108,56 @@ export default RouterApp.extend({
     this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId });
   },
 
-  showFlow(flowId) {
-    this.startRoute('flow', { flowId });
+  showSchedule() {
+    this.clearCurrentPatient();
+    this.startCurrent('schedule');
   },
 
-  showSchedule() {
-    this.startCurrent('schedule');
+  showPatient(patientId) {
+    Radio.trigger('dialer', 'change:currentPatientId', patientId);
+    this.startRoute('patient', { patientId });
+  },
+
+  redirectPatientFlow(flowId) {
+    return this.resolveFlowPatient('patient:flow', flowId);
+  },
+
+  redirectPatientFlowAction(flowId, actionId) {
+    return this.resolveFlowPatient('patient:flow:action', flowId, actionId);
+  },
+
+  resolveFlowPatient(event, flowId, actionId) {
+    const sourceRoute = this.getCurrentRoute();
+
+    return Radio.request('entities', 'fetch:flows:model', flowId)
+      .then(flow => {
+        const patientId = flow.getPatient().id;
+        const routeArgs = actionId ?
+          [patientId, flowId, actionId] :
+          [patientId, flowId];
+
+        this.redirectResolvedRoute(sourceRoute, event, ...routeArgs);
+      })
+      .catch(error => this.failResolvedRoute(sourceRoute, error));
+  },
+
+  redirectResolvedRoute(sourceRoute, event, ...eventArgs) {
+    // Ignore a resolver that completed after the user navigated elsewhere.
+    if (!this.isRunning() || this.getCurrentRoute() !== sourceRoute) return;
+
+    // Replace the legacy URL without dispatching, then route the canonical event.
+    this.replaceRoute(event, ...eventArgs);
+    Radio.trigger('event-router', event, ...eventArgs);
+  },
+
+  failResolvedRoute(sourceRoute, error) {
+    if (!this.isRunning() || this.getCurrentRoute() !== sourceRoute) return;
+
+    if (get(error, ['response', 'status']) === 410) {
+      Radio.trigger('event-router', 'notFound');
+      return;
+    }
+
+    return handleErrors(error);
   },
 });

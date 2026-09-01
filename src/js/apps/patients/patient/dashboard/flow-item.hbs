@@ -1,8 +1,0 @@
-<div class="table-list__icon--large patient__flow-icon">{{fas "folder"}}</div>
-<div class="u-text--overflow-two-lines">{{ name }}</div>
-<div class="table-list__meta u-margin--l-32">
-  <span class="patient__flow-status action--{{ stateOptions.color }}">{{fa stateOptions.iconType stateOptions.icon}}</span>
-  <span data-owner-region></span>
-  <progress class="progress-bar patient__flow-progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>
-</div>
-<div class="patient__action-ts">{{formatDateTime updated_at "TIME_OR_DAY"}}</div>

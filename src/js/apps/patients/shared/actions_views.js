@@ -1,14 +1,16 @@
+import { extend, result } from 'underscore';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import { renderTemplate } from 'js/i18n';
-
 import 'scss/modules/buttons.scss';
+
+import intl, { renderTemplate } from 'js/i18n';
 
 import Tooltip from 'js/components/tooltip';
 
 import trim from 'js/utils/formatting/trim';
+import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import CheckComponent from './components/check_component';
 import StateComponent from './components/state_component';
@@ -17,22 +19,74 @@ import DueComponent from './components/due_component';
 import TimeComponent from './components/time_component';
 import DurationComponent from './components/duration_component';
 
+import './actions.scss';
+
+function createCardControl(Component) {
+  return Component.extend({
+    viewOptions() {
+      const options = Component.prototype.viewOptions.call(this);
+
+      return extend({}, options, {
+        className: `${ result(options, 'className') } js-no-click`,
+      });
+    },
+  });
+}
+
+const CardOwnerComponent = createCardControl(OwnerComponent);
+const CardDueComponent = createCardControl(DueComponent);
+const CardTimeComponent = createCardControl(TimeComponent);
+
 const FormButton = View.extend({
-  className: 'button-secondary--compact',
+  className: 'button button--icon action-form-button',
   tagName: 'button',
+  attributes: {
+    'aria-label': intl.patients.shared.actionsViews.formButtonLabel,
+    'type': 'button',
+  },
   template: hbs`{{far "square-poll-horizontal"}}`,
   triggers: {
     'click': 'click',
   },
   onClick() {
-    Radio.trigger('event-router', 'form:patientAction', this.model.id, this.model.getForm().id);
+    const flow = this.model.getFlow();
+    const entryTarget = { formExpanded: true };
+
+    if (flow) {
+      Radio.trigger(
+        'event-router',
+        'patient:flow:action',
+        this.model.getPatient().id,
+        flow.id,
+        this.model.id,
+        entryTarget,
+      );
+      return;
+    }
+
+    Radio.trigger(
+      'event-router',
+      'patient:action',
+      this.model.getPatient().id,
+      this.model.id,
+      entryTarget,
+    );
   },
 });
 
 const DetailsTooltip = View.extend({
+  tagName: 'button',
+  className: 'button button--icon action-details-tooltip',
+  attributes() {
+    return {
+      'aria-describedby': `action-details-tooltip-${ this.cid }`,
+      'aria-label': intl.patients.shared.actionsViews.detailsTooltipLabel,
+      'type': 'button',
+    };
+  },
   template: hbs`{{far "circle-info"}}`,
-  triggers: {
-    'click': 'prevent-row-click',
+  events: {
+    'click': stopEventPropagation,
   },
   onRender() {
     const template = hbs`
@@ -44,6 +98,7 @@ const DetailsTooltip = View.extend({
     const flow = this.model.getFlow();
 
     new Tooltip({
+      id: `action-details-tooltip-${ this.cid }`,
       messageHtml: renderTemplate(template, {
         name: this.model.get('name'),
         flowName: flow ? flow.get('name') : null,
@@ -67,6 +122,9 @@ export {
   OwnerComponent,
   DueComponent,
   TimeComponent,
+  CardOwnerComponent,
+  CardDueComponent,
+  CardTimeComponent,
   DurationComponent,
   FormButton,
   DetailsTooltip,

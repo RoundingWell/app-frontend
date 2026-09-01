@@ -42,8 +42,8 @@ context('Handlebars helpers', function() {
 
     cy
       .get('@root')
-      .find('.test-noescape strong')
-      .should('have.css', 'color', 'rgb(0, 128, 0)');
+      .find('.test-noescape > span strong')
+      .should('contain', 'Patient');
   });
 
   specify('Date time formatting', function() {

@@ -6,7 +6,7 @@ import { testDate, testDateSubtract } from 'helpers/test-date';
 import { getResource, getRelationship, getErrors } from 'helpers/json-api';
 import { testTs } from 'helpers/test-timestamp';
 
-import { workspaceOne, getWorkspace } from 'support/api/workspaces';
+import { workspaceOne } from 'support/api/workspaces';
 import { getWorkspacePatient } from 'support/api/workspace-patients';
 import { getPatient } from 'support/api/patients';
 import { getCurrentClinician } from 'support/api/clinicians';
@@ -15,6 +15,193 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
+  specify('uses the sidebar setting for panel membership and order', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('sidebar', ['status', 'demographics'])
+      .routePanels(fx => {
+        const addPanel = _.partial(getResource, _, 'panels');
+
+        fx.data = [
+          addPanel({
+            id: 'demographics-panel',
+            slug: 'demographics',
+            name: 'Demographics',
+            widgets: ['dob', 'sex'],
+          }),
+          addPanel({
+            id: 'status-panel',
+            slug: 'status',
+            name: 'Status',
+            widgets: ['status'],
+          }),
+        ];
+
+        return fx;
+      })
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar__card')
+      .should('have.length', 2)
+      .first()
+      .find('.patient-sidebar__card-toggle')
+      .should('contain', 'Status');
+
+    cy.get('.patient-sidebar__card')
+      .eq(1)
+      .should('contain', 'Demographics')
+      .and('contain', 'Sex')
+      .and('contain', 'Date of Birth');
+  });
+
+  specify('renders available panels when the sidebar setting references a missing panel', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('sidebar', ['missing-panel', 'demographics'])
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar__card')
+      .should('have.length', 1)
+      .and('contain', 'Demographics');
+  });
+
+  specify('expands and collapses sidebar sections accessibly', function() {
+    cy
+      .routesForPatientDashboard()
+      .routeSettings('sidebar', ['demographics', 'care-team'])
+      .routePanels(fx => {
+        const addPanel = _.partial(getResource, _, 'panels');
+
+        fx.data = [
+          addPanel({
+            id: 'demographics-panel',
+            slug: 'demographics',
+            name: 'Demographics',
+            widgets: ['sex'],
+          }),
+          addPanel({
+            id: 'care-team-panel',
+            slug: 'care-team',
+            name: 'Care & Support',
+            widgets: ['sex'],
+          }),
+        ];
+
+        return fx;
+      })
+      .visit('/patient/dashboard/1')
+      .wait('@routePatient');
+
+    cy
+      .contains('.patient-sidebar__card-toggle', 'Demographics')
+      .as('demographicsToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Demographics section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('be.visible');
+      });
+
+    cy
+      .get('@demographicsToggle')
+      .find('.patient-sidebar__card-toggle-icon use')
+      .should('have.attr', 'href', '#far-fa-angle-right');
+
+    cy
+      .contains('.patient-sidebar__card-toggle', 'Care & Support')
+      .as('careToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Care & Support section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('be.visible');
+      });
+
+    cy
+      .get('@demographicsToggle')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false')
+      .and('have.attr', 'aria-label', 'Expand Demographics section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('not.be.visible');
+      });
+
+    cy
+      .get('@demographicsToggle')
+      .focus()
+      .should('be.focused')
+      .typeEnter();
+
+    cy
+      .get('@demographicsToggle')
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Demographics section');
+
+    cy
+      .get('@careToggle')
+      .focus()
+      .should('be.focused')
+      .typeEnter();
+
+    cy
+      .get('@careToggle')
+      .should('have.attr', 'aria-expanded', 'false')
+      .and('have.attr', 'aria-label', 'Expand Care & Support section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('not.be.visible');
+      });
+
+    cy
+      .get('@careToggle')
+      .typeEnter()
+      .should('have.attr', 'aria-expanded', 'true')
+      .and('have.attr', 'aria-label', 'Collapse Care & Support section')
+      .invoke('attr', 'aria-controls')
+      .then(regionId => {
+        cy.get(`#${ regionId }`).should('be.visible');
+      });
+
+    cy.viewport(720, 720);
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .should('have.attr', 'aria-expanded', 'false')
+      .click();
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .type('{esc}');
+
+    cy
+      .get('.patient__frame')
+      .should('have.class', 'patient__frame--sidebar-hidden');
+
+    cy
+      .get('.patient__sidebar-toggle')
+      .should('be.focused')
+      .and('have.attr', 'aria-expanded', 'false');
+
+    cy.viewport(721, 720);
+
+    cy
+      .get('.patient__sidebar')
+      .should('be.visible');
+  });
+
   specify('display patient data', function() {
     const dob = testDateSubtract(10, 'years');
 
@@ -53,6 +240,25 @@ context('patient sidebar', function() {
         },
       },
     });
+    const panelWidgetSlugs = [
+      'dob',
+      'sex',
+      'status',
+      'divider',
+      'workspaces',
+      'divider',
+      'formWidget',
+      'formModalWidget',
+      'readOnlyFormModalWidget',
+      'formModalWidgetSmall',
+      'formModalWidgetLarge',
+      'patientMRNIdentifier',
+      'patientSSNIdentifier',
+      'hbsWidget',
+      'hbsEmptyWidget',
+      'hbsNoRegionWidget',
+      'hbsEmptyTemplateWidget',
+    ];
 
     cy
       .routesForPatientDashboard()
@@ -60,6 +266,11 @@ context('patient sidebar', function() {
       .routeLatestFormResponse()
       .routeFormFields()
       .routeForm()
+      .routeForm(fx => {
+        fx.data = testForm;
+
+        return fx;
+      }, testForm.id)
       .routeForm(fx => {
         fx.data = testScriptReducerForm;
 
@@ -78,26 +289,10 @@ context('patient sidebar', function() {
 
         return fx;
       })
-      .routeSettings('widgets_patient_sidebar', {
-        widgets: [
-          'dob',
-          'sex',
-          'status',
-          'divider',
-          'workspaces',
-          'divider',
-          'formWidget',
-          'formModalWidget',
-          'readOnlyFormModalWidget',
-          'formModalWidgetSmall',
-          'formModalWidgetLarge',
-          'patientMRNIdentifier',
-          'patientSSNIdentifier',
-          'hbsWidget',
-          'hbsEmptyWidget',
-          'hbsNoRegionWidget',
-          'hbsEmptyTemplateWidget',
-        ],
+      .routePanels(fx => {
+        fx.data[0].attributes.widgets = panelWidgetSlugs;
+
+        return fx;
       })
       .routeWidgets(fx => {
         const addWidget = _.partial(getResource, _, 'widgets');
@@ -130,6 +325,7 @@ context('patient sidebar', function() {
               form_id: testReadOnlyForm.id,
               form_name: 'Test Modal Read Only Form',
               is_modal: true,
+              modal_size: 'regular',
             },
           }),
           addWidget({
@@ -320,7 +516,7 @@ context('patient sidebar', function() {
       .find('.patient-sidebar__section')
       .contains('Template - Empty Widget Value')
       .next()
-      .find('.widgets-value')
+      .find('.widgets__value')
       .hasBeforeContent('–');
 
     cy
@@ -343,7 +539,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled');
 
@@ -384,13 +580,13 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled')
       .wait('@postFormResponse');
@@ -403,14 +599,14 @@ context('patient sidebar', function() {
       .as('postFormResponse');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('not.be.disabled')
       .click()
       .wait('@postFormResponse');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .should('not.exist');
 
     cy
@@ -430,7 +626,7 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('button:has(.fa-shield-check)')
       .as('draftStatusButton')
       .trigger('pointerover');
@@ -499,12 +695,12 @@ context('patient sidebar', function() {
       .should('not.exist');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-submit')
       .should('be.disabled');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-close')
       .first()
       .click();
@@ -527,17 +723,17 @@ context('patient sidebar', function() {
       });
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.modal__footer-actions .js-close')
       .should('not.exist');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.modal__footer-actions .js-submit')
       .should('contain', 'Done');
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
       .find('.js-close')
       .first()
       .click();
@@ -549,7 +745,7 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-small')
       .find('.js-close')
       .first()
       .click();
@@ -561,10 +757,13 @@ context('patient sidebar', function() {
       .click();
 
     cy
-      .get('.modal--large')
+      .get('.modal--form-large')
+      .should('exist')
       .find('.js-close')
-      .last()
+      .first()
       .click();
+
+    cy.url().should('contain', `patient/dashboard/${ testPatient.id }`);
 
     cy
       .get('@patientSidebar')
@@ -575,6 +774,99 @@ context('patient sidebar', function() {
     cy
       .url()
       .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
+  });
+
+  specify('renders patient sidebar when widget values fail', function() {
+    const panelWidgetSlugs = [
+      'sex',
+      'failingWidget',
+      'unknownWidget',
+    ];
+    const testPatient = getPatient({
+      attributes: {
+        first_name: 'Test',
+        last_name: 'Patient',
+        sex: 'f',
+      },
+    });
+
+    cy
+      .routesForPatientDashboard()
+      .routePanels(fx => {
+        fx.data[0].attributes.widgets = panelWidgetSlugs;
+
+        return fx;
+      })
+      .routeWidgets(fx => {
+        const addWidget = _.partial(getResource, _, 'widgets');
+
+        fx.data = fx.data.concat([
+          addWidget({
+            slug: 'failingWidget',
+            category: 'widget',
+            definition: {
+              template: 'Widget value: {{ sex }}',
+              display_name: 'Failing Widget',
+            },
+            values: {
+              sex: '@patient.sex',
+            },
+          }),
+          addWidget({
+            slug: 'unknownWidget',
+            category: 'customWidget',
+            definition: {
+              template: 'Custom widget value',
+              display_name: 'Unknown Widget',
+            },
+          }),
+        ]);
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      });
+
+    cy
+      .intercept('GET', '/api/widgets/failingWidget/values*', {
+        statusCode: 404,
+        body: {
+          errors: getErrors({
+            status: '404',
+            title: 'Not Found',
+            detail: 'Widget values failed',
+          }),
+        },
+      })
+      .as('routeFailingWidgetValues');
+
+    cy
+      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .wait('@routePatient')
+      .wait('@routeFailingWidgetValues');
+
+    cy
+      .get('.patient-sidebar')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.patient-sidebar__section')
+      .should('have.length', 3);
+
+    cy
+      .get('.patient-sidebar__section')
+      .first()
+      .should('contain', 'Sex')
+      .should('contain', 'Female');
+
+    cy
+      .get('.patient-sidebar__section')
+      .eq(2)
+      .should('contain', 'Unknown Widget')
+      .should('contain', 'Custom widget value');
   });
 
   specify('patient workspaces', function() {
@@ -608,19 +900,11 @@ context('patient sidebar', function() {
       .should('not.contain', 'Workspace Two');
   });
 
-  specify('workspace specific widgets setting', function() {
+  specify('renders widgets from the panel definition', function() {
     cy
       .routesForPatientDashboard()
-      .routeWorkspaces(fx => {
-        fx.data[0] = getWorkspace({
-          attributes: {
-            settings: {
-              widgets_patient_sidebar: {
-                widgets: ['divider'],
-              },
-            },
-          },
-        }, { id: workspaceOne.id });
+      .routePanels(fx => {
+        fx.data[0].attributes.widgets = ['divider'];
 
         return fx;
       });
@@ -663,6 +947,7 @@ context('patient sidebar', function() {
     cy
       .get('.patient__sidebar')
       .find('.js-menu')
+      .should('have.class', 'button--menu')
       .click();
 
     cy
@@ -704,7 +989,7 @@ context('patient sidebar', function() {
 
     cy
       .url()
-      .should('contain', `/patient/dashboard/${ testPatient.id }`);
+      .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
   specify('view patient modal', function() {

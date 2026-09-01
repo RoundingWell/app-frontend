@@ -1,5 +1,7 @@
-<h1 class="program-sidebar__name">{{ name }}</h1>
-<button class="button--icon program-sidebar__context-menu js-menu">{{far "ellipsis"}}</button>
+<div class="program-sidebar__header">
+  <h1 class="program-sidebar__name">{{ name }}</h1>
+  <button class="button button--icon button--menu program-sidebar__context-menu js-menu" type="button" aria-label="{{ @intl.programs.program.sidebar.sidebarViews.menuOptions.headingText }}">{{far "ellipsis"}}</button>
+</div>
 <div class="u-margin--t-16">
   <div class="program-sidebar__heading">{{ @intl.programs.program.sidebar.sidebarLayoutTemplate.details }}</div>
   <div>{{#if details}}{{ details }}{{else}}<span class="u-text--italic">{{ @intl.programs.program.sidebar.sidebarLayoutTemplate.noDetails }}</span>{{/if}}</div>

@@ -160,7 +160,7 @@ context('Patient Quick Search', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ patients[2].id }`);
+      .should('contain', `patient/${ patients[2].id }/workflow`);
 
     cy
       .get('@search')

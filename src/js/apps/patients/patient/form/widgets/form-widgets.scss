@@ -1,0 +1,28 @@
+.form-widgets {
+  background-color: #{$white};
+  border: 1px solid #{$black-90};
+  border-radius: 4px;
+  box-sizing: border-box;
+  flex: none;
+  margin-bottom: 16px;
+  min-width: 0;
+  padding: 8px 8px 0;
+  width: 100%;
+
+  [data-widgets-region],
+  [data-widgets-region] > .flex {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .form-widgets__section {
+    margin-bottom: 8px;
+    max-width: 100%;
+    min-width: 0;
+    padding: 0 8px;
+
+    &:empty {
+      display: none;
+    }
+  }
+}

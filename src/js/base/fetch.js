@@ -5,33 +5,34 @@ import dayjs from 'dayjs';
 
 const fetchers = [];
 
-function registerFetcher(baseUrl, fetcher, controller) {
-  fetchers[baseUrl] = { fetcher, controller };
+function registerFetcher(baseUrl, request) {
+  fetchers[baseUrl] = request;
 
-  return fetcher;
+  return request.fetcher;
 }
 
 function getFetcher(baseUrl) {
   return get(fetchers[baseUrl], 'fetcher');
 }
 
-function removeFetcher(baseUrl) {
+function removeFetcher(baseUrl, request) {
+  if (fetchers[baseUrl] !== request) return;
+
   delete fetchers[baseUrl];
 }
 
 function abortFetcher(baseUrl) {
-  const controller = get(fetchers[baseUrl], 'controller');
+  const request = fetchers[baseUrl];
 
-  if (!controller) return;
+  if (!request) return;
 
-  controller.abort();
-  removeFetcher(baseUrl);
+  request.controller.abort();
+  removeFetcher(baseUrl, request);
 }
 
 function getActiveFetcher(baseUrl, options = {}) {
   const fetcher = getFetcher(baseUrl);
 
-  /* istanbul ignore if: async safety */
   if (fetcher) {
     if (options.abort !== false) {
       abortFetcher(baseUrl);
@@ -44,44 +45,76 @@ function getActiveFetcher(baseUrl, options = {}) {
   return false;
 }
 
-async function buildFetcher(url, options = {}) {
-  const token = await Radio.request('auth', 'getToken');
+function forwardAbort(signal, controller) {
+  if (!signal) return () => {};
+
+  const abort = () => controller.abort(signal.reason);
+
+  if (signal.aborted) abort();
+  else signal.addEventListener('abort', abort, { once: true });
+
+  return () => signal.removeEventListener('abort', abort);
+}
+
+function isGetRequest({ method } = {}) {
+  return !method || String(method).toUpperCase() === 'GET';
+}
+
+function buildFetcher(url, options = {}, shouldRegister = false) {
   const controller = new AbortController();
   const baseUrl = url;
+  const removeAbortListener = forwardAbort(options.signal, controller);
+  const request = { controller };
 
-  options = extend({
-    signal: controller.signal,
-    dataType: 'json',
-    headers: defaults(options.headers, {
-      'Accept': 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json',
-    }),
-  }, options);
+  request.fetcher = (async() => {
+    const token = await Radio.request('auth', 'getToken');
 
-  if (token) options.headers.Authorization = token;
+    options = extend({
+      dataType: 'json',
+      headers: defaults(options.headers, {
+        'Accept': 'application/vnd.api+json',
+        'Content-Type': 'application/vnd.api+json',
+      }),
+    }, options, { signal: controller.signal });
 
-  if (!options.method || options.method === 'GET') {
-    url = getUrl(url, options.data);
-  } else if (options.data) {
-    options.body = options.data;
-  }
+    if (token) options.headers.Authorization = token;
 
-  // Attach preferred workspace to request
-  const currentWorkspace = Radio.request('workspace', 'current');
-  if (currentWorkspace) options.headers.Workspace = currentWorkspace.id;
+    if (isGetRequest(options)) {
+      url = getUrl(url, options.data);
+    } else if (options.data) {
+      options.body = options.data;
+    }
 
-  // Attach Client ID
-  const currentUser = Radio.request('bootstrap', 'currentUser');
-  if (currentUser) options.headers['Client-Key'] = currentUser.clientKey;
+    // Attach preferred workspace to request
+    const currentWorkspace = Radio.request('workspace', 'current');
+    if (currentWorkspace) options.headers.Workspace = currentWorkspace.id;
 
-  return registerFetcher(baseUrl, fetch(url, options), controller);
+    // Attach Client ID
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+    if (currentUser) options.headers['Client-Key'] = currentUser.clientKey;
+
+    return fetch(url, options);
+  })()
+    .finally(() => {
+      removeAbortListener();
+      if (shouldRegister) removeFetcher(baseUrl, request);
+    });
+
+  if (shouldRegister) return registerFetcher(baseUrl, request);
+
+  return request.fetcher;
+}
+
+function getRequestFetcher(url, options = {}) {
+  if (!isGetRequest(options)) return buildFetcher(url, options);
+
+  return getActiveFetcher(url, options) || buildFetcher(url, options, true);
 }
 
 async function handleUnauthorized(url, options = {}) {
   return Radio.request('auth', 'handleUnauthorized', async() => {
     // recoverAuth force-refreshes through AuthKit; the retry uses the SDK-cached fresh token.
-    return buildFetcher(url, options)
-      .finally(() => removeFetcher(url));
+    return getRequestFetcher(url, options);
   });
 }
 
@@ -175,12 +208,10 @@ export function handleError(error) {
 }
 
 export default async(url, options) => {
-  const fetcher = getActiveFetcher(url, options) || buildFetcher(url, options);
+  const fetcher = getRequestFetcher(url, options);
 
   return fetcher
     .then(response => {
-      removeFetcher(url);
-
       if (response.status === 401) {
         return handleUnauthorized(url, options)
           .then(retryResponse => retryResponse || response);

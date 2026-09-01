@@ -4,9 +4,10 @@
     "stylelint-scss",
     "stylelint-order"
   ],
-  "ignoreFiles": ["coverage/**", "src/scss/provider-variables.scss", "public/**"],
+  "ignoreFiles": ["coverage/**", "src/scss/core/_tokens.scss", "src/scss/provider-variables.scss", "public/**"],
   "rules": {
     "at-rule-no-unknown": null,
+    "color-no-hex": true,
     "font-family-no-missing-generic-family-keyword": null,
     "length-zero-no-unit": true,
     "max-nesting-depth": 3,

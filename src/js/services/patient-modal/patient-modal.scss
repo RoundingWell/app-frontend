@@ -1,0 +1,48 @@
+.patient-modal__field {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.patient-modal__field-label {
+  align-items: center;
+  color: #{$black-60};
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  width: 124px;
+}
+
+.patient-modal__field-control {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.patient-modal__form-component {
+  width: 248px;
+}
+
+.patient-modal__locked-icon {
+  color: #{$black-60};
+  line-height: 24px;
+  position: absolute;
+  right: 16px;
+  top: 8px;
+}
+
+@media (width <= 480px) {
+  .patient-modal__field {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .patient-modal__field-label {
+    width: 100%;
+  }
+
+  .patient-modal__form-component {
+    min-width: 0;
+    width: 100%;
+  }
+}

@@ -19,7 +19,7 @@ const headingText = intl.clinicians.sidebar.clinicianSidebarViews.headingText;
 const NameView = View.extend({
   className: 'pos--relative',
   template: hbs`
-    <input class="input-primary w-100 js-input{{#if error}} has-error{{/if}}" placeholder="{{ @intl.clinicians.sidebar.clinicianSidebarViews.nameView.placeholder }}" value="{{ name }}" {{#unless canEdit}}disabled{{/unless}} />{{~ remove_whitespace ~}}
+    <input class="form-input form-input--primary w-100 js-input{{#if error}} has-error{{/if}}" placeholder="{{ @intl.clinicians.sidebar.clinicianSidebarViews.nameView.placeholder }}" value="{{ name }}" {{#unless canEdit}}disabled{{/unless}} />{{~ remove_whitespace ~}}
     {{#unless canEdit}}<span class="clinician-sidebar__locked-icon">{{far "lock"}}</span>{{/unless}}
     {{#if error}}<div class="form-error u-margin--b-4">{{ error }}</div>{{/if}}
   `,
@@ -43,7 +43,7 @@ const NameView = View.extend({
 const EmailView = View.extend({
   className: 'pos--relative',
   template: hbs`
-    <input class="input-primary w-100 js-input{{#if error}} has-error{{/if}}" placeholder="{{ @intl.clinicians.sidebar.clinicianSidebarViews.emailView.placeholder }}" value="{{ email }}" {{#unless canEdit}}disabled{{/unless}} />{{~ remove_whitespace ~}}
+    <input class="form-input form-input--primary w-100 js-input{{#if error}} has-error{{/if}}" placeholder="{{ @intl.clinicians.sidebar.clinicianSidebarViews.emailView.placeholder }}" value="{{ email }}" {{#unless canEdit}}disabled{{/unless}} />{{~ remove_whitespace ~}}
     {{#unless canEdit}}<span class="clinician-sidebar__locked-icon">{{far "lock"}}</span>{{/unless}}
     {{#if error}}<div class="form-error u-margin--b-4">{{ error }}</div>{{/if}}
   `,
@@ -67,8 +67,8 @@ const EmailView = View.extend({
 const SaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
   template: hbs`
-    <button class="button--green js-save">{{ @intl.clinicians.sidebar.clinicianSidebarViews.saveView.saveBtn }}</button>
-    <button class="button--text u-margin--r-4 js-cancel">{{ @intl.clinicians.sidebar.clinicianSidebarViews.saveView.cancelBtn }}</button>
+    <button class="button button--positive js-save" type="button">{{ @intl.clinicians.sidebar.clinicianSidebarViews.saveView.saveBtn }}</button>
+    <button class="button button--text u-margin--r-4 js-cancel" type="button">{{ @intl.clinicians.sidebar.clinicianSidebarViews.saveView.cancelBtn }}</button>
   `,
   triggers: {
     'click .js-cancel': 'cancel',
@@ -78,11 +78,11 @@ const SaveView = View.extend({
 
 const DisabledSaveView = View.extend({
   className: 'u-margin--t-8 sidebar__save',
-  template: hbs`<button class="button--green" disabled>{{ @intl.clinicians.sidebar.clinicianSidebarViews.disabledSaveView.saveBtn }}</button>`,
+  template: hbs`<button class="button button--positive" type="button" disabled>{{ @intl.clinicians.sidebar.clinicianSidebarViews.disabledSaveView.saveBtn }}</button>`,
 });
 
 const InfoView = View.extend({
-  className: 'sidebar__info',
+  className: 'clinician-sidebar__info',
   template: hbs`
     {{fas "circle-info"}}{{ @intl.clinicians.sidebar.clinicianSidebarViews.infoView.workspaceTeamInfo }}
   `,
@@ -94,7 +94,7 @@ const WorklistView = View.extend({
     <h3 class="sidebar__heading">
       {{formatHTMLMessage (intlGet "clinicians.sidebar.clinicianSidebarViews.worklistView.workspaceName") name=workspaceName}}
     </h3>
-    <button class="button-primary w-100 u-margin--t-8 js-button">
+    <button class="button button--outline w-100 u-margin--t-8 js-button" type="button">
       {{far "list"}}<span>{{formatHTMLMessage (intlGet "clinicians.sidebar.clinicianSidebarViews.worklistView.worklistBtn") name=clinicianName}}</span>
     </button>
     <div class="clinician-sidebar__worklist-info">

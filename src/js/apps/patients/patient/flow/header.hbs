@@ -1,7 +1,13 @@
-<h1 class="patient-flow__name">{{fas "folder-open"}} {{ name }}</h1>
-<div>
-  <span class="patient-flow__details">{{ details }}</span>
+<h1 class="patient-detail-page__title patient-flow__name"><span class="patient-flow__name-icon">{{far "folder-open"}}</span><span>{{ name }}</span></h1>
+<div class="patient-flow__details">{{ details }}</div>
+<div class="button-group patient-flow__chips">
   <span class="patient-flow__meta" data-state-region></span>{{~ remove_whitespace ~}}
   <span class="patient-flow__meta" data-owner-region></span>{{~ remove_whitespace ~}}
-  <progress class="js-progress progress-bar patient-flow__progress" value={{ _progress.complete }} max={{ _progress.total }}></progress>
 </div>
+{{#unless canEdit}}
+<div class="patient-flow__permission">
+  <div class="patient-detail-page__notice patient-flow__info">
+    {{far "ban"}}<span class="u-margin--l-8">{{ @intl.patients.patient.flow.flowViews.permissionInfo }}</span>
+  </div>
+</div>
+{{/unless}}

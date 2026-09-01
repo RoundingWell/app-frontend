@@ -11,11 +11,34 @@ import {
   startRum,
 } from '@roundingwell/care-ops-datadog';
 
+let formInteractionCleanup;
 let formsConfigPromise;
 let formsDatadogPromise;
 
 function getSearchParams() {
   return new URLSearchParams(window.location.search);
+}
+
+function initFormInteraction({ targetOrigin, targetWindow }) {
+  if (formInteractionCleanup || targetWindow === window) return;
+
+  const handleInteraction = () => {
+    targetWindow.postMessage({ message: 'form:interact' }, targetOrigin);
+  };
+  const handlePageHide = event => {
+    if (!event.persisted) formInteractionCleanup();
+  };
+
+  formInteractionCleanup = () => {
+    document.removeEventListener('click', handleInteraction, true);
+    document.removeEventListener('focusin', handleInteraction, true);
+    window.removeEventListener('pagehide', handlePageHide);
+    formInteractionCleanup = null;
+  };
+
+  document.addEventListener('click', handleInteraction, true);
+  document.addEventListener('focusin', handleInteraction, true);
+  window.addEventListener('pagehide', handlePageHide);
 }
 
 function isPdfFormRequest() {
@@ -81,6 +104,8 @@ async function initFormServices({
   targetWindow = parent,
   targetOrigin = window.origin,
 } = {}) {
+  initFormInteraction({ targetOrigin, targetWindow });
+
   await fetchFormsConfig();
   postFormsVersion(targetWindow, targetOrigin);
 

@@ -8,8 +8,13 @@ import { alphaSort } from 'js/utils/sorting';
 import { FORM_RESPONSE_STATUS } from 'js/static';
 
 const TYPE = 'form-responses';
+const WRITABLE_ATTRIBUTES = [
+  'status',
+  'response',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
   urlRoot: '/api/form-responses',
   saveAll() {

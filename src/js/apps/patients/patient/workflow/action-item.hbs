@@ -1,0 +1,31 @@
+<div class="work-card__surface">
+  <div class="work-card__main">
+    <div class="work-card__heading">
+      <span class="work-card__state patient-list__state js-no-click" data-state-region></span>
+      <button class="work-card__title js-primary" type="button">
+        {{ name }}
+        {{~#unless name}}<em>{{ @intl.patients.shared.actionCard.newAction }}</em>{{/unless~}}
+      </button>
+      <span class="action-card__tool js-no-click" data-details-region></span>
+      <span class="action-card__tool js-no-click" data-form-region></span>
+    </div>
+  </div>
+  <div class="work-card__aside">
+    <div class="work-card__controls action-card__controls">
+      <span class="work-card__control action-card__owner" data-owner-region></span>
+      <span class="work-card__control button-group button-group--joined action-card__due"><span data-due-date-region></span>{{~ remove_whitespace ~}}<span data-due-time-region></span></span>
+    </div>
+    <div class="work-card__meta action-card__meta">
+      <span class="work-card__timestamps">
+        <span>{{ @intl.patients.shared.actionCard.added }} {{formatDateTime created_at "TIME_OR_DAY"}}</span>
+        <span>{{ @intl.patients.shared.actionCard.updated }} {{formatDateTime updated_at "TIME_OR_DAY"}}</span>
+      </span>
+      {{#if attachmentCount}}<span class="action-card__counts">
+        <span class="action-card__count" role="img" aria-label="{{formatMessage (intlGet "patients.shared.actionCard.attachmentsLabel") itemCount=attachmentCount}}">{{far "paperclip"}}<span> {{ attachmentCount }}</span></span>
+        {{#if commentCount}}<span class="action-card__count" role="img" aria-label="{{formatMessage (intlGet "patients.shared.actionCard.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></span>{{/if}}
+      </span>{{else}}{{#if commentCount}}<span class="action-card__counts">
+        <span class="action-card__count" role="img" aria-label="{{formatMessage (intlGet "patients.shared.actionCard.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span> {{ commentCount }}</span></span>
+      </span>{{/if}}{{/if}}
+    </div>
+  </div>
+</div>

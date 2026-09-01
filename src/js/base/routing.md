@@ -28,9 +28,12 @@ definitions.
 
 ```js
 eventRoutes: {
-  'patient:dashboard': {
+  'patient:workflow': {
     action: 'showPatient',          // method name or function (positional handler)
-    route: 'patient/dashboard/:id', // string, or array of aliases (first is canonical)
+    route: [                        // first route is canonical
+      'patient/:id/workflow',
+      'patient/dashboard/:id',
+    ],
     // root: true,                  // skip the workspace-slug prefix
     meta: { isList: true },         // behavioral flags live under meta
   },
@@ -55,7 +58,7 @@ Each match is normalized before any hook runs:
 
 ```js
 {
-  event,            // 'patient:dashboard'
+  event,            // 'patient:workflow'
   eventArgs,        // ['patient-id', ...] — positional, as the action receives them
   definition: { action, route, root, meta },
 }
@@ -134,8 +137,8 @@ onStart(options, data) {
 
 ```js
 routeActions: {
-  'flow:action': 'showActionSidebar',
-  'flow:details': 'showFlowDetails',
+  'patient:flow:action': 'showAction',
+  'patient:flow': 'showFlow',
 }
 ```
 

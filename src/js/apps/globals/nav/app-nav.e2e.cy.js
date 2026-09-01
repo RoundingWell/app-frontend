@@ -6,10 +6,20 @@ import { getRelationship, getErrors } from 'helpers/json-api';
 import { testTs } from 'helpers/test-timestamp';
 
 import { workspaceOne, workspaceTwo, getWorkspace } from 'support/api/workspaces';
-import { getClinician, getCurrentClinician } from 'support/api/clinicians';
+import { getClinician, getCurrentClinician, fxCurrentClinician } from 'support/api/clinicians';
 import { roleAdmin, roleEmployee } from 'support/api/roles';
 import { teamCoordinator } from 'support/api/teams';
 import { testForm } from 'support/api/forms';
+
+const navMinimizedKey = `isNavMenuMinimized_${ fxCurrentClinician.id }`;
+const whatsNewDismissedKey = `whatsNewDismissed_v6-design-update_${ fxCurrentClinician.id }`;
+
+function expectNavMenuLabel(label, assertion = 'be.visible') {
+  cy
+    .get('.app-nav__bottom')
+    .contains('.app-nav__label', label)
+    .should(assertion);
+}
 
 context('App Nav', function() {
   beforeEach(function() {
@@ -50,7 +60,7 @@ context('App Nav', function() {
       .routeClinicians()
       .visit()
       .then(() => {
-        const storageItem = JSON.parse(localStorage.getItem('isNavMenuMinimized'));
+        const storageItem = JSON.parse(localStorage.getItem(navMinimizedKey));
 
         expect(storageItem).to.be.false;
       });
@@ -83,14 +93,12 @@ context('App Nav', function() {
 
     cy
       .get('.picklist')
-      .find('.app-nav__picklist-bottom')
       .contains('Help & Support')
       .should('have.attr', 'href')
       .and('contain', 'help.roundingwell.com');
 
     cy
       .get('.picklist')
-      .find('.app-nav__picklist-bottom')
       .contains('Sign Out')
       .should('have.attr', 'href')
       .and('contain', '/logout');
@@ -224,6 +232,102 @@ context('App Nav', function() {
       .should('not.have.class', 'is-selected');
   });
 
+  specify('shows and remembers the design update announcement', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav__announcement')
+      .should('be.visible')
+      .should('contain', 'RW Design Update')
+      .contains('button', 'See what\'s new')
+      .click();
+
+    cy
+      .get('.whats-new-modal')
+      .should('contain', 'What\'s New')
+      .find('iframe')
+      .should('have.attr', 'src', 'https://www.roundingwell.com/rw-design-update');
+
+    cy
+      .get('.whats-new-modal')
+      .contains('button', 'Done')
+      .click();
+
+    cy
+      .get('.app-nav__announcement')
+      .find('[aria-label="Dismiss design update announcement"]')
+      .click()
+      .then(() => {
+        expect(JSON.parse(localStorage.getItem(whatsNewDismissedKey))).to.be.true;
+      });
+
+    cy
+      .get('.app-nav__announcement')
+      .should('not.exist');
+
+    cy.reload();
+
+    cy
+      .get('.app-nav__announcement')
+      .should('not.exist');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('.js-picklist-item', 'What\'s New')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.whats-new-modal')
+      .find('iframe')
+      .should('have.attr', 'src', 'https://www.roundingwell.com/rw-design-update');
+  });
+
+  specify('keeps the design update announcement clear of menu controls', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    [700, 900].forEach(viewportHeight => {
+      cy.viewport(1280, viewportHeight);
+
+      cy
+        .get('.app-nav__announcement')
+        .then($announcement => {
+          const announcementRect = $announcement[0].getBoundingClientRect();
+
+          cy
+            .get('.app-nav__bottom .app-nav__link')
+            .first()
+            .then($menuLink => {
+              const menuLinkRect = $menuLink[0].getBoundingClientRect();
+
+              expect(announcementRect.bottom).to.be.at.most(menuLinkRect.top);
+            });
+        });
+
+      cy
+        .get('.whats-new-announcement__badge')
+        .then($badge => {
+          const badgeRect = $badge[0].getBoundingClientRect();
+
+          cy
+            .get('.whats-new-announcement__dismiss')
+            .then($dismiss => {
+              const dismissRect = $dismiss[0].getBoundingClientRect();
+
+              expect(badgeRect.right).to.be.at.most(dismissRect.left);
+            });
+        });
+    });
+  });
+
   specify('switch workspaces', function() {
     cy
       .routeActions()
@@ -336,7 +440,7 @@ context('App Nav', function() {
   });
 
   specify('minimized nav menu', function() {
-    localStorage.setItem('isNavMenuMinimized', true);
+    localStorage.setItem(navMinimizedKey, true);
 
     cy
       .routePrograms()
@@ -344,8 +448,12 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav__header')
-      .should('not.contain', 'Workspace One')
-      .should('not.contain', 'Clinician McTester');
+      .find('.app-nav__header-details')
+      .should('not.be.visible');
+
+    cy
+      .get('.app-nav__announcement')
+      .should('not.be.visible');
 
     cy
       .get('.app-nav__header')
@@ -362,23 +470,21 @@ context('App Nav', function() {
       .should('have.class', 'is-active');
 
     cy
-      .get('.app-frame__content')
-      .click('left');
+      .get('body')
+      .type('{esc}');
 
     cy
       .get('[data-nav-content-region]')
       .find('.js-search')
-      .should('not.contain', 'Search')
+      .contains('.app-nav__label', 'Search')
+      .should('not.be.visible')
+      .parents('.js-search')
       .click();
 
     cy
       .get('.patient-search__modal')
       .find('.js-close')
       .click();
-
-    cy
-      .get('.app-nav__title')
-      .should('not.exist');
 
     cy
       .get('[data-nav-content-region]')
@@ -393,26 +499,24 @@ context('App Nav', function() {
     cy
       .get('@worklists')
       .find('.app-nav__link')
-      .should('not.contain', 'Owned By')
-      .should('not.contain', 'Schedule')
-      .should('not.contain', 'Shared By')
-      .should('not.contain', 'New < 1 Day')
-      .should('not.contain', 'Updated < 3 Days')
-      .should('not.contain', 'Done < 30 Days');
+      .find('.app-nav__label')
+      .should('not.be.visible');
 
     cy
       .get('.app-nav__bottom')
       .find('.app-nav__link')
       .should('have.length', 1)
-      .should('not.contain', 'Dashboards');
+      .find('.app-nav__label')
+      .should('not.be.visible');
 
     cy
       .get('.app-nav__bottom')
       .find('.app-nav__bottom-button')
-      .should('have.length', 3)
-      .should('not.contain', 'Add Patient')
-      .should('not.contain', 'Admin Tools')
-      .should('not.contain', 'Minimize Menu');
+      .should('have.length', 3);
+
+    expectNavMenuLabel('Add Patient', 'not.be.visible');
+    expectNavMenuLabel('Admin Tools', 'not.be.visible');
+    expectNavMenuLabel('Minimize Menu', 'not.be.visible');
 
     cy
       .get('.app-nav__bottom')
@@ -451,7 +555,7 @@ context('App Nav', function() {
       .as('minimizeMenuButton')
       .click()
       .then(() => {
-        const storageItem = JSON.parse(localStorage.getItem('isNavMenuMinimized'));
+        const storageItem = JSON.parse(localStorage.getItem(navMinimizedKey));
 
         expect(storageItem).to.be.false;
       });
@@ -464,21 +568,14 @@ context('App Nav', function() {
     cy
       .get('[data-nav-content-region]')
       .find('.js-search')
-      .should('contain', 'Search');
-
-    cy
-      .get('.app-nav__title')
-      .should('exist');
+      .contains('.app-nav__label', 'Search')
+      .should('be.visible');
 
     cy
       .get('@worklists')
       .find('.app-nav__link')
-      .should('contain', 'Owned By')
-      .should('contain', 'Schedule')
-      .should('contain', 'Shared By')
-      .should('contain', 'New < 1 Day')
-      .should('contain', 'Updated < 3 Days')
-      .should('contain', 'Done < 30 Days');
+      .find('.app-nav__label')
+      .should('be.visible');
 
     cy
       .get('.app-nav__bottom')
@@ -521,7 +618,7 @@ context('App Nav', function() {
       .get('@minimizeMenuButton')
       .click()
       .then(() => {
-        const storageItem = JSON.parse(localStorage.getItem('isNavMenuMinimized'));
+        const storageItem = JSON.parse(localStorage.getItem(navMinimizedKey));
 
         expect(storageItem).to.be.true;
       });
@@ -536,6 +633,406 @@ context('App Nav', function() {
       .get('.js-picklist-item')
       .first()
       .should('have.class', 'is-selected');
+  });
+
+  specify('minimized nav expands as an overlay for focus and droplists', function() {
+    localStorage.setItem(navMinimizedKey, true);
+
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav__header')
+      .focus();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav__announcement')
+      .should('be.visible');
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.js-minimize-menu')
+      .should('have.attr', 'aria-label', 'Keep Menu Open')
+      .click()
+      .then(() => {
+        const storageItem = JSON.parse(localStorage.getItem(navMinimizedKey));
+
+        expect(storageItem).to.be.false;
+      });
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-minimized')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.js-minimize-menu')
+      .click();
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.picklist')
+      .should('be.visible');
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+  });
+
+  specify('minimized nav closes after selecting a destination', function() {
+    localStorage.setItem(navMinimizedKey, true);
+
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .eq(1)
+      .focus();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .eq(1)
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+  });
+
+  specify('navigation controls use native buttons', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.js-add-patient')
+      .should('have.prop', 'tagName', 'BUTTON')
+      .should('have.attr', 'type', 'button')
+      .click();
+
+    cy
+      .get('.modal')
+      .find('.js-close .icon')
+      .click();
+
+    cy
+      .get('[data-nav-content-region]')
+      .find('.js-search')
+      .should('have.prop', 'tagName', 'BUTTON')
+      .should('have.attr', 'type', 'button')
+      .click();
+
+    cy
+      .get('.patient-search__modal')
+      .find('.js-close')
+      .should('have.prop', 'tagName', 'BUTTON')
+      .should('have.attr', 'type', 'button')
+      .should('have.attr', 'aria-label', 'Close Patient Search')
+      .click();
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .last()
+      .should('have.prop', 'tagName', 'BUTTON')
+      .should('have.attr', 'type', 'button')
+      .click();
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .last()
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.js-minimize-menu')
+      .should('have.prop', 'tagName', 'BUTTON')
+      .should('have.attr', 'type', 'button')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+  });
+
+  specify('narrow nav opens as a touch drawer and closes without pinning', function() {
+    cy
+      .viewport(800, 768)
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-narrow')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.js-minimize-menu')
+      .as('minimizeMenuButton')
+      .should('have.attr', 'aria-label', 'Expand Menu')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('@minimizeMenuButton')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-narrow')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .get('@minimizeMenuButton')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('@minimizeMenuButton')
+      .should('have.attr', 'aria-label', 'Close Menu')
+      .should('contain', 'Close Menu')
+      .find('.fa-xmark');
+
+    cy
+      .get('@minimizeMenuButton')
+      .click()
+      .then(() => {
+        const storageItem = JSON.parse(localStorage.getItem(navMinimizedKey));
+
+        expect(storageItem).to.be.false;
+      });
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-narrow')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+  });
+
+  specify('responds to global navigation and viewport changes', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('event-router', 'default');
+      });
+
+    cy
+      .url()
+      .should('contain', '/one/worklist/owned-by');
+
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('hotkey', 'search', { preventDefault() {} });
+      });
+
+    cy
+      .get('.patient-search__modal')
+      .find('.js-close')
+      .click();
+
+    cy
+      .viewport(800, 768);
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-narrow');
+
+    cy
+      .viewport(1280, 768);
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-narrow');
+  });
+
+  specify('expands a minimized nav only for mouse hover', function() {
+    localStorage.setItem(navMinimizedKey, true);
+
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible')
+      .then($nav => {
+        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
+
+        $nav[0].dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'touch' }));
+        $nav[0].dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerType: 'touch' }));
+      });
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .window()
+      .then(win => {
+        const nativeMatchMedia = win.matchMedia.bind(win);
+
+        cy.stub(win, 'matchMedia').callsFake(query => {
+          if (query !== '(hover: hover) and (pointer: fine)') return nativeMatchMedia(query);
+
+          return {
+            addEventListener() {},
+            addListener() {},
+            dispatchEvent() {
+              return true;
+            },
+            matches: true,
+            media: query,
+            onchange: null,
+            removeEventListener() {},
+            removeListener() {},
+          };
+        });
+      });
+
+    cy
+      .get('.app-nav')
+      .then($nav => {
+        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
+
+        $nav[0].dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }));
+      });
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav')
+      .then($nav => {
+        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
+
+        $nav[0].dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerType: 'mouse' }));
+      });
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-full-nav-visible');
+  });
+
+  specify('closes a narrow drawer after clicking outside', function() {
+    cy
+      .viewport(800, 768)
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.js-minimize-menu')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-frame__content')
+      .click('topRight');
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-full-nav-visible');
+  });
+
+  specify('nav radio minimize requests are covered through e2e', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('nav', 'setMinimized', true);
+      });
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('nav', 'setMinimized', false);
+      });
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-minimized')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('nav', 'setMinimized', true);
+      });
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('.js-picklist-item', 'Workspace Two')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-minimized')
+      .should('have.class', 'is-full-nav-visible');
   });
 
   specify('add patient success', function() {
@@ -617,6 +1114,11 @@ context('App Nav', function() {
 
     cy
       .get('@addPatientModal')
+      .find('[data-dob-region] .patient-modal__form-component')
+      .should('have.class', 'is-partial');
+
+    cy
+      .get('@addPatientModal')
       .find('[data-dob-region] .date-select__button')
       .click();
 
@@ -643,6 +1145,11 @@ context('App Nav', function() {
       .should('contain', pastDate.format('MMM DD, YYYY'))
       .find('.date-select__button')
       .should('not.exist');
+
+    cy
+      .get('@addPatientModal')
+      .find('[data-dob-region] .patient-modal__form-component')
+      .should('not.have.class', 'is-partial');
 
     cy
       .get('@addPatientModal')
@@ -682,7 +1189,7 @@ context('App Nav', function() {
 
     cy
       .url()
-      .should('contain', `patient/dashboard/${ testNewPatientId }`);
+      .should('contain', `patient/${ testNewPatientId }/workflow`);
   });
 
   specify('add patient failure', function() {
@@ -925,7 +1432,6 @@ context('App Nav', function() {
 
     cy
       .get('.picklist')
-      .find('.app-nav__picklist-bottom')
       .contains('Help & Support')
       .should('not.exist');
   });
@@ -940,7 +1446,6 @@ context('App Nav', function() {
 
     cy
       .get('.picklist')
-      .find('.app-nav__picklist-bottom')
       .contains('Help & Support')
       .should('have.attr', 'href')
       .and('contain', 'customer-help-url.com');

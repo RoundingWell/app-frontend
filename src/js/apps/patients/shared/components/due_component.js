@@ -12,7 +12,7 @@ import './due-component.scss';
 const i18n = intl.patients.shared.components.dueComponent;
 
 const DueTemplate = hbs`
-  <span{{#if isOverdue}} class="is-overdue"{{/if}}>
+  <span class="due-component__value{{#if isOverdue}} due-component__value--overdue is-overdue{{/if}}">
     {{far "calendar-days"}}{{formatDateTime date dateFormat inputFormat="YYYY-MM-DD" defaultHtml=defaultHtml}}
   </span>
 `;
@@ -42,6 +42,7 @@ export default Component.extend({
   },
   viewOptions() {
     const isCompact = this.getOption('isCompact');
+    const showLabel = this.getOption('showLabel');
     const selected = this.getState('selected');
     const isDisabled = this.getState('isDisabled');
 
@@ -49,20 +50,21 @@ export default Component.extend({
       tagName: 'button',
       attributes: {
         disabled: isDisabled,
+        type: 'button',
       },
       className() {
         if (isCompact) {
-          return 'button-secondary--compact due-component';
+          return 'button button--compact due-component';
         }
 
-        return 'button-secondary w-100 due-component';
+        return 'button button--secondary w-100 due-component';
       },
       triggers: {
         'click': 'click',
       },
       template: DueTemplate,
       templateContext: {
-        defaultHtml: isCompact ? '' : `<span>${ i18n.defaultText }</span>`,
+        defaultHtml: !isCompact || showLabel ? `<span>${ i18n.defaultText }</span>` : '',
         dateFormat: isCompact ? 'SHORT' : 'LONG',
         date: selected,
         isOverdue: !isDisabled && this.getOption('isOverdue'),

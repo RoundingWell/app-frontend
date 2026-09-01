@@ -7,8 +7,15 @@ import BaseModel from 'js/base/model';
 import trim from 'js/utils/formatting/trim';
 
 const TYPE = 'programs';
+const WRITABLE_ATTRIBUTES = [
+  'name',
+  'details',
+  'published_at',
+  'archived_at',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
   validate({ name }) {
     if (!trim(name)) return 'Program name required';

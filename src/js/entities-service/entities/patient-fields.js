@@ -6,8 +6,12 @@ import { v5 as uuid } from 'uuid';
 import { RWELL_NS } from 'js/static';
 
 const TYPE = 'patient-fields';
+const WRITABLE_ATTRIBUTES = [
+  'value',
+];
 
 const _Model = BaseModel.extend({
+  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
   url() {
     const patient = this.getPatient();

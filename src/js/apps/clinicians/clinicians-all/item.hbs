@@ -1,0 +1,17 @@
+<div class="card-list__item-surface">
+  <div class="card-list__item-main">
+    <div class="card-list__item-heading">
+      <span class="card-list__item-title">{{#unless name}}{{ @intl.clinicians.cliniciansAllViews.itemView.newClinician }}{{/unless}}{{ name }}</span>
+      <span class="card-list__item-meta">
+        {{#unless workspaces}}<span class="u-text--subtle">{{ @intl.clinicians.cliniciansAllViews.itemView.noWorkspaces }}</span>{{/unless}}
+        {{#each workspaces}}{{#unless @first}}, {{/unless}}{{ this.name }}{{/each}}&#8203;
+      </span>
+    </div>
+    <div class="card-list__item-controls">
+      <span class="js-no-click"><span data-state-region></span>&#8203;</span>
+      <span class="js-no-click"><span data-role-region></span>&#8203;</span>
+      <span class="js-no-click"><span data-team-region></span>&#8203;</span>
+      <span>{{formatDateTime last_active_at "TIME_OR_DAY" defaultHtml=(intlGet "clinicians.cliniciansAllViews.itemView.noLastActive")}}&#8203;</span>
+    </div>
+  </div>
+</div>

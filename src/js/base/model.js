@@ -1,4 +1,4 @@
-import { each, extend, isEmpty, isFunction, pick, reduce, result } from 'underscore';
+import { each, extend, isEmpty, isFunction, reduce, result } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
@@ -87,19 +87,6 @@ export default Backbone.Model.extend(extend({
       parsedErrors[key] = detail;
       return parsedErrors;
     }, {});
-  },
-  removeFEOnly(attrs) {
-    // Removes JSON:API identity and frontend _fields for POST/PATCHes
-    return pick(attrs, function(value, key) {
-      return key !== 'id' && key !== 'type' && /^[^_]/.test(key);
-    });
-  },
-  toJSONApi(attributes = this.attributes) {
-    return {
-      id: this.id,
-      type: this.type,
-      attributes: this.removeFEOnly(attributes),
-    };
   },
   save(attrs, data = {}, opts) {
     // Supports the prototype overloading

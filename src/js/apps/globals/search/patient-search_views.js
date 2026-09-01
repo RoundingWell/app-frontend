@@ -14,31 +14,12 @@ import InputFocusBehavior from 'js/behaviors/input-focus';
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
 import PicklistBehavior from 'js/behaviors/picklist-transport';
 
-import './patient-search.scss';
+import DialogTemplate from './dialog.hbs';
+import ResultHeaderTemplate from './result-header.hbs';
+import ResultItemTemplate from './result-item.hbs';
+import TipTemplate from './tip.hbs';
 
-const TipTemplate = hbs`
-  <div class="patient-search__tip">{{ @intl.globals.search.patientSearchViews.emptyView.searchTip }}</div>
-  <div class="patient-search__search-by">
-    <div class="patient-search__search-by-title">{{ @intl.globals.search.patientSearchViews.emptyView.searchBy }}</div>
-    <div class="u-margin--t-8 qa-search-option">
-      <span class="patient-search__search-by-label">{{ @intl.globals.search.patientSearchViews.emptyView.exampleDobLabel }}</span>
-      {{ @intl.globals.search.patientSearchViews.emptyView.exampleDob }}
-    </div>
-    {{#each settings.identifiers}}
-      <div class="u-margin--t-8 qa-search-option">
-        <span class="patient-search__search-by-label">{{this.label}}</span>
-        {{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}
-      </div>
-    {{/each}}
-    {{#each settings.queries}}
-      <div class="u-margin--t-8 qa-search-option">
-        <span class="patient-search__search-by-label">{{this.label}}</span>
-        {{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}
-      </div>
-    {{/each}}
-  </div>
-  <div class="patient-search__shortcut">{{fas "keyboard"}}<strong class="u-margin--l-8">{{ @intl.globals.search.patientSearchViews.emptyView.shortcut }}</strong></div>
-`;
+import './patient-search.scss';
 
 const EmptyView = View.extend({
   tagName: 'li',
@@ -61,7 +42,7 @@ const EmptyView = View.extend({
     return hbs`
       {{ @intl.globals.search.patientSearchViews.emptyView.noResults }}
       {{#if canPatientCreate}}
-        <a class="u-margin--l-8 u-text-link js-add">{{ @intl.globals.search.patientSearchViews.emptyView.addPatient }}</a>
+        <button class="patient-search__add u-margin--l-8 js-add" type="button">{{ @intl.globals.search.patientSearchViews.emptyView.addPatient }}</button>
       {{/if}}
     `;
   },
@@ -86,36 +67,7 @@ const PicklistItem = View.extend({
   onSelect() {
     this.state.set({ selected: this.model });
   },
-  template: hbs`
-    <div class="patient-search__picklist-item-name-icon">
-      {{far "address-card"}}
-    </div>
-    <div class="patient-search__picklist-item-name-text">
-      <span class="u-text--overflow">{{matchText name search includeSubstrings=true}}{{~ remove_whitespace ~}}</span>
-    </div>
-    <div class="patient-search__picklist-item-meta">
-      <div class="patient-search__picklist-item-dob u-text--overflow">
-        {{#if isDobMatch}}
-          <strong>{{formatDateTime birth_date "MM/DD/YYYY"}}</strong>
-        {{else}}
-          {{formatDateTime birth_date "MM/DD/YYYY"}}
-        {{/if}}
-      </div>
-      <div class="patient-search__picklist-item-status u-text--overflow">
-        {{status}}
-      </div>
-      <div class="patient-search__picklist-item-result-value u-text--overflow">
-        {{#if shouldShowMatch}}
-          {{matchText match.value search includeSubstrings=true}}
-        {{/if}}
-      </div>
-      <div class="patient-search__picklist-item-result-label u-text--overflow">
-        {{#if shouldShowMatch}}
-          {{match.label}}
-        {{/if}}
-      </div>
-    </div>
-  `,
+  template: ResultItemTemplate,
   templateContext() {
     return {
       name: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
@@ -160,24 +112,7 @@ const ListView = CollectionView.extend({
 
 const HeaderView = View.extend({
   className: 'patient-search__picklist-header',
-  template: hbs`
-    <div class="patient-search__picklist-header-name-icon"></div>
-    <div class="patient-search__picklist-header-name-text">
-      {{ @intl.globals.search.patientSearchViews.headerView.patient }}
-    </div>
-    <div class="patient-search__picklist-header-meta">
-      <div class="patient-search__picklist-header-dob">
-        {{ @intl.globals.search.patientSearchViews.headerView.dob }}
-      </div>
-      <div class="patient-search__picklist-header-status">
-        {{ @intl.globals.search.patientSearchViews.headerView.workspaceStatus }}
-      </div>
-      <div class="patient-search__picklist-header-results">
-        {{ @intl.globals.search.patientSearchViews.headerView.results }}
-      </div>
-      <div class="patient-search__picklist-header-results-label"></div>
-    </div>
-  `,
+  template: ResultHeaderTemplate,
 });
 
 const DialogView = View.extend({
@@ -209,16 +144,7 @@ const DialogView = View.extend({
     header: '[data-header-region]',
     list: '[data-list-region]',
   },
-  template: hbs`
-    <div class="modal__header patient-search__header">
-      <span class="modal__header-icon">{{far "magnifying-glass"}}</span>
-      <input type="text" class="js-input patient-search__input" placeholder="{{ @intl.globals.search.patientSearchViews.dialogView.placeholderText }}" value="{{ search }}">
-    </div>
-    <div class="flex-region picklist__scroll js-picklist-scroll">
-      <div data-header-region></div>
-      <div data-list-region></div>
-    </div>
-  `,
+  template: DialogTemplate,
   onRender() {
     this.showHeader();
     this.showList();
@@ -269,7 +195,7 @@ const PatientSearchPicklist = Component.extend({
 const PatientSearchModal = View.extend({
   className: 'modal patient-search__modal',
   template: hbs`
-    <a href="#" class="button--icon patient-search__close js-close">{{far "xmark"}}</a>
+    <button class="button button--icon patient-search__close js-close" type="button" aria-label="{{ @intl.globals.search.patientSearchViews.patientSearchModal.close }}">{{far "xmark"}}</button>
     <div data-picklist-region></div>
   `,
   triggers: {

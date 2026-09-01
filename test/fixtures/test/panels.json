@@ -1,0 +1,14 @@
+[
+  {
+    "id": "demographics",
+    "slug": "demographics",
+    "name": "Demographics",
+    "widgets": [
+      "dob",
+      "sex",
+      "status",
+      "divider",
+      "workspaces"
+    ]
+  }
+]

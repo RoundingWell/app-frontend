@@ -39,6 +39,7 @@ import './api/program-flows';
 import './api/programs';
 import './api/roles';
 import './api/settings';
+import './api/panels';
 import './api/states';
 import './api/tags';
 import './api/teams';

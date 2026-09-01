@@ -1,70 +1,67 @@
-import { partial, get, noop } from 'underscore';
+import { get } from 'underscore';
+import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 
 import handleErrors from 'js/utils/handle-errors';
+import localStore from 'js/utils/local-store';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
-import DashboardApp from 'js/apps/patients/patient/dashboard/dashboard_app';
-import ArchiveApp from 'js/apps/patients/patient/archive/archive_app';
+import WorkflowPageApp from 'js/apps/patients/patient/workflow/workflow_app';
+import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
+import ActionApp from 'js/apps/patients/patient/action/action_app';
+import FormApp from 'js/apps/patients/patient/form/form_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
-import ActionSiderbarApp from 'js/apps/patients/sidebar/action/action-sidebar_app';
 
-import { LayoutView, intl } from 'js/apps/patients/patient/patient_views';
+import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
 export default SubRouterApp.extend({
   routeScope: ['patientId'],
 
   routeActions() {
     return {
-      'patient:dashboard': partial(this.startList, 'dashboard'),
-      'patient:archive': partial(this.startList, 'archive'),
-      'patient:action': partial(this.startPatientAction, 'dashboard'),
-      'patient:action:archive': partial(this.startPatientAction, 'archive'),
+      'patient:workflow': this.showWorkflow,
+      'patient:workflow:closed': this.showClosedWorkflow,
+      'patient:action': this.showPatientAction,
+      'patient:flow': this.showFlow,
+      'patient:flow:action': this.showFlowAction,
+      'patient:form': this.showPatientForm,
     };
   },
 
   childApps: {
-    dashboard: DashboardApp,
-    archive: ArchiveApp,
-    actionSidebar: ActionSiderbarApp,
-    patient: PatientSidebarApp,
+    workflow: WorkflowPageApp,
+    flow: FlowPageApp,
+    action: ActionApp,
+    form: FormApp,
+    patientSidebar: PatientSidebarApp,
   },
 
   currentAppOptions() {
     return {
+      layoutState: this.layoutState,
       region: this.getRegion('content'),
-      patient: this.getOption('patient'),
+      patient: this.patient,
+      patientId: this.patient.id,
     };
   },
 
-  onBeforeStartRoute() {
-    if (this.action) {
-      this.action.trigger('editing', false);
-      delete this.action;
-    }
+  onBeforeStart() {
+    this.getRegion().startPreloader({ variant: 'generic' });
   },
 
-  onBeforeStart() {
-    this.getRegion().startPreloader();
+  onBeforeStop() {
+    Radio.request('nav', 'setMinimized', false);
   },
 
   beforeStart() {
-    const [patientId, actionId] = this.getCurrentRoute().eventArgs;
+    const [patientId] = this.getCurrentRoute().eventArgs;
 
-    return [
-      Radio.request('entities', 'fetch:patients:model', patientId),
-      // the action is a non-aborting prefetch: it warms the cache for the initial
-      // route but its failure must never reject startup or override a newer route —
-      // dispatch (startPatientAction) is the source of truth and handles errors
-      actionId && Radio.request('entities', 'fetch:actions:model', actionId).catch(noop),
-    ];
+    return Radio.request('entities', 'fetch:patients:model', patientId);
   },
 
   /* istanbul ignore next: beforeStart error handling */
   onFail(options, error) {
-    // the action prefetch is non-aborting, so a startup failure is the patient's;
-    // a 410 means the patient is gone
     if (get(error, ['response', 'status']) === 410) {
       Radio.trigger('event-router', 'notFound');
       this.stop();
@@ -74,101 +71,167 @@ export default SubRouterApp.extend({
     handleErrors(error);
   },
 
-  // status-aware action failure handling for the on-demand dispatch fetch
-  failAction(error, patientId) {
-    /* istanbul ignore else: only the 410 path is exercised; others are generic */
-    if (get(error, ['response', 'status']) === 410) {
-      this.showActionNotFound();
-      this.stop();
-      Radio.trigger('event-router', 'patient:dashboard', patientId);
-      return;
-    }
-
-    /* istanbul ignore next: generic error handling */
-    handleErrors(error);
-  },
-
   onStart(options, patient) {
     this.patient = patient;
+    this.contextTrail = new Backbone.Model();
+    this.currentUser = Radio.request('bootstrap', 'currentUser');
+    this.sidebarPreferenceHidden = !!localStore.get(this.getSidebarPreferenceKey());
+    this.layoutState = new Backbone.Model({
+      formExpanded: false,
+      sidebarHidden: this.sidebarPreferenceHidden,
+    });
+    this.listenTo(this.layoutState, 'change:formExpanded', this.onChangeFormExpanded);
 
-    this.setView(new LayoutView({ model: patient }));
+    const layout = new LayoutView({
+      model: patient,
+      contextTrail: this.contextTrail,
+      layoutState: this.layoutState,
+    });
 
-    this.showSidebar();
-
-    this.startCurrentRoute();
+    this.listenTo(layout, {
+      'change:sidebar-layout': this.onChangeSidebarLayout,
+      'click:sidebarButton': this.togglePatientSidebar,
+      'close:sidebar-drawer': this.closePatientSidebarDrawer,
+    });
+    this.setView(layout);
 
     this.showView();
+    this.renderFormExpandedState();
+    this.showPatientSidebar();
+    this.startCurrentRoute();
   },
 
-  onStop() {
-    delete this._list;
-    delete this.action;
+  showWorkflow() {
+    this.startContent('workflow', { status: 'notDone' });
   },
 
-  showActionNotFound() {
-    Radio.request('alert', 'show:error', intl.actionNotFound);
+  showClosedWorkflow() {
+    this.startContent('workflow', { status: 'done' });
   },
 
-  startList(list) {
-    if (this._list === list) return;
+  showPatientAction(patientId, actionId, entryTarget) {
+    this.startContent('action', { actionId, entryTarget });
+  },
 
-    this._list = list;
+  showFlow(patientId, flowId) {
+    this.startContent('flow', { flowId });
+  },
 
-    this.startCurrent(list);
+  showFlowAction(patientId, flowId, actionId, entryTarget) {
+    this.startContent('action', { flowId, actionId, entryTarget });
+  },
 
-    if (this.action) {
-      this.listenToOnce(this.getChildApp(list), 'start', () => {
-        this.action.trigger('editing', true);
-      });
+  showPatientForm(patientId, formId) {
+    this.startContent('form', { formId });
+  },
+
+  startContent(appName, options) {
+    const previousPageApp = this.getCurrent();
+
+    if (previousPageApp) {
+      this.stopListening(previousPageApp, 'context:change');
     }
+
+    this.setFormExpanded(false);
+    this.setSidebarHidden(this.sidebarPreferenceHidden);
+    this.contextTrail.set('context', this.getOptimisticContext(appName, options));
+
+    const pageApp = this.getChildApp(appName);
+
+    this.listenTo(pageApp, 'context:change', this.updateContextTrail);
+
+    this.startCurrent(appName, options);
   },
+  setSidebarHidden(isHidden) {
+    const layout = this.getView();
 
-  startPatientAction(list, patientId, actionId) {
-    const action = Radio.request('entities', 'actions:model', actionId);
-    this.action = action;
+    const shouldHide = !layout.isSidebarFixed()
+      && (layout.isSidebarDrawer() && !this._isTogglingPatientSidebar ? true : isHidden);
 
-    this.startList(list);
+    this.layoutState.set('sidebarHidden', shouldHide);
+  },
+  setFormExpanded(isExpanded) {
+    this.layoutState.set('formExpanded', isExpanded);
+  },
+  onChangeFormExpanded() {
+    const isExpanded = this.layoutState.get('formExpanded');
 
-    this.getChildApp('actionSidebar').stop();
-
-    if (action.isCached()) {
-      this.showActionSidebar(action, list, patientId);
+    this.setSidebarHidden(isExpanded || this.sidebarPreferenceHidden);
+    this.renderFormExpandedState();
+  },
+  renderFormExpandedState() {
+    Radio.request('nav', 'setMinimized', this.layoutState.get('formExpanded'));
+  },
+  togglePatientSidebar() {
+    const isHidden = !this.getView().isSidebarHidden();
+    this.setSidebarPreferenceHidden(isHidden);
+    this._isTogglingPatientSidebar = true;
+    this.setCurrentPatientSidebarHidden(isHidden);
+    this._isTogglingPatientSidebar = false;
+  },
+  getSidebarPreferenceKey() {
+    return `isPatientSidebarHidden_${ this.currentUser.id }`;
+  },
+  setSidebarPreferenceHidden(isHidden) {
+    this.sidebarPreferenceHidden = isHidden;
+    localStore.set(this.getSidebarPreferenceKey(), isHidden);
+  },
+  setCurrentPatientSidebarHidden(isHidden) {
+    this.setSidebarHidden(isHidden);
+  },
+  onChangeSidebarLayout({ isSidebarDrawer, isSidebarFixed }) {
+    if (isSidebarFixed) {
+      this.layoutState.set('sidebarHidden', false);
       return;
     }
 
-    // not cached when its route coalesced into a still-loading PatientApp, the
-    // prefetch failed, or the action is absent from the list: fetch it on demand
-    // rather than reporting it missing
-    Radio.request('entities', 'fetch:actions:model', actionId)
-      .then(() => this.showActionSidebar(action, list, patientId))
-      .catch(error => {
-        // suppress when a newer action route superseded this one (or the app stopped)
-        if (this.action !== action) return;
+    if (isSidebarDrawer) {
+      this.layoutState.set('sidebarHidden', true);
+      return;
+    }
 
-        this.failAction(error, patientId);
-      });
+    this.setCurrentPatientSidebarHidden(this.layoutState.get('formExpanded') || this.sidebarPreferenceHidden);
+  },
+  closePatientSidebarDrawer() {
+    this._isTogglingPatientSidebar = true;
+    this.setCurrentPatientSidebarHidden(true);
+    this._isTogglingPatientSidebar = false;
+    this.getView().focusSidebarToggle();
+  },
+  getOptimisticContext(page, options) {
+    const previous = this.contextTrail.get('context') || {};
+    const context = { page };
+
+    if (page === 'workflow') {
+      context.status = options.status;
+      return context;
+    }
+
+    this.addOptimisticResource(context, previous, 'flow', options.flowId);
+    this.addOptimisticResource(context, previous, 'action', options.actionId);
+    this.addOptimisticResource(context, previous, 'form', options.formId);
+
+    return context;
   },
 
-  showActionSidebar(action, list, patientId) {
-    // a newer action route may have superseded this one while it loaded
-    if (this.action !== action) return;
+  addOptimisticResource(context, previous, resource, id) {
+    if (!id) return;
 
-    /* istanbul ignore next: defensive — app stopped mid-fetch */
-    if (!this.isRunning()) return;
+    const idKey = `${ resource }Id`;
+    const nameKey = `${ resource }Name`;
 
-    const sidebarApp = this.getChildApp('actionSidebar');
-
-    Radio.request('sidebar', 'start', sidebarApp, { action });
-
-    // re-dispatched routes must not accumulate close handlers on the singleton
-    this.stopListening(sidebarApp, 'close');
-    this.listenTo(sidebarApp, 'close', () => {
-      Radio.trigger('event-router', `patient:${ list }`, patientId);
-    });
+    context[idKey] = id;
+    if (id === previous[idKey] && previous[nameKey]) {
+      context[nameKey] = previous[nameKey];
+    }
   },
 
-  showSidebar() {
-    this.startChildApp('patient', {
+  updateContextTrail(context) {
+    this.contextTrail.set('context', context);
+  },
+
+  showPatientSidebar() {
+    this.startChildApp('patientSidebar', {
       region: this.getRegion('sidebar'),
       patient: this.patient,
     });

@@ -1,0 +1,35 @@
+---
+careOptsFrontend:
+  components:
+    datepicker:
+      clear: Clear
+      today: Today
+      tomorrow: Tomorrow
+    dateSelect:
+      clearText: Clear date
+      yearPlaceholderText: Select Year...
+      monthPlaceholderText: Select Month...
+      dayPlaceholderText: Select Day...
+    droplist:
+      defaultText: Choose One...
+    picklist:
+      clearText: Clear Selection
+      loadingText: Loading...
+      noResultsText: No results found
+  regions:
+    preload:
+      loading: Loading...
+  shared:
+    components:
+      listSearch:
+        listSearchViews:
+          clearSearch: Clear Search
+          placeholder: Find in List…
+      teamComponent:
+        defaultText: Select Team...
+        headingText: Update Team
+        placeholderText: Team...
+      workspacesManager:
+        workspacesDroplist:
+          addWorkspace: Add Workspace...
+locales: en-US

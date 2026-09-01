@@ -17,6 +17,7 @@ const durations = map(range(99), function(duration) {
 });
 
 const NoDurationTemplate = hbs`{{far "stopwatch"}}<span>{{ @intl.patients.shared.components.durationComponent.defaultText }}</span>`;
+const IconOnlyNoDurationTemplate = hbs`{{far "stopwatch"}}`;
 
 const DurationTemplate = hbs`{{far "stopwatch"}}<span>{{formatMessage (intlGet "patients.shared.components.durationComponent.mins") min=id}}</span>`;
 
@@ -24,15 +25,16 @@ const itemTemplate = hbs`{{formatMessage (intlGet "patients.shared.components.du
 
 export default Droplist.extend({
   collection: new Backbone.Collection(durations),
+  isCompact: false,
   getTemplate() {
     if (!this.getState('selected')) {
-      return NoDurationTemplate;
+      return this.getOption('hideDefaultText') ? IconOnlyNoDurationTemplate : NoDurationTemplate;
     }
     return DurationTemplate;
   },
   viewOptions() {
     return {
-      className: 'button-secondary w-100',
+      className: this.getOption('isCompact') ? 'button button--compact' : 'button button--secondary w-100',
       template: this.getTemplate(),
     };
   },
@@ -50,7 +52,7 @@ export default Droplist.extend({
     this.setState({ selected });
   },
   popWidth() {
-    return this.getView().$el.outerWidth();
+    return this.getOption('isCompact') ? null : this.getView().$el.outerWidth();
   },
   onChangeSelected(selected) {
     const duration = selected ? selected.id : 0;

@@ -37,17 +37,17 @@ export default Droplist.extend({
     const isOverdue = time && this.getOption('isOverdue') ? 'is-overdue' : '';
 
     if (isCompact) {
-      return `button-secondary--compact time-component ${ isOverdue }`;
+      return `button button--compact time-component ${ isOverdue }`;
     }
 
-    return `button-secondary time-component w-100 ${ isOverdue }`;
+    return `button button--secondary time-component w-100 ${ isOverdue }`;
   },
   getTemplate(time, isCompact) {
     if (!time && this.getOption('time')) {
       return CustomTimeTemplate;
     }
 
-    if (!time && isCompact) {
+    if (!time && isCompact && !this.getOption('showLabel')) {
       return NoTimeCompactTemplate;
     }
 
@@ -63,7 +63,7 @@ export default Droplist.extend({
       template: this.getTemplate(time, isCompact),
       templateContext: {
         time: this.getOption('time'),
-        defaultHtml: `<span>${ i18n.placeholderText }</span>`,
+        defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
       },
     };
   },

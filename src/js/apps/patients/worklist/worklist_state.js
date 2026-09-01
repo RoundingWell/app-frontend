@@ -44,6 +44,7 @@ const StateModel = Backbone.Model.extend({
       flowsSelected: {},
       searchQuery: '',
       listType: 'actions',
+      filtersSidebarCollapsed: false,
     };
   },
   getFiltersState() {
@@ -76,6 +77,9 @@ const StateModel = Backbone.Model.extend({
   },
   onChange() {
     localStore.set(this.getStoreKey(this.id), omit(this.attributes, 'lastSelectedIndex', 'searchQuery'));
+  },
+  setFiltersSidebarCollapsed(isCollapsed) {
+    return this.set('filtersSidebarCollapsed', isCollapsed);
   },
   setClinicianId(clinicianId) {
     if (clinicianId) return this.set({ clinicianId });

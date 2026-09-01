@@ -7,47 +7,49 @@ import localStore from 'js/utils/local-store';
 import RouterApp from 'js/base/routerapp';
 
 import SearchApp from 'js/apps/globals/search/search_app';
+import StateModel from 'js/apps/globals/nav/nav_state';
 import { AppNavView, AppNavCollectionView, MainNavDroplist, PatientsAppNav, BottomNavView, NavItemView, AdminToolsDroplist, i18n } from 'js/apps/globals/nav/app-nav/app-nav_views';
-import { getPatientModal, ErrorView } from 'js/apps/globals/nav/patient-modal/patient-modal_views';
+import { AnnouncementView, WHATS_NEW_VERSION, showWhatsNew } from 'js/apps/globals/nav/whats-new/whats-new_views';
 
-const StateModel = Backbone.Model.extend({
-  defaults: {
-    isMinimized: false,
-  },
-});
+// Viewport width at/below which the nav auto-collapses to the rail.
+const NAV_COLLAPSE_QUERY = '(max-width: 900px)';
 
 const dashboardsNav = new Backbone.Model({
   text: i18n.dashboardsNav.dashboards,
   icons: [{
     type: 'far',
     icon: 'gauge',
+    classes: 'app-nav__link-icon',
   }],
   event: 'dashboards:all',
   eventArgs: [],
 });
 
+const whatsNewMenu = new Backbone.Collection([{
+  id: 'WhatsNew',
+  text: i18n.mainNavDroplist.whatsNew,
+  icon: { type: 'far', icon: 'circle-info' },
+  event: 'whats-new',
+}]);
+
 const adminNavMenu = new Backbone.Collection([
   {
-    onSelect() {
-      Radio.trigger('event-router', 'programs:all');
-    },
     id: 'ProgramsApp',
     text: i18n.adminNav.programs,
     icon: {
       type: 'far',
       icon: 'screwdriver-wrench',
     },
+    event: 'programs:all',
   },
   {
-    onSelect() {
-      Radio.trigger('event-router', 'clinicians:all');
-    },
     id: 'CliniciansApp',
     text: i18n.adminNav.clinicians,
     icon: {
       type: 'far',
       icon: 'users-gear',
     },
+    event: 'clinicians:all',
   },
 ]);
 
@@ -55,8 +57,9 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
   {
     text: i18n.patientsAppNav.ownedBy,
     icons: [{
-      type: 'fas',
-      icon: 'list',
+      type: 'far',
+      icon: 'user',
+      classes: 'app-nav__link-icon app-nav__link-icon--compact',
     }],
     event: 'worklist',
     eventArgs: ['owned-by'],
@@ -64,8 +67,9 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
   {
     text: i18n.patientsAppNav.schedule,
     icons: [{
-      type: 'fas',
+      type: 'far',
       icon: 'calendar-star',
+      classes: 'app-nav__link-icon app-nav__link-icon--compact',
     }],
     event: 'schedule',
     eventArgs: [],
@@ -73,8 +77,9 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
   {
     text: i18n.patientsAppNav.sharedBy,
     icons: [{
-      type: 'fas',
-      icon: 'arrow-right-arrow-left',
+      type: 'far',
+      icon: 'users',
+      classes: 'app-nav__link-icon',
     }],
     event: 'worklist',
     eventArgs: ['shared-by'],
@@ -85,10 +90,12 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
       {
         type: 'fas',
         icon: 'angle-left',
+        classes: 'app-nav__link-icon app-nav__link-icon--back',
       },
       {
         type: 'fas',
         icon: '1',
+        classes: 'app-nav__link-icon app-nav__link-icon--one',
       },
     ],
     event: 'worklist',
@@ -100,10 +107,12 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
       {
         type: 'fas',
         icon: 'angle-left',
+        classes: 'app-nav__link-icon app-nav__link-icon--back',
       },
       {
         type: 'fas',
         icon: '3',
+        classes: 'app-nav__link-icon app-nav__link-icon--three',
       },
     ],
     event: 'worklist',
@@ -115,10 +124,12 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
       {
         type: 'fas',
         icon: '3',
+        classes: 'app-nav__link-icon app-nav__link-icon--three',
       },
       {
         type: 'fas',
         icon: '0',
+        classes: 'app-nav__link-icon app-nav__link-icon--zero',
       },
     ],
     event: 'worklist',
@@ -127,6 +138,97 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
 ]);
 
 export default RouterApp.extend({
+  // NOTE: Don't stop this app on no match
+  onNoMatch: noop,
+  StateModel,
+  startAfterInitialized: true,
+  channelName: 'nav',
+  childApps: {
+    search: SearchApp,
+  },
+  radioRequests: {
+    search: 'showSearch',
+    setMinimized: 'setTemporarilyMinimized',
+    select: 'selectNav',
+  },
+  stateEvents: {
+    'change:currentApp': 'onChangeCurrentApp',
+  },
+  viewEvents: {
+    'focus:in': 'onFocusIn',
+    'focus:out': 'onFocusOut',
+    'pointer:enter': 'onPointerEnter',
+    'pointer:leave': 'onPointerLeave',
+  },
+  initialize() {
+    this.listenTo(Radio.channel('workspace'), 'change:workspace', () => this.restart());
+
+    this.listenTo(Radio.channel('event-router'), 'default', () => {
+      defer(() => {
+        Backbone.history.navigate(this.getDefaultRoute(), { trigger: true });
+      });
+    });
+
+    this._narrowQuery = window.matchMedia(NAV_COLLAPSE_QUERY);
+    this._onNarrowQueryChange = () => {
+      this.setState('isNarrow', this._narrowQuery.matches);
+    };
+
+    this.listenTo(Radio.channel('user-activity'), 'body:down', this.onBodyDown);
+    this.listenTo(Radio.channel('hotkey'), 'close', () => this.getState().closeOverlay());
+  },
+  onBeforeStart() {
+    this._narrowQuery.addEventListener('change', this._onNarrowQueryChange);
+
+    const isRestarting = this.isRestarting();
+    let userMinimized = this.getState('userMinimized');
+
+    if (!isRestarting) {
+      // Drop admin items the current user can't access — permissions are stable.
+      const currentUser = Radio.request('bootstrap', 'currentUser');
+
+      if (!currentUser.can('clinicians:manage')) {
+        adminNavMenu.remove('CliniciansApp');
+      }
+
+      if (!currentUser.can('programs:manage')) {
+        adminNavMenu.remove('ProgramsApp');
+      }
+
+      const storedState = localStore.get(this.getNavMenuMinimizedKey());
+
+      if (storedState === undefined) {
+        localStore.set(this.getNavMenuMinimizedKey(), false);
+      }
+
+      userMinimized = Boolean(storedState);
+    }
+
+    this.setState({
+      isFocusWithin: false,
+      isHovering: false,
+      isNarrow: this._narrowQuery.matches,
+      isNavDroplistOpen: false,
+      isTouchDrawerOpen: false,
+      temporaryMinimized: false,
+      userMinimized,
+    });
+  },
+  onStop() {
+    this._narrowQuery.removeEventListener('change', this._onNarrowQueryChange);
+  },
+  onStart() {
+    // Rebuild the shell every start so it's bound to the current state — a
+    // restart otherwise leaves a preserved view wired to a stale model.
+    this.setView(new AppNavView({ model: this.getState() }));
+
+    this.updateCanPatientCreate();
+    this.showMainNavDroplist();
+    this.showNavContent();
+    this.showBottomNavView();
+
+    this.showView();
+  },
   eventRoutes() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const workspaces = currentUser.getWorkspaces();
@@ -164,142 +266,128 @@ export default RouterApp.extend({
 
     return `/${ workspaceSlug }/worklist/owned-by`;
   },
-  // NOTE: Don't stop this app on no match
-  onNoMatch: noop,
-  StateModel,
-  startAfterInitialized: true,
-  channelName: 'nav',
-  initialize() {
-    const workspaceCh = Radio.channel('workspace');
-
-    this.listenTo(workspaceCh, 'change:workspace', () => {
-      this.setCanPatientCreate();
-      this.showNav();
-    });
-
-    const routerCh = Radio.channel('event-router');
-
-    this.listenTo(routerCh, 'default', () => {
-      defer(() => {
-        Backbone.history.navigate(this.getDefaultRoute(), { trigger: true });
-      });
-    });
-  },
-  radioRequests: {
-    'search': 'showSearch',
-    'patient': 'showPatientModal',
-    'select': 'selectNav',
-  },
-  stateEvents: {
-    'change:currentApp': 'onChangeCurrentApp',
-    'change:isMinimized': 'onChangeIsMinimized',
-  },
-  viewEvents: {
-    'click:addPatient': 'onClickAddPatient',
-    'click:minimizeMenu': 'onClickMinimizeMenu',
-  },
-  childApps: {
-    search: SearchApp,
-  },
   selectNav(appName, event, eventArgs) {
     this.setState('currentApp', appName);
 
-    this.navMatch = this.getNavMatch(appName, event, compact(eventArgs));
+    const selectedNav = this.findNavItem(event, compact(eventArgs));
 
-    if (event === 'dashboards:all' && !this.navMatch) this.navMatch = dashboardsNav;
+    this.setState('selectedNav', selectedNav);
 
-    if (this.navMatch) {
-      this.getView().removeSelected();
-      this.navMatch.trigger('selected');
-    }
+    // Navigating dismisses any transient expansion without changing the
+    // persisted minimized preference.
+    this.getState().closeOverlay();
   },
-  onChangeCurrentApp(state, appName) {
-    this.setSelectedAdminNavItem(appName);
+  findNavItem(event, eventArgs) {
+    if (event === 'dashboards:all') return dashboardsNav;
 
-    this.getView().removeSelected();
-  },
-  onChangeIsMinimized() {
-    this.showNav();
-
-    if (this.navMatch) {
-      this.getView().removeSelected();
-      this.navMatch.trigger('selected');
-    }
-
-    const currentAppName = this.getState('currentApp');
-    this.setSelectedAdminNavItem(currentAppName);
-
-    localStore.set('isNavMenuMinimized', this.getState('isMinimized'));
-  },
-  getNavMatch(appName, event, eventArgs) {
-    return this._navMatch(patientsAppWorkflowsNav, event, eventArgs);
-  },
-  _navMatch(navCollection, event, eventArgs) {
-    return navCollection.find(model => {
-      return model.get('event') === event && isEqual(model.get('eventArgs')[0], eventArgs[0]);
+    return patientsAppWorkflowsNav.find(model => {
+      return (
+        model.get('event') === event
+        && isEqual(model.get('eventArgs')[0], eventArgs[0])
+      );
     });
   },
-  onBeforeStart() {
-    const storedState = localStore.get('isNavMenuMinimized');
+  onChangeCurrentApp(state, appName) {
+    if (!this.adminNavDroplist) return;
 
-    if (storedState) {
-      this.setState('isMinimized', storedState);
+    this.adminNavDroplist.setState('selected', adminNavMenu.get(appName));
+  },
+  setTemporarilyMinimized(isMinimized) {
+    this.setState('temporaryMinimized', isMinimized);
+  },
+  onPointerEnter(evt) {
+    if (!this.canHoverExpand(evt)) return;
+
+    this.setState('isHovering', true);
+  },
+  onPointerLeave(evt) {
+    if (!this.canHoverExpand(evt)) return;
+
+    this.setState('isHovering', false);
+  },
+  onFocusIn() {
+    if (!this.getState('isMinimized')) return;
+
+    this.setState('isFocusWithin', true);
+  },
+  onFocusOut() {
+    this.setState('isFocusWithin', false);
+  },
+  toggleTouchDrawer() {
+    const shouldOpen = !this.getState('isTouchDrawerOpen');
+
+    this.getState().closeOverlay();
+    this.setState('isTouchDrawerOpen', shouldOpen);
+  },
+  closeTouchDrawer() {
+    this.setState('isTouchDrawerOpen', false);
+  },
+  getNavMenuMinimizedKey() {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+
+    return `isNavMenuMinimized_${ currentUser.id }`;
+  },
+  getWhatsNewDismissedKey() {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+
+    return `whatsNewDismissed_${ WHATS_NEW_VERSION }_${ currentUser.id }`;
+  },
+  onBodyDown(evt) {
+    if (!this.getState('isTouchDrawerOpen')) return;
+
+    const view = this.getView();
+    if (view && (view.el === evt.target || view.Dom.hasEl(view.el, evt.target))) return;
+
+    this.closeTouchDrawer();
+  },
+  onClickAddPatient() {
+    Radio.request('patient-modal', 'show');
+  },
+  onClickMinimizeMenu() {
+    const isNarrow = this.getState('isNarrow');
+
+    if (isNarrow) {
+      this.toggleTouchDrawer();
       return;
     }
 
-    localStore.set('isNavMenuMinimized', this.getState('isMinimized'));
-  },
-  onStart() {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
+    // A visible minimized nav is being previewed, so clicking pins it open.
+    // Otherwise the click toggles the persisted minimized preference.
+    const isPinningOpen = this.getState('isMinimized') && this.getState('isFullNavVisible');
 
-    if (!currentUser.can('clinicians:manage')) {
-      adminNavMenu.remove('CliniciansApp');
+    this.getState().closeOverlay();
+
+    if (!isPinningOpen) {
+      this.toggleState('userMinimized');
+    } else {
+      this.setState({
+        temporaryMinimized: false,
+        userMinimized: false,
+      });
     }
 
-    if (!currentUser.can('programs:manage')) {
-      adminNavMenu.remove('ProgramsApp');
-    }
-
-    this.setView(new AppNavView({ model: this.getState() }));
-
-    this.setCanPatientCreate();
-    this.showNav();
-
-    this.showView();
+    localStore.set(this.getNavMenuMinimizedKey(), this.getState('userMinimized'));
   },
-  setCanPatientCreate() {
+  onNavDroplistActiveChange() {
+    this.setState('isNavDroplistOpen', this.hasActiveNavDroplist());
+  },
+  canHoverExpand(evt) {
+    if (!evt || evt.pointerType !== 'mouse') return false;
+
+    return window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  },
+  hasActiveNavDroplist() {
+    return Boolean(
+      (this.mainNavDroplist && this.mainNavDroplist.getState('isActive'))
+      || (this.adminNavDroplist && this.adminNavDroplist.getState('isActive')),
+    );
+  },
+  updateCanPatientCreate() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const hasManualPatientCreate = Radio.request('settings', 'get', 'manual_patient_creation');
-    this.canPatientCreate = hasManualPatientCreate && currentUser.can('patients:manage');
-  },
-  setSelectedAdminNavItem(appName) {
-    if (!adminNavMenu.length) return;
+    const canPatientCreate = hasManualPatientCreate && currentUser.can('patients:manage');
 
-    const selectedApp = adminNavMenu.get(appName);
-
-    if (!selectedApp) this.adminNavMenu.setState('selected', null);
-
-    this.adminNavMenu.setState('selected', selectedApp);
-  },
-  showBottomNavView() {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
-
-    const bottomNavView = new BottomNavView({
-      model: this.getState(),
-      canPatientCreate: this.canPatientCreate,
-    });
-
-    this.showChildView('bottomNavContent', bottomNavView);
-
-    if (currentUser.can('dashboards:view')) {
-      this.dashboardsNavView = new NavItemView({ model: dashboardsNav, state: this.getState() });
-      bottomNavView.showChildView('dashboards', this.dashboardsNavView);
-    }
-
-    if (adminNavMenu.length) {
-      this.adminNavMenu = new AdminToolsDroplist({ collection: adminNavMenu, state: this.getState() });
-      bottomNavView.showChildView('adminTools', this.adminNavMenu);
-    }
+    this.setState('canPatientCreate', canPatientCreate);
   },
   showMainNavDroplist() {
     const currentWorkspace = Radio.request('workspace', 'current');
@@ -310,34 +398,40 @@ export default RouterApp.extend({
       workspaces.map(workspace => {
         return {
           id: workspace.id,
-          onSelect() {
-            Radio.trigger('event-router', `workspace:${ workspace.get('slug') }`);
-          },
           text: workspace.get('name'),
-          icon: {
-            type: 'far',
-            icon: 'window',
-          },
+          icon: { type: 'far', icon: 'window' },
+          event: `workspace:${ workspace.get('slug') }`,
         };
       }),
     );
 
-    this.showChildView('navMain', new MainNavDroplist({
+    if (this.mainNavDroplist) {
+      this.stopListening(this.mainNavDroplist.getState());
+    }
+
+    this.mainNavDroplist = new MainNavDroplist({
       collection: workspacesMenu,
+      lists: [
+        { collection: workspacesMenu },
+        { collection: whatsNewMenu },
+      ],
       state: {
         selected: workspacesMenu.get(currentWorkspace.id),
-        isMinimized: this.getState('isMinimized'),
       },
-    }));
+    });
+    this.listenTo(this.mainNavDroplist, 'show:whatsNew', this.showWhatsNew);
+    this.listenTo(this.mainNavDroplist.getState(), 'change:isActive', this.onNavDroplistActiveChange);
+    this.showChildView('navMain', this.mainNavDroplist);
   },
-  showNav() {
-    this.showMainNavDroplist();
-
+  showNavContent() {
     const navView = new PatientsAppNav({
       model: this.getState(),
     });
 
-    const workflowsCollectionView = new AppNavCollectionView({ collection: patientsAppWorkflowsNav, model: this.getState() });
+    const workflowsCollectionView = new AppNavCollectionView({
+      collection: patientsAppWorkflowsNav,
+      model: this.getState(),
+    });
 
     navView.showChildView('worklists', workflowsCollectionView);
 
@@ -352,103 +446,85 @@ export default RouterApp.extend({
     });
 
     this.showChildView('navContent', navView);
+  },
+  showBottomNavView() {
+    if (this.bottomNavView) {
+      this.stopListening(this.bottomNavView);
+    }
 
-    this.showBottomNavView();
+    this.bottomNavView = new BottomNavView({
+      model: this.getState(),
+    });
+
+    this.listenTo(this.bottomNavView, {
+      'click:addPatient': this.onClickAddPatient,
+      'click:minimizeMenu': this.onClickMinimizeMenu,
+    });
+
+    this.showWhatsNewAnnouncement();
+    this.showDashboardsNav();
+    this.showAdminTools();
+
+    this.showChildView('bottomNavContent', this.bottomNavView);
+  },
+  showWhatsNewAnnouncement() {
+    if (localStore.get(this.getWhatsNewDismissedKey())) return;
+
+    const announcementView = new AnnouncementView();
+
+    this.listenTo(announcementView, {
+      'dismiss': this.onDismissWhatsNewAnnouncement,
+      'show:update': this.showWhatsNew,
+    });
+
+    this.bottomNavView.showChildView('announcement', announcementView);
+  },
+  onDismissWhatsNewAnnouncement(view) {
+    localStore.set(this.getWhatsNewDismissedKey(), true);
+    view.destroy();
+  },
+  showWhatsNew() {
+    showWhatsNew();
+  },
+  showDashboardsNav() {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+
+    if (!currentUser.can('dashboards:view')) return;
+
+    this.bottomNavView.showChildView('dashboards', new NavItemView({
+      model: dashboardsNav,
+      state: this.getState(),
+    }));
+  },
+  showAdminTools() {
+    if (this.adminNavDroplist) {
+      this.stopListening(this.adminNavDroplist.getState());
+    }
+
+    if (!adminNavMenu.length) return;
+
+    this.adminNavDroplist = new AdminToolsDroplist({
+      collection: adminNavMenu,
+      state: {
+        selected: adminNavMenu.get(this.getState().get('currentApp')),
+      },
+    });
+
+    this.listenTo(this.adminNavDroplist.getState(), 'change:isActive', this.onNavDroplistActiveChange);
+    this.bottomNavView.showChildView('adminTools', this.adminNavDroplist);
   },
   showSearch(prefillText) {
     const navView = this.getChildView('navContent');
 
     const searchApp = this.startChildApp('search', {
       prefillText,
-      canPatientCreate: this.canPatientCreate,
+      canPatientCreate: this.getState('canPatientCreate'),
     });
 
-    this.listenTo(searchApp, {
-      'stop'() {
-        navView.triggerMethod('search:active', false);
-      },
-      'click:addPatient': this.onClickAddPatient,
+    this.listenToOnce(searchApp, 'stop', () => {
+      navView.triggerMethod('search:active', false);
     });
 
     navView.triggerMethod('search:active', true);
-  },
-  onClickAddPatient() {
-    this.showPatientModal();
-  },
-  onClickMinimizeMenu() {
-    this.toggleState('isMinimized');
-  },
-  getNewPatient() {
-    const currentClinician = Radio.request('bootstrap', 'currentUser');
-    const workspaces = currentClinician.getWorkspaces();
-
-    if (workspaces.length === 1) {
-      return Radio.request('entities', 'patients:model', {
-        _workspaces: [workspaces.first().getResource()],
-      });
-    }
-
-    return Radio.request('entities', 'patients:model');
-  },
-  showPatientModal(patient) {
-    const { form_id: patientFormId } = Radio.request('settings', 'get', 'patient_creation_form') || {};
-
-    patient = patient || this.getNewPatient();
-    const patientClone = patient.clone();
-    const patientModal = Radio.request('modal', 'show', getPatientModal({
-      patient: patientClone,
-      onSubmit: () => {
-        if (!patient.canEdit()) {
-          patientModal.destroy();
-          return;
-        }
-
-        patientModal.disableSubmit();
-        patient.saveAll(patientClone.attributes)
-          .then(() => {
-            patientModal.destroy();
-
-            if (patientFormId && patientClone.isNew()) {
-              Radio.trigger('event-router', 'form:patient', patient.id, patientFormId);
-              return;
-            }
-
-            Radio.trigger('event-router', 'patient:dashboard', patient.id);
-          })
-          .catch(({ responseData }) => {
-            // This assumes that only the similar patient error is handled on the server
-            const error = responseData.errors[0].detail;
-
-            patientModal.getChildView('body').setState({
-              errors: {
-                name: error,
-              },
-            });
-
-            const errorView = new ErrorView({ hasSearch: true, error });
-
-            patientModal.listenTo(errorView, 'click:search', () => {
-              const query = `${ patientClone.get('first_name') } ${ patientClone.get('last_name') }`;
-              this.showSearch(query);
-            });
-
-            patientModal.showChildView('info', errorView);
-          });
-      },
-    }));
-
-    patientModal.disableSubmit(patient.canEdit());
-    patientModal.listenTo(patientClone, {
-      'change'() {
-        patientModal.getRegion('info').empty();
-        patientModal.disableSubmit(!patientClone.isValid());
-      },
-      'invalid'(model, errors) {
-        const errorCode = errors.birth_date;
-        if (errorCode === 'invalidDate') {
-          patientModal.showChildView('info', new ErrorView({ errorCode }));
-        }
-      },
-    });
   },
 });

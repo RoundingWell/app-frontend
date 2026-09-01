@@ -4,16 +4,6 @@
   margin-left: 4px;
 }
 
-.is-highlighted .owner-component__team {
-  color: #{$white};
-}
-
 .owner-component--compact {
-  min-width: 80px;
-}
-
-@media (width <= 1500px) {
-  .owner-component--compact {
-    width: 80px;
-  }
+  max-width: var(--owner-component-max-width, 160px);
 }

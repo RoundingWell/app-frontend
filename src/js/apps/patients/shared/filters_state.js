@@ -22,6 +22,12 @@ export default Backbone.Model.extend({
     };
   },
   initialize() {
+    this.set({
+      customFiltersExpanded: true,
+      flowStatesExpanded: false,
+      statesExpanded: false,
+    }, { silent: true });
+
     this.initStates();
 
     this.setFiltersCount = debounce(this.setFiltersCount, 30);
@@ -72,7 +78,7 @@ export default Backbone.Model.extend({
   setDefaultFilterStates() {
     return this.set(this.defaults());
   },
-  selectStatesFilter(stateId, shouldSelect, stateType = 'states') {
+  selectStatesFilter(stateId, shouldSelect, stateType) {
     const selectedStates = clone(this.get(`${ stateType }`));
 
     if (!shouldSelect) {
@@ -80,9 +86,6 @@ export default Backbone.Model.extend({
     }
 
     return this.set(stateType, [...selectedStates, stateId]);
-  },
-  selectFlowStatesFilter(stateId, shouldSelect) {
-    return this.selectStatesFilter(stateId, shouldSelect, 'flowStates');
   },
   getFilter(name) {
     return this.get('customFilters')[name];

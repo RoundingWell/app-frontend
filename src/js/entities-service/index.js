@@ -22,6 +22,8 @@ import './forms';
 
 import './form-responses';
 
+import './panels';
+
 import './patient-fields';
 
 import './patients';

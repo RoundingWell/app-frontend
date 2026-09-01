@@ -1,13 +1,30 @@
-import { extend, isString, keys, reduce } from 'underscore';
+import { extend, find, has, isString, keys, reduce } from 'underscore';
 import dayjs from 'dayjs';
 import Handlebars from 'handlebars/dist/cjs/handlebars';
 import HandlebarsRuntime from 'handlebars/runtime';
 import { setRenderer } from 'marionette';
 
-import localEnUs from './en-US.yml';
+import cliniciansEnUs from './en-US/clinicians.yml';
+import dashboardsEnUs from './en-US/dashboards.yml';
+import globalsEnUs from './en-US/globals.yml';
+import patientsEnUs from './en-US/patients.yml';
+import programsEnUs from './en-US/programs.yml';
+import sharedEnUs from './en-US/shared.yml';
 import { registerWith } from './intl';
 
 const localeKey = 'careOptsFrontend';
+
+const localEnUs = {
+  locales: sharedEnUs.locales,
+  [localeKey]: composeLocale([
+    cliniciansEnUs[localeKey],
+    dashboardsEnUs[localeKey],
+    globalsEnUs[localeKey],
+    patientsEnUs[localeKey],
+    programsEnUs[localeKey],
+    sharedEnUs[localeKey],
+  ]),
+};
 
 const locales = {
   'en-US': localEnUs,
@@ -15,6 +32,18 @@ const locales = {
 
 let currentLocale;
 const intl = {};
+
+function composeLocale(localeSections) {
+  return reduce(localeSections, (locale, section) => {
+    const duplicateKey = find(keys(section), key => has(locale, key));
+
+    if (duplicateKey) {
+      throw new TypeError(`Duplicate locale namespace: ${ duplicateKey }`);
+    }
+
+    return Object.assign(locale, section);
+  }, {});
+}
 
 function setLocale(locale = 'en-US') {
   currentLocale = locale;
@@ -65,6 +94,7 @@ function phraseAppMessages(nestedMessages, prefix = localeKey) {
 }
 
 export {
+  composeLocale,
   renderTemplate,
   setLocale,
 };
