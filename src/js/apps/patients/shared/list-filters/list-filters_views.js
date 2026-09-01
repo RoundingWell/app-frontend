@@ -305,6 +305,7 @@ const StateFiltersView = CollectionView.extend({
   initialize() {
     this.expandedState = `${ this.stateType }Expanded`;
     this.listenTo(this.model, `change:${ this.stateType }`, this.render);
+    this.listenTo(this.model, 'change:listType', this.render);
     this.listenTo(this.model, 'expand:sections', this.expandSection);
   },
   onRender() {
@@ -333,7 +334,9 @@ const StateFiltersView = CollectionView.extend({
   },
   templateContext() {
     return {
-      headingText: this.headingText,
+      headingText: this.model.isFlowType() ?
+        i18n.flowStatesFiltersView.headingText :
+        this.headingText,
     };
   },
 });

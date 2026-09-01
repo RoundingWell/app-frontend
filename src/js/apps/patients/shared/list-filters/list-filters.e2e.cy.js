@@ -160,6 +160,11 @@ context('list filters', function() {
       });
 
     cy
+      .get('[data-states-filters-region] .list-filters__section-button')
+      .should('contain', 'Flow States')
+      .and('not.contain', 'Action States');
+
+    cy
       .get('[data-flow-states-filters-region]')
       .should('be.empty');
 
