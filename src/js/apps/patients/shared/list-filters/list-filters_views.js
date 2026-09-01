@@ -334,7 +334,7 @@ const StateFiltersView = CollectionView.extend({
   },
   templateContext() {
     return {
-      headingText: this.model.isFlowType() && this.stateType === 'states' ?
+      headingText: this.model.isFlowType() ?
         i18n.flowStatesFiltersView.headingText :
         this.headingText,
     };
