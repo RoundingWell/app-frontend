@@ -13,7 +13,7 @@ export function getDashboard(data) {
   data = _.extend({ id: uuid() }, data);
 
   const embed_url = `https://us-west-2.quicksight.aws.amazon.com/embed/embed_id/dashboards/${ data.id }?identityprovider=quicksight`;
-  data.attributes = _.extend({ embed_url }, data.attributes);
+  data.attributes = _.extend({ provider: 'quicksight', embed_url }, data.attributes);
 
   return mergeJsonApi(resource, data);
 }
@@ -40,4 +40,31 @@ Cypress.Commands.add('routeDashboard', (mutator = _.identity) => {
       body: mutator({ data, included: [] }),
     })
     .as('routeDashboard');
+});
+
+Cypress.Commands.add('routeDashboardGuestToken', (token) => {
+  if (!token) {
+    const encode = obj => btoa(JSON.stringify(obj))
+      .replace(/=+$/, '')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_');
+
+    token = [
+      encode({ alg: 'HS256', typ: 'JWT' }),
+      encode({ exp: Math.floor(Date.now() / 1000) + 600 }),
+      'sig',
+    ].join('.');
+  }
+
+  cy
+    .intercept('POST', '/api/dashboards/*/guest-token', {
+      body: {
+        data: {
+          type: 'dashboard-guest-tokens',
+          id: 'guest-token',
+          attributes: { token },
+        },
+      },
+    })
+    .as('routeDashboardGuestToken');
 });

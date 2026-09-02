@@ -15,7 +15,8 @@
     "packages/care-ops-five9",
     "packages/care-ops-fontawesome",
     "packages/care-ops-quicksight",
-    "packages/care-ops-ringcentral"
+    "packages/care-ops-ringcentral",
+    "packages/care-ops-superset"
   ],
   "scripts": {
     "analyze": "npx vite-bundle-visualizer",
@@ -127,6 +128,7 @@
     "@roundingwell/care-ops-five9": "workspace:*",
     "@roundingwell/care-ops-quicksight": "workspace:*",
     "@roundingwell/care-ops-ringcentral": "workspace:*",
+    "@roundingwell/care-ops-superset": "workspace:*",
     "animejs": "^4.1.3",
     "backbone": "^1.4.0",
     "backbone.eventrouter": "^1.0.1",
