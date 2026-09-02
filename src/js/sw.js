@@ -16,10 +16,11 @@ clientsClaim();
 if (self.location.hostname !== 'localhost') {
   cleanupOutdatedCaches();
 
-  precacheAndRoute(self.__WB_MANIFEST);
   enableNavigationPreload();
 
-  // Any navigation loads the precached index.html
+  // Register navigation before the precache route because Workbox uses the
+  // earliest matching route. Online navigations must not use an older worker's
+  // precached shell; offline navigations still fall back to that shell.
   const networkOnlyNavigationRoute = new Route(({ request }) => {
     return request.mode === 'navigate';
   }, new NetworkOnly({
@@ -29,6 +30,7 @@ if (self.location.hostname !== 'localhost') {
   }));
 
   registerRoute(networkOnlyNavigationRoute);
+  precacheAndRoute(self.__WB_MANIFEST);
 
   const staticAssetsRoute = new Route(({ request }) => {
     return ['image'].includes(request.destination);
