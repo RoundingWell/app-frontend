@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `9ba0d9febd3902f0d7abee2e860c0726b5a02d50`.
+  `a8565bf814aaeefabb7b5275761772c78d307921`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -23,8 +23,10 @@
   with a direct Marionette View and was merged by a human.
 - Completed: PR #1775 replaced the patient action dialer Toolkit Component with
   a direct Marionette View and was merged by a human.
-- Active step: replace the shared due-date Toolkit Component with a
-  direct Marionette View and remove the superseded Component path.
+- Completed: PR #1776 replaced the shared due-date Toolkit Component with a
+  direct Marionette View and was merged by a human.
+- Active step: remove both Toolkit `mixinState` integrations from clinician and
+  patient modals in favor of modal-specific error updates and explicit renders.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
@@ -34,12 +36,13 @@
 
 ## Active-step validation
 
-- Due View component spec: 1 spec and 3 tests passed, including repeated-click
-  Datepicker teardown.
-- Affected E2E: 5 unchanged specs and 116 tests passed, covering patient action,
-  flow, workflow, worklist, and bulk-edit behavior.
-- Test-mode build, ESLint, and Stylelint passed; full lint retains the baseline
-  editor-config binary download failure (`ec-darwin-arm64*` not found).
+- Targeted ESLint passed for the four changed JavaScript files.
+- The test-mode build passed.
+- The unchanged clinician-modal and app-nav E2E specs passed: 2 specs and 21
+  tests after review correction, including clinician and patient
+  validation-error behavior.
+- Full repository lint ran: ESLint and Stylelint passed, then the pre-existing
+  editor-config check failed because `ec-darwin-arm64*` was not found.
 
 ## Friction and corrected failures
 
@@ -51,3 +54,7 @@
   `extend` adopts that value as the subclass constructor, but native object
   methods are not constructable. Changing it to a function-valued constructor
   restored the established Backbone extension contract.
+- The first modal-state replacement rendered again for deeply equal repeated
+  errors and moved focus back to the first input, unlike Backbone.Model state,
+  which de-duplicated the same errors. Review caught this and both modals now
+  preserve the equality guard.
