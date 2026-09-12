@@ -17,7 +17,7 @@ context('Optionlist', function() {
     dateState: {},
     onClick() {
       const optionlist = new Optionlist({
-        ui: this.ui.button,
+        anchor: this.ui.button,
         uiView: this,
         lists: [{ collection: this.collection }],
         isSelectlist: true,

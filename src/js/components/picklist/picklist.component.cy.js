@@ -120,14 +120,14 @@ context('Picklist', function() {
         const picklist = new Picklist({
           lists,
           headingText: 'Test Picklist',
-          viewEvents: {
-            'close': onClose,
-            'picklist:group1:select': onSelect1,
-            'picklist:group2:select': onSelect2,
-          },
         });
 
-        picklist.setState('query', 'this item');
+        picklist.on({
+          'close': onClose,
+          'picklist:group1:select': onSelect1,
+          'picklist:group2:select': onSelect2,
+        });
+        picklist.model.set('query', 'this item');
 
         return picklist;
       })
