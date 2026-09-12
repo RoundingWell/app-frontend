@@ -61,7 +61,7 @@ export default View.extend({
     this.el.blur();
 
     const optionlist = new Optionlist({
-      ui: this.$el,
+      anchor: this.$el,
       uiView: this,
       headingText: i18n.headingText,
       itemTemplate: hbs`

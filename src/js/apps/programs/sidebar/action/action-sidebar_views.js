@@ -189,7 +189,7 @@ const MenuView = View.extend({
     const menuOptions = new Backbone.Collection([{}]);
 
     const optionlist = new Optionlist({
-      ui: this.$el,
+      anchor: this.$el,
       uiView: this,
       headingText: intl.programs.sidebar.action.actionSidebarViews.menuView.headingText,
       itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.programs.sidebar.action.actionSidebarViews.menuView.delete }}</span>`,

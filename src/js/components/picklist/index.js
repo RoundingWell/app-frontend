@@ -1,4 +1,5 @@
 import { debounce, each, extend, noop, pick, result, size } from 'underscore';
+import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
@@ -6,8 +7,6 @@ import 'scss/modules/forms.scss';
 
 import intl from 'js/i18n';
 import hasAllText from 'js/utils/formatting/has-all-text';
-
-import Component from 'js/base/component';
 
 import InputFocusBehavior from 'js/behaviors/input-focus';
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
@@ -114,7 +113,7 @@ const PicklistItem = View.extend({
   },
 });
 
-const Picklist = CollectionView.extend({
+const PicklistGroup = CollectionView.extend({
   className: 'picklist__group',
   tagName: 'li',
   template: hbs`
@@ -148,7 +147,18 @@ const Picklist = CollectionView.extend({
   },
 });
 
-const Picklists = CollectionView.extend({
+const Picklist = CollectionView.extend({
+  attr,
+  canClear,
+  isSelectList,
+  childView: PicklistItem,
+  className: 'picklist',
+  childViewEventPrefix: 'picklist',
+  clearText: intl.components.picklist.clearText,
+  headingText: '',
+  infoText: '',
+  loadingText: intl.components.picklist.loadingText,
+  noResultsText: intl.components.picklist.noResultsText,
   behaviors: [
     {
       behaviorClass: InputFocusBehavior,
@@ -184,6 +194,8 @@ const Picklists = CollectionView.extend({
     this.mergeOptions(options, CLASS_OPTIONS);
     this.mergeOptions(options, CLASS_OPTIONS_ITEM);
 
+    if (!this.model) this.model = new Backbone.Model();
+
     this.debouncedFilter = debounce(this.filter, 1);
 
     if (this.isListsAsync) {
@@ -209,7 +221,7 @@ const Picklists = CollectionView.extend({
       childView: this.childView,
     }, pick(this, ...CLASS_OPTIONS_ITEM), list);
 
-    const picklist = new Picklist(options);
+    const picklist = new PicklistGroup(options);
 
     picklist.render();
 
@@ -230,6 +242,9 @@ const Picklists = CollectionView.extend({
 
     this.$('.js-picklist-item').first().addClass('is-highlighted');
   },
+  onWatchChange(query) {
+    this.model.set('query', query);
+  },
   emptyViewOptions() {
     return {
       isLoading: this.isLoading,
@@ -249,33 +264,4 @@ const Picklists = CollectionView.extend({
   },
 });
 
-export default Component.extend({
-  attr,
-  canClear,
-  isSelectList,
-  childView: PicklistItem,
-  className: 'picklist',
-  childViewEventPrefix: 'picklist',
-  clearText: intl.components.picklist.clearText,
-  headingText: '',
-  infoText: '',
-  loadingText: intl.components.picklist.loadingText,
-  noResultsText: intl.components.picklist.noResultsText,
-  constructor: function(options) {
-    this.mergeOptions(options, CLASS_OPTIONS);
-    this.mergeOptions(options, CLASS_OPTIONS_ITEM);
-
-    Component.apply(this, arguments);
-  },
-  viewOptions() {
-    const opts = pick(this, ...CLASS_OPTIONS, ...CLASS_OPTIONS_ITEM);
-    return extend({ model: this.getState() }, opts);
-  },
-  ViewClass: Picklists,
-  viewEvents: {
-    'watch:change': 'onWatchChange',
-  },
-  onWatchChange(query) {
-    this.setState('query', query);
-  },
-});
+export default Picklist;

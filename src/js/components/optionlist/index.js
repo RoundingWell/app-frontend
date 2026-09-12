@@ -6,11 +6,11 @@ import Picklist from 'js/components/picklist';
 
 const CLASS_OPTIONS = [
   'align',
+  'anchor',
   'ignoreEl',
   'popWidth',
   'position',
   'uiView',
-  'ui',
 ];
 
 const attr = 'text';
@@ -28,19 +28,15 @@ export default Picklist.extend({
 
     Picklist.apply(this, arguments);
   },
-  viewTriggers: {
-    'close': 'close',
-  },
-  viewEvents: {
-    'watch:change': 'onWatchChange',
-    'picklist:item:select': 'onPicklistSelect',
+  show() {
+    this.region.show(this, this.regionOptions());
   },
   position() {
-    return this.uiView.getBounds(this.ui);
+    return this.uiView.getBounds(this.anchor);
   },
   regionOptions() {
     return extend({
-      ignoreEl: this.ignoreEl || this.ui[0],
+      ignoreEl: this.ignoreEl || this.anchor[0],
       popWidth: this.popWidth,
       align: this.align,
     }, result(this, 'position'));
@@ -48,11 +44,15 @@ export default Picklist.extend({
   onClose() {
     this.destroy();
   },
-  onPicklistSelect({ model }) {
+  onPicklistItemSelect({ model }) {
     if (model.get('isDisabled')) return;
 
-    this.triggerMethod('select', model);
+    this.trigger('select', model);
 
     this.destroy();
+  },
+}, {
+  setRegion(region) {
+    this.prototype.region = region;
   },
 });

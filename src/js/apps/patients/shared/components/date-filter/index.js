@@ -104,7 +104,7 @@ export default Component.extend({
 
     const dateRanges = new DateRanges({
       lists: [{ collection: relativeRanges }],
-      state: { selected: selectedRange },
+      model: new Backbone.Model({ selected: selectedRange }),
     });
 
     this.listenTo(dateRanges, 'select', selected => {

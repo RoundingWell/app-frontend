@@ -198,7 +198,7 @@ const SidebarView = View.extend({
     }
 
     const optionlist = new Optionlist({
-      ui: this.ui.menu,
+      anchor: this.ui.menu,
       uiView: this,
       headingText: i18n.menuOptions.headingText,
       itemTemplate: hbs`{{ text }}`,

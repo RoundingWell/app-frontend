@@ -51,7 +51,7 @@ const MenuView = View.extend({
   },
   onClick() {
     const optionlist = new Optionlist({
-      ui: this.$el,
+      anchor: this.$el,
       uiView: this,
       headingText: i18n.menuView.menuOptions.headingText,
       itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.patient.action.actionViews.menuView.menuOptions.delete }}</span>`,
