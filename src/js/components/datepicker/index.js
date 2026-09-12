@@ -132,7 +132,7 @@ export default Component.extend({
     return calView;
   },
   position() {
-    return this.uiView.getBounds(this.ui);
+    return this.uiView.getBounds(this.ui?.[0]);
   },
   regionOptions() {
     return extend({ popWidth: 256 }, result(this, 'position'));

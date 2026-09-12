@@ -132,13 +132,13 @@ export default Component.extend({
   showPicklist() {
     const picklist = new Picklist(extend({
       lists: this.lists || [{ collection: this.collection }],
-      state: { selected: this.getState('selected') },
+      model: new Backbone.Model({ selected: this.getState('selected') }),
     }, result(this, 'picklistOptions')));
 
     this.popRegion.show(picklist, this.popRegionOptions());
 
-    this.bindEvents(picklist.getView(), this._picklistEvents);
-    this.bindEvents(picklist.getView(), result(this, 'picklistEvents'));
+    this.bindEvents(picklist, this._picklistEvents);
+    this.bindEvents(picklist, result(this, 'picklistEvents'));
   },
   position() {
     return this.getView().getBounds();

@@ -214,11 +214,8 @@ const DateRanges = Picklist.extend({
       isSelected: this.model === this.state.get('selected'),
     };
   },
-  viewEvents: {
-    'picklist:item:select': 'onItemSelect',
-  },
-  onItemSelect({ model }) {
-    this.triggerMethod('select', model.id);
+  onPicklistItemSelect({ model }) {
+    this.trigger('select', model.id);
   },
 });
 
