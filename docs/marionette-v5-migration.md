@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `a8565bf814aaeefabb7b5275761772c78d307921`.
+  `d721d082f6846d45b904e46ba4ff4396e87f3009`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -25,8 +25,10 @@
   a direct Marionette View and was merged by a human.
 - Completed: PR #1776 replaced the shared due-date Toolkit Component with a
   direct Marionette View and was merged by a human.
-- Active step: remove both Toolkit `mixinState` integrations from clinician and
-  patient modals in favor of modal-specific error updates and explicit renders.
+- Completed: PR #1777 removed both Toolkit `mixinState` integrations from
+  clinician and patient modals and was merged by a human.
+- Active step: replace the patient quick-search Toolkit Component with its
+  direct Marionette View while retaining its Backbone state model.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
@@ -36,11 +38,9 @@
 
 ## Active-step validation
 
-- Targeted ESLint passed for the four changed JavaScript files.
-- The test-mode build passed.
-- The unchanged clinician-modal and app-nav E2E specs passed: 2 specs and 21
-  tests after review correction, including clinician and patient
-  validation-error behavior.
+- Targeted ESLint and the test-mode build passed.
+- The unchanged patient quick-search E2E spec passed: 1 spec and 4 tests,
+  covering search updates, result selection, close, and patient-add behavior.
 - Full repository lint ran: ESLint and Stylelint passed, then the pre-existing
   editor-config check failed because `ec-darwin-arm64*` was not found.
 
