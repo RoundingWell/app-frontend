@@ -1,8 +1,7 @@
-import { extend } from 'underscore';
+import { extend, isEqual } from 'underscore';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
-import { mixinState } from 'marionette.toolkit';
 
 import 'scss/modules/forms.scss';
 import 'scss/modules/modals.scss';
@@ -33,7 +32,7 @@ const InputView = View.extend({
     <input class="form-input form-input--primary w-100 js-input {{#if hasError}}has-error{{/if}}" placeholder="{{ placeholder }}" value="{{ value }}" />
   `,
   templateContext() {
-    const errors = this.getOption('state').get('errors');
+    const errors = this.errors;
 
     return {
       hasError: errors && errors[this.getOption('attr')],
@@ -47,8 +46,12 @@ const InputView = View.extend({
   events: {
     'input @ui.input': 'onChange',
   },
-  initialize({ state }) {
-    this.listenTo(state, 'change:errors', this.render);
+  initialize({ errors }) {
+    this.errors = errors;
+  },
+  showErrors(errors) {
+    this.errors = errors;
+    this.render();
   },
   onChange() {
     const text = this.ui.input.val();
@@ -70,13 +73,7 @@ const ClinicianModal = View.extend({
     team: '[data-team-region]',
     workspaces: '[data-workspaces-region]',
   },
-  modelEvents: {
-    'change': 'onChange',
-  },
   template: ClinicianModalTemplate,
-  initialize({ state }) {
-    this.initState({ state });
-  },
   onRender() {
     this.showNameView();
     this.showEmailView();
@@ -87,7 +84,7 @@ const ClinicianModal = View.extend({
   showNameView() {
     this.showChildView('name', new InputView({
       model: this.model,
-      state: this.getState(),
+      errors: this.errors,
       attr: 'name',
       placeholder: i18n.clinicianModal.name,
       shouldFocus: true,
@@ -96,7 +93,7 @@ const ClinicianModal = View.extend({
   showEmailView() {
     this.showChildView('email', new InputView({
       model: this.model,
-      state: this.getState(),
+      errors: this.errors,
       attr: 'email',
       placeholder: i18n.clinicianModal.email,
     }));
@@ -141,9 +138,14 @@ const ClinicianModal = View.extend({
       },
     });
   },
-});
+  showErrors(errors) {
+    if (isEqual(this.errors, errors)) return;
 
-mixinState(ClinicianModal);
+    this.errors = errors;
+    this.getChildView('name').showErrors(errors);
+    this.getChildView('email').showErrors(errors);
+  },
+});
 
 function getClinicianModal(opts) {
   const clinician = opts.clinician;

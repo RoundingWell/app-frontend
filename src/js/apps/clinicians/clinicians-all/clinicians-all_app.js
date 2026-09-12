@@ -107,7 +107,7 @@ export default SubRouterApp.extend({
             clinicianModal.disableSubmit();
             const errors = clinician.parseErrors(error.responseData);
 
-            clinicianModal.getChildView('body').setState({ errors });
+            clinicianModal.getChildView('body').showErrors(errors);
             Radio.request('alert', 'show:error', values(errors).join(', '));
           });
       },
