@@ -1,10 +1,5 @@
 import SubRouterApp from './subrouterapp';
 
-// Resolve queued microtasks (the base App loading chain) before asserting.
-function flush() {
-  return new Cypress.Promise(resolve => setTimeout(resolve, 0));
-}
-
 function deferred() {
   let resolve;
   const promise = new Cypress.Promise(res => {
@@ -47,7 +42,7 @@ const SyncApp = BaseApp.extend({
 });
 
 const LoadingApp = BaseApp.extend({
-  beforeStart() {
+  onBeforeStart() {
     this.loaded = deferred();
     return this.loaded.promise;
   },
@@ -62,8 +57,8 @@ const action = { event: 'patient:action', eventArgs: ['p1', 'a1'], definition: {
 context('SubRouterApp', function() {
   let app;
 
-  afterEach(function() {
-    if (app) app.destroy();
+  afterEach(async function() {
+    if (app) await app.destroy();
     app = null;
   });
 
@@ -90,19 +85,19 @@ context('SubRouterApp', function() {
   });
 
   describe('synchronous startup', function() {
-    specify('dispatches the current route from onStart with positional args', function() {
+    specify('dispatches the current route from onStart with positional args', async function() {
       app = new SyncApp();
       app.setCurrentRoute(action);
-      app.start();
+      await app.start();
 
       expect(app.calls).to.deep.equal([['action', 'p1', 'a1']]);
       expect(app.beforeRoutes).to.deep.equal(['patient:action']);
       expect(app.startedRoutes).to.deep.equal(['patient:action']);
     });
 
-    specify('dispatches immediately when a route arrives while running', function() {
+    specify('dispatches immediately when a route arrives while running', async function() {
       app = new SyncApp();
-      app.start();
+      await app.start();
       expect(app.calls).to.deep.equal([]);
 
       app.startRoute(workflow);
@@ -111,27 +106,27 @@ context('SubRouterApp', function() {
   });
 
   describe('loading startup', function() {
-    specify('retains only the newest route while loading and dispatches it once ready', function() {
+    specify('retains only the newest route while loading and dispatches it once ready', async function() {
       app = new LoadingApp();
       app.setCurrentRoute(workflow);
-      app.start();
+      const starting = app.start();
 
       // still loading: nothing dispatched
       app.startRoute(action);
       expect(app.calls).to.deep.equal([]);
 
       app.loaded.resolve();
-      return flush().then(() => {
-        expect(app.calls).to.deep.equal([['action', 'p1', 'a1']]);
-      });
+      await starting;
+
+      expect(app.calls).to.deep.equal([['action', 'p1', 'a1']]);
     });
   });
 
   describe('unmatched routes', function() {
-    specify('is a safe no-op and does not fire startRoute', function() {
+    specify('is a safe no-op and does not fire startRoute', async function() {
       app = new SyncApp();
       app.setCurrentRoute({ event: 'patient:missing', eventArgs: [], definition: {} });
-      app.start();
+      await app.start();
 
       expect(app.calls).to.deep.equal([]);
       expect(app.beforeRoutes).to.deep.equal(['patient:missing']);
@@ -140,20 +135,20 @@ context('SubRouterApp', function() {
   });
 
   describe('stop and restart', function() {
-    specify('clears the current route on a normal stop', function() {
+    specify('preserves route state while stopped', async function() {
       app = new SyncApp();
       app.setCurrentRoute(workflow);
-      app.start();
-      app.stop();
+      await app.start();
+      await app.stop();
 
-      expect(app.getCurrentRoute()).to.equal(null);
+      expect(app.getCurrentRoute()).to.deep.equal(workflow);
     });
 
-    specify('preserves the current route across restart', function() {
+    specify('preserves the current route across restart', async function() {
       app = new SyncApp();
       app.setCurrentRoute(workflow);
-      app.start();
-      app.restart();
+      await app.start();
+      await app.restart();
 
       expect(app.getCurrentRoute()).to.deep.equal(workflow);
       // re-dispatched on restart

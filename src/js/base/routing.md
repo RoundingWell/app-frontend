@@ -161,10 +161,9 @@ routeActions: {
   (`child.isRestarting()`), so a child that restarts itself (e.g. a worklist applying
   filter state) **stays current**. Treating a restart as a teardown would desync
   tracking and leave two apps in one region.
-- A `SubRouterApp` clears its `_currentRoute` on a normal stop but preserves it across
-  `restart()` (also guarded by `isRestarting()`), so the route re-dispatches after
-  re-fetching. Rely on this instead of threading `currentRoute` through restart
-  options.
+- A `SubRouterApp` owns its current route in Marionette state. Application state
+  persists while stopped and across `restart()`, so the route re-dispatches after
+  re-fetching without restart flags or threading `currentRoute` through options.
 
 ## Async ownership
 
