@@ -75,7 +75,7 @@ export default Component.extend({
     this.dateTypeState = new Backbone.Model({ dateType: this.getState('dateType') });
   },
   showPop() {
-    const position = this.getView().getBounds(this.getView().$el);
+    const position = this.getView().getBounds();
     this.popView = new LayoutView();
 
     this.popView.listenTo(this, 'destroy', this.popView.destroy);
@@ -104,7 +104,7 @@ export default Component.extend({
 
     const dateRanges = new DateRanges({
       lists: [{ collection: relativeRanges }],
-      state: { selected: selectedRange },
+      model: new Backbone.Model({ selected: selectedRange }),
     });
 
     this.listenTo(dateRanges, 'select', selected => {

@@ -50,13 +50,16 @@ const getBounds = function(ui) {
   }
 
   // Allow for the user to get the bounds of a different ui elem
-  const $el = ui || this.$el;
+  const el = ui || this.el;
+  const { left, top } = el.getBoundingClientRect();
+  const { scrollX, scrollY } = el.ownerDocument.defaultView;
 
-  const { left, top } = $el.offset();
-  const outerHeight = $el.outerHeight();
-  const outerWidth = $el.outerWidth();
-
-  return { left, top, outerHeight, outerWidth };
+  return {
+    left: left + scrollX,
+    top: top + scrollY,
+    outerHeight: el.offsetHeight,
+    outerWidth: el.offsetWidth,
+  };
 };
 
 extend(View.prototype, {

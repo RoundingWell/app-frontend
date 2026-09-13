@@ -99,7 +99,7 @@ export default Component.extend({
     };
   },
   position() {
-    return this.uiView.getBounds(this.ui);
+    return this.uiView.getBounds(this.ui?.[0]);
   },
   regionOptions() {
     const orientation = result(this, 'orientation');

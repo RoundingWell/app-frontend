@@ -13,7 +13,7 @@ export default Behavior.extend({
       keyEvents: {
         'transport:down': DOWN_KEY,
         'transport:up': UP_KEY,
-        'select': ENTER_KEY,
+        'transport:select': ENTER_KEY,
         'close': [ESCAPE_KEY, TAB_KEY],
       },
     },
@@ -155,7 +155,7 @@ export default Behavior.extend({
   // -----------------------------------------
 
   // simulates the click trigger on the currently highlighted element
-  onSelect(evt) {
+  onTransportSelect(evt) {
     evt.preventDefault();
 
     this.view.$('.is-highlighted').click();
