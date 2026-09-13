@@ -1,26 +1,19 @@
 import { extend, pick, result } from 'underscore';
-import { normalizeMethods } from 'marionette';
+import Backbone from 'backbone';
 
 import App from './app';
 
 export default App.extend({
   constructor: function() {
     this._current = null;
-    this._currentRoute = null;
-
-    this.initRouter();
 
     this.on('before:stop', this.stopCurrent);
-    this.on('before:stop', this.clearCurrentRoute);
 
     App.apply(this, arguments);
   },
 
-  // route actions dispatch a matched route to a local handler
-  // (distinct from RouterApp's `eventRoutes` URL definitions)
-  initRouter() {
-    const routeActions = result(this, 'routeActions', {});
-    this._routeActions = normalizeMethods(this, routeActions);
+  createState() {
+    return new Backbone.Model({ currentRoute: null });
   },
 
   // declarative scope identity used by a parent RouterApp to decide reuse;
@@ -31,11 +24,11 @@ export default App.extend({
   },
 
   setCurrentRoute(routeContext) {
-    this._currentRoute = routeContext;
+    this.getState().set('currentRoute', routeContext);
   },
 
   getCurrentRoute() {
-    return this._currentRoute;
+    return this.getState().get('currentRoute');
   },
 
   // records the newest route, dispatching only when already running;
@@ -57,21 +50,14 @@ export default App.extend({
     this.triggerMethod('before:startRoute', currentRoute);
 
     const { event, eventArgs } = currentRoute;
-    const action = this._routeActions[event];
+    const routeActions = this.normalizeMethods(result(this, 'routeActions', {}));
+    const action = routeActions[event];
 
     if (!action) return;
 
     action.apply(this, eventArgs);
 
     this.triggerMethod('startRoute', currentRoute);
-  },
-
-  // clears the current route on a normal stop, but preserves it across a
-  // Toolkit restart() so the route can be re-dispatched after re-fetching
-  clearCurrentRoute() {
-    if (!this.isRestarting()) {
-      this._currentRoute = null;
-    }
   },
 
   mixinOptions(options) {
@@ -98,7 +84,9 @@ export default App.extend({
   stopCurrent() {
     if (!this._current) return;
 
-    this._current.stop();
+    const stopping = this._current.stop();
     this._current = null;
+
+    return stopping;
   },
 });

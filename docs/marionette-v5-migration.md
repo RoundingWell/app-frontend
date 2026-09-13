@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `cb3019a97697c5ef196965013422862424e9e546`.
+  `b425a2f47d9030d6a835a2609220dc37b4db712d`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -35,16 +35,21 @@
 - Closed: PR #1780 converted Droplist with mutable View fields. A branch-wide
   state assessment found that this repeated the wrong pre-v5 pattern, so it was
   closed without merge.
-- Active step: cut over to the exact beta.2 runtime with the Backbone data/state,
-  jQuery DOM, and Morphdom DOM adapters; remove the v4 runtime, Toolkit, alias,
-  and superseded custom DOM adapter; and apply the target Browserslist.
+- Completed: PR #1781 cut over to the exact beta.2 runtime with the Backbone
+  data/state, jQuery DOM, and Morphdom DOM adapters; removed the v4 runtime,
+  Toolkit, alias, and superseded custom DOM adapter; and applied the target
+  Browserslist. It was merged by a human.
+- Active step: migrate `SubRouterApp` route state and dispatch to beta.2's
+  native Application lifecycle, Common API, and owned Backbone state without
+  restoring Toolkit restart flags.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
   runs locally before publication.
-- Next after human merge: migrate application and View owners directly onto the
-  available v5 lifecycle and state APIs. Intermediate runtime failures are
-  expected and recorded rather than hidden behind compatibility implementations.
+- Next after human merge: migrate route-driven child Application ownership to
+  beta.2's explicit instance registration and asynchronous lifecycle.
+  Intermediate runtime failures are expected and recorded rather than hidden
+  behind compatibility implementations.
 
 ## Active-step validation
 
@@ -57,6 +62,21 @@
   `src/js/base/subrouterapp.js`: beta.2 does not export v4's private
   `normalizeMethods` helper. This is the first expected application migration
   gap, not a runtime defect. Cypress cannot run until the application builds.
+- The active step removes that private-helper dependency, stores the current
+  route in owned Backbone state, uses the documented Application
+  `normalizeMethods()` Common API, and uses v5 state persistence across stop
+  and restart instead of `isRestarting()` branches.
+- Targeted ESLint passes. The focused SubRouterApp component spec is blocked
+  before loading by shared Cypress support imports of the deleted
+  `js/base/component` path; this is an existing runtime-cutover boundary.
+- The test-mode build now passes `SubRouterApp` and stops at that same deleted
+  Toolkit Component import path.
+- `SubRouterApp` temporarily retains its constructor-bound current-child stop
+  listener because existing route children are not yet registered through v5
+  Application ownership. Moving that binding to `initialize()` would let
+  subclass initialization shadow it. The listener is removed when the next
+  step makes the current child an explicitly owned Application, whose lifecycle
+  Marionette stops automatically.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -109,3 +129,9 @@
   owns Application lifecycle, child Applications, state, root Region/View, and
   cancellation; the migration will use those APIs rather than recreate Toolkit
   `App`, state, running-event, or View-event mixins locally.
+- The first `SubRouterApp` edit treated `normalizeMethods` as fully removed
+  after its core named export failed. Beta.2's Common API documentation shows
+  that it remains available as `this.normalizeMethods()` (and from
+  `@mnjs/utils`). The PR was corrected to use the documented owner method
+  instead of duplicating method-name resolution; the initial conclusion was an
+  agent documentation-reading mistake, not a Marionette defect or gap.
