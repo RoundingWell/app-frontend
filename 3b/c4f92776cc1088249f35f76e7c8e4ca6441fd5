@@ -1,0 +1,33 @@
+src/js/apps/patients/shared/components/due_view.js
+  s_85aebd1623278c::t_998e4e26ec74b1 68
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_85aebd1623278c::t_998e4e26ec74b1 120
+src/js/components/datepicker/index.js
+  s_85aebd1623278c::t_c2eea597a8816b 29
+  s_85aebd1623278c::t_1d3d9376a5f9e3 5-6,11,19,22,26,30,33-34,36,40-55,57-58,60,73-74,76,91-94,157-160,165-176
+  s_85aebd1623278c::t_aaf078e0c7c4f9 24,28,56,101
+src/js/components/datepicker/datepicker.component.cy.js
+  s_85aebd1623278c::t_998e4e26ec74b1 42,44,171,307
+src/js/components/datepicker/datepicker_views.js
+  s_85aebd1623278c::t_4cf2beccbf4ea3 2
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_4e2fccd2c958ad 97-99
+  s_85aebd1623278c::t_f0c6d15931c845 53-54,95-96
+  s_85aebd1623278c::t_998e4e26ec74b1 15,45-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3bc4f92776cc1088249f35f76e7c8e4ca6441fd5",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
