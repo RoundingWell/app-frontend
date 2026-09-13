@@ -291,7 +291,7 @@ export default App.extend({
 
     const submissionStatus = new SubmissionStatusDroplist({
       collection: this.responses.filterSubmissions(),
-      state: { selected },
+      selected,
     });
 
     this.showChildView('draftStatus', submissionStatus);

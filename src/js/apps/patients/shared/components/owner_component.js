@@ -68,7 +68,7 @@ export default Droplist.extend({
   hasClinicians: true,
   hasCurrentClinician: true,
   popWidth() {
-    return this.isCompact ? null : this.getView().$el.outerWidth();
+    return this.isCompact ? null : this.el.offsetWidth;
   },
   picklistOptions() {
     const lists = this.getLists();
@@ -94,28 +94,27 @@ export default Droplist.extend({
       clearText: this.currentUser.get('name'),
     };
   },
-  viewOptions() {
+  className() {
+    if (this.getOption('isCompact')) return 'owner-component owner-component--compact button button--compact';
+
+    return 'owner-component button button--secondary w-100';
+  },
+  templateContext() {
     const icon = { type: 'far', icon: 'circle-user' };
 
     if (this.isCompact) {
-      const selected = this.getState('selected');
+      const { selected } = this;
       const isTeam = selected.type === 'teams';
 
       return {
-        className: 'owner-component owner-component--compact button button--compact',
-        templateContext: {
-          attr: isTeam ? 'abbr' : 'name',
-          icon,
-        },
+        attr: isTeam ? 'abbr' : 'name',
+        icon,
       };
     }
 
     return {
-      className: 'owner-component button button--secondary w-100',
-      templateContext: {
-        attr: 'name',
-        icon,
-      },
+      attr: 'name',
+      icon,
     };
   },
   initialize(options) {
@@ -133,7 +132,7 @@ export default Droplist.extend({
       currentWorkspaceCache = currentWorkspace.id;
     }
 
-    this.setState({ selected: this.owner });
+    this.selected = this.owner;
   },
   getLists() {
     const lists = [];
@@ -161,7 +160,7 @@ export default Droplist.extend({
     return lists;
   },
   onPicklistSelect({ model }) {
-    this.setState('selected', model || this.currentUser);
+    this.setSelected(model || this.currentUser);
 
     this.popRegion.empty();
   },

@@ -49,29 +49,29 @@ function getNavMenuButtonAttributes(label) {
 const MainNavDroplist = Droplist.extend({
   popWidth: 248,
   position() {
-    const { outerHeight } = this.getView().getBounds();
+    const { outerHeight } = this.getBounds();
 
     return {
       top: outerHeight,
       left: 16,
     };
   },
-  viewOptions: {
-    tagName: 'button',
-    className: 'app-nav__header js-nav-menu',
-    attributes() {
-      return getNavMenuButtonAttributes(i18n.mainNavDroplist.workspaceMenu);
-    },
-    template: WorkspaceButtonTemplate,
-    templateContext() {
-      const currentUser = Radio.request('bootstrap', 'currentUser');
-      const currentWorkspace = Radio.request('workspace', 'current');
+  className: 'app-nav__header js-nav-menu',
+  attributes() {
+    return {
+      ...Droplist.prototype.attributes.call(this),
+      ...getNavMenuButtonAttributes(i18n.mainNavDroplist.workspaceMenu),
+    };
+  },
+  template: WorkspaceButtonTemplate,
+  templateContext() {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+    const currentWorkspace = Radio.request('workspace', 'current');
 
-      return {
-        userName: currentUser.get('name'),
-        workspaceName: currentWorkspace.get('name'),
-      };
-    },
+    return {
+      userName: currentUser.get('name'),
+      workspaceName: currentWorkspace.get('name'),
+    };
   },
   picklistOptions() {
     return {
@@ -98,7 +98,7 @@ const MainNavDroplist = Droplist.extend({
 
     if (model.get('event') === 'whats-new') return;
 
-    this.setState('selected', model);
+    this.setSelected(model);
   },
   onSelect({ model }) {
     if (model.get('event') === 'whats-new') {
@@ -116,14 +116,14 @@ const MainNavDroplist = Droplist.extend({
 
 const AdminToolsDroplist = Droplist.extend({
   popWidth: 248,
-  viewOptions: {
-    tagName: 'button',
-    className: 'flex flex-align-center app-nav__bottom-button js-nav-menu',
-    attributes() {
-      return getNavMenuButtonAttributes(i18n.adminToolsDroplist.adminTools);
-    },
-    template: hbs`{{fas "ellipsis"}}<span class="app-nav__label u-text--overflow">{{ @intl.globals.appNav.appNavViews.adminToolsDroplist.adminTools }}</span>`,
+  className: 'flex flex-align-center app-nav__bottom-button js-nav-menu',
+  attributes() {
+    return {
+      ...Droplist.prototype.attributes.call(this),
+      ...getNavMenuButtonAttributes(i18n.adminToolsDroplist.adminTools),
+    };
   },
+  template: hbs`{{fas "ellipsis"}}<span class="app-nav__label u-text--overflow">{{ @intl.globals.appNav.appNavViews.adminToolsDroplist.adminTools }}</span>`,
   picklistOptions() {
     return {
       className: 'picklist app-nav__picklist',

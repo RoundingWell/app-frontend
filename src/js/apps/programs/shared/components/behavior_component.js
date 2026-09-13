@@ -51,31 +51,27 @@ export default Droplist.extend({
       this.collection.remove(conditional);
     }
 
-    this.setSelected({ behavior });
+    this.selected = this.collection.find({ behavior });
   },
   isConditionalAvailable: true,
   onChangeSelected(selected) {
     const behavior = selected.get('behavior');
     this.triggerMethod('change:status', { behavior });
   },
-  setSelected({ behavior }) {
-    const selected = this.collection.find({ behavior });
-    this.setState({ selected });
-  },
   popWidth() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? null : this.getView().$el.outerWidth();
+    return isCompact ? null : this.el.offsetWidth;
   },
-  viewOptions() {
-    const isCompact = this.getOption('isCompact');
-
+  className() {
+    return this.getOption('isCompact') ? 'button button--compact' : 'button button--secondary w-100';
+  },
+  getTemplate() {
+    return this.getOption('isCompact') ? ButtonCompactTemplate : BehaviorTemplate;
+  },
+  templateContext() {
     return {
-      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
-      template: isCompact ? ButtonCompactTemplate : BehaviorTemplate,
-      templateContext: {
-        isDisabled: this.getState('isDisabled'),
-      },
+      isDisabled: this.isDisabled,
     };
   },
   picklistOptions() {

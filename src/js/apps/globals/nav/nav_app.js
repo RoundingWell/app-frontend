@@ -290,7 +290,7 @@ export default RouterApp.extend({
   onChangeCurrentApp(state, appName) {
     if (!this.adminNavDroplist) return;
 
-    this.adminNavDroplist.setState('selected', adminNavMenu.get(appName));
+    this.adminNavDroplist.setSelected(adminNavMenu.get(appName));
   },
   setTemporarilyMinimized(isMinimized) {
     this.setState('temporaryMinimized', isMinimized);
@@ -378,8 +378,8 @@ export default RouterApp.extend({
   },
   hasActiveNavDroplist() {
     return Boolean(
-      (this.mainNavDroplist && this.mainNavDroplist.getState('isActive'))
-      || (this.adminNavDroplist && this.adminNavDroplist.getState('isActive')),
+      (this.mainNavDroplist && this.mainNavDroplist.isOpen)
+      || (this.adminNavDroplist && this.adminNavDroplist.isOpen),
     );
   },
   updateCanPatientCreate() {
@@ -406,7 +406,7 @@ export default RouterApp.extend({
     );
 
     if (this.mainNavDroplist) {
-      this.stopListening(this.mainNavDroplist.getState());
+      this.stopListening(this.mainNavDroplist);
     }
 
     this.mainNavDroplist = new MainNavDroplist({
@@ -415,12 +415,10 @@ export default RouterApp.extend({
         { collection: workspacesMenu },
         { collection: whatsNewMenu },
       ],
-      state: {
-        selected: workspacesMenu.get(currentWorkspace.id),
-      },
+      selected: workspacesMenu.get(currentWorkspace.id),
     });
     this.listenTo(this.mainNavDroplist, 'show:whatsNew', this.showWhatsNew);
-    this.listenTo(this.mainNavDroplist.getState(), 'change:isActive', this.onNavDroplistActiveChange);
+    this.listenTo(this.mainNavDroplist, 'change:isOpen', this.onNavDroplistActiveChange);
     this.showChildView('navMain', this.mainNavDroplist);
   },
   showNavContent() {
@@ -498,19 +496,17 @@ export default RouterApp.extend({
   },
   showAdminTools() {
     if (this.adminNavDroplist) {
-      this.stopListening(this.adminNavDroplist.getState());
+      this.stopListening(this.adminNavDroplist);
     }
 
     if (!adminNavMenu.length) return;
 
     this.adminNavDroplist = new AdminToolsDroplist({
       collection: adminNavMenu,
-      state: {
-        selected: adminNavMenu.get(this.getState().get('currentApp')),
-      },
+      selected: adminNavMenu.get(this.getState().get('currentApp')),
     });
 
-    this.listenTo(this.adminNavDroplist.getState(), 'change:isActive', this.onNavDroplistActiveChange);
+    this.listenTo(this.adminNavDroplist, 'change:isOpen', this.onNavDroplistActiveChange);
     this.bottomNavView.showChildView('adminTools', this.adminNavDroplist);
   },
   showSearch(prefillText) {

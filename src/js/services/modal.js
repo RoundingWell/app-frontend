@@ -90,13 +90,11 @@ export default App.extend({
       if (modal.getRegion('draftStatus').hasView()) return;
 
       const draftStatusView = new DraftStatusView({
+        className: 'button button--icon flex flex-align-center u-margin--r-16',
         model: draftModel,
-        viewOptions: {
-          className: 'button button--icon flex flex-align-center u-margin--r-16',
-          template: hbs`{{far "shield-check"}}`,
-        },
+        template: hbs`{{far "shield-check"}}`,
         position() {
-          const bounds = this.getView().getBounds();
+          const bounds = this.getBounds();
           return { ...bounds, outerHeight: bounds.outerHeight + 4 };
         },
       });

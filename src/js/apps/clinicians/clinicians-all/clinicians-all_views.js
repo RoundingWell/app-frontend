@@ -91,7 +91,7 @@ const ItemView = View.extend({
     const roleComponent = new RoleComponent({
       role: this.model.getRole(),
       isCompact: true,
-      state: { isDisabled: !this.model.isEnabled() },
+      isDisabled: !this.model.isEnabled(),
     });
 
     this.listenTo(roleComponent, 'change:role', role => {
@@ -104,7 +104,7 @@ const ItemView = View.extend({
     const teamComponent = new TeamComponent({
       team: this.model.getTeam(),
       isCompact: true,
-      state: { isDisabled: !this.model.isEnabled() },
+      isDisabled: !this.model.isEnabled(),
     });
 
     this.listenTo(teamComponent, 'change:team', team => {

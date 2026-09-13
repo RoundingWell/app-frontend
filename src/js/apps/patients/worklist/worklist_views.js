@@ -374,10 +374,8 @@ const SortDroplist = Droplist.extend({
   picklistOptions: {
     headingText: i18n.sortDroplist.headingText,
   },
-  viewOptions: {
-    className: 'button worklist-list__sidebar-button',
-    template: hbs`{{far "arrow-down-arrow-up" classes="worklist-list__sort-icon"}}{{ text }}`,
-  },
+  className: 'button worklist-list__sidebar-button',
+  template: hbs`{{far "arrow-down-arrow-up" classes="worklist-list__sort-icon"}}{{ text }}`,
 });
 
 export {

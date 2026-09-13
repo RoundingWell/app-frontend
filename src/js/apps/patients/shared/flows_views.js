@@ -53,7 +53,7 @@ const FlowStateComponent = StateComponent.extend({
     });
   },
   setSelectedStatus(model) {
-    this.setState('selected', model);
+    this.setSelected(model);
     this.popRegion.empty();
   },
 });

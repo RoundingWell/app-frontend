@@ -30,25 +30,19 @@ function getForms(workspace) {
 }
 
 export default Droplist.extend({
-  viewOptions() {
-    const selected = this.getState('selected');
+  tagName: 'div',
+  className: 'flex',
+  getTemplate() {
+    return this.selected ? FormTemplate : NoFormTemplate;
+  },
+  templateContext() {
     return {
-      className: 'flex',
-      template: selected ? FormTemplate : NoFormTemplate,
-      templateContext() {
-        return {
-          isDisabled: this.getOption('state').isDisabled,
-        };
-      },
-      tagName: 'div',
-      triggers: {
-        'click .js-button': 'click',
-        'focus .js-button': 'focus',
-      },
+      isDisabled: this.isDisabled,
     };
   },
-  viewEvents: {
-    'click': 'onClick',
+  triggers: {
+    'click .js-button': 'click',
+    'focus .js-button': 'focus',
   },
   picklistOptions: {
     canClear: true,
@@ -74,10 +68,14 @@ export default Droplist.extend({
 
     this.collection = getForms(currentWorkspace);
 
-    this.setState({ selected: form });
+    this.selected = form;
   },
   popWidth() {
-    return this.getView().$el.outerWidth();
+    return this.el.offsetWidth;
+  },
+  setDisabled(isDisabled) {
+    this.isDisabled = isDisabled;
+    this.el.querySelector('.js-button')?.toggleAttribute('disabled', isDisabled);
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:form', selected);

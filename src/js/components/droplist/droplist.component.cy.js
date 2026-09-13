@@ -22,7 +22,7 @@ context('Droplist', function() {
             headingText,
           },
           collection,
-          state: { isDisabled: true },
+          isDisabled: true,
         });
 
         return droplist;
@@ -34,7 +34,7 @@ context('Droplist', function() {
       .contains('Choose One...')
       .should('be.disabled')
       .then(() => {
-        droplist.setState({ isDisabled: false });
+        droplist.setDisabled(false);
       });
 
     cy
@@ -57,7 +57,7 @@ context('Droplist', function() {
       .get('@root')
       .contains('Option 1')
       .then(() => {
-        droplist.setState({ selected: null });
+        droplist.setSelected(null);
       });
 
     cy

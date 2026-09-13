@@ -42,7 +42,7 @@ export default Droplist.extend({
 
     return `button button--secondary time-component w-100 ${ isOverdue }`;
   },
-  getTemplate(time, isCompact) {
+  getTemplateForTime(time, isCompact) {
     if (!time && this.getOption('time')) {
       return CustomTimeTemplate;
     }
@@ -53,18 +53,27 @@ export default Droplist.extend({
 
     return TimeTemplate;
   },
-  viewOptions() {
-    const isCompact = this.getOption('isCompact');
-    const selected = this.getState('selected');
+  className() {
+    const { selected } = this;
     const time = selected ? selected.id : null;
 
+    return this.getClassName(time, this.getOption('isCompact'));
+  },
+  getTemplate() {
+    if (Object.hasOwn(this, 'template')) return this.template;
+
+    const isCompact = this.getOption('isCompact');
+    const { selected } = this;
+    const time = selected ? selected.id : null;
+
+    return this.getTemplateForTime(time, isCompact);
+  },
+  templateContext() {
+    const isCompact = this.getOption('isCompact');
+
     return {
-      className: this.getClassName(time, isCompact),
-      template: this.getTemplate(time, isCompact),
-      templateContext: {
-        time: this.getOption('time'),
-        defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
-      },
+      time: this.getOption('time'),
+      defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
     };
   },
   picklistOptions: {
@@ -82,7 +91,7 @@ export default Droplist.extend({
   initialize({ time }) {
     const selected = this.collection.get(time);
 
-    this.setState({ selected });
+    this.selected = selected;
   },
   onChangeSelected(selected) {
     const time = selected ? selected.id : null;

@@ -176,7 +176,7 @@ const ActionItemView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      isDisabled,
     });
 
     if (!isDisabled) {
@@ -219,7 +219,7 @@ const ActionItemView = View.extend({
     const dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
       isCompact: true,
-      state: { isDisabled },
+      isDisabled,
       isOverdue: this.model.isOverdue(),
     });
 
@@ -298,7 +298,7 @@ const FlowItemView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      isDisabled,
     });
 
     if (!isDisabled) {

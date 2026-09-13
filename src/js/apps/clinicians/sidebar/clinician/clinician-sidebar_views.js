@@ -188,7 +188,7 @@ const SidebarView = View.extend({
   },
   showRole() {
     const isDisabled = !this.model.isEnabled();
-    const roleComponent = new RoleComponent({ role: this.model.getRole(), state: { isDisabled } });
+    const roleComponent = new RoleComponent({ role: this.model.getRole(), isDisabled });
 
     this.listenTo(roleComponent, 'change:role', role => {
       this.model.saveRole(role);
@@ -198,7 +198,7 @@ const SidebarView = View.extend({
   },
   showTeam() {
     const isDisabled = !this.model.isEnabled();
-    const teamComponent = new TeamComponent({ team: this.model.getTeam(), state: { isDisabled } });
+    const teamComponent = new TeamComponent({ team: this.model.getTeam(), isDisabled });
 
     this.listenTo(teamComponent, 'change:team', team => {
       this.model.saveTeam(team);

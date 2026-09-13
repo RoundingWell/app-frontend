@@ -24,7 +24,7 @@ const OwnerComponent = TeamComponent.extend({
 
     if (isFromFlow) this.defaultText = intl.programs.shared.actionsView.ownerComponent.defaultText;
 
-    this.setState({ selected: owner });
+    this.selected = owner;
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:owner', selected);

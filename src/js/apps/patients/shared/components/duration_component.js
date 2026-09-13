@@ -27,16 +27,15 @@ export default Droplist.extend({
   collection: new Backbone.Collection(durations),
   isCompact: false,
   getTemplate() {
-    if (!this.getState('selected')) {
+    if (Object.hasOwn(this, 'template')) return this.template;
+
+    if (!this.selected) {
       return this.getOption('hideDefaultText') ? IconOnlyNoDurationTemplate : NoDurationTemplate;
     }
     return DurationTemplate;
   },
-  viewOptions() {
-    return {
-      className: this.getOption('isCompact') ? 'button button--compact' : 'button button--secondary w-100',
-      template: this.getTemplate(),
-    };
+  className() {
+    return this.getOption('isCompact') ? 'button button--compact' : 'button button--secondary w-100';
   },
   picklistOptions: {
     canClear: true,
@@ -49,10 +48,10 @@ export default Droplist.extend({
   initialize({ duration }) {
     const selected = this.collection.get(duration);
 
-    this.setState({ selected });
+    this.selected = selected;
   },
   popWidth() {
-    return this.getOption('isCompact') ? null : this.getView().$el.outerWidth();
+    return this.getOption('isCompact') ? null : this.el.offsetWidth;
   },
   onChangeSelected(selected) {
     const duration = selected ? selected.id : 0;

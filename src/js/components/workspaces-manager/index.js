@@ -41,23 +41,25 @@ const WorkspacesListView = CollectionView.extend({
 });
 
 const WorkspacesDropList = Droplist.extend({
-  initialize() {
-    this.listenTo(this.collection, 'update', this.show);
+  initialize({ isDisabled = false } = {}) {
+    this.isExplicitlyDisabled = isDisabled;
+    this.listenTo(this.collection, 'update', this.syncDisabled);
   },
   popWidth() {
-    return this.getView().$el.outerWidth();
+    return this.el.offsetWidth;
   },
-  viewOptions: {
-    className: 'button button--secondary list-manager__droplist',
-    template: hbs`{{far "users"}}<span>{{ @intl.shared.components.workspacesManager.workspacesDroplist.addWorkspace }}</span>`,
-  },
+  className: 'button button--secondary list-manager__droplist',
+  template: hbs`{{far "users"}}<span>{{ @intl.shared.components.workspacesManager.workspacesDroplist.addWorkspace }}</span>`,
   picklistOptions: {
     attr: 'name',
   },
-  onShow() {
-    const isDisabled = this.getOption('isDisabled');
+  onAttach() {
+    this.syncDisabled();
 
-    this.setState({ isDisabled: isDisabled || this.collection.length === 0 });
+    Droplist.prototype.onAttach.call(this);
+  },
+  syncDisabled() {
+    this.setDisabled(this.isExplicitlyDisabled || this.collection.length === 0);
   },
   onPicklistSelect({ model }) {
     this.triggerMethod('add:member', model);

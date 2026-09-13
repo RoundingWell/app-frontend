@@ -91,12 +91,10 @@ const SexDroplist = Droplist.extend({
       },
     ]);
 
-    this.setState('selected', this.collection.find({ value: patientSex }));
+    this.selected = this.collection.find({ value: patientSex });
   },
-  viewOptions: {
-    className: 'button button--secondary modal__form-component patient-modal__form-component',
-    template: hbs`{{far "user"}}<span>{{ text }}{{#unless text}}{{ @intl.globals.patientModal.patientModalViews.sexDroplist.defaultText }}{{/unless}}</span>`,
-  },
+  className: 'button button--secondary modal__form-component patient-modal__form-component',
+  template: hbs`{{far "user"}}<span>{{ text }}{{#unless text}}{{ @intl.globals.patientModal.patientModalViews.sexDroplist.defaultText }}{{/unless}}</span>`,
 });
 
 const BirthdateView = View.extend({
@@ -187,9 +185,7 @@ const PatientModal = View.extend({
   showSexDroplist() {
     const sexDroplist = this.showChildView('sex', new SexDroplist({
       model: this.model,
-      state: {
-        isDisabled: !this.model.canEdit(),
-      },
+      isDisabled: !this.model.canEdit(),
     }));
 
     this.listenTo(sexDroplist, {

@@ -6,7 +6,7 @@ import TeamComponent from 'js/components/team';
 const FlowBehaviorComponent = BehaviorComponent.extend({
   isConditionalAvailable: false,
   onPicklistSelect({ model }) {
-    this.setState('selected', model);
+    this.setSelected(model);
     this.popRegion.empty();
   },
 });
@@ -24,7 +24,7 @@ const OwnerComponent = TeamComponent.extend({
   initialize({ owner }) {
     this.collection = getTeams();
 
-    this.setState({ selected: owner });
+    this.selected = owner;
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:owner', selected);

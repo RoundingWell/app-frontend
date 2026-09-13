@@ -1,4 +1,4 @@
-import { extend, get, some } from 'underscore';
+import { get, some } from 'underscore';
 import dayjs from 'dayjs';
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
@@ -31,12 +31,8 @@ function getIsOverdue(date, time) {
 const BulkStateTemplate = hbs`<span class="action-state action-state--{{ options.color }}">{{fa options.iconType options.icon}}<span>{{ name }}</span></span>`;
 
 const BulkEditOwnerComponent = OwnerComponent.extend({
-  viewOptions() {
-    const options = OwnerComponent.prototype.viewOptions.call(this);
-
-    return extend({}, options, {
-      className: `${ options.className } bulk-edit-inline__owner-button`,
-    });
+  className() {
+    return `${ OwnerComponent.prototype.className.call(this) } bulk-edit-inline__owner-button`;
   },
 });
 
@@ -48,10 +44,8 @@ const BulkDueDateView = DueView.extend({
 const OwnerScopeComponent = Droplist.extend({
   align: 'right',
   popWidth: 184,
-  viewOptions: {
-    className: 'button button--compact bulk-edit-inline__owner-scope',
-    template: hbs`<span class="button__value">{{ text }}</span>{{far "angle-down"}}`,
-  },
+  className: 'button button--compact bulk-edit-inline__owner-scope',
+  template: hbs`<span class="button__value">{{ text }}</span>{{far "angle-down"}}`,
   picklistOptions: {
     headingText: i18n.bulkEditButtonView.ownerScopeLabel,
     isCheckable: true,
@@ -80,12 +74,12 @@ const OwnerScopeComponent = Droplist.extend({
   syncSelected() {
     const applyOwner = this.bulkEditModel.get('applyOwner') === true;
 
-    this.setState('selected', this.collection.findWhere({
+    this.setSelected(this.collection.findWhere({
       applyOwner,
     }));
   },
   syncDisabled() {
-    this.setState('isDisabled', this.bulkEditModel.get('ownerMulti') || this.bulkEditModel.get('isSaving'));
+    this.setDisabled(this.bulkEditModel.get('ownerMulti') || this.bulkEditModel.get('isSaving'));
   },
   onChangeSelected(selected) {
     this.bulkEditModel.set('applyOwner', selected.get('applyOwner'));
@@ -136,7 +130,7 @@ const FlowsStateComponent = StateComponent.extend({
     });
   },
   setSelectedStatus(model) {
-    this.setState('selected', model);
+    this.setSelected(model);
     this.popRegion.empty();
   },
 });
@@ -174,25 +168,18 @@ const BulkEditActionsBodyView = View.extend({
     if (this.model.get('stateMulti')) {
       return new StateComponent({
         isCompact: true,
-        viewOptions: {
-          attributes: {
-            disabled: isDisabled,
-            type: 'button',
-          },
-          className: 'button button--compact',
-          template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
-        },
+        isDisabled,
+        className: 'button button--compact',
+        template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
       });
     }
 
     return new StateComponent({
       isCompact: true,
       stateId: get(this.model.get('state'), 'id'),
-      state: { isDisabled },
-      viewOptions: {
-        className: 'button button--compact',
-        template: BulkStateTemplate,
-      },
+      isDisabled,
+      className: 'button button--compact',
+      template: BulkStateTemplate,
     });
   },
   getOwnerComponent() {
@@ -200,13 +187,9 @@ const BulkEditActionsBodyView = View.extend({
 
     if (this.model.get('ownerMulti')) {
       return new BulkEditOwnerComponent({
-        viewOptions: {
-          attributes: {
-            disabled: isDisabled,
-          },
-          className: 'owner-component owner-component--compact button button--compact bulk-edit-inline__owner-button',
-          template: hbs`{{far "circle-user"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkOwnerDefaultText }}</span>`,
-        },
+        isDisabled,
+        className: 'owner-component owner-component--compact button button--compact bulk-edit-inline__owner-button',
+        template: hbs`{{far "circle-user"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkOwnerDefaultText }}</span>`,
       });
     }
 
@@ -214,7 +197,7 @@ const BulkEditActionsBodyView = View.extend({
       isCompact: true,
       owner: this.model.get('owner'),
       workspaces: this.model.get('workspaces'),
-      state: { isDisabled },
+      isDisabled,
     });
   },
   getDueDateView() {
@@ -239,13 +222,9 @@ const BulkEditActionsBodyView = View.extend({
   getDueTimeComponent() {
     if (this.model.get('timeMulti')) {
       return new TimeComponent({
-        viewOptions: {
-          attributes: {
-            disabled: this.model.get('hasMissingDueDate') || this.model.someComplete() || this.isSaving,
-          },
-          className: 'button button--compact time-component',
-          template: hbs`{{far "clock"}} <span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDueTimeDefaultText }}</span>`,
-        },
+        isDisabled: this.model.get('hasMissingDueDate') || this.model.someComplete() || this.isSaving,
+        className: 'button button--compact time-component',
+        template: hbs`{{far "clock"}} <span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDueTimeDefaultText }}</span>`,
       });
     }
 
@@ -257,7 +236,7 @@ const BulkEditActionsBodyView = View.extend({
 
     return new TimeComponent({
       time,
-      state: { isDisabled },
+      isDisabled,
       isOverdue,
       isCompact: true,
       showLabel: !isDisabled,
@@ -269,20 +248,16 @@ const BulkEditActionsBodyView = View.extend({
     if (this.model.get('durationMulti')) {
       return new DurationComponent({
         isCompact: true,
-        viewOptions: {
-          className: 'button button--compact',
-          attributes: {
-            disabled: isDisabled,
-          },
-          template: hbs`{{far "stopwatch"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDurationDefaultText }}</span>`,
-        },
+        isDisabled,
+        className: 'button button--compact',
+        template: hbs`{{far "stopwatch"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDurationDefaultText }}</span>`,
       });
     }
 
     return new DurationComponent({
       duration: this.model.get('duration'),
       isCompact: true,
-      state: { isDisabled },
+      isDisabled,
     });
   },
   showState() {
@@ -382,13 +357,9 @@ const BulkEditFlowsBodyView = View.extend({
       return new FlowsStateComponent({
         isCompact: true,
         flows: this.collection,
-        viewOptions: {
-          attributes: {
-            disabled: isDisabled,
-          },
-          className: 'button button--compact',
-          template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
-        },
+        isDisabled,
+        className: 'button button--compact',
+        template: hbs`{{fas "circle-dot"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkStateDefaultText }}</span>`,
       });
     }
 
@@ -396,11 +367,9 @@ const BulkEditFlowsBodyView = View.extend({
       isCompact: true,
       flows: this.collection,
       stateId: get(this.model.get('state'), 'id'),
-      state: { isDisabled },
-      viewOptions: {
-        className: 'button button--compact',
-        template: BulkStateTemplate,
-      },
+      isDisabled,
+      className: 'button button--compact',
+      template: BulkStateTemplate,
     });
   },
   getOwnerComponent() {
@@ -408,11 +377,9 @@ const BulkEditFlowsBodyView = View.extend({
 
     if (this.model.get('ownerMulti')) {
       return new BulkEditOwnerComponent({
-        viewOptions: {
-          className: 'owner-component owner-component--compact button button--compact bulk-edit-inline__owner-button',
-          template: hbs`{{far "circle-user"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkOwnerDefaultText }}</span>`,
-        },
-        state: { isDisabled },
+        isDisabled,
+        className: 'owner-component owner-component--compact button button--compact bulk-edit-inline__owner-button',
+        template: hbs`{{far "circle-user"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkOwnerDefaultText }}</span>`,
       });
     }
 
@@ -420,7 +387,7 @@ const BulkEditFlowsBodyView = View.extend({
       isCompact: true,
       owner: this.model.get('owner'),
       workspaces: this.model.get('workspaces'),
-      state: { isDisabled },
+      isDisabled,
     });
   },
   showState() {

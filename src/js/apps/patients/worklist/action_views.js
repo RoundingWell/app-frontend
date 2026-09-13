@@ -188,7 +188,7 @@ const ActionItemView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      isDisabled,
     });
 
     this.listenTo(this.ownerComponent, 'change:owner', owner => {
@@ -229,7 +229,7 @@ const ActionItemView = View.extend({
     this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
       isCompact: true,
-      state: { isDisabled },
+      isDisabled,
       isOverdue: this.model.isOverdue(),
     });
 
