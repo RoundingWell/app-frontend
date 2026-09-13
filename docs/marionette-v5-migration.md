@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `b425a2f47d9030d6a835a2609220dc37b4db712d`.
+  `462cbf9fb832ac5d1c6863f2c04bd0a82ea9a5b7`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -39,19 +39,21 @@
   data/state, jQuery DOM, and Morphdom DOM adapters; removed the v4 runtime,
   Toolkit, alias, and superseded custom DOM adapter; and applied the target
   Browserslist. It was merged by a human.
-- Active step: migrate `SubRouterApp` route state and dispatch to beta.2's
-  native Application lifecycle, Common API, and owned Backbone state without
-  restoring Toolkit restart flags.
+- Completed: PR #1782 migrated `SubRouterApp` route state and dispatch to
+  beta.2's native Application lifecycle, Common API, and owned Backbone state.
+  It was merged by a human.
+- Active step: replace the remaining stateless Tooltip Component with a direct
+  Marionette View and native root-element positioning.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
   runs locally before publication.
-- Next after human merge: migrate route-driven child Application ownership to
-  beta.2's explicit instance registration and asynchronous lifecycle.
-  Intermediate runtime failures are expected and recorded rather than hidden
-  behind compatibility implementations.
+- Next after human merge: migrate the next remaining `js/base/component`
+  consumer so the application and focused Cypress specs can build again.
+  Route-driven child ownership follows when its per-route startup data moves
+  with the same lifecycle change.
 
-## Active-step validation
+## Validation
 
 - Runtime-cutover `npm ci` passed and the resolved top-level packages are
   `marionette@5.0.0-beta.2`, `@mnjs/adapters@5.0.0-beta.2`, and
@@ -62,7 +64,7 @@
   `src/js/base/subrouterapp.js`: beta.2 does not export v4's private
   `normalizeMethods` helper. This is the first expected application migration
   gap, not a runtime defect. Cypress cannot run until the application builds.
-- The active step removes that private-helper dependency, stores the current
+- PR #1782 removes that private-helper dependency, stores the current
   route in owned Backbone state, uses the documented Application
   `normalizeMethods()` Common API, and uses v5 state persistence across stop
   and restart instead of `isRestarting()` branches.
@@ -77,6 +79,17 @@
   subclass initialization shadow it. The listener is removed when the next
   step makes the current child an explicitly owned Application, whose lifecycle
   Marionette stops automatically.
+- A direct child-ownership step was considered immediately after PR #1782 and
+  deferred. V5 owner restarts forward the parent's lifecycle options to owned
+  children, while current route children still load from their own per-route
+  start options. Converting ownership alone would restart children with the
+  wrong patient, flow, form, or action inputs. Lifecycle data and ownership
+  must move together rather than adding an options compatibility layer.
+- Tooltip now compiles as a direct Marionette View. The test-mode build advances
+  to the remaining Datepicker `js/base/component` import. The focused Tooltip
+  component run executes zero Tooltip tests because shared Cypress support first
+  imports the remaining Droplist and Datepicker Component paths; this is the
+  same known module-graph boundary, not a Tooltip assertion failure.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -109,6 +122,17 @@
   direct Marionette View owns `ui`, so positioning received the View's bound UI
   object instead of the anchor element. The canonical option and all callers
   now use `anchor`.
+- Tooltip had the same controller-to-View option collision. Its public trigger
+  element and all callers now use `anchor`, allowing the direct View to retain
+  Marionette's `ui` namespace. Tooltip keeps its explicit `CLASS_OPTIONS`
+  promotion in its constructor so root-element options are available before
+  View construction without consuming the subclass `preinitialize` or
+  `initialize` extension points. Repeating this mistake on generic components
+  exposed a missing repo guardrail; `AGENTS.md` now records the pattern.
+- Review also caught a lifetime difference after collapsing Tooltip into its
+  View: replacing one Tooltip in the shared region destroyed it and removed its
+  anchor listeners. Tooltip now detaches a different incumbent before showing,
+  keeping both instances reusable as the former controller did.
 - Collapsing the Picklist controller and View made its public `select` event
   collide with the keyboard behavior's internal `onSelect` handler. The
   internal keyboard event is now `transport:select`; public selection remains

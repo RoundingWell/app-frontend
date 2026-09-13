@@ -109,7 +109,7 @@ const DetailsTooltip = View.extend({
         details: this._formatDetails(this.model.get('details')),
       }),
       uiView: this,
-      ui: this.$el,
+      anchor: this.el,
       shouldDelay: true,
     });
   },

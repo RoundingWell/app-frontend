@@ -67,7 +67,7 @@ const FormExpandActionView = View.extend({
     this.expandTooltip = new Tooltip({
       message,
       uiView: this,
-      ui: this.ui.expandButton,
+      anchor: this.ui.expandButton,
     });
   },
 });
@@ -221,7 +221,7 @@ const DraftStatusView = Droplist.extend({
     this._tooltip = new Tooltip({
       message: i18n.draftStatusView.tooltip,
       uiView: view,
-      ui: view.$el,
+      anchor: view.el,
       orientation: 'vertical',
       shouldDelay: true,
     });

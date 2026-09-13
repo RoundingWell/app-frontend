@@ -224,7 +224,7 @@ const CommentView = View.extend({
     new Tooltip({
       messageHtml: renderTemplate(template, { edited }),
       uiView: this,
-      ui: this.ui.edit,
+      anchor: this.ui.edit,
     });
   },
   onClickEdit() {

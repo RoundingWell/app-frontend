@@ -3,11 +3,10 @@ import hbs from 'handlebars-inline-precompile';
 import { animate } from 'animejs';
 import { View } from 'marionette';
 
-import Component from 'js/base/component';
-
 import './tooltip.scss';
 
 const CLASS_OPTIONS = [
+  'anchor',
   'className',
   'delay',
   'id',
@@ -18,57 +17,57 @@ const CLASS_OPTIONS = [
   'position',
   'shouldDelay',
   'uiView',
-  'ui',
 ];
 
-const TooltipView = View.extend({
-  attributes() {
-    const id = this.getOption('id');
+export default View.extend({
+  className: 'tooltip',
+  constructor: function(options) {
+    this.mergeOptions(options, CLASS_OPTIONS);
+    this.setListeners();
 
+    this.listenTo(this.uiView, 'render', this.destroy);
+    this.listenTo(this.uiView, 'destroy', this.destroy);
+
+    View.apply(this, arguments);
+  },
+  attributes() {
     return {
-      ...(id && { id }),
+      ...(this.id && { id: this.id }),
       'role': 'tooltip',
     };
   },
   template: hbs`{{ message }}{{{ messageHtml }}}`,
   templateContext() {
     return {
-      message: this.getOption('message'),
-      messageHtml: this.getOption('messageHtml'),
+      message: this.message,
+      messageHtml: this.messageHtml,
     };
   },
-});
-
-export default Component.extend({
-  ViewClass: TooltipView,
-  className: 'tooltip',
-  /* istanbul ignore next */
-  delay() {
-    if (_TEST_) return 0;
-
-    return this.shouldDelay ? 200 : 0;
-  },
-  constructor: function(options) {
-    this.mergeOptions(options, CLASS_OPTIONS);
-
-    this.setListeners();
-
-    this.listenTo(this.uiView, 'render destroy', this.destroy);
-
-    Component.apply(this, arguments);
-  },
   setListeners() {
-    if (!this.ui) return;
+    const ui = this.anchor;
 
-    this.ui.on('pointerenter.tooltip', bind(this.showTooltip, this));
+    if (!ui) return;
 
-    this.ui.on('mouseleave.tooltip', bind(this.hideTooltip, this));
+    if (ui.on) {
+      ui.on('pointerenter.tooltip', bind(this.showTooltip, this));
+      ui.on('mouseleave.tooltip', bind(this.hideTooltip, this));
+      ui.on('pointerdown.tooltip', bind(this.showTooltip, this));
+      ui.on('focus.tooltip', bind(this.showTooltip, this));
+      ui.on('blur.tooltip', bind(this.hideTooltip, this));
+      return;
+    }
 
-    this.ui.on('pointerdown.tooltip', bind(this.showTooltip, this));
+    this._uiListeners = [
+      ['pointerenter', bind(this.showTooltip, this)],
+      ['mouseleave', bind(this.hideTooltip, this)],
+      ['pointerdown', bind(this.showTooltip, this)],
+      ['focus', bind(this.showTooltip, this)],
+      ['blur', bind(this.hideTooltip, this)],
+    ];
 
-    this.ui.on('focus.tooltip', bind(this.showTooltip, this));
-
-    this.ui.on('blur.tooltip', bind(this.hideTooltip, this));
+    this._uiListeners.forEach(([eventName, listener]) => {
+      ui.addEventListener(eventName, listener);
+    });
   },
   showTooltip() {
     clearTimeout(this.delayTimeout);
@@ -80,30 +79,62 @@ export default Component.extend({
   hideTooltip() {
     clearTimeout(this.delayTimeout);
 
-    this.empty();
+    if (this.isShown()) {
+      this.region.detachView();
+    }
+  },
+  isShown() {
+    return this.region?.currentView === this;
+  },
+  show() {
+    const current = this.region.currentView;
+
+    if (current && current !== this) {
+      this.region.detachView();
+    }
+
+    this.region.show(this, this.regionOptions());
+
+    return this;
   },
   onBeforeDestroy() {
     clearTimeout(this.delayTimeout);
+
+    const ui = this.anchor;
+
+    if (ui?.off) {
+      ui.off('.tooltip');
+    }
+
+    this._uiListeners?.forEach(([eventName, listener]) => {
+      ui.removeEventListener(eventName, listener);
+    });
   },
-  onShow() {
-    animate(this.getView().el, {
+  onAttach() {
+    animate(this.el, {
       opacity: { to: 1, duration: 500 },
     });
   },
-  viewOptions() {
-    return {
-      className: result(this, 'className'),
-      id: result(this, 'id'),
-      message: result(this, 'message'),
-      messageHtml: result(this, 'messageHtml'),
-    };
+  /* istanbul ignore next */
+  delay() {
+    if (_TEST_) return 0;
+
+    return this.shouldDelay ? 200 : 0;
   },
   position() {
-    return this.uiView.getBounds(this.ui?.[0]);
+    const ui = this.anchor;
+    const el = ui?.[0] || (ui?.addEventListener ? ui : undefined);
+
+    return this.uiView.getBounds(el);
   },
   regionOptions() {
     const orientation = result(this, 'orientation');
     const ignoreEl = result(this, 'ignoreEl');
+
     return extend({ orientation, ignoreEl }, result(this, 'position'));
+  },
+}, {
+  setRegion(region) {
+    this.prototype.region = region;
   },
 });

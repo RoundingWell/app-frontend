@@ -247,15 +247,15 @@ const TooltipRegionView = TopRegionView.extend({
   },
   addClass(className) {
     const view = this.region.currentView;
-    view.$el.addClass(className);
+    view.el.classList.add(className);
   },
   setTop(top) {
     const view = this.region.currentView;
-    view.$el.css({ top: px(top) });
+    view.el.style.top = px(top);
   },
   setLeft(left) {
     const view = this.region.currentView;
-    view.$el.css({ left: px(left) });
+    view.el.style.left = px(left);
   },
   setHorizontalLocation({ left, top, outerWidth, outerHeight }) {
     const view = this.region.currentView;
@@ -269,15 +269,15 @@ const TooltipRegionView = TopRegionView.extend({
     // bottom 25% of screen
     } else if (topPer > 0.75) {
       this.addClass('is-bottom');
-      this.setTop(top + outerHeight / 2 - view.$el.outerHeight());
+      this.setTop(top + outerHeight / 2 - view.el.offsetHeight);
     } else {
-      this.setTop(top - view.$el.outerHeight() / 2 + outerHeight / 2);
+      this.setTop(top - view.el.offsetHeight / 2 + outerHeight / 2);
     }
 
     // left 60% of screen
     if (leftPer > 0.6) {
       this.addClass('is-right-arrow');
-      this.setLeft(left - view.$el.outerWidth());
+      this.setLeft(left - view.el.offsetWidth);
     // right 40% of screen
     } else {
       this.addClass('is-left-arrow');
@@ -296,15 +296,15 @@ const TooltipRegionView = TopRegionView.extend({
     // right 15% of screen
     } else if (leftPer > 0.85) {
       this.addClass('is-right');
-      this.setLeft(left + outerWidth / 2 - view.$el.outerWidth());
+      this.setLeft(left + outerWidth / 2 - view.el.offsetWidth);
     } else {
-      this.setLeft(left - view.$el.outerWidth() / 2 + outerWidth / 2);
+      this.setLeft(left - view.el.offsetWidth / 2 + outerWidth / 2);
     }
 
     // bottom 40% of screen
     if (topPer > 0.6) {
       this.addClass('is-bottom-arrow');
-      this.setTop(top - view.$el.outerHeight());
+      this.setTop(top - view.el.offsetHeight);
     // top 60% of screen
     } else {
       this.addClass('is-top-arrow');
