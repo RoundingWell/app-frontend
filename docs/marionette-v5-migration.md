@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `9c34844b634bba5fd9a450f3c3d6ff3d8b33b7af`.
+  `cb3019a97697c5ef196965013422862424e9e546`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -30,18 +30,35 @@
 - Completed: PR #1778 replaced the patient quick-search Toolkit Component with
   its direct Marionette View while retaining its Backbone state model and was
   merged by a human.
-- Active step: replace the shared Picklist and Optionlist Toolkit Components
-  with direct Marionette CollectionViews and update their dependent Droplist
-  and date-filter integrations.
+- Completed: PR #1779 replaced the shared Picklist and Optionlist Toolkit
+  Components with direct Marionette CollectionViews and was merged by a human.
+- Closed: PR #1780 converted Droplist with mutable View fields. A branch-wide
+  state assessment found that this repeated the wrong pre-v5 pattern, so it was
+  closed without merge.
+- Active step: cut over to the exact beta.2 runtime with the Backbone data/state,
+  jQuery DOM, and Morphdom DOM adapters; remove the v4 runtime, Toolkit, alias,
+  and superseded custom DOM adapter; and apply the target Browserslist.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
   runs locally before publication.
-- Next after human merge: continue replacing Toolkit Components with Marionette
-  Views in bounded groups without adding a compatibility Component.
+- Next after human merge: migrate application and View owners directly onto the
+  available v5 lifecycle and state APIs. Intermediate runtime failures are
+  expected and recorded rather than hidden behind compatibility implementations.
 
 ## Active-step validation
 
+- Runtime-cutover `npm ci` passed and the resolved top-level packages are
+  `marionette@5.0.0-beta.2`, `@mnjs/adapters@5.0.0-beta.2`, and
+  `morphdom@2.7.8`; Marionette 4 and Toolkit are absent.
+- ESLint and Stylelint passed. Full repository lint reached the same
+  pre-existing editor-config failure because `ec-darwin-arm64*` was not found.
+- The test-mode build reaches application code and stops at
+  `src/js/base/subrouterapp.js`: beta.2 does not export v4's private
+  `normalizeMethods` helper. This is the first expected application migration
+  gap, not a runtime defect. Cypress cannot run until the application builds.
+- The results below belong to the preceding Picklist step, before the runtime
+  cutover.
 - The test-mode build passed.
 - Component coverage passed: all 49 specs and 248 tests, including focused
   coverage for Picklist, Optionlist, Droplist, and date-filter state behavior.
@@ -82,3 +99,13 @@
   native DOM elements. Position remains viewport bounds plus scroll offset,
   while size remains the untransformed layout box. The documented temporary
   jQuery wrapper was unnecessary.
+- The audit prompted by PR #1780 found the same sequencing error in earlier
+  stateful conversions: list search, check, due date, modal errors, patient
+  search, and Picklist replaced Toolkit state with mutable View fields, mutated
+  options, or UI state passed as `model`. These are not the beta.2 owner-state
+  contract. The routing, explicit Region-View ownership, and stateless dialer
+  steps do not share this problem.
+- Further stateful conversion under Marionette 4 was stopped. Beta.2 already
+  owns Application lifecycle, child Applications, state, root Region/View, and
+  cancellation; the migration will use those APIs rather than recreate Toolkit
+  `App`, state, running-event, or View-event mixins locally.
