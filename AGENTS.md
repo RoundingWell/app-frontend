@@ -33,6 +33,7 @@ Load a scoped overlay only when the task touches:
 
 - Stay in JavaScript. Do not introduce TypeScript or a new framework.
 - Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
+- Keep `preinitialize` and `initialize` available as safe extension points on generic components. Put mandatory internal setup in the constructor when it must run even if a subclass defines either hook.
 - Colocate app-specific views, templates, SCSS, state, and Cypress specs under `src/js/apps/<domain>/<app>/**`.
 - Keep domain-shared UI under `src/js/apps/<domain>/shared/**` and cross-domain reusable UI under `src/js/components/**`.
 - Route data access through `src/js/entities-service/**` instead of introducing ad hoc fetch logic elsewhere.

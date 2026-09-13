@@ -27,7 +27,7 @@ context('Tooltip', function() {
       new Tooltip({
         message: this.model.id,
         uiView: this,
-        ui: this.ui.button,
+        anchor: this.ui.button,
         orientation: this.getOption('orientation'),
       });
     },
@@ -137,7 +137,7 @@ context('Tooltip', function() {
         });
       },
       onClick() {
-        if (this.tooltip.getView()) {
+        if (this.tooltip.isShown()) {
           this.tooltip.hideTooltip();
           return;
         }
@@ -202,5 +202,42 @@ context('Tooltip', function() {
     cy
       .get('.tooltip')
       .should('not.exist');
+  });
+
+  specify('Retains anchor listeners when tooltips replace each other', function() {
+    const SwapTestView = View.extend({
+      template: hbs`<button class="first">First</button><button class="second">Second</button>`,
+      ui: {
+        first: '.first',
+        second: '.second',
+      },
+      onRender() {
+        new Tooltip({
+          message: 'First tooltip',
+          uiView: this,
+          anchor: this.ui.first,
+        });
+
+        new Tooltip({
+          message: 'Second tooltip',
+          uiView: this,
+          anchor: this.ui.second,
+        });
+      },
+    });
+
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new SwapTestView();
+    });
+
+    cy.get('.first').trigger('pointerover');
+    cy.get('.tooltip').contains('First tooltip');
+
+    cy.get('.second').trigger('pointerover');
+    cy.get('.tooltip').contains('Second tooltip');
+
+    cy.get('.first').trigger('pointerover');
+    cy.get('.tooltip').contains('First tooltip');
   });
 });

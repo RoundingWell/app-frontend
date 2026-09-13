@@ -125,13 +125,13 @@ const ControllerView = View.extend({
     new Tooltip({
       message: tooltipMessages.prevMessage,
       uiView: this,
-      ui: this.ui.prev,
+      anchor: this.ui.prev,
     });
 
     new Tooltip({
       message: tooltipMessages.nextMessage,
       uiView: this,
-      ui: this.ui.next,
+      anchor: this.ui.next,
     });
   },
   getTooltipMessages() {
