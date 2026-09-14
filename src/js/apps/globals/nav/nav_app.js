@@ -290,7 +290,7 @@ export default RouterApp.extend({
   onChangeCurrentApp(state, appName) {
     if (!this.adminNavDroplist) return;
 
-    this.adminNavDroplist.setState('selected', adminNavMenu.get(appName));
+    this.adminNavDroplist.getState().set('selected', adminNavMenu.get(appName));
   },
   setTemporarilyMinimized(isMinimized) {
     this.setState('temporaryMinimized', isMinimized);
@@ -378,8 +378,8 @@ export default RouterApp.extend({
   },
   hasActiveNavDroplist() {
     return Boolean(
-      (this.mainNavDroplist && this.mainNavDroplist.getState('isActive'))
-      || (this.adminNavDroplist && this.adminNavDroplist.getState('isActive')),
+      (this.mainNavDroplist && this.mainNavDroplist.getState().get('isActive'))
+      || (this.adminNavDroplist && this.adminNavDroplist.getState().get('isActive')),
     );
   },
   updateCanPatientCreate() {
@@ -415,7 +415,7 @@ export default RouterApp.extend({
         { collection: workspacesMenu },
         { collection: whatsNewMenu },
       ],
-      state: {
+      stateOptions: {
         selected: workspacesMenu.get(currentWorkspace.id),
       },
     });
@@ -505,7 +505,7 @@ export default RouterApp.extend({
 
     this.adminNavDroplist = new AdminToolsDroplist({
       collection: adminNavMenu,
-      state: {
+      stateOptions: {
         selected: adminNavMenu.get(this.getState().get('currentApp')),
       },
     });

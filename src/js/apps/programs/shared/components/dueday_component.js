@@ -27,7 +27,11 @@ const itemTemplate = hbs`{{formatMessage  (intlGet "programs.shared.components.d
 export default Droplist.extend({
   collection: new Backbone.Collection(days),
   isCompact: false,
-  getTemplate(day, isCompact) {
+  getTemplate() {
+    const isCompact = this.getOption('isCompact');
+    const selected = this.getState().get('selected');
+    const day = selected ? selected.id : null;
+
     if (day === 0) {
       return SameDayTemplate;
     }
@@ -38,15 +42,10 @@ export default Droplist.extend({
 
     return day ? DueDayTemplate : NoDayTemplate;
   },
-  viewOptions() {
-    const isCompact = this.getOption('isCompact');
-    const selected = this.getState('selected');
-    const day = selected ? selected.id : null;
-
-    return {
-      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
-      template: this.getTemplate(day, isCompact),
-    };
+  className() {
+    return this.getOption('isCompact') ?
+      'button button--compact' :
+      'button button--secondary w-100';
   },
   picklistOptions: {
     canClear: true,
@@ -58,12 +57,12 @@ export default Droplist.extend({
   initialize({ day }) {
     const selected = this.collection.get(day);
 
-    this.setState({ selected });
+    this.getState().set({ selected });
   },
   popWidth() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? null : this.getView().$el.outerWidth();
+    return isCompact ? null : this.el.offsetWidth;
   },
   onChangeSelected(selected) {
     const day = selected ? selected.id : null;

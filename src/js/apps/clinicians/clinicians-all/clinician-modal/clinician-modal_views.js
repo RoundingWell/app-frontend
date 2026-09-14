@@ -101,7 +101,7 @@ const ClinicianModal = View.extend({
   showRole() {
     const roleComponent = new RoleComponent({
       role: this.model.getRole(),
-      className: 'modal__form-component',
+      className: 'button button--secondary w-100 modal__form-component',
     });
 
     this.listenTo(roleComponent, 'change:role', role => {

@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `a689cae1f5d9f38f78c94dfd778d722af3ddb4a6`.
+  `5fcaa35e8da5de3230cff522606d4c37a0f130e2`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -44,14 +44,18 @@
   It was merged by a human.
 - Completed: PR #1783 replaced the Tooltip Component with a direct Marionette
   View and native root-element positioning. It was merged by a human.
-- Active step: replace the Datepicker Component and its inner layout with one
-  Marionette View that owns its Backbone state and child Regions.
+- Completed: PR #1784 replaced the Datepicker Component and its inner layout
+  with one Marionette View that owns its Backbone state and child Regions. It
+  was merged by a human.
+- Active step: replace Droplist and its wrapper View with one Marionette View
+  that owns its Backbone state. Convert its subclasses to direct View options
+  and remove the Toolkit `viewOptions`, state-helper, and `$el` contracts.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
   runs locally before publication.
-- Next after human merge: migrate Droplist, the next remaining
-  `js/base/component` consumer in the application build.
+- Next after human merge: migrate Dateselect; the date-filter component also
+  remains on `js/base/component` in the application build.
   Route-driven child ownership follows when its per-route startup data moves
   with the same lifecycle change.
 
@@ -97,6 +101,13 @@
   `js/base/component` import. Its focused component spec is blocked before the
   Datepicker tests load because shared Cypress support imports the remaining
   Droplist and Dateselect Component paths.
+- Droplist and its direct and indirect subclasses pass targeted ESLint as
+  direct Marionette Views with owned Backbone state. The test-mode build now
+  advances to Dateselect's remaining `js/base/component` import; that is the
+  expected next migration boundary. The focused Droplist component run is also
+  blocked before loading its tests by that Dateselect import from shared
+  Cypress support; Cypress reports one generated support-load failure and zero
+  Droplist assertions.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -144,6 +155,21 @@
   child on every state-driven render. Review caught that the destroyed children
   would remain retained by the parent. Datepicker now uses `childViewEvents`, so
   Marionette owns those subscriptions and releases them with Region ownership.
+- Droplist's Toolkit wrapper allowed callers to inject an arbitrary nested
+  `viewOptions` object. Direct View conversion exposed several bulk-edit
+  consumers of that hidden contract. They now use explicit local subclasses
+  for the distinct button presentations, rather than preserving an option
+  channel that bypasses the View class contract.
+- Review caught that a View does not receive Toolkit's component-level `show`
+  event. Droplist's initial-open behavior now binds to `attach`, and the
+  workspace-disabled and draft-tooltip hooks use `onAttach`.
+- Review also caught early state creation from a dynamic root `className()`.
+  Droplist state creation now reads the constructor-promoted `stateOptions`
+  directly, and time-control classes synchronize after state initialization
+  instead of reading state while the root element is being created.
+- Droplist selection data is supplied to Handlebars through `serializeData()`.
+  Assigning it to `this.model` would overwrite domain models used by subclasses
+  such as the form draft-status control.
 - Collapsing the Picklist controller and View made its public `select` event
   collide with the keyboard behavior's internal `onSelect` handler. The
   internal keyboard event is now `transport:select`; public selection remains

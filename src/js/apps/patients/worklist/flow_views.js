@@ -157,7 +157,7 @@ const FlowItemView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(this.ownerComponent, 'change:owner', owner => {

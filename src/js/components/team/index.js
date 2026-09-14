@@ -25,7 +25,7 @@ export default Droplist.extend({
   popWidth() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? null : this.getView().$el.outerWidth();
+    return isCompact ? null : this.el.offsetWidth;
   },
   canClear: false,
   picklistOptions() {
@@ -37,34 +37,33 @@ export default Droplist.extend({
       placeholderText: i18n.placeholderText,
     };
   },
-  viewOptions() {
+  className() {
+    return this.getOption('isCompact') ?
+      'button button--compact' :
+      'button button--secondary w-100';
+  },
+  templateContext() {
     const icon = { type: 'far', icon: 'circle-user' };
     const defaultText = result(this, 'defaultText');
 
     if (this.getOption('isCompact')) {
       return {
-        className: 'button button--compact',
-        templateContext: {
-          defaultText,
-          attr: 'abbr',
-          icon,
-        },
+        defaultText,
+        attr: 'abbr',
+        icon,
       };
     }
 
     return {
-      className: 'button button--secondary w-100',
-      templateContext: {
-        defaultText,
-        attr: 'name',
-        icon,
-      },
+      defaultText,
+      attr: 'name',
+      icon,
     };
   },
   initialize({ team }) {
     this.collection = Radio.request('bootstrap', 'teams');
 
-    this.setState({ selected: this.collection.get(team) });
+    this.getState().set({ selected: this.collection.get(team) });
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:team', selected);

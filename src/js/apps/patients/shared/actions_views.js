@@ -1,4 +1,3 @@
-import { extend, result } from 'underscore';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
@@ -22,13 +21,13 @@ import DurationComponent from './components/duration_component';
 import './actions.scss';
 
 function createCardControl(Component) {
-  return Component.extend({
-    viewOptions() {
-      const options = Component.prototype.viewOptions.call(this);
+  const className = Component.prototype.className;
 
-      return extend({}, options, {
-        className: `${ result(options, 'className') } js-no-click`,
-      });
+  return Component.extend({
+    className() {
+      const componentClassName = typeof className === 'function' ? className.call(this) : className;
+
+      return `${ componentClassName } js-no-click`;
     },
   });
 }

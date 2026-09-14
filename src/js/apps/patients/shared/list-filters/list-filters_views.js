@@ -28,14 +28,12 @@ const ItemTemplate = hbs`
 
 const CustomFilterDropList = Droplist.extend({
   popWidth() {
-    return this.getView().$el.outerWidth();
+    return this.el.offsetWidth;
   },
-  viewOptions: {
-    className: 'button button--secondary list-filters__custom-filter-button w-100',
-    template: hbs`{{ value }}{{#unless value}}{{ defaultText }}{{/unless}}`,
-    templateContext: {
-      defaultText: i18n.customFilterView.defaultText,
-    },
+  className: 'button button--secondary list-filters__custom-filter-button w-100',
+  template: hbs`{{ value }}{{#unless value}}{{ defaultText }}{{/unless}}`,
+  templateContext: {
+    defaultText: i18n.customFilterView.defaultText,
   },
   picklistOptions() {
     return {
@@ -81,7 +79,7 @@ const CustomFilterView = View.extend({
           collection: withoutTotals,
         },
       ],
-      state: { selected },
+      stateOptions: { selected },
       filterTitle: this.model.get('name'),
     });
 

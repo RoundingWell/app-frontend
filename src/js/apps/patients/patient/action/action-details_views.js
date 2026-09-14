@@ -331,7 +331,7 @@ const ActionView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
@@ -361,7 +361,7 @@ const ActionView = View.extend({
       time: this.model.get('due_time'),
       isCompact: true,
       isOverdue: this.model.isOverdue(),
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(dueTimeComponent, 'change:time', time => {
@@ -376,7 +376,7 @@ const ActionView = View.extend({
       duration: this.model.get('duration'),
       hideDefaultText: true,
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(durationComponent, 'change:duration', duration => {

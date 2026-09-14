@@ -33,16 +33,26 @@ export default Droplist.extend({
   popWidth: 192,
   isCompact: false,
   isSelectlist: true,
-  getClassName(time, isCompact) {
-    const isOverdue = time && this.getOption('isOverdue') ? 'is-overdue' : '';
+  className() {
+    const isCompact = this.getOption('isCompact');
 
     if (isCompact) {
-      return `button button--compact time-component ${ isOverdue }`;
+      return 'button button--compact time-component';
     }
 
-    return `button button--secondary time-component w-100 ${ isOverdue }`;
+    return 'button button--secondary time-component w-100';
   },
-  getTemplate(time, isCompact) {
+  syncStateAttributes() {
+    Droplist.prototype.syncStateAttributes.apply(this, arguments);
+
+    const hasSelectedTime = !!this.getState().get('selected');
+    this.el.classList.toggle('is-overdue', hasSelectedTime && this.getOption('isOverdue'));
+  },
+  getTemplate() {
+    const isCompact = this.getOption('isCompact');
+    const selected = this.getState().get('selected');
+    const time = selected ? selected.id : null;
+
     if (!time && this.getOption('time')) {
       return CustomTimeTemplate;
     }
@@ -53,18 +63,11 @@ export default Droplist.extend({
 
     return TimeTemplate;
   },
-  viewOptions() {
+  templateContext() {
     const isCompact = this.getOption('isCompact');
-    const selected = this.getState('selected');
-    const time = selected ? selected.id : null;
-
     return {
-      className: this.getClassName(time, isCompact),
-      template: this.getTemplate(time, isCompact),
-      templateContext: {
-        time: this.getOption('time'),
-        defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
-      },
+      time: this.getOption('time'),
+      defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
     };
   },
   picklistOptions: {
@@ -82,7 +85,7 @@ export default Droplist.extend({
   initialize({ time }) {
     const selected = this.collection.get(time);
 
-    this.setState({ selected });
+    this.getState().set({ selected });
   },
   onChangeSelected(selected) {
     const time = selected ? selected.id : null;

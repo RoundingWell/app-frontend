@@ -78,7 +78,7 @@ const StateComponent = Droplist.extend({
   popWidth() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? null : this.getView().$el.outerWidth();
+    return isCompact ? null : this.el.offsetWidth;
   },
   picklistOptions() {
     return {
@@ -86,16 +86,17 @@ const StateComponent = Droplist.extend({
       headingText: i18n.stateComponent.headingText,
     };
   },
-  viewOptions() {
+  className() {
     const isCompact = this.getOption('isCompact');
-    return {
-      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
-      template: isCompact ? StateCompactTemplate : StateTemplate,
-    };
+
+    return isCompact ? 'button button--compact' : 'button button--secondary w-100';
+  },
+  getTemplate() {
+    return this.getOption('isCompact') ? StateCompactTemplate : StateTemplate;
   },
   initialize({ selectedId, isActive }) {
     this.collection = new Backbone.Collection([isActive ? ActiveState : PendingState, DisabledState]);
-    this.setState('selected', this.collection.get(selectedId));
+    this.getState().set('selected', this.collection.get(selectedId));
   },
 });
 

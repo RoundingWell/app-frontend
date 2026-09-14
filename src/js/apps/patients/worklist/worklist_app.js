@@ -483,7 +483,7 @@ const WorklistApp = App.extend({
 
     const sortSelect = new SortDroplist({
       collection: this.sortOptions,
-      state: { selected: this.getSortOption(this.getState().getSort()) },
+      stateOptions: { selected: this.getSortOption(this.getState().getSort()) },
     });
 
     this.listenTo(sortSelect.getState(), 'change:selected', (state, selected) => {
