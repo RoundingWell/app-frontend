@@ -16,11 +16,6 @@ const relativeRanges = new Backbone.Collection([...RELATIVE_DATE_RANGES, { id: '
 const dateTypes = ['create_at', 'updated_at', 'due_date'];
 
 const DateFilterPickerComponent = Datepicker.extend({
-  stateEvents: {
-    'change': 'show',
-    'change:selectedDate': 'onChangeStateSelectedDate',
-    'change:selectedMonth': 'onChangeStateSelectedMonth',
-  },
   getActionsView() {
     const actionsView = new ActionsView();
 
@@ -122,7 +117,7 @@ export default Component.extend({
     const state = this.getState();
 
     const datePicker = new DateFilterPickerComponent({
-      state: state.pick('selectedDate', 'selectedMonth'),
+      stateOptions: state.pick('selectedDate', 'selectedMonth'),
       canSelectMonth: true,
     });
 

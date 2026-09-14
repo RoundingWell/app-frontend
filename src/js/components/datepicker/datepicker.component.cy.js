@@ -39,9 +39,9 @@ context('Datepicker', function() {
       const state = this.getOption('dateState');
 
       const datepicker = new Datepicker({
-        ui: this.ui.button,
+        anchor: this.ui.button,
         uiView: this,
-        state,
+        stateOptions: state,
         canSelectMonth: this.getOption('canSelectMonth'),
       });
 
@@ -168,7 +168,7 @@ context('Datepicker', function() {
 
     cy
       .then(() => {
-        testView.datepicker.setState('currentMonth', '01/01/2016');
+        testView.datepicker.getState().setCurrentMonth('01/01/2016');
       });
 
     cy
@@ -304,7 +304,7 @@ context('Datepicker', function() {
       model: new Backbone.Model(),
     });
 
-    testView.$el.css({ position: 'fixed', bottom: '10px' });
+    Object.assign(testView.el.style, { position: 'fixed', bottom: '10px' });
 
     cy
       .mount(rootView => {

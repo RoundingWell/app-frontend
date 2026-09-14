@@ -65,7 +65,7 @@ export default View.extend({
   showDatepicker() {
     const datepicker = this.datepicker = new Datepicker({
       uiView: this,
-      state: { selectedDate: this.selected },
+      stateOptions: { selectedDate: this.selected },
     });
 
     this.listenTo(datepicker, {

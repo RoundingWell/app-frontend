@@ -2,13 +2,13 @@
     Datepicker Component init API
 
     uiView:                    // required - the view ui $('.selector') is in
-    ui: $('.selector')         // if not defined uiView will be used
-    position: {                // set by default to uiView.getBounds(ui)
+    anchor: $('.selector')     // if not defined uiView will be used
+    position: {                // set by default to uiView.getBounds(anchor)
         top: 1,
         left: 1,
     }
 
-    state: {
+    stateOptions: {
         beginDate dayjs(),    // No dates selectable before this date
         endDate: dayjs(),     // No dates selectable after this date
         currentMonth: dayjs(),
@@ -16,26 +16,57 @@
     }
 */
 
-import { extend, result } from 'underscore';
+import { extend, result, times } from 'underscore';
 
 import dayjs from 'dayjs';
-
-import Component from 'js/base/component';
-
-import { ActionsView, LayoutView, MonthPickerView, CalendarView } from './datepicker_views';
+import { Region, View } from 'marionette';
 
 import StateModel from './datepicker_state.js';
 
+import { ActionsView, MonthPickerView, CalendarView } from './datepicker_views';
+
+import LayoutTemplate from './layout.hbs';
+
+import './datepicker.scss';
+
 const CLASS_OPTIONS = [
+  'anchor',
+  'canSelectMonth',
   'position',
+  'stateOptions',
   'uiView',
-  'ui',
 ];
 
-export default Component.extend({
-  StateModel,
+export default View.extend({
+  className: 'datepicker',
+  regionClass: Region.extend({ replaceElement: true }),
+  regions: {
+    calendar: '[data-calendar-region]',
+    monthPicker: '[data-month-picker-region]',
+    actions: '[data-actions-region]',
+  },
+  childViewEvents: {
+    'click:nextMonth': 'onSelectNextMonth',
+    'click:prevMonth': 'onSelectPrevMonth',
+    'click:month': 'onSelectMonth',
+    'click:today': 'onSelectToday',
+    'click:tomorrow': 'onSelectTomorrow',
+    'click:clear': 'onSelectClear',
+    'select:date': 'onSelectDate',
+  },
+  template: LayoutTemplate,
+  templateContext() {
+    const dayOfWeek = times(7, index => {
+      return dayjs().weekday(index);
+    });
+
+    return { dayOfWeek };
+  },
+  createState({ stateOptions = {} } = {}) {
+    return new StateModel(stateOptions);
+  },
   stateEvents: {
-    'change': 'show',
+    'change': 'render',
     'change:selectedDate': 'onChangeStateSelectedDate',
     'change:selectedMonth': 'onChangeStateSelectedMonth',
   },
@@ -48,11 +79,11 @@ export default Component.extend({
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
 
-    this.listenTo(this.uiView, 'render destroy', this.destroy);
+    this.listenTo(this.uiView, 'render', this.destroy);
+    this.listenTo(this.uiView, 'destroy', this.destroy);
 
-    Component.apply(this, arguments);
+    View.apply(this, arguments);
   },
-  ViewClass: LayoutView,
   onSelectToday() {
     const state = this.getState();
     state.setSelectedDate(dayjs());
@@ -66,37 +97,19 @@ export default Component.extend({
     state.setSelectedDate(null);
     state.setSelectedMonth(null);
   },
-  onBeforeShow(datepicker, view) {
-    view.showChildView('monthPicker', this.getMonthPickerView());
-    view.showChildView('actions', this.getActionsView());
-    view.showChildView('calendar', this.getCalendarView());
+  onRender() {
+    this.showChildView('monthPicker', this.getMonthPickerView());
+    this.showChildView('actions', this.getActionsView());
+    this.showChildView('calendar', this.getCalendarView());
   },
   getMonthPickerView() {
-    const model = this.getState();
-
-    const monthPickerView = new MonthPickerView({
-      model,
-      canSelectMonth: this.getOption('canSelectMonth'),
+    return new MonthPickerView({
+      model: this.getState(),
+      canSelectMonth: this.canSelectMonth,
     });
-
-    this.listenTo(monthPickerView, {
-      'click:nextMonth': this.onSelectNextMonth,
-      'click:prevMonth': this.onSelectPrevMonth,
-      'click:month': this.onSelectMonth,
-    });
-
-    return monthPickerView;
   },
   getActionsView() {
-    const actionsView = new ActionsView();
-
-    this.listenTo(actionsView, {
-      'click:today': this.onSelectToday,
-      'click:tomorrow': this.onSelectTomorrow,
-      'click:clear': this.onSelectClear,
-    });
-
-    return actionsView;
+    return new ActionsView();
   },
   onSelectNextMonth() {
     const state = this.getState();
@@ -120,21 +133,30 @@ export default Component.extend({
   getCalendarView() {
     const model = this.getState();
 
-    const calView = new CalendarView({
+    return new CalendarView({
       model,
       collection: model.getCalendar(),
     });
-
-    this.listenTo(calView, {
-      'select:date': this.onSelectDate,
-    });
-
-    return calView;
   },
   position() {
-    return this.uiView.getBounds(this.ui?.[0]);
+    const anchor = this.anchor;
+    const el = anchor?.[0] || (anchor?.addEventListener ? anchor : undefined);
+
+    return this.uiView.getBounds(el);
   },
   regionOptions() {
     return extend({ popWidth: 256 }, result(this, 'position'));
+  },
+  showIn(region) {
+    region.show(this, this.regionOptions());
+
+    return this;
+  },
+  show() {
+    return this.showIn(this.region);
+  },
+}, {
+  setRegion(region) {
+    this.prototype.region = region;
   },
 });

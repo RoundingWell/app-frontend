@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `462cbf9fb832ac5d1c6863f2c04bd0a82ea9a5b7`.
+  `a689cae1f5d9f38f78c94dfd778d722af3ddb4a6`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -42,14 +42,16 @@
 - Completed: PR #1782 migrated `SubRouterApp` route state and dispatch to
   beta.2's native Application lifecycle, Common API, and owned Backbone state.
   It was merged by a human.
-- Active step: replace the remaining stateless Tooltip Component with a direct
-  Marionette View and native root-element positioning.
+- Completed: PR #1783 replaced the Tooltip Component with a direct Marionette
+  View and native root-element positioning. It was merged by a human.
+- Active step: replace the Datepicker Component and its inner layout with one
+  Marionette View that owns its Backbone state and child Regions.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
   runs locally before publication.
-- Next after human merge: migrate the next remaining `js/base/component`
-  consumer so the application and focused Cypress specs can build again.
+- Next after human merge: migrate Droplist, the next remaining
+  `js/base/component` consumer in the application build.
   Route-driven child ownership follows when its per-route startup data moves
   with the same lifecycle change.
 
@@ -90,6 +92,11 @@
   component run executes zero Tooltip tests because shared Cypress support first
   imports the remaining Droplist and Datepicker Component paths; this is the
   same known module-graph boundary, not a Tooltip assertion failure.
+- Datepicker now compiles as one Marionette View with owned Backbone state and
+  child Regions. The test-mode build advances to the remaining Droplist
+  `js/base/component` import. Its focused component spec is blocked before the
+  Datepicker tests load because shared Cypress support imports the remaining
+  Droplist and Dateselect Component paths.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -133,6 +140,10 @@
   View: replacing one Tooltip in the shared region destroyed it and removed its
   anchor listeners. Tooltip now detaches a different incumbent before showing,
   keeping both instances reusable as the former controller did.
+- The first direct Datepicker conversion manually listened to each new Region
+  child on every state-driven render. Review caught that the destroyed children
+  would remain retained by the parent. Datepicker now uses `childViewEvents`, so
+  Marionette owns those subscriptions and releases them with Region ownership.
 - Collapsing the Picklist controller and View made its public `select` event
   collide with the keyboard behavior's internal `onSelect` handler. The
   internal keyboard event is now `transport:select`; public selection remains
