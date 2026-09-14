@@ -73,7 +73,8 @@ context('Patient Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/forms/formio/index.html');
+      .should('have.attr', 'src')
+      .and('match', /^\/forms\/formio\/index\.html\?_ts=\d+$/);
 
     cy
       .get('.patient__sidebar')
@@ -888,7 +889,8 @@ context('Patient Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testFormResponse.id }`);
+      .should('have.attr', 'src')
+      .and('match', new RegExp(`^/forms/formio/index\\.html\\?responseId=${ testFormResponse.id }&_ts=\\d+$`));
 
     cy
       .get('.form__controls')

@@ -28,6 +28,8 @@ const _Model = BaseModel.extend({
       url.searchParams.set(key, value);
     });
 
+    url.searchParams.set('_ts', Date.now());
+
     return `${ url.pathname }${ url.search }${ url.hash }`;
   },
   getWidgets() {
