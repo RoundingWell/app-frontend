@@ -310,7 +310,8 @@ const TooltipRegionView = TopRegionView.extend({
 
 const RootView = CollectionView.extend({
   viewComparator: false,
-  el: '#root',
+  id: 'root',
+  className: 'app-root',
   template: hbs``,
   AppView: AppView,
   initialize() {
