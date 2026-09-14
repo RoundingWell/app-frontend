@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `630a9e80ee91b215419076d2fdeef631a057624a`.
+  `c4cd71a4dd60eae3d6d4acaaee2f966c9b22f7d9`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -57,19 +57,23 @@
 - Completed: PR #1787 replaced the date-filter Component and controller wrapper
   with one Marionette View that owns its Backbone state and label Region. It
   was merged by a human.
-- Active step: backport the prepared-root Application contract from Marionette
+- Completed: PR #1788 backported the prepared-root Application contract from Marionette
   PR #516 at its merged head
   `1833f9223fd934b9e0c0eff6e98cd76bd6f794f2` through the single
   version-pinned `marionette+5.0.0-beta.2` package patch. The global Application
   now selects and composes its root while detached, then displays the complete
-  tree from `onStart()` through its replacing root Region.
+  tree from `onStart()` through its replacing root Region. It was merged by a
+  human.
+- Active step: move the global Application and bootstrap service from Toolkit's
+  returned-value startup pipeline to beta.2's `onBeforeStart` readiness,
+  Application-owned Backbone state, explicit child ownership, cancellation
+  signals, and entry-point failure handling.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: move the global Application's asynchronous bootstrap
-  data onto beta.2's `onBeforeStart` readiness contract. Route-driven child
-  ownership and its per-route startup data follow as one later step.
+- Next after human merge: move route-driven child ownership and its per-route
+  startup data together so owner restarts cannot forward the wrong route inputs.
 - Remove the prepared-root patch atomically when upgrading to the first
   published Marionette release containing PR #516: update the pinned Marionette
   dependency and lockfile, remove the patch and its install hook/tooling if no
@@ -154,6 +158,12 @@
   and failed at the same next boundary: `onStart` still receives none of the
   values that the removed Toolkit `beforeStart()` pipeline returned. No E2E
   spec was changed.
+- The global readiness step keeps beta.2 installed. The root Application now
+  owns the bootstrap Application, both commit resolved values to owned Backbone
+  state only while their readiness signals remain current, and the browser entry
+  point handles a rejected `start()` through the existing visible failure path.
+  Bootstrap entity fetches receive the lifecycle signal through the existing
+  fetch options contract.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.

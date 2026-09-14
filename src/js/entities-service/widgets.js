@@ -9,9 +9,9 @@ const Entity = BaseEntity.extend({
     'widgets:collection': 'getCollection',
     'fetch:widgets:collection': 'fetchWidgets',
   },
-  fetchWidgets({ filter = {} } = {}) {
+  fetchWidgets({ filter = {}, ...options } = {}) {
     const data = { filter };
-    return this.fetchCollectionCache({ data });
+    return this.fetchCollectionCache({ ...options, data });
   },
 
 });

@@ -47,17 +47,67 @@ const Application = App.extend({
     initPlatform();
   },
 
+  createState() {
+    return new Backbone.Model();
+  },
+
   // Before the application starts make sure:
   // - A root layout is prepared
   // - Global services are started
-  onBeforeStart() {
-    new BootstrapService();
+  async onBeforeStart(app, options, { signal }) {
+    const bootstrapService = this.getBootstrapService();
+
     this.setView(new RootView());
     this.configComponents();
     this.startServices();
     this.setListeners();
     // Ensure Error is the first app initialized
     new ErrorApp({ region: this.getRegion('error') });
+
+    const [currentUser, appFrameModule] = await Promise.all([
+      bootstrapService.fetchBootstrap(),
+      import('js/apps/globals/app-frame/app-frame_app'),
+    ]);
+
+    if (signal.aborted) return;
+
+    this.getState().set({ currentUser, appFrameModule });
+  },
+
+  getBootstrapService() {
+    if (this.hasChildApp('bootstrap')) return this.getChildApp('bootstrap');
+
+    return this.addChildApp('bootstrap', new BootstrapService());
+  },
+
+  showStartFailure(error) {
+    addError(get(error, 'responseData', error));
+
+    if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
+      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.showView();
+    }
+  },
+
+  onStart() {
+    const currentUser = this.getState().get('currentUser');
+    const appFrameModule = this.getState().get('appFrameModule');
+
+    this.showView();
+    const { default: AppFrameApp } = appFrameModule;
+
+    if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
+      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      return;
+    }
+
+    this.getRegion('preloader').empty();
+
+    const appFrameApp = this.addChildApp('appFrame', AppFrameApp);
+
+    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
+
+    appFrameApp.start({ view: this.getView().appView });
   },
 
   configComponents() {
@@ -129,40 +179,6 @@ const Application = App.extend({
     });
   },
 
-  beforeStart() {
-    return [
-      Radio.request('bootstrap', 'fetch'),
-      import('js/apps/globals/app-frame/app-frame_app'),
-    ];
-  },
-
-  onFail(options, error) {
-    addError(get(error, 'responseData', error));
-
-    if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
-      this.showView();
-    }
-  },
-
-  onStart(options, currentUser, appFrameModule) {
-    this.showView();
-    const { default: AppFrameApp } = appFrameModule;
-
-    if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
-      return;
-    }
-
-    this.getRegion('preloader').empty();
-
-    const appFrameApp = this.addChildApp('appFrame', AppFrameApp);
-
-    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
-
-    appFrameApp.start({ view: this.getView().appView });
-  },
-
   startHistory() {
     Backbone.history.start({ pushState: true });
 
@@ -178,7 +194,7 @@ function startApp() {
     },
   });
 
-  app.start();
+  return app.start().catch(error => app.showStartFailure(error));
 }
 
 export {
