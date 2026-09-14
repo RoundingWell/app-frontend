@@ -145,6 +145,7 @@ context('Patient Quick Search', function() {
     });
 
     cy.then(() => replies.Test());
+    cy.wait('@supersededSearch');
     cy.get('.patient-search__no-results').should('have.text', 'Searching...');
     cy.then(() => replies['Test 2']());
 

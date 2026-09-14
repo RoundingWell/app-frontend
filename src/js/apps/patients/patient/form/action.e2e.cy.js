@@ -618,6 +618,11 @@ context('Patient Action Form', function() {
       .get('@metaRegion')
       .find('.js-save-button')
       .should('contain', 'Submit')
+      .and('be.enabled');
+
+    cy
+      .get('@metaRegion')
+      .find('.js-save-button')
       .click();
 
     cy
