@@ -5,44 +5,8 @@ import { getRelationship, getResource } from 'helpers/json-api';
 import { getPatient } from 'support/api/patients';
 
 context('Patient Quick Search', function() {
-  specify('keeps searching when an earlier request is superseded', function() {
-    const replies = {};
-
-    cy
-      .routesForPatientWorkflow()
-      .routeActions()
-      .intercept('GET', '/api/patients?filter*', req => new Cypress.Promise(resolve => {
-        const search = new URL(req.url).searchParams.get('filter[search]');
-
-        replies[search] = () => {
-          req.reply({ body: { data: [] } });
-          resolve();
-        };
-        req.alias = search === 'Test' ? 'firstSearch' : 'latestSearch';
-      }))
-      .visit()
-      .wait('@routeActions');
-
-    cy.get('.app-frame__nav .js-search').click();
-    cy.get('.patient-search__input').type('Test');
-    cy.wrap(null).should(() => {
-      expect(replies.Test).to.be.a('function');
-    });
-
-    cy.get('.patient-search__input').type(' Patient');
-    cy.wrap(null).should(() => {
-      expect(replies['Test Patient']).to.be.a('function');
-    });
-
-    cy.then(() => replies.Test());
-    cy.get('.patient-search__no-results').should('have.text', 'Searching...');
-
-    cy.then(() => replies['Test Patient']());
-    cy.wait('@latestSearch');
-    cy.get('.patient-search__no-results').should('contain', 'No results match your query.');
-  });
-
   specify('Modal & default searching functionality', function() {
+    const replies = {};
     const patients = _.times(10, index => {
       return getPatient({
         attributes: {
@@ -86,14 +50,27 @@ context('Patient Quick Search', function() {
           req.alias = 'routeEmptyPatientSearch';
           return;
         }
-        req.reply({
+        const reply = () => req.reply({
           body: {
             data: searchResults,
             included: [...getResource(patients, 'patients')],
           },
           delay: 300,
         });
-        req.alias = 'routePatientSearch';
+        const search = new URL(req.url).searchParams.get('filter[search]');
+
+        req.alias = search === 'Test' ? 'supersededSearch' : 'routePatientSearch';
+
+        if (search === 'Test' || search === 'Test 2') {
+          return new Cypress.Promise(resolve => {
+            replies[search] = () => {
+              reply();
+              resolve();
+            };
+          });
+        }
+
+        reply();
       });
 
     cy
@@ -158,11 +135,24 @@ context('Patient Quick Search', function() {
       .find('.patient-search__input')
       .type('Test');
 
+    cy.wrap(null).should(() => {
+      expect(replies.Test).to.be.a('function');
+    });
+
+    cy.get('@searchModal').find('.patient-search__input').type(' 2');
+    cy.wrap(null).should(() => {
+      expect(replies['Test 2']).to.be.a('function');
+    });
+
+    cy.then(() => replies.Test());
+    cy.get('.patient-search__no-results').should('have.text', 'Searching...');
+    cy.then(() => replies['Test 2']());
+
     cy
       .wait('@routePatientSearch')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[search]=Test');
+      .should('contain', 'filter[search]=Test 2');
 
     cy
       .get('@searchModal')
@@ -176,13 +166,6 @@ context('Patient Quick Search', function() {
       .should('not.have.class', 'is-inactive')
       .next()
       .should('have.class', 'is-inactive');
-
-    cy
-      .get('@searchModal')
-      .find('.patient-search__input')
-      .type(' 2')
-      .wait('@routePatientSearch')
-      .wait(100); // wait for debounce
 
     cy
       .get('@searchModal')

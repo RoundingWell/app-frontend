@@ -1306,51 +1306,58 @@ context('patient flow page', function() {
       });
   });
 
-  ['schedule', 'programs'].forEach(destination => {
-    const destinationPath = `/one/${ destination }`;
-
-    specify(`keeps ${ destination } open when a previous flow request completes`, function() {
-      const testPatient = getPatient();
-      const delayedFlow = getFlow({
-        relationships: {
-          patient: getRelationship(testPatient),
-        },
-      });
-      let replyToFlow;
-
-      cy
-        .routeActions()
-        .intercept('GET', new RegExp(`/api/flows/${ delayedFlow.id }\\?`), req => new Cypress.Promise(resolve => {
-          replyToFlow = () => {
-            req.reply({ body: { data: delayedFlow, included: [testPatient] } });
-            resolve();
-          };
-        }))
-        .as('routeDelayedFlow')
-        .visit(`/flow/${ delayedFlow.id }`);
-
-      cy.wrap(null).should(() => {
-        expect(replyToFlow).to.be.a('function');
-      });
-
-      if (destination === 'schedule') {
-        cy.contains('.app-nav__link', 'Schedule').click();
-        cy.wait('@routeActions');
-      } else {
-        cy.contains('.app-nav__bottom-button', 'Admin Tools').click();
-        cy.contains('.js-picklist-item', 'Programs').click();
-        cy.wait('@routePrograms');
-      }
-
-      cy.location('pathname').should('eq', destinationPath);
-      cy.get('.list-page').should('be.visible');
-
-      cy.then(() => replyToFlow());
-      cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
-
-      cy.get('.list-page').should('be.visible');
-      cy.location('pathname').should('eq', destinationPath);
+  specify('ignores a previous flow request after navigating away', function() {
+    const testPatient = getPatient();
+    const delayedFlow = getFlow({
+      relationships: {
+        patient: getRelationship(testPatient),
+      },
     });
+    let replyToFlow;
+
+    cy
+      .routeActions()
+      .intercept('GET', new RegExp(`/api/flows/${ delayedFlow.id }\\?`), req => new Cypress.Promise(resolve => {
+        replyToFlow = () => {
+          req.reply({ body: { data: delayedFlow, included: [testPatient] } });
+          resolve();
+        };
+      }))
+      .as('routeDelayedFlow')
+      .visit(`/flow/${ delayedFlow.id }`);
+
+    cy.wrap(null).should(() => {
+      expect(replyToFlow).to.be.a('function');
+    });
+
+    cy.contains('.app-nav__link', 'Schedule').click();
+    cy.wait('@routeActions');
+    cy.location('pathname').should('eq', '/one/schedule');
+    cy.get('.list-page').should('be.visible');
+
+    cy.then(() => replyToFlow());
+    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
+    cy.get('.list-page').should('be.visible');
+    cy.location('pathname').should('eq', '/one/schedule');
+
+    cy.then(() => {
+      replyToFlow = null;
+    });
+    cy.visit(`/flow/${ delayedFlow.id }`);
+    cy.wrap(null).should(() => {
+      expect(replyToFlow).to.be.a('function');
+    });
+
+    cy.contains('.app-nav__bottom-button', 'Admin Tools').click();
+    cy.contains('.js-picklist-item', 'Programs').click();
+    cy.wait('@routePrograms');
+    cy.location('pathname').should('eq', '/one/programs');
+    cy.get('.list-page').should('be.visible');
+
+    cy.then(() => replyToFlow());
+    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
+    cy.get('.list-page').should('be.visible');
+    cy.location('pathname').should('eq', '/one/programs');
   });
 
   specify('flow server error', function() {
