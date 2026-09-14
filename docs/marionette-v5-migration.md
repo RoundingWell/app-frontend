@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `0fea9581943cee2938358ef58cfcbd49ae13f804`.
+  `d5d4356b5b68e6d9734d7c3f3c031fd5ee54678c`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -51,16 +51,17 @@
   Marionette View that owns its Backbone state, converted its subclasses to
   direct View options and native DOM, and removed the Toolkit `viewOptions`
   and state-helper contracts. It was merged by a human.
-- Active step: replace Dateselect and its inner layout with one Marionette View
-  that owns its Backbone state and current selection Region.
+- Completed: PR #1786 replaced Dateselect and its inner layout with one
+  Marionette View that owns its Backbone state and current selection Region.
+  It was merged by a human.
+- Active: PR #1787 replaces the date-filter Component and controller wrapper
+  with one Marionette View that owns its Backbone state and label Region.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
-- Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
-  runs locally before publication.
-- Next after human merge: migrate the date-filter component, the remaining
-  `js/base/component` consumer in the application build.
-  Route-driven child ownership follows when its per-route startup data moves
-  with the same lifecycle change.
+- Intermediate PRs keep GitHub Cypress deferred; the PR is published before
+  running the unchanged Cypress contract locally and addressing regressions.
+- Next after human merge: move route-driven child ownership together with its
+  per-route startup data so child restart receives the correct route inputs.
 
 ## Validation
 
@@ -118,6 +119,18 @@
   Droplist also required converting the shared top-region positioning path and
   behavior from removed `$el` access to beta.2's native `el`; no compatibility
   wrapper was added.
+- Date-filter now compiles as one Marionette View with owned Backbone state,
+  and the complete test-mode build passes. Its focused component spec passes
+  all 4 tests, including navigation through the View's state and construction
+  of the calendar picker with its owning UI View.
+- The full component run executes all 49 specs: 182 of 250 tests pass, 64 fail,
+  and 4 are skipped across 17 failing specs. The focused date-filter spec is
+  green; the failures remain in unmigrated services and shared components.
+- The unchanged worklist and schedule E2E specs execute all 55 tests, but all
+  fail at application startup before route behavior: `RootView` is constructed
+  without a document context and beta.2's attachment check reads an undefined
+  `documentElement`. This is a branch-wide Application/root-View migration
+  boundary, not a date-filter assertion failure; the E2E specs were unchanged.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -169,6 +182,10 @@
   child on every state-driven render. Review caught that the destroyed children
   would remain retained by the parent. Datepicker now uses `childViewEvents`, so
   Marionette owns those subscriptions and releases them with Region ownership.
+- Date-filter review caught that its nested Datepicker no longer received the
+  required owning `uiView` after its Toolkit wrapper was removed. The direct
+  View now passes itself explicitly, and focused coverage constructs the
+  calendar branch.
 - Droplist's Toolkit wrapper allowed callers to inject an arbitrary nested
   `viewOptions` object. Direct View conversion exposed several bulk-edit
   consumers of that hidden contract. They now use explicit local subclasses
