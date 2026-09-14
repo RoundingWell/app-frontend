@@ -111,13 +111,11 @@ const BirthdateView = View.extend({
   },
   onRender() {
     const birthdateSelect = new DateSelectComponent({
-      state: {
+      stateOptions: {
         selectedDate: this.model.get('birth_date'),
         isDisabled: !this.model.canEdit(),
       },
-      viewOptions: {
-        rootClassName: 'modal__form-component patient-modal__form-component',
-      },
+      rootClassName: 'modal__form-component patient-modal__form-component',
     });
 
     this.listenTo(birthdateSelect, 'change:date', this.onChangeDate);

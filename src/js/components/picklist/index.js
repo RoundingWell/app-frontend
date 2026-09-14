@@ -95,7 +95,7 @@ const PicklistItem = View.extend({
     this.searchText = this.getItemSearchText(this.model);
   },
   getItemSearchText(item) {
-    return this.$el.text();
+    return this.el.textContent;
   },
   itemTemplateContext: noop,
   templateContext() {

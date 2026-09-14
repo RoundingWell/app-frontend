@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `5fcaa35e8da5de3230cff522606d4c37a0f130e2`.
+  `0fea9581943cee2938358ef58cfcbd49ae13f804`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -47,15 +47,18 @@
 - Completed: PR #1784 replaced the Datepicker Component and its inner layout
   with one Marionette View that owns its Backbone state and child Regions. It
   was merged by a human.
-- Active step: replace Droplist and its wrapper View with one Marionette View
-  that owns its Backbone state. Convert its subclasses to direct View options
-  and remove the Toolkit `viewOptions`, state-helper, and `$el` contracts.
+- Completed: PR #1785 replaced Droplist and its wrapper View with one
+  Marionette View that owns its Backbone state, converted its subclasses to
+  direct View options and native DOM, and removed the Toolkit `viewOptions`
+  and state-helper contracts. It was merged by a human.
+- Active step: replace Dateselect and its inner layout with one Marionette View
+  that owns its Backbone state and current selection Region.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the unchanged Cypress contract
   runs locally before publication.
-- Next after human merge: migrate Dateselect; the date-filter component also
-  remains on `js/base/component` in the application build.
+- Next after human merge: migrate the date-filter component, the remaining
+  `js/base/component` consumer in the application build.
   Route-driven child ownership follows when its per-route startup data moves
   with the same lifecycle change.
 
@@ -108,6 +111,13 @@
   blocked before loading its tests by that Dateselect import from shared
   Cypress support; Cypress reports one generated support-load failure and zero
   Droplist assertions.
+- Dateselect now compiles as one Marionette View with owned Backbone state and
+  a Region-owned year, month, or day Droplist. The test-mode build advances to
+  the date-filter component's remaining `js/base/component` import.
+- The focused Dateselect component spec passes both tests. Exercising its
+  Droplist also required converting the shared top-region positioning path and
+  behavior from removed `$el` access to beta.2's native `el`; no compatibility
+  wrapper was added.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -126,6 +136,10 @@
 
 - Closed PR #1770 copied toolkit lifecycle behavior locally. That recreated
   Marionette 4 patterns and was abandoned before merge.
+- The packaged consumer skill points to `marionette/scripts/docs.mjs`, while
+  beta.2 publishes the helper at
+  `marionette/dist/agent-skill/scripts/docs.mjs`. Locating the packaged helper
+  was straightforward, but the documented invocation fails as written.
 - A native Navigation API implementation was completed locally, then stashed as
   `native Navigation API routing experiment` when the routing target changed.
 - The first local EventRouter constructor used object-method syntax. Backbone's
@@ -190,6 +204,13 @@
   owns Application lifecycle, child Applications, state, root Region/View, and
   cancellation; the migration will use those APIs rather than recreate Toolkit
   `App`, state, running-event, or View-event mixins locally.
+- Dateselect's first focused run reached the shared pop Region and failed before
+  its assertions because both the app-frame positioning views and top-region
+  behavior still expected v4 `$el`. Converting those direct DOM operations to
+  `el`, `classList`, element dimensions, and element styles exposed one final
+  Picklist `$el.text()` call; replacing it with `el.textContent` made the
+  focused behavior pass. These were application integration gaps, not a
+  Marionette runtime defect.
 - The first `SubRouterApp` edit treated `normalizeMethods` as fully removed
   after its core named export failed. Beta.2's Common API documentation shows
   that it remains available as `this.normalizeMethods()` (and from

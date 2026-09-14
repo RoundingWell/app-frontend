@@ -23,11 +23,11 @@ export default Behavior.extend({
   onRegionShow() {
     this.listenTo(userActivityCh, 'body:down', this.onBodyDown);
     this.listenTo(userActivityCh, 'iframe:focus', this.onIframeFocus);
-    this.$el.addClass(this.className);
+    this.el.classList.add(this.className);
   },
   onRegionEmpty() {
     this.stopListening(userActivityCh);
-    if (!this.region.isSwappingView()) this.$el.removeClass(this.className);
+    if (!this.region.isSwappingView()) this.el.classList.remove(this.className);
   },
   onBodyDown({ target }) {
     this.emptyOnActvity(target);

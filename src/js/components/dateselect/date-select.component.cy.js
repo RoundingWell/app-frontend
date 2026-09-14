@@ -45,11 +45,11 @@ context('DateSelect', function() {
     cy
       .get('@root')
       .find('.date-select__button')
-      .should('contain', 'Select Month...')
-      .click();
+      .should('contain', 'Select Month...');
 
     cy
       .get('.picklist')
+      .should('exist')
       .find('.js-picklist-item')
       .contains(pastDate.format('MMMM'))
       .click();
@@ -62,11 +62,11 @@ context('DateSelect', function() {
     cy
       .get('@root')
       .find('.date-select__button')
-      .should('contain', 'Select Day...')
-      .click();
+      .should('contain', 'Select Day...');
 
     cy
       .get('.picklist')
+      .should('exist')
       .find('.js-picklist-item')
       .contains(pastDate.date())
       .click();
@@ -120,11 +120,11 @@ context('DateSelect', function() {
     cy
       .get('@root')
       .find('.date-select__button')
-      .should('contain', 'Select Month...')
-      .click();
+      .should('contain', 'Select Month...');
 
     cy
       .get('.picklist')
+      .should('exist')
       .find('.js-picklist-item')
       .contains('January')
       .click();
@@ -137,11 +137,11 @@ context('DateSelect', function() {
     cy
       .get('@root')
       .find('.date-select__button')
-      .should('contain', 'Select Day...')
-      .click();
+      .should('contain', 'Select Day...');
 
     cy
       .get('.picklist')
+      .should('exist')
       .find('.js-picklist-item')
       .contains('1')
       .click();
@@ -161,7 +161,7 @@ context('DateSelect', function() {
         Droplist.setPopRegion(rootView.getRegion('pop'));
 
         return new DateSelect({
-          state: {
+          stateOptions: {
             selectedDate: pastDate.format('YYYY-MM-DD'),
           },
         });
