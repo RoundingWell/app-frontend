@@ -54,15 +54,13 @@ const TagsListView = CollectionView.extend({
 
 const TagsDropList = Droplist.extend({
   initialize() {
-    this.listenTo(this.collection, 'update', this.show);
+    this.listenTo(this.collection, 'update', this.render);
   },
   popWidth() {
-    return this.getView().$el.outerWidth();
+    return this.el.offsetWidth;
   },
-  viewOptions: {
-    className: 'button button--secondary list-manager__droplist',
-    template: hbs`{{far "tag"}}<span>{{ @intl.programs.shared.components.tagsManagerComponent.tagsDroplist.addTag }}</span>`,
-  },
+  className: 'button button--secondary list-manager__droplist',
+  template: hbs`{{far "tag"}}<span>{{ @intl.programs.shared.components.tagsManagerComponent.tagsDroplist.addTag }}</span>`,
   picklistOptions: {
     attr: 'text',
     headingText: i18n.tagsDroplist.picklistOptions.headingText,
@@ -72,10 +70,10 @@ const TagsDropList = Droplist.extend({
   },
   picklistEvents: {
     'watch:change'(query) {
-      this.setState('query', query);
+      this.getState().set('query', query);
     },
     'picklist:click:add'() {
-      const tagName = trim(this.getState('query'));
+      const tagName = trim(this.getState().get('query'));
       const tag = Radio.request('entities', 'tags:model', { text: tagName });
 
       this.triggerMethod('add:tag', tag);

@@ -14,6 +14,15 @@ import FormsService from 'js/services/forms';
 import { ModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
 import { DraftStatusView } from 'js/apps/patients/patient/form/form_views';
 
+const ModalDraftStatusView = DraftStatusView.extend({
+  className: 'button button--icon flex flex-align-center u-margin--r-16',
+  template: hbs`{{far "shield-check"}}`,
+  position() {
+    const bounds = this.getBounds();
+    return { ...bounds, outerHeight: bounds.outerHeight + 4 };
+  },
+});
+
 export default App.extend({
   channelName: 'modal',
   radioRequests: {
@@ -89,16 +98,8 @@ export default App.extend({
 
       if (modal.getRegion('draftStatus').hasView()) return;
 
-      const draftStatusView = new DraftStatusView({
+      const draftStatusView = new ModalDraftStatusView({
         model: draftModel,
-        viewOptions: {
-          className: 'button button--icon flex flex-align-center u-margin--r-16',
-          template: hbs`{{far "shield-check"}}`,
-        },
-        position() {
-          const bounds = this.getView().getBounds();
-          return { ...bounds, outerHeight: bounds.outerHeight + 4 };
-        },
       });
 
       modal.showChildView('draftStatus', draftStatusView);

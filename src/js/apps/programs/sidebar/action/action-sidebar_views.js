@@ -320,7 +320,7 @@ const SidebarView = View.extend({
     const behaviorComponent = new BehaviorComponent({
       isConditionalAvailable: isFromFlow,
       behavior: this.action.get('behavior'),
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(behaviorComponent, 'change:status', ({ behavior }) => {
@@ -332,7 +332,7 @@ const SidebarView = View.extend({
   showOwner() {
     const isDisabled = this.action.isNew();
     const isFromFlow = !!this.action.getProgramFlow();
-    const ownerComponent = new OwnerComponent({ owner: this.action.getOwner(), isFromFlow, state: { isDisabled } });
+    const ownerComponent = new OwnerComponent({ owner: this.action.getOwner(), isFromFlow, stateOptions: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
       this.action.saveOwner(owner);
@@ -342,7 +342,7 @@ const SidebarView = View.extend({
   },
   showDueDay() {
     const isDisabled = this.action.isNew();
-    const dueDayComponent = new DueDayComponent({ day: this.action.get('days_until_due'), state: { isDisabled } });
+    const dueDayComponent = new DueDayComponent({ day: this.action.get('days_until_due'), stateOptions: { isDisabled } });
 
     this.listenTo(dueDayComponent, 'change:day', day => {
       this.action.save({ days_until_due: day });
@@ -352,7 +352,7 @@ const SidebarView = View.extend({
   },
   showForm() {
     const isDisabled = this.action.isNew();
-    const formComponent = new FormComponent({ form: this.action.getForm(), state: { isDisabled } });
+    const formComponent = new FormComponent({ form: this.action.getForm(), stateOptions: { isDisabled } });
 
     this.listenTo(formComponent, {
       'change:form'(form) {

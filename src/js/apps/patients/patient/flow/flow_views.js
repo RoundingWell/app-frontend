@@ -1,4 +1,4 @@
-import { debounce, extend } from 'underscore';
+import { debounce } from 'underscore';
 import Backbone from 'backbone';
 import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
@@ -52,12 +52,8 @@ const FlowDetailsTooltip = DetailsTooltip.extend({
 
 export const i18n = intl.patients.patient.flow.flowViews;
 const FlowHeaderOwnerComponent = FlowOwnerComponent.extend({
-  viewOptions() {
-    const options = FlowOwnerComponent.prototype.viewOptions.call(this);
-
-    return extend({}, options, {
-      className: `${ options.className } patient-flow__owner`,
-    });
+  className() {
+    return `${ FlowOwnerComponent.prototype.className.call(this) } patient-flow__owner`;
   },
 });
 
@@ -119,7 +115,7 @@ const HeaderView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
@@ -317,7 +313,7 @@ const ActionItemView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(this.ownerComponent, 'change:owner', owner => {
@@ -357,7 +353,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
     this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true, state: { isDisabled },
+      isCompact: true, stateOptions: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
 

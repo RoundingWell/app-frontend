@@ -34,20 +34,16 @@ const yearsObj = map(yearRange, function(year) {
 });
 
 const SelectList = Droplist.extend({
+  className: 'button button--secondary date-select__button',
   picklistOptions: {
     isSelectlist: true,
   },
   template: hbs`{{ buttonText }}`,
-  viewOptions() {
-    const buttonText = this.getOption('buttonText');
-
-    return {
-      className: 'button button--secondary date-select__button',
-      template: this.getOption('template'),
-      templateContext: {
-        buttonText,
-      },
-    };
+  getTemplate() {
+    return this.getOption('template');
+  },
+  templateContext() {
+    return { buttonText: this.getOption('buttonText') };
   },
 });
 
@@ -126,14 +122,14 @@ export default Component.extend({
     return new SelectList({
       collection: monthsCollection,
       buttonText: i18n.monthPlaceholderText,
-      state: { isActive: true },
+      stateOptions: { isActive: true },
     });
   },
   getDaySelect() {
     return new SelectList({
       collection: this.getDayOpts(),
       buttonText: i18n.dayPlaceholderText,
-      state: { isActive: true },
+      stateOptions: { isActive: true },
     });
   },
   showSelectList(component, { field, view }) {

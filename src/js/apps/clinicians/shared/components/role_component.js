@@ -18,30 +18,28 @@ export default Droplist.extend({
   popWidth() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? null : this.getView().$el.outerWidth();
+    return isCompact ? null : this.el.offsetWidth;
   },
   picklistOptions: {
     headingText: i18n.headingText,
     itemTemplate: ItemTemplate,
   },
-  viewOptions() {
+  className() {
     const isCompact = this.getOption('isCompact');
 
-    return {
-      className: isCompact ? 'button button--secondary' : 'button button--secondary w-100',
-      templateContext: {
-        attr: 'label',
-        defaultText: i18n.defaultText,
-        icon: {
-          type: 'far',
-          icon: 'shield',
-        },
-      },
-    };
+    return isCompact ? 'button button--secondary' : 'button button--secondary w-100';
+  },
+  templateContext: {
+    attr: 'label',
+    defaultText: i18n.defaultText,
+    icon: {
+      type: 'far',
+      icon: 'shield',
+    },
   },
   initialize({ role }) {
     this.collection = Radio.request('bootstrap', 'roles');
-    this.setState({ selected: role });
+    this.getState().set({ selected: role });
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:role', selected);

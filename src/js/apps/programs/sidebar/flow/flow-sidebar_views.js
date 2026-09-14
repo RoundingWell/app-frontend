@@ -259,7 +259,7 @@ const SidebarView = View.extend({
     const isDisabled = this.flow.isNew();
     const behaviorComponent = new FlowBehaviorComponent({
       behavior: this.flow.get('behavior'),
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(behaviorComponent, 'change:status', ({ behavior }) => {
@@ -270,7 +270,7 @@ const SidebarView = View.extend({
   },
   showOwner() {
     const isDisabled = this.flow.isNew();
-    const ownerComponent = new OwnerComponent({ owner: this.flow.getOwner(), state: { isDisabled } });
+    const ownerComponent = new OwnerComponent({ owner: this.flow.getOwner(), stateOptions: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
       this.flow.saveOwner(owner);

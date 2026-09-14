@@ -56,7 +56,7 @@ export default Droplist.extend({
   },
   setSelected(stateId) {
     const states = getStates();
-    this.setState({ selected: states.get(stateId) });
+    this.getState().set({ selected: states.get(stateId) });
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:state', selected);
@@ -64,17 +64,17 @@ export default Droplist.extend({
   popWidth() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? null : this.getView().$el.outerWidth();
+    return isCompact ? null : this.el.offsetWidth;
   },
-  viewOptions() {
-    const isCompact = this.getOption('isCompact');
-
+  className() {
+    return this.getOption('isCompact') ?
+      'button button--compact' :
+      'button button--secondary w-100';
+  },
+  template: StateTemplate,
+  templateContext() {
     return {
-      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
-      template: StateTemplate,
-      templateContext: {
-        isIconOnly: isCompact && !this.getOption('showLabel'),
-      },
+      isIconOnly: this.getOption('isCompact') && !this.getOption('showLabel'),
     };
   },
   picklistOptions: {
