@@ -1,0 +1,42 @@
+src/js/base/app.component.cy.js
+  s_85aebd1623278c::t_e44ef3d1aaa0f7 88-89,108-111,113,115
+  s_85aebd1623278c::t_aca50720c2ff11 112,114
+  s_85aebd1623278c::t_094de06cf05701 39,41-42,84,90-93,95-97,101-107
+  s_85aebd1623278c::t_d5ae36424d9032 1-38,40,43-83,85-87,94,98-100,116-139
+patches/marionette+5.0.0-beta.2.patch
+  s_85aebd1623278c::t_370c8feb750631 1-386
+src/js/auth/prelogin/prelogin_views.js
+  s_85aebd1623278c::t_3a45a99b828466 24-26
+src/js/apps/globals/app-frame/root_views.js
+  s_85aebd1623278c::t_d5ae36424d9032 313-314
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_82d9effe4fae9d 15,57-59
+  s_85aebd1623278c::t_aec653b817a898 60-64,72-75,140-145,148-149
+  s_85aebd1623278c::t_7bf332ff95c478 170-174
+  s_85aebd1623278c::t_52f259adb14e08 262-266
+  s_85aebd1623278c::t_76e3a4b8142fe3 69-71
+  s_85aebd1623278c::t_ca623571dd9f39 146-147,150-153
+package.json
+  s_85aebd1623278c::t_d4c7fdd4c9bf82 39,105
+src/js/app.js
+  s_85aebd1623278c::t_d5ae36424d9032 148,150,173-178
+  s_85aebd1623278c::t_f8960667753858 147,149
+package-lock.json
+  s_85aebd1623278c::t_c80fc29772e6cf 83,6961-6967,9885-9894,10967-10982,11357-11369,11709-11728,11776-11785,11841-11850,12971-12987,13128-13211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b0b46cdac552b5c46ac821f4baca73354ea07aae",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
