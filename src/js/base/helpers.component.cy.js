@@ -102,7 +102,7 @@ context('Handlebars helpers', function() {
         <div class="test-intlname">{{formatMessage intlName="patients.shared.components.durationComponent.mins" min=4}}</div>
         <div class="test-function">{{formatMessage functionMessage name="Patient"}}</div>
         <div class="test-message">{{formatMessage (intlGet "patients.shared.components.durationComponent.mins") min=2}}</div>
-        <div class="test-select">{{formatMessage (intlGet "patients.shared.components.dateFilterComponent.dateTypes") type="created_at"}}</div>
+        <div class="test-select">{{formatMessage (intlGet "patients.shared.components.dateFilter.dateTypes") type="created_at"}}</div>
         <div class="test-number-select">{{formatMessage (intlGet "patients.shared.listViews.countView.maximumListCount") maximumCount=50 totalInDb=1000 isFlowList=false}}</div>
         <div class="test-html">{{formatHTMLMessage "<strong>{ name }</strong>" name=name}}</div>
         <div class="test-html-safe">{{formatHTMLMessage "{ name }" name=(matchText "Patient Name" "Patient")}}</div>

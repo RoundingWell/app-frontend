@@ -13,7 +13,7 @@ import BulkEditFlowsApp from 'js/apps/patients/shared/bulk-edit/bulk-edit-flows_
 import { ListFiltersPanelApp } from 'js/apps/patients/shared/list-filters/list-filters_app';
 import ListPatientSidebarApp from 'js/apps/patients/shared/list-patient-sidebar_app';
 
-import DateFilterComponent from 'js/apps/patients/shared/components/date-filter';
+import DateFilter from 'js/apps/patients/shared/components/date-filter';
 import SearchView from 'js/components/list-search';
 import { CountView } from 'js/apps/patients/shared/list_views';
 import { ListPageAppMixin } from 'js/apps/patients/shared/list-page';
@@ -467,16 +467,16 @@ const WorklistApp = App.extend({
 
     const dateTypes = this.getState().isFlowType() ? ['created_at', 'updated_at'] : ['created_at', 'updated_at', 'due_date'];
 
-    const dateFilterComponent = new DateFilterComponent({
+    const dateFilter = new DateFilter({
       dateTypes,
-      state: this.getState().getDateFilters(),
+      stateOptions: this.getState().getDateFilters(),
     });
 
-    this.listenTo(dateFilterComponent.getState(), 'change', ({ attributes }) => {
+    this.listenTo(dateFilter.getState(), 'change', ({ attributes }) => {
       this.getState().setDateFilters(attributes);
     });
 
-    this.showChildView('dateFilter', dateFilterComponent);
+    this.showChildView('dateFilter', dateFilter);
   },
   showSortDroplist() {
     this.sortOptions = getSortOptions(this.getState().getType());

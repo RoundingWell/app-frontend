@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 
 import DateFilter from './index';
 import DateFilterState from './date-filter_state';
+import { PickerView } from './date-filter_views';
 
 function expectDate(state, attribute, value) {
   expect(state.dayjs(attribute).format('YYYY-MM-DD')).to.equal(value);
@@ -52,7 +53,7 @@ context('Date Filter State', function() {
 
     cy.mount(() => {
       component = new DateFilter({
-        state: { dateType: 'due_date', relativeDate: 'today' },
+        stateOptions: { dateType: 'due_date', relativeDate: 'today' },
       });
       return component;
     });
@@ -62,5 +63,26 @@ context('Date Filter State', function() {
 
     cy.get('.date-filter__nav-button--prev').trigger('click');
     cy.then(() => expectDate(component.getState(), 'selectedDate', dayjs().format('YYYY-MM-DD')));
+  });
+
+  specify('opens the calendar range picker', function() {
+    let component;
+
+    cy.mount(() => {
+      component = new DateFilter();
+      return component;
+    });
+
+    cy.then(() => {
+      component.popView = new PickerView();
+      component.popView.render();
+      component.showDatePicker();
+
+      const datePicker = component.popView.getChildView('component');
+
+      expect(datePicker.uiView).to.equal(component);
+      expect(datePicker.el.classList.contains('datepicker')).to.be.true;
+      expect(datePicker.isRendered()).to.be.true;
+    });
   });
 });

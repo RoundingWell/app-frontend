@@ -310,16 +310,15 @@ careOptsFrontend:
           postBtn: Post
           saveBtn: Save
       components:
-        dateFilterComponent:
+        dateFilter:
           dateFilterViews:
-            actionView:
+            actionsView:
               month: This Month
               today: Today
               week: This Week
-            defaultTemplate:
+            dateLabelView:
               thisMonth: This Month
-            layoutView:
-              dateLabel: Filter by Date…
+          dateLabel: Filter by Date…
           dateTypeFilter:
             addButton: Added
             dueButton: Due

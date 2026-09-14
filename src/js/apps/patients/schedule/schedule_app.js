@@ -12,7 +12,7 @@ import BulkEditActionsApp from 'js/apps/patients/shared/bulk-edit/bulk-edit-acti
 import { ListFiltersPanelApp } from 'js/apps/patients/shared/list-filters/list-filters_app';
 import ListPatientSidebarApp from 'js/apps/patients/shared/list-patient-sidebar_app';
 
-import DateFilterComponent from 'js/apps/patients/shared/components/date-filter';
+import DateFilter from 'js/apps/patients/shared/components/date-filter';
 import SearchView from 'js/components/list-search';
 
 import { CountView } from 'js/apps/patients/shared/list_views';
@@ -333,16 +333,16 @@ const ScheduleApp = App.extend({
   showDateFilter() {
     const dateTypes = ['due_date'];
 
-    const dateFilterComponent = new DateFilterComponent({
+    const dateFilter = new DateFilter({
       dateTypes,
-      state: this.getState().getDateFilters(),
+      stateOptions: this.getState().getDateFilters(),
     });
 
-    this.listenTo(dateFilterComponent.getState(), 'change', ({ attributes }) => {
+    this.listenTo(dateFilter.getState(), 'change', ({ attributes }) => {
       this.getState().setDateFilters(attributes);
     });
 
-    this.showChildView('dateFilter', dateFilterComponent);
+    this.showChildView('dateFilter', dateFilter);
   },
   showScheduleTitle() {
     const scheduleTitleView = new ScheduleTitleView({ model: this.getState() });
