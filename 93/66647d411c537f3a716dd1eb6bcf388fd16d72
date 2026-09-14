@@ -1,0 +1,33 @@
+src/js/behaviors/top-region.js
+  s_85aebd1623278c::t_61c96bc2acd7df 26,30
+src/js/services/patient-modal/patient-modal_views.js
+  s_85aebd1623278c::t_4fbe449668a5ae 114,118
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_5d2cdeaaa27d0d 15,50-55,60-61,114-116,139-142
+  s_85aebd1623278c::t_eab512d47da636 117-120,207-213
+src/js/components/dateselect/date-select.component.cy.js
+  s_85aebd1623278c::t_4fbe449668a5ae 164
+src/js/components/dateselect/index.js
+  s_85aebd1623278c::t_96e6d20e38adae 1,69,74
+  s_85aebd1623278c::t_4fbe449668a5ae 5,13,48-50,67-68,70-73,75-101,107-115,119,127-130,132-135,139-140,144-174,178,186,194,200-201,204-205
+src/js/components/picklist/index.js
+  s_85aebd1623278c::t_7cc53b185c09fc 98
+src/js/apps/globals/app-frame/root_views.js
+  s_85aebd1623278c::t_c60d02f15a60b6 49,91,107-110,115-116,141,143,148,153-154,158,177,180,182,185-186,192,200,224,226,257-258,284-285,320,328-331,333
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9366647d411c537f3a716dd1eb6bcf388fd16d72",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
