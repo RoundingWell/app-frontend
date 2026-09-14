@@ -12,7 +12,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `d5d4356b5b68e6d9734d7c3f3c031fd5ee54678c`.
+  `630a9e80ee91b215419076d2fdeef631a057624a`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -54,14 +54,26 @@
 - Completed: PR #1786 replaced Dateselect and its inner layout with one
   Marionette View that owns its Backbone state and current selection Region.
   It was merged by a human.
-- Active: PR #1787 replaces the date-filter Component and controller wrapper
-  with one Marionette View that owns its Backbone state and label Region.
+- Completed: PR #1787 replaced the date-filter Component and controller wrapper
+  with one Marionette View that owns its Backbone state and label Region. It
+  was merged by a human.
+- Active step: backport the prepared-root Application contract from Marionette
+  PR #516 at its merged head
+  `1833f9223fd934b9e0c0eff6e98cd76bd6f794f2` through the single
+  version-pinned `marionette+5.0.0-beta.2` package patch. The global Application
+  now selects and composes its root while detached, then displays the complete
+  tree from `onStart()` through its replacing root Region.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: move route-driven child ownership together with its
-  per-route startup data so child restart receives the correct route inputs.
+- Next after human merge: move the global Application's asynchronous bootstrap
+  data onto beta.2's `onBeforeStart` readiness contract. Route-driven child
+  ownership and its per-route startup data follow as one later step.
+- Remove the prepared-root patch atomically when upgrading to the first
+  published Marionette release containing PR #516: update the pinned Marionette
+  dependency and lockfile, remove the patch and its install hook/tooling if no
+  other package patches exist, and rerun the Application contract coverage.
 
 ## Validation
 
@@ -126,11 +138,22 @@
 - The full component run executes all 49 specs: 182 of 250 tests pass, 64 fail,
   and 4 are skipped across 17 failing specs. The focused date-filter spec is
   green; the failures remain in unmigrated services and shared components.
-- The unchanged worklist and schedule E2E specs execute all 55 tests, but all
-  fail at application startup before route behavior: `RootView` is constructed
-  without a document context and beta.2's attachment check reads an undefined
-  `documentElement`. This is a branch-wide Application/root-View migration
-  boundary, not a date-filter assertion failure; the E2E specs were unchanged.
+- PR #1788 carries only PR #516's Application runtime and declaration changes
+  into the installed beta.2 package. It does not feature-detect or copy other
+  post-beta.2 changes. Focused contract coverage verifies detached composition,
+  whole-tree attachment, isolated header replacement that preserves content
+  identity/input/focus, preparing a replacement without disturbing the displayed
+  tree, never-displayed cleanup, direct destruction and host detachment, and
+  Region ownership after display. Without a pending prepared View, `getView()`
+  now reflects the host Region's current View. A clean `npm ci` applied the
+  pinned patch, the test-mode build passed, and the focused Application component
+  spec passed all 7 tests.
+- The global `RootView` is now a fresh detached `#root.app-root` tree. The
+  Application selects it in `onBeforeStart`, and its replacing Region displays
+  it at the start of `onStart`. The unchanged worklist E2E executed all 40 tests
+  and failed at the same next boundary: `onStart` still receives none of the
+  values that the removed Toolkit `beforeStart()` pipeline returned. No E2E
+  spec was changed.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -147,6 +170,14 @@
 
 ## Friction and corrected failures
 
+- PR #516 is not present in beta.2. A public Application subclass can add the
+  visible methods, but cannot place prepared-root cleanup inside beta.2's
+  existing stop/restart/destroy commit points without reordering lifecycle
+  notifications. The temporary package patch was therefore built from the
+  beta.2 source with only the merged #516 Application and declaration diffs
+  applied. The final PR revision removed separate post-display Application
+  ownership: preparation preserves the displayed View until Region handoff,
+  after which the Region is the sole owner.
 - Closed PR #1770 copied toolkit lifecycle behavior locally. That recreated
   Marionette 4 patterns and was abandoned before merge.
 - The packaged consumer skill points to `marionette/scripts/docs.mjs`, while
@@ -234,3 +265,8 @@
   `@mnjs/utils`). The PR was corrected to use the documented owner method
   instead of duplicating method-name resolution; the initial conclusion was an
   agent documentation-reading mistake, not a Marionette defect or gap.
+- The first root-Application edit passed `document.body` directly as the
+  `region` option. Beta.2 accepts a selector, Region class, definition object,
+  or existing Region; a native element belongs under `{ el }`. The resulting
+  `MN0004` was an agent integration mistake, corrected to the documented Region
+  definition without adding an adapter.

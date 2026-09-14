@@ -48,7 +48,7 @@ const Application = App.extend({
   },
 
   // Before the application starts make sure:
-  // - A root layout is attached
+  // - A root layout is prepared
   // - Global services are started
   onBeforeStart() {
     new BootstrapService();
@@ -141,10 +141,14 @@ const Application = App.extend({
 
     if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
       this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.showView();
     }
   },
 
-  onStart(options, currentUser, { default: AppFrameApp }) {
+  onStart(options, currentUser, appFrameModule) {
+    this.showView();
+    const { default: AppFrameApp } = appFrameModule;
+
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
       this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       return;
@@ -167,7 +171,12 @@ const Application = App.extend({
 });
 
 function startApp() {
-  const app = new Application();
+  const app = new Application({
+    region: {
+      el: '#root',
+      replaceElement: true,
+    },
+  });
 
   app.start();
 }
