@@ -5,6 +5,43 @@ import { getRelationship, getResource } from 'helpers/json-api';
 import { getPatient } from 'support/api/patients';
 
 context('Patient Quick Search', function() {
+  specify('keeps searching when an earlier request is superseded', function() {
+    const replies = {};
+
+    cy
+      .routesForPatientWorkflow()
+      .routeActions()
+      .intercept('GET', '/api/patients?filter*', req => new Cypress.Promise(resolve => {
+        const search = new URL(req.url).searchParams.get('filter[search]');
+
+        replies[search] = () => {
+          req.reply({ body: { data: [] } });
+          resolve();
+        };
+        req.alias = search === 'Test' ? 'firstSearch' : 'latestSearch';
+      }))
+      .visit()
+      .wait('@routeActions');
+
+    cy.get('.app-frame__nav .js-search').click();
+    cy.get('.patient-search__input').type('Test');
+    cy.wrap(null).should(() => {
+      expect(replies.Test).to.be.a('function');
+    });
+
+    cy.get('.patient-search__input').type(' Patient');
+    cy.wrap(null).should(() => {
+      expect(replies['Test Patient']).to.be.a('function');
+    });
+
+    cy.then(() => replies.Test());
+    cy.get('.patient-search__no-results').should('have.text', 'Searching...');
+
+    cy.then(() => replies['Test Patient']());
+    cy.wait('@latestSearch');
+    cy.get('.patient-search__no-results').should('contain', 'No results match your query.');
+  });
+
   specify('Modal & default searching functionality', function() {
     const patients = _.times(10, index => {
       return getPatient({
