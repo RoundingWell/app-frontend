@@ -131,6 +131,8 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 
 ## Validation
 
+- Cover behavior that users can exercise through the UI with E2E tests. Do not substitute component tests that stub application methods or state for those flows; reserve component tests for behavior that cannot be meaningfully exercised through the UI. Prefer extending an existing E2E scenario for the same flow; add a separate `specify` only when the scenario needs its own isolation.
+
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.
 - Do not make incidental presentation a Cypress contract. Avoid exact assertions for alignment, spacing, typography, dimensions, colors, or computed CSS unless the presentation itself communicates product state or the geometry proves functional behavior such as a breakpoint mode, overflow prevention, reachability, popup direction, or layout stability during a state change.

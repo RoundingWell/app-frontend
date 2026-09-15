@@ -618,6 +618,11 @@ context('Patient Action Form', function() {
       .get('@metaRegion')
       .find('.js-save-button')
       .should('contain', 'Submit')
+      .and('be.enabled');
+
+    cy
+      .get('@metaRegion')
+      .find('.js-save-button')
       .click();
 
     cy
@@ -630,7 +635,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testDraftResponse.id }`);
+      .should('have.attr', 'src')
+      .and('match', new RegExp(`^/forms/formio/index\\.html\\?responseId=${ testDraftResponse.id }&_ts=\\d+$`));
 
     cy
       .get('@metaRegion')
@@ -1283,7 +1289,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testFormResponses[2].id }`);
+      .should('have.attr', 'src')
+      .and('match', new RegExp(`^/forms/formio/index\\.html\\?responseId=${ testFormResponses[2].id }&_ts=\\d+$`));
 
     cy
       .get('@metaRegion')
@@ -1547,7 +1554,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testFormResponse.id }`);
+      .should('have.attr', 'src')
+      .and('match', new RegExp(`^/forms/formio/index\\.html\\?responseId=${ testFormResponse.id }&_ts=\\d+$`));
 
     cy
       .get('.form__frame')
@@ -1558,7 +1566,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/forms/formio/index.html');
+      .should('have.attr', 'src')
+      .and('match', /^\/forms\/formio\/index\.html\?_ts=\d+$/);
 
     cy
       .get('.js-back')
@@ -1619,7 +1628,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', '/forms/formio/index.html');
+      .should('have.attr', 'src')
+      .and('match', /^\/forms\/formio\/index\.html\?_ts=\d+$/);
 
     cy
       .get('.patient__context-trail [aria-current="page"]')
@@ -2043,7 +2053,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('iframe')
-      .should('have.attr', 'src', `/forms/formio/index.html?responseId=${ testFormResponse.id }`);
+      .should('have.attr', 'src')
+      .and('match', new RegExp(`^/forms/formio/index\\.html\\?responseId=${ testFormResponse.id }&_ts=\\d+$`));
 
     cy
       .get('.form__controls')

@@ -1306,7 +1306,7 @@ context('patient flow page', function() {
       });
   });
 
-  specify('ignores a patient-less flow resolution after leaving patient routes', function() {
+  specify('ignores a previous flow request after navigating away', function() {
     const testPatient = getPatient();
     const delayedFlow = getFlow({
       relationships: {
@@ -1316,6 +1316,7 @@ context('patient flow page', function() {
     let replyToFlow;
 
     cy
+      .routeActions()
       .intercept('GET', new RegExp(`/api/flows/${ delayedFlow.id }\\?`), req => new Cypress.Promise(resolve => {
         replyToFlow = () => {
           req.reply({ body: { data: delayedFlow, included: [testPatient] } });
@@ -1325,29 +1326,38 @@ context('patient flow page', function() {
       .as('routeDelayedFlow')
       .visit(`/flow/${ delayedFlow.id }`);
 
-    cy
-      .wrap(null)
-      .should(() => {
-        expect(replyToFlow).to.be.a('function');
-      });
-
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'notFound');
+    cy.wrap(null).should(() => {
+      expect(replyToFlow).to.be.a('function');
     });
 
-    cy
-      .get('.error-page')
-      .should('contain', 'This page doesn\'t exist.');
+    cy.contains('.app-nav__link', 'Schedule').click();
+    cy.wait('@routeActions');
+    cy.location('pathname').should('eq', '/one/schedule');
+    cy.get('.list-page').should('be.visible');
 
     cy.then(() => replyToFlow());
+    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
+    cy.get('.list-page').should('be.visible');
+    cy.location('pathname').should('eq', '/one/schedule');
 
-    cy
-      .wait('@routeDelayedFlow');
+    cy.then(() => {
+      replyToFlow = null;
+    });
+    cy.visit(`/flow/${ delayedFlow.id }`);
+    cy.wrap(null).should(() => {
+      expect(replyToFlow).to.be.a('function');
+    });
 
-    cy
-      .url()
-      .should('contain', '/404')
-      .should('not.contain', `/patient/${ testPatient.id }/flow/${ delayedFlow.id }`);
+    cy.contains('.app-nav__bottom-button', 'Admin Tools').click();
+    cy.contains('.js-picklist-item', 'Programs').click();
+    cy.wait('@routePrograms');
+    cy.location('pathname').should('eq', '/one/programs');
+    cy.get('.list-page').should('be.visible');
+
+    cy.then(() => replyToFlow());
+    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
+    cy.get('.list-page').should('be.visible');
+    cy.location('pathname').should('eq', '/one/programs');
   });
 
   specify('flow server error', function() {

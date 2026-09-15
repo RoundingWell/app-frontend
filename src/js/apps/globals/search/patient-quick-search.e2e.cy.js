@@ -6,6 +6,7 @@ import { getPatient } from 'support/api/patients';
 
 context('Patient Quick Search', function() {
   specify('Modal & default searching functionality', function() {
+    const replies = {};
     const patients = _.times(10, index => {
       return getPatient({
         attributes: {
@@ -49,14 +50,27 @@ context('Patient Quick Search', function() {
           req.alias = 'routeEmptyPatientSearch';
           return;
         }
-        req.reply({
+        const reply = () => req.reply({
           body: {
             data: searchResults,
             included: [...getResource(patients, 'patients')],
           },
           delay: 300,
         });
-        req.alias = 'routePatientSearch';
+        const search = new URL(req.url).searchParams.get('filter[search]');
+
+        req.alias = search === 'Test' ? 'supersededSearch' : 'routePatientSearch';
+
+        if (search === 'Test' || search === 'Test 2') {
+          return new Cypress.Promise(resolve => {
+            replies[search] = () => {
+              reply();
+              resolve();
+            };
+          });
+        }
+
+        reply();
       });
 
     cy
@@ -121,11 +135,25 @@ context('Patient Quick Search', function() {
       .find('.patient-search__input')
       .type('Test');
 
+    cy.wrap(null).should(() => {
+      expect(replies.Test).to.be.a('function');
+    });
+
+    cy.get('@searchModal').find('.patient-search__input').type(' 2');
+    cy.wrap(null).should(() => {
+      expect(replies['Test 2']).to.be.a('function');
+    });
+
+    cy.then(() => replies.Test());
+    cy.wait('@supersededSearch');
+    cy.get('.patient-search__no-results').should('have.text', 'Searching...');
+    cy.then(() => replies['Test 2']());
+
     cy
       .wait('@routePatientSearch')
       .itsUrl()
       .its('search')
-      .should('contain', 'filter[search]=Test');
+      .should('contain', 'filter[search]=Test 2');
 
     cy
       .get('@searchModal')
@@ -139,13 +167,6 @@ context('Patient Quick Search', function() {
       .should('not.have.class', 'is-inactive')
       .next()
       .should('have.class', 'is-inactive');
-
-    cy
-      .get('@searchModal')
-      .find('.patient-search__input')
-      .type(' 2')
-      .wait('@routePatientSearch')
-      .wait(100); // wait for debounce
 
     cy
       .get('@searchModal')
