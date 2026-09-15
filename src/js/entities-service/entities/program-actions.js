@@ -15,7 +15,6 @@ const WRITABLE_ATTRIBUTES = [
   'details',
   'days_until_due',
   'weekdays_only',
-  'outreach',
   'sequence',
   'tags',
   'sync',
