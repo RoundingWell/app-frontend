@@ -1,0 +1,83 @@
+src/js/index.js
+  s_85aebd1623278c::t_6a4dc3f0006814 29
+packages/care-ops-ringcentral/ringcentral_views.js
+  s_85aebd1623278c::t_bfc7978489be4b 5
+src/js/base/entity-service.js
+  s_85aebd1623278c::t_6237f49989c67b 5
+patches/marionette+5.0.0-beta.3.patch
+  s_85aebd1623278c::t_f4796321a53dff 2-239
+src/js/apps/programs/sidebar/program/programs-sidebar_views.js
+  s_85aebd1623278c::t_ff873e79fb6e8c 159-160
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_cbf711992f959a 72,191,228-233
+  s_85aebd1623278c::t_50f3790ec938d7 75-77
+  s_85aebd1623278c::t_fb8eeea3cfb1e6 187-189
+  s_85aebd1623278c::t_22e1b1a75cec45 16,61,66-67
+  s_85aebd1623278c::t_344453fad608d8 82-83,85,166-169,181-186,234-240,244
+  s_85aebd1623278c::t_113d110ea4ea9d 175-176,178-179
+  s_85aebd1623278c::t_0441c3a5eb728b 5-8,84,174,177,180,221-227
+  s_85aebd1623278c::t_a8182a0f676be4 170-173
+  s_85aebd1623278c::t_0ccf73d7aae611 68-71,73-74,190,192-196
+src/js/app.js
+  s_85aebd1623278c::t_bb5c638c9c5ae4 62-63,73-76,94,96,98
+  s_85aebd1623278c::t_4245d1f82743e1 77-82
+  s_85aebd1623278c::t_48f3190adc45ba 65-66,71,196
+  s_85aebd1623278c::t_6a4dc3f0006814 64,67-70,72,83-93,95,97,99-110
+  s_85aebd1623278c::t_505218cb3eec38 111
+packages/care-ops-five9/five9_views.js
+  s_85aebd1623278c::t_bfc7978489be4b 5
+src/js/apps/programs/program/flow/flow_app.js
+  s_85aebd1623278c::t_ff873e79fb6e8c 60-63
+package.json
+  s_85aebd1623278c::t_51118fd78396b5 128,144
+src/js/base/app.component.cy.js
+  s_85aebd1623278c::t_85e8bdddf0ff75 24
+  s_85aebd1623278c::t_9e8575e124efbf 191-260
+  s_85aebd1623278c::t_ab5d8a42e5f6e9 261
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_85aebd1623278c::t_ff873e79fb6e8c 239-240
+src/js/services/bootstrap.js
+  s_85aebd1623278c::t_bb5c638c9c5ae4 66-67,77
+  s_85aebd1623278c::t_6a4dc3f0006814 68-75,78
+  s_85aebd1623278c::t_a8182a0f676be4 83-85,87,89,91
+src/js/entities-service/widgets.js
+  s_85aebd1623278c::t_6a4dc3f0006814 12,14
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_85aebd1623278c::t_6e4d2f4cab75eb 3
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_85aebd1623278c::t_ff873e79fb6e8c 213-214
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_85aebd1623278c::t_ff873e79fb6e8c 272-273
+src/js/apps/patients/shared/filters_state.js
+  s_85aebd1623278c::t_ff873e79fb6e8c 35-38
+src/js/components/optionlist/index.js
+  s_85aebd1623278c::t_ff873e79fb6e8c 27-28
+src/js/entities-service/clinicians.js
+  s_85aebd1623278c::t_48f3190adc45ba 20-21
+  s_85aebd1623278c::t_6a4dc3f0006814 17-18
+packages/care-ops-five9/five9_app.js
+  s_85aebd1623278c::t_bfc7978489be4b 3
+package-lock.json
+  s_85aebd1623278c::t_c3ecf0ed582fca 25,41,4358-4360,4371,4396-4398,4401,4408-4410,12393-12395,12402-12403
+  s_85aebd1623278c::t_0359b79780f4f2 10
+README.md
+  s_85aebd1623278c::t_c29afa056ddcaf 120
+src/js/behaviors/iframe-form.js
+  s_85aebd1623278c::t_38e40a4e5ad517 40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "67c9d29a3d4e98de3667ab2221b872cb32615b34",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
