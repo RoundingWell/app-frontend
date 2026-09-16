@@ -116,7 +116,7 @@ If this doesn't work try turning your computer off and then on again 😜
 
 - [Underscore](https://underscorejs.org/)
 - [Backbone](https://backbonejs.org/)
-- [Backbone.Radio](https://github.com/marionettejs/backbone.radio)
+- [Marionette Radio](https://marionettejs.com/docs/radio.html)
 - [Marionette](https://marionettejs.com/)
 - [Marionette.Toolkit](https://github.com/RoundingWellOS/marionette.toolkit)
   Toolkit adds the `App` class for an Application tree. Each `App` has a lifecycle and an attached state model.

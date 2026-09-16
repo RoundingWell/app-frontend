@@ -1,6 +1,5 @@
-import Radio from 'backbone.radio';
+import { Radio, View, CollectionView } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView } from 'marionette';
 
 import intl from 'js/i18n';
 

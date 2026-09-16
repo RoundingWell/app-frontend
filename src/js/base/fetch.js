@@ -1,6 +1,6 @@
 //  Similar to https://github.com/akre54/Backbone.Fetch
 import { isObject, isArray, defaults, extend, map, flatten, reduce, first, rest, get } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import dayjs from 'dayjs';
 
 const fetchers = [];

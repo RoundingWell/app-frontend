@@ -2,7 +2,6 @@ import $ from 'jquery';
 import _, { extend } from 'underscore';
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
-import Radio from 'backbone.radio';
 import BackboneApi from '@mnjs/adapters/backbone';
 import JQueryDomApi from '@mnjs/adapters/dom/jquery';
 import MorphdomDomApi from '@mnjs/adapters/dom/morphdom';
@@ -14,7 +13,7 @@ import './helpers';
 import './hotkeys';
 import './uuid';
 
-const { View, CollectionView, setDataApi, setDomApi, setStateApi } = Marionette;
+const { Radio, View, CollectionView, setDataApi, setDomApi, setStateApi } = Marionette;
 
 setDataApi(BackboneApi);
 setStateApi(BackboneApi);
@@ -23,7 +22,7 @@ setDomApi(MorphdomDomApi);
 
 /* istanbul ignore if */
 if (_DEVELOP_) {
-  Radio.DEBUG = true;
+  Radio.setDebug();
 }
 
 // Expose libraries for the console

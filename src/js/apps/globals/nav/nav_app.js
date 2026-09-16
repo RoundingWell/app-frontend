@@ -1,6 +1,6 @@
 import { compact, isEqual, noop, partial, defer } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import localStore from 'js/utils/local-store';
 

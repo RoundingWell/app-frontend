@@ -1,5 +1,4 @@
 import { delay } from 'underscore';
-import Radio from 'backbone.radio';
 import dayjs from 'dayjs';
 
 import hbs from 'handlebars-inline-precompile';

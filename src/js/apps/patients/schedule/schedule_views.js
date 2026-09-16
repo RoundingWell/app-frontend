@@ -1,6 +1,6 @@
 import { debounce, every } from 'underscore';
-import Radio from 'backbone.radio';
-import { View, CollectionView } from 'marionette';
+import { Radio, View, CollectionView } from 'marionette';
+
 import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 

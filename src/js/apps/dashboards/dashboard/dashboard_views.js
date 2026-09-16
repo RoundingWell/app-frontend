@@ -1,7 +1,5 @@
-import Radio from 'backbone.radio';
+import { Radio, View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
-
-import { View } from 'marionette';
 
 import { embedDashboard as embedQuicksightDashboard } from '@roundingwell/care-ops-quicksight';
 import { embedDashboard as embedSupersetDashboard } from '@roundingwell/care-ops-superset';

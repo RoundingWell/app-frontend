@@ -1,6 +1,5 @@
-import Radio from 'backbone.radio';
+import { Radio, View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
 
 import 'scss/modules/card-list.scss';
 import 'scss/modules/progress-bar.scss';

@@ -1,5 +1,5 @@
 import { map } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import BaseEntity from 'js/base/entity-service';
 import { Model, Collection } from './entities/filters';
 

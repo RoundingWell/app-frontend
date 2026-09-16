@@ -1,5 +1,5 @@
 import { get } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import handleErrors from 'js/utils/handle-errors';
 

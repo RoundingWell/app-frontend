@@ -1,8 +1,7 @@
 import { isObject, result } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio, MnObject } from 'marionette';
 import Store from 'backbone.store';
-import { MnObject } from 'marionette';
 import fetcher, { getData, getUrl } from 'js/base/fetch';
 import { getResponse, cacheKey } from 'js/base/cache/entity-cache';
 

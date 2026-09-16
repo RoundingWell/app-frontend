@@ -1,5 +1,5 @@
 import { compact, difference, filter, map } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
