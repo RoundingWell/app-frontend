@@ -1,0 +1,47 @@
+src/js/app.js
+  s_85aebd1623278c::t_a71ef19d943a2f 143,151-176,188
+  s_85aebd1623278c::t_4f78e29afa1759 60,64-66,73,78,80,83-84,87,183,192,196
+src/js/services/bootstrap.js
+  s_85aebd1623278c::t_8f5df86cd6cac2 89-92
+src/js/apps/globals/search/search_app.js
+  s_85aebd1623278c::t_410cf88721030f 8
+src/js/entities-service/clinicians.js
+  s_85aebd1623278c::t_80ebf359448ab7 28,32
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_8f5df86cd6cac2 77-80,85-87
+  s_85aebd1623278c::t_7197e65ef97c56 192-195
+src/js/apps/globals/nav/nav_app.js
+  s_85aebd1623278c::t_03cd9f9851a908 152-153,156-157,174-175,177-179,181-183,185,187-188,191-196,211-218
+  s_85aebd1623278c::t_410cf88721030f 168,265,269,291,296,301,304,306,309,312,315,318,331,342-343,352,354,357,359,365,368,386,420,444,464,513,515-516,518
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_85aebd1623278c::t_80ebf359448ab7 65-69
+  s_85aebd1623278c::t_93cbb4cd8b8c6b 102
+  s_85aebd1623278c::t_2b794422ec5c6c 1,12-15,17,19,21-24,29,32,34,40,50-59,62,64,70,85-88,90,97,101
+src/js/entities-service/programs.js
+  s_85aebd1623278c::t_80ebf359448ab7 17,19
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_85aebd1623278c::t_4f78e29afa1759 237
+  s_85aebd1623278c::t_cbbe424ce7dcba 286
+src/js/services/workspace.js
+  s_85aebd1623278c::t_80ebf359448ab7 56-69,73-78,81,83,85-88,90-91,93-94
+src/js/base/routing.md
+  s_85aebd1623278c::t_8f5df86cd6cac2 14-15,128-129,141,160-162,169-172
+src/js/entities-service/forms.js
+  s_85aebd1623278c::t_80ebf359448ab7 21,28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e71651768167977387aa5aee863fe0c96d95e869",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
