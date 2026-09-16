@@ -57,32 +57,34 @@ const Application = App.extend({
     this.startServices();
     this.setListeners();
     // Ensure Error is the first app initialized
-    new ErrorApp({ region: this.getRegion('error') });
+    new ErrorApp({ region: this.getView().getRegion('error') });
   },
 
   configComponents() {
-    Tooltip.setRegion(this.getRegion('tooltip'));
-    const popRegion = this.getRegion('pop');
+    const rootView = this.getView();
+    Tooltip.setRegion(rootView.getRegion('tooltip'));
+    const popRegion = rootView.getRegion('pop');
     Datepicker.setRegion(popRegion);
     Droplist.setPopRegion(popRegion);
     Optionlist.setRegion(popRegion);
   },
 
   showPop(view, opts) {
-    const popRegion = this.getRegion('pop');
+    const popRegion = this.getView().getRegion('pop');
     return popRegion.show(view, opts);
   },
 
   startServices() {
+    const rootView = this.getView();
     new WSService();
-    new AlertService({ region: this.getRegion('alert') });
+    new AlertService({ region: rootView.getRegion('alert') });
     new LastestListService();
     new ModalService({
-      modalRegion: this.getRegion('modal'),
-      modalSmallRegion: this.getRegion('modalSmall'),
+      modalRegion: rootView.getRegion('modal'),
+      modalSmallRegion: rootView.getRegion('modalSmall'),
     });
     new PatientModalService();
-    new DialerService({ region: this.getRegion('overlay') });
+    new DialerService({ region: rootView.getRegion('overlay') });
   },
 
   setListeners() {
@@ -138,7 +140,7 @@ const Application = App.extend({
   async prepareStart(options, { signal }) {
     const bootstrapService = this.getChildApp('bootstrap');
 
-    const [bootstrapStarted, appFrameModule] = await Promise.all([
+    const [bootstrapStarted, { default: AppFrameApp }] = await Promise.all([
       bootstrapService.start(),
       import('js/apps/globals/app-frame/app-frame_app'),
     ]);
@@ -146,37 +148,52 @@ const Application = App.extend({
     if (signal.aborted) return;
     if (!bootstrapStarted) throw new Error('Bootstrap startup was canceled');
 
-    return {
-      appFrameModule,
-      currentUser: bootstrapService.getCurrentUser(),
-    };
+    const currentUser = bootstrapService.getCurrentUser();
+
+    if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
+
+    const appView = this.getView().appView;
+    const appFrameApp = this.addChildApp('appFrame', new AppFrameApp({
+      contentRegion: appView.getRegion('content'),
+      navRegion: appView.getRegion('nav'),
+      setNavMinimized: appView.setNavMinimized.bind(appView),
+      sidebarRegion: appView.getRegion('sidebar'),
+    }));
+
+    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
+
+    const appFrameStarted = await appFrameApp.start();
+
+    if (signal.aborted) return;
+    if (!appFrameStarted) throw new Error('App frame startup was canceled');
+
+    return { currentUser };
+  },
+
+  prepareStop(options) {
+    if (!this.hasChildApp('appFrame')) return;
+
+    return this.removeChildApp('appFrame', options);
   },
 
   showStartFailure(error) {
     addError(get(error, 'responseData', error));
 
     if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       this.showView();
     }
   },
 
-  onStart(app, options, { appFrameModule, currentUser }) {
+  onStart(app, options, { currentUser }) {
     this.showView();
-    const { default: AppFrameApp } = appFrameModule;
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       return;
     }
 
-    this.getRegion('preloader').empty();
-
-    const appFrameApp = this.addChildApp('appFrame', AppFrameApp);
-
-    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
-
-    appFrameApp.start({ view: this.getView().appView });
+    this.getView().getRegion('preloader').empty();
   },
 
   startHistory() {

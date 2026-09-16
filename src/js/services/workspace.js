@@ -53,46 +53,44 @@ export default App.extend({
   initialize({ route }) {
     this._setCurrentWorkspace(route);
   },
-  beforeStart() {
-    return [
-      Radio.request('entities', 'fetch:programs:byWorkspace', this.currentWorkspace.id),
-      Radio.request('entities', 'fetch:states:collection'),
-      Radio.request('entities', 'fetch:forms:collection'),
-    ];
-  },
-  onStart(options, programs) {
+  async prepareStart(options, { signal }) {
+    const [programs] = await Promise.all([
+      Radio.request(
+        'entities',
+        'fetch:programs:byWorkspace',
+        this.currentWorkspace.id,
+        { signal },
+      ),
+      Radio.request('entities', 'fetch:states:collection', { signal }),
+      Radio.request('entities', 'fetch:forms:collection', { signal }),
+    ]);
+
+    if (signal.aborted) return;
+
     const workspaces = this._getSharedWorkspaces(programs);
 
     const clinicianRequests = workspaces.map(workspace => {
-      return Radio.request('entities', 'fetch:clinicians:byWorkspace', workspace.id);
+      return Radio.request(
+        'entities',
+        'fetch:clinicians:byWorkspace',
+        workspace.id,
+        { signal },
+      );
     });
 
-    Promise.all([...clinicianRequests])
-      .then(() => {
-        this.resolvePromise(this.currentWorkspace);
-      })
-      .catch((...args) => {
-        this.rejectPromise(...args);
-        this.stop();
-      });
-  },
-  onFail(options, ...args) {
-    this.rejectPromise(...args);
+    await Promise.all(clinicianRequests);
+
+    if (signal.aborted) return;
+
+    return this.currentWorkspace;
   },
   fetchWorkspace() {
-    const promise = new Promise((resolvePromise, rejectPromise) => {
-      this.resolvePromise = resolvePromise;
-      this.rejectPromise = rejectPromise;
+    const operation = this.isRunning() ? this.restart() : this.start();
+
+    return operation.then(started => {
+      if (!started) throw new Error('Workspace startup was canceled');
+
+      return this.currentWorkspace;
     });
-
-    if (this.isRunning()) {
-      this.restart();
-
-      return promise;
-    }
-
-    this.start();
-
-    return promise;
   },
 });

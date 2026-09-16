@@ -86,8 +86,10 @@ export default App.extend({
 
     new WidgetsService({ widgets });
 
-    Radio.channel('workspace').reset();
-    new WorkspaceService({ route: getWorkspaceRoute() });
+    if (!this.hasChildApp('workspace')) {
+      Radio.channel('workspace').reset();
+      this.addChildApp('workspace', new WorkspaceService({ route: getWorkspaceRoute() }));
+    }
 
     Radio.request('dialer', 'init');
   },

@@ -25,11 +25,11 @@ const Entity = BaseEntity.extend({
         return currentUser;
       });
   },
-  fetchByWorkspace(workspaceId) {
+  fetchByWorkspace(workspaceId, options = {}) {
     const url = `/api/workspaces/${ workspaceId }/clinicians`;
     const workspace = Radio.request('entities', 'workspaces:model', workspaceId);
 
-    return this.fetchCollectionCache({ url })
+    return this.fetchCollectionCache({ ...options, url })
       .then(clinicians => {
         workspace.updateClinicians(clinicians);
       });

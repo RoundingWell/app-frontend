@@ -1,4 +1,4 @@
-import { invoke, some } from 'underscore';
+import { some } from 'underscore';
 import { Radio } from 'marionette';
 import Backbone from 'backbone';
 
@@ -9,34 +9,35 @@ import SidebarService from 'js/services/sidebar';
 import NavApp from 'js/apps/globals/nav/nav_app';
 
 export default App.extend({
-  routers: [],
+  initialize() {
+    this.routers = [];
+    this.listenTo(Radio.channel('workspace'), 'change:workspace', () => this.restart());
+  },
   onBeforeStart() {
-    this.getRegion('content').empty();
+    this.getOption('contentRegion').empty();
 
-    if (this.isRestarting()) return;
+    if (this.hasChildApp('nav')) return;
 
-    const workspaceCh = Radio.channel('workspace');
-
-    this.listenTo(workspaceCh, 'change:workspace', this.restart);
-
-    this.navApp = new NavApp({ region: this.getRegion('nav') });
-    const navState = this.navApp.getState();
+    const navApp = this.addChildApp('nav', new NavApp({
+      region: this.getOption('navRegion'),
+    }));
+    const navState = navApp.getState();
 
     this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
     this.onChangeNavMinimized(navState, navState.get('isMinimized'));
 
-    new SidebarService({ region: this.getRegion('sidebar') });
+    new SidebarService({ region: this.getOption('sidebarRegion') });
   },
   onChangeNavMinimized(state, isMinimized) {
-    this.getView().setNavMinimized(isMinimized);
+    this.getOption('setNavMinimized')(isMinimized);
   },
-  beforeStart() {
+  async prepareStart(options, { signal }) {
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const hasDashboards = currentUser.can('dashboards:view');
     const hasClinicians = currentUser.can('clinicians:manage');
     const hasPrograms = currentUser.can('programs:manage');
 
-    return [
+    const results = await Promise.all([
       Radio.request('workspace', 'fetch'),
       import('js/apps/patients/patients-main_app'),
       hasDashboards ?
@@ -46,15 +47,27 @@ export default App.extend({
         import('js/apps/clinicians/clinicians-main_app.js') :
         null,
       hasPrograms ? import('js/apps/programs/programs-main_app.js') : null,
-    ];
+    ]);
+
+    if (signal.aborted) return;
+
+    const navStarted = await this.getChildApp('nav').start();
+
+    if (signal.aborted) return;
+    if (!navStarted) throw new Error('Navigation startup was canceled');
+
+    return results;
   },
   onStart(
+    app,
     options,
-    currentWorkspace,
-    PatientsMainApp,
-    DashboardsMainApp,
-    CliniciansMainApp,
-    ProgramsMainApp,
+    [
+      currentWorkspace,
+      PatientsMainApp,
+      DashboardsMainApp,
+      CliniciansMainApp,
+      ProgramsMainApp,
+    ],
   ) {
     this.workspaceSlug = currentWorkspace.get('slug');
 
@@ -69,20 +82,23 @@ export default App.extend({
       Radio.trigger('event-router', 'notFound');
     }
   },
-  onStop() {
-    invoke(this.routers, 'destroy');
-    this.routers = [];
+  async prepareStop(options) {
+    for (const router of this.routers) {
+      await this.removeChildApp(router.getName(), options);
+    }
 
-    if (!this.isRestarting()) this.navApp.destroy();
+    this.routers = [];
   },
   initRouter(module) {
     const RouterApp = module?.default;
     if (!RouterApp) return;
 
     const router = new RouterApp({
-      region: this.getRegion('content'),
+      region: this.getOption('contentRegion'),
       workspaceSlug: this.workspaceSlug,
     });
+
+    this.addChildApp(router.routerAppName, router);
 
     this.listenTo(router, 'before:appRoute', this.onBeforeAppRoute);
 

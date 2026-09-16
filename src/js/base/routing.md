@@ -11,8 +11,8 @@ definitions.
   It registers routes with the local EventRouter, builds a normalized route
   context on each match, manages the single current child app, and fires the
   `before:appRoute` / `appRoute` lifecycle hooks.
-- **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns the global app
-  shell and the area RouterApps it instantiates. It responds to area route
+- **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns Nav and
+  the area RouterApps it instantiates within the global app shell. It responds to area route
   transitions by selecting the nav item, closing the transient sidebar, and
   forwarding route metadata to the latest-list service. It also passes the
   current workspace slug into area RouterApps when they are created.
@@ -125,8 +125,8 @@ scope. Plain page Apps are always started this way.
 A `SubRouterApp` separates "record the route" from "dispatch the route":
 
 - `setCurrentRoute(routeContext)` / `getCurrentRoute()` — RouterApp sets the route on
-  the child *before* `startChildApp`, so it is available in `beforeStart()`,
-  `onFail()`, and `onStart()`. Read route data via `getCurrentRoute().eventArgs`;
+  the child before starting it, so it is available throughout preparation and
+  startup. Read route data via `getCurrentRoute().eventArgs`;
   do **not** read `currentRoute` from startup options.
 - `startRoute(routeContext)` — records the newest route; dispatches immediately only
   if already running. While loading or stopped it just stores (latest wins).
@@ -138,7 +138,7 @@ This is why same-scope navigation arriving during an in-flight load does not res
 the app: the route is retained and dispatched once `onStart` runs.
 
 ```js
-onStart(options, data) {
+onStart(app, options, data) {
   // build the shared shell / set views
   this.startCurrentRoute();
 }
@@ -157,19 +157,19 @@ routeActions: {
 
 - RouterApp keeps exactly one stop listener per current child. A child that stops
   **itself** clears RouterApp's current-child references.
-- A Toolkit `restart()` emits `stop` then `start`. RouterApp ignores the restart-stop
-  (`child.isRestarting()`), so a child that restarts itself (e.g. a worklist applying
-  filter state) **stays current**. Treating a restart as a teardown would desync
-  tracking and leave two apps in one region.
+- Route-driven child ownership is not yet migrated. Its current restart-specific
+  tracking must be removed atomically when RouterApp adopts those children through
+  Marionette ownership and supplies their per-route startup data.
 - A `SubRouterApp` owns its current route in Marionette state. Application state
   persists while stopped and across `restart()`, so the route re-dispatches after
   re-fetching without restart flags or threading `currentRoute` through options.
 
 ## Async ownership
 
-Async loading belongs in `beforeStart()` (return a promise / array of promises). The
-base App lifecycle sets `isLoading()` true until it resolves, then runs `onStart`.
-Route dispatch stays synchronous — do not add another async layer.
+Async loading belongs in `prepareStart(options, { signal })`. Return the prepared
+value for `onStart(app, options, result)`, and pass the lifecycle signal through to
+cancelable requests. Route dispatch stays synchronous — do not add another async
+layer.
 
 ## Common mistakes
 

@@ -74,15 +74,18 @@
   to `onStart`.
 - The PR keeps the Radio registry cutover as its first independently reviewable
   commit on beta.2. The second commit upgrades to beta.4 and migrates
-  root/bootstrap readiness against the published preparation contract.
+  root/bootstrap readiness against the published preparation contract. The
+  third commit migrates the
+  AppFrame/Nav boundary: the root prepares AppFrame while detached, AppFrame owns
+  Nav and its area routers, Nav owns Search and its state, and workspace readiness
+  uses the v5 preparation and cancellation contract.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: migrate AppFrame and Nav startup together, then move
-  route-driven child ownership with its per-route startup data. AppFrame's
-  Toolkit returned-value startup and Nav's restart helpers remain the next
-  runtime boundary; ownership must not move separately from route inputs.
+- Next after human merge: move each area RouterApp's route-driven child ownership
+  together with its per-route startup data. Ownership must not move separately
+  from route inputs.
 
 ## Validation
 
@@ -189,6 +192,14 @@
 - The unchanged worklist E2E spec executes all 40 tests and fails all 40 before
   the expected workspace-clinician request. This is the same known AppFrame/Nav
   startup boundary recorded before the beta.3 amendment; no E2E test changed.
+- The AppFrame/Nav commit passes targeted ESLint, the test-mode build, and both
+  Nav state component tests. The unchanged default-route E2E now passes all four
+  account/setup cases and reaches the route-driven page boundary; its two
+  worklist cases fail because no patient list is started. No E2E test changed.
+- After replacing the package patch with published beta.4, a clean `npm ci`,
+  ESLint, the test-mode build, and both Nav state component tests pass. The
+  unchanged default-route E2E has the same result: four account/setup cases pass
+  and two worklist cases stop at the known route-driven patient-list boundary.
 - The beta.3 package patch and `patch-package` install hook were removed
   atomically when beta.4 published the preparation contract. The inspected
   beta.4 package reports source revision
