@@ -1,0 +1,64 @@
+src/js/apps/patients/shared/filters_state.js
+  s_85aebd1623278c::t_ec24961f87e2ee 35-38
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_85aebd1623278c::t_d1e2aaa3de9b27 239-240
+src/js/index.js
+  s_85aebd1623278c::t_e1b64d81ba1540 29
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_0967fe155b3e49 5-8,16,61,66-77,82-85,166-196,221-240,244
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_85aebd1623278c::t_c116af3e666c95 213-214
+src/js/apps/programs/sidebar/program/programs-sidebar_views.js
+  s_85aebd1623278c::t_f91b375e996bbc 159-160
+src/js/app.js
+  s_85aebd1623278c::t_c94c7bd501fee2 62-111,196
+package-lock.json
+  s_85aebd1623278c::t_779a0a88fa876f 10,25,41,4358-4360,4371,4396-4398,4401,4408-4410,12393-12395,12402-12403
+src/js/behaviors/iframe-form.js
+  s_85aebd1623278c::t_8c9d4fa0d45bb7 40
+packages/care-ops-five9/five9_views.js
+  s_85aebd1623278c::t_e455de7e270e0f 5
+src/js/entities-service/clinicians.js
+  s_85aebd1623278c::t_9a8c8766d3fe77 17-18,20-21
+packages/care-ops-five9/five9_app.js
+  s_85aebd1623278c::t_d21569b9651f03 3
+src/js/base/entity-service.js
+  s_85aebd1623278c::t_77c2cfdfa9f016 5
+package.json
+  s_85aebd1623278c::t_318a0001ba623c 128,144
+README.md
+  s_85aebd1623278c::t_b353344df0712f 120
+patches/marionette+5.0.0-beta.3.patch
+  s_85aebd1623278c::t_bac2ae6e1cc93c 2,5,7-11,14-19,21-51,53,56,58-62,65-70,72-102,104,107,109-113,116-121,123-153,155,158-185,189-196,198,201-228,232-239
+packages/care-ops-ringcentral/ringcentral_views.js
+  s_85aebd1623278c::t_337d5aca1c0426 5
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_85aebd1623278c::t_5eb481919413ed 272-273
+src/js/entities-service/widgets.js
+  s_85aebd1623278c::t_db84ce319bf00e 12,14
+src/js/components/optionlist/index.js
+  s_85aebd1623278c::t_103e0c0bbd88c7 27-28
+src/js/apps/programs/program/flow/flow_app.js
+  s_85aebd1623278c::t_58d7a4a74630f9 60-63
+src/js/services/bootstrap.js
+  s_85aebd1623278c::t_f727eee5340429 77
+  s_85aebd1623278c::t_f76a4ada5946b9 66-75,82-84,86,88,90
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_85aebd1623278c::t_4723138b27a6ee 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "79bafdc43fe7ac906743c6c10d0f1099da71435d",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
