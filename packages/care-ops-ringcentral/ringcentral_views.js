@@ -2,7 +2,7 @@ import { delay } from 'underscore';
 import dayjs from 'dayjs';
 
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView } from 'marionette';
+import { Radio, View, CollectionView } from 'marionette';
 
 import './ringcentral.scss';
 

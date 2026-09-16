@@ -51,7 +51,7 @@ const Application = App.extend({
   // - A root layout is prepared
   // - Global services are started
   onBeforeStart() {
-    new BootstrapService();
+    this.getBootstrapService();
     this.setView(new RootView());
     this.configComponents();
     this.startServices();
@@ -129,14 +129,30 @@ const Application = App.extend({
     });
   },
 
-  beforeStart() {
-    return [
-      Radio.request('bootstrap', 'fetch'),
-      import('js/apps/globals/app-frame/app-frame_app'),
-    ];
+  getBootstrapService() {
+    if (this.hasChildApp('bootstrap')) return this.getChildApp('bootstrap');
+
+    return this.addChildApp('bootstrap', new BootstrapService());
   },
 
-  onFail(options, error) {
+  async prepareStart(options, { signal }) {
+    const bootstrapService = this.getChildApp('bootstrap');
+
+    const [bootstrapStarted, appFrameModule] = await Promise.all([
+      bootstrapService.start(),
+      import('js/apps/globals/app-frame/app-frame_app'),
+    ]);
+
+    if (signal.aborted) return;
+    if (!bootstrapStarted) throw new Error('Bootstrap startup was canceled');
+
+    return {
+      appFrameModule,
+      currentUser: bootstrapService.getCurrentUser(),
+    };
+  },
+
+  showStartFailure(error) {
     addError(get(error, 'responseData', error));
 
     if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
@@ -145,7 +161,7 @@ const Application = App.extend({
     }
   },
 
-  onStart(options, currentUser, appFrameModule) {
+  onStart(app, options, { appFrameModule, currentUser }) {
     this.showView();
     const { default: AppFrameApp } = appFrameModule;
 
@@ -178,7 +194,7 @@ function startApp() {
     },
   });
 
-  app.start();
+  return app.start().catch(error => app.showStartFailure(error));
 }
 
 export {

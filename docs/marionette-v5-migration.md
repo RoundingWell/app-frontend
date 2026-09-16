@@ -2,9 +2,10 @@
 
 ## Target and baseline
 
-- Target: `marionette@5.0.0-beta.2`; published source revision
-  `13f4954c352e646c413091ffdd83f6da59404573`.
-- Pre-install package inspection completed before target dependency installation.
+- Target: `marionette@5.0.0-beta.4`; published source revision
+  `f4165f14198da115cc998c842fbf4b6a4886fe45`.
+- Beta.4 release notes, migration guidance, package metadata, and companion
+  versions were inspected before installation.
 - Baseline: `npm ci` passed; 49 component specs and 248 tests passed; 35 E2E
   specs passed unchanged. ESLint and Stylelint passed; the local editor-config
   check could not find its downloaded macOS ARM binary.
@@ -12,7 +13,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `630a9e80ee91b215419076d2fdeef631a057624a`.
+  `c4cd71a4dd60eae3d6d4acaaee2f966c9b22f7d9`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -57,23 +58,31 @@
 - Completed: PR #1787 replaced the date-filter Component and controller wrapper
   with one Marionette View that owns its Backbone state and label Region. It
   was merged by a human.
-- Active step: backport the prepared-root Application contract from Marionette
+- Completed: PR #1788 backported the prepared-root Application contract from Marionette
   PR #516 at its merged head
   `1833f9223fd934b9e0c0eff6e98cd76bd6f794f2` through the single
   version-pinned `marionette+5.0.0-beta.2` package patch. The global Application
   now selects and composes its root while detached, then displays the complete
-  tree from `onStart()` through its replacing root Region.
+  tree from `onStart()` through its replacing root Region. It was merged by a
+  human.
+- Active step: keep the runtime and adapters pinned to beta.4, move the app
+  atomically from `backbone.radio` to Marionette Radio, and migrate global
+  bootstrap startup to explicit child ownership and cancellation. Published
+  beta.4 supplies the preparation contract previously backported from
+  Marionette PR #533, so the version-pinned patch and install hook are removed.
+  Root and bootstrap readiness use `prepareStart` and pass the prepared result
+  to `onStart`.
+- The PR keeps the Radio registry cutover as its first independently reviewable
+  commit on beta.2. The second commit upgrades to beta.4 and migrates
+  root/bootstrap readiness against the published preparation contract.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: move the global Application's asynchronous bootstrap
-  data onto beta.2's `onBeforeStart` readiness contract. Route-driven child
-  ownership and its per-route startup data follow as one later step.
-- Remove the prepared-root patch atomically when upgrading to the first
-  published Marionette release containing PR #516: update the pinned Marionette
-  dependency and lockfile, remove the patch and its install hook/tooling if no
-  other package patches exist, and rerun the Application contract coverage.
+- Next after human merge: migrate AppFrame and Nav startup together, then move
+  route-driven child ownership with its per-route startup data. AppFrame's
+  Toolkit returned-value startup and Nav's restart helpers remain the next
+  runtime boundary; ownership must not move separately from route inputs.
 
 ## Validation
 
@@ -154,6 +163,37 @@
   and failed at the same next boundary: `onStart` still receives none of the
   values that the removed Toolkit `beforeStart()` pipeline returned. No E2E
   spec was changed.
+- The initial global readiness revision was authored on beta.2. The amended
+  revision uses beta.4, and the root Application now owns and explicitly starts
+  the bootstrap Application. Both revisions load dependencies only while their
+  readiness signals remain current, and the browser entry point handles a
+  rejected `start()` through the existing visible failure path. Bootstrap entity
+  fetches receive the lifecycle signal through the existing fetch options
+  contract. Loaded Models, Collections, and modules remain direct dependencies;
+  they are not nested inside a second observable state source.
+- Beta.4 publishes the prepared-root, explicit-child-activation, and preparation
+  contracts used by this step.
+  The active step removes the superseded beta.2 prepared-root patch, aligns
+  Marionette and `@mnjs/adapters` at beta.4, removes `backbone.radio`, and
+  converts all application, test, and workspace-package imports to the one
+  Marionette Radio singleton. No package patch or postinstall hook remains.
+  Whitespace-batched Marionette events and iframe reply cleanup were split or
+  converted to map form for beta.3's literal names.
+- A clean beta.3 `npm ci`, ESLint, and test-mode build passed before the beta.4
+  package replacement. The full component
+  run executes all 50 specs: 216 of 258 tests pass, 38 fail, and 4 are skipped
+  across 10 failing specs. A detached worktree at the exact pre-beta.3 PR head
+  ran those same 10 specs and produced the same 38 failures and 4 skips, so the
+  beta.3 amendment adds no component regression. The failures remain the known
+  child-Application, shared input, Team, and Tooltip migration boundaries.
+- The unchanged worklist E2E spec executes all 40 tests and fails all 40 before
+  the expected workspace-clinician request. This is the same known AppFrame/Nav
+  startup boundary recorded before the beta.3 amendment; no E2E test changed.
+- The beta.3 package patch and `patch-package` install hook were removed
+  atomically when beta.4 published the preparation contract. The inspected
+  beta.4 package reports source revision
+  `f4165f14198da115cc998c842fbf4b6a4886fe45` and content SHA-256
+  `f4a73b9e5421b5388f5e41868deb51ae2d3c0da800d10e417fa97238bae5762d`.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
@@ -178,12 +218,30 @@
   applied. The final PR revision removed separate post-display Application
   ownership: preparation preserves the displayed View until Region handoff,
   after which the Region is the sole owner.
+- Beta.3 still permits an already-running child to be registered synchronously
+  from `onStop` after descendant draining. A published-package reproduction
+  shows `await owner.stop()` resolving `true` while that newly owned child stays
+  running, contrary to the documented stopped-hierarchy invariant. The app does
+  not use this pattern; no local workaround was added. Upstream should reject
+  ownership adoption during stop completion or drain registrations before the
+  stop operation settles, with stop and restart regression coverage.
+- Before beta.4, Marionette PR #533's documented
+  contract leaves rejected Promises returned by synchronous lifecycle
+  notifications to the host and skips an owner's `prepareStop` when that owner
+  is already stopped but still has active descendants. This migration step uses
+  neither pattern and adds no local divergence from the published implementation.
+- A bounded Claude sequencing challenge recommended testing whether explicit
+  child ownership could be migrated under beta.2 before deciding between a
+  larger beta.3 PR and a revert. Published beta.2 does support instance
+  ownership, but an exact-head comparison showed beta.3 did not add any of the
+  current component failures. The PR therefore retained the atomic Radio and
+  runtime cutovers; beta.4 now replaces the patched beta.3 package while
+  leaving route-child ownership as the next coherent migration boundary.
 - Closed PR #1770 copied toolkit lifecycle behavior locally. That recreated
   Marionette 4 patterns and was abandoned before merge.
-- The packaged consumer skill points to `marionette/scripts/docs.mjs`, while
-  beta.2 publishes the helper at
-  `marionette/dist/agent-skill/scripts/docs.mjs`. Locating the packaged helper
-  was straightforward, but the documented invocation fails as written.
+- Beta.3's packaged consumer skill pointed to `marionette/scripts/docs.mjs`
+  while publishing the helper under `dist/agent-skill`. Beta.4 documents the
+  published helper path correctly, resolving that tooling friction.
 - A native Navigation API implementation was completed locally, then stashed as
   `native Navigation API routing experiment` when the routing target changed.
 - The first local EventRouter constructor used object-method syntax. Backbone's

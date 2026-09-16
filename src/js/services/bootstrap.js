@@ -33,7 +33,6 @@ export default App.extend({
     'organization': 'getOrganization',
     'roles': 'getActiveRoles',
     'teams': 'getTeams',
-    'fetch': 'fetchBootstrap',
   },
   getCurrentUser() {
     return this.currentUser;
@@ -64,18 +63,18 @@ export default App.extend({
     // NOTE: handle pre-init'd workspace requests
     Radio.reply('workspace', 'current');
   },
-  beforeStart() {
-    return [
-      Radio.request('entities', 'fetch:clinicians:current'),
-      Radio.request('entities', 'fetch:roles:collection'),
-      Radio.request('entities', 'fetch:teams:collection'),
-      Radio.request('entities', 'fetch:workspaces:collection'),
-      Radio.request('entities', 'fetch:settings:collection'),
-      Radio.request('entities', 'fetch:panels:collection'),
-      Radio.request('entities', 'fetch:widgets:collection'),
-    ];
+  prepareStart(options, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:clinicians:current', { signal }),
+      Radio.request('entities', 'fetch:roles:collection', { signal }),
+      Radio.request('entities', 'fetch:teams:collection', { signal }),
+      Radio.request('entities', 'fetch:workspaces:collection', { signal }),
+      Radio.request('entities', 'fetch:settings:collection', { signal }),
+      Radio.request('entities', 'fetch:panels:collection', { signal }),
+      Radio.request('entities', 'fetch:widgets:collection', { signal }),
+    ]);
   },
-  onStart(options, currentUser, roles, teams, workspaces, settings, panels, widgets) {
+  onStart(app, options, [currentUser, roles, teams, workspaces, settings, panels, widgets]) {
     this.currentUser = currentUser;
     this.roles = roles;
     this.teams = teams;
@@ -87,24 +86,9 @@ export default App.extend({
 
     new WidgetsService({ widgets });
 
-    Radio.reset('workspace');
+    Radio.channel('workspace').reset();
     new WorkspaceService({ route: getWorkspaceRoute() });
 
     Radio.request('dialer', 'init');
-
-    this.resolvePromise(currentUser);
-  },
-  onFail(options, ...args) {
-    this.rejectPromise(...args);
-  },
-  fetchBootstrap() {
-    const promise = new Promise((resolvePromise, rejectPromise) => {
-      this.resolvePromise = resolvePromise;
-      this.rejectPromise = rejectPromise;
-    });
-
-    this.start();
-
-    return promise;
   },
 });

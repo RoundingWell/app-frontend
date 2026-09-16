@@ -210,7 +210,8 @@ const SidebarView = View.extend({
   showForm() {
     this.stopListening(this.model);
     this.model = this.flow.clone();
-    this.listenTo(this.model, 'change:name change:details', this.showSave);
+    this.listenTo(this.model, 'change:name', this.showSave);
+    this.listenTo(this.model, 'change:details', this.showSave);
 
     if (this.model.isNew()) this.showDisabledSave();
     else this.getRegion('save').empty();

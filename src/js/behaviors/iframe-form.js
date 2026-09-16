@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import { keys } from 'underscore';
 import { Radio, Behavior } from 'marionette';
 
 export default Behavior.extend({
@@ -38,6 +37,6 @@ export default Behavior.extend({
   },
   onBeforeDetach() {
     $(window).off('message', this.messageHandler);
-    this.channel.stopReplying(keys(this.replies).join(' '));
+    this.channel.stopReplying(this.replies, this);
   },
 });

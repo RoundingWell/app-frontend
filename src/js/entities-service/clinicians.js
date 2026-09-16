@@ -14,9 +14,11 @@ const Entity = BaseEntity.extend({
     'fetch:clinicians:model': 'fetchModel',
     'fetch:clinicians:byWorkspace': 'fetchByWorkspace',
   },
-  fetchCurrentClinician() {
-    return this.fetchByCache('/api/clinicians/me', { cacheScope: 'user' })
+  fetchCurrentClinician(options = {}) {
+    return this.fetchByCache('/api/clinicians/me', { ...options, cacheScope: 'user' })
       .then(currentUser => {
+        if (!currentUser) return currentUser;
+
         setUser(currentUser.pick('id', 'name', 'email'));
         startRum();
         currentUser.clientKey = uuid();

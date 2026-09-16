@@ -24,7 +24,8 @@ export default Picklist.extend({
   constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
 
-    this.listenTo(this.uiView, 'render destroy', this.destroy);
+    this.listenTo(this.uiView, 'render', this.destroy);
+    this.listenTo(this.uiView, 'destroy', this.destroy);
 
     Picklist.apply(this, arguments);
   },
