@@ -1,6 +1,6 @@
 import { setUser, startRum } from 'js/datadog';
 import { v7 as uuid } from 'uuid';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model, Collection } from './entities/clinicians';
 
@@ -14,20 +14,22 @@ const Entity = BaseEntity.extend({
     'fetch:clinicians:model': 'fetchModel',
     'fetch:clinicians:byWorkspace': 'fetchByWorkspace',
   },
-  fetchCurrentClinician() {
-    return this.fetchByCache('/api/clinicians/me', { cacheScope: 'user' })
+  fetchCurrentClinician(options = {}) {
+    return this.fetchByCache('/api/clinicians/me', { ...options, cacheScope: 'user' })
       .then(currentUser => {
+        if (!currentUser) return currentUser;
+
         setUser(currentUser.pick('id', 'name', 'email'));
         startRum();
         currentUser.clientKey = uuid();
         return currentUser;
       });
   },
-  fetchByWorkspace(workspaceId) {
+  fetchByWorkspace(workspaceId, options = {}) {
     const url = `/api/workspaces/${ workspaceId }/clinicians`;
     const workspace = Radio.request('entities', 'workspaces:model', workspaceId);
 
-    return this.fetchCollectionCache({ url })
+    return this.fetchCollectionCache({ ...options, url })
       .then(clinicians => {
         workspace.updateClinicians(clinicians);
       });

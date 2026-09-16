@@ -18,14 +18,14 @@ const Entity = BaseEntity.extend({
     'fetch:forms:byAction': 'fetchByAction',
     'fetch:forms:definition:byAction': 'fetchDefinitionByAction',
   },
-  fetchFormsCollection() {
+  fetchFormsCollection(options = {}) {
     const data = {
       fields: {
         forms: FORM_COLLECTION_FIELDS,
       },
     };
 
-    return this.fetchCollectionCache({ data });
+    return this.fetchCollectionCache({ ...options, data });
   },
   fetchDefinition(formId) {
     return fetcher(`/api/forms/${ formId }/definition`).then(handleJSON);

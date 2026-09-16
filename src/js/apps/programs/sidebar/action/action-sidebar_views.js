@@ -1,8 +1,7 @@
 import dayjs from 'dayjs';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio, View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
@@ -270,7 +269,8 @@ const SidebarView = View.extend({
   showEditForm() {
     this.stopListening(this.model);
     this.model = this.action.clone();
-    this.listenTo(this.model, 'change:name change:details', this.showSave);
+    this.listenTo(this.model, 'change:name', this.showSave);
+    this.listenTo(this.model, 'change:details', this.showSave);
 
     if (this.model.isNew()) this.showDisabledSave();
     else this.getRegion('save').empty();

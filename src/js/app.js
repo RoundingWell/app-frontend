@@ -4,7 +4,7 @@ import 'js/i18n';
 import $ from 'jquery';
 import { get } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { addError } from 'js/datadog';
 
 import 'scss/provider-core.scss';
@@ -51,38 +51,40 @@ const Application = App.extend({
   // - A root layout is prepared
   // - Global services are started
   onBeforeStart() {
-    new BootstrapService();
+    this.getBootstrapService();
     this.setView(new RootView());
     this.configComponents();
     this.startServices();
     this.setListeners();
     // Ensure Error is the first app initialized
-    new ErrorApp({ region: this.getRegion('error') });
+    new ErrorApp({ region: this.getView().getRegion('error') });
   },
 
   configComponents() {
-    Tooltip.setRegion(this.getRegion('tooltip'));
-    const popRegion = this.getRegion('pop');
+    const rootView = this.getView();
+    Tooltip.setRegion(rootView.getRegion('tooltip'));
+    const popRegion = rootView.getRegion('pop');
     Datepicker.setRegion(popRegion);
     Droplist.setPopRegion(popRegion);
     Optionlist.setRegion(popRegion);
   },
 
   showPop(view, opts) {
-    const popRegion = this.getRegion('pop');
+    const popRegion = this.getView().getRegion('pop');
     return popRegion.show(view, opts);
   },
 
   startServices() {
+    const rootView = this.getView();
     new WSService();
-    new AlertService({ region: this.getRegion('alert') });
+    new AlertService({ region: rootView.getRegion('alert') });
     new LastestListService();
     new ModalService({
-      modalRegion: this.getRegion('modal'),
-      modalSmallRegion: this.getRegion('modalSmall'),
+      modalRegion: rootView.getRegion('modal'),
+      modalSmallRegion: rootView.getRegion('modalSmall'),
     });
     new PatientModalService();
-    new DialerService({ region: this.getRegion('overlay') });
+    new DialerService({ region: rootView.getRegion('overlay') });
   },
 
   setListeners() {
@@ -129,38 +131,69 @@ const Application = App.extend({
     });
   },
 
-  beforeStart() {
-    return [
-      Radio.request('bootstrap', 'fetch'),
-      import('js/apps/globals/app-frame/app-frame_app'),
-    ];
+  getBootstrapService() {
+    if (this.hasChildApp('bootstrap')) return this.getChildApp('bootstrap');
+
+    return this.addChildApp('bootstrap', new BootstrapService());
   },
 
-  onFail(options, error) {
+  async prepareStart(options, { signal }) {
+    const bootstrapService = this.getChildApp('bootstrap');
+
+    const [bootstrapStarted, { default: AppFrameApp }] = await Promise.all([
+      bootstrapService.start(),
+      import('js/apps/globals/app-frame/app-frame_app'),
+    ]);
+
+    if (signal.aborted) return;
+    if (!bootstrapStarted) throw new Error('Bootstrap startup was canceled');
+
+    const currentUser = bootstrapService.getCurrentUser();
+
+    if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
+
+    const appView = this.getView().appView;
+    const appFrameApp = this.addChildApp('appFrame', new AppFrameApp({
+      contentRegion: appView.getRegion('content'),
+      navRegion: appView.getRegion('nav'),
+      setNavMinimized: appView.setNavMinimized.bind(appView),
+      sidebarRegion: appView.getRegion('sidebar'),
+    }));
+
+    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
+
+    const appFrameStarted = await appFrameApp.start();
+
+    if (signal.aborted) return;
+    if (!appFrameStarted) throw new Error('App frame startup was canceled');
+
+    return { currentUser };
+  },
+
+  prepareStop(options) {
+    if (!this.hasChildApp('appFrame')) return;
+
+    return this.removeChildApp('appFrame', options);
+  },
+
+  showStartFailure(error) {
     addError(get(error, 'responseData', error));
 
     if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       this.showView();
     }
   },
 
-  onStart(options, currentUser, appFrameModule) {
+  onStart(app, options, { currentUser }) {
     this.showView();
-    const { default: AppFrameApp } = appFrameModule;
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       return;
     }
 
-    this.getRegion('preloader').empty();
-
-    const appFrameApp = this.addChildApp('appFrame', AppFrameApp);
-
-    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
-
-    appFrameApp.start({ view: this.getView().appView });
+    this.getView().getRegion('preloader').empty();
   },
 
   startHistory() {
@@ -178,7 +211,7 @@ function startApp() {
     },
   });
 
-  app.start();
+  return app.start().catch(error => app.showStartFailure(error));
 }
 
 export {

@@ -1,6 +1,5 @@
-import Radio from 'backbone.radio';
+import { Radio, View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
@@ -237,7 +236,8 @@ const SidebarView = View.extend({
   },
   showForm() {
     this.cloneClinician();
-    this.listenTo(this.clonedClinician, 'change:name change:email', this.showSave);
+    this.listenTo(this.clonedClinician, 'change:name', this.showSave);
+    this.listenTo(this.clonedClinician, 'change:email', this.showSave);
 
     this.getRegion('save').empty();
 

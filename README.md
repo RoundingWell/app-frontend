@@ -116,13 +116,8 @@ If this doesn't work try turning your computer off and then on again 😜
 
 - [Underscore](https://underscorejs.org/)
 - [Backbone](https://backbonejs.org/)
-- [Backbone.Radio](https://github.com/marionettejs/backbone.radio)
 - [Marionette](https://marionettejs.com/)
-- [Marionette.Toolkit](https://github.com/RoundingWellOS/marionette.toolkit)
-  Toolkit adds the `App` class for an Application tree. Each `App` has a lifecycle and an attached state model.
-  Apps are best for requesting data, packaging it and choosing the correct views to show.
-  Toolkit also comes with `Component` for making generic encapsulated components such as datepickers or other widgets.
-  In this program [Apps have been made async by default](https://github.com/RoundingWellOS/marionette.toolkit/blob/master/docs/async-app-start.md).
+- [Marionette Radio](https://marionettejs.com/docs/radio.html)
 
   A typical app will look like:
 

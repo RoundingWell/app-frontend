@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import BehaviorComponent from './components/behavior_component';
 import TeamComponent from 'js/components/team';

@@ -2,8 +2,7 @@ import { get, some } from 'underscore';
 import dayjs from 'dayjs';
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
-import Radio from 'backbone.radio';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 

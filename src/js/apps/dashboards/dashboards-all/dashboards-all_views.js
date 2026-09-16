@@ -1,7 +1,6 @@
 import { every } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio, View, CollectionView } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView } from 'marionette';
 
 import 'scss/modules/list-pages.scss';
 import 'scss/modules/card-list.scss';

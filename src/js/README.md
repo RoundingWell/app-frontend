@@ -136,5 +136,5 @@ const y = {
 
 - [Favor object composition over class inheritance](https://medium.com/javascript-scene/10-interview-questions-every-javascript-developer-should-know-6fa6bdf5ad95#.haauzmicp)
 - [Writing Efficient Javascript](http://archive.oreilly.com/pub/a/server-administration/excerpts/even-faster-websites/writing-efficient-javascript.html) (Hint use [underscorejs](underscorejs.org)).
-- [Decoupling with pub/sub](https://msdn.microsoft.com/en-us/magazine/hh201955.aspx)  (Hint use [Backbone.Radio](https://github.com/marionettejs/backbone.radio)).
+- [Decoupling with pub/sub](https://msdn.microsoft.com/en-us/magazine/hh201955.aspx) (use [Marionette Radio](https://marionettejs.com/docs/radio.html)).
 - [Reducing Complexity by Refactoring with Guard Clauses](http://there4.io/2015/06/10/refactoring-with-guard-clauses-php-javascript/)

@@ -1,6 +1,6 @@
 import { each, extend, isEmpty, isFunction, reduce, result } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import dayjs from 'dayjs';
 import JsonApiMixin from './jsonapi-mixin';
 

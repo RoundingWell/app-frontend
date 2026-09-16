@@ -1,5 +1,5 @@
 import { extend, isEmpty } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import Store from 'backbone.store';
 import dayjs from 'dayjs';
 

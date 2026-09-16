@@ -1,6 +1,6 @@
 import { extend, isFunction, find, get } from 'underscore';
-import Radio from 'backbone.radio';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
+
 import dayjs from 'dayjs';
 
 import hbs from 'handlebars-inline-precompile';

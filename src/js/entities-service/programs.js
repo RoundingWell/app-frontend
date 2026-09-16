@@ -14,9 +14,9 @@ const Entity = BaseEntity.extend({
   fetchProgramByProgramFlow(flowId) {
     return this.fetchBy(`/api/program-flows/${ flowId }/program`);
   },
-  fetchProgramsByWorkspace(workspaceId) {
+  fetchProgramsByWorkspace(workspaceId, options = {}) {
     const url = `/api/workspaces/${ workspaceId }/programs`;
-    return this.fetchCollectionCache({ url });
+    return this.fetchCollectionCache({ ...options, url });
   },
 });
 

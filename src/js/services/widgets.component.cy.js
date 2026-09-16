@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { Model } from 'backbone';
 
 import WidgetsService from './widgets';

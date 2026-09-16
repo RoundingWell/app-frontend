@@ -1,6 +1,5 @@
-import Radio from 'backbone.radio';
+import { Radio, View, CollectionView } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView } from 'marionette';
 
 import intl from 'js/i18n';
 
@@ -235,7 +234,7 @@ const AppNavView = View.extend({
     this.updateDisplayState();
   },
   updateDisplayState() {
-    this.$el.attr('class', getAppNavClassName(this.model));
+    this.el.className = getAppNavClassName(this.model);
   },
   onPointerEnter(evt) {
     this.trigger('pointer:enter', evt);
@@ -284,7 +283,7 @@ const NavItemView = View.extend({
     Radio.trigger('event-router', this.model.get('event'), ...this.model.get('eventArgs'));
   },
   updateSelected() {
-    this.$el.toggleClass('is-selected', this.state.get('selectedNav') === this.model);
+    this.el.classList.toggle('is-selected', this.state.get('selectedNav') === this.model);
   },
 });
 
