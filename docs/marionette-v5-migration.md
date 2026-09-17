@@ -207,6 +207,10 @@
   pending, and the shared list-search path expected jQuery event/UI wrappers.
   Route context now supplies the match signal and the shared input path uses the
   native event and DOM contracts.
+- Focused InputWatcher coverage passes for a host textarea override and an
+  input-less host. The existing Picklist component spec now mounts without the
+  input watcher crashing; four tests pass and three keyboard transport/selection
+  assertions remain as a later post-cutover migration boundary.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.
