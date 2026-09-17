@@ -17,7 +17,9 @@ export default SubRouterApp.extend({
     'clinicians:all': 'hideCliniciansSidebar',
   },
   initialize() {
-    this.addChildApp('sidebar', new ClinicianSidebarApp());
+    this.addChildApp('sidebar', new ClinicianSidebarApp({
+      region: Radio.request('sidebar', 'region'),
+    }));
   },
   onBeforeStart() {
     const view = this.setView(new LayoutView());

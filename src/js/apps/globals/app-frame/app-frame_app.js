@@ -6,6 +6,8 @@ import App from 'js/base/app';
 
 import SidebarService from 'js/services/sidebar';
 
+import PreloadRegion from 'js/regions/preload_region';
+
 import NavApp from 'js/apps/globals/nav/nav_app';
 
 export default App.extend({
@@ -93,8 +95,13 @@ export default App.extend({
     const RouterApp = module?.default;
     if (!RouterApp) return;
 
+    // each router owns a region over the shared content element so that
+    // stopping an unmatched router cannot empty the displayed router's view
     const router = new RouterApp({
-      region: this.getOption('contentRegion'),
+      region: {
+        el: this.getOption('contentRegion').el,
+        regionClass: PreloadRegion,
+      },
       workspaceSlug: this.workspaceSlug,
     });
 

@@ -17,6 +17,11 @@ export default App.extend({
   radioRequests: {
     'stop': 'stopSidebarApp',
     'start': 'startSidebarApp',
+    'region': 'getSidebarRegion',
+  },
+
+  getSidebarRegion() {
+    return this.getRegion();
   },
 
   startSidebarApp(app, appOptions, viewOptions) {
@@ -26,7 +31,6 @@ export default App.extend({
 
     this.currentApp = app;
 
-    app.setRegion(this.getRegion());
     app.showView(new LayoutView(viewOptions));
 
     app.start(appOptions);
