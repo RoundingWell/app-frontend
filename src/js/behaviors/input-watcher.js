@@ -21,7 +21,7 @@ export default Behavior.extend({
   },
 
   getWatchText() {
-    return this.ui.input.val();
+    return this.el.querySelector('input').value;
   },
 
   watchKeyDown(evt) {
@@ -34,7 +34,7 @@ export default Behavior.extend({
     if (!this._evt) return;
 
     /* istanbul ignore next */
-    if (this._evt.isDefaultPrevented()) return;
+    if (this._evt.defaultPrevented) return;
 
     this.watchKeyUp(this._evt);
   },

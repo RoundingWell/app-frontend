@@ -46,15 +46,15 @@ const SearchView = View.extend({
   },
   onWatchChange(text) {
     this.options.query = text;
-    this.ui.clear.toggleClass('is-hidden', !text.length);
-    this.$el.toggleClass('is-applied', text.length > 2);
+    this.el.querySelector('.js-clear').classList.toggle('is-hidden', !text.length);
+    this.el.classList.toggle('is-applied', text.length > 2);
     this.triggerMethod('change:query', text);
   },
   onClear() {
     this.options.query = '';
-    this.ui.input.val('');
-    this.ui.clear.addClass('is-hidden');
-    this.$el.removeClass('is-applied');
+    this.el.querySelector('.js-input').value = '';
+    this.el.querySelector('.js-clear').classList.add('is-hidden');
+    this.el.classList.remove('is-applied');
     this.triggerMethod('change:query', '');
   },
 });

@@ -17,7 +17,7 @@ export default App.extend({
     // if the app does not handle a given route, stop
     this.listenTo(this.router, 'noMatch', this.onNoMatch);
 
-    this.on('before:stop', this.stopCurrent);
+    this.on('stop', this._clearCurrent);
 
     App.apply(this, arguments);
   },
@@ -115,8 +115,12 @@ export default App.extend({
   },
 
   // handler that ensures one running app
-  startCurrent(appName, options) {
-    this.stopCurrent();
+  async startCurrent(appName, options) {
+    const routeContext = this.getCurrentRoute();
+
+    await this.stopCurrent();
+
+    if (this.getCurrentRoute() !== routeContext) return;
 
     const child = this.getChildApp(appName);
 
@@ -130,11 +134,9 @@ export default App.extend({
     this._currentAppScope = this.getChildScope(child, options);
     this._current = child;
 
-    // child apps are singletons; ensure exactly one stop listener
-    this.stopListening(child, 'stop');
-    this.listenTo(child, 'stop', this._handleChildStop);
+    const started = await child.start(options);
 
-    this.startChildApp(appName, options);
+    if (!started || this.getCurrentRoute() !== routeContext) return;
 
     return child;
   },
@@ -143,13 +145,17 @@ export default App.extend({
     return isFunction(child.getRouteScope) ? child.getRouteScope(options) : undefined;
   },
 
-  startRoute(appName, options) {
+  async startRoute(appName, options) {
     const child = this.getChildApp(appName);
     const scope = this.getChildScope(child, options);
     const current = this.getCurrent();
 
-    if (current && this.isCurrent(appName, scope) && (current.isRunning() || current.isLoading())) {
-      return current.startRoute(this.getCurrentRoute());
+    if (current && this.isCurrent(appName, scope)) {
+      current.startRoute(this.getCurrentRoute());
+
+      const started = await current.start(options);
+
+      return started && current === this.getCurrent() ? current : undefined;
     }
 
     return this.startCurrent(appName, options);
@@ -172,22 +178,14 @@ export default App.extend({
     return this._currentRoute && this._currentRoute.definition.meta;
   },
 
-  _handleChildStop() {
-    // Preserve the current child through Toolkit restart().
-    if (this._current && this._current.isRestarting()) return;
-
-    this._clearCurrent();
-  },
-
   stopCurrent() {
     if (!this._current) return;
 
     const current = this._current;
 
-    this.stopListening(current, 'stop');
     this._clearCurrent();
 
-    current.stop();
+    return current.stop();
   },
 
   _clearCurrent() {

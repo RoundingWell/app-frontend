@@ -78,7 +78,7 @@ export default App.extend({
 
     Backbone.history.loadUrl();
 
-    if (!some(this.routers, router => router.isRunning())) {
+    if (!some(this.routers, router => router.getCurrentRoute())) {
       Radio.trigger('event-router', 'notFound');
     }
   },
