@@ -280,18 +280,11 @@
   width: var(--content-detail-width);
 }
 
-.patient-action__form-body,
 .patient-action__form-region {
   height: auto;
-  width: 100%;
-}
-
-.patient-action__form-region {
-  min-height: 320px;
-}
-
-.patient-action__form-body {
   margin-top: 24px;
+  min-height: 320px;
+  width: 100%;
 }
 
 .patient-action--form-expanded .patient-action__header,
@@ -324,16 +317,12 @@
   width: calc(100% - 48px);
 }
 
-.patient-action--form-expanded .patient-action__form-body,
 .patient-action--form-expanded .patient-action__form-region {
   display: flex;
   flex: 1;
+  margin-top: 0;
   min-height: 0;
   width: 100%;
-}
-
-.patient-action--form-expanded .patient-action__form-body {
-  margin-top: 0;
 }
 
 .patient-action__attachment-file {
