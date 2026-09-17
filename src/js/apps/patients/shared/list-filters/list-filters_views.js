@@ -189,17 +189,16 @@ const CustomFiltersView = CollectionView.extend({
   updateCollapsed() {
     const isExpanded = this.state.get('customFiltersExpanded');
 
-    this.ui.customFiltersList.prop('hidden', !isExpanded);
-    this.ui.sectionButton.attr('aria-expanded', String(isExpanded));
+    this.getUI('customFiltersList').prop('hidden', !isExpanded);
+    this.getUI('sectionButton').attr('aria-expanded', String(isExpanded));
   },
   onClickToggle() {
     this.state.set('customFiltersExpanded', !this.state.get('customFiltersExpanded'));
     this.updateCollapsed();
   },
   setLoading(isLoading) {
-    this.$el
-      .attr('aria-busy', String(isLoading))
-      .toggleClass('is-loading', isLoading);
+    this.el.setAttribute('aria-busy', String(isLoading));
+    this.el.classList.toggle('is-loading', isLoading);
   },
   setLoadError(hasLoadError) {
     this.hasLoadError = hasLoadError;
@@ -243,7 +242,7 @@ const StatesFilterView = View.extend({
     this.showCheck();
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   showCheck() {
     const stateId = this.model.id;
@@ -315,8 +314,8 @@ const StateFiltersView = CollectionView.extend({
   updateCollapsed() {
     const isExpanded = this.model.get(this.expandedState);
 
-    this.ui.sectionButton.attr('aria-expanded', String(isExpanded));
-    this.$el.toggleClass('is-collapsed', !isExpanded);
+    this.getUI('sectionButton').attr('aria-expanded', String(isExpanded));
+    this.el.classList.toggle('is-collapsed', !isExpanded);
   },
   expandSection() {
     this.model.set(this.expandedState, true);
@@ -396,12 +395,12 @@ const PanelView = View.extend({
   },
   toggleCollapsed() {
     const isCollapsed = !this.isDrawer && this.model.get('sidebarCollapsed');
-    this.ui.body.prop('hidden', isCollapsed);
-    this.$el.toggleClass('is-collapsed', isCollapsed);
+    this.getUI('body').prop('hidden', isCollapsed);
+    this.el.classList.toggle('is-collapsed', isCollapsed);
   },
   setDrawerMode(isDrawer) {
     this.isDrawer = isDrawer;
-    this.$el.toggleClass('list-filters--drawer', isDrawer);
+    this.el.classList.toggle('list-filters--drawer', isDrawer);
     this.toggleCollapsed();
   },
 });

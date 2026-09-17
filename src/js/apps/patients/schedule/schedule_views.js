@@ -145,14 +145,15 @@ const DayItemView = View.extend({
       commentCount: this.model.commentCount(),
     };
   },
-  triggers: {
-    'click .js-form': 'click:form',
-  },
   events: {
-    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-action': 'onClickAction',
     'click .js-patient': 'onClickPatient',
+    'click .js-form': 'onClickForm',
+    'click .js-action-surface': 'onClickSurface',
+  },
+  ui: {
+    patient: '.js-patient',
   },
   modelEvents: {
     'change': 'render',
@@ -181,14 +182,17 @@ const DayItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    this.$('.js-patient')
+    this.getUI('patient')
       .toggleClass('patient-list__patient--selected', isSelected)
       .attr('aria-expanded', String(isSelected));
+  },
+  focusPatient() {
+    this.getUI('patient').trigger('focus');
   },
   showCheck() {
     if (!this.canEdit) return;
@@ -211,14 +215,15 @@ const DayItemView = View.extend({
     this.showChildView('check', checkView);
   },
   onClickPatient(event) {
-    event.stopPropagation();
-    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+    event.stopImmediatePropagation();
+    this.trigger('click:patient', this.model.getPatient(), this);
   },
   onClickAction(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction();
   },
-  onClickForm() {
+  onClickForm(event) {
+    event.stopImmediatePropagation();
     this.navigateToAction({ formExpanded: true });
   },
   onClickSurface() {
@@ -289,7 +294,7 @@ const DayListView = CollectionView.extend({
   },
   onListItemRender(view) {
     const date = dayjs(this.model.get('date'));
-    view.searchString = `${ date.format('D') } ${ date.format('MMM, ddd') } ${ view.$el.text() }`;
+    view.searchString = `${ date.format('D') } ${ date.format('MMM, ddd') } ${ view.el.textContent }`;
   },
   searchList(state, searchQuery) {
     if (!searchQuery) {
@@ -395,7 +400,7 @@ const ScheduleListView = CollectionView.extend({
   }, 10),
   setVisibleChildren() {
     const visibleActions = this.children.reduce((models, cv) => {
-      return models.concat(cv.children.pluck('model'));
+      return models.concat(cv.children.map(view => view.model));
     }, []);
     this.triggerMethod('filtered', visibleActions);
   },

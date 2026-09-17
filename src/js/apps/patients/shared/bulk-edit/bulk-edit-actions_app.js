@@ -15,15 +15,16 @@ const StateModel = Backbone.Model.extend({
   },
   updateCollection(collection) {
     const initModel = collection.at(0);
+    const options = { silent: true };
 
-    this.set('collection', collection);
-    if (!this.get('stateChanged')) this.initBulkState(collection, initModel);
-    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel);
-    if (!this.get('dateChanged')) this.initBulkDueDate(collection, initModel);
-    if (!this.get('timeChanged')) this.initBulkDueTime(collection, initModel);
-    if (!this.get('durationChanged')) this.initBulkDuration(collection, initModel);
+    this.set('collection', collection, options);
+    if (!this.get('stateChanged')) this.initBulkState(collection, initModel, options);
+    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel, options);
+    if (!this.get('dateChanged')) this.initBulkDueDate(collection, initModel, options);
+    if (!this.get('timeChanged')) this.initBulkDueTime(collection, initModel, options);
+    if (!this.get('durationChanged')) this.initBulkDuration(collection, initModel, options);
   },
-  initBulkState(collection, initModel) {
+  initBulkState(collection, initModel, options) {
     const state = initModel.getState().getResource();
     const stateMulti = collection.some(item => {
       return item.getState().id !== state.id;
@@ -32,9 +33,9 @@ const StateModel = Backbone.Model.extend({
     this.set({
       stateMulti,
       state: stateMulti ? null : state,
-    });
+    }, options);
   },
-  initBulkOwner(collection, initModel) {
+  initBulkOwner(collection, initModel, options) {
     const owner = initModel.getOwner();
     const program = initModel.getProgram();
     const ownerMulti = collection.some(item => {
@@ -47,9 +48,9 @@ const StateModel = Backbone.Model.extend({
       ownerMulti,
       owner: ownerMulti ? null : owner,
       workspaces: program.getUserWorkspaces(),
-    });
+    }, options);
   },
-  initBulkDueDate(collection, initModel) {
+  initBulkDueDate(collection, initModel, options) {
     const date = initModel.get('due_date');
     const dateMulti = collection.some(item => {
       return item.get('due_date') !== date;
@@ -60,9 +61,9 @@ const StateModel = Backbone.Model.extend({
       dateMulti,
       date: dateMulti ? null : date,
       hasMissingDueDate,
-    });
+    }, options);
   },
-  initBulkDueTime(collection, initModel) {
+  initBulkDueTime(collection, initModel, options) {
     const time = initModel.get('due_time');
     const timeMulti = collection.some(item => {
       return item.get('due_time') !== time;
@@ -71,9 +72,9 @@ const StateModel = Backbone.Model.extend({
     this.set({
       timeMulti,
       time: timeMulti ? null : time,
-    });
+    }, options);
   },
-  initBulkDuration(collection, initModel) {
+  initBulkDuration(collection, initModel, options) {
     const duration = initModel.get('duration');
     const durationMulti = collection.some(item => {
       return item.get('duration') !== duration;
@@ -82,7 +83,7 @@ const StateModel = Backbone.Model.extend({
     this.set({
       durationMulti,
       duration: durationMulti ? null : duration,
-    });
+    }, options);
   },
   setState(state) {
     return this.set({ state: state.getResource(), stateMulti: false, stateChanged: true });

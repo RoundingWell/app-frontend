@@ -315,7 +315,7 @@ const ListView = CollectionView.extend({
     'click:patient': 'click:patient',
   },
   onListItemRender(view) {
-    view.searchString = view.$el.text();
+    view.searchString = view.el.textContent;
   },
   onListItemCanEdit() {
     // NOTE: debounced in initialize
@@ -341,15 +341,14 @@ const ListView = CollectionView.extend({
   /* istanbul ignore next: future proof */
   onRenderChildren() {
     if (!this.isAttached()) return;
-    this.triggerMethod('filtered', this.children.map('model'));
+    this.triggerMethod('filtered', this.children.map(view => view.model));
   },
   onSelect(selectedView, isShiftKeyPressed) {
     this.state.selectRange(this.editableCollection, selectedView.model, isShiftKeyPressed);
   },
   setLoading(isLoading) {
-    this.$el
-      .attr('aria-busy', String(isLoading))
-      .toggleClass('is-loading', isLoading);
+    this.el.setAttribute('aria-busy', String(isLoading));
+    this.el.classList.toggle('is-loading', isLoading);
   },
   searchList(state, searchQuery) {
     if (!searchQuery) {

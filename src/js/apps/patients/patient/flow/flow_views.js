@@ -215,11 +215,11 @@ const ActionItemView = View.extend({
     form: '[data-form-region]',
   },
   events: {
-    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-action-surface': 'onClickSurface',
   },
   navigateToAction(entryTarget) {
     Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id, entryTarget);
@@ -228,15 +228,15 @@ const ActionItemView = View.extend({
     this.navigateToAction();
   },
   onClickPrimary(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction();
   },
   onClickAttachments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction({ section: 'attachments' });
   },
   onClickComments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction({ section: 'comments' });
   },
   onRender() {

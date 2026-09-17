@@ -1,10 +1,12 @@
 import App from 'js/base/app';
 
 export default App.extend({
+  createState({ stateOptions }) {
+    return new this.StateModel(stateOptions);
+  },
   onStart() {
     const view = new this.ViewClass({
       model: this.getState(),
-      collection: this.getState('collection'),
     });
 
     this.listenTo(view, {
@@ -16,23 +18,19 @@ export default App.extend({
   },
   updateCollection(collection) {
     this.getState().updateCollection(collection);
-    this.getView().collection = collection;
-    this.getView().render();
+    this.getView().updateCollection();
   },
   onClickCancel() {
     this.trigger('cancel');
   },
   onSubmit() {
-    this.setState({ isSaving: true });
+    this.getState().set({ isSaving: true });
 
-    const applyOwner = !!this.getState('applyOwner');
+    const applyOwner = !!this.getState().get('applyOwner');
     if (applyOwner) {
-      this.triggerMethod('applyOwner', this.getState('owner'));
+      this.triggerMethod('applyOwner', this.getState().get('owner'));
     }
 
     this.triggerMethod('save', this.getState().getData());
-  },
-  onStop() {
-    this.getRegion().empty();
   },
 });

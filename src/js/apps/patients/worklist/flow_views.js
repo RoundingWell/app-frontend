@@ -74,11 +74,11 @@ const FlowItemView = View.extend({
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
   onClickPatient(event) {
-    event.stopPropagation();
-    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+    event.stopImmediatePropagation();
+    this.trigger('click:patient', this.model.getPatient(), this);
   },
   onClickPrimary(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToFlow();
   },
   onRender() {
@@ -96,14 +96,17 @@ const FlowItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    this.ui.patient
+    this.getUI('patient')
       .toggleClass('patient-list__patient--selected', isSelected)
       .attr('aria-expanded', String(isSelected));
+  },
+  focusPatient() {
+    this.getUI('patient').trigger('focus');
   },
   showCheck() {
     if (!this.canEdit) return;

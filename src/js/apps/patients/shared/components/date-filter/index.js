@@ -230,7 +230,7 @@ export default View.extend({
     }
 
     this.getState().setRelativeDate(selected, this.dateTypeState.get('dateType'));
-    this.popView.destroy();
+    this.popView?.destroy();
   },
   showDatePicker() {
     const datePicker = new DateFilterPicker({
@@ -243,23 +243,23 @@ export default View.extend({
   },
   onSelectCurrentWeek() {
     this.getState().setRelativeDate('thisweek', this.dateTypeState.get('dateType'));
-    this.popView.destroy();
+    this.popView?.destroy();
   },
   onSelectToday() {
     this.getState().setRelativeDate('today', this.dateTypeState.get('dateType'));
-    this.popView.destroy();
+    this.popView?.destroy();
   },
   onSelectCurrentMonth() {
     this.getState().setRelativeDate('thismonth', this.dateTypeState.get('dateType'));
-    this.popView.destroy();
+    this.popView?.destroy();
   },
   onChangeSelectedDate(date) {
     this.getState().setDate(date, this.dateTypeState.get('dateType'));
-    this.popView.destroy();
+    this.popView?.destroy();
   },
   onChangeSelectedMonth(month) {
     this.getState().setMonth(month, this.dateTypeState.get('dateType'));
-    this.popView.destroy();
+    this.popView?.destroy();
   },
   onDestroyPop(popView) {
     this.stopListening(popView);

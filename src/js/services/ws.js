@@ -7,11 +7,10 @@ import App from 'js/base/app';
 import fetcher, { handleJSON } from 'js/base/fetch';
 
 const AdderApp = App.extend({
-  restartWithParent: false,
-  beforeStart({ model, dataParams }) {
-    return model.fetch({ data: dataParams });
+  prepareStart({ model, dataParams }, { signal }) {
+    return model.fetch({ data: dataParams, signal });
   },
-  onStart({ model, collection }) {
+  onStart(app, { model, collection }) {
     collection.add(model);
     Radio.request('ws', 'add', model);
     this.destroy();
@@ -40,10 +39,13 @@ export default App.extend({
     this.reconnectAttempts = 0;
   },
 
-  getUrl() {
-    return fetcher('/api/websockets')
+  getUrl({ signal } = {}) {
+    return fetcher('/api/websockets', { signal })
       .then(handleJSON)
-      .then(({ data }) => {
+      .then(response => {
+        if (!response) return;
+
+        const { data } = response;
         if (!data.is_enabled) return;
         const { token, query_parameter: queryParameter } = data.authentication;
 
@@ -53,11 +55,11 @@ export default App.extend({
       });
   },
 
-  beforeStart() {
-    return this.getUrl();
+  prepareStart(options, { signal }) {
+    return this.getUrl({ signal });
   },
 
-  onStart({ data }, url) {
+  onStart(app, { data } = {}, url) {
     /* istanbul ignore next: Essentially avoid offline */
     if (!url) return;
     this.ws = new WebSocket(url.toString());
@@ -193,7 +195,7 @@ export default App.extend({
 
       if (app.isRunning() && app.getChildApp(appName)) return;
 
-      const adderApp = app.addChildApp(appName, AdderApp);
+      const adderApp = app.addChildApp(appName, new AdderApp());
       adderApp.start({ model, collection, dataParams });
     });
   },

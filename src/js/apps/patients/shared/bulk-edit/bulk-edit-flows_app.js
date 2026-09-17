@@ -12,12 +12,13 @@ const StateModel = Backbone.Model.extend({
   },
   updateCollection(collection) {
     const initModel = collection.at(0);
+    const options = { silent: true };
 
-    this.set('collection', collection);
-    if (!this.get('stateChanged')) this.initBulkState(collection, initModel);
-    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel);
+    this.set('collection', collection, options);
+    if (!this.get('stateChanged')) this.initBulkState(collection, initModel, options);
+    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel, options);
   },
-  initBulkState(collection, initModel) {
+  initBulkState(collection, initModel, options) {
     const state = initModel.getState().getResource();
     const stateMulti = collection.some(item => {
       return item.getState().id !== state.id;
@@ -26,9 +27,9 @@ const StateModel = Backbone.Model.extend({
     this.set({
       stateMulti,
       state: stateMulti ? null : state,
-    });
+    }, options);
   },
-  initBulkOwner(collection, initModel) {
+  initBulkOwner(collection, initModel, options) {
     const owner = initModel.getOwner();
     const program = initModel.getProgram();
     const ownerMulti = collection.some(item => {
@@ -41,7 +42,7 @@ const StateModel = Backbone.Model.extend({
       ownerMulti,
       owner: ownerMulti ? null : owner,
       workspaces: program.getUserWorkspaces(),
-    });
+    }, options);
   },
   setState(state) {
     return this.set({ state: state.getResource(), stateMulti: false, stateChanged: true });

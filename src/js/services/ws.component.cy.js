@@ -132,8 +132,7 @@ context('WS Service', function() {
       .should('be.calledTwice')
       .then(spy => {
         const secondCall = spy.getCall(1);
-        expect(secondCall.args[0]).to.deep.equal({
-          state: {},
+        expect(secondCall.args[1]).to.deep.equal({
           data: {
             name: 'Subscribe',
             data: {
@@ -390,8 +389,7 @@ context('WS Service', function() {
       .then(spy => {
         const secondCall = spy.getCall(1);
 
-        expect(secondCall.args[0]).to.deep.equal({
-          state: {},
+        expect(secondCall.args[1]).to.deep.equal({
           data: {
             name: 'Subscribe',
             data: {
@@ -582,8 +580,7 @@ context('WS Service', function() {
       .then(spy => {
         const call = spy.getCall(1);
 
-        expect(call.args[0]).to.deep.equal({
-          state: {},
+        expect(call.args[1]).to.deep.equal({
           data: {
             name: 'Subscribe',
             data: {

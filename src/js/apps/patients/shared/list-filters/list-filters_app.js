@@ -5,18 +5,30 @@ import App from 'js/base/app';
 import { PanelView, LayoutView, HeadingView, MenuView, CustomFiltersLoadingView, CustomFiltersView, StatesFiltersView, FlowStatesFiltersView } from 'js/apps/patients/shared/list-filters/list-filters_views';
 
 const ListFiltersApp = App.extend({
-  onStart({ filtersState }) {
+  ViewClass: LayoutView,
+
+  onBeforeStart(app, options) {
+    const view = this.setView(new this.ViewClass({
+      isDrawer: options.isDrawer,
+      model: options.layoutState,
+    }));
+
+    view.render();
+    view.showChildView('content', new LayoutView());
+    if (options.controlsView) view.showChildView('controls', options.controlsView);
+  },
+  onStart(app, { filtersState }) {
     this.filtersState = filtersState;
     this.filters = Radio.request('entities', 'filters:customFilters');
     this.isCustomFiltersLoaded = false;
 
     this.showHeadingView();
     this.showMenu();
-    this.showChildView('content', new LayoutView());
     this.showCustomFiltersLoadingView();
     this.loadCustomFilters();
     this.showStatesFiltersView();
     this.showFlowStatesFiltersView();
+    this.showView();
 
     this.listenTo(filtersState, {
       'change:listType'() {
@@ -31,7 +43,7 @@ const ListFiltersApp = App.extend({
   showHeadingView() {
     const headerView = new HeadingView({ model: this.filtersState });
 
-    this.showChildView('heading', headerView);
+    this.getView().showChildView('heading', headerView);
   },
   showMenu() {
     const menuView = new MenuView({ model: this.filtersState });
@@ -40,7 +52,7 @@ const ListFiltersApp = App.extend({
       this.filtersState.setDefaultFilterStates();
     });
 
-    this.showChildView('menu', menuView);
+    this.getView().showChildView('menu', menuView);
   },
   showCustomFiltersLoadingView() {
     const loadingView = new CustomFiltersLoadingView({ filterCount: Math.min(this.filters.length, 2) });
@@ -60,7 +72,7 @@ const ListFiltersApp = App.extend({
     if (!request) return;
 
     this.customFiltersController = controller;
-    const currentView = this.getChildView('content').getRegion('customFilters').currentView;
+    const currentView = this.getView().getChildView('content').getRegion('customFilters').currentView;
 
     if (this.isCustomFiltersLoaded && currentView && currentView.setLoading) {
       currentView.setLoading(true);
@@ -81,7 +93,7 @@ const ListFiltersApp = App.extend({
           return;
         }
 
-        const customFiltersView = this.getChildView('content').getRegion('customFilters').currentView;
+        const customFiltersView = this.getView().getChildView('content').getRegion('customFilters').currentView;
 
         customFiltersView.setLoadError(hasLoadError);
         customFiltersView.setLoading(false);
@@ -110,14 +122,14 @@ const ListFiltersApp = App.extend({
     this.showContentView('customFilters', customFiltersView);
   },
   showContentView(name, view, options) {
-    const region = this.getChildView('content').getRegion(name);
+    const region = this.getView().getChildView('content').getRegion(name);
     region.show(view, options);
     return view;
   },
   showFlowStatesFiltersView() {
     // Filters actions by their flow's state
     if (this.filtersState.isFlowType()) {
-      this.getChildView('content').getRegion('flowStatesFilters').empty();
+      this.getView().getChildView('content').getRegion('flowStatesFilters').empty();
       return;
     }
 
@@ -142,16 +154,7 @@ const ListFiltersApp = App.extend({
 });
 
 const ListFiltersPanelApp = ListFiltersApp.extend({
-  onStart(options) {
-    this.showView(new PanelView({
-      isDrawer: options.isDrawer,
-      model: options.layoutState,
-    }));
-
-    if (options.controlsView) this.showChildView('controls', options.controlsView);
-
-    ListFiltersApp.prototype.onStart.call(this, options);
-  },
+  ViewClass: PanelView,
 });
 
 export {

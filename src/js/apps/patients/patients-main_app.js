@@ -12,14 +12,16 @@ import ScheduleApp from 'js/apps/patients/schedule/schedule_app';
 export default RouterApp.extend({
   routerAppName: 'PatientsApp',
 
-  childApps: {
-    patient: PatientApp,
-    ownedBy: WorklistApp,
-    forTeam: WorklistApp,
-    newPastDay: WorklistApp,
-    pastThree: WorklistApp,
-    lastThirty: WorklistApp,
-    schedule: ScheduleApp,
+  initialize() {
+    const region = this.getRegion();
+
+    this.addChildApp('patient', new PatientApp({ region }));
+    this.addChildApp('ownedBy', new WorklistApp({ region }));
+    this.addChildApp('forTeam', new WorklistApp({ region }));
+    this.addChildApp('newPastDay', new WorklistApp({ region }));
+    this.addChildApp('pastThree', new WorklistApp({ region }));
+    this.addChildApp('lastThirty', new WorklistApp({ region }));
+    this.addChildApp('schedule', new ScheduleApp({ region }));
   },
 
   eventRoutes: {
@@ -91,7 +93,7 @@ export default RouterApp.extend({
     Radio.trigger('dialer', 'change:currentPatientId', null);
   },
 
-  showPatientsWorklist(worklistId, options) {
+  async showPatientsWorklist(worklistId, options) {
     this.clearCurrentPatient();
 
     const worklistsById = {
@@ -107,12 +109,28 @@ export default RouterApp.extend({
       return;
     }
 
-    this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    }
   },
 
-  showSchedule() {
+  async showSchedule() {
     this.clearCurrentPatient();
-    this.startCurrent('schedule');
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startCurrent('schedule');
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    }
   },
 
   showPatient(patientId) {
