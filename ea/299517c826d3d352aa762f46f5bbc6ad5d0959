@@ -1,0 +1,24 @@
+src/js/behaviors/input-watcher.js
+  s_85aebd1623278c::t_35800322fc6303 24
+src/js/apps/dashboards/dashboards-main_app.js
+  s_85aebd1623278c::t_f1fc3876b30542 32-36,38-41
+  s_85aebd1623278c::t_0d9360f066feef 37
+src/js/behaviors/input-watcher.component.cy.js
+  s_85aebd1623278c::t_fd57a4b3e8a962 1-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ea299517c826d3d352aa762f46f5bbc6ad5d0959",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
