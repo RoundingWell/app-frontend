@@ -25,8 +25,8 @@ const PatientStub = SubRouterApp.extend({
 
 const Router = RouterApp.extend({
   routerAppName: 'patients',
-  childApps: {
-    patient: PatientStub,
+  initialize() {
+    this.addChildApp('patient', new PatientStub());
   },
   eventRoutes() {
     return {
@@ -37,7 +37,9 @@ const Router = RouterApp.extend({
     };
   },
   showPatient(patientId) {
-    this.startRoute('patient', { patientId });
+    this.routePromise = this.startRoute('patient', { patientId });
+
+    return this.routePromise;
   },
   showWorklist() {},
   showSchedule() {},
@@ -50,8 +52,8 @@ function trigger(app, event, ...args) {
 context('RouterApp', function() {
   let app;
 
-  afterEach(function() {
-    if (app) app.destroy();
+  afterEach(async function() {
+    if (app) await app.destroy();
     app = null;
   });
 
@@ -148,60 +150,68 @@ context('RouterApp', function() {
   });
 
   describe('scope identity', function() {
-    specify('reuses the child and forwards the route for an equal scope', function() {
+    specify('reuses the child and forwards the route for an equal scope', async function() {
       app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'patient:workflow', 'p1');
+      await app.routePromise;
       const child = app.getCurrent();
 
       trigger(app, 'patient:action', 'p1', 'a1');
+      await app.routePromise;
 
       expect(app.getCurrent()).to.equal(child);
       expect(child.startCount).to.equal(1);
       expect(child.routes).to.deep.equal(['patient:workflow', 'patient:action']);
     });
 
-    specify('restarts the child for a different scope', function() {
+    specify('restarts the child for a different scope', async function() {
       app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'patient:workflow', 'p1');
+      await app.routePromise;
       const child = app.getCurrent();
 
       trigger(app, 'patient:workflow', 'p2');
+      await app.routePromise;
 
       expect(child.startCount).to.equal(2);
     });
 
-    specify('startCurrent is unconditional even for an equal scope', function() {
+    specify('startCurrent is unconditional even for an equal scope', async function() {
       app = new Router({ workspaceSlug: 'test-ws' });
-      app.startCurrent('patient', { patientId: 'p1' });
+      await app.startCurrent('patient', { patientId: 'p1' });
       const child = app.getCurrent();
-      app.startCurrent('patient', { patientId: 'p1' });
+      await app.startCurrent('patient', { patientId: 'p1' });
 
       expect(child.startCount).to.equal(2);
     });
   });
 
   describe('child stop cleanup', function() {
-    specify('clears current references when the child stops itself', function() {
+    specify('restarts a stopped child for the next route in the same scope', async function() {
       app = new Router({ workspaceSlug: 'test-ws' });
       trigger(app, 'patient:workflow', 'p1');
+      await app.routePromise;
       const child = app.getCurrent();
 
-      child.stop();
-
-      expect(app.getCurrent()).to.equal(null);
-      expect(app.isCurrent('patient', { patientId: 'p1' })).to.equal(false);
-    });
-
-    specify('keeps the current child when it restarts itself', function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
-      trigger(app, 'patient:workflow', 'p1');
-      const child = app.getCurrent();
-
-      // a Toolkit restart() emits stop+start; the child remains current
-      child.restart();
+      await child.stop();
+      trigger(app, 'patient:action', 'p1', 'a1');
+      await app.routePromise;
 
       expect(app.getCurrent()).to.equal(child);
-      expect(app.isCurrent('patient', { patientId: 'p1' })).to.equal(true);
+      expect(child.startCount).to.equal(2);
+      expect(child.routes).to.deep.equal(['patient:workflow', 'patient:action']);
+    });
+
+    specify('clears the current child when its owner stops', async function() {
+      app = new Router({ workspaceSlug: 'test-ws' });
+      trigger(app, 'patient:workflow', 'p1');
+      await app.routePromise;
+      const child = app.getCurrent();
+
+      await app.stop();
+
+      expect(app.getCurrent()).to.equal(null);
+      expect(child.isRunning()).to.equal(false);
     });
   });
 });

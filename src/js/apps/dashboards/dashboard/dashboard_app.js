@@ -5,29 +5,25 @@ import { getEmbeddingContext } from '@roundingwell/care-ops-quicksight';
 import App from 'js/base/app';
 import { LayoutView, ContextTrailView, getEmbedView } from 'js/apps/dashboards/dashboard/dashboard_views';
 
-import intl from 'js/i18n';
-
 export default App.extend({
   onBeforeStart() {
-    this.showView(new LayoutView());
-    this.getRegion('dashboard').startPreloader({ variant: 'generic' });
+    const view = this.setView(new LayoutView());
+
+    view.render();
+    view.getRegion('dashboard').startPreloader({ variant: 'generic' });
+    this.showView();
   },
-  beforeStart({ dashboardId }) {
-    return [
-      Radio.request('entities', 'fetch:dashboards:model', dashboardId),
+  prepareStart({ dashboardId }, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:dashboards:model', dashboardId, { signal }),
       getEmbeddingContext(),
-    ];
+    ]);
   },
-  onStart(options, dashboard) {
-    this.showChildView('contextTrail', new ContextTrailView({
+  onStart(app, options, [dashboard]) {
+    this.getView().showChildView('contextTrail', new ContextTrailView({
       model: dashboard,
     }));
 
-    this.showChildView('dashboard', getEmbedView(dashboard));
-  },
-  onFail() {
-    Radio.request('alert', 'show:error', intl.dashboards.dashboardApp.notFound);
-    Radio.trigger('event-router', 'dashboards:all');
-    this.stop();
+    this.getView().showChildView('dashboard', getEmbedView(dashboard));
   },
 });

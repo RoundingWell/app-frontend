@@ -13,7 +13,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `c4cd71a4dd60eae3d6d4acaaee2f966c9b22f7d9`.
+  `73e95e3c9ee287819e4008c0d11572f945dd061f`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -65,27 +65,22 @@
   now selects and composes its root while detached, then displays the complete
   tree from `onStart()` through its replacing root Region. It was merged by a
   human.
-- Active step: keep the runtime and adapters pinned to beta.4, move the app
-  atomically from `backbone.radio` to Marionette Radio, and migrate global
-  bootstrap startup to explicit child ownership and cancellation. Published
-  beta.4 supplies the preparation contract previously backported from
-  Marionette PR #533, so the version-pinned patch and install hook are removed.
-  Root and bootstrap readiness use `prepareStart` and pass the prepared result
-  to `onStart`.
-- The PR keeps the Radio registry cutover as its first independently reviewable
-  commit on beta.2. The second commit upgrades to beta.4 and migrates
-  root/bootstrap readiness against the published preparation contract. The
-  third commit migrates the
-  AppFrame/Nav boundary: the root prepares AppFrame while detached, AppFrame owns
-  Nav and its area routers, Nav owns Search and its state, and workspace readiness
-  uses the v5 preparation and cancellation contract.
+- Completed: PR #1789 moved the app to the published beta.4 runtime, the single
+  Marionette Radio registry, and explicit root, bootstrap, AppFrame, Nav, Search,
+  and area-router ownership. It removed the temporary package patch and was
+  merged by a human.
+- Active step: migrate RouterApp's selected-child lifecycle and the Dashboard
+  list/detail route tree together. Dashboard children are explicitly owned,
+  asynchronous fetches use `prepareStart` and cancellation, list search is owned
+  Backbone state, and Application-controlled layouts are composed before display.
+- The shared list-search path now consumes native DOM events and elements exposed
+  by beta.4 instead of relying on jQuery event and `$el` methods.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: move each area RouterApp's route-driven child ownership
-  together with its per-route startup data. Ownership must not move separately
-  from route inputs.
+- Next after human merge: migrate the next smallest area RouterApp's route-driven
+  child ownership together with its per-route startup data.
 
 ## Validation
 
@@ -205,6 +200,17 @@
   beta.4 package reports source revision
   `f4165f14198da115cc998c842fbf4b6a4886fe45` and content SHA-256
   `f4a73b9e5421b5388f5e41868deb51ae2d3c0da800d10e417fa97238bae5762d`.
+- The Dashboard route slice passes targeted ESLint, the RouterApp component spec
+  (12 tests), the test-mode build, and both unchanged Dashboard E2E specs (7
+  tests). The first E2E run exposed two migration gaps: AppFrame treated
+  `isRunning()` as synchronous route-match evidence while beta.4 preparation was
+  pending, and the shared list-search path expected jQuery event/UI wrappers.
+  Route context now supplies the match signal and the shared input path uses the
+  native event and DOM contracts.
+- Focused InputWatcher coverage passes for a host textarea override and an
+  input-less host. The existing Picklist component spec now mounts without the
+  input watcher crashing; four tests pass and three keyboard transport/selection
+  assertions remain as a later post-cutover migration boundary.
 - The results below belong to the preceding Picklist step, before the runtime
   cutover.
 - The test-mode build passed.

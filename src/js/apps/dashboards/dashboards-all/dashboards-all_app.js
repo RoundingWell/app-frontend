@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import Backbone from 'backbone';
 
 import App from 'js/base/app';
 
@@ -6,38 +7,36 @@ import { ListView, LayoutView } from 'js/apps/dashboards/dashboards-all/dashboar
 import SearchView from 'js/components/list-search';
 
 export default App.extend({
-  stateEvents: {
-    'change:searchQuery': 'onChangSearchQuery',
-  },
-  onChangSearchQuery(state) {
-    this.currentSearchQuery = state.get('searchQuery');
+  createState() {
+    return new Backbone.Model({ searchQuery: '' });
   },
   onBeforeStart() {
-    this.showView(new LayoutView());
-    this.getRegion('list').startPreloader({ variant: 'generic' });
+    const view = this.setView(new LayoutView());
 
-    this.setState({ searchQuery: this.currentSearchQuery });
+    view.render();
+    view.getRegion('list').startPreloader({ variant: 'generic' });
 
     this.showSearchView();
+    this.showView();
   },
-  beforeStart() {
-    return Radio.request('entities', 'fetch:dashboards:collection');
+  prepareStart(options, { signal }) {
+    return Radio.request('entities', 'fetch:dashboards:collection', { signal });
   },
-  onStart(options, collection) {
-    this.showChildView('list', new ListView({
+  onStart(app, options, collection) {
+    this.getView().showChildView('list', new ListView({
       collection,
       state: this.getState(),
     }));
   },
   showSearchView() {
-    const searchView = this.showChildView('search', new SearchView({
-      query: this.getState('searchQuery'),
+    const searchView = this.getView().showChildView('search', new SearchView({
+      query: this.getState().get('searchQuery'),
     }));
 
     this.listenTo(searchView, 'change:query', this.setSearchState);
   },
   setSearchState(searchQuery) {
-    this.setState({
+    this.getState().set({
       searchQuery: searchQuery.length > 2 ? searchQuery : '',
     });
   },

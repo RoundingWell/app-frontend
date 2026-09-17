@@ -108,8 +108,8 @@ routeScope: []              // CliniciansAllApp — always "the same" instance
 `getRouteScope(options = {})` returns `pick(options, routeScope)`. RouterApp compares
 scope objects with `isEqual` — **never** the full startup options:
 
-- **Same app + equal scope** → reuse the running (or loading) child; forward the
-  newest route to it.
+- **Same app + equal scope** → reuse the selected child; forward the newest route
+  and start it if it was stopped.
 - **Different app or scope** → stop the current child and start the replacement.
 
 Scope identity is workspace/resource identity, **not** route-specific detail. Put the
@@ -155,11 +155,15 @@ routeActions: {
 
 ## Stop and restart
 
-- RouterApp keeps exactly one stop listener per current child. A child that stops
-  **itself** clears RouterApp's current-child references.
-- Route-driven child ownership is not yet migrated. Its current restart-specific
-  tracking must be removed atomically when RouterApp adopts those children through
-  Marionette ownership and supplies their per-route startup data.
+- RouterApp starts and stops its selected child asynchronously. A newer route wins
+  if it arrives while the prior child is stopping or preparing.
+- Route children are registered as owned Application instances. Owner stop and
+  destruction clean them up; RouterApp clears its selection after its own stop.
+  A selected child that stopped independently is restarted when the next matching
+  route arrives.
+- Dashboard route ownership is migrated. Other area routers must move their child
+  registration and per-route startup data together rather than adding a temporary
+  options or lifecycle compatibility path.
 - A `SubRouterApp` owns its current route in Marionette state. Application state
   persists while stopped and across `restart()`, so the route re-dispatches after
   re-fetching without restart flags or threading `currentRoute` through options.
@@ -191,8 +195,9 @@ layer.
 
 1. Add/extend the `RouterApp` `eventRoutes` entry: `action`, `route` (string or alias
    array), and `meta` for any behavioral flag. Keep IDs out of `meta`.
-2. Implement the positional action handler; route to a child via `startRoute(appName,
-   options)` (scoped child) or `startCurrent(appName, options)` (plain page app).
+2. Register each child instance with `addChildApp()`. Implement the positional
+   action handler and return `startRoute(appName, options)` (scoped child) or
+   `startCurrent(appName, options)` (plain page app).
 3. If the child is a `SubRouterApp`: declare `routeScope`, add the event to
    `routeActions`, read route data via `getCurrentRoute()`, and call
    `startCurrentRoute()` in `onStart()`.

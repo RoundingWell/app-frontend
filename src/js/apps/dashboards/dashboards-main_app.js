@@ -1,3 +1,7 @@
+import { Radio } from 'marionette';
+
+import intl from 'js/i18n';
+
 import RouterApp from 'js/base/routerapp';
 
 import DashboardsAllApp from 'js/apps/dashboards/dashboards-all/dashboards-all_app';
@@ -6,9 +10,11 @@ import DashboardApp from 'js/apps/dashboards/dashboard/dashboard_app';
 export default RouterApp.extend({
   routerAppName: 'DashboardsApp',
 
-  childApps: {
-    dashboardsAll: DashboardsAllApp,
-    dashboard: DashboardApp,
+  initialize() {
+    const region = this.getRegion();
+
+    this.addChildApp('dashboardsAll', new DashboardsAllApp({ region }));
+    this.addChildApp('dashboard', new DashboardApp({ region }));
   },
 
   eventRoutes: {
@@ -23,10 +29,27 @@ export default RouterApp.extend({
     },
   },
 
-  showDashboardsAll() {
-    this.startCurrent('dashboardsAll');
+  async showDashboardsAll() {
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startCurrent('dashboardsAll');
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    }
   },
-  showDashboard(dashboardId) {
-    this.startCurrent('dashboard', { dashboardId });
+  async showDashboard(dashboardId) {
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startCurrent('dashboard', { dashboardId });
+    } catch {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.request('alert', 'show:error', intl.dashboards.dashboardApp.notFound);
+      Radio.trigger('event-router', 'dashboards:all');
+    }
   },
 });
