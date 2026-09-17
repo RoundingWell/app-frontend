@@ -42,7 +42,10 @@ export default App.extend({
   getUrl({ signal } = {}) {
     return fetcher('/api/websockets', { signal })
       .then(handleJSON)
-      .then(({ data }) => {
+      .then(response => {
+        if (!response) return;
+
+        const { data } = response;
         if (!data.is_enabled) return;
         const { token, query_parameter: queryParameter } = data.authentication;
 

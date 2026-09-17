@@ -201,10 +201,7 @@ const ScheduleApp = App.extend({
     this.getState().clearSelected();
 
     const app = this.getChildApp('bulkEditActions');
-    if (app) {
-      app.updateCollection(this.selected);
-      app.getView().el.hidden = true;
-    }
+    if (app) app.getView().el.hidden = true;
 
     return this._canRefresh;
   },
