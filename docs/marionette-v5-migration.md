@@ -450,3 +450,21 @@
   cover the known patient-detail `$el` path plus bulk-edit visibility, find-list
   refresh, and click-shift list setup; they remain migration work rather than
   test changes.
+- The patient shell and workflow route now use beta.4 preparation, owned child
+  Applications, detached initial composition, and cancellation-aware fetches.
+  Route page Applications are created only when selected, so an unmigrated
+  Action, Flow, or Form page cannot break the default workflow route during
+  construction.
+- Program action and flow collection services accepted a behavior argument but
+  discarded fetch options. Their existing request contract now also forwards
+  options so Application cancellation reaches the underlying Backbone fetch.
+- Focused unchanged E2E currently passes 4/5 patient-shell cases, 7/9 workflow
+  cases, and 9/10 patient-sidebar cases. The remaining patient alias and
+  add-workflow failures enter the not-yet-migrated Action Application; the
+  workflow tooltip assertion and sidebar `$el.prop` failure are separate
+  existing integration gaps. Those belong to following route/component steps
+  rather than an E2E rewrite.
+- Cypress fixture generation is not concurrency-safe: three parallel focused
+  runs wrote the same ignored JSON fixtures and produced trailing data. Running
+  the specs serially regenerated valid fixtures; this was test tooling friction,
+  not a Marionette or application failure.

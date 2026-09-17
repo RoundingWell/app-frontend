@@ -207,6 +207,31 @@ context('WS Service', function() {
       });
   });
 
+  specify('Managing additions only while an app is running', function() {
+    const channel = Radio.channel('ws');
+    const collection = new Backbone.Collection();
+    const model = new Backbone.Model({ id: 'flow-id' });
+    const app = new Backbone.Model();
+    const start = cy.stub();
+
+    model.type = 'flows';
+    app.isRunning = cy.stub().returns(true);
+    app.getChildApp = cy.stub();
+    app.addChildApp = cy.stub().returns({ start });
+
+    service.manageAdd(app, collection, 'flows');
+    app.trigger('before:stop');
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+    expect(app.addChildApp).to.not.be.called;
+
+    service.manageAdd(app, collection, 'flows');
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+    expect(app.addChildApp).to.be.calledOnce;
+    expect(start).to.be.calledOnceWith({ model, collection, dataParams: undefined });
+  });
+
   specify('Heartbeat', function() {
     service.HEART_BEAT_INTERVAL = 10;
 

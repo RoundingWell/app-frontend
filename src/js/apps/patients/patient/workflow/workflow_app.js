@@ -2,6 +2,8 @@ import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import { NIL as NIL_UUID } from 'uuid';
 
+import { addError } from 'js/datadog';
+
 import App from 'js/base/app';
 
 import { ACTION_INCLUDE } from 'js/entities-service/actions';
@@ -12,11 +14,7 @@ import AddWorkflowApp from './add-workflow_app';
 import { LayoutView, ListView, WorkflowLoadingView } from './workflow_views';
 
 export default App.extend({
-  childApps: {
-    addWorkflow: AddWorkflowApp,
-  },
-
-  onBeforeStart({ patient, status }) {
+  onBeforeStart(app, { patient, status }) {
     const currentWorkspace = Radio.request('workspace', 'current');
     const stateGroup = currentWorkspace.getStates().groupByDone()[status];
 
@@ -25,28 +23,31 @@ export default App.extend({
     this.status = status;
     this.states = stateGroup.getFilterIds();
 
-    this.showView(new LayoutView({
+    const view = this.setView(new LayoutView({
       model: patient,
       status,
-    }));
+    })).render();
 
     if (status === 'notDone' && !this.currentUser.can('work:own')) {
-      this.getRegion('addWorkflow').empty();
+      view.getRegion('addWorkflow').empty();
     }
 
-    this.showChildView('content', new WorkflowLoadingView());
+    view.showChildView('content', new WorkflowLoadingView());
+
+    // Every start replaces the workflow content with its loading state.
+    this.showView();
   },
 
-  beforeStart({ patient }) {
+  prepareStart({ patient }, { signal }) {
     const filter = { states: this.states };
 
-    return [
-      Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId: patient.id, filter }),
-      Radio.request('entities', 'fetch:flows:collection:byPatient', { patientId: patient.id, filter }),
-    ];
+    return Promise.all([
+      Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId: patient.id, filter }, { signal }),
+      Radio.request('entities', 'fetch:flows:collection:byPatient', { patientId: patient.id, filter }, { signal }),
+    ]);
   },
 
-  onStart(options, actions, flows) {
+  onStart(app, options, [actions, flows]) {
     this.collection = new Backbone.Collection([...actions.models, ...flows.models]);
 
     this.subscribe();
@@ -56,12 +57,21 @@ export default App.extend({
       status: this.status,
     });
 
-    this.showChildView('content', new ListView({
+    this.getView().showChildView('content', new ListView({
       collection: this.collection,
       status: this.status,
     }));
 
+    this.addChildApp('addWorkflow', new AddWorkflowApp({
+      region: this.getView().getRegion('addWorkflow'),
+    }));
+
     this.startAddWorkflow();
+    this.showView();
+  },
+
+  prepareStop(options) {
+    return this.removeChildApp('addWorkflow', options);
   },
 
   subscribe() {
@@ -80,15 +90,14 @@ export default App.extend({
   startAddWorkflow() {
     if (this.status === 'done' || !this.currentUser.can('work:own')) return;
 
-    const addWorkflow = this.startChildApp('addWorkflow', {
-      region: this.getRegion('addWorkflow'),
-      patient: this.patient,
-    });
+    const addWorkflow = this.getChildApp('addWorkflow');
 
     this.listenTo(addWorkflow, {
       'add:programAction': this.onAddProgramAction,
       'add:programFlow': this.onAddProgramFlow,
     });
+
+    addWorkflow.start({ patient: this.patient }).catch(addError);
   },
 
   onAddProgramAction(programAction) {

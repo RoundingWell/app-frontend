@@ -1,4 +1,3 @@
-import { get } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
@@ -30,18 +29,9 @@ export default SubRouterApp.extend({
     };
   },
 
-  childApps: {
-    workflow: WorkflowPageApp,
-    flow: FlowPageApp,
-    action: ActionApp,
-    form: FormApp,
-    patientSidebar: PatientSidebarApp,
-  },
-
   currentAppOptions() {
     return {
       layoutState: this.layoutState,
-      region: this.getRegion('content'),
       patient: this.patient,
       patientId: this.patient.id,
     };
@@ -55,24 +45,11 @@ export default SubRouterApp.extend({
     Radio.request('nav', 'setMinimized', false);
   },
 
-  beforeStart() {
-    const [patientId] = this.getCurrentRoute().eventArgs;
-
-    return Radio.request('entities', 'fetch:patients:model', patientId);
+  prepareStart({ patientId }, { signal }) {
+    return Radio.request('entities', 'fetch:patients:model', patientId, { signal });
   },
 
-  /* istanbul ignore next: beforeStart error handling */
-  onFail(options, error) {
-    if (get(error, ['response', 'status']) === 410) {
-      Radio.trigger('event-router', 'notFound');
-      this.stop();
-      return;
-    }
-
-    handleErrors(error);
-  },
-
-  onStart(options, patient) {
+  onStart(app, options, patient) {
     this.patient = patient;
     this.contextTrail = new Backbone.Model();
     this.currentUser = Radio.request('bootstrap', 'currentUser');
@@ -96,11 +73,24 @@ export default SubRouterApp.extend({
       'close:sidebar-drawer': this.closePatientSidebarDrawer,
     });
     this.setView(layout);
+    layout.render();
 
-    this.showView();
+    this.addChildApp('patientSidebar', new PatientSidebarApp({
+      region: layout.getRegion('sidebar'),
+    }));
+
     this.renderFormExpandedState();
     this.showPatientSidebar();
     this.startCurrentRoute();
+    this.showView();
+  },
+
+  prepareStop(options) {
+    const childApps = ['workflow', 'flow', 'action', 'form', 'patientSidebar'];
+
+    return Promise.all(childApps
+      .filter(name => this.hasChildApp(name))
+      .map(name => this.removeChildApp(name, options)));
   },
 
   showWorkflow() {
@@ -128,7 +118,9 @@ export default SubRouterApp.extend({
   },
 
   startContent(appName, options) {
+    const routeContext = this.getCurrentRoute();
     const previousPageApp = this.getCurrent();
+    const pageApp = this.getContentApp(appName);
 
     if (previousPageApp) {
       this.stopListening(previousPageApp, 'context:change');
@@ -138,11 +130,28 @@ export default SubRouterApp.extend({
     this.setSidebarHidden(this.sidebarPreferenceHidden);
     this.contextTrail.set('context', this.getOptimisticContext(appName, options));
 
-    const pageApp = this.getChildApp(appName);
-
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
 
-    this.startCurrent(appName, options);
+    return this.startCurrent(appName, options).catch(error => {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      handleErrors(error);
+    });
+  },
+  getContentApp(appName) {
+    const currentApp = this.getChildApp(appName);
+    if (currentApp) return currentApp;
+
+    const ContentApp = {
+      workflow: WorkflowPageApp,
+      flow: FlowPageApp,
+      action: ActionApp,
+      form: FormApp,
+    }[appName];
+
+    return this.addChildApp(appName, new ContentApp({
+      region: this.getView().getRegion('content'),
+    }));
   },
   setSidebarHidden(isHidden) {
     const layout = this.getView();
@@ -250,9 +259,8 @@ export default SubRouterApp.extend({
   },
 
   showPatientSidebar() {
-    this.startChildApp('patientSidebar', {
-      region: this.getRegion('sidebar'),
+    this.getChildApp('patientSidebar').start({
       patient: this.patient,
-    });
+    }).catch(handleErrors);
   },
 });

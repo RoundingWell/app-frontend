@@ -88,9 +88,7 @@ const StatusBehavior = Behavior.extend({
       return;
     }
 
-    this.$el.css({
-      opacity: 1,
-    });
+    this.el.style.opacity = 1;
 
     this.view.triggerMethod('change:visible');
   },

@@ -30,11 +30,14 @@ const Entity = BaseEntity.extend({
 
     return this.fetchModel(id, { data });
   },
-  fetchActionsByPatient({ patientId, filter }) {
-    const data = { filter };
+  fetchActionsByPatient({ patientId, filter }, options = {}) {
+    const data = {
+      ...options.data,
+      filter: { ...options.data?.filter, ...filter },
+    };
     const url = `/api/patients/${ patientId }/actions`;
 
-    return this.fetchCollection({ url, data });
+    return this.fetchCollection({ ...options, url, data });
   },
   fetchActionsByFlow(flowId) {
     const data = { include: ACTION_INCLUDE };

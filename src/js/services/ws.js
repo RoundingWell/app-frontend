@@ -187,8 +187,9 @@ export default App.extend({
 
   manageAdd(app, collection, type, dataParams) {
     const channel = this.getChannel();
+    const eventName = `message:${ type }`;
 
-    app.listenTo(channel, `message:${ type }`, (data, model) => {
+    const onMessage = (data, model) => {
       if (collection.get(model) || data.category === 'ResourceDeleted') return;
 
       const appName = `${ model.type }-${ model.id }`;
@@ -197,7 +198,10 @@ export default App.extend({
 
       const adderApp = app.addChildApp(appName, new AdderApp());
       adderApp.start({ model, collection, dataParams });
-    });
+    };
+
+    app.listenTo(channel, eventName, onMessage);
+    app.once('before:stop', () => app.stopListening(channel, eventName, onMessage));
   },
 
   onMessage(event) {

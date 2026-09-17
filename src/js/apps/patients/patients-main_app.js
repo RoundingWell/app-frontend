@@ -133,9 +133,22 @@ export default RouterApp.extend({
     }
   },
 
-  showPatient(patientId) {
+  async showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
-    this.startRoute('patient', { patientId });
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startRoute('patient', { patientId });
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      if (get(error, ['response', 'status']) === 410) {
+        Radio.trigger('event-router', 'notFound');
+        return;
+      }
+
+      return handleErrors(error);
+    }
   },
 
   redirectPatientFlow(flowId) {
