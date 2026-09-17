@@ -24,25 +24,25 @@ export default App.extend({
     return this.getRegion();
   },
 
-  startSidebarApp(app, appOptions, viewOptions) {
+  async startSidebarApp(app, appOptions, viewOptions) {
     if (this.currentApp === app) return this.currentApp;
 
-    this.stopSidebarApp();
+    await this.stopSidebarApp();
 
     this.currentApp = app;
 
     app.showView(new LayoutView(viewOptions));
 
-    app.start(appOptions);
-
     this.listenTo(app.getView(), 'close', () => {
       app.triggerMethod('close', app);
     });
 
-    this.listenTo(app, 'stop', () => {
+    this.listenToOnce(app, 'stop', () => {
       this.getRegion().empty();
       delete this.currentApp;
     });
+
+    await app.start(appOptions);
 
     return this.currentApp;
   },
@@ -50,8 +50,10 @@ export default App.extend({
   stopSidebarApp() {
     if (!this.currentApp) return;
 
-    this.currentApp.stop();
+    const app = this.currentApp;
 
     delete this.currentApp;
+
+    return app.stop();
   },
 });

@@ -27,9 +27,9 @@ export default App.extend({
   onClickAdd() {
     const programSidebar = this.getChildApp('programSidebar');
     const program = Radio.request('entities', 'programs:model', {});
-    const sidebar = Radio.request('sidebar', 'start', programSidebar, { program });
+    Radio.request('sidebar', 'start', programSidebar, { program });
 
-    this.listenTo(sidebar, 'stop', () => {
+    this.listenToOnce(programSidebar, 'stop', () => {
       if (!program.isNew()) this.programs.add(program);
     });
   },

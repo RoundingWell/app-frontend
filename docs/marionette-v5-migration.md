@@ -281,6 +281,14 @@
   `setRegion`, which beta.4 does not expose. The service now publishes its Region
   and owners pass it at construction. Its component spec constructed the service
   the same way and was corrected with it.
+- Review then caught that the service discarded both lifecycle Promises: its
+  start could not be awaited, and its stop returned nothing while the app was
+  still stopping, so a replacement sidebar could show before the outgoing one
+  emptied the shared Region. The service now awaits the outgoing stop before
+  adopting a new app, returns the app once started, and returns the stop
+  Promise, which also makes `Radio.request('sidebar', 'stop')` deterministic.
+  The one caller that read the former synchronous return now listens to the
+  sidebar app it already holds.
 - Review caught that the migrated `showCliniciansAll` returned its route start
   without the rejection handling the Dashboard migration applies. `routeAction`
   does not await the action, so a failed clinician fetch would have surfaced as

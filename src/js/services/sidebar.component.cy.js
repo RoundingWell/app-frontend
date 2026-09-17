@@ -17,15 +17,17 @@ context('Sidebar Service', function() {
 
       await service.start();
 
-      const first = service.startSidebarApp(sidebarApp, {}, {});
-      const second = service.startSidebarApp(sidebarApp, {}, {});
+      const first = await service.startSidebarApp(sidebarApp, {}, {});
+      const second = await service.startSidebarApp(sidebarApp, {}, {});
 
       expect(first).to.equal(sidebarApp);
       expect(second).to.equal(sidebarApp);
-      expect(await sidebarApp.start()).to.be.true;
       expect(sidebarApp.isRunning()).to.be.true;
 
       await service.stopSidebarApp();
+
+      expect(sidebarApp.isRunning()).to.be.false;
+
       await service.stop();
       element.remove();
     });
