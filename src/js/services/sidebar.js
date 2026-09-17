@@ -1,3 +1,5 @@
+import { Region } from 'marionette';
+
 import App from 'js/base/app';
 
 import { LayoutView } from 'js/services/sidebar/sidebar_views';
@@ -17,37 +19,52 @@ export default App.extend({
   radioRequests: {
     'stop': 'stopSidebarApp',
     'start': 'startSidebarApp',
+    'region': 'getSidebarRegion',
   },
 
-  startSidebarApp(app, appOptions, viewOptions) {
+  // each sidebar app owns a Region over the shared host element so that a
+  // stopping app cannot empty its replacement's root
+  getSidebarRegion() {
+    return new Region({ el: this.getRegion().el });
+  },
+
+  async startSidebarApp(app, appOptions, viewOptions) {
     if (this.currentApp === app) return this.currentApp;
 
-    this.stopSidebarApp();
+    // claim the sidebar before awaiting so an interleaved start supersedes
+    // this one instead of attaching a second layout to the host element
+    const stopping = this.stopSidebarApp();
 
     this.currentApp = app;
 
-    app.setRegion(this.getRegion());
-    app.showView(new LayoutView(viewOptions));
+    await stopping;
 
-    app.start(appOptions);
+    if (this.currentApp !== app) return;
+
+    app.showView(new LayoutView(viewOptions));
 
     this.listenTo(app.getView(), 'close', () => {
       app.triggerMethod('close', app);
     });
 
-    this.listenTo(app, 'stop', () => {
-      this.getRegion().empty();
+    this.listenToOnce(app, 'stop', () => {
+      if (this.currentApp !== app) return;
+
       delete this.currentApp;
     });
 
-    return this.currentApp;
+    await app.start(appOptions);
+
+    return this.currentApp === app ? app : undefined;
   },
 
   stopSidebarApp() {
     if (!this.currentApp) return;
 
-    this.currentApp.stop();
+    const app = this.currentApp;
 
     delete this.currentApp;
+
+    return app.stop();
   },
 });

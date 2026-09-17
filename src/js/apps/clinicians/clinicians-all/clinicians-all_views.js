@@ -29,7 +29,7 @@ const RowBehavior = Behavior.extend({
     this.view.render();
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.el.classList.toggle('is-selected', isEditing);
   },
 });
 
@@ -163,7 +163,7 @@ const ListView = CollectionView.extend({
     this.searchList(null, this.state.get('searchQuery'));
   },
   onListItemRender(view) {
-    view.searchString = view.$el.text();
+    view.searchString = view.el.textContent;
   },
   onRenderChildren() {
     this.triggerMethod('filtered', this.children.pluck('model'));

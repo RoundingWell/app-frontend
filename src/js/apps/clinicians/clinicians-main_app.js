@@ -1,3 +1,5 @@
+import { Radio } from 'marionette';
+
 import RouterApp from 'js/base/routerapp';
 
 import CliniciansAllApp from 'js/apps/clinicians/clinicians-all/clinicians-all_app';
@@ -5,8 +7,10 @@ import CliniciansAllApp from 'js/apps/clinicians/clinicians-all/clinicians-all_a
 export default RouterApp.extend({
   routerAppName: 'CliniciansApp',
 
-  childApps: {
-    cliniciansAll: CliniciansAllApp,
+  initialize() {
+    const region = this.getRegion();
+
+    this.addChildApp('cliniciansAll', new CliniciansAllApp({ region }));
   },
 
   eventRoutes: {
@@ -21,7 +25,15 @@ export default RouterApp.extend({
     },
   },
 
-  showCliniciansAll() {
-    this.startRoute('cliniciansAll');
+  async showCliniciansAll() {
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startRoute('cliniciansAll');
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    }
   },
 });

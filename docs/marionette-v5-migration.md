@@ -69,18 +69,27 @@
   Marionette Radio registry, and explicit root, bootstrap, AppFrame, Nav, Search,
   and area-router ownership. It removed the temporary package patch and was
   merged by a human.
-- Active step: migrate RouterApp's selected-child lifecycle and the Dashboard
-  list/detail route tree together. Dashboard children are explicitly owned,
-  asynchronous fetches use `prepareStart` and cancellation, list search is owned
-  Backbone state, and Application-controlled layouts are composed before display.
+- Completed: PR #1792 migrated RouterApp's selected-child lifecycle and the
+  Dashboard list/detail route tree together. Dashboard children are explicitly
+  owned, asynchronous fetches use `prepareStart` and cancellation, list search is
+  owned Backbone state, and Application-controlled layouts are composed before
+  display. It was merged by a human.
 - The shared list-search path now consumes native DOM events and elements exposed
   by beta.4 instead of relying on jQuery event and `$el` methods.
+- Active step: PR #1793 migrates the Clinicians route tree, the second router to
+  own v5 children. Its list and sidebar children are explicitly registered, the
+  clinician collection loads through `prepareStart` with its readiness signal,
+  search reuses `SubRouterApp`'s owned route state, and the sidebar app receives
+  its Region at construction. The step also scopes each area router to its own
+  content Region and removes the sidebar service's `setRegion` handoff, both of
+  which only became observable once a second router owned v5 children.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: migrate the next smallest area RouterApp's route-driven
-  child ownership together with its per-route startup data.
+- Next after human merge: migrate the Programs route tree, then Patients. The
+  two cross-app assertions still failing in the Clinicians contract clear with
+  the Patients step.
 
 ## Validation
 
@@ -207,6 +216,14 @@
   pending, and the shared list-search path expected jQuery event/UI wrappers.
   Route context now supplies the match signal and the shared input path uses the
   native event and DOM contracts.
+- The Clinicians route slice passes ESLint, Stylelint, the sidebar service
+  component spec, and 8 of its 10 unchanged E2E assertions: `clinician-modal`
+  1/1, `clinicians-all` 2/3, and `clinician-sidebar` 5/6. Both failures are the
+  final navigation of their test into `PatientsApp`, which still uses the removed
+  `childApps` hash; `worklist-loading` fails all 9 tests with that same
+  `setCurrentRoute` error on the migration base, independent of this step. The
+  unchanged `dashboards-all` E2E still passes 3/3, confirming the per-router
+  Region change causes no regression. No E2E spec was changed.
 - Focused InputWatcher coverage passes for a host textarea override and an
   input-less host. The existing Picklist component spec now mounts without the
   input watcher crashing; four tests pass and three keyboard transport/selection
@@ -254,6 +271,40 @@
   current component failures. The PR therefore retained the atomic Radio and
   runtime cutovers; beta.4 now replaces the patched beta.3 package while
   leaving route-child ownership as the next coherent migration boundary.
+- One shared content Region was handed to every area router. Because beta.4
+  stops an Application asynchronously and clears its roots, an unmatched router's
+  stop emptied whichever router was displayed, and the matched app found no root
+  in `onStart`. This stayed invisible while Dashboard was the only router owning
+  v5 children and appeared immediately with the second. Each router now owns a
+  Region over the content element, so a stop clears only that router's own view.
+- The sidebar service adopted a sidebar app's Region at start through v4's
+  `setRegion`, which beta.4 does not expose. The service now publishes its Region
+  and owners pass it at construction. Its component spec constructed the service
+  the same way and was corrected with it.
+- Review then caught that the service discarded both lifecycle Promises: its
+  start could not be awaited, and its stop returned nothing while the app was
+  still stopping, so a replacement sidebar could show before the outgoing one
+  emptied the shared Region. The service now awaits the outgoing stop before
+  adopting a new app, returns the app once started, and returns the stop
+  Promise, which also makes `Radio.request('sidebar', 'stop')` deterministic.
+  The one caller that read the former synchronous return now listens to the
+  sidebar app it already holds.
+- Review also caught that publishing the service's own Region gave every sidebar
+  Application the same root owner, repeating the ownership race the AppFrame
+  change removes. The service now builds an independent Region over the shared
+  sidebar host element for each app, and its stop cleanup ignores an app that is
+  no longer current.
+- Awaiting the outgoing stop before recording the new app then moved the
+  guard-to-assignment gap behind an await: two interleaved starts could both
+  pass the guard and, with per-app Regions, attach two layouts to the host
+  element. The service now claims the sidebar synchronously and drops a start
+  that a later one has superseded. Focused coverage fails against the previous
+  ordering.
+- Review caught that the migrated `showCliniciansAll` returned its route start
+  without the rejection handling the Dashboard migration applies. `routeAction`
+  does not await the action, so a failed clinician fetch would have surfaced as
+  an unhandled rejection with no error routing. It now routes to `unknownError`
+  under the same route-context guard.
 - Closed PR #1770 copied toolkit lifecycle behavior locally. That recreated
   Marionette 4 patterns and was abandoned before merge.
 - Beta.3's packaged consumer skill pointed to `marionette/scripts/docs.mjs`
