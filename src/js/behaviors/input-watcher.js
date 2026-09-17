@@ -21,7 +21,7 @@ export default Behavior.extend({
   },
 
   getWatchText() {
-    return this.el.querySelector('input').value;
+    return this.getUI('input')[0]?.value;
   },
 
   watchKeyDown(evt) {

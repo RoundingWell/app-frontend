@@ -29,8 +29,16 @@ export default RouterApp.extend({
     },
   },
 
-  showDashboardsAll() {
-    return this.startCurrent('dashboardsAll');
+  async showDashboardsAll() {
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startCurrent('dashboardsAll');
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    }
   },
   async showDashboard(dashboardId) {
     const routeContext = this.getCurrentRoute();
