@@ -289,6 +289,11 @@
   Promise, which also makes `Radio.request('sidebar', 'stop')` deterministic.
   The one caller that read the former synchronous return now listens to the
   sidebar app it already holds.
+- Review also caught that publishing the service's own Region gave every sidebar
+  Application the same root owner, repeating the ownership race the AppFrame
+  change removes. The service now builds an independent Region over the shared
+  sidebar host element for each app, and its stop cleanup ignores an app that is
+  no longer current.
 - Review caught that the migrated `showCliniciansAll` returned its route start
   without the rejection handling the Dashboard migration applies. `routeAction`
   does not await the action, so a failed clinician fetch would have surfaced as

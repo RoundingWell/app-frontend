@@ -1,3 +1,5 @@
+import { Region } from 'marionette';
+
 import App from 'js/base/app';
 
 import { LayoutView } from 'js/services/sidebar/sidebar_views';
@@ -20,8 +22,10 @@ export default App.extend({
     'region': 'getSidebarRegion',
   },
 
+  // each sidebar app owns a Region over the shared host element so that a
+  // stopping app cannot empty its replacement's root
   getSidebarRegion() {
-    return this.getRegion();
+    return new Region({ el: this.getRegion().el });
   },
 
   async startSidebarApp(app, appOptions, viewOptions) {
@@ -38,7 +42,8 @@ export default App.extend({
     });
 
     this.listenToOnce(app, 'stop', () => {
-      this.getRegion().empty();
+      if (this.currentApp !== app) return;
+
       delete this.currentApp;
     });
 
