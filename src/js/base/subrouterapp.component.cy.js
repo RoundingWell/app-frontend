@@ -1,3 +1,4 @@
+import App from './app';
 import SubRouterApp from './subrouterapp';
 
 function deferred() {
@@ -53,6 +54,12 @@ const LoadingApp = BaseApp.extend({
 
 const workflow = { event: 'patient:workflow', eventArgs: ['p1'], definition: {} };
 const action = { event: 'patient:action', eventArgs: ['p1', 'a1'], definition: {} };
+
+const SelectedApp = SubRouterApp.extend({
+  initialize() {
+    this.addChildApp('child', new App());
+  },
+});
 
 context('SubRouterApp', function() {
   let app;
@@ -153,6 +160,101 @@ context('SubRouterApp', function() {
       expect(app.getCurrentRoute()).to.deep.equal(workflow);
       // re-dispatched on restart
       expect(app.calls).to.deep.equal([['workflow', 'p1'], ['workflow', 'p1']]);
+    });
+  });
+
+  describe('selected child lifecycle', function() {
+    specify('starts a registered child and clears it when the owner stops', async function() {
+      app = new SelectedApp();
+      await app.start();
+
+      const child = await app.startCurrent('child');
+
+      expect(child).to.equal(app.getChildApp('child'));
+      expect(child.isRunning()).to.be.true;
+      expect(app.getCurrent()).to.equal(child);
+
+      await app.stop();
+
+      expect(child.isRunning()).to.be.false;
+      expect(app.getCurrent()).to.equal(null);
+    });
+
+    specify('clears a child whose startup rejects', async function() {
+      const BrokenApp = App.extend({
+        prepareStart() {
+          throw new Error('failed to start');
+        },
+      });
+      app = new SubRouterApp();
+      app.addChildApp('child', new BrokenApp());
+
+      let failure;
+
+      try {
+        await app.startCurrent('child');
+      } catch(error) {
+        failure = error;
+      }
+
+      expect(failure.message).to.equal('failed to start');
+      expect(app.getCurrent()).to.equal(null);
+    });
+
+    specify('clears a child whose startup is canceled', async function() {
+      const readiness = deferred();
+      const preparing = deferred();
+      const child = new (App.extend({
+        prepareStart() {
+          preparing.resolve();
+          return readiness.promise;
+        },
+      }))();
+
+      app = new SubRouterApp();
+      app.addChildApp('child', child);
+
+      const starting = app.startCurrent('child');
+
+      await preparing.promise;
+      const stopping = child.stop();
+      readiness.resolve();
+      await stopping;
+
+      expect(await starting).to.equal(undefined);
+      expect(app.getCurrent()).to.equal(null);
+    });
+
+    specify('serializes overlapping child replacements', async function() {
+      const stopReadiness = deferred();
+      const current = new (App.extend({
+        prepareStop() {
+          return stopReadiness.promise;
+        },
+      }))();
+      const first = new App();
+      const latest = new App();
+
+      app = new SubRouterApp();
+      app.addChildApp('current', current);
+      app.addChildApp('first', first);
+      app.addChildApp('latest', latest);
+
+      await app.startCurrent('current');
+
+      const firstStart = app.startCurrent('first');
+      const latestStart = app.startCurrent('latest');
+
+      expect(first.isRunning()).to.be.false;
+      expect(latest.isRunning()).to.be.false;
+
+      stopReadiness.resolve();
+
+      expect(await firstStart).to.equal(undefined);
+      expect(await latestStart).to.equal(latest);
+      expect(first.isRunning()).to.be.false;
+      expect(latest.isRunning()).to.be.true;
+      expect(app.getCurrent()).to.equal(latest);
     });
   });
 });

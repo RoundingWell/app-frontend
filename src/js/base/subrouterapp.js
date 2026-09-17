@@ -6,8 +6,10 @@ import App from './app';
 export default App.extend({
   constructor: function() {
     this._current = null;
+    this._currentClaim = null;
+    this._stoppingCurrent = null;
 
-    this.on('before:stop', this.stopCurrent);
+    this.on('stop', this._clearCurrent);
 
     App.apply(this, arguments);
   },
@@ -67,14 +69,44 @@ export default App.extend({
   },
 
   // handler that ensures one running app per type
-  startCurrent(appName, options) {
-    this.stopCurrent();
+  async startCurrent(appName, options) {
+    const routeContext = this.getCurrentRoute();
+    const stopping = this.stopCurrent();
+    const claim = {};
 
-    const app = this.startChildApp(appName, this.mixinOptions(options));
+    this._currentClaim = claim;
+
+    await stopping;
+
+    if (!this._isCurrentClaim(claim, routeContext)) return;
+
+    const app = this.getChildApp(appName);
+    if (!app) return;
 
     this._current = app;
 
-    return app;
+    try {
+      const started = await app.start(this.mixinOptions(options));
+
+      if (!started) {
+        this._clearCurrentClaim(claim);
+        return;
+      }
+
+      return this._isCurrentClaim(claim, routeContext) && app === this.getCurrent() ? app : undefined;
+    } catch(error) {
+      this._clearCurrentClaim(claim);
+
+      throw error;
+    }
+  },
+
+  _isCurrentClaim(claim, routeContext) {
+    return this._currentClaim === claim && this.getCurrentRoute() === routeContext;
+  },
+
+  _clearCurrentClaim(claim) {
+    if (this._currentClaim === claim) this._clearCurrent();
   },
 
   getCurrent() {
@@ -82,11 +114,23 @@ export default App.extend({
   },
 
   stopCurrent() {
-    if (!this._current) return;
+    if (!this._current) return this._stoppingCurrent || undefined;
 
-    const stopping = this._current.stop();
-    this._current = null;
+    const current = this._current;
+
+    this._clearCurrent();
+
+    const stopping = Promise.resolve(current.stop()).finally(() => {
+      if (this._stoppingCurrent === stopping) this._stoppingCurrent = null;
+    });
+
+    this._stoppingCurrent = stopping;
 
     return stopping;
+  },
+
+  _clearCurrent() {
+    this._current = null;
+    this._currentClaim = null;
   },
 });
