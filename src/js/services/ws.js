@@ -59,7 +59,7 @@ export default App.extend({
     return this.getUrl({ signal });
   },
 
-  onStart(app, { data }, url) {
+  onStart(app, { data } = {}, url) {
     /* istanbul ignore next: Essentially avoid offline */
     if (!url) return;
     this.ws = new WebSocket(url.toString());
