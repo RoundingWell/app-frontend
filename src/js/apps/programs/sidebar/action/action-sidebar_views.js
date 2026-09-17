@@ -122,29 +122,7 @@ const TimestampsView = View.extend({
 });
 
 const HeadingView = View.extend({
-  getTemplate() {
-    if (this.model.hasOutreach()) {
-      return hbs`{{ @intl.programs.sidebar.action.actionSidebarViews.headingView.headingOutreachText }}`;
-    }
-    return hbs`{{ @intl.programs.sidebar.action.actionSidebarViews.headingView.headingText }}`;
-  },
-});
-
-const FormSharingView = View.extend({
-  className: 'sidebar__dialog',
-  template: hbs`
-    <div class="flex">
-      <h3 class="sidebar__heading flex-grow">{{far "share-from-square" classes="u-margin--r-8"}}{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.label }}</h3>
-    </div>
-    <div class="flex u-margin--t-16">
-      <h4 class="sidebar__label sidebar__label--inset u-margin--t-8">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.recipientLabel }}</h4>
-      <div class="flex-grow"><button class="button button--secondary w-100" type="button" disabled>{{far "user-plus"}} {{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.recipientDefault }}</button></div>
-    </div>
-    <div class="flex u-margin--t-8">
-      <h4 class="sidebar__label sidebar__label--inset u-margin--t-8">{{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.whenLabel }}</h4>
-      <div class="flex-grow"><button class="button button--secondary w-100" type="button" disabled>{{far "stopwatch"}} {{ @intl.programs.sidebar.action.actionSidebarViews.formSharingView.whenDefault }}</button></div>
-    </div>
-  `,
+  template: hbs`{{ @intl.programs.sidebar.action.actionSidebarViews.headingView.headingText }}`,
 });
 
 const UploadsEnabledView = View.extend({
@@ -222,7 +200,6 @@ const SidebarView = View.extend({
     owner: '[data-owner-region]',
     due: '[data-due-region]',
     form: '[data-form-region]',
-    formSharing: '[data-form-sharing-region]',
     allowUploads: '[data-allow-uploads-region]',
     tags: '[data-tags-region]',
     save: '[data-save-region]',
@@ -407,6 +384,5 @@ export {
   MenuView,
   TimestampsView,
   SidebarView,
-  FormSharingView,
   UploadsEnabledView,
 };

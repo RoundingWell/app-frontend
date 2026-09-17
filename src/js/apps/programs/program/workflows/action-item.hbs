@@ -5,11 +5,7 @@
         <span class="work-card__state">
           <span class="action-icon action-icon--{{options.color}}">{{fa options.iconType options.icon}}</span>
         </span>
-      {{else}}{{#if icon}}
-        <span class="work-card__state">
-          {{far icon}}
-        </span>
-      {{/if}}{{/if}}
+      {{/if}}
       <span class="work-card__title">
         {{ name }}
         {{~#unless name}}<em>{{ @intl.programs.program.workflows.actionItemTemplate.newProgramAction }}</em>{{/unless~}}

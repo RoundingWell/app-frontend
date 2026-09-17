@@ -110,15 +110,8 @@ careOptsFrontend:
         actionSidebarViews:
           disabledSaveView:
             saveBtn: Save
-          formSharingView:
-            label: Share Form
-            recipientDefault: Patient
-            recipientLabel: Recipient
-            whenDefault: Automatically
-            whenLabel: When
           headingView:
             headingText: Program Action
-            headingOutreachText: Program Outreach Action
           menuView:
             delete: Delete Program Action
             headingText: Program Action Menu

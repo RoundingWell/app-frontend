@@ -21,13 +21,6 @@ import 'scss/domain/action-icons.scss';
 import './action.scss';
 
 const getActionIcon = model => {
-  if (model.hasOutreach()) {
-    return {
-      icon: 'share-from-square',
-      iconType: 'far',
-    };
-  }
-
   const options = model.get('options');
 
   return options?.icon ? options : null;

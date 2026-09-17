@@ -19,7 +19,6 @@ const AddWorkflowOptlist = Optionlist.extend({
   placeholderText: i18n.addWorkflowOptlist.placeholderText,
   itemTemplateContext() {
     const isProgramAction = this.model.get('itemType') === 'program-actions';
-    const defaultActionIcon = this.model.get('hasOutreach') ? 'share-from-square' : 'file-lines';
     const hasCustomIcon = this.model.get('customIcon')?.icon;
 
     if (hasCustomIcon) {
@@ -36,7 +35,7 @@ const AddWorkflowOptlist = Optionlist.extend({
 
     return {
       icon: {
-        icon: isProgramAction ? defaultActionIcon : 'folder',
+        icon: isProgramAction ? 'file-lines' : 'folder',
         type: isProgramAction ? 'far' : 'fas',
         classes: 'add-workflow__picklist-icon',
       },

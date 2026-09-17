@@ -52,12 +52,9 @@ careOptsFrontend:
             dueTimeUpdated: '<strong>{ name }</strong> ({ team }) changed the due time to { time }'
             durationCleared: '<strong>{ name }</strong> ({ team }) cleared duration'
             durationUpdated: '<strong>{ name }</strong> ({ team }) updated the duration to { duration }'
-            formRecipientResponded: '<strong>{ recipient }</strong> completed the form { form }'
             formResponded: '<strong>{ name }</strong> ({ team }) worked on the form { form }'
             formUpdated: '<strong>{ name }</strong> ({ team }) added the form { form }'
             nameUpdated: '<strong>{ name }</strong> ({ team }) updated the name of this action from { from_name } to { to_name }'
-            sharingCanceled: '<strong>{ name }</strong> ({ team }) cancelled form sharing'
-            sharingSent: 'Form shared with <strong>{ recipient }</strong>. Waiting for response.'
             stateUpdated: '<strong>{ name }</strong> ({ team }) changed the state to { to_state }'
             teamAssigned: '<strong>{ name }</strong> ({ team }) changed the owner to { to_team }'
           system:
@@ -70,12 +67,9 @@ careOptsFrontend:
             dueTimeUpdated: '<strong>Due Time</strong> changed to { time }'
             durationCleared: '<strong>Duration</strong> cleared'
             durationUpdated: '<strong>Duration</strong> updated to { duration }'
-            formRecipientResponded: '<strong>Form</strong> { form } completed'
             formResponded: '<strong>Form</strong> { form } worked on'
             formUpdated: '<strong>Form</strong> { form } added'
             nameUpdated: '<strong>Action name</strong> updated from { from_name } to { to_name }'
-            sharingCanceled: '<strong>Form sharing</strong> ({ team }) cancelled'
-            sharingSent: 'Form shared with <strong>{ recipient }</strong>. Waiting for response.'
             stateUpdated: '<strong>State</strong> changed to { to_state }'
             teamAssigned: '<strong>Owner</strong> changed to { to_team }'
           activityHeadingText: Activity
@@ -85,20 +79,6 @@ careOptsFrontend:
             edited: (Edited)
         dialerView:
           label: Dialer
-        formSharingTemplate:
-          buttonResponseText: View Response
-          label: Share Form
-          recipientLabel: Recipient
-          stateText: |
-            {sharing, select,
-              responded {Response Saved}
-              canceled {Form Sharing Canceled}
-              error_no_phone {Missing Mobile Phone}
-              error_opt_out {Recipient Opted Out}
-              error_sms_failed {Mobile Phone SMS Failed}
-              other {Waiting for Response}
-            }
-          stateLabel: Share State
       workflow:
         workflowViews:
           closedBtn: Closed

@@ -136,7 +136,6 @@ const ActionItemView = View.extend({
   templateContext() {
     return {
       hasForm: this.model.getForm(),
-      icon: this.model.hasOutreach() ? 'share-from-square' : null,
     };
   },
   regions: {

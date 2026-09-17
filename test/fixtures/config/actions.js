@@ -39,8 +39,6 @@ export default () => {
     sequence: faker.number.int(100),
     created_at: created,
     options: {},
-    outreach: 'disabled',
-    sharing: 'disabled',
     updated_at: faker.date.between({
       from: created,
       to: dayjs().format(),

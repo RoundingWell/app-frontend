@@ -217,19 +217,13 @@ export default App.extend({
     return this.flow && this.flow.get('name');
   },
   showForm() {
-    const hasForm = this.action.hasForm();
-
-    if (!hasForm && !this.action.hasSharing()) return;
+    if (!this.action.hasForm()) return;
 
     const formView = this.showContentView('form', new FormLayoutView({
       model: this.action,
     }));
 
-    this.listenTo(formView, {
-      'click:form': this.onClickForm,
-    });
-
-    if (hasForm) this.startEmbeddedForm(formView);
+    this.startEmbeddedForm(formView);
   },
   startEmbeddedForm(formView) {
     const formApp = this.startChildApp('form', {
@@ -252,14 +246,6 @@ export default App.extend({
     const layout = this.getView();
 
     layout.$el.toggleClass('patient-action--form-expanded', isExpanded);
-  },
-  onClickForm() {
-    if (this.flow) {
-      Radio.trigger('event-router', 'patient:flow:action', this.patient.id, this.flow.id, this.action.id);
-      return;
-    }
-
-    Radio.trigger('event-router', 'patient:action', this.patient.id, this.action.id);
   },
   getSubscriptionResources() {
     return [

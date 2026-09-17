@@ -30,7 +30,6 @@ export function getAction(data, { depth = 0 } = {}) {
     'patient': getRelationship(getPatient({}, { depth })),
     'program': getRelationship(programOne),
     'program-action': getRelationship(getProgramAction()),
-    'recipient': getRelationship(),
     'state': getRelationship(getState()),
   };
 

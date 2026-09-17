@@ -352,7 +352,6 @@ context('program flow page', function() {
               sequence: 0,
               name: 'First In List',
               updated_at: testTs(),
-              outreach: 'patient',
             },
             relationships: {
               'owner': getRelationship(),
@@ -414,11 +413,6 @@ context('program flow page', function() {
       .find('.program-flow__sort-handle')
       .trigger('pointerdown', { button: 0, force: true })
       .trigger('dragstart', { force: true });
-
-    cy
-      .get('.action-card')
-      .first()
-      .find('.fa-share-from-square');
 
     cy
       .get('.action-card')

@@ -12,7 +12,7 @@
   <div class="schedule-list__action">
     <button class="schedule-list__action-name js-action" type="button">{{ name }}&#8203;</button>
     <div class="schedule-list__details js-no-click" data-details-region></div>
-    {{#if form}}<button class="button button--icon action-form-button schedule-list__action-form-button js-form" type="button" aria-label="{{ @intl.patients.schedule.scheduleViews.dayItemView.openForm }}">{{#if hasOutreach}}{{far "share-from-square"}}{{else}}{{far "square-poll-horizontal"}}{{/if}}</button>{{/if}}
+    {{#if form}}<button class="button button--icon action-form-button schedule-list__action-form-button js-form" type="button" aria-label="{{ @intl.patients.schedule.scheduleViews.dayItemView.openForm }}">{{far "square-poll-horizontal"}}</button>{{/if}}
   </div>
   {{#if commentCount}}<span class="schedule-list__comments" role="img" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span>{{ commentCount }}</span></span>{{/if}}
   <span class="schedule-list__search-helper">{{ state }} {{ flow }}</span>

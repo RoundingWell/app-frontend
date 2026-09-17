@@ -11,9 +11,6 @@ const _Model = BaseModel.extend({
   getClinician() {
     return this.getRelationship('_clinician');
   },
-  getRecipient() {
-    return this.getRelationship('_recipient');
-  },
   getEditor() {
     if (!this.get('_editor')) {
       return Radio.request('entities', 'clinicians:model', { name: 'RoundingWell' });

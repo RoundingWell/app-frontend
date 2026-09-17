@@ -1,24 +1,8 @@
 const RWELL_NS = '17167534-18f9-5622-81b0-872907d3efa5';
 
-const ACTION_OUTREACH = {
-  DISABLED: 'disabled',
-  PATIENT: 'patient',
-};
-
 const FORM_RESPONSE_STATUS = {
   DRAFT: 'draft',
   SUBMITTED: 'submitted',
-};
-
-const ACTION_SHARING = {
-  DISABLED: 'disabled',
-  PENDING: 'pending',
-  SENT: 'sent',
-  RESPONDED: 'responded',
-  CANCELED: 'canceled',
-  ERROR_NO_PHONE: 'error_no_phone',
-  ERROR_OPT_OUT: 'error_opt_out',
-  ERROR_SMS_FAILED: 'error_sms_failed',
 };
 
 const PROGRAM_BEHAVIORS = {
@@ -73,8 +57,6 @@ const PATIENT_STATUS = {
 };
 
 export {
-  ACTION_OUTREACH,
-  ACTION_SHARING,
   FORM_RESPONSE_STATUS,
   PROGRAM_BEHAVIORS,
   RELATIVE_DATE_RANGES,

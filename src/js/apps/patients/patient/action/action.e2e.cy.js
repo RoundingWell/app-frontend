@@ -54,7 +54,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         due_date: testDateSubtract(2),
         due_time: '06:01:00',
         updated_at: testTs(),
-        sharing: true,
       },
       relationships: {
         comments: getRelationship([getComment()]),
@@ -142,6 +141,13 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             state: getRelationship(stateDone),
           }),
           getActivity({
+            event_type: 'ActionStateUpdated',
+            source: 'api',
+          }, {
+            editor: getRelationship(),
+            state: getRelationship(stateInProgress),
+          }),
+          getActivity({
             event_type: 'ActionFormUpdated',
             source: 'api',
           }, {
@@ -164,35 +170,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             source: 'api',
             previous: null,
             value: null,
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'api',
-            value: 'sent',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'api',
-            value: 'canceled',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionFormResponded',
-            source: 'api',
-          }, {
-            editor: getRelationship(),
-            recipient: getRelationship(testPatient),
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'api',
-            value: 'pending',
-          }, {
-            recipient: getRelationship(testPatient),
           }),
           getActivity({
             event_type: 'ActionCreated',
@@ -262,14 +239,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             event_type: 'ActionFormResponded',
             source: 'system',
           }, {
-            editor: getRelationship(),
-            recipient: getRelationship(testPatient),
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionFormResponded',
-            source: 'system',
-          }, {
             form: getRelationship(testForm),
           }),
           getActivity({
@@ -283,27 +252,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             source: 'system',
             previous: null,
             value: null,
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'system',
-            value: 'sent',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'system',
-            value: 'canceled',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'system',
-            value: 'pending',
-          }, {
-            recipient: getRelationship(testPatient),
           }),
           getActivity({
             event_type: 'UnsupportedActionEvent',
@@ -696,11 +644,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .get('.patient-action')
-      .find('[data-form-sharing-region]')
-      .should('contain', 'Share Form');
-
-    cy
-      .get('.patient-action')
       .find('[data-dialer-region]')
       .should('be.empty');
 
@@ -722,13 +665,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', 'Clinician McTester (Nurse) updated the name of this action from New Action to New Action Name Updated')
       .should('contain', 'Clinician McTester (Nurse) changed the owner to Other')
       .should('contain', 'Clinician McTester (Nurse) changed the state to Done')
+      .should('contain', 'RoundingWell')
       .should('contain', 'Clinician McTester (Nurse) added the form Test Form')
       .should('contain', 'Clinician McTester (Nurse) worked on the form Test Form')
       .should('contain', 'Clinician McTester (Nurse) changed the due time to 11:12 AM')
       .should('contain', 'Clinician McTester (Nurse) cleared the due time')
-      .should('contain', 'Form shared with Test Patient. Waiting for response.')
-      .should('contain', 'Clinician McTester (Nurse) cancelled form sharing')
-      .should('contain', 'Test Patient completed the form Test Form')
       // source = 'system' activity events
       .should('contain', 'Owner changed to Another Clinician')
       .should('contain', 'Action details updated')
@@ -740,12 +681,9 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', 'Owner changed to Other')
       .should('contain', 'State changed to Done')
       .should('contain', 'Form Test Form added')
-      .should('contain', 'Form Test Form completed')
       .should('contain', 'Form Test Form worked on')
       .should('contain', 'Due Time changed to 11:12 AM')
-      .should('contain', 'Due Time cleared')
-      .should('contain', 'Form shared with Test Patient. Waiting for response.')
-      .should('contain', 'Form sharing (Nurse) cancelled');
+      .should('contain', 'Due Time cleared');
 
     cy
       .get('[data-activity-region] .patient-action__activity-item')
@@ -2360,138 +2298,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       });
   });
 
-  specify('outreach form', function() {
-    const testFlow = getFlow();
-    const testAction = getAction({
-      attributes: {
-        outreach: 'patient',
-        sharing: 'responded',
-      },
-      relationships: {
-        flow: getRelationship(testFlow),
-        form: getRelationship(testForm),
-        state: getRelationship(stateDone),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeFlow(fx => {
-        fx.data = testFlow;
-        return fx;
-      })
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .routePatientByFlow()
-      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
-      .wait('@routeAction');
-
-    cy
-      .get('.patient-action')
-      .find('.form__frame--embedded')
-      .should('contain', 'Test Form');
-
-    cy
-      .get('.patient-action__title-icon')
-      .find('.fa-share-from-square');
-
-    cy
-      .get('.patient-action__form')
-      .find('.js-response')
-      .click();
-
-    cy
-      .location('pathname')
-      .should('contain', `/flow/${ testFlow.id }/action/${ testAction.id }`);
-  });
-
-  specify('outreach form outside a flow', function() {
-    const testAction = getAction({
-      attributes: {
-        outreach: 'patient',
-        sharing: 'responded',
-      },
-      relationships: {
-        form: getRelationship(testForm),
-        state: getRelationship(stateDone),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testAction;
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .visit(`/patient/1/action/${ testAction.id }`)
-      .wait('@routeAction')
-      .get('.patient-action__form .js-response')
-      .click();
-
-    cy
-      .location('pathname')
-      .should('contain', `/action/${ testAction.id }`);
-  });
-
-  specify('outreach pending sharing state', function() {
-    const testAction = getAction({
-      attributes: { sharing: 'pending' },
-      relationships: { form: getRelationship(testForm) },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testAction;
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .visit(`/patient/1/action/${ testAction.id }`)
-      .wait('@routeAction')
-      .get('.patient-action__sharing-state')
-      .should('contain', 'Waiting for Response')
-      .find('.fa-circle-dot')
-      .should('exist');
-  });
-
-  specify('outreach canceled sharing state', function() {
-    const testAction = getAction({
-      attributes: { sharing: 'canceled' },
-      relationships: { form: getRelationship(testForm) },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testAction;
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .visit(`/patient/1/action/${ testAction.id }`)
-      .wait('@routeAction')
-      .get('.patient-action__sharing-state')
-      .should('contain', 'Form Sharing Canceled')
-      .find('.fa-octagon-minus')
-      .should('exist');
-  });
-
   specify('socket comments and attachments', function() {
     const currentClinician = getCurrentClinician();
     const commentId = uuid();
@@ -2642,8 +2448,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     const testAction = getAction({
       attributes: {
-        outreach: 'disabled',
-        sharing: 'disabled',
         details: '',
         duration: 0,
       },

@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
-import { ACTION_OUTREACH, ACTION_SHARING } from 'js/static';
 
 import { addError } from 'js/datadog';
 
@@ -153,12 +152,6 @@ const _Model = BaseModel.extend({
   },
   hasTag(tagName) {
     return contains(this.get('tags'), tagName);
-  },
-  hasOutreach() {
-    return this.get('outreach') === ACTION_OUTREACH.PATIENT;
-  },
-  hasSharing() {
-    return this.get('sharing') !== ACTION_SHARING.DISABLED;
   },
   commentCount() {
     return this.getComments().length;

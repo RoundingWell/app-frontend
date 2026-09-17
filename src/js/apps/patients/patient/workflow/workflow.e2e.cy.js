@@ -22,8 +22,6 @@ import { roleEmployee, roleAdmin, roleNoFilterEmployee, roleTeamEmployee } from 
 import { getComment } from 'support/api/comments';
 import { getFile } from 'support/api/files';
 
-import { ACTION_OUTREACH } from 'js/static';
-
 context('patient workflow page', function() {
   const testPatient = getPatient();
 
@@ -75,8 +73,6 @@ context('patient workflow page', function() {
       attributes: {
         name,
         updated_at: testTs(),
-        outreach: 'disabled',
-        sharing: 'disabled',
         due_time: null,
       },
       relationships: {
@@ -180,9 +176,8 @@ context('patient workflow page', function() {
           getAction({
             attributes: {
               details: null,
-              name: 'Outreach',
+              name: 'Third In List',
               updated_at: testTsSubtract(3),
-              outreach: ACTION_OUTREACH.PATIENT,
             },
             relationships: {
               state: getRelationship(stateInProgress),
@@ -311,7 +306,7 @@ context('patient workflow page', function() {
       .get('.workflow-page__list')
       .find('.action-card')
       .eq(2)
-      .should('contain', 'Outreach');
+      .should('contain', 'Third In List');
 
     cy
       .get('.workflow-page__list')
@@ -653,7 +648,6 @@ context('patient workflow page', function() {
           behavior: 'standard',
           published_at: testTs(),
           archived_at: null,
-          outreach: 'patient',
           details: '',
           days_until_due: 0,
         },
@@ -1080,7 +1074,7 @@ context('patient workflow page', function() {
       .find('.picklist__item')
       .eq(2)
       .should('contain', 'One of Two')
-      .find('.fa-share-from-square');
+      .find('.fa-file-lines');
 
     cy
       .get('.picklist')
