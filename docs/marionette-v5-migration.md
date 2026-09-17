@@ -439,3 +439,14 @@
   Marionette runtime defect was identified. The same review caught an agent
   mistake that replaced declared `ui` bindings with raw `querySelector` calls;
   the touched views now retain their Marionette `ui` contracts.
+- Follow-up review caught two application integration mistakes: Schedule tried
+  to repopulate its hidden bulk editor after clearing the selection, and the
+  WebSocket service destructured an empty result after lifecycle cancellation.
+  Both now preserve beta.4 cancellation and ownership semantics. Focused
+  WebSocket coverage also exposed v4 assertions that treated the Application
+  instance as start options and expected injected `state`; the assertions now
+  verify beta.4's `(app, options, result)` contract and pass 20/20.
+- The unchanged Schedule E2E spec currently passes 11/15. Remaining failures
+  cover the known patient-detail `$el` path plus bulk-edit visibility, find-list
+  refresh, and click-shift list setup; they remain migration work rather than
+  test changes.
