@@ -94,8 +94,7 @@ const ScheduleApp = App.extend({
     this._refreshController = null;
     if (this.filteredCollection) this.stopListening(this.filteredCollection);
     if (this.editableCollection) this.stopListening(this.editableCollection);
-    const listView = this.getView()?.getChildView('list');
-    if (listView) this.stopListening(listView);
+    this.stopListeningToList();
     this.collection = null;
     this.filteredCollection = null;
     this.editableCollection = null;
@@ -172,6 +171,7 @@ const ScheduleApp = App.extend({
     this._refreshController?.abort();
     const controller = new AbortController();
     this._refreshController = controller;
+    this.stopListeningToList();
     if (this.editableCollection) this.stopListening(this.editableCollection);
     this.editableCollection = null;
     this.showDisabledSelectAll();
@@ -191,6 +191,10 @@ const ScheduleApp = App.extend({
   },
   finishRefresh(controller) {
     if (this._refreshController === controller) this._refreshController = null;
+  },
+  stopListeningToList() {
+    const listView = this.getView()?.getChildView('list');
+    if (listView) this.stopListening(listView);
   },
   suspendBulkEditForRefresh() {
     this._bulkEditSuspended = true;
