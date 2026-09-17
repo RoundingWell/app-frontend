@@ -84,17 +84,20 @@
   content Region and removes the sidebar service's `setRegion` handoff, both of
   which only became observable once a second router owned v5 children. It was
   merged by a human.
-- Active PR #1794: migrate the Programs route tree as one ownership boundary. The
+- Completed: PR #1794 migrated the Programs route tree as one ownership boundary. The
   area, nested route apps, content app, and globally hosted sidebar apps use
   explicit child registration; asynchronous entity preparation receives the
   lifecycle signal; and the nested selected-child path uses Application start,
   stop, and cancellation semantics instead of the removed `startChildApp` API.
+  It was merged by a human.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: migrate Patients. The two cross-app assertions still
-  failing in the Clinicians contract clear with that step.
+- Current step: migrate the Patients Schedule, Worklist, shared list-page,
+  filters, bulk-edit, and sidebar ownership boundary. Application children are
+  registered explicitly, readiness uses lifecycle signals, and list refreshes
+  replace collections without rebuilding the prepared page layout.
 
 ## Validation
 
@@ -253,8 +256,28 @@
   workflow.
 - Targeted ESLint and Stylelint passed. Full repository lint reached the same
   pre-existing editor-config failure because `ec-darwin-arm64*` was not found.
+- The Patients step builds successfully. Unchanged focused E2E currently passes
+  Schedule 13/15, shared bulk edit 7/7, list filters 6/6, and worklist loading
+  8/9. The Schedule patient-detail failure and worklist-loading failure both
+  enter the not-yet-migrated Patient detail application. The remaining Schedule
+  bulk-owner failure is still in scope for this step; tracing showed its owner
+  scope mounts correctly, but the post-save interaction reaches a destroyed
+  toolbar while collection refresh and child-app replacement overlap. This is
+  currently classified as an app integration race, not a demonstrated
+  Marionette defect. No E2E file is changed.
 
 ## Friction and corrected failures
+
+- During the Patients step, calling `stopListening(undefined)` while the first
+  collection was still absent removed every controller subscription. Guarding
+  the collection-specific teardown restored filter, count, search, and layout
+  behavior. This was an app misuse exposed by the new lifecycle, not a runtime
+  defect.
+- Tooltip construction during a host View's `onRender` exposed event-ordering
+  friction: listening for the same host's `render` event immediately destroyed
+  the newly created Tooltip. Binding cleanup to `before:render` preserves the
+  intended owner lifecycle. The public lifecycle documentation did not make
+  this same-dispatch consequence obvious, but no runtime defect is established.
 
 - PR #516 is not present in beta.2. A public Application subclass can add the
   visible methods, but cannot place prepared-root cleanup inside beta.2's

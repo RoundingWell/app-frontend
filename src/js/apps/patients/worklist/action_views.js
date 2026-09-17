@@ -66,13 +66,13 @@ const ActionItemView = View.extend({
     'change': 'render',
   },
   events: {
-    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-patient': 'onClickPatient',
     'click .js-flow': 'onClickFlow',
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-action-surface': 'onClickSurface',
   },
   ui: {
     patient: '.js-patient',
@@ -89,23 +89,23 @@ const ActionItemView = View.extend({
     this.navigateToAction();
   },
   onClickPatient(event) {
-    event.stopPropagation();
-    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+    event.stopImmediatePropagation();
+    this.trigger('click:patient', this.model.getPatient(), this);
   },
   onClickFlow(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.flow.id);
   },
   onClickPrimary(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction();
   },
   onClickAttachments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToActionSection('attachments');
   },
   onClickComments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToActionSection('comments');
   },
   navigateToActionSection(section) {
@@ -131,14 +131,17 @@ const ActionItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    this.ui.patient
-      .toggleClass('patient-list__patient--selected', isSelected)
-      .attr('aria-expanded', String(isSelected));
+    const patientElement = this.el.querySelector('.js-patient');
+    patientElement.classList.toggle('patient-list__patient--selected', isSelected);
+    patientElement.setAttribute('aria-expanded', String(isSelected));
+  },
+  focusPatient() {
+    this.el.querySelector('.js-patient').focus();
   },
   showCheck() {
     if (!this.canEdit) return;

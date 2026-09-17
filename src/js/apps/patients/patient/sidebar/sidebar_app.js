@@ -19,43 +19,46 @@ function getPatientSidebarRequests(patient, sidebars) {
 }
 
 export default App.extend({
-  viewEvents: {
-    'click:close': 'onClickClose',
-    'click:patient': 'onClickPatient',
-    'click:patientEdit': 'showPatientModal',
-    'click:patientView': 'showPatientModal',
-    'click:activeStatus': 'toggleActiveStatus',
-    'click:archivedStatus': 'archivePatient',
-  },
-  onBeforeStart({ patient, isClosable, isListSidebar, isPreloaded }) {
+  onBeforeStart(app, { patient, isClosable, isListSidebar, isPreloaded }) {
     this.patient = patient;
     this.sidebars = Radio.request('sidebars', 'patient');
 
-    this.showView(new SidebarView({
+    const view = this.setView(new SidebarView({
       model: patient,
       collection: isPreloaded ? this.sidebars : null,
       isClosable,
       isListSidebar,
-    }));
+    })).render();
+
+    this.listenTo(view, {
+      'click:close': this.onClickClose,
+      'click:patient': this.onClickPatient,
+      'click:patientEdit': this.showPatientModal,
+      'click:patientView': this.showPatientModal,
+      'click:activeStatus': this.toggleActiveStatus,
+      'click:archivedStatus': this.archivePatient,
+    });
 
     if (isPreloaded) return;
 
-    this.showChildView('sidebars', new SidebarLoadingView());
+    view.showChildView('sidebars', new SidebarLoadingView());
   },
-  beforeStart({ patient, isPreloaded }) {
+  prepareStart({ patient, isPreloaded }) {
     if (isPreloaded) return [];
 
     return getPatientSidebarRequests(patient, this.sidebars);
   },
-  onStart({ patient, isClosable, isListSidebar, isPreloaded }) {
-    if (isPreloaded) return;
+  onStart(app, { isClosable, isListSidebar, isPreloaded }) {
+    if (!isPreloaded) {
+      this.setView(new SidebarView({
+        model: this.patient,
+        collection: this.sidebars,
+        isClosable,
+        isListSidebar,
+      }));
+    }
 
-    this.showView(new SidebarView({
-      model: this.patient,
-      collection: this.sidebars,
-      isClosable,
-      isListSidebar,
-    }));
+    this.showView();
   },
   onClickClose() {
     this.trigger('close');

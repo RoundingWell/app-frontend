@@ -8,47 +8,52 @@ import PatientSidebarApp, { getPatientSidebarRequests } from 'js/apps/patients/p
 import { SidebarLoadingView, SidebarView } from 'js/apps/patients/patient/sidebar/sidebar_views';
 
 export default App.extend({
-  childApps: {
-    patientSidebar: PatientSidebarApp,
-  },
-  onBeforeStart({ patient }) {
+  onBeforeStart(app, { patient }) {
     this.patient = patient;
 
-    const loadingView = new SidebarView({
+    const view = this.setView(new SidebarView({
       model: patient,
       isClosable: true,
       isListSidebar: true,
-    });
+    })).render();
 
-    this.listenTo(loadingView, {
+    this.listenTo(view, {
       'click:close': this.onClickClose,
       'click:patient': this.onClickPatient,
     });
 
-    this.getRegion().show(loadingView);
-    loadingView.showChildView('sidebars', new SidebarLoadingView());
+    view.showChildView('sidebars', new SidebarLoadingView());
+    this.showView();
+
+    this.addChildApp('patientSidebar', new PatientSidebarApp({
+      region: this.getRegion(),
+    }));
+
+    this.listenTo(this.getChildApp('patientSidebar'), 'close', () => {
+      this.trigger('close');
+    });
   },
-  beforeStart({ patient }) {
+  async prepareStart({ patient }) {
     return Radio.request('entities', 'fetch:patients:model', patient.id)
       .then(loadedPatient => {
         const sidebars = Radio.request('sidebars', 'patient');
 
         return Promise.all(getPatientSidebarRequests(loadedPatient, sidebars))
           .then(() => loadedPatient);
+      })
+      .then(async loadedPatient => {
+        await this.getChildApp('patientSidebar').start({
+          patient: loadedPatient,
+          isClosable: true,
+          isListSidebar: true,
+          isPreloaded: true,
+        });
+
+        return loadedPatient;
       });
   },
-  onStart(options, patient) {
-    const patientSidebar = this.startChildApp('patientSidebar', {
-      region: this.getRegion(),
-      patient,
-      isClosable: true,
-      isListSidebar: true,
-      isPreloaded: true,
-    });
-
-    this.listenTo(patientSidebar, 'close', () => {
-      this.trigger('close');
-    });
+  prepareStop(options) {
+    return this.removeChildApp('patientSidebar', options);
   },
   focusClose() {
     this.getRegion().currentView?.focusClose();
@@ -59,7 +64,7 @@ export default App.extend({
   onClickPatient() {
     Radio.trigger('event-router', 'patient:workflow', this.patient.id);
   },
-  onFail(options, error) {
+  onFail(error) {
     this.trigger('close');
 
     if (error?.responseData) {

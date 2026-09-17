@@ -14,9 +14,6 @@ const WidgetView = View.extend({
     return this.contentWidget.getOption('wrapperTemplate') || this.template;
   },
   template: hbs`{{#if definition.display_name}}<div class="widgets__heading">{{ definition.display_name }}</div>{{/if}}<div class="widgets__item" data-content-region></div>`,
-  ui: {
-    content: '[data-content-region]',
-  },
   initialize() {
     const patient = this.getOption('patient');
     this.contentWidget = buildWidget(this.model, patient);
@@ -28,8 +25,10 @@ const WidgetView = View.extend({
     };
   },
   onRender() {
-    if (this.ui.content.length === 0) return;
-    this.addRegion('content', { el: this.ui.content });
+    const contentElement = this.el.querySelector('[data-content-region]');
+    if (!contentElement) return;
+
+    this.addRegion('content', { el: contentElement });
     this.showChildView('content', this.contentWidget);
   },
 });

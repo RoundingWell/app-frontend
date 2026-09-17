@@ -6,7 +6,7 @@ import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
-import intl from 'js/i18n';
+import intl, { renderTemplate } from 'js/i18n';
 
 import Droplist from 'js/components/droplist';
 
@@ -30,6 +30,8 @@ function getIsOverdue(date, time) {
 const BulkStateTemplate = hbs`<span class="action-state action-state--{{ options.color }}">{{fa options.iconType options.icon}}<span>{{ name }}</span></span>`;
 const MixedTimeTemplate = hbs`{{far "clock"}} <span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDueTimeDefaultText }}</span>`;
 const MixedDurationTemplate = hbs`{{far "stopwatch"}}<span class="button__value--indeterminate">{{ @intl.patients.shared.bulkEdit.bulkEditViews.bulkDurationDefaultText }}</span>`;
+const ActionsCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editActions") itemCount=itemCount}}`;
+const FlowsCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editFlows") itemCount=itemCount}}`;
 
 const BulkEditOwnerComponent = OwnerComponent.extend({
   className() {
@@ -357,9 +359,19 @@ const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
   },
   templateContext() {
     return {
-      itemCount: this.collection.length,
+      itemCount: this.model.get('collection').length,
       isSaving: this.model.get('isSaving'),
     };
+  },
+  updateCollection() {
+    this.el.querySelector('.bulk-edit-inline__heading').textContent = renderTemplate(ActionsCountTemplate, {
+      itemCount: this.model.get('collection').length,
+    });
+    this.showState();
+    this.showOwner();
+    this.showDueDateTime();
+    this.showDuration();
+    this.showOwnerScope();
   },
 });
 
@@ -387,14 +399,14 @@ const BulkEditFlowsBodyView = View.extend({
     if (this.model.get('stateMulti')) {
       return new MixedFlowStateComponent({
         isCompact: true,
-        flows: this.collection,
+        flows: this.model.get('collection'),
         stateOptions: { isDisabled },
       });
     }
 
     return new BulkFlowsStateComponent({
       isCompact: true,
-      flows: this.collection,
+      flows: this.model.get('collection'),
       stateId: get(this.model.get('state'), 'id'),
       stateOptions: { isDisabled },
     });
@@ -450,9 +462,17 @@ const BulkEditFlowsInlineView = BulkEditFlowsBodyView.extend({
   },
   templateContext() {
     return {
-      itemCount: this.collection.length,
+      itemCount: this.model.get('collection').length,
       isSaving: this.model.get('isSaving'),
     };
+  },
+  updateCollection() {
+    this.el.querySelector('.bulk-edit-inline__heading').textContent = renderTemplate(FlowsCountTemplate, {
+      itemCount: this.model.get('collection').length,
+    });
+    this.showState();
+    this.showOwner();
+    this.showOwnerScope();
   },
 });
 

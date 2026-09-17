@@ -25,7 +25,7 @@ export default View.extend({
     this.mergeOptions(options, CLASS_OPTIONS);
     this.setListeners();
 
-    this.listenTo(this.uiView, 'render', this.destroy);
+    this.listenTo(this.uiView, 'before:render', this.destroy);
     this.listenTo(this.uiView, 'destroy', this.destroy);
 
     View.apply(this, arguments);
