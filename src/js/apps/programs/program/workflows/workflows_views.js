@@ -6,7 +6,6 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
 
 import { alphaSort } from 'js/utils/sorting';
-import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { PROGRAM_BEHAVIORS } from 'js/static';
 import intl from 'js/i18n';
@@ -43,10 +42,10 @@ const RowBehavior = Behavior.extend({
     this.view.render();
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.view.el.classList.toggle('is-selected', isEditing);
   },
   onInitialize() {
-    if (this.view.model.isNew()) this.$el.addClass('is-selected');
+    if (this.view.model.isNew()) this.view.el.classList.add('is-selected');
   },
 });
 
@@ -65,11 +64,8 @@ const ActionItemView = View.extend({
       icon: this.model.hasOutreach() ? 'share-from-square' : null,
     };
   },
-  triggers: {
-    'click': 'click',
-  },
   events: {
-    'click .js-no-click': stopEventPropagation,
+    'click .js-route': 'onClick',
   },
   onClick() {
     if (this.model.isNew()) {
@@ -136,11 +132,8 @@ const FlowItemView = View.extend({
       isAutomated: this.model.get('behavior') === PROGRAM_BEHAVIORS.AUTOMATED,
     };
   },
-  triggers: {
-    'click': 'click',
-  },
   events: {
-    'click .js-no-click': stopEventPropagation,
+    'click .js-route': 'onClick',
   },
   onClick() {
     if (this.model.isNew()) {

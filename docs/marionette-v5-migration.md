@@ -13,7 +13,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `73e95e3c9ee287819e4008c0d11572f945dd061f`.
+  `899faa0b7043387a854cc456a113a82a921f1b23`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -76,20 +76,25 @@
   display. It was merged by a human.
 - The shared list-search path now consumes native DOM events and elements exposed
   by beta.4 instead of relying on jQuery event and `$el` methods.
-- Active step: PR #1793 migrates the Clinicians route tree, the second router to
+- Completed: PR #1793 migrated the Clinicians route tree, the second router to
   own v5 children. Its list and sidebar children are explicitly registered, the
   clinician collection loads through `prepareStart` with its readiness signal,
   search reuses `SubRouterApp`'s owned route state, and the sidebar app receives
   its Region at construction. The step also scopes each area router to its own
   content Region and removes the sidebar service's `setRegion` handoff, both of
-  which only became observable once a second router owned v5 children.
+  which only became observable once a second router owned v5 children. It was
+  merged by a human.
+- Active PR #1794: migrate the Programs route tree as one ownership boundary. The
+  area, nested route apps, content app, and globally hosted sidebar apps use
+  explicit child registration; asynchronous entity preparation receives the
+  lifecycle signal; and the nested selected-child path uses Application start,
+  stop, and cancellation semantics instead of the removed `startChildApp` API.
 - The final routing target was changed by human direction: retain Backbone.Router
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Next after human merge: migrate the Programs route tree, then Patients. The
-  two cross-app assertions still failing in the Clinicians contract clear with
-  the Patients step.
+- Next after human merge: migrate Patients. The two cross-app assertions still
+  failing in the Clinicians contract clear with that step.
 
 ## Validation
 
@@ -233,6 +238,13 @@
 - The test-mode build passed.
 - Component coverage passed: all 49 specs and 248 tests, including focused
   coverage for Picklist, Optionlist, Droplist, and date-filter state behavior.
+- The Programs route slice passes the test-mode build, the focused Sidebar
+  Service and SubRouterApp component specs (19 tests), and all 7 unchanged
+  Programs E2E specs (26 tests). Iteration exposed and corrected removed state
+  and `$el` helpers, negative nested-control click filtering, owner/child
+  restart coupling, sidebar stop/start races, and canceled-navigation alerts;
+  card navigation now binds only to explicit route surfaces, with no
+  compatibility wrapper or E2E change.
 - After replacing jQuery-wrapped positioning inputs, the 6 affected component
   specs and all 18 tests passed for Optionlist, Datepicker, Tooltip, Droplist,
   date-filter, and the no-anchor DueView Datepicker path.

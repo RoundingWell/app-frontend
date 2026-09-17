@@ -12,10 +12,14 @@ import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
 
 export default SubRouterApp.extend({
   routerAppName: 'ProgramFlowApp',
-  childApps: {
-    action: ActionApp,
-    programSidebar: ProgramSidebarApp,
-    flowSidebar: FlowSidebarApp,
+  initialize() {
+    this.addChildApp('action', new ActionApp());
+    this.addChildApp('programSidebar', new ProgramSidebarApp({
+      region: Radio.request('sidebar', 'region'),
+    }));
+    this.addChildApp('flowSidebar', new FlowSidebarApp({
+      region: Radio.request('sidebar', 'region'),
+    }));
   },
   routeScope: ['flowId'],
   routeActions: {
@@ -23,27 +27,23 @@ export default SubRouterApp.extend({
     'programFlow:action:new': 'showActionSidebar',
   },
   onBeforeStart() {
-    this.showView(new LayoutView());
+    this.setView(new LayoutView()).render();
   },
-  beforeStart({ flowId }) {
-    return [
-      Radio.request('entities', 'fetch:programs:model:byProgramFlow', flowId),
-      Radio.request('entities', 'fetch:programFlows:model', flowId),
-      Radio.request('entities', 'fetch:programActions:collection:byProgramFlow', flowId),
-    ];
+  prepareStart({ flowId }, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:programs:model:byProgramFlow', flowId, { signal }),
+      Radio.request('entities', 'fetch:programFlows:model', flowId, { signal }),
+      Radio.request('entities', 'fetch:programActions:collection:byProgramFlow', flowId, { signal }),
+    ]);
   },
-  onFail() {
-    Radio.trigger('event-router', 'notFound');
-    this.stop();
-  },
-  onStart(options, program, flow, actions) {
+  onStart(app, options, [program, flow, actions]) {
     this.program = program;
     this.flow = flow;
     this.actions = actions;
 
     this.maintainFlowActions();
 
-    this.showChildView('contextTrail', new ContextTrailView({
+    this.getView().showChildView('contextTrail', new ContextTrailView({
       model: this.flow,
       program: this.program,
     }));
@@ -54,12 +54,17 @@ export default SubRouterApp.extend({
     this.showProgramSidebar();
 
     this.startCurrentRoute();
+    this.showView();
   },
 
   maintainFlowActions() {
-    this.listenTo(this.actions, 'change:id destroy', () => {
-      this.flow.setActions(this.actions);
+    this.listenTo(this.actions, {
+      'change:id': this.updateFlowActions,
+      'destroy': this.updateFlowActions,
     });
+  },
+  updateFlowActions() {
+    this.flow.setActions(this.actions);
   },
 
   showHeader() {
@@ -71,7 +76,7 @@ export default SubRouterApp.extend({
       'edit': this.onEditFlow,
     });
 
-    this.showChildView('header', headerView);
+    this.getView().showChildView('header', headerView);
   },
 
   showAddAction() {
@@ -83,11 +88,11 @@ export default SubRouterApp.extend({
       },
     });
 
-    this.showChildView('addAction', addActionView);
+    this.getView().showChildView('addAction', addActionView);
   },
 
   showActionList() {
-    this.showChildView('actionList', new ListView({
+    this.getView().showChildView('actionList', new ListView({
       collection: this.actions,
     }));
   },
@@ -99,19 +104,24 @@ export default SubRouterApp.extend({
       'edit': this.onEditProgram,
     });
 
-    this.showChildView('sidebar', sidebarView);
+    this.getView().showChildView('sidebar', sidebarView);
   },
 
   showActionSidebar(flowId, actionId) {
     const actionApp = this.getChildApp('action');
+    const routeContext = this.getCurrentRoute();
 
-    this.listenToOnce(actionApp, {
-      'start'(options, action) {
-        this.editAction(action);
-      },
-    });
+    return actionApp.restart({ actionId, flowId })
+      .then(started => {
+        if (!started || this.getCurrentRoute() !== routeContext) return;
 
-    this.startChildApp('action', { actionId, flowId });
+        this.editAction(actionApp.action);
+      })
+      .catch(error => {
+        if (this.getCurrentRoute() !== routeContext || error?.response) return;
+
+        throw error;
+      });
   },
 
   editAction(action) {

@@ -10,10 +10,10 @@ const Entity = BaseEntity.extend({
     'tags:collection': 'getCollection',
     'fetch:tags:collection': 'fetchTags',
   },
-  fetchTags() {
+  fetchTags(options) {
     if (tagsCache) return tagsCache;
 
-    return this.fetchCollection().then(tags => {
+    return this.fetchCollection(options).then(tags => {
       tagsCache = tags;
       return tags;
     });

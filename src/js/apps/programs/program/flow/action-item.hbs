@@ -1,5 +1,5 @@
 <div class="work-card__surface">
-  <div class="work-card__main">
+  <div class="work-card__main js-route">
     <div class="work-card__heading">
       {{#if options.icon}}
         <span class="work-card__state">
@@ -17,15 +17,15 @@
     </div>
   </div>
   <div class="work-card__aside">
-    <div class="work-card__controls action-card__controls program-flow__action-controls js-no-click">
+    <div class="work-card__controls action-card__controls program-flow__action-controls">
       <span class="work-card__control" data-behavior-region></span>
       <span class="work-card__control" data-owner-region></span>
       <span class="work-card__control" data-due-region></span>
       {{#if hasForm}}<span class="work-card__control"><button class="button button--compact" type="button" disabled>{{far "square-poll-horizontal"}}</button></span>{{/if}}
     </div>
     <div class="work-card__meta action-card__meta">
-      <span>{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
-      <span class="program-flow__sort-handle js-sort js-no-click">{{fas "grip-vertical"}}</span>
+      <span class="js-route">{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
+      <span class="program-flow__sort-handle js-sort">{{fas "grip-vertical"}}</span>
     </div>
   </div>
 </div>

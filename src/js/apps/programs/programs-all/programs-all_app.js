@@ -7,22 +7,26 @@ import ProgramSidebarApp from 'js/apps/programs/sidebar/program/program-sidebar_
 import { ListView, LayoutView } from 'js/apps/programs/programs-all/programs-all_views';
 
 export default App.extend({
-  childApps: {
-    programSidebar: ProgramSidebarApp,
-  },
-  viewTriggers: {
-    'click:add': 'click:add',
+  initialize() {
+    this.addChildApp('programSidebar', new ProgramSidebarApp({
+      region: Radio.request('sidebar', 'region'),
+    }));
   },
   onBeforeStart() {
-    this.showView(new LayoutView());
-    this.getRegion('list').startPreloader({ variant: 'generic' });
+    const view = this.setView(new LayoutView());
+
+    view.render();
+    view.getRegion('list').startPreloader({ variant: 'generic' });
+
+    this.listenTo(view, 'click:add', this.onClickAdd);
+    this.showView();
   },
-  beforeStart() {
-    return Radio.request('entities', 'fetch:programs:collection');
+  prepareStart(options, { signal }) {
+    return Radio.request('entities', 'fetch:programs:collection', { signal });
   },
-  onStart(options, collection) {
+  onStart(app, options, collection) {
     this.programs = collection;
-    this.showChildView('list', new ListView({ collection }));
+    this.getView().showChildView('list', new ListView({ collection }));
   },
   onClickAdd() {
     const programSidebar = this.getChildApp('programSidebar');
