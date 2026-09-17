@@ -33,6 +33,34 @@ context('Sidebar Service', function() {
     });
   });
 
+  specify('interleaved starts display only the latest app', function() {
+    cy.document().then(async document => {
+      const element = document.createElement('div');
+
+      document.body.append(element);
+
+      const service = new SidebarService({ region: new Region({ el: element }) });
+      const superseded = new App({ region: service.getSidebarRegion() });
+      const latest = new App({ region: service.getSidebarRegion() });
+
+      await service.start();
+
+      const both = Promise.all([
+        service.startSidebarApp(superseded, {}, {}),
+        service.startSidebarApp(latest, {}, {}),
+      ]);
+
+      expect(await both).to.deep.equal([undefined, latest]);
+      expect(superseded.getView()).to.not.exist;
+      expect(element.children).to.have.length(1);
+      expect(element.contains(latest.getView().el)).to.be.true;
+
+      await service.stopSidebarApp();
+      await service.stop();
+      element.remove();
+    });
+  });
+
   specify('a stopping app leaves its replacement displayed', function() {
     cy.document().then(async document => {
       const element = document.createElement('div');

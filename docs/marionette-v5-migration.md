@@ -294,6 +294,12 @@
   change removes. The service now builds an independent Region over the shared
   sidebar host element for each app, and its stop cleanup ignores an app that is
   no longer current.
+- Awaiting the outgoing stop before recording the new app then moved the
+  guard-to-assignment gap behind an await: two interleaved starts could both
+  pass the guard and, with per-app Regions, attach two layouts to the host
+  element. The service now claims the sidebar synchronously and drops a start
+  that a later one has superseded. Focused coverage fails against the previous
+  ordering.
 - Review caught that the migrated `showCliniciansAll` returned its route start
   without the rejection handling the Dashboard migration applies. `routeAction`
   does not await the action, so a failed clinician fetch would have surfaced as

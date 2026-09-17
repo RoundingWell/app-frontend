@@ -31,9 +31,15 @@ export default App.extend({
   async startSidebarApp(app, appOptions, viewOptions) {
     if (this.currentApp === app) return this.currentApp;
 
-    await this.stopSidebarApp();
+    // claim the sidebar before awaiting so an interleaved start supersedes
+    // this one instead of attaching a second layout to the host element
+    const stopping = this.stopSidebarApp();
 
     this.currentApp = app;
+
+    await stopping;
+
+    if (this.currentApp !== app) return;
 
     app.showView(new LayoutView(viewOptions));
 
@@ -49,7 +55,7 @@ export default App.extend({
 
     await app.start(appOptions);
 
-    return this.currentApp;
+    return this.currentApp === app ? app : undefined;
   },
 
   stopSidebarApp() {
