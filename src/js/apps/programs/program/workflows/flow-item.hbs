@@ -1,5 +1,5 @@
 <div class="work-card__surface">
-  <div class="work-card__main">
+  <div class="work-card__main js-route">
     <div class="work-card__heading">
       <span class="work-card__state">{{far "folder"}}</span>
       <span class="work-card__title flow-card__title">
@@ -9,7 +9,7 @@
     </div>
   </div>
   <div class="work-card__aside">
-    <div class="work-card__controls flow-card__controls workflows__flow-controls js-no-click">
+    <div class="work-card__controls flow-card__controls workflows__flow-controls">
       <span class="work-card__control workflows__flow-status">
         {{#if published}}
           {{#if isAutomated}}
@@ -24,7 +24,7 @@
       <span class="work-card__control flow-card__owner" data-owner-region></span>
     </div>
     <div class="work-card__meta">
-      <span>{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
+      <span class="js-route">{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
     </div>
   </div>
 </div>

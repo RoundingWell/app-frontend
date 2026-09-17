@@ -9,10 +9,12 @@ import App from 'js/base/app';
 import ActionSidebarApp from 'js/apps/programs/sidebar/action/action-sidebar_app';
 
 export default App.extend({
-  childApps: {
-    actionSidebar: ActionSidebarApp,
+  initialize() {
+    this.addChildApp('actionSidebar', new ActionSidebarApp({
+      region: Radio.request('sidebar', 'region'),
+    }));
   },
-  beforeStart({ actionId, programId, flowId }) {
+  async prepareStart({ actionId, programId, flowId }, { signal }) {
     if (!actionId) {
       return Radio.request('entities', 'programActions:model', {
         _program: { id: programId, type: 'programs' },
@@ -25,16 +27,20 @@ export default App.extend({
       });
     }
 
-    return Radio.request('entities', 'fetch:programActions:model', actionId);
+    try {
+      return await Radio.request('entities', 'fetch:programActions:model', actionId, { signal });
+    } catch(error) {
+      if (!signal.aborted) {
+        Radio.request('alert', 'show:error', intl.programs.program.action.actionApp.notFound);
+      }
+
+      throw error;
+    }
   },
-  onFail() {
-    Radio.request('alert', 'show:error', intl.programs.program.action.actionApp.notFound);
-    this.stop();
-  },
-  onStart(options, action) {
+  onStart(app, options, action) {
+    this.action = action;
+
     const actionSidebar = this.getChildApp('actionSidebar');
     Radio.request('sidebar', 'start', actionSidebar, { action });
-
-    this.listenTo(actionSidebar, 'stop', this.stop);
   },
 });

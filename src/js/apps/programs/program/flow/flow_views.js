@@ -4,8 +4,6 @@ import hbs from 'handlebars-inline-precompile';
 import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
 
-import stopEventPropagation from 'js/utils/stop-event-propagation';
-
 import PreloadRegion from 'js/regions/preload_region';
 import SortableList from 'js/behaviors/sortable-list';
 
@@ -66,7 +64,7 @@ const HeaderView = View.extend({
     'change': 'render',
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.el.classList.toggle('is-selected', isEditing);
   },
   template: HeaderTemplate,
   regions: {
@@ -143,11 +141,8 @@ const ActionItemView = View.extend({
     owner: '[data-owner-region]',
     due: '[data-due-region]',
   },
-  triggers: {
-    'click': 'click',
-  },
   events: {
-    'click .js-no-click': stopEventPropagation,
+    'click .js-route': 'onClick',
   },
   onClick() {
     if (this.model.isNew()) {
@@ -157,7 +152,7 @@ const ActionItemView = View.extend({
     Radio.trigger('event-router', 'programFlow:action', this.model.getProgramFlow().id, this.model.id);
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.el.classList.toggle('is-selected', isEditing);
   },
   onRender() {
     this.showBehavior();

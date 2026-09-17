@@ -70,6 +70,9 @@ export default App.extend({
 
   // handler that ensures one running app per type
   async startCurrent(appName, options) {
+    const app = this.getChildApp(appName);
+    if (!app) throw new Error(`Child application "${ appName }" is not registered`);
+
     const routeContext = this.getCurrentRoute();
     const stopping = this.stopCurrent();
     const claim = {};
@@ -79,9 +82,6 @@ export default App.extend({
     await stopping;
 
     if (!this._isCurrentClaim(claim, routeContext)) return;
-
-    const app = this.getChildApp(appName);
-    if (!app) return;
 
     this._current = app;
 

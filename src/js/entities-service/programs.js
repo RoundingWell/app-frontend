@@ -11,8 +11,8 @@ const Entity = BaseEntity.extend({
     'fetch:programs:model:byProgramFlow': 'fetchProgramByProgramFlow',
     'fetch:programs:byWorkspace': 'fetchProgramsByWorkspace',
   },
-  fetchProgramByProgramFlow(flowId) {
-    return this.fetchBy(`/api/program-flows/${ flowId }/program`);
+  fetchProgramByProgramFlow(flowId, options) {
+    return this.fetchBy(`/api/program-flows/${ flowId }/program`, options);
   },
   fetchProgramsByWorkspace(workspaceId, options = {}) {
     const url = `/api/workspaces/${ workspaceId }/programs`;

@@ -164,6 +164,22 @@ context('SubRouterApp', function() {
   });
 
   describe('selected child lifecycle', function() {
+    specify('rejects an unregistered child without stopping the current child', async function() {
+      app = new SelectedApp();
+      const child = await app.startCurrent('child');
+      let failure;
+
+      try {
+        await app.startCurrent('missing');
+      } catch(error) {
+        failure = error;
+      }
+
+      expect(failure.message).to.equal('Child application "missing" is not registered');
+      expect(child.isRunning()).to.be.true;
+      expect(app.getCurrent()).to.equal(child);
+    });
+
     specify('starts a registered child and clears it when the owner stops', async function() {
       app = new SelectedApp();
       await app.start();

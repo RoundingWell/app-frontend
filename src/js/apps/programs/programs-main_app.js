@@ -1,3 +1,5 @@
+import { Radio } from 'marionette';
+
 import RouterApp from 'js/base/routerapp';
 
 import ProgramsAllApp from 'js/apps/programs/programs-all/programs-all_app';
@@ -7,10 +9,12 @@ import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
 export default RouterApp.extend({
   routerAppName: 'ProgramsApp',
 
-  childApps: {
-    programsAll: ProgramsAllApp,
-    program: ProgramApp,
-    programflow: ProgramFlowApp,
+  initialize() {
+    const region = this.getRegion();
+
+    this.addChildApp('programsAll', new ProgramsAllApp({ region }));
+    this.addChildApp('program', new ProgramApp({ region }));
+    this.addChildApp('programflow', new ProgramFlowApp({ region }));
   },
 
   eventRoutes: {
@@ -49,13 +53,37 @@ export default RouterApp.extend({
     },
   },
 
-  showProgramsAll() {
-    this.startCurrent('programsAll');
+  async showProgramsAll() {
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startCurrent('programsAll');
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    }
   },
-  showProgram(programId) {
-    this.startRoute('program', { programId });
+  async showProgram(programId) {
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startRoute('program', { programId });
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    }
   },
-  showProgramFlow(flowId) {
-    this.startRoute('programflow', { flowId });
+  async showProgramFlow(flowId) {
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startRoute('programflow', { flowId });
+    } catch {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'notFound');
+    }
   },
 });

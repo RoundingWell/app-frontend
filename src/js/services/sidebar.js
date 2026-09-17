@@ -29,33 +29,63 @@ export default App.extend({
   },
 
   async startSidebarApp(app, appOptions, viewOptions) {
-    if (this.currentApp === app) return this.currentApp;
-
     // claim the sidebar before awaiting so an interleaved start supersedes
     // this one instead of attaching a second layout to the host element
     const stopping = this.stopSidebarApp();
+    const claim = {};
 
     this.currentApp = app;
+    this.currentClaim = claim;
 
-    await stopping;
+    try {
+      await stopping;
 
-    if (this.currentApp !== app) return;
+      if (this.currentClaim !== claim) return;
 
-    app.showView(new LayoutView(viewOptions));
+      await app.stop();
 
-    this.listenTo(app.getView(), 'close', () => {
-      app.triggerMethod('close', app);
-    });
+      if (this.currentClaim !== claim) return;
 
-    this.listenToOnce(app, 'stop', () => {
-      if (this.currentApp !== app) return;
+      const view = app.setView(new LayoutView(viewOptions));
 
+      this.listenTo(view, 'close', () => {
+        app.triggerMethod('close', app);
+      });
+
+      this.listenToOnce(app, 'stop', () => {
+        if (this.currentClaim !== claim) return;
+
+        delete this.currentApp;
+        delete this.currentClaim;
+      });
+
+      const started = await app.start(appOptions);
+
+      if (!started) return;
+
+      if (this.currentClaim !== claim) {
+        if (this.currentApp !== app) await app.stop();
+        return;
+      }
+
+      app.showView();
+    } catch(error) {
+      await this._cleanupFailedStart(app, claim);
+      throw error;
+    }
+
+    return app;
+  },
+
+  async _cleanupFailedStart(app, claim) {
+    const ownsClaim = this.currentClaim === claim;
+
+    if (ownsClaim) {
       delete this.currentApp;
-    });
+      delete this.currentClaim;
+    }
 
-    await app.start(appOptions);
-
-    return this.currentApp === app ? app : undefined;
+    if (ownsClaim || this.currentApp !== app) await app.stop();
   },
 
   stopSidebarApp() {
@@ -64,6 +94,7 @@ export default App.extend({
     const app = this.currentApp;
 
     delete this.currentApp;
+    delete this.currentClaim;
 
     return app.stop();
   },

@@ -13,10 +13,10 @@ const Entity = BaseEntity.extend({
     'fetch:programActions:collection': 'fetchProgramActions',
     'fetch:programActions:collection:byProgramFlow': 'fetchProgramActionsByFlow',
   },
-  fetchProgramActionsByProgram({ programId }) {
+  fetchProgramActionsByProgram({ programId }, options) {
     const url = `/api/programs/${ programId }/actions`;
 
-    return this.fetchCollection({ url });
+    return this.fetchCollection({ ...options, url });
   },
   fetchProgramActions(behavior = PROGRAM_BEHAVIORS.STANDARD) {
     const collection = new this.Entity.Collection();
