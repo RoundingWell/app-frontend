@@ -1,0 +1,19 @@
+docs/marionette-v5-migration.md
+  s_4071d1618c057a::t_7b8f25e26b760c 72-76,79-85,90-92,219-226,274-288
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "94bb06fb249b5862e5681147c10eff6945ef32af",
+  "prompts": {},
+  "sessions": {
+    "s_4071d1618c057a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7fb702ed-238b-4f50-afad-3364d3d7e0c2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
