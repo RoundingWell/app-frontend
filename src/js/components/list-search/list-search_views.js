@@ -8,6 +8,9 @@ import InputWatcherBehavior from 'js/behaviors/input-watcher';
 
 import './list-search-component.scss';
 
+const INPUT_SELECTOR = '.js-input';
+const CLEAR_SELECTOR = '.js-clear';
+
 const InputTemplate = hbs`
   <span class="list-search__search-icon">{{far "magnifying-glass"}}</span>
   <input
@@ -38,22 +41,22 @@ const SearchView = View.extend({
     };
   },
   ui: {
-    input: '.js-input',
-    clear: '.js-clear',
+    input: INPUT_SELECTOR,
+    clear: CLEAR_SELECTOR,
   },
   triggers: {
     'click @ui.clear': 'clear',
   },
   onWatchChange(text) {
     this.options.query = text;
-    this.el.querySelector('.js-clear').classList.toggle('is-hidden', !text.length);
+    this.el.querySelector(CLEAR_SELECTOR).classList.toggle('is-hidden', !text.length);
     this.el.classList.toggle('is-applied', text.length > 2);
     this.triggerMethod('change:query', text);
   },
   onClear() {
     this.options.query = '';
-    this.el.querySelector('.js-input').value = '';
-    this.el.querySelector('.js-clear').classList.add('is-hidden');
+    this.el.querySelector(INPUT_SELECTOR).value = '';
+    this.el.querySelector(CLEAR_SELECTOR).classList.add('is-hidden');
     this.el.classList.remove('is-applied');
     this.triggerMethod('change:query', '');
   },
