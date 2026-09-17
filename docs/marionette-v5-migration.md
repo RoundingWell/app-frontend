@@ -431,3 +431,11 @@
   or existing Region; a native element belongs under `{ el }`. The resulting
   `MN0004` was an agent integration mistake, corrected to the documented Region
   definition without adding an adapter.
+- Patients review found that replacing broad v4 `restart()` calls with targeted
+  refreshes exposed app-owned cleanup that restart had performed implicitly:
+  stale bulk editors, late collection-view events, concurrent patient-sidebar
+  starts, and swallowed refresh failures. The fixes use beta.4 ownership,
+  prepared roots, cancellation signals, and explicit app-level sequencing; no
+  Marionette runtime defect was identified. The same review caught an agent
+  mistake that replaced declared `ui` bindings with raw `querySelector` calls;
+  the touched views now retain their Marionette `ui` contracts.

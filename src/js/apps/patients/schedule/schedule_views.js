@@ -152,6 +152,9 @@ const DayItemView = View.extend({
     'click .js-form': 'onClickForm',
     'click .js-action-surface': 'onClickSurface',
   },
+  ui: {
+    patient: '.js-patient',
+  },
   modelEvents: {
     'change': 'render',
   },
@@ -184,12 +187,12 @@ const DayItemView = View.extend({
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    const patientElement = this.el.querySelector('.js-patient');
-    patientElement.classList.toggle('patient-list__patient--selected', isSelected);
-    patientElement.setAttribute('aria-expanded', String(isSelected));
+    this.getUI('patient')
+      .toggleClass('patient-list__patient--selected', isSelected)
+      .attr('aria-expanded', String(isSelected));
   },
   focusPatient() {
-    this.el.querySelector('.js-patient').focus();
+    this.getUI('patient').trigger('focus');
   },
   showCheck() {
     if (!this.canEdit) return;

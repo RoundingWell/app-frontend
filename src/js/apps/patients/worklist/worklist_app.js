@@ -52,22 +52,25 @@ const WorklistApp = App.extend({
     'change:searchQuery': 'onChangeSearchQuery',
   },
   initFiltersApp({ setDefaults } = {}) {
-    if (!this.hasChildApp('filters')) {
-      const filtersApp = this.addChildApp('filters', new FiltersApp({
-        stateOptions: this.getState().getFiltersState(),
-      }));
-
-      this.filterState = filtersApp.getState();
-
-      filtersApp.listenTo(this.filterState, 'change', () => {
-        this.getState().set(this.filterState.getFiltersState());
-      });
-    } else {
+    if (this.hasChildApp('filters')) {
       this.filterState.set(this.getState().getFiltersState());
+
+      if (setDefaults) this.filterState.setDefaultFilterStates();
+      this.getState().set(this.filterState.getFiltersState());
+      return;
     }
 
-    if (setDefaults) this.filterState.setDefaultFilterStates();
+    const filtersApp = this.addChildApp('filters', new FiltersApp({
+      stateOptions: this.getState().getFiltersState(),
+    }));
 
+    this.filterState = filtersApp.getState();
+
+    filtersApp.listenTo(this.filterState, 'change', () => {
+      this.getState().set(this.filterState.getFiltersState());
+    });
+
+    if (setDefaults) this.filterState.setDefaultFilterStates();
     this.getState().set(this.filterState.getFiltersState());
   },
   onChangeStateSort() {
@@ -105,10 +108,16 @@ const WorklistApp = App.extend({
   },
   onBeforeStop() {
     this._canRefresh = false;
+    this._patientSidebarRequest = null;
     this._refreshController?.abort();
     this._refreshController = null;
-    this._filtersSidebarStart = null;
+    if (this.filteredCollection) this.stopListening(this.filteredCollection);
+    if (this.editableCollection) this.stopListening(this.editableCollection);
+    const listView = this.getView()?.getChildView('list');
+    if (listView) this.stopListening(listView);
     this.collection = null;
+    this.filteredCollection = null;
+    this.editableCollection = null;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
   },
@@ -127,7 +136,6 @@ const WorklistApp = App.extend({
     this.showFiltersButtonView();
 
     this.showListLoading();
-    this.showView();
   },
   showListLoading() {
     const loadingView = new ListLoadingView({ isFlowList: this.getState().isFlowType() });
@@ -206,16 +214,18 @@ const WorklistApp = App.extend({
     if (!collection) {
       this.showInitialControls();
       this.showListError(false);
+      this.showView();
       this._canRefresh = true;
       return;
     }
 
     this.showCollection(collection);
     this.showInitialControls();
+    this.showView();
     this._canRefresh = true;
   },
   showInitialControls() {
-    this._filtersSidebarStart = this.mountFiltersSidebar();
+    this.mountFiltersSidebar().catch(addError);
     this.showTypeViews();
   },
   showCollection(collection) {
@@ -242,6 +252,8 @@ const WorklistApp = App.extend({
   async refreshList() {
     if (!this._canRefresh) return;
 
+    if (!await this.stopBulkEditForRefresh()) return;
+
     this.filterState.set(this.getState().getFiltersState());
     this._refreshController?.abort();
     const controller = new AbortController();
@@ -259,6 +271,15 @@ const WorklistApp = App.extend({
       if (this.isCurrentRefresh(controller)) this.handleRefreshError(error);
     } finally {
       if (this._refreshController === controller) this._refreshController = null;
+    }
+  },
+  async stopBulkEditForRefresh() {
+    this.stopBulkEdit();
+    try {
+      await this._bulkEditStop;
+      return this._canRefresh;
+    } catch {
+      return false;
     }
   },
   isCurrentRefresh(controller) {
@@ -366,18 +387,26 @@ const WorklistApp = App.extend({
       controlsView: this.sidebarControlsView,
     });
   },
-  async showPatientSidebar(patient, triggerView) {
+  showPatientSidebar(patient, triggerView) {
     if (this.isPatientSidebarOpen && this.patientSidebarPatientId === patient.id) {
       this.closePatientSidebar();
       return;
     }
 
+    const request = {};
+    this._patientSidebarRequest = request;
     this.isPatientSidebarOpen = true;
     this.patientSidebarPatientId = patient.id;
     this.patientSidebarTrigger = triggerView;
     this.getView().getChildView('list').setPatientSelected(patient.id);
+
+    return this.startPatientSidebar(request, patient)
+      .catch(error => this.handlePatientSidebarRequestError(request, error));
+  },
+  async startPatientSidebar(request, patient) {
     await this.getChildApp('filtersSidebar')?.stop();
     await this.getChildApp('patientSidebar')?.stop();
+    if (this._patientSidebarRequest !== request) return;
     this.setSidebarLayoutCollapsed(false);
 
     if (!this.hasChildApp('patientSidebar')) {
@@ -389,17 +418,17 @@ const WorklistApp = App.extend({
     const patientSidebar = this.getChildApp('patientSidebar');
     this.listenToPatientSidebar();
 
-    try {
-      await patientSidebar.start({ patient });
-    } catch(error) {
-      this.handlePatientSidebarError(error);
-      return;
-    }
+    await patientSidebar.start({ patient });
 
+    if (this._patientSidebarRequest !== request) return;
     this.focusPatientSidebar(patientSidebar);
   },
+  handlePatientSidebarRequestError(request, error) {
+    if (this._patientSidebarRequest !== request) return;
+    this.handlePatientSidebarError(error);
+  },
   handlePatientSidebarError(error) {
-    this.showFiltersSidebar();
+    this.showFiltersSidebar().catch(addError);
 
     if (error?.responseData) {
       Radio.request('alert', 'show:apiError', error.responseData);
@@ -409,6 +438,7 @@ const WorklistApp = App.extend({
     addError(error);
   },
   async showFiltersSidebar() {
+    this._patientSidebarRequest = null;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
     this.getView().getChildView('list').setPatientSelected(null);
@@ -434,12 +464,20 @@ const WorklistApp = App.extend({
     this.getState().clearSelected();
   },
   stopBulkEdit() {
-    const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
-    const stop = this.removeChildApp(appName);
+    const stop = Promise.all([
+      this.removeChildApp('bulkEditActions'),
+      this.removeChildApp('bulkEditFlows'),
+    ]);
     this._bulkEditStop = stop;
-    stop.finally(() => {
-      if (this._bulkEditStop === stop) this._bulkEditStop = null;
-    });
+    stop.then(
+      () => {
+        if (this._bulkEditStop === stop) this._bulkEditStop = null;
+      },
+      error => {
+        if (this._bulkEditStop === stop) this._bulkEditStop = null;
+        addError(error);
+      },
+    );
   },
   showBulkEdit() {
     const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
@@ -460,7 +498,7 @@ const WorklistApp = App.extend({
     }
 
     if (this._bulkEditStop) {
-      this._bulkEditStop.then(() => this.showBulkEdit());
+      this._bulkEditStop.then(() => this.showBulkEdit(), addError);
       return;
     }
 

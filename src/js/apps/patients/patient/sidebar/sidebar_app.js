@@ -19,16 +19,11 @@ function getPatientSidebarRequests(patient, sidebars) {
 }
 
 export default App.extend({
-  onBeforeStart(app, { patient, isClosable, isListSidebar, isPreloaded }) {
-    this.patient = patient;
-    this.sidebars = Radio.request('sidebars', 'patient');
+  setSidebarView(options) {
+    const currentView = this.getView();
+    if (currentView) this.stopListening(currentView);
 
-    const view = this.setView(new SidebarView({
-      model: patient,
-      collection: isPreloaded ? this.sidebars : null,
-      isClosable,
-      isListSidebar,
-    })).render();
+    const view = this.setView(new SidebarView(options));
 
     this.listenTo(view, {
       'click:close': this.onClickClose,
@@ -38,6 +33,19 @@ export default App.extend({
       'click:activeStatus': this.toggleActiveStatus,
       'click:archivedStatus': this.archivePatient,
     });
+
+    return view;
+  },
+  onBeforeStart(app, { patient, isClosable, isListSidebar, isPreloaded }) {
+    this.patient = patient;
+    this.sidebars = Radio.request('sidebars', 'patient');
+
+    const view = this.setSidebarView({
+      model: patient,
+      collection: isPreloaded ? this.sidebars : null,
+      isClosable,
+      isListSidebar,
+    }).render();
 
     if (isPreloaded) return;
 
@@ -50,12 +58,12 @@ export default App.extend({
   },
   onStart(app, { isClosable, isListSidebar, isPreloaded }) {
     if (!isPreloaded) {
-      this.setView(new SidebarView({
+      this.setSidebarView({
         model: this.patient,
         collection: this.sidebars,
         isClosable,
         isListSidebar,
-      }));
+      });
     }
 
     this.showView();

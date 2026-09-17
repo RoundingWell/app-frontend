@@ -212,7 +212,7 @@ export default App.extend({
 
     this.startChildApp('bulkEditActions', {
       region: this.getRegion('tools'),
-      state: { collection: this.selected },
+      stateOptions: { collection: this.selected },
     });
 
     this.listenTo(app, {

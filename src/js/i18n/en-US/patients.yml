@@ -203,6 +203,7 @@ careOptsFrontend:
     schedule:
       scheduleApp:
         bulkEditFailure: Something went wrong. Please try again.
+        refreshFailure: The schedule could not be updated. Please try again.
       scheduleViews:
         allFiltersButtonView:
           allFiltersButton: All Filters

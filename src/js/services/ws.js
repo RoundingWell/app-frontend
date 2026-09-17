@@ -7,8 +7,8 @@ import App from 'js/base/app';
 import fetcher, { handleJSON } from 'js/base/fetch';
 
 const AdderApp = App.extend({
-  prepareStart({ model, dataParams }) {
-    return model.fetch({ data: dataParams });
+  prepareStart({ model, dataParams }, { signal }) {
+    return model.fetch({ data: dataParams, signal });
   },
   onStart(app, { model, collection }) {
     collection.add(model);
@@ -39,8 +39,8 @@ export default App.extend({
     this.reconnectAttempts = 0;
   },
 
-  getUrl() {
-    return fetcher('/api/websockets')
+  getUrl({ signal } = {}) {
+    return fetcher('/api/websockets', { signal })
       .then(handleJSON)
       .then(({ data }) => {
         if (!data.is_enabled) return;
@@ -52,8 +52,8 @@ export default App.extend({
       });
   },
 
-  prepareStart() {
-    return this.getUrl();
+  prepareStart(options, { signal }) {
+    return this.getUrl({ signal });
   },
 
   onStart(app, { data }, url) {

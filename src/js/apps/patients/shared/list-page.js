@@ -81,7 +81,7 @@ const ListPageView = View.extend({
     const isCollapsed = this.isFiltersSidebarCollapsed();
 
     this.el.classList.toggle('is-filters-collapsed', isCollapsed);
-    this.el.querySelector(LIST_PAGE_UI.filtersSidebar).setAttribute('aria-hidden', String(isCollapsed));
+    this.getUI('filtersSidebar').attr('aria-hidden', String(isCollapsed));
   },
   isFiltersSidebarCollapsed() {
     return this.layoutState.get('sidebarCollapsed');
@@ -96,10 +96,10 @@ const ListPageView = View.extend({
     return window.matchMedia(FILTERS_SIDEBAR_FIXED_QUERY).matches;
   },
   focusFiltersDrawer() {
-    this.el.querySelector(LIST_PAGE_UI.filtersDrawerClose).focus();
+    this.getUI('filtersDrawerClose').trigger('focus');
   },
   setDrawerCloseHidden(isHidden) {
-    this.el.querySelector(LIST_PAGE_UI.filtersDrawerClose).hidden = isHidden;
+    this.getUI('filtersDrawerClose').prop('hidden', isHidden);
   },
   onClickCloseSidebarDrawer() {
     this.triggerMethod('close:sidebar-drawer');
@@ -221,10 +221,18 @@ const ListPageAppMixin = {
   onChangeFiltersSidebarFixed(isFixed) {
     if (isFixed) this.setSidebarCollapsed(false);
   },
-  onCloseSidebarDrawer() {
+  async onCloseSidebarDrawer() {
     const wasPatientSidebarOpen = this.isPatientSidebarOpen;
 
-    if (wasPatientSidebarOpen) this.showFiltersSidebar();
+    if (wasPatientSidebarOpen) {
+      try {
+        await this.showFiltersSidebar();
+      } catch(error) {
+        addError(error);
+        return;
+      }
+    }
+
     this.setSidebarLayoutCollapsed(true);
     if (wasPatientSidebarOpen) {
       this.focusPatientSidebarTrigger();

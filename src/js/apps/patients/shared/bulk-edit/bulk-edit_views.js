@@ -357,6 +357,9 @@ const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
     'click .js-cancel': 'cancel',
     'click .js-save': 'save',
   },
+  ui: {
+    heading: '.bulk-edit-inline__heading',
+  },
   templateContext() {
     return {
       itemCount: this.model.get('collection').length,
@@ -364,9 +367,9 @@ const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
     };
   },
   updateCollection() {
-    this.el.querySelector('.bulk-edit-inline__heading').textContent = renderTemplate(ActionsCountTemplate, {
+    this.getUI('heading').text(renderTemplate(ActionsCountTemplate, {
       itemCount: this.model.get('collection').length,
-    });
+    }));
     this.showState();
     this.showOwner();
     this.showDueDateTime();
@@ -460,6 +463,9 @@ const BulkEditFlowsInlineView = BulkEditFlowsBodyView.extend({
     'click .js-cancel': 'cancel',
     'click .js-save': 'save',
   },
+  ui: {
+    heading: '.bulk-edit-inline__heading',
+  },
   templateContext() {
     return {
       itemCount: this.model.get('collection').length,
@@ -467,9 +473,9 @@ const BulkEditFlowsInlineView = BulkEditFlowsBodyView.extend({
     };
   },
   updateCollection() {
-    this.el.querySelector('.bulk-edit-inline__heading').textContent = renderTemplate(FlowsCountTemplate, {
+    this.getUI('heading').text(renderTemplate(FlowsCountTemplate, {
       itemCount: this.model.get('collection').length,
-    });
+    }));
     this.showState();
     this.showOwner();
     this.showOwnerScope();

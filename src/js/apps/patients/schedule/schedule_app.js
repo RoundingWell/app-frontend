@@ -43,22 +43,25 @@ const ScheduleApp = App.extend({
     'change:searchQuery': 'onChangeSearchQuery',
   },
   initFiltersApp({ setDefaults } = {}) {
-    if (!this.hasChildApp('filters')) {
-      const filtersApp = this.addChildApp('filters', new FiltersApp({
-        stateOptions: this.getState().getFiltersState(),
-      }));
-
-      this.filterState = filtersApp.getState();
-
-      filtersApp.listenTo(this.filterState, 'change', () => {
-        this.getState().set(this.filterState.getFiltersState());
-      });
-    } else {
+    if (this.hasChildApp('filters')) {
       this.filterState.set(this.getState().getFiltersState());
+
+      if (setDefaults) this.filterState.setDefaultFilterStates();
+      this.getState().set(this.filterState.getFiltersState());
+      return;
     }
 
-    if (setDefaults) this.filterState.setDefaultFilterStates();
+    const filtersApp = this.addChildApp('filters', new FiltersApp({
+      stateOptions: this.getState().getFiltersState(),
+    }));
 
+    this.filterState = filtersApp.getState();
+
+    filtersApp.listenTo(this.filterState, 'change', () => {
+      this.getState().set(this.filterState.getFiltersState());
+    });
+
+    if (setDefaults) this.filterState.setDefaultFilterStates();
     this.getState().set(this.filterState.getFiltersState());
   },
   onChangeSelected() {
@@ -85,15 +88,23 @@ const ScheduleApp = App.extend({
   },
   onBeforeStop() {
     this._canRefresh = false;
+    this._bulkEditSuspended = false;
+    this._patientSidebarRequest = null;
     this._refreshController?.abort();
     this._refreshController = null;
-    this._filtersSidebarStart = null;
+    if (this.filteredCollection) this.stopListening(this.filteredCollection);
+    if (this.editableCollection) this.stopListening(this.editableCollection);
+    const listView = this.getView()?.getChildView('list');
+    if (listView) this.stopListening(listView);
     this.collection = null;
+    this.filteredCollection = null;
+    this.editableCollection = null;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
   },
   onBeforeStart() {
     this._canRefresh = false;
+    this._bulkEditSuspended = false;
     this.initListState();
 
     const layoutView = new LayoutView({ model: this.getState() });
@@ -105,7 +116,6 @@ const ScheduleApp = App.extend({
     this.showFiltersButtonView();
 
     this.getView().getRegion('list').startPreloader({ variant: 'generic' });
-    this.showView();
   },
   prepareStart(options, { signal }) {
     if (this.isPatientSidebarOpen) this.listenToPatientSidebar();
@@ -130,9 +140,10 @@ const ScheduleApp = App.extend({
   },
   onStart(app, options, collection) {
     this.showCollection(collection);
-    this._filtersSidebarStart = this.mountFiltersSidebar();
+    this.mountFiltersSidebar().catch(addError);
     this.showScheduleTitle();
     this.showDateFilter();
+    this.showView();
     this._canRefresh = true;
   },
   showCollection(collection) {
@@ -155,6 +166,8 @@ const ScheduleApp = App.extend({
   async refreshList() {
     if (!this._canRefresh) return;
 
+    if (!this.suspendBulkEditForRefresh()) return;
+
     this.filterState.set(this.getState().getFiltersState());
     this._refreshController?.abort();
     const controller = new AbortController();
@@ -173,14 +186,36 @@ const ScheduleApp = App.extend({
     } catch(error) {
       if (this.isCurrentRefresh(controller)) this.handleRefreshError(error);
     } finally {
-      if (this._refreshController === controller) this._refreshController = null;
+      this.finishRefresh(controller);
     }
+  },
+  finishRefresh(controller) {
+    if (this._refreshController === controller) this._refreshController = null;
+  },
+  suspendBulkEditForRefresh() {
+    this._bulkEditSuspended = true;
+    this.getState().clearSelected();
+
+    const app = this.getChildApp('bulkEditActions');
+    if (app) {
+      app.updateCollection(this.selected);
+      app.getView().el.hidden = true;
+    }
+
+    return this._canRefresh;
   },
   isCurrentRefresh(controller) {
     return !controller.signal.aborted && this._refreshController === controller;
   },
   handleRefreshError(error) {
-    if (get(error, ['response', 'status']) === 400) this.filterState.setDefaultFilterStates();
+    if (get(error, ['response', 'status']) === 400) {
+      this.filterState.setDefaultFilterStates();
+      return;
+    }
+
+    if (this.collection) this.showCollection(this.collection);
+    Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.refreshFailure);
+    addError(error);
   },
   setWorklist(worklist) {
     this.getState().setWorklist(worklist);
@@ -245,18 +280,26 @@ const ScheduleApp = App.extend({
       isDrawer: this.getView().isFiltersDrawer(),
     });
   },
-  async showPatientSidebar(patient, triggerView) {
+  showPatientSidebar(patient, triggerView) {
     if (this.isPatientSidebarOpen && this.patientSidebarPatientId === patient.id) {
       this.closePatientSidebar();
       return;
     }
 
+    const request = {};
+    this._patientSidebarRequest = request;
     this.isPatientSidebarOpen = true;
     this.patientSidebarPatientId = patient.id;
     this.patientSidebarTrigger = triggerView;
     this.getView().getChildView('list').setPatientSelected(patient.id);
+
+    return this.startPatientSidebar(request, patient)
+      .catch(error => this.handlePatientSidebarRequestError(request, error));
+  },
+  async startPatientSidebar(request, patient) {
     await this.getChildApp('filtersSidebar')?.stop();
     await this.getChildApp('patientSidebar')?.stop();
+    if (this._patientSidebarRequest !== request) return;
     this.setSidebarLayoutCollapsed(false);
 
     if (!this.hasChildApp('patientSidebar')) {
@@ -268,17 +311,17 @@ const ScheduleApp = App.extend({
     const patientSidebar = this.getChildApp('patientSidebar');
     this.listenToPatientSidebar();
 
-    try {
-      await patientSidebar.start({ patient });
-    } catch(error) {
-      this.handlePatientSidebarError(error);
-      return;
-    }
+    await patientSidebar.start({ patient });
 
+    if (this._patientSidebarRequest !== request) return;
     this.focusPatientSidebar(patientSidebar);
   },
+  handlePatientSidebarRequestError(request, error) {
+    if (this._patientSidebarRequest !== request) return;
+    this.handlePatientSidebarError(error);
+  },
   handlePatientSidebarError(error) {
-    this.showFiltersSidebar();
+    this.showFiltersSidebar().catch(addError);
 
     if (error?.responseData) {
       Radio.request('alert', 'show:apiError', error.responseData);
@@ -288,6 +331,7 @@ const ScheduleApp = App.extend({
     addError(error);
   },
   async showFiltersSidebar() {
+    this._patientSidebarRequest = null;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
     this.getView().getChildView('list').setPatientSelected(null);
@@ -306,11 +350,19 @@ const ScheduleApp = App.extend({
       return;
     }
 
+    if (this._bulkEditSuspended) return;
+
     const stop = this.removeChildApp('bulkEditActions');
     this._bulkEditStop = stop;
-    stop.finally(() => {
-      if (this._bulkEditStop === stop) this._bulkEditStop = null;
-    });
+    stop.then(
+      () => {
+        if (this._bulkEditStop === stop) this._bulkEditStop = null;
+      },
+      error => {
+        if (this._bulkEditStop === stop) this._bulkEditStop = null;
+        addError(error);
+      },
+    );
   },
   onClickBulkCancel() {
     this.getState().clearSelected();
@@ -319,6 +371,9 @@ const ScheduleApp = App.extend({
     const currentApp = this.getChildApp('bulkEditActions');
 
     if (currentApp && !this._bulkEditStop) {
+      this._bulkEditSuspended = false;
+      currentApp.getView().el.hidden = false;
+
       if (this._bulkEditStart) {
         this._bulkEditStart.then(started => {
           if (started && this.getChildApp('bulkEditActions') === currentApp) {
@@ -332,7 +387,7 @@ const ScheduleApp = App.extend({
     }
 
     if (this._bulkEditStop) {
-      this._bulkEditStop.then(() => this.showBulkEdit());
+      this._bulkEditStop.then(() => this.showBulkEdit(), addError);
       return;
     }
 
@@ -359,7 +414,6 @@ const ScheduleApp = App.extend({
             Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));
 
             if (shouldRefresh) {
-              this.getState().clearSelected();
               this.refreshList();
               return;
             }
@@ -368,7 +422,6 @@ const ScheduleApp = App.extend({
           })
           .catch(() => {
             Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.bulkEditFailure);
-            this.getState().clearSelected();
             this.refreshList();
           });
       },
