@@ -5,8 +5,10 @@ import CliniciansAllApp from 'js/apps/clinicians/clinicians-all/clinicians-all_a
 export default RouterApp.extend({
   routerAppName: 'CliniciansApp',
 
-  childApps: {
-    cliniciansAll: CliniciansAllApp,
+  initialize() {
+    const region = this.getRegion();
+
+    this.addChildApp('cliniciansAll', new CliniciansAllApp({ region }));
   },
 
   eventRoutes: {
@@ -22,6 +24,6 @@ export default RouterApp.extend({
   },
 
   showCliniciansAll() {
-    this.startRoute('cliniciansAll');
+    return this.startRoute('cliniciansAll');
   },
 });
