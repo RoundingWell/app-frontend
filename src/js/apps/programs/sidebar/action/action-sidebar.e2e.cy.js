@@ -217,11 +217,6 @@ context('program action sidebar', function() {
       .should('be.empty');
 
     cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .should('be.empty');
-
-    cy
       .get('.sidebar__footer')
       .contains('Added')
       .next()
@@ -323,7 +318,6 @@ context('program action sidebar', function() {
         published_at: null,
         archived_at: null,
         behavior: 'standard',
-        outreach: 'patient',
         allowed_uploads: [],
         days_until_due: 5,
         created_at: testTs(),
@@ -743,11 +737,6 @@ context('program action sidebar', function() {
     cy
       .get('.picklist')
       .should('contain', 'No Available Forms');
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .should('exist');
   });
 
   specify('display action sidebar with no workspace forms', function() {
@@ -831,7 +820,6 @@ context('program action sidebar', function() {
         details: 'Details',
         published_at: testTs(),
         behavior: 'standard',
-        outreach: null,
         allowed_uploads: [],
         days_until_due: 5,
         created_at: testTs(),
@@ -877,11 +865,6 @@ context('program action sidebar', function() {
       .get('.program-flow__list')
       .contains('Name')
       .click();
-
-    cy
-      .get('.sidebar')
-      .find('[data-form-sharing-region]')
-      .should('be.empty');
 
     cy
       .get('.sidebar')

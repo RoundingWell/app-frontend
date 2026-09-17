@@ -141,7 +141,6 @@ const DayItemView = View.extend({
       patient: this.model.getPatient().attributes,
       form: this.model.getForm(),
       flow: this.model.getFlow() && this.model.getFlow().get('name'),
-      hasOutreach: this.model.hasOutreach(),
       commentCount: this.model.commentCount(),
     };
   },

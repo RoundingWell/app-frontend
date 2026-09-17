@@ -19,7 +19,6 @@ context('program workflows page', function() {
         details: null,
         published_at: testTs(),
         behavior: 'standard',
-        outreach: 'patient',
         days_until_due: null,
         created_at: testTs(),
         updated_at: testTs(),
@@ -221,11 +220,6 @@ context('program workflows page', function() {
       .find('[data-due-region]')
       .find('button')
       .should('not.have.text');
-
-    cy
-      .get('.action-card, .flow-card')
-      .first()
-      .find('.fa-share-from-square');
 
     cy
       .get('.action-card, .flow-card')

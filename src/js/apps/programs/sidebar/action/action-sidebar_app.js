@@ -10,7 +10,6 @@ import {
   MenuView,
   HeadingView,
   TimestampsView,
-  FormSharingView,
   UploadsEnabledView,
 } from 'js/apps/programs/sidebar/action/action-sidebar_views';
 
@@ -44,11 +43,10 @@ export default App.extend(extend({
       'change:allowed_uploads': this.showUploadsEnabled,
     });
 
-    this.showFormSharing();
     this.showUploadsEnabled();
   },
   showHeading() {
-    this.showChildView('heading', new HeadingView({ model: this.action }));
+    this.showChildView('heading', new HeadingView());
   },
   showMenu() {
     const menuView = new MenuView();
@@ -78,13 +76,6 @@ export default App.extend(extend({
     });
 
     this.showContentView('allowUploads', uploadsEnabledView);
-  },
-  showFormSharing() {
-    if (!this.action.hasOutreach()) return;
-
-    const formSharingView = new FormSharingView();
-
-    this.showContentView('formSharing', formSharingView);
   },
   onSave({ model }) {
     if (model.isNew()) {

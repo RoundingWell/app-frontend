@@ -7,7 +7,7 @@ import BaseModel from 'js/base/model';
 import trim from 'js/utils/formatting/trim';
 import collectionOf from 'js/utils/formatting/collection-of';
 
-import { ACTION_OUTREACH, STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
+import { STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-actions';
 const WRITABLE_ATTRIBUTES = [
@@ -88,9 +88,6 @@ const _Model = BaseModel.extend({
   },
   getForm() {
     return this.getRelationship('_form');
-  },
-  hasOutreach() {
-    return this.get('outreach') === ACTION_OUTREACH.PATIENT;
   },
   isVisibleToCurrentUser() {
     const visibleToTeamsList = this.get('_teams');

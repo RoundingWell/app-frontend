@@ -14,7 +14,6 @@ import 'scss/modules/textarea-flex.scss';
 
 import { alphaSort } from 'js/utils/sorting';
 
-import { ACTION_SHARING } from 'js/static';
 import { renderTemplate } from 'js/i18n';
 
 import Tooltip from 'js/components/tooltip';
@@ -76,11 +75,7 @@ const FormUpdatedTemplate = hbs`
 `;
 
 const FormRespondedTemplate = hbs`
-  {{#if _editor}}
-    {{formatHTMLMessage (intlGet (getI18nSource "formResponded")) name = name team = team form = form}}
-  {{ else }}
-    {{formatHTMLMessage (intlGet (getI18nSource "formRecipientResponded")) recipient = recipient form = form}}
-  {{/if}}
+  {{formatHTMLMessage (intlGet (getI18nSource "formResponded")) name = name team = team form = form}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
@@ -99,16 +94,6 @@ const StateUpdatedTemplate = hbs`
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
-const SharingCanceledTemplate = hbs`
-  {{formatHTMLMessage (intlGet (getI18nSource "sharingCanceled")) name = name team = team}}
-  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
-`;
-
-const SharingSentTemplate = hbs`
-  {{formatHTMLMessage (intlGet (getI18nSource "sharingSent")) recipient = recipient form = form}}
-  <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
-`;
-
 const ActivityIconTemplate = hbs`{{far icon}}`;
 
 const ACTIVITY_ICONS = {
@@ -124,7 +109,6 @@ const ACTIVITY_ICONS = {
   ActionFormResponded: 'square-poll-horizontal',
   ActionNameUpdated: 'pen-to-square',
   ActionStateUpdated: 'circle-exclamation',
-  ActionSharingUpdated: 'share-from-square',
 };
 const ACTIVITY_TYPES = Object.keys(ACTIVITY_ICONS);
 
@@ -264,12 +248,6 @@ const ActivityView = View.extend({
       ActionStateUpdated: StateUpdatedTemplate,
     };
 
-    if (type === 'ActionSharingUpdated') {
-      const sharing = this.model.get('value');
-      if (sharing === ACTION_SHARING.SENT) return SharingSentTemplate;
-      return SharingCanceledTemplate;
-    }
-
     return Templates[type];
   },
   onRender() {
@@ -280,7 +258,6 @@ const ActivityView = View.extend({
     return model ? model.get('name') : null;
   },
   templateContext() {
-    const recipient = this.model.getRecipient();
     const editor = this.model.getEditor();
     const editorTeam = editor && editor.getTeam();
     const clinician = this.model.getClinician();
@@ -291,7 +268,6 @@ const ActivityView = View.extend({
     const sourceI18n = `patients.patient.action.activityViews.${ this.model.get('source') }`;
 
     return {
-      recipient: recipient ? `${ recipient.get('first_name') } ${ recipient.get('last_name') }` : null,
       name: this._getModelName(editor),
       team: this._getModelName(editorTeam),
       to_clinician: this._getModelName(clinician),
@@ -325,9 +301,6 @@ const ActivitiesView = CollectionView.extend({
     if (model.type !== 'events') return true;
     if (!ACTIVITY_TYPES.includes(model.get('event_type'))) return false;
     if (model.get('event_type') === 'ActionCreated' && model.get('source') === 'system') return false;
-    if (model.get('event_type') === 'ActionSharingUpdated') {
-      return [ACTION_SHARING.SENT, ACTION_SHARING.CANCELED].includes(model.get('value'));
-    }
     return true;
   },
   viewComparator(viewA, viewB) {

@@ -163,7 +163,6 @@ context('program page', function() {
         published_at: null,
         archived_at: null,
         behavior: 'standard',
-        outreach: 'disabled',
         allowed_uploads: [],
         days_until_due: 5,
         created_at: testTs(),

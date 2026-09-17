@@ -311,8 +311,6 @@ context('patient flow page', function() {
       attributes: {
         name: 'Test Action',
         duration: 10,
-        outreach: null,
-        sharing: 'disabled',
         updated_at: testTsSubtract(1),
         allowed_uploads: ['pdf'],
       },
@@ -457,11 +455,6 @@ context('patient flow page', function() {
       .get('.patient-action')
       .find('[data-duration-region]')
       .should('contain', '20 mins');
-
-    cy
-      .get('.patient-action')
-      .find('[data-form-sharing-region]')
-      .should('be.empty');
   });
 
   specify('done patient flow action page', function() {
@@ -562,7 +555,6 @@ context('patient flow page', function() {
         details: null,
         due_date: testDateAdd(1),
         created_at: testTsSubtract(3),
-        outreach: 'patient',
         sequence: 3,
       },
       relationships: {
@@ -596,8 +588,6 @@ context('patient flow page', function() {
               due_date: testDateSubtract(1),
               created_at: testTsSubtract(1),
               sequence: 1,
-              outreach: 'patient',
-              sharing: 'sent',
               options: {
                 icon: 'caret-down',
                 iconType: 'fas',
@@ -3049,8 +3039,6 @@ context('patient flow page', function() {
         details: null,
         due_date: testDate(),
         due_time: '06:00:00',
-        outreach: 'disabled',
-        sharing: 'disabled',
         updated_at: testTsSubtract(1),
       },
       relationships: {

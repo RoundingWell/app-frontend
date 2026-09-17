@@ -175,19 +175,6 @@
   }
 }
 
-.patient-action__sharing-state {
-  border: 1px solid var(--color-surface);
-  padding: 4px 16px 8px;
-
-  .icon {
-    font-size: 16px;
-    line-height: 16px;
-    margin-right: 8px;
-    position: relative;
-    width: 16px;
-  }
-}
-
 .patient-action__chips {
   --button-align-items: center;
   --button-background: var(--color-surface);
@@ -347,10 +334,6 @@
 
 .patient-action--form-expanded .patient-action__form-body {
   margin-top: 0;
-}
-
-.patient-action--form-expanded .patient-action__form-sharing {
-  display: none;
 }
 
 .patient-action__attachment-file {

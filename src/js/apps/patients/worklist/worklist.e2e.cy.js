@@ -2,8 +2,6 @@ import _ from 'underscore';
 import dayjs from 'dayjs';
 import { v7 as uuid, NIL as NIL_UUID } from 'uuid';
 
-import { ACTION_OUTREACH } from 'js/static';
-
 import formatDate from 'helpers/format-date';
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
@@ -1440,7 +1438,6 @@ context('worklist page', function() {
           due_time: null,
           created_at: priorYear.format(),
           updated_at: priorYear.add(1, 'day').format(),
-          outreach: ACTION_OUTREACH.PATIENT,
         },
         relationships: {
           state: getRelationship(stateDone),
