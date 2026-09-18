@@ -157,24 +157,6 @@
   }
 }
 
-.patient-action__button {
-  align-items: center;
-  background: #{$white};
-  border: 0.5px solid var(--color-border-subtle);
-  border-radius: 8px;
-  box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
-  color: color(blue);
-  display: flex;
-  gap: 8px;
-  justify-content: flex-start;
-  min-height: 52px;
-  padding: 12px 16px;
-
-  .icon {
-    font-size: 18px;
-  }
-}
-
 .patient-action__chips {
   --button-align-items: center;
   --button-background: var(--color-surface);
