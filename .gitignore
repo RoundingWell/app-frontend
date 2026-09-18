@@ -1,4 +1,5 @@
 dist/
+tmp/
 webpack.stats.json
 
 # Logs
