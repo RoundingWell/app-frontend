@@ -121,8 +121,6 @@ careOptsFrontend:
             saveAndGoBack:
               buttonText: Submit + Go Back
               droplistItemText: Submit Form + Go Back
-          statusView:
-            label: Last submitted { date }
           updateView:
             buttonText: Update
       flow:
