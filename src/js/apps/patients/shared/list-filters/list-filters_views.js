@@ -99,7 +99,7 @@ const CustomFilterView = View.extend({
 });
 
 const CustomFiltersLoadingView = View.extend({
-  className: 'list-filters__custom-filters list-filters__skeleton skeleton-loading',
+  className: 'list-filters__custom-filters list-filters__skeleton skeleton-loading skeleton-loading--immediate',
   attributes: {
     'aria-busy': 'true',
     'aria-label': i18n.loadingView.loading,
