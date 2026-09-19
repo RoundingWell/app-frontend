@@ -35,6 +35,7 @@ export default App.extend({
   initialize() {
     this.resources = new Backbone.Collection();
     this.persistent = {};
+    this.managedAdds = new WeakMap();
     this.ws = {};
     this.reconnectAttempts = 0;
   },
@@ -188,20 +189,34 @@ export default App.extend({
   manageAdd(app, collection, type, dataParams) {
     const channel = this.getChannel();
     const eventName = `message:${ type }`;
+    const subscriptions = this.managedAdds.get(app) || new Map();
+    const previous = subscriptions.get(type);
+
+    if (previous) {
+      app.stopListening(channel, eventName, previous.onMessage);
+      app.off('before:stop', previous.onStop);
+    }
 
     const onMessage = (data, model) => {
       if (collection.get(model) || data.category === 'ResourceDeleted') return;
 
       const appName = `${ model.type }-${ model.id }`;
 
-      if (app.isRunning() && app.getChildApp(appName)) return;
+      if (!app.isRunning() || app.getChildApp(appName)) return;
 
       const adderApp = app.addChildApp(appName, new AdderApp());
       adderApp.start({ model, collection, dataParams });
     };
+    const onStop = () => {
+      app.stopListening(channel, eventName, onMessage);
+      subscriptions.delete(type);
+      if (!subscriptions.size) this.managedAdds.delete(app);
+    };
 
+    subscriptions.set(type, { onMessage, onStop });
+    this.managedAdds.set(app, subscriptions);
     app.listenTo(channel, eventName, onMessage);
-    app.once('before:stop', () => app.stopListening(channel, eventName, onMessage));
+    app.once('before:stop', onStop);
   },
 
   onMessage(event) {
