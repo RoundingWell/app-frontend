@@ -13,15 +13,13 @@ export default RouterApp.extend({
   routerAppName: 'PatientsApp',
 
   initialize() {
-    const region = this.getRegion();
-
-    this.addChildApp('patient', new PatientApp({ region }));
-    this.addChildApp('ownedBy', new WorklistApp({ region }));
-    this.addChildApp('forTeam', new WorklistApp({ region }));
-    this.addChildApp('newPastDay', new WorklistApp({ region }));
-    this.addChildApp('pastThree', new WorklistApp({ region }));
-    this.addChildApp('lastThirty', new WorklistApp({ region }));
-    this.addChildApp('schedule', new ScheduleApp({ region }));
+    this.addChildApp('patient', new PatientApp());
+    this.addChildApp('ownedBy', new WorklistApp());
+    this.addChildApp('forTeam', new WorklistApp());
+    this.addChildApp('newPastDay', new WorklistApp());
+    this.addChildApp('pastThree', new WorklistApp());
+    this.addChildApp('lastThirty', new WorklistApp());
+    this.addChildApp('schedule', new ScheduleApp());
   },
 
   eventRoutes: {
@@ -133,9 +131,22 @@ export default RouterApp.extend({
     }
   },
 
-  showPatient(patientId) {
+  async showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
-    this.startRoute('patient', { patientId });
+    const routeContext = this.getCurrentRoute();
+
+    try {
+      return await this.startRoute('patient', { patientId });
+    } catch(error) {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      if (get(error, ['response', 'status']) === 410) {
+        Radio.trigger('event-router', 'notFound');
+        return;
+      }
+
+      return handleErrors(error);
+    }
   },
 
   redirectPatientFlow(flowId) {

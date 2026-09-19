@@ -152,28 +152,23 @@ const Application = App.extend({
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
 
+    if (!this.hasChildApp('appFrame')) {
+      const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
+      this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
+    }
+
     const appView = this.getView().appView;
-    const appFrameApp = this.addChildApp('appFrame', new AppFrameApp({
+    const appFrameStarted = await this.getChildApp('appFrame').start({
       contentRegion: appView.getRegion('content'),
       navRegion: appView.getRegion('nav'),
       setNavMinimized: appView.setNavMinimized.bind(appView),
       sidebarRegion: appView.getRegion('sidebar'),
-    }));
-
-    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
-
-    const appFrameStarted = await appFrameApp.start();
+    });
 
     if (signal.aborted) return;
     if (!appFrameStarted) throw new Error('App frame startup was canceled');
 
     return { currentUser };
-  },
-
-  prepareStop(options) {
-    if (!this.hasChildApp('appFrame')) return;
-
-    return this.removeChildApp('appFrame', options);
   },
 
   showStartFailure(error) {

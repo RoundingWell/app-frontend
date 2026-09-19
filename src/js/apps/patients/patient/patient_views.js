@@ -113,7 +113,7 @@ const LayoutView = View.extend({
   renderSidebarState() {
     const isHidden = this.isSidebarHidden();
 
-    this.$el.toggleClass('patient__frame--sidebar-hidden', isHidden);
+    this.el.classList.toggle('patient__frame--sidebar-hidden', isHidden);
     this.ui.sidebarButton
       .prop('hidden', this.isSidebarFixed())
       .toggleClass('is-selected', !isHidden)
@@ -160,7 +160,7 @@ const LayoutView = View.extend({
     sidebarButton: '.js-sidebar-button',
   },
   renderFormExpandedState() {
-    this.$el.toggleClass('patient__frame--form-expanded', this.layoutState.get('formExpanded'));
+    this.el.classList.toggle('patient__frame--form-expanded', this.layoutState.get('formExpanded'));
   },
   templateContext() {
     const sidebarHidden = this.layoutState.get('sidebarHidden');

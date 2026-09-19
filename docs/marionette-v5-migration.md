@@ -2,8 +2,16 @@
 
 ## Target and baseline
 
-- Target: `marionette@5.0.0-beta.4`; published source revision
-  `f4165f14198da115cc998c842fbf4b6a4886fe45`.
+- Current candidate: Marionette PRs #545 and #546 at combined commit
+  `7c9c84d346adfe10ce9ed3b9b295f1b7795210b5`. This is unpublished code,
+  packaged with upstream's `release:artifact` workflow and installed from
+  `vendor/marionette/marionette-5.0.0-beta.4-7c9c84d.tgz` (SHA-256
+  `0479ab8b720c68118e596f5a1f9151705ddd23ef412122e4e0b6197e840af20e`).
+- The candidate build produced all five workspace artifacts. The exact source
+  changes only core Marionette, so the tracked candidate replaces that package;
+  the published beta.4 adapters, Radio, and utils packages remain exactly
+  pinned. Replace the tarball dependency atomically when a published release
+  contains the combined commit.
 - Beta.4 release notes, migration guidance, package metadata, and companion
   versions were inspected before installation.
 - Baseline: `npm ci` passed; 49 component specs and 248 tests passed; 35 E2E
@@ -94,10 +102,13 @@
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Current step: migrate the Patients Schedule, Worklist, shared list-page,
-  filters, bulk-edit, and sidebar ownership boundary. Application children are
-  registered explicitly, readiness uses lifecycle signals, and list refreshes
-  replace collections without rebuilding the prepared page layout.
+- Completed: PR #1795 migrated the Patients Schedule, Worklist, shared
+  list-page, filters, bulk-edit, and sidebar ownership boundary.
+- Active: PR #1797 consumes the #545/#546 candidate contract. Reusable route,
+  patient-page, filter-sidebar, and global-sidebar Applications remain
+  registered while start/stop controls activation. Routers and recreated
+  layouts pass their current Region at start; loading roots are app-owned; and
+  the beta.4 duplicate-Region and remove/re-add workarounds are removed.
 
 ## Validation
 
@@ -450,3 +461,51 @@
   cover the known patient-detail `$el` path plus bulk-edit visibility, find-list
   refresh, and click-shift list setup; they remain migration work rather than
   test changes.
+- The patient shell and workflow route now use beta.4 preparation, owned child
+  Applications, detached initial composition, and cancellation-aware fetches.
+  Route page Applications are created only when selected, so an unmigrated
+  Action, Flow, or Form page cannot break the default workflow route during
+  construction.
+- Program action and flow collection services accepted a behavior argument but
+  discarded fetch options. Their existing request contract now also forwards
+  options so Application cancellation reaches the underlying Backbone fetch.
+- Focused unchanged E2E currently passes 4/5 patient-shell cases, 7/9 workflow
+  cases, and 9/10 patient-sidebar cases. The remaining patient alias and
+  add-workflow failures enter the not-yet-migrated Action Application; the
+  workflow tooltip assertion and sidebar `$el.prop` failure are separate
+  existing integration gaps. Those belong to following route/component steps
+  rather than an E2E rewrite.
+- Cypress fixture generation is not concurrency-safe: three parallel focused
+  runs wrote the same ignored JSON fixtures and produced trailing data. Running
+  the specs serially regenerated valid fixtures; this was test tooling friction,
+  not a Marionette or application failure.
+- The #545/#546 candidate installed reproducibly with a clean `npm ci`; the
+  test build and targeted ESLint pass. Focused SidebarService, RouterApp, and
+  SubRouterApp component coverage passes 32/32, including replacement safety,
+  recreated-shell Region rebinding, state preservation, route switching, and
+  late-start cancellation.
+- The full component sweep passes 45/50 specs (252 tests pass, 7 fail, 4 are
+  pending). The five failing specs and all seven failures reproduce unchanged
+  at the original PR head: Alert, Dialer, Tooltip, Picklist, and Team.
+- Unchanged E2E passes 6/6 default-route cases, 9/9 worklist-loading cases, and
+  8/8 focused Program cases. The workspace-switch case also passes. The
+  candidate makes both app-owned worklist and patient-sidebar loading roots
+  reachable; the original PR head failed those same two loading assertions.
+- Patient workflow remains 7/9 and App Nav remains 16/20, matching the original
+  PR head. The blockers are the not-yet-migrated Action/Form state contracts,
+  an existing tooltip interaction failure, and existing nav viewport failures;
+  no E2E file was changed for this candidate update.
+- Initial candidate integration eagerly constructed every patient page and
+  prevented default-route startup when unmigrated Action/Flow state contracts
+  initialized. Registration is now lazy but one-time: selecting a page changes
+  ownership once, while later route activation uses start/stop and the current
+  layout Region. This was an application sequencing mistake, not evidence of a
+  defect in PR #545 or #546.
+- PR review caught three consumer cleanup gaps: SidebarService now awaits
+  already-pending child stops, retained workflow/filter children do not stack
+  listeners across restarts, and a failed patient-sidebar start clears its
+  app-owned loading root before reporting the error. Suggestions to recreate
+  the Program workflow child or restore per-router Region wrappers were not
+  adopted: the candidate explicitly supports stopped-child Region rebinding
+  and guarantees that stopping one borrower preserves another borrower's
+  replacement in the shared host.

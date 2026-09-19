@@ -11,18 +11,16 @@ import FlowSidebarApp from 'js/apps/programs/sidebar/flow/flow-sidebar_app';
 
 import { LayoutView } from 'js/apps/programs/program/program_views';
 import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
+import { LoadingView } from 'js/regions/preload_region';
 
 export default SubRouterApp.extend({
   routeScope: ['programId'],
 
   initialize() {
     this.addChildApp('action', new ActionApp());
-    this.addChildApp('programSidebar', new ProgramSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
-    this.addChildApp('flowSidebar', new FlowSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
+    this.addChildApp('workflows', new WorkflowsApp());
+    this.addChildApp('programSidebar', new ProgramSidebarApp());
+    this.addChildApp('flowSidebar', new FlowSidebarApp());
   },
 
   routeActions: {
@@ -39,7 +37,7 @@ export default SubRouterApp.extend({
   },
 
   onBeforeStart() {
-    this.getRegion().startPreloader({ variant: 'generic' });
+    this.showView(new LoadingView({ variant: 'generic' }));
   },
 
   prepareStart({ programId }, { signal }) {
@@ -53,10 +51,6 @@ export default SubRouterApp.extend({
 
     view.render();
 
-    this.addChildApp('workflows', new WorkflowsApp({
-      region: view.getRegion('content'),
-    }));
-
     this.showSidebar();
 
     this.startCurrentRoute();
@@ -64,16 +58,12 @@ export default SubRouterApp.extend({
     this.showView();
   },
 
-  prepareStop(options) {
-    if (!this.hasChildApp('workflows')) return;
-
-    return this.removeChildApp('workflows', options);
-  },
-
   showWorkflows() {
     const routeContext = this.getCurrentRoute();
 
-    return this.startCurrent('workflows').catch(error => {
+    return this.startCurrent('workflows', {
+      region: this.getView().getRegion('content'),
+    }).catch(error => {
       if (this.getCurrentRoute() !== routeContext) return;
 
       Radio.trigger('event-router', 'unknownError', error?.response?.status);

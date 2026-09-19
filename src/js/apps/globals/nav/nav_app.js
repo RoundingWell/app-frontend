@@ -140,6 +140,7 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
 export default RouterApp.extend({
   // NOTE: Don't stop this app on no match
   onNoMatch: noop,
+  startOnRoute: false,
   channelName: 'nav',
   radioRequests: {
     search: 'showSearch',
@@ -154,8 +155,6 @@ export default RouterApp.extend({
   },
   initialize() {
     this.addChildApp('search', new SearchApp());
-
-    this.listenTo(Radio.channel('workspace'), 'change:workspace', () => this.restart());
 
     this.listenTo(Radio.channel('event-router'), 'default', () => {
       defer(() => {

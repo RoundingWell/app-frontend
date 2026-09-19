@@ -1,4 +1,3 @@
-import { get } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
@@ -13,6 +12,7 @@ import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
 import ActionApp from 'js/apps/patients/patient/action/action_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import { LoadingView } from 'js/regions/preload_region';
 
 import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
@@ -30,49 +30,27 @@ export default SubRouterApp.extend({
     };
   },
 
-  childApps: {
-    workflow: WorkflowPageApp,
-    flow: FlowPageApp,
-    action: ActionApp,
-    form: FormApp,
-    patientSidebar: PatientSidebarApp,
-  },
-
   currentAppOptions() {
     return {
       layoutState: this.layoutState,
-      region: this.getRegion('content'),
       patient: this.patient,
       patientId: this.patient.id,
     };
   },
 
   onBeforeStart() {
-    this.getRegion().startPreloader({ variant: 'generic' });
+    this.showView(new LoadingView({ variant: 'generic' }));
   },
 
   onBeforeStop() {
     Radio.request('nav', 'setMinimized', false);
   },
 
-  beforeStart() {
-    const [patientId] = this.getCurrentRoute().eventArgs;
-
-    return Radio.request('entities', 'fetch:patients:model', patientId);
+  prepareStart({ patientId }, { signal }) {
+    return Radio.request('entities', 'fetch:patients:model', patientId, { signal });
   },
 
-  /* istanbul ignore next: beforeStart error handling */
-  onFail(options, error) {
-    if (get(error, ['response', 'status']) === 410) {
-      Radio.trigger('event-router', 'notFound');
-      this.stop();
-      return;
-    }
-
-    handleErrors(error);
-  },
-
-  onStart(options, patient) {
+  onStart(app, options, patient) {
     this.patient = patient;
     this.contextTrail = new Backbone.Model();
     this.currentUser = Radio.request('bootstrap', 'currentUser');
@@ -96,11 +74,12 @@ export default SubRouterApp.extend({
       'close:sidebar-drawer': this.closePatientSidebarDrawer,
     });
     this.setView(layout);
+    layout.render();
 
-    this.showView();
     this.renderFormExpandedState();
     this.showPatientSidebar();
     this.startCurrentRoute();
+    this.showView();
   },
 
   showWorkflow() {
@@ -128,7 +107,9 @@ export default SubRouterApp.extend({
   },
 
   startContent(appName, options) {
+    const routeContext = this.getCurrentRoute();
     const previousPageApp = this.getCurrent();
+    const pageApp = this.getContentApp(appName);
 
     if (previousPageApp) {
       this.stopListening(previousPageApp, 'context:change');
@@ -138,11 +119,29 @@ export default SubRouterApp.extend({
     this.setSidebarHidden(this.sidebarPreferenceHidden);
     this.contextTrail.set('context', this.getOptimisticContext(appName, options));
 
-    const pageApp = this.getChildApp(appName);
-
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
 
-    this.startCurrent(appName, options);
+    return this.startCurrent(appName, {
+      ...options,
+      region: this.getView().getRegion('content'),
+    }).catch(error => {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      handleErrors(error);
+    });
+  },
+  getContentApp(appName) {
+    const currentApp = this.getChildApp(appName);
+    if (currentApp) return currentApp;
+
+    const ContentApp = {
+      workflow: WorkflowPageApp,
+      flow: FlowPageApp,
+      action: ActionApp,
+      form: FormApp,
+    }[appName];
+
+    return this.addChildApp(appName, new ContentApp());
   },
   setSidebarHidden(isHidden) {
     const layout = this.getView();
@@ -250,9 +249,15 @@ export default SubRouterApp.extend({
   },
 
   showPatientSidebar() {
-    this.startChildApp('patientSidebar', {
-      region: this.getRegion('sidebar'),
+    const sidebar = this.getChildApp('patientSidebar')
+      || this.addChildApp('patientSidebar', new PatientSidebarApp());
+
+    sidebar.start({
       patient: this.patient,
+      region: this.getView().getRegion('sidebar'),
+    }).catch(async error => {
+      await sidebar.stop();
+      handleErrors(error);
     });
   },
 });

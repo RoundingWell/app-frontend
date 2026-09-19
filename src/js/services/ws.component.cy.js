@@ -207,6 +207,41 @@ context('WS Service', function() {
       });
   });
 
+  specify('Replacing managed additions and stopping with the owner', function() {
+    const channel = Radio.channel('ws');
+    const firstCollection = new Backbone.Collection();
+    const collection = new Backbone.Collection();
+    const model = new Backbone.Model({ id: 'flow-id' });
+    const app = new Backbone.Model();
+    const start = cy.stub();
+
+    model.type = 'flows';
+    app.isRunning = cy.stub().returns(false);
+    app.getChildApp = cy.stub();
+    app.addChildApp = cy.stub().returns({ start });
+
+    service.manageAdd(app, firstCollection, 'flows');
+    service.manageAdd(app, collection, 'flows');
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+    expect(app.addChildApp).to.not.be.called;
+
+    app.isRunning.returns(true);
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+    expect(app.addChildApp).to.be.calledOnce;
+    expect(start).to.be.calledOnceWith({ model, collection, dataParams: undefined });
+
+    app.getChildApp.returns({});
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+    expect(app.addChildApp).to.be.calledOnce;
+
+    app.trigger('before:stop');
+    app.getChildApp.returns(undefined);
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+    expect(app.addChildApp).to.be.calledOnce;
+  });
+
   specify('Heartbeat', function() {
     service.HEART_BEAT_INTERVAL = 10;
 
