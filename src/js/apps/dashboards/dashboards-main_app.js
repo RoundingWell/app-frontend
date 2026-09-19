@@ -9,10 +9,9 @@ import DashboardApp from 'js/apps/dashboards/dashboard/dashboard_app';
 
 export default RouterApp.extend({
   routerAppName: 'DashboardsApp',
-
-  initialize() {
-    this.addChildApp('dashboardsAll', new DashboardsAllApp());
-    this.addChildApp('dashboard', new DashboardApp());
+  childApps: {
+    dashboardsAll: DashboardsAllApp,
+    dashboard: DashboardApp,
   },
 
   eventRoutes: {

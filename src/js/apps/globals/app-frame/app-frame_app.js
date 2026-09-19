@@ -9,13 +9,16 @@ import SidebarService from 'js/services/sidebar';
 import NavApp from 'js/apps/globals/nav/nav_app';
 
 export default App.extend({
+  childApps: {
+    nav: NavApp,
+    sidebar: SidebarService,
+  },
   initialize() {
     this.routers = [];
-    const navApp = this.addChildApp('nav', new NavApp());
+    const navApp = this.getChildApp('nav');
     const navState = navApp.getState();
 
     this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
-    this.addChildApp('sidebar', new SidebarService());
 
     this.listenTo(Radio.channel('workspace'), 'change:workspace', () => {
       if (this.isRunning()) this.restart(this.shellOptions);

@@ -39,6 +39,9 @@ const $document = $(document);
 
 const Application = App.extend({
   channelName: 'app',
+  childApps: {
+    bootstrap: BootstrapService,
+  },
   radioRequests: {
     'show:pop': 'showPop',
   },
@@ -51,7 +54,6 @@ const Application = App.extend({
   // - A root layout is prepared
   // - Global services are started
   onBeforeStart() {
-    this.getBootstrapService();
     this.setView(new RootView());
     this.configComponents();
     this.startServices();
@@ -129,12 +131,6 @@ const Application = App.extend({
     $document.on('keydown.app', null, 'esc', function(evt) {
       Radio.trigger('hotkey', 'close', evt);
     });
-  },
-
-  getBootstrapService() {
-    if (this.hasChildApp('bootstrap')) return this.getChildApp('bootstrap');
-
-    return this.addChildApp('bootstrap', new BootstrapService());
   },
 
   async prepareStart(options, { signal }) {

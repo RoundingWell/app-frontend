@@ -142,6 +142,9 @@ export default RouterApp.extend({
   onNoMatch: noop,
   startOnRoute: false,
   channelName: 'nav',
+  childApps: {
+    search: SearchApp,
+  },
   radioRequests: {
     search: 'showSearch',
     setMinimized: 'setTemporarilyMinimized',
@@ -154,8 +157,6 @@ export default RouterApp.extend({
     return new StateModel();
   },
   initialize() {
-    this.addChildApp('search', new SearchApp());
-
     this.listenTo(Radio.channel('event-router'), 'default', () => {
       defer(() => {
         Backbone.history.navigate(this.getDefaultRoute(), { trigger: true });

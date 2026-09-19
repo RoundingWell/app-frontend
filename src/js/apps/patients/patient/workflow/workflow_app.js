@@ -14,8 +14,11 @@ import AddWorkflowApp from './add-workflow_app';
 import { LayoutView, ListView, WorkflowLoadingView } from './workflow_views';
 
 export default App.extend({
+  childApps: {
+    addWorkflow: AddWorkflowApp,
+  },
   initialize() {
-    const addWorkflow = this.addChildApp('addWorkflow', new AddWorkflowApp());
+    const addWorkflow = this.getChildApp('addWorkflow');
 
     this.listenTo(addWorkflow, {
       'add:programAction': this.onAddProgramAction,

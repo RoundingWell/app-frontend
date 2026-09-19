@@ -8,11 +8,10 @@ import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
 
 export default RouterApp.extend({
   routerAppName: 'ProgramsApp',
-
-  initialize() {
-    this.addChildApp('programsAll', new ProgramsAllApp());
-    this.addChildApp('program', new ProgramApp());
-    this.addChildApp('programflow', new ProgramFlowApp());
+  childApps: {
+    programsAll: ProgramsAllApp,
+    program: ProgramApp,
+    programflow: ProgramFlowApp,
   },
 
   eventRoutes: {

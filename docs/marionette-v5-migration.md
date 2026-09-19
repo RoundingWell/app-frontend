@@ -3,15 +3,17 @@
 ## Target and baseline
 
 - Current candidate: Marionette PRs #545 and #546 at combined commit
-  `7c9c84d346adfe10ce9ed3b9b295f1b7795210b5`. This is unpublished code,
+  `7c9c84d346adfe10ce9ed3b9b295f1b7795210b5`, composed with PR #548 at
+  `89beea9faecbd0f906a7137beacd42c7d749538c`. The reproducible integration
+  commit is `754e427fcb348d7b3127dde1f4b2e66919658c5c`. This is unpublished code,
   packaged with upstream's `release:artifact` workflow and installed from
-  `vendor/marionette/marionette-5.0.0-beta.4-7c9c84d.tgz` (SHA-256
-  `0479ab8b720c68118e596f5a1f9151705ddd23ef412122e4e0b6197e840af20e`).
+  `vendor/marionette/marionette-5.0.0-beta.4-7c9c84d-89beea9.tgz` (SHA-256
+  `769e43a9d576c28d55eeb4a77035bc6dc4688012d39b14a48fe53972270ec260`).
 - The candidate build produced all five workspace artifacts. The exact source
   changes only core Marionette, so the tracked candidate replaces that package;
   the published beta.4 adapters, Radio, and utils packages remain exactly
   pinned. Replace the tarball dependency atomically when a published release
-  contains the combined commit.
+  contains all three contracts.
 - Beta.4 release notes, migration guidance, package metadata, and companion
   versions were inspected before installation.
 - Baseline: `npm ci` passed; 49 component specs and 248 tests passed; 35 E2E
@@ -104,11 +106,13 @@
   running the unchanged Cypress contract locally and addressing regressions.
 - Completed: PR #1795 migrated the Patients Schedule, Worklist, shared
   list-page, filters, bulk-edit, and sidebar ownership boundary.
-- Active: PR #1797 consumes the #545/#546 candidate contract. Reusable route,
+- Active: PR #1797 consumes the #545/#546/#548 candidate contract. Reusable route,
   patient-page, filter-sidebar, and global-sidebar Applications remain
   registered while start/stop controls activation. Routers and recreated
   layouts pass their current Region at start; loading roots are app-owned; and
-  the beta.4 duplicate-Region and remove/re-add workarounds are removed.
+  the beta.4 duplicate-Region and remove/re-add workarounds are removed. Static,
+  no-argument children use `childApps`; dynamically imported, lazy, configured,
+  and route-created children retain explicit registration.
 
 ## Validation
 
@@ -509,3 +513,16 @@
   adopted: the candidate explicitly supports stopped-child Region rebinding
   and guarantees that stopping one borrower preserves another borrower's
   replacement in the shared host.
+- PR #548 was based independently from the #545/#546 integration. Composing its
+  four commits produced conflicts only in generated Application contract
+  metadata and derived compact documentation. Regenerating those artifacts from
+  the combined source preserved both contracts; the focused upstream
+  Application suite passes 228/228, with lint, documentation checks, and the
+  release-artifact build also passing. This was branch-integration friction,
+  not a runtime defect.
+- The combined #545/#546/#548 candidate installs reproducibly with `npm ci`.
+  Targeted ESLint and the test-mode build pass. RouterApp, SubRouterApp,
+  SidebarService, and WebSocket component coverage passes 54/54. Unchanged E2E
+  passes default routes 6/6, worklist loading 9/9, and Programs 8/8. Patient
+  workflow remains 7/9 and App Nav remains 16/20, matching the pre-#548 PR
+  head. No E2E spec changed.

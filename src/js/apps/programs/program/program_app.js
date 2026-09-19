@@ -15,12 +15,11 @@ import { LoadingView } from 'js/regions/preload_region';
 
 export default SubRouterApp.extend({
   routeScope: ['programId'],
-
-  initialize() {
-    this.addChildApp('action', new ActionApp());
-    this.addChildApp('workflows', new WorkflowsApp());
-    this.addChildApp('programSidebar', new ProgramSidebarApp());
-    this.addChildApp('flowSidebar', new FlowSidebarApp());
+  childApps: {
+    action: ActionApp,
+    workflows: WorkflowsApp,
+    programSidebar: ProgramSidebarApp,
+    flowSidebar: FlowSidebarApp,
   },
 
   routeActions: {

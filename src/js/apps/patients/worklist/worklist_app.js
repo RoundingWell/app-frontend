@@ -32,9 +32,9 @@ const FiltersApp = App.extend({
 });
 
 const WorklistApp = App.extend({
-  initialize() {
-    this.addChildApp('filtersSidebar', new ListFiltersPanelApp());
-    this.addChildApp('patientSidebar', new ListPatientSidebarApp());
+  childApps: {
+    filtersSidebar: ListFiltersPanelApp,
+    patientSidebar: ListPatientSidebarApp,
   },
   createState() {
     return new StateModel();

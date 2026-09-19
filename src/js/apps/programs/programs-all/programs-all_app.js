@@ -7,8 +7,8 @@ import ProgramSidebarApp from 'js/apps/programs/sidebar/program/program-sidebar_
 import { ListView, LayoutView } from 'js/apps/programs/programs-all/programs-all_views';
 
 export default App.extend({
-  initialize() {
-    this.addChildApp('programSidebar', new ProgramSidebarApp());
+  childApps: {
+    programSidebar: ProgramSidebarApp,
   },
   onBeforeStart() {
     const view = this.setView(new LayoutView());

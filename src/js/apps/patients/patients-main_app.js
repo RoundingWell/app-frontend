@@ -11,15 +11,14 @@ import ScheduleApp from 'js/apps/patients/schedule/schedule_app';
 
 export default RouterApp.extend({
   routerAppName: 'PatientsApp',
-
-  initialize() {
-    this.addChildApp('patient', new PatientApp());
-    this.addChildApp('ownedBy', new WorklistApp());
-    this.addChildApp('forTeam', new WorklistApp());
-    this.addChildApp('newPastDay', new WorklistApp());
-    this.addChildApp('pastThree', new WorklistApp());
-    this.addChildApp('lastThirty', new WorklistApp());
-    this.addChildApp('schedule', new ScheduleApp());
+  childApps: {
+    patient: PatientApp,
+    ownedBy: WorklistApp,
+    forTeam: WorklistApp,
+    newPastDay: WorklistApp,
+    pastThree: WorklistApp,
+    lastThirty: WorklistApp,
+    schedule: ScheduleApp,
   },
 
   eventRoutes: {
