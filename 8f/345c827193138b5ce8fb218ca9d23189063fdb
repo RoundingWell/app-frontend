@@ -1,0 +1,83 @@
+src/js/apps/programs/programs-main_app.js
+  s_85aebd1623278c::t_07730d1d9196eb 13-15
+src/js/apps/clinicians/clinicians-main_app.js
+  s_85aebd1623278c::t_07730d1d9196eb 11
+src/js/regions/preload_region.js
+  s_85aebd1623278c::t_574c31ecff5b4a 28-29
+src/js/apps/programs/program/flow/flow_app.js
+  s_85aebd1623278c::t_574c31ecff5b4a 17-18
+src/js/apps/patients/worklist/worklist_app.js
+  s_85aebd1623278c::t_96b4f66c42578e 143
+  s_85aebd1623278c::t_5b3f532b326907 681
+  s_85aebd1623278c::t_66909641790a3c 35-38,387,415-418,528
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_85aebd1623278c::t_e9e69e4700c43e 20
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_85aebd1623278c::t_ec72c1e71b1403 20-22
+  s_85aebd1623278c::t_07730d1d9196eb 14,18,24-26,29,51-54,58,98
+  s_85aebd1623278c::t_a7e2e578d5cf28 23
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_7e430ae582ec8e 5-14,108-111
+  s_85aebd1623278c::t_934b29e6700a03 487-489
+  s_85aebd1623278c::t_91ba538a5ca2f5 105-107,482-486,490-503
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_85aebd1623278c::t_574c31ecff5b4a 11
+src/js/app.js
+  s_85aebd1623278c::t_07730d1d9196eb 155-159,161,166
+src/js/services/sidebar.js
+  s_85aebd1623278c::t_07730d1d9196eb 53
+  s_85aebd1623278c::t_00ed5b57ec6f74 92-95
+src/js/apps/patients/schedule/schedule_app.js
+  s_85aebd1623278c::t_96b4f66c42578e 122
+  s_85aebd1623278c::t_66909641790a3c 33-36,281,309-312,427,504
+src/js/base/routerapp.js
+  s_85aebd1623278c::t_07730d1d9196eb 15,140,159
+  s_85aebd1623278c::t_50c7004afff4c6 91
+  s_85aebd1623278c::t_24b23fdb82e57f 11,92-93
+src/js/apps/globals/nav/nav_app.js
+  s_85aebd1623278c::t_24b23fdb82e57f 143
+src/js/apps/patients/patient/workflow/workflow_app.js
+  s_85aebd1623278c::t_16167247624e65 17-19,95-98
+src/js/apps/programs/program/program_app.js
+  s_85aebd1623278c::t_574c31ecff5b4a 14,21-23,40,64-66
+src/js/apps/dashboards/dashboards-main_app.js
+  s_85aebd1623278c::t_07730d1d9196eb 14-15
+.gitignore
+  s_85aebd1623278c::t_7d0e1871bc9da6 44
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_85aebd1623278c::t_574c31ecff5b4a 20
+src/js/apps/patients/patients-main_app.js
+  s_85aebd1623278c::t_07730d1d9196eb 16-22
+src/js/apps/programs/program/action/action_app.js
+  s_85aebd1623278c::t_574c31ecff5b4a 13
+src/js/apps/patients/patient/patient_app.js
+  s_85aebd1623278c::t_152aa1685d848c 252-253
+  s_85aebd1623278c::t_16167247624e65 15,42,124-127,257
+  s_85aebd1623278c::t_9faaa406512e73 144,254-255
+src/js/services/sidebar.component.cy.js
+  s_85aebd1623278c::t_8db72b52af4cda 2,103-108
+  s_85aebd1623278c::t_5b3f532b326907 16,29,47-48,76-77,135-136
+  s_85aebd1623278c::t_eab1ce3f6b5341 95-102,109-127
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_85aebd1623278c::t_e9e69e4700c43e 53
+package-lock.json
+  s_85aebd1623278c::t_e8e2b17febd984 40,12306-12307
+package.json
+  s_85aebd1623278c::t_c395ce04cdf1c1 142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8f345c827193138b5ce8fb218ca9d23189063fdb",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
