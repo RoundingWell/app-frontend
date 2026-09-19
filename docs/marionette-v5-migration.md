@@ -501,3 +501,11 @@
   ownership once, while later route activation uses start/stop and the current
   layout Region. This was an application sequencing mistake, not evidence of a
   defect in PR #545 or #546.
+- PR review caught three consumer cleanup gaps: SidebarService now awaits
+  already-pending child stops, retained workflow/filter children do not stack
+  listeners across restarts, and a failed patient-sidebar start clears its
+  app-owned loading root before reporting the error. Suggestions to recreate
+  the Program workflow child or restore per-router Region wrappers were not
+  adopted: the candidate explicitly supports stopped-child Region rebinding
+  and guarantees that stopping one borrower preserves another borrower's
+  replacement in the shared host.

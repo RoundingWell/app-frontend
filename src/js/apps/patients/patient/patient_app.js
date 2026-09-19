@@ -255,6 +255,9 @@ export default SubRouterApp.extend({
     sidebar.start({
       patient: this.patient,
       region: this.getView().getRegion('sidebar'),
-    }).catch(handleErrors);
+    }).catch(async error => {
+      await sidebar.stop();
+      handleErrors(error);
+    });
   },
 });

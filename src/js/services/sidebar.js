@@ -76,18 +76,28 @@ export default App.extend({
       delete this.currentClaim;
     }
 
-    if (ownsClaim || this.currentApp !== app) await app.stop();
+    if (ownsClaim || this.currentApp !== app) await this._trackStop(app.stop());
+  },
+
+  _trackStop(stopping) {
+    const pending = Promise.resolve(stopping).finally(() => {
+      this.pendingStops.delete(pending);
+    });
+
+    this.pendingStops ||= new Set();
+    this.pendingStops.add(pending);
+    return pending;
   },
 
   stopSidebarApp() {
-    if (!this.currentApp) return;
+    if (!this.currentApp) return Promise.all(this.pendingStops || []);
 
     const app = this.currentApp;
 
     delete this.currentApp;
     delete this.currentClaim;
 
-    return app.stop();
+    return this._trackStop(app.stop());
   },
 
   prepareStop() {

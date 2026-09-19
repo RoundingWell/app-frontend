@@ -15,7 +15,12 @@ import { LayoutView, ListView, WorkflowLoadingView } from './workflow_views';
 
 export default App.extend({
   initialize() {
-    this.addChildApp('addWorkflow', new AddWorkflowApp());
+    const addWorkflow = this.addChildApp('addWorkflow', new AddWorkflowApp());
+
+    this.listenTo(addWorkflow, {
+      'add:programAction': this.onAddProgramAction,
+      'add:programFlow': this.onAddProgramFlow,
+    });
   },
   onBeforeStart(app, { patient, status }) {
     const currentWorkspace = Radio.request('workspace', 'current');
@@ -86,11 +91,6 @@ export default App.extend({
     if (this.status === 'done' || !this.currentUser.can('work:own')) return;
 
     const addWorkflow = this.getChildApp('addWorkflow');
-
-    this.listenTo(addWorkflow, {
-      'add:programAction': this.onAddProgramAction,
-      'add:programFlow': this.onAddProgramFlow,
-    });
 
     addWorkflow.start({
       patient: this.patient,
