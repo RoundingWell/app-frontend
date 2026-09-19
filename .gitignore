@@ -41,6 +41,7 @@ typings/
 
 # Output of 'npm pack'
 *.tgz
+!vendor/marionette/*.tgz
 
 # Yarn Integrity file
 .yarn-integrity

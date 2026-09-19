@@ -12,6 +12,7 @@ import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
 import ActionApp from 'js/apps/patients/patient/action/action_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import { LoadingView } from 'js/regions/preload_region';
 
 import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
@@ -38,7 +39,7 @@ export default SubRouterApp.extend({
   },
 
   onBeforeStart() {
-    this.getRegion().startPreloader({ variant: 'generic' });
+    this.showView(new LoadingView({ variant: 'generic' }));
   },
 
   onBeforeStop() {
@@ -75,22 +76,10 @@ export default SubRouterApp.extend({
     this.setView(layout);
     layout.render();
 
-    this.addChildApp('patientSidebar', new PatientSidebarApp({
-      region: layout.getRegion('sidebar'),
-    }));
-
     this.renderFormExpandedState();
     this.showPatientSidebar();
     this.startCurrentRoute();
     this.showView();
-  },
-
-  prepareStop(options) {
-    const childApps = ['workflow', 'flow', 'action', 'form', 'patientSidebar'];
-
-    return Promise.all(childApps
-      .filter(name => this.hasChildApp(name))
-      .map(name => this.removeChildApp(name, options)));
   },
 
   showWorkflow() {
@@ -132,7 +121,10 @@ export default SubRouterApp.extend({
 
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
 
-    return this.startCurrent(appName, options).catch(error => {
+    return this.startCurrent(appName, {
+      ...options,
+      region: this.getView().getRegion('content'),
+    }).catch(error => {
       if (this.getCurrentRoute() !== routeContext) return;
 
       handleErrors(error);
@@ -149,9 +141,7 @@ export default SubRouterApp.extend({
       form: FormApp,
     }[appName];
 
-    return this.addChildApp(appName, new ContentApp({
-      region: this.getView().getRegion('content'),
-    }));
+    return this.addChildApp(appName, new ContentApp());
   },
   setSidebarHidden(isHidden) {
     const layout = this.getView();
@@ -259,8 +249,12 @@ export default SubRouterApp.extend({
   },
 
   showPatientSidebar() {
-    this.getChildApp('patientSidebar').start({
+    const sidebar = this.getChildApp('patientSidebar')
+      || this.addChildApp('patientSidebar', new PatientSidebarApp());
+
+    sidebar.start({
       patient: this.patient,
+      region: this.getView().getRegion('sidebar'),
     }).catch(handleErrors);
   },
 });

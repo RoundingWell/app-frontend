@@ -14,6 +14,9 @@ import AddWorkflowApp from './add-workflow_app';
 import { LayoutView, ListView, WorkflowLoadingView } from './workflow_views';
 
 export default App.extend({
+  initialize() {
+    this.addChildApp('addWorkflow', new AddWorkflowApp());
+  },
   onBeforeStart(app, { patient, status }) {
     const currentWorkspace = Radio.request('workspace', 'current');
     const stateGroup = currentWorkspace.getStates().groupByDone()[status];
@@ -62,16 +65,8 @@ export default App.extend({
       status: this.status,
     }));
 
-    this.addChildApp('addWorkflow', new AddWorkflowApp({
-      region: this.getView().getRegion('addWorkflow'),
-    }));
-
     this.startAddWorkflow();
     this.showView();
-  },
-
-  prepareStop(options) {
-    return this.removeChildApp('addWorkflow', options);
   },
 
   subscribe() {
@@ -97,7 +92,10 @@ export default App.extend({
       'add:programFlow': this.onAddProgramFlow,
     });
 
-    addWorkflow.start({ patient: this.patient }).catch(addError);
+    addWorkflow.start({
+      patient: this.patient,
+      region: this.getView().getRegion('addWorkflow'),
+    }).catch(addError);
   },
 
   onAddProgramAction(programAction) {

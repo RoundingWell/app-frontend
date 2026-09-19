@@ -32,6 +32,10 @@ const FiltersApp = App.extend({
 });
 
 const WorklistApp = App.extend({
+  initialize() {
+    this.addChildApp('filtersSidebar', new ListFiltersPanelApp());
+    this.addChildApp('patientSidebar', new ListPatientSidebarApp());
+  },
   createState() {
     return new StateModel();
   },
@@ -136,6 +140,7 @@ const WorklistApp = App.extend({
     this.showFiltersButtonView();
 
     this.showListLoading();
+    this.showView();
   },
   showListLoading() {
     const loadingView = new ListLoadingView({ isFlowList: this.getState().isFlowType() });
@@ -374,17 +379,12 @@ const WorklistApp = App.extend({
 
     this.sidebarControlsView = new SidebarControlsView();
 
-    if (!this.hasChildApp('filtersSidebar')) {
-      this.addChildApp('filtersSidebar', new ListFiltersPanelApp({
-        region: this.getView().getRegion('filtersSidebar'),
-      }));
-    }
-
     return this.getChildApp('filtersSidebar').start({
       filtersState,
       layoutState: this.getView().getLayoutState(),
       isDrawer: this.getView().isFiltersDrawer(),
       controlsView: this.sidebarControlsView,
+      region: this.getView().getRegion('filtersSidebar'),
     });
   },
   showPatientSidebar(patient, triggerView) {
@@ -409,16 +409,13 @@ const WorklistApp = App.extend({
     if (this._patientSidebarRequest !== request) return;
     this.setSidebarLayoutCollapsed(false);
 
-    if (!this.hasChildApp('patientSidebar')) {
-      this.addChildApp('patientSidebar', new ListPatientSidebarApp({
-        region: this.getView().getRegion('filtersSidebar'),
-      }));
-    }
-
     const patientSidebar = this.getChildApp('patientSidebar');
     this.listenToPatientSidebar();
 
-    await patientSidebar.start({ patient });
+    await patientSidebar.start({
+      patient,
+      region: this.getView().getRegion('filtersSidebar'),
+    });
 
     if (this._patientSidebarRequest !== request) return;
     this.focusPatientSidebar(patientSidebar);
@@ -503,7 +500,6 @@ const WorklistApp = App.extend({
     }
 
     const app = this.addChildApp(appName, new AppClass({
-      region: this.getSelectionBarRegion('bulkEdit'),
       stateOptions: { collection: this.selected },
     }));
 
@@ -529,7 +525,7 @@ const WorklistApp = App.extend({
       },
     });
 
-    const start = app.start();
+    const start = app.start({ region: this.getSelectionBarRegion('bulkEdit') });
     this._bulkEditStart = start;
     start
       .catch(addError)
@@ -682,7 +678,7 @@ const WorklistApp = App.extend({
     this.getView().showChildView('search', searchView);
   },
   prepareStop(options) {
-    const dynamicApps = ['filtersSidebar', 'patientSidebar', 'bulkEditActions', 'bulkEditFlows'];
+    const dynamicApps = ['bulkEditActions', 'bulkEditFlows'];
 
     return Promise.all(dynamicApps.map(name => this.removeChildApp(name, options)));
   },

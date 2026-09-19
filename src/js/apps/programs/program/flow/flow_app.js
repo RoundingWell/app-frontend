@@ -14,12 +14,8 @@ export default SubRouterApp.extend({
   routerAppName: 'ProgramFlowApp',
   initialize() {
     this.addChildApp('action', new ActionApp());
-    this.addChildApp('programSidebar', new ProgramSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
-    this.addChildApp('flowSidebar', new FlowSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
+    this.addChildApp('programSidebar', new ProgramSidebarApp());
+    this.addChildApp('flowSidebar', new FlowSidebarApp());
   },
   routeScope: ['flowId'],
   routeActions: {

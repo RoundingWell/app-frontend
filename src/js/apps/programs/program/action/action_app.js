@@ -10,9 +10,7 @@ import ActionSidebarApp from 'js/apps/programs/sidebar/action/action-sidebar_app
 
 export default App.extend({
   initialize() {
-    this.addChildApp('actionSidebar', new ActionSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
+    this.addChildApp('actionSidebar', new ActionSidebarApp());
   },
   async prepareStart({ actionId, programId, flowId }, { signal }) {
     if (!actionId) {

@@ -6,32 +6,27 @@ import App from 'js/base/app';
 
 import SidebarService from 'js/services/sidebar';
 
-import PreloadRegion from 'js/regions/preload_region';
-
 import NavApp from 'js/apps/globals/nav/nav_app';
 
 export default App.extend({
   initialize() {
     this.routers = [];
-    this.listenTo(Radio.channel('workspace'), 'change:workspace', () => this.restart());
-  },
-  onBeforeStart() {
-    this.getOption('contentRegion').empty();
-
-    if (this.hasChildApp('nav')) return;
-
-    const navApp = this.addChildApp('nav', new NavApp({
-      region: this.getOption('navRegion'),
-    }));
+    const navApp = this.addChildApp('nav', new NavApp());
     const navState = navApp.getState();
 
     this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
-    this.onChangeNavMinimized(navState, navState.get('isMinimized'));
+    this.addChildApp('sidebar', new SidebarService());
 
-    new SidebarService({ region: this.getOption('sidebarRegion') });
+    this.listenTo(Radio.channel('workspace'), 'change:workspace', () => {
+      if (this.isRunning()) this.restart(this.shellOptions);
+    });
+  },
+  onBeforeStart(app, options) {
+    this.shellOptions = options;
+    this.onChangeNavMinimized(this.getChildApp('nav').getState(), this.getChildApp('nav').getState().get('isMinimized'));
   },
   onChangeNavMinimized(state, isMinimized) {
-    this.getOption('setNavMinimized')(isMinimized);
+    this.shellOptions.setNavMinimized(isMinimized);
   },
   async prepareStart(options, { signal }) {
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -53,10 +48,14 @@ export default App.extend({
 
     if (signal.aborted) return;
 
-    const navStarted = await this.getChildApp('nav').start();
+    const [navStarted, sidebarStarted] = await Promise.all([
+      this.getChildApp('nav').start({ region: options.navRegion }),
+      this.getChildApp('sidebar').start({ region: options.sidebarRegion }),
+    ]);
 
     if (signal.aborted) return;
     if (!navStarted) throw new Error('Navigation startup was canceled');
+    if (!sidebarStarted) throw new Error('Sidebar startup was canceled');
 
     return results;
   },
@@ -95,13 +94,8 @@ export default App.extend({
     const RouterApp = module?.default;
     if (!RouterApp) return;
 
-    // each router owns a region over the shared content element so that
-    // stopping an unmatched router cannot empty the displayed router's view
     const router = new RouterApp({
-      region: {
-        el: this.getOption('contentRegion').el,
-        regionClass: PreloadRegion,
-      },
+      routeRegion: this.shellOptions.contentRegion,
       workspaceSlug: this.workspaceSlug,
     });
 

@@ -8,9 +8,7 @@ export default RouterApp.extend({
   routerAppName: 'CliniciansApp',
 
   initialize() {
-    const region = this.getRegion();
-
-    this.addChildApp('cliniciansAll', new CliniciansAllApp({ region }));
+    this.addChildApp('cliniciansAll', new CliniciansAllApp());
   },
 
   eventRoutes: {

@@ -8,9 +8,11 @@ import EventRouter from './event-router';
 export default App.extend({
   // Set in router apps for nav selection
   routerAppName: '',
+  startOnRoute: true,
 
   constructor: function(options = {}) {
     this.workspaceSlug = options.workspaceSlug;
+    this.routeRegion = options.routeRegion;
 
     this.initRouter();
 
@@ -86,8 +88,9 @@ export default App.extend({
   // starts this routerapp if necessary
   // triggers before and after events
   routeAction(event, action, ...args) {
-    if (!this.isRunning()) {
-      this.start();
+    const region = this.routeRegion || this.getRegion();
+    if (!this.isRunning() && this.startOnRoute) {
+      this.start(region ? { region } : undefined);
     }
 
     const definition = this._routes[event];
@@ -134,7 +137,7 @@ export default App.extend({
     this._currentAppScope = this.getChildScope(child, options);
     this._current = child;
 
-    const started = await child.start(options);
+    const started = await child.start({ ...options, region: this.getRegion() });
 
     if (!started || this.getCurrentRoute() !== routeContext) return;
 
@@ -153,7 +156,7 @@ export default App.extend({
     if (current && this.isCurrent(appName, scope)) {
       current.startRoute(this.getCurrentRoute());
 
-      const started = await current.start(options);
+      const started = await current.start({ ...options, region: this.getRegion() });
 
       return started && current === this.getCurrent() ? current : undefined;
     }

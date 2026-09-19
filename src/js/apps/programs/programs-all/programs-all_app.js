@@ -8,9 +8,7 @@ import { ListView, LayoutView } from 'js/apps/programs/programs-all/programs-all
 
 export default App.extend({
   initialize() {
-    this.addChildApp('programSidebar', new ProgramSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
+    this.addChildApp('programSidebar', new ProgramSidebarApp());
   },
   onBeforeStart() {
     const view = this.setView(new LayoutView());

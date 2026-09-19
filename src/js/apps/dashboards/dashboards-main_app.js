@@ -11,10 +11,8 @@ export default RouterApp.extend({
   routerAppName: 'DashboardsApp',
 
   initialize() {
-    const region = this.getRegion();
-
-    this.addChildApp('dashboardsAll', new DashboardsAllApp({ region }));
-    this.addChildApp('dashboard', new DashboardApp({ region }));
+    this.addChildApp('dashboardsAll', new DashboardsAllApp());
+    this.addChildApp('dashboard', new DashboardApp());
   },
 
   eventRoutes: {

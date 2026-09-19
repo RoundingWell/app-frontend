@@ -10,11 +10,9 @@ export default RouterApp.extend({
   routerAppName: 'ProgramsApp',
 
   initialize() {
-    const region = this.getRegion();
-
-    this.addChildApp('programsAll', new ProgramsAllApp({ region }));
-    this.addChildApp('program', new ProgramApp({ region }));
-    this.addChildApp('programflow', new ProgramFlowApp({ region }));
+    this.addChildApp('programsAll', new ProgramsAllApp());
+    this.addChildApp('program', new ProgramApp());
+    this.addChildApp('programflow', new ProgramFlowApp());
   },
 
   eventRoutes: {

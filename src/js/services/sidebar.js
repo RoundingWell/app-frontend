@@ -1,5 +1,3 @@
-import { Region } from 'marionette';
-
 import App from 'js/base/app';
 
 import { LayoutView } from 'js/services/sidebar/sidebar_views';
@@ -19,13 +17,6 @@ export default App.extend({
   radioRequests: {
     'stop': 'stopSidebarApp',
     'start': 'startSidebarApp',
-    'region': 'getSidebarRegion',
-  },
-
-  // each sidebar app owns a Region over the shared host element so that a
-  // stopping app cannot empty its replacement's root
-  getSidebarRegion() {
-    return new Region({ el: this.getRegion().el });
   },
 
   async startSidebarApp(app, appOptions, viewOptions) {
@@ -59,7 +50,7 @@ export default App.extend({
         delete this.currentClaim;
       });
 
-      const started = await app.start(appOptions);
+      const started = await app.start({ ...appOptions, region: this.getRegion() });
 
       if (!started) return;
 
@@ -97,5 +88,9 @@ export default App.extend({
     delete this.currentClaim;
 
     return app.stop();
+  },
+
+  prepareStop() {
+    return this.stopSidebarApp();
   },
 });
