@@ -1,0 +1,54 @@
+src/js/apps/programs/programs-main_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 11-14
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 15-17
+src/js/apps/patients/schedule/schedule_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 33-35
+src/js/apps/clinicians/clinicians-main_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 9-10
+package.json
+  s_85aebd1623278c::t_d4027eaa355a02 142
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_eee9b30e6b5ecb 6-8,10-11,16,109,113-115,516-522
+  s_85aebd1623278c::t_d910e597474be8 523-528
+src/js/apps/globals/nav/nav_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 145-147
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 10-11
+src/js/apps/programs/program/action/action_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 12-13
+src/js/apps/dashboards/dashboards-main_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 12-14
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 12-15,18
+src/js/app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 42-44
+src/js/apps/programs/program/program_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 18-22
+src/js/apps/patients/patients-main_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 14-21
+src/js/apps/programs/program/flow/flow_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 15-18
+src/js/apps/patients/worklist/worklist_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 35-37
+src/js/apps/patients/patient/workflow/workflow_app.js
+  s_85aebd1623278c::t_346ebdc509ccd2 17-19,21
+package-lock.json
+  s_85aebd1623278c::t_21af1732c12d59 40,12306-12307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b6f2f2771b8d337ed309036635297ffcc589ce39",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
