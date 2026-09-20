@@ -526,3 +526,12 @@
   passes default routes 6/6, worklist loading 9/9, and Programs 8/8. Patient
   workflow remains 7/9 and App Nav remains 16/20, matching the pre-#548 PR
   head. No E2E spec changed.
+- PR review found one remaining Toolkit-style `childApps` descriptor that #548
+  correctly rejected as a non-constructor. Form now declares the child class
+  once and supplies its Region and context when starting it. Review also caught
+  canceled WebSocket additions that could not retry, service shutdown that did
+  not await an older replacement stop, and cleanup before filter state existed.
+  These were consumer integration gaps, not Marionette defects. Targeted lint,
+  the test build, and Sidebar/WebSocket component coverage pass 29/29. The
+  unchanged patient workflow spec remains 7/9 and now reaches the next
+  unmigrated Action state-event contract instead of failing child construction.

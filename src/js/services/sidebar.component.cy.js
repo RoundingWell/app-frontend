@@ -131,6 +131,47 @@ context('Sidebar Service', function() {
     });
   });
 
+  specify('waits for an outgoing replacement during service shutdown', function() {
+    cy.document().then(async document => {
+      const element = document.createElement('div');
+      let resolveStop;
+      const stopReady = new Promise(resolve => {
+        resolveStop = resolve;
+      });
+
+      document.body.append(element);
+
+      const service = new SidebarService({ region: new Region({ el: element }) });
+      const OutgoingApp = App.extend({
+        prepareStop() {
+          return stopReady;
+        },
+      });
+      const outgoing = new OutgoingApp();
+      const incoming = new App();
+
+      await service.start();
+      await service.startSidebarApp(outgoing, {}, {});
+
+      const replacing = service.startSidebarApp(incoming, {}, {});
+      let serviceStopped = false;
+      const stoppingService = service.stop().then(() => {
+        serviceStopped = true;
+      });
+
+      await Promise.resolve();
+      expect(serviceStopped).to.be.false;
+
+      resolveStop();
+      await Promise.all([replacing, stoppingService]);
+
+      expect(serviceStopped).to.be.true;
+      expect(outgoing.isRunning()).to.be.false;
+      expect(incoming.isRunning()).to.be.false;
+      element.remove();
+    });
+  });
+
   specify('rebinds a reusable app to a recreated shell without losing state', function() {
     cy.document().then(async document => {
       const firstElement = document.createElement('div');

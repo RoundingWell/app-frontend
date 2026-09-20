@@ -97,7 +97,8 @@ export default App.extend({
     delete this.currentApp;
     delete this.currentClaim;
 
-    return this._trackStop(app.stop());
+    this._trackStop(app.stop());
+    return Promise.all(this.pendingStops);
   },
 
   prepareStop() {

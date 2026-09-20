@@ -3,6 +3,8 @@ import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import { v7 as uuid } from 'uuid';
 
+import { addError } from 'js/datadog';
+
 import App from 'js/base/app';
 import fetcher, { handleJSON } from 'js/base/fetch';
 
@@ -202,10 +204,14 @@ export default App.extend({
 
       const appName = `${ model.type }-${ model.id }`;
 
-      if (!app.isRunning() || app.getChildApp(appName)) return;
+      if (!app.isRunning()) return;
 
-      const adderApp = app.addChildApp(appName, new AdderApp());
-      adderApp.start({ model, collection, dataParams });
+      const adderApp = app.getChildApp(appName)
+        || app.addChildApp(appName, new AdderApp());
+
+      if (adderApp.isRunning()) return;
+
+      adderApp.start({ model, collection, dataParams }).catch(addError);
     };
     const onStop = () => {
       app.stopListening(channel, eventName, onMessage);
