@@ -79,8 +79,8 @@ export default App.extend({
       viewportView,
     }));
     if (!this.action) this.triggerContextChange();
-    this.startChildApp('widgetHeader', {
-      region: this.getRegion('widgets'),
+    this.getChildApp('widgetHeader').start({
+      region: this.getView().getRegion('widgets'),
       patient: this.patient,
       form: this.form,
     });

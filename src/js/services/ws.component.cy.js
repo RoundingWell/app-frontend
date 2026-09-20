@@ -2,9 +2,9 @@ import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import { version } from 'uuid';
 
-import 'js/entities-service/entities/flows';
-
 import App from 'js/base/app';
+
+import 'js/entities-service/entities/flows';
 
 import WSService from './ws';
 

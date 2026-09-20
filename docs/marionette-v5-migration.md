@@ -2,20 +2,14 @@
 
 ## Target and baseline
 
-- Current candidate: Marionette PRs #545 and #546 at combined commit
-  `7c9c84d346adfe10ce9ed3b9b295f1b7795210b5`, composed with PR #548 at
-  `89beea9faecbd0f906a7137beacd42c7d749538c`. The reproducible integration
-  commit is `754e427fcb348d7b3127dde1f4b2e66919658c5c`. This is unpublished code,
-  packaged with upstream's `release:artifact` workflow and installed from
-  `vendor/marionette/marionette-5.0.0-beta.4-7c9c84d-89beea9.tgz` (SHA-256
-  `769e43a9d576c28d55eeb4a77035bc6dc4688012d39b14a48fe53972270ec260`).
-- The candidate build produced all five workspace artifacts. The exact source
-  changes only core Marionette, so the tracked candidate replaces that package;
-  the published beta.4 adapters, Radio, and utils packages remain exactly
-  pinned. Replace the tarball dependency atomically when a published release
-  contains all three contracts.
-- Beta.4 release notes, migration guidance, package metadata, and companion
-  versions were inspected before installation.
+- Current runtime: published `marionette@5.0.0-beta.5` from npm, built from
+  upstream commit `14153fd03fd616fdb989e210a860409853d84733`. The lockfile
+  pins the registry artifact by its published SHA-512 integrity.
+- `@mnjs/adapters` is directly pinned to `5.0.0-beta.5`; Marionette resolves
+  matching `@mnjs/radio` and `@mnjs/utils` packages. The temporary vendored
+  #545/#546/#548 candidate was removed atomically with this upgrade.
+- Beta.5 release notes, migration guidance, package metadata, companion
+  versions, and immutable release checksums were inspected before installation.
 - Baseline: `npm ci` passed; 49 component specs and 248 tests passed; 35 E2E
   specs passed unchanged. ESLint and Stylelint passed; the local editor-config
   check could not find its downloaded macOS ARM binary.
@@ -106,7 +100,7 @@
   running the unchanged Cypress contract locally and addressing regressions.
 - Completed: PR #1795 migrated the Patients Schedule, Worklist, shared
   list-page, filters, bulk-edit, and sidebar ownership boundary.
-- Active: PR #1797 consumes the #545/#546/#548 candidate contract. Reusable route,
+- Active: PR #1797 consumes the published beta.5 contract. Reusable route,
   patient-page, filter-sidebar, and global-sidebar Applications remain
   registered while start/stop controls activation. Routers and recreated
   layouts pass their current Region at start; loading roots are app-owned; and
@@ -535,3 +529,10 @@
   the test build, and Sidebar/WebSocket component coverage pass 29/29. The
   unchanged patient workflow spec remains 7/9 and now reaches the next
   unmigrated Action state-event contract instead of failing child construction.
+- Beta.5 published the previously vendored #545/#546/#548 contract from
+  immutable upstream commit `14153fd03fd616fdb989e210a860409853d84733`.
+  PR #1797 now consumes the exact npm release and aligned companion packages;
+  the candidate tarball and file dependency were removed in the same change. A
+  clean `npm ci`, resolved-package check, test build, and the four lifecycle
+  component specs pass 56/56. Unchanged default-route and worklist-loading E2E
+  pass 6/6 and 9/9; patient workflow remains at its known 7/9 boundary.
