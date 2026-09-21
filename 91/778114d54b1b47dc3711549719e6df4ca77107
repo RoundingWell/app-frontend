@@ -1,0 +1,30 @@
+src/js/entities-service/README.md
+  s_85aebd1623278c::t_090cd59c00aa6c 38,40-43
+src/js/entities-service/forms.js
+  s_85aebd1623278c::t_090cd59c00aa6c 31,36,40,46
+  s_85aebd1623278c::t_161df5854091d1 30,33,45
+src/js/formservice.js
+  s_85aebd1623278c::t_090cd59c00aa6c 17-23,25,27-36,53-58,61
+  s_85aebd1623278c::t_161df5854091d1 59
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_090cd59c00aa6c 123,129-131
+  s_85aebd1623278c::t_1ea1de996a9327 128,135-138
+src/js/entities-service/form-responses.js
+  s_85aebd1623278c::t_161df5854091d1 27,36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "91778114d54b1b47dc3711549719e6df4ca77107",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
