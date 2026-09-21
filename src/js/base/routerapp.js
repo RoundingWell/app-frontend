@@ -4,10 +4,10 @@ import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
-import CurrentChildApp from './current-child-app';
+import RouteBaseApp from './route-base-app';
 import EventRouter from './event-router';
 
-export default CurrentChildApp.extend({
+export default RouteBaseApp.extend({
   // Set in router apps for nav selection
   routerAppName: '',
   startOnRoute: true,
@@ -24,7 +24,7 @@ export default CurrentChildApp.extend({
 
     this.on('before:stop', this._clearRouteIntent);
 
-    CurrentChildApp.apply(this, arguments);
+    RouteBaseApp.apply(this, arguments);
   },
 
   initRouter() {

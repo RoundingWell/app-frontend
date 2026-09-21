@@ -159,7 +159,7 @@ routeActions: {
 
 ## Stop and restart
 
-Both router classes use the internal `CurrentChildApp` base for child selection.
+Both router classes use the internal `RouteBaseApp` base for child selection.
 It has no URL, Radio-channel, resource-scope comparison, or error-presentation
 policy. Keep those concerns in the routing adapters and application subclasses;
 this boundary allows future extraction without adding a second routing backend.

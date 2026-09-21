@@ -3,9 +3,9 @@ import Backbone from 'backbone';
 
 import { addError } from 'js/datadog';
 
-import CurrentChildApp from './current-child-app';
+import RouteBaseApp from './route-base-app';
 
-export default CurrentChildApp.extend({
+export default RouteBaseApp.extend({
   constructor: function() {
     this._runId = 0;
     this._routeIntent = null;
@@ -13,7 +13,7 @@ export default CurrentChildApp.extend({
     this.on('start', () => this._runId++);
     this.on('before:stop', this._clearRouteIntent);
 
-    CurrentChildApp.apply(this, arguments);
+    RouteBaseApp.apply(this, arguments);
   },
 
   createState() {
