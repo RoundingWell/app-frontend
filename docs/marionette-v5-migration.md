@@ -120,14 +120,25 @@
   A previous child remains selected until teardown succeeds, only the latest
   route intent may activate a replacement, and failed or canceled startup does
   not abandon live descendants. It was merged by a human.
-- Active: PR #1805 moves the Patient Flow page and its Activity child from removed
+- Completed: PR #1805 moves the Patient Flow page and its Activity child from removed
   Toolkit readiness and child-control methods to Application preparation,
   app-owned loading roots, explicit reusable-child activation, and a dynamic
   bulk-edit child that is registered once and reactivated with updated state.
   Existing E2E specifications remain unchanged.
+- Active: PR #1806 migrates the standalone Formservice entry point from Toolkit
+  `beforeStart` result spreading to Application preparation. Its entity requests
+  receive the active run's cancellation signal, and its existing E2E contract
+  remains unchanged.
 
 ## Validation
 
+- PR #1806 installs cleanly from the pinned lockfile, passes targeted ESLint and
+  the test-mode build, and passes all 4 unchanged Formservice E2E tests. The
+  action response lookup now completes within Application preparation, so the
+  PDF message is sent only after the active startup run owns every result. The
+  existing E2E only observes the request sequence; parent-message payload
+  coverage remains deferred by human direction rather than adding a component
+  test or changing the E2E acceptance contract in this step.
 - At the PR #1804 migration base, a clean `npm ci` and test-mode build pass.
   The unchanged Patient Flow E2E spec runs 29 tests: 5 Action-page and error
   boundary tests pass, while 24 Flow-page tests fail before the Flow data

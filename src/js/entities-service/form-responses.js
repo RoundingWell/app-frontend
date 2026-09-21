@@ -24,7 +24,7 @@ const Entity = BaseEntity.extend({
 
     return this.fetchOrEmpty('/api/clinicians/me/form-responses/latest', { filter }, options);
   },
-  fetchSubmittedByPatient({ patientId, actionId, flowId, formId, actionTags, submittedAt }) {
+  fetchSubmittedByPatient({ patientId, actionId, flowId, formId, actionTags, submittedAt }, options = {}) {
     const filter = {
       ...(actionId && { actions: actionId }),
       ...(flowId && { flows: flowId }),
@@ -33,7 +33,7 @@ const Entity = BaseEntity.extend({
       ...(submittedAt && { submitted_at: submittedAt }),
     };
 
-    return this.fetchOrEmpty(`/api/patients/${ patientId }/form-responses/submitted`, { filter });
+    return this.fetchOrEmpty(`/api/patients/${ patientId }/form-responses/submitted`, { filter }, options);
   },
 });
 
