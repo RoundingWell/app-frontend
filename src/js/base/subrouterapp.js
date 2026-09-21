@@ -65,11 +65,11 @@ export default RouteBaseApp.extend({
 
     if (!action) return;
 
-    const activation = action.apply(this, eventArgs);
+    const activation = this.invokeRouteAction(action, eventArgs);
     // onStart notifications do not await returned promises. Observe action
     // failures here as well as on routes dispatched into an already-active run.
     const completion = Promise.resolve(activation).catch(error => {
-      if (this.getCurrentRoute() === currentRoute && this.isRunning()) {
+      if (this.getCurrentRoute() === currentRoute) {
         this.triggerMethod('route:error', error, currentRoute);
       }
     });
@@ -77,6 +77,18 @@ export default RouteBaseApp.extend({
     this.triggerMethod('startRoute', currentRoute);
 
     return completion;
+  },
+
+  invokeRouteAction(action, eventArgs) {
+    try {
+      return action.apply(this, eventArgs);
+    } catch(error) {
+      return Promise.reject(error);
+    }
+  },
+
+  onChildCleanupError(error) {
+    addError(error);
   },
 
   onRouteError(error) {

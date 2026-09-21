@@ -53,7 +53,7 @@ export default App.extend({
       if (!started) {
         // A superseding child restart may still own a live run. Retain it so
         // the next selection can stop it before activating another child.
-        if (!app.isRunning()) await this._stopSelectedChild();
+        if (!app.isRunning()) await this._cleanupSelectedChild(app);
         return;
       }
 
@@ -63,8 +63,18 @@ export default App.extend({
 
       // Failed preparation can leave owned descendants running. Clean those
       // up before forgetting the selection; rejected cleanup retains it.
-      await this._stopSelectedChild();
+      await this._cleanupSelectedChild(app);
       throw error;
+    }
+  },
+
+  async _cleanupSelectedChild(app) {
+    try {
+      await this._stopSelectedChild();
+    } catch(error) {
+      // Cleanup is observable independently; it must not replace the original
+      // activation failure or turn canceled activation into a failure.
+      this.triggerMethod('child:cleanup:error', error, app);
     }
   },
 

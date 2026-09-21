@@ -171,7 +171,9 @@ this boundary allows future extraction without adding a second routing backend.
   `false` from `prepareStop` is not a veto; stop permission must reject or throw.
 - Owner stop, restart, and destroy invalidate pending selection even when the owner
   is already stopped. A failed child startup cleans up partially started descendants
-  before clearing the selection. If cleanup fails, selection is retained for retry.
+  before clearing the selection. If cleanup fails, selection is retained for retry. Cleanup errors are reported
+  separately through `child:cleanup:error` (Datadog by default); callers still
+  receive the original activation error or canceled result.
 - This is application-selection policy, not browser navigation blocking. It does
   not roll back the URL or guarantee atomic teardown of an entire child tree.
 
@@ -195,7 +197,7 @@ value for `onStart(app, options, result)`, and pass the lifecycle signal through
 cancelable requests. Route dispatch stays synchronous — do not add another async
 layer. Route handlers should return their activation promise. Route completion
 notifications still fire synchronously after invoking the handler; they do not
-mean that async content is ready. Returned async failures are observed through
+mean that async content is ready. Synchronous throws and returned async failures are observed through
 `onRouteError(error, routeContext)` (Datadog by default), including initial
 SubRouterApp dispatch from `onStart`. Domain handlers may handle expected errors
 before returning. Radio dispatch remains synchronous.

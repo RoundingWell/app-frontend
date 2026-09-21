@@ -44,8 +44,14 @@ export default RouteBaseApp.extend({
 
   onNoMatch() {
     const routeContext = this.getCurrentRoute();
-    this.stop().catch(error => this.triggerMethod('route:error', error, routeContext));
+    const stopping = this.stop();
+    const routeIntent = {};
+    this._routeIntent = routeIntent;
     this._currentRoute = null;
+
+    return stopping.catch(error => {
+      if (this._routeIntent === routeIntent) this.triggerMethod('route:error', error, routeContext);
+    });
   },
 
   // For each route in the hash creates a routeTriggers hash,
@@ -122,6 +128,10 @@ export default RouteBaseApp.extend({
     }
 
     return this.dispatchRoute(routeContext);
+  },
+
+  onChildCleanupError(error) {
+    addError(error);
   },
 
   onRouteError(error) {

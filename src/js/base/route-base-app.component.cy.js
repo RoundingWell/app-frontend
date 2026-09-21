@@ -181,6 +181,44 @@ function deferred() {
       expect(await owner.startCurrent('next')).to.equal(next);
     });
 
+    specify('preserves the activation error when cleanup rejects', async function() {
+      const failure = { resource: 'action', error: { response: { status: 410 } } };
+      const cleanupFailure = new Error('cleanup failed');
+      const reported = cy.stub(owner, 'onChildCleanupError');
+      const child = owner.addChildApp('child', new (App.extend({
+        childApps: { nested: App },
+        async prepareStart() {
+          const nested = this.getChildApp('nested');
+          await nested.start();
+          nested.prepareStop = () => Promise.reject(cleanupFailure);
+          throw failure;
+        },
+      }))());
+
+      const result = await owner.startCurrent('child').catch(error => error);
+      child.getChildApp('nested').prepareStop = () => {};
+      expect(result).to.equal(failure);
+      expect(reported).to.have.been.calledOnceWith(cleanupFailure, child);
+      expect(owner.getCurrent()).to.equal(child);
+      await owner.stopCurrent();
+      expect(owner.getCurrent()).to.equal(null);
+    });
+
+    specify('reports cleanup separately without turning cancellation into activation failure', async function() {
+      const cleanupFailure = new Error('cleanup failed');
+      const reported = cy.stub(owner, 'onChildCleanupError');
+      const child = owner.addChildApp('child', new App({ childApps: { nested: App } }));
+      const nested = child.getChildApp('nested');
+      await nested.start();
+      nested.prepareStop = () => Promise.reject(cleanupFailure);
+
+      const result = await owner.selectChild('child', { start: () => false });
+      nested.prepareStop = () => {};
+      expect(result).to.equal(undefined);
+      expect(reported).to.have.been.calledOnceWith(cleanupFailure, child);
+      expect(owner.getCurrent()).to.equal(child);
+    });
+
     specify('ignores a late startup failure after a newer child has been selected', async function() {
       const readiness = deferred();
       const preparing = deferred();
