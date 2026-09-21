@@ -6,11 +6,8 @@ import CliniciansAllApp from 'js/apps/clinicians/clinicians-all/clinicians-all_a
 
 export default RouterApp.extend({
   routerAppName: 'CliniciansApp',
-
-  initialize() {
-    const region = this.getRegion();
-
-    this.addChildApp('cliniciansAll', new CliniciansAllApp({ region }));
+  childApps: {
+    cliniciansAll: CliniciansAllApp,
   },
 
   eventRoutes: {

@@ -25,11 +25,7 @@ import {
 
 export default App.extend({
   childApps: {
-    widgetHeader: {
-      AppClass: WidgetsHeaderApp,
-      regionName: 'widgets',
-      getOptions: ['patient', 'form'],
-    },
+    widgetHeader: WidgetsHeaderApp,
   },
   initFormState({ actionId }) {
     const storedState = actionId && localStore.get(`form-state_${ this.currentUser.id }`);
@@ -83,7 +79,11 @@ export default App.extend({
       viewportView,
     }));
     if (!this.action) this.triggerContextChange();
-    this.startChildApp('widgetHeader');
+    this.getChildApp('widgetHeader').start({
+      region: this.getView().getRegion('widgets'),
+      patient: this.patient,
+      form: this.form,
+    });
     if (this.action) this.showExpandAction();
     this.showInitialForm();
     this.showView();

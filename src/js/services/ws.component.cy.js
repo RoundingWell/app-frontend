@@ -2,6 +2,8 @@ import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import { version } from 'uuid';
 
+import App from 'js/base/app';
+
 import 'js/entities-service/entities/flows';
 
 import WSService from './ws';
@@ -205,6 +207,82 @@ context('WS Service', function() {
         expect(handler).to.not.be.called;
         expect(handler2).to.not.be.called;
       });
+  });
+
+  specify('Replacing managed additions and stopping with the owner', function() {
+    const channel = Radio.channel('ws');
+    const firstCollection = new Backbone.Collection();
+    const collection = new Backbone.Collection();
+    const model = new Backbone.Model({ id: 'flow-id' });
+    const app = new Backbone.Model();
+    const start = cy.stub().resolves(true);
+
+    model.type = 'flows';
+    app.isRunning = cy.stub().returns(false);
+    app.getChildApp = cy.stub();
+    app.addChildApp = cy.stub().returns({ start, isRunning: () => false });
+
+    service.manageAdd(app, firstCollection, 'flows');
+    service.manageAdd(app, collection, 'flows');
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+    expect(app.addChildApp).to.not.be.called;
+
+    app.isRunning.returns(true);
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+    expect(app.addChildApp).to.be.calledOnce;
+    expect(start).to.be.calledOnceWith({ model, collection, dataParams: undefined });
+
+    app.getChildApp.returns({ isRunning: () => true });
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+    expect(app.addChildApp).to.be.calledOnce;
+
+    app.trigger('before:stop');
+    app.getChildApp.returns(undefined);
+    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+    expect(app.addChildApp).to.be.calledOnce;
+  });
+
+  specify('Restarts a managed addition canceled with its owner', function() {
+    cy.then(async() => {
+      const channel = Radio.channel('ws');
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'flow-id' });
+      const app = new App();
+      let resolveFetch;
+      const firstFetch = new Promise(resolve => {
+        resolveFetch = resolve;
+      });
+
+      model.type = 'flows';
+      const fetch = cy.stub(model, 'fetch');
+      fetch.onFirstCall().returns(firstFetch);
+      fetch.onSecondCall().resolves(model);
+
+      await app.start();
+      service.manageAdd(app, collection, 'flows');
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+      expect(app.hasChildApp('flows-flow-id')).to.be.true;
+
+      const stopping = app.stop();
+      resolveFetch(model);
+      await stopping;
+
+      expect(app.hasChildApp('flows-flow-id')).to.be.true;
+
+      await app.start();
+      service.manageAdd(app, collection, 'flows');
+      const added = new Promise(resolve => collection.once('add', resolve));
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+      await added;
+
+      expect(fetch).to.be.calledTwice;
+      expect(collection.get(model)).to.equal(model);
+
+      await app.destroy();
+    });
   });
 
   specify('Heartbeat', function() {

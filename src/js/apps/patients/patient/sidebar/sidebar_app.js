@@ -50,6 +50,7 @@ export default App.extend({
     if (isPreloaded) return;
 
     view.showChildView('sidebars', new SidebarLoadingView());
+    this.showView();
   },
   prepareStart({ patient, isPreloaded }) {
     if (isPreloaded) return [];

@@ -17,6 +17,7 @@ export default PatientSidebarApp.extend({
     }).render();
 
     view.showChildView('sidebars', new SidebarLoadingView());
+    this.showView();
   },
   async prepareStart({ patient }) {
     const loadedPatient = await Radio.request('entities', 'fetch:patients:model', patient.id);

@@ -1,4 +1,5 @@
 import { Region } from 'marionette';
+import Backbone from 'backbone';
 
 import App from 'js/base/app';
 
@@ -12,7 +13,7 @@ context('Sidebar Service', function() {
       document.body.append(element);
 
       const service = new SidebarService({ region: new Region({ el: element }) });
-      const sidebarApp = new App({ region: service.getSidebarRegion() });
+      const sidebarApp = new App();
 
       await service.start();
 
@@ -25,7 +26,7 @@ context('Sidebar Service', function() {
       expect(sidebarApp.isRunning()).to.be.true;
       expect(firstView.isDestroyed()).to.be.true;
       expect(sidebarApp.getView()).to.not.equal(firstView);
-      expect(sidebarApp.getRegion()).to.not.equal(service.getRegion());
+      expect(sidebarApp.getRegion()).to.equal(service.getRegion());
 
       await service.stopSidebarApp();
 
@@ -43,8 +44,8 @@ context('Sidebar Service', function() {
       document.body.append(element);
 
       const service = new SidebarService({ region: new Region({ el: element }) });
-      const superseded = new App({ region: service.getSidebarRegion() });
-      const latest = new App({ region: service.getSidebarRegion() });
+      const superseded = new App();
+      const latest = new App();
 
       await service.start();
 
@@ -72,8 +73,8 @@ context('Sidebar Service', function() {
       document.body.append(element);
 
       const service = new SidebarService({ region: new Region({ el: element }) });
-      const outgoing = new App({ region: service.getSidebarRegion() });
-      const incoming = new App({ region: service.getSidebarRegion() });
+      const outgoing = new App();
+      const incoming = new App();
 
       await service.start();
 
@@ -91,6 +92,119 @@ context('Sidebar Service', function() {
     });
   });
 
+  specify('waits for an in-flight sidebar stop during service shutdown', function() {
+    cy.document().then(async document => {
+      const element = document.createElement('div');
+      let resolveStop;
+      const stopReady = new Promise(resolve => {
+        resolveStop = resolve;
+      });
+
+      document.body.append(element);
+
+      const service = new SidebarService({ region: new Region({ el: element }) });
+      const SidebarApp = App.extend({
+        prepareStop() {
+          return stopReady;
+        },
+      });
+      const sidebarApp = new SidebarApp();
+
+      await service.start();
+      await service.startSidebarApp(sidebarApp, {}, {});
+
+      const stoppingSidebar = service.stopSidebarApp();
+      let serviceStopped = false;
+      const stoppingService = service.stop().then(() => {
+        serviceStopped = true;
+      });
+
+      await Promise.resolve();
+      expect(serviceStopped).to.be.false;
+
+      resolveStop();
+      await Promise.all([stoppingSidebar, stoppingService]);
+
+      expect(serviceStopped).to.be.true;
+      expect(sidebarApp.isRunning()).to.be.false;
+      element.remove();
+    });
+  });
+
+  specify('waits for an outgoing replacement during service shutdown', function() {
+    cy.document().then(async document => {
+      const element = document.createElement('div');
+      let resolveStop;
+      const stopReady = new Promise(resolve => {
+        resolveStop = resolve;
+      });
+
+      document.body.append(element);
+
+      const service = new SidebarService({ region: new Region({ el: element }) });
+      const OutgoingApp = App.extend({
+        prepareStop() {
+          return stopReady;
+        },
+      });
+      const outgoing = new OutgoingApp();
+      const incoming = new App();
+
+      await service.start();
+      await service.startSidebarApp(outgoing, {}, {});
+
+      const replacing = service.startSidebarApp(incoming, {}, {});
+      let serviceStopped = false;
+      const stoppingService = service.stop().then(() => {
+        serviceStopped = true;
+      });
+
+      await Promise.resolve();
+      expect(serviceStopped).to.be.false;
+
+      resolveStop();
+      await Promise.all([replacing, stoppingService]);
+
+      expect(serviceStopped).to.be.true;
+      expect(outgoing.isRunning()).to.be.false;
+      expect(incoming.isRunning()).to.be.false;
+      element.remove();
+    });
+  });
+
+  specify('rebinds a reusable app to a recreated shell without losing state', function() {
+    cy.document().then(async document => {
+      const firstElement = document.createElement('div');
+      const nextElement = document.createElement('div');
+
+      document.body.append(firstElement, nextElement);
+
+      const service = new SidebarService();
+      const StatefulApp = App.extend({
+        createState() {
+          return new Backbone.Model();
+        },
+      });
+      const sidebarApp = new StatefulApp();
+
+      await service.start({ region: new Region({ el: firstElement }) });
+      await service.startSidebarApp(sidebarApp, {}, {});
+      sidebarApp.getState().set('draft', 'preserved');
+      await service.stop();
+
+      await service.start({ region: new Region({ el: nextElement }) });
+      await service.startSidebarApp(sidebarApp, {}, {});
+
+      expect(firstElement.children).to.have.length(0);
+      expect(nextElement.contains(sidebarApp.getView().el)).to.be.true;
+      expect(sidebarApp.getState().get('draft')).to.equal('preserved');
+
+      await service.stop();
+      firstElement.remove();
+      nextElement.remove();
+    });
+  });
+
   specify('clears a replacement claim when the outgoing stop fails', function() {
     cy.document().then(async document => {
       const element = document.createElement('div');
@@ -98,8 +212,8 @@ context('Sidebar Service', function() {
       document.body.append(element);
 
       const service = new SidebarService({ region: new Region({ el: element }) });
-      const outgoing = new App({ region: service.getSidebarRegion() });
-      const incoming = new App({ region: service.getSidebarRegion() });
+      const outgoing = new App();
+      const incoming = new App();
 
       await service.start();
       await service.startSidebarApp(outgoing, {}, {});

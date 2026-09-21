@@ -17,10 +17,14 @@ const Entity = BaseEntity.extend({
 
     return this.fetchCollection({ ...options, url });
   },
-  fetchProgramFlows(behavior = PROGRAM_BEHAVIORS.STANDARD) {
+  fetchProgramFlows(behavior = PROGRAM_BEHAVIORS.STANDARD, options = {}) {
     const collection = new this.Entity.Collection();
+    const data = {
+      ...options.data,
+      filter: { ...options.data?.filter, behavior },
+    };
 
-    return collection.fetch({ data: { filter: { behavior } } });
+    return collection.fetch({ ...options, data });
   },
 });
 

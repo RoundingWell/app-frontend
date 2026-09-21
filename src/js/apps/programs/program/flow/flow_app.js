@@ -12,14 +12,10 @@ import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
 
 export default SubRouterApp.extend({
   routerAppName: 'ProgramFlowApp',
-  initialize() {
-    this.addChildApp('action', new ActionApp());
-    this.addChildApp('programSidebar', new ProgramSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
-    this.addChildApp('flowSidebar', new FlowSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
+  childApps: {
+    action: ActionApp,
+    programSidebar: ProgramSidebarApp,
+    flowSidebar: FlowSidebarApp,
   },
   routeScope: ['flowId'],
   routeActions: {

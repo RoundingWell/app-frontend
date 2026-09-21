@@ -2,10 +2,14 @@
 
 ## Target and baseline
 
-- Target: `marionette@5.0.0-beta.4`; published source revision
-  `f4165f14198da115cc998c842fbf4b6a4886fe45`.
-- Beta.4 release notes, migration guidance, package metadata, and companion
-  versions were inspected before installation.
+- Current runtime: published `marionette@5.0.0-beta.5` from npm, built from
+  upstream commit `14153fd03fd616fdb989e210a860409853d84733`. The lockfile
+  pins the registry artifact by its published SHA-512 integrity.
+- `@mnjs/adapters` is directly pinned to `5.0.0-beta.5`; Marionette resolves
+  matching `@mnjs/radio` and `@mnjs/utils` packages. The temporary vendored
+  #545/#546/#548 candidate was removed atomically with this upgrade.
+- Beta.5 release notes, migration guidance, package metadata, companion
+  versions, and immutable release checksums were inspected before installation.
 - Baseline: `npm ci` passed; 49 component specs and 248 tests passed; 35 E2E
   specs passed unchanged. ESLint and Stylelint passed; the local editor-config
   check could not find its downloaded macOS ARM binary.
@@ -94,10 +98,15 @@
   rather than migrate to the browser Navigation API.
 - Intermediate PRs keep GitHub Cypress deferred; the PR is published before
   running the unchanged Cypress contract locally and addressing regressions.
-- Current step: migrate the Patients Schedule, Worklist, shared list-page,
-  filters, bulk-edit, and sidebar ownership boundary. Application children are
-  registered explicitly, readiness uses lifecycle signals, and list refreshes
-  replace collections without rebuilding the prepared page layout.
+- Completed: PR #1795 migrated the Patients Schedule, Worklist, shared
+  list-page, filters, bulk-edit, and sidebar ownership boundary.
+- Active: PR #1797 consumes the published beta.5 contract. Reusable route,
+  patient-page, filter-sidebar, and global-sidebar Applications remain
+  registered while start/stop controls activation. Routers and recreated
+  layouts pass their current Region at start; loading roots are app-owned; and
+  the beta.4 duplicate-Region and remove/re-add workarounds are removed. Static,
+  no-argument children use `childApps`; dynamically imported, lazy, configured,
+  and route-created children retain explicit registration.
 
 ## Validation
 
@@ -450,3 +459,80 @@
   cover the known patient-detail `$el` path plus bulk-edit visibility, find-list
   refresh, and click-shift list setup; they remain migration work rather than
   test changes.
+- The patient shell and workflow route now use beta.4 preparation, owned child
+  Applications, detached initial composition, and cancellation-aware fetches.
+  Route page Applications are created only when selected, so an unmigrated
+  Action, Flow, or Form page cannot break the default workflow route during
+  construction.
+- Program action and flow collection services accepted a behavior argument but
+  discarded fetch options. Their existing request contract now also forwards
+  options so Application cancellation reaches the underlying Backbone fetch.
+- Focused unchanged E2E currently passes 4/5 patient-shell cases, 7/9 workflow
+  cases, and 9/10 patient-sidebar cases. The remaining patient alias and
+  add-workflow failures enter the not-yet-migrated Action Application; the
+  workflow tooltip assertion and sidebar `$el.prop` failure are separate
+  existing integration gaps. Those belong to following route/component steps
+  rather than an E2E rewrite.
+- Cypress fixture generation is not concurrency-safe: three parallel focused
+  runs wrote the same ignored JSON fixtures and produced trailing data. Running
+  the specs serially regenerated valid fixtures; this was test tooling friction,
+  not a Marionette or application failure.
+- The #545/#546 candidate installed reproducibly with a clean `npm ci`; the
+  test build and targeted ESLint pass. Focused SidebarService, RouterApp, and
+  SubRouterApp component coverage passes 32/32, including replacement safety,
+  recreated-shell Region rebinding, state preservation, route switching, and
+  late-start cancellation.
+- The full component sweep passes 45/50 specs (252 tests pass, 7 fail, 4 are
+  pending). The five failing specs and all seven failures reproduce unchanged
+  at the original PR head: Alert, Dialer, Tooltip, Picklist, and Team.
+- Unchanged E2E passes 6/6 default-route cases, 9/9 worklist-loading cases, and
+  8/8 focused Program cases. The workspace-switch case also passes. The
+  candidate makes both app-owned worklist and patient-sidebar loading roots
+  reachable; the original PR head failed those same two loading assertions.
+- Patient workflow remains 7/9 and App Nav remains 16/20, matching the original
+  PR head. The blockers are the not-yet-migrated Action/Form state contracts,
+  an existing tooltip interaction failure, and existing nav viewport failures;
+  no E2E file was changed for this candidate update.
+- Initial candidate integration eagerly constructed every patient page and
+  prevented default-route startup when unmigrated Action/Flow state contracts
+  initialized. Registration is now lazy but one-time: selecting a page changes
+  ownership once, while later route activation uses start/stop and the current
+  layout Region. This was an application sequencing mistake, not evidence of a
+  defect in PR #545 or #546.
+- PR review caught three consumer cleanup gaps: SidebarService now awaits
+  already-pending child stops, retained workflow/filter children do not stack
+  listeners across restarts, and a failed patient-sidebar start clears its
+  app-owned loading root before reporting the error. Suggestions to recreate
+  the Program workflow child or restore per-router Region wrappers were not
+  adopted: the candidate explicitly supports stopped-child Region rebinding
+  and guarantees that stopping one borrower preserves another borrower's
+  replacement in the shared host.
+- PR #548 was based independently from the #545/#546 integration. Composing its
+  four commits produced conflicts only in generated Application contract
+  metadata and derived compact documentation. Regenerating those artifacts from
+  the combined source preserved both contracts; the focused upstream
+  Application suite passes 228/228, with lint, documentation checks, and the
+  release-artifact build also passing. This was branch-integration friction,
+  not a runtime defect.
+- The combined #545/#546/#548 candidate installs reproducibly with `npm ci`.
+  Targeted ESLint and the test-mode build pass. RouterApp, SubRouterApp,
+  SidebarService, and WebSocket component coverage passes 54/54. Unchanged E2E
+  passes default routes 6/6, worklist loading 9/9, and Programs 8/8. Patient
+  workflow remains 7/9 and App Nav remains 16/20, matching the pre-#548 PR
+  head. No E2E spec changed.
+- PR review found one remaining Toolkit-style `childApps` descriptor that #548
+  correctly rejected as a non-constructor. Form now declares the child class
+  once and supplies its Region and context when starting it. Review also caught
+  canceled WebSocket additions that could not retry, service shutdown that did
+  not await an older replacement stop, and cleanup before filter state existed.
+  These were consumer integration gaps, not Marionette defects. Targeted lint,
+  the test build, and Sidebar/WebSocket component coverage pass 29/29. The
+  unchanged patient workflow spec remains 7/9 and now reaches the next
+  unmigrated Action state-event contract instead of failing child construction.
+- Beta.5 published the previously vendored #545/#546/#548 contract from
+  immutable upstream commit `14153fd03fd616fdb989e210a860409853d84733`.
+  PR #1797 now consumes the exact npm release and aligned companion packages;
+  the candidate tarball and file dependency were removed in the same change. A
+  clean `npm ci`, resolved-package check, test build, and the four lifecycle
+  component specs pass 56/56. Unchanged default-route and worklist-loading E2E
+  pass 6/6 and 9/9; patient workflow remains at its known 7/9 boundary.

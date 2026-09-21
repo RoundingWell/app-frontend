@@ -30,6 +30,10 @@ const FiltersApp = App.extend({
 });
 
 const ScheduleApp = App.extend({
+  childApps: {
+    filtersSidebar: ListFiltersPanelApp,
+    patientSidebar: ListPatientSidebarApp,
+  },
   createState() {
     return new StateModel();
   },
@@ -115,6 +119,7 @@ const ScheduleApp = App.extend({
     this.showFiltersButtonView();
 
     this.getView().getRegion('list').startPreloader({ variant: 'generic' });
+    this.showView();
   },
   prepareStart(options, { signal }) {
     if (this.isPatientSidebarOpen) this.listenToPatientSidebar();
@@ -269,16 +274,11 @@ const ScheduleApp = App.extend({
   mountFiltersSidebar() {
     const filtersState = this.getFiltersState();
 
-    if (!this.hasChildApp('filtersSidebar')) {
-      this.addChildApp('filtersSidebar', new ListFiltersPanelApp({
-        region: this.getView().getRegion('filtersSidebar'),
-      }));
-    }
-
     return this.getChildApp('filtersSidebar').start({
       filtersState,
       layoutState: this.getView().getLayoutState(),
       isDrawer: this.getView().isFiltersDrawer(),
+      region: this.getView().getRegion('filtersSidebar'),
     });
   },
   showPatientSidebar(patient, triggerView) {
@@ -303,16 +303,13 @@ const ScheduleApp = App.extend({
     if (this._patientSidebarRequest !== request) return;
     this.setSidebarLayoutCollapsed(false);
 
-    if (!this.hasChildApp('patientSidebar')) {
-      this.addChildApp('patientSidebar', new ListPatientSidebarApp({
-        region: this.getView().getRegion('filtersSidebar'),
-      }));
-    }
-
     const patientSidebar = this.getChildApp('patientSidebar');
     this.listenToPatientSidebar();
 
-    await patientSidebar.start({ patient });
+    await patientSidebar.start({
+      patient,
+      region: this.getView().getRegion('filtersSidebar'),
+    });
 
     if (this._patientSidebarRequest !== request) return;
     this.focusPatientSidebar(patientSidebar);
@@ -393,7 +390,6 @@ const ScheduleApp = App.extend({
     }
 
     const app = this.addChildApp('bulkEditActions', new BulkEditActionsApp({
-      region: this.getSelectionBarRegion('bulkEdit'),
       stateOptions: { collection: this.selected },
     }));
 
@@ -428,7 +424,7 @@ const ScheduleApp = App.extend({
       },
     });
 
-    const start = app.start();
+    const start = app.start({ region: this.getSelectionBarRegion('bulkEdit') });
     this._bulkEditStart = start;
     start
       .catch(addError)
@@ -505,7 +501,7 @@ const ScheduleApp = App.extend({
     this.getView().showChildView('search', searchView);
   },
   prepareStop(options) {
-    const dynamicApps = ['filtersSidebar', 'patientSidebar', 'bulkEditActions'];
+    const dynamicApps = ['bulkEditActions'];
 
     return Promise.all(dynamicApps.map(name => this.removeChildApp(name, options)));
   },

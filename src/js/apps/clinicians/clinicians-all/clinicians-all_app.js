@@ -12,14 +12,12 @@ import { getClinicianModal } from 'js/apps/clinicians/clinicians-all/clinician-m
 export default SubRouterApp.extend({
   routerAppName: 'CliniciansApp',
   routeScope: [],
+  childApps: {
+    sidebar: ClinicianSidebarApp,
+  },
   routeActions: {
     'clinician': 'showClinicianSidebar',
     'clinicians:all': 'hideCliniciansSidebar',
-  },
-  initialize() {
-    this.addChildApp('sidebar', new ClinicianSidebarApp({
-      region: Radio.request('sidebar', 'region'),
-    }));
   },
   onBeforeStart() {
     const view = this.setView(new LayoutView());
