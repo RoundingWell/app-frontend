@@ -1,0 +1,54 @@
+src/js/apps/patients/patient/action/action_views.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 109-111
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11-12,14,37-38
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_5993d3362bd802 20,103,110-113
+src/js/apps/patients/patient/form/widgets/widgets_header_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 8-9,11,13,15
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 20-23,25,27,34
+src/js/entities-service/forms.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 42-43
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11,13-17,19,27,31,42,59,76
+src/js/entities-service/comments.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,14
+src/js/apps/patients/patient/form/form_app.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 51-65,67-69
+  s_85aebd1623278c::t_e3ef32db9d5350 2,6,14,33-35,39,48,66,80-81,83,98,122,141,155,180,195,204,213,227,241,250,252,258,279,287,289,292,295,298,300,309,311,315,319,324,327,331,334,338,341,353,357,366,377
+src/js/entities-service/entities/widgets.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11-12
+src/js/apps/patients/patient/action/action_app.js
+  s_85aebd1623278c::t_35479938c99de5 130
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 60-65,67,69-71,73-77
+  s_85aebd1623278c::t_a3fcf71e266ab6 2,6,23-28,33,58,96,106,141,154-156,168,201,203,250-252,258,267,290-293,296,301-304,307,312
+src/js/entities-service/flows.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 19-22
+src/js/entities-service/form-responses.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 18-20,22,25
+src/js/entities-service/widget-values.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,21
+src/js/entities-service/files.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,13,15
+src/js/entities-service/events.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12-13
+src/js/entities-service/workspace-patients.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a8a716fd627189209265b0f03671e7e35b81d652",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
