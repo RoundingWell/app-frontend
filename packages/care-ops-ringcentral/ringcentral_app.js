@@ -1,3 +1,4 @@
+import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
 import App from 'js/base/app';
@@ -5,10 +6,20 @@ import App from 'js/base/app';
 import { LayoutView } from './ringcentral_views';
 
 export default App.extend({
-  startAfterInitialized: true,
+  dialerEvents: {
+    'rc-dialer-status-notify': 'onDialerStatus',
+    'rc-login-status-notify': 'onLoginStatus',
+    'rc-call-init-notify': 'onCallInit',
+    'rc-call-ring-notify': 'onCallRing',
+    'rc-call-start-notify': 'onCallStart',
+    'rc-call-end-notify': 'onCallEnd',
+  },
   stateEvents: {
     'change:isDialerReady': 'onDialerReady',
     'change:isLoggedIn': 'onLoginChange',
+  },
+  createState() {
+    return new Backbone.Model();
   },
   onDialerReady() {
     this._call();
@@ -20,88 +31,95 @@ export default App.extend({
     this.patients = patients;
   },
   onStart() {
+    this._eventListeners?.abort();
+    this._eventListeners = new AbortController();
+
     this.showView(new LayoutView({
       model: this.getState(),
       collection: this.patients,
     }));
 
-    window.addEventListener('message', ({ data, origin }) => {
-      if (origin !== 'https://apps.ringcentral.com') return;
+    window.addEventListener('message', this.onMessage.bind(this), {
+      signal: this._eventListeners.signal,
+    });
 
-      // fired when dialer is ready
-      if (data.type === 'rc-dialer-status-notify') {
-        this.setState('isDialerReady', data.ready);
-      }
-
-      // when a user has logged in or out in the iframe
-      if (data.type === 'rc-login-status-notify') {
-        this.setState('isLoggedIn', data.loggedIn);
-      }
-
-      // when user creates a call from dial pad
-      if (data.type === 'rc-call-init-notify') {
-        this.setState('callState', null);
-        this.setState('actionId', null);
-      }
-
-      // when an inbound call is ringing
-      if (data.type === 'rc-call-ring-notify') {
-        if (this.getState('callState') === 'active') return;
-
-        this.setState('callState', 'ringing');
-      }
-
-      // when a user accepts a ringing inbound call or outbound call is connected
-      if (data.type === 'rc-call-start-notify') {
-        const isInboundCall = data.call?.direction === 'Inbound';
-
-        this.setState('callState', 'active');
-
-        Radio.request('dialer', 'showPatientLinks', {
-          actionId: this.getState('actionId'),
-          number: isInboundCall ? data.call?.from : data.call?.to,
-        });
-      }
-
-      // when a call is ended
-      if (data.type === 'rc-call-end-notify') {
-        Radio.request('dialer', 'ringcentralCall', { callData: data.call });
-
-        this.setState('callState', null);
-        this.setState('actionId', null);
-
-        Radio.request('dialer', 'showPatientLinks', null);
-      }
+    this._call();
+  },
+  onStop() {
+    this._eventListeners?.abort();
+    this.getState().set({
+      isDialerReady: false,
+      isLoggedIn: false,
+      callState: null,
+      actionId: null,
+      pendingCall: null,
     });
   },
+  onBeforeDestroy() {
+    this._eventListeners?.abort();
+  },
+  onMessage({ data, origin }) {
+    if (origin !== 'https://apps.ringcentral.com') return;
+
+    this.handleDialerEvent(data);
+  },
+  handleDialerEvent(data) {
+    if (!Object.hasOwn(this.dialerEvents, data?.type)) return;
+
+    const handler = this.dialerEvents[data.type];
+    this[handler](data);
+  },
+  onDialerStatus({ ready }) {
+    this.getState().set('isDialerReady', ready);
+  },
+  onLoginStatus({ loggedIn }) {
+    this.getState().set('isLoggedIn', loggedIn);
+  },
+  onCallInit() {
+    this.getState().set({ callState: null, actionId: null });
+  },
+  onCallRing() {
+    const state = this.getState();
+    if (state.get('callState') === 'active') return;
+
+    state.set('callState', 'ringing');
+  },
+  onCallStart({ call }) {
+    const state = this.getState();
+    state.set('callState', 'active');
+
+    Radio.request('dialer', 'showPatientLinks', {
+      actionId: state.get('actionId'),
+      number: call?.direction === 'Inbound' ? call?.from : call?.to,
+    });
+  },
+  onCallEnd({ call }) {
+    Radio.request('dialer', 'ringcentralCall', { callData: call });
+    this.getState().set({ callState: null, actionId: null });
+    Radio.request('dialer', 'showPatientLinks', null);
+  },
   call(number, action) {
-    this.setState('isOpen', true);
+    const state = this.getState();
+    state.set('isOpen', true);
 
     // If there's an active call, only show the panel
-    if (this.getState('callState') === 'active') return;
+    if (state.get('callState') === 'active') return;
 
-    this.setState('pendingCall', number);
-    this.setState('actionId', action.id);
+    state.set({ pendingCall: number, actionId: action.id });
 
     this._call();
   },
   _call() {
-    if (!this.getState('isDialerReady')) return;
+    const state = this.getState();
+    if (!state.get('isDialerReady')) return;
 
-    const number = this.getState('pendingCall');
+    const number = state.get('pendingCall');
     if (!number) return;
 
-    if (!this.getState('isLoggedIn')) return;
+    if (!state.get('isLoggedIn')) return;
 
-    const iframe = document.querySelector('.ringcentral-panel__iframe');
-    if (!iframe) return;
+    if (!this.getView().call(number)) return;
 
-    iframe.contentWindow.postMessage({
-      type: 'rc-adapter-new-call',
-      phoneNumber: number,
-      toCall: true,
-    }, 'https://apps.ringcentral.com');
-
-    this.setState('pendingCall', null);
+    state.set('pendingCall', null);
   },
 });

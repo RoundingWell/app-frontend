@@ -90,7 +90,5 @@ export default App.extend({
       Radio.channel('workspace').reset();
       this.addChildApp('workspace', new WorkspaceService({ route: getWorkspaceRoute() }));
     }
-
-    Radio.request('dialer', 'init');
   },
 });

@@ -129,13 +129,24 @@
   `beforeStart` result spreading to Application preparation. Its entity requests
   receive the active run's cancellation signal, and its existing E2E contract
   remains unchanged. It was merged by a human.
-- Active: PR #1807 removes the temporary jQuery DOM adapter and dependency now that the
+- Completed: PR #1807 removes the temporary jQuery DOM adapter and dependency now that the
   migrated views use Marionette's native DOM collections. Application-level
   browser listeners retain explicit ownership and cleanup, and Morphdom remains
-  the renderer-specific DOM adapter.
+  the renderer-specific DOM adapter. It was merged by a human.
+- Active: PR #1808 replaces Five9 and RingCentral constructor
+  autostart and module singletons with Applications owned and explicitly started
+  by DialerService. Their Backbone state sources, borrowed overlay Region, and
+  browser effects now follow the beta.5 lifecycle contract.
 
 ## Validation
 
+- The dialer package step installs from the pinned lockfile, passes targeted
+  ESLint and the test-mode build, and leaves its existing E2E specification
+  unchanged. Both Five9 and RingCentral scenarios render their provider UI and
+  patient button, then encounter the already-recorded Worklist startup race
+  when the scenario opens the Owned By list; the global error screen covers the
+  button before either provider call can be exercised. This is the same shared
+  blocker reproduced on PR #1806's clean head, not a dialer-package regression.
 - PR #1807 installs without jQuery and passes the test-mode build, ESLint, and
   Stylelint. The full component run reaches the pre-existing component harness
   failure where constructing the global Application calls `getAppName` without
