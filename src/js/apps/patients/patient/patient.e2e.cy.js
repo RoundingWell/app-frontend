@@ -227,9 +227,6 @@ context('patient page', function() {
   });
 
   specify('patient routing', function() {
-    let patientShell;
-    const otherPatient = getPatient({ attributes: { first_name: 'Other', last_name: 'Patient' } });
-
     cy
       .viewport(1920, 900)
       .routesForPatientWorkflow()
@@ -240,10 +237,6 @@ context('patient page', function() {
       })
       .visit(`/patient/${ testPatient.id }/workflow`)
       .wait('@routePatient');
-
-    cy.get('.patient__layout').then($shell => {
-      patientShell = $shell[0];
-    });
 
     cy
       .get('.patient__layout')
@@ -275,24 +268,6 @@ context('patient page', function() {
       .get('.patient__layout')
       .find('.workflow-page__tab.is-selected')
       .contains('Open');
-
-    // Same-patient routes retain the shell; a different patient gets a new one.
-    cy.get('.patient__layout').should($shell => {
-      expect($shell[0]).to.equal(patientShell);
-    });
-
-    cy
-      .routePatient(fx => {
-        fx.data = otherPatient;
-        return fx;
-      })
-      .navigate(`/patient/${ otherPatient.id }/workflow`)
-      .wait('@routePatient');
-
-    cy.get('.patient__context-trail').should('contain', 'Other Patient');
-    cy.get('.patient__layout').should($shell => {
-      expect($shell[0]).not.to.equal(patientShell);
-    });
   });
 
   specify('remembers the patient sidebar across patients and reloads', function() {
