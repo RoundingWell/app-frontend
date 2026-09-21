@@ -4,10 +4,10 @@ import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
-import App from './app';
+import RouteBaseApp from './route-base-app';
 import EventRouter from './event-router';
 
-export default App.extend({
+export default RouteBaseApp.extend({
   // Set in router apps for nav selection
   routerAppName: '',
   startOnRoute: true,
@@ -22,10 +22,9 @@ export default App.extend({
     // if the app does not handle a given route, stop
     this.listenTo(this.router, 'noMatch', this.onNoMatch);
 
-    this.on('stop', this._clearCurrent);
     this.on('before:stop', this._clearRouteIntent);
 
-    App.apply(this, arguments);
+    RouteBaseApp.apply(this, arguments);
   },
 
   initRouter() {
@@ -44,8 +43,15 @@ export default App.extend({
   },
 
   onNoMatch() {
-    this.stop();
+    const routeContext = this.getCurrentRoute();
+    const stopping = this.stop();
+    const routeIntent = {};
+    this._routeIntent = routeIntent;
     this._currentRoute = null;
+
+    return stopping.catch(error => {
+      if (this._routeIntent === routeIntent) this.triggerMethod('route:error', error, routeContext);
+    });
   },
 
   // For each route in the hash creates a routeTriggers hash,
@@ -105,21 +111,33 @@ export default App.extend({
         meta: definition.meta || {},
       },
     };
+    this.invalidateSelection();
     this._currentRoute = routeContext;
     this._routeIntent = routeIntent;
 
-    if (!this.startOnRoute) return this.dispatchRoute(routeContext);
-
-    const region = this.routeRegion || this.getRegion();
-
-    return this.start(region ? { region } : undefined)
-      .then(started => {
-        if (!started || this._routeIntent !== routeIntent) return;
-
-        return this.dispatchRoute(routeContext);
-      })
-      .catch(addError);
+    return this.activateRoute(routeContext, routeIntent).catch(error => {
+      if (this._routeIntent === routeIntent) this.triggerMethod('route:error', error, routeContext);
+    });
   },
+
+  async activateRoute(routeContext, routeIntent) {
+    if (this.startOnRoute) {
+      const region = this.routeRegion || this.getRegion();
+      const started = await this.start(region ? { region } : undefined);
+      if (!started || this._routeIntent !== routeIntent) return;
+    }
+
+    return this.dispatchRoute(routeContext);
+  },
+
+  onChildCleanupError(error) {
+    addError(error);
+  },
+
+  onRouteError(error) {
+    addError(error);
+  },
+
   dispatchRoute(routeContext) {
     const { definition, eventArgs } = routeContext;
 
@@ -130,66 +148,45 @@ export default App.extend({
       action = this[action];
     }
 
-    action.apply(this, eventArgs);
+    const activation = action.apply(this, eventArgs);
 
     this.triggerMethod('appRoute', this, routeContext);
+
+    return activation;
   },
 
-  // handler that ensures one running app
-  async startCurrent(appName, options) {
+  startCurrent(appName, options) {
     const routeContext = this.getCurrentRoute();
-
-    await this.stopCurrent();
-
-    if (this.getCurrentRoute() !== routeContext) return;
-
     const child = this.getChildApp(appName);
 
-    // only SubRouterApp children participate in route dispatch and scope identity;
-    // plain list/leaf children (worklist, schedule, programs-all) do neither
-    if (isFunction(child.setCurrentRoute)) {
-      child.setCurrentRoute(this.getCurrentRoute());
-    }
-
-    this._currentAppName = appName;
-    this._currentAppScope = this.getChildScope(child, options);
-    this._current = child;
-
-    const started = await child.start({ ...options, region: this.getRegion() });
-
-    if (!started || this.getCurrentRoute() !== routeContext) return;
-
-    return child;
+    return this.selectChild(appName, {
+      scope: child && this.getChildScope(child, options),
+      start: app => {
+        if (isFunction(app.setCurrentRoute)) app.setCurrentRoute(routeContext);
+        return app.start({ ...options, region: this.getRegion() });
+      },
+    });
   },
 
   getChildScope(child, options) {
     return isFunction(child.getRouteScope) ? child.getRouteScope(options) : undefined;
   },
 
-  async startRoute(appName, options) {
+  startRoute(appName, options) {
     const child = this.getChildApp(appName);
-    const scope = this.getChildScope(child, options);
-    const current = this.getCurrent();
+    const scope = child && this.getChildScope(child, options);
+    const routeContext = this.getCurrentRoute();
 
-    if (current && this.isCurrent(appName, scope)) {
-      const started = await current.startRoute(this.getCurrentRoute(), {
-        ...options,
-        region: this.getRegion(),
-      });
-
-      return started && current === this.getCurrent() ? current : undefined;
-    }
-
-    return this.startCurrent(appName, options);
-  },
-
-  getCurrent() {
-    return this._current;
+    return this.selectChild(appName, {
+      scope,
+      reuse: this.isCurrent(appName, scope),
+      start: app => app.startRoute(routeContext, { ...options, region: this.getRegion() }),
+    });
   },
 
   isCurrent(appName, scope) {
-    return (appName === this._currentAppName)
-      && (isEqual(scope, this._currentAppScope));
+    const selection = this.getCurrentSelection();
+    return selection?.appName === appName && isEqual(scope, selection.scope);
   },
 
   getCurrentRoute() {
@@ -198,22 +195,6 @@ export default App.extend({
 
   getCurrentRouteMeta() {
     return this._currentRoute && this._currentRoute.definition.meta;
-  },
-
-  stopCurrent() {
-    if (!this._current) return;
-
-    const current = this._current;
-
-    this._clearCurrent();
-
-    return current.stop();
-  },
-
-  _clearCurrent() {
-    this._current = null;
-    this._currentAppName = null;
-    this._currentAppScope = null;
   },
 
   _clearRouteIntent() {

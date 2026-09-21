@@ -159,6 +159,68 @@ context('RouterApp', function() {
     });
   });
 
+  describe('route action failures', function() {
+    [true, false].forEach(startOnRoute => {
+      const title = `observes async failures with startOnRoute=${ startOnRoute }`;
+
+      specify(title, async function() {
+        const failure = new Error('route failed');
+        const readiness = deferred();
+        const errorHandler = cy.stub();
+        const dispatched = cy.stub();
+        const dispatchedRoute = deferred();
+        app = new (Router.extend({
+          startOnRoute,
+          showSchedule() {
+            return readiness.promise.then(() => {
+              throw failure;
+            });
+          },
+          onRouteError: errorHandler,
+        }))({ workspaceSlug: 'test-ws' });
+        app.on('appRoute', () => {
+          dispatched();
+          dispatchedRoute.resolve();
+        });
+
+        const routing = app.routeAction('schedule', 'showSchedule');
+        await dispatchedRoute.promise;
+        expect(dispatched).to.have.been.calledOnce;
+        expect(errorHandler).not.to.have.been.called;
+        readiness.resolve();
+        await routing;
+        expect(errorHandler).to.have.been.calledOnceWith(failure, app.getCurrentRoute());
+      });
+    });
+  });
+
+  describe('unmatched route failures', function() {
+    specify('reports a rejected stop for the current departure', async function() {
+      const failure = new Error('cannot stop');
+      const reported = cy.stub();
+      app = new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' });
+      await app.routeAction('schedule', 'showSchedule');
+      const route = app.getCurrentRoute();
+      const stop = cy.stub(app, 'stop').rejects(failure);
+      await app.onNoMatch();
+      stop.restore();
+      expect(reported).to.have.been.calledOnceWith(failure, route);
+    });
+
+    specify('ignores an already-rejected stop after a newer route takes over', async function() {
+      const failure = new Error('obsolete stop failure');
+      const reported = cy.stub();
+      app = new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' });
+      await app.routeAction('schedule', 'showSchedule');
+      const stop = cy.stub(app, 'stop').rejects(failure);
+      const leaving = app.onNoMatch();
+      const routing = app.routeAction('worklist', 'showWorklist', 'w1');
+      stop.restore();
+      await Promise.all([leaving, routing]);
+      expect(reported).not.to.have.been.called;
+    });
+  });
+
   describe('scope identity', function() {
     specify('reuses the child and forwards the route for an equal scope', async function() {
       app = new Router({ workspaceSlug: 'test-ws' });

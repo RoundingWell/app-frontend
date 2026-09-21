@@ -83,27 +83,27 @@ export default SubRouterApp.extend({
   },
 
   showWorkflow() {
-    this.startContent('workflow', { status: 'notDone' });
+    return this.startContent('workflow', { status: 'notDone' });
   },
 
   showClosedWorkflow() {
-    this.startContent('workflow', { status: 'done' });
+    return this.startContent('workflow', { status: 'done' });
   },
 
   showPatientAction(patientId, actionId, entryTarget) {
-    this.startContent('action', { actionId, entryTarget });
+    return this.startContent('action', { actionId, entryTarget });
   },
 
   showFlow(patientId, flowId) {
-    this.startContent('flow', { flowId });
+    return this.startContent('flow', { flowId });
   },
 
   showFlowAction(patientId, flowId, actionId, entryTarget) {
-    this.startContent('action', { flowId, actionId, entryTarget });
+    return this.startContent('action', { flowId, actionId, entryTarget });
   },
 
   showPatientForm(patientId, formId) {
-    this.startContent('form', { formId });
+    return this.startContent('form', { formId });
   },
 
   startContent(appName, options) {

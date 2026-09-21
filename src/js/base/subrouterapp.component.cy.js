@@ -43,7 +43,7 @@ const SyncApp = BaseApp.extend({
 });
 
 const LoadingApp = BaseApp.extend({
-  onBeforeStart() {
+  prepareStart() {
     this.loaded = deferred();
     return this.loaded.promise;
   },
@@ -85,9 +85,9 @@ context('SubRouterApp', function() {
       expect(app.getRouteScope({ patientId: 'p1' })).to.deep.equal({});
     });
 
-    specify('returns the full options when no scope is declared', function() {
+    specify('requires an explicit scope declaration', function() {
       app = new (BaseApp.extend({ routeScope: undefined }))();
-      expect(app.getRouteScope({ patientId: 'p1', clinicianId: 'c9' })).to.deep.equal({ patientId: 'p1', clinicianId: 'c9' });
+      expect(() => app.getRouteScope()).to.throw('SubRouterApp requires a routeScope array');
     });
   });
 
@@ -126,6 +126,91 @@ context('SubRouterApp', function() {
       await Promise.all([starting, routing]);
 
       expect(app.calls).to.deep.equal([['action', 'p1', 'a1']]);
+    });
+  });
+
+  describe('route action failures', function() {
+    specify('observes async action failure during initial and subsequent dispatch', async function() {
+      const failure = new Error('content failed');
+      const reported = [];
+      app = new (SyncApp.extend({
+        showAction() {
+          return Promise.reject(failure);
+        },
+        onRouteError(error) {
+          reported.push(error);
+        },
+      }))();
+      app.setCurrentRoute(action);
+      await app.start();
+      await app.startRoute(action);
+      await Promise.resolve();
+
+      expect(reported).to.deep.equal([failure, failure]);
+    });
+  });
+
+  describe('route failure reporting', function() {
+    specify('reports synchronous throws during initial and running dispatch', async function() {
+      const failure = new Error('synchronous route failure');
+      const reported = [];
+      app = new (SyncApp.extend({
+        showAction() {
+          throw failure;
+        },
+        onRouteError(error) {
+          reported.push(error);
+        },
+      }))();
+      app.setCurrentRoute(action);
+      expect(await app.start()).to.be.true;
+      await app.startRoute(action);
+      await Promise.resolve();
+
+      expect(reported).to.deep.equal([failure, failure]);
+      expect(app.startedRoutes).to.deep.equal(['patient:action', 'patient:action']);
+    });
+
+    specify('reports a current route failure even after the action stops its owner', async function() {
+      const failure = new Error('route stopped itself');
+      const reported = [];
+      app = new (SyncApp.extend({
+        async showAction() {
+          await this.stop();
+          throw failure;
+        },
+        onRouteError(error) {
+          reported.push(error);
+        },
+      }))();
+      await app.start();
+      app.setCurrentRoute(action);
+      await app.startCurrentRoute();
+
+      expect(app.isRunning()).to.be.false;
+      expect(reported).to.deep.equal([failure]);
+    });
+
+    specify('ignores an action failure once a newer route takes over', async function() {
+      const readiness = deferred();
+      const reported = [];
+      app = new (SyncApp.extend({
+        showAction() {
+          return readiness.promise.then(() => {
+            throw new Error('stale failure');
+          });
+        },
+        onRouteError(error) {
+          reported.push(error);
+        },
+      }))();
+      await app.start();
+      app.setCurrentRoute(action);
+      const dispatching = app.startCurrentRoute();
+      await app.startRoute(workflow);
+      readiness.resolve();
+      await dispatching;
+      expect(reported).to.deep.equal([]);
     });
   });
 
