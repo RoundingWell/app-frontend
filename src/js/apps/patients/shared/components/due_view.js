@@ -27,10 +27,11 @@ export default View.extend({
     return 'button button--secondary w-100 due-component';
   },
   attributes() {
-    return {
-      disabled: this.getOption('isDisabled'),
-      type: 'button',
-    };
+    const attributes = { type: 'button' };
+
+    if (this.getOption('isDisabled')) attributes.disabled = 'disabled';
+
+    return attributes;
   },
   template: DueTemplate,
   templateContext() {

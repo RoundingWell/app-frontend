@@ -39,8 +39,8 @@ const Entity = BaseEntity.extend({
     const data = { filter: { patient: patientId } };
     return model.fetch({ url: `/api/forms/${ formId }/fields`, data });
   },
-  fetchByAction(actionId) {
-    return this.fetchBy(`/api/actions/${ actionId }/form`);
+  fetchByAction(actionId, options) {
+    return this.fetchBy(`/api/actions/${ actionId }/form`, options);
   },
   fetchDefinitionByAction(actionId) {
     return fetcher(`/api/actions/${ actionId }/form/definition`).then(handleJSON);

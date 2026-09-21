@@ -15,13 +15,14 @@ const Entity = BaseEntity.extend({
 
     return this.fetchModel(id, options);
   },
-  fetchOrEmpty(url, data) {
-    return this.fetchBy(url, { data }).then(response => response || new Model());
+  fetchOrEmpty(url, data, options = {}) {
+    return this.fetchBy(url, { ...options, data: { ...options.data, ...data } })
+      .then(response => response || new Model());
   },
-  fetchByMe({ actionId, patientId, formId }) {
+  fetchByMe({ actionId, patientId, formId }, options) {
     const filter = actionId ? { action: actionId } : { patient: patientId, form: formId };
 
-    return this.fetchOrEmpty('/api/clinicians/me/form-responses/latest', { filter });
+    return this.fetchOrEmpty('/api/clinicians/me/form-responses/latest', { filter }, options);
   },
   fetchSubmittedByPatient({ patientId, actionId, flowId, formId, actionTags, submittedAt }) {
     const filter = {

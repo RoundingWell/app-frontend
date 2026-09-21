@@ -1,8 +1,9 @@
 import { get } from 'underscore';
+import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
-import App from 'js/base/app';
-import handleErrors from 'js/utils/handle-errors';
+import App, { wrapStartFailure } from 'js/base/app';
+import { addError } from 'js/datadog';
 
 import intl from 'js/i18n';
 
@@ -19,11 +20,17 @@ export default App.extend({
     attachments: AttachmentsApp,
     form: FormApp,
   },
+  initialize() {
+    this.listenTo(this.getChildApp('form'), 'toggle:expanded', this.onToggleFormExpanded);
+  },
+  createState() {
+    return new Backbone.Model();
+  },
   setAccess() {
     const canEdit = !this.action.isFlowDone() && this.action.canEdit();
     const canDelete = this.action.canDelete();
 
-    this.setState({ canEdit, canDelete });
+    this.getState().set({ canEdit, canDelete });
   },
   stateEvents: {
     'change:canEdit': 'onStateChangeCanEdit',
@@ -48,29 +55,26 @@ export default App.extend({
       && layout.getRegion(name);
   },
   onBeforeStart() {
-    this.getRegion().show(new ActionLoadingView());
+    this.showView(new ActionLoadingView());
   },
-  beforeStart({ actionId, flowId }) {
-    const actionRequest = this.fetchRouteResource('action',
-      Radio.request('entities', 'fetch:actions:model', actionId),
+  prepareStart({ actionId, flowId }, { signal }) {
+    const actionRequest = wrapStartFailure('action',
+      Radio.request('entities', 'fetch:actions:model', actionId, { signal }),
     );
 
-    if (!flowId) return actionRequest;
+    if (!flowId) return Promise.all([actionRequest, null]);
 
-    const flowRequest = this.fetchRouteResource('flow',
-      Radio.request('entities', 'fetch:flows:model', flowId),
+    const flowRequest = wrapStartFailure('flow',
+      Radio.request('entities', 'fetch:flows:model', flowId, { signal }),
     );
 
-    return [actionRequest, flowRequest];
+    return Promise.all([actionRequest, flowRequest]);
   },
-  fetchRouteResource(resource, request) {
-    return request.catch(error => Promise.reject({ resource, error }));
-  },
-  onFail(options, failure) {
+  handleStartFailure(options, failure) {
     const error = get(failure, 'error', failure);
     const resource = get(failure, 'resource');
 
-    if (get(error, ['response', 'status']) === 410) {
+    if ((resource === 'action' || resource === 'flow') && get(error, ['response', 'status']) === 410) {
       const message = resource === 'flow' ?
         intl.patients.patient.flow.flowViews.notFound :
         intl.patients.patient.action.actionApp.notFound;
@@ -80,7 +84,7 @@ export default App.extend({
       return;
     }
 
-    handleErrors(error);
+    throw error;
   },
   navigateAfterGone({ patient, flowId }, resource) {
     if (flowId && resource === 'action') {
@@ -90,7 +94,7 @@ export default App.extend({
 
     Radio.trigger('event-router', 'patient:workflow', patient.id);
   },
-  onStart(options, action, flow) {
+  onStart(app, options, [action, flow]) {
     this.patient = options.patient;
     this.flow = flow || null;
     this.action = action;
@@ -114,9 +118,7 @@ export default App.extend({
     });
     this.listenTo(this.layoutState, 'change:formExpanded', this.renderFormExpandedState);
 
-    const layout = new LayoutView();
-
-    this.showView(layout);
+    this.setView(new LayoutView()).render();
     this.renderFormExpandedState();
 
     this.showContent();
@@ -127,6 +129,7 @@ export default App.extend({
     this.updateContext();
 
     this.subscribe();
+    this.showView();
   },
   updateContext() {
     this.triggerMethod('context:change', {
@@ -137,8 +140,12 @@ export default App.extend({
       flowName: this.getFlowName(),
     });
   },
-  onBeforeStop() {
+  onStop() {
+    this._formStartRequest = null;
     this.unsubscribe();
+    if (this.currentFlow) this.stopListening(this.currentFlow);
+    this.stopListening(this.action);
+    this.stopListening(this.layoutState);
   },
   onChangeOwner() {
     this.setAccess();
@@ -150,7 +157,7 @@ export default App.extend({
   showAction() {
     const hasDialer = !!Radio.request('settings', 'get', 'dialer');
 
-    if (!this.getState('canEdit')) {
+    if (!this.getState().get('canEdit')) {
       const actionView = new ReadOnlyActionView({
         model: this.action,
         hasDialer,
@@ -183,9 +190,9 @@ export default App.extend({
     });
   },
   showMenu() {
-    const menuRegion = this.getRegion('menu');
+    const menuRegion = this.getView().getRegion('menu');
 
-    if (!this.getState('canDelete')) {
+    if (!this.getState().get('canDelete')) {
       menuRegion.empty();
       return;
     }
@@ -232,16 +239,25 @@ export default App.extend({
     if (hasForm) this.startEmbeddedForm(formView);
   },
   startEmbeddedForm(formView) {
-    const formApp = this.startChildApp('form', {
+    const formApp = this.getChildApp('form');
+    const request = {};
+
+    this._formStartRequest = request;
+
+    formApp.start({
       region: formView.getRegion('form'),
       patient: this.patient,
       actionId: this.action.id,
       layoutState: this.layoutState,
       viewportView: this.getView(),
-    });
+    }).catch(error => {
+      if (!this.isRunning() || this._formStartRequest !== request) return;
 
-    this.listenTo(formApp, {
-      'toggle:expanded': this.onToggleFormExpanded,
+      try {
+        formApp.handleStartFailure({ actionId: this.action.id }, error);
+      } catch(unhandledError) {
+        addError(unhandledError);
+      }
     });
   },
   onToggleFormExpanded() {
@@ -251,7 +267,7 @@ export default App.extend({
     const isExpanded = this.layoutState.get('formExpanded');
     const layout = this.getView();
 
-    layout.$el.toggleClass('patient-action--form-expanded', isExpanded);
+    layout.setFormExpanded(isExpanded);
   },
   onClickForm() {
     if (this.flow) {
@@ -274,25 +290,29 @@ export default App.extend({
     Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());
   },
   startActivity(initialSection) {
-    const activityApp = this.startChildApp('activity', {
-      region: this.getRegion('activity'),
+    const activityApp = this.getChildApp('activity');
+
+    activityApp.start({
+      region: this.getView().getRegion('activity'),
       action: this.action,
       focusOnLoad: initialSection === 'comments',
-    });
+    }).catch(addError);
 
     return activityApp;
   },
   startAttachments(initialSection) {
-    const attachmentsApp = this.startChildApp('attachments', {
-      region: this.getRegion('attachments'),
+    const attachmentsApp = this.getChildApp('attachments');
+
+    attachmentsApp.start({
+      region: this.getView().getRegion('attachments'),
       action: this.action,
       focusOnLoad: initialSection === 'attachments',
-    });
+    }).catch(addError);
 
     return attachmentsApp;
   },
   showContentView(name, view, options) {
-    const region = this.getRegion(name);
+    const region = this.getView().getRegion(name);
     region.show(view, options);
     return view;
   },

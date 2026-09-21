@@ -131,10 +131,13 @@ const widgets = {
     className: 'button button--outline widgets__form-widget',
     tagName: 'button',
     attributes() {
-      return {
-        disabled: this.getOption('is_modal'),
+      const attributes = {
         type: 'button',
       };
+
+      if (this.getOption('is_modal')) attributes.disabled = 'disabled';
+
+      return attributes;
     },
     template: hbs`
       {{far "square-poll-horizontal"}}

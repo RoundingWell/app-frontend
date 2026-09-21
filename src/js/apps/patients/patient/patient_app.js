@@ -42,7 +42,7 @@ export default SubRouterApp.extend({
     this.showView(new LoadingView({ variant: 'generic' }));
   },
 
-  onBeforeStop() {
+  onStop() {
     Radio.request('nav', 'setMinimized', false);
   },
 
@@ -125,10 +125,20 @@ export default SubRouterApp.extend({
       ...options,
       region: this.getView().getRegion('content'),
     }).catch(error => {
-      if (this.getCurrentRoute() !== routeContext) return;
+      if (!this.isRunning() || this.getCurrentRoute() !== routeContext) return;
 
-      handleErrors(error);
+      // Failure handlers receive the same shared context as application startup.
+      return this.handleContentStartFailure(pageApp, this.mixinOptions(options), error);
     });
+  },
+  handleContentStartFailure(pageApp, options, error) {
+    if (!pageApp.handleStartFailure) return handleErrors(error);
+
+    try {
+      return pageApp.handleStartFailure(options, error);
+    } catch(unhandledError) {
+      return handleErrors(unhandledError);
+    }
   },
   getContentApp(appName) {
     const currentApp = this.getChildApp(appName);

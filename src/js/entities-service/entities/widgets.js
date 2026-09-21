@@ -8,8 +8,8 @@ const TYPE = 'widgets';
 
 const _Model = BaseModel.extend({
   type: TYPE,
-  fetchValues(patientId) {
-    return Radio.request('entities', 'fetch:widgetValues:byPatient', this, patientId);
+  fetchValues(patientId, options) {
+    return Radio.request('entities', 'fetch:widgetValues:byPatient', this, patientId, options);
   },
 });
 

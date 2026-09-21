@@ -8,8 +8,12 @@ export default App.extend({
     this._current = null;
     this._currentClaim = null;
     this._stoppingCurrent = null;
+    this._runId = 0;
+    this._routeIntent = null;
 
     this.on('stop', this._clearCurrent);
+    this.on('start', () => this._runId++);
+    this.on('before:stop', this._clearRouteIntent);
 
     App.apply(this, arguments);
   },
@@ -33,14 +37,19 @@ export default App.extend({
     return this.getState().get('currentRoute');
   },
 
-  // records the newest route, dispatching only when already running;
-  // while loading or stopped the route is retained for startCurrentRoute()
-  startRoute(routeContext) {
+  // records the newest route and ensures it is dispatched by the active run
+  async startRoute(routeContext, options) {
+    const runId = this._runId;
+    const routeIntent = {};
     this.setCurrentRoute(routeContext);
+    this._routeIntent = routeIntent;
 
-    if (this.isRunning()) {
-      this.startCurrentRoute();
-    }
+    const started = await this.start(options);
+
+    if (!started || this._routeIntent !== routeIntent) return;
+    if (this._runId === runId) this.startCurrentRoute();
+
+    return this;
   },
 
   // synchronously dispatches the current route to its action
@@ -132,5 +141,9 @@ export default App.extend({
   _clearCurrent() {
     this._current = null;
     this._currentClaim = null;
+  },
+
+  _clearRouteIntent() {
+    this._routeIntent = null;
   },
 });

@@ -2,14 +2,18 @@
 
 ## Target and baseline
 
-- Current runtime: published `marionette@5.0.0-beta.5` from npm, built from
-  upstream commit `14153fd03fd616fdb989e210a860409853d84733`. The lockfile
-  pins the registry artifact by its published SHA-512 integrity.
-- `@mnjs/adapters` is directly pinned to `5.0.0-beta.5`; Marionette resolves
-  matching `@mnjs/radio` and `@mnjs/utils` packages. The temporary vendored
-  #545/#546/#548 candidate was removed atomically with this upgrade.
-- Beta.5 release notes, migration guidance, package metadata, companion
-  versions, and immutable release checksums were inspected before installation.
+- Current candidate: Marionette PRs #551 and #554 at combined commit
+  `e5073543f28d8dcd237115f3b7ad7f4131a44a15`. This is unpublished code,
+  packaged with upstream's `release:artifact` workflow and installed from
+  `vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz` (SHA-256
+  `939a03a6d7fb14815b9f3a495334c0808baef7683b0532c4c725f0e5993994e8`).
+- The candidate build produced all five workspace artifacts. Only core
+  Marionette differs from the published beta.5 packages, so the tracked
+  candidate replaces that package; the published beta.5 adapters, Radio, and
+  utils packages remain exactly pinned. Replace the tarball dependency
+  atomically when a published release contains both contracts.
+- The PR implementations, tests, documentation, migration guidance, package
+  metadata, and companion package artifacts were inspected before installation.
 - Baseline: `npm ci` passed; 49 component specs and 248 tests passed; 35 E2E
   specs passed unchanged. ESLint and Stylelint passed; the local editor-config
   check could not find its downloaded macOS ARM binary.
@@ -17,7 +21,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `899faa0b7043387a854cc456a113a82a921f1b23`.
+  `edb201522a97f1f66ec9e675dc3497046d6678cc`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -100,13 +104,18 @@
   running the unchanged Cypress contract locally and addressing regressions.
 - Completed: PR #1795 migrated the Patients Schedule, Worklist, shared
   list-page, filters, bulk-edit, and sidebar ownership boundary.
-- Active: PR #1797 consumes the published beta.5 contract. Reusable route,
+- Completed: PR #1797 consumes the published beta.5 contract. Reusable route,
   patient-page, filter-sidebar, and global-sidebar Applications remain
   registered while start/stop controls activation. Routers and recreated
   layouts pass their current Region at start; loading roots are app-owned; and
   the beta.4 duplicate-Region and remove/re-add workarounds are removed. Static,
   no-argument children use `childApps`; dynamically imported, lazy, configured,
   and route-created children retain explicit registration.
+- Active: PR #1803 moves the patient Action/Form page subtree from removed
+  Toolkit readiness, state helpers, named Application Regions, and
+  `startChildApp` to candidate Application preparation, active-run state-event
+  delivery, owned Backbone state, root View Regions, and explicit child
+  activation. Existing E2E specifications remain unchanged.
 
 ## Validation
 
@@ -536,3 +545,44 @@
   clean `npm ci`, resolved-package check, test build, and the four lifecycle
   component specs pass 56/56. Unchanged default-route and worklist-loading E2E
   pass 6/6 and 9/9; patient workflow remains at its known 7/9 boundary.
+- The Action/Form step installs cleanly and its test-mode build and targeted
+  ESLint pass against the exact candidate source revision. Its unchanged Action
+  E2E spec passes 28/31, including
+  embedded and standalone forms, expansion across stop/restart, attachments,
+  comments, cancellation, and gone-action redirects. Two remaining failures
+  construct the not-yet-migrated Five9 state source; the third constructs the
+  not-yet-migrated Flow Application. These are the next ownership boundaries,
+  not changes to the Action/Form acceptance contract.
+- The unchanged patient Form E2E spec passes 9/11. Discard and reload now pass;
+  the two remaining failures are the existing stored-submission tooltip and
+  hidden-submit response-id boundaries. The focused deleted-form and
+  unavailable-action error spec passes 2/2. The action-form spec reaches the
+  correct deleted-action redirect, then its first scenario aborts because it
+  does not stub the patient-workflow requests made by that redirect. No E2E
+  specification was changed.
+- Form initialization originally emitted state events before selecting its
+  root. PR #551 moves this active-run boundary into Application `stateEvents`,
+  so Form seeds state normally without silent Backbone updates or per-handler
+  running guards; initial UI remains explicit in `onStart`. PR #554 gives a
+  restart requested from completion callbacks its own cycle and options.
+  Native boolean attributes omit `disabled` when false instead of rendering
+  HTML's still-disabled `disabled="false"`.
+- Initial review placed request invalidation, subscriptions, and Form-service
+  removal in `onBeforeStop`. That contradicted the candidate's documented stop
+  permission contract: a rejected stop leaves the Application running. This was
+  an agent integration mistake, not a documentation gap. Active effects now
+  remain intact through pending or rejected permission and clean up in `onStop`.
+  FormsService is now a started child, so the parent awaits its successful stop
+  and effect cleanup; the stopped per-run service is destroyed before the next
+  run prepares. Form's layout listener is acquired only after startup succeeds,
+  so failed startup does not leave a per-run listener behind.
+- Review of #551's repo-wide `isRunning()` change exposed two consumer
+  assumptions rather than a framework defect. Route dispatch now awaits the
+  router and selected child Applications' idempotent `start()` calls; the newest
+  route dispatches only after activation succeeds. WebSocket-managed additions
+  remain ordinary run-owned requests rather than temporary child Applications:
+  listeners and in-flight fetches survive pending or rejected stop permission,
+  and successful stop removes the listener and aborts unfinished fetches. The
+  exact-candidate RouterApp, SubRouterApp, and WebSocket component specs pass
+  54/54, including both stop/route orderings, rejected stop permission, late
+  fetch completion, and successful-stop cancellation.

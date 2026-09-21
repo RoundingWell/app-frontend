@@ -101,14 +101,14 @@ const LayoutView = View.extend({
     'click @ui.viewportInteract': 'form:interact',
   },
   onRender() {
-    this.$el.toggleClass('form__frame--embedded', !!this.getOption('isActionForm'));
+    this.el.classList.toggle('form__frame--embedded', !!this.getOption('isActionForm'));
     this.setExpanded(this.getOption('isExpanded'));
   },
   templateContext() {
     return { isActionForm: !!this.getOption('isActionForm') };
   },
   setExpanded(isExpanded) {
-    this.$el.toggleClass('form__frame--expanded', !!isExpanded);
+    this.el.classList.toggle('form__frame--expanded', !!isExpanded);
     this.trigger('change:expanded', !!isExpanded);
   },
 });

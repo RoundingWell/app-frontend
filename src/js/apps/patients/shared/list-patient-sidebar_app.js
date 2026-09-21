@@ -1,7 +1,5 @@
 import { Radio } from 'marionette';
 
-import { addError } from 'js/datadog';
-
 import PatientSidebarApp, { getPatientSidebarRequests } from 'js/apps/patients/patient/sidebar/sidebar_app';
 import { SidebarLoadingView } from 'js/apps/patients/patient/sidebar/sidebar_views';
 
@@ -37,15 +35,5 @@ export default PatientSidebarApp.extend({
   },
   focusClose() {
     this.getView()?.focusClose();
-  },
-  onFail(error) {
-    this.trigger('close');
-
-    if (error?.responseData) {
-      Radio.request('alert', 'show:apiError', error.responseData);
-      return;
-    }
-
-    addError(error);
   },
 });

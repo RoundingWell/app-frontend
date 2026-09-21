@@ -2,6 +2,8 @@ import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
+import { addError } from 'js/datadog';
+
 import App from './app';
 import EventRouter from './event-router';
 
@@ -13,6 +15,7 @@ export default App.extend({
   constructor: function(options = {}) {
     this.workspaceSlug = options.workspaceSlug;
     this.routeRegion = options.routeRegion;
+    this._routeIntent = null;
 
     this.initRouter();
 
@@ -20,6 +23,7 @@ export default App.extend({
     this.listenTo(this.router, 'noMatch', this.onNoMatch);
 
     this.on('stop', this._clearCurrent);
+    this.on('before:stop', this._clearRouteIntent);
 
     App.apply(this, arguments);
   },
@@ -88,14 +92,10 @@ export default App.extend({
   // starts this routerapp if necessary
   // triggers before and after events
   routeAction(event, action, ...args) {
-    const region = this.routeRegion || this.getRegion();
-    if (!this.isRunning() && this.startOnRoute) {
-      this.start(region ? { region } : undefined);
-    }
-
     const definition = this._routes[event];
+    const routeIntent = {};
 
-    this._currentRoute = {
+    const routeContext = {
       event,
       eventArgs: args,
       definition: {
@@ -105,16 +105,34 @@ export default App.extend({
         meta: definition.meta || {},
       },
     };
+    this._currentRoute = routeContext;
+    this._routeIntent = routeIntent;
 
-    this.triggerMethod('before:appRoute', this, this._currentRoute);
+    if (!this.startOnRoute) return this.dispatchRoute(routeContext);
 
+    const region = this.routeRegion || this.getRegion();
+
+    return this.start(region ? { region } : undefined)
+      .then(started => {
+        if (!started || this._routeIntent !== routeIntent) return;
+
+        return this.dispatchRoute(routeContext);
+      })
+      .catch(addError);
+  },
+  dispatchRoute(routeContext) {
+    const { definition, eventArgs } = routeContext;
+
+    this.triggerMethod('before:appRoute', this, routeContext);
+
+    let { action } = definition;
     if (!isFunction(action)) {
       action = this[action];
     }
 
-    action.apply(this, args);
+    action.apply(this, eventArgs);
 
-    this.triggerMethod('appRoute', this, this._currentRoute);
+    this.triggerMethod('appRoute', this, routeContext);
   },
 
   // handler that ensures one running app
@@ -154,9 +172,10 @@ export default App.extend({
     const current = this.getCurrent();
 
     if (current && this.isCurrent(appName, scope)) {
-      current.startRoute(this.getCurrentRoute());
-
-      const started = await current.start({ ...options, region: this.getRegion() });
+      const started = await current.startRoute(this.getCurrentRoute(), {
+        ...options,
+        region: this.getRegion(),
+      });
 
       return started && current === this.getCurrent() ? current : undefined;
     }
@@ -195,6 +214,10 @@ export default App.extend({
     this._current = null;
     this._currentAppName = null;
     this._currentAppScope = null;
+  },
+
+  _clearRouteIntent() {
+    this._routeIntent = null;
   },
 
   // takes an event and translates data into the applicable url fragment
