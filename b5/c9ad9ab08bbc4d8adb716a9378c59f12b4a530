@@ -1,0 +1,62 @@
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_5993d3362bd802 20,103,110-113
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 20-23,25,27,34
+src/js/apps/patients/patient/action/action_views.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 109-111
+  s_85aebd1623278c::t_447647e7a1a406 22
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 104,111
+src/js/apps/patients/patient/action/action_app.js
+  s_85aebd1623278c::t_35479938c99de5 130
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 60-65,67,69-71,73-77
+  s_85aebd1623278c::t_a3fcf71e266ab6 2,6,23-28,33,58,96,106,141,154-156,168,201,203,250-252,258,267,290-293,296,301-304,307,312
+src/js/apps/patients/patient/form/widgets/widgets_header_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 8-9,11,13,15
+src/js/apps/patients/patient/form/form_app.js
+  s_85aebd1623278c::t_e3ef32db9d5350 2,6,14,33-35,39,48,66,80-81,86,101,125,144,158,183,198,207,216,230,244,253,255,261,282,290,292,295,298,301,303,312,314,318,322,327,330,334,337,341,344,356,360,369,380
+  s_85aebd1623278c::t_447647e7a1a406 44,82,84
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 51-65,67-69
+src/js/entities-service/entities/widgets.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11-12
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11,13-17,19,27,31,42,59,76
+src/js/entities-service/comments.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,14
+src/js/entities-service/forms.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 42-43
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11-12,14,37-38
+src/js/entities-service/files.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,13,15
+src/js/entities-service/workspace-patients.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,15
+src/js/entities-service/flows.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 19-22
+src/js/entities-service/form-responses.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 18-20,22,25
+src/js/apps/patients/patient/action/action-details_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 125,130
+src/js/entities-service/widget-values.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,21
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 276
+src/js/entities-service/events.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b5c9ad9ab08bbc4d8adb716a9378c59f12b4a530",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
