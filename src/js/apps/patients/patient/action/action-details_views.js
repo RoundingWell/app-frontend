@@ -122,12 +122,12 @@ const DetailsView = View.extend({
   },
   onFocusInput() {
     this.hasDetailsChange = false;
-    this.$el.addClass('is-editing');
+    this.el.classList.add('is-editing');
   },
   onFocusoutInput() {
     if (this.hasDetailsChange) return;
 
-    this.$el.removeClass('is-editing');
+    this.el.classList.remove('is-editing');
   },
   onWatchChange(text) {
     this.ui.input.val(text);

@@ -128,8 +128,11 @@ A `SubRouterApp` separates "record the route" from "dispatch the route":
   the child before starting it, so it is available throughout preparation and
   startup. Read route data via `getCurrentRoute().eventArgs`;
   do **not** read `currentRoute` from startup options.
-- `startRoute(routeContext)` — records the newest route; dispatches immediately only
-  if already running. While loading or stopped it just stores (latest wins).
+- `startRoute(routeContext, options)` — records the newest route and passes options
+  to the idempotent Application `start()`. A stable active run dispatches the route;
+  while loading or stopping, the newest route waits for successful activation and
+  is dispatched once by that run's `onStart()`. A later stop invalidates pending
+  route dispatch, so route and stop ordering remains latest-intent-wins.
 - `startCurrentRoute()` — synchronously dispatches the current route to its
   `routeActions` handler. **Subclasses call this from `onStart()` after building
   their shell.**

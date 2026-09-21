@@ -8,17 +8,6 @@ import { addError } from 'js/datadog';
 import App from 'js/base/app';
 import fetcher, { handleJSON } from 'js/base/fetch';
 
-const AdderApp = App.extend({
-  prepareStart({ model, dataParams }, { signal }) {
-    return model.fetch({ data: dataParams, signal });
-  },
-  onStart(app, { model, collection }) {
-    collection.add(model);
-    Radio.request('ws', 'add', model);
-    this.destroy();
-  },
-});
-
 export default App.extend({
   HEART_BEAT_INTERVAL: 50000,
   RECONNECT_BASE_DELAY: 1000,
@@ -176,7 +165,7 @@ export default App.extend({
     this.startReconnect();
   },
 
-  onBeforeStop() {
+  onStop() {
     this.stopHeartbeat();
     this.stopReconnect();
   },
@@ -196,33 +185,50 @@ export default App.extend({
 
     if (previous) {
       app.stopListening(channel, eventName, previous.onMessage);
-      app.off('before:stop', previous.onStop);
+      app.off('stop', previous.onStop);
+      previous.abort();
     }
+
+    const requests = new Map();
+    const abort = () => {
+      requests.forEach(controller => controller.abort());
+      requests.clear();
+    };
 
     const onMessage = (data, model) => {
       if (collection.get(model) || data.category === 'ResourceDeleted') return;
 
-      const appName = `${ model.type }-${ model.id }`;
-
       if (!app.isRunning()) return;
 
-      const adderApp = app.getChildApp(appName)
-        || app.addChildApp(appName, new AdderApp());
+      const requestId = `${ model.type }-${ model.id }`;
+      if (requests.has(requestId)) return;
 
-      if (adderApp.isRunning()) return;
+      const controller = new AbortController();
+      requests.set(requestId, controller);
 
-      adderApp.start({ model, collection, dataParams }).catch(addError);
+      Promise.resolve(model.fetch({ data: dataParams, signal: controller.signal }))
+        .then(() => {
+          if (controller.signal.aborted || !app.isRunning()) return;
+
+          collection.add(model);
+          Radio.request('ws', 'add', model);
+        })
+        .catch(error => {
+          if (!controller.signal.aborted) addError(error);
+        })
+        .finally(() => requests.delete(requestId));
     };
     const onStop = () => {
+      abort();
       app.stopListening(channel, eventName, onMessage);
       subscriptions.delete(type);
       if (!subscriptions.size) this.managedAdds.delete(app);
     };
 
-    subscriptions.set(type, { onMessage, onStop });
+    subscriptions.set(type, { abort, onMessage, onStop });
     this.managedAdds.set(app, subscriptions);
     app.listenTo(channel, eventName, onMessage);
-    app.once('before:stop', onStop);
+    app.once('stop', onStop);
   },
 
   onMessage(event) {

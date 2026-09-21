@@ -139,7 +139,7 @@
     "idb": "^7.1.1",
     "jquery": "^4.0.0",
     "libphonenumber-js": "^1.10.38",
-    "marionette": "5.0.0-beta.5",
+    "marionette": "file:vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz",
     "morphdom": "2.7.8",
     "sortablejs": "^1.14.0",
     "underscore": "^1.13.1",

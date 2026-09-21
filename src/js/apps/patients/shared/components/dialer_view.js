@@ -16,10 +16,11 @@ export default View.extend({
   tagName: 'button',
   className: 'button button--compact dialer-component__button',
   attributes() {
-    return {
-      disabled: this.getOption('isDisabled'),
-      type: 'button',
-    };
+    const attributes = { type: 'button' };
+
+    if (this.getOption('isDisabled')) attributes.disabled = 'disabled';
+
+    return attributes;
   },
   template: hbs`{{far "phone"}}<span>{{ @intl.patients.shared.components.dialerView.defaultText }}</span>`,
   triggers: {

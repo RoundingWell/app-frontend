@@ -107,7 +107,7 @@ context('SubRouterApp', function() {
       await app.start();
       expect(app.calls).to.deep.equal([]);
 
-      app.startRoute(workflow);
+      await app.startRoute(workflow);
       expect(app.calls).to.deep.equal([['workflow', 'p1']]);
     });
   });
@@ -119,11 +119,11 @@ context('SubRouterApp', function() {
       const starting = app.start();
 
       // still loading: nothing dispatched
-      app.startRoute(action);
+      const routing = app.startRoute(action);
       expect(app.calls).to.deep.equal([]);
 
       app.loaded.resolve();
-      await starting;
+      await Promise.all([starting, routing]);
 
       expect(app.calls).to.deep.equal([['action', 'p1', 'a1']]);
     });
@@ -160,6 +160,46 @@ context('SubRouterApp', function() {
       expect(app.getCurrentRoute()).to.deep.equal(workflow);
       // re-dispatched on restart
       expect(app.calls).to.deep.equal([['workflow', 'p1'], ['workflow', 'p1']]);
+    });
+
+    specify('dispatches a route after a pending stop is superseded', async function() {
+      const PendingApp = SyncApp.extend({
+        prepareStop() {
+          return this.stopReadiness.promise;
+        },
+      });
+      app = new PendingApp();
+      app.stopReadiness = deferred();
+      app.setCurrentRoute(workflow);
+      await app.start();
+
+      const stopping = app.stop();
+      const routing = app.startRoute(action);
+
+      expect(app.calls).to.deep.equal([['workflow', 'p1']]);
+
+      app.stopReadiness.resolve();
+      expect(await stopping).to.equal(false);
+      await routing;
+
+      expect(app.calls).to.deep.equal([
+        ['workflow', 'p1'],
+        ['action', 'p1', 'a1'],
+      ]);
+    });
+
+    specify('does not dispatch a route overtaken by a later stop', async function() {
+      app = new SyncApp();
+      app.setCurrentRoute(workflow);
+      await app.start();
+
+      const routing = app.startRoute(action);
+      const stopping = app.stop();
+
+      await Promise.all([routing, stopping]);
+
+      expect(app.calls).to.deep.equal([['workflow', 'p1']]);
+      expect(app.isRunning()).to.be.false;
     });
   });
 

@@ -13,6 +13,16 @@ const clientKey = 'clientKey';
 const workspace = 'workspaceId';
 const endpoint = 'ws://cypress-websocket/ws';
 
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Cypress.Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, reject, resolve };
+}
+
 function getWsResponse(token, options = {}) {
   return {
     statusCode: 200,
@@ -209,78 +219,130 @@ context('WS Service', function() {
       });
   });
 
-  specify('Replacing managed additions and stopping with the owner', function() {
-    const channel = Radio.channel('ws');
-    const firstCollection = new Backbone.Collection();
-    const collection = new Backbone.Collection();
-    const model = new Backbone.Model({ id: 'flow-id' });
-    const app = new Backbone.Model();
-    const start = cy.stub().resolves(true);
+  specify('Replaces managed additions and keeps them through pending stop', function() {
+    cy.then(async() => {
+      const channel = Radio.channel('ws');
+      const firstCollection = new Backbone.Collection();
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'flow-id' });
+      const pendingModel = new Backbone.Model({ id: 'pending-flow-id' });
+      const stoppedModel = new Backbone.Model({ id: 'stopped-flow-id' });
+      const app = new Backbone.Model();
 
-    model.type = 'flows';
-    app.isRunning = cy.stub().returns(false);
-    app.getChildApp = cy.stub();
-    app.addChildApp = cy.stub().returns({ start, isRunning: () => false });
+      model.type = 'flows';
+      pendingModel.type = 'flows';
+      stoppedModel.type = 'flows';
+      app.isRunning = cy.stub().returns(true);
+      cy.stub(model, 'fetch').resolves(model);
+      cy.stub(pendingModel, 'fetch').resolves(pendingModel);
+      cy.stub(stoppedModel, 'fetch').resolves(stoppedModel);
 
-    service.manageAdd(app, firstCollection, 'flows');
-    service.manageAdd(app, collection, 'flows');
-    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+      service.manageAdd(app, firstCollection, 'flows');
+      service.manageAdd(app, collection, 'flows');
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+      await Cypress.Promise.resolve();
 
-    expect(app.addChildApp).to.not.be.called;
+      expect(firstCollection).to.have.length(0);
+      expect(collection.get(model)).to.equal(model);
 
-    app.isRunning.returns(true);
-    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+      app.trigger('before:stop');
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, pendingModel);
+      await Cypress.Promise.resolve();
 
-    expect(app.addChildApp).to.be.calledOnce;
-    expect(start).to.be.calledOnceWith({ model, collection, dataParams: undefined });
+      expect(collection.get(pendingModel)).to.equal(pendingModel);
 
-    app.getChildApp.returns({ isRunning: () => true });
-    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
-    expect(app.addChildApp).to.be.calledOnce;
+      app.trigger('stop');
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, stoppedModel);
+      await Cypress.Promise.resolve();
 
-    app.trigger('before:stop');
-    app.getChildApp.returns(undefined);
-    channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
-    expect(app.addChildApp).to.be.calledOnce;
+      expect(stoppedModel.fetch).to.not.be.called;
+    });
   });
 
-  specify('Restarts a managed addition canceled with its owner', function() {
+  specify('Aborts a pending managed addition only after stop succeeds', function() {
     cy.then(async() => {
       const channel = Radio.channel('ws');
       const collection = new Backbone.Collection();
       const model = new Backbone.Model({ id: 'flow-id' });
-      const app = new App();
-      let resolveFetch;
-      const firstFetch = new Promise(resolve => {
-        resolveFetch = resolve;
+      const fetch = deferred();
+      const stopPermission = deferred();
+      const Owner = App.extend({
+        prepareStop() {
+          return stopPermission.promise;
+        },
       });
+      const app = new Owner();
 
       model.type = 'flows';
-      const fetch = cy.stub(model, 'fetch');
-      fetch.onFirstCall().returns(firstFetch);
-      fetch.onSecondCall().resolves(model);
+      cy.stub(model, 'fetch').returns(fetch.promise);
 
       await app.start();
       service.manageAdd(app, collection, 'flows');
-      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
-
-      expect(app.hasChildApp('flows-flow-id')).to.be.true;
 
       const stopping = app.stop();
-      resolveFetch(model);
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+      expect(model.fetch).to.be.calledOnce;
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
+
+      stopPermission.resolve();
       await stopping;
 
-      expect(app.hasChildApp('flows-flow-id')).to.be.true;
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.true;
+
+      fetch.resolve(model);
+      await Cypress.Promise.resolve();
+
+      expect(collection.get(model)).to.be.undefined;
+
+      await app.destroy();
+    });
+  });
+
+  specify('Completes a managed addition when stop is rejected', function() {
+    cy.then(async() => {
+      const channel = Radio.channel('ws');
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'flow-id' });
+      const fetch = deferred();
+      const stopPermission = deferred();
+      const Owner = App.extend({
+        prepareStop() {
+          return stopPermission.promise;
+        },
+      });
+      const app = new Owner();
+
+      model.type = 'flows';
+      cy.stub(model, 'fetch').returns(fetch.promise);
 
       await app.start();
       service.manageAdd(app, collection, 'flows');
-      const added = new Promise(resolve => collection.once('add', resolve));
-      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
-      await added;
 
-      expect(fetch).to.be.calledTwice;
+      const stopping = app.stop();
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+      expect(model.fetch).to.be.calledOnce;
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
+
+      stopPermission.reject(new Error('Keep the current run'));
+
+      let stopError;
+      try {
+        await stopping;
+      } catch(error) {
+        stopError = error;
+      }
+      expect(stopError.message).to.equal('Keep the current run');
+      expect(app.isRunning()).to.be.true;
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
+
+      fetch.resolve(model);
+      await Cypress.Promise.resolve();
+
       expect(collection.get(model)).to.equal(model);
 
+      app.prepareStop = undefined;
       await app.destroy();
     });
   });
@@ -315,8 +377,8 @@ context('WS Service', function() {
       })
       .get('@sendData')
       .should('be.calledOnce')
-      .then(() => {
-        service.stop();
+      .then(async() => {
+        await service.stop();
         service.sendData.resetHistory();
       });
 

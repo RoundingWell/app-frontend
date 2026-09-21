@@ -17,18 +17,21 @@ const Entity = BaseEntity.extend({
     'fetch:actions:collection:byPatient': 'fetchActionsByPatient',
     'fetch:actions:collection:byFlow': 'fetchActionsByFlow',
   },
-  fetchAction(id) {
-    return this.fetchModel(id, { data: { include: ACTION_INCLUDE } });
+  fetchAction(id, options = {}) {
+    const data = { ...options.data, include: ACTION_INCLUDE };
+
+    return this.fetchModel(id, { ...options, data });
   },
-  fetchActionWithResponses(id) {
+  fetchActionWithResponses(id, options = {}) {
     const data = {
+      ...options.data,
       include: [ACTION_INCLUDE, 'form-responses'].join(),
       fields: {
         'form-responses': ['status', 'updated_at', 'editor'],
       },
     };
 
-    return this.fetchModel(id, { data });
+    return this.fetchModel(id, { ...options, data });
   },
   fetchActionsByPatient({ patientId, filter }, options = {}) {
     const data = {

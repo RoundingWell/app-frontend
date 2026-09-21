@@ -23,26 +23,31 @@ import { CommentFormView, PostCommentView } from 'js/apps/patients/shared/commen
 import './action.scss';
 
 const CreatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "created")) name = name team = team}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const ClinicianAssignedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "clinicianAssigned")) name = name team = team to_name = to_clinician}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const ActionCopiedFromProgramActionTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "actionCopiedFromProgram")) name = name team = team program = program source = source}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const DetailsUpdatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "detailsUpdated")) name = name team = team}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const DueDateUpdatedTemplate = hbs`
+  {{far icon}}
   {{#unless value}}
   {{formatHTMLMessage (intlGet (getI18nSource "dueDateCleared")) name = name team = team }}
   {{else}}
@@ -52,6 +57,7 @@ const DueDateUpdatedTemplate = hbs`
 `;
 
 const DueTimeUpdatedTemplate = hbs`
+  {{far icon}}
   {{#unless value}}
   {{formatHTMLMessage (intlGet (getI18nSource "dueTimeCleared")) name = name team = team }}
   {{else}}
@@ -61,6 +67,7 @@ const DueTimeUpdatedTemplate = hbs`
 `;
 
 const DurationUpdatedTemplate = hbs`
+  {{far icon}}
   {{#unless value}}
   {{formatHTMLMessage (intlGet (getI18nSource "durationCleared")) name = name team = team}}
   {{else}}
@@ -70,11 +77,13 @@ const DurationUpdatedTemplate = hbs`
 `;
 
 const FormUpdatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "formUpdated")) name = name team = team form = form}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const FormRespondedTemplate = hbs`
+  {{far icon}}
   {{#if _editor}}
     {{formatHTMLMessage (intlGet (getI18nSource "formResponded")) name = name team = team form = form}}
   {{ else }}
@@ -84,31 +93,34 @@ const FormRespondedTemplate = hbs`
 `;
 
 const NameUpdatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "nameUpdated")) name = name team = team to_name = value from_name = previous}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const TeamAssignedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "teamAssigned")) name = name team = team to_team = to_team}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const StateUpdatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "stateUpdated")) name = name team = team to_state = to_state}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const SharingCanceledTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "sharingCanceled")) name = name team = team}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const SharingSentTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "sharingSent")) recipient = recipient form = form}}
   <span class="patient-action__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
-
-const ActivityIconTemplate = hbs`{{far icon}}`;
 
 const ACTIVITY_ICONS = {
   ActionClinicianAssigned: 'circle-user',
@@ -271,10 +283,6 @@ const ActivityView = View.extend({
 
     return Templates[type];
   },
-  onRender() {
-    const icon = ACTIVITY_ICONS[this.model.get('event_type')];
-    this.$el.prepend(renderTemplate(ActivityIconTemplate, { icon }));
-  },
   _getModelName(model) {
     return model ? model.get('name') : null;
   },
@@ -290,6 +298,7 @@ const ActivityView = View.extend({
     const sourceI18n = `patients.patient.action.activityViews.${ this.model.get('source') }`;
 
     return {
+      icon: ACTIVITY_ICONS[this.model.get('event_type')],
       recipient: recipient ? `${ recipient.get('first_name') } ${ recipient.get('last_name') }` : null,
       name: this._getModelName(editor),
       team: this._getModelName(editorTeam),

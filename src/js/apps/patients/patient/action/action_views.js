@@ -19,7 +19,7 @@ import './action.scss';
 
 const FocusablePreloadRegion = PreloadRegion.extend({
   focus() {
-    const el = this.getEl(this.el)[0];
+    const el = this.getEl(this.el);
 
     el.scrollIntoView({ block: 'start' });
     el.focus({ preventScroll: true });
@@ -105,6 +105,9 @@ const LayoutView = View.extend({
   },
   scrollViewportTo(options) {
     this.el.scrollTo(options);
+  },
+  setFormExpanded(isExpanded) {
+    this.el.classList.toggle('patient-action--form-expanded', isExpanded);
   },
 });
 

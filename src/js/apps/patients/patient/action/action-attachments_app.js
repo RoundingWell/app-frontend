@@ -8,19 +8,19 @@ import intl from 'js/i18n';
 import { AttachmentsView } from 'js/apps/patients/patient/action/action-attachments_views';
 
 export default App.extend({
-  beforeStart({ action }) {
-    return Radio.request('entities', 'fetch:files:collection:byAction', action.id);
+  prepareStart({ action }, { signal }) {
+    return Radio.request('entities', 'fetch:files:collection:byAction', action.id, { signal });
   },
-  onStart({ action, focusOnLoad }, attachments) {
+  onStart(app, { action, focusOnLoad }, attachments) {
     this.action = action;
     this.attachments = attachments;
-    const flow = action.getFlow();
+    this.flow = action.getFlow();
 
     this.listenTo(action, {
       'change:_owner': this.showAttachments,
       'ws:add:attachment': this.onWsAddAttachment,
     });
-    if (flow) this.listenTo(flow, 'change:_state', this.showAttachments);
+    if (this.flow) this.listenTo(this.flow, 'change:_state', this.showAttachments);
 
     this.showAttachments();
     this.subscribe();
@@ -30,10 +30,12 @@ export default App.extend({
   focus() {
     this.getRegion().focus();
   },
-  onBeforeStop() {
+  onStop() {
     if (!this.attachments) return;
 
     Radio.request('ws', 'unsubscribe', this.attachments.models);
+    this.stopListening(this.action);
+    if (this.flow) this.stopListening(this.flow);
   },
   onWsAddAttachment(model) {
     this.attachments.add(model);
