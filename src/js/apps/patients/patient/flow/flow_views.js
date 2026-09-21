@@ -215,10 +215,10 @@ const ActionItemView = View.extend({
     form: '[data-form-region]',
   },
   events: {
-    'click .js-no-click': stopEventPropagation,
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-no-click': stopEventPropagation,
     'click .js-action-surface': 'onClickSurface',
   },
   navigateToAction(entryTarget) {
@@ -257,7 +257,7 @@ const ActionItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   showCheck() {
     if (!this.canEdit) return;

@@ -58,7 +58,7 @@ export default View.extend({
     }
 
     this._uiListeners = [
-      ['pointerenter', bind(this.showTooltip, this)],
+      ['pointerover', bind(this.onPointerOver, this)],
       ['mouseleave', bind(this.hideTooltip, this)],
       ['pointerdown', bind(this.showTooltip, this)],
       ['focus', bind(this.showTooltip, this)],
@@ -68,6 +68,11 @@ export default View.extend({
     this._uiListeners.forEach(([eventName, listener]) => {
       ui.addEventListener(eventName, listener);
     });
+  },
+  onPointerOver(event) {
+    if (event.relatedTarget && event.currentTarget.contains(event.relatedTarget)) return;
+
+    this.showTooltip();
   },
   showTooltip() {
     clearTimeout(this.delayTimeout);

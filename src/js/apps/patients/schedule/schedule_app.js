@@ -206,7 +206,11 @@ const ScheduleApp = App.extend({
     this.getState().clearSelected();
 
     const app = this.getChildApp('bulkEditActions');
-    if (app) app.getView().el.hidden = true;
+    if (app) {
+      app.resetChanges();
+      const view = app.getView();
+      if (view) view.el.hidden = true;
+    }
 
     return this._canRefresh;
   },
@@ -350,17 +354,7 @@ const ScheduleApp = App.extend({
 
     if (this._bulkEditSuspended) return;
 
-    const stop = this.removeChildApp('bulkEditActions');
-    this._bulkEditStop = stop;
-    stop.then(
-      () => {
-        if (this._bulkEditStop === stop) this._bulkEditStop = null;
-      },
-      error => {
-        if (this._bulkEditStop === stop) this._bulkEditStop = null;
-        addError(error);
-      },
-    );
+    this.getChildApp('bulkEditActions')?.stop().catch(addError);
   },
   onClickBulkCancel() {
     this.getState().clearSelected();
@@ -368,69 +362,53 @@ const ScheduleApp = App.extend({
   showBulkEdit() {
     const currentApp = this.getChildApp('bulkEditActions');
 
-    if (currentApp && !this._bulkEditStop) {
-      this._bulkEditSuspended = false;
-      currentApp.getView().el.hidden = false;
+    this._bulkEditSuspended = false;
+    const currentView = currentApp?.getView();
+    if (currentView) currentView.el.hidden = false;
 
-      if (this._bulkEditStart) {
-        this._bulkEditStart.then(started => {
-          if (started && this.getChildApp('bulkEditActions') === currentApp) {
-            currentApp.updateCollection(this.selected);
-          }
-        }, addError);
-      } else {
-        currentApp.updateCollection(this.selected);
-      }
-      return;
-    }
-
-    if (this._bulkEditStop) {
-      this._bulkEditStop.then(() => this.showBulkEdit(), addError);
-      return;
-    }
-
-    const app = this.addChildApp('bulkEditActions', new BulkEditActionsApp({
+    const app = currentApp || this.addChildApp('bulkEditActions', new BulkEditActionsApp({
       stateOptions: { collection: this.selected },
     }));
 
-    this.stopListening(app);
-    this.listenTo(app, {
-      'cancel': this.onClickBulkCancel,
-      'applyOwner'(owner) {
-        this.selected.applyOwner(owner);
-      },
-      'save'(saveData) {
-        const selected = this.selected;
-        const itemCount = selected.length;
-        const shouldRefresh = saveData.due_date && selected.some(action => {
-          return action.get('due_date') !== saveData.due_date;
-        });
-
-        selected.save(saveData)
-          .then(() => {
-            Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));
-
-            if (shouldRefresh) {
-              this.refreshList();
-              return;
-            }
-
-            this.getState().clearSelected();
-          })
-          .catch(() => {
-            Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.bulkEditFailure);
-            this.refreshList();
+    if (!currentApp) {
+      this.listenTo(app, {
+        'cancel': this.onClickBulkCancel,
+        'applyOwner'(owner) {
+          this.selected.applyOwner(owner);
+        },
+        'save'(saveData) {
+          const selected = this.selected;
+          const itemCount = selected.length;
+          const shouldRefresh = saveData.due_date && selected.some(action => {
+            return action.get('due_date') !== saveData.due_date;
           });
-      },
-    });
 
-    const start = app.start({ region: this.getSelectionBarRegion('bulkEdit') });
-    this._bulkEditStart = start;
-    start
-      .catch(addError)
-      .finally(() => {
-        if (this._bulkEditStart === start) this._bulkEditStart = null;
+          selected.save(saveData)
+            .then(() => {
+              app.resetChanges();
+              Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));
+
+              if (shouldRefresh) {
+                this.refreshList();
+                return;
+              }
+
+              this.getState().clearSelected();
+            })
+            .catch(() => {
+              app.resetChanges();
+              Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.bulkEditFailure);
+              this.refreshList();
+            });
+        },
       });
+    }
+
+    app.updateCollection(this.selected);
+    app.start({
+      collection: this.selected,
+      region: this.getSelectionBarRegion('bulkEdit'),
+    }).catch(addError);
   },
   showDisabledSelectAll() {
     this.showSelectionBarChildView('selectAll', new SelectAllView({ isDisabled: true }));

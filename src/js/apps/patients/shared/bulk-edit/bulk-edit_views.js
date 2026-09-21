@@ -111,7 +111,10 @@ const OwnerScopeComponent = Droplist.extend({
     }));
   },
   syncDisabled() {
-    this.getState().set('isDisabled', this.bulkEditModel.get('ownerMulti') || this.bulkEditModel.get('isSaving'));
+    const isDisabled = !!(this.bulkEditModel.get('ownerMulti') || this.bulkEditModel.get('isSaving'));
+
+    this.getState().set({ isDisabled });
+    this.syncStateAttributes();
   },
   onChangeSelected(selected) {
     this.bulkEditModel.set('applyOwner', selected.get('applyOwner'));

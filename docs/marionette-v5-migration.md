@@ -21,7 +21,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `edb201522a97f1f66ec9e675dc3497046d6678cc`.
+  `97a8d537e24c8f0aa96c0435b34cea25e530e62e`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -111,13 +111,42 @@
   the beta.4 duplicate-Region and remove/re-add workarounds are removed. Static,
   no-argument children use `childApps`; dynamically imported, lazy, configured,
   and route-created children retain explicit registration.
-- Active: PR #1803 moves the patient Action/Form page subtree from removed
+- Completed: PR #1803 moved the patient Action/Form page subtree from removed
   Toolkit readiness, state helpers, named Application Regions, and
   `startChildApp` to candidate Application preparation, active-run state-event
   delivery, owned Backbone state, root View Regions, and explicit child
-  activation. Existing E2E specifications remain unchanged.
+  activation. Existing E2E specifications remained unchanged.
+- Completed: PR #1804 centralized RouterApp and SubRouterApp child selection.
+  A previous child remains selected until teardown succeeds, only the latest
+  route intent may activate a replacement, and failed or canceled startup does
+  not abandon live descendants. It was merged by a human.
+- Active: PR #1805 moves the Patient Flow page and its Activity child from removed
+  Toolkit readiness and child-control methods to Application preparation,
+  app-owned loading roots, explicit reusable-child activation, and a dynamic
+  bulk-edit child that is registered once and reactivated with updated state.
+  Existing E2E specifications remain unchanged.
 
 ## Validation
+
+- At the PR #1804 migration base, a clean `npm ci` and test-mode build pass.
+  The unchanged Patient Flow E2E spec runs 29 tests: 5 Action-page and error
+  boundary tests pass, while 24 Flow-page tests fail before the Flow data
+  requests because that page still uses the removed lifecycle contract. This
+  is the baseline for the active Flow step, not a regression from its changes.
+- After the Flow migration, the unchanged Patient Flow E2E spec has 27 passing
+  tests. The two remaining failures expect route-action rejections to surface
+  as browser `uncaught:exception` events, while PR #1804 intentionally observes
+  them through `route:error`. Resolving that acceptance-contract conflict would
+  require an E2E expectation change or reversing the merged routing policy, so
+  Cypress remains deferred for human direction.
+- Native delegated events run in declaration order. Registering a broad
+  `.js-no-click` guard before the Flow card's attachment and comment handlers
+  suppressed those specific actions; ordering the specific handlers first
+  restores the unchanged route-switching E2E without a `closest()` workaround.
+- The focused Tooltip component spec is blocked before mount by the existing
+  component bootstrap harness calling `getAppName` without an Application.
+  The unchanged Flow E2E covers the native `pointerover` tooltip path and now
+  passes that scenario.
 
 - Runtime-cutover `npm ci` passed and the resolved top-level packages are
   `marionette@5.0.0-beta.2`, `@mnjs/adapters@5.0.0-beta.2`, and
@@ -586,3 +615,17 @@
   exact-candidate RouterApp, SubRouterApp, and WebSocket component specs pass
   54/54, including both stop/route orderings, rejected stop permission, late
   fetch completion, and successful-stop cancellation.
+- A first pass at retained bulk-edit children added controller-owned
+  `_bulkEditStart` and `_bulkEditStop` promises. Beta.5 already arbitrates
+  superseding starts and stops, so Flow, Schedule, and Worklist now register
+  each bulk-edit child once, use start/stop only for activation, and reset its
+  run-local state after a successful stop. The duplicate controller lifecycle
+  state was an agent integration mistake, not a Marionette limitation.
+- Follow-up review found two remaining consequences of retaining those
+  children: a repeated selection during pending startup reused the first start
+  options, and Schedule refresh hid the child without completing a stop. Each
+  controller now updates the live collection before its idempotent start, while
+  Schedule explicitly resets the suspended edit session while preserving the
+  displayed toolbar root across a list refresh. Collection changes no longer
+  clear `isSaving`, which keeps an in-flight save disabled until its owning
+  operation completes.

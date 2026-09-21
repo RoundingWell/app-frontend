@@ -12,8 +12,8 @@ const Entity = BaseEntity.extend({
   fetchActionEvents(actionId, options = {}) {
     return this.fetchCollection({ ...options, url: `/api/actions/${ actionId }/activity` });
   },
-  fetchFlowEvents(flowId) {
-    return this.fetchCollection({ url: `/api/flows/${ flowId }/activity` });
+  fetchFlowEvents(flowId, options = {}) {
+    return this.fetchCollection({ ...options, url: `/api/flows/${ flowId }/activity` });
   },
 });
 

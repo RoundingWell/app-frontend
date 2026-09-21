@@ -42,11 +42,11 @@ const Entity = BaseEntity.extend({
 
     return this.fetchCollection({ ...options, url, data });
   },
-  fetchActionsByFlow(flowId) {
-    const data = { include: ACTION_INCLUDE };
+  fetchActionsByFlow(flowId, options = {}) {
+    const data = { ...options.data, include: ACTION_INCLUDE };
     const url = `/api/flows/${ flowId }/actions`;
 
-    return this.fetchCollection({ url, data });
+    return this.fetchCollection({ ...options, url, data });
   },
 });
 

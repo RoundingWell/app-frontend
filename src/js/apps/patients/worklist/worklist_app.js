@@ -279,9 +279,8 @@ const WorklistApp = App.extend({
     }
   },
   async stopBulkEditForRefresh() {
-    this.stopBulkEdit();
     try {
-      await this._bulkEditStop;
+      await this.stopBulkEdit();
       return this._canRefresh;
     } catch {
       return false;
@@ -455,83 +454,56 @@ const WorklistApp = App.extend({
       return;
     }
 
-    this.stopBulkEdit();
+    this.stopBulkEdit().catch(addError);
   },
   onClickBulkCancel() {
     this.getState().clearSelected();
   },
   stopBulkEdit() {
-    const stop = Promise.all([
-      this.removeChildApp('bulkEditActions'),
-      this.removeChildApp('bulkEditFlows'),
+    return Promise.all([
+      this.getChildApp('bulkEditActions')?.stop(),
+      this.getChildApp('bulkEditFlows')?.stop(),
     ]);
-    this._bulkEditStop = stop;
-    stop.then(
-      () => {
-        if (this._bulkEditStop === stop) this._bulkEditStop = null;
-      },
-      error => {
-        if (this._bulkEditStop === stop) this._bulkEditStop = null;
-        addError(error);
-      },
-    );
   },
   showBulkEdit() {
     const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
     const AppClass = this.getState().isFlowType() ? BulkEditFlowsApp : BulkEditActionsApp;
     const currentApp = this.getChildApp(appName);
 
-    if (currentApp && !this._bulkEditStop) {
-      if (this._bulkEditStart) {
-        this._bulkEditStart.then(started => {
-          if (started && this.getChildApp(appName) === currentApp) {
-            currentApp.updateCollection(this.selected);
-          }
-        }, addError);
-      } else {
-        currentApp.updateCollection(this.selected);
-      }
-      return;
-    }
-
-    if (this._bulkEditStop) {
-      this._bulkEditStop.then(() => this.showBulkEdit(), addError);
-      return;
-    }
-
-    const app = this.addChildApp(appName, new AppClass({
+    const app = currentApp || this.addChildApp(appName, new AppClass({
       stateOptions: { collection: this.selected },
     }));
 
-    this.stopListening(app);
-    this.listenTo(app, {
-      'cancel': this.onClickBulkCancel,
-      'applyOwner'(owner) {
-        this.selected.applyOwner(owner);
-      },
-      'save'(saveData) {
-        const itemCount = this.selected.length;
+    if (!currentApp) {
+      this.listenTo(app, {
+        'cancel': this.onClickBulkCancel,
+        'applyOwner'(owner) {
+          this.selected.applyOwner(owner);
+        },
+        'save'(saveData) {
+          const itemCount = this.selected.length;
 
-        this.selected.save(saveData)
-          .then(() => {
-            this.showUpdateSuccess(itemCount);
-            this.getState().clearSelected();
-          })
-          .catch(() => {
-            Radio.request('alert', 'show:error', intl.patients.worklist.worklistApp.bulkEditFailure);
-            this.getState().clearSelected();
-            this.refreshList();
-          });
-      },
-    });
-
-    const start = app.start({ region: this.getSelectionBarRegion('bulkEdit') });
-    this._bulkEditStart = start;
-    start
-      .catch(addError)
-      .finally(() => {
-        if (this._bulkEditStart === start) this._bulkEditStart = null;
+          this.selected.save(saveData)
+            .then(() => {
+              app.resetChanges();
+              this.showUpdateSuccess(itemCount);
+              this.getState().clearSelected();
+            })
+            .catch(() => {
+              app.resetChanges();
+              Radio.request('alert', 'show:error', intl.patients.worklist.worklistApp.bulkEditFailure);
+              this.getState().clearSelected();
+              this.refreshList();
+            });
+        },
       });
+    }
+
+    app.updateCollection(this.selected);
+    app.start({
+      collection: this.selected,
+      region: this.getSelectionBarRegion('bulkEdit'),
+    }).catch(addError);
   },
   showUpdateSuccess(itemCount) {
     if (this.getState().isFlowType()) {
