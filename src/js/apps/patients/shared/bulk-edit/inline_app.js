@@ -4,6 +4,9 @@ export default App.extend({
   createState({ stateOptions }) {
     return new this.StateModel(stateOptions);
   },
+  onBeforeStart(app, { collection } = {}) {
+    if (collection) this.updateCollection(collection);
+  },
   onStart() {
     const view = new this.ViewClass({
       model: this.getState(),
@@ -16,9 +19,23 @@ export default App.extend({
 
     this.showView(view);
   },
+  onStop() {
+    this.getState().clear({ silent: true });
+  },
+  resetChanges() {
+    this.getState().set({
+      applyOwner: false,
+      isSaving: false,
+      stateChanged: false,
+      ownerChanged: false,
+      dateChanged: false,
+      timeChanged: false,
+      durationChanged: false,
+    });
+  },
   updateCollection(collection) {
     this.getState().updateCollection(collection);
-    this.getView().updateCollection();
+    this.getView()?.updateCollection();
   },
   onClickCancel() {
     this.trigger('cancel');

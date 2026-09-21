@@ -240,4 +240,40 @@ context('Tooltip', function() {
     cy.get('.first').trigger('pointerover');
     cy.get('.tooltip').contains('First tooltip');
   });
+
+  specify('Retains the delay across pointer transitions within a raw anchor', function() {
+    const RawAnchorView = View.extend({
+      template: hbs`<button class="raw-anchor">Raw anchor <span class="icon">Icon</span></button>`,
+      onRender() {
+        new Tooltip({
+          anchor: this.el.querySelector('.raw-anchor'),
+          delay: 200,
+          message: 'Raw anchor tooltip',
+          shouldDelay: true,
+          uiView: this,
+        });
+      },
+    });
+
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new RawAnchorView();
+    });
+    cy.clock();
+
+    cy.get('.raw-anchor').then(([anchor]) => {
+      const { PointerEvent } = anchor.ownerDocument.defaultView;
+
+      anchor.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+      cy.tick(150);
+
+      anchor.querySelector('.icon').dispatchEvent(new PointerEvent('pointerover', {
+        bubbles: true,
+        relatedTarget: anchor,
+      }));
+      cy.tick(50);
+    });
+
+    cy.get('.tooltip').contains('Raw anchor tooltip');
+  });
 });
