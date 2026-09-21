@@ -136,12 +136,12 @@ const ActionItemView = View.extend({
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    this.getUI('patient')
-      .toggleClass('patient-list__patient--selected', isSelected)
-      .attr('aria-expanded', String(isSelected));
+    const [patient] = this.getUI('patient');
+    patient.classList.toggle('patient-list__patient--selected', isSelected);
+    patient.setAttribute('aria-expanded', String(isSelected));
   },
   focusPatient() {
-    this.getUI('patient').trigger('focus');
+    this.getUI('patient')[0].focus();
   },
   showCheck() {
     if (!this.canEdit) return;

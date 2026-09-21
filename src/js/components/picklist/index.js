@@ -234,11 +234,12 @@ const Picklist = CollectionView.extend({
     },
   },
   onRenderChildren() {
-    this.$('.js-picklist-item').removeClass('is-highlighted');
+    const items = this.$('.js-picklist-item');
+    items.forEach(item => item.classList.remove('is-highlighted'));
 
     if (!this.model.get('query')) return;
 
-    this.$('.js-picklist-item').first().addClass('is-highlighted');
+    items[0]?.classList.add('is-highlighted');
   },
   onWatchChange(query) {
     this.model.set('query', query);

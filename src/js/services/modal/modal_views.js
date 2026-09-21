@@ -108,7 +108,7 @@ const ModalView = View.extend({
     }));
   },
   disableSubmit(disable = true) {
-    this.ui.submit.prop('disabled', disable);
+    this.ui.submit[0].disabled = disable;
   },
   startPreloader() {
     this.getRegion('body').startPreloader({ variant: 'generic' });

@@ -189,8 +189,8 @@ const CustomFiltersView = CollectionView.extend({
   updateCollapsed() {
     const isExpanded = this.state.get('customFiltersExpanded');
 
-    this.getUI('customFiltersList').prop('hidden', !isExpanded);
-    this.getUI('sectionButton').attr('aria-expanded', String(isExpanded));
+    this.getUI('customFiltersList')[0].hidden = !isExpanded;
+    this.getUI('sectionButton')[0].setAttribute('aria-expanded', String(isExpanded));
   },
   onClickToggle() {
     this.state.set('customFiltersExpanded', !this.state.get('customFiltersExpanded'));
@@ -314,7 +314,7 @@ const StateFiltersView = CollectionView.extend({
   updateCollapsed() {
     const isExpanded = this.model.get(this.expandedState);
 
-    this.getUI('sectionButton').attr('aria-expanded', String(isExpanded));
+    this.getUI('sectionButton')[0].setAttribute('aria-expanded', String(isExpanded));
     this.el.classList.toggle('is-collapsed', !isExpanded);
   },
   expandSection() {
@@ -395,7 +395,7 @@ const PanelView = View.extend({
   },
   toggleCollapsed() {
     const isCollapsed = !this.isDrawer && this.model.get('sidebarCollapsed');
-    this.getUI('body').prop('hidden', isCollapsed);
+    this.getUI('body')[0].hidden = isCollapsed;
     this.el.classList.toggle('is-collapsed', isCollapsed);
   },
   setDrawerMode(isDrawer) {

@@ -38,7 +38,7 @@ const AppView = View.extend({
     sidebar: '[data-app-sidebar-region]',
   },
   setNavMinimized(isMinimized) {
-    this.getUI('nav').toggleClass('is-minimized', isMinimized);
+    this.getUI('nav')[0].classList.toggle('is-minimized', isMinimized);
   },
 });
 

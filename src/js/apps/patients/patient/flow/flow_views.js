@@ -434,7 +434,7 @@ const LayoutView = View.extend({
     actions: '.js-actions',
   },
   setEditing(isEditing) {
-    this.ui.actions.toggleClass('is-editing', isEditing);
+    this.ui.actions[0].classList.toggle('is-editing', isEditing);
   },
 });
 

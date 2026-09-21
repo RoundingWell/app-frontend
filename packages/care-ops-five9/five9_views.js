@@ -130,7 +130,7 @@ const LayoutView = View.extend({
     }));
   },
   togglePanel() {
-    this.$el.toggleClass('is-open', this.model.get('isOpen'));
+    this.el.classList.toggle('is-open', this.model.get('isOpen'));
   },
   showCallState() {
     const callTime = this.model.get('callTime');
@@ -138,7 +138,9 @@ const LayoutView = View.extend({
     const isTransferredCall = !!this.model.get('isTransferredCall');
     const isCalling = !!this.model.get('isCalling');
 
-    this.ui.header.toggleClass('is-call-active', isTransferredCall || hasCallTime);
+    const [header] = this.getUI('header');
+
+    header.classList.toggle('is-call-active', isTransferredCall || hasCallTime);
 
     if (isTransferredCall) {
       this.showChildView('heading', new View({ template: hbs`Transferred Call` }));
@@ -150,7 +152,7 @@ const LayoutView = View.extend({
       return;
     }
 
-    this.ui.header.toggleClass('is-call-ended', isCalling);
+    header.classList.toggle('is-call-ended', isCalling);
 
     if (isCalling) {
       this.showChildView('heading', new CallEndedView({ startTime: this.model.previous('callTime') }));

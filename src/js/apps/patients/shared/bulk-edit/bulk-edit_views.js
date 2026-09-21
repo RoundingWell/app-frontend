@@ -370,9 +370,9 @@ const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
     };
   },
   updateCollection() {
-    this.getUI('heading').text(renderTemplate(ActionsCountTemplate, {
+    this.getUI('heading')[0].textContent = renderTemplate(ActionsCountTemplate, {
       itemCount: this.model.get('collection').length,
-    }));
+    });
     this.showState();
     this.showOwner();
     this.showDueDateTime();
@@ -476,9 +476,9 @@ const BulkEditFlowsInlineView = BulkEditFlowsBodyView.extend({
     };
   },
   updateCollection() {
-    this.getUI('heading').text(renderTemplate(FlowsCountTemplate, {
+    this.getUI('heading')[0].textContent = renderTemplate(FlowsCountTemplate, {
       itemCount: this.model.get('collection').length,
-    }));
+    });
     this.showState();
     this.showOwner();
     this.showOwnerScope();

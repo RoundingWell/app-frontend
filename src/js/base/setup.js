@@ -1,23 +1,19 @@
-import $ from 'jquery';
 import _, { extend } from 'underscore';
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
 import BackboneApi from '@mnjs/adapters/backbone';
-import JQueryDomApi from '@mnjs/adapters/dom/jquery';
 import MorphdomDomApi from '@mnjs/adapters/dom/morphdom';
 import * as Marionette from 'marionette';
 import './backbone-fetch';
 import './dayjs';
 import './fontawesome';
 import './helpers';
-import './hotkeys';
 import './uuid';
 
 const { Radio, View, CollectionView, setDataApi, setDomApi, setStateApi } = Marionette;
 
 setDataApi(BackboneApi);
 setStateApi(BackboneApi);
-setDomApi(JQueryDomApi);
 setDomApi(MorphdomDomApi);
 
 /* istanbul ignore if */
@@ -27,7 +23,6 @@ if (_DEVELOP_) {
 
 // Expose libraries for the console
 window._ = _;
-window.$ = $;
 window.Backbone = Backbone;
 window.Radio = Radio;
 window.Marionette = Marionette;
