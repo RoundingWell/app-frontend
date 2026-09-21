@@ -40,10 +40,6 @@
   height: auto;
 }
 
-.form__frame--embedded .form__status {
-  display: none;
-}
-
 .form__frame--embedded .form__title {
   height: auto;
 }
@@ -198,13 +194,6 @@
   align-items: stretch;
   display: flex;
   flex: 0 1 auto;
-}
-
-.form__status {
-  align-items: center;
-  display: flex;
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 .form__title {

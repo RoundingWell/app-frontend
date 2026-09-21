@@ -92,7 +92,6 @@ const LayoutView = View.extend({
       replaceElement: true,
     },
     expandAction: '[data-expand-action-region]',
-    status: '[data-status-region]',
     widgets: '[data-widgets-header-region]',
   },
   ui: {
@@ -140,11 +139,6 @@ const IframeView = View.extend({
   clearViewportHeight() {
     this.getViewportElement().style.removeProperty('height');
   },
-});
-
-const StatusView = View.extend({
-  className: 'u-text-align--right',
-  template: hbs`{{formatHTMLMessage (intlGet "patients.patient.form.formViews.statusView.label") date=(formatDateTime updated_at "AT_TIME")}}`,
 });
 
 const ReadOnlyView = View.extend({
@@ -380,7 +374,6 @@ export {
   LayoutView,
   IframeView,
   FormExpandActionView,
-  StatusView,
   ReadOnlyView,
   LockedSubmitView,
   SaveView,
