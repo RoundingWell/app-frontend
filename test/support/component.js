@@ -7,7 +7,6 @@ import '@cypress/code-coverage/support';
 import './websockets';
 
 import 'js/base/setup';
-import $ from 'jquery';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
@@ -15,18 +14,29 @@ import { Application } from 'js/app';
 
 import { RootView } from 'js/apps/globals/app-frame/root_views';
 
+let app;
+
+async function destroyApp() {
+  const currentApp = app;
+  app = undefined;
+
+  await currentApp?.destroy();
+}
+
 Cypress.on('run:start', () => {
   // Consider doing a check to ensure your adapter only runs in Component Testing mode.
   if (Cypress.testingType !== 'component') {
     return;
   }
 
-  Cypress.on('test:before:run', () => {
-    // Do some cleanup from previous test - for example, clear the DOM.
-    $(document).off();
+  Cypress.on('test:before:run:async', async() => {
+    await destroyApp();
     getContainerEl().innerHTML = '';
   });
 });
+
+/* eslint-disable-next-line mocha/no-top-level-hooks */
+afterEach(() => destroyApp());
 
 const AppView = View.extend({
   regions: {
@@ -37,26 +47,28 @@ const AppView = View.extend({
 });
 
 function mount(getView = () => new View({ template: false })) {
-  const app = new Application();
-  app.setListeners();
+  return cy.then(async() => {
+    await destroyApp();
 
-  const TestRootView = RootView.extend({ AppView });
+    app = new Application();
+    app.setListeners();
 
-  const rootView = new TestRootView({ el: getContainerEl() });
+    const TestRootView = RootView.extend({ AppView });
 
-  rootView.getRegion('preloader').empty();
+    const rootView = new TestRootView({ el: getContainerEl() });
 
-  const view = getView(rootView);
+    rootView.getRegion('preloader').empty();
 
-  rootView.appView.showChildView('region', view);
+    const view = getView(rootView);
 
-  // Log a messsage in the Command Log.
-  Cypress.log({
-    name: 'mount',
-    message: [`Mount View: ${ view.cid }`],
-  });
+    rootView.appView.showChildView('region', view);
 
-  return cy.get('[data-cy-root]');
+    // Log a messsage in the Command Log.
+    Cypress.log({
+      name: 'mount',
+      message: [`Mount View: ${ view.cid }`],
+    });
+  }).get('[data-cy-root]');
 }
 
 Cypress.Commands.add('mount', mount);

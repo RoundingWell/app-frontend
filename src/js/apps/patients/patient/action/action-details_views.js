@@ -130,8 +130,8 @@ const DetailsView = View.extend({
     this.el.classList.remove('is-editing');
   },
   onWatchChange(text) {
-    this.ui.input.val(text);
-    this.ui.spacer.text(text || ' ');
+    this.ui.input[0].value = text;
+    this.ui.spacer[0].textContent = text || ' ';
 
     this.model.set('details', trim(text));
   },

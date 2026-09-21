@@ -1,7 +1,6 @@
 import 'js/base/setup';
 import 'js/i18n';
 
-import $ from 'jquery';
 import { get } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
@@ -35,7 +34,14 @@ import ErrorApp from 'js/apps/globals/error/error_app';
 import { RootView } from 'js/apps/globals/app-frame/root_views';
 import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
 
-const $document = $(document);
+function isTextInput(target) {
+  return target instanceof HTMLElement
+    && (target.matches('textarea, input, select') || target.isContentEditable);
+}
+
+function hasHotkeyModifier({ altKey, ctrlKey, metaKey, shiftKey }) {
+  return altKey || ctrlKey || metaKey || shiftKey;
+}
 
 const Application = App.extend({
   channelName: 'app',
@@ -90,47 +96,39 @@ const Application = App.extend({
   },
 
   setListeners() {
-    $(window).on({
-      'resize.app'() {
-        Radio.trigger('user-activity', 'window:resize');
-      },
-      'beforeunload': /* istanbul ignore next: Unloading the window loses coverage reports */ () => {
-        this.stop();
-      },
-    });
+    this._eventListeners?.abort();
+    this._eventListeners = new AbortController();
+    const { signal } = this._eventListeners;
 
-    $document.on('keydown.app', function(evt) {
+    window.addEventListener('resize', () => {
+      Radio.trigger('user-activity', 'window:resize');
+    }, { signal });
+    window.addEventListener('beforeunload', /* istanbul ignore next: Unloading the window loses coverage reports */ () => {
+      this.stop();
+    }, { signal });
+    document.addEventListener('keydown', evt => {
       Radio.trigger('user-activity', 'document:keydown', evt);
-    });
 
-    this.setMouseListeners();
-    this.setHotkeyListeners();
-  },
+      if (isTextInput(evt.target) || hasHotkeyModifier(evt)) return;
+      if (evt.key === '/') Radio.trigger('hotkey', 'search', evt);
+      if (evt.key === 'Escape') Radio.trigger('hotkey', 'close', evt);
+    }, { signal });
 
-  setMouseListeners() {
-    $document.on('mouseover.app', function(evt) {
+    document.addEventListener('mouseover', evt => {
       Radio.trigger('user-activity', 'document:mouseover', evt);
-    });
+    }, { signal });
 
-    /* istanbul ignore next: No need to test jquery functionality */
-    $document.on('mouseleave.app', function(evt) {
+    /* istanbul ignore next: No need to test browser event delivery */
+    document.addEventListener('mouseleave', evt => {
       Radio.trigger('user-activity', 'document:mouseleave', evt);
-    });
+    }, { signal });
 
-    $('body').on('pointerdown.app', function(evt) {
+    document.body.addEventListener('pointerdown', evt => {
       Radio.trigger('user-activity', 'body:down', evt);
-    });
+    }, { signal });
   },
-
-  setHotkeyListeners() {
-    // https://github.com/jeresig/jquery.hotkeys
-    $document.on('keydown.app', null, '/', function(evt) {
-      Radio.trigger('hotkey', 'search', evt);
-    });
-
-    $document.on('keydown.app', null, 'esc', function(evt) {
-      Radio.trigger('hotkey', 'close', evt);
-    });
+  onDestroy() {
+    this._eventListeners?.abort();
   },
 
   async prepareStart(options, { signal }) {

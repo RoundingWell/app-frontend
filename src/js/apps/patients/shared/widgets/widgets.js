@@ -153,7 +153,7 @@ const widgets = {
         const fetchForm = Radio.request('entities', 'fetch:forms:model', form_id);
         fetchForm.then(form => {
           this.form = form;
-          this.$el.prop('disabled', false);
+          this.el.disabled = false;
         });
       }
     },

@@ -118,12 +118,14 @@ const LayoutView = View.extend({
     }));
   },
   togglePanel() {
-    this.$el.toggleClass('is-open', this.model.get('isOpen'));
+    this.el.classList.toggle('is-open', this.model.get('isOpen'));
   },
   showCallState() {
     const callState = this.model.get('callState');
 
-    this.ui.header.toggleClass('is-call-active', callState === 'ringing' || callState === 'active');
+    const [header] = this.getUI('header');
+
+    header.classList.toggle('is-call-active', callState === 'ringing' || callState === 'active');
 
     if (callState === 'ringing') {
       this.showChildView('heading', new View({ template: hbs`Incoming Call` }));

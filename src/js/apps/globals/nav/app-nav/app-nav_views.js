@@ -199,7 +199,7 @@ const BottomNavView = View.extend({
     return i18n.appNavView.minimizeMenu;
   },
   updateMinimizeMenuLabel() {
-    this.ui.minimizeMenu.attr('aria-label', this.getMinimizeMenuLabel());
+    this.ui.minimizeMenu[0].setAttribute('aria-label', this.getMinimizeMenuLabel());
   },
 });
 
@@ -316,7 +316,7 @@ const PatientsAppNav = View.extend({
   onSearchActive(isActive) {
     /* istanbul ignore if: No need to test safeguard */
     if (this.isDestroyed()) return;
-    this.ui.search.toggleClass('is-active', isActive);
+    this.ui.search[0].classList.toggle('is-active', isActive);
   },
 });
 

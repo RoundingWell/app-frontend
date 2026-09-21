@@ -65,8 +65,8 @@ const NameView = View.extend({
   },
   onWatchChange(text) {
     const newText = removeNewline(text);
-    this.ui.input.val(newText);
-    this.ui.spacer.text(newText || ' ');
+    this.ui.input[0].value = newText;
+    this.ui.spacer[0].textContent = newText || ' ';
 
     this.model.set('name', newText);
   },
@@ -77,7 +77,7 @@ const NameView = View.extend({
   },
   onDomRefresh() {
     if (this.model.isNew()) {
-      this.ui.input.focus();
+      this.ui.input[0].focus();
     }
   },
 });
@@ -91,8 +91,8 @@ const DetailsView = View.extend({
     spacer: '.js-spacer',
   },
   onWatchChange(text) {
-    this.ui.input.val(text);
-    this.ui.spacer.text(text || ' ');
+    this.ui.input[0].value = text;
+    this.ui.spacer[0].textContent = text || ' ';
 
     this.model.set('details', trim(text));
   },

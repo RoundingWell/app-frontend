@@ -87,8 +87,8 @@ const CommentFormView = View.extend({
     this.showPostView();
   },
   onWatchChange(text) {
-    this.ui.input.val(text);
-    this.ui.spacer.text(text || ' ');
+    this.ui.input[0].value = text;
+    this.ui.spacer[0].textContent = text || ' ';
 
     this.model.set('message', trim(text));
   },

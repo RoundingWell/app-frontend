@@ -90,10 +90,10 @@ const SidebarSectionView = View.extend({
     return renderTemplate(labelTemplate, { name: this.model.get('name') });
   },
   updateDisclosure() {
-    this.getUI('toggleSection')
-      .attr('aria-expanded', String(this.isExpanded))
-      .attr('aria-label', this.getToggleLabel());
-    this.getUI('widgets').prop('hidden', !this.isExpanded);
+    const [toggleSection] = this.getUI('toggleSection');
+    toggleSection.setAttribute('aria-expanded', String(this.isExpanded));
+    toggleSection.setAttribute('aria-label', this.getToggleLabel());
+    this.getUI('widgets')[0].hidden = !this.isExpanded;
     this.el.classList.toggle('is-collapsed', !this.isExpanded);
   },
   templateContext() {
@@ -168,7 +168,7 @@ const SidebarView = View.extend({
     menu: '.js-menu',
   },
   focusClose() {
-    this.getUI('close').trigger('focus');
+    this.getUI('close')[0].focus();
   },
   onClickMenu() {
     const workspacePatient = this.model.getWorkspacePatient();

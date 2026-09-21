@@ -112,12 +112,12 @@ const LayoutView = View.extend({
   },
   renderSidebarState() {
     const isHidden = this.isSidebarHidden();
+    const sidebarButton = this.ui.sidebarButton[0];
 
     this.el.classList.toggle('patient__frame--sidebar-hidden', isHidden);
-    this.ui.sidebarButton
-      .prop('hidden', this.isSidebarFixed())
-      .toggleClass('is-selected', !isHidden)
-      .attr('aria-expanded', String(!isHidden));
+    sidebarButton.hidden = this.isSidebarFixed();
+    sidebarButton.classList.toggle('is-selected', !isHidden);
+    sidebarButton.setAttribute('aria-expanded', String(!isHidden));
   },
   isSidebarHidden() {
     return !this.isSidebarFixed() && this.layoutState.get('sidebarHidden');
@@ -129,7 +129,7 @@ const LayoutView = View.extend({
     return window.matchMedia(PATIENT_SIDEBAR_FIXED_QUERY).matches;
   },
   focusSidebarToggle() {
-    this.ui.sidebarButton.trigger('focus');
+    this.ui.sidebarButton[0].focus();
   },
   onPatientFrameKeydown(event) {
     if (event.key !== 'Escape' || !this.isSidebarDrawer() || this.isSidebarHidden()) return;

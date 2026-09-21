@@ -21,7 +21,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `97a8d537e24c8f0aa96c0435b34cea25e530e62e`.
+  `f4435dc23ba1bc686b3126e479bd1a0113db0255`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -125,13 +125,33 @@
   app-owned loading roots, explicit reusable-child activation, and a dynamic
   bulk-edit child that is registered once and reactivated with updated state.
   Existing E2E specifications remain unchanged.
-- Active: PR #1806 migrates the standalone Formservice entry point from Toolkit
+- Completed: PR #1806 migrates the standalone Formservice entry point from Toolkit
   `beforeStart` result spreading to Application preparation. Its entity requests
   receive the active run's cancellation signal, and its existing E2E contract
-  remains unchanged.
+  remains unchanged. It was merged by a human.
+- Active: PR #1807 removes the temporary jQuery DOM adapter and dependency now that the
+  migrated views use Marionette's native DOM collections. Application-level
+  browser listeners retain explicit ownership and cleanup, and Morphdom remains
+  the renderer-specific DOM adapter.
 
 ## Validation
 
+- PR #1807 installs without jQuery and passes the test-mode build, ESLint, and
+  Stylelint. The full component run reaches the pre-existing component harness
+  failure where constructing the global Application calls `getAppName` without
+  an Application configuration; this blocks affected mounted specs before their
+  assertions run. Review found that the initial dependency sweep omitted the
+  Five9 and RingCentral workspace views and that the component harness did not
+  await Application destruction between repeated mounts. The workspace views
+  now use native roots and `ui` collections, while the harness serializes
+  Application teardown before clearing or replacing its root. These were
+  consumer-sweep and test-harness mistakes, not Marionette defects.
+- The local E2E run reaches a pre-existing Worklist startup race where an
+  initial `change:canEdit` handler reads a null `editableCollection`, after
+  which later scenarios may be covered by the global error screen. The focused
+  App Nav reproduction fails identically on PR #1806's clean head with the
+  jQuery adapter still active. Formservice and Dashboard E2E scenarios pass on
+  PR #1807 before that shared failure; existing E2E files remain unchanged.
 - PR #1806 installs cleanly from the pinned lockfile, passes targeted ESLint and
   the test-mode build, and passes all 4 unchanged Formservice E2E tests. The
   action response lookup now completes within Application preparation, so the

@@ -137,7 +137,6 @@
     "dayjs": "^1.10.6",
     "handlebars": "^4.7.9",
     "idb": "^7.1.1",
-    "jquery": "^4.0.0",
     "libphonenumber-js": "^1.10.38",
     "marionette": "file:vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz",
     "morphdom": "2.7.8",

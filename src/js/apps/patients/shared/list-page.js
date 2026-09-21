@@ -81,7 +81,7 @@ const ListPageView = View.extend({
     const isCollapsed = this.isFiltersSidebarCollapsed();
 
     this.el.classList.toggle('is-filters-collapsed', isCollapsed);
-    this.getUI('filtersSidebar').attr('aria-hidden', String(isCollapsed));
+    this.getUI('filtersSidebar')[0].setAttribute('aria-hidden', String(isCollapsed));
   },
   isFiltersSidebarCollapsed() {
     return this.layoutState.get('sidebarCollapsed');
@@ -96,10 +96,10 @@ const ListPageView = View.extend({
     return window.matchMedia(FILTERS_SIDEBAR_FIXED_QUERY).matches;
   },
   focusFiltersDrawer() {
-    this.getUI('filtersDrawerClose').trigger('focus');
+    this.getUI('filtersDrawerClose')[0].focus();
   },
   setDrawerCloseHidden(isHidden) {
-    this.getUI('filtersDrawerClose').prop('hidden', isHidden);
+    this.getUI('filtersDrawerClose')[0].hidden = isHidden;
   },
   onClickCloseSidebarDrawer() {
     this.triggerMethod('close:sidebar-drawer');

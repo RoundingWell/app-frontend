@@ -53,12 +53,12 @@ const InputView = View.extend({
     this.render();
   },
   onChange() {
-    const text = this.ui.input.val();
+    const text = this.ui.input[0].value;
     this.model.set(this.getOption('attr'), trim(text));
   },
   onDomRefresh() {
     if (this.getOption('shouldFocus')) {
-      this.ui.input.focus();
+      this.ui.input[0].focus();
     }
   },
 });
