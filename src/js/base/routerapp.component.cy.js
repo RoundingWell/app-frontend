@@ -159,6 +159,41 @@ context('RouterApp', function() {
     });
   });
 
+  describe('route action failures', function() {
+    [true, false].forEach(startOnRoute => {
+      const title = `observes async failures with startOnRoute=${ startOnRoute }`;
+
+      specify(title, async function() {
+        const failure = new Error('route failed');
+        const readiness = deferred();
+        const errorHandler = cy.stub();
+        const dispatched = cy.stub();
+        const dispatchedRoute = deferred();
+        app = new (Router.extend({
+          startOnRoute,
+          showSchedule() {
+            return readiness.promise.then(() => {
+              throw failure;
+            });
+          },
+          onRouteError: errorHandler,
+        }))({ workspaceSlug: 'test-ws' });
+        app.on('appRoute', () => {
+          dispatched();
+          dispatchedRoute.resolve();
+        });
+
+        const routing = app.routeAction('schedule', 'showSchedule');
+        await dispatchedRoute.promise;
+        expect(dispatched).to.have.been.calledOnce;
+        expect(errorHandler).not.to.have.been.called;
+        readiness.resolve();
+        await routing;
+        expect(errorHandler).to.have.been.calledOnceWith(failure, app.getCurrentRoute());
+      });
+    });
+  });
+
   describe('scope identity', function() {
     specify('reuses the child and forwards the route for an equal scope', async function() {
       app = new Router({ workspaceSlug: 'test-ws' });

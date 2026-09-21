@@ -1,35 +1,34 @@
-import { extend, pick, result } from 'underscore';
+import { extend, isArray, pick, result } from 'underscore';
 import Backbone from 'backbone';
 
-import App from './app';
+import { addError } from 'js/datadog';
 
-export default App.extend({
+import CurrentChildApp from './current-child-app';
+
+export default CurrentChildApp.extend({
   constructor: function() {
-    this._current = null;
-    this._currentClaim = null;
-    this._stoppingCurrent = null;
     this._runId = 0;
     this._routeIntent = null;
 
-    this.on('stop', this._clearCurrent);
     this.on('start', () => this._runId++);
     this.on('before:stop', this._clearRouteIntent);
 
-    App.apply(this, arguments);
+    CurrentChildApp.apply(this, arguments);
   },
 
   createState() {
     return new Backbone.Model({ currentRoute: null });
   },
 
-  // declarative scope identity used by a parent RouterApp to decide reuse;
-  // without a declared routeScope, fall back to full-option identity
+  // Explicit resource identity; route-specific startup options never define scope.
   getRouteScope(options = {}) {
     const scope = result(this, 'routeScope');
-    return scope ? pick(options, scope) : options;
+    if (!isArray(scope)) throw new Error('SubRouterApp requires a routeScope array');
+    return pick(options, scope);
   },
 
   setCurrentRoute(routeContext) {
+    this.invalidateSelection();
     this.getState().set('currentRoute', routeContext);
   },
 
@@ -66,9 +65,22 @@ export default App.extend({
 
     if (!action) return;
 
-    action.apply(this, eventArgs);
+    const activation = action.apply(this, eventArgs);
+    // onStart notifications do not await returned promises. Observe action
+    // failures here as well as on routes dispatched into an already-active run.
+    const completion = Promise.resolve(activation).catch(error => {
+      if (this.getCurrentRoute() === currentRoute && this.isRunning()) {
+        this.triggerMethod('route:error', error, currentRoute);
+      }
+    });
 
     this.triggerMethod('startRoute', currentRoute);
+
+    return completion;
+  },
+
+  onRouteError(error) {
+    addError(error);
   },
 
   mixinOptions(options) {
@@ -77,70 +89,10 @@ export default App.extend({
     return extend({}, appOptions, options);
   },
 
-  // handler that ensures one running app per type
-  async startCurrent(appName, options) {
-    const app = this.getChildApp(appName);
-    if (!app) throw new Error(`Child application "${ appName }" is not registered`);
-
-    const routeContext = this.getCurrentRoute();
-    const stopping = this.stopCurrent();
-    const claim = {};
-
-    this._currentClaim = claim;
-
-    await stopping;
-
-    if (!this._isCurrentClaim(claim, routeContext)) return;
-
-    this._current = app;
-
-    try {
-      const started = await app.start(this.mixinOptions(options));
-
-      if (!started) {
-        this._clearCurrentClaim(claim);
-        return;
-      }
-
-      return this._isCurrentClaim(claim, routeContext) && app === this.getCurrent() ? app : undefined;
-    } catch(error) {
-      this._clearCurrentClaim(claim);
-
-      throw error;
-    }
-  },
-
-  _isCurrentClaim(claim, routeContext) {
-    return this._currentClaim === claim && this.getCurrentRoute() === routeContext;
-  },
-
-  _clearCurrentClaim(claim) {
-    if (this._currentClaim === claim) this._clearCurrent();
-  },
-
-  getCurrent() {
-    return this._current;
-  },
-
-  stopCurrent() {
-    if (!this._current) return this._stoppingCurrent || undefined;
-
-    const current = this._current;
-
-    this._clearCurrent();
-
-    const stopping = Promise.resolve(current.stop()).finally(() => {
-      if (this._stoppingCurrent === stopping) this._stoppingCurrent = null;
+  startCurrent(appName, options) {
+    return this.selectChild(appName, {
+      start: app => app.start(this.mixinOptions(options)),
     });
-
-    this._stoppingCurrent = stopping;
-
-    return stopping;
-  },
-
-  _clearCurrent() {
-    this._current = null;
-    this._currentClaim = null;
   },
 
   _clearRouteIntent() {

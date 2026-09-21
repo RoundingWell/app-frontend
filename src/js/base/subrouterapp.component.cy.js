@@ -43,7 +43,7 @@ const SyncApp = BaseApp.extend({
 });
 
 const LoadingApp = BaseApp.extend({
-  onBeforeStart() {
+  prepareStart() {
     this.loaded = deferred();
     return this.loaded.promise;
   },
@@ -85,9 +85,9 @@ context('SubRouterApp', function() {
       expect(app.getRouteScope({ patientId: 'p1' })).to.deep.equal({});
     });
 
-    specify('returns the full options when no scope is declared', function() {
+    specify('requires an explicit scope declaration', function() {
       app = new (BaseApp.extend({ routeScope: undefined }))();
-      expect(app.getRouteScope({ patientId: 'p1', clinicianId: 'c9' })).to.deep.equal({ patientId: 'p1', clinicianId: 'c9' });
+      expect(() => app.getRouteScope()).to.throw('SubRouterApp requires a routeScope array');
     });
   });
 
@@ -126,6 +126,27 @@ context('SubRouterApp', function() {
       await Promise.all([starting, routing]);
 
       expect(app.calls).to.deep.equal([['action', 'p1', 'a1']]);
+    });
+  });
+
+  describe('route action failures', function() {
+    specify('observes async action failure during initial and subsequent dispatch', async function() {
+      const failure = new Error('content failed');
+      const reported = [];
+      app = new (SyncApp.extend({
+        showAction() {
+          return Promise.reject(failure);
+        },
+        onRouteError(error) {
+          reported.push(error);
+        },
+      }))();
+      app.setCurrentRoute(action);
+      await app.start();
+      await app.startRoute(action);
+      await Promise.resolve();
+
+      expect(reported).to.deep.equal([failure, failure]);
     });
   });
 

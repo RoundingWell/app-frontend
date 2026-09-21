@@ -105,6 +105,7 @@ routeScope: ['programId']   // ProgramApp
 routeScope: []              // CliniciansAllApp — always "the same" instance
 ```
 
+An omitted or non-array `routeScope` is an error; use `[]` for a global scope.
 `getRouteScope(options = {})` returns `pick(options, routeScope)`. RouterApp compares
 scope objects with `isEqual` — **never** the full startup options:
 
@@ -158,6 +159,22 @@ routeActions: {
 
 ## Stop and restart
 
+Both router classes use the internal `CurrentChildApp` base for child selection.
+It has no URL, Radio-channel, resource-scope comparison, or error-presentation
+policy. Keep those concerns in the routing adapters and application subclasses;
+this boundary allows future extraction without adding a second routing backend.
+
+- Selection retains the previous child until its stop resolves `true`. Overlapping
+  replacements share that stop, and only the newest selection can activate.
+- A rejected stop keeps the selection and propagates the error. A stop resolving
+  `false` is superseded/canceled and does not authorize a replacement. Returning
+  `false` from `prepareStop` is not a veto; stop permission must reject or throw.
+- Owner stop, restart, and destroy invalidate pending selection even when the owner
+  is already stopped. A failed child startup cleans up partially started descendants
+  before clearing the selection. If cleanup fails, selection is retained for retry.
+- This is application-selection policy, not browser navigation blocking. It does
+  not roll back the URL or guarantee atomic teardown of an entire child tree.
+
 - RouterApp starts and stops its selected child asynchronously. A newer route wins
   if it arrives while the prior child is stopping or preparing.
 - Route children are registered as owned Application instances. Owner stop and
@@ -176,7 +193,12 @@ routeActions: {
 Async loading belongs in `prepareStart(options, { signal })`. Return the prepared
 value for `onStart(app, options, result)`, and pass the lifecycle signal through to
 cancelable requests. Route dispatch stays synchronous — do not add another async
-layer.
+layer. Route handlers should return their activation promise. Route completion
+notifications still fire synchronously after invoking the handler; they do not
+mean that async content is ready. Returned async failures are observed through
+`onRouteError(error, routeContext)` (Datadog by default), including initial
+SubRouterApp dispatch from `onStart`. Domain handlers may handle expected errors
+before returning. Radio dispatch remains synchronous.
 
 ## Common mistakes
 
