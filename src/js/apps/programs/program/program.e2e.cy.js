@@ -3,7 +3,7 @@ import { testTs } from 'helpers/test-timestamp';
 import { getRelationship } from 'helpers/json-api';
 
 import { getProgram } from 'support/api/programs';
-import { getProgramAction } from 'support/api//program-actions';
+import { getProgramAction } from 'support/api/program-actions';
 
 context('program page', function() {
   specify('context trail', function() {
@@ -52,6 +52,30 @@ context('program page', function() {
     cy
       .url()
       .should('contain', 'programs');
+
+    cy.then(() => {
+      const program = getProgram();
+
+      cy
+        .routesForDefault()
+        .intercept('GET', `/api/programs/${ program.id }`, { statusCode: 400, body: {} })
+        .as('failedProgram')
+        .visit(`/program/${ program.id }`)
+        .wait('@failedProgram');
+
+      cy.get('.error-page').should('contain', 'Error code: 400.');
+
+      cy
+        .routesForDefault()
+        .routeProgram(fx => ({ ...fx, data: program }))
+        .routeProgramFlows()
+        .intercept('GET', `/api/programs/${ program.id }/actions*`, { statusCode: 400, body: {} })
+        .as('failedWorkflows')
+        .visit(`/program/${ program.id }`)
+        .wait('@failedWorkflows');
+
+      cy.get('.error-page').should('contain', 'Error code: 400.');
+    });
   });
 
   specify('read only sidebar', function() {

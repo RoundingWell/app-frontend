@@ -4,7 +4,7 @@ import { v7 as uuidv7, v5 as uuidv5 } from 'uuid';
 
 import formatDate from 'helpers/format-date';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, getErrors } from 'helpers/json-api';
 
 import { getAction, getActions, longActionName } from 'support/api/actions';
 import { getComment } from 'support/api/comments';
@@ -2532,6 +2532,17 @@ context('schedule page', function() {
         expect(storage.customFilters).to.deep.equal({});
         expect(storage.states).to.deep.equal([stateTodo.id, stateInProgress.id]);
       });
+
+    cy.then(() => {
+      cy
+        .routesForDefault()
+        .intercept('GET', '/api/actions?*', { statusCode: 400, body: {} })
+        .as('failedSchedule')
+        .visit('/schedule')
+        .wait('@failedSchedule');
+
+      cy.get('.error-page').should('contain', 'Error code: 400.');
+    });
   });
 
   specify('500 error', function() {
@@ -2580,5 +2591,43 @@ context('schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
+
+    cy.then(() => {
+      const patient = getPatient();
+      const action = getAction({
+        attributes: { name: 'Schedule Recovery Action' },
+        relationships: { patient: getRelationship(patient) },
+      });
+
+      function visitSchedule() {
+        cy.routesForPatientAction()
+          .routeActions(fx => ({ ...fx, data: [action], included: [...fx.included, patient] }))
+          .visit('/schedule')
+          .wait('@routeActions');
+      }
+
+      visitSchedule();
+      cy.intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } }).as('failedRefresh');
+      cy.get('[data-date-filter-region]').click();
+      cy.get('.app-frame__pop-region').contains('Last Month').click();
+      cy.wait('@failedRefresh');
+      cy.get('.alert-box').should('be.visible');
+      cy.get('.schedule-list__list').should('contain', 'Schedule Recovery Action');
+
+      cy.intercept('GET', '/api/patients/**?*', {
+        statusCode: 410,
+        body: { errors: getErrors({ status: '410', title: 'Not Found', detail: 'Cannot find patient' }) },
+      }).as('failedPatient');
+      cy.get('.patient-list__patient').first().click();
+      cy.wait('@failedPatient');
+      cy.get('.patient-sidebar').should('not.exist');
+      cy.get('.alert-box').should('contain', 'Cannot find patient');
+
+      cy.intercept('GET', '/api/patients/**?*', { forceNetworkError: true }).as('failedPatient');
+      cy.get('.patient-list__patient').first().click();
+      cy.wait('@failedPatient');
+      cy.get('.patient-sidebar').should('not.exist');
+      cy.get('.schedule-list__list').should('contain', 'Schedule Recovery Action');
+    });
   });
 });

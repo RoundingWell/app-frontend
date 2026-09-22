@@ -15,58 +15,60 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
-  specify('uses the sidebar setting for panel membership and order', function() {
-    cy
-      .routesForPatientWorkflow()
-      .routeSettings('sidebar', ['status', 'demographics'])
-      .routePanels(fx => {
-        const addPanel = _.partial(getResource, _, 'panels');
+  specify('sidebar settings determine panel order and tolerate missing panels', function() {
+    cy.then(() => {
+      cy
+        .routesForPatientWorkflow()
+        .routeSettings('sidebar', ['status', 'demographics'])
+        .routePanels(fx => {
+          const addPanel = _.partial(getResource, _, 'panels');
 
-        fx.data = [
-          addPanel({
-            id: 'demographics-panel',
-            slug: 'demographics',
-            name: 'Demographics',
-            widgets: ['dob', 'sex'],
-          }),
-          addPanel({
-            id: 'status-panel',
-            slug: 'status',
-            name: 'Status',
-            widgets: ['status'],
-          }),
-        ];
+          fx.data = [
+            addPanel({
+              id: 'demographics-panel',
+              slug: 'demographics',
+              name: 'Demographics',
+              widgets: ['dob', 'sex'],
+            }),
+            addPanel({
+              id: 'status-panel',
+              slug: 'status',
+              name: 'Status',
+              widgets: ['status'],
+            }),
+          ];
 
-        return fx;
-      })
-      .visit('/patient/1/workflow')
-      .wait('@routePatient');
+          return fx;
+        })
+        .visit('/patient/1/workflow')
+        .wait('@routePatient');
 
-    cy
-      .get('.patient-sidebar__card')
-      .should('have.length', 2)
-      .first()
-      .find('.patient-sidebar__card-toggle')
-      .should('contain', 'Status');
+      cy
+        .get('.patient-sidebar__card')
+        .should('have.length', 2)
+        .first()
+        .find('.patient-sidebar__card-toggle')
+        .should('contain', 'Status');
 
-    cy.get('.patient-sidebar__card')
-      .eq(1)
-      .should('contain', 'Demographics')
-      .and('contain', 'Sex')
-      .and('contain', 'Date of Birth');
-  });
+      cy.get('.patient-sidebar__card')
+        .eq(1)
+        .should('contain', 'Demographics')
+        .and('contain', 'Sex')
+        .and('contain', 'Date of Birth');
+    });
 
-  specify('renders available panels when the sidebar setting references a missing panel', function() {
-    cy
-      .routesForPatientWorkflow()
-      .routeSettings('sidebar', ['missing-panel', 'demographics'])
-      .visit('/patient/1/workflow')
-      .wait('@routePatient');
+    cy.then(() => {
+      cy
+        .routesForPatientWorkflow()
+        .routeSettings('sidebar', ['missing-panel', 'demographics'])
+        .visit('/patient/1/workflow')
+        .wait('@routePatient');
 
-    cy
-      .get('.patient-sidebar__card')
-      .should('have.length', 1)
-      .and('contain', 'Demographics');
+      cy
+        .get('.patient-sidebar__card')
+        .should('have.length', 1)
+        .and('contain', 'Demographics');
+    });
   });
 
   specify('expands and collapses sidebar sections accessibly', function() {
@@ -869,6 +871,21 @@ context('patient sidebar', function() {
       .eq(2)
       .should('contain', 'Unknown Widget')
       .should('contain', 'Custom widget value');
+
+    cy.then(() => {
+      const patient = getPatient();
+      const reported = cy.stub().as('reported');
+      cy.on('uncaught:exception', error => {
+        reported(error.message);
+        return false;
+      });
+      cy.routesForPatientAction()
+        .routePatient(fx => ({ ...fx, data: patient }))
+        .intercept('GET', '/api/workspace-patients/*', { statusCode: 400, body: { errors: [] } })
+        .visit(`/patient/${ patient.id }/workflow`);
+      cy.get('@reported').should('have.been.calledWithMatch', 'Error Status: 400');
+      cy.get('.patient-sidebar').should('not.exist');
+    });
   });
 
   specify('patient workspaces', function() {

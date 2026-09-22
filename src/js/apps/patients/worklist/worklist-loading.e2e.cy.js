@@ -35,7 +35,7 @@ function getActionsResponse() {
   };
 }
 
-function chooseLastWeek() {
+function chooseLastWeek(label = 'Last Week') {
   cy
     .get('[data-date-filter-region]')
     .should('contain', 'Added:')
@@ -43,12 +43,12 @@ function chooseLastWeek() {
 
   cy
     .get('.app-frame__pop-region')
-    .contains('Last Week')
+    .contains(label)
     .click();
 }
 
 context('worklist loading states', function() {
-  specify('shows content-shaped skeletons while the initial worklist and filters load', function() {
+  specify('initial loading, refresh loading, and retry preserve worklist content', function() {
     cy.viewport(1440, 720);
 
     const filter = getFilter({
@@ -112,22 +112,16 @@ context('worklist loading states', function() {
       .get('.list-filters__custom-filters')
       .should('have.attr', 'aria-busy', 'false')
       .should('contain', 'Facility');
-  });
-
-  specify('retains the current cards while the worklist refreshes', function() {
-    let requestCount = 0;
 
     cy
       .intercept('GET', '/api/actions?*', req => {
-        requestCount += 1;
         req.reply({
-          delay: requestCount > 1 ? 1000 : 0,
+          delay: 1000,
           body: getActionsResponse(),
         });
       })
       .as('routeActions')
-      .visit('/worklist/owned-by')
-      .wait('@routeActions');
+    ;
 
     chooseLastWeek();
 
@@ -152,9 +146,46 @@ context('worklist loading states', function() {
       .should('not.have.class', 'is-loading')
       .should('have.attr', 'aria-busy', 'false')
       .should('contain', 'Loading State Action');
+
+    let shouldFail = true;
+
+    cy
+      .intercept('GET', '/api/actions?*', req => {
+        if (shouldFail) {
+          req.reply({ statusCode: 422, body: { errors: [] } });
+          return;
+        }
+
+        req.reply({ body: getActionsResponse() });
+      })
+      .as('routeActions')
+    ;
+
+    chooseLastWeek('This Week');
+
+    cy
+      .wait('@routeActions')
+      .get('.list-page__list')
+      .should('contain', 'Loading State Action')
+      .should('have.attr', 'aria-busy', 'false');
+
+    cy
+      .get('.worklist-list__error')
+      .should('contain', 'The worklist could not be updated.')
+      .find('button')
+      .should('contain', 'Retry')
+      .then(() => {
+        shouldFail = false;
+      })
+      .click();
+
+    cy
+      .wait('@routeActions')
+      .get('.worklist-list__error')
+      .should('not.exist');
   });
 
-  specify('keeps the patient sidebar loader mounted while data loads', function() {
+  specify('patient sidebar loading preserves its shell, close, and navigation controls', function() {
     let loadingElement;
     const workspacePatient = getWorkspacePatient();
 
@@ -207,20 +238,10 @@ context('worklist loading states', function() {
       .get('.patient-sidebar__card')
       .first()
       .should('be.visible');
-  });
 
-  specify('keeps patient sidebar navigation and close actions available while loading', function() {
+    cy.get('.patient-sidebar__close').click();
+
     cy
-      .routesForPatientAction()
-      .intercept('GET', '/api/actions?*', { body: getActionsResponse() })
-      .as('routeActions')
-      .intercept('GET', '/api/patients/**?*', {
-        delay: 1000,
-        body: { data: patient, included: [] },
-      })
-      .as('routeDelayedPatient')
-      .visit('/worklist/owned-by')
-      .wait('@routeActions')
       .get('.patient-list__patient')
       .first()
       .click();
@@ -247,7 +268,7 @@ context('worklist loading states', function() {
       .should('contain', `/patient/${ patient.id }/workflow`);
   });
 
-  specify('closes the patient sidebar when its patient cannot load', function() {
+  specify('patient sidebar closes after API and network failures', function() {
     cy
       .routesForPatientAction()
       .intercept('GET', '/api/actions?*', { body: getActionsResponse() })
@@ -277,17 +298,11 @@ context('worklist loading states', function() {
     cy
       .get('.alert-box')
       .should('contain', 'Cannot find patient');
-  });
 
-  specify('closes the patient sidebar when its request loses the network', function() {
     cy
-      .routesForPatientAction()
-      .intercept('GET', '/api/actions?*', { body: getActionsResponse() })
-      .as('routeActions')
       .intercept('GET', '/api/patients/**?*', { forceNetworkError: true })
       .as('routePatientNetworkError')
-      .visit('/worklist/owned-by')
-      .wait('@routeActions')
+
       .get('.patient-list__patient')
       .first()
       .click()
@@ -295,49 +310,6 @@ context('worklist loading states', function() {
 
     cy
       .get('.patient-sidebar')
-      .should('not.exist');
-  });
-
-  specify('keeps the previous cards and offers retry when a refresh fails', function() {
-    let shouldFail = false;
-
-    cy
-      .intercept('GET', '/api/actions?*', req => {
-        if (shouldFail) {
-          req.reply({ statusCode: 422, body: { errors: [] } });
-          return;
-        }
-
-        req.reply({ body: getActionsResponse() });
-      })
-      .as('routeActions')
-      .visit('/worklist/owned-by')
-      .wait('@routeActions')
-      .then(() => {
-        shouldFail = true;
-      });
-
-    chooseLastWeek();
-
-    cy
-      .wait('@routeActions')
-      .get('.list-page__list')
-      .should('contain', 'Loading State Action')
-      .should('have.attr', 'aria-busy', 'false');
-
-    cy
-      .get('.worklist-list__error')
-      .should('contain', 'The worklist could not be updated.')
-      .find('button')
-      .should('contain', 'Retry')
-      .then(() => {
-        shouldFail = false;
-      })
-      .click();
-
-    cy
-      .wait('@routeActions')
-      .get('.worklist-list__error')
       .should('not.exist');
   });
 
@@ -380,6 +352,31 @@ context('worklist loading states', function() {
     cy
       .get('.worklist-list__item')
       .should('exist');
+
+    cy.then(() => {
+      cy
+        .routesForDefault()
+        .intercept('GET', '/api/actions?*', { statusCode: 400, body: {} })
+        .as('failedWorklist')
+        .visit('/worklist/owned-by')
+        .wait('@failedWorklist')
+        .wait('@failedWorklist');
+
+      cy.get('.worklist-list__error').should('be.visible');
+
+      // A failed initial list must also allow navigation away and back before retrying.
+      cy.routeDashboards();
+      cy.get('.app-nav__link').contains('Dashboards').click().wait('@routeDashboards');
+      cy.location('pathname').should('include', '/dashboards');
+      cy.go('back').wait('@failedWorklist').wait('@failedWorklist');
+      cy.get('.worklist-list__error').should('be.visible');
+
+      cy.routeActions();
+      cy.get('.worklist-list__error .js-retry').click();
+      cy.wait('@routeActions');
+      cy.get('.worklist-list__error').should('not.exist');
+      cy.get('.worklist-list__list').should('be.visible');
+    });
   });
 
   specify('shows a retryable error when custom filters cannot load', function() {

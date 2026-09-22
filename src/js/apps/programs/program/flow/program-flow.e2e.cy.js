@@ -6,7 +6,7 @@ import { getRelationship, mergeJsonApi, getErrors } from 'helpers/json-api';
 
 import { getProgramFlow } from 'support/api/program-flows';
 import { getProgram } from 'support/api/programs';
-import { getProgramActions, getProgramAction } from 'support/api//program-actions';
+import { getProgramActions, getProgramAction } from 'support/api/program-actions';
 import { testForm } from 'support/api/forms';
 import { teamNurse, teamCoordinator } from 'support/api/teams';
 
@@ -750,5 +750,35 @@ context('program flow page', function() {
     cy
       .get('.sidebar')
       .should('exist');
+
+    cy.then(() => {
+      [false, true].forEach(networkFailure => {
+        cy.then(() => {
+          const program = getProgram();
+          const flow = getProgramFlow({ relationships: { program: getRelationship(program) } });
+          const action = getProgramAction({ relationships: {
+            'program': getRelationship(program), 'program-flow': getRelationship(flow),
+          } });
+          const reported = cy.stub().as('reported');
+          if (networkFailure) {
+            cy.on('uncaught:exception', error => {
+              reported(error.message);
+              return false;
+            });
+          }
+          cy.routeProgramByProgramFlow(fx => ({ ...fx, data: program }))
+            .routeProgramFlow(fx => ({ ...fx, data: flow }))
+            .routeProgramFlowActions(fx => ({ ...fx, data: [action] }))
+            .intercept('GET', `/api/program-actions/${ action.id }*`, networkFailure ?
+              { forceNetworkError: true } :
+              { statusCode: 400, body: { errors: [] } })
+            .as('failedAction')
+            .visit(`/program-flow/${ flow.id }/action/${ action.id }`)
+            .wait('@failedAction');
+          cy.get('.alert-box').should('be.visible');
+          if (networkFailure) cy.get('@reported').should('have.been.calledWithMatch', 'Failed to fetch');
+        });
+      });
+    });
   });
 });

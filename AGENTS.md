@@ -168,6 +168,7 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
   Component coverage is not evidence that application code is reachable; if an
   E2E flow cannot reach that code, verify whether it is dead and remove it
   instead of adding a component spec to preserve it.
+- To reduce Cypress test cost, extend an existing E2E scenario for related behavior instead of adding a `specify` for each assertion or input variant. Reuse page setup where possible, keep specs beside the feature they exercise, and retain separate tests when authentication, permissions, or incompatible fixtures require isolation.
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.
 - Do not make incidental presentation a Cypress contract. Avoid exact assertions for alignment, spacing, typography, dimensions, colors, or computed CSS unless the presentation itself communicates product state or the geometry proves functional behavior such as a breakpoint mode, overflow prevention, reachability, popup direction, or layout stability during a state change.

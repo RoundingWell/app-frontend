@@ -1,3 +1,4 @@
+import { getPatientField } from 'support/api/patient-fields';
 import { getRelationship, getResource } from 'helpers/json-api';
 
 import { getAction } from 'support/api/actions';
@@ -592,5 +593,34 @@ context('Dialer Service', function() {
       .should('contain', 'Test Patient')
       .next()
       .should('contain', 'Other Patient');
+
+    cy.then(() => {
+      const patient = getPatient();
+      const action = getAction({ relationships: {
+        patient: getRelationship(patient), state: getRelationship(stateTodo),
+      } });
+      const clinician = getCurrentClinician({ attributes: { settings: { dialer: 'ringcentral' } } });
+      let releaseProvider;
+      const providerReady = new Promise(resolve => {
+        releaseProvider = resolve;
+      });
+
+      cy.intercept('GET', '**/*care-ops-ringcentral-*.js', () => providerReady).as('provider');
+      cy.intercept('GET', 'https://apps.ringcentral.com/**', { body: '<html><body>Test dialer</body></html>', headers: { 'content-type': 'text/html' } });
+      cy.routesForPatientAction()
+        .routeCurrentClinician(fx => ({ ...fx, data: clinician }))
+        .routePatient(fx => ({ ...fx, data: patient }))
+        .routeAction(fx => ({ ...fx, data: action }))
+        .routePatientField(fx => ({ ...fx, data: getPatientField({ attributes: {
+          name: 'phones', value: [{ label: 'mobile', number: '+13215551234', preferred: true }],
+        } }) }))
+        .visit(`/patient/${ patient.id }/action/${ action.id }`)
+        .wait('@routeAction');
+      cy.get('.patient-action [data-dialer-region] button').click();
+      cy.get('.picklist .js-picklist-item').contains('(321) 555-1234').click();
+      cy.then(() => releaseProvider());
+      cy.wait('@provider');
+      cy.get('.ringcentral-panel__iframe').should('be.visible');
+    });
   });
 });

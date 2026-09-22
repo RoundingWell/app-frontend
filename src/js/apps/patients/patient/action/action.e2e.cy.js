@@ -1,3 +1,4 @@
+import { getWorkspacePatient } from 'support/api/workspace-patients';
 import dayjs from 'dayjs';
 import { v7 as uuid } from 'uuid';
 
@@ -24,756 +25,914 @@ import { getPatientField } from 'support/api/patient-fields';
 
 context('patient action page', { scrollBehavior: 'center' }, function() {
   specify('display patient action', function() {
-    const testTime = dayjs(testDate()).hour(12).valueOf();
+    cy.then(() => {
+      let releaseActivity;
+      let releasePatient;
+      const activityResponse = new Cypress.Promise(resolve => {
+        releaseActivity = resolve;
+      });
+      const patientResponse = new Cypress.Promise(resolve => {
+        releasePatient = resolve;
+      });
+      const patient = getPatient({
+        attributes: {
+          first_name: 'Test',
+          last_name: 'Patient',
+        },
+      });
+      const action = getAction({
+        attributes: {
+          name: 'Loading State Action',
+        },
+        relationships: {
+          form: getRelationship(testForm),
+          patient: getRelationship(patient),
+        },
+      });
+      const workspacePatient = getWorkspacePatient();
 
-    const currentClinician = getCurrentClinician();
-    const testClinician = getClinician({
-      attributes: {
-        name: 'Another Clinician',
-      },
-      relationships: {
-        team: getRelationship(teamCoordinator),
-      },
+      cy
+        .routesForPatientAction()
+        .routePatient(fx => {
+          fx.data = patient;
+
+          return fx;
+        })
+        .routeFormByAction(fx => {
+          fx.data = testForm;
+
+          return fx;
+        })
+        .routeLatestFormResponse()
+        .routeFormDefinition()
+        .routeFormActionFields()
+        .intercept('GET', '/api/patients/**?*', req => {
+          return patientResponse.then(() => {
+            req.reply({ body: { data: patient, included: [] } });
+          });
+        })
+        .as('routeDelayedPatient')
+        .intercept('GET', '/api/workspace-patients/*', {
+          delay: 5000,
+          body: { data: workspacePatient, included: [] },
+        })
+        .as('routeDelayedWorkspacePatient')
+        .intercept('GET', `/api/actions/${ action.id }/form`, {
+          delay: 1000,
+          body: { data: testForm, included: [] },
+        })
+        .as('routeDelayedForm')
+        .intercept('GET', `/api/actions/${ action.id }*`, {
+          delay: 1000,
+          body: { data: action, included: [] },
+        })
+        .as('routeDelayedAction')
+        .intercept('GET', `/api/actions/${ action.id }/activity*`, req => {
+          return activityResponse.then(() => {
+            req.reply({ body: { data: [], included: [] } });
+          });
+        })
+        .as('routeDelayedActivity')
+        .intercept('GET', `/api/actions/${ action.id }/comments`, {
+          delay: 1000,
+          body: { data: [], included: [] },
+        })
+        .as('routeDelayedComments')
+        .intercept('GET', `/api/actions/${ action.id }/files*`, {
+          delay: 1000,
+          body: { data: [], included: [] },
+        })
+        .as('routeDelayedFiles')
+        .visit(`/patient/${ patient.id }/action/${ action.id }`);
+
+      cy
+        .get('.loader__indicator')
+        .should('be.visible')
+        .find('.loader__indicator-dot')
+        .should('have.length', 3);
+
+      cy
+        .get('.patient__frame')
+        .should('not.exist')
+        .then(releasePatient);
+
+      cy
+        .wait('@routeDelayedPatient')
+        .get('.patient-action__loader')
+        .should('be.visible')
+        .and('have.attr', 'aria-busy', 'true')
+        .find('.patient-action-loading__skeleton')
+        .should('be.visible')
+        .find('.patient-action-loading__chip')
+        .should('have.length', 4);
+
+      cy
+        .get('.patient-action-loading__skeleton')
+        .find('.patient-action__form, .patient-action__attachments')
+        .should('not.exist');
+
+      cy
+        .get('.patient-sidebar__header')
+        .should('be.visible');
+
+      cy
+        .get('.patient-sidebar__sidebars .patient-sidebar__loader')
+        .should('be.visible')
+        .and('have.attr', 'aria-busy', 'true');
+
+      cy
+        .wait('@routeDelayedAction')
+        .get('.patient-action__name')
+        .should('contain', 'Loading State Action');
+
+      cy
+        .get('.patient-action__form-region .loader')
+        .should('not.exist');
+
+      cy
+        .get('.patient-action__activity-loading')
+        .should('exist')
+        .and('have.attr', 'aria-busy', 'true')
+        .find('.skeleton-loading__shape')
+        .should('have.length', 2)
+        .then(releaseActivity);
+
+      cy
+        .get('.patient-action__attachments .loader')
+        .should('not.exist');
+
+      cy
+        .wait('@routeDelayedWorkspacePatient')
+        .get('.patient-sidebar__header')
+        .should('be.visible')
+        .get('.patient-sidebar__card')
+        .first()
+        .should('be.visible');
+
+      cy
+        .wait('@routeDelayedForm')
+        .get('.patient-action__form-region .form__frame')
+        .should('exist');
+
+      cy
+        .wait(['@routeDelayedActivity', '@routeDelayedComments', '@routeDelayedFiles'])
+        .get('.patient-action__activity')
+        .should('contain', 'Activity')
+        .find('.loader')
+        .should('not.exist');
     });
+    cy.then(() => {
+      const testTime = dayjs(testDate()).hour(12).valueOf();
 
-    const testPatient = getPatient({
-      attributes: {
-        first_name: 'Test',
-        last_name: 'Patient',
-      },
-      relationships: {
-        workspaces: getRelationship(workspaceOne),
-      },
-    });
-
-    const testAction = getAction({
-      attributes: {
-        name: longActionName,
-        details: 'Details',
-        duration: 5,
-        due_date: testDateSubtract(2),
-        due_time: '06:01:00',
-        updated_at: testTs(),
-        sharing: true,
-      },
-      relationships: {
-        comments: getRelationship([getComment()]),
-        files: getRelationship([getFile()]),
-        owner: getRelationship(currentClinician),
-        state: getRelationship(stateTodo),
-        patient: getRelationship(testPatient),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeWorkspaceClinicians(fx => {
-        fx.data = [currentClinician, testClinician];
-
-        return fx;
-      })
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        return fx;
-      })
-      .routePatientActions(fx => {
-        fx.data = [testAction];
-
-        return fx;
-      })
-      .routeActionActivity(fx => {
-        fx.data = [
-          getActivity({
-            event_type: 'ActionCreated',
-            source: 'api',
-            date: testTs(),
-          }),
-          getActivity({
-            event_type: 'ActionClinicianAssigned',
-            source: 'api',
-          }, {
-            clinician: getRelationship(testClinician),
-          }),
-          getActivity({
-            event_type: 'ActionDetailsUpdated',
-            source: 'api',
-          }),
-          getActivity({
-            event_type: 'ActionDueDateUpdated',
-            source: 'api',
-            previous: null,
-            value: '2019-09-10',
-          }),
-          getActivity({
-            event_type: 'ActionDueDateUpdated',
-            source: 'api',
-            previous: null,
-            value: null,
-          }),
-          getActivity({
-            event_type: 'ActionDurationUpdated',
-            source: 'api',
-            previous: 0,
-            value: 10,
-          }),
-          getActivity({
-            event_type: 'ActionDurationUpdated',
-            source: 'api',
-            previous: 0,
-            value: null,
-          }),
-          getActivity({
-            event_type: 'ActionNameUpdated',
-            source: 'api',
-            previous: 'New Action',
-            value: 'New Action Name Updated',
-          }),
-          getActivity({
-            event_type: 'ActionTeamAssigned',
-            source: 'api',
-          }, {
-            team: getRelationship(teamOther),
-          }),
-          getActivity({
-            event_type: 'ActionStateUpdated',
-            source: 'api',
-          }, {
-            state: getRelationship(stateDone),
-          }),
-          getActivity({
-            event_type: 'ActionFormUpdated',
-            source: 'api',
-          }, {
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionFormResponded',
-            source: 'api',
-          }, {
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionDueTimeUpdated',
-            source: 'api',
-            previous: null,
-            value: '11:12:13',
-          }),
-          getActivity({
-            event_type: 'ActionDueTimeUpdated',
-            source: 'api',
-            previous: null,
-            value: null,
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'api',
-            value: 'sent',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'api',
-            value: 'canceled',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionFormResponded',
-            source: 'api',
-          }, {
-            editor: getRelationship(),
-            recipient: getRelationship(testPatient),
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'api',
-            value: 'pending',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionCreated',
-            source: 'system',
-          }, {
-            editor: getRelationship(testClinician),
-          }),
-          getActivity({
-            event_type: 'ActionClinicianAssigned',
-            source: 'system',
-          }, {
-            clinician: getRelationship(testClinician),
-          }),
-          getActivity({
-            event_type: 'ActionDetailsUpdated',
-            source: 'system',
-          }),
-          getActivity({
-            event_type: 'ActionDueDateUpdated',
-            source: 'system',
-            previous: null,
-            value: '2019-09-10',
-          }),
-          getActivity({
-            event_type: 'ActionDueDateUpdated',
-            source: 'system',
-            previous: null,
-            value: null,
-          }),
-          getActivity({
-            event_type: 'ActionDurationUpdated',
-            source: 'system',
-            previous: 0,
-            value: 10,
-          }),
-          getActivity({
-            event_type: 'ActionDurationUpdated',
-            source: 'system',
-            previous: 0,
-            value: null,
-          }),
-          getActivity({
-            event_type: 'ActionNameUpdated',
-            source: 'system',
-            previous: 'New Action',
-            value: 'New Action Name Updated',
-          }),
-          getActivity({
-            event_type: 'ActionTeamAssigned',
-            source: 'system',
-          }, {
-            team: getRelationship(teamOther),
-          }),
-          getActivity({
-            event_type: 'ActionStateUpdated',
-            source: 'system',
-          }, {
-            state: getRelationship(stateDone),
-          }),
-          getActivity({
-            event_type: 'ActionFormUpdated',
-            source: 'system',
-          }, {
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionFormResponded',
-            source: 'system',
-          }, {
-            editor: getRelationship(),
-            recipient: getRelationship(testPatient),
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionFormResponded',
-            source: 'system',
-          }, {
-            form: getRelationship(testForm),
-          }),
-          getActivity({
-            event_type: 'ActionDueTimeUpdated',
-            source: 'system',
-            previous: null,
-            value: '11:12:13',
-          }),
-          getActivity({
-            event_type: 'ActionDueTimeUpdated',
-            source: 'system',
-            previous: null,
-            value: null,
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'system',
-            value: 'sent',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'system',
-            value: 'canceled',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'ActionSharingUpdated',
-            source: 'system',
-            value: 'pending',
-          }, {
-            recipient: getRelationship(testPatient),
-          }),
-          getActivity({
-            event_type: 'UnsupportedActionEvent',
-            source: 'system',
-          }),
-        ];
-
-        return fx;
-      })
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routePatientFlows()
-      .visitOnClock(`/patient/${ testPatient.id }/action/${ testAction.id }`, { now: testTime, functionNames: ['Date'] })
-      .wait('@routeAction')
-      .wait('@routeActionActivity')
-      .wait('@routePatient')
-      .tick(350); // since this test uses visitOnClock, we need this for the sidebar animation
-
-    cy.viewport(1048, 785);
-
-    cy
-      .get('.patient-action__menu')
-      .should('have.class', 'button--menu');
-
-    cy
-      .get('.patient__context-trail')
-      .contains(testAction.attributes.name)
-      .should('have.class', 'patient__context-current')
-      .and('not.have.class', 'patient__context-link');
-
-    cy
-      .get('.patient-action__chips')
-      .should('be.visible');
-
-    cy
-      .get('.patient-action__counts .js-attachments')
-      .should('have.attr', 'aria-label', '1 attachment')
-      .click();
-
-    cy
-      .get('[data-attachments-region]')
-      .should('be.focused');
-
-    cy
-      .get('.patient-action__counts .js-comments')
-      .should('have.attr', 'aria-label', '1 comment')
-      .click();
-
-    cy
-      .get('[data-activity-region]')
-      .should('be.focused');
-
-    cy.viewport(1920, 900);
-
-    cy
-      .get('.patient-action__header')
-      .should($header => {
-        expect($header[0].getBoundingClientRect().width).to.equal(1200);
+      const currentClinician = getCurrentClinician();
+      const testClinician = getClinician({
+        attributes: {
+          name: 'Another Clinician',
+        },
+        relationships: {
+          team: getRelationship(teamCoordinator),
+        },
       });
 
-    cy.viewport(1280, 720);
-
-    cy
-      .get('.patient-action')
-      .find('[data-save-region]')
-      .should('be.empty');
-
-    cy
-      .get('.patient-action')
-      .find('[data-details-region] .js-input')
-      .focus()
-      .parents('.textarea-flex')
-      .should('have.class', 'is-editing')
-      .find('.js-input')
-      .blur()
-      .parents('.textarea-flex')
-      .should('not.have.class', 'is-editing');
-
-    cy
-      .get('.patient-action')
-      .find('[data-save-region]')
-      .should('be.empty');
-
-    cy
-      .get('.patient-action')
-      .find('[data-details-region] .js-input')
-      .clear();
-
-    cy
-      .get('.patient-action__details-actions')
-      .should('be.visible');
-
-    cy
-      .intercept('PATCH', `/api/actions/${ testAction.id }`, {
-        statusCode: 204,
-        body: {},
-      })
-      .as('routePatchAction');
-
-    cy
-      .get('.patient-action')
-      .find('[data-save-region]')
-      .contains('Save')
-      .click();
-
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.relationships).to.be.undefined;
-        expect(data.id).to.equal(testAction.id);
-        expect(data.attributes.details).to.equal('');
-        expect(data.attributes.due_date).to.not.exist;
-        expect(data.attributes.due_time).to.not.exist;
-        expect(data.attributes.duration).to.not.exist;
+      const testPatient = getPatient({
+        attributes: {
+          first_name: 'Test',
+          last_name: 'Patient',
+        },
+        relationships: {
+          workspaces: getRelationship(workspaceOne),
+        },
       });
 
-    cy
-      .get('.patient-action')
-      .find('[data-save-region]')
-      .should('be.empty');
+      const testAction = getAction({
+        attributes: {
+          name: longActionName,
+          details: 'Details',
+          duration: 5,
+          due_date: testDateSubtract(2),
+          due_time: '06:01:00',
+          updated_at: testTs(),
+          sharing: true,
+        },
+        relationships: {
+          comments: getRelationship([getComment()]),
+          files: getRelationship([getFile()]),
+          owner: getRelationship(currentClinician),
+          state: getRelationship(stateTodo),
+          patient: getRelationship(testPatient),
+        },
+      });
 
-    cy
-      .get('.patient-action')
-      .find('[data-details-region] .js-input')
-      .focus()
-      .should('have.css', 'overflow-y', 'auto')
-      .parents('.textarea-flex')
-      .should('have.class', 'is-editing')
-      .find('.js-input')
-      .type('First line{enter}Second line')
-      .should('have.value', 'First line\nSecond line')
-      .blur()
-      .parents('.textarea-flex')
-      .should('have.class', 'is-editing');
+      cy
+        .routesForPatientAction()
+        .routeWorkspaceClinicians(fx => {
+          fx.data = [currentClinician, testClinician];
 
-    cy
-      .get('.patient-action')
-      .find('[data-details-region] .js-input')
-      .focus()
-      .blur()
-      .parents('.textarea-flex')
-      .should('not.have.class', 'is-editing');
+          return fx;
+        })
+        .routeAction(fx => {
+          fx.data = testAction;
 
-    cy
-      .get('.patient-action')
-      .find('[data-save-region]')
-      .contains('Cancel')
+          return fx;
+        })
+        .routePatientActions(fx => {
+          fx.data = [testAction];
+
+          return fx;
+        })
+        .routeActionActivity(fx => {
+          fx.data = [
+            getActivity({
+              event_type: 'ActionCreated',
+              source: 'api',
+              date: testTs(),
+            }),
+            getActivity({
+              event_type: 'ActionClinicianAssigned',
+              source: 'api',
+            }, {
+              clinician: getRelationship(testClinician),
+            }),
+            getActivity({
+              event_type: 'ActionDetailsUpdated',
+              source: 'api',
+            }),
+            getActivity({
+              event_type: 'ActionDueDateUpdated',
+              source: 'api',
+              previous: null,
+              value: '2019-09-10',
+            }),
+            getActivity({
+              event_type: 'ActionDueDateUpdated',
+              source: 'api',
+              previous: null,
+              value: null,
+            }),
+            getActivity({
+              event_type: 'ActionDurationUpdated',
+              source: 'api',
+              previous: 0,
+              value: 10,
+            }),
+            getActivity({
+              event_type: 'ActionDurationUpdated',
+              source: 'api',
+              previous: 0,
+              value: null,
+            }),
+            getActivity({
+              event_type: 'ActionNameUpdated',
+              source: 'api',
+              previous: 'New Action',
+              value: 'New Action Name Updated',
+            }),
+            getActivity({
+              event_type: 'ActionTeamAssigned',
+              source: 'api',
+            }, {
+              team: getRelationship(teamOther),
+            }),
+            getActivity({
+              event_type: 'ActionStateUpdated',
+              source: 'api',
+            }, {
+              state: getRelationship(stateDone),
+            }),
+            getActivity({
+              event_type: 'ActionFormUpdated',
+              source: 'api',
+            }, {
+              form: getRelationship(testForm),
+            }),
+            getActivity({
+              event_type: 'ActionFormResponded',
+              source: 'api',
+            }, {
+              form: getRelationship(testForm),
+            }),
+            getActivity({
+              event_type: 'ActionDueTimeUpdated',
+              source: 'api',
+              previous: null,
+              value: '11:12:13',
+            }),
+            getActivity({
+              event_type: 'ActionDueTimeUpdated',
+              source: 'api',
+              previous: null,
+              value: null,
+            }),
+            getActivity({
+              event_type: 'ActionSharingUpdated',
+              source: 'api',
+              value: 'sent',
+            }, {
+              recipient: getRelationship(testPatient),
+            }),
+            getActivity({
+              event_type: 'ActionSharingUpdated',
+              source: 'api',
+              value: 'canceled',
+            }, {
+              recipient: getRelationship(testPatient),
+            }),
+            getActivity({
+              event_type: 'ActionFormResponded',
+              source: 'api',
+            }, {
+              editor: getRelationship(),
+              recipient: getRelationship(testPatient),
+              form: getRelationship(testForm),
+            }),
+            getActivity({
+              event_type: 'ActionSharingUpdated',
+              source: 'api',
+              value: 'pending',
+            }, {
+              recipient: getRelationship(testPatient),
+            }),
+            getActivity({
+              event_type: 'ActionCreated',
+              source: 'system',
+            }, {
+              editor: getRelationship(testClinician),
+            }),
+            getActivity({
+              event_type: 'ActionClinicianAssigned',
+              source: 'system',
+            }, {
+              clinician: getRelationship(testClinician),
+            }),
+            getActivity({
+              event_type: 'ActionDetailsUpdated',
+              source: 'system',
+            }),
+            getActivity({
+              event_type: 'ActionDueDateUpdated',
+              source: 'system',
+              previous: null,
+              value: '2019-09-10',
+            }),
+            getActivity({
+              event_type: 'ActionDueDateUpdated',
+              source: 'system',
+              previous: null,
+              value: null,
+            }),
+            getActivity({
+              event_type: 'ActionDurationUpdated',
+              source: 'system',
+              previous: 0,
+              value: 10,
+            }),
+            getActivity({
+              event_type: 'ActionDurationUpdated',
+              source: 'system',
+              previous: 0,
+              value: null,
+            }),
+            getActivity({
+              event_type: 'ActionNameUpdated',
+              source: 'system',
+              previous: 'New Action',
+              value: 'New Action Name Updated',
+            }),
+            getActivity({
+              event_type: 'ActionTeamAssigned',
+              source: 'system',
+            }, {
+              team: getRelationship(teamOther),
+            }),
+            getActivity({
+              event_type: 'ActionStateUpdated',
+              source: 'system',
+            }, {
+              state: getRelationship(stateDone),
+            }),
+            getActivity({
+              event_type: 'ActionFormUpdated',
+              source: 'system',
+            }, {
+              form: getRelationship(testForm),
+            }),
+            getActivity({
+              event_type: 'ActionFormResponded',
+              source: 'system',
+            }, {
+              editor: getRelationship(),
+              recipient: getRelationship(testPatient),
+              form: getRelationship(testForm),
+            }),
+            getActivity({
+              event_type: 'ActionFormResponded',
+              source: 'system',
+            }, {
+              form: getRelationship(testForm),
+            }),
+            getActivity({
+              event_type: 'ActionDueTimeUpdated',
+              source: 'system',
+              previous: null,
+              value: '11:12:13',
+            }),
+            getActivity({
+              event_type: 'ActionDueTimeUpdated',
+              source: 'system',
+              previous: null,
+              value: null,
+            }),
+            getActivity({
+              event_type: 'ActionSharingUpdated',
+              source: 'system',
+              value: 'sent',
+            }, {
+              recipient: getRelationship(testPatient),
+            }),
+            getActivity({
+              event_type: 'ActionSharingUpdated',
+              source: 'system',
+              value: 'canceled',
+            }, {
+              recipient: getRelationship(testPatient),
+            }),
+            getActivity({
+              event_type: 'ActionSharingUpdated',
+              source: 'system',
+              value: 'pending',
+            }, {
+              recipient: getRelationship(testPatient),
+            }),
+            getActivity({
+              event_type: 'UnsupportedActionEvent',
+              source: 'system',
+            }),
+          ];
+
+          return fx;
+        })
+        .routePatient(fx => {
+          fx.data = testPatient;
+
+          return fx;
+        })
+        .routePatientFlows()
+        .visitOnClock(`/patient/${ testPatient.id }/action/${ testAction.id }`, { now: testTime, functionNames: ['Date'] })
+        .wait('@routeAction')
+        .wait('@routeActionActivity')
+        .wait('@routePatient')
+        .tick(350); // since this test uses visitOnClock, we need this for the sidebar animation
+
+      cy.viewport(1048, 785);
+
+      cy
+        .get('.patient-action__menu')
+        .should('have.class', 'button--menu');
+
+      cy
+        .get('.patient__context-trail')
+        .contains(testAction.attributes.name)
+        .should('have.class', 'patient__context-current')
+        .and('not.have.class', 'patient__context-link');
+
+      cy
+        .get('.patient-action__chips')
+        .should('be.visible');
+
+      cy
+        .get('.patient-action__counts .js-attachments')
+        .should('have.attr', 'aria-label', '1 attachment')
+        .click();
+
+      cy
+        .get('[data-attachments-region]')
+        .should('be.focused');
+
+      cy
+        .get('.patient-action__counts .js-comments')
+        .should('have.attr', 'aria-label', '1 comment')
+        .click();
+
+      cy
+        .get('[data-activity-region]')
+        .should('be.focused');
+
+      cy.viewport(1920, 900);
+
+      cy
+        .get('.patient-action__header')
+        .should($header => {
+          expect($header[0].getBoundingClientRect().width).to.equal(1200);
+        });
+
+      cy.viewport(1280, 720);
+
+      cy
+        .get('.patient-action')
+        .find('[data-save-region]')
+        .should('be.empty');
+
+      cy
+        .get('.patient-action')
+        .find('[data-details-region] .js-input')
+        .focus()
+        .parents('.textarea-flex')
+        .should('have.class', 'is-editing')
+        .find('.js-input')
+        .blur()
+        .parents('.textarea-flex')
+        .should('not.have.class', 'is-editing');
+
+      cy
+        .get('.patient-action')
+        .find('[data-save-region]')
+        .should('be.empty');
+
+      cy
+        .get('.patient-action')
+        .find('[data-details-region] .js-input')
+        .clear();
+
+      cy
+        .get('.patient-action__details-actions')
+        .should('be.visible');
+
+      cy
+        .intercept('PATCH', `/api/actions/${ testAction.id }`, {
+          statusCode: 204,
+          body: {},
+        })
+        .as('routePatchAction');
+
+      cy
+        .get('.patient-action')
+        .find('[data-save-region]')
+        .contains('Save')
+        .click();
+
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.relationships).to.be.undefined;
+          expect(data.id).to.equal(testAction.id);
+          expect(data.attributes.details).to.equal('');
+          expect(data.attributes.due_date).to.not.exist;
+          expect(data.attributes.due_time).to.not.exist;
+          expect(data.attributes.duration).to.not.exist;
+        });
+
+      cy
+        .get('.patient-action')
+        .find('[data-save-region]')
+        .should('be.empty');
+
+      cy
+        .get('.patient-action')
+        .find('[data-details-region] .js-input')
+        .focus()
+        .should('have.css', 'overflow-y', 'auto')
+        .parents('.textarea-flex')
+        .should('have.class', 'is-editing')
+        .find('.js-input')
+        .type('First line{enter}Second line')
+        .should('have.value', 'First line\nSecond line')
+        .blur()
+        .parents('.textarea-flex')
+        .should('have.class', 'is-editing');
+
+      cy
+        .get('.patient-action')
+        .find('[data-details-region] .js-input')
+        .focus()
+        .blur()
+        .parents('.textarea-flex')
+        .should('not.have.class', 'is-editing');
+
+      cy
+        .get('.patient-action')
+        .find('[data-save-region]')
+        .contains('Cancel')
       // Need force because Cypress does not recognize the element is typeable
-      .type('{enter}', { force: true });
+        .type('{enter}', { force: true });
 
-    cy
-      .get('.patient-action')
-      .find('[data-details-region] .js-input')
-      .should('have.value', '');
+      cy
+        .get('.patient-action')
+        .find('[data-details-region] .js-input')
+        .should('have.value', '');
 
-    cy
-      .get('.patient-action')
-      .find('[data-save-region]')
-      .should('be.empty');
+      cy
+        .get('.patient-action')
+        .find('[data-save-region]')
+        .should('be.empty');
 
-    cy
-      .get('.patient-action')
-      .find('[data-state-region]')
-      .contains('To Do')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-state-region]')
+        .contains('To Do')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('In Progress')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('In Progress')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.relationships.state.data.id).to.equal(stateInProgress.id);
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.relationships.state.data.id).to.equal(stateInProgress.id);
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-owner-region]')
-      .contains('Clinician McTester')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-owner-region]')
+        .contains('Clinician McTester')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('Nurse NUR')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('Nurse NUR')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.relationships.owner.data.id).to.equal(teamNurse.id);
-        expect(data.relationships.owner.data.type).to.equal(teamNurse.type);
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.relationships.owner.data.id).to.equal(teamNurse.id);
+          expect(data.relationships.owner.data.type).to.equal(teamNurse.type);
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-owner-region]')
-      .contains('NUR')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-owner-region]')
+        .contains('NUR')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('Clinician McTester')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('Clinician McTester')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.relationships.owner.data.id).to.equal(currentClinician.id);
-        expect(data.relationships.owner.data.type).to.equal(currentClinician.type);
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.relationships.owner.data.id).to.equal(currentClinician.id);
+          expect(data.relationships.owner.data.type).to.equal(currentClinician.type);
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-time-region]')
-      .contains('6:01 AM')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-due-time-region]')
+        .contains('6:01 AM')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('Clear Time')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('Clear Time')
+        .click();
 
-    cy
-      .wait('@routePatchAction');
+      cy
+        .wait('@routePatchAction');
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-time-region]')
-      .find('button')
-      .should('exist')
-      .find('.is-overdue')
-      .should('not.exist');
+      cy
+        .get('.patient-action')
+        .find('[data-due-time-region]')
+        .find('button')
+        .should('exist')
+        .find('.is-overdue')
+        .should('not.exist');
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-time-region]')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-due-time-region]')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('7:00 AM')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('7:00 AM')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.due_time).to.equal('07:00:00');
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.attributes.due_time).to.equal('07:00:00');
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-date-region]')
-      .contains(formatDate(testDateSubtract(2), 'SHORT'))
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-due-date-region]')
+        .contains(formatDate(testDateSubtract(2), 'SHORT'))
+        .click();
 
-    cy
-      .get('.datepicker')
-      .contains('Today')
-      .click();
+      cy
+        .get('.datepicker')
+        .contains('Today')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.due_date).to.equal(testDate());
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.attributes.due_date).to.equal(testDate());
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-time-region]')
-      .find('.is-overdue');
+      cy
+        .get('.patient-action')
+        .find('[data-due-time-region]')
+        .find('.is-overdue');
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-time-region]')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-due-time-region]')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('1:30 PM')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('1:30 PM')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.due_time).to.equal('13:30:00');
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.attributes.due_time).to.equal('13:30:00');
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-time-region]')
-      .find('.is-overdue')
-      .should('not.exist');
+      cy
+        .get('.patient-action')
+        .find('[data-due-time-region]')
+        .find('.is-overdue')
+        .should('not.exist');
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-time-region]')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-due-time-region]')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('Clear Time')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('Clear Time')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.due_time).to.be.null;
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.attributes.due_time).to.be.null;
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-due-date-region]')
-      .contains(formatDate(testDate(), 'SHORT'))
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-due-date-region]')
+        .contains(formatDate(testDate(), 'SHORT'))
+        .click();
 
-    cy
-      .get('.datepicker')
-      .contains('Clear')
-      .click();
+      cy
+        .get('.datepicker')
+        .contains('Clear')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.due_date).to.be.null;
-        expect(data.attributes.due_time).to.be.null;
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.attributes.due_date).to.be.null;
+          expect(data.attributes.due_time).to.be.null;
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-duration-region]')
-      .contains('5')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-duration-region]')
+        .contains('5')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('Clear')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('Clear')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.duration).to.equal(0);
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.attributes.duration).to.equal(0);
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-duration-region]')
-      .find('button')
-      .should('not.contain', 'Select Duration')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-duration-region]')
+        .find('button')
+        .should('not.contain', 'Select Duration')
+        .click();
 
-    cy
-      .get('.picklist')
-      .contains('3 mins')
-      .click();
+      cy
+        .get('.picklist')
+        .contains('3 mins')
+        .click();
 
-    cy
-      .wait('@routePatchAction')
-      .its('request.body')
-      .should(({ data }) => {
-        expect(data.attributes.duration).to.equal(3);
-      });
+      cy
+        .wait('@routePatchAction')
+        .its('request.body')
+        .should(({ data }) => {
+          expect(data.attributes.duration).to.equal(3);
+        });
 
-    cy
-      .get('.patient-action')
-      .find('[data-state-region]')
-      .contains('In Progress')
-      .click();
+      cy
+        .get('.patient-action')
+        .find('[data-state-region]')
+        .contains('In Progress')
+        .click();
 
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .contains('Done')
-      .click();
+      cy
+        .get('.picklist')
+        .find('.js-picklist-item')
+        .contains('Done')
+        .click();
 
-    cy
-      .get('.patient-action')
-      .find('[data-form-sharing-region]')
-      .should('contain', 'Share Form');
+      cy
+        .get('.patient-action')
+        .find('[data-form-sharing-region]')
+        .should('contain', 'Share Form');
 
-    cy
-      .get('.patient-action')
-      .find('[data-dialer-region]')
-      .should('be.empty');
+      cy
+        .get('.patient-action')
+        .find('[data-dialer-region]')
+        .should('be.empty');
 
-    cy
-      .get('.patient-action')
-      .find('[data-attachments-region]')
-      .should('be.empty');
+      cy
+        .get('.patient-action')
+        .find('[data-attachments-region]')
+        .should('be.empty');
 
-    cy
-      .get('[data-activity-region]')
+      cy
+        .get('[data-activity-region]')
       // source = 'api' activity events
-      .should('contain', 'Clinician McTester (Nurse) added this action')
-      .should('contain', 'Clinician McTester (Nurse) changed the owner to Another Clinician')
-      .should('contain', 'Clinician McTester (Nurse) updated the details of this action')
-      .should('contain', 'Clinician McTester (Nurse) changed the due date to Sep 10, 2019')
-      .should('contain', 'Clinician McTester (Nurse) cleared the due date')
-      .should('contain', 'Clinician McTester (Nurse) updated the duration to 10')
-      .should('contain', 'Clinician McTester (Nurse) cleared duration')
-      .should('contain', 'Clinician McTester (Nurse) updated the name of this action from New Action to New Action Name Updated')
-      .should('contain', 'Clinician McTester (Nurse) changed the owner to Other')
-      .should('contain', 'Clinician McTester (Nurse) changed the state to Done')
-      .should('contain', 'Clinician McTester (Nurse) added the form Test Form')
-      .should('contain', 'Clinician McTester (Nurse) worked on the form Test Form')
-      .should('contain', 'Clinician McTester (Nurse) changed the due time to 11:12 AM')
-      .should('contain', 'Clinician McTester (Nurse) cleared the due time')
-      .should('contain', 'Form shared with Test Patient. Waiting for response.')
-      .should('contain', 'Clinician McTester (Nurse) cancelled form sharing')
-      .should('contain', 'Test Patient completed the form Test Form')
+        .should('contain', 'Clinician McTester (Nurse) added this action')
+        .should('contain', 'Clinician McTester (Nurse) changed the owner to Another Clinician')
+        .should('contain', 'Clinician McTester (Nurse) updated the details of this action')
+        .should('contain', 'Clinician McTester (Nurse) changed the due date to Sep 10, 2019')
+        .should('contain', 'Clinician McTester (Nurse) cleared the due date')
+        .should('contain', 'Clinician McTester (Nurse) updated the duration to 10')
+        .should('contain', 'Clinician McTester (Nurse) cleared duration')
+        .should('contain', 'Clinician McTester (Nurse) updated the name of this action from New Action to New Action Name Updated')
+        .should('contain', 'Clinician McTester (Nurse) changed the owner to Other')
+        .should('contain', 'Clinician McTester (Nurse) changed the state to Done')
+        .should('contain', 'Clinician McTester (Nurse) added the form Test Form')
+        .should('contain', 'Clinician McTester (Nurse) worked on the form Test Form')
+        .should('contain', 'Clinician McTester (Nurse) changed the due time to 11:12 AM')
+        .should('contain', 'Clinician McTester (Nurse) cleared the due time')
+        .should('contain', 'Form shared with Test Patient. Waiting for response.')
+        .should('contain', 'Clinician McTester (Nurse) cancelled form sharing')
+        .should('contain', 'Test Patient completed the form Test Form')
       // source = 'system' activity events
-      .should('contain', 'Owner changed to Another Clinician')
-      .should('contain', 'Action details updated')
-      .should('contain', 'Due Date changed to Sep 10, 2019')
-      .should('contain', 'Due Date cleared')
-      .should('contain', 'Duration updated to 10')
-      .should('contain', 'Duration cleared')
-      .should('contain', 'Action name updated from New Action to New Action Name Updated')
-      .should('contain', 'Owner changed to Other')
-      .should('contain', 'State changed to Done')
-      .should('contain', 'Form Test Form added')
-      .should('contain', 'Form Test Form completed')
-      .should('contain', 'Form Test Form worked on')
-      .should('contain', 'Due Time changed to 11:12 AM')
-      .should('contain', 'Due Time cleared')
-      .should('contain', 'Form shared with Test Patient. Waiting for response.')
-      .should('contain', 'Form sharing (Nurse) cancelled');
+        .should('contain', 'Owner changed to Another Clinician')
+        .should('contain', 'Action details updated')
+        .should('contain', 'Due Date changed to Sep 10, 2019')
+        .should('contain', 'Due Date cleared')
+        .should('contain', 'Duration updated to 10')
+        .should('contain', 'Duration cleared')
+        .should('contain', 'Action name updated from New Action to New Action Name Updated')
+        .should('contain', 'Owner changed to Other')
+        .should('contain', 'State changed to Done')
+        .should('contain', 'Form Test Form added')
+        .should('contain', 'Form Test Form completed')
+        .should('contain', 'Form Test Form worked on')
+        .should('contain', 'Due Time changed to 11:12 AM')
+        .should('contain', 'Due Time cleared')
+        .should('contain', 'Form shared with Test Patient. Waiting for response.')
+        .should('contain', 'Form sharing (Nurse) cancelled');
 
-    cy
-      .get('[data-activity-region] .patient-action__activity-item')
-      .each($item => {
-        expect($item.text().trim()).not.to.equal('');
-      });
+      cy
+        .get('[data-activity-region] .patient-action__activity-item')
+        .each($item => {
+          expect($item.text().trim()).not.to.equal('');
+        });
 
-    cy
-      .intercept('DELETE', `/api/actions/${ testAction.id }`, {
-        statusCode: 204,
-        body: {},
-      })
-      .as('routeDeleteFlowAction');
+      cy
+        .intercept('DELETE', `/api/actions/${ testAction.id }`, {
+          statusCode: 204,
+          body: {},
+        })
+        .as('routeDeleteFlowAction');
 
-    cy
-      .get('.patient-action__menu')
-      .click();
+      cy
+        .get('.patient-action__menu')
+        .click();
 
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .contains('Delete Action')
-      .click()
-      .wait('@routeDeleteFlowAction');
+      cy
+        .get('.picklist')
+        .find('.js-picklist-item')
+        .contains('Delete Action')
+        .click()
+        .wait('@routeDeleteFlowAction');
 
-    cy
-      .url()
-      .should('not.contain', '/action/');
+      cy
+        .url()
+        .should('not.contain', '/action/');
+    });
   });
 
   specify('action phone dialer', function() {
@@ -1322,6 +1481,100 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('not.exist');
   });
 
+  specify('action attachments - uploads not allowed without edit permission', function() {
+    const testFile = getFile();
+    const testProgramAction = getProgramAction({
+      attributes: {
+        allowed_uploads: ['pdf'],
+      },
+    });
+    const testAction = getAction({
+      relationships: {
+        'files': getRelationship([testFile]),
+        'owner': getRelationship(teamNurse),
+        'program-action': getRelationship(testProgramAction),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeSettings('upload_attachments', true)
+      .routeCurrentClinician(fx => {
+        fx.data = getCurrentClinician({
+          relationships: {
+            role: getRelationship(roleNoFilterEmployee),
+          },
+        });
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+        fx.included.push(testProgramAction);
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [testFile];
+        return fx;
+      })
+      .visit(`/patient/1/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('[data-attachments-region]')
+      .find('.js-add')
+      .should('not.exist');
+  });
+
+  specify('action attachments - uploads not allowed for org', function() {
+    const testPatient = getPatient();
+    const testFile = getFile();
+
+    const testProgramAction = getProgramAction({
+      attributes: {
+        allowed_uploads: ['pdf'],
+      },
+    });
+
+    const testAction = getAction({
+      relationships: {
+        'files': getRelationship([testFile]),
+        'program-action': getRelationship(testProgramAction),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        fx.included.push(testProgramAction);
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [testFile];
+
+        return fx;
+      })
+
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('.patient-action')
+      .find('[data-attachments-files-region]')
+      .children()
+      .should('have.length', 1);
+
+    cy
+      .get('.patient-action')
+      .find('[data-attachments-region]')
+      .find('.js-add')
+      .should('not.exist');
+  });
+
   specify('action attachments become read-only when the flow is done', function() {
     const testFile = getFile();
     const testProgramAction = getProgramAction({
@@ -1446,100 +1699,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .get('.patient__context-trail')
       .should('contain', 'New Action Name');
-  });
-
-  specify('action attachments - uploads not allowed without edit permission', function() {
-    const testFile = getFile();
-    const testProgramAction = getProgramAction({
-      attributes: {
-        allowed_uploads: ['pdf'],
-      },
-    });
-    const testAction = getAction({
-      relationships: {
-        'files': getRelationship([testFile]),
-        'owner': getRelationship(teamNurse),
-        'program-action': getRelationship(testProgramAction),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeSettings('upload_attachments', true)
-      .routeCurrentClinician(fx => {
-        fx.data = getCurrentClinician({
-          relationships: {
-            role: getRelationship(roleNoFilterEmployee),
-          },
-        });
-        return fx;
-      })
-      .routeAction(fx => {
-        fx.data = testAction;
-        fx.included.push(testProgramAction);
-        return fx;
-      })
-      .routeActionFiles(fx => {
-        fx.data = [testFile];
-        return fx;
-      })
-      .visit(`/patient/1/action/${ testAction.id }`)
-      .wait('@routeAction')
-      .wait('@routeActionFiles');
-
-    cy
-      .get('[data-attachments-region]')
-      .find('.js-add')
-      .should('not.exist');
-  });
-
-  specify('action attachments - uploads not allowed for org', function() {
-    const testPatient = getPatient();
-    const testFile = getFile();
-
-    const testProgramAction = getProgramAction({
-      attributes: {
-        allowed_uploads: ['pdf'],
-      },
-    });
-
-    const testAction = getAction({
-      relationships: {
-        'files': getRelationship([testFile]),
-        'program-action': getRelationship(testProgramAction),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        fx.included.push(testProgramAction);
-
-        return fx;
-      })
-      .routeActionFiles(fx => {
-        fx.data = [testFile];
-
-        return fx;
-      })
-
-      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
-      .wait('@routeAction')
-      .wait('@routeActionFiles');
-
-    cy
-      .get('.patient-action')
-      .find('[data-attachments-files-region]')
-      .children()
-      .should('have.length', 1);
-
-    cy
-      .get('.patient-action')
-      .find('[data-attachments-region]')
-      .find('.js-add')
-      .should('not.exist');
   });
 
   specify('action comments', function() {
@@ -2455,52 +2614,56 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', `/action/${ testAction.id }`);
   });
 
-  specify('outreach pending sharing state', function() {
-    const testAction = getAction({
-      attributes: { sharing: 'pending' },
-      relationships: { form: getRelationship(testForm) },
+  specify('outreach pending and canceled sharing states', function() {
+    cy.then(() => {
+      cy.log('outreach pending sharing state');
+      const testAction = getAction({
+        attributes: { sharing: 'pending' },
+        relationships: { form: getRelationship(testForm) },
+      });
+
+      cy
+        .routesForPatientAction()
+        .routeAction(fx => {
+          fx.data = testAction;
+          return fx;
+        })
+        .routeFormByAction()
+        .routeFormDefinition()
+        .routeFormActionFields()
+        .routeLatestFormResponse()
+        .visit(`/patient/1/action/${ testAction.id }`)
+        .wait('@routeAction')
+        .get('.patient-action__sharing-state')
+        .should('contain', 'Waiting for Response')
+        .find('.fa-circle-dot')
+        .should('exist');
     });
 
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testAction;
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .visit(`/patient/1/action/${ testAction.id }`)
-      .wait('@routeAction')
-      .get('.patient-action__sharing-state')
-      .should('contain', 'Waiting for Response')
-      .find('.fa-circle-dot')
-      .should('exist');
-  });
+    cy.then(() => {
+      cy.log('outreach canceled sharing state');
+      const testAction = getAction({
+        attributes: { sharing: 'canceled' },
+        relationships: { form: getRelationship(testForm) },
+      });
 
-  specify('outreach canceled sharing state', function() {
-    const testAction = getAction({
-      attributes: { sharing: 'canceled' },
-      relationships: { form: getRelationship(testForm) },
+      cy
+        .routesForPatientAction()
+        .routeAction(fx => {
+          fx.data = testAction;
+          return fx;
+        })
+        .routeFormByAction()
+        .routeFormDefinition()
+        .routeFormActionFields()
+        .routeLatestFormResponse()
+        .visit(`/patient/1/action/${ testAction.id }`)
+        .wait('@routeAction')
+        .get('.patient-action__sharing-state')
+        .should('contain', 'Form Sharing Canceled')
+        .find('.fa-octagon-minus')
+        .should('exist');
     });
-
-    cy
-      .routesForPatientAction()
-      .routeAction(fx => {
-        fx.data = testAction;
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .visit(`/patient/1/action/${ testAction.id }`)
-      .wait('@routeAction')
-      .get('.patient-action__sharing-state')
-      .should('contain', 'Form Sharing Canceled')
-      .find('.fa-octagon-minus')
-      .should('exist');
   });
 
   specify('socket comments and attachments', function() {

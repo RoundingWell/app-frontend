@@ -2667,6 +2667,36 @@ context('patient flow page', function() {
       .get('.app-frame__content')
       .find('.action-card')
       .should('have.length', 3);
+
+    cy.then(() => {
+      [400, 410].forEach(status => {
+        cy.then(() => {
+          const patient = getPatient();
+          const flow = getFlow({ relationships: { patient: getRelationship(patient), state: getRelationship(stateTodo) } });
+          const action = getAction({ relationships: {
+            patient: getRelationship(patient), flow: getRelationship(flow), state: getRelationship(stateTodo),
+          } });
+          cy.routesForPatientAction()
+            .routePatient(fx => ({ ...fx, data: patient }))
+            .routeFlow(fx => ({ ...fx, data: flow }))
+            .routeFlowActions(fx => ({ ...fx, data: [action] }))
+            .routeFlowActivity()
+            .visit(`/patient/${ patient.id }/flow/${ flow.id }`)
+            .wait('@routeFlow')
+            .wait('@routeFlowActions');
+          cy.get('.patient-flow__list .action-card .js-select').should('be.visible');
+          cy.intercept('PATCH', '/api/actions/*', { statusCode: 400, body: {} }).as('failedSave');
+          cy.intercept('GET', `/api/flows/${ flow.id }?*`, { statusCode: status, body: { errors: [] } }).as('failedReload');
+          cy.get('.patient-flow__list .action-card .js-select').first().click();
+          cy.get('.bulk-edit-inline [data-due-time-region] button').click();
+          cy.get('.picklist').contains('10:00 AM').click();
+          cy.get('.bulk-edit-inline .js-save').click();
+          cy.wait('@failedSave').wait('@failedReload');
+          cy.get('.alert-box').should('be.visible');
+          if (status === 410) cy.location('pathname').should('include', `/patient/${ patient.id }/workflow`);
+        });
+      });
+    });
   });
 
   specify('click+shift multiselect', function() {

@@ -30,7 +30,7 @@ context('Noncontext Form', function() {
       .routesForDefault();
   });
 
-  specify('getClinicians', function() {
+  specify('form lookups fetch clinicians, directories, and patients', function() {
     const currentClinician = getCurrentClinician({
       relationships: {
         team: getRelationship(teamCoordinator),
@@ -114,14 +114,6 @@ context('Noncontext Form', function() {
       .should('have.length', 2)
       .invoke('map', clinician => clinician.name)
       .should('not.include', 'Non Team Member');
-  });
-
-  specify('getDirectory', function() {
-    const testAction = getAction({
-      relationships: {
-        form: getRelationship(testForm),
-      },
-    });
 
     cy
       .intercept('GET', '/api/directory/foo*', {
@@ -132,29 +124,7 @@ context('Noncontext Form', function() {
         statusCode: 400,
         body: { data: getTestPatientField('bar', ['bar', 'baz']) },
       })
-      .as('routeDirectoryBar')
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .routeActionActivity()
-      .routePatient(fx => {
-        fx.data = getPatient({
-          attributes: { first_name: 'Testin' },
-        });
-
-        return fx;
-      })
-      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
-      .wait('@routeFormByAction')
-      .wait('@routeAction')
-      .wait('@routePatient')
-      .wait('@routeFormDefinition');
+      .as('routeDirectoryBar');
 
     cy
       .iframeStub()
@@ -186,36 +156,12 @@ context('Noncontext Form', function() {
         expect(search).to.contain('?filter[foo]=bar');
         expect(pathname).to.equal('/api/directory/bar');
       });
-  });
-
-  specify('getPatientsBy - identifier', function() {
-    const testAction = getAction({
-      relationships: {
-        form: getRelationship(testForm),
-      },
-    });
 
     cy
       .intercept('GET', '/api/patients?filter*', {
         body: { data: [getPatient({ attributes: { first_name: 'Test', last_name: 'Patient' } })] },
       })
-      .as('routeGetPatientsByIdentifier')
-      .routeAction(fx => {
-        fx.data = testAction;
-
-        return fx;
-      })
-      .routeFormByAction()
-      .routeFormDefinition()
-      .routeFormActionFields()
-      .routeLatestFormResponse()
-      .routeActionActivity()
-      .routePatient()
-      .visit(`/patient/${ routePatientId }/action/${ testAction.id }`)
-      .wait('@routeFormByAction')
-      .wait('@routeAction')
-      .wait('@routePatient')
-      .wait('@routeFormDefinition');
+      .as('routeGetPatientsByIdentifier');
 
     cy
       .iframeStub()
