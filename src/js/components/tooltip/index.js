@@ -48,15 +48,6 @@ export default View.extend({
 
     if (!ui) return;
 
-    if (ui.on) {
-      ui.on('pointerenter.tooltip', bind(this.showTooltip, this));
-      ui.on('mouseleave.tooltip', bind(this.hideTooltip, this));
-      ui.on('pointerdown.tooltip', bind(this.showTooltip, this));
-      ui.on('focus.tooltip', bind(this.showTooltip, this));
-      ui.on('blur.tooltip', bind(this.hideTooltip, this));
-      return;
-    }
-
     this._uiListeners = [
       ['pointerover', bind(this.onPointerOver, this)],
       ['mouseleave', bind(this.hideTooltip, this)],
@@ -107,10 +98,6 @@ export default View.extend({
 
     const ui = this.anchor;
 
-    if (ui?.off) {
-      ui.off('.tooltip');
-    }
-
     this._uiListeners?.forEach(([eventName, listener]) => {
       ui.removeEventListener(eventName, listener);
     });
@@ -128,13 +115,12 @@ export default View.extend({
   },
   position() {
     const ui = this.anchor;
-    const el = ui?.[0] || (ui?.addEventListener ? ui : undefined);
 
-    return this.uiView.getBounds(el);
+    return this.uiView.getBounds(ui);
   },
   regionOptions() {
     const orientation = result(this, 'orientation');
-    const ignoreEl = result(this, 'ignoreEl');
+    const ignoreEl = result(this, 'ignoreEl') || this.anchor;
 
     return extend({ orientation, ignoreEl }, result(this, 'position'));
   },

@@ -872,14 +872,35 @@ context('App Nav', function() {
       .should('contain', '/one/worklist/owned-by');
 
     cy
-      .getRadio(Radio => {
-        Radio.trigger('hotkey', 'search', { preventDefault() {} });
-      });
+      .get('body')
+      .type('{ctrl}/');
 
     cy
       .get('.patient-search__modal')
-      .find('.js-close')
-      .click();
+      .should('not.exist');
+
+    cy
+      .get('body')
+      .type('/');
+
+    cy
+      .get('.patient-search__modal')
+      .should('have.length', 1)
+      .find('.patient-search__input')
+      .type('/')
+      .should('have.value', '/');
+
+    cy
+      .get('.patient-search__modal')
+      .should('have.length', 1);
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.patient-search__modal')
+      .should('not.exist');
 
     cy
       .viewport(800, 768);

@@ -42,7 +42,7 @@ function getStateLists() {
 
 export default Droplist.extend({
   isCompact: false,
-  initialize({ stateId }) {
+  initialize() {
     const currentWorkspace = Radio.request('workspace', 'current');
 
     if (currentWorkspaceCache !== currentWorkspace) {
@@ -52,7 +52,7 @@ export default Droplist.extend({
     }
 
     this.lists = getStateLists();
-    this.setSelected(stateId);
+    this.setSelected(this.getOption('stateId'));
   },
   setSelected(stateId) {
     const states = getStates();

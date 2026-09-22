@@ -129,13 +129,13 @@ export default View.extend({
     new Tooltip({
       message: tooltipMessages.prevMessage,
       uiView: this,
-      anchor: this.ui.prev,
+      anchor: this.getUI('prev')[0],
     });
 
     new Tooltip({
       message: tooltipMessages.nextMessage,
       uiView: this,
-      anchor: this.ui.next,
+      anchor: this.getUI('next')[0],
     });
   },
   getTooltipMessages() {

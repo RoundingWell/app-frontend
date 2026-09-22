@@ -6,15 +6,37 @@ import {
 import '@cypress/code-coverage/support';
 import './websockets';
 
+import 'scss/provider-core.scss';
+import 'scss/app-root.scss';
+
 import 'js/base/setup';
+import 'js/i18n';
+import 'js/entities-service';
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import { Application } from 'js/app';
+import Application from 'js/base/app';
+import listenToUserActivity from 'js/utils/user-activity';
 
 import { RootView } from 'js/apps/globals/app-frame/root_views';
 
 let app;
+
+const TestApplication = Application.extend({
+  channelName: 'app',
+  radioRequests: {
+    'show:pop': 'showPop',
+  },
+  initialize() {
+    this._eventListeners = listenToUserActivity();
+  },
+  showPop(view, options) {
+    return this.getView().getRegion('pop').show(view, options);
+  },
+  onDestroy() {
+    this._eventListeners.abort();
+  },
+});
 
 async function destroyApp() {
   const currentApp = app;
@@ -50,12 +72,17 @@ function mount(getView = () => new View({ template: false })) {
   return cy.then(async() => {
     await destroyApp();
 
-    app = new Application();
-    app.setListeners();
+    app = new TestApplication({
+      region: {
+        el: getContainerEl(),
+      },
+    });
 
     const TestRootView = RootView.extend({ AppView });
+    const rootView = new TestRootView();
 
-    const rootView = new TestRootView({ el: getContainerEl() });
+    app.setView(rootView);
+    app.showView();
 
     rootView.getRegion('preloader').empty();
 
@@ -68,7 +95,7 @@ function mount(getView = () => new View({ template: false })) {
       name: 'mount',
       message: [`Mount View: ${ view.cid }`],
     });
-  }).get('[data-cy-root]');
+  }).get('#root');
 }
 
 Cypress.Commands.add('mount', mount);

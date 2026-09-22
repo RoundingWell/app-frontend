@@ -17,8 +17,8 @@ context('Widgets Service', function() {
     service = new WidgetsService({ widgets });
   });
 
-  afterEach(function() {
-    service.destroy();
+  afterEach(async function() {
+    await service?.destroy();
   });
 
   specify('build', function() {
