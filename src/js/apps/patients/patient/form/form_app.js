@@ -50,8 +50,6 @@ export default App.extend({
   },
   async prepareStart(options, { signal }) {
     await this.removeChildApp('formsService');
-    if (signal.aborted) return;
-
     const { patient, formId, actionId } = options;
     if (!actionId) {
       return Promise.all([
@@ -83,9 +81,11 @@ export default App.extend({
     Radio.trigger('event-router', 'default');
   },
   onStop() {
+    const formService = this.getChildApp('formsService');
+    if (formService) this.unbindEvents(formService, this.serviceEvents);
     this._draftStatusRequest = null;
     this._discardRequest = null;
-    if (this.layoutState) this.stopListening(this.layoutState);
+    this.stopListening(this.layoutState);
   },
   onStart(app, { patient, viewportView }, [form, action, latestResponse]) {
     this.viewportView = viewportView;
@@ -97,7 +97,7 @@ export default App.extend({
       isActionForm: !!this.action,
       isExpanded: !!this.action && this.layoutState.get('formExpanded'),
       viewportView,
-    }));
+    })).render();
     if (!this.action) this.triggerContextChange();
     this.getChildApp('widgetHeader').start({
       region: this.getView().getRegion('widgets'),
@@ -224,8 +224,6 @@ export default App.extend({
     });
   },
   onChangeResponseId() {
-    if (!this.getView()) return;
-
     this.showFormActions();
     this.showContent();
   },
@@ -244,8 +242,6 @@ export default App.extend({
   renderExpandedState() {
     const isExpanded = this.layoutState.get('formExpanded');
     const layout = this.getView();
-
-    if (!layout) return;
 
     layout.setExpanded(isExpanded);
   },
@@ -275,8 +271,6 @@ export default App.extend({
     this.getView().trigger('change:form:view');
   },
   showFormActions() {
-    if (!this.getView()) return;
-
     if (this.action) this.showSubmissionStatus();
 
     if (this.isShowingHistoricalResponse()) {
@@ -348,8 +342,6 @@ export default App.extend({
   onChangeDraftStatus() {
     const updated = this.getState().get('updated');
     const layout = this.getView();
-
-    if (!layout) return;
 
     if (!updated) {
       layout.getRegion('draftStatus').empty();

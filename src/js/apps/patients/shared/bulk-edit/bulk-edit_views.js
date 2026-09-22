@@ -34,9 +34,7 @@ const ActionsCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.bulkE
 const FlowsCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editFlows") itemCount=itemCount}}`;
 
 const BulkEditOwnerComponent = OwnerComponent.extend({
-  className() {
-    return `${ OwnerComponent.prototype.className.call(this) } bulk-edit-inline__owner-button`;
-  },
+  className: `${ OwnerComponent.prototype.className } bulk-edit-inline__owner-button`,
 });
 
 const MixedOwnerComponent = BulkEditOwnerComponent.extend({
@@ -181,13 +179,16 @@ const MixedFlowStateComponent = BulkFlowsStateComponent.extend({
 
 const BulkEditActionsBodyView = View.extend({
   modelEvents: {
-    'change:stateMulti': 'showState',
-    'change:ownerMulti': 'showOwner',
-    'change:dateMulti': 'showDueDateTime',
-    'change:date': 'showDueDateTime',
-    'change:timeMulti': 'showDueTime',
-    'change:durationMulti': 'showDuration',
-    'change:isSaving': 'render',
+    'change': 'onModelChange',
+  },
+  onModelChange() {
+    if (this.model.hasChanged('collection')) return this.updateCollection();
+    if (this.model.hasChanged('isSaving')) return this.render();
+
+    if (this.model.hasChanged('stateMulti')) this.showState();
+    if (this.model.hasChanged('ownerMulti')) this.showOwner();
+    this.showChangedDueDateTime();
+    if (this.model.hasChanged('durationMulti')) this.showDuration();
   },
   regions: {
     state: '[data-state-region]',
@@ -253,7 +254,7 @@ const BulkEditActionsBodyView = View.extend({
       date: this.model.get('date'),
       isDisabled,
       isOverdue,
-      isCompact: true,
+
       showLabel: !isDisabled,
     });
   },
@@ -276,7 +277,7 @@ const BulkEditActionsBodyView = View.extend({
       time,
       stateOptions: { isDisabled },
       isOverdue,
-      isCompact: true,
+
       showLabel: !isDisabled,
     });
   },
@@ -292,7 +293,7 @@ const BulkEditActionsBodyView = View.extend({
 
     return new DurationComponent({
       duration: this.model.get('duration'),
-      isCompact: true,
+
       stateOptions: { isDisabled },
     });
   },
@@ -313,6 +314,13 @@ const BulkEditActionsBodyView = View.extend({
     });
 
     this.showChildView('owner', ownerComponent);
+  },
+  showChangedDueDateTime() {
+    if (this.model.hasChanged('dateMulti') || this.model.hasChanged('date')) {
+      this.showDueDateTime();
+    } else if (this.model.hasChanged('timeMulti')) {
+      this.showDueTime();
+    }
   },
   showDueDateTime() {
     this.showDueDate();
@@ -383,9 +391,14 @@ const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
 
 const BulkEditFlowsBodyView = View.extend({
   modelEvents: {
-    'change:stateMulti': 'showState',
-    'change:ownerMulti': 'showOwner',
-    'change:isSaving': 'render',
+    'change': 'onModelChange',
+  },
+  onModelChange() {
+    if (this.model.hasChanged('collection')) return this.updateCollection();
+    if (this.model.hasChanged('isSaving')) return this.render();
+
+    if (this.model.hasChanged('stateMulti')) this.showState();
+    if (this.model.hasChanged('ownerMulti')) this.showOwner();
   },
   regions: {
     state: '[data-state-region]',

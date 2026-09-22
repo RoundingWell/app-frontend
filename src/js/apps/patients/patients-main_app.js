@@ -90,7 +90,7 @@ export default RouterApp.extend({
     Radio.trigger('dialer', 'change:currentPatientId', null);
   },
 
-  async showPatientsWorklist(worklistId, options) {
+  showPatientsWorklist(worklistId, options) {
     this.clearCurrentPatient();
 
     const worklistsById = {
@@ -106,46 +106,34 @@ export default RouterApp.extend({
       return;
     }
 
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+    return this.showListPage(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
   },
 
-  async showSchedule() {
+  showSchedule() {
     this.clearCurrentPatient();
-    const routeContext = this.getCurrentRoute();
 
-    try {
-      return await this.startCurrent('schedule');
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+    return this.showListPage('schedule');
   },
 
-  async showPatient(patientId) {
+  showListPage(appName, options) {
+    return this.startCurrent(appName, options);
+  },
+  showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startRoute('patient', { patientId });
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      if (get(error, ['response', 'status']) === 410) {
-        Radio.trigger('event-router', 'notFound');
-        return;
-      }
-
-      return handleErrors(error);
+    return this.startRoute('patient', { patientId });
+  },
+  onRouteError(error, { definition }) {
+    if (definition.action === 'showPatientsWorklist' || definition.action === 'showSchedule') {
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+      return;
     }
+
+    if (get(error, ['response', 'status']) === 410) {
+      Radio.trigger('event-router', 'notFound');
+      return;
+    }
+
+    handleErrors(error).catch(reportedError => window.reportError(reportedError));
   },
 
   redirectPatientFlow(flowId) {

@@ -66,12 +66,12 @@ const ActionItemView = View.extend({
     'change': 'render',
   },
   events: {
-    'click .js-no-click': stopEventPropagation,
     'click .js-patient': 'onClickPatient',
     'click .js-flow': 'onClickFlow',
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-no-click': stopEventPropagation,
     'click .js-action-surface': 'onClickSurface',
   },
   ui: {
@@ -169,7 +169,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    this.stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    this.stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(this.stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -189,7 +189,7 @@ const ActionItemView = View.extend({
     this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
+
       stateOptions: { isDisabled },
     });
 
@@ -209,7 +209,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.model.isDone();
     const dueDateView = new CardDueView({
       date: this.model.get('due_date'),
-      isCompact: true,
+
       isDisabled,
       isOverdue: this.model.isOverdue(),
     });
@@ -230,7 +230,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
     this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true,
+
       stateOptions: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });

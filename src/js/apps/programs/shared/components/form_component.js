@@ -38,10 +38,6 @@ export default Droplist.extend({
   templateContext() {
     return { isDisabled: this.getState().get('isDisabled') };
   },
-  onChangeIsDisabled() {
-    Droplist.prototype.onChangeIsDisabled.apply(this, arguments);
-    this.render();
-  },
   triggers: {
     'click .js-button': 'click',
     'focus .js-button': 'focus',

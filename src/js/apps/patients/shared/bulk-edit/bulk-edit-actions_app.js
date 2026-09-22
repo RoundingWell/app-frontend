@@ -1,4 +1,4 @@
-import { pick } from 'underscore';
+import { extend, pick } from 'underscore';
 import Backbone from 'backbone';
 
 import BulkEditInlineApp from 'js/apps/patients/shared/bulk-edit/inline_app';
@@ -6,36 +6,32 @@ import { BulkEditActionsInlineView } from 'js/apps/patients/shared/bulk-edit/bul
 
 const StateModel = Backbone.Model.extend({
   initialize({ collection }) {
-    const initModel = collection.at(0);
-    this.initBulkState(collection, initModel);
-    this.initBulkOwner(collection, initModel);
-    this.initBulkDueDate(collection, initModel);
-    this.initBulkDueTime(collection, initModel);
-    this.initBulkDuration(collection, initModel);
+    this.updateCollection(collection);
   },
   updateCollection(collection) {
     const initModel = collection.at(0);
-    const options = { silent: true };
+    const attributes = { collection };
 
-    this.set('collection', collection, options);
-    if (!this.get('stateChanged')) this.initBulkState(collection, initModel, options);
-    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel, options);
-    if (!this.get('dateChanged')) this.initBulkDueDate(collection, initModel, options);
-    if (!this.get('timeChanged')) this.initBulkDueTime(collection, initModel, options);
-    if (!this.get('durationChanged')) this.initBulkDuration(collection, initModel, options);
+    if (!this.get('stateChanged')) extend(attributes, this.getBulkState(collection, initModel));
+    if (!this.get('ownerChanged')) extend(attributes, this.getBulkOwner(collection, initModel));
+    if (!this.get('dateChanged')) extend(attributes, this.getBulkDueDate(collection, initModel));
+    if (!this.get('timeChanged')) extend(attributes, this.getBulkDueTime(collection, initModel));
+    if (!this.get('durationChanged')) extend(attributes, this.getBulkDuration(collection, initModel));
+
+    return this.set(attributes);
   },
-  initBulkState(collection, initModel, options) {
+  getBulkState(collection, initModel) {
     const state = initModel.getState().getResource();
     const stateMulti = collection.some(item => {
       return item.getState().id !== state.id;
     });
 
-    this.set({
+    return {
       stateMulti,
       state: stateMulti ? null : state,
-    }, options);
+    };
   },
-  initBulkOwner(collection, initModel, options) {
+  getBulkOwner(collection, initModel) {
     const owner = initModel.getOwner();
     const program = initModel.getProgram();
     const ownerMulti = collection.some(item => {
@@ -44,46 +40,46 @@ const StateModel = Backbone.Model.extend({
       return differentOwners || differentPrograms;
     });
 
-    this.set({
+    return {
       ownerMulti,
       owner: ownerMulti ? null : owner,
       workspaces: program.getUserWorkspaces(),
-    }, options);
+    };
   },
-  initBulkDueDate(collection, initModel, options) {
+  getBulkDueDate(collection, initModel) {
     const date = initModel.get('due_date');
     const dateMulti = collection.some(item => {
       return item.get('due_date') !== date;
     });
     const hasMissingDueDate = collection.some(item => !item.get('due_date'));
 
-    this.set({
+    return {
       dateMulti,
       date: dateMulti ? null : date,
       hasMissingDueDate,
-    }, options);
+    };
   },
-  initBulkDueTime(collection, initModel, options) {
+  getBulkDueTime(collection, initModel) {
     const time = initModel.get('due_time');
     const timeMulti = collection.some(item => {
       return item.get('due_time') !== time;
     });
 
-    this.set({
+    return {
       timeMulti,
       time: timeMulti ? null : time,
-    }, options);
+    };
   },
-  initBulkDuration(collection, initModel, options) {
+  getBulkDuration(collection, initModel) {
     const duration = initModel.get('duration');
     const durationMulti = collection.some(item => {
       return item.get('duration') !== duration;
     });
 
-    this.set({
+    return {
       durationMulti,
       duration: durationMulti ? null : duration,
-    }, options);
+    };
   },
   setState(state) {
     return this.set({ state: state.getResource(), stateMulti: false, stateChanged: true });

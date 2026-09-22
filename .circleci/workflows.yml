@@ -131,6 +131,9 @@ jobs:
       parallelism:
         type: integer
         default: 12
+      coverage_group:
+        type: string
+        default: e2e
       upload_coverage:
         type: boolean
         default: true
@@ -195,11 +198,16 @@ jobs:
           steps:
             - install-curl-if-missing
 
-            - run: npm run coverage:report:ci || true
+            - run:
+                name: Verify coverage report and identify worker
+                command: |
+                  test -s coverage/lcov.info
+                  printf 'export COVERALLS_FLAG_NAME=%q\n' "<< parameters.coverage_group >>-${CIRCLE_NODE_INDEX}" >> "$BASH_ENV"
 
             - coveralls/upload:
-                fail_on_error: false
+                fail_on_error: true
                 parallel: true
+                coverage_file: coverage/lcov.info
 
       # Notify #frontend on failure (nightly only)
       - when:
@@ -230,6 +238,7 @@ jobs:
     steps:
       - coveralls/upload:
           parallel_finished: true
+          fail_on_error: true
 
   build:
     docker:
@@ -380,10 +389,11 @@ workflows:
             tags:
               ignore: /.*/
           name: Component develop
-          parallelism: 1
+          parallelism: 4
           should_build: false
+          coverage_group: component
           cypress_command: >
-            npx cypress run --component
+            node scripts/run-component-shard.js
 
       - run-cypress:
           filters: |
@@ -391,10 +401,11 @@ workflows:
             and pipeline.git.branch != "develop"
             and not pipeline.parameters.defer_cypress
           name: Component
-          parallelism: 1
+          parallelism: 4
           should_build: false
+          coverage_group: component
           cypress_command: >
-            npx cypress run --component
+            node scripts/run-component-shard.js
 
       - cypress-approval:
           type: approval
@@ -427,10 +438,11 @@ workflows:
             pipeline.git.branch
             and pipeline.git.branch != "develop"
             and pipeline.parameters.defer_cypress
-          parallelism: 1
+          parallelism: 4
           should_build: false
+          coverage_group: component
           cypress_command: >
-            npx cypress run --component
+            node scripts/run-component-shard.js
 
       - coveralls-finish:
           filters:
@@ -485,12 +497,13 @@ workflows:
           name: Chrome nightly Component
           context:
             - slack-secrets
-          parallelism: 1
+          parallelism: 4
           should_build: false
+          coverage_group: component
           upload_coverage: false
           notify_on_fail: true
           cypress_command: >
-            npx cypress run --component
+            node scripts/run-component-shard.js
             --browser chrome
             --config retries=4
 
@@ -510,12 +523,13 @@ workflows:
           name: Firefox nightly Component
           context:
             - slack-secrets
-          parallelism: 1
+          parallelism: 4
           should_build: false
+          coverage_group: component
           upload_coverage: false
           notify_on_fail: true
           cypress_command: >
-            npx cypress run --component
+            node scripts/run-component-shard.js
             --browser firefox
             --config retries=4
 
@@ -535,12 +549,13 @@ workflows:
           name: Edge nightly Component
           context:
             - slack-secrets
-          parallelism: 1
+          parallelism: 4
           should_build: false
+          coverage_group: component
           upload_coverage: false
           notify_on_fail: true
           cypress_command: >
-            npx cypress run --component
+            node scripts/run-component-shard.js
             --browser edge
             --config retries=4
 

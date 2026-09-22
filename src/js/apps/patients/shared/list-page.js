@@ -192,7 +192,7 @@ const ListPageAppMixin = {
   },
   onClickFiltersButton() {
     if (this.isPatientSidebarOpen) {
-      this.showFiltersSidebar();
+      this.showFiltersSidebar().catch(addError);
       return;
     }
 
@@ -207,16 +207,15 @@ const ListPageAppMixin = {
 
     this.setSidebarLayoutCollapsed(isCollapsed);
   },
-  onChangeFiltersDrawer(isFiltersDrawer) {
-    if (isFiltersDrawer) {
-      if (this.isPatientSidebarOpen) this.showFiltersSidebar();
-      this.setFiltersSidebarDrawerMode(true);
-      this.setSidebarLayoutCollapsed(true);
-      return;
+  async onChangeFiltersDrawer(isFiltersDrawer) {
+    if (isFiltersDrawer && this.isPatientSidebarOpen) {
+      if (!await this.showFiltersSidebar().catch(addError)) return;
+      isFiltersDrawer = this.getView().isFiltersDrawer();
     }
 
-    this.setFiltersSidebarDrawerMode(false);
-    this.setSidebarLayoutCollapsed(this.isPatientSidebarOpen ? false : this.getState().get('filtersSidebarCollapsed'));
+    this.setFiltersSidebarDrawerMode(isFiltersDrawer);
+    this.setSidebarLayoutCollapsed(isFiltersDrawer
+      || (!this.isPatientSidebarOpen && this.getState().get('filtersSidebarCollapsed')));
   },
   onChangeFiltersSidebarFixed(isFixed) {
     if (isFixed) this.setSidebarCollapsed(false);
@@ -225,12 +224,7 @@ const ListPageAppMixin = {
     const wasPatientSidebarOpen = this.isPatientSidebarOpen;
 
     if (wasPatientSidebarOpen) {
-      try {
-        await this.showFiltersSidebar();
-      } catch(error) {
-        addError(error);
-        return;
-      }
+      if (!await this.showFiltersSidebar().catch(addError)) return;
     }
 
     this.setSidebarLayoutCollapsed(true);
@@ -259,7 +253,9 @@ const ListPageAppMixin = {
   },
   closePatientSidebar() {
     this.showFiltersSidebar()
-      .then(() => this.focusPatientSidebarTrigger())
+      .then(shown => {
+        if (shown) this.focusPatientSidebarTrigger();
+      })
       .catch(addError);
   },
   focusPatientSidebar(patientSidebar) {
@@ -269,7 +265,6 @@ const ListPageAppMixin = {
     if (!layoutView.isFiltersDrawer()) return;
 
     patientSidebar.focusClose();
-    this.listenToOnce(patientSidebar, 'sync:data', () => patientSidebar.focusClose());
   },
   focusPatientSidebarTrigger() {
     const triggerView = this.patientSidebarTrigger;

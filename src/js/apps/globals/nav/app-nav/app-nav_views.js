@@ -221,8 +221,8 @@ const AppNavView = View.extend({
   events: {
     'focusin': 'onFocusIn',
     'focusout': 'onFocusOut',
-    'pointerenter': 'onPointerEnter',
-    'pointerleave': 'onPointerLeave',
+    'pointerover': 'onPointerEnter',
+    'pointerout': 'onPointerLeave',
   },
   template: LayoutTemplate,
   modelEvents: {
@@ -237,9 +237,13 @@ const AppNavView = View.extend({
     this.el.className = getAppNavClassName(this.model);
   },
   onPointerEnter(evt) {
+    if (this.el.contains(evt.relatedTarget)) return;
+
     this.trigger('pointer:enter', evt);
   },
   onPointerLeave(evt) {
+    if (this.el.contains(evt.relatedTarget)) return;
+
     this.trigger('pointer:leave', evt);
   },
   onFocusIn(evt) {

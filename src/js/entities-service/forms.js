@@ -18,7 +18,7 @@ const Entity = BaseEntity.extend({
     'fetch:forms:byAction': 'fetchByAction',
     'fetch:forms:definition:byAction': 'fetchDefinitionByAction',
   },
-  fetchFormsCollection(options = {}) {
+  fetchFormsCollection(options) {
     const data = {
       fields: {
         forms: FORM_COLLECTION_FIELDS,
@@ -42,7 +42,7 @@ const Entity = BaseEntity.extend({
   fetchByAction(actionId, options) {
     return this.fetchBy(`/api/actions/${ actionId }/form`, options);
   },
-  fetchDefinitionByAction(actionId, options = {}) {
+  fetchDefinitionByAction(actionId, options) {
     return fetcher(`/api/actions/${ actionId }/form/definition`, options).then(handleJSON);
   },
 });

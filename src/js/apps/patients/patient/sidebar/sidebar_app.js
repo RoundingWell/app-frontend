@@ -36,36 +36,29 @@ export default App.extend({
 
     return view;
   },
-  onBeforeStart(app, { patient, isClosable, isListSidebar, isPreloaded }) {
+  onBeforeStart(app, { patient, isClosable, isListSidebar }) {
     this.patient = patient;
     this.sidebars = Radio.request('sidebars', 'patient');
 
     const view = this.setSidebarView({
       model: patient,
-      collection: isPreloaded ? this.sidebars : null,
       isClosable,
       isListSidebar,
     }).render();
 
-    if (isPreloaded) return;
-
     view.showChildView('sidebars', new SidebarLoadingView());
     this.showView();
   },
-  prepareStart({ patient, isPreloaded }) {
-    if (isPreloaded) return [];
-
-    return getPatientSidebarRequests(patient, this.sidebars);
+  prepareStart({ patient }) {
+    return Promise.all(getPatientSidebarRequests(patient, this.sidebars));
   },
-  onStart(app, { isClosable, isListSidebar, isPreloaded }) {
-    if (!isPreloaded) {
-      this.setSidebarView({
-        model: this.patient,
-        collection: this.sidebars,
-        isClosable,
-        isListSidebar,
-      });
-    }
+  onStart(app, { isClosable, isListSidebar }) {
+    this.setSidebarView({
+      model: this.patient,
+      collection: this.sidebars,
+      isClosable,
+      isListSidebar,
+    });
 
     this.showView();
   },

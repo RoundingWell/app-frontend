@@ -8,7 +8,7 @@ const Entity = BaseEntity.extend({
     'files:collection': 'getCollection',
     'fetch:files:collection:byAction': 'fetchFilesByAction',
   },
-  fetchFilesByAction(actionId, options = {}) {
+  fetchFilesByAction(actionId, options) {
     const url = `/api/actions/${ actionId }/files`;
     const data = { ...options.data, urls: ['download', 'view'] };
 

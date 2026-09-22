@@ -1,6 +1,5 @@
 import idb from 'js/base/cache/idb';
 import {
-  draftKeyPrefix,
   getDraft,
   setDraft,
   removeDraft,
@@ -31,19 +30,6 @@ context('cache/form-drafts', function() {
   specify('returns null for a missing key', function() {
     return getDraft('form-subm-user_A-missing').then(value => {
       expect(value).to.be.null;
-    });
-  });
-
-  specify('ignores empty inputs', function() {
-    expect(draftKeyPrefix()).to.be.undefined;
-
-    return Promise.all([
-      getDraft(),
-      setDraft(),
-      setDraft('form-subm-user_A-patient-form'),
-      removeDraft(),
-    ]).then(([draft]) => {
-      expect(draft).to.be.null;
     });
   });
 

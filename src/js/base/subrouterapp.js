@@ -92,7 +92,7 @@ export default RouteBaseApp.extend({
   },
 
   onRouteError(error) {
-    addError(error);
+    window.reportError(error);
   },
 
   mixinOptions(options) {

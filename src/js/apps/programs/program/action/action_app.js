@@ -12,7 +12,7 @@ export default App.extend({
   childApps: {
     actionSidebar: ActionSidebarApp,
   },
-  async prepareStart({ actionId, programId, flowId }, { signal }) {
+  prepareStart({ actionId, programId, flowId }, { signal }) {
     if (!actionId) {
       return Radio.request('entities', 'programActions:model', {
         _program: { id: programId, type: 'programs' },
@@ -25,15 +25,10 @@ export default App.extend({
       });
     }
 
-    try {
-      return await Radio.request('entities', 'fetch:programActions:model', actionId, { signal });
-    } catch(error) {
-      if (!signal.aborted) {
-        Radio.request('alert', 'show:error', intl.programs.program.action.actionApp.notFound);
-      }
-
-      throw error;
-    }
+    return Radio.request('entities', 'fetch:programActions:model', actionId, { signal });
+  },
+  handleStartFailure() {
+    Radio.request('alert', 'show:error', intl.programs.program.action.actionApp.notFound);
   },
   onStart(app, options, action) {
     this.action = action;

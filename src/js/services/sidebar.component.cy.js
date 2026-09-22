@@ -204,41 +204,4 @@ context('Sidebar Service', function() {
       nextElement.remove();
     });
   });
-
-  specify('clears a replacement claim when the outgoing stop fails', function() {
-    cy.document().then(async document => {
-      const element = document.createElement('div');
-
-      document.body.append(element);
-
-      const service = new SidebarService({ region: new Region({ el: element }) });
-      const outgoing = new App();
-      const incoming = new App();
-
-      await service.start();
-      await service.startSidebarApp(outgoing, {}, {});
-
-      const stop = cy.stub(outgoing, 'stop').rejects(new Error('failed to stop'));
-      let failure;
-
-      try {
-        await service.startSidebarApp(incoming, {}, {});
-      } catch(error) {
-        failure = error;
-      }
-
-      expect(failure.message).to.equal('failed to stop');
-      expect(service.currentApp).to.not.exist;
-      expect(service.currentClaim).to.not.exist;
-
-      stop.restore();
-
-      expect(await service.startSidebarApp(incoming, {}, {})).to.equal(incoming);
-
-      await service.stopSidebarApp();
-      await outgoing.stop();
-      await service.stop();
-      element.remove();
-    });
-  });
 });

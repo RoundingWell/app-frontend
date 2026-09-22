@@ -7,32 +7,6 @@ import {
 } from './modal_views';
 
 context('Modal Views', function() {
-  specify('shows the saving state in the footer', function() {
-    let modal;
-
-    cy.mount(() => {
-      const SavingModalView = ModalView.extend({
-        savingInfoText: 'Saving changes',
-        savingSubmitText: 'Saving',
-      });
-      modal = new SavingModalView({
-        headingText: 'Save changes',
-        bodyText: 'Current content',
-      });
-      return modal;
-    });
-
-    cy.then(() => modal.showSavingFooter());
-
-    cy.get('.modal__footer-saving-info')
-      .should('contain', 'Saving changes')
-      .next('button')
-      .should('be.disabled')
-      .and('contain', 'Saving');
-
-    cy.then(() => modal.destroy());
-  });
-
   specify('renders the small modal and form iframe', function() {
     const form = new Backbone.Model();
     const getFormUrl = cy.stub().returns('/forms/example');

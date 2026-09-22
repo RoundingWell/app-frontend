@@ -9,6 +9,7 @@ import 'scss/provider-core.scss';
 import 'scss/app-root.scss';
 
 import initPlatform from 'js/utils/platform';
+import handleErrors from 'js/utils/handle-errors';
 
 import App from 'js/base/app';
 import listenToUserActivity from 'js/utils/user-activity';
@@ -49,10 +50,10 @@ const Application = App.extend({
   },
 
   // Before the application starts make sure:
-  // - A root layout is prepared
+  // - A root layout is mounted
   // - Global services are started
   onBeforeStart() {
-    this.setView(new RootView());
+    this.showView(new RootView());
     this.configComponents();
     this.startServices();
     this.setListeners();
@@ -93,6 +94,7 @@ const Application = App.extend({
       this.stop();
     }, { signal: this._eventListeners.signal });
   },
+
   onDestroy() {
     this._eventListeners?.abort();
   },
@@ -100,37 +102,31 @@ const Application = App.extend({
   async prepareStart(options, { signal }) {
     const bootstrapService = this.getChildApp('bootstrap');
 
-    const [bootstrapStarted, { default: AppFrameApp }] = await Promise.all([
+    const [, { default: AppFrameApp }] = await Promise.all([
       bootstrapService.start(),
       import('js/apps/globals/app-frame/app-frame_app'),
     ]);
 
-    if (signal.aborted) return;
-    if (!bootstrapStarted) throw new Error('Bootstrap startup was canceled');
+    signal.throwIfAborted();
 
-    return this.startAppFrame(bootstrapService, AppFrameApp, signal);
+    return this.startAppFrame(bootstrapService, AppFrameApp);
   },
 
-  async startAppFrame(bootstrapService, AppFrameApp, signal) {
+  async startAppFrame(bootstrapService, AppFrameApp) {
     const currentUser = bootstrapService.getCurrentUser();
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
 
-    if (!this.hasChildApp('appFrame')) {
-      const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
-      this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
-    }
+    const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
+    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
 
     const appView = this.getView().appView;
-    const appFrameStarted = await this.getChildApp('appFrame').start({
+    await this.getChildApp('appFrame').start({
       contentRegion: appView.getRegion('content'),
       navRegion: appView.getRegion('nav'),
       setNavMinimized: appView.setNavMinimized.bind(appView),
       sidebarRegion: appView.getRegion('sidebar'),
     });
-
-    if (signal.aborted) return;
-    if (!appFrameStarted) throw new Error('App frame startup was canceled');
 
     return { currentUser };
   },
@@ -142,9 +138,15 @@ const Application = App.extend({
   },
 
   showStartFailure(error) {
+    const isNotSetup = error === 'No workspaces found' || get(error, ['response', 'status']) === 403;
+
+    if (!isNotSetup && this.getChildApp('bootstrap').isRunning()) {
+      return handleErrors(error).catch(reportedError => window.reportError(reportedError));
+    }
+
     addError(get(error, 'responseData', error));
 
-    if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
+    if (isNotSetup) {
       this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       this.showView();
     }

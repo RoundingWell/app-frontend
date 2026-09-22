@@ -31,25 +31,13 @@ export default Droplist.extend({
   collection: new Backbone.Collection(times),
   align: 'right',
   popWidth: 192,
-  isCompact: false,
   isSelectlist: true,
-  className() {
-    const isCompact = this.getOption('isCompact');
-
-    if (isCompact) {
-      return 'button button--compact time-component';
-    }
-
-    return 'button button--secondary time-component w-100';
-  },
-  syncStateAttributes() {
-    Droplist.prototype.syncStateAttributes.apply(this, arguments);
-
+  className: 'button button--compact time-component',
+  onRender() {
     const hasSelectedTime = !!this.getState().get('selected');
     this.el.classList.toggle('is-overdue', hasSelectedTime && this.getOption('isOverdue'));
   },
   getTemplate() {
-    const isCompact = this.getOption('isCompact');
     const selected = this.getState().get('selected');
     const time = selected ? selected.id : null;
 
@@ -57,17 +45,16 @@ export default Droplist.extend({
       return CustomTimeTemplate;
     }
 
-    if (!time && isCompact && !this.getOption('showLabel')) {
+    if (!time && !this.getOption('showLabel')) {
       return NoTimeCompactTemplate;
     }
 
     return TimeTemplate;
   },
   templateContext() {
-    const isCompact = this.getOption('isCompact');
     return {
       time: this.getOption('time'),
-      defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
+      defaultHtml: `<span>${ i18n.defaultText }</span>`,
     };
   },
   picklistOptions: {

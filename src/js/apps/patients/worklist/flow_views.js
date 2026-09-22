@@ -158,7 +158,7 @@ const FlowItemView = View.extend({
     this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
+
       stateOptions: { isDisabled },
     });
 

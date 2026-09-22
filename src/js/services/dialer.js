@@ -27,16 +27,13 @@ export default App.extend({
 
     const provider = await this.loadProvider(dialerSetting);
 
-    if (signal.aborted || !provider) return;
+    signal.throwIfAborted();
 
-    if (!this.hasChildApp('provider')) {
-      this.addChildApp('provider', new provider.DialerApp(provider.options));
-    }
+    if (!provider) return;
 
-    const started = await this.getChildApp('provider').start({ region: this.getRegion() });
+    this.addChildApp('provider', new provider.DialerApp(provider.options));
 
-    if (signal.aborted) return;
-    if (!started) throw new Error('Dialer startup was canceled');
+    await this.getChildApp('provider').start({ region: this.getRegion() });
   },
   async loadProvider(dialerSetting) {
     if (dialerSetting === 'five9') {

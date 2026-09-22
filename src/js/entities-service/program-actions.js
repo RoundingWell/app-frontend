@@ -18,7 +18,7 @@ const Entity = BaseEntity.extend({
 
     return this.fetchCollection({ ...options, url });
   },
-  fetchProgramActions(behavior = PROGRAM_BEHAVIORS.STANDARD, options = {}) {
+  fetchProgramActions(behavior = PROGRAM_BEHAVIORS.STANDARD, options) {
     const collection = new this.Entity.Collection();
     const data = {
       ...options.data,

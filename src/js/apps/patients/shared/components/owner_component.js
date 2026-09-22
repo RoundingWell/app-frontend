@@ -15,7 +15,6 @@ const i18n = intl.patients.shared.components.ownerComponent;
 const OwnerItemTemplate = hbs`<div class="owner-component">{{matchText name query}} <span class="owner-component__team">{{matchText abbr query}}</span></div>`;
 
 const CLASS_OPTIONS = [
-  'isCompact',
   'headingText',
   'infoText',
   'placeholderText',
@@ -61,15 +60,13 @@ function getClinicians(workspace, currentUser) {
 }
 
 export default Droplist.extend({
-  isCompact: false,
+  className: 'owner-component owner-component--compact button button--compact',
+  popWidth: null,
   headingText: i18n.headingText,
   placeholderText: i18n.placeholderText,
   hasTeams: true,
   hasClinicians: true,
   hasCurrentClinician: true,
-  popWidth() {
-    return this.isCompact ? null : this.el.offsetWidth;
-  },
   picklistOptions() {
     const lists = this.getLists();
 
@@ -94,17 +91,12 @@ export default Droplist.extend({
       clearText: this.currentUser.get('name'),
     };
   },
-  className() {
-    return this.getOption('isCompact') ?
-      'owner-component owner-component--compact button button--compact' :
-      'owner-component button button--secondary w-100';
-  },
   templateContext() {
     const selected = this.getState().get('selected');
     const isTeam = selected?.type === 'teams';
 
     return {
-      attr: this.isCompact && isTeam ? 'abbr' : 'name',
+      attr: isTeam ? 'abbr' : 'name',
       icon: { type: 'far', icon: 'circle-user' },
     };
   },

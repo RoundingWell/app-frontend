@@ -5,7 +5,8 @@ context('Global Error Page', function() {
     cy.routesForDefault();
   });
 
-  specify('404 not found', function() {
+  specify('unknown workspace and root routes return to the workspace', function() {
+    cy.log('404 not found');
     cy
       .visit('/route-does-not-exist');
 
@@ -22,9 +23,8 @@ context('Global Error Page', function() {
     cy
       .get('.error-page')
       .should('not.exist');
-  });
 
-  specify('404 not found - root routes', function() {
+    cy.log('404 not found - root routes');
     cy
       .visit('/route-does-not-exist', { isRoot: true });
 

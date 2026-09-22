@@ -26,27 +26,19 @@ export default RouterApp.extend({
     },
   },
 
-  async showDashboardsAll() {
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startCurrent('dashboardsAll');
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+  showDashboardsAll() {
+    return this.startCurrent('dashboardsAll');
   },
-  async showDashboard(dashboardId) {
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startCurrent('dashboard', { dashboardId });
-    } catch {
-      if (this.getCurrentRoute() !== routeContext) return;
-
+  showDashboard(dashboardId) {
+    return this.startCurrent('dashboard', { dashboardId });
+  },
+  onRouteError(error, { definition }) {
+    if (definition.action === 'showDashboard') {
       Radio.request('alert', 'show:error', intl.dashboards.dashboardApp.notFound);
       Radio.trigger('event-router', 'dashboards:all');
+      return;
     }
+
+    Radio.trigger('event-router', 'unknownError', error?.response?.status);
   },
 });

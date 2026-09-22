@@ -41,7 +41,8 @@ function getStateLists() {
 }
 
 export default Droplist.extend({
-  isCompact: false,
+  className: 'button button--compact',
+  popWidth: null,
   initialize() {
     const currentWorkspace = Radio.request('workspace', 'current');
 
@@ -58,23 +59,16 @@ export default Droplist.extend({
     const states = getStates();
     this.getState().set({ selected: states.get(stateId) });
   },
+  onRender() {
+    this.el.setAttribute('aria-label', this.getState().get('selected')?.get('name') || this.el.textContent.trim());
+  },
   onChangeSelected(selected) {
     this.triggerMethod('change:state', selected);
-  },
-  popWidth() {
-    const isCompact = this.getOption('isCompact');
-
-    return isCompact ? null : this.el.offsetWidth;
-  },
-  className() {
-    return this.getOption('isCompact') ?
-      'button button--compact' :
-      'button button--secondary w-100';
   },
   template: StateTemplate,
   templateContext() {
     return {
-      isIconOnly: this.getOption('isCompact') && !this.getOption('showLabel'),
+      isIconOnly: !this.getOption('showLabel'),
     };
   },
   picklistOptions: {

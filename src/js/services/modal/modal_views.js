@@ -1,5 +1,4 @@
-import { extend } from 'underscore';
-import { animate } from 'animejs';
+import { extend, isString } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
 import { View, Region } from 'marionette';
 
@@ -17,37 +16,6 @@ const i18n = intl.globals.modal.modalViews;
 
 const ReplaceElRegion = Region.extend({ replaceElement: true, timeout: 0 });
 
-const SavingFooterView = View.extend({
-  className: 'flex flex-align-center',
-  template: hbs`
-    <div class="modal__footer-saving-info">{{ savingInfoText }}</div>
-    <button class="{{ buttonClass }} js-loading" disabled>
-      <span>{{ savingSubmitText }}</span>
-    </button>
-  `,
-  ui: {
-    loading: '.js-loading',
-  },
-  serializeData() {
-    return extend({}, this.options);
-  },
-  onRender() {
-    this.animation = animate(this.ui.loading[0], {
-      opacity: [1, 0.5],
-      loop: Infinity,
-      duration: 400,
-      ease: 'inOutSine',
-      alternate: true,
-    });
-  },
-  onBeforeDestroy() {
-    /* istanbul ignore else */
-    if (this.animation) {
-      this.animation.cancel();
-    }
-  },
-});
-
 const ModalView = View.extend({
   className: 'modal',
   buttonClass: 'button button--positive',
@@ -56,8 +24,6 @@ const ModalView = View.extend({
   headerIconType: 'far',
   cancelText: i18n.modalView.cancelText,
   submitText: i18n.modalView.submitText,
-  savingSubmitText: i18n.modalView.savingSubmitText,
-  savingInfoText: i18n.modalView.savingInfoText,
   regionClass: ReplaceElRegion,
   regions: {
     header: '[data-header-region]',
@@ -90,22 +56,19 @@ const ModalView = View.extend({
   },
   template: ModalTemplate,
   initialize() {
-    if (this.headerView) this.showChildView('header', this.headerView);
-    if (this.bodyView) this.showChildView('body', this.bodyView);
-    if (this.footerView) this.showChildView('footer', this.footerView);
+    ['header', 'body', 'footer'].forEach(region => {
+      const content = this[`${ region }View`];
+      if (!content) return;
+
+      const view = isString(content) ? new View({ template: () => content }) : content;
+      this.showChildView(region, view);
+    });
   },
   onSubmit() {
     this.destroy();
   },
   onCancel() {
     this.destroy();
-  },
-  showSavingFooter() {
-    this.showChildView('footer', new SavingFooterView({
-      buttonClass: this.buttonClass,
-      savingSubmitText: this.savingSubmitText,
-      savingInfoText: this.savingInfoText,
-    }));
   },
   disableSubmit(disable = true) {
     this.ui.submit[0].disabled = disable;

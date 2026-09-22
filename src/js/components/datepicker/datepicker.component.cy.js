@@ -35,11 +35,16 @@ context('Datepicker', function() {
       'change:date change:selectedMonth': 'render',
     },
     dateState: {},
+    getAnchor() {
+      if (this.getOption('omitAnchor')) return;
+      const button = this.getUI('button');
+      return this.getOption('rawAnchor') ? button[0] : button;
+    },
     onClick() {
       const state = this.getOption('dateState');
 
       const datepicker = new Datepicker({
-        anchor: this.ui.button,
+        anchor: this.getAnchor(),
         uiView: this,
         stateOptions: state,
         canSelectMonth: this.getOption('canSelectMonth'),
@@ -76,6 +81,7 @@ context('Datepicker', function() {
   specify('Displaying', function() {
     const testView = new TestView({
       model: new Backbone.Model(),
+      rawAnchor: true,
     });
 
     cy
@@ -189,6 +195,7 @@ context('Datepicker', function() {
         Datepicker.setRegion(rootView.getRegion('pop'));
 
         return new TestView({
+          omitAnchor: true,
           model: new Backbone.Model(),
           dateState: {
             beginDate: '02/08/2015',

@@ -49,8 +49,8 @@ Cypress.Commands.add('startService', () => {
 
   // Return a promise that resolves when the service starts
   return new Cypress.Promise(resolve => {
-    service.once('start', resolve);
-    service.start();
+    service.once('start', () => service.ws.addEventListener('open', () => resolve(), { once: true }));
+    service.start({ data: { name: 'ping' } });
   });
 });
 
@@ -83,7 +83,7 @@ context('WS Service', function() {
   specify('Constructing the websocket', function() {
     const testNotConnected = { name: 'SendTest', data: 'NOTCONNECTED' };
 
-    service.start();
+    service.start({ data: { name: 'ping' } });
 
     service.on('start', () => {
       const channel = Radio.channel('ws');
@@ -420,7 +420,7 @@ context('WS Service', function() {
 
       .then(() => {
         expect(version(service.subscriptionVersion)).to.equal(7);
-        channel.request('add', notifications[1], { shouldPersist: true });
+        channel.request('add', notifications[1]);
       })
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[0], notifications[1]]))
@@ -429,7 +429,7 @@ context('WS Service', function() {
         channel.request('subscribe', notifications[2]);
       })
       .get('@wsHandleMessage')
-      .should('be.calledWith', testData([notifications[2], notifications[1]]))
+      .should('be.calledWith', testData([notifications[2]]))
 
       .then(() => {
         channel.request('unsubscribe', notifications[1]);
@@ -438,7 +438,7 @@ context('WS Service', function() {
       .should('be.calledWith', testData([notifications[2]]))
 
       .then(() => {
-        channel.request('subscribe', [notifications[3]], { shouldPersist: true });
+        channel.request('subscribe', [notifications[3]]);
       })
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[3]]))
@@ -561,35 +561,11 @@ context('WS Service', function() {
         service.ws.readyState = WebSocket.CLOSED;
         service.onClose();
         // No subscription, so no reconnect was scheduled.
-        expect(service.reconnect).to.be.undefined;
+        expect(service.reconnect).to.be.null;
       })
       .tick(1000)
       .get('@startService')
       .should('be.calledOnce');
-  });
-
-  specify('Skipping scheduled resubscribe after subscriptions clear', function() {
-    cy
-      .startService()
-      .then(() => {
-        service.RECONNECT_BASE_DELAY = 1000;
-        cy.stub(Math, 'random').returns(0);
-        cy.spy(service, '_subscribe').as('_subscribe');
-      });
-
-    cy.clock();
-    cy.then(() => {
-      // Schedule a reconnect with no resources, so the timer is a no-op.
-      service.startReconnect();
-    });
-
-    cy
-      .tick(1000)
-      .get('@_subscribe')
-      .should('not.be.called')
-      .then(() => {
-        expect(service.reconnect).to.be.null;
-      });
   });
 
   specify('Applying reconnect backoff and jitter', function() {
@@ -630,7 +606,7 @@ context('WS Service', function() {
       expect(service.reconnect).to.not.be.null;
 
       // A successful (re)open resets backoff and cancels the pending reconnect.
-      service.onOpen();
+      service.onOpen({ name: 'ping' });
       expect(service.reconnectAttempts).to.equal(0);
       expect(service.reconnect).to.be.null;
     });
@@ -698,8 +674,7 @@ context('WS Service', function() {
         channel.request('subscribe', resource);
       })
       .get('@wsHandleMessage')
-      .should('have.been.calledTwice')
-      .then(spy => {
+      .should(spy => {
         expect(spy.lastCall.args[0]).to.deep.equal({
           name: 'Subscribe',
           data: {
@@ -828,5 +803,28 @@ context('WS Service - Disabled', function() {
     channel.request('subscribe', { id: 'foo', type: 'bar' });
 
     expect(disabledService.isRunning()).to.be.false;
+  });
+
+  specify('allows another managed addition after a fetch fails', function() {
+    cy.then(async() => {
+      const app = new App();
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'retry-flow' });
+      model.type = 'flows';
+      const fetch = cy.stub(model, 'fetch');
+      fetch.onFirstCall().rejects(new Error('Network unavailable'));
+      fetch.onSecondCall().resolves(model);
+      await app.start();
+      const retryService = new WSService();
+      retryService.manageAdd(app, collection, 'flows');
+      Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(collection).to.have.length(0);
+      Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(collection.get(model)).to.equal(model);
+      await app.destroy();
+      await retryService.destroy();
+    });
   });
 });

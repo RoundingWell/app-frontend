@@ -11,90 +11,151 @@ context('patient page', function() {
     },
   });
 
-  specify('context trail', function() {
-    cy
-      .routesForPatientWorkflow()
-      .routeActions()
-      .routePatient(fx => {
-        fx.data = testPatient;
+  specify('patient navigation, context trail, and legacy URLs', function() {
+    cy.then(() => {
+      cy.log('context trail');
+      cy
+        .routesForPatientWorkflow()
+        .routeActions()
+        .routePatient(fx => {
+          fx.data = testPatient;
 
-        return fx;
-      })
-      .visit(`/patient/${ testPatient.id }/workflow`)
-      .wait('@routePatient');
+          return fx;
+        })
+        .visit(`/patient/${ testPatient.id }/workflow`)
+        .wait('@routePatient');
 
-    cy
-      .get('.patient__context-trail')
-      .should('contain', 'First Last')
-      .should('not.contain', 'Back to List');
+      cy
+        .get('.patient__context-trail')
+        .should('contain', 'First Last')
+        .should('not.contain', 'Back to List');
 
-    cy
-      .get('.app-nav')
-      .contains('Owned By')
-      .click();
+      cy
+        .get('.app-nav')
+        .contains('Owned By')
+        .click();
 
-    cy
-      .go('back')
-      .wait('@routePatient');
+      cy
+        .go('back')
+        .wait('@routePatient');
 
-    cy
-      .get('.patient__context-trail')
-      .should('contain', 'First Last')
-      .contains('Back to List')
-      .click();
+      cy
+        .get('.patient__context-trail')
+        .should('contain', 'First Last')
+        .contains('Back to List')
+        .click();
 
-    cy
-      .url()
-      .should('contain', 'worklist/owned-by');
-  });
-
-  // Compatibility coverage for the three legacy patient URL aliases. They must
-  // keep routing until September 2, 2027; delete this spec with the aliases.
-  specify('legacy patient URL aliases still route', function() {
-    const legacyAction = getAction({
-      attributes: { name: 'Legacy Alias Action' },
-      relationships: { patient: getRelationship(testPatient) },
+      cy
+        .location('pathname')
+        .should('equal', '/one/worklist/owned-by');
     });
 
-    cy
-      .routesForPatientAction()
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .routeAction(fx => {
-        fx.data = legacyAction;
-
-        return fx;
+    cy.then(() => {
+      // Remove this scenario with the aliases after September 2, 2027.
+      cy.log('legacy patient URL aliases still route');
+      const legacyAction = getAction({
+        attributes: { name: 'Legacy Alias Action' },
+        relationships: { patient: getRelationship(testPatient) },
       });
 
-    // patient/dashboard/:patientId -> Open workflow
-    cy
-      .visit(`/patient/dashboard/${ testPatient.id }`)
-      .wait('@routePatient');
+      cy
+        .routesForPatientAction()
+        .routePatient(fx => {
+          fx.data = testPatient;
 
-    cy
-      .get('.workflow-page__tab.is-selected')
-      .contains('Open');
+          return fx;
+        })
+        .routeAction(fx => {
+          fx.data = legacyAction;
 
-    // patient/archive/:patientId -> Closed workflow
-    cy
-      .visit(`/patient/archive/${ testPatient.id }`)
-      .wait('@routePatient');
+          return fx;
+        });
 
-    cy
-      .get('.workflow-page__tab.is-selected')
-      .contains('Closed');
+      // patient/dashboard/:patientId -> Open workflow
+      cy
+        .visit(`/patient/dashboard/${ testPatient.id }`)
+        .wait('@routePatient');
 
-    // patient/archive/:patientId/action/:actionId -> Action
-    cy
-      .visit(`/patient/archive/${ testPatient.id }/action/${ legacyAction.id }`)
-      .wait('@routeAction');
+      cy
+        .get('.workflow-page__tab.is-selected')
+        .contains('Open');
 
-    cy
-      .get('.patient-action__name')
-      .should('contain', 'Legacy Alias Action');
+      // patient/archive/:patientId -> Closed workflow
+      cy
+        .visit(`/patient/archive/${ testPatient.id }`)
+        .wait('@routePatient');
+
+      cy
+        .get('.workflow-page__tab.is-selected')
+        .contains('Closed');
+
+      // patient/archive/:patientId/action/:actionId -> Action
+      cy
+        .visit(`/patient/archive/${ testPatient.id }/action/${ legacyAction.id }`)
+        .wait('@routeAction');
+
+      cy
+        .get('.patient-action__name')
+        .should('contain', 'Legacy Alias Action');
+    });
+
+    cy.then(() => {
+      cy.log('patient routing');
+      cy
+        .viewport(1920, 900)
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = testPatient;
+
+          return fx;
+        })
+        .visit(`/patient/${ testPatient.id }/workflow`)
+        .wait('@routePatient');
+
+      cy
+        .get('.patient__layout')
+        .find('.workflow-page__tab.is-selected')
+        .contains('Open');
+
+      cy
+        .get('.workflow-page')
+        .should($page => {
+          expect($page[0].getBoundingClientRect().width).to.equal(1200);
+        });
+
+      cy
+        .get('.patient__layout')
+        .find('.js-workflow-closed')
+        .click();
+
+      cy
+        .get('.patient__layout')
+        .find('.workflow-page__tab.is-selected')
+        .contains('Closed');
+
+      cy
+        .get('.patient__layout')
+        .find('.js-workflow-open')
+        .click();
+
+      cy
+        .get('.patient__layout')
+        .find('.workflow-page__tab.is-selected')
+        .contains('Open');
+
+      cy.then(() => {
+        const patient = getPatient();
+        const reported = cy.stub().as('reported');
+        cy.on('uncaught:exception', error => {
+          reported(error.message);
+          return false;
+        });
+        cy.routesForPatientAction()
+          .intercept('GET', '/api/patients/**?*', { statusCode: 400, body: { errors: [] } })
+          .visit(`/patient/${ patient.id }/workflow`);
+        cy.get('@reported').should('have.been.calledWithMatch', 'Error Status: 400');
+      });
+    });
   });
 
   specify('uses drawer, collapsible, and fixed wide patient sidebar modes', function() {
@@ -224,50 +285,6 @@ context('patient page', function() {
       .wait('@routePatient')
       .get('.patient__frame')
       .should('not.have.class', 'patient__frame--sidebar-hidden');
-  });
-
-  specify('patient routing', function() {
-    cy
-      .viewport(1920, 900)
-      .routesForPatientWorkflow()
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .visit(`/patient/${ testPatient.id }/workflow`)
-      .wait('@routePatient');
-
-    cy
-      .get('.patient__layout')
-      .find('.workflow-page__tab.is-selected')
-      .contains('Open');
-
-    cy
-      .get('.workflow-page')
-      .should($page => {
-        expect($page[0].getBoundingClientRect().width).to.equal(1200);
-      });
-
-    cy
-      .get('.patient__layout')
-      .find('.js-workflow-closed')
-      .click();
-
-    cy
-      .get('.patient__layout')
-      .find('.workflow-page__tab.is-selected')
-      .contains('Closed');
-
-    cy
-      .get('.patient__layout')
-      .find('.js-workflow-open')
-      .click();
-
-    cy
-      .get('.patient__layout')
-      .find('.workflow-page__tab.is-selected')
-      .contains('Open');
   });
 
   specify('remembers the patient sidebar across patients and reloads', function() {

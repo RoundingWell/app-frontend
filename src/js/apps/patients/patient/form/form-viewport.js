@@ -14,7 +14,6 @@ export default Behavior.extend({
   onInitialize() {
     this.isExpanded = !!this.view.getOption('isExpanded');
     this.viewportView = this.view.getOption('viewportView');
-    if (!this.viewportView) throw new Error('FormViewportBehavior requires a viewport view');
 
     this.channel = Radio.channel(`form${ this.view.model.id }`);
   },
@@ -99,8 +98,6 @@ export default Behavior.extend({
     this.currentHeight = null;
   },
   startResizeObserver() {
-    if (!window.ResizeObserver) return;
-
     this.resizeObserver = new window.ResizeObserver(() => this.scheduleFrameSizing());
     [
       this.viewportView.getViewportElement(),

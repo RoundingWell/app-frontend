@@ -2,18 +2,15 @@
 
 ## Target and baseline
 
-- Current candidate: Marionette PRs #551 and #554 at combined commit
-  `e5073543f28d8dcd237115f3b7ad7f4131a44a15`. This is unpublished code,
-  packaged with upstream's `release:artifact` workflow and installed from
-  `vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz` (SHA-256
-  `939a03a6d7fb14815b9f3a495334c0808baef7683b0532c4c725f0e5993994e8`).
-- The candidate build produced all five workspace artifacts. Only core
-  Marionette differs from the published beta.5 packages, so the tracked
-  candidate replaces that package; the published beta.5 adapters, Radio, and
-  utils packages remain exactly pinned. Replace the tarball dependency
-  atomically when a published release contains both contracts.
-- The PR implementations, tests, documentation, migration guidance, package
-  metadata, and companion package artifacts were inspected before installation.
+- Current release: published Marionette `5.0.0-beta.6`, source
+  `18e21435fa21f75bf4a5067a210dec2ea7e0bccc`, with matching adapters, Radio,
+  and utils packages. This replaces the temporary beta.5 tarball containing
+  upstream PRs #551 and #554; beta.6 includes those Application lifecycle fixes.
+- Beta.6 scopes Application state events to the active run and keeps
+  `isRunning()` true while stop permission and descendant stopping are pending.
+  Restart requested during start notification begins a new restart cycle.
+- The release also removes silent mutations from `@mnjs/data`; this app uses
+  the Backbone data and state adapters and does not install `@mnjs/data`.
 - Baseline: `npm ci` passed; 49 component specs and 248 tests passed; 35 E2E
   specs passed unchanged. ESLint and Stylelint passed; the local editor-config
   check could not find its downloaded macOS ARM binary.

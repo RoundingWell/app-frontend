@@ -141,7 +141,6 @@ export default App.extend({
     });
   },
   onStop() {
-    this._formStartRequest = null;
     this.unsubscribe();
     if (this.currentFlow) this.stopListening(this.currentFlow);
     this.stopListening(this.action);
@@ -240,10 +239,6 @@ export default App.extend({
   },
   startEmbeddedForm(formView) {
     const formApp = this.getChildApp('form');
-    const request = {};
-
-    this._formStartRequest = request;
-
     formApp.start({
       region: formView.getRegion('form'),
       patient: this.patient,
@@ -251,8 +246,6 @@ export default App.extend({
       layoutState: this.layoutState,
       viewportView: this.getView(),
     }).catch(error => {
-      if (!this.isRunning() || this._formStartRequest !== request) return;
-
       try {
         formApp.handleStartFailure({ actionId: this.action.id }, error);
       } catch(unhandledError) {

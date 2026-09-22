@@ -19,7 +19,8 @@ import './action.scss';
 
 const FocusablePreloadRegion = PreloadRegion.extend({
   focus() {
-    const el = this.getEl(this.el);
+    // Clicking the attachment count before its view loads leaves el as a selector.
+    const el = typeof this.el === 'string' ? this.getEl(this.el) : this.el;
 
     el.scrollIntoView({ block: 'start' });
     el.focus({ preventScroll: true });

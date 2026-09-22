@@ -153,7 +153,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -172,7 +172,7 @@ const ActionItemView = View.extend({
     const ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
+
       stateOptions: { isDisabled },
     });
 
@@ -193,7 +193,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.getOption('status') === 'done';
     const dueDateView = new CardDueView({
       date: this.model.get('due_date'),
-      isCompact: true,
+
       isDisabled,
       isOverdue: this.model.isOverdue(),
     });
@@ -215,7 +215,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.getOption('status') === 'done' || !this.model.get('due_date');
     const dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true,
+
       stateOptions: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
@@ -275,7 +275,7 @@ const FlowItemView = View.extend({
       return;
     }
 
-    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -294,7 +294,7 @@ const FlowItemView = View.extend({
     const ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
+
       stateOptions: { isDisabled },
     });
 

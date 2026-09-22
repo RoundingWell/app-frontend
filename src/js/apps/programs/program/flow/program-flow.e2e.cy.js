@@ -6,7 +6,7 @@ import { getRelationship, mergeJsonApi, getErrors } from 'helpers/json-api';
 
 import { getProgramFlow } from 'support/api/program-flows';
 import { getProgram } from 'support/api/programs';
-import { getProgramActions, getProgramAction } from 'support/api//program-actions';
+import { getProgramActions, getProgramAction } from 'support/api/program-actions';
 import { testForm } from 'support/api/forms';
 import { teamNurse, teamCoordinator } from 'support/api/teams';
 
@@ -750,5 +750,55 @@ context('program flow page', function() {
     cy
       .get('.sidebar')
       .should('exist');
+
+    cy.get('.sidebar .js-close').first().click();
+    let releaseAction;
+    let requested = false;
+    const response = new Cypress.Promise(resolve => {
+      releaseAction = resolve;
+    });
+    cy.intercept('GET', `/api/program-actions/${ testProgramFlowActions[0].id }*`, req => {
+      requested = true;
+      return response.then(() => req.reply({ body: { data: testProgramFlowActions[0] } }));
+    }).as('heldFlowAction');
+    cy.get('.action-card').first().click();
+    cy.wrap(null).should(() => expect(requested).to.equal(true));
+    cy.get('.app-nav').contains('Admin Tools').click();
+    cy.get('.picklist').contains('Programs').click();
+    cy.location('pathname').should('equal', '/one/programs');
+    cy.get('.card-list').should('be.visible').then(() => releaseAction());
+    cy.wait('@heldFlowAction');
+    cy.get('.sidebar').should('not.exist');
+
+    cy.then(() => {
+      [false, true].forEach(networkFailure => {
+        cy.then(() => {
+          const program = getProgram();
+          const flow = getProgramFlow({ relationships: { program: getRelationship(program) } });
+          const action = getProgramAction({ relationships: {
+            'program': getRelationship(program), 'program-flow': getRelationship(flow),
+          } });
+          const reported = cy.stub().as('reported');
+          if (networkFailure) {
+            cy.on('uncaught:exception', error => {
+              if (!error.message.includes('Failed to fetch')) return;
+              reported(error.message);
+              return false;
+            });
+          }
+          cy.routeProgramByProgramFlow(fx => ({ ...fx, data: program }))
+            .routeProgramFlow(fx => ({ ...fx, data: flow }))
+            .routeProgramFlowActions(fx => ({ ...fx, data: [action] }))
+            .intercept('GET', `/api/program-actions/${ action.id }*`, networkFailure ?
+              { forceNetworkError: true } :
+              { statusCode: 400, body: { errors: [] } })
+            .as('failedAction')
+            .visit(`/program-flow/${ flow.id }/action/${ action.id }`)
+            .wait('@failedAction');
+          cy.get('.alert-box').should('be.visible');
+          if (networkFailure) cy.get('@reported').should('have.been.calledWithMatch', 'Failed to fetch');
+        });
+      });
+    });
   });
 });

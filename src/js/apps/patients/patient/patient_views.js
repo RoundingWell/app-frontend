@@ -91,9 +91,9 @@ const LayoutView = View.extend({
     this._isSidebarFixed = this.isSidebarFixed();
 
     if (this._isSidebarFixed) {
-      this.layoutState.set('sidebarHidden', false, { silent: true });
+      this.layoutState.set('sidebarHidden', false);
     } else if (this._isSidebarDrawer) {
-      this.layoutState.set('sidebarHidden', true, { silent: true });
+      this.layoutState.set('sidebarHidden', true);
     }
 
     this.listenTo(this.layoutState, {

@@ -58,31 +58,27 @@ export default SubRouterApp.extend({
   },
 
   showWorkflows() {
-    const routeContext = this.getCurrentRoute();
-
     return this.startCurrent('workflows', {
       region: this.getView().getRegion('content'),
     }).catch(error => {
-      if (this.getCurrentRoute() !== routeContext) return;
-
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
     });
+  },
+
+  onRouteError() {
+    this.getChildApp('action').handleStartFailure();
+    return this.showWorkflows();
   },
 
   startProgramAction(programId, actionId) {
     const actionApp = this.getChildApp('action');
     const routeContext = this.getCurrentRoute();
 
-    actionApp.restart({ actionId, programId })
+    return actionApp.restart({ actionId, programId })
       .then(started => {
         if (!started || this.getCurrentRoute() !== routeContext) return;
 
         this.editList(actionApp.action);
-      })
-      .catch(() => {
-        if (this.getCurrentRoute() !== routeContext) return;
-
-        this.showWorkflows();
       });
   },
 

@@ -4,8 +4,8 @@ export default App.extend({
   createState({ stateOptions }) {
     return new this.StateModel(stateOptions);
   },
-  onBeforeStart(app, { collection } = {}) {
-    if (collection) this.updateCollection(collection);
+  onBeforeStart(app, { collection }) {
+    this.updateCollection(collection);
   },
   onStart() {
     const view = new this.ViewClass({
@@ -20,7 +20,7 @@ export default App.extend({
     this.showView(view);
   },
   onStop() {
-    this.getState().clear({ silent: true });
+    this.getState().clear();
   },
   resetChanges() {
     this.getState().set({
@@ -35,7 +35,6 @@ export default App.extend({
   },
   updateCollection(collection) {
     this.getState().updateCollection(collection);
-    this.getView()?.updateCollection();
   },
   onClickCancel() {
     this.trigger('cancel');

@@ -124,57 +124,64 @@ function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
 }
 
 context('worklist page', function() {
-  specify('ignores URL query strings when selecting the worklist owner', function() {
-    cy
-      .routeActions()
-      .visit('/worklist/owned-by?ct=1788555349799')
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[clinicians]=${ currentClinician.id }`);
-  });
+  specify('worklist owner selection ignores query strings and recovers saved filters', function() {
+    cy.then(() => {
+      cy.log('ignores URL query strings when selecting the worklist owner');
+      cy
+        .routeActions()
+        .visit('/worklist/owned-by?ct=1788555349799')
+        .wait('@routeActions')
+        .itsUrl()
+        .its('search')
+        .should('contain', `filter[clinicians]=${ currentClinician.id }`);
+    });
 
-  specify('preserves the saved owner when the worklist URL has a query string', function() {
-    const clinician = getClinician();
+    cy.then(() => {
+      cy.log('preserves the saved owner when the worklist URL has a query string');
+      const clinician = getClinician();
 
-    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
-      id: 'owned-by',
-      clinicianId: clinician.id,
-    }));
+      cy
+        .routeWorkspaceClinicians(fx => {
+          fx.data.push(clinician);
+          return fx;
+        })
+        .routeActions()
+        .visit('/worklist/owned-by?ct=1788555349799', {
+          onBeforeLoad(win) {
+            win.localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+              id: 'owned-by', clinicianId: clinician.id,
+            }));
+          },
+        })
+        .wait('@routeActions')
+        .itsUrl()
+        .its('search')
+        .should('contain', `filter[clinicians]=${ clinician.id }`);
+    });
 
-    cy
-      .routeWorkspaceClinicians(fx => {
-        fx.data.push(clinician);
-        return fx;
-      })
-      .routeActions()
-      .visit('/worklist/owned-by?ct=1788555349799')
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[clinicians]=${ clinician.id }`);
-  });
+    cy.then(() => {
+      cy.log('recovers a saved invalid owner while preserving date filters');
+      const storeKey = `owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`;
 
-  specify('recovers a saved invalid owner while preserving date filters', function() {
-    const storeKey = `owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`;
+      cy
+        .routeActions()
+        .visit('/worklist/owned-by', {
+          onBeforeLoad(win) {
+            win.localStorage.setItem(storeKey, JSON.stringify({
+              id: 'owned-by', clinicianId: 'ct=1788555349799',
+              actionsDateFilters: { dateType: 'updated_at', selectedDate: testDate() },
+            }));
+          },
+        })
+        .wait('@routeActions')
+        .itsUrl()
+        .its('search')
+        .should('contain', `filter[clinicians]=${ currentClinician.id }`)
+        .should('contain', `filter[updated_at]=${ dayjs(testDate()).startOf('day').format() },${ dayjs(testDate()).endOf('day').format() }`);
 
-    localStorage.setItem(storeKey, JSON.stringify({
-      id: 'owned-by',
-      clinicianId: 'ct=1788555349799',
-      actionsDateFilters: { dateType: 'updated_at', selectedDate: testDate() },
-    }));
-
-    cy
-      .routeActions()
-      .visit('/worklist/owned-by')
-      .wait('@routeActions')
-      .itsUrl()
-      .its('search')
-      .should('contain', `filter[clinicians]=${ currentClinician.id }`)
-      .should('contain', `filter[updated_at]=${ dayjs(testDate()).startOf('day').format() },${ dayjs(testDate()).endOf('day').format() }`);
-
-    cy.window().then(win => {
-      expect(JSON.parse(win.localStorage.getItem(storeKey)).clinicianId).to.equal(currentClinician.id);
+      cy.window().then(win => {
+        expect(JSON.parse(win.localStorage.getItem(storeKey)).clinicianId).to.equal(currentClinician.id);
+      });
     });
   });
 
@@ -419,44 +426,47 @@ context('worklist page', function() {
       .should('not.have.class', 'is-filters-collapsed');
   });
 
-  specify('patient sidebar desktop cards', function() {
-    cy.viewport(1820, 900);
+  specify('patient sidebar cards remain reachable on desktop and mobile', function() {
+    cy.then(() => {
+      cy.viewport(1820, 900);
 
-    openPatientSidebar(4);
+      openPatientSidebar(4);
 
-    cy
-      .window()
-      .should(win => {
-        expect(win.matchMedia('(width >= 1800px)').matches).to.be.true;
-      });
+      cy
+        .window()
+        .should(win => {
+          expect(win.matchMedia('(width >= 1800px)').matches).to.be.true;
+        });
 
-    cy
-      .get('.patient-sidebar__card')
-      .should('have.length', 4)
-      .then($cards => {
-        const cards = [...$cards].map(card => card.getBoundingClientRect());
-        const [firstCard] = cards;
+      cy
+        .get('.patient-sidebar__card')
+        .should('have.length', 4)
+        .then($cards => {
+          const cards = [...$cards].map(card => card.getBoundingClientRect());
+          const [firstCard] = cards;
 
-        expect(firstCard.width).to.equal(260);
-        expect(cards.every(card => card.width === 260)).to.be.true;
-        expect(Math.max(...cards.map(card => card.left))).to.be.greaterThan(firstCard.right);
-      });
-  });
+          expect(firstCard.width).to.equal(260);
+          expect(cards.every(card => card.width === 260)).to.be.true;
+          expect(Math.max(...cards.map(card => card.left))).to.be.greaterThan(firstCard.right);
+        });
+    });
 
-  specify('patient sidebar mobile scrolling', function() {
-    cy.viewport(390, 400);
+    cy.then(() => {
+      cy.get('.patient-sidebar__close').click();
+      cy.get('.worklist-list__toggle').contains('Actions').click().wait('@routeActions');
+      cy.viewport(390, 400);
+      cy.get('.worklist-list__item').contains('Test Patient').click();
 
-    openPatientSidebar(4, 'actions');
+      cy
+        .get('.patient-list-page__sidebar-content')
+        .should(([sidebarContent]) => {
+          expect(sidebarContent.scrollHeight).to.be.greaterThan(sidebarContent.clientHeight);
 
-    cy
-      .get('.patient-list-page__sidebar-content')
-      .should(([sidebarContent]) => {
-        expect(sidebarContent.scrollHeight).to.be.greaterThan(sidebarContent.clientHeight);
+          sidebarContent.scrollTop = sidebarContent.scrollHeight;
 
-        sidebarContent.scrollTop = sidebarContent.scrollHeight;
-
-        expect(sidebarContent.scrollTop).to.be.greaterThan(0);
-      });
+          expect(sidebarContent.scrollTop).to.be.greaterThan(0);
+        });
+    });
   });
 
   specify('keeps patient sidebar mounted while list refreshes', function() {
@@ -1257,6 +1267,8 @@ context('worklist page', function() {
     cy
       .get('@firstRow')
       .find('[data-state-region] .fa-circle-check');
+
+    cy.get('@firstRow').find('[data-state-region] button').should('have.attr', 'aria-label', 'Done');
 
     cy
       .routeFlow(fx => {
@@ -2392,6 +2404,22 @@ context('worklist page', function() {
 
         return fx;
       });
+
+    cy.intercept({ method: 'GET', url: `/api/actions/${ testNewSocketAction.id }?*`, times: 1 }, {
+      statusCode: 404,
+      body: { errors: [{ status: '404', detail: 'Action not available yet' }] },
+    }).as('failedSocketAction');
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+    cy.wait('@failedSocketAction');
+    cy.get('[data-count-region]').should('contain', '1 Action');
 
     cy.sendWs({
       category: 'ResourceCreated',
@@ -4804,49 +4832,53 @@ context('worklist page', function() {
       .should('have.length', 2);
   });
 
-  specify('empty flows view', function() {
-    cy
-      .routeFlows(fx => {
-        fx.data = [];
+  specify('empty flow and action worklists', function() {
+    cy.then(() => {
+      cy.log('empty flows view');
+      cy
+        .routeFlows(fx => {
+          fx.data = [];
 
-        return fx;
-      })
-      .routeActions()
-      .visit('/worklist/owned-by')
-      .wait('@routeActions');
+          return fx;
+        })
+        .routeActions()
+        .visit('/worklist/owned-by')
+        .wait('@routeActions');
 
-    cy
-      .get('.worklist-list__toggle')
-      .contains('Flows')
-      .click()
-      .wait('@routeFlows');
+      cy
+        .get('.worklist-list__toggle')
+        .contains('Flows')
+        .click()
+        .wait('@routeFlows');
 
-    cy
-      .get('[data-count-region] div')
-      .should('be.empty');
+      cy
+        .get('[data-count-region] div')
+        .should('be.empty');
 
-    cy
-      .get('.card-list__empty')
-      .contains('No Flows');
-  });
+      cy
+        .get('.card-list__empty')
+        .contains('No Flows');
+    });
 
-  specify('empty actions view', function() {
-    cy
-      .routeActions(fx => {
-        fx.data = [];
+    cy.then(() => {
+      cy.log('empty actions view');
+      cy
+        .routeActions(fx => {
+          fx.data = [];
 
-        return fx;
-      })
-      .visit('/worklist/owned-by')
-      .wait('@routeActions');
+          return fx;
+        })
+        .get('.worklist-list__toggle').contains('Actions').click()
+        .wait('@routeActions');
 
-    cy
-      .get('[data-count-region] div')
-      .should('be.empty');
+      cy
+        .get('[data-count-region] div')
+        .should('be.empty');
 
-    cy
-      .get('.card-list__empty')
-      .contains('No Actions');
+      cy
+        .get('.card-list__empty')
+        .contains('No Actions');
+    });
   });
 
   specify('actions with work:owned:manage permission', function() {

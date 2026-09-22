@@ -41,7 +41,7 @@ eventRoutes: {
 ```
 
 Structural fields: `action`, `route`, `root`. Behavioral flags go under `meta`
-(`isList`, `clearLatestList`). `action` is a method name (resolved on the RouterApp)
+(`isList`). `action` is a method name (resolved on the RouterApp)
 or a function; `route` is a string or a non-empty array of alias strings; non-root
 routes are prefixed with the `workspaceSlug` supplied by AppFrame, so they must not
 begin with `/`.
@@ -93,6 +93,14 @@ Router-specific `onBeforeAppRoute` / `onAppRoute` hooks use the same
 `(router, routeContext)` signature. Root/workspace routing in `NavApp` and global
 error routing are not coordinated by AppFrame because they are not area routers
 instantiated through `AppFrameApp.initRouter()`.
+
+## Route failures
+
+Return the activation promise from top-level route handlers. Put user-facing error
+presentation in `onRouteError(error, routeContext)`: RouterApp invokes it only for
+the current route, including failures that finish cleanup after navigation.
+Avoid duplicating route-identity checks in individual handler catches. If an error
+hook starts asynchronous reporting, handle that promise's rejection explicitly.
 
 ## Scope identity (which child is "the same")
 
@@ -198,7 +206,7 @@ cancelable requests. Route dispatch stays synchronous — do not add another asy
 layer. Route handlers should return their activation promise. Route completion
 notifications still fire synchronously after invoking the handler; they do not
 mean that async content is ready. Synchronous throws and returned async failures are observed through
-`onRouteError(error, routeContext)` (Datadog by default), including initial
+`onRouteError(error, routeContext)` (the browser error channel by default, also observed by Datadog), including initial
 SubRouterApp dispatch from `onStart`. Domain handlers may handle expected errors
 before returning. Radio dispatch remains synchronous.
 
@@ -213,7 +221,7 @@ before returning. Radio dispatch remains synchronous.
   `getCurrentRouteMeta()`.
 - A non-root `route` beginning with `/` (the workspace slug is prepended, producing a
   double slash).
-- Leaving `isList` / `clearLatestList` at the top level of a definition instead of
+- Leaving `isList` at the top level of a definition instead of
   under `meta` (silently stops updating the latest-list history).
 - Adding global shell effects directly to RouterApp. AppFrame owns nav selection,
   transient-sidebar cleanup, and latest-list metadata handling for area routes.

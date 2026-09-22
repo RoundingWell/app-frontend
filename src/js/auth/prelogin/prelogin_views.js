@@ -24,7 +24,6 @@ const LoginPromptView = View.extend({
   el() {
     return document.getElementById('root');
   },
-  /* istanbul ignore next: unable to test auth views in cypress */
   onRender() {
     this.showChildView('content', new LoginView());
   },

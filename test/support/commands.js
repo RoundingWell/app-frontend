@@ -109,7 +109,7 @@ Cypress.Commands.add('iframe', (getSelector = 'iframe') => {
     .get(getSelector)
     .its('0.contentDocument.body')
     .should('not.be.empty')
-    .then(cy.wrap);
+    .then(body => cy.wrap(Cypress.$(body)));
 });
 
 Cypress.Commands.add('iframeStub', (getSelector = 'iframe') => {

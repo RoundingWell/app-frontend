@@ -40,6 +40,8 @@ Load a scoped overlay only when the task touches:
 - Route data access through `src/js/entities-service/**` instead of introducing ad hoc fetch logic elsewhere.
 - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
 - Keep feature flags easy to remove. Prefer guard-clause style branching.
+- Never use `silent: true` to suppress model/state notifications. Seed initial values before observers attach, or compute a complete update and apply it with a normal `set`; use lifecycle ownership for cleanup.
+- Avoid prototype-method `.call()`/`.apply()` chains outside constructor delegation. Prefer lifecycle hooks, supported extension points, or shared helpers; retain a parent-method call only when its behavior is required and no suitable hook exists.
 - Reuse existing utilities and workspace packages before adding dependencies.
 - Use i18n keys that match the repo's existing formatjs-style naming.
 
@@ -49,13 +51,12 @@ Use the `marionette` skill supplied by Marionette's upstream plugin for Marionet
 work. It selects the version-matched framework docs; this file records the app's
 integration choices and verification policy.
 
-- Contract: the repository root's `package.json` and `package-lock.json` select
-  `marionette` from `vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz`, with
-  `@mnjs/adapters` at `5.0.0-beta.5`.
-- Packaged docs: `node_modules/marionette/dist/docs`, version `5.0.0-beta.5`, source
-  `e5073543f28d8dcd237115f3b7ad7f4131a44a15`, `sourceDirty: false`, content
-  SHA-256 `8939d7bfa64fcbdcd6cf65eadd37f57fbe90d332236bbe42285b8f79ebd2b8c8`.
-  Verify the installed package against this candidate before relying on its APIs.
+- Contract: the repository root's `package.json` and `package-lock.json` pin
+  `marionette` and `@mnjs/adapters` to published `5.0.0-beta.6` packages.
+- Packaged docs: `node_modules/marionette/dist/docs`, version `5.0.0-beta.6`, source
+  `18e21435fa21f75bf4a5067a210dec2ea7e0bccc`, `sourceDirty: false`, content
+  SHA-256 `d875bebadc7a01dec4d2271d93c22771caf6f8caf4191972b193f2241a9c4291`.
+  Verify the installed package against this release before relying on its APIs.
 - Runtime: the shared named exports from `marionette`; `src/js/base/setup.js`
   registers Backbone for DataApi and StateApi, and Morphdom for DomApi. DOM event
   delegation uses Marionette's native default.
@@ -123,6 +124,12 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - `scripts/**` drives release, artifact, and deploy flows. Preserve CLI flags, output shape, and release semantics when editing.
 - Workspace packages under `packages/**` are shared entry points for the app. Treat public APIs as stable unless the task explicitly changes them.
 
+## Lifecycle Review
+
+- Verify cancellation claims against the installed Marionette version and actual callers. Superseded startup operations resolve false, but code inside an async `prepareStart` still needs `signal.throwIfAborted()` before manually starting children after awaits.
+- A stopped app can be stopped without stop notifications; canceling an in-progress start can still invoke `onStop`. Scope listener cleanup by event/callback when its source may not yet be assigned.
+- Internal fetch helpers require the options passed by their current callers. Do not restore hypothetical no-options consumers or removed configuration variants without finding an active caller.
+
 ## Reviewing Changes
 
 - Put findings first.
@@ -163,14 +170,17 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 ## Validation
 
 - Reserve Cypress component specs for generic reusable units, including base
-  infrastructure and genuinely generic components colocated under `apps/**`.
-  Cover feature and application behavior under `apps/**` through E2E flows.
+  infrastructure, `components/**`, and `behaviors/**`.
+  Cover `apps/**`, `entities-service/**`, and `services/**` through E2E flows alone.
+  Component coverage for these directories is discarded before merging reports.
   Component coverage is not evidence that application code is reachable; if an
   E2E flow cannot reach that code, verify whether it is dead and remove it
   instead of adding a component spec to preserve it.
+- To reduce Cypress test cost, extend an existing E2E scenario for related behavior instead of adding a `specify` for each assertion or input variant. Reuse page setup where possible, keep specs beside the feature they exercise, and retain separate tests when authentication, permissions, or incompatible fixtures require isolation.
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.
 - Do not make incidental presentation a Cypress contract. Avoid exact assertions for alignment, spacing, typography, dimensions, colors, or computed CSS unless the presentation itself communicates product state or the geometry proves functional behavior such as a breakpoint mode, overflow prevention, reachability, popup direction, or layout stability during a state change.
+- Keep related Cypress scenarios consolidated when their setup can be reset explicitly. Do not recommend splitting solely because an earlier assertion failure skips later steps; that is normal test behavior. Flag actual leaked intercepts, clocks, or exception handlers instead.
 - During review, flag newly added visual assertions that would fail for an equally valid design implementation without changing state or behavior. Use design review or manual visual inspection for ordinary visual fidelity.
 - Iterate with single specs; they are much faster than the full suites:
   - Component: `npx cypress run --component --spec src/js/base/routerapp.component.cy.js`

@@ -8,7 +8,7 @@ const Entity = BaseEntity.extend({
     'comments:collection': 'getCollection',
     'fetch:comments:collection:byAction': 'fetchCommentsByAction',
   },
-  fetchCommentsByAction(actionId, options = {}) {
+  fetchCommentsByAction(actionId, options) {
     const url = `/api/actions/${ actionId }/comments`;
 
     return this.fetchCollection({ ...options, url });
