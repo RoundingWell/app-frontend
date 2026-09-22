@@ -68,7 +68,7 @@ export default App.extend({
   call(number, action) {
     const provider = this.getChildApp('provider');
 
-    if (!provider) {
+    if (!provider || !this.isRunning()) {
       this._pendingCall = { number, action };
       return;
     }

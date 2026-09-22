@@ -133,10 +133,14 @@
   migrated views use Marionette's native DOM collections. Application-level
   browser listeners retain explicit ownership and cleanup, and Morphdom remains
   the renderer-specific DOM adapter. It was merged by a human.
-- Active: PR #1808 replaces Five9 and RingCentral constructor
+- Completed: PR #1808 replaces Five9 and RingCentral constructor
   autostart and module singletons with Applications owned and explicitly started
   by DialerService. Their Backbone state sources, borrowed overlay Region, and
-  browser effects now follow the beta.5 lifecycle contract.
+  browser effects now follow the beta.5 lifecycle contract. It was merged by a
+  human.
+- Active: PR #1809 keeps the latest dialer call buffered until
+  DialerService is running, so provider registration cannot let an older call
+  overtake a newer click.
 
 ## Validation
 
