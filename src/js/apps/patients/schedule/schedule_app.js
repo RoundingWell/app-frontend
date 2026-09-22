@@ -90,7 +90,7 @@ const ScheduleApp = App.extend({
 
     this.initFiltersApp({ setDefaults: true });
   },
-  onBeforeStop() {
+  onStop() {
     this._canRefresh = false;
     this._bulkEditSuspended = false;
     this._patientSidebarRequest = null;
@@ -98,7 +98,6 @@ const ScheduleApp = App.extend({
     this._refreshController = null;
     if (this.filteredCollection) this.stopListening(this.filteredCollection);
     if (this.editableCollection) this.stopListening(this.editableCollection);
-    this.stopListeningToList();
     this.collection = null;
     this.filteredCollection = null;
     this.editableCollection = null;
@@ -241,6 +240,9 @@ const ScheduleApp = App.extend({
     });
 
     this.listenTo(scheduleListView, {
+      'destroy'() {
+        this.stopListening(scheduleListView);
+      },
       'filtered'(filtered) {
         this.filteredCollection.reset(filtered);
         this.editableCollection.reset(this._getListEditable(scheduleListView));
@@ -477,11 +479,6 @@ const ScheduleApp = App.extend({
     });
 
     this.getView().showChildView('search', searchView);
-  },
-  prepareStop(options) {
-    const dynamicApps = ['bulkEditActions'];
-
-    return Promise.all(dynamicApps.map(name => this.removeChildApp(name, options)));
   },
 });
 

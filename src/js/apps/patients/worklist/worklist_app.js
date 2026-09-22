@@ -110,15 +110,13 @@ const WorklistApp = App.extend({
 
     this.initFiltersApp({ setDefaults: true });
   },
-  onBeforeStop() {
+  onStop() {
     this._canRefresh = false;
     this._patientSidebarRequest = null;
     this._refreshController?.abort();
     this._refreshController = null;
     if (this.filteredCollection) this.stopListening(this.filteredCollection);
     if (this.editableCollection) this.stopListening(this.editableCollection);
-    const listView = this.getView()?.getChildView('list');
-    if (listView) this.stopListening(listView);
     this.collection = null;
     this.filteredCollection = null;
     this.editableCollection = null;
@@ -166,7 +164,12 @@ const WorklistApp = App.extend({
   showListError(isRefresh) {
     const errorView = new ListErrorView({ isRefresh });
 
-    this.listenTo(errorView, 'retry', this.refreshList);
+    this.listenTo(errorView, {
+      'destroy'() {
+        this.stopListening(errorView);
+      },
+      'retry': this.refreshList,
+    });
 
     if (isRefresh) {
       this.getView().showChildView('listStatus', errorView);
@@ -257,17 +260,13 @@ const WorklistApp = App.extend({
   async refreshList() {
     if (!this._canRefresh) return;
 
-    if (!await this.stopBulkEditForRefresh()) return;
-
-    this.filterState.set(this.getState().getFiltersState());
     this._refreshController?.abort();
     const controller = new AbortController();
     this._refreshController = controller;
-    this.showFiltersButtonView();
-    this.showTypeViews();
-    this.showListUpdating();
 
     try {
+      if (!await this.prepareListRefresh(controller)) return;
+
       const collection = await this.loadCollection({ signal: controller.signal });
       if (!this.isCurrentRefresh(controller)) return;
 
@@ -277,6 +276,15 @@ const WorklistApp = App.extend({
     } finally {
       if (this._refreshController === controller) this._refreshController = null;
     }
+  },
+  async prepareListRefresh(controller) {
+    if (!await this.stopBulkEditForRefresh() || !this.isCurrentRefresh(controller)) return false;
+
+    this.filterState.set(this.getState().getFiltersState());
+    this.showFiltersButtonView();
+    this.showTypeViews();
+    this.showListUpdating();
+    return true;
   },
   async stopBulkEditForRefresh() {
     try {
@@ -341,6 +349,9 @@ const WorklistApp = App.extend({
     });
 
     this.listenTo(collectionView, {
+      'destroy'() {
+        this.stopListening(collectionView);
+      },
       'filtered'(filtered) {
         this.filteredCollection.reset(filtered);
         this.editableCollection.reset(this._getListEditable(collectionView));
@@ -648,11 +659,6 @@ const WorklistApp = App.extend({
     });
 
     this.getView().showChildView('search', searchView);
-  },
-  prepareStop(options) {
-    const dynamicApps = ['bulkEditActions', 'bulkEditFlows'];
-
-    return Promise.all(dynamicApps.map(name => this.removeChildApp(name, options)));
   },
 });
 
