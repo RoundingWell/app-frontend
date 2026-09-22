@@ -1,0 +1,76 @@
+src/js/services/modal.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 110
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 765
+src/js/apps/programs/program/program.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 73,75
+src/js/apps/patients/patient/form/patient.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 158,160,163-165
+  s_e0e7fbf19a3b71::t_c869bf4d5f0f9c 125
+src/js/apps/patients/patients-main_app.js
+  s_e0e7fbf19a3b71::t_217ec468e6c792 109,112,114-118,122
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_e0e7fbf19a3b71::t_427da93ab3c5c0 885-886
+  s_e0e7fbf19a3b71::t_d621e35096d38e 63,784,880
+src/js/utils/handle-errors.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 8
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 155,160
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 304-305,310
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 49-50,54
+src/js/apps/patients/patient/form/form-interaction.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 73
+src/js/auth/prelogin/prelogin.component.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 4-9
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_e0e7fbf19a3b71::t_d621e35096d38e 99-100,105
+src/js/apps/patients/shared/list-page.js
+  s_e0e7fbf19a3b71::t_4a952e38f842dc 229,233-234
+  s_e0e7fbf19a3b71::t_f3d12708f04163 195,214,263-265
+AGENTS.md
+  s_e0e7fbf19a3b71::t_db1f4221d064c3 177
+src/js/app.component.cy.js
+  s_e0e7fbf19a3b71::t_dd8b3fea1128a6 1-26
+src/js/app.js
+  s_e0e7fbf19a3b71::t_ba6f295aca6b52 98-101
+src/js/apps/globals/error/error.e2e.cy.js
+  s_e0e7fbf19a3b71::t_bbd7ca6d8d9ed7 9-11,13-16,18-21,23-25,27-29,31-34,36-39,41-43
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_e0e7fbf19a3b71::t_1980fd31dfcbf7 1784,1827
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_e0e7fbf19a3b71::t_0e25f065505bfe 2696
+src/js/apps/patients/schedule/schedule_app.js
+  s_e0e7fbf19a3b71::t_e52bdc8a9a123c 343,349-350,352
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_e0e7fbf19a3b71::t_18449ccca52ec4 370
+src/js/apps/patients/worklist/worklist_app.js
+  s_e0e7fbf19a3b71::t_9b620b82429e1b 448,454-455,458
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_e0e7fbf19a3b71::t_c2ad84b59e584d 453
+src/js/components/tooltip/tooltip.component.cy.js
+  s_e0e7fbf19a3b71::t_ec928e1c606260 308
+src/js/services/dialer.e2e.cy.js
+  s_e0e7fbf19a3b71::t_8fb1a7fc03bbc0 339
+src/js/services/ws.component.cy.js
+  s_e0e7fbf19a3b71::t_a1eadd91998957 843-844,852
+src/js/utils/handle-errors.component.cy.js
+  s_e0e7fbf19a3b71::t_11ad277d48f7f3 20-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d7952c08019be4c594137554c83fb0a244e294f1",
+  "prompts": {},
+  "sessions": {
+    "s_e0e7fbf19a3b71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c800-da6b-7301-8f2d-7eb6aea7f772",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
