@@ -1,0 +1,38 @@
+scripts/cypress-coverage-events.test.js
+  s_e0e7fbf19a3b71::t_b8f4597b6cd2d4 9-10,13-49,51-53
+  s_e0e7fbf19a3b71::t_437674175d7518 1-8,11-12,50,54-56
+scripts/run-component-shard.js
+  s_e0e7fbf19a3b71::t_bc33da4790dada 30
+  s_e0e7fbf19a3b71::t_028f6f5c9437d7 1-29,31-39
+.circleci/README.md
+  s_e0e7fbf19a3b71::t_b8f4597b6cd2d4 24-36
+.circleci/workflows.yml
+  s_e0e7fbf19a3b71::t_427da93ab3c5c0 134-136,201-205,208,210,241,392,394,396,404,406,408,441,443,445,500,502,506,526,528,532,552,554,558
+test/README.md
+  s_e0e7fbf19a3b71::t_b8f4597b6cd2d4 5-12
+  s_e0e7fbf19a3b71::t_e2e5afe1b1f727 18-21
+cypress.config.mjs
+  s_e0e7fbf19a3b71::t_a579dc29bed977 7,22
+package.json
+  s_e0e7fbf19a3b71::t_b86f622581980a 44
+scripts/cypress-coverage-events.js
+  s_e0e7fbf19a3b71::t_3a7629f228a275 1-11
+scripts/run-component-shard.test.js
+  s_e0e7fbf19a3b71::t_887add5daf7474 1-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "585806d1e723d8bf1c96acdb7b7f3021e6394f07",
+  "prompts": {},
+  "sessions": {
+    "s_e0e7fbf19a3b71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c800-da6b-7301-8f2d-7eb6aea7f772",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
