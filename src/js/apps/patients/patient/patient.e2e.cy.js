@@ -46,11 +46,12 @@ context('patient page', function() {
         .click();
 
       cy
-        .url()
-        .should('contain', 'worklist/owned-by');
+        .location('pathname')
+        .should('equal', '/one/worklist/owned-by');
     });
 
     cy.then(() => {
+      // Remove this scenario with the aliases after September 2, 2027.
       cy.log('legacy patient URL aliases still route');
       const legacyAction = getAction({
         attributes: { name: 'Legacy Alias Action' },
@@ -156,9 +157,6 @@ context('patient page', function() {
       });
     });
   });
-
-  // Compatibility coverage for the three legacy patient URL aliases. They must
-  // keep routing until September 2, 2027; delete this spec with the aliases.
 
   specify('uses drawer, collapsible, and fixed wide patient sidebar modes', function() {
     cy

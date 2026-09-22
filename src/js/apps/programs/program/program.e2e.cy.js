@@ -70,9 +70,9 @@ context('program page', function() {
         .routeProgram(fx => ({ ...fx, data: program }))
         .routeProgramFlows()
         .intercept('GET', `/api/programs/${ program.id }/actions*`, { statusCode: 400, body: {} })
-        .as('failedWorkflows')
+        .as('failedActions')
         .visit(`/program/${ program.id }`)
-        .wait('@failedWorkflows');
+        .wait('@failedActions');
 
       cy.get('.error-page').should('contain', 'Error code: 400.');
     });

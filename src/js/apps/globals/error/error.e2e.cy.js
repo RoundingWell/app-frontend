@@ -6,45 +6,41 @@ context('Global Error Page', function() {
   });
 
   specify('unknown workspace and root routes return to the workspace', function() {
-    cy.then(() => {
-      cy.log('404 not found');
-      cy
-        .visit('/route-does-not-exist');
+    cy.log('404 not found');
+    cy
+      .visit('/route-does-not-exist');
 
-      cy
-        .get('.error-page')
-        .should('contain', 'Something went wrong.')
-        .and('contain', ' This page doesn\'t exist.');
+    cy
+      .get('.error-page')
+      .should('contain', 'Something went wrong.')
+      .and('contain', ' This page doesn\'t exist.');
 
-      cy
-        .get('.error-page')
-        .contains('Back to Your Workspace')
-        .click();
+    cy
+      .get('.error-page')
+      .contains('Back to Your Workspace')
+      .click();
 
-      cy
-        .get('.error-page')
-        .should('not.exist');
-    });
+    cy
+      .get('.error-page')
+      .should('not.exist');
 
-    cy.then(() => {
-      cy.log('404 not found - root routes');
-      cy
-        .visit('/route-does-not-exist', { isRoot: true });
+    cy.log('404 not found - root routes');
+    cy
+      .visit('/route-does-not-exist', { isRoot: true });
 
-      cy
-        .get('.error-page')
-        .should('contain', 'Something went wrong.')
-        .and('contain', ' This page doesn\'t exist.');
+    cy
+      .get('.error-page')
+      .should('contain', 'Something went wrong.')
+      .and('contain', ' This page doesn\'t exist.');
 
-      cy
-        .get('.error-page')
-        .contains('Back to Your Workspace')
-        .click();
+    cy
+      .get('.error-page')
+      .contains('Back to Your Workspace')
+      .click();
 
-      cy
-        .get('.error-page')
-        .should('not.exist');
-    });
+    cy
+      .get('.error-page')
+      .should('not.exist');
   });
 
   specify('401 token error keeps the current workspace route', function() {

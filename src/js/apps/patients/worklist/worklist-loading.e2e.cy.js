@@ -367,7 +367,7 @@ context('worklist loading states', function() {
       // A failed initial list must also allow navigation away and back before retrying.
       cy.routeDashboards();
       cy.get('.app-nav__link').contains('Dashboards').click().wait('@routeDashboards');
-      cy.location('pathname').should('include', '/dashboards');
+      cy.location('pathname').should('equal', '/one/dashboards');
       cy.go('back').wait('@failedWorklist').wait('@failedWorklist');
       cy.get('.worklist-list__error').should('be.visible');
 

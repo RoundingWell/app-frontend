@@ -95,6 +95,10 @@ const Application = App.extend({
     }, { signal: this._eventListeners.signal });
   },
 
+  onDestroy() {
+    this._eventListeners?.abort();
+  },
+
   async prepareStart(options, { signal }) {
     const bootstrapService = this.getChildApp('bootstrap');
 

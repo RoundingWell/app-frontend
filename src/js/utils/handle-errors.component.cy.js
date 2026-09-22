@@ -17,7 +17,9 @@ context('handleErrors', function() {
       },
     };
 
-    return handleErrors(fakeResponseError).catch(error => {
+    return handleErrors({ response: { status: 500 } }).catch(error => {
+      expect(error.message).to.equal('Error Status: 500 - undefined');
+    }).then(() => handleErrors(fakeResponseError)).catch(error => {
       expect(error.message).to.equal('Error Status: 400 - [{"details":"fake error"}]');
     });
   });

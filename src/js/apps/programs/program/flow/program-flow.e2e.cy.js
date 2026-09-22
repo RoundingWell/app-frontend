@@ -762,6 +762,7 @@ context('program flow page', function() {
           const reported = cy.stub().as('reported');
           if (networkFailure) {
             cy.on('uncaught:exception', error => {
+              if (!error.message.includes('Failed to fetch')) return;
               reported(error.message);
               return false;
             });

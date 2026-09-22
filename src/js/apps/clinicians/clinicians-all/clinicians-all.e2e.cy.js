@@ -298,21 +298,16 @@ context('clinicians list', function() {
       cy.then(() => {
         const label = 'Clinicians';
         const url = '/api/clinicians*';
-        const admin = true;
         cy.routesForDefault().visit('/worklist/owned-by').wait('@routeActions');
         cy.intercept('GET', url, { statusCode: 400, body: {} }).as('failedRoute');
 
-        if (admin) {
-          cy.get('.app-nav__bottom-button').contains('Admin Tools').click();
-          cy.get('.js-picklist-item').contains(label).click();
-        } else {
-          cy.get('.app-nav__link').contains(label).click();
-        }
+        cy.get('.app-nav__bottom-button').contains('Admin Tools').click();
+        cy.get('.js-picklist-item').contains(label).click();
 
         cy.wait('@failedRoute');
         cy.get('.error-page').should('contain', 'Error code: 400.');
         cy.get('.error-page').contains('Back to Your Workspace').click();
-        cy.location('pathname').should('include', '/worklist/owned-by');
+        cy.location('pathname').should('equal', '/one/worklist/owned-by');
         cy.get('.worklist-list__list').should('be.visible');
         cy.get('.error-page').should('not.exist');
       });

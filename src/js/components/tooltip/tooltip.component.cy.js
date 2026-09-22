@@ -305,7 +305,7 @@ context('Tooltip', function() {
 
     cy.get('button').as('anchor').trigger('pointerover');
     cy.get('.tooltip').should('have.class', 'is-left').and('have.class', 'is-top-arrow');
-    cy.get('@anchor').trigger('mouseleave');
+    cy.get('@anchor').trigger('mouseout');
     cy.get('.tooltip').should('not.exist');
     cy.then(() => {
       bounds = {

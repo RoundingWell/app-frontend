@@ -122,6 +122,7 @@ context('Patient Form', function() {
       const patient = getPatient();
       const response = getFormResponse();
       let releaseSave;
+      const pendingDraftKey = `form-subm-${ currentClinician.id }-${ patient.id }-${ testForm.id }`;
 
       cy
         .clearFormDrafts()
@@ -154,13 +155,14 @@ context('Patient Form', function() {
 
       cy.get('.app-nav__link').contains('Owned By').click();
       cy.wait('@routeActions');
-      cy.location('pathname').should('include', '/worklist/owned-by');
+      cy.location('pathname').should('equal', '/one/worklist/owned-by');
 
+      cy.setFormDraft(pendingDraftKey, { submission: { data: { pending: true } } });
       cy.then(() => releaseSave());
       cy.wait('@saveForm');
-      // The save completes IndexedDB draft cleanup before notifying its former owner.
-      cy.wait(300);
-      cy.location('pathname').should('include', '/worklist/owned-by');
+      // Wait for the completed save to remove the draft before checking navigation.
+      cy.waitForFormDraft(pendingDraftKey, { exists: false });
+      cy.location('pathname').should('equal', '/one/worklist/owned-by');
     });
   });
 

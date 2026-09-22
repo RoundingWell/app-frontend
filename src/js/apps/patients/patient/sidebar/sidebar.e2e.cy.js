@@ -60,6 +60,7 @@ context('patient sidebar', function() {
     cy.then(() => {
       cy
         .routesForPatientWorkflow()
+        .routePanels()
         .routeSettings('sidebar', ['missing-panel', 'demographics'])
         .visit('/patient/1/workflow')
         .wait('@routePatient');
@@ -780,7 +781,7 @@ context('patient sidebar', function() {
       .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
   });
 
-  specify('renders patient sidebar when widget values fail', function() {
+  specify('handles widget-value and workspace-patient failures', function() {
     const panelWidgetSlugs = [
       'sex',
       'failingWidget',
@@ -876,10 +877,13 @@ context('patient sidebar', function() {
       const patient = getPatient();
       const reported = cy.stub().as('reported');
       cy.on('uncaught:exception', error => {
+        if (!error.message.includes('Error Status: 400')) return;
         reported(error.message);
         return false;
       });
       cy.routesForPatientAction()
+        .routePanels()
+        .routeWidgets()
         .routePatient(fx => ({ ...fx, data: patient }))
         .intercept('GET', '/api/workspace-patients/*', { statusCode: 400, body: { errors: [] } })
         .visit(`/patient/${ patient.id }/workflow`);

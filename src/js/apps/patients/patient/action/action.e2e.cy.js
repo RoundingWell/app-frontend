@@ -1781,7 +1781,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .get('@editedLabel')
-      .trigger('mouseleave');
+      .trigger('mouseout');
 
     cy
       .get('[data-activity-region]')
@@ -1824,7 +1824,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .get('@otherEditedLabel')
-      .trigger('mouseleave');
+      .trigger('mouseout');
 
     cy
       .get('@activityComment')

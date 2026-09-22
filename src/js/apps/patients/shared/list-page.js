@@ -192,7 +192,7 @@ const ListPageAppMixin = {
   },
   onClickFiltersButton() {
     if (this.isPatientSidebarOpen) {
-      this.showFiltersSidebar();
+      this.showFiltersSidebar().catch(addError);
       return;
     }
 
@@ -211,7 +211,7 @@ const ListPageAppMixin = {
     if (isFiltersDrawer) {
       if (this.isPatientSidebarOpen) {
         const layoutView = this.getView();
-        await this.showFiltersSidebar();
+        if (!await this.showFiltersSidebar().catch(addError)) return;
         if (this.getView() !== layoutView || !layoutView.isFiltersDrawer()) return;
       }
       this.setFiltersSidebarDrawerMode(true);
@@ -226,10 +226,12 @@ const ListPageAppMixin = {
     if (isFixed) this.setSidebarCollapsed(false);
   },
   async onCloseSidebarDrawer() {
+    const layoutView = this.getView();
     const wasPatientSidebarOpen = this.isPatientSidebarOpen;
 
     if (wasPatientSidebarOpen) {
-      await this.showFiltersSidebar();
+      if (!await this.showFiltersSidebar().catch(addError)) return;
+      if (this.getView() !== layoutView) return;
     }
 
     this.setSidebarLayoutCollapsed(true);
@@ -258,7 +260,9 @@ const ListPageAppMixin = {
   },
   closePatientSidebar() {
     this.showFiltersSidebar()
-      .then(() => this.focusPatientSidebarTrigger())
+      .then(shown => {
+        if (shown) this.focusPatientSidebarTrigger();
+      })
       .catch(addError);
   },
   focusPatientSidebar(patientSidebar) {

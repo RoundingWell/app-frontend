@@ -445,14 +445,17 @@ const WorklistApp = App.extend({
     addError(error);
   },
   async showFiltersSidebar() {
+    const layoutView = this.getView();
     this._patientSidebarRequest = null;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
     this.getView().getChildView('list').setPatientSelected(null);
     await this.getChildApp('patientSidebar')?.stop();
-    await this.mountFiltersSidebar();
+    if (this.getView() !== layoutView) return false;
+    if (!await this.mountFiltersSidebar() || this.getView() !== layoutView) return false;
     this.showSidebarControls();
     this.restoreFiltersSidebarLayout();
+    return true;
   },
   toggleBulkSelect() {
     if (!this.editableCollection) return;

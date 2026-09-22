@@ -70,7 +70,7 @@ context('Embedded form interaction', function() {
 
     function resetInteraction() {
       cy.get('@formBody').then($body => {
-        $body[0].ownerDocument.activeElement.blur();
+        $body[0].ownerDocument.activeElement?.blur();
       });
       cy.window().then(win => {
         win.document.querySelector('[data-form-viewport-scroll-container]').scrollTop = 0;

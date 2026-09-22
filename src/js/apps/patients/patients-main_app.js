@@ -106,15 +106,20 @@ export default RouterApp.extend({
       return;
     }
 
-    return this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
+    return this.showListPage(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
   },
 
-  async showSchedule() {
+  showSchedule() {
     this.clearCurrentPatient();
+
+    return this.showListPage('schedule');
+  },
+
+  async showListPage(appName, options) {
     const routeContext = this.getCurrentRoute();
 
     try {
-      return await this.startCurrent('schedule');
+      return await this.startCurrent(appName, options);
     } catch(error) {
       if (this.getCurrentRoute() !== routeContext) return;
 

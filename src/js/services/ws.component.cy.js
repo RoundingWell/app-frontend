@@ -840,7 +840,8 @@ context('WS Service - Disabled', function() {
       fetch.onFirstCall().rejects(new Error('Network unavailable'));
       fetch.onSecondCall().resolves(model);
       await app.start();
-      service.manageAdd(app, collection, 'flows');
+      const retryService = new WSService();
+      retryService.manageAdd(app, collection, 'flows');
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(collection).to.have.length(0);
@@ -848,6 +849,7 @@ context('WS Service - Disabled', function() {
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(collection.get(model)).to.equal(model);
       await app.destroy();
+      await retryService.destroy();
     });
   });
 });

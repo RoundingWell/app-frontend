@@ -107,6 +107,7 @@ export default App.extend({
       this.listenTo(draftStatusView, {
         async 'discard:submission'() {
           await Radio.request(`form${ form.id }`, 'clear:storedSubmission');
+          if (modal.isDestroyed()) return;
 
           modal.showChildView('body', new IframeFormView({ model: form }));
           modal.disableSubmit();

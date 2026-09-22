@@ -51,7 +51,6 @@ export default View.extend({
     this._uiListeners = [
       ['pointerover', bind(this.onPointerOver, this)],
       ['mouseout', bind(this.onMouseOut, this)],
-      ['mouseleave', bind(this.hideTooltip, this)],
       ['pointerdown', bind(this.showTooltip, this)],
       ['focus', bind(this.showTooltip, this)],
       ['blur', bind(this.hideTooltip, this)],

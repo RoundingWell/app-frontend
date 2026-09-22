@@ -336,7 +336,7 @@ context('Dialer Service', function() {
       .should('contain', 'Other Patient');
   });
 
-  specify('RingCentral - patient dashboard buttons', function() {
+  specify('RingCentral patient links and calls while the provider loads', function() {
     const currentClinician = getCurrentClinician({
       attributes: {
         settings: { dialer: 'ringcentral' },

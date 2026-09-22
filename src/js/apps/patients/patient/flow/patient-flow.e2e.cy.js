@@ -2693,7 +2693,7 @@ context('patient flow page', function() {
           cy.get('.bulk-edit-inline .js-save').click();
           cy.wait('@failedSave').wait('@failedReload');
           cy.get('.alert-box').should('be.visible');
-          if (status === 410) cy.location('pathname').should('include', `/patient/${ patient.id }/workflow`);
+          if (status === 410) cy.location('pathname').should('equal', `/one/patient/${ patient.id }/workflow`);
         });
       });
     });
