@@ -171,7 +171,9 @@ context('Embedded form interaction', function() {
     cy.get('@scrollForm').should('not.have.been.called');
 
     cy.get('.js-expand-button').click();
-    cy.window().then(win => win.matchMedia.restore());
+    cy.window().then(win => {
+      win.matchMedia.withArgs('(prefers-reduced-motion: reduce)').returns({ matches: false });
+    });
     resetInteraction();
     cy.get('@formBody').find('#text').focus();
     cy.get('@scrollForm').should('have.been.calledWithMatch', { behavior: 'smooth' });

@@ -1268,6 +1268,8 @@ context('worklist page', function() {
       .get('@firstRow')
       .find('[data-state-region] .fa-circle-check');
 
+    cy.get('@firstRow').find('[data-state-region] button').should('have.attr', 'aria-label', 'Done');
+
     cy
       .routeFlow(fx => {
         fx.data = testNewStateSocketFlow;

@@ -489,7 +489,7 @@ context('Patient Form', function() {
       submit.click();
       worklist.click();
     });
-    cy.location('pathname').should('contain', '/worklist');
+    cy.location('pathname').should('equal', '/one/worklist/owned-by');
     cy.waitForFormDraft(draftKey, { exists: false });
     cy.get('.form__controls').should('not.exist');
   });

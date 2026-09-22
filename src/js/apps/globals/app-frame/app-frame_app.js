@@ -31,7 +31,7 @@ export default App.extend({
   onChangeNavMinimized(state, isMinimized) {
     this.shellOptions.setNavMinimized(isMinimized);
   },
-  async prepareStart(options) {
+  async prepareStart(options, { signal }) {
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const hasDashboards = currentUser.can('dashboards:view');
     const hasClinicians = currentUser.can('clinicians:manage');
@@ -48,6 +48,8 @@ export default App.extend({
         null,
       hasPrograms ? import('js/apps/programs/programs-main_app.js') : null,
     ]);
+
+    signal.throwIfAborted();
 
     await Promise.all([
       this.getChildApp('nav').start({ region: options.navRegion }),

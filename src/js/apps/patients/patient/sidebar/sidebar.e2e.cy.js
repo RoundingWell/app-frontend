@@ -70,8 +70,11 @@ context('patient sidebar', function() {
         .should('have.length', 1)
         .and('contain', 'Demographics');
     });
-    cy.routeSettings('sidebar', null).visit('/patient/1/workflow').wait('@routePatient');
-    cy.get('.patient-sidebar__card').should('have.length', 1).and('contain', 'Demographics');
+    cy.routeSettings('sidebar', null).routePanels(fx => {
+      fx.data.push(getResource({ id: 'status-panel', slug: 'status', name: 'Status', widgets: ['status'] }, 'panels'));
+      return fx;
+    }).visit('/patient/1/workflow').wait('@routePatient');
+    cy.get('.patient-sidebar__card').should('have.length', 2).and('contain', 'Demographics').and('contain', 'Status');
   });
 
   specify('expands and collapses sidebar sections accessibly', function() {

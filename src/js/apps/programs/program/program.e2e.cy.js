@@ -257,13 +257,15 @@ context('program page', function() {
     cy.intercept('GET', `/api/program-actions/${ testProgramAction.id }*`, req => {
       requested = true;
       return response.then(() => req.reply({ body: { data: testProgramAction } }));
-    });
+    }).as('heldProgramAction');
     cy.get('.action-card').contains('Test Action').click();
     cy.wrap(null).should(() => expect(requested).to.equal(true));
     cy.routePrograms();
     cy.get('.app-nav').contains('Admin Tools').click();
     cy.get('.picklist').contains('Programs').click();
+    cy.location('pathname').should('equal', '/one/programs');
     cy.get('.card-list').should('be.visible').then(() => releaseAction());
+    cy.wait('@heldProgramAction');
     cy.get('.sidebar').should('not.exist');
   });
 });

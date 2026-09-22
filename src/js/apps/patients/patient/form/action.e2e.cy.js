@@ -82,7 +82,7 @@ context('Patient Action Form', function() {
       .url()
       .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`);
     const action = getAction({ relationships: { form: getRelationship(testForm) } });
-    cy.routeAction(fx => ({ ...fx, data: action }))
+    cy.routePatient().routeAction(fx => ({ ...fx, data: action }))
       .routeFormByAction(fx => ({ ...fx, data: testForm }))
       .intercept('GET', `/api/actions/${ action.id }*`, req => {
         if (req.query.include?.includes('form-responses')) req.reply({ statusCode: 410, body: { errors } });

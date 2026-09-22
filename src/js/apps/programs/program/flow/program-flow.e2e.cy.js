@@ -760,12 +760,14 @@ context('program flow page', function() {
     cy.intercept('GET', `/api/program-actions/${ testProgramFlowActions[0].id }*`, req => {
       requested = true;
       return response.then(() => req.reply({ body: { data: testProgramFlowActions[0] } }));
-    });
+    }).as('heldFlowAction');
     cy.get('.action-card').first().click();
     cy.wrap(null).should(() => expect(requested).to.equal(true));
     cy.get('.app-nav').contains('Admin Tools').click();
     cy.get('.picklist').contains('Programs').click();
+    cy.location('pathname').should('equal', '/one/programs');
     cy.get('.card-list').should('be.visible').then(() => releaseAction());
+    cy.wait('@heldFlowAction');
     cy.get('.sidebar').should('not.exist');
 
     cy.then(() => {

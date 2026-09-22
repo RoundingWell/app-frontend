@@ -59,6 +59,9 @@ export default Droplist.extend({
     const states = getStates();
     this.getState().set({ selected: states.get(stateId) });
   },
+  onRender() {
+    this.el.setAttribute('aria-label', this.getState().get('selected')?.get('name') || this.el.textContent.trim());
+  },
   onChangeSelected(selected) {
     this.triggerMethod('change:state', selected);
   },

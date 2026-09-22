@@ -21,11 +21,13 @@ export default App.extend({
     patients.currentPatientId = patientId;
     patients.trigger('change:currentPatientId');
   },
-  async prepareStart() {
+  async prepareStart(options, { signal }) {
     const dialerSetting = Radio.request('settings', 'get', 'dialer');
     if (!dialerSetting) return;
 
     const provider = await this.loadProvider(dialerSetting);
+
+    signal.throwIfAborted();
 
     if (!provider) return;
 

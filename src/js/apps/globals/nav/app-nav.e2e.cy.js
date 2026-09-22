@@ -103,6 +103,7 @@ context('App Nav', function() {
       .should('have.attr', 'href')
       .and('contain', '/logout');
 
+    // Resize preserves the menu while it owns focus, and closes it after focus leaves.
     cy.get('.picklist a').first().focus();
     cy.viewport(1300, 768);
     cy.get('.picklist').should('be.visible');

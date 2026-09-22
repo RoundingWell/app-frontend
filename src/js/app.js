@@ -99,13 +99,15 @@ const Application = App.extend({
     this._eventListeners?.abort();
   },
 
-  async prepareStart() {
+  async prepareStart(options, { signal }) {
     const bootstrapService = this.getChildApp('bootstrap');
 
     const [, { default: AppFrameApp }] = await Promise.all([
       bootstrapService.start(),
       import('js/apps/globals/app-frame/app-frame_app'),
     ]);
+
+    signal.throwIfAborted();
 
     return this.startAppFrame(bootstrapService, AppFrameApp);
   },

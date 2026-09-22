@@ -259,6 +259,7 @@ context('clinician sidebar', function() {
       .should('not.contain', `clinicians/${ testClinician.id }`);
     cy.routeClinicians(fx => ({ ...fx, data: [testClinician, otherClinician] }))
       .visit('/clinicians').wait('@routeClinicians');
+    // These cached clinician starts have no network wait; vary lifecycle microtask boundaries.
     [0, 1, 2, 4, 8].forEach(turns => {
       cy.get('.card-list__item').should('have.length', 2).then(async items => {
         const first = [...items].find(item => item.textContent.includes('Test Clinician'));

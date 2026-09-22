@@ -35,11 +35,16 @@ context('Datepicker', function() {
       'change:date change:selectedMonth': 'render',
     },
     dateState: {},
+    getAnchor() {
+      if (this.getOption('omitAnchor')) return;
+      const button = this.getUI('button');
+      return this.getOption('rawAnchor') ? button[0] : button;
+    },
     onClick() {
       const state = this.getOption('dateState');
 
       const datepicker = new Datepicker({
-        anchor: this.getOption('omitAnchor') ? undefined : (this.getOption('rawAnchor') ? this.getUI('button')[0] : this.getUI('button')),
+        anchor: this.getAnchor(),
         uiView: this,
         stateOptions: state,
         canSelectMonth: this.getOption('canSelectMonth'),

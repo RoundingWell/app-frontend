@@ -99,7 +99,7 @@ const ScheduleApp = App.extend({
     this._patientSidebarRequest = null;
     this._refreshController?.abort();
     this._refreshController = null;
-    this.stopListening(this.filteredCollection);
+    this.stopListening(this.filteredCollection, 'reset', this.showCountView);
     if (this.editableCollection) this.stopListening(this.editableCollection);
     this.collection = null;
     this.filteredCollection = null;
@@ -155,7 +155,7 @@ const ScheduleApp = App.extend({
   showCollection(collection) {
     this.setWorklist(collection.getMeta('worklist'));
 
-    if (this.filteredCollection) this.stopListening(this.filteredCollection);
+    if (this.filteredCollection) this.stopListening(this.filteredCollection, 'reset', this.showCountView);
     this.collection = collection;
     this.filteredCollection = collection.clone();
     this.editableCollection = collection.clone();

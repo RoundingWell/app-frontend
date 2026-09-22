@@ -1170,7 +1170,7 @@ context('Worklist bulk editing', function() {
     cy.get('.picklist').contains('Clinicians').click();
     cy.get('.card-list').should('be.visible').then(() => releaseSave());
     cy.wait('@lateSave');
-    cy.location('pathname').should('contain', '/clinicians');
+    cy.location('pathname').should('equal', '/one/clinicians');
     cy.get('.card-list').should('be.visible');
   });
 

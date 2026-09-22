@@ -124,6 +124,12 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - `scripts/**` drives release, artifact, and deploy flows. Preserve CLI flags, output shape, and release semantics when editing.
 - Workspace packages under `packages/**` are shared entry points for the app. Treat public APIs as stable unless the task explicitly changes them.
 
+## Lifecycle Review
+
+- Verify cancellation claims against the installed Marionette version and actual callers. Superseded startup operations resolve false, but code inside an async `prepareStart` still needs `signal.throwIfAborted()` before manually starting children after awaits.
+- A stopped app can be stopped without stop notifications; canceling an in-progress start can still invoke `onStop`. Scope listener cleanup by event/callback when its source may not yet be assigned.
+- Internal fetch helpers require the options passed by their current callers. Do not restore hypothetical no-options consumers or removed configuration variants without finding an active caller.
+
 ## Reviewing Changes
 
 - Put findings first.

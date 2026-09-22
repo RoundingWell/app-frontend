@@ -105,7 +105,7 @@ const ListFiltersApp = App.extend({
   },
   onStop() {
     this.abortCustomFiltersFetch();
-    this.stopListening(this.filtersState);
+    this.stopListening(this.filtersState, 'change:listType change:worklist');
   },
   retryCustomFilters() {
     this.isCustomFiltersLoaded = false;
