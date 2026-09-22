@@ -47,6 +47,7 @@ const Application = App.extend({
   channelName: 'app',
   childApps: {
     bootstrap: BootstrapService,
+    dialer: DialerService,
   },
   radioRequests: {
     'show:pop': 'showPop',
@@ -92,7 +93,6 @@ const Application = App.extend({
       modalSmallRegion: rootView.getRegion('modalSmall'),
     });
     new PatientModalService();
-    new DialerService({ region: rootView.getRegion('overlay') });
   },
 
   setListeners() {
@@ -142,6 +142,10 @@ const Application = App.extend({
     if (signal.aborted) return;
     if (!bootstrapStarted) throw new Error('Bootstrap startup was canceled');
 
+    return this.startAppFrame(bootstrapService, AppFrameApp, signal);
+  },
+
+  async startAppFrame(bootstrapService, AppFrameApp, signal) {
     const currentUser = bootstrapService.getCurrentUser();
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
@@ -165,6 +169,12 @@ const Application = App.extend({
     return { currentUser };
   },
 
+  startDialer() {
+    return this.getChildApp('dialer').start({
+      region: this.getView().getRegion('overlay'),
+    });
+  },
+
   showStartFailure(error) {
     addError(get(error, 'responseData', error));
 
@@ -176,6 +186,7 @@ const Application = App.extend({
 
   onStart(app, options, { currentUser }) {
     this.showView();
+    this.startDialer().catch(addError);
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
       this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
