@@ -40,6 +40,11 @@ context('Picklist', function() {
       .trigger('mouseover')
       .should('have.class', 'is-highlighted');
 
+    cy.get('.js-picklist-item').first().then(([item]) => {
+      item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: item }));
+    });
+    cy.get('.js-picklist-item').first().should('have.class', 'is-highlighted');
+
     cy
       .get('body')
       .type('{downarrow}{downarrow}');

@@ -224,8 +224,6 @@ export default App.extend({
     this.getChildApp('bulkEditActions')?.stop().catch(addError);
   },
   showBulkEdit() {
-    if (!this.selected.length) return;
-
     const app = this.getChildApp('bulkEditActions') || this.addBulkEditApp();
 
     app.updateCollection(this.selected);

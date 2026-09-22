@@ -99,40 +99,32 @@ const Application = App.extend({
     this._eventListeners?.abort();
   },
 
-  async prepareStart(options, { signal }) {
+  async prepareStart() {
     const bootstrapService = this.getChildApp('bootstrap');
 
-    const [bootstrapStarted, { default: AppFrameApp }] = await Promise.all([
+    const [, { default: AppFrameApp }] = await Promise.all([
       bootstrapService.start(),
       import('js/apps/globals/app-frame/app-frame_app'),
     ]);
 
-    if (signal.aborted) return;
-    if (!bootstrapStarted) throw new Error('Bootstrap startup was canceled');
-
-    return this.startAppFrame(bootstrapService, AppFrameApp, signal);
+    return this.startAppFrame(bootstrapService, AppFrameApp);
   },
 
-  async startAppFrame(bootstrapService, AppFrameApp, signal) {
+  async startAppFrame(bootstrapService, AppFrameApp) {
     const currentUser = bootstrapService.getCurrentUser();
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
 
-    if (!this.hasChildApp('appFrame')) {
-      const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
-      this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
-    }
+    const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
+    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
 
     const appView = this.getView().appView;
-    const appFrameStarted = await this.getChildApp('appFrame').start({
+    await this.getChildApp('appFrame').start({
       contentRegion: appView.getRegion('content'),
       navRegion: appView.getRegion('nav'),
       setNavMinimized: appView.setNavMinimized.bind(appView),
       sidebarRegion: appView.getRegion('sidebar'),
     });
-
-    if (signal.aborted) return;
-    if (!appFrameStarted) throw new Error('App frame startup was canceled');
 
     return { currentUser };
   },

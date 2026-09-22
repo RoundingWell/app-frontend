@@ -50,37 +50,21 @@ export default RouterApp.extend({
     },
   },
 
-  async showProgramsAll() {
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startCurrent('programsAll');
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+  showProgramsAll() {
+    return this.startCurrent('programsAll');
   },
-  async showProgram(programId) {
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startRoute('program', { programId });
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+  showProgram(programId) {
+    return this.startRoute('program', { programId });
   },
-  async showProgramFlow(flowId) {
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startRoute('programflow', { flowId });
-    } catch {
-      if (this.getCurrentRoute() !== routeContext) return;
-
+  showProgramFlow(flowId) {
+    return this.startRoute('programflow', { flowId });
+  },
+  onRouteError(error, { definition }) {
+    if (definition.action === 'showProgramFlow') {
       Radio.trigger('event-router', 'notFound');
+      return;
     }
+
+    Radio.trigger('event-router', 'unknownError', error?.response?.status);
   },
 });

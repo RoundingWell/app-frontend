@@ -62,7 +62,7 @@ export default View.extend({
 
     return { dayOfWeek };
   },
-  createState({ stateOptions = {} } = {}) {
+  createState({ stateOptions }) {
     return new StateModel(stateOptions);
   },
   stateEvents: {

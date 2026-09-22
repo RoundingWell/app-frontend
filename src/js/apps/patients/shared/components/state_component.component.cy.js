@@ -25,7 +25,7 @@ context('State Component', function() {
       .mount(rootView => {
         StateComponent.setPopRegion(rootView.getRegion('pop'));
 
-        const component = new StateComponent({ stateId: stateInProgress.id });
+        const component = new StateComponent({ showLabel: true, stateId: stateInProgress.id });
 
         component.on('change:state', onChange);
 
@@ -63,7 +63,7 @@ context('State Component', function() {
       });
   });
 
-  specify('isCompact', function() {
+  specify('uses the selected workspace states', function() {
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(1).id });
     });
@@ -72,7 +72,7 @@ context('State Component', function() {
       .mount(rootView => {
         StateComponent.setPopRegion(rootView.getRegion('pop'));
 
-        return new StateComponent({ isCompact: true, stateId: stateInProgress.id });
+        return new StateComponent({ stateId: stateInProgress.id });
       })
       .as('root');
 
@@ -96,7 +96,7 @@ context('State Component', function() {
       .mount(rootView => {
         StateComponent.setPopRegion(rootView.getRegion('pop'));
 
-        return new StateComponent({ isCompact: true, showLabel: true, stateId: stateInProgress.id });
+        return new StateComponent({ showLabel: true, stateId: stateInProgress.id });
       })
       .find('.action-state')
       .should('contain', 'In Progress');

@@ -229,20 +229,11 @@ const TooltipRegionView = TopRegionView.extend({
 
     this.ignoreEl = options.ignoreEl;
     view.el.classList.remove(
-      'is-top',
-      'is-bottom',
       'is-left',
       'is-right',
       'is-top-arrow',
       'is-bottom-arrow',
-      'is-left-arrow',
-      'is-right-arrow',
     );
-
-    if (options.orientation === 'horizontal') {
-      this.setHorizontalLocation(options);
-      return;
-    }
 
     this.setVerticalLocation(options);
   },
@@ -263,33 +254,6 @@ const TooltipRegionView = TopRegionView.extend({
   setLeft(left) {
     const view = this.region.currentView;
     view.el.style.left = px(left);
-  },
-  setHorizontalLocation({ left, top, outerWidth, outerHeight }) {
-    const view = this.region.currentView;
-    const leftPer = (left + outerWidth) / this.body.clientWidth;
-    const topPer = (top + outerHeight / 2) / this.body.clientHeight;
-
-    // top 25% of screen
-    if (topPer < 0.25) {
-      this.addClass('is-top');
-      this.setTop(top + outerHeight / 2);
-    // bottom 25% of screen
-    } else if (topPer > 0.75) {
-      this.addClass('is-bottom');
-      this.setTop(top + outerHeight / 2 - view.el.offsetHeight);
-    } else {
-      this.setTop(top - view.el.offsetHeight / 2 + outerHeight / 2);
-    }
-
-    // left 60% of screen
-    if (leftPer > 0.6) {
-      this.addClass('is-right-arrow');
-      this.setLeft(left - view.el.offsetWidth);
-    // right 40% of screen
-    } else {
-      this.addClass('is-left-arrow');
-      this.setLeft(left + outerWidth);
-    }
   },
   setVerticalLocation({ left, top, outerWidth, outerHeight }) {
     const view = this.region.currentView;

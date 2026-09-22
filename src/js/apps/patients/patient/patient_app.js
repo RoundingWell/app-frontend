@@ -107,7 +107,6 @@ export default SubRouterApp.extend({
   },
 
   startContent(appName, options) {
-    const routeContext = this.getCurrentRoute();
     const previousPageApp = this.getCurrent();
     const pageApp = this.getContentApp(appName);
 
@@ -125,8 +124,6 @@ export default SubRouterApp.extend({
       ...options,
       region: this.getView().getRegion('content'),
     }).catch(error => {
-      if (!this.isRunning() || this.getCurrentRoute() !== routeContext) return;
-
       // Failure handlers receive the same shared context as application startup.
       return this.handleContentStartFailure(pageApp, this.mixinOptions(options), error);
     });

@@ -78,19 +78,7 @@ context('Embedded form interaction', function() {
       cy.get('@scrollForm').then(spy => spy.resetHistory());
     }
 
-    ['mouse', 'touch'].forEach(pointerType => {
-      const control = pointerType === 'mouse' ? 'tab' : 'checkbox';
-      resetInteraction();
-      cy.get('@formBody').find(`#${ control }`).trigger('pointerdown', { pointerId: 1, pointerType });
-
-      if (pointerType === 'touch') {
-        // Touch releases before the browser generates mousedown and focus.
-        cy.get('@formBody').find(`#${ control }`).trigger('pointerup', { pointerId: 1, pointerType });
-      }
-
-      cy.get('@formBody').find(`#${ control }`).trigger('mousedown', { button: 0, buttons: 1 }).focus();
-
-      // Flush earlier postMessages while the mouse press is still held.
+    function flushInteraction() {
       cy.get('@formBody').then($body => {
         const frameWindow = $body[0].ownerDocument.defaultView;
         const appWindow = frameWindow.parent;
@@ -106,6 +94,22 @@ context('Embedded form interaction', function() {
           frameWindow.flushFormInteraction();
         });
       });
+    }
+
+    ['mouse', 'touch'].forEach(pointerType => {
+      const control = pointerType === 'mouse' ? 'tab' : 'checkbox';
+      resetInteraction();
+      cy.get('@formBody').find(`#${ control }`).trigger('pointerdown', { pointerId: 1, pointerType });
+
+      if (pointerType === 'touch') {
+        // Touch releases before the browser generates mousedown and focus.
+        cy.get('@formBody').find(`#${ control }`).trigger('pointerup', { pointerId: 1, pointerType });
+      }
+
+      cy.get('@formBody').find(`#${ control }`).trigger('mousedown', { button: 0, buttons: 1 }).focus();
+
+      // Flush earlier postMessages while the mouse press is still held.
+      flushInteraction();
       cy.get('@scrollForm').should('not.have.been.called');
 
       if (pointerType === 'mouse') {
@@ -151,5 +155,25 @@ context('Embedded form interaction', function() {
       cy.get('@formBody').find('#text').focus().should('be.focused');
       cy.get('@scrollForm').should('have.been.calledOnce');
     });
+
+    resetInteraction();
+    cy.get('@formBody').find('#text').focus();
+    cy.get('@scrollForm').should('have.been.calledOnce');
+    cy.get('@formBody').find('#checkbox').focus();
+    flushInteraction();
+    cy.get('@scrollForm').should('have.been.calledOnce');
+
+    cy.get('.js-expand-button').click();
+    cy.get('.form__frame--expanded').should('be.visible');
+    resetInteraction();
+    cy.get('@formBody').find('#text').focus();
+    flushInteraction();
+    cy.get('@scrollForm').should('not.have.been.called');
+
+    cy.get('.js-expand-button').click();
+    cy.window().then(win => win.matchMedia.restore());
+    resetInteraction();
+    cy.get('@formBody').find('#text').focus();
+    cy.get('@scrollForm').should('have.been.calledWithMatch', { behavior: 'smooth' });
   });
 });

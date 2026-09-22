@@ -85,13 +85,13 @@ export default View.extend({
     'click @ui.next': 'click:next',
     'click @ui.date': 'click:date',
   },
-  createState({ stateOptions = {} } = {}) {
+  createState({ stateOptions }) {
     return new StateModel(stateOptions);
   },
   stateEvents: {
     'change': 'render',
   },
-  constructor: function(options = {}) {
+  constructor: function(options) {
     this.mergeOptions(options, CLASS_OPTIONS);
 
     this.dateTypes = new Backbone.Collection(collectionOf(this.dateTypes, 'id'));
@@ -184,6 +184,8 @@ export default View.extend({
     };
   },
   showPop() {
+    // Finish the previous picker before its destroy handler updates filter state.
+    this.popView?.destroy();
     const position = this.getBounds();
     this.popView = new PickerView();
 
@@ -264,6 +266,6 @@ export default View.extend({
   onDestroyPop(popView) {
     this.stopListening(popView);
     this.getState().set('dateType', this.dateTypeState.get('dateType'));
-    if (this.popView === popView) this.popView = undefined;
+    this.popView = undefined;
   },
 });

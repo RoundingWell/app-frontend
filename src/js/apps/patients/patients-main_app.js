@@ -115,34 +115,25 @@ export default RouterApp.extend({
     return this.showListPage('schedule');
   },
 
-  async showListPage(appName, options) {
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startCurrent(appName, options);
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+  showListPage(appName, options) {
+    return this.startCurrent(appName, options);
   },
-
-  async showPatient(patientId) {
+  showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startRoute('patient', { patientId });
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      if (get(error, ['response', 'status']) === 410) {
-        Radio.trigger('event-router', 'notFound');
-        return;
-      }
-
-      return handleErrors(error);
+    return this.startRoute('patient', { patientId });
+  },
+  onRouteError(error, { definition }) {
+    if (definition.action === 'showPatientsWorklist' || definition.action === 'showSchedule') {
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+      return;
     }
+
+    if (get(error, ['response', 'status']) === 410) {
+      Radio.trigger('event-router', 'notFound');
+      return;
+    }
+
+    handleErrors(error).catch(reportedError => window.reportError(reportedError));
   },
 
   redirectPatientFlow(flowId) {

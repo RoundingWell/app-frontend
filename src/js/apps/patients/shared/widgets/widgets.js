@@ -22,8 +22,6 @@ function getWrapperTemplate(definition) {
 function getTemplate(definition) {
   const template = get(definition, 'template');
 
-  if (isFunction(template)) return template;
-
   return Handlebars.compile(template || '');
 }
 

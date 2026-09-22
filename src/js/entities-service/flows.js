@@ -21,7 +21,7 @@ const Entity = BaseEntity.extend({
 
     return this.fetchModel(id, { ...options, data });
   },
-  fetchFlowsByPatient({ patientId, filter }, options = {}) {
+  fetchFlowsByPatient({ patientId, filter }, options) {
     const data = {
       ...options.data,
       filter: { ...options.data?.filter, ...filter },

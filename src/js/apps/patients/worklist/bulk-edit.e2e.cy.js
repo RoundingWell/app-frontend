@@ -1151,6 +1151,27 @@ context('Worklist bulk editing', function() {
     cy
       .get('@failedPatchAction.all')
       .should('have.length', 1);
+    let releaseSave;
+    let saveRequested = false;
+    const saveResponse = new Cypress.Promise(resolve => {
+      releaseSave = resolve;
+    });
+    cy.intercept('PATCH', '/api/actions/*', req => {
+      saveRequested = true;
+      return saveResponse.then(() => req.reply({ statusCode: 400, body: { errors: [] } }));
+    }).as('lateSave');
+    cy.get('.worklist-list__item .js-select').first().click();
+    cy.get('.bulk-edit-inline [data-owner-region]').click();
+    cy.get('.picklist .js-picklist-item').contains('Nurse').click();
+    cy.get('.bulk-edit-inline .js-save').click();
+    cy.wrap(null).should(() => expect(saveRequested).to.equal(true));
+    cy.routeClinicians();
+    cy.get('.app-nav').contains('Admin Tools').click();
+    cy.get('.picklist').contains('Clinicians').click();
+    cy.get('.card-list').should('be.visible').then(() => releaseSave());
+    cy.wait('@lateSave');
+    cy.location('pathname').should('contain', '/clinicians');
+    cy.get('.card-list').should('be.visible');
   });
 
   specify('bulk flow editing completed', function() {

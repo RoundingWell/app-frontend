@@ -15,7 +15,7 @@ const Entity = BaseEntity.extend({
 
     return this.fetchModel(id, options);
   },
-  fetchOrEmpty(url, data, options = {}) {
+  fetchOrEmpty(url, data, options) {
     return this.fetchBy(url, { ...options, data: { ...options.data, ...data } })
       .then(response => response || new Model());
   },

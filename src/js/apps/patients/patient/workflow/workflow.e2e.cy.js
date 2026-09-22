@@ -2236,5 +2236,16 @@ context('patient workflow page', function() {
     cy
       .url()
       .should('contain', '/404');
+
+    const reported = cy.stub().as('workflowLoadError');
+    cy.on('uncaught:exception', error => {
+      if (!error.message.includes('Error Status: 422')) return;
+      reported(error.message);
+      return false;
+    });
+    cy.routesForPatientWorkflow()
+      .intercept('GET', '/api/patients/*/actions*', { statusCode: 422, body: { errors: [] } })
+      .visit('/patient/1/workflow');
+    cy.get('@workflowLoadError').should('have.been.calledOnce');
   });
 });

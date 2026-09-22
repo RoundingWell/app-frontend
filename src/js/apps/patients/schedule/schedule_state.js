@@ -71,7 +71,7 @@ const StateModel = Backbone.Model.extend({
   setFiltersSidebarCollapsed(isCollapsed) {
     return this.set('filtersSidebarCollapsed', isCollapsed);
   },
-  setSearchQuery(searchQuery = '') {
+  setSearchQuery(searchQuery) {
     return this.set({
       searchQuery: searchQuery.length > 2 ? searchQuery : '',
       lastSelectedIndex: null,

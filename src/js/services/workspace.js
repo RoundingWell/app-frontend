@@ -65,8 +65,6 @@ export default App.extend({
       Radio.request('entities', 'fetch:forms:collection', { signal }),
     ]);
 
-    if (signal.aborted) return;
-
     const workspaces = this._getSharedWorkspaces(programs);
 
     const clinicianRequests = workspaces.map(workspace => {
@@ -80,17 +78,11 @@ export default App.extend({
 
     await Promise.all(clinicianRequests);
 
-    if (signal.aborted) return;
-
     return this.currentWorkspace;
   },
   fetchWorkspace() {
     const operation = this.isRunning() ? this.restart() : this.start();
 
-    return operation.then(started => {
-      if (!started) throw new Error('Workspace startup was canceled');
-
-      return this.currentWorkspace;
-    });
+    return operation.then(() => this.currentWorkspace);
   },
 });

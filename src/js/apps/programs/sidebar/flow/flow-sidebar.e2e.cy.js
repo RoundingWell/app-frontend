@@ -167,6 +167,14 @@ context('program flow sidebar', function() {
     cy
       .url()
       .should('contain', `program-flow/${ testProgramFlow.id }`);
+    cy.intercept('GET', '/api/tags', {
+      statusCode: 400,
+      body: { errors: getErrors({ status: '400', detail: 'Cannot load flow tags' }) },
+    }).as('failedTags');
+    cy.visit(`/program/${ testProgram.id }/flow`).wait('@failedTags');
+    cy.location('pathname').should('equal', '/unknown-error');
+    cy.get('.sidebar').should('not.exist');
+    cy.contains('Error code: 400').should('be.visible');
   });
 
   specify('display flow sidebar', function() {

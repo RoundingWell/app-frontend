@@ -49,7 +49,7 @@ const ScheduleApp = App.extend({
     'change:actionsSelected': 'onChangeSelected',
     'change:searchQuery': 'onChangeSearchQuery',
   },
-  initFiltersApp({ setDefaults } = {}) {
+  initFiltersApp({ setDefaults }) {
     if (this.hasChildApp('filters')) {
       this.filterState.set(this.getState().getFiltersState());
 
@@ -99,7 +99,7 @@ const ScheduleApp = App.extend({
     this._patientSidebarRequest = null;
     this._refreshController?.abort();
     this._refreshController = null;
-    if (this.filteredCollection) this.stopListening(this.filteredCollection);
+    this.stopListening(this.filteredCollection);
     if (this.editableCollection) this.stopListening(this.editableCollection);
     this.collection = null;
     this.filteredCollection = null;
@@ -126,8 +126,6 @@ const ScheduleApp = App.extend({
     this.showView();
   },
   prepareStart(options, { signal }) {
-    if (this.isPatientSidebarOpen) this.listenToPatientSidebar();
-
     return this.getChildApp('filters').start()
       .then(() => this.loadCollection({ signal }))
       .catch(error => {
@@ -137,7 +135,7 @@ const ScheduleApp = App.extend({
         return this.loadCollection({ signal });
       });
   },
-  loadCollection({ signal } = {}) {
+  loadCollection({ signal }) {
     const filter = this.getState().getEntityFilter();
     const fields = { flows: ['name', 'state'], patients: ['first_name', 'last_name'] };
     const include = 'patient,flow';
@@ -158,7 +156,6 @@ const ScheduleApp = App.extend({
     this.setWorklist(collection.getMeta('worklist'));
 
     if (this.filteredCollection) this.stopListening(this.filteredCollection);
-    if (this.editableCollection) this.stopListening(this.editableCollection);
     this.collection = collection;
     this.filteredCollection = collection.clone();
     this.editableCollection = collection.clone();
@@ -174,7 +171,7 @@ const ScheduleApp = App.extend({
   async refreshList() {
     if (!this._canRefresh) return;
 
-    if (!this.suspendBulkEditForRefresh()) return;
+    this.suspendBulkEditForRefresh();
 
     this.filterState.set(this.getState().getFiltersState());
     this._refreshController?.abort();
@@ -202,8 +199,7 @@ const ScheduleApp = App.extend({
     if (this._refreshController === controller) this._refreshController = null;
   },
   stopListeningToList() {
-    const listView = this.getView()?.getChildView('list');
-    if (listView) this.stopListening(listView);
+    this.stopListening(this.getView().getChildView('list'));
   },
   suspendBulkEditForRefresh() {
     this._bulkEditSuspended = true;
@@ -215,8 +211,6 @@ const ScheduleApp = App.extend({
       const view = app.getView();
       if (view) view.el.hidden = true;
     }
-
-    return this._canRefresh;
   },
   isCurrentRefresh(controller) {
     return !controller.signal.aborted && this._refreshController === controller;
@@ -227,7 +221,7 @@ const ScheduleApp = App.extend({
       return;
     }
 
-    if (this.collection) this.showCollection(this.collection);
+    this.showCollection(this.collection);
     Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.refreshFailure);
     addError(error);
   },
@@ -306,7 +300,7 @@ const ScheduleApp = App.extend({
     this.getView().getChildView('list').setPatientSelected(patient.id);
 
     return this.startPatientSidebar(request, patient)
-      .catch(error => this.handlePatientSidebarRequestError(request, error));
+      .catch(error => this.handlePatientSidebarError(error));
   },
   async startPatientSidebar(request, patient) {
     await this.getChildApp('filtersSidebar')?.stop();
@@ -325,10 +319,6 @@ const ScheduleApp = App.extend({
     if (this._patientSidebarRequest !== request) return;
     this.focusPatientSidebar(patientSidebar);
   },
-  handlePatientSidebarRequestError(request, error) {
-    if (this._patientSidebarRequest !== request) return;
-    this.handlePatientSidebarError(error);
-  },
   handlePatientSidebarError(error) {
     this.showFiltersSidebar().catch(addError);
 
@@ -340,20 +330,19 @@ const ScheduleApp = App.extend({
     addError(error);
   },
   async showFiltersSidebar() {
-    const layoutView = this.getView();
-    this._patientSidebarRequest = null;
+    const request = {};
+    this._patientSidebarRequest = request;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
     this.getView().getChildView('list').setPatientSelected(null);
     await this.getChildApp('patientSidebar')?.stop();
-    if (this.getView() !== layoutView) return false;
-    if (!await this.mountFiltersSidebar() || this.getView() !== layoutView) return false;
+    if (this._patientSidebarRequest !== request) return false;
+    await this.mountFiltersSidebar();
+    if (this._patientSidebarRequest !== request) return false;
     this.restoreFiltersSidebarLayout();
     return true;
   },
   toggleBulkSelect() {
-    if (!this.editableCollection) return;
-
     this.selected = this.getState().getSelected(this.editableCollection);
     this.showSelectAll();
 

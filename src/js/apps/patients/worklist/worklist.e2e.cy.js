@@ -2403,6 +2403,22 @@ context('worklist page', function() {
         return fx;
       });
 
+    cy.intercept({ method: 'GET', url: `/api/actions/${ testNewSocketAction.id }?*`, times: 1 }, {
+      statusCode: 404,
+      body: { errors: [{ status: '404', detail: 'Action not available yet' }] },
+    }).as('failedSocketAction');
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+    cy.wait('@failedSocketAction');
+    cy.get('[data-count-region]').should('contain', '1 Action');
+
     cy.sendWs({
       category: 'ResourceCreated',
       resource: {

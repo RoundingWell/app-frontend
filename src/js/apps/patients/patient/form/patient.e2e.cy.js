@@ -479,6 +479,19 @@ context('Patient Form', function() {
 
         expect(response.args.value.formData.fields.foo).to.equal('bar');
       });
+    // Navigating away while draft deletion is pending must not recreate the form.
+    cy.setFormDraft(draftKey, { updated: testTs(), submission: { fields: { foo: 'again' } } });
+    cy.visit(`/patient/${ testPatient.id }/form/${ testForm.id }`).wait('@routeForm');
+    cy.get('.form__actions-icon--draft').click();
+    cy.get('.form__draft-menu .js-discard').click();
+    cy.get('.modal--small .js-submit').then(([submit]) => {
+      const worklist = submit.ownerDocument.querySelector('[data-worklists-region] .app-nav__link');
+      submit.click();
+      worklist.click();
+    });
+    cy.location('pathname').should('contain', '/worklist');
+    cy.waitForFormDraft(draftKey, { exists: false });
+    cy.get('.form__controls').should('not.exist');
   });
 
   specify('read only form', function() {

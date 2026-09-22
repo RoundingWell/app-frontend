@@ -90,7 +90,7 @@ export default App.extend({
 
     modal.disableSubmit();
 
-    this.listenTo(draftModel, 'change:updated', (model, updated) => {
+    modal.listenTo(draftModel, 'change:updated', (model, updated) => {
       if (!updated) {
         modal.getRegion('draftStatus').empty();
         return;
@@ -104,7 +104,7 @@ export default App.extend({
 
       modal.showChildView('draftStatus', draftStatusView);
 
-      this.listenTo(draftStatusView, {
+      modal.listenTo(draftStatusView, {
         async 'discard:submission'() {
           await Radio.request(`form${ form.id }`, 'clear:storedSubmission');
           if (modal.isDestroyed()) return;
@@ -115,7 +115,7 @@ export default App.extend({
       });
     });
 
-    this.listenTo(formService, {
+    modal.listenTo(formService, {
       'update:submission'(updated) {
         draftModel.set('updated', updated);
       },

@@ -20,6 +20,7 @@ const testClinician = getClinician({
 
 context('clinician sidebar', function() {
   specify('edit clinician', function() {
+    const otherClinician = getClinician({ attributes: { name: 'Other Clinician' } });
     cy
       .routeClinicians(fx => {
         fx.data = [testClinician];
@@ -256,6 +257,21 @@ context('clinician sidebar', function() {
       .url()
       .should('contain', 'clinicians')
       .should('not.contain', `clinicians/${ testClinician.id }`);
+    cy.routeClinicians(fx => ({ ...fx, data: [testClinician, otherClinician] }))
+      .visit('/clinicians').wait('@routeClinicians');
+    [0, 1, 2, 4, 8].forEach(turns => {
+      cy.get('.card-list__item').should('have.length', 2).then(async items => {
+        const first = [...items].find(item => item.textContent.includes('Test Clinician'));
+        const last = [...items].find(item => item.textContent.includes('Other Clinician'));
+        first.click();
+        for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+        last.click();
+      });
+      cy.get('.sidebar [data-name-region] .js-input').should('have.value', 'Other Clinician');
+      cy.get('.sidebar').should('have.length', 1);
+      cy.get('.sidebar .js-close').first().click();
+      cy.get('.sidebar').should('not.exist');
+    });
   });
 
   specify('link to owned by worklist', function() {

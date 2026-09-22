@@ -105,7 +105,7 @@ const ListFiltersApp = App.extend({
   },
   onStop() {
     this.abortCustomFiltersFetch();
-    if (this.filtersState) this.stopListening(this.filtersState);
+    this.stopListening(this.filtersState);
   },
   retryCustomFilters() {
     this.isCustomFiltersLoaded = false;

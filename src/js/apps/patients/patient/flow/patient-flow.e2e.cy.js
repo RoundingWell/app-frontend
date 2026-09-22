@@ -781,6 +781,10 @@ context('patient flow page', function() {
       .find('[data-due-date-region] button')
       .click();
 
+    cy.get('.patient-flow__list .action-card').last().find('[data-due-date-region] button').click();
+    cy.get('.datepicker').should('not.exist');
+    cy.get('.patient-flow__list .action-card').last().find('[data-due-date-region] button').click();
+
     cy
       .get('.datepicker')
       .find('.js-next')
@@ -1486,6 +1490,8 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               sequence: 1,
+              due_date: testDate(),
+              due_time: null,
             },
             relationships: {
               state: getRelationship(stateTodo),
@@ -1516,6 +1522,7 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               sequence: 4,
+              details: 'Last action details',
             },
             relationships: {
               state: getRelationship(stateDone),
@@ -1660,6 +1667,24 @@ context('patient flow page', function() {
       .last()
       .find('[data-owner-region]')
       .should('contain', 'NUR');
+    cy.routeWorkspaceClinicians(fx => ({ ...fx, data: [] }));
+    cy.visit(`/flow/${ testFlow.id }`).wait('@routeFlow').wait('@routeFlowActions');
+    cy.get('[data-header-region] [data-owner-region]').click();
+    cy.get('.picklist').should('be.visible').and('not.contain', 'Other Clinician');
+    cy.get('.picklist .js-picklist-item').should('not.exist');
+    cy.get('body').type('{esc}');
+    cy.viewport(320, 480);
+    cy.get('.action-card [data-due-time-region] button').first().click();
+    cy.get('.picklist').should(([picker]) => {
+      const bounds = picker.getBoundingClientRect();
+      expect(bounds.left).to.be.at.least(0);
+      expect(bounds.right).to.be.at.most(320);
+    });
+    cy.get('body').type('{esc}');
+    cy.get('.action-card').last().find('.action-details-tooltip').then(([button]) => {
+      button.scrollIntoView({ block: 'end' });
+    }).trigger('pointerover');
+    cy.get('.tooltip').should('contain', 'Last action details');
   });
 
   specify('flow with work:owned:manage permission', function() {
@@ -1825,6 +1850,7 @@ context('patient flow page', function() {
 
         return fx;
       })
+      .routeWorkspaceClinicians(fx => ({ ...fx, data: [currentClinician] }))
       .routeFlow(fx => {
         fx.data = authoredFlow;
 
@@ -1844,6 +1870,10 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__header-container .js-menu')
       .should('exist');
+    cy.get('.patient-flow__owner').click();
+    cy.get('.picklist').should('contain', currentClinician.attributes.name)
+      .and('contain', teamCoordinator.attributes.name);
+    cy.get('.picklist').should('not.contain', teamNurse.attributes.name);
   });
 
   specify('flow not authored by a user with work:authored:delete permission', function() {

@@ -4,8 +4,8 @@ export default App.extend({
   createState({ stateOptions }) {
     return new this.StateModel(stateOptions);
   },
-  onBeforeStart(app, { collection } = {}) {
-    if (collection) this.updateCollection(collection);
+  onBeforeStart(app, { collection }) {
+    this.updateCollection(collection);
   },
   onStart() {
     const view = new this.ViewClass({

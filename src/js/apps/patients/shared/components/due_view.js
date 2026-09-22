@@ -19,13 +19,7 @@ const DueTemplate = hbs`
 
 export default View.extend({
   tagName: 'button',
-  className() {
-    if (this.getOption('isCompact')) {
-      return 'button button--compact due-component';
-    }
-
-    return 'button button--secondary w-100 due-component';
-  },
+  className: 'button button--compact due-component',
   attributes() {
     const attributes = { type: 'button' };
 
@@ -35,11 +29,9 @@ export default View.extend({
   },
   template: DueTemplate,
   templateContext() {
-    const isCompact = this.getOption('isCompact');
-
     return {
-      defaultHtml: !isCompact || this.getOption('showLabel') ? `<span>${ i18n.defaultText }</span>` : '',
-      dateFormat: isCompact ? 'SHORT' : 'LONG',
+      defaultHtml: this.getOption('showLabel') ? `<span>${ i18n.defaultText }</span>` : '',
+      dateFormat: 'SHORT',
       date: this.selected,
       isOverdue: !this.getOption('isDisabled') && this.getOption('isOverdue'),
     };
@@ -66,6 +58,7 @@ export default View.extend({
   showDatepicker() {
     const datepicker = this.datepicker = new Datepicker({
       uiView: this,
+      position: { ...this.getBounds(), ignoreEl: this.el },
       stateOptions: { selectedDate: this.selected },
     });
 

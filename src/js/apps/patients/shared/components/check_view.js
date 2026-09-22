@@ -13,12 +13,8 @@ export default View.extend({
     'role': 'checkbox',
     'type': 'button',
   },
-  initialize(options = {}) {
-    if (!this.getOption('selectLabel') || !this.getOption('deselectLabel')) {
-      throw new TypeError('CheckView requires selectLabel and deselectLabel');
-    }
-
-    this.isSelected = !!options.isSelected;
+  initialize({ isSelected }) {
+    this.isSelected = !!isSelected;
   },
   getTemplate() {
     return this.isSelected ? SelectedTemplate : EmptyTemplate;

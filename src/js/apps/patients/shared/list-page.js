@@ -208,30 +208,23 @@ const ListPageAppMixin = {
     this.setSidebarLayoutCollapsed(isCollapsed);
   },
   async onChangeFiltersDrawer(isFiltersDrawer) {
-    if (isFiltersDrawer) {
-      if (this.isPatientSidebarOpen) {
-        const layoutView = this.getView();
-        if (!await this.showFiltersSidebar().catch(addError)) return;
-        if (this.getView() !== layoutView || !layoutView.isFiltersDrawer()) return;
-      }
-      this.setFiltersSidebarDrawerMode(true);
-      this.setSidebarLayoutCollapsed(true);
-      return;
+    if (isFiltersDrawer && this.isPatientSidebarOpen) {
+      if (!await this.showFiltersSidebar().catch(addError)) return;
+      isFiltersDrawer = this.getView().isFiltersDrawer();
     }
 
-    this.setFiltersSidebarDrawerMode(false);
-    this.setSidebarLayoutCollapsed(this.isPatientSidebarOpen ? false : this.getState().get('filtersSidebarCollapsed'));
+    this.setFiltersSidebarDrawerMode(isFiltersDrawer);
+    this.setSidebarLayoutCollapsed(isFiltersDrawer
+      || (!this.isPatientSidebarOpen && this.getState().get('filtersSidebarCollapsed')));
   },
   onChangeFiltersSidebarFixed(isFixed) {
     if (isFixed) this.setSidebarCollapsed(false);
   },
   async onCloseSidebarDrawer() {
-    const layoutView = this.getView();
     const wasPatientSidebarOpen = this.isPatientSidebarOpen;
 
     if (wasPatientSidebarOpen) {
       if (!await this.showFiltersSidebar().catch(addError)) return;
-      if (this.getView() !== layoutView) return;
     }
 
     this.setSidebarLayoutCollapsed(true);

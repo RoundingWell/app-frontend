@@ -751,6 +751,23 @@ context('program flow page', function() {
       .get('.sidebar')
       .should('exist');
 
+    cy.get('.sidebar .js-close').first().click();
+    let releaseAction;
+    let requested = false;
+    const response = new Cypress.Promise(resolve => {
+      releaseAction = resolve;
+    });
+    cy.intercept('GET', `/api/program-actions/${ testProgramFlowActions[0].id }*`, req => {
+      requested = true;
+      return response.then(() => req.reply({ body: { data: testProgramFlowActions[0] } }));
+    });
+    cy.get('.action-card').first().click();
+    cy.wrap(null).should(() => expect(requested).to.equal(true));
+    cy.get('.app-nav').contains('Admin Tools').click();
+    cy.get('.picklist').contains('Programs').click();
+    cy.get('.card-list').should('be.visible').then(() => releaseAction());
+    cy.get('.sidebar').should('not.exist');
+
     cy.then(() => {
       [false, true].forEach(networkFailure => {
         cy.then(() => {

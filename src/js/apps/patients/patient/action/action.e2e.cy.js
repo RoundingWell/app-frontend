@@ -1702,6 +1702,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
   });
 
   specify('action comments', function() {
+    cy.viewport(1280, 480);
     cy
       .routesForPatientAction()
       .routeActionActivity(fx => {
@@ -1733,7 +1734,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             attributes: {
               edited_at: testTs(),
               created_at: testTsSubtract(1),
-              message: 'Most Recent Message from Clinician McTester',
+              message: 'Most Recent Message from Clinician McTester\n',
             },
             relationships: {
               clinician: getRelationship(getCurrentClinician()),
@@ -1757,6 +1758,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .wait('@routeActionActivity')
       .wait('@routeActionComments');
 
+    cy.get('.app-nav').contains('Minimize Menu').click();
+
     cy
       .get('[data-activity-region]')
       .find('.comment__item')
@@ -1773,7 +1776,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .eq(2)
       .find('.comment__edited')
       .as('editedLabel')
-      .trigger('pointerover');
+      .then(([label]) => label.scrollIntoView({ block: 'end' }))
+      .trigger('pointerover', { scrollBehavior: false });
 
     cy
       .get('.tooltip')
@@ -3302,6 +3306,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
   // startup and is not in the dashboard list, so the dispatch must fetch it on demand
   // rather than report it missing.
   specify('loads an action navigated to while the patient is still loading', function() {
+    let releasePatient;
     const testPatient = getPatient({
       attributes: {
         first_name: 'Test',
@@ -3342,19 +3347,22 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         return fx;
       });
 
-    // delay the patient model so PatientApp stays in its loading state
-    cy.intercept('GET', '/api/patients/**?*', {
-      body: { data: testPatient, included: [] },
-      delay: 1000,
+    cy.intercept('GET', '/api/patients/**?*', req => {
+      return new Promise(resolve => {
+        releasePatient = () => {
+          req.reply({ body: { data: testPatient, included: [] } });
+          resolve();
+        };
+      });
     });
 
     cy.visit(`/patient/${ testPatient.id }/workflow`);
 
-    // while PatientApp is loading (preloader shown), navigate to the action
+    // Wait for this patient's request, not the shell's earlier loading indicator.
+    cy.wrap(null).should(() => expect(releasePatient).to.be.a('function'));
     cy.get('.loader').should('exist');
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, testAction.id);
-    });
+    cy.navigate(`/patient/${ testPatient.id }/action/${ testAction.id }`);
+    cy.then(() => releasePatient());
 
     // the action is fetched on demand and the sidebar renders (rather than "not found")
     cy

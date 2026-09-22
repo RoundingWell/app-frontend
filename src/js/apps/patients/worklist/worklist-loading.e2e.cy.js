@@ -183,6 +183,30 @@ context('worklist loading states', function() {
       .wait('@routeActions')
       .get('.worklist-list__error')
       .should('not.exist');
+    let releaseOldFilter;
+    let oldFilterRequested = false;
+    const oldFilterResponse = new Cypress.Promise(resolve => {
+      releaseOldFilter = resolve;
+    });
+    cy.intercept('GET', '/api/actions?*', req => {
+      if (oldFilterRequested) {
+        req.reply({ body: getActionsResponse() });
+        return;
+      }
+      oldFilterRequested = true;
+      req.alias = 'oldFilter';
+      const response = getActionsResponse();
+      response.data = [{ ...action, attributes: { ...action.attributes, name: 'Outdated filter result' } }];
+      return oldFilterResponse.then(() => req.reply({ body: response }));
+    });
+    cy.get('[data-date-filter-region] .js-prev').click();
+    cy.wrap(null).should(() => expect(oldFilterRequested).to.equal(true));
+    cy.get('[data-date-filter-region] .js-next').click();
+    cy.get('.list-page__list').should('have.attr', 'aria-busy', 'false')
+      .then(() => releaseOldFilter());
+    cy.wait('@oldFilter');
+    cy.get('.list-page__list').should('contain', 'Loading State Action')
+      .and('not.contain', 'Outdated filter result');
   });
 
   specify('patient sidebar loading preserves its shell, close, and navigation controls', function() {
@@ -239,14 +263,39 @@ context('worklist loading states', function() {
       .first()
       .should('be.visible');
 
-    // Reopening immediately must cancel the pending return to filters.
-    cy.get('.patient-sidebar__close').then($close => {
-      const document = $close[0].ownerDocument;
-      $close[0].click();
-      document.querySelector('.patient-list__patient').click();
+    // Reopening at each stage of teardown must retain the latest sidebar.
+    [0, 1, 2, 4, 8].forEach(turns => {
+      cy.get('.patient-sidebar__close').then(async([close]) => {
+        const document = close.ownerDocument;
+        close.click();
+        for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+        document.querySelector('.patient-list__patient').click();
+      });
+      cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
     });
-
-    cy.get('.patient-sidebar__card').first().should('be.visible');
+    // Reopen as resize removes the old sidebar, before filters finish mounting.
+    let reopened;
+    cy.window().then(win => {
+      reopened = new Cypress.Promise(resolve => {
+        const observer = new win.MutationObserver(() => {
+          if (win.document.querySelector('.patient-sidebar')) return;
+          observer.disconnect();
+          win.document.querySelector('.patient-list__patient').click();
+          resolve();
+        });
+        observer.observe(win.document.querySelector('.list-page'), { childList: true, subtree: true });
+      });
+    });
+    cy.viewport(640, 720);
+    cy.then(() => reopened);
+    cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+    cy.get('.patient-sidebar__close').then(([close]) => {
+      const doc = close.ownerDocument;
+      close.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      doc.querySelector('.patient-list__patient').click();
+    });
+    cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+    cy.viewport(1440, 720);
     cy.get('.patient-sidebar__close').click();
 
     cy
@@ -284,11 +333,10 @@ context('worklist loading states', function() {
       .intercept('GET', '/api/patients/**?*', {
         statusCode: 410,
         body: {
-          errors: getErrors({
-            status: '410',
-            title: 'Not Found',
-            detail: 'Cannot find patient',
-          }),
+          errors: getErrors([
+            { status: '410', detail: 'Cannot find patient' },
+            { status: '410', detail: 'Patient access was removed' },
+          ]),
         },
       })
       .as('routeMissingPatient')
@@ -305,7 +353,11 @@ context('worklist loading states', function() {
 
     cy
       .get('.alert-box')
-      .should('contain', 'Cannot find patient');
+      .should('have.length', 2)
+      .and('contain', 'Cannot find patient');
+
+    cy.get('.alert-box').first().find('.js-dismiss').click();
+    cy.get('.alert-box').should('have.length', 1).and('contain', 'Patient access was removed');
 
     cy
       .intercept('GET', '/api/patients/**?*', { forceNetworkError: true })
@@ -347,6 +399,9 @@ context('worklist loading states', function() {
       .get('.picklist')
       .contains('Added: Oldest - Newest')
       .click();
+
+    cy.get('.worklist-list__error .js-retry').click().wait('@routeActions');
+    cy.get('.worklist-list__error').should('contain', 'The worklist could not be loaded.');
 
     cy.then(() => {
       shouldFail = false;

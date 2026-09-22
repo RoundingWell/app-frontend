@@ -34,9 +34,7 @@ const ActionsCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.bulkE
 const FlowsCountTemplate = hbs`{{formatMessage (intlGet "patients.shared.bulkEdit.bulkEditViews.bulkEditButtonView.editFlows") itemCount=itemCount}}`;
 
 const BulkEditOwnerComponent = OwnerComponent.extend({
-  className() {
-    return `${ OwnerComponent.prototype.className.call(this) } bulk-edit-inline__owner-button`;
-  },
+  className: `${ OwnerComponent.prototype.className } bulk-edit-inline__owner-button`,
 });
 
 const MixedOwnerComponent = BulkEditOwnerComponent.extend({
@@ -256,7 +254,7 @@ const BulkEditActionsBodyView = View.extend({
       date: this.model.get('date'),
       isDisabled,
       isOverdue,
-      isCompact: true,
+
       showLabel: !isDisabled,
     });
   },
@@ -279,7 +277,7 @@ const BulkEditActionsBodyView = View.extend({
       time,
       stateOptions: { isDisabled },
       isOverdue,
-      isCompact: true,
+
       showLabel: !isDisabled,
     });
   },
@@ -295,7 +293,7 @@ const BulkEditActionsBodyView = View.extend({
 
     return new DurationComponent({
       duration: this.model.get('duration'),
-      isCompact: true,
+
       stateOptions: { isDisabled },
     });
   },

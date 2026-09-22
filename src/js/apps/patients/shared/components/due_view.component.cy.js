@@ -12,7 +12,7 @@ context('Due View', function() {
 
         return new DueView({
           date: null,
-          isCompact: true,
+
           showLabel: true,
         });
       })
@@ -28,7 +28,7 @@ context('Due View', function() {
 
         const view = new DueView({
           date: null,
-          isCompact: false,
+          showLabel: true,
         });
 
         view.on('change:due', onChange);
@@ -63,7 +63,7 @@ context('Due View', function() {
 
         return new DueView({
           date: null,
-          isCompact: false,
+          showLabel: true,
         });
       })
       .as('root');

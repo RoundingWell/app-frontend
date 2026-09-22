@@ -65,6 +65,14 @@ context('schedule page', function() {
 
     cy
       .routeActions()
+      .routeCurrentClinician(fx => {
+        fx.data.attributes.name = 'Al Li';
+        return fx;
+      })
+      .routeWorkspaceClinicians(fx => {
+        fx.data[1].attributes.name = 'Alexandra Montgomery-Smith';
+        return fx;
+      })
       .visit('/schedule')
       .wait('@routeActions');
 
@@ -80,6 +88,16 @@ context('schedule page', function() {
       .should('contain', 'This Month')
       .click();
 
+    cy.get('.app-frame__pop-region').contains('Select from calendar').click();
+    cy.get('.datepicker .js-next').then(([next]) => {
+      const win = next.ownerDocument.defaultView;
+      next.focus();
+      win.dispatchEvent(new win.Event('resize'));
+    });
+    cy.get('.datepicker .js-next').should('be.focused');
+    cy.get('[data-date-filter-region] .js-date').then(([button]) => button.click());
+    cy.get('.app-frame__pop-region').should('have.length', 1);
+
     cy
       .get('.app-frame__pop-region')
       .contains('Last Month')
@@ -94,6 +112,14 @@ context('schedule page', function() {
     cy
       .get('.list-filters__body')
       .should('be.visible');
+
+    cy.viewport(320, 720);
+    cy.get('[data-owner-filter-region]').click();
+    cy.get('.picklist').should(([picker]) => {
+      const bounds = picker.getBoundingClientRect();
+      expect(bounds.left).to.be.at.least(0);
+      expect(bounds.right).to.be.at.most(320);
+    });
   });
 
   specify('display schedule', function() {
@@ -694,7 +720,6 @@ context('schedule page', function() {
       .should('contain', 'Try narrowing your filters.');
   });
 
-  // TODO: Move to component test
   specify('filter schedule', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
@@ -778,9 +803,14 @@ context('schedule page', function() {
       .its('search')
       .should('contain', `filter[due_date]=${ testDate() },${ testDate() }`);
 
+    cy.get('[data-date-filter-region] .js-next').click()
+      .wait('@routeActions').itsUrl().its('search')
+      .should('contain', `filter[due_date]=${ testDateAdd(1) },${ testDateAdd(1) }`);
+    cy.get('[data-date-filter-region] .js-prev').click().wait('@routeActions');
+
     cy
       .get('[data-date-filter-region]')
-      .should('contain', 'Today')
+      .should('contain', formatDate(testDate(), 'MM/DD/YYYY'))
       .click();
 
     cy
@@ -829,6 +859,14 @@ context('schedule page', function() {
       .its('search')
       .should('contain', `filter[due_date]=${ testDate() },${ testDate() }`);
 
+    // Calendar selections can be stepped in either direction without reopening the picker.
+    for (const [direction, offset] of [['prev', -1], ['next', 0]]) {
+      const date = dayjs(testDate()).add(offset, 'day').format('YYYY-MM-DD');
+      cy.get(`[data-date-filter-region] .js-${ direction }`).click()
+        .wait('@routeActions').itsUrl().its('search')
+        .should('contain', `filter[due_date]=${ date },${ date }`);
+    }
+
     cy
       .get('[data-date-filter-region]')
       .should('contain', formatDate(testDate(), 'MM/DD/YYYY'))
@@ -861,6 +899,13 @@ context('schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[due_date]=${ formatDate(dayjs(testDateAdd(1, 'month')).startOf('month'), 'YYYY-MM-DD') },${ formatDate(dayjs(testDateAdd(1, 'month')).endOf('month'), 'YYYY-MM-DD') }`);
+
+    for (const [direction, offset] of [['prev', 0], ['next', 1]]) {
+      const month = dayjs(testDate()).add(offset, 'month');
+      cy.get(`[data-date-filter-region] .js-${ direction }`).click()
+        .wait('@routeActions').itsUrl().its('search')
+        .should('contain', `filter[due_date]=${ month.startOf('month').format('YYYY-MM-DD') },${ month.endOf('month').format('YYYY-MM-DD') }`);
+    }
 
     cy
       .get('[data-date-filter-region]')
@@ -941,6 +986,13 @@ context('schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[due_date]=${ formatDate(dayjs(testDateSubtract(1, 'week')).startOf('week'), 'YYYY-MM-DD') },${ formatDate(dayjs(testDateSubtract(1, 'week')).endOf('week'), 'YYYY-MM-DD') }`);
+
+    for (const [direction, offset] of [['prev', -2], ['next', -1]]) {
+      const week = dayjs(testDate()).add(offset, 'week');
+      cy.get(`[data-date-filter-region] .js-${ direction }`).click()
+        .wait('@routeActions').itsUrl().its('search')
+        .should('contain', `filter[due_date]=${ week.startOf('week').format('YYYY-MM-DD') },${ week.endOf('week').format('YYYY-MM-DD') }`);
+    }
 
     cy
       .get('[data-date-filter-region]')
@@ -1341,6 +1393,26 @@ context('schedule page', function() {
       .get('@patientSidebarTrigger')
       .should('be.focused');
 
+    [0, 1, 2, 4, 8, 16].forEach(turns => {
+      cy.get('.patient-list__patient').first().then(async([button]) => {
+        button.click();
+        for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+        button.click();
+      });
+      cy.get('.patient-sidebar').should('not.exist');
+      cy.get('.patient-list__patient').first().click();
+      cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+      cy.get('.patient-sidebar__close').then(async([close]) => {
+        const button = close.ownerDocument.querySelector('.patient-list__patient');
+        close.click();
+        for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+        button.click();
+      });
+      cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+      cy.get('.patient-sidebar__close').click();
+      cy.get('.patient-sidebar').should('not.exist');
+    });
+
     cy
       .get('.schedule-list__day-list-row')
       .first()
@@ -1667,6 +1739,27 @@ context('schedule page', function() {
     cy
       .get('.alert-box')
       .should('contain', 'Something went wrong. Please try again.');
+    let releaseSave;
+    let saveRequested = false;
+    const saveResponse = new Cypress.Promise(resolve => {
+      releaseSave = resolve;
+    });
+    cy.intercept('PATCH', '/api/actions/*', req => {
+      saveRequested = true;
+      return saveResponse.then(() => req.reply({ statusCode: 400, body: { errors: [] } }));
+    }).as('lateSave');
+    cy.get('.schedule-list__list-row .js-select').first().click();
+    cy.get('.bulk-edit-inline [data-owner-region]').click();
+    cy.get('.picklist .js-picklist-item').contains('Nurse').click();
+    cy.get('.bulk-edit-inline .js-save').click();
+    cy.wrap(null).should(() => expect(saveRequested).to.equal(true));
+    cy.routeClinicians();
+    cy.get('.app-nav').contains('Admin Tools').click();
+    cy.get('.picklist').contains('Clinicians').click();
+    cy.get('.card-list').should('be.visible').then(() => releaseSave());
+    cy.wait('@lateSave');
+    cy.location('pathname').should('contain', '/clinicians');
+    cy.get('.card-list').should('be.visible');
   });
 
   specify('empty schedule', function() {
@@ -2543,6 +2636,9 @@ context('schedule page', function() {
         .wait('@failedSchedule');
 
       cy.get('.error-page').should('contain', 'Error code: 400.');
+      cy.intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } });
+      cy.visit('/schedule');
+      cy.get('.error-page').should('contain', 'Error code: 422.');
     });
   });
 
@@ -2592,6 +2688,9 @@ context('schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
+
+    cy.get('.app-nav').contains('Schedule').click().wait('@routeActions');
+    cy.get('.schedule-list__list').should('be.visible');
 
     cy.then(() => {
       const patient = getPatient();

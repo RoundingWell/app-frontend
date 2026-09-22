@@ -1,3 +1,5 @@
+import { Radio } from 'marionette';
+
 import App from 'js/base/app';
 
 import { LayoutView } from 'js/services/sidebar/sidebar_views';
@@ -54,29 +56,17 @@ export default App.extend({
 
       if (!started) return;
 
-      if (this.currentClaim !== claim) {
-        if (this.currentApp !== app) await app.stop();
-        return;
-      }
-
       app.showView();
     } catch(error) {
-      await this._cleanupFailedStart(app, claim);
-      throw error;
+      // Marionette only rejects the current startup; canceled starts resolve false.
+      delete this.currentApp;
+      delete this.currentClaim;
+      await this._trackStop(app.stop());
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+      return;
     }
 
     return app;
-  },
-
-  async _cleanupFailedStart(app, claim) {
-    const ownsClaim = this.currentClaim === claim;
-
-    if (ownsClaim) {
-      delete this.currentApp;
-      delete this.currentClaim;
-    }
-
-    if (ownsClaim || this.currentApp !== app) await this._trackStop(app.stop());
   },
 
   _trackStop(stopping) {

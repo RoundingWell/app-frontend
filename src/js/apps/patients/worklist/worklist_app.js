@@ -58,7 +58,7 @@ const WorklistApp = App.extend({
     'change:flowsSelected': 'onChangeSelected',
     'change:searchQuery': 'onChangeSearchQuery',
   },
-  initFiltersApp({ setDefaults } = {}) {
+  initFiltersApp({ setDefaults }) {
     if (this.hasChildApp('filters')) {
       this.filterState.set(this.getState().getFiltersState());
 
@@ -81,8 +81,6 @@ const WorklistApp = App.extend({
     this.getState().set(this.filterState.getFiltersState());
   },
   onChangeStateSort() {
-    if (!this.isRunning()) return;
-
     const listView = this.getView().getChildView('list');
 
     if (!listView?.setComparator) return;
@@ -184,23 +182,16 @@ const WorklistApp = App.extend({
     this.getView().showChildView('list', errorView);
   },
   prepareStart(options, { signal }) {
-    if (this.isPatientSidebarOpen) this.listenToPatientSidebar();
-
     return this.getChildApp('filters').start()
       .then(() => this.loadCollection({ signal }))
       .catch(error => {
-        if (signal.aborted) throw error;
-
         if (get(error, ['response', 'status']) !== 400) return null;
 
         this.filterState.setDefaultFilterStates();
-        return this.loadCollection({ signal }).catch(retryError => {
-          if (signal.aborted) throw retryError;
-          return null;
-        });
+        return this.loadCollection({ signal }).catch(() => null);
       });
   },
-  loadCollection({ signal } = {}) {
+  loadCollection({ signal }) {
     const isFlowType = this.getState().isFlowType();
     const entityRequest = isFlowType ? 'fetch:flows:collection' : 'fetch:actions:collection';
     this.sortOptions = getSortOptions(this.getState().getType());
@@ -411,7 +402,7 @@ const WorklistApp = App.extend({
     this.getView().getChildView('list').setPatientSelected(patient.id);
 
     return this.startPatientSidebar(request, patient)
-      .catch(error => this.handlePatientSidebarRequestError(request, error));
+      .catch(error => this.handlePatientSidebarError(error));
   },
   async startPatientSidebar(request, patient) {
     await this.getChildApp('filtersSidebar')?.stop();
@@ -430,10 +421,6 @@ const WorklistApp = App.extend({
     if (this._patientSidebarRequest !== request) return;
     this.focusPatientSidebar(patientSidebar);
   },
-  handlePatientSidebarRequestError(request, error) {
-    if (this._patientSidebarRequest !== request) return;
-    this.handlePatientSidebarError(error);
-  },
   handlePatientSidebarError(error) {
     this.showFiltersSidebar().catch(addError);
 
@@ -445,23 +432,20 @@ const WorklistApp = App.extend({
     addError(error);
   },
   async showFiltersSidebar() {
-    const layoutView = this.getView();
     const request = {};
     this._patientSidebarRequest = request;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
     this.getView().getChildView('list').setPatientSelected(null);
     await this.getChildApp('patientSidebar')?.stop();
-    if (this._patientSidebarRequest !== request || this.getView() !== layoutView) return false;
-    if (!await this.mountFiltersSidebar()) return false;
-    if (this._patientSidebarRequest !== request || this.getView() !== layoutView) return false;
+    if (this._patientSidebarRequest !== request) return false;
+    await this.mountFiltersSidebar();
+    if (this._patientSidebarRequest !== request) return false;
     this.showSidebarControls();
     this.restoreFiltersSidebarLayout();
     return true;
   },
   toggleBulkSelect() {
-    if (!this.editableCollection) return;
-
     this.selected = this.getState().getSelected(this.editableCollection);
     this.showSelectAll();
 

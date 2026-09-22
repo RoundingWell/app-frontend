@@ -22,15 +22,10 @@ export default RouterApp.extend({
     },
   },
 
-  async showCliniciansAll() {
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startRoute('cliniciansAll');
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+  showCliniciansAll() {
+    return this.startRoute('cliniciansAll');
+  },
+  onRouteError(error) {
+    Radio.trigger('event-router', 'unknownError', error?.response?.status);
   },
 });

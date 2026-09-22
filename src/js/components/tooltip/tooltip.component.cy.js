@@ -77,47 +77,6 @@ context('Tooltip', function() {
     });
   });
 
-  specify('Displaying horizontal positioning', function() {
-    cy
-      .mount(rootView => {
-        Tooltip.setRegion(rootView.getRegion('tooltip'));
-        return new TestView({
-          childViewOptions: { orientation: 'horizontal' },
-        });
-      })
-      .as('root');
-
-    testCollection.each(model => {
-      cy
-        .get('@root')
-        .contains(model.id)
-        .as('button')
-        .trigger('pointerover');
-
-      cy
-        .get('.tooltip')
-        .contains(model.id);
-
-      cy
-        .get('@button')
-        .trigger('mouseout');
-
-      cy
-        .get('@root')
-        .contains(model.id)
-        .as('button')
-        .trigger('pointerdown');
-
-      cy
-        .get('.tooltip')
-        .contains(model.id);
-
-      cy
-        .get('@button')
-        .trigger('mouseout');
-    });
-  });
-
   specify('Manual trigger', function() {
     const ManualTestView = View.extend({
       tagName: 'button',
@@ -274,6 +233,14 @@ context('Tooltip', function() {
       cy.tick(50);
     });
 
+    cy.get('.tooltip').contains('Raw anchor tooltip');
+
+    cy.get('.raw-anchor').then(([anchor]) => {
+      anchor.dispatchEvent(new MouseEvent('mouseout', {
+        bubbles: true,
+        relatedTarget: anchor.querySelector('.icon'),
+      }));
+    });
     cy.get('.tooltip').contains('Raw anchor tooltip');
   });
 

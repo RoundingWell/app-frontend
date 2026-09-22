@@ -121,7 +121,7 @@
   "dependencies": {
     "@formatjs/intl": "^4.1.8",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
-    "@mnjs/adapters": "5.0.0-beta.5",
+    "@mnjs/adapters": "5.0.0-beta.6",
     "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
     "@roundingwell/care-ops-datadog": "workspace:*",
@@ -136,7 +136,7 @@
     "handlebars": "^4.7.9",
     "idb": "^7.1.1",
     "libphonenumber-js": "^1.10.38",
-    "marionette": "file:vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz",
+    "marionette": "5.0.0-beta.6",
     "morphdom": "2.7.8",
     "sortablejs": "^1.14.0",
     "underscore": "^1.13.1",

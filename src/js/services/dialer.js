@@ -21,22 +21,17 @@ export default App.extend({
     patients.currentPatientId = patientId;
     patients.trigger('change:currentPatientId');
   },
-  async prepareStart(options, { signal }) {
+  async prepareStart() {
     const dialerSetting = Radio.request('settings', 'get', 'dialer');
     if (!dialerSetting) return;
 
     const provider = await this.loadProvider(dialerSetting);
 
-    if (signal.aborted || !provider) return;
+    if (!provider) return;
 
-    if (!this.hasChildApp('provider')) {
-      this.addChildApp('provider', new provider.DialerApp(provider.options));
-    }
+    this.addChildApp('provider', new provider.DialerApp(provider.options));
 
-    const started = await this.getChildApp('provider').start({ region: this.getRegion() });
-
-    if (signal.aborted) return;
-    if (!started) throw new Error('Dialer startup was canceled');
+    await this.getChildApp('provider').start({ region: this.getRegion() });
   },
   async loadProvider(dialerSetting) {
     if (dialerSetting === 'five9') {

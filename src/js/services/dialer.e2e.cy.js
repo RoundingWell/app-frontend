@@ -78,6 +78,7 @@ const searchResults = [
 
 context('Dialer Service', function() {
   specify('five9 - patient dashboard buttons', function() {
+    let five9Events;
     const currentClinician = getCurrentClinician({
       attributes: {
         settings: { dialer: 'five9' },
@@ -146,7 +147,24 @@ context('Dialer Service', function() {
         return fx;
       })
       .routeDashboards()
-      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`, {
+        onBeforeLoad(win) {
+          let sdk;
+          win.Five9 = {};
+          Object.defineProperty(win.Five9, 'CrmSdk', {
+            get() {
+              return sdk;
+            },
+            set(value) {
+              sdk = value;
+              // Receive call notifications at the external SDK boundary.
+              cy.stub(sdk.interactionApi(), 'subscribe').callsFake(events => {
+                five9Events = events;
+              });
+            },
+          });
+        },
+      })
       .wait('@routeFlow')
       .wait('@routeActionActivity')
       .wait('@routeActionComments')
@@ -334,6 +352,21 @@ context('Dialer Service', function() {
       .should('contain', 'Test Patient')
       .next()
       .should('contain', 'Other Patient');
+
+    cy.intercept('PATCH', '/api/artifacts/**', { statusCode: 201, body: { data: {} } }).as('saveCall');
+    cy.then(() => five9Events.callFinished({
+      callData: { interactionId: 'five9-completed-call', number: '+16513216543' },
+      callLogData: { disposition: 'completed' },
+    }));
+    cy.wait('@saveCall').its('request.body.data.attributes').should('deep.include', {
+      artifact: 'five9-call-log',
+      identifier: 'five9-completed-call',
+      values: {
+        callData: { interactionId: 'five9-completed-call', number: '+16513216543' },
+        callLogData: { disposition: 'completed' },
+      },
+    });
+    cy.get('@patientButtons').should('have.length', 0);
   });
 
   specify('RingCentral patient links and calls while the provider loads', function() {
@@ -594,6 +627,27 @@ context('Dialer Service', function() {
       .next()
       .should('contain', 'Other Patient');
 
+    cy.window().then(win => {
+      win.dispatchEvent(new win.MessageEvent('message', {
+        origin: 'https://apps.ringcentral.com',
+        data: { type: 'rc-call-start-notify', call: { direction: 'Inbound', from: '123' } },
+      }));
+    });
+    cy.get('@patientButtons').should('have.length', 2);
+    cy.intercept('PATCH', '/api/artifacts/**', { statusCode: 201, body: { data: {} } }).as('saveCall');
+    cy.window().then(win => {
+      win.dispatchEvent(new win.MessageEvent('message', {
+        origin: 'https://apps.ringcentral.com',
+        data: { type: 'rc-call-end-notify', call: { callId: 'ringcentral-completed-call' } },
+      }));
+    });
+    cy.wait('@saveCall').its('request.body.data.attributes').should('deep.include', {
+      artifact: 'ringcentral-call-log',
+      identifier: 'ringcentral-completed-call',
+      values: { callData: { callId: 'ringcentral-completed-call' } },
+    });
+    cy.get('@patientButtons').should('have.length', 0);
+
     cy.then(() => {
       const patient = getPatient();
       const action = getAction({ relationships: {
@@ -621,6 +675,14 @@ context('Dialer Service', function() {
       cy.then(() => releaseProvider());
       cy.wait('@provider');
       cy.get('.ringcentral-panel__iframe').should('be.visible');
+    });
+    cy.then(() => {
+      cy.routeCurrentClinician(fx => ({
+        ...fx,
+        data: getCurrentClinician({ attributes: { settings: { dialer: 'unavailable-provider' } } }),
+      })).routeActions().visit('/worklist/owned-by');
+      cy.get('.list-page').should('be.visible');
+      cy.get('.ringcentral-panel__iframe').should('not.exist');
     });
   });
 });

@@ -81,6 +81,15 @@ context('Patient Action Form', function() {
     cy
       .url()
       .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`);
+    const action = getAction({ relationships: { form: getRelationship(testForm) } });
+    cy.routeAction(fx => ({ ...fx, data: action }))
+      .routeFormByAction(fx => ({ ...fx, data: testForm }))
+      .intercept('GET', `/api/actions/${ action.id }*`, req => {
+        if (req.query.include?.includes('form-responses')) req.reply({ statusCode: 410, body: { errors } });
+      })
+      .visit(`/patient/${ routePatientId }/action/${ action.id }`);
+    cy.get('.alert-box__body').should('contain', 'The Action you requested does not exist.');
+    cy.location('pathname').should('not.contain', action.id);
   });
 
   specify('action deleted while its form is open', function() {
@@ -1922,6 +1931,7 @@ context('Patient Action Form', function() {
         return fx;
       })
       .routeLatestFormResponse()
+      .routeFormResponse(fx => ({ ...fx, data: testFormResponse }))
       .routeFormDefinition()
       .routeFormActionFields()
       .routeActionActivity()

@@ -112,12 +112,12 @@ export default SubRouterApp.extend({
         if (!started || this.getCurrentRoute() !== routeContext) return;
 
         this.editAction(actionApp.action);
-      })
-      .catch(error => {
-        if (this.getCurrentRoute() !== routeContext || error?.response) return;
-
-        throw error;
       });
+  },
+
+  onRouteError(error) {
+    this.getChildApp('action').handleStartFailure();
+    if (!error?.response) window.reportError(error);
   },
 
   editAction(action) {

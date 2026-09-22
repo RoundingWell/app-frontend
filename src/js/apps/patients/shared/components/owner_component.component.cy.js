@@ -108,7 +108,7 @@ context('Owner Component', function() {
 
     cy
       .get('@root')
-      .contains('Nurse')
+      .contains('NUR')
       .click();
 
     cy
@@ -121,35 +121,6 @@ context('Owner Component', function() {
           .to.be.calledOnce
           .and.calledWith(clinicians.get(currentClinician.id));
       });
-  });
-
-  specify('isCompact', function() {
-    cy
-      .mount(rootView => {
-        OwnerComponent.setPopRegion(rootView.getRegion('pop'));
-
-        return new OwnerComponent({
-          isCompact: true,
-          owner: clinicians.get(currentClinician.id),
-        });
-      })
-      .as('root');
-
-    cy
-      .get('@root')
-      .contains('Clinician McTester')
-      .click();
-
-    cy
-      .get('@root')
-      .find('.picklist')
-      .contains('Nurse')
-      .click();
-
-    cy
-      .get('@root')
-      .contains('NUR')
-      .should('have.class', 'owner-component--compact');
   });
 
   specify('without Current User', function() {

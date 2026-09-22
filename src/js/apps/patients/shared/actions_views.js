@@ -20,23 +20,13 @@ import DurationComponent from './components/duration_component';
 import './actions.scss';
 
 function createCardControl(Component) {
-  const className = Component.prototype.className;
-
   return Component.extend({
-    className() {
-      const componentClassName = typeof className === 'function' ? className.call(this) : className;
-
-      return `${ componentClassName } js-no-click`;
-    },
+    className: `${ Component.prototype.className } js-no-click`,
   });
 }
 
 const CardOwnerComponent = createCardControl(OwnerComponent);
-const CardDueView = DueView.extend({
-  className() {
-    return `${ DueView.prototype.className.call(this) } js-no-click`;
-  },
-});
+const CardDueView = createCardControl(DueView);
 const CardTimeComponent = createCardControl(TimeComponent);
 
 const FormButton = View.extend({

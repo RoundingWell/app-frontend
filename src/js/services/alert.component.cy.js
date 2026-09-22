@@ -33,7 +33,7 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:info', 'info');
+        Radio.request('alert', 'show', { text: 'info' });
       })
       .find('.alert-box')
       .contains('info');
@@ -41,7 +41,7 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:info', 'error');
+        Radio.request('alert', 'show:error', 'error');
       })
       .find('.alert-box')
       .contains('error')
@@ -87,7 +87,8 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:undo', { onComplete });
+        const alert = Radio.request('alert', 'show', { text: 'Dismiss me' });
+        alert.on('dismiss', onComplete);
       })
       .find('.js-dismiss')
       .click()
@@ -107,7 +108,7 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:info', 'info');
+        Radio.request('alert', 'show', { text: 'info' });
       })
       .find('.alert-box')
       .should('exist');
@@ -115,28 +116,6 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .click('bottomRight')
-      .find('.alert-box')
-      .should('not.exist');
-  });
-
-  specify('Closing via undo button', function() {
-    const onUndo = cy.stub();
-
-    cy
-      .get('@root')
-      .then(() => {
-        Radio.request('alert', 'show:undo', { onUndo });
-      })
-      .find('.js-undo')
-      .click()
-      .click()
-      .then(() => {
-        expect(onUndo).to.be.calledOnce;
-      })
-      .tick(1000);
-
-    cy
-      .get('@root')
       .find('.alert-box')
       .should('not.exist');
   });

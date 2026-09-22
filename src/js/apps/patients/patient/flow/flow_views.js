@@ -51,9 +51,7 @@ const FlowDetailsTooltip = DetailsTooltip.extend({
 
 export const i18n = intl.patients.patient.flow.flowViews;
 const FlowHeaderOwnerComponent = FlowOwnerComponent.extend({
-  className() {
-    return `${ FlowOwnerComponent.prototype.className.call(this) } patient-flow__owner`;
-  },
+  className: `${ FlowOwnerComponent.prototype.className } patient-flow__owner`,
 });
 
 const FlowHeaderReadOnlyOwnerView = ReadOnlyOwnerView.extend({
@@ -291,7 +289,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    this.stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    this.stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(this.stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -311,7 +309,7 @@ const ActionItemView = View.extend({
     this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
+
       stateOptions: { isDisabled },
     });
 
@@ -331,7 +329,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.model.isDone();
     const dueDateView = new CardDueView({
       date: this.model.get('due_date'),
-      isCompact: true,
+
       isDisabled,
       isOverdue: this.model.isOverdue(),
     });
@@ -352,7 +350,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
     this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true, stateOptions: { isDisabled },
+      stateOptions: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
 

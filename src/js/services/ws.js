@@ -1,4 +1,4 @@
-import { each, map, values, isArray, isEmpty } from 'underscore';
+import { map, isArray, isEmpty } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import { v7 as uuid } from 'uuid';
@@ -25,13 +25,12 @@ export default App.extend({
 
   initialize() {
     this.resources = new Backbone.Collection();
-    this.persistent = {};
     this.managedAdds = new WeakMap();
     this.ws = {};
     this.reconnectAttempts = 0;
   },
 
-  getUrl({ signal } = {}) {
+  getUrl({ signal }) {
     return fetcher('/api/websockets', { signal })
       .then(handleJSON)
       .then(response => {
@@ -51,11 +50,11 @@ export default App.extend({
     return this.getUrl({ signal });
   },
 
-  onStart(app, { data } = {}, url) {
+  onStart(app, options, url) {
     /* istanbul ignore next: Essentially avoid offline */
     if (!url) return;
     this.ws = new WebSocket(url.toString());
-    this.ws.addEventListener('open', this.onOpen.bind(this, data));
+    this.ws.addEventListener('open', this.onOpen.bind(this, options.data));
     this.ws.addEventListener('close', this.onClose.bind(this));
     this.ws.addEventListener('message', this.onMessage.bind(this));
   },
@@ -115,7 +114,7 @@ export default App.extend({
   onOpen(data) {
     this.stopReconnect();
     this.reconnectAttempts = 0;
-    if (data) this.sendData(data);
+    this.sendData(data);
     this.startHeartbeat();
   },
 
@@ -128,8 +127,6 @@ export default App.extend({
   },
 
   stopHeartbeat() {
-    if (!this.heartBeat) return;
-
     clearInterval(this.heartBeat);
     this.heartBeat = null;
   },
@@ -145,7 +142,6 @@ export default App.extend({
 
     this.reconnect = setTimeout(() => {
       this.reconnect = null;
-      if (!this.isRunning() || !this._hasSubscription()) return;
       this._subscribe();
     }, this._getReconnectDelay());
 
@@ -153,8 +149,6 @@ export default App.extend({
   },
 
   stopReconnect() {
-    if (!this.reconnect) return;
-
     clearTimeout(this.reconnect);
     this.reconnect = null;
   },
@@ -198,8 +192,6 @@ export default App.extend({
     const onMessage = (data, model) => {
       if (collection.get(model) || data.category === 'ResourceDeleted') return;
 
-      if (!app.isRunning()) return;
-
       const requestId = `${ model.type }-${ model.id }`;
       if (requests.has(requestId)) return;
 
@@ -208,7 +200,7 @@ export default App.extend({
 
       Promise.resolve(model.fetch({ data: dataParams, signal: controller.signal }))
         .then(() => {
-          if (controller.signal.aborted || !app.isRunning()) return;
+          if (controller.signal.aborted) return;
 
           collection.add(model);
           Radio.request('ws', 'add', model);
@@ -256,46 +248,19 @@ export default App.extend({
     return map(resources, ({ id, type }) => ({ id, type }));
   },
 
-  // TODO: We likely want to support a more reboust way of maintaining filters
-  subscribe(resources, { shouldPersist, filters } = {}) {
-    resources = this._getResources(resources);
+  subscribe(resources, { filters } = {}) {
     this.filters = filters;
-
-    if (shouldPersist) {
-      each(resources, ({ id, type }) => {
-        this.persistent[id] = { id, type };
-      });
-
-      this.resources.reset(resources);
-      this._subscribe();
-      return;
-    }
-
-    this.resources.reset(resources);
-    this.resources.add(values(this.persistent));
+    this.resources.reset(this._getResources(resources));
     this._subscribe();
   },
 
-  add(resources, { shouldPersist } = {}) {
-    resources = this._getResources(resources);
-
-    if (shouldPersist) {
-      each(resources, ({ id, type }) => {
-        this.persistent[id] = { id, type };
-      });
-    }
-
-    this.resources.add(resources);
+  add(resources) {
+    this.resources.add(this._getResources(resources));
     this._subscribe();
   },
 
   unsubscribe(resources) {
-    resources = this._getResources(resources);
-
-    each(resources, ({ id }) => {
-      delete this.persistent[id];
-    });
-    this.resources.remove(resources);
+    this.resources.remove(this._getResources(resources));
     this._subscribe();
   },
 });

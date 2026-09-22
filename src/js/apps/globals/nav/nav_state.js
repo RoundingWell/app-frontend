@@ -1,4 +1,3 @@
-import { isEmpty, omit } from 'underscore';
 import Backbone from 'backbone';
 
 const LAYOUT_INPUTS = [
@@ -59,13 +58,8 @@ const StateModel = Backbone.Model.extend({
     this.on(LAYOUT_EVENTS, this.updateLayout);
     this.updateLayout();
   },
-  updateLayout(model, value, options) {
-    const setOptions = model === this ? options : model;
-    if (setOptions?.unset && isEmpty(this.attributes)) return this;
-
-    const layoutOptions = setOptions?.unset ? omit(setOptions, 'unset') : setOptions;
-
-    return this.set(getLayout(this.attributes), layoutOptions);
+  updateLayout() {
+    return this.set(getLayout(this.attributes));
   },
   // Clear the transient overlay reasons so a minimized nav settles closed.
   closeOverlay() {

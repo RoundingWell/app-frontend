@@ -13,7 +13,6 @@ const CLASS_OPTIONS = [
   'ignoreEl',
   'message',
   'messageHtml',
-  'orientation',
   'position',
   'shouldDelay',
   'uiView',
@@ -124,10 +123,9 @@ export default View.extend({
     return this.uiView.getBounds(ui);
   },
   regionOptions() {
-    const orientation = result(this, 'orientation');
     const ignoreEl = result(this, 'ignoreEl') || this.anchor;
 
-    return extend({ orientation, ignoreEl }, result(this, 'position'));
+    return extend({ ignoreEl }, result(this, 'position'));
   },
 }, {
   setRegion(region) {

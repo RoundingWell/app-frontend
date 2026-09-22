@@ -33,7 +33,7 @@ const Router = RouterApp.extend({
       'patient:workflow': { action: 'showPatient', route: 'patient/:id/workflow' },
       'patient:action': { action: 'showPatient', route: 'patient/:id/action/:aid' },
       'worklist': { action: 'showWorklist', route: 'worklist/:id', meta: { isList: true } },
-      'schedule': { action: 'showSchedule', route: 'schedule', meta: { clearLatestList: true } },
+      'schedule': { action: 'showSchedule', route: 'schedule', meta: { isList: true } },
     };
   },
   showPatient(patientId) {

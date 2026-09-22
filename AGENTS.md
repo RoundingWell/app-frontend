@@ -51,13 +51,12 @@ Use the `marionette` skill supplied by Marionette's upstream plugin for Marionet
 work. It selects the version-matched framework docs; this file records the app's
 integration choices and verification policy.
 
-- Contract: the repository root's `package.json` and `package-lock.json` select
-  `marionette` from `vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz`, with
-  `@mnjs/adapters` at `5.0.0-beta.5`.
-- Packaged docs: `node_modules/marionette/dist/docs`, version `5.0.0-beta.5`, source
-  `e5073543f28d8dcd237115f3b7ad7f4131a44a15`, `sourceDirty: false`, content
-  SHA-256 `8939d7bfa64fcbdcd6cf65eadd37f57fbe90d332236bbe42285b8f79ebd2b8c8`.
-  Verify the installed package against this candidate before relying on its APIs.
+- Contract: the repository root's `package.json` and `package-lock.json` pin
+  `marionette` and `@mnjs/adapters` to published `5.0.0-beta.6` packages.
+- Packaged docs: `node_modules/marionette/dist/docs`, version `5.0.0-beta.6`, source
+  `18e21435fa21f75bf4a5067a210dec2ea7e0bccc`, `sourceDirty: false`, content
+  SHA-256 `d875bebadc7a01dec4d2271d93c22771caf6f8caf4191972b193f2241a9c4291`.
+  Verify the installed package against this release before relying on its APIs.
 - Runtime: the shared named exports from `marionette`; `src/js/base/setup.js`
   registers Backbone for DataApi and StateApi, and Morphdom for DomApi. DOM event
   delegation uses Marionette's native default.
@@ -165,8 +164,9 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 ## Validation
 
 - Reserve Cypress component specs for generic reusable units, including base
-  infrastructure and genuinely generic components colocated under `apps/**`.
-  Cover feature and application behavior under `apps/**` through E2E flows.
+  infrastructure, `components/**`, and `behaviors/**`.
+  Cover `apps/**`, `entities-service/**`, and `services/**` through E2E flows alone.
+  Component coverage for these directories is discarded before merging reports.
   Component coverage is not evidence that application code is reachable; if an
   E2E flow cannot reach that code, verify whether it is dead and remove it
   instead of adding a component spec to preserve it.

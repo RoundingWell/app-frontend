@@ -21,7 +21,7 @@ export default App.extend({
     this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
 
     this.listenTo(Radio.channel('workspace'), 'change:workspace', () => {
-      if (this.isRunning()) this.restart(this.shellOptions);
+      this.restart(this.shellOptions);
     });
   },
   onBeforeStart(app, options) {
@@ -31,7 +31,7 @@ export default App.extend({
   onChangeNavMinimized(state, isMinimized) {
     this.shellOptions.setNavMinimized(isMinimized);
   },
-  async prepareStart(options, { signal }) {
+  async prepareStart(options) {
     const currentUser = Radio.request('bootstrap', 'currentUser');
     const hasDashboards = currentUser.can('dashboards:view');
     const hasClinicians = currentUser.can('clinicians:manage');
@@ -49,16 +49,10 @@ export default App.extend({
       hasPrograms ? import('js/apps/programs/programs-main_app.js') : null,
     ]);
 
-    if (signal.aborted) return;
-
-    const [navStarted, sidebarStarted] = await Promise.all([
+    await Promise.all([
       this.getChildApp('nav').start({ region: options.navRegion }),
       this.getChildApp('sidebar').start({ region: options.sidebarRegion }),
     ]);
-
-    if (signal.aborted) return;
-    if (!navStarted) throw new Error('Navigation startup was canceled');
-    if (!sidebarStarted) throw new Error('Sidebar startup was canceled');
 
     return results;
   },

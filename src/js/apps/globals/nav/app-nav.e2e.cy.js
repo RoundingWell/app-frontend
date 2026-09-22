@@ -103,6 +103,14 @@ context('App Nav', function() {
       .should('have.attr', 'href')
       .and('contain', '/logout');
 
+    cy.get('.picklist a').first().focus();
+    cy.viewport(1300, 768);
+    cy.get('.picklist').should('be.visible');
+    cy.get('.picklist a').first().blur();
+    cy.viewport(1280, 768);
+    cy.get('.picklist').should('not.exist');
+    cy.get('@mainNav').click();
+
     // NOTE: this closes the main nav droplist so it doesn't cover other nav links
     cy
       .get('.picklist')
