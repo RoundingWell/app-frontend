@@ -21,7 +21,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `f4435dc23ba1bc686b3126e479bd1a0113db0255`.
+  `a7ec394915cb5a9c41b9b3bdf908005b925f7a29`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -138,12 +138,20 @@
   by DialerService. Their Backbone state sources, borrowed overlay Region, and
   browser effects now follow the beta.5 lifecycle contract. It was merged by a
   human.
-- Active: PR #1809 keeps the latest dialer call buffered until
+- Completed: PR #1809 keeps the latest dialer call buffered until
   DialerService is running, so provider registration cannot let an older call
-  overtake a newer click.
+  overtake a newer click. It was merged by a human.
+- Active: PR #1810 keeps Worklist and Schedule
+  run resources intact until stop succeeds and retains their reusable bulk-edit
+  children across parent restarts.
 
 ## Validation
 
+- PR #1810 installs from the pinned lockfile and passes targeted ESLint and the
+  test-mode build. The unchanged Worklist bulk-edit and Schedule E2E specs both
+  reach the existing `/unknown-error` boundary immediately after their initial
+  actions fetch, before list controls render or the changed stop/restart paths
+  execute. No E2E file was changed, and GitHub Cypress remains deferred.
 - The dialer package step installs from the pinned lockfile, passes targeted
   ESLint and the test-mode build, and leaves its existing E2E specification
   unchanged. Both Five9 and RingCentral scenarios render their provider UI and
@@ -675,3 +683,9 @@
   displayed toolbar root across a list refresh. Collection changes no longer
   clear `isSaving`, which keeps an in-flight save disabled until its owning
   operation completes.
+- PR #1810 review found that moving successful-stop cleanup exposed Worklist's
+  pre-request await: a refresh could otherwise resume after its run stopped.
+  The refresh now owns its cancellation controller before stopping bulk-edit
+  children, so successful stop cancels the continuation while rejected stop
+  leaves it usable. List and error-view listeners now release with their views;
+  this was consumer lifecycle cleanup, not a Marionette runtime defect.
