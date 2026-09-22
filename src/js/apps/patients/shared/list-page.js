@@ -207,9 +207,13 @@ const ListPageAppMixin = {
 
     this.setSidebarLayoutCollapsed(isCollapsed);
   },
-  onChangeFiltersDrawer(isFiltersDrawer) {
+  async onChangeFiltersDrawer(isFiltersDrawer) {
     if (isFiltersDrawer) {
-      if (this.isPatientSidebarOpen) this.showFiltersSidebar();
+      if (this.isPatientSidebarOpen) {
+        const layoutView = this.getView();
+        await this.showFiltersSidebar();
+        if (this.getView() !== layoutView || !layoutView.isFiltersDrawer()) return;
+      }
       this.setFiltersSidebarDrawerMode(true);
       this.setSidebarLayoutCollapsed(true);
       return;
@@ -225,12 +229,7 @@ const ListPageAppMixin = {
     const wasPatientSidebarOpen = this.isPatientSidebarOpen;
 
     if (wasPatientSidebarOpen) {
-      try {
-        await this.showFiltersSidebar();
-      } catch(error) {
-        addError(error);
-        return;
-      }
+      await this.showFiltersSidebar();
     }
 
     this.setSidebarLayoutCollapsed(true);
@@ -269,7 +268,6 @@ const ListPageAppMixin = {
     if (!layoutView.isFiltersDrawer()) return;
 
     patientSidebar.focusClose();
-    this.listenToOnce(patientSidebar, 'sync:data', () => patientSidebar.focusClose());
   },
   focusPatientSidebarTrigger() {
     const triggerView = this.patientSidebarTrigger;

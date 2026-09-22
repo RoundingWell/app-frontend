@@ -108,7 +108,7 @@ export default App.extend({
         async 'discard:submission'() {
           await Radio.request(`form${ form.id }`, 'clear:storedSubmission');
 
-          modal.getChildView('body').render();
+          modal.showChildView('body', new IframeFormView({ model: form }));
           modal.disableSubmit();
         },
       });

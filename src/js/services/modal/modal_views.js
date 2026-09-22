@@ -1,4 +1,4 @@
-import { extend } from 'underscore';
+import { extend, isString } from 'underscore';
 import { animate } from 'animejs';
 import hbs from 'handlebars-inline-precompile';
 import { View, Region } from 'marionette';
@@ -90,9 +90,13 @@ const ModalView = View.extend({
   },
   template: ModalTemplate,
   initialize() {
-    if (this.headerView) this.showChildView('header', this.headerView);
-    if (this.bodyView) this.showChildView('body', this.bodyView);
-    if (this.footerView) this.showChildView('footer', this.footerView);
+    ['header', 'body', 'footer'].forEach(region => {
+      const content = this[`${ region }View`];
+      if (!content) return;
+
+      const view = isString(content) ? new View({ template: () => content }) : content;
+      this.showChildView(region, view);
+    });
   },
   onSubmit() {
     this.destroy();

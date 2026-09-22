@@ -63,8 +63,6 @@ const StateModel = Backbone.Model.extend({
   },
   initialize() {
     this.on('change', this.onChange);
-
-    this.listenTo(Radio.channel('event-router'), 'unknownError', this.removeStore);
   },
   getStoreKey(id) {
     return `${ id }_${ this.currentClinician.id }_${ this.currentWorkspace.id }-${ STATE_VERSION }`;
@@ -78,10 +76,17 @@ const StateModel = Backbone.Model.extend({
 
     return state;
   },
+  restoreStore() {
+    this.isStoreInvalidated = false;
+  },
   removeStore() {
+    // Retained filter state can still emit debounced changes after an error.
+    this.isStoreInvalidated = true;
     localStore.remove(this.getStoreKey(this.id));
   },
   onChange() {
+    if (this.isStoreInvalidated) return;
+
     localStore.set(this.getStoreKey(this.id), omit(this.attributes, 'lastSelectedIndex', 'searchQuery'));
   },
   setFiltersSidebarCollapsed(isCollapsed) {

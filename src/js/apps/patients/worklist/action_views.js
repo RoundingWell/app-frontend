@@ -66,12 +66,12 @@ const ActionItemView = View.extend({
     'change': 'render',
   },
   events: {
-    'click .js-no-click': stopEventPropagation,
     'click .js-patient': 'onClickPatient',
     'click .js-flow': 'onClickFlow',
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-no-click': stopEventPropagation,
     'click .js-action-surface': 'onClickSurface',
   },
   ui: {

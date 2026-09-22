@@ -829,4 +829,25 @@ context('WS Service - Disabled', function() {
 
     expect(disabledService.isRunning()).to.be.false;
   });
+
+  specify('allows another managed addition after a fetch fails', function() {
+    cy.then(async() => {
+      const app = new App();
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'retry-flow' });
+      model.type = 'flows';
+      const fetch = cy.stub(model, 'fetch');
+      fetch.onFirstCall().rejects(new Error('Network unavailable'));
+      fetch.onSecondCall().resolves(model);
+      await app.start();
+      service.manageAdd(app, collection, 'flows');
+      Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(collection).to.have.length(0);
+      Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(collection.get(model)).to.equal(model);
+      await app.destroy();
+    });
+  });
 });

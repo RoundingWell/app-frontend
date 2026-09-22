@@ -241,4 +241,27 @@ context('Sidebar Service', function() {
       element.remove();
     });
   });
+
+  specify('releases an app superseded from its start event', function() {
+    cy.document().then(async document => {
+      const element = document.createElement('div');
+      document.body.append(element);
+      const service = new SidebarService({ region: new Region({ el: element }) });
+      const outgoing = new App();
+      const incoming = new App();
+      let replacement;
+
+      await service.start();
+      outgoing.once('start', () => {
+        replacement = service.startSidebarApp(incoming, {}, {});
+      });
+      expect(await service.startSidebarApp(outgoing, {}, {})).to.be.undefined;
+      expect(await replacement).to.equal(incoming);
+      expect(outgoing.isRunning()).to.be.false;
+      expect(element.contains(incoming.getView().el)).to.be.true;
+
+      await service.stop();
+      element.remove();
+    });
+  });
 });

@@ -19,7 +19,7 @@ import './action.scss';
 
 const FocusablePreloadRegion = PreloadRegion.extend({
   focus() {
-    const el = this.getEl(this.el);
+    const el = typeof this.el === 'string' ? this.getEl(this.el) : this.el;
 
     el.scrollIntoView({ block: 'start' });
     el.focus({ preventScroll: true });

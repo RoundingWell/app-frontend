@@ -9,6 +9,7 @@ import 'scss/provider-core.scss';
 import 'scss/app-root.scss';
 
 import initPlatform from 'js/utils/platform';
+import handleErrors from 'js/utils/handle-errors';
 
 import App from 'js/base/app';
 import listenToUserActivity from 'js/utils/user-activity';
@@ -49,10 +50,10 @@ const Application = App.extend({
   },
 
   // Before the application starts make sure:
-  // - A root layout is prepared
+  // - A root layout is mounted
   // - Global services are started
   onBeforeStart() {
-    this.setView(new RootView());
+    this.showView(new RootView());
     this.configComponents();
     this.startServices();
     this.setListeners();
@@ -92,9 +93,6 @@ const Application = App.extend({
     window.addEventListener('beforeunload', /* istanbul ignore next: Unloading the window loses coverage reports */ () => {
       this.stop();
     }, { signal: this._eventListeners.signal });
-  },
-  onDestroy() {
-    this._eventListeners?.abort();
   },
 
   async prepareStart(options, { signal }) {
@@ -142,9 +140,15 @@ const Application = App.extend({
   },
 
   showStartFailure(error) {
+    const isNotSetup = error === 'No workspaces found' || get(error, ['response', 'status']) === 403;
+
+    if (!isNotSetup && this.getChildApp('bootstrap').isRunning()) {
+      return handleErrors(error).catch(reportedError => window.reportError(reportedError));
+    }
+
     addError(get(error, 'responseData', error));
 
-    if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
+    if (isNotSetup) {
       this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
       this.showView();
     }

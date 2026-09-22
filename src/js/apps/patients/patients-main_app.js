@@ -90,7 +90,7 @@ export default RouterApp.extend({
     Radio.trigger('dialer', 'change:currentPatientId', null);
   },
 
-  async showPatientsWorklist(worklistId, options) {
+  showPatientsWorklist(worklistId, options) {
     this.clearCurrentPatient();
 
     const worklistsById = {
@@ -106,15 +106,7 @@ export default RouterApp.extend({
       return;
     }
 
-    const routeContext = this.getCurrentRoute();
-
-    try {
-      return await this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
-    } catch(error) {
-      if (this.getCurrentRoute() !== routeContext) return;
-
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-    }
+    return this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
   },
 
   async showSchedule() {

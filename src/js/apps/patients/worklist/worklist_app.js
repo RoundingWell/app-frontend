@@ -39,6 +39,9 @@ const WorklistApp = App.extend({
   createState() {
     return new StateModel();
   },
+  onUnknownError() {
+    this.getState().removeStore();
+  },
   stateEvents: {
     'change:listType': 'refreshList',
     'change:clinicianId': 'refreshList',
@@ -95,6 +98,8 @@ const WorklistApp = App.extend({
   initListState() {
     const storedState = this.getState().getStore(this.worklistId);
 
+    this.getState().restoreStore();
+    this.getState().set(this.getState().defaults(), { silent: true });
     this.getState().setSearchQuery(this.currentSearchQuery);
 
     if (storedState) {
@@ -111,6 +116,7 @@ const WorklistApp = App.extend({
     this.initFiltersApp({ setDefaults: true });
   },
   onStop() {
+    this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
     this._canRefresh = false;
     this._patientSidebarRequest = null;
     this._refreshController?.abort();
@@ -124,6 +130,8 @@ const WorklistApp = App.extend({
     this.patientSidebarPatientId = null;
   },
   onBeforeStart(app, { worklistId, clinicianId }) {
+    this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
+    this.listenTo(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
     this._canRefresh = false;
     this.isRefreshingList = false;
 
@@ -287,12 +295,8 @@ const WorklistApp = App.extend({
     return true;
   },
   async stopBulkEditForRefresh() {
-    try {
-      await this.stopBulkEdit();
-      return this._canRefresh;
-    } catch {
-      return false;
-    }
+    await this.stopBulkEdit();
+    return this._canRefresh;
   },
   isCurrentRefresh(controller) {
     return !controller.signal.aborted && this._refreshController === controller;

@@ -55,7 +55,7 @@ export default App.extend({
   prepareStart({ patient, isPreloaded }) {
     if (isPreloaded) return [];
 
-    return getPatientSidebarRequests(patient, this.sidebars);
+    return Promise.all(getPatientSidebarRequests(patient, this.sidebars));
   },
   onStart(app, { isClosable, isListSidebar, isPreloaded }) {
     if (!isPreloaded) {

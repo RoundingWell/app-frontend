@@ -37,6 +37,9 @@ const ScheduleApp = App.extend({
   createState() {
     return new StateModel();
   },
+  onUnknownError() {
+    this.getState().removeStore();
+  },
   stateEvents: {
     'change:clinicianId': 'refreshList',
     'change:dateFilters': 'refreshList',
@@ -77,6 +80,8 @@ const ScheduleApp = App.extend({
   initListState() {
     const storedState = this.getState().getStore();
 
+    this.getState().restoreStore();
+    this.getState().set(this.getState().defaults(), { silent: true });
     this.getState().setSearchQuery(this.currentSearchQuery);
 
     if (storedState) {
@@ -91,6 +96,7 @@ const ScheduleApp = App.extend({
     this.initFiltersApp({ setDefaults: true });
   },
   onStop() {
+    this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
     this._canRefresh = false;
     this._bulkEditSuspended = false;
     this._patientSidebarRequest = null;
@@ -105,6 +111,8 @@ const ScheduleApp = App.extend({
     this.patientSidebarPatientId = null;
   },
   onBeforeStart() {
+    this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
+    this.listenTo(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
     this._canRefresh = false;
     this._bulkEditSuspended = false;
     this.initListState();

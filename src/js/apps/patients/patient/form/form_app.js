@@ -83,6 +83,8 @@ export default App.extend({
     Radio.trigger('event-router', 'default');
   },
   onStop() {
+    const formService = this.getChildApp('formsService');
+    if (formService) this.unbindEvents(formService, this.serviceEvents);
     this._draftStatusRequest = null;
     this._discardRequest = null;
     if (this.layoutState) this.stopListening(this.layoutState);
@@ -97,7 +99,7 @@ export default App.extend({
       isActionForm: !!this.action,
       isExpanded: !!this.action && this.layoutState.get('formExpanded'),
       viewportView,
-    }));
+    })).render();
     if (!this.action) this.triggerContextChange();
     this.getChildApp('widgetHeader').start({
       region: this.getView().getRegion('widgets'),

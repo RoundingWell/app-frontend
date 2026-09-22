@@ -198,7 +198,7 @@ cancelable requests. Route dispatch stays synchronous — do not add another asy
 layer. Route handlers should return their activation promise. Route completion
 notifications still fire synchronously after invoking the handler; they do not
 mean that async content is ready. Synchronous throws and returned async failures are observed through
-`onRouteError(error, routeContext)` (Datadog by default), including initial
+`onRouteError(error, routeContext)` (the browser error channel by default, also observed by Datadog), including initial
 SubRouterApp dispatch from `onStart`. Domain handlers may handle expected errors
 before returning. Radio dispatch remains synchronous.
 
