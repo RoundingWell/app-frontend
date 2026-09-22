@@ -229,5 +229,7 @@ before returning. Radio dispatch remains synchronous.
    `routeActions`, read route data via `getCurrentRoute()`, and call
    `startCurrentRoute()` in `onStart()`.
 4. Do not change existing URLs unless that is the explicit task.
-5. Add/extend specs in `src/js/base/*.component.cy.js` for base-class behavior and run targeted
-   `npm run coverage:e2e` specs for the affected area, plus `npm run lint`.
+5. Add/extend specs in `src/js/base/*.component.cy.js` for generic base-class behavior
+   and E2E scenarios for the affected application flow. Use the focused Cypress
+   commands and full-suite validation boundary in [AGENTS.md](../../../AGENTS.md#validation),
+   plus `npm run lint`.
