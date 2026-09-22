@@ -1,0 +1,60 @@
+packages/care-ops-ringcentral/ringcentral_app.js
+  s_85aebd1623278c::t_bbf4c45f6b8d66 64-66
+  s_85aebd1623278c::t_46462a4340d70e 1,21-23,35-36,42-44,46-49,57-62,82,102-103,106,108,113-114,116,119,123
+  s_85aebd1623278c::t_bb62a3e5d27e9f 9-16,69,71-81,83,85-89,91-93,96-100
+  s_85aebd1623278c::t_f14e28493890c1 50-56,67,70,121
+  s_85aebd1623278c::t_3ef0362ec52965 34
+packages/care-ops-five9/five9_app.js
+  s_85aebd1623278c::t_46462a4340d70e 2,20-22,31-32,37-44,59,64-68,70-79,81,83,85-92,95-104,106-127,129-130,133,135,141-143,145,147,151,154
+  s_85aebd1623278c::t_f14e28493890c1 153,164,166
+  s_85aebd1623278c::t_bbf4c45f6b8d66 105
+  s_85aebd1623278c::t_3ef0362ec52965 30
+packages/care-ops-five9/index.js
+  s_85aebd1623278c::t_46462a4340d70e 1
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_f14e28493890c1 136
+  s_85aebd1623278c::t_e887b9e8eb43d2 143-149
+  s_85aebd1623278c::t_46462a4340d70e 137-139
+  s_85aebd1623278c::t_6047e1a7c695f4 132,135
+packages/care-ops-ringcentral/index.js
+  s_85aebd1623278c::t_46462a4340d70e 1
+packages/care-ops-ringcentral/ringcentral_views.js
+  s_85aebd1623278c::t_f14e28493890c1 78,99,123,130-131
+  s_85aebd1623278c::t_46462a4340d70e 121-122,124-129
+  s_54052f6f5f906b::t_c3a96d340b8258 132
+src/js/app.js
+  s_85aebd1623278c::t_bb62a3e5d27e9f 145-148,176
+  s_85aebd1623278c::t_46462a4340d70e 50
+  s_85aebd1623278c::t_f14e28493890c1 172-173,189
+  s_85aebd1623278c::t_bbf4c45f6b8d66 174-175
+  s_54052f6f5f906b::t_6ad78d11c3229e 177
+src/js/services/dialer.js
+  s_85aebd1623278c::t_46462a4340d70e 24,26,29,31-32,35-36,38-39
+  s_85aebd1623278c::t_bbf4c45f6b8d66 28,30,33,40-41,44,46-49,53-55
+  s_85aebd1623278c::t_14ba779b33582e 58-67,69-76
+  s_54052f6f5f906b::t_c29aa950dd494e 27,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2860266ad865485e7815d81958ea7c304241e98c",
+  "prompts": {},
+  "sessions": {
+    "s_54052f6f5f906b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c529-e3bf-7441-9837-f94e8cdb4bc1",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
