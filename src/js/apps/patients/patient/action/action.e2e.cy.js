@@ -1582,7 +1582,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
           }),
           getComment({
             attributes: {
-              edited_at: null,
+              edited_at: testTs(),
               created_at: testTsSubtract(4),
               message: 'Message from Someone Else',
             },
@@ -1612,8 +1612,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('[data-activity-region]')
       .find('.comment__item')
       .eq(2)
-      .find('.js-edit')
-      .as('editIcon')
+      .find('.comment__edited')
+      .as('editedLabel')
       .trigger('pointerover');
 
     cy
@@ -1621,8 +1621,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', 'Last edited on');
 
     cy
-      .get('@editIcon')
-      .trigger('mouseout');
+      .get('@editedLabel')
+      .trigger('mouseleave');
 
     cy
       .get('[data-activity-region]')
@@ -1652,9 +1652,20 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .eq(0)
       .should('not.contain', 'CM')
       .should('not.contain', 'Clinician McTester')
-      .should('not.contain', 'Edit')
       .should('contain', 'Message from Someone Else')
-      .should('not.contain', '(Edited)');
+      .should('contain', '(Edited)')
+      .should('not.have.descendants', '.js-edit')
+      .find('.comment__edited')
+      .as('otherEditedLabel')
+      .trigger('pointerover');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Last edited on');
+
+    cy
+      .get('@otherEditedLabel')
+      .trigger('mouseleave');
 
     cy
       .get('@activityComment')

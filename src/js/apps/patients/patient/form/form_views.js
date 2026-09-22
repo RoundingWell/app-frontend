@@ -66,7 +66,7 @@ const FormExpandActionView = View.extend({
     this.expandTooltip = new Tooltip({
       message,
       uiView: this,
-      anchor: this.ui.expandButton,
+      anchor: this.getUI('expandButton')[0],
     });
   },
 });

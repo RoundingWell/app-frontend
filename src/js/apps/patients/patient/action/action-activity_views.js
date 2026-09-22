@@ -188,6 +188,7 @@ const CommentView = View.extend({
   className: 'patient-action__comment',
   ui: {
     edit: '.js-edit',
+    edited: '.comment__edited',
   },
   triggers: {
     'click @ui.edit': 'click:edit',
@@ -235,7 +236,7 @@ const CommentView = View.extend({
     new Tooltip({
       messageHtml: renderTemplate(template, { edited }),
       uiView: this,
-      anchor: this.ui.edit,
+      anchor: this.getUI('edited')[0],
     });
   },
   onClickEdit() {

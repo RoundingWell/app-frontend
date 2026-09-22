@@ -27,7 +27,7 @@ context('Tooltip', function() {
       new Tooltip({
         message: this.model.id,
         uiView: this,
-        anchor: this.ui.button,
+        anchor: this.getUI('button')[0],
         orientation: this.getOption('orientation'),
       });
     },
@@ -215,13 +215,13 @@ context('Tooltip', function() {
         new Tooltip({
           message: 'First tooltip',
           uiView: this,
-          anchor: this.ui.first,
+          anchor: this.getUI('first')[0],
         });
 
         new Tooltip({
           message: 'Second tooltip',
           uiView: this,
-          anchor: this.ui.second,
+          anchor: this.getUI('second')[0],
         });
       },
     });
@@ -275,5 +275,52 @@ context('Tooltip', function() {
     });
 
     cy.get('.tooltip').contains('Raw anchor tooltip');
+  });
+
+  specify('Resets positioning classes when reusing a tooltip', function() {
+    let bounds = {
+      left: 5,
+      outerHeight: 20,
+      outerWidth: 20,
+      top: 5,
+    };
+    const RepositionedAnchorView = View.extend({
+      template: hbs`<button>Anchor</button>`,
+      getBounds() {
+        return bounds;
+      },
+      onRender() {
+        new Tooltip({
+          anchor: this.el.querySelector('button'),
+          message: 'Reusable tooltip',
+          uiView: this,
+        });
+      },
+    });
+
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new RepositionedAnchorView();
+    });
+
+    cy.get('button').as('anchor').trigger('pointerover');
+    cy.get('.tooltip').should('have.class', 'is-left').and('have.class', 'is-top-arrow');
+    cy.get('@anchor').trigger('mouseleave');
+    cy.get('.tooltip').should('not.exist');
+    cy.then(() => {
+      bounds = {
+        left: 1200,
+        outerHeight: 20,
+        outerWidth: 20,
+        top: 700,
+      };
+    });
+    cy.get('@anchor').trigger('pointerover');
+
+    cy.get('.tooltip')
+      .should('have.class', 'is-right')
+      .and('have.class', 'is-bottom-arrow')
+      .and('not.have.class', 'is-left')
+      .and('not.have.class', 'is-top-arrow');
   });
 });

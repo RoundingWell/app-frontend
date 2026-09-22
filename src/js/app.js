@@ -3,7 +3,6 @@ import 'js/i18n';
 
 import { get } from 'underscore';
 import Backbone from 'backbone';
-import { Radio } from 'marionette';
 import { addError } from 'js/datadog';
 
 import 'scss/provider-core.scss';
@@ -12,6 +11,7 @@ import 'scss/app-root.scss';
 import initPlatform from 'js/utils/platform';
 
 import App from 'js/base/app';
+import listenToUserActivity from 'js/utils/user-activity';
 
 import Datepicker from 'js/components/datepicker';
 import Droplist from 'js/components/droplist';
@@ -33,15 +33,6 @@ import ErrorApp from 'js/apps/globals/error/error_app';
 
 import { RootView } from 'js/apps/globals/app-frame/root_views';
 import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
-
-function isTextInput(target) {
-  return target instanceof HTMLElement
-    && (target.matches('textarea, input, select') || target.isContentEditable);
-}
-
-function hasHotkeyModifier({ altKey, ctrlKey, metaKey, shiftKey }) {
-  return altKey || ctrlKey || metaKey || shiftKey;
-}
 
 const Application = App.extend({
   channelName: 'app',
@@ -97,35 +88,10 @@ const Application = App.extend({
 
   setListeners() {
     this._eventListeners?.abort();
-    this._eventListeners = new AbortController();
-    const { signal } = this._eventListeners;
-
-    window.addEventListener('resize', () => {
-      Radio.trigger('user-activity', 'window:resize');
-    }, { signal });
+    this._eventListeners = listenToUserActivity();
     window.addEventListener('beforeunload', /* istanbul ignore next: Unloading the window loses coverage reports */ () => {
       this.stop();
-    }, { signal });
-    document.addEventListener('keydown', evt => {
-      Radio.trigger('user-activity', 'document:keydown', evt);
-
-      if (isTextInput(evt.target) || hasHotkeyModifier(evt)) return;
-      if (evt.key === '/') Radio.trigger('hotkey', 'search', evt);
-      if (evt.key === 'Escape') Radio.trigger('hotkey', 'close', evt);
-    }, { signal });
-
-    document.addEventListener('mouseover', evt => {
-      Radio.trigger('user-activity', 'document:mouseover', evt);
-    }, { signal });
-
-    /* istanbul ignore next: No need to test browser event delivery */
-    document.addEventListener('mouseleave', evt => {
-      Radio.trigger('user-activity', 'document:mouseleave', evt);
-    }, { signal });
-
-    document.body.addEventListener('pointerdown', evt => {
-      Radio.trigger('user-activity', 'body:down', evt);
-    }, { signal });
+    }, { signal: this._eventListeners.signal });
   },
   onDestroy() {
     this._eventListeners?.abort();

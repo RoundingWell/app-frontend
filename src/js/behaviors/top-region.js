@@ -37,6 +37,6 @@ export default Behavior.extend({
   emptyOnActvity(el) {
     if (!this.region.hasView() || topRegionCh.request('contains', this.view, el)) return;
 
-    this.region.empty();
+    this.view.empty();
   },
 });

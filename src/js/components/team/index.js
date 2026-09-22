@@ -60,10 +60,10 @@ export default Droplist.extend({
       icon,
     };
   },
-  initialize({ team }) {
+  initialize() {
     this.collection = Radio.request('bootstrap', 'teams');
 
-    this.getState().set({ selected: this.collection.get(team) });
+    this.getState().set({ selected: this.collection.get(this.getOption('team')) });
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:team', selected);

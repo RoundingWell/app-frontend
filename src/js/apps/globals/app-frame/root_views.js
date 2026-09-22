@@ -63,7 +63,7 @@ const TopRegionView = View.extend({
     if (this.ignoreEl && this.Dom.hasEl(this.ignoreEl, target)) return true;
   },
   empty() {
-    this.region.empty();
+    this.getRegion('region').empty();
   },
 });
 
@@ -228,6 +228,16 @@ const TooltipRegionView = TopRegionView.extend({
     this.listenTo(userActivityCh, 'window:resize', this.empty);
 
     this.ignoreEl = options.ignoreEl;
+    view.el.classList.remove(
+      'is-top',
+      'is-bottom',
+      'is-left',
+      'is-right',
+      'is-top-arrow',
+      'is-bottom-arrow',
+      'is-left-arrow',
+      'is-right-arrow',
+    );
 
     if (options.orientation === 'horizontal') {
       this.setHorizontalLocation(options);
@@ -238,6 +248,9 @@ const TooltipRegionView = TopRegionView.extend({
   },
   onRegionEmpty() {
     this.stopListening(userActivityCh);
+  },
+  empty() {
+    this.region.detachView();
   },
   addClass(className) {
     const view = this.region.currentView;
