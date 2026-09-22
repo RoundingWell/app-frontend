@@ -377,6 +377,14 @@ const ScheduleApp = App.extend({
         },
         'save'(saveData) {
           const selected = this.selected;
+          const view = app.getView();
+          const state = this.getState();
+          const type = state.getType();
+          const selection = state.get(`${ type }Selected`);
+          const isCurrent = () => this.isRunning()
+            && app.getView() === view
+            && state.getType() === type
+            && state.get(`${ type }Selected`) === selection;
           const itemCount = selected.length;
           const shouldRefresh = saveData.due_date && selected.some(action => {
             return action.get('due_date') !== saveData.due_date;
@@ -384,6 +392,8 @@ const ScheduleApp = App.extend({
 
           selected.save(saveData)
             .then(() => {
+              if (!isCurrent()) return;
+
               app.resetChanges();
               Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));
 
@@ -395,6 +405,8 @@ const ScheduleApp = App.extend({
               this.getState().clearSelected();
             })
             .catch(() => {
+              if (!isCurrent()) return;
+
               app.resetChanges();
               Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.bulkEditFailure);
               this.refreshList();

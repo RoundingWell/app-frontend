@@ -34,8 +34,10 @@ export default App.extend({
     if (!this.attachments) return;
 
     Radio.request('ws', 'unsubscribe', this.attachments.models);
-    this.stopListening(this.action);
-    if (this.flow) this.stopListening(this.flow);
+    this.stopListening(this.action, 'change:_owner', this.showAttachments);
+    this.stopListening(this.action, 'ws:add:attachment', this.onWsAddAttachment);
+    this.stopListening(this.flow, 'change:_state', this.showAttachments);
+    this.attachments.each(attachment => this.stopListening(attachment, 'upload:success upload:failed'));
   },
   onWsAddAttachment(model) {
     this.attachments.add(model);
@@ -76,10 +78,12 @@ export default App.extend({
 
     this.listenTo(attachment, {
       'upload:success': uploadedAttachment => {
+        this.stopListening(attachment, 'upload:success upload:failed');
         this.action.addFile(uploadedAttachment);
         Radio.request('ws', 'add', uploadedAttachment);
       },
       'upload:failed': () => {
+        this.stopListening(attachment, 'upload:success upload:failed');
         Radio.request('alert', 'show:error', intl.patients.patient.action.actionApp.uploadError);
       },
     });

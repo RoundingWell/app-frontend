@@ -53,6 +53,10 @@ export default SubRouterApp.extend({
     this.showView();
   },
 
+  onStop() {
+    this.stopListening(this.actions, 'change:id destroy', this.updateFlowActions);
+  },
+
   maintainFlowActions() {
     this.listenTo(this.actions, {
       'change:id': this.updateFlowActions,

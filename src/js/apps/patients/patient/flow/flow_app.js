@@ -243,15 +243,28 @@ export default App.extend({
         this.selected.applyOwner(owner);
       },
       'save'(saveData) {
-        const itemCount = this.selected.length;
+        const selected = this.selected;
+        const view = app.getView();
+        const state = this.getState();
+        const type = state.getType();
+        const selection = state.get(`${ type }Selected`);
+        const isCurrent = () => this.isRunning()
+          && app.getView() === view
+          && state.getType() === type
+          && state.get(`${ type }Selected`) === selection;
+        const itemCount = selected.length;
 
-        this.selected.save(saveData)
+        selected.save(saveData)
           .then(() => {
+            if (!isCurrent()) return;
+
             app.resetChanges();
             this.showUpdateSuccess(itemCount);
             this.getState().clearSelected();
           })
           .catch(() => {
+            if (!isCurrent()) return;
+
             app.resetChanges();
             Radio.request('alert', 'show:error', i18n.bulkEditFailure);
             this.restart({

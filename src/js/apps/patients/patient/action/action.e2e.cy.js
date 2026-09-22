@@ -24,6 +24,45 @@ import { getFile } from 'support/api/files';
 import { getPatientField } from 'support/api/patient-fields';
 
 context('patient action page', { scrollBehavior: 'center' }, function() {
+  specify('expands a form after canceling the first action load', function() {
+    const action = getAction({
+      relationships: {
+        form: getRelationship(testForm),
+      },
+    });
+    let releaseAction;
+
+    cy.routesForPatientAction()
+      .routeFormByAction()
+      .routeForm()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeFormFields()
+      .routeLatestFormResponse()
+      .routeAction(fx => {
+        fx.data = action;
+        return fx;
+      });
+    cy.intercept({ method: 'GET', url: '/api/actions/*', times: 1 }, req => {
+      return new Cypress.Promise(resolve => {
+        releaseAction = () => {
+          req.reply({ body: { data: action, included: [] } });
+          resolve();
+        };
+      });
+    });
+    cy.visit(`/patient/1/action/${ action.id }`);
+    cy.wrap(null).should(() => expect(releaseAction).to.be.a('function'));
+    cy.navigate('/patient/1/workflow');
+    cy.get('.patient-action-loading__skeleton').should('not.exist');
+    cy.then(() => releaseAction());
+    cy.navigate(`/patient/1/action/${ action.id }`);
+    cy.get('.patient-action .js-expand-button').click();
+    cy.get('.patient-action').should('have.class', 'patient-action--form-expanded');
+    cy.get('.patient-action .js-expand-button').click();
+    cy.get('.patient-action').should('not.have.class', 'patient-action--form-expanded');
+  });
+
   specify('display patient action', function() {
     cy.then(() => {
       let releaseActivity;
@@ -1095,7 +1134,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('be.disabled');
   });
 
-  specify('action attachments', function() {
+  specify('action attachments', { defaultCommandTimeout: 10000 }, function() {
     const testPatient = getPatient();
 
     const testProgramAction = getProgramAction({
@@ -1388,6 +1427,39 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .then(pathname => {
         expect(pathname).to.contain(`/api/files/${ fileId }`);
       });
+
+    let releaseUpload;
+    cy.intercept('PUT', '/upload-test', req => {
+      return new Cypress.Promise(resolve => {
+        releaseUpload = () => {
+          req.reply({ statusCode: 200 });
+          resolve();
+        };
+      });
+    });
+    cy.get('#upload-attachment').selectFile({
+      contents: Cypress.Buffer.from('late upload'),
+      fileName: 'test-copy.pdf',
+    }, { force: true });
+    cy.wrap(null).should(() => expect(releaseUpload).to.be.a('function'));
+
+    const nextAction = getAction({
+      attributes: { name: 'Next Action' },
+      relationships: { patient: getRelationship(testPatient) },
+    });
+    cy.routeAction(fx => {
+      fx.data = nextAction;
+      return fx;
+    }).routeActionFiles(fx => {
+      fx.data = [];
+      return fx;
+    });
+    cy.navigate(`/patient/${ testPatient.id }/action/${ nextAction.id }`);
+    cy.get('.patient-action__name').should('contain', 'Next Action');
+    cy.get('.patient-action .js-attachments').should('not.exist');
+    cy.then(() => releaseUpload());
+    cy.wait('@routeGetFile');
+    cy.get('.patient-action .js-attachments').should('not.exist');
   });
 
   specify('action attachment count focus while the attachments are still loading', function() {

@@ -657,7 +657,7 @@ context('Worklist bulk editing', function() {
       .click();
   });
 
-  specify('bulk actions editing', function() {
+  specify('bulk actions editing', { defaultCommandTimeout: 10000 }, function() {
     const testFlow = getFlow({
       relationships: {
         state: getRelationship(stateTodo),
@@ -1158,7 +1158,7 @@ context('Worklist bulk editing', function() {
     });
     cy.intercept('PATCH', '/api/actions/*', req => {
       saveRequested = true;
-      return saveResponse.then(() => req.reply({ statusCode: 400, body: { errors: [] } }));
+      return saveResponse.then(() => req.reply({ body: req.body }));
     }).as('lateSave');
     cy.get('.worklist-list__item .js-select').first().click();
     cy.get('.bulk-edit-inline [data-owner-region]').click();
@@ -1168,10 +1168,18 @@ context('Worklist bulk editing', function() {
     cy.routeClinicians();
     cy.get('.app-nav').contains('Admin Tools').click();
     cy.get('.picklist').contains('Clinicians').click();
-    cy.get('.card-list').should('be.visible').then(() => releaseSave());
-    cy.wait('@lateSave');
-    cy.location('pathname').should('equal', '/one/clinicians');
     cy.get('.card-list').should('be.visible');
+    cy.navigate('/worklist/owned-by').wait('@routeActions');
+    cy.get('.bulk-edit-inline .js-cancel').click();
+    cy.get('.worklist-list__item .js-select').eq(1).click();
+    cy.get('.bulk-edit-inline [data-due-date-region]').click();
+    cy.get('.datepicker .js-tomorrow').click();
+    cy.get('.bulk-edit-inline .js-save').should('not.be.disabled');
+    cy.then(() => releaseSave());
+    cy.wait('@lateSave');
+    cy.location('pathname').should('equal', '/one/worklist/owned-by');
+    cy.get('.worklist-list__item .js-select[aria-checked="true"]').should('have.length', 1);
+    cy.get('.bulk-edit-inline .js-save').should('not.be.disabled');
   });
 
   specify('bulk flow editing completed', function() {

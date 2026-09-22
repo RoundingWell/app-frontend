@@ -43,6 +43,8 @@ export default SubRouterApp.extend({
   },
 
   onStop() {
+    this.stopListening(this.layoutState, 'change:formExpanded', this.onChangeFormExpanded);
+    this.stopListening(undefined, 'context:change', this.updateContextTrail);
     Radio.request('nav', 'setMinimized', false);
   },
 
@@ -107,12 +109,9 @@ export default SubRouterApp.extend({
   },
 
   startContent(appName, options) {
-    const previousPageApp = this.getCurrent();
     const pageApp = this.getContentApp(appName);
 
-    if (previousPageApp) {
-      this.stopListening(previousPageApp, 'context:change');
-    }
+    this.stopListening(undefined, 'context:change', this.updateContextTrail);
 
     this.setFormExpanded(false);
     this.setSidebarHidden(this.sidebarPreferenceHidden);
