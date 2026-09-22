@@ -96,24 +96,20 @@ const WorklistApp = App.extend({
     this.currentSearchQuery = state.get('searchQuery');
   },
   initListState() {
-    const storedState = this.getState().getStore(this.worklistId);
+    const state = this.getState();
+    const storedState = state.getStore(this.worklistId);
+    const restoredState = {
+      ...state.defaults(),
+      ...storedState,
+      id: this.worklistId,
+      searchQuery: this.currentSearchQuery || '',
+      lastSelectedIndex: null,
+    };
+    if (this.clinicianId) restoredState.clinicianId = this.clinicianId;
 
-    this.getState().restoreStore();
-    this.getState().set(this.getState().defaults(), { silent: true });
-    this.getState().setSearchQuery(this.currentSearchQuery);
-
-    if (storedState) {
-      this.getState().set(storedState);
-      this.getState().setClinicianId(this.clinicianId);
-      this.initFiltersApp();
-      return;
-    }
-
-    this.getState().set({ id: this.worklistId });
-
-    this.getState().setClinicianId(this.clinicianId);
-
-    this.initFiltersApp({ setDefaults: true });
+    state.restoreStore();
+    state.set(restoredState);
+    this.initFiltersApp({ setDefaults: !storedState });
   },
   onStop() {
     this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);

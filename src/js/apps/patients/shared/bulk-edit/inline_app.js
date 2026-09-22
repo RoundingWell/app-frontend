@@ -20,7 +20,7 @@ export default App.extend({
     this.showView(view);
   },
   onStop() {
-    this.getState().clear({ silent: true });
+    this.getState().clear();
   },
   resetChanges() {
     this.getState().set({
@@ -35,7 +35,6 @@ export default App.extend({
   },
   updateCollection(collection) {
     this.getState().updateCollection(collection);
-    this.getView()?.updateCollection();
   },
   onClickCancel() {
     this.trigger('cancel');

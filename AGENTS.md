@@ -40,6 +40,8 @@ Load a scoped overlay only when the task touches:
 - Route data access through `src/js/entities-service/**` instead of introducing ad hoc fetch logic elsewhere.
 - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
 - Keep feature flags easy to remove. Prefer guard-clause style branching.
+- Never use `silent: true` to suppress model/state notifications. Seed initial values before observers attach, or compute a complete update and apply it with a normal `set`; use lifecycle ownership for cleanup.
+- Avoid prototype-method `.call()`/`.apply()` chains outside constructor delegation. Prefer lifecycle hooks, supported extension points, or shared helpers; retain a parent-method call only when its behavior is required and no suitable hook exists.
 - Reuse existing utilities and workspace packages before adding dependencies.
 - Use i18n keys that match the repo's existing formatjs-style naming.
 

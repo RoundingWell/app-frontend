@@ -181,13 +181,16 @@ const MixedFlowStateComponent = BulkFlowsStateComponent.extend({
 
 const BulkEditActionsBodyView = View.extend({
   modelEvents: {
-    'change:stateMulti': 'showState',
-    'change:ownerMulti': 'showOwner',
-    'change:dateMulti': 'showDueDateTime',
-    'change:date': 'showDueDateTime',
-    'change:timeMulti': 'showDueTime',
-    'change:durationMulti': 'showDuration',
-    'change:isSaving': 'render',
+    'change': 'onModelChange',
+  },
+  onModelChange() {
+    if (this.model.hasChanged('collection')) return this.updateCollection();
+    if (this.model.hasChanged('isSaving')) return this.render();
+
+    if (this.model.hasChanged('stateMulti')) this.showState();
+    if (this.model.hasChanged('ownerMulti')) this.showOwner();
+    this.showChangedDueDateTime();
+    if (this.model.hasChanged('durationMulti')) this.showDuration();
   },
   regions: {
     state: '[data-state-region]',
@@ -314,6 +317,13 @@ const BulkEditActionsBodyView = View.extend({
 
     this.showChildView('owner', ownerComponent);
   },
+  showChangedDueDateTime() {
+    if (this.model.hasChanged('dateMulti') || this.model.hasChanged('date')) {
+      this.showDueDateTime();
+    } else if (this.model.hasChanged('timeMulti')) {
+      this.showDueTime();
+    }
+  },
   showDueDateTime() {
     this.showDueDate();
     this.showDueTime();
@@ -383,9 +393,14 @@ const BulkEditActionsInlineView = BulkEditActionsBodyView.extend({
 
 const BulkEditFlowsBodyView = View.extend({
   modelEvents: {
-    'change:stateMulti': 'showState',
-    'change:ownerMulti': 'showOwner',
-    'change:isSaving': 'render',
+    'change': 'onModelChange',
+  },
+  onModelChange() {
+    if (this.model.hasChanged('collection')) return this.updateCollection();
+    if (this.model.hasChanged('isSaving')) return this.render();
+
+    if (this.model.hasChanged('stateMulti')) this.showState();
+    if (this.model.hasChanged('ownerMulti')) this.showOwner();
   },
   regions: {
     state: '[data-state-region]',

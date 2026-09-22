@@ -78,22 +78,19 @@ const ScheduleApp = App.extend({
     this.currentSearchQuery = state.get('searchQuery');
   },
   initListState() {
-    const storedState = this.getState().getStore();
-
-    this.getState().restoreStore();
-    this.getState().set(this.getState().defaults(), { silent: true });
-    this.getState().setSearchQuery(this.currentSearchQuery);
-
-    if (storedState) {
-      this.getState().set(storedState);
-      this.initFiltersApp();
-      return;
-    }
-
+    const state = this.getState();
+    const storedState = state.getStore();
     const currentUser = Radio.request('bootstrap', 'currentUser');
-    this.getState().set({ id: `schedule_${ currentUser.id }` });
 
-    this.initFiltersApp({ setDefaults: true });
+    state.restoreStore();
+    state.set({
+      ...state.defaults(),
+      ...storedState,
+      id: `schedule_${ currentUser.id }`,
+      searchQuery: this.currentSearchQuery || '',
+      lastSelectedIndex: null,
+    });
+    this.initFiltersApp({ setDefaults: !storedState });
   },
   onStop() {
     this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);

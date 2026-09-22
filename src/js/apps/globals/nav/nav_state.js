@@ -57,7 +57,7 @@ const StateModel = Backbone.Model.extend({
   },
   initialize() {
     this.on(LAYOUT_EVENTS, this.updateLayout);
-    this.updateLayout({ silent: true });
+    this.updateLayout();
   },
   updateLayout(model, value, options) {
     const setOptions = model === this ? options : model;
@@ -65,7 +65,7 @@ const StateModel = Backbone.Model.extend({
 
     const layoutOptions = setOptions?.unset ? omit(setOptions, 'unset') : setOptions;
 
-    return Backbone.Model.prototype.set.call(this, getLayout(this.attributes), layoutOptions);
+    return this.set(getLayout(this.attributes), layoutOptions);
   },
   // Clear the transient overlay reasons so a minimized nav settles closed.
   closeOverlay() {
