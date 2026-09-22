@@ -1,0 +1,58 @@
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_e0e7fbf19a3b71::t_64f273395e957a 1173
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_e0e7fbf19a3b71::t_64f273395e957a 1761
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_e0e7fbf19a3b71::t_64f273395e957a 768
+  s_e0e7fbf19a3b71::t_9706ddbca92079 763,770
+src/js/apps/programs/program/program.e2e.cy.js
+  s_e0e7fbf19a3b71::t_64f273395e957a 266
+  s_e0e7fbf19a3b71::t_8fa780979894cc 260,268
+src/js/apps/patients/shared/components/state_component.js
+  s_e0e7fbf19a3b71::t_ea9efa246e35b1 63
+  s_e0e7fbf19a3b71::t_6eb6474a265c31 62,64
+AGENTS.md
+  s_e0e7fbf19a3b71::t_b7a231807b78a3 127-132
+src/js/app.js
+  s_e0e7fbf19a3b71::t_87c093258c476b 102,110-111
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_e0e7fbf19a3b71::t_8640764b474b19 262
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_e0e7fbf19a3b71::t_3cc758e21d5b21 34,52-53
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_e0e7fbf19a3b71::t_c7b6e6ccca0581 106
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_e0e7fbf19a3b71::t_8242a9a74dc87f 85
+src/js/apps/patients/patient/form/form-interaction.e2e.cy.js
+  s_e0e7fbf19a3b71::t_c9438451c02143 174-176
+src/js/apps/patients/patient/form/patient.e2e.cy.js
+  s_e0e7fbf19a3b71::t_2a7d5f7e0f7239 492
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_e0e7fbf19a3b71::t_26cd63e5c10458 73-77
+src/js/apps/patients/schedule/schedule_app.js
+  s_e0e7fbf19a3b71::t_2ef05b34934e51 102,158
+src/js/apps/patients/shared/list-filters/list-filters_app.js
+  s_e0e7fbf19a3b71::t_4a20bf4c7afe0d 108
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_e0e7fbf19a3b71::t_ccbd9ee341c0bb 1271-1272
+src/js/components/datepicker/datepicker.component.cy.js
+  s_e0e7fbf19a3b71::t_c9f499edbc3ab9 38-42,47
+src/js/services/dialer.js
+  s_e0e7fbf19a3b71::t_7368a51a5affa5 24,30-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "61b37640101c39daadeaa112452df44b8d50b4ed",
+  "prompts": {},
+  "sessions": {
+    "s_e0e7fbf19a3b71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c800-da6b-7301-8f2d-7eb6aea7f772",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
