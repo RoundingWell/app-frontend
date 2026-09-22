@@ -1,0 +1,22 @@
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_ba127ccddcb3c4 136,139-140,142-143
+  s_85aebd1623278c::t_07b2a878b9a7fd 141
+src/js/services/dialer.js
+  s_85aebd1623278c::t_ba127ccddcb3c4 71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "52e2c6d9fb41b12699a2140cf7f49a46d62c1ddb",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
