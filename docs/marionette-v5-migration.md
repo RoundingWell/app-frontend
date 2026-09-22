@@ -21,7 +21,7 @@
 ## Current state
 
 - Migration base: `feature/marionette-v5` at
-  `a7ec394915cb5a9c41b9b3bdf908005b925f7a29`.
+  `501146d1458d089cde470db46c4c8d773c8b9dcc`.
 - Completed: PR #1771 replaced `backbone.eventrouter` with a local
   Backbone.Router adapter and was merged by a human.
 - Completed: PR #1772 replaced Marionette 4's implicit Region child conversion
@@ -141,17 +141,26 @@
 - Completed: PR #1809 keeps the latest dialer call buffered until
   DialerService is running, so provider registration cannot let an older call
   overtake a newer click. It was merged by a human.
-- Active: PR #1810 keeps Worklist and Schedule
+- Completed: PR #1810 keeps Worklist and Schedule
   run resources intact until stop succeeds and retains their reusable bulk-edit
-  children across parent restarts.
+  children across parent restarts. It was merged by a human.
+- Current branches: `feature/marionette-v5-component-harness` and
+  `feature/marionette-v5-docs-config` were branched independently from the
+  current migration base. The former repairs the shared component Application
+  harness; the latter removes obsolete v4 resolution and local Toolkit/jQuery
+  documentation without changing runtime code, tests, or dependencies.
+- Next action: review and merge those two independent cleanup branches, then
+  use the repaired harness to rerun the component suite against the integrated
+  migration branch.
 
 ## Validation
 
-- PR #1810 installs from the pinned lockfile and passes targeted ESLint and the
+- PR #1810 installed from the pinned lockfile and passed targeted ESLint and the
   test-mode build. The unchanged Worklist bulk-edit and Schedule E2E specs both
   reach the existing `/unknown-error` boundary immediately after their initial
   actions fetch, before list controls render or the changed stop/restart paths
-  execute. No E2E file was changed, and GitHub Cypress remains deferred.
+  execute. No E2E file was changed, and GitHub Cypress remained deferred for
+  that PR.
 - The dialer package step installs from the pinned lockfile, passes targeted
   ESLint and the test-mode build, and leaves its existing E2E specification
   unchanged. Both Five9 and RingCentral scenarios render their provider UI and
@@ -689,3 +698,10 @@
   children, so successful stop cancels the continuation while rejected stop
   leaves it usable. List and error-view listeners now release with their views;
   this was consumer lifecycle cleanup, not a Marionette runtime defect.
+- Marionette PR #560 at `21e87fda0725e614f963d2fd4ee77588853f56a4`
+  makes its upstream plugin the consumer entrypoint for the canonical skill and
+  hosted documentation MCP. PR #1811 follows that contract:
+  it records only application integrations and verification policy, removes
+  duplicated framework guidance, and leaves skill and MCP distribution upstream.
+  The installed package documentation remains the version-matched contract. No
+  consumer compatibility path is added.

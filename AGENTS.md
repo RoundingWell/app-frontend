@@ -32,7 +32,8 @@ Load a scoped overlay only when the task touches:
 ## Core Guardrails
 
 - Stay in JavaScript. Do not introduce TypeScript or a new framework.
-- Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
+- Define template element selectors in the View's `ui` hash and access them through `getUI`; do not scatter selector queries through View methods. Keep DOM mutation with its owning View.
+- Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
 - Keep `preinitialize` and `initialize` available as safe extension points on generic components. Put mandatory internal setup in the constructor when it must run even if a subclass defines either hook.
 - Colocate app-specific views, templates, SCSS, state, and Cypress specs under `src/js/apps/<domain>/<app>/**`.
 - Keep domain-shared UI under `src/js/apps/<domain>/shared/**` and cross-domain reusable UI under `src/js/components/**`.
@@ -42,22 +43,51 @@ Load a scoped overlay only when the task touches:
 - Reuse existing utilities and workspace packages before adding dependencies.
 - Use i18n keys that match the repo's existing formatjs-style naming.
 
+## Marionette Application Context
+
+Use the `marionette` skill supplied by Marionette's upstream plugin for Marionette
+work. It selects the version-matched framework docs; this file records the app's
+integration choices and verification policy.
+
+- Contract: the repository root's `package.json` and `package-lock.json` select
+  `marionette` from `vendor/marionette/marionette-5.0.0-beta.5-e507354.tgz`, with
+  `@mnjs/adapters` at `5.0.0-beta.5`.
+- Packaged docs: `node_modules/marionette/dist/docs`, version `5.0.0-beta.5`, source
+  `e5073543f28d8dcd237115f3b7ad7f4131a44a15`, `sourceDirty: false`, content
+  SHA-256 `8939d7bfa64fcbdcd6cf65eadd37f57fbe90d332236bbe42285b8f79ebd2b8c8`.
+  Verify the installed package against this candidate before relying on its APIs.
+- Runtime: the shared named exports from `marionette`; `src/js/base/setup.js`
+  registers Backbone for DataApi and StateApi, and Morphdom for DomApi. DOM event
+  delegation uses Marionette's native default.
+- Renderer: `src/js/i18n/index.js` registers the Handlebars renderer with `@intl`
+  template data. `src/js/app.js` imports both setup modules before app consumers.
+- Events/routing: use `Radio` from `marionette`. The local
+  `src/js/base/event-router.js` extends `Backbone.Router`; `Backbone.history` owns
+  URL/history handling. AppFrame and the local RouterApp/SubRouterApp classes own
+  feature selection and loading; see `src/js/base/routing.md` for app policy.
+- Ownership entrypoint: `src/js/app.js` owns the `#root` Region, RootView, and
+  bootstrap/dialer/app-frame child Applications. It configures shared popup Regions
+  and owns its document/window listeners. Follow each feature's existing owner.
+- Verification: run this repo's commands from the root using the boundaries in
+  **Validation** below; generic units use component specs, app flows use E2E.
+
+The upstream plugin supplies the consumer skill and hosted documentation MCP.
+Follow that workflow for retrieval and verification. Keep framework API
+instructions upstream; keep this section limited to application decisions.
+
 ## Intentional Choices — Do Not Propose Changing or Flag in Review
 
 These are deliberate, settled decisions. Do not suggest "modernizing" them in
 generated code, and do not flag them as issues, tech debt, or risks in review.
 
 - The Backbone + Marionette stack is the permanent direction. The team
-  maintains `backbone.marionette` and `backbone.radio` upstream. Never propose
-  a framework migration or describe the stack as legacy.
-- `backbone.radio` stays synchronous. Do not propose Promise normalization,
+  maintains Marionette and Radio upstream. Never propose a framework migration
+  or describe the stack as legacy.
+- Marionette Radio stays synchronous. Do not propose Promise normalization,
   async middleware, or typed wrappers around Radio.
 - String-based Radio request names (e.g. `'fetch:actions:model'`) are
   intentional: they keep test stubbing and console debugging trivial. Do not
   propose typed or constant-based replacements.
-- Underscore is the default data-manipulation API, including where native
-  equivalents exist (see `src/js/README.md`). Do not flag underscore usage as
-  outdated or suggest native one-for-one rewrites.
 - JavaScript, not TypeScript, per the guardrails above. Do not flag missing
   type annotations.
 
@@ -132,6 +162,12 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 
 ## Validation
 
+- Reserve Cypress component specs for generic reusable units, including base
+  infrastructure and genuinely generic components colocated under `apps/**`.
+  Cover feature and application behavior under `apps/**` through E2E flows.
+  Component coverage is not evidence that application code is reachable; if an
+  E2E flow cannot reach that code, verify whether it is dead and remove it
+  instead of adding a component spec to preserve it.
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.
 - Do not make incidental presentation a Cypress contract. Avoid exact assertions for alignment, spacing, typography, dimensions, colors, or computed CSS unless the presentation itself communicates product state or the geometry proves functional behavior such as a breakpoint mode, overflow prevention, reachability, popup direction, or layout stability during a state change.
