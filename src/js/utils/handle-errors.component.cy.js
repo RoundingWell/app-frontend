@@ -17,11 +17,18 @@ context('handleErrors', function() {
       },
     };
 
-    return handleErrors({ response: { status: 500 } }).catch(error => {
-      expect(error.message).to.equal('Error Status: 500 - undefined');
-    }).then(() => handleErrors(fakeResponseError)).catch(error => {
-      expect(error.message).to.equal('Error Status: 400 - [{"details":"fake error"}]');
-    });
+    return Promise.all([
+      handleErrors({ response: { status: 500 } }).then(() => {
+        throw new Error('Expected the 500 response to reject');
+      }, error => {
+        expect(error.message).to.equal('Error Status: 500 - undefined');
+      }),
+      handleErrors(fakeResponseError).then(() => {
+        throw new Error('Expected the 400 response to reject');
+      }, error => {
+        expect(error.message).to.equal('Error Status: 400 - [{"details":"fake error"}]');
+      }),
+    ]);
   });
 
   specify('unknown error', function() {

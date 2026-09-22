@@ -325,7 +325,8 @@ context('program workflows page', function() {
 
     cy
       .get('@flowItem')
-      .click('top')
+      .find('.flow-card__title')
+      .click()
       .wait('@routeProgramFlow');
 
     cy
@@ -396,7 +397,8 @@ context('program workflows page', function() {
 
     cy
       .get('@newAction')
-      .click('top');
+      .find('.work-card__title')
+      .click();
 
     cy
       .get('.sidebar')
@@ -468,7 +470,8 @@ context('program workflows page', function() {
 
     cy
       .get('@newFlow')
-      .click('top');
+      .find('.flow-card__title')
+      .click();
 
     cy
       .get('.sidebar')

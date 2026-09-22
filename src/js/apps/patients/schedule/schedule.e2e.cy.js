@@ -1364,6 +1364,7 @@ context('schedule page', function() {
 
     const testActions = _.times(20, index => {
       return getAction({
+        attributes: { due_date: testDate() },
         relationships: {
           owner: getRelationship(currentClinician),
           state: getRelationship(index % 2 ? stateTodo : stateInProgress),

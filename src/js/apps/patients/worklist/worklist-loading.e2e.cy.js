@@ -239,6 +239,14 @@ context('worklist loading states', function() {
       .first()
       .should('be.visible');
 
+    // Reopening immediately must cancel the pending return to filters.
+    cy.get('.patient-sidebar__close').then($close => {
+      const document = $close[0].ownerDocument;
+      $close[0].click();
+      document.querySelector('.patient-list__patient').click();
+    });
+
+    cy.get('.patient-sidebar__card').first().should('be.visible');
     cy.get('.patient-sidebar__close').click();
 
     cy

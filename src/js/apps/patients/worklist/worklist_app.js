@@ -446,13 +446,15 @@ const WorklistApp = App.extend({
   },
   async showFiltersSidebar() {
     const layoutView = this.getView();
-    this._patientSidebarRequest = null;
+    const request = {};
+    this._patientSidebarRequest = request;
     this.isPatientSidebarOpen = false;
     this.patientSidebarPatientId = null;
     this.getView().getChildView('list').setPatientSelected(null);
     await this.getChildApp('patientSidebar')?.stop();
-    if (this.getView() !== layoutView) return false;
-    if (!await this.mountFiltersSidebar() || this.getView() !== layoutView) return false;
+    if (this._patientSidebarRequest !== request || this.getView() !== layoutView) return false;
+    if (!await this.mountFiltersSidebar()) return false;
+    if (this._patientSidebarRequest !== request || this.getView() !== layoutView) return false;
     this.showSidebarControls();
     this.restoreFiltersSidebarLayout();
     return true;
