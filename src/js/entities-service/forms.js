@@ -18,32 +18,32 @@ const Entity = BaseEntity.extend({
     'fetch:forms:byAction': 'fetchByAction',
     'fetch:forms:definition:byAction': 'fetchDefinitionByAction',
   },
-  fetchFormsCollection() {
+  fetchFormsCollection(options) {
     const data = {
       fields: {
         forms: FORM_COLLECTION_FIELDS,
       },
     };
 
-    return this.fetchCollectionCache({ data });
+    return this.fetchCollectionCache({ ...options, data });
   },
-  fetchDefinition(formId) {
-    return fetcher(`/api/forms/${ formId }/definition`).then(handleJSON);
+  fetchDefinition(formId, options = {}) {
+    return fetcher(`/api/forms/${ formId }/definition`, options).then(handleJSON);
   },
-  fetchFormData(actionId, patientId, formId) {
+  fetchFormData(actionId, patientId, formId, options = {}) {
     const model = new BaseModel();
     if (actionId) {
-      return model.fetch({ url: `/api/actions/${ actionId }/form/fields` });
+      return model.fetch({ ...options, url: `/api/actions/${ actionId }/form/fields` });
     }
 
     const data = { filter: { patient: patientId } };
-    return model.fetch({ url: `/api/forms/${ formId }/fields`, data });
+    return model.fetch({ ...options, url: `/api/forms/${ formId }/fields`, data });
   },
-  fetchByAction(actionId) {
-    return this.fetchBy(`/api/actions/${ actionId }/form`);
+  fetchByAction(actionId, options) {
+    return this.fetchBy(`/api/actions/${ actionId }/form`, options);
   },
-  fetchDefinitionByAction(actionId) {
-    return fetcher(`/api/actions/${ actionId }/form/definition`).then(handleJSON);
+  fetchDefinitionByAction(actionId, options) {
+    return fetcher(`/api/actions/${ actionId }/form/definition`, options).then(handleJSON);
   },
 });
 

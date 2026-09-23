@@ -9,7 +9,7 @@ const Entity = BaseEntity.extend({
     'get:widgetValues:model': 'getByPatient',
     'fetch:widgetValues:byPatient': 'fetchByPatient',
   },
-  fetchByPatient(widget, patientId) {
+  fetchByPatient(widget, patientId, options = {}) {
     const model = this.getByPatient(widget.get('slug'), patientId);
 
     const requestValues = widget.get('values');
@@ -18,7 +18,7 @@ const Entity = BaseEntity.extend({
     if (isEmpty(requestValues)) return model;
 
     const data = { filter: { patient: patientId } };
-    return model.fetch({ url: `/api/widgets/${ widget.get('slug') }/values`, data });
+    return model.fetch({ ...options, url: `/api/widgets/${ widget.get('slug') }/values`, data });
   },
   getByPatient(slug, patientId) {
     /* istanbul ignore next: makes patientId a uuid for cypress */
