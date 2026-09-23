@@ -140,8 +140,7 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
 export default RouterApp.extend({
   // NOTE: Don't stop this app on no match
   onNoMatch: noop,
-  StateModel,
-  startAfterInitialized: true,
+  startOnRoute: false,
   channelName: 'nav',
   childApps: {
     search: SearchApp,
@@ -154,15 +153,10 @@ export default RouterApp.extend({
   stateEvents: {
     'change:currentApp': 'onChangeCurrentApp',
   },
-  viewEvents: {
-    'focus:in': 'onFocusIn',
-    'focus:out': 'onFocusOut',
-    'pointer:enter': 'onPointerEnter',
-    'pointer:leave': 'onPointerLeave',
+  createState() {
+    return new StateModel();
   },
   initialize() {
-    this.listenTo(Radio.channel('workspace'), 'change:workspace', () => this.restart());
-
     this.listenTo(Radio.channel('event-router'), 'default', () => {
       defer(() => {
         Backbone.history.navigate(this.getDefaultRoute(), { trigger: true });
@@ -171,47 +165,43 @@ export default RouterApp.extend({
 
     this._narrowQuery = window.matchMedia(NAV_COLLAPSE_QUERY);
     this._onNarrowQueryChange = () => {
-      this.setState('isNarrow', this._narrowQuery.matches);
+      this.getState().set('isNarrow', this._narrowQuery.matches);
     };
 
     this.listenTo(Radio.channel('user-activity'), 'body:down', this.onBodyDown);
     this.listenTo(Radio.channel('hotkey'), 'close', () => this.getState().closeOverlay());
+
+    // Drop admin items the current user can't access — permissions are stable.
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+
+    if (!currentUser.can('clinicians:manage')) {
+      adminNavMenu.remove('CliniciansApp');
+    }
+
+    if (!currentUser.can('programs:manage')) {
+      adminNavMenu.remove('ProgramsApp');
+    }
+
+    const storedState = localStore.get(this.getNavMenuMinimizedKey());
+
+    if (storedState === undefined) {
+      localStore.set(this.getNavMenuMinimizedKey(), false);
+    }
+
+    this.getState().set('userMinimized', Boolean(storedState));
   },
   onBeforeStart() {
     this._narrowQuery.addEventListener('change', this._onNarrowQueryChange);
-
-    const isRestarting = this.isRestarting();
-    let userMinimized = this.getState('userMinimized');
-
-    if (!isRestarting) {
-      // Drop admin items the current user can't access — permissions are stable.
-      const currentUser = Radio.request('bootstrap', 'currentUser');
-
-      if (!currentUser.can('clinicians:manage')) {
-        adminNavMenu.remove('CliniciansApp');
-      }
-
-      if (!currentUser.can('programs:manage')) {
-        adminNavMenu.remove('ProgramsApp');
-      }
-
-      const storedState = localStore.get(this.getNavMenuMinimizedKey());
-
-      if (storedState === undefined) {
-        localStore.set(this.getNavMenuMinimizedKey(), false);
-      }
-
-      userMinimized = Boolean(storedState);
-    }
-
-    this.setState({
+    this.resetNavigationState();
+  },
+  resetNavigationState() {
+    this.getState().set({
       isFocusWithin: false,
       isHovering: false,
       isNarrow: this._narrowQuery.matches,
       isNavDroplistOpen: false,
       isTouchDrawerOpen: false,
       temporaryMinimized: false,
-      userMinimized,
     });
   },
   onStop() {
@@ -220,7 +210,14 @@ export default RouterApp.extend({
   onStart() {
     // Rebuild the shell every start so it's bound to the current state — a
     // restart otherwise leaves a preserved view wired to a stale model.
-    this.setView(new AppNavView({ model: this.getState() }));
+    const view = this.setView(new AppNavView({ model: this.getState() }));
+
+    this.listenTo(view, {
+      'focus:in': this.onFocusIn,
+      'focus:out': this.onFocusOut,
+      'pointer:enter': this.onPointerEnter,
+      'pointer:leave': this.onPointerLeave,
+    });
 
     this.updateCanPatientCreate();
     this.showMainNavDroplist();
@@ -228,6 +225,12 @@ export default RouterApp.extend({
     this.showBottomNavView();
 
     this.showView();
+  },
+  refreshWorkspace() {
+    this.resetNavigationState();
+    this.updateCanPatientCreate();
+    this.showMainNavDroplist();
+    this.showBottomNavView();
   },
   eventRoutes() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -267,11 +270,11 @@ export default RouterApp.extend({
     return `/${ workspaceSlug }/worklist/owned-by`;
   },
   selectNav(appName, event, eventArgs) {
-    this.setState('currentApp', appName);
+    this.getState().set('currentApp', appName);
 
     const selectedNav = this.findNavItem(event, compact(eventArgs));
 
-    this.setState('selectedNav', selectedNav);
+    this.getState().set('selectedNav', selectedNav);
 
     // Navigating dismisses any transient expansion without changing the
     // persisted minimized preference.
@@ -290,37 +293,37 @@ export default RouterApp.extend({
   onChangeCurrentApp(state, appName) {
     if (!this.adminNavDroplist) return;
 
-    this.adminNavDroplist.setState('selected', adminNavMenu.get(appName));
+    this.adminNavDroplist.getState().set('selected', adminNavMenu.get(appName));
   },
   setTemporarilyMinimized(isMinimized) {
-    this.setState('temporaryMinimized', isMinimized);
+    this.getState().set('temporaryMinimized', isMinimized);
   },
   onPointerEnter(evt) {
     if (!this.canHoverExpand(evt)) return;
 
-    this.setState('isHovering', true);
+    this.getState().set('isHovering', true);
   },
   onPointerLeave(evt) {
     if (!this.canHoverExpand(evt)) return;
 
-    this.setState('isHovering', false);
+    this.getState().set('isHovering', false);
   },
   onFocusIn() {
-    if (!this.getState('isMinimized')) return;
+    if (!this.getState().get('isMinimized')) return;
 
-    this.setState('isFocusWithin', true);
+    this.getState().set('isFocusWithin', true);
   },
   onFocusOut() {
-    this.setState('isFocusWithin', false);
+    this.getState().set('isFocusWithin', false);
   },
   toggleTouchDrawer() {
-    const shouldOpen = !this.getState('isTouchDrawerOpen');
+    const shouldOpen = !this.getState().get('isTouchDrawerOpen');
 
     this.getState().closeOverlay();
-    this.setState('isTouchDrawerOpen', shouldOpen);
+    this.getState().set('isTouchDrawerOpen', shouldOpen);
   },
   closeTouchDrawer() {
-    this.setState('isTouchDrawerOpen', false);
+    this.getState().set('isTouchDrawerOpen', false);
   },
   getNavMenuMinimizedKey() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -333,7 +336,7 @@ export default RouterApp.extend({
     return `whatsNewDismissed_${ WHATS_NEW_VERSION }_${ currentUser.id }`;
   },
   onBodyDown(evt) {
-    if (!this.getState('isTouchDrawerOpen')) return;
+    if (!this.getState().get('isTouchDrawerOpen')) return;
 
     const view = this.getView();
     if (view && (view.el === evt.target || view.Dom.hasEl(view.el, evt.target))) return;
@@ -344,7 +347,8 @@ export default RouterApp.extend({
     Radio.request('patient-modal', 'show');
   },
   onClickMinimizeMenu() {
-    const isNarrow = this.getState('isNarrow');
+    const state = this.getState();
+    const isNarrow = state.get('isNarrow');
 
     if (isNarrow) {
       this.toggleTouchDrawer();
@@ -353,23 +357,23 @@ export default RouterApp.extend({
 
     // A visible minimized nav is being previewed, so clicking pins it open.
     // Otherwise the click toggles the persisted minimized preference.
-    const isPinningOpen = this.getState('isMinimized') && this.getState('isFullNavVisible');
+    const isPinningOpen = state.get('isMinimized') && state.get('isFullNavVisible');
 
-    this.getState().closeOverlay();
+    state.closeOverlay();
 
     if (!isPinningOpen) {
-      this.toggleState('userMinimized');
+      state.set('userMinimized', !state.get('userMinimized'));
     } else {
-      this.setState({
+      state.set({
         temporaryMinimized: false,
         userMinimized: false,
       });
     }
 
-    localStore.set(this.getNavMenuMinimizedKey(), this.getState('userMinimized'));
+    localStore.set(this.getNavMenuMinimizedKey(), state.get('userMinimized'));
   },
   onNavDroplistActiveChange() {
-    this.setState('isNavDroplistOpen', this.hasActiveNavDroplist());
+    this.getState().set('isNavDroplistOpen', this.hasActiveNavDroplist());
   },
   canHoverExpand(evt) {
     if (!evt || evt.pointerType !== 'mouse') return false;
@@ -378,8 +382,8 @@ export default RouterApp.extend({
   },
   hasActiveNavDroplist() {
     return Boolean(
-      (this.mainNavDroplist && this.mainNavDroplist.getState('isActive'))
-      || (this.adminNavDroplist && this.adminNavDroplist.getState('isActive')),
+      (this.mainNavDroplist && this.mainNavDroplist.getState().get('isActive'))
+      || (this.adminNavDroplist && this.adminNavDroplist.getState().get('isActive')),
     );
   },
   updateCanPatientCreate() {
@@ -387,7 +391,7 @@ export default RouterApp.extend({
     const hasManualPatientCreate = Radio.request('settings', 'get', 'manual_patient_creation');
     const canPatientCreate = hasManualPatientCreate && currentUser.can('patients:manage');
 
-    this.setState('canPatientCreate', canPatientCreate);
+    this.getState().set('canPatientCreate', canPatientCreate);
   },
   showMainNavDroplist() {
     const currentWorkspace = Radio.request('workspace', 'current');
@@ -405,23 +409,19 @@ export default RouterApp.extend({
       }),
     );
 
-    if (this.mainNavDroplist) {
-      this.stopListening(this.mainNavDroplist.getState());
-    }
-
     this.mainNavDroplist = new MainNavDroplist({
       collection: workspacesMenu,
       lists: [
         { collection: workspacesMenu },
         { collection: whatsNewMenu },
       ],
-      state: {
+      stateOptions: {
         selected: workspacesMenu.get(currentWorkspace.id),
       },
     });
     this.listenTo(this.mainNavDroplist, 'show:whatsNew', this.showWhatsNew);
-    this.listenTo(this.mainNavDroplist.getState(), 'change:isActive', this.onNavDroplistActiveChange);
-    this.showChildView('navMain', this.mainNavDroplist);
+    this.mainNavDroplist.listenTo(this.mainNavDroplist.getState(), 'change:isActive', () => this.onNavDroplistActiveChange());
+    this.getView().showChildView('navMain', this.mainNavDroplist);
   },
   showNavContent() {
     const navView = new PatientsAppNav({
@@ -445,7 +445,7 @@ export default RouterApp.extend({
       this.showSearch();
     });
 
-    this.showChildView('navContent', navView);
+    this.getView().showChildView('navContent', navView);
   },
   showBottomNavView() {
     if (this.bottomNavView) {
@@ -465,7 +465,7 @@ export default RouterApp.extend({
     this.showDashboardsNav();
     this.showAdminTools();
 
-    this.showChildView('bottomNavContent', this.bottomNavView);
+    this.getView().showChildView('bottomNavContent', this.bottomNavView);
   },
   showWhatsNewAnnouncement() {
     if (localStore.get(this.getWhatsNewDismissedKey())) return;
@@ -497,28 +497,25 @@ export default RouterApp.extend({
     }));
   },
   showAdminTools() {
-    if (this.adminNavDroplist) {
-      this.stopListening(this.adminNavDroplist.getState());
-    }
-
     if (!adminNavMenu.length) return;
 
     this.adminNavDroplist = new AdminToolsDroplist({
       collection: adminNavMenu,
-      state: {
+      stateOptions: {
         selected: adminNavMenu.get(this.getState().get('currentApp')),
       },
     });
 
-    this.listenTo(this.adminNavDroplist.getState(), 'change:isActive', this.onNavDroplistActiveChange);
+    this.adminNavDroplist.listenTo(this.adminNavDroplist.getState(), 'change:isActive', () => this.onNavDroplistActiveChange());
     this.bottomNavView.showChildView('adminTools', this.adminNavDroplist);
   },
   showSearch(prefillText) {
-    const navView = this.getChildView('navContent');
+    const navView = this.getView().getChildView('navContent');
 
-    const searchApp = this.startChildApp('search', {
+    const searchApp = this.getChildApp('search');
+    searchApp.start({
       prefillText,
-      canPatientCreate: this.getState('canPatientCreate'),
+      canPatientCreate: this.getState().get('canPatientCreate'),
     });
 
     this.listenToOnce(searchApp, 'stop', () => {

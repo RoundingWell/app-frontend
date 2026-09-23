@@ -5,7 +5,7 @@ import App from 'js/base/app';
 import { PatientSearchModal } from 'js/apps/globals/search/patient-search_views';
 
 export default App.extend({
-  onStart({ prefillText, canPatientCreate }) {
+  onStart(app, { prefillText, canPatientCreate }) {
     const patientSearchModal = new PatientSearchModal({
       collection: Radio.request('entities', 'searchPatients:collection'),
       prefillText,
