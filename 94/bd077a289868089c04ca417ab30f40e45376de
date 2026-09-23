@@ -1,0 +1,27 @@
+src/js/apps/patients/patient/form/form-interaction.e2e.cy.js
+  s_267e7a791356aa::t_d0707f8c22d0f0 7,71-79,81,97-112,132,136-137,141-142,158-179
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_267e7a791356aa::t_22b7405041bd27 84-92,628,1944,2519-2579
+src/js/apps/patients/patient/form/form.e2e.cy.js
+  s_267e7a791356aa::t_e753a341fe61ff 33,127,164
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_267e7a791356aa::t_7addea1c13107f 1,27-28,30,33,35-41,43,46-51,53-64,66-71,73-74,76-80,82-89,91-224,226-233,236-243,246-261,264-513,515-570,572-632,634-651,653-670,672-709,711-727,729-749,751-772,774-791,793-809,811-828,830-912,1075,1368-1400,1494-1587,1715,1747,1755,1771-1772,1828-1829,3169,3210-3216,3221-3222,3224-3225
+src/js/apps/patients/patient/form/patient.e2e.cy.js
+  s_267e7a791356aa::t_7b9331b9fa6b3d 121-167,483-495,873-908
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "94bd077a289868089c04ca417ab30f40e45376de",
+  "prompts": {},
+  "sessions": {
+    "s_267e7a791356aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08689-8981-7cf3-a3c5-0ee0a88b599c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
