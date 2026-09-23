@@ -7,7 +7,7 @@ import 'scss/modules/card-list.scss';
 import intl from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
-import { CheckComponent, StateComponent, CardOwnerComponent, CardDueComponent, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 import ActionItemTemplate from './action-item.hbs';
 
@@ -66,13 +66,13 @@ const ActionItemView = View.extend({
     'change': 'render',
   },
   events: {
-    'click .js-action-surface': 'onClickSurface',
-    'click .js-no-click': stopEventPropagation,
     'click .js-patient': 'onClickPatient',
     'click .js-flow': 'onClickFlow',
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-no-click': stopEventPropagation,
+    'click .js-action-surface': 'onClickSurface',
   },
   ui: {
     patient: '.js-patient',
@@ -89,23 +89,23 @@ const ActionItemView = View.extend({
     this.navigateToAction();
   },
   onClickPatient(event) {
-    event.stopPropagation();
-    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+    event.stopImmediatePropagation();
+    this.trigger('click:patient', this.model.getPatient(), this);
   },
   onClickFlow(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.flow.id);
   },
   onClickPrimary(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction();
   },
   onClickAttachments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToActionSection('attachments');
   },
   onClickComments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToActionSection('comments');
   },
   navigateToActionSection(section) {
@@ -131,33 +131,36 @@ const ActionItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    this.ui.patient
-      .toggleClass('patient-list__patient--selected', isSelected)
-      .attr('aria-expanded', String(isSelected));
+    const [patient] = this.getUI('patient');
+    patient.classList.toggle('patient-list__patient--selected', isSelected);
+    patient.setAttribute('aria-expanded', String(isSelected));
+  },
+  focusPatient() {
+    this.getUI('patient')[0].focus();
   },
   showCheck() {
     if (!this.canEdit) return;
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
+    const checkView = new CheckView({
       deselectLabel: intl.patients.shared.actionsViews.deselectAction,
       selectLabel: intl.patients.shared.actionsViews.selectAction,
-      state: { isSelected },
+      isSelected,
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(checkView, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', checkView);
   },
   showState() {
     if (!this.canEdit) {
@@ -166,7 +169,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    this.stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    this.stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(this.stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -186,8 +189,8 @@ const ActionItemView = View.extend({
     this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(this.ownerComponent, 'change:owner', owner => {
@@ -204,18 +207,18 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.model.isDone();
-    this.dueDateComponent = new CardDueComponent({
+    const dueDateView = new CardDueView({
       date: this.model.get('due_date'),
-      isCompact: true,
-      state: { isDisabled },
+
+      isDisabled,
       isOverdue: this.model.isOverdue(),
     });
 
-    this.listenTo(this.dueDateComponent, 'change:due', date => {
+    this.listenTo(dueDateView, 'change:due', date => {
       this.model.saveDueDate(date);
     });
 
-    this.showChildView('dueDate', this.dueDateComponent);
+    this.showChildView('dueDate', dueDateView);
   },
   showDueTime() {
     if (!this.canEdit) {
@@ -227,8 +230,8 @@ const ActionItemView = View.extend({
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
     this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
 

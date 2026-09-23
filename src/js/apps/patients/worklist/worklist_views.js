@@ -40,17 +40,15 @@ const LayoutView = ListPageView.extend({
   regions: {
     dateFilter: '[data-date-filter-region]',
     filters: '[data-filters-region]',
-    list: {
-      el: '[data-list-region]',
+    results: {
+      el: '[data-results-region]',
       replaceElement: true,
     },
-    selectionBar: '[data-selection-bar-region]',
     title: {
       el: '[data-title-region]',
       replaceElement: true,
     },
     search: '[data-search-region]',
-    listStatus: '[data-list-status-region]',
     filtersSidebar: '[data-filters-sidebar-region]',
   },
   modelEvents: {
@@ -315,7 +313,10 @@ const ListView = CollectionView.extend({
     'click:patient': 'click:patient',
   },
   onListItemRender(view) {
-    view.searchString = view.$el.text();
+    view.searchString = view.el.textContent;
+  },
+  onBeforeDestroy() {
+    this.onListItemCanEdit.cancel();
   },
   onListItemCanEdit() {
     // NOTE: debounced in initialize
@@ -341,15 +342,14 @@ const ListView = CollectionView.extend({
   /* istanbul ignore next: future proof */
   onRenderChildren() {
     if (!this.isAttached()) return;
-    this.triggerMethod('filtered', this.children.map('model'));
+    this.triggerMethod('filtered', this.children.map(view => view.model));
   },
   onSelect(selectedView, isShiftKeyPressed) {
     this.state.selectRange(this.editableCollection, selectedView.model, isShiftKeyPressed);
   },
   setLoading(isLoading) {
-    this.$el
-      .attr('aria-busy', String(isLoading))
-      .toggleClass('is-loading', isLoading);
+    this.el.setAttribute('aria-busy', String(isLoading));
+    this.el.classList.toggle('is-loading', isLoading);
   },
   searchList(state, searchQuery) {
     if (!searchQuery) {
@@ -373,10 +373,8 @@ const SortDroplist = Droplist.extend({
   picklistOptions: {
     headingText: i18n.sortDroplist.headingText,
   },
-  viewOptions: {
-    className: 'button worklist-list__sidebar-button',
-    template: hbs`{{far "arrow-down-arrow-up" classes="worklist-list__sort-icon"}}{{ text }}`,
-  },
+  className: 'button worklist-list__sidebar-button',
+  template: hbs`{{far "arrow-down-arrow-up" classes="worklist-list__sort-icon"}}{{ text }}`,
 });
 
 export {
