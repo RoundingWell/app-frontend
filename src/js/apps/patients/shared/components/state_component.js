@@ -1,6 +1,6 @@
 import { map } from 'underscore';
-import { Radio } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
+import { Radio } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
@@ -41,8 +41,9 @@ function getStateLists() {
 }
 
 export default Droplist.extend({
-  isCompact: false,
-  initialize({ stateId }) {
+  className: 'button button--compact',
+  popWidth: null,
+  initialize() {
     const currentWorkspace = Radio.request('workspace', 'current');
 
     if (currentWorkspaceCache !== currentWorkspace) {
@@ -52,29 +53,22 @@ export default Droplist.extend({
     }
 
     this.lists = getStateLists();
-    this.setSelected(stateId);
+    this.setSelected(this.getOption('stateId'));
   },
   setSelected(stateId) {
     const states = getStates();
-    this.setState({ selected: states.get(stateId) });
+    this.getState().set({ selected: states.get(stateId) });
+  },
+  onRender() {
+    this.el.setAttribute('aria-label', this.getState().get('selected')?.get('name') || this.el.textContent.trim());
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:state', selected);
   },
-  popWidth() {
-    const isCompact = this.getOption('isCompact');
-
-    return isCompact ? null : this.getView().$el.outerWidth();
-  },
-  viewOptions() {
-    const isCompact = this.getOption('isCompact');
-
+  template: StateTemplate,
+  templateContext() {
     return {
-      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
-      template: StateTemplate,
-      templateContext: {
-        isIconOnly: isCompact && !this.getOption('showLabel'),
-      },
+      isIconOnly: !this.getOption('showLabel'),
     };
   },
   picklistOptions: {

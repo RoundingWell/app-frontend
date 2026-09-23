@@ -31,40 +31,30 @@ export default Droplist.extend({
   collection: new Backbone.Collection(times),
   align: 'right',
   popWidth: 192,
-  isCompact: false,
   isSelectlist: true,
-  getClassName(time, isCompact) {
-    const isOverdue = time && this.getOption('isOverdue') ? 'is-overdue' : '';
-
-    if (isCompact) {
-      return `button button--compact time-component ${ isOverdue }`;
-    }
-
-    return `button button--secondary time-component w-100 ${ isOverdue }`;
+  className: 'button button--compact time-component',
+  onRender() {
+    const hasSelectedTime = !!this.getState().get('selected');
+    this.el.classList.toggle('is-overdue', hasSelectedTime && this.getOption('isOverdue'));
   },
-  getTemplate(time, isCompact) {
+  getTemplate() {
+    const selected = this.getState().get('selected');
+    const time = selected ? selected.id : null;
+
     if (!time && this.getOption('time')) {
       return CustomTimeTemplate;
     }
 
-    if (!time && isCompact && !this.getOption('showLabel')) {
+    if (!time && !this.getOption('showLabel')) {
       return NoTimeCompactTemplate;
     }
 
     return TimeTemplate;
   },
-  viewOptions() {
-    const isCompact = this.getOption('isCompact');
-    const selected = this.getState('selected');
-    const time = selected ? selected.id : null;
-
+  templateContext() {
     return {
-      className: this.getClassName(time, isCompact),
-      template: this.getTemplate(time, isCompact),
-      templateContext: {
-        time: this.getOption('time'),
-        defaultHtml: `<span>${ isCompact ? i18n.defaultText : i18n.placeholderText }</span>`,
-      },
+      time: this.getOption('time'),
+      defaultHtml: `<span>${ i18n.defaultText }</span>`,
     };
   },
   picklistOptions: {
@@ -82,7 +72,7 @@ export default Droplist.extend({
   initialize({ time }) {
     const selected = this.collection.get(time);
 
-    this.setState({ selected });
+    this.getState().set({ selected });
   },
   onChangeSelected(selected) {
     const time = selected ? selected.id : null;

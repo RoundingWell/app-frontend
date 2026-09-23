@@ -1,6 +1,6 @@
 import { find } from 'underscore';
-import { Radio } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
+import { Radio } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
@@ -15,7 +15,6 @@ const i18n = intl.patients.shared.components.ownerComponent;
 const OwnerItemTemplate = hbs`<div class="owner-component">{{matchText name query}} <span class="owner-component__team">{{matchText abbr query}}</span></div>`;
 
 const CLASS_OPTIONS = [
-  'isCompact',
   'headingText',
   'infoText',
   'placeholderText',
@@ -61,15 +60,13 @@ function getClinicians(workspace, currentUser) {
 }
 
 export default Droplist.extend({
-  isCompact: false,
+  className: 'owner-component owner-component--compact button button--compact',
+  popWidth: null,
   headingText: i18n.headingText,
   placeholderText: i18n.placeholderText,
   hasTeams: true,
   hasClinicians: true,
   hasCurrentClinician: true,
-  popWidth() {
-    return this.isCompact ? null : this.getView().$el.outerWidth();
-  },
   picklistOptions() {
     const lists = this.getLists();
 
@@ -94,28 +91,13 @@ export default Droplist.extend({
       clearText: this.currentUser.get('name'),
     };
   },
-  viewOptions() {
-    const icon = { type: 'far', icon: 'circle-user' };
-
-    if (this.isCompact) {
-      const selected = this.getState('selected');
-      const isTeam = selected.type === 'teams';
-
-      return {
-        className: 'owner-component owner-component--compact button button--compact',
-        templateContext: {
-          attr: isTeam ? 'abbr' : 'name',
-          icon,
-        },
-      };
-    }
+  templateContext() {
+    const selected = this.getState().get('selected');
+    const isTeam = selected?.type === 'teams';
 
     return {
-      className: 'owner-component button button--secondary w-100',
-      templateContext: {
-        attr: 'name',
-        icon,
-      },
+      attr: isTeam ? 'abbr' : 'name',
+      icon: { type: 'far', icon: 'circle-user' },
     };
   },
   initialize(options) {
@@ -133,7 +115,7 @@ export default Droplist.extend({
       currentWorkspaceCache = currentWorkspace.id;
     }
 
-    this.setState({ selected: this.owner });
+    this.getState().set({ selected: this.owner });
   },
   getLists() {
     const lists = [];
@@ -161,7 +143,7 @@ export default Droplist.extend({
     return lists;
   },
   onPicklistSelect({ model }) {
-    this.setState('selected', model || this.currentUser);
+    this.getState().set('selected', model || this.currentUser);
 
     this.popRegion.empty();
   },
