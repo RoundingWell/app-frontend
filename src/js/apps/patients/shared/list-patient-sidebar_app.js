@@ -1,72 +1,42 @@
 import { Radio } from 'marionette';
 
-import { addError } from 'js/datadog';
-
-import App from 'js/base/app';
-
 import PatientSidebarApp, { getPatientSidebarRequests } from 'js/apps/patients/patient/sidebar/sidebar_app';
-import { SidebarLoadingView, SidebarView } from 'js/apps/patients/patient/sidebar/sidebar_views';
+import { SidebarLoadingView } from 'js/apps/patients/patient/sidebar/sidebar_views';
 
-export default App.extend({
-  childApps: {
-    patientSidebar: PatientSidebarApp,
-  },
-  onBeforeStart({ patient }) {
+export default PatientSidebarApp.extend({
+  onBeforeStart(app, { patient }) {
     this.patient = patient;
+    this.sidebars = Radio.request('sidebars', 'patient');
 
-    const loadingView = new SidebarView({
+    const view = this.setSidebarView({
       model: patient,
       isClosable: true,
       isListSidebar: true,
-    });
+    }).render();
 
-    this.listenTo(loadingView, {
-      'click:close': this.onClickClose,
-      'click:patient': this.onClickPatient,
-    });
-
-    this.getRegion().show(loadingView);
-    loadingView.showChildView('sidebars', new SidebarLoadingView());
+    view.showChildView('sidebars', new SidebarLoadingView());
+    this.showView();
+    this.triggerMethod('show:sidebar');
   },
-  beforeStart({ patient }) {
-    return Radio.request('entities', 'fetch:patients:model', patient.id)
-      .then(loadedPatient => {
-        const sidebars = Radio.request('sidebars', 'patient');
+  async prepareStart({ patient }, { signal }) {
+    const loadedPatient = await Radio.request('entities', 'fetch:patients:model', patient.id, { signal });
+    signal.throwIfAborted();
+    await Promise.all(getPatientSidebarRequests(loadedPatient, this.sidebars, { signal }));
 
-        return Promise.all(getPatientSidebarRequests(loadedPatient, sidebars))
-          .then(() => loadedPatient);
-      });
+    return loadedPatient;
   },
-  onStart(options, patient) {
-    const patientSidebar = this.startChildApp('patientSidebar', {
-      region: this.getRegion(),
-      patient,
+  onStart(app, options, loadedPatient) {
+    this.patient = loadedPatient;
+    this.setSidebarView({
+      model: loadedPatient,
+      collection: this.sidebars,
       isClosable: true,
       isListSidebar: true,
-      isPreloaded: true,
     });
-
-    this.listenTo(patientSidebar, 'close', () => {
-      this.trigger('close');
-    });
+    this.showView();
+    this.triggerMethod('show:sidebar');
   },
   focusClose() {
-    this.getRegion().currentView?.focusClose();
-  },
-  onClickClose() {
-    this.trigger('close');
-  },
-  onClickPatient() {
-    Radio.trigger('event-router', 'patient:workflow', this.patient.id);
-  },
-  onFail(options, error) {
-    this.trigger('close');
-
-    if (error?.responseData) {
-      Radio.request('alert', 'show:apiError', error.responseData);
-      return;
-    }
-
-    addError(error);
+    this.getView()?.focusClose();
   },
 });

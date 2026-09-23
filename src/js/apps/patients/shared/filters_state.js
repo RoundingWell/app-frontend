@@ -26,7 +26,7 @@ export default Backbone.Model.extend({
       customFiltersExpanded: true,
       flowStatesExpanded: false,
       statesExpanded: false,
-    }, { silent: true });
+    });
 
     this.initStates();
 

@@ -64,10 +64,8 @@ const CountView = View.extend({
 const TitleOwnerDroplist = OwnerDroplist.extend({
   align: 'right',
   popWidth: null,
-  viewOptions: {
-    className: 'patient-list__title-filter-button',
-    template: TitleOwnerFilterTemplate,
-  },
+  className: 'patient-list__title-filter-button',
+  template: TitleOwnerFilterTemplate,
 });
 
 export {
