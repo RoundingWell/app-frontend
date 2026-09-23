@@ -1,5 +1,5 @@
 import { find } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
 
 import 'scss/modules/buttons.scss';

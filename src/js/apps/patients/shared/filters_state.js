@@ -1,7 +1,7 @@
 import { sortBy, isEqual, omit, size, isNull, clone, intersection, debounce, without } from 'underscore';
 
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 export default Backbone.Model.extend({
   preinitialize() {

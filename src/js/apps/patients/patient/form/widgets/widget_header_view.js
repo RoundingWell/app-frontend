@@ -1,5 +1,5 @@
-import { View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
+import { View } from 'marionette';
 
 import { WidgetCollectionView } from 'js/apps/patients/shared/widgets/widgets_views';
 

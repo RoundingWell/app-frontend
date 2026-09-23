@@ -4,7 +4,7 @@ import 'js/i18n';
 import $ from 'jquery';
 import { get } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { addError } from 'js/datadog';
 
 import 'scss/provider-core.scss';

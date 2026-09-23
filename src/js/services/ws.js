@@ -1,6 +1,6 @@
 import { each, map, values, isArray, isEmpty } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { v7 as uuid } from 'uuid';
 
 import App from 'js/base/app';

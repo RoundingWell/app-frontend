@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';

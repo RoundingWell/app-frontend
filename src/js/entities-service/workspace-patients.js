@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model } from './entities/workspace-patients';
 import { v5 as uuid } from 'uuid';

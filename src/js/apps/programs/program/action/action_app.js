@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import intl from 'js/i18n';
 

@@ -1,9 +1,8 @@
 import { extend } from 'underscore';
 import dayjs from 'dayjs';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';

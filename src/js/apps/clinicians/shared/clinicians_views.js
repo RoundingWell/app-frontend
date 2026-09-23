@@ -1,5 +1,5 @@
 import hbs from 'handlebars-inline-precompile';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import Backbone from 'backbone';
 
 import 'scss/modules/buttons.scss';

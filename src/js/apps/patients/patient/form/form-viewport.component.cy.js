@@ -1,7 +1,6 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { Region, View } from 'marionette';
+import { Radio, Region, View } from 'marionette';
 
 import FormViewportBehavior from './form-viewport';
 
