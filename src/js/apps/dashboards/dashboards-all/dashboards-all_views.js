@@ -59,7 +59,7 @@ const ListView = CollectionView.extend({
     this.searchList(null, this.state.get('searchQuery'));
   },
   onListItemRender(view) {
-    view.searchString = view.$el.text();
+    view.searchString = view.el.textContent;
   },
   searchList(state, searchQuery) {
     if (!searchQuery) {

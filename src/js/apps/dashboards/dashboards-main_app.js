@@ -1,3 +1,7 @@
+import { Radio } from 'marionette';
+
+import intl from 'js/i18n';
+
 import RouterApp from 'js/base/routerapp';
 
 import DashboardsAllApp from 'js/apps/dashboards/dashboards-all/dashboards-all_app';
@@ -5,7 +9,6 @@ import DashboardApp from 'js/apps/dashboards/dashboard/dashboard_app';
 
 export default RouterApp.extend({
   routerAppName: 'DashboardsApp',
-
   childApps: {
     dashboardsAll: DashboardsAllApp,
     dashboard: DashboardApp,
@@ -24,9 +27,18 @@ export default RouterApp.extend({
   },
 
   showDashboardsAll() {
-    this.startCurrent('dashboardsAll');
+    return this.startCurrent('dashboardsAll');
   },
   showDashboard(dashboardId) {
-    this.startCurrent('dashboard', { dashboardId });
+    return this.startCurrent('dashboard', { dashboardId });
+  },
+  onRouteError(error, { definition }) {
+    if (definition.action === 'showDashboard') {
+      Radio.request('alert', 'show:error', intl.dashboards.dashboardApp.notFound);
+      Radio.trigger('event-router', 'dashboards:all');
+      return;
+    }
+
+    Radio.trigger('event-router', 'unknownError', error?.response?.status);
   },
 });
