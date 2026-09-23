@@ -1,8 +1,8 @@
 import { extend, isFunction, find, get } from 'underscore';
-import { Radio, View } from 'marionette';
-import dayjs from 'dayjs';
-
 import hbs from 'handlebars-inline-precompile';
+import { Radio, View } from 'marionette';
+
+import dayjs from 'dayjs';
 
 import Handlebars from 'handlebars/dist/cjs/handlebars';
 
@@ -20,8 +20,6 @@ function getWrapperTemplate(definition) {
 
 function getTemplate(definition) {
   const template = get(definition, 'template');
-
-  if (isFunction(template)) return template;
 
   return Handlebars.compile(template || '');
 }
@@ -130,10 +128,13 @@ const widgets = {
     className: 'button button--outline widgets__form-widget',
     tagName: 'button',
     attributes() {
-      return {
-        disabled: this.getOption('is_modal'),
+      const attributes = {
         type: 'button',
       };
+
+      if (this.getOption('is_modal')) attributes.disabled = 'disabled';
+
+      return attributes;
     },
     template: hbs`
       {{far "square-poll-horizontal"}}
@@ -149,7 +150,7 @@ const widgets = {
         const fetchForm = Radio.request('entities', 'fetch:forms:model', form_id);
         fetchForm.then(form => {
           this.form = form;
-          this.$el.prop('disabled', false);
+          this.el.disabled = false;
         });
       }
     },
