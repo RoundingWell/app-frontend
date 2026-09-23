@@ -1,4 +1,5 @@
 import { noop } from 'underscore';
+import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView, Region } from 'marionette';
 
@@ -6,8 +7,6 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/modals.scss';
 
 import intl from 'js/i18n';
-
-import Component from 'js/base/component';
 
 import InputFocusBehavior from 'js/behaviors/input-focus';
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
@@ -100,11 +99,12 @@ const ListView = CollectionView.extend({
     };
   },
   onRenderChildren() {
-    this.$('.js-picklist-item').removeClass('is-highlighted');
+    const items = this.$('.js-picklist-item');
+    items.forEach(item => item.classList.remove('is-highlighted'));
 
     if (!this.model.get('search')) return;
 
-    this.$('.js-picklist-item').first().addClass('is-highlighted');
+    items[0]?.classList.add('is-highlighted');
   },
   emptyView: EmptyView,
 });
@@ -114,7 +114,7 @@ const HeaderView = View.extend({
   template: ResultHeaderTemplate,
 });
 
-const DialogView = View.extend({
+const PatientSearchPicklist = View.extend({
   className: 'patient-search__picklist',
   collectionEvents: {
     'search': 'onSearchComplete',
@@ -132,7 +132,7 @@ const DialogView = View.extend({
   ],
   triggers: {
     'focus @ui.input': 'focus',
-    'click @ui.add': 'add',
+    'click @ui.add': 'click:addPatient',
   },
   ui: {
     input: '.js-input',
@@ -152,6 +152,9 @@ const DialogView = View.extend({
     this.showHeader();
     this.showList();
   },
+  onWatchChange(search) {
+    this.model.set('search', search);
+  },
   showHeader() {
     if (!this.collection.length) {
       this.getRegion('header').empty();
@@ -165,29 +168,6 @@ const DialogView = View.extend({
       collection: this.collection,
       model: this.model,
     }));
-  },
-});
-
-const PatientSearchPicklist = Component.extend({
-  initialize: function(options) {
-    this.mergeOptions(options, ['collection']);
-  },
-  viewOptions() {
-    return {
-      model: this.getState(),
-      collection: this.collection,
-    };
-  },
-  ViewClass: DialogView,
-  viewEvents: {
-    'watch:change': 'onWatchChange',
-  },
-  viewTriggers: {
-    'add': 'click:addPatient',
-    'close': 'close',
-  },
-  onWatchChange(search) {
-    this.setState('search', search);
   },
 });
 
@@ -210,22 +190,26 @@ const PatientSearchModal = View.extend({
   onRender() {
     const collection = this.collection;
     const search = this.getOption('prefillText');
-
-    const picklistComponent = new PatientSearchPicklist({
-      collection,
-      state: { search, canPatientCreate: this.getOption('canPatientCreate') },
+    const state = new Backbone.Model({
+      search,
+      canPatientCreate: this.getOption('canPatientCreate'),
     });
 
-    this.listenTo(picklistComponent.getState(), {
+    const picklistView = new PatientSearchPicklist({
+      collection,
+      model: state,
+    });
+
+    this.listenTo(state, {
       'change:search': this.onChangeSearch,
       'change:selected': this.onChangeSelected,
     });
 
-    this.showChildView('picklist', picklistComponent);
+    this.showChildView('picklist', picklistView);
 
     if (search) this.collection.search(search);
 
-    this.listenTo(picklistComponent, {
+    this.listenTo(picklistView, {
       'click:addPatient': () => {
         this.triggerMethod('click:addPatient');
       },
