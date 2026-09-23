@@ -13,7 +13,7 @@ export default Behavior.extend({
       keyEvents: {
         'transport:down': DOWN_KEY,
         'transport:up': UP_KEY,
-        'select': ENTER_KEY,
+        'transport:select': ENTER_KEY,
         'close': [ESCAPE_KEY, TAB_KEY],
       },
     },
@@ -27,114 +27,118 @@ export default Behavior.extend({
   events() {
     const evts = {};
 
-    // by default 'mouseenter .js-picklist-item'
-    evts[`mouseenter ${ this.getOption('items') }`] = this.onHoverItem;
+    // mouseover is delegated; ignore movement within the same item below.
+    evts[`mouseover ${ this.getOption('items') }`] = this.onHoverItem;
 
     return evts;
   },
 
   // must be onAttach, so that the width of droplist is already set for scrolling calc
   onAttach() {
-    const $items = this.getItems();
-    this.scrollTo($items, $items.filter('.is-selected'), 'middle');
+    const items = this.getItems();
+    this.scrollTo(items, items.filter(item => item.classList.contains('is-selected')), 'middle');
   },
 
   onHoverItem(evt) {
-    this.updateTransport(this.getItems(), this.view.$(evt.currentTarget));
+    const item = evt.delegateTarget;
+    if (item.contains(evt.relatedTarget)) return;
+
+    this.updateTransport(this.getItems(), [item]);
   },
 
   onTransportDown(evt) {
     evt.preventDefault();
 
-    const $items = this.getItems();
-    const $highlighted = this._getNextHighlighted($items);
+    const items = this.getItems();
+    const highlighted = this._getNextHighlighted(items);
 
-    this.updateTransport($items, $highlighted);
+    this.updateTransport(items, highlighted);
 
-    this.scrollTo($items);
+    this.scrollTo(items);
   },
 
   onTransportUp(evt) {
     evt.preventDefault();
 
-    const $items = this.getItems();
-    const $highlighted = this._getPrevHighlighted($items);
+    const items = this.getItems();
+    const highlighted = this._getPrevHighlighted(items);
 
-    this.updateTransport($items, $highlighted);
+    this.updateTransport(items, highlighted);
 
-    this.scrollTo($items);
+    this.scrollTo(items);
   },
 
   getItems() {
-    return this.view.$(this.getOption('items'));
+    return Array.from(this.view.$(this.getOption('items')));
   },
 
-  getHighlighted($items) {
-    return $items.filter('.is-highlighted');
+  getHighlighted(items) {
+    return items.filter(item => item.classList.contains('is-highlighted'));
   },
 
-  updateTransport($items, $highlighted) {
-    $items.removeClass('is-highlighted');
-    $highlighted.addClass('is-highlighted');
+  updateTransport(items, highlighted) {
+    items.forEach(item => item.classList.remove('is-highlighted'));
+    highlighted.forEach(item => item.classList.add('is-highlighted'));
   },
 
   // determines based on what is highlighted (or not)
   // what the next highlighted item will be when arrow up is pushed
-  _getPrevHighlighted($items) {
-    const $highlighted = this.getHighlighted($items);
+  _getPrevHighlighted(items) {
+    const highlighted = this.getHighlighted(items);
 
     /* istanbul ignore if: complicated generic test, but simple code */
-    if (!$highlighted.length) {
-      return $items.last();
+    if (!highlighted.length) {
+      return items.slice(-1);
     }
 
-    const nextIndex = $items.index($highlighted) - 1;
+    const nextIndex = items.indexOf(highlighted[0]) - 1;
 
     if (nextIndex < 0) {
-      return $highlighted;
+      return highlighted;
     }
 
-    return $items.eq(nextIndex);
+    return [items[nextIndex]];
   },
 
   // determines based on what is highlighted (or not)
   // what the next highlighted item will be when arrow down is pushed
-  _getNextHighlighted($items) {
-    const $highlighted = this.getHighlighted($items);
+  _getNextHighlighted(items) {
+    const highlighted = this.getHighlighted(items);
 
     /* istanbul ignore if: complicated generic test, but simple code */
-    if (!$highlighted.length) {
-      return $items.first();
+    if (!highlighted.length) {
+      return items.slice(0, 1);
     }
 
-    const nextIndex = $items.index($highlighted) + 1;
+    const nextIndex = items.indexOf(highlighted[0]) + 1;
 
-    if (nextIndex === $items.length) {
-      return $highlighted;
+    if (nextIndex === items.length) {
+      return highlighted;
     }
 
-    return $items.eq(nextIndex);
+    return [items[nextIndex]];
   },
 
   // looks for the highlighted items position and scrolls the list so that it is shown.
   // pass 'middle' as the offsetDir to place the highlighted element in the middle
   // of the scrollable window
   /* istanbul ignore next: hard to test, but battle tested */
-  scrollTo($items, $scrollItem, offsetDir) {
-    if (!$items.length) return;
+  scrollTo(items, scrollItems, offsetDir) {
+    if (!items.length) return;
 
-    if (!$scrollItem || !$scrollItem.length) {
-      $scrollItem = this.getHighlighted($items);
+    if (!scrollItems || !scrollItems.length) {
+      scrollItems = this.getHighlighted(items);
     }
 
-    if (!$scrollItem.length) return;
+    const [scrollItem] = scrollItems;
+    if (!scrollItem) return;
 
-    const $scrollEl = this.view.$(this.getOption('scroll'));
+    const [scrollEl] = this.view.$(this.getOption('scroll'));
 
-    const picklistScrollTop = $scrollEl.scrollTop();
-    const picklistHeight = $scrollEl.outerHeight();
-    const childViewHeight = $scrollItem.outerHeight();
-    const childViewTop = $scrollItem.position().top;
+    const picklistScrollTop = scrollEl.scrollTop;
+    const picklistHeight = scrollEl.offsetHeight;
+    const childViewHeight = scrollItem.offsetHeight;
+    const childViewTop = scrollItem.getBoundingClientRect().top - scrollEl.getBoundingClientRect().top;
     const childViewBottom = childViewTop + childViewHeight - picklistHeight;
     let offset = 0;
 
@@ -143,11 +147,11 @@ export default Behavior.extend({
     }
 
     if (childViewTop < 0) {
-      $scrollEl.scrollTop(picklistScrollTop + childViewTop + offset);
+      scrollEl.scrollTop = picklistScrollTop + childViewTop + offset;
     }
 
     if (childViewBottom > 0) {
-      $scrollEl.scrollTop(picklistScrollTop + childViewBottom + offset);
+      scrollEl.scrollTop = picklistScrollTop + childViewBottom + offset;
     }
   },
 
@@ -155,9 +159,9 @@ export default Behavior.extend({
   // -----------------------------------------
 
   // simulates the click trigger on the currently highlighted element
-  onSelect(evt) {
+  onTransportSelect(evt) {
     evt.preventDefault();
 
-    this.view.$('.is-highlighted').click();
+    this.view.$('.is-highlighted')[0]?.click();
   },
 });
