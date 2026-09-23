@@ -8,14 +8,18 @@ definitions.
 
 - **RouterApp** (`src/js/base/routerapp.js`) — owns URL ↔ event mapping for a
   top-level area (Patients, Programs, Clinicians, Dashboards, Forms, Nav, Error).
-  It registers routes with `backbone.eventrouter`, builds a normalized route
+  It registers routes with the local EventRouter, builds a normalized route
   context on each match, manages the single current child app, and fires the
   `before:appRoute` / `appRoute` lifecycle hooks.
-- **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns the global app
-  shell and the area RouterApps it instantiates. It responds to area route
-  transitions by selecting the nav item, closing the transient sidebar, and
-  forwarding route metadata to the latest-list service. It also passes the
-  current workspace slug into area RouterApps when they are created.
+- **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns the
+  persistent navigation and a workspace content Application. Workspace switches
+  refresh navigation controls without stopping or removing the navigation shell.
+  Its shared child selector cancels superseded workspace activation; WorkspaceApp
+  receives the selected workspace explicitly and owns the data-loading signal.
+- **WorkspaceApp** (`src/js/apps/globals/app-frame/workspace_app.js`) — owns the
+  transient sidebar and area RouterApps. It reloads workspace data and replaces
+  those routers on workspace changes, supplies their workspace slug, and forwards
+  route transitions to navigation, sidebar, and latest-list services.
 - **SubRouterApp** (`src/js/base/subrouterapp.js`) — a child app that dispatches a
   route to a local handler without owning any URLs. It carries declarative scope
   identity, retains the latest route while loading, and re-dispatches after its
@@ -41,9 +45,9 @@ eventRoutes: {
 ```
 
 Structural fields: `action`, `route`, `root`. Behavioral flags go under `meta`
-(`isList`, `clearLatestList`). `action` is a method name (resolved on the RouterApp)
+(`isList`). `action` is a method name (resolved on the RouterApp)
 or a function; `route` is a string or a non-empty array of alias strings; non-root
-routes are prefixed with the `workspaceSlug` supplied by AppFrame, so they must not
+routes are prefixed with the `workspaceSlug` supplied by WorkspaceApp, so they must not
 begin with `/`.
 
 ### Aliases
@@ -51,6 +55,10 @@ begin with `/`.
 `route` may be an array. Every alias is registered (each prefixed with the workspace
 slug unless `root`), and the **first** alias is canonical for URL generation
 (`translateEvent` / `replaceRoute`). EventRouter supports this natively.
+
+The local EventRouter is a Backbone.Router adapter. RouterApp supplies the
+application's `event-router` Radio channel; the adapter must not import or bridge
+a separate Radio singleton.
 
 Non-canonical aliases exist only to keep old bookmarks working during a stated
 compatibility window. The patient app carries three — `patient/dashboard/:id`,
@@ -81,14 +89,22 @@ is set first so it is observable in `before:appRoute`):
 
 ```text
 set current route → before:appRoute
-  → AppFrame selects nav, stops sidebar, applies latest-list metadata
+  → WorkspaceApp selects nav, stops sidebar, applies latest-list metadata
   → action handler → appRoute
 ```
 
 Router-specific `onBeforeAppRoute` / `onAppRoute` hooks use the same
 `(router, routeContext)` signature. Root/workspace routing in `NavApp` and global
-error routing are not coordinated by AppFrame because they are not area routers
-instantiated through `AppFrameApp.initRouter()`.
+error routing are not coordinated by WorkspaceApp because they are not area routers
+instantiated through `WorkspaceApp.initRouter()`.
+
+## Route failures
+
+Return the activation promise from top-level route handlers. Put user-facing error
+presentation in `onRouteError(error, routeContext)`: RouterApp invokes it only for
+the current route, including failures that finish cleanup after navigation.
+Avoid duplicating route-identity checks in individual handler catches. If an error
+hook starts asynchronous reporting, handle that promise's rejection explicitly.
 
 ## Scope identity (which child is "the same")
 
@@ -101,11 +117,12 @@ routeScope: ['programId']   // ProgramApp
 routeScope: []              // CliniciansAllApp — always "the same" instance
 ```
 
+An omitted or non-array `routeScope` is an error; use `[]` for a global scope.
 `getRouteScope(options = {})` returns `pick(options, routeScope)`. RouterApp compares
 scope objects with `isEqual` — **never** the full startup options:
 
-- **Same app + equal scope** → reuse the running (or loading) child; forward the
-  newest route to it.
+- **Same app + equal scope** → reuse the selected child; forward the newest route
+  and start it if it was stopped.
 - **Different app or scope** → stop the current child and start the replacement.
 
 Scope identity is workspace/resource identity, **not** route-specific detail. Put the
@@ -121,11 +138,14 @@ scope. Plain page Apps are always started this way.
 A `SubRouterApp` separates "record the route" from "dispatch the route":
 
 - `setCurrentRoute(routeContext)` / `getCurrentRoute()` — RouterApp sets the route on
-  the child *before* `startChildApp`, so it is available in `beforeStart()`,
-  `onFail()`, and `onStart()`. Read route data via `getCurrentRoute().eventArgs`;
+  the child before starting it, so it is available throughout preparation and
+  startup. Read route data via `getCurrentRoute().eventArgs`;
   do **not** read `currentRoute` from startup options.
-- `startRoute(routeContext)` — records the newest route; dispatches immediately only
-  if already running. While loading or stopped it just stores (latest wins).
+- `startRoute(routeContext, options)` — records the newest route and passes options
+  to the idempotent Application `start()`. A stable active run dispatches the route;
+  while loading or stopping, the newest route waits for successful activation and
+  is dispatched once by that run's `onStart()`. A later stop invalidates pending
+  route dispatch, so route and stop ordering remains latest-intent-wins.
 - `startCurrentRoute()` — synchronously dispatches the current route to its
   `routeActions` handler. **Subclasses call this from `onStart()` after building
   their shell.**
@@ -134,7 +154,7 @@ This is why same-scope navigation arriving during an in-flight load does not res
 the app: the route is retained and dispatched once `onStart` runs.
 
 ```js
-onStart(options, data) {
+onStart(app, options, data) {
   // build the shared shell / set views
   this.startCurrentRoute();
 }
@@ -151,22 +171,48 @@ routeActions: {
 
 ## Stop and restart
 
-- RouterApp keeps exactly one stop listener per current child. A child that stops
-  **itself** clears RouterApp's current-child references.
-- A Toolkit `restart()` emits `stop` then `start`. RouterApp ignores the restart-stop
-  (`child.isRestarting()`), so a child that restarts itself (e.g. a worklist applying
-  filter state) **stays current**. Treating a restart as a teardown would desync
-  tracking and leave two apps in one region.
-- A `SubRouterApp` clears its `_currentRoute` on a normal stop but preserves it across
-  `restart()` (also guarded by `isRestarting()`), so the route re-dispatches after
-  re-fetching. Rely on this instead of threading `currentRoute` through restart
-  options.
+Both router classes use the internal `RouteBaseApp` base for child selection.
+It has no URL, Radio-channel, resource-scope comparison, or error-presentation
+policy. Keep those concerns in the routing adapters and application subclasses;
+this boundary allows future extraction without adding a second routing backend.
+
+- Selection retains the previous child until its stop resolves `true`. Overlapping
+  replacements share that stop, and only the newest selection can activate.
+- A rejected stop keeps the selection and propagates the error. A stop resolving
+  `false` is superseded/canceled and does not authorize a replacement. Returning
+  `false` from `prepareStop` is not a veto; stop permission must reject or throw.
+- Owner stop, restart, and destroy invalidate pending selection even when the owner
+  is already stopped. A failed child startup cleans up partially started descendants
+  before clearing the selection. If cleanup fails, selection is retained for retry. Cleanup errors are reported
+  separately through `child:cleanup:error` (Datadog by default); callers still
+  receive the original activation error or canceled result.
+- This is application-selection policy, not browser navigation blocking. It does
+  not roll back the URL or guarantee atomic teardown of an entire child tree.
+
+- RouterApp starts and stops its selected child asynchronously. A newer route wins
+  if it arrives while the prior child is stopping or preparing.
+- Route children are registered as owned Application instances. Owner stop and
+  destruction clean them up; RouterApp clears its selection after its own stop.
+  A selected child that stopped independently is restarted when the next matching
+  route arrives.
+- Area routers register their children explicitly and supply per-route startup
+  data through the Application lifecycle. Keep ownership and startup data together
+  when extending a route tree.
+- A `SubRouterApp` owns its current route in Marionette state. Application state
+  persists while stopped and across `restart()`, so the route re-dispatches after
+  re-fetching without restart flags or threading `currentRoute` through options.
 
 ## Async ownership
 
-Async loading belongs in `beforeStart()` (return a promise / array of promises). The
-base App lifecycle sets `isLoading()` true until it resolves, then runs `onStart`.
-Route dispatch stays synchronous — do not add another async layer.
+Async loading belongs in `prepareStart(options, { signal })`. Return the prepared
+value for `onStart(app, options, result)`, and pass the lifecycle signal through to
+cancelable requests. Route dispatch stays synchronous — do not add another async
+layer. Route handlers should return their activation promise. Route completion
+notifications still fire synchronously after invoking the handler; they do not
+mean that async content is ready. Synchronous throws and returned async failures are observed through
+`onRouteError(error, routeContext)` (the browser error channel by default, also observed by Datadog), including initial
+SubRouterApp dispatch from `onStart`. Domain handlers may handle expected errors
+before returning. Radio dispatch remains synchronous.
 
 ## Common mistakes
 
@@ -179,20 +225,24 @@ Route dispatch stays synchronous — do not add another async layer.
   `getCurrentRouteMeta()`.
 - A non-root `route` beginning with `/` (the workspace slug is prepended, producing a
   double slash).
-- Leaving `isList` / `clearLatestList` at the top level of a definition instead of
+- Leaving `isList` at the top level of a definition instead of
   under `meta` (silently stops updating the latest-list history).
-- Adding global shell effects directly to RouterApp. AppFrame owns nav selection,
+- Adding global shell effects directly to RouterApp. WorkspaceApp owns nav selection,
   transient-sidebar cleanup, and latest-list metadata handling for area routes.
 
 ## AI checklist for adding or changing a route
 
 1. Add/extend the `RouterApp` `eventRoutes` entry: `action`, `route` (string or alias
    array), and `meta` for any behavioral flag. Keep IDs out of `meta`.
-2. Implement the positional action handler; route to a child via `startRoute(appName,
-   options)` (scoped child) or `startCurrent(appName, options)` (plain page app).
+2. Declare static children with `childApps`; use `addChildApp()` for configured or
+   dynamically created instances. Implement the positional
+   action handler and return `startRoute(appName, options)` (scoped child) or
+   `startCurrent(appName, options)` (plain page app).
 3. If the child is a `SubRouterApp`: declare `routeScope`, add the event to
    `routeActions`, read route data via `getCurrentRoute()`, and call
    `startCurrentRoute()` in `onStart()`.
 4. Do not change existing URLs unless that is the explicit task.
-5. Add/extend specs in `src/js/base/*.component.cy.js` for base-class behavior and run targeted
-   `npm run coverage:e2e` specs for the affected area, plus `npm run lint`.
+5. Add/extend specs in `src/js/base/*.component.cy.js` for generic base-class behavior
+   and E2E scenarios for the affected application flow. Use the focused Cypress
+   commands and full-suite validation boundary in [AGENTS.md](../../../AGENTS.md#validation),
+   plus `npm run lint`.
