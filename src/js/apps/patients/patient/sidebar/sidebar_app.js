@@ -4,11 +4,11 @@ import App from 'js/base/app';
 
 import { SidebarLoadingView, SidebarView } from 'js/apps/patients/patient/sidebar/sidebar_views';
 
-function getPatientSidebarRequests(patient, sidebars) {
-  const workspacePatient = Radio.request('entities', 'fetch:workspacePatients:byPatient', patient.id);
+function getPatientSidebarRequests(patient, sidebars, options) {
+  const workspacePatient = Radio.request('entities', 'fetch:workspacePatients:byPatient', patient.id, options);
   const values = sidebars.reduce((requests, sidebar) => {
     const valueRequests = sidebar.getWidgets()
-      .invoke('fetchValues', patient.id)
+      .invoke('fetchValues', patient.id, options)
       .map(request => Promise.resolve(request).catch(() => null));
 
     requests.push(...valueRequests);
@@ -19,43 +19,48 @@ function getPatientSidebarRequests(patient, sidebars) {
 }
 
 export default App.extend({
-  viewEvents: {
-    'click:close': 'onClickClose',
-    'click:patient': 'onClickPatient',
-    'click:patientEdit': 'showPatientModal',
-    'click:patientView': 'showPatientModal',
-    'click:activeStatus': 'toggleActiveStatus',
-    'click:archivedStatus': 'archivePatient',
+  setSidebarView(options) {
+    const currentView = this.getView();
+    if (currentView) this.stopListening(currentView);
+
+    const view = this.setView(new SidebarView(options));
+
+    this.listenTo(view, {
+      'click:close': this.onClickClose,
+      'click:patient': this.onClickPatient,
+      'click:patientEdit': this.showPatientModal,
+      'click:patientView': this.showPatientModal,
+      'click:activeStatus': this.toggleActiveStatus,
+      'click:archivedStatus': this.archivePatient,
+    });
+
+    return view;
   },
-  onBeforeStart({ patient, isClosable, isListSidebar, isPreloaded }) {
+  onBeforeStart(app, { patient, isClosable, isListSidebar }) {
     this.patient = patient;
     this.sidebars = Radio.request('sidebars', 'patient');
 
-    this.showView(new SidebarView({
+    const view = this.setSidebarView({
       model: patient,
-      collection: isPreloaded ? this.sidebars : null,
       isClosable,
       isListSidebar,
-    }));
+    }).render();
 
-    if (isPreloaded) return;
-
-    this.showChildView('sidebars', new SidebarLoadingView());
+    view.showChildView('sidebars', new SidebarLoadingView());
+    this.showView();
   },
-  beforeStart({ patient, isPreloaded }) {
-    if (isPreloaded) return [];
-
-    return getPatientSidebarRequests(patient, this.sidebars);
+  prepareStart({ patient }, { signal }) {
+    return Promise.all(getPatientSidebarRequests(patient, this.sidebars, { signal }));
   },
-  onStart({ patient, isClosable, isListSidebar, isPreloaded }) {
-    if (isPreloaded) return;
-
-    this.showView(new SidebarView({
+  onStart(app, { isClosable, isListSidebar }) {
+    this.setSidebarView({
       model: this.patient,
       collection: this.sidebars,
       isClosable,
       isListSidebar,
-    }));
+    });
+
+    this.showView();
   },
   onClickClose() {
     this.trigger('close');

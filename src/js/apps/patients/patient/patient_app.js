@@ -1,4 +1,3 @@
-import { get } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
@@ -13,11 +12,19 @@ import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
 import ActionApp from 'js/apps/patients/patient/action/action_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
 import PatientSidebarApp from 'js/apps/patients/patient/sidebar/sidebar_app';
+import { LoadingView } from 'js/regions/preload_region';
 
 import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
 export default SubRouterApp.extend({
   routeScope: ['patientId'],
+  childApps: {
+    workflow: WorkflowPageApp,
+    flow: FlowPageApp,
+    action: ActionApp,
+    form: FormApp,
+    patientSidebar: PatientSidebarApp,
+  },
 
   routeActions() {
     return {
@@ -30,49 +37,29 @@ export default SubRouterApp.extend({
     };
   },
 
-  childApps: {
-    workflow: WorkflowPageApp,
-    flow: FlowPageApp,
-    action: ActionApp,
-    form: FormApp,
-    patientSidebar: PatientSidebarApp,
-  },
-
   currentAppOptions() {
     return {
       layoutState: this.layoutState,
-      region: this.getRegion('content'),
       patient: this.patient,
       patientId: this.patient.id,
     };
   },
 
   onBeforeStart() {
-    this.getRegion().startPreloader({ variant: 'generic' });
+    this.showView(new LoadingView({ variant: 'generic' }));
   },
 
-  onBeforeStop() {
+  onStop() {
+    if (this.layoutState) this.stopListening(this.layoutState);
+    this.stopListening(undefined, 'context:change', this.updateContextTrail);
     Radio.request('nav', 'setMinimized', false);
   },
 
-  beforeStart() {
-    const [patientId] = this.getCurrentRoute().eventArgs;
-
-    return Radio.request('entities', 'fetch:patients:model', patientId);
+  prepareStart({ patientId }, { signal }) {
+    return Radio.request('entities', 'fetch:patients:model', patientId, { signal });
   },
 
-  /* istanbul ignore next: beforeStart error handling */
-  onFail(options, error) {
-    if (get(error, ['response', 'status']) === 410) {
-      Radio.trigger('event-router', 'notFound');
-      this.stop();
-      return;
-    }
-
-    handleErrors(error);
-  },
-
-  onStart(options, patient) {
+  onStart(app, options, patient) {
     this.patient = patient;
     this.contextTrail = new Backbone.Model();
     this.currentUser = Radio.request('bootstrap', 'currentUser');
@@ -96,53 +83,65 @@ export default SubRouterApp.extend({
       'close:sidebar-drawer': this.closePatientSidebarDrawer,
     });
     this.setView(layout);
+    layout.render();
 
-    this.showView();
     this.renderFormExpandedState();
     this.showPatientSidebar();
     this.startCurrentRoute();
+    this.showView();
   },
 
   showWorkflow() {
-    this.startContent('workflow', { status: 'notDone' });
+    return this.startContent('workflow', { status: 'notDone' });
   },
 
   showClosedWorkflow() {
-    this.startContent('workflow', { status: 'done' });
+    return this.startContent('workflow', { status: 'done' });
   },
 
   showPatientAction(patientId, actionId, entryTarget) {
-    this.startContent('action', { actionId, entryTarget });
+    return this.startContent('action', { actionId, entryTarget });
   },
 
   showFlow(patientId, flowId) {
-    this.startContent('flow', { flowId });
+    return this.startContent('flow', { flowId });
   },
 
   showFlowAction(patientId, flowId, actionId, entryTarget) {
-    this.startContent('action', { flowId, actionId, entryTarget });
+    return this.startContent('action', { flowId, actionId, entryTarget });
   },
 
   showPatientForm(patientId, formId) {
-    this.startContent('form', { formId });
+    return this.startContent('form', { formId });
   },
 
   startContent(appName, options) {
-    const previousPageApp = this.getCurrent();
+    const pageApp = this.getChildApp(appName);
 
-    if (previousPageApp) {
-      this.stopListening(previousPageApp, 'context:change');
-    }
+    this.stopListening(undefined, 'context:change', this.updateContextTrail);
 
     this.setFormExpanded(false);
     this.setSidebarHidden(this.sidebarPreferenceHidden);
     this.contextTrail.set('context', this.getOptimisticContext(appName, options));
 
-    const pageApp = this.getChildApp(appName);
-
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
 
-    this.startCurrent(appName, options);
+    return this.startCurrent(appName, {
+      ...options,
+      region: this.getView().getRegion('content'),
+    }).catch(error => {
+      // Failure handlers receive the same shared context as application startup.
+      return this.handleContentStartFailure(pageApp, this.mixinOptions(options), error);
+    });
+  },
+  handleContentStartFailure(pageApp, options, error) {
+    if (!pageApp.handleStartFailure) return handleErrors(error);
+
+    try {
+      return pageApp.handleStartFailure(options, error);
+    } catch(unhandledError) {
+      return handleErrors(unhandledError);
+    }
   },
   setSidebarHidden(isHidden) {
     const layout = this.getView();
@@ -250,9 +249,14 @@ export default SubRouterApp.extend({
   },
 
   showPatientSidebar() {
-    this.startChildApp('patientSidebar', {
-      region: this.getRegion('sidebar'),
+    const sidebar = this.getChildApp('patientSidebar');
+
+    sidebar.start({
       patient: this.patient,
+      region: this.getView().getRegion('sidebar'),
+    }).catch(async error => {
+      await sidebar.stop();
+      handleErrors(error);
     });
   },
 });
