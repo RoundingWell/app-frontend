@@ -1,0 +1,59 @@
+src/js/entities-service/events.js
+  s_267e7a791356aa::t_0428e569ca2273 12-13,15-16
+src/js/entities-service/files.js
+  s_267e7a791356aa::t_b9337f5eec2264 11,13,15
+src/js/entities-service/flows.js
+  s_267e7a791356aa::t_eae1b6f0d91b5d 19-22,24-28,31
+src/js/entities-service/form-responses.js
+  s_267e7a791356aa::t_a056453507c6cb 18-20,22,25,27,36
+src/js/entities-service/forms.js
+  s_267e7a791356aa::t_876997cd9f90f6 21,28,30-31,33,36,40,42-43,45-46
+src/js/entities-service/program-actions.js
+  s_267e7a791356aa::t_b77563efe3b8e8 16,19,21,23-26,28
+src/js/entities-service/program-flows.js
+  s_267e7a791356aa::t_eebec1ec9e80f8 15,18,20,22-25,27
+src/js/entities-service/programs.js
+  s_267e7a791356aa::t_b2711a0bfa88e6 14-15,17,19
+src/js/entities-service/tags.js
+  s_267e7a791356aa::t_b22f2ce5820949 13,16
+src/js/entities-service/widget-values.js
+  s_267e7a791356aa::t_660491d414e7b2 12,21
+src/js/entities-service/widgets.js
+  s_267e7a791356aa::t_8689729010cfb3 12,14
+src/js/entities-service/workspace-patients.js
+  s_267e7a791356aa::t_0fab963e845f94 12,15
+src/js/base/entity-service.js
+  s_7d9748a0496f68::t_c355e7090b74af 4-5
+src/js/entities-service/actions.js
+  s_7d9748a0496f68::t_e7ae27aa330a67 20-23,25,27,34,36-40,43,45-46,49
+src/js/entities-service/clinicians.js
+  s_7d9748a0496f68::t_72c64c59fc44d3 17-18,26,30
+src/js/entities-service/comments.js
+  s_7d9748a0496f68::t_4fd0a789fb1fbd 11,14
+src/js/entities-service/entities/widgets.js
+  s_7d9748a0496f68::t_3a504d7e445506 11-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bd47ead1059a89281818b2f5f8503ccc2d319c38",
+  "prompts": {},
+  "sessions": {
+    "s_267e7a791356aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08689-8981-7cf3-a3c5-0ee0a88b599c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
