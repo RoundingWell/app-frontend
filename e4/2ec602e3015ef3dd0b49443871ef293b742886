@@ -1,0 +1,33 @@
+src/js/apps/patients/shared/components/duration_component.component.cy.js
+  s_7d9748a0496f68::t_1196121ef6ec39 13
+src/js/apps/patients/shared/components/duration_component.js
+  s_7d9748a0496f68::t_e71d8866eb6d05 28-29,31,47
+src/js/apps/patients/shared/components/owner_component.component.cy.js
+  s_7d9748a0496f68::t_7befbfa19e599f 111
+src/js/apps/patients/shared/components/owner_component.js
+  s_7d9748a0496f68::t_8a92e06af9b022 63-64,94-96,99-100,118,146
+src/js/apps/patients/shared/components/state_component.component.cy.js
+  s_7d9748a0496f68::t_5140d8419fe3d0 28,66,75,99
+src/js/apps/patients/shared/components/state_component.js
+  s_7d9748a0496f68::t_6ee8dcb8c5a842 44-46,56,60-63,68-69,71
+src/js/apps/patients/shared/components/time_component.component.cy.js
+  s_7d9748a0496f68::t_30d8986aaf8b7e 20,62
+src/js/apps/patients/shared/components/time_component.js
+  s_7d9748a0496f68::t_1a444c80a4d457 35-38,40-43,48,54,56-57,75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e42ec602e3015ef3dd0b49443871ef293b742886",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
