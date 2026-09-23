@@ -1,0 +1,23 @@
+AGENTS.md
+  s_7d9748a0496f68::t_ad8bbdd09eae8d 35
+docs/marionette-v5-migration.md
+  s_7d9748a0496f68::t_f43e65f8fbeef0 29,31-33,41-43,53
+src/js/base/routing.md
+  s_7d9748a0496f68::t_db39fd55f14e73 14-20,48,90,96-97,228
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b36217b6eda0a278c9bf047bb516718b1562ba05",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
