@@ -98,7 +98,7 @@ const ControllerView = View.extend({
     return DefaultTemplate;
   },
   onRender() {
-    this.showChildView('datepicker', {
+    this.showChildView('datepicker', new View({
       tagName: 'span',
       model: this.model,
       template: this.getLabelTemplate(),
@@ -108,7 +108,7 @@ const ControllerView = View.extend({
           selectedEndWeek: this.model.dayjs('selectedWeek').endOf('week'),
         };
       },
-    });
+    }));
 
     if (this.getOption('showPrevNextButtons') === false || this.model.get('relativeDate') === 'alltime') return;
 

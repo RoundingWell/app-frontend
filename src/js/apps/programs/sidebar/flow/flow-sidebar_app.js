@@ -1,4 +1,5 @@
 import Radio from 'backbone.radio';
+import { View } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -36,7 +37,7 @@ export default App.extend({
     this.showChildView('content', contentView);
   },
   showHeading() {
-    this.showChildView('heading', headingText);
+    this.showChildView('heading', new View({ template: () => headingText }));
   },
   showMenu() {
     const menuView = new MenuView();

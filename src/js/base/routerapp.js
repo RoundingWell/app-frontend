@@ -1,7 +1,9 @@
 import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from 'underscore';
 import Backbone from 'backbone';
-import EventRouter from 'backbone.eventrouter';
+import Radio from 'backbone.radio';
+
 import App from './app';
+import EventRouter from './event-router';
 
 export default App.extend({
   // Set in router apps for nav selection
@@ -25,7 +27,10 @@ export default App.extend({
 
     const routeTriggers = this.getRouteTriggers();
 
-    this.router = new EventRouter({ routeTriggers });
+    this.router = new EventRouter({
+      channel: Radio.channel('event-router'),
+      routeTriggers,
+    });
 
     this.on('before:destroy', () => this.router.destroy());
 

@@ -1,4 +1,5 @@
 import Radio from 'backbone.radio';
+import { View } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -39,7 +40,7 @@ export default App.extend({
     if (this.program && this.program.isNew()) this.program.destroy();
   },
   showHeading() {
-    this.showChildView('heading', headingText);
+    this.showChildView('heading', new View({ template: () => headingText }));
   },
   showTimestamps() {
     if (this.program.isNew()) return;
