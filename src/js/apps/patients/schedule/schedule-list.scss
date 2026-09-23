@@ -273,3 +273,13 @@
   }
 
 }
+
+.schedule-list__error {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  justify-content: center;
+  margin: 0 var(--space-6) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+}
