@@ -1,7 +1,8 @@
 import { debounce, every } from 'underscore';
-import { Radio, View, CollectionView } from 'marionette';
-import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
+import { Radio, View, CollectionView } from 'marionette';
+
+import dayjs from 'dayjs';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
@@ -11,11 +12,9 @@ import intl from 'js/i18n';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
-import PreloadRegion from 'js/regions/preload_region';
-
 import { ListPageFiltersButtonView, ListPageView } from 'js/apps/patients/shared/list-page';
 import { TitleOwnerDroplist } from 'js/apps/patients/shared/list_views';
-import { CheckComponent, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { CheckView, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import SelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import DayItemTemplate from './day-item.hbs';
 import DayListTemplate from './day-list.hbs';
@@ -25,6 +24,20 @@ import 'scss/domain/action-icons.scss';
 import 'scss/domain/patient-list.scss';
 import './schedule-list.scss';
 
+const ListErrorView = View.extend({
+  className: 'schedule-list__error',
+  attributes: {
+    role: 'alert',
+  },
+  template: hbs`
+    <span>{{ @intl.patients.schedule.scheduleViews.errorView.message }}</span>
+    <button class="button button--text js-retry" type="button">{{ @intl.patients.schedule.scheduleViews.errorView.retry }}</button>
+  `,
+  triggers: {
+    'click .js-retry': 'retry',
+  },
+});
+
 const ScheduleDetailsTooltip = DetailsTooltip.extend({
   className: 'button button--icon action-details-tooltip schedule-list__details-tooltip',
 });
@@ -33,12 +46,10 @@ const LayoutView = ListPageView.extend({
   template: LayoutTemplate,
   regions: {
     filters: '[data-filters-region]',
-    list: {
-      el: '[data-list-region]',
-      regionClass: PreloadRegion,
+    results: {
+      el: '[data-results-region]',
       replaceElement: true,
     },
-    selectionBar: '[data-selection-bar-region]',
     title: {
       el: '[data-title-region]',
       replaceElement: true,
@@ -143,14 +154,15 @@ const DayItemView = View.extend({
       commentCount: this.model.commentCount(),
     };
   },
-  triggers: {
-    'click .js-form': 'click:form',
-  },
   events: {
-    'click .js-action-surface': 'onClickSurface',
     'click .js-no-click': stopEventPropagation,
     'click .js-action': 'onClickAction',
     'click .js-patient': 'onClickPatient',
+    'click .js-form': 'onClickForm',
+    'click .js-action-surface': 'onClickSurface',
+  },
+  ui: {
+    patient: '.js-patient',
   },
   modelEvents: {
     'change': 'render',
@@ -179,44 +191,48 @@ const DayItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    this.$('.js-patient')
-      .toggleClass('patient-list__patient--selected', isSelected)
-      .attr('aria-expanded', String(isSelected));
+    const [patient] = this.getUI('patient');
+    patient.classList.toggle('patient-list__patient--selected', isSelected);
+    patient.setAttribute('aria-expanded', String(isSelected));
+  },
+  focusPatient() {
+    this.getUI('patient')[0].focus();
   },
   showCheck() {
     if (!this.canEdit) return;
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
+    const checkView = new CheckView({
       deselectLabel: intl.patients.schedule.scheduleViews.dayItemView.deselectAction,
       selectLabel: intl.patients.schedule.scheduleViews.dayItemView.selectAction,
-      state: { isSelected },
+      isSelected,
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(checkView, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', checkView);
   },
   onClickPatient(event) {
-    event.stopPropagation();
-    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+    event.stopImmediatePropagation();
+    this.trigger('click:patient', this.model.getPatient(), this);
   },
   onClickAction(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction();
   },
-  onClickForm() {
+  onClickForm(event) {
+    event.stopImmediatePropagation();
     this.navigateToAction({ formExpanded: true });
   },
   onClickSurface() {
@@ -287,7 +303,7 @@ const DayListView = CollectionView.extend({
   },
   onListItemRender(view) {
     const date = dayjs(this.model.get('date'));
-    view.searchString = `${ date.format('D') } ${ date.format('MMM, ddd') } ${ view.$el.text() }`;
+    view.searchString = `${ date.format('D') } ${ date.format('MMM, ddd') } ${ view.el.textContent }`;
   },
   searchList(state, searchQuery) {
     if (!searchQuery) {
@@ -348,6 +364,9 @@ const ScheduleListView = CollectionView.extend({
   childViewEvents: {
     'render:children': 'onChildFilter',
   },
+  preinitialize() {
+    this.onChildFilter = debounce(this.onChildFilter, 10);
+  },
   emptyView() {
     if (this.collection.length && this.state.get('searchQuery')) {
       return EmptyFindInListView;
@@ -388,12 +407,16 @@ const ScheduleListView = CollectionView.extend({
     this.selectedPatientId = patientId;
     this.children.each(view => view.setPatientSelected(patientId));
   },
-  onChildFilter: debounce(function() {
+  onChildFilter() {
     this.filter();
-  }, 10),
+  },
+  onBeforeDestroy() {
+    this.onListItemCanEdit.cancel();
+    this.onChildFilter.cancel();
+  },
   setVisibleChildren() {
     const visibleActions = this.children.reduce((models, cv) => {
-      return models.concat(cv.children.pluck('model'));
+      return models.concat(cv.children.map(view => view.model));
     }, []);
     this.triggerMethod('filtered', visibleActions);
   },
@@ -404,6 +427,7 @@ const ScheduleListView = CollectionView.extend({
 
 export {
   LayoutView,
+  ListErrorView,
   ScheduleTitleView,
   AllFiltersButtonView,
   ScheduleListView,

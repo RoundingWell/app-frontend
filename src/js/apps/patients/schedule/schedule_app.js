@@ -1,373 +1,229 @@
-import { extend, get } from 'underscore';
 import { Radio } from 'marionette';
 
-import App from 'js/base/app';
-
-import intl, { renderTemplate } from 'js/i18n';
+import { addError } from 'js/datadog';
 
 import StateModel from './schedule_state';
+import ResultsApp from './schedule-results_app';
+
+import App from 'js/base/app';
 import FiltersStateModel from 'js/apps/patients/shared/filters_state';
+import ListSidebarApp from 'js/apps/patients/shared/list-sidebar_app';
 
-import BulkEditActionsApp from 'js/apps/patients/shared/bulk-edit/bulk-edit-actions_app';
-import { ListFiltersPanelApp } from 'js/apps/patients/shared/list-filters/list-filters_app';
-import ListPatientSidebarApp from 'js/apps/patients/shared/list-patient-sidebar_app';
+import DateFilter from 'js/apps/patients/shared/components/date-filter';
+import SearchView from 'js/components/list-search';
 
-import DateFilterComponent from 'js/apps/patients/shared/components/date-filter';
-import SearchComponent from 'js/components/list-search';
-
-import { CountView } from 'js/apps/patients/shared/list_views';
-import { ListPageAppMixin } from 'js/apps/patients/shared/list-page';
-
-import { LayoutView, ScheduleTitleView, SelectAllView, ScheduleListView, AllFiltersButtonView } from 'js/apps/patients/schedule/schedule_views';
-import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
-
-const FiltersApp = App.extend({
-  StateModel: FiltersStateModel,
-});
+import { LayoutView, ScheduleTitleView, AllFiltersButtonView } from 'js/apps/patients/schedule/schedule_views';
 
 const ScheduleApp = App.extend({
-  StateModel,
   childApps: {
-    filters: {
-      AppClass: FiltersApp,
-      restartWithParent: false,
-    },
-    bulkEditActions: BulkEditActionsApp,
-    filtersSidebar: {
-      AppClass: ListFiltersPanelApp,
-      restartWithParent: false,
-    },
-    patientSidebar: {
-      AppClass: ListPatientSidebarApp,
-      restartWithParent: false,
-    },
+    sidebar: ListSidebarApp,
+  },
+  createState() {
+    return new StateModel();
   },
   stateEvents: {
-    'change:clinicianId change:dateFilters change:customFilters change:states change:flowStates': 'restart',
-    'change:actionsSelected': 'onChangeSelected',
+    'change:clinicianId': 'refreshList',
+    'change:dateFilters': 'refreshList',
+    'change:customFilters': 'refreshList',
+    'change:states': 'refreshList',
+    'change:flowStates': 'refreshList',
     'change:searchQuery': 'onChangeSearchQuery',
   },
-  startFiltersApp({ setDefaults } = {}) {
-    const filtersApp = this.startChildApp('filters', { state: this.getState().getFiltersState() });
-
-    this.filterState = filtersApp.getState();
-
-    filtersApp.listenTo(this.filterState, 'change', () => {
-      this.setState(this.filterState.getFiltersState());
+  initialize() {
+    const results = this.addChildApp('results', new ResultsApp({ state: this.getState() }));
+    const sidebar = this.getChildApp('sidebar');
+    this.listenTo(results, 'click:patient', patient => sidebar.selectPatient(patient));
+    this.listenTo(sidebar, {
+      'change:patient': patient => {
+        results.setPatientSelected(patient?.id || null);
+        if (patient) this.getView().showPatientSidebar();
+      },
+      'show:patient': () => {
+        const view = this.getView();
+        view.setDrawerCloseHidden(true);
+        if (view.isFiltersDrawer()) sidebar.focusPatientClose();
+      },
+      'show:filters': this.onShowFilters,
+      'close': () => results.focusPatientTrigger(),
     });
+  },
+  onBeforeStart() {
+    this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
+    this.listenTo(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
+    this.initListState();
+
+    const view = this.setView(new LayoutView({ model: this.getState() }));
+    this.listenTo(view, {
+      'change:filters-drawer': this.onChangeFiltersDrawer,
+      'change:filters-sidebar-fixed': this.onChangeFiltersSidebarFixed,
+      'close:sidebar-drawer': this.onCloseSidebarDrawer,
+      'before:destroy': this.onBeforeDestroyPageView,
+    });
+    this.expandFixedFiltersSidebar(view.isFiltersSidebarFixed());
+    view.render();
+
+    this.showSearchView();
+    this.showFiltersButtonView();
+    this.showScheduleTitle();
+    this.showDateFilter();
+
+    this.showView();
+  },
+  async prepareStart(options, { signal }) {
+    const view = this.getView();
+    const [resultsStarted, sidebarStarted] = await Promise.all([
+      this.getChildApp('results').start({
+        region: view.getRegion('results'),
+        filtersState: this.filterState,
+      }),
+      this.getChildApp('sidebar').start({
+        region: view.getRegion('filtersSidebar'),
+        filtersState: this.filterState,
+        layoutState: view.getLayoutState(),
+        isDrawer: view.isFiltersDrawer(),
+      }),
+    ]);
+    signal.throwIfAborted();
+    return resultsStarted && sidebarStarted && !view.isDestroyed();
+  },
+  onStop() {
+    this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
+  },
+  onBeforeDestroy() {
+    this.filterState?.setFiltersCount.cancel();
+    this.filterState?.stopListening();
+    this.filterState?.off();
+  },
+  onUnknownError() {
+    this.getState().removeStore();
+  },
+  initListState() {
+    const state = this.getState();
+    const storedState = state.getStore();
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+
+    state.restoreStore();
+    state.set({
+      ...state.defaults(),
+      ...storedState,
+      id: `schedule_${ currentUser.id }`,
+      searchQuery: this.currentSearchQuery || '',
+      lastSelectedIndex: null,
+    });
+    this.initFiltersState({ setDefaults: !storedState });
+  },
+  initFiltersState({ setDefaults }) {
+    if (!this.filterState) {
+      this.filterState = new FiltersStateModel(this.getState().getFiltersState());
+      this.listenTo(this.filterState, 'change', (state, options) => {
+        this.getState().set(state.getFiltersState(), options);
+      });
+    } else {
+      this.filterState.set(this.getState().getFiltersState());
+    }
 
     if (setDefaults) this.filterState.setDefaultFilterStates();
-
-    this.setState(this.filterState.getFiltersState());
+    this.getState().set(this.filterState.getFiltersState());
   },
-  onChangeSelected() {
-    this.toggleBulkSelect();
+  onChangeFiltersSidebarFixed(isFixed) {
+    this.expandFixedFiltersSidebar(isFixed);
+  },
+  expandFixedFiltersSidebar(isFixed) {
+    if (isFixed) this.getState().setFiltersSidebarCollapsed(false);
+  },
+  onBeforeDestroyPageView(view) {
+    const results = this.getChildApp('results');
+    const sidebar = this.getChildApp('sidebar');
+    sidebar.releaseHost();
+    results.stop().catch(addError);
+    sidebar.stop().catch(addError);
+    this.stopListening(view);
+  },
+  onShowFilters() {
+    this.getView().showFiltersSidebar();
+  },
+  onClickFilters() {
+    const sidebar = this.getChildApp('sidebar');
+    if (sidebar.isPatientOpen()) {
+      sidebar.showFilters().catch(addError);
+      return;
+    }
+    if (this.getView().toggleFiltersSidebar()) this.filterState.trigger('expand:sections');
+  },
+  async onChangeFiltersDrawer(isDrawer) {
+    const view = this.getView();
+    const sidebar = this.getChildApp('sidebar');
+    if (isDrawer && sidebar.isPatientOpen()) {
+      if (!await sidebar.showFilters().catch(addError) || view.isDestroyed()) return;
+      isDrawer = view.isFiltersDrawer();
+    }
+    sidebar.setDrawerMode(isDrawer);
+    view.setSidebarCollapsed(isDrawer || (!sidebar.isPatientOpen() && this.getState().get('filtersSidebarCollapsed')));
+  },
+  async onCloseSidebarDrawer() {
+    const view = this.getView();
+    const sidebar = this.getChildApp('sidebar');
+    const wasPatientOpen = sidebar.isPatientOpen();
+    if (wasPatientOpen && (!await sidebar.showFilters().catch(addError) || view.isDestroyed())) return;
+
+    view.setSidebarCollapsed(true);
+    if (wasPatientOpen) this.getChildApp('results').focusPatientTrigger();
+    else view.getChildView('filters').focus();
+  },
+  refreshList(state, value, options) {
+    const results = this.getChildApp('results');
+    if (!results.isRunning() || options?.source === results) return;
+
+    this.filterState.set(this.getState().getFiltersState());
+    return results.refreshList();
   },
   onChangeSearchQuery(state) {
     this.currentSearchQuery = state.get('searchQuery');
   },
-  initListState() {
-    const storedState = this.getState().getStore();
-
-    this.getState().setSearchQuery(this.currentSearchQuery);
-
-    if (storedState) {
-      this.setState(storedState);
-      this.startFiltersApp();
-      return;
-    }
-
-    const currentUser = Radio.request('bootstrap', 'currentUser');
-    this.setState({ id: `schedule_${ currentUser.id }` });
-
-    this.startFiltersApp({ setDefaults: true });
-  },
-  onBeforeStop() {
-    this.collection = null;
-    if (!this.isRestarting()) {
-      this.isPatientSidebarOpen = false;
-      this.patientSidebarPatientId = null;
-      this.stopChildApp('filters');
-      this.stopChildApp('filtersSidebar');
-      this.stopChildApp('patientSidebar');
-    }
-  },
-  onBeforeStart() {
-    if (this.isRestarting()) {
-      const filtersApp = this.getChildApp('filters');
-
-      filtersApp.setState(this.getState().getFiltersState());
-
-      this.getSelectionBarRegion('count').empty();
-
-      this.showFiltersButtonView();
-      this.getRegion('list').startPreloader({ variant: 'generic' });
-
-      return;
-    }
-
-    this.initListState();
-
-    const layoutView = new LayoutView({ model: this.getState() });
-
-    this.setListPageView(layoutView);
-
-    this.showDisabledSelectAll();
-    this.showSearchView();
-    this.showScheduleTitle();
-    this.showDateFilter();
-    this.showFiltersButtonView();
-    this.mountFiltersSidebar();
-
-    this.getRegion('list').startPreloader({ variant: 'generic' });
-
-    this.showView();
-  },
-  beforeStart() {
-    if (this.isPatientSidebarOpen) this.listenToPatientSidebar();
-
-    const filter = this.getState().getEntityFilter();
-    const fields = { flows: ['name', 'state'], patients: ['first_name', 'last_name'] };
-    const include = 'patient,flow';
-    return Radio.request('entities', 'fetch:actions:collection', { data: { filter, fields, include } });
-  },
-  onStart(options, collection) {
-    this.setWorklist(collection.getMeta('worklist'));
-
-    this.collection = collection;
-    this.filteredCollection = collection.clone();
-    this.editableCollection = collection.clone();
-
-    this.listenTo(this.filteredCollection, 'reset', this.showCountView);
-    this.showCountView();
-
-    this.listenTo(this.editableCollection, 'reset', this.toggleBulkSelect);
-    this.toggleBulkSelect();
-
-    this.showList();
-  },
-  /* istanbul ignore next: error handling */
-  onFail(options, error) {
-    if (get(error, ['response', 'status']) === 400) {
-      this.filterState.setDefaultFilterStates();
-    }
-  },
-  setWorklist(worklist) {
-    this.getState().setWorklist(worklist);
-    const filtersState = this.getFiltersState();
-    filtersState.set('worklist', worklist);
-  },
-  showList() {
-    const scheduleListView = new ScheduleListView({
-      collection: this.collection.groupByDate(),
-      editableCollection: this.editableCollection,
-      selectedPatientId: this.patientSidebarPatientId,
-      state: this.getState(),
+  showSearchView() {
+    const searchView = new SearchView({
+      query: this.getState().get('searchQuery'),
     });
 
-    this.listenTo(scheduleListView, {
-      'filtered'(filtered) {
-        this.filteredCollection.reset(filtered);
-        this.editableCollection.reset(this._getListEditable(scheduleListView));
-      },
-      'change:canEdit'() {
-        this.editableCollection.reset(this._getListEditable(scheduleListView));
-      },
-      'click:patient': this.showPatientSidebar,
+    this.listenTo(searchView, 'change:query', searchQuery => {
+      this.getState().setSearchQuery(searchQuery);
     });
 
-    this.showChildView('list', scheduleListView);
-  },
-  _getListEditable(list) {
-    return list.children.reduce((allModels, dayView) => {
-      return dayView.children.reduce((models, { canEdit, model }) => {
-        if (canEdit) models.push(model);
-        return models;
-      }, allModels);
-    }, []);
-  },
-  getFiltersState() {
-    const filtersApp = this.getChildApp('filters');
-    return filtersApp.getState();
+    this.getView().showChildView('search', searchView);
   },
   showFiltersButtonView() {
     const filtersButtonView = new AllFiltersButtonView({
-      layoutState: this.layoutView.getLayoutState(),
-      model: this.getFiltersState(),
+      layoutState: this.getView().getLayoutState(),
+      model: this.filterState,
     });
 
-    this.listenTo(filtersButtonView, 'click', this.onClickFiltersButton);
+    this.listenTo(filtersButtonView, 'click', this.onClickFilters);
 
-    this.showChildView('filters', filtersButtonView);
-  },
-  mountFiltersSidebar() {
-    const filtersState = this.getFiltersState();
-
-    this.startChildApp('filtersSidebar', {
-      region: this.getRegion('filtersSidebar'),
-      filtersState,
-      layoutState: this.layoutView.getLayoutState(),
-      isDrawer: this.layoutView.isFiltersDrawer(),
-    });
-  },
-  showPatientSidebar(patient, triggerElement) {
-    if (this.isPatientSidebarOpen && this.patientSidebarPatientId === patient.id) {
-      this.closePatientSidebar();
-      return;
-    }
-
-    this.isPatientSidebarOpen = true;
-    this.patientSidebarPatientId = patient.id;
-    this.patientSidebarTrigger = triggerElement;
-    this.getChildView('list').setPatientSelected(patient.id);
-    this.stopChildApp('filtersSidebar');
-    this.stopChildApp('patientSidebar');
-    this.setSidebarLayoutCollapsed(false);
-
-    const patientSidebar = this.startChildApp('patientSidebar', {
-      region: this.getRegion('filtersSidebar'),
-      patient,
-    });
-
-    this.focusPatientSidebar(patientSidebar);
-    this.listenToPatientSidebar();
-  },
-  showFiltersSidebar() {
-    this.isPatientSidebarOpen = false;
-    this.patientSidebarPatientId = null;
-    this.getChildView('list').setPatientSelected(null);
-    this.stopChildApp('patientSidebar');
-    this.mountFiltersSidebar();
-    this.restoreFiltersSidebarLayout();
-  },
-  toggleBulkSelect() {
-    this.selected = this.getState().getSelected(this.editableCollection);
-    this.showSelectAll();
-
-    if (this.selected.length) {
-      this.showBulkEdit();
-      return;
-    }
-
-    this.stopChildApp('bulkEditActions');
-  },
-  onClickBulkCancel() {
-    this.getState().clearSelected();
-  },
-  showBulkEdit() {
-    const app = this.getChildApp('bulkEditActions');
-
-    if (app.isRunning()) {
-      app.updateCollection(this.selected);
-      return;
-    }
-
-    this.startChildApp('bulkEditActions', {
-      region: this.getSelectionBarRegion('bulkEdit'),
-      state: { collection: this.selected },
-    });
-
-    this.listenTo(app, {
-      'cancel': this.onClickBulkCancel,
-      'applyOwner'(owner) {
-        this.selected.applyOwner(owner);
-      },
-      'save'(saveData) {
-        const itemCount = this.selected.length;
-
-        this.selected.save(saveData)
-          .then(() => {
-            Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));
-            app.stop();
-
-            if (saveData.due_date && this.selected.some(action => action.changed.due_date)) {
-              this.getState().clearSelected();
-              this.restart();
-              return;
-            }
-
-            this.getState().clearSelected();
-          })
-          .catch(() => {
-            Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.bulkEditFailure);
-            this.getState().clearSelected();
-            this.restart();
-          });
-      },
-    });
-  },
-  showDisabledSelectAll() {
-    this.showSelectionBarChildView('selectAll', new SelectAllView({ isDisabled: true }));
-  },
-  showSelectAll() {
-    if (!this.editableCollection.length) {
-      this.showDisabledSelectAll();
-      return;
-    }
-
-    const selectAllView = new SelectAllView({
-      isSelectAll: this.selected.length === this.editableCollection.length,
-      isSelectNone: !this.selected.length,
-    });
-
-    this.listenTo(selectAllView, 'click', this.onClickBulkSelect);
-
-    this.showSelectionBarChildView('selectAll', selectAllView);
-  },
-  onClickBulkSelect() {
-    if (this.selected.length === this.editableCollection.length) {
-      this.getState().clearSelected();
-      return;
-    }
-
-    this.getState().selectMultiple(this.editableCollection.map('id'));
-  },
-  showCountView() {
-    const countView = new CountView({
-      collection: this.collection,
-      filteredCollection: this.filteredCollection,
-    });
-
-    this.showSelectionBarChildView('count', countView);
+    this.getView().showChildView('filters', filtersButtonView);
   },
   showDateFilter() {
     const dateTypes = ['due_date'];
 
-    const dateFilterComponent = new DateFilterComponent({
+    const dateFilter = new DateFilter({
       dateTypes,
-      state: this.getState().getDateFilters(),
+      stateOptions: this.getState().getDateFilters(),
     });
 
-    this.listenTo(dateFilterComponent.getState(), 'change', ({ attributes }) => {
+    dateFilter.listenTo(dateFilter.getState(), 'change', ({ attributes }) => {
       this.getState().setDateFilters(attributes);
     });
 
-    this.showChildView('dateFilter', dateFilterComponent);
+    this.getView().showChildView('dateFilter', dateFilter);
   },
   showScheduleTitle() {
     const scheduleTitleView = new ScheduleTitleView({ model: this.getState() });
 
     this.listenTo(scheduleTitleView, 'change:owner', ({ id }) => {
-      this.setState({ clinicianId: id });
+      this.getState().set({ clinicianId: id });
     });
 
-    this.showChildView('title', scheduleTitleView);
-  },
-  showSearchView() {
-    const searchComponent = new SearchComponent({
-      state: {
-        query: this.getState('searchQuery'),
-      },
-    });
-
-    this.listenTo(searchComponent.getState(), 'change:query', (state, searchQuery) => {
-      this.getState().setSearchQuery(searchQuery);
-    });
-
-    this.showChildView('search', searchComponent);
+    this.getView().showChildView('title', scheduleTitleView);
   },
 });
-
-extend(ScheduleApp.prototype, ListPageAppMixin);
 
 export default ScheduleApp;
