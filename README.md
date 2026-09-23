@@ -116,34 +116,15 @@ If this doesn't work try turning your computer off and then on again 😜
 
 - [Underscore](https://underscorejs.org/)
 - [Backbone](https://backbonejs.org/)
-- [Backbone.Radio](https://github.com/marionettejs/backbone.radio)
-- [Marionette](https://marionettejs.com/)
-- [Marionette.Toolkit](https://github.com/RoundingWellOS/marionette.toolkit)
-  Toolkit adds the `App` class for an Application tree. Each `App` has a lifecycle and an attached state model.
-  Apps are best for requesting data, packaging it and choosing the correct views to show.
-  Toolkit also comes with `Component` for making generic encapsulated components such as datepickers or other widgets.
-  In this program [Apps have been made async by default](https://github.com/RoundingWellOS/marionette.toolkit/blob/master/docs/async-app-start.md).
+- [Marionette](https://marionettejs.com/docs/)
+- [Marionette Radio](https://marionettejs.com/docs/radio/)
 
-  A typical app will look like:
-
-```js
-const MyApp = Toolkit.App.extend({
-  onBeforeStart(options) {
-    this.setView(new MyLayoutView());
-    this.showChildView('header', options.headerText);
-    this.showView();
-  },
-  beforeStart() {
-    return Radio.request('entities', 'data');
-  },
-  onStart(options, data) {
-    this.showChildView('content', new DataView({ model: data }));
-  }
-});
-```
-
-`Components` should be configurable but not built to be extended. They can also act as a wrapper for 3rd party widgets such as jquery plugins.
-A component controls a region and a view combined with a state model, providing a consistent API for interaction.
+Follow [`AGENTS.md`](AGENTS.md) and the [`src/js` guide](src/js/README.md) for
+local ownership, View, and DOM conventions. The
+[Marionette application context](AGENTS.md#marionette-application-context) records
+the installed integrations and how to retrieve version-matched framework API
+docs with Marionette's upstream `marionette` plugin and skill. See the
+[agent tooling guide](https://marionettejs.com/docs/agent-tools/) for setup.
 
 - [Backbone.Store](https://github.com/RoundingWellOS/backbone.store)
   A small but important library that ensures there is only a single instance of a model in memory. It is used for both server models and to sync state models across applications.
@@ -273,7 +254,7 @@ Outside of linting there are some recommendations for code standards that will h
 - Within reason functions should ideally accomplish one task in less than 10 lines unless logically trivial. If it is getting to big, break up the function.
 - Similarly modules should ideally get no larger than 300 lines or so. This is a general guideline and not a rule.
 - Use only .js- prefixed selectors if at all possible from the code. Do not use style classes, ids, or tagnames if it can be avoided.
-- Utilize the ui hash on views and avoid using the $el if possible. Never use $ directly within a view. Worst case use this.$el or this.$.
+- Define template element selectors in a View's `ui` hash and access them with `getUI` rather than querying selectors from View methods.
 - The view should have say over only the DOM inside its own template or in the case of a CollectionView sometimes its direct children. Avoid allowing deep reaching within the DOM or anything external changing the DOM besides the view itself.
 - Anything AJAX should happen within the entities service only.
 - Generally it is better to store state on a state model than to append a property to an instance.
