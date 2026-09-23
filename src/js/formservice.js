@@ -14,27 +14,26 @@ function isFormIo() {
 }
 
 const ActionFormApp = App.extend({
-  beforeStart({ actionId }) {
-    return [
-      Radio.request('entities', 'fetch:forms:byAction', actionId),
-      Radio.request('entities', 'fetch:forms:data', actionId),
-      Radio.request('entities', 'fetch:actions:model', actionId),
-      isFormIo() && Radio.request('entities', 'fetch:forms:definition:byAction', actionId),
-    ];
-  },
-  onStart(opts, form, data, action, definition) {
+  async prepareStart({ actionId }, { signal }) {
+    const [form, data, action, definition] = await Promise.all([
+      Radio.request('entities', 'fetch:forms:byAction', actionId, { signal }),
+      Radio.request('entities', 'fetch:forms:data', actionId, null, null, { signal }),
+      Radio.request('entities', 'fetch:actions:model', actionId, { signal }),
+      isFormIo() && Radio.request('entities', 'fetch:forms:definition:byAction', actionId, { signal }),
+    ]);
     const filter = this._getPrefillFilters(form, action);
+    const response = await Radio.request('entities', 'fetch:formResponses:byPatient', filter, { signal });
 
-    return Promise.resolve(Radio.request('entities', 'fetch:formResponses:byPatient', filter))
-      .then(response => {
-        parent.postMessage({ message: 'form:pdf', args: { value: {
-          ...(definition && { definition }),
-          formData: data.attributes,
-          responseData: response.getFormData(),
-          formSubmission: response.getResponse(),
-          options: form.get('options'),
-        } } }, window.origin);
-      });
+    return [form, data, response, definition];
+  },
+  onStart(app, options, [form, data, response, definition]) {
+    parent.postMessage({ message: 'form:pdf', args: { value: {
+      ...(definition && { definition }),
+      formData: data.attributes,
+      responseData: response.getFormData(),
+      formSubmission: response.getResponse(),
+      options: form.get('options'),
+    } } }, window.origin);
   },
   _getPrefillFilters(form, action) {
     const isReport = form.isReport();
@@ -51,15 +50,15 @@ const ActionFormApp = App.extend({
 });
 
 const FormApp = App.extend({
-  beforeStart({ formId, patientId, responseId }) {
-    return [
-      Radio.request('entities', 'fetch:forms:model', formId),
-      Radio.request('entities', 'fetch:forms:data', null, patientId, formId),
-      Radio.request('entities', 'fetch:formResponses:model', responseId),
-      isFormIo() && Radio.request('entities', 'fetch:forms:definition', formId),
-    ];
+  prepareStart({ formId, patientId, responseId }, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:forms:model', formId, { signal }),
+      Radio.request('entities', 'fetch:forms:data', null, patientId, formId, { signal }),
+      Radio.request('entities', 'fetch:formResponses:model', responseId, { signal }),
+      isFormIo() && Radio.request('entities', 'fetch:forms:definition', formId, { signal }),
+    ]);
   },
-  onStart(opts, form, data, response, definition) {
+  onStart(app, options, [form, data, response, definition]) {
     parent.postMessage({ message: 'form:pdf', args: { value: {
       ...(definition && { definition }),
       formData: data.attributes,
