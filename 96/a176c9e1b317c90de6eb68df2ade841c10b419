@@ -1,0 +1,29 @@
+src/js/apps/patients/schedule/schedule_views.js
+  s_7d9748a0496f68::t_b778370b9d6ec1 35-36
+src/js/apps/patients/schedule/schedule_app.js
+  s_7d9748a0496f68::t_0d524998735e5d 3-4,35-48,75,126-141,143-175,204
+  s_7d9748a0496f68::t_85ca046f5b3952 65-66,71-74,76-77,79,81-83
+  s_7d9748a0496f68::t_b778370b9d6ec1 67
+src/js/apps/patients/schedule/schedule-results_app.js
+  s_7d9748a0496f68::t_b4ecdb68528522 63-64,101,144
+  s_7d9748a0496f68::t_84534887174eb2 13-14,20,24-35,37,47-48,55,57,75,77-81,125,134,151,205
+  s_7d9748a0496f68::t_a359e2d7ec847a 83,120-123,127-130
+src/js/apps/patients/schedule/layout.hbs
+  s_7d9748a0496f68::t_b778370b9d6ec1 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "96a176c9e1b317c90de6eb68df2ade841c10b419",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
