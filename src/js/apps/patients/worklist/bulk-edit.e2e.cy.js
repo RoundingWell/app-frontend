@@ -311,7 +311,8 @@ context('Worklist bulk editing', function() {
       }),
     ];
 
-    cy.viewport(1000, 720);
+    cy
+      .viewport(1000, 720);
 
     cy
       .routesForDefault()
@@ -1151,6 +1152,135 @@ context('Worklist bulk editing', function() {
     cy
       .get('@failedPatchAction.all')
       .should('have.length', 1);
+    cy
+      .wait('@routeActions');
+    // A save belongs to its submitted editor, while later selections remain usable.
+    [{ statusCode: 204 }, { statusCode: 400 }, { statusCode: 204, reopen: true }].forEach(({ statusCode, reopen }) => {
+      let releaseSelectionSave;
+      let selectionSaveRequested = false;
+      const selectionSaveResponse = new Cypress.Promise(resolve => {
+        releaseSelectionSave = resolve;
+      });
+      cy.intercept('PATCH', '/api/actions/*', req => {
+        selectionSaveRequested = true;
+        return selectionSaveResponse.then(() => req.reply({ statusCode, body: {} }));
+      }).as('selectionSave');
+      cy
+        .get('.worklist-list__item .js-select')
+        .first()
+        .click();
+      cy
+        .get('.bulk-edit-inline [data-owner-region]')
+        .click();
+      cy
+        .get('.picklist .js-picklist-item')
+        .contains('Nurse')
+        .click();
+      cy
+        .get('.bulk-edit-inline .js-save')
+        .click();
+      cy
+        .wrap(null)
+        .should(() => expect(selectionSaveRequested).to.equal(true));
+      if (reopen) {
+        cy
+          .get('.worklist-list__item .js-select')
+          .first()
+          .click();
+        cy
+          .get('.bulk-edit-inline')
+          .should('not.exist');
+        cy
+          .get('.worklist-list__item .js-select')
+          .eq(1)
+          .click();
+      } else {
+        cy
+          .get('.worklist-list__item .js-select')
+          .eq(1)
+          .click();
+      }
+      cy
+        .get('.bulk-edit-inline__heading')
+        .should('contain', reopen ? 'Edit 1 Action' : 'Edit 2 Actions');
+      cy
+        .then(() => releaseSelectionSave());
+      cy
+        .wait('@selectionSave');
+      if (statusCode === 400) cy.wait('@routeActions');
+      cy
+        .get('.bulk-edit-inline__heading')
+        .should('contain', reopen ? 'Edit 1 Action' : 'Edit 2 Actions');
+      cy
+        .get('.bulk-edit-inline .js-save')
+        .should('be.enabled');
+      cy
+        .get('.bulk-edit-inline .js-cancel')
+        .click();
+      cy
+        .get('.bulk-edit-inline')
+        .should('not.exist');
+    });
+
+    [204, 400].forEach((statusCode, index) => {
+      if (index) {
+        cy
+          .go('back');
+        cy
+          .get('.worklist-list__item')
+          .should('be.visible');
+      }
+      let releaseSave;
+      let saveRequested = false;
+      const saveResponse = new Cypress.Promise(resolve => {
+        releaseSave = resolve;
+      });
+      cy.intercept('PATCH', '/api/actions/*', req => {
+        saveRequested = true;
+        return saveResponse.then(() => req.reply({ statusCode, body: { errors: [] } }));
+      }).as('lateSave');
+      cy.get('.worklist-list__item .js-select').first().then($select => {
+        // Returning through history can retain the submitted row's selection.
+        if ($select.attr('aria-checked') !== 'true') cy.wrap($select).click();
+      });
+      cy
+        .get('.bulk-edit-inline [data-owner-region]')
+        .click();
+      cy
+        .get('.picklist .js-picklist-item')
+        .contains('Nurse')
+        .click();
+      cy
+        .get('.bulk-edit-inline .js-save')
+        .click();
+      cy
+        .wrap(null)
+        .should(() => expect(saveRequested).to.equal(true));
+      cy
+        .routeClinicians();
+      cy
+        .get('.app-nav')
+        .contains('Admin Tools')
+        .click();
+      cy
+        .get('.picklist')
+        .contains('Clinicians')
+        .click();
+      cy
+        .get('.card-list')
+        .should('be.visible')
+        .then(() => releaseSave());
+      cy
+        .wait('@lateSave');
+      cy
+        .waitForAppRequests();
+      cy
+        .location('pathname')
+        .should('equal', '/one/clinicians');
+      cy
+        .get('.card-list')
+        .should('be.visible');
+    });
   });
 
   specify('bulk flow editing completed', function() {
