@@ -1,4 +1,5 @@
 import Radio from 'backbone.radio';
+import { View } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -9,7 +10,7 @@ export default App.extend({
     this.clinician = clinician;
     this.clinician.trigger('editing', true);
 
-    this.showChildView('heading', headingText);
+    this.showChildView('heading', new View({ template: () => headingText }));
     this.showContent();
   },
   onStop() {
