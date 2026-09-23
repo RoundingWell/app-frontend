@@ -10,7 +10,7 @@ context('Duration Component', function() {
 
         const component = new DurationComponent({
           duration: null,
-          isCompact: false,
+
         });
 
         component.on('change:duration', onChange);
