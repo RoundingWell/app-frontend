@@ -85,7 +85,7 @@ export default App.extend({
     if (formService) this.unbindEvents(formService, this.serviceEvents);
     this._draftStatusRequest = null;
     this._discardRequest = null;
-    this.stopListening(this.layoutState, 'change:formExpanded', this.renderExpandedState);
+    if (this.layoutState) this.stopListening(this.layoutState);
   },
   onStart(app, { patient, viewportView }, [form, action, latestResponse]) {
     this.viewportView = viewportView;

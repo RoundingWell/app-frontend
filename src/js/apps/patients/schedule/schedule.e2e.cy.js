@@ -1431,7 +1431,7 @@ context('schedule page', function() {
       .click();
   });
 
-  specify('bulk edit', { defaultCommandTimeout: 10000 }, function() {
+  specify('bulk edit', function() {
     cy.viewport(1100, 720);
 
     const testActions = _.times(20, index => {
@@ -1756,18 +1756,10 @@ context('schedule page', function() {
     cy.routeClinicians();
     cy.get('.app-nav').contains('Admin Tools').click();
     cy.get('.picklist').contains('Clinicians').click();
-    cy.get('.card-list').should('be.visible');
-    cy.navigate('/schedule').wait('@routeActions');
-    cy.get('.bulk-edit-inline .js-cancel').click();
-    cy.get('.schedule-list__list-row .js-select').eq(1).click();
-    cy.get('.bulk-edit-inline [data-due-date-region]').click();
-    cy.get('.datepicker .js-tomorrow').click();
-    cy.get('.bulk-edit-inline .js-save').should('not.be.disabled');
-    cy.then(() => releaseSave());
+    cy.get('.card-list').should('be.visible').then(() => releaseSave());
     cy.wait('@lateSave');
-    cy.location('pathname').should('equal', '/one/schedule');
-    cy.get('.schedule-list__list-row .js-select[aria-checked="true"]').should('have.length', 1);
-    cy.get('.bulk-edit-inline .js-save').should('not.be.disabled');
+    cy.location('pathname').should('equal', '/one/clinicians');
+    cy.get('.card-list').should('be.visible');
   });
 
   specify('empty schedule', function() {

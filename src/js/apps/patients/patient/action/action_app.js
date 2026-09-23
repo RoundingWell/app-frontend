@@ -143,10 +143,8 @@ export default App.extend({
   onStop() {
     this.unsubscribe();
     if (this.currentFlow) this.stopListening(this.currentFlow);
-    this.stopListening(this.action, 'change:_owner', this.onChangeOwner);
-    this.stopListening(this.action, 'change:name', this.updateContext);
-    this.stopListening(this.action, 'destroy', this.onDestroy);
-    this.stopListening(this.layoutState, 'change:formExpanded', this.renderFormExpandedState);
+    if (this.action) this.stopListening(this.action);
+    if (this.layoutState) this.stopListening(this.layoutState);
   },
   onChangeOwner() {
     this.setAccess();

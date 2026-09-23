@@ -54,7 +54,7 @@ export default SubRouterApp.extend({
   },
 
   onStop() {
-    this.stopListening(this.actions, 'change:id destroy', this.updateFlowActions);
+    if (this.actions) this.stopListening(this.actions);
   },
 
   maintainFlowActions() {

@@ -43,7 +43,7 @@ export default SubRouterApp.extend({
   },
 
   onStop() {
-    this.stopListening(this.layoutState, 'change:formExpanded', this.onChangeFormExpanded);
+    if (this.layoutState) this.stopListening(this.layoutState);
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
     Radio.request('nav', 'setMinimized', false);
   },
