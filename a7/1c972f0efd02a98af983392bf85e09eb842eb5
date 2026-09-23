@@ -1,0 +1,27 @@
+src/js/services/patient-modal.js
+  s_7d9748a0496f68::t_961b7b0c866820 53
+src/js/services/patient-modal/patient-modal_views.js
+  s_7d9748a0496f68::t_89a2267de0df61 1,4,41,56-61,64,69,93,95-96,113,117,166,176,185,218-219,221-225
+src/js/services/sidebar.component.cy.js
+  s_7d9748a0496f68::t_d1cdf0b888aec7 2,9-10,15-22,27-50,52-64,68-206
+src/js/services/sidebar.js
+  s_7d9748a0496f68::t_a04719ac916090 1-2,24-28,31,33-34,36,38-53,55-61,63-74,77-79,83,85,88-95
+src/js/services/sidebars.component.cy.js
+  s_7d9748a0496f68::t_073517b754a3d8 37,39-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a71c972f0efd02a98af983392bf85e09eb842eb5",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
