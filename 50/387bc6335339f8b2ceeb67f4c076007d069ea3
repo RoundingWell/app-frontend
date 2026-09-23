@@ -1,0 +1,37 @@
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_5d6404ac856228::t_1dda57c8d00dc3 37-38,70,80-81,85
+src/js/apps/patients/patient/action/action_app.js
+  s_5d6404ac856228::t_49fe700cbd6335 146-147
+src/js/apps/patients/patient/flow/flow_app.js
+  s_5d6404ac856228::t_aca53279601b2e 246,248-249
+src/js/apps/patients/patient/form/form_app.js
+  s_5d6404ac856228::t_464f179682d877 88
+src/js/apps/patients/patient/patient_app.js
+  s_5d6404ac856228::t_4addc7f6158c83 46
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_5d6404ac856228::t_70af9acd0393bc 1434,1759,1761-1762
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_5d6404ac856228::t_c0c88b81c7a6e0 660,1161,1171,1173-1174
+src/js/apps/patients/worklist/worklist_app.js
+  s_5d6404ac856228::t_c9b415558575f2 484,486-487
+src/js/apps/programs/program/flow/flow_app.js
+  s_5d6404ac856228::t_68cd31a51050a9 57
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_5d6404ac856228::t_fb4c5d5ac4cfb8 120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "50387bc6335339f8b2ceeb67f4c076007d069ea3",
+  "prompts": {},
+  "sessions": {
+    "s_5d6404ac856228": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ca84-bf69-7522-ab0f-6119dc692698",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
