@@ -1,0 +1,24 @@
+src/js/apps/programs/shared/actions_views.js
+  h_0f06c286dda36f 27
+src/js/apps/programs/shared/components/behavior_component.js
+  h_0f06c286dda36f 63,68,70-79
+src/js/apps/programs/shared/components/dueday_component.js
+  h_0f06c286dda36f 30-34,45-48,60,65
+src/js/apps/programs/shared/components/form_component.js
+  h_0f06c286dda36f 33-39,41-43,69,72
+src/js/apps/programs/shared/components/tags-manager_component.js
+  h_0f06c286dda36f 56,59,61-62,72,75
+src/js/apps/programs/shared/flows_views.js
+  h_0f06c286dda36f 9,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6ec518e3bd9ac4e2b1ebab07fcd1d70307e919a3",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
