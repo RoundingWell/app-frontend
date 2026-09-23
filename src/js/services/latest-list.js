@@ -16,10 +16,7 @@ export default App.extend({
 
     if (meta.isList) {
       this._setLatestList(event, eventArgs);
-      return;
     }
-
-    if (meta.clearLatestList) this._setLatestList(false);
   },
 
   _setLatestList(event,

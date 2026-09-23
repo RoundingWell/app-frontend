@@ -8,7 +8,7 @@ import intl from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CardOwnerComponent } from 'js/apps/patients/shared/actions_views';
-import { CheckComponent, FlowStateComponent } from 'js/apps/patients/shared/flows_views';
+import { CheckView, FlowStateComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView } from 'js/apps/patients/shared/read-only_views';
 
 import FlowItemTemplate from './flow-item.hbs';
@@ -74,11 +74,11 @@ const FlowItemView = View.extend({
     Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.model.id);
   },
   onClickPatient(event) {
-    event.stopPropagation();
-    this.trigger('click:patient', this.model.getPatient(), event.currentTarget);
+    event.stopImmediatePropagation();
+    this.trigger('click:patient', this.model.getPatient(), this);
   },
   onClickPrimary(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToFlow();
   },
   onRender() {
@@ -96,34 +96,37 @@ const FlowItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
     const isSelected = this.model.getPatient().id === patientId;
-    this.ui.patient
-      .toggleClass('patient-list__patient--selected', isSelected)
-      .attr('aria-expanded', String(isSelected));
+    const [patient] = this.getUI('patient');
+    patient.classList.toggle('patient-list__patient--selected', isSelected);
+    patient.setAttribute('aria-expanded', String(isSelected));
+  },
+  focusPatient() {
+    this.getUI('patient')[0].focus();
   },
   showCheck() {
     if (!this.canEdit) return;
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
+    const checkView = new CheckView({
       deselectLabel: intl.patients.shared.actionsViews.deselectFlow,
       selectLabel: intl.patients.shared.actionsViews.selectFlow,
-      state: { isSelected },
+      isSelected,
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(checkView, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', checkView);
   },
   showState() {
     if (!this.model.isDone() || !this.canEdit) {
@@ -155,8 +158,8 @@ const FlowItemView = View.extend({
     this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(this.ownerComponent, 'change:owner', owner => {
