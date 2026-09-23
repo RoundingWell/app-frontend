@@ -5,11 +5,11 @@ import App from 'js/base/app';
 import { SidebarView, headingText } from 'js/apps/clinicians/sidebar/clinician/clinician-sidebar_views';
 
 export default App.extend({
-  onBeforeStart({ clinician }) {
+  onBeforeStart(app, { clinician }) {
     this.clinician = clinician;
     this.clinician.trigger('editing', true);
 
-    this.showChildView('heading', new View({ template: () => headingText }));
+    this.getView().showChildView('heading', new View({ template: () => headingText }));
     this.showContent();
   },
   onStop() {
@@ -20,14 +20,14 @@ export default App.extend({
 
     this.listenTo(sidebarView, 'save', this.onSave);
 
-    this.showChildView('content', sidebarView);
+    this.getView().showChildView('content', sidebarView);
   },
   onSave({ model }) {
     this.clinician.save(model.attributes).then(() => {
       Radio.trigger('event-router', 'clinician', this.clinician.id);
     }, ({ responseData }) => {
       const errors = this.clinician.parseErrors(responseData);
-      this.getChildView('content').showErrors(errors);
+      this.getView().getChildView('content').showErrors(errors);
     });
   },
 });

@@ -1,10 +1,11 @@
+import { Radio } from 'marionette';
+
 import RouterApp from 'js/base/routerapp';
 
 import CliniciansAllApp from 'js/apps/clinicians/clinicians-all/clinicians-all_app';
 
 export default RouterApp.extend({
   routerAppName: 'CliniciansApp',
-
   childApps: {
     cliniciansAll: CliniciansAllApp,
   },
@@ -22,6 +23,9 @@ export default RouterApp.extend({
   },
 
   showCliniciansAll() {
-    this.startRoute('cliniciansAll');
+    return this.startRoute('cliniciansAll');
+  },
+  onRouteError(error) {
+    Radio.trigger('event-router', 'unknownError', error?.response?.status);
   },
 });

@@ -4,7 +4,7 @@ import { Radio } from 'marionette';
 import SubRouterApp from 'js/base/subrouterapp';
 
 import ClinicianSidebarApp from 'js/apps/clinicians/sidebar/clinician/clinician-sidebar_app';
-import SearchComponent from 'js/components/list-search';
+import SearchView from 'js/components/list-search';
 
 import { ListView, LayoutView, notFound } from 'js/apps/clinicians/clinicians-all/clinicians-all_views';
 import { getClinicianModal } from 'js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views';
@@ -12,37 +12,31 @@ import { getClinicianModal } from 'js/apps/clinicians/clinicians-all/clinician-m
 export default SubRouterApp.extend({
   routerAppName: 'CliniciansApp',
   routeScope: [],
+  childApps: {
+    sidebar: ClinicianSidebarApp,
+  },
   routeActions: {
     'clinician': 'showClinicianSidebar',
     'clinicians:all': 'hideCliniciansSidebar',
   },
-  childApps: {
-    sidebar: ClinicianSidebarApp,
-  },
-  viewEvents: {
-    'click:addClinician': 'onClickAddClinician',
-  },
-  stateEvents: {
-    'change:searchQuery': 'onChangSearchQuery',
-  },
-  onChangSearchQuery(state) {
-    this.currentSearchQuery = state.get('searchQuery');
-  },
   onBeforeStart() {
-    this.showView(new LayoutView());
-    this.getRegion('list').startPreloader({ variant: 'generic' });
+    const view = this.setView(new LayoutView());
 
-    this.setState({ searchQuery: this.currentSearchQuery });
+    view.render();
+    view.getRegion('list').startPreloader({ variant: 'generic' });
+
+    this.listenTo(view, 'click:addClinician', this.showAddModal);
 
     this.showSearchView();
+    this.showView();
   },
-  beforeStart() {
-    return Radio.request('entities', 'fetch:clinicians:collection');
+  prepareStart(options, { signal }) {
+    return Radio.request('entities', 'fetch:clinicians:collection', { signal });
   },
-  onStart(options, clinicians) {
+  onStart(app, options, clinicians) {
     this.clinicians = clinicians;
 
-    this.showChildView('list', new ListView({
+    this.getView().showChildView('list', new ListView({
       collection: this.clinicians,
       state: this.getState(),
     }));
@@ -50,16 +44,14 @@ export default SubRouterApp.extend({
     this.startCurrentRoute();
   },
   showSearchView() {
-    const searchComponent = this.showChildView('search', new SearchComponent({
-      state: {
-        query: this.getState('searchQuery'),
-      },
+    const searchView = this.getView().showChildView('search', new SearchView({
+      query: this.getState().get('searchQuery'),
     }));
 
-    this.listenTo(searchComponent.getState(), 'change:query', this.setSearchState);
+    this.listenTo(searchView, 'change:query', this.setSearchState);
   },
-  setSearchState(state, searchQuery) {
-    this.setState({
+  setSearchState(searchQuery) {
+    this.getState().set({
       searchQuery: searchQuery.length > 2 ? searchQuery : '',
     });
   },
@@ -74,18 +66,15 @@ export default SubRouterApp.extend({
 
     const sidebarApp = this.getChildApp('sidebar');
 
-    Radio.request('sidebar', 'start', sidebarApp, { clinician });
-
     this.stopListening(sidebarApp, 'close');
     this.listenTo(sidebarApp, 'close', () => {
       Radio.trigger('event-router', 'clinicians:all');
     });
+
+    return Radio.request('sidebar', 'start', sidebarApp, { clinician });
   },
   hideCliniciansSidebar() {
-    this.stopChildApp('sidebar');
-  },
-  onClickAddClinician() {
-    this.showAddModal();
+    return this.getChildApp('sidebar').stop();
   },
   _getNewClinician() {
     return Radio.request('entities', 'clinicians:model', {
@@ -109,7 +98,7 @@ export default SubRouterApp.extend({
             clinicianModal.disableSubmit();
             const errors = clinician.parseErrors(error.responseData);
 
-            clinicianModal.getChildView('body').setState({ errors });
+            clinicianModal.getChildView('body').showErrors(errors);
             Radio.request('alert', 'show:error', values(errors).join(', '));
           });
       },
