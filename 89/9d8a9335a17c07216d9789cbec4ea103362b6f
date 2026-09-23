@@ -1,0 +1,29 @@
+src/js/app.component.cy.js
+  s_7d9748a0496f68::t_46f3ec8de9ed91 1-26
+src/js/app.js
+  s_7d9748a0496f68::t_3748a9f86d9dfb 12,15,40-43,53,56,61,65-67,74,79,81,84-85,91-96,98-99,102-103,105-108,110-112,115-118,120-128,130-131,134-137,140-146,149-151,155-158,160,164,175-182
+src/js/services/bootstrap.js
+  s_7d9748a0496f68::t_f94194e30655d7 66-75,77,89-90
+src/js/services/widgets.component.cy.js
+  s_7d9748a0496f68::t_09dcee102c50a6 18-19
+src/js/services/workspace.js
+  s_7d9748a0496f68::t_38b20222940dc8 56-67,71-76,79-81,84,86
+src/js/utils/user-activity.js
+  s_7d9748a0496f68::t_d1f4633d6353a4 1-38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "899d8a9335a17c07216d9789cbec4ea103362b6f",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
