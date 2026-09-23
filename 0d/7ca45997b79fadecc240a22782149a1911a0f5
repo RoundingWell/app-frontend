@@ -1,0 +1,23 @@
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_7d9748a0496f68::t_78feba70e66e4e 5,10,33,35-43,46
+src/js/apps/globals/app-frame/workspace_app.js
+  s_7d9748a0496f68::t_637f1f92798fc0 32
+src/js/apps/globals/nav/nav_app.js
+  s_7d9748a0496f68::t_0ac8eb2fafe5f5 423,509
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "0d7ca45997b79fadecc240a22782149a1911a0f5",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
