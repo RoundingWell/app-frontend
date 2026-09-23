@@ -1,6 +1,5 @@
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
-import $ from 'jquery';
 import { Radio, View } from 'marionette';
 
 import IframeFormBehavior from './iframe-form';
@@ -50,16 +49,14 @@ context('Iframe Form Behavior', function() {
     cy.window().then(win => {
       const [firstIframe, secondIframe] = win.document.querySelectorAll('iframe');
 
-      $(win).trigger($.Event('message', {
-        originalEvent: {
-          data: {
-            message: 'fetch:form:data',
-            args: { patientId: 'patient-1' },
-            requestId: 'req_1',
-          },
-          origin: win.origin,
-          source: firstIframe.contentWindow,
+      win.dispatchEvent(new win.MessageEvent('message', {
+        data: {
+          message: 'fetch:form:data',
+          args: { patientId: 'patient-1' },
+          requestId: 'req_1',
         },
+        origin: win.origin,
+        source: firstIframe.contentWindow,
       }));
 
       expect(requests).to.deep.equal([
@@ -68,16 +65,14 @@ context('Iframe Form Behavior', function() {
 
       requests.length = 0;
 
-      $(win).trigger($.Event('message', {
-        originalEvent: {
-          data: {
-            message: 'fetch:form:data',
-            args: { patientId: 'patient-2' },
-            requestId: 'req_2',
-          },
-          origin: win.origin,
-          source: secondIframe.contentWindow,
+      win.dispatchEvent(new win.MessageEvent('message', {
+        data: {
+          message: 'fetch:form:data',
+          args: { patientId: 'patient-2' },
+          requestId: 'req_2',
         },
+        origin: win.origin,
+        source: secondIframe.contentWindow,
       }));
 
       expect(requests).to.deep.equal([
@@ -99,12 +94,10 @@ context('Iframe Form Behavior', function() {
     cy.window().then(win => {
       const [firstIframe] = win.document.querySelectorAll('iframe');
 
-      $(win).trigger($.Event('message', {
-        originalEvent: {
-          data: { message: 'form:interact' },
-          origin: win.origin,
-          source: firstIframe.contentWindow,
-        },
+      win.dispatchEvent(new win.MessageEvent('message', {
+        data: { message: 'form:interact' },
+        origin: win.origin,
+        source: firstIframe.contentWindow,
       }));
 
       expect(focusedIframes).to.deep.equal([firstIframe]);

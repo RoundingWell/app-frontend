@@ -1,5 +1,3 @@
-import $ from 'jquery';
-import { keys } from 'underscore';
 import { Radio, Behavior } from 'marionette';
 
 export default Behavior.extend({
@@ -11,33 +9,33 @@ export default Behavior.extend({
   },
   replies: {
     send(message, args = {}, requestId) {
-      const iframeWindow = this.ui.iframe[0].contentWindow;
+      const iframeWindow = this.getUI('iframe')[0].contentWindow;
       iframeWindow.postMessage({ message, args, requestId }, window.origin);
     },
     focus() {
-      Radio.trigger('user-activity', 'iframe:focus', this.ui.iframe[0]);
+      Radio.trigger('user-activity', 'iframe:focus', this.getUI('iframe')[0]);
     },
   },
   onAttach() {
     this.channel.reply(this.replies, this);
 
-    this.messageHandler = ({ originalEvent }) => {
-      const { data, origin } = originalEvent;
-      const iframeWindow = this.ui.iframe[0].contentWindow;
+    this.messageHandler = event => {
+      const { data, origin, source } = event;
+      const iframeWindow = this.getUI('iframe')[0].contentWindow;
       /* istanbul ignore next: security check */
-      if (origin !== window.origin || originalEvent.source !== iframeWindow || !data || !data.message) return;
+      if (origin !== window.origin || source !== iframeWindow || !data || !data.message) return;
 
       if (data.message === 'form:interact') {
-        Radio.trigger('user-activity', 'iframe:focus', this.ui.iframe[0]);
+        Radio.trigger('user-activity', 'iframe:focus', this.getUI('iframe')[0]);
       }
 
       this.channel.request(data.message, data.args, data.requestId);
     };
 
-    $(window).on('message', this.messageHandler);
+    window.addEventListener('message', this.messageHandler);
   },
   onBeforeDetach() {
-    $(window).off('message', this.messageHandler);
-    this.channel.stopReplying(keys(this.replies).join(' '));
+    window.removeEventListener('message', this.messageHandler);
+    this.channel.stopReplying(this.replies, this);
   },
 });
