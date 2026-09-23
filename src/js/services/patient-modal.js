@@ -50,11 +50,7 @@ export default App.extend({
             // This assumes that only the similar patient error is handled on the server
             const error = responseData.errors[0].detail;
 
-            patientModal.getChildView('body').setState({
-              errors: {
-                name: error,
-              },
-            });
+            patientModal.getChildView('body').showErrors({ name: error });
 
             const errorView = new ErrorView({ hasSearch: true, error });
 
