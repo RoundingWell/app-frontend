@@ -2,13 +2,23 @@
 
 ## Coverage
 
-Coverage report can be run with commands `npm run coverage` and `npm run coverage:component` for running a full reports and `npm test` for running individual reports on runs from the cypress runner.
+Use `npm run coverage` for both suites, `npm run coverage:component` for components,
+or `npm run coverage:e2e` for app flows. Headless runs collect every spec's coverage
+and generate HTML, text, and LCOV reports once at run completion. Interactive
+`npm test` runs retain per-spec reports.
+
+Local component runs use one process. CircleCI splits component specs across four
+isolated workers without recording to Cypress Cloud and combines their coverage
+with E2E coverage in Coveralls. See [the CI documentation](../.circleci/README.md#cypress-workers-and-coverage).
 
 **Note** You will want to make sure no other build processes are run/running that may overwrite the instrumented files for the coverage reports.
 
 Reports can be found in `coverage/`.
 
-**Note** In order to preserve coverage only _one_ `visit` should be used per `specify`.
+Related scenarios may share a `specify`, including multiple visits. The coverage
+plugin retains coverage from each loaded window and merges it after each test.
+Reset scenario-specific intercepts, clocks, and exception handlers when reusing a
+test. Keep a separate `specify` when a scenario needs independent isolation.
 
 ## What is a Cypress Test?
 
