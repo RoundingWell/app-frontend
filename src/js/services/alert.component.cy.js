@@ -1,4 +1,5 @@
-import { Radio } from 'marionette';
+import hbs from 'handlebars-inline-precompile';
+import { Radio, View } from 'marionette';
 
 import AlertService from './alert';
 
@@ -12,14 +13,16 @@ context('Alert Service', function() {
         const region = rootView.getRegion('alert');
         alertService = new AlertService({ region });
 
-        return '<style>.alert-box{ opacity:1!important; }</style>';
+        return new View({
+          template: hbs`<style>.alert-box{ opacity:1!important; }</style>`,
+        });
       })
       .as('root');
   });
 
-  afterEach(function() {
+  afterEach(async function() {
     if (alertService) {
-      alertService.destroy();
+      await alertService.destroy();
       alertService = null;
     }
 
@@ -30,7 +33,7 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:info', 'info');
+        Radio.request('alert', 'show', { text: 'info' });
       })
       .find('.alert-box')
       .contains('info');
@@ -38,7 +41,7 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:info', 'error');
+        Radio.request('alert', 'show:error', 'error');
       })
       .find('.alert-box')
       .contains('error')
@@ -84,7 +87,8 @@ context('Alert Service', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:undo', { onComplete });
+        const alert = Radio.request('alert', 'show', { text: 'Dismiss me' });
+        alert.on('dismiss', onComplete);
       })
       .find('.js-dismiss')
       .click()
@@ -100,24 +104,18 @@ context('Alert Service', function() {
       .should('not.exist');
   });
 
-  specify('Closing via undo button', function() {
-    const onUndo = cy.stub();
-
+  specify('Closing via outside activity', function() {
     cy
       .get('@root')
       .then(() => {
-        Radio.request('alert', 'show:undo', { onUndo });
+        Radio.request('alert', 'show', { text: 'info' });
       })
-      .find('.js-undo')
-      .click()
-      .click()
-      .then(() => {
-        expect(onUndo).to.be.calledOnce;
-      })
-      .tick(1000);
+      .find('.alert-box')
+      .should('exist');
 
     cy
       .get('@root')
+      .click('bottomRight')
       .find('.alert-box')
       .should('not.exist');
   });
