@@ -1,6 +1,5 @@
 import { bind } from 'underscore';
-import Radio from 'backbone.radio';
-import { Behavior } from 'marionette';
+import { Radio, Behavior } from 'marionette';
 
 import 'scss/modules/fill-window.scss';
 

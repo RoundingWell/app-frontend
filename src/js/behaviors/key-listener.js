@@ -1,6 +1,5 @@
 import { bind, isArray, some } from 'underscore';
-import Radio from 'backbone.radio';
-import { Behavior } from 'marionette';
+import { Radio, Behavior } from 'marionette';
 
 export default Behavior.extend({
   initialize() {

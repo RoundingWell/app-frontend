@@ -1,5 +1,4 @@
-import Radio from 'backbone.radio';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 

@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import parsePhoneNumber from 'libphonenumber-js/min';
 
 import App from 'js/base/app';

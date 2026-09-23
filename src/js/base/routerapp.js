@@ -1,6 +1,6 @@
 import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from './app';
 import EventRouter from './event-router';

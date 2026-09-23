@@ -1,5 +1,4 @@
-import Radio from 'backbone.radio';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import App from 'js/base/app';
 

@@ -1,6 +1,5 @@
 import hbs from 'handlebars-inline-precompile';
-import Radio from 'backbone.radio';
-import { CollectionView, View } from 'marionette';
+import { Radio, CollectionView, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-manager.scss';

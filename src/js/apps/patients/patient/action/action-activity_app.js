@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import dayjs from 'dayjs';
 
 import App from 'js/base/app';

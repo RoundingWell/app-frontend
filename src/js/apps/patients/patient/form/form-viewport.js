@@ -1,5 +1,4 @@
-import Radio from 'backbone.radio';
-import { Behavior } from 'marionette';
+import { Radio, Behavior } from 'marionette';
 
 const FRAME_BOTTOM_OVERFLOW = 8;
 const FRAME_MIN_HEIGHT = 320;

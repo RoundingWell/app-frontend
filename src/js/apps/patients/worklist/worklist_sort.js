@@ -1,6 +1,6 @@
 import { get, union, map, uniq, compact } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import { alphaSort, numSort } from 'js/utils/sorting';
 import { i18n } from 'js/apps/patients/worklist/worklist_views';

@@ -1,6 +1,6 @@
 import { noop } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import collectionOf from 'js/utils/formatting/collection-of';
 import Component from 'js/base/component';

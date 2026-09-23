@@ -1,7 +1,6 @@
 import { noop } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
-import Radio from 'backbone.radio';
-import { View, CollectionView, Region } from 'marionette';
+import { Radio, View, CollectionView, Region } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/modals.scss';

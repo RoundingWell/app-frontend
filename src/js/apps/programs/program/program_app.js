@@ -1,5 +1,5 @@
 import { partial } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import SubRouterApp from 'js/base/subrouterapp';
 

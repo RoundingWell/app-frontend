@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import Store from 'backbone.store';
 
 import 'js/base/setup'; // wires Backbone.ajax -> js/base/fetch

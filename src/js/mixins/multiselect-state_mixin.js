@@ -1,6 +1,6 @@
 import { clone, keys, reduce } from 'underscore';
 
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 // Note: Requires a `getType` method to be defined on the model returning the entity name
 

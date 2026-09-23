@@ -1,7 +1,6 @@
 import { every, map, sortBy } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
-import Radio from 'backbone.radio';
-import { View, CollectionView, Behavior } from 'marionette';
+import { Radio, View, CollectionView, Behavior } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';

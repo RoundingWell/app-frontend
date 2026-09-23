@@ -1,6 +1,6 @@
 import { includes, reject } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { getAppName } from '@roundingwell/care-ops-config';
 
 import getWorkspaceRoute from 'js/utils/root-route';

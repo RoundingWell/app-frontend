@@ -1,8 +1,7 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
 import $ from 'jquery';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import IframeFormBehavior from './iframe-form';
 

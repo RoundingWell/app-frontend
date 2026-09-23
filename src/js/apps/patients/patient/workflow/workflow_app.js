@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { NIL as NIL_UUID } from 'uuid';
 
 import App from 'js/base/app';

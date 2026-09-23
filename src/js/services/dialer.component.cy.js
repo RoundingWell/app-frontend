@@ -1,5 +1,5 @@
 import { v5 as uuid } from 'uuid';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { RWELL_NS } from 'js/static';
 import DialerService from './dialer';
 

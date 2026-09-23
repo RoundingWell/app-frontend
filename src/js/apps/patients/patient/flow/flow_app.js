@@ -1,6 +1,6 @@
 import { extend, get } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import intl, { renderTemplate } from 'js/i18n';
 import handleErrors from 'js/utils/handle-errors';
