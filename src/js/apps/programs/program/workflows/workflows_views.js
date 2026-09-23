@@ -1,4 +1,3 @@
-
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView, Behavior } from 'marionette';
 
@@ -43,10 +42,10 @@ const RowBehavior = Behavior.extend({
     this.view.render();
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.view.el.classList.toggle('is-selected', isEditing);
   },
   onInitialize() {
-    if (this.view.model.isNew()) this.$el.addClass('is-selected');
+    if (this.view.model.isNew()) this.view.el.classList.add('is-selected');
   },
 });
 
@@ -90,7 +89,7 @@ const ActionItemView = View.extend({
       isConditionalAvailable: isFromFlow,
       behavior: this.model.get('behavior'),
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(behaviorComponent, 'change:status', ({ behavior }) => {
@@ -102,7 +101,7 @@ const ActionItemView = View.extend({
   showOwner() {
     const isDisabled = this.model.isNew();
     const isFromFlow = !!this.model.getProgramFlow();
-    const ownerComponent = new OwnerComponent({ owner: this.model.getOwner(), isFromFlow, isCompact: true, state: { isDisabled } });
+    const ownerComponent = new OwnerComponent({ owner: this.model.getOwner(), isFromFlow, isCompact: true, stateOptions: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
       this.model.saveOwner(owner);
@@ -112,7 +111,7 @@ const ActionItemView = View.extend({
   },
   showDue() {
     const isDisabled = this.model.isNew();
-    const dueDayComponent = new DueDayComponent({ day: this.model.get('days_until_due'), isCompact: true, state: { isDisabled } });
+    const dueDayComponent = new DueDayComponent({ day: this.model.get('days_until_due'), isCompact: true, stateOptions: { isDisabled } });
 
     this.listenTo(dueDayComponent, 'change:day', day => {
       this.model.save({ days_until_due: day });
@@ -154,7 +153,7 @@ const FlowItemView = View.extend({
   },
   showOwner() {
     const isDisabled = this.model.isNew();
-    const ownerComponent = new FlowOwnerComponent({ owner: this.model.getOwner(), isCompact: true, state: { isDisabled } });
+    const ownerComponent = new FlowOwnerComponent({ owner: this.model.getOwner(), isCompact: true, stateOptions: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
       this.model.saveOwner(owner);
@@ -200,10 +199,8 @@ const AddActionDroplist = Droplist.extend({
       itemClassName: 'u-text--italic',
     };
   },
-  viewOptions: {
-    className: 'button button--outline',
-    template: hbs`{{far "circle-plus"}}<span>{{ @intl.programs.program.workflows.workflowsViews.addAction }}</span>{{far "angle-down" classes="workflows__arrow"}}`,
-  },
+  className: 'button button--outline',
+  template: hbs`{{far "circle-plus"}}<span>{{ @intl.programs.program.workflows.workflowsViews.addAction }}</span>{{far "angle-down" classes="workflows__arrow"}}`,
   picklistEvents: {
     'picklist:item:select': 'onSelect',
   },
