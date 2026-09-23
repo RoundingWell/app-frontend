@@ -1,6 +1,5 @@
-import { View, CollectionView } from 'marionette';
-
 import hbs from 'handlebars-inline-precompile';
+import { View, CollectionView } from 'marionette';
 
 import { buildWidget } from './widgets';
 
@@ -28,8 +27,10 @@ const WidgetView = View.extend({
     };
   },
   onRender() {
-    if (this.ui.content.length === 0) return;
-    this.addRegion('content', { el: this.ui.content });
+    const content = this.getUI('content');
+    if (!content.length) return;
+
+    this.addRegion('content', { el: content[0] });
     this.showChildView('content', this.contentWidget);
   },
 });
