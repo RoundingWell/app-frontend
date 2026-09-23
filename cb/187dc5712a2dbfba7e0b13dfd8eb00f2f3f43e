@@ -1,0 +1,28 @@
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_7d9748a0496f68::t_2a4942ab2e13e3 191,202,217,221,319,332,340,419-425,427-454,484-486,499-541
+  s_7d9748a0496f68::t_fe3671ac774979 7,39,47,52,120,125,150-190,192-201,203-216,218-220,222-253,256,310-318,320-331,333-339,341-344,372,380-383,400-404,409
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_7d9748a0496f68::t_271f4740802dda 774-777,1493-1494,1525,1670-1687,1853,1873-1876,2700-2729
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_7d9748a0496f68::t_49f92f3c929f56 125-135,137-158,160-182,427-429,431,433-437,439-444,446-450,452-456,458-461,463,465-467,1269-1270,2405-2420,4832-4858,4860-4864,4866-4869,4871-4873,4875-4878
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_7d9748a0496f68::t_3c4f1aa9f51989 7,68-75,91-100,115-122,806-810,813,862-869,903-909,990-996,1396-1415,1439,1483-1509,1769-1861,2728-2742,2791-2834
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_7d9748a0496f68::t_d8da77a494f495 1154-1174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cb187dc5712a2dbfba7e0b13dfd8eb00f2f3f43e",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
