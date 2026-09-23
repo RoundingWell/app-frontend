@@ -1,0 +1,21 @@
+src/js/components/optionlist/optionlist.component.cy.js
+  s_7d9748a0496f68::t_945f313fcfa67a 3
+src/js/components/team/index.js
+  s_7d9748a0496f68::t_1e269483a73463 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ea1366c83f5c676345c435107951118624312886",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
