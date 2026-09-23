@@ -1,7 +1,6 @@
 import Backbone from 'backbone';
-import { View } from 'marionette';
-
 import hbs from 'handlebars-inline-precompile';
+import { View } from 'marionette';
 
 import Optionlist from './index';
 
@@ -17,7 +16,7 @@ context('Optionlist', function() {
     dateState: {},
     onClick() {
       const optionlist = new Optionlist({
-        ui: this.ui.button,
+        anchor: this.ui.button[0],
         uiView: this,
         lists: [{ collection: this.collection }],
         isSelectlist: true,
