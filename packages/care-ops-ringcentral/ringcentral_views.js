@@ -75,7 +75,7 @@ const LayoutView = View.extend({
         <span data-status-region></span>
       </div>
       <iframe
-        class="ringcentral-panel__iframe"
+        class="ringcentral-panel__iframe js-iframe"
         src="https://apps.ringcentral.com/integration/ringcentral-embeddable/latest/app.html?clientId=e2M8xGmJjcGcHFuFe7epUC"
         title="RingCentral Dialer"
         loading="lazy"
@@ -96,6 +96,7 @@ const LayoutView = View.extend({
   },
   ui: {
     header: '.js-header',
+    iframe: '.js-iframe',
   },
   triggers: {
     'click @ui.header': 'click:header',
@@ -117,13 +118,27 @@ const LayoutView = View.extend({
       collection: this.collection,
     }));
   },
+  call(number) {
+    const [iframe] = this.getUI('iframe');
+    if (!iframe) return false;
+
+    iframe.contentWindow.postMessage({
+      type: 'rc-adapter-new-call',
+      phoneNumber: number,
+      toCall: true,
+    }, 'https://apps.ringcentral.com');
+
+    return true;
+  },
   togglePanel() {
-    this.$el.toggleClass('is-open', this.model.get('isOpen'));
+    this.el.classList.toggle('is-open', this.model.get('isOpen'));
   },
   showCallState() {
     const callState = this.model.get('callState');
 
-    this.ui.header.toggleClass('is-call-active', callState === 'ringing' || callState === 'active');
+    const [header] = this.getUI('header');
+
+    header.classList.toggle('is-call-active', callState === 'ringing' || callState === 'active');
 
     if (callState === 'ringing') {
       this.showChildView('heading', new View({ template: hbs`Incoming Call` }));
