@@ -1,3 +1,5 @@
+import { Radio } from 'marionette';
+
 import RouterApp from 'js/base/routerapp';
 
 import ProgramsAllApp from 'js/apps/programs/programs-all/programs-all_app';
@@ -6,7 +8,6 @@ import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
 
 export default RouterApp.extend({
   routerAppName: 'ProgramsApp',
-
   childApps: {
     programsAll: ProgramsAllApp,
     program: ProgramApp,
@@ -50,12 +51,20 @@ export default RouterApp.extend({
   },
 
   showProgramsAll() {
-    this.startCurrent('programsAll');
+    return this.startCurrent('programsAll');
   },
   showProgram(programId) {
-    this.startRoute('program', { programId });
+    return this.startRoute('program', { programId });
   },
   showProgramFlow(flowId) {
-    this.startRoute('programflow', { flowId });
+    return this.startRoute('programflow', { flowId });
+  },
+  onRouteError(error, { definition }) {
+    if (definition.action === 'showProgramFlow') {
+      Radio.trigger('event-router', 'notFound');
+      return;
+    }
+
+    Radio.trigger('event-router', 'unknownError', error?.response?.status);
   },
 });
