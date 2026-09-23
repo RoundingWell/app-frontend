@@ -28,7 +28,7 @@ async function loadApp() {
 }
 
 async function start({ startApp }) {
-  startApp();
+  return startApp();
 }
 
 document.addEventListener('DOMContentLoaded', async() => {
