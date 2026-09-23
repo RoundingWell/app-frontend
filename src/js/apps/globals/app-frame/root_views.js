@@ -38,14 +38,14 @@ const AppView = View.extend({
     sidebar: '[data-app-sidebar-region]',
   },
   setNavMinimized(isMinimized) {
-    this.getUI('nav').toggleClass('is-minimized', isMinimized);
+    this.getUI('nav')[0].classList.toggle('is-minimized', isMinimized);
   },
 });
 
 const FillWindowContentRegion = Region.extend({
   replaceElement: true,
   onBeforeShow(region, view) {
-    view.$el.addClass('fill-window__content');
+    view.el.classList.add('fill-window__content');
   },
 });
 
@@ -63,7 +63,7 @@ const TopRegionView = View.extend({
     if (this.ignoreEl && this.Dom.hasEl(this.ignoreEl, target)) return true;
   },
   empty() {
-    this.region.empty();
+    this.getRegion('region').empty();
   },
 });
 
@@ -87,7 +87,7 @@ const ModalRegionView = TopRegionView.extend({
     className: 'is-shown',
   }],
   initialize(options) {
-    this.mergeOptions(options, ['$body', 'setLocation', 'contains']);
+    this.mergeOptions(options, ['body', 'setLocation', 'contains']);
     this.region = this.getRegion('region');
 
     const hotkeyCh = Radio.channel('hotkey');
@@ -103,18 +103,16 @@ const ModalRegionView = TopRegionView.extend({
   },
   setLocation() {
     const view = this.region.currentView;
-    const width = view.$el.outerWidth();
-    const height = view.$el.outerHeight();
-    const bodyHeight = this.$body.height();
-    const bodyWidth = this.$body.width();
+    const width = view.el.offsetWidth;
+    const height = view.el.offsetHeight;
+    const bodyHeight = this.body.clientHeight;
+    const bodyWidth = this.body.clientWidth;
 
     const left = bodyWidth / 2 - width / 2;
     const top = bodyHeight / 3 - height / 3;
 
-    view.$el.css({
-      left: px(left),
-      top: px(top),
-    });
+    view.el.style.left = px(left);
+    view.el.style.top = px(top);
   },
   contains(target, testView) {
     if (!this.region.hasView()) return false;
@@ -139,23 +137,24 @@ const popDefaults = {
 };
 
 const PopRegionView = TopRegionView.extend({
-  initialize({ $body }) {
+  initialize({ body }) {
     this.region = this.getRegion('region');
-    this.$body = $body;
+    this.body = body;
     const hotkeyCh = Radio.channel('hotkey');
     this.listenTo(hotkeyCh, 'close', this.empty);
   },
   onRegionShow(region, view, options) {
-    view.$el.addClass('app-frame__pop-region');
+    view.el.classList.add('app-frame__pop-region');
     const popOptions = extend({}, popDefaults, options);
     this.ignoreEl = options.ignoreEl;
     this.listenTo(userActivityCh, 'window:resize', partial(this.onWindowResize, popOptions));
     this.listenTo(historyCh, 'change:route', this.empty);
-    this.listenTo(view, 'render render:children', partial(this.setLocation, popOptions));
+    this.listenTo(view, 'render', partial(this.setLocation, popOptions));
+    this.listenTo(view, 'render:children', partial(this.setLocation, popOptions));
     this.setLocation(popOptions);
   },
   onRegionEmpty(region, view) {
-    view.$el.removeClass('app-frame__pop-region');
+    view.el.classList.remove('app-frame__pop-region');
     this.stopListening(userActivityCh);
     this.stopListening(historyCh);
     this.stopListening(view);
@@ -174,26 +173,22 @@ const PopRegionView = TopRegionView.extend({
     const view = this.region.currentView;
 
     if (popOptions.popWidth) {
-      view.$el.css({
-        width: px(popOptions.popWidth),
-      });
+      view.el.style.width = px(popOptions.popWidth);
     }
 
-    const height = view.$el.outerHeight();
+    const height = view.el.offsetHeight;
     const top = this.setDirection(height, popOptions);
-    const width = popOptions.popWidth || view.$el.outerWidth();
+    const width = popOptions.popWidth || view.el.offsetWidth;
     const left = this.setAlign(width, popOptions);
 
-    view.$el.css({
-      top: px(top),
-      left: px(left),
-    });
+    view.el.style.top = px(top);
+    view.el.style.left = px(left);
   },
   setAlign(width, { left, align, windowPadding, outerWidth }) {
     if (align === 'right') left += outerWidth - width;
     if (left < windowPadding) return windowPadding;
 
-    const bodyWidth = this.$body.width();
+    const bodyWidth = this.body.clientWidth;
     if (left + width > bodyWidth - windowPadding) {
       return bodyWidth - width - windowPadding;
     }
@@ -201,7 +196,7 @@ const PopRegionView = TopRegionView.extend({
   },
   /* istanbul ignore next: difficult to test in context */
   setDirection(height, { top, direction, gap, windowPadding, outerHeight }) {
-    const bodyHeight = this.$body.height();
+    const bodyHeight = this.body.clientHeight;
 
     if (direction === 'down') {
       if (top + outerHeight + gap + height + windowPadding > bodyHeight) {
@@ -314,14 +309,15 @@ const TooltipRegionView = TopRegionView.extend({
 
 const RootView = CollectionView.extend({
   viewComparator: false,
-  el: '#root',
+  id: 'root',
+  className: 'app-root',
   template: hbs``,
   AppView: AppView,
   initialize() {
     // Render away any preexisting html
     this.render();
     this.regions = [];
-    const $body = this.$el;
+    const body = this.el;
 
     Radio.reply('top-region', 'contains', this.contains, this);
 
@@ -329,12 +325,12 @@ const RootView = CollectionView.extend({
 
     // Add lowest layer (z-index) to highest
     this.addChildView(this.appView);
-    this.addRegionView('tooltip', new TooltipRegionView({ $body }));
-    this.addRegionView('modal', new ModalRegionView({ $body }));
-    this.addRegionView('modalSmall', new ModalRegionView({ $body }));
-    this.addRegionView('modalLoading', new ModalRegionView({ $body, contains: preventRegionClose }));
+    this.addRegionView('tooltip', new TooltipRegionView({ body }));
+    this.addRegionView('modal', new ModalRegionView({ body }));
+    this.addRegionView('modalSmall', new ModalRegionView({ body }));
+    this.addRegionView('modalLoading', new ModalRegionView({ body, contains: preventRegionClose }));
     this.addRegionView('alert', new TopRegionView());
-    this.addRegionView('pop', new PopRegionView({ $body }));
+    this.addRegionView('pop', new PopRegionView({ body }));
     this.addRegionView('overlay', new OverlayRegionView());
     this.addRegionView('preloader', new PreloaderRegionView());
     this.addRegionView('error', new TopRegionView());
