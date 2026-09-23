@@ -1,3 +1,5 @@
+import '@fortawesome/fontawesome-svg-core/styles.css';
+
 import { Workbox } from 'workbox-window';
 
 import { fetchConfig } from '@roundingwell/care-ops-config';
