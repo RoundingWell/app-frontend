@@ -1,4 +1,4 @@
-import { debounce, extend } from 'underscore';
+import { debounce } from 'underscore';
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
@@ -13,7 +13,7 @@ import intl from 'js/i18n';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 import Optionlist from 'js/components/optionlist';
 
-import { CheckComponent, StateComponent, CardOwnerComponent, CardDueComponent, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import SharedSelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
@@ -51,13 +51,7 @@ const FlowDetailsTooltip = DetailsTooltip.extend({
 
 export const i18n = intl.patients.patient.flow.flowViews;
 const FlowHeaderOwnerComponent = FlowOwnerComponent.extend({
-  viewOptions() {
-    const options = FlowOwnerComponent.prototype.viewOptions.call(this);
-
-    return extend({}, options, {
-      className: `${ options.className } patient-flow__owner`,
-    });
-  },
+  className: `${ FlowOwnerComponent.prototype.className } patient-flow__owner`,
 });
 
 const FlowHeaderReadOnlyOwnerView = ReadOnlyOwnerView.extend({
@@ -118,7 +112,7 @@ const HeaderView = View.extend({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
@@ -154,7 +148,7 @@ const MenuView = View.extend({
   },
   onClick() {
     const optionlist = new Optionlist({
-      ui: this.$el,
+      anchor: this.el,
       uiView: this,
       headingText: i18n.menu.headingText,
       itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.patient.flow.flowViews.menu.delete }}</span>`,
@@ -219,11 +213,11 @@ const ActionItemView = View.extend({
     form: '[data-form-region]',
   },
   events: {
-    'click .js-action-surface': 'onClickSurface',
-    'click .js-no-click': stopEventPropagation,
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-no-click': stopEventPropagation,
+    'click .js-action-surface': 'onClickSurface',
   },
   navigateToAction(entryTarget) {
     Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id, entryTarget);
@@ -232,15 +226,15 @@ const ActionItemView = View.extend({
     this.navigateToAction();
   },
   onClickPrimary(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction();
   },
   onClickAttachments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction({ section: 'attachments' });
   },
   onClickComments(event) {
-    event.stopPropagation();
+    event.stopImmediatePropagation();
     this.navigateToAction({ section: 'comments' });
   },
   onRender() {
@@ -261,27 +255,27 @@ const ActionItemView = View.extend({
     }
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   showCheck() {
     if (!this.canEdit) return;
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
-    const checkComponent = new CheckComponent({
+    const checkView = new CheckView({
       deselectLabel: intl.patients.shared.actionsViews.deselectAction,
       selectLabel: intl.patients.shared.actionsViews.selectAction,
-      state: { isSelected },
+      isSelected,
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(checkView, {
       'select'(domEvent) {
         this.triggerMethod('select', this, !!domEvent.shiftKey);
       },
       'change:isSelected': this.toggleSelected,
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', checkView);
   },
   showDetailsTooltip() {
     if (!this.model.get('details')) return;
@@ -295,7 +289,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    this.stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    this.stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(this.stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -315,8 +309,8 @@ const ActionItemView = View.extend({
     this.ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(this.ownerComponent, 'change:owner', owner => {
@@ -333,18 +327,18 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.model.isDone();
-    this.dueDateComponent = new CardDueComponent({
+    const dueDateView = new CardDueView({
       date: this.model.get('due_date'),
-      isCompact: true,
-      state: { isDisabled },
+
+      isDisabled,
       isOverdue: this.model.isOverdue(),
     });
 
-    this.listenTo(this.dueDateComponent, 'change:due', date => {
+    this.listenTo(dueDateView, 'change:due', date => {
       this.model.saveDueDate(date);
     });
 
-    this.showChildView('dueDate', this.dueDateComponent);
+    this.showChildView('dueDate', dueDateView);
   },
   showDueTime() {
     if (!this.canEdit) {
@@ -356,7 +350,7 @@ const ActionItemView = View.extend({
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
     this.dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true, state: { isDisabled },
+      stateOptions: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
 
@@ -438,7 +432,7 @@ const LayoutView = View.extend({
     actions: '.js-actions',
   },
   setEditing(isEditing) {
-    this.ui.actions.toggleClass('is-editing', isEditing);
+    this.ui.actions[0].classList.toggle('is-editing', isEditing);
   },
 });
 

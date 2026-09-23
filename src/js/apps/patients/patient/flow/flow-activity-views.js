@@ -4,41 +4,43 @@ import { View, CollectionView } from 'marionette';
 import 'scss/modules/loader.scss';
 import 'scss/modules/skeleton.scss';
 
-import { renderTemplate } from 'js/i18n';
-
 import './patient-flow.scss';
 
 const ProgramStartedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "programStarted")) name = name team = team program = program}}
   <span class="patient-flow__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const ClinicianAssignedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "clinicianAssigned")) name = name team = team to_name = to_clinician}}
   <span class="patient-flow__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const DetailsUpdatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "detailsUpdated")) name = name team = team}}
   <span class="patient-flow__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const NameUpdatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "nameUpdated")) name = name team = team to_name = value from_name = previous}}
   <span class="patient-flow__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const TeamAssignedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "teamAssigned")) name = name team = team to_team = to_team}}
   <span class="patient-flow__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
 
 const StateUpdatedTemplate = hbs`
+  {{far icon}}
   {{formatHTMLMessage (intlGet (getI18nSource "stateUpdated")) name = name team = team to_state = to_state}}
   <span class="patient-flow__activity-date">{{formatDateTime date "AT_TIME"}}</span>
 `;
-
-const ActivityIconTemplate = hbs`{{far icon}}`;
 
 const ACTIVITY_ICONS = {
   FlowProgramStarted: 'folder-open',
@@ -82,12 +84,6 @@ const ActivityView = View.extend({
 
     return Templates[type];
   },
-  onRender() {
-    const icon = ACTIVITY_ICONS[this.model.get('event_type')];
-    if (!icon) return;
-
-    this.$el.prepend(renderTemplate(ActivityIconTemplate, { icon }));
-  },
   _getModelName(model) {
     return model ? model.get('name') : null;
   },
@@ -101,6 +97,7 @@ const ActivityView = View.extend({
     const sourceI18n = `patients.patient.flow.flowViews.activity.${ this.model.get('source') }`;
 
     return {
+      icon: ACTIVITY_ICONS[this.model.get('event_type')],
       name: this._getModelName(editor),
       team: this._getModelName(editorTeam),
       to_clinician: this._getModelName(clinician),
