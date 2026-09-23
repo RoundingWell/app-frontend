@@ -1,0 +1,79 @@
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.e2e.cy.js
+  s_267e7a791356aa::t_5e4dbc45e6a15f 251-252,286-298
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_267e7a791356aa::t_a9b5b4ad2a4ef3 11-312,314-330
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_267e7a791356aa::t_bcb672b82840a3 23,260-275
+src/js/apps/dashboards/dashboard/dashboard.e2e.cy.js
+  s_267e7a791356aa::t_164ce8d2532021 65-101,104-137
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  s_267e7a791356aa::t_e9974dc5462979 4-181
+src/js/apps/globals/error/error.e2e.cy.js
+  s_267e7a791356aa::t_6a1c12aff87c3d 8-9,27
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_267e7a791356aa::t_d89fc6e0972818 106-114,244,249-281,641,730-791,794,852-854,857-858,861-862,865-866,869-870,873-877,880-881,884-885,889,905-907,910-911,916,920-921,926-927,929-931,935-936,939-941,945-946,949,955-960,964-965,970,974-975,979-980,984-985,988-990,993-996,999-1004,1009-1011,1014-1016,1019-1020,1023-1024,1028,1417-1421,1423-1425,1427-1431,1433-1436,1438-1440,1442-1447
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_267e7a791356aa::t_7addea1c13107f 1,27-28,30,33,35-41,43,46-51,53-64,66-71,73-74,76-80,82-89,91-224,226-233,236-243,246-261,264-513,515-570,572-632,634-651,653-670,672-709,711-727,729-749,751-772,774-791,793-809,811-828,830-912,1075,1368-1400,1494-1587,1715,1747,1755,1771-1772,1828-1829,3169,3210-3216,3221-3222,3224-3225
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_267e7a791356aa::t_9bebbda98812cf 774-777,1493-1494,1525,1670-1687,1853,1873-1876,2700-2729
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_267e7a791356aa::t_22b7405041bd27 84-92,628,1944,2519-2579
+src/js/apps/patients/patient/form/form-interaction.e2e.cy.js
+  s_267e7a791356aa::t_d0707f8c22d0f0 7,71-79,81,97-112,132,136-137,141-142,158-179
+src/js/apps/patients/patient/form/form.e2e.cy.js
+  s_267e7a791356aa::t_e753a341fe61ff 33,127,164
+src/js/apps/patients/patient/form/patient.e2e.cy.js
+  s_267e7a791356aa::t_7b9331b9fa6b3d 121-167,483-495,873-908
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_267e7a791356aa::t_8e725e339129ba 14-51,53-59,61-64,66-69,71-72,74-77,79-81,83-86,88-90,92-95,97-100,102-124,126-158
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_267e7a791356aa::t_132ab84a654788 18-58,60-77,538-542,544-545,556-557,695-702,711,720-738,819,910-927,965,970-978,987,990-991
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_267e7a791356aa::t_45cdbea83f4a58 2233-2243
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_267e7a791356aa::t_6044a4608b8e21 7,68-75,91-100,115-122,806-810,813,862-869,903-909,990-996,1396-1415,1439,1742-1762,2629-2642,2691-2731
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_267e7a791356aa::t_ce66bf221b0f34 1154-1174
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_267e7a791356aa::t_92132c136ea358 38,46,51,119,124,149-209,212,266-300,328,336-339,356-360,365,403-405,418-442
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_267e7a791356aa::t_95ba2b69a0dc90 125-135,137-158,160-182,427-429,431,433-437,439-444,446-450,452-456,458-461,463,465-467,1269-1270,2405-2420,4832-4858,4860-4864,4866-4869,4871-4873,4875-4878
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_267e7a791356aa::t_6ddc6456096def 9,70-87,763-812
+src/js/apps/programs/program/program.e2e.cy.js
+  s_267e7a791356aa::t_ba41c5492ed54b 6,55-78,249-268
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_267e7a791356aa::t_49a7f7ff600a5c 446-450
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_267e7a791356aa::t_7e97ca570c4444 92-108
+src/js/apps/programs/sidebar/flow/flow-sidebar.e2e.cy.js
+  s_267e7a791356aa::t_c51291e7637fb0 170-177
+src/js/auth.e2e.cy.js
+  s_267e7a791356aa::t_588288463d02c0 1-23,26-30,32-35,38-43
+src/js/formservice.e2e.cy.js
+  s_267e7a791356aa::t_d310df6b825910 20-29,31-68,71-86,88-129,132-141,143-189,191-231
+src/js/services/dialer.e2e.cy.js
+  s_267e7a791356aa::t_e04fc7ea2759a4 1,81,150-167,355-369,372,629-686
+src/js/services/ws.e2e.cy.js
+  s_267e7a791356aa::t_259547b7dbfef4 3-6,8-12,14-15,17-21,23-45,47-55,58-78,80-87,89-134,136-144
+test/support/commands.js
+  s_267e7a791356aa::t_2a87ea655998ac 112
+test/support/websockets.js
+  s_267e7a791356aa::t_eddd0ca4267b3c 55-65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5a17ee1629c4659abcd42f24f5531b027a55d246",
+  "prompts": {},
+  "sessions": {
+    "s_267e7a791356aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08689-8981-7cf3-a3c5-0ee0a88b599c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
