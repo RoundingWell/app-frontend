@@ -1,0 +1,27 @@
+src/js/components/datepicker/datepicker.component.cy.js
+  s_7d9748a0496f68::t_ef14fe66ded5ea 38-42,47,49,84,177,198,314
+src/js/components/datepicker/datepicker_views.js
+  s_7d9748a0496f68::t_e4fb575d6ab614 2
+src/js/components/datepicker/index.js
+  s_7d9748a0496f68::t_4d29c0e2a796ab 5-6,11,19,22,24,26,28-30,33-34,36,40-67,69,82-83,85,100-103,106-108,112,136,142-145,150-161
+src/js/components/dateselect/date-select.component.cy.js
+  s_7d9748a0496f68::t_a3a4e9e54ded4d 48,52,65,69,123,127,140,144,164
+src/js/components/dateselect/index.js
+  s_7d9748a0496f68::t_e21247c72624a6 1,5,13,37,42-49,67-101,107-115,119,127-130,132-135,139-140,144-174,178,186,189,194,197,200-201,204-205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5699b2409d71ab6b07d247ac7a600e537e3262a4",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

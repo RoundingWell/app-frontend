@@ -1,0 +1,25 @@
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_7d9748a0496f68::t_4cc81b2df35903 3
+src/js/apps/patients/patient/form/form_app.js
+  s_7d9748a0496f68::t_ffedbe50a70e7e 2,5,16,33-36,41,44,47,50,53-55,57,61,64,68,70-77,85-90,92,95,102,104-108,132,151,154-155,167,192,207,216,225,239,251,255-259,262,264,266,272,293,301,303,306,309,312,314,320,323,325,329,333,338,341,345-346,349,353,356,360-366,374,378,387,398
+src/js/apps/patients/patient/form/form_views.js
+  s_7d9748a0496f68::t_91af565c054241 3,69,103,110,190-191,195,210-211,256,260-261,307,332-335
+src/js/apps/patients/patient/form/widgets/widgets_header_app.js
+  s_7d9748a0496f68::t_a809d01d159ea7 8-9,11,13,15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ec4871f1345eb10e30f4428362a31a3fc90a94d8",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
