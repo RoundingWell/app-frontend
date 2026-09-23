@@ -21,3 +21,17 @@ When a config path or pipeline definition changes, merge the checked-in config
 first, then update CircleCI Project Setup. Keep the existing schedule active
 until its replacement is configured, and remove the old schedule only after the
 new pipeline has produced a successful nightly run.
+
+## Cypress workers and coverage
+
+Component jobs use four workers without Cypress Cloud recording. The
+`scripts/run-component-shard.js` runner assigns each spec to exactly one worker,
+balancing total file size as a simple runtime proxy. Local component runs remain
+single-process. E2E jobs retain their existing Cypress Cloud parallelization.
+
+Headless Cypress collects coverage throughout the run and generates reports once
+at completion. In coverage-uploading CI jobs, each worker must produce a nonempty LCOV report and successfully
+upload it to Coveralls with a unique suite/worker flag. The existing Coveralls
+finalizer waits for both complete jobs, including all their workers, before
+finishing the combined coverage build. Nightly component workers set
+`upload_coverage: false` and do not participate in that finalizer.
