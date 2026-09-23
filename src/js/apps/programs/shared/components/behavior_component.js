@@ -60,23 +60,23 @@ export default Droplist.extend({
   },
   setSelected({ behavior }) {
     const selected = this.collection.find({ behavior });
-    this.setState({ selected });
+    this.getState().set({ selected });
   },
   popWidth() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? null : this.getView().$el.outerWidth();
+    return isCompact ? null : this.el.offsetWidth;
   },
-  viewOptions() {
-    const isCompact = this.getOption('isCompact');
-
-    return {
-      className: isCompact ? 'button button--compact' : 'button button--secondary w-100',
-      template: isCompact ? ButtonCompactTemplate : BehaviorTemplate,
-      templateContext: {
-        isDisabled: this.getState('isDisabled'),
-      },
-    };
+  className() {
+    return this.getOption('isCompact') ?
+      'button button--compact' :
+      'button button--secondary w-100';
+  },
+  getTemplate() {
+    return this.getOption('isCompact') ? ButtonCompactTemplate : BehaviorTemplate;
+  },
+  templateContext() {
+    return { isDisabled: this.getState().get('isDisabled') };
   },
   picklistOptions() {
     return {
