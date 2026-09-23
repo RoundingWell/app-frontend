@@ -1,0 +1,14 @@
+docs/marionette-v5-migration.md
+  h_0f06c286dda36f 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "54dfd79b596b0e98dedebf24a0ae30e01c2336ae",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
