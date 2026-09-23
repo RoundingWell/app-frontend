@@ -1,7 +1,6 @@
 import { partial } from 'underscore';
 import Handlebars from 'handlebars/dist/cjs/handlebars';
 import HandlebarsRuntime from 'handlebars/runtime';
-import '@fortawesome/fontawesome-svg-core/styles.css';
 
 function faHelper(prefix, iconName, { hash = {} }) {
   const svgId = `${ prefix }-fa-${ iconName }`;
