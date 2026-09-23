@@ -62,6 +62,7 @@
   },
   "browserslist": [
     ">1%",
+    "not ios_saf < 26.2",
     "not op_mini all"
   ],
   "devDependencies": {
