@@ -78,6 +78,16 @@ context('program all list', function() {
         cy.contains('Off');
       });
 
+    // Repeated Add clicks during activation leave one usable program editor.
+    cy.get('.js-add').then(([button]) => {
+      button.click();
+      button.click();
+    });
+    cy.get('.sidebar').should('have.length', 1);
+    cy.get('.sidebar [data-name-region] textarea').should('be.enabled');
+    cy.get('.sidebar .js-close').first().click();
+    cy.get('.sidebar').should('not.exist');
+
     cy
       .get('.card-list__item')
       .first()
@@ -89,5 +99,22 @@ context('program all list', function() {
     cy
       .location('pathname')
       .should('contain', `/program/${ firstProgram.id }`);
+
+    cy.then(() => {
+      const label = 'Programs';
+      const url = '/api/programs';
+      cy.routesForDefault().visit('/worklist/owned-by').wait('@routeActions');
+      cy.intercept('GET', url, { statusCode: 400, body: {} }).as('failedRoute');
+
+      cy.get('.app-nav__bottom-button').contains('Admin Tools').click();
+      cy.get('.js-picklist-item').contains(label).click();
+
+      cy.wait('@failedRoute');
+      cy.get('.error-page').should('contain', 'Error code: 400.');
+      cy.get('.error-page').contains('Back to Your Workspace').click();
+      cy.location('pathname').should('equal', '/one/worklist/owned-by');
+      cy.get('.worklist-list__list').should('be.visible');
+      cy.get('.error-page').should('not.exist');
+    });
   });
 });
