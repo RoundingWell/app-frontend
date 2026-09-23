@@ -313,11 +313,11 @@ careOptsFrontend:
               today {Today}
               yesterday {Yesterday}
               other {}}"
-        dialerComponent:
+        dialerView:
           callLabel: Call
           defaultText: Call Number
           headingText: Phone Numbers
-        dueComponent:
+        dueView:
           defaultText: Select Date...
         durationComponent:
           clear: Clear Duration
