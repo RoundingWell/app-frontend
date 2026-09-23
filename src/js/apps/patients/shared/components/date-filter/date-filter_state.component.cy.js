@@ -52,7 +52,7 @@ context('Date Filter State', function() {
 
     cy.mount(() => {
       component = new DateFilter({
-        state: { dateType: 'due_date', relativeDate: 'today' },
+        stateOptions: { dateType: 'due_date', relativeDate: 'today' },
       });
       return component;
     });
@@ -62,5 +62,13 @@ context('Date Filter State', function() {
 
     cy.get('.date-filter__nav-button--prev').trigger('click');
     cy.then(() => expectDate(component.getState(), 'selectedDate', dayjs().format('YYYY-MM-DD')));
+  });
+
+  specify('opens the calendar range picker', function() {
+    cy.mount(() => new DateFilter());
+
+    cy.get('.date-filter__date-button').click();
+    cy.get('.date-filter__range').contains('Select from calendar').click();
+    cy.get('.datepicker').should('be.visible');
   });
 });
