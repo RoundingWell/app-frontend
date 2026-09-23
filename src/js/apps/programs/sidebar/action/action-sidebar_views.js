@@ -61,8 +61,8 @@ const NameView = View.extend({
   },
   onWatchChange(text) {
     const newText = removeNewline(text);
-    this.ui.input.val(newText);
-    this.ui.spacer.text(newText || ' ');
+    this.ui.input[0].value = newText;
+    this.ui.spacer[0].textContent = newText || ' ';
 
     this.model.set('name', newText);
   },
@@ -73,7 +73,7 @@ const NameView = View.extend({
   },
   onDomRefresh() {
     if (this.model.isNew()) {
-      this.ui.input.focus();
+      this.ui.input[0].focus();
     }
   },
 });
@@ -87,8 +87,8 @@ const DetailsView = View.extend({
     spacer: '.js-spacer',
   },
   onWatchChange(text) {
-    this.ui.input.val(text);
-    this.ui.spacer.text(text || ' ');
+    this.ui.input[0].value = text;
+    this.ui.spacer[0].textContent = text || ' ';
 
     this.model.set('details', trim(text));
   },
@@ -166,7 +166,7 @@ const MenuView = View.extend({
     const menuOptions = new Backbone.Collection([{}]);
 
     const optionlist = new Optionlist({
-      ui: this.$el,
+      anchor: this.el,
       uiView: this,
       headingText: intl.programs.sidebar.action.actionSidebarViews.menuView.headingText,
       itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.programs.sidebar.action.actionSidebarViews.menuView.delete }}</span>`,
@@ -246,7 +246,8 @@ const SidebarView = View.extend({
   showEditForm() {
     this.stopListening(this.model);
     this.model = this.action.clone();
-    this.listenTo(this.model, 'change:name change:details', this.showSave);
+    this.listenTo(this.model, 'change:name', this.showSave);
+    this.listenTo(this.model, 'change:details', this.showSave);
 
     if (this.model.isNew()) this.showDisabledSave();
     else this.getRegion('save').empty();
@@ -296,7 +297,7 @@ const SidebarView = View.extend({
     const behaviorComponent = new BehaviorComponent({
       isConditionalAvailable: isFromFlow,
       behavior: this.action.get('behavior'),
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(behaviorComponent, 'change:status', ({ behavior }) => {
@@ -308,7 +309,7 @@ const SidebarView = View.extend({
   showOwner() {
     const isDisabled = this.action.isNew();
     const isFromFlow = !!this.action.getProgramFlow();
-    const ownerComponent = new OwnerComponent({ owner: this.action.getOwner(), isFromFlow, state: { isDisabled } });
+    const ownerComponent = new OwnerComponent({ owner: this.action.getOwner(), isFromFlow, stateOptions: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
       this.action.saveOwner(owner);
@@ -318,7 +319,7 @@ const SidebarView = View.extend({
   },
   showDueDay() {
     const isDisabled = this.action.isNew();
-    const dueDayComponent = new DueDayComponent({ day: this.action.get('days_until_due'), state: { isDisabled } });
+    const dueDayComponent = new DueDayComponent({ day: this.action.get('days_until_due'), stateOptions: { isDisabled } });
 
     this.listenTo(dueDayComponent, 'change:day', day => {
       this.action.save({ days_until_due: day });
@@ -328,7 +329,7 @@ const SidebarView = View.extend({
   },
   showForm() {
     const isDisabled = this.action.isNew();
-    const formComponent = new FormComponent({ form: this.action.getForm(), state: { isDisabled } });
+    const formComponent = new FormComponent({ form: this.action.getForm(), stateOptions: { isDisabled } });
 
     this.listenTo(formComponent, {
       'change:form'(form) {

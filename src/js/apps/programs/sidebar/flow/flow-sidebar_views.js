@@ -65,8 +65,8 @@ const NameView = View.extend({
   },
   onWatchChange(text) {
     const newText = removeNewline(text);
-    this.ui.input.val(newText);
-    this.ui.spacer.text(newText || ' ');
+    this.ui.input[0].value = newText;
+    this.ui.spacer[0].textContent = newText || ' ';
 
     this.model.set('name', newText);
   },
@@ -77,7 +77,7 @@ const NameView = View.extend({
   },
   onDomRefresh() {
     if (this.model.isNew()) {
-      this.ui.input.focus();
+      this.ui.input[0].focus();
     }
   },
 });
@@ -91,8 +91,8 @@ const DetailsView = View.extend({
     spacer: '.js-spacer',
   },
   onWatchChange(text) {
-    this.ui.input.val(text);
-    this.ui.spacer.text(text || ' ');
+    this.ui.input[0].value = text;
+    this.ui.spacer[0].textContent = text || ' ';
 
     this.model.set('details', trim(text));
   },
@@ -139,7 +139,7 @@ const MenuView = View.extend({
     const menuOptions = new Backbone.Collection([{}]);
 
     const optionlist = new Optionlist({
-      ui: this.$el,
+      anchor: this.el,
       uiView: this,
       headingText: intl.programs.sidebar.flow.flowSidebarViews.menuView.headingText,
       itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.programs.sidebar.flow.flowSidebarViews.menuView.delete }}</span>`,
@@ -210,7 +210,8 @@ const SidebarView = View.extend({
   showForm() {
     this.stopListening(this.model);
     this.model = this.flow.clone();
-    this.listenTo(this.model, 'change:name change:details', this.showSave);
+    this.listenTo(this.model, 'change:name', this.showSave);
+    this.listenTo(this.model, 'change:details', this.showSave);
 
     if (this.model.isNew()) this.showDisabledSave();
     else this.getRegion('save').empty();
@@ -258,7 +259,7 @@ const SidebarView = View.extend({
     const isDisabled = this.flow.isNew();
     const behaviorComponent = new FlowBehaviorComponent({
       behavior: this.flow.get('behavior'),
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(behaviorComponent, 'change:status', ({ behavior }) => {
@@ -269,7 +270,7 @@ const SidebarView = View.extend({
   },
   showOwner() {
     const isDisabled = this.flow.isNew();
-    const ownerComponent = new OwnerComponent({ owner: this.flow.getOwner(), state: { isDisabled } });
+    const ownerComponent = new OwnerComponent({ owner: this.flow.getOwner(), stateOptions: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
       this.flow.saveOwner(owner);
