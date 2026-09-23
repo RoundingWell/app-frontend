@@ -9,7 +9,7 @@ import trim from 'js/utils/formatting/trim';
 
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
 
-import { StateComponent, OwnerComponent, DueComponent, TimeComponent, DurationComponent } from 'js/apps/patients/shared/actions_views';
+import { StateComponent, OwnerComponent, DueView, TimeComponent, DurationComponent } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateTimeView, ReadOnlyDurationView } from 'js/apps/patients/shared/read-only_views';
 import { DialerView } from 'js/apps/patients/patient/action/action-dialer_views';
 
@@ -115,16 +115,16 @@ const DetailsView = View.extend({
   },
   onFocusInput() {
     this.hasDetailsChange = false;
-    this.$el.addClass('is-editing');
+    this.el.classList.add('is-editing');
   },
   onFocusoutInput() {
     if (this.hasDetailsChange) return;
 
-    this.$el.removeClass('is-editing');
+    this.el.classList.remove('is-editing');
   },
   onWatchChange(text) {
-    this.ui.input.val(text);
-    this.ui.spacer.text(text || ' ');
+    this.ui.input[0].value = text;
+    this.ui.spacer[0].textContent = text || ' ';
 
     this.model.set('details', trim(text));
   },
@@ -309,7 +309,7 @@ const ActionView = View.extend({
     this.showChildView('details', new DetailsView({ model: this.clonedAction }));
   },
   showState() {
-    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true, showLabel: true });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id, showLabel: true });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -323,8 +323,8 @@ const ActionView = View.extend({
     const ownerComponent = new OwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
@@ -335,26 +335,26 @@ const ActionView = View.extend({
   },
   showDueDate() {
     const isDisabled = this.model.isDone();
-    const dueDateComponent = new DueComponent({
+    const dueDateView = new DueView({
       date: this.model.get('due_date'),
-      isCompact: true,
-      state: { isDisabled },
+
+      isDisabled,
       isOverdue: this.model.isOverdue(),
     });
 
-    this.listenTo(dueDateComponent, 'change:due', date => {
+    this.listenTo(dueDateView, 'change:due', date => {
       this.model.saveDueDate(date);
     });
 
-    this.showChildView('dueDate', dueDateComponent);
+    this.showChildView('dueDate', dueDateView);
   },
   showDueTime() {
     const isDisabled = this.model.isDone() || !this.model.get('due_date');
     const dueTimeComponent = new TimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true,
+
       isOverdue: this.model.isOverdue(),
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(dueTimeComponent, 'change:time', time => {
@@ -368,8 +368,8 @@ const ActionView = View.extend({
     const durationComponent = new DurationComponent({
       duration: this.model.get('duration'),
       hideDefaultText: true,
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(durationComponent, 'change:duration', duration => {

@@ -1,5 +1,6 @@
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
+
 import { animate } from 'animejs';
 
 import { alphaSort } from 'js/utils/sorting';

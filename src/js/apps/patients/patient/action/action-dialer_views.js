@@ -3,7 +3,7 @@ import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
-import DialerComponent from 'js/apps/patients/shared/components/dialer_component.js';
+import DialerButtonView from 'js/apps/patients/shared/components/dialer_view.js';
 
 import './action.scss';
 
@@ -21,12 +21,12 @@ const DialerView = View.extend({
   showDialerButton() {
     const isDisabled = this.model.isDone() || !this.getOption('canEdit');
 
-    const dialerComponent = new DialerComponent({
+    const dialerButtonView = new DialerButtonView({
       action: this.model,
-      state: { isDisabled },
+      isDisabled,
     });
 
-    this.showChildView('dialerButton', dialerComponent);
+    this.showChildView('dialerButton', dialerButtonView);
   },
 });
 
