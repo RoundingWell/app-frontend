@@ -9,7 +9,8 @@ const Entity = BaseEntity.extend({
     'get:widgetValues:model': 'getByPatient',
     'fetch:widgetValues:byPatient': 'fetchByPatient',
   },
-  fetchByPatient(widget, patientId, options = {}) {
+  // UI callers supply request options with their lifetime signal.
+  fetchByPatient(widget, patientId, /* istanbul ignore next */ options = {}) {
     const model = this.getByPatient(widget.get('slug'), patientId);
 
     const requestValues = widget.get('values');

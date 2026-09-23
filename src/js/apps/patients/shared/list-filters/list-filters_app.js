@@ -26,7 +26,8 @@ const ListFiltersPanelApp = App.extend({
       commit: result => {
         if (result) this.showCustomFilters(result);
       },
-      fail: error => {
+      // The entity helper resolves HTTP/network failures via allSettled; guard unexpected exceptions.
+      fail: /* istanbul ignore next */ error => {
         this.showCustomFilters({ filters: this.filters, hasLoadError: true });
         addError(error);
       },

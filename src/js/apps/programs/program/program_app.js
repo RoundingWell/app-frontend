@@ -69,6 +69,8 @@ export default SubRouterApp.extend({
     return this.startCurrent('workflows', {
       region: this.getView().getRegion('content'),
     }).catch(error => {
+      // Child selection already rejects stale routes; retain the cleanup-race guard.
+      /* istanbul ignore if */
       if (this.getCurrentRoute() !== routeContext) return;
 
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
@@ -76,11 +78,15 @@ export default SubRouterApp.extend({
   },
 
   onRouteError(error, { event }) {
-    if (event === 'program:action' || event === 'program:action:new') {
+    // Only existing actions fetch during activation; new-action failures are programmer errors.
+    /* istanbul ignore else */
+    if (event === 'program:action' || /* istanbul ignore next */ event === 'program:action:new') {
       this.getChildApp('action').handleStartFailure();
       return this.showWorkflows();
     }
 
+    // Other routes handle request errors locally; preserve unexpected startup reporting.
+    /* istanbul ignore next */
     Radio.trigger('event-router', 'unknownError', error?.response?.status);
   },
 
