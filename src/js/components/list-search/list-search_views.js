@@ -1,5 +1,5 @@
-import { View } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
+import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
@@ -20,11 +20,12 @@ const InputTemplate = hbs`
 `;
 
 const SearchView = View.extend({
+  query: '',
   behaviors: {
     InputWatcherBehavior,
   },
   className() {
-    const query = this.getOption('state').query;
+    const query = this.getOption('query');
 
     if (query.length > 2) return 'list-search__container is-applied';
 
@@ -33,7 +34,7 @@ const SearchView = View.extend({
   template: InputTemplate,
   templateContext() {
     return {
-      query: this.getOption('state').query,
+      query: this.getOption('query'),
     };
   },
   ui: {
@@ -44,13 +45,17 @@ const SearchView = View.extend({
     'click @ui.clear': 'clear',
   },
   onWatchChange(text) {
-    this.ui.clear.toggleClass('is-hidden', !text.length);
-    this.$el.toggleClass('is-applied', text.length > 2);
+    this.options.query = text;
+    this.getUI('clear')[0].classList.toggle('is-hidden', !text.length);
+    this.el.classList.toggle('is-applied', text.length > 2);
+    this.triggerMethod('change:query', text);
   },
   onClear() {
-    this.ui.input.val('');
-    this.ui.clear.addClass('is-hidden');
-    this.$el.removeClass('is-applied');
+    this.options.query = '';
+    this.getUI('input')[0].value = '';
+    this.getUI('clear')[0].classList.add('is-hidden');
+    this.el.classList.remove('is-applied');
+    this.triggerMethod('change:query', '');
   },
 });
 
