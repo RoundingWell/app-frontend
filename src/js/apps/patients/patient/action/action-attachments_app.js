@@ -67,6 +67,7 @@ export default App.extend({
     this.showView(attachmentsView);
   },
   onAddAttachment(file) {
+    const action = this.action;
     const attachment = this.attachments.add({
       _actions: [this.action.getResource()],
       _patient: this.action.getPatient().getResource(),
@@ -76,10 +77,12 @@ export default App.extend({
 
     this.listenTo(attachment, {
       'upload:success': uploadedAttachment => {
-        this.action.addFile(uploadedAttachment);
+        this.stopListening(attachment);
+        action.addFile(uploadedAttachment);
         Radio.request('ws', 'add', uploadedAttachment);
       },
       'upload:failed': () => {
+        this.stopListening(attachment);
         Radio.request('alert', 'show:error', intl.patients.patient.action.actionApp.uploadError);
       },
     });

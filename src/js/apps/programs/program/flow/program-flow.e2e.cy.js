@@ -67,8 +67,24 @@ context('program flow page', function() {
       .routeProgram()
       .routePrograms()
       .routeProgramActions()
-      .routeProgramFlows()
-      .visit(`/program-flow/${ testProgramFlowId }`)
+      .routeProgramFlows();
+
+    let releaseFlow;
+    cy.intercept({ method: 'GET', url: `/api/program-flows/${ testProgramFlowId }`, times: 1 }, req => {
+      return new Cypress.Promise(resolve => {
+        releaseFlow = () => {
+          req.reply({ body: { data: testProgramFlow, included: [] } });
+          resolve();
+        };
+      });
+    });
+    cy.visit(`/program-flow/${ testProgramFlowId }`);
+    cy.wrap(null).should(() => expect(releaseFlow).to.be.a('function'));
+    cy.navigate('/programs').wait('@routePrograms');
+    cy.then(() => releaseFlow());
+
+    cy
+      .navigate(`/program-flow/${ testProgramFlowId }`)
       .wait('@routeProgramFlow')
       .wait('@routeProgramFlowActions')
       .wait('@routeProgramByProgramFlow');

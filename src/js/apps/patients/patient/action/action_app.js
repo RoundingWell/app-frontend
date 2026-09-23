@@ -143,8 +143,8 @@ export default App.extend({
   onStop() {
     this.unsubscribe();
     if (this.currentFlow) this.stopListening(this.currentFlow);
-    this.stopListening(this.action);
-    this.stopListening(this.layoutState);
+    if (this.action) this.stopListening(this.action);
+    if (this.layoutState) this.stopListening(this.layoutState);
   },
   onChangeOwner() {
     this.setAccess();

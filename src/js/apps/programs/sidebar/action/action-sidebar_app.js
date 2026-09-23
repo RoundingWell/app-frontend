@@ -117,6 +117,7 @@ export default App.extend(extend({
     this.stop();
   },
   onStop() {
+    this.stopListening(this.action);
     this.action.trigger('editing', false);
     if (this.action && this.action.isNew()) this.action.destroy();
   },
