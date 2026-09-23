@@ -25,6 +25,8 @@ const LoadingView = View.extend({
   },
 });
 
+export { LoadingView };
+
 export default Region.extend({
   timeout: 500,
   startPreloader(options = {}) {
