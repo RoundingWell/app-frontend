@@ -17,30 +17,36 @@ const Entity = BaseEntity.extend({
     'fetch:actions:collection:byPatient': 'fetchActionsByPatient',
     'fetch:actions:collection:byFlow': 'fetchActionsByFlow',
   },
-  fetchAction(id) {
-    return this.fetchModel(id, { data: { include: ACTION_INCLUDE } });
+  fetchAction(id, /* istanbul ignore next */ options = {}) {
+    const data = { ...options.data, include: ACTION_INCLUDE };
+
+    return this.fetchModel(id, { ...options, data });
   },
-  fetchActionWithResponses(id) {
+  fetchActionWithResponses(id, /* istanbul ignore next */ options = {}) {
     const data = {
+      ...options.data,
       include: [ACTION_INCLUDE, 'form-responses'].join(),
       fields: {
         'form-responses': ['status', 'updated_at', 'editor'],
       },
     };
 
-    return this.fetchModel(id, { data });
+    return this.fetchModel(id, { ...options, data });
   },
-  fetchActionsByPatient({ patientId, filter }) {
-    const data = { filter };
+  fetchActionsByPatient({ patientId, filter }, /* istanbul ignore next */ options = {}) {
+    const data = {
+      ...options.data,
+      filter: { ...options.data?.filter, ...filter },
+    };
     const url = `/api/patients/${ patientId }/actions`;
 
-    return this.fetchCollection({ url, data });
+    return this.fetchCollection({ ...options, url, data });
   },
-  fetchActionsByFlow(flowId) {
-    const data = { include: ACTION_INCLUDE };
+  fetchActionsByFlow(flowId, /* istanbul ignore next */ options = {}) {
+    const data = { ...options.data, include: ACTION_INCLUDE };
     const url = `/api/flows/${ flowId }/actions`;
 
-    return this.fetchCollection({ url, data });
+    return this.fetchCollection({ ...options, url, data });
   },
 });
 
