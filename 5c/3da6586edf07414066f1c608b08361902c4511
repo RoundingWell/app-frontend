@@ -1,0 +1,33 @@
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_932355d3ceb435::t_210e9823479558 11,13-17,19,27,31,38,42,59,76
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_932355d3ceb435::t_c7a3fb71a3f1e7 3,25,31,37,43,49,59,69,79,85,91,97,103,220,276
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_932355d3ceb435::t_34f2299d445cf5 11-12,14,17,23,33,37-38,70,80-81,85
+src/js/apps/patients/patient/action/action-attachments_views.js
+  s_932355d3ceb435::t_a28209d9d4e296 3
+src/js/apps/patients/patient/action/action-details_views.js
+  s_932355d3ceb435::t_1cba07cb874093 12,118,123,126-127,312,326-327,338,340-341,345,349,355,357,371-372
+src/js/apps/patients/patient/action/action-dialer_views.js
+  s_932355d3ceb435::t_101d8c6f06669b 6,24,26,29
+src/js/apps/patients/patient/action/action_app.js
+  s_932355d3ceb435::t_2b82c6ba76debf 2,5-6,23-28,33,58,60-62,65,67-68,71,73,77,87,97,121,132,143,145-147,159,192,194,235-236,242-247,257,272-275,278,283-286,289,294
+src/js/apps/patients/patient/action/action_views.js
+  s_932355d3ceb435::t_ff9d6f1ca72681 22-23,55,110-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5c3da6586edf07414066f1c608b08361902c4511",
+  "prompts": {},
+  "sessions": {
+    "s_932355d3ceb435": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ccb7-194c-72d2-b859-443afa9808ef",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
