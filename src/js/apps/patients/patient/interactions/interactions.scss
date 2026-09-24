@@ -5,6 +5,7 @@
 .patient-interactions__body {
   margin: 0 auto;
   max-width: var(--content-detail-width);
+  padding: 0 24px 48px;
 }
 
 .patient-interactions__pages,
@@ -12,7 +13,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 16px 0;
+  padding: 18px 0;
 }
 
 .patient-interactions__pages {
@@ -22,34 +23,227 @@
 .patient-interactions__page,
 .patient-interactions__filters .button {
   border: 1px solid var(--color-border-subtle);
-  border-radius: 16px;
+  border-radius: 18px;
+  min-height: 32px;
+  padding: 5px 12px;
 }
 
 .patient-interactions__page.is-selected,
 .patient-interactions__filters [aria-pressed='true'] {
-  background: var(--color-control-background);
+  background: var(--color-surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+.patient-interactions__filters [aria-pressed='true']::before {
+  content: '✓';
+  margin-right: 5px;
+}
+
+.patient-interactions__filters [data-filter='messages'] {
+  color: color(blue);
+}
+
+.patient-interactions__filters [data-filter='calls'] {
+  color: color(purple);
+}
+
+.patient-interactions__filters [data-filter='appointments'] {
+  color: color(green);
+}
+
+.patient-interactions__filters [data-filter='visits'] {
+  color: color(orange);
 }
 
 .patient-interactions__list {
-  display: grid;
-  gap: 12px;
   list-style: none;
   margin: 0;
-  padding: 8px 0 40px;
+  padding: 0 0 24px;
 }
 
 .patient-interactions__item {
+  position: relative;
+}
+
+.patient-interactions__day,
+.patient-interactions__day-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.patient-interactions__date-divider {
+  align-items: center;
+  background: var(--color-page-bg);
+  display: flex;
+  gap: 10px;
+  margin: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.patient-interactions__date-divider::before,
+.patient-interactions__date-divider::after {
+  background: var(--color-divider);
+  content: '';
+  flex: 1;
+  height: 1px;
+}
+
+.patient-interactions__date-button {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 18px;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  order: 1;
+  padding: 4px 10px;
+}
+
+.patient-interactions__date-divider::after {
+  order: 2;
+}
+
+.patient-interactions__date-menu {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 12%);
+  left: 50%;
+  min-width: 220px;
+  padding: 8px 0;
+  position: absolute;
+  top: 100%;
+  transform: translateX(-50%);
+  z-index: 4;
+}
+
+.patient-interactions__date-menu[hidden] {
+  display: none;
+}
+
+.patient-interactions__date-menu > span {
+  color: var(--color-text-secondary);
+  display: block;
+  font-size: 12px;
+  padding: 5px 12px;
+}
+
+.patient-interactions__date-menu button {
+  background: none;
+  border: 0;
+  color: var(--color-text);
+  cursor: pointer;
+  display: block;
+  padding: 8px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.patient-interactions__date-menu button:hover {
+  background: var(--color-surface-hover);
+}
+
+.patient-interactions__date-menu .js-specific-date {
+  border-top: 1px solid var(--color-divider);
+  margin-top: 6px;
+  padding-top: 12px;
+}
+
+.patient-interactions__calendar-modal {
+  padding: 20px;
+  width: 400px;
+}
+
+.patient-interactions__calendar-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.patient-interactions__calendar-heading h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.patient-interactions__calendar-heading button {
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.patient-interactions__calendar-modal .datepicker__button {
+  display: none;
+}
+
+.patient-interactions__activity {
+  display: flex;
+  gap: 12px;
+  padding: 0 0 18px;
+}
+
+.patient-interactions__marker {
+  align-items: center;
+  background: var(--color-control-background);
+  border-radius: 50%;
+  color: var(--color-text);
+  display: flex;
+  flex: 0 0 28px;
+  font-size: 10px;
+  font-weight: 600;
+  height: 28px;
+  justify-content: center;
+}
+
+.patient-interactions__item--sms .patient-interactions__marker,
+.patient-interactions__item--email .patient-interactions__marker {
+  color: color(blue);
+}
+
+.patient-interactions__item--voice .patient-interactions__marker,
+.patient-interactions__item--voicemail .patient-interactions__marker,
+.patient-interactions__item--video .patient-interactions__marker {
+  color: color(purple);
+}
+
+.patient-interactions__activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.patient-interactions__activity-line {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 9px;
+}
+
+.patient-interactions__activity-line time {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.patient-interactions__card {
   background: var(--color-surface);
   border: 1px solid var(--color-border-subtle);
   border-radius: 8px;
-  padding: 16px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  padding: 12px 16px;
 }
 
-.patient-interactions__item.is-selected {
+.patient-interactions__item.is-selected .patient-interactions__card {
   border-color: color(blue);
 }
 
 .patient-interactions__item-heading {
+  align-items: baseline;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -57,11 +251,26 @@
 }
 
 .patient-interactions__channel {
+  color: color(purple);
   font-weight: 600;
 }
 
+.patient-interactions__item--appointment .patient-interactions__channel {
+  color: color(green);
+}
+
+.patient-interactions__item--visit .patient-interactions__channel {
+  color: color(orange);
+}
+
+.patient-interactions__item-heading time {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
 .patient-interactions__summary {
-  margin: 8px 0 0;
+  line-height: 1.45;
+  margin: 6px 0 0;
   overflow-wrap: anywhere;
 }
 
@@ -92,9 +301,12 @@
 
 .patient-interactions-preview__heading,
 .patient-interactions-preview__link {
-  align-items: center;
   display: flex;
   gap: 8px;
+}
+
+.patient-interactions-preview__heading {
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -125,11 +337,34 @@
 }
 
 .patient-interactions-preview__link {
+  align-items: flex-start;
+  text-align: left;
   width: 100%;
 }
 
-.patient-interactions-preview__summary {
+.patient-interactions-preview__symbol {
+  flex: 0 0 16px;
+}
+
+.patient-interactions-preview__details {
   display: block;
+  min-width: 0;
   overflow-wrap: anywhere;
-  text-align: left;
+}
+
+.patient-interactions-preview__details strong,
+.patient-interactions-preview__sender,
+.patient-interactions-preview__details time {
+  display: block;
+}
+
+.patient-interactions-preview__details strong {
+  font-weight: 600;
+}
+
+.patient-interactions-preview__sender,
+.patient-interactions-preview__details time {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  margin-top: 2px;
 }

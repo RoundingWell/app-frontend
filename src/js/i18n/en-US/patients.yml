@@ -20,6 +20,23 @@ careOptsFrontend:
         calls: Calls
         appointments: Appointments
         visits: Visits
+        inbound: Inbound
+        outbound: Outbound
+        careTeam: Care Team
+        sentMessage: sent a message
+        loggedCall: logged a call
+        addedAppointment: Appointment added
+        addedVisit: Visit added
+        addedInteraction: added an interaction
+        jumpToDate: Jump to date
+        jumpTo: Jump to...
+        today: Today
+        yesterday: Yesterday
+        lastWeek: Last week
+        lastMonth: Last month
+        beginning: The very beginning
+        specificDate: Jump to a specific date
+        closeDate: Close calendar
         viewAll: View all
         loadOlder: Load older
         loading: Loading interactions…

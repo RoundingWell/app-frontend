@@ -10,6 +10,9 @@ const _Model = BaseModel.extend({
   getAction() {
     return this.getRelationship('_action');
   },
+  getFlow() {
+    return this.getRelationship('_flow');
+  },
 });
 
 const Model = Store(_Model, TYPE);

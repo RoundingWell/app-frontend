@@ -2,7 +2,7 @@ import { v7 as uuid } from 'uuid';
 
 import { getRelationship } from 'helpers/json-api';
 
-export function getInteraction({ id = uuid(), channel = 'sms', action, reference = 'Interaction summary' } = {}) {
+export function getInteraction({ id = uuid(), channel = 'sms', action, flow, reference = 'Interaction summary' } = {}) {
   return {
     id,
     type: 'interactions',
@@ -17,6 +17,7 @@ export function getInteraction({ id = uuid(), channel = 'sms', action, reference
     },
     relationships: {
       action: getRelationship(action),
+      flow: getRelationship(flow),
     },
   };
 }

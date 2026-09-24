@@ -31,7 +31,7 @@ const Entity = BaseEntity.extend({
     'fetch:interactions:collection:byPatient': 'fetchByPatient',
   },
   fetchByPatient({ patientId, actionId, channels, at, before, limit }, options = {}) {
-    const data = { ...options.data, include: 'action.flow' };
+    const data = { ...options.data, include: 'action.flow,flow' };
     addParams(data, 'filter', getFilter(actionId, channels));
     addParams(data, 'page', getPage(at, before, limit));
 
