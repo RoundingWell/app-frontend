@@ -2,6 +2,29 @@
 careOptsFrontend:
   patients:
     patient:
+      interactions:
+        workflowTab: Workflows
+        interactionsTab: Interactions
+        pagesLabel: Patient pages
+        typesLabel: Interaction types
+        message: Message
+        email: Email
+        mail: Mail
+        fax: Fax
+        call: Call
+        voicemail: Voicemail
+        videoCall: Video call
+        appointment: Appointment
+        visit: Visit
+        messages: Messages
+        calls: Calls
+        appointments: Appointments
+        visits: Visits
+        viewAll: View all
+        loadOlder: Load older
+        loading: Loading interactions…
+        empty: No interactions yet.
+        loadError: Interactions could not be loaded.
       action:
         actionApp:
           notFound: The Action you requested does not exist.

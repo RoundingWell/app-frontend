@@ -1,4 +1,8 @@
 <div class="workflow-page">
+  <nav class="workflow-page__pages" aria-label="{{ @intl.patients.patient.interactions.pagesLabel }}">
+    <span class="workflow-page__tab is-selected" aria-current="page">{{ @intl.patients.patient.interactions.workflowTab }}</span>
+    <button class="workflow-page__tab js-interactions" type="button">{{ @intl.patients.patient.interactions.interactionsTab }}</button>
+  </nav>
   <div class="workflow-page__toolbar">
     <div class="workflow-page__tabs" role="group" aria-label="{{ @intl.patients.patient.workflow.workflowViews.tabsLabel }}">
       <button class="workflow-page__tab is-selected js-workflow-open" type="button" aria-pressed="true">

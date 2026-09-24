@@ -21,6 +21,12 @@
     {{/if}}
   </span>
 {{/if}}
+{{#if isInteractions}}
+  <span class="patient__context-segment">
+    {{fas "chevron-right"}}
+    <span class="patient__context-current" aria-current="page">{{ @intl.patients.patient.interactions.interactionsTab }}</span>
+  </span>
+{{/if}}
 {{#if actionName}}
   <span class="patient__context-segment">
     {{fas "chevron-right"}}

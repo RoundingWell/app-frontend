@@ -93,6 +93,7 @@ const LayoutView = View.extend({
       el: '[data-attachments-region]',
       regionClass: FocusablePreloadRegion,
     },
+    interactions: '[data-interactions-region]',
   },
   getViewportElement() {
     return this.el;

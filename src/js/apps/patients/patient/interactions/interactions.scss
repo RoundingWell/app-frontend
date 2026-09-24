@@ -1,0 +1,135 @@
+.patient-interactions {
+  background: var(--color-page-bg);
+}
+
+.patient-interactions__body {
+  margin: 0 auto;
+  max-width: var(--content-detail-width);
+}
+
+.patient-interactions__pages,
+.patient-interactions__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+.patient-interactions__pages {
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.patient-interactions__page,
+.patient-interactions__filters .button {
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 16px;
+}
+
+.patient-interactions__page.is-selected,
+.patient-interactions__filters [aria-pressed='true'] {
+  background: var(--color-control-background);
+}
+
+.patient-interactions__list {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 0 40px;
+}
+
+.patient-interactions__item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.patient-interactions__item.is-selected {
+  border-color: color(blue);
+}
+
+.patient-interactions__item-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.patient-interactions__channel {
+  font-weight: 600;
+}
+
+.patient-interactions__summary {
+  margin: 8px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.patient-interactions__action {
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  margin-top: 8px;
+  padding: 0;
+}
+
+.patient-interactions__status,
+.patient-interactions__empty {
+  padding: 16px 0;
+}
+
+.patient-interactions__older[hidden] {
+  display: none;
+}
+
+.patient-interactions-preview--action {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.patient-interactions-preview__heading,
+.patient-interactions-preview__link {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.patient-interactions-preview__heading h2 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.patient-interactions-preview__all,
+.patient-interactions-preview__link {
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  padding: 0;
+}
+
+.patient-interactions-preview__list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.patient-interactions-preview__item + .patient-interactions-preview__item {
+  border-top: 1px solid var(--color-divider);
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.patient-interactions-preview__link {
+  width: 100%;
+}
+
+.patient-interactions-preview__summary {
+  display: block;
+  overflow-wrap: anywhere;
+  text-align: left;
+}

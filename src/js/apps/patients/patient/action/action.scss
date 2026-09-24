@@ -1,9 +1,14 @@
 .patient-action__header,
 .patient-action__form,
 .patient-action__attachments,
+.patient-action__interactions,
 .patient-action__activity {
   margin-inline: auto;
   width: var(--content-detail-width);
+}
+
+.patient-action__interactions {
+  margin-top: 24px;
 }
 
 .patient-action {
