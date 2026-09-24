@@ -1,0 +1,63 @@
+src/js/apps/patients/patient/interactions/interactions.scss
+  s_37e61ebb2259b1::t_462b5e2cb5ce79 198-199
+  s_37e61ebb2259b1::t_d37a2b1ad1e399 201
+  s_37e61ebb2259b1::t_9bf7317923c00d 8,16,26-28,33-55,61,65-67,75-76,78-80,84-109,111-115,118-120,179-180,182-197,202-228,230-233,237-238,241,246,254,258-266,268-270,272-273
+  s_37e61ebb2259b1::t_57369d239f5561 200
+  s_37e61ebb2259b1::t_5fb465765e8120 68-74,77,81-83,110,116-117,121-178,181
+  s_37e61ebb2259b1::t_4c21f02f1704e5 229,267
+  s_37e61ebb2259b1::t_2dc87729b5f9cb 306-309,340-341,345-349,351,353-369
+src/js/apps/patients/patient/interactions/interactions_app.js
+  s_37e61ebb2259b1::t_371c0142cc43ab 130
+  s_37e61ebb2259b1::t_cddcd9c9ef7e25 2,46-47,52,66,83-84,90,93-95,99-104,106,109,116-127,129,131-139,141-143,148
+  s_37e61ebb2259b1::t_5fb465765e8120 31,146-147
+  s_37e61ebb2259b1::t_8edccf72a2a983 30
+  s_37e61ebb2259b1::t_9a1142deb43bc9 97-98,128
+  s_37e61ebb2259b1::t_b995407e89613b 42,80,105,115
+src/js/entities-service/entities/interactions.js
+  s_37e61ebb2259b1::t_7861534088ce75 13-15
+src/js/apps/patients/patient/interactions/interactions_views.js
+  s_37e61ebb2259b1::t_fe8e469fc458d3 28-47,79-81,83-86,88-95,97-98,121,126,130-131,266,280,284,292,298-299,302,455,459,461,464-467
+  s_37e61ebb2259b1::t_3da579a31e6774 71-76,133
+  s_37e61ebb2259b1::t_462b5e2cb5ce79 59-63,87,125,127
+  s_37e61ebb2259b1::t_5fb465765e8120 168
+  s_37e61ebb2259b1::t_7861534088ce75 96,106,110-114
+  s_37e61ebb2259b1::t_d4372ff1bb6574 1-2,148-159,195-230,232-262,267-272,276,286-291,295-297,300-301,456-457,463
+  s_37e61ebb2259b1::t_a48805325d8805 175
+  s_37e61ebb2259b1::t_6cfa23f3a80bab 178,263
+  s_37e61ebb2259b1::t_d37a2b1ad1e399 164
+  s_37e61ebb2259b1::t_a1d74972a6039b 54-58,64-70,128
+  s_37e61ebb2259b1::t_dac04b27bac022 322-326,335,337-339,351-354,397
+  s_37e61ebb2259b1::t_8ec5780a615040 285,293-294,462
+  s_37e61ebb2259b1::t_1de9d305a8e83e 11-12,160-163,165-167,169-174,176-177,179-194,231,264-265
+src/js/entities-service/interactions.js
+  s_37e61ebb2259b1::t_7861534088ce75 34
+src/js/i18n/en-US/patients.yml
+  s_37e61ebb2259b1::t_f53d92348346d0 23-27,30-31
+  s_37e61ebb2259b1::t_462b5e2cb5ce79 28-29
+  s_37e61ebb2259b1::t_5fb465765e8120 32-39
+test/support/api/interactions.js
+  s_37e61ebb2259b1::t_7861534088ce75 5,20
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  s_37e61ebb2259b1::t_fa1a89dc6b40f5 77
+  s_37e61ebb2259b1::t_40003b91ad6f57 28
+  s_37e61ebb2259b1::t_e5c6524be6a0ac 44-46,54,83,85
+  s_37e61ebb2259b1::t_56fe51b68fe826 5,9-27,29-36
+  s_37e61ebb2259b1::t_baadd2239d27fe 84,86-98
+  s_37e61ebb2259b1::t_ac24d0b6401128 101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fa85e6f6cec0d0f70bc5a7f69aea75b1e1a890ef",
+  "prompts": {},
+  "sessions": {
+    "s_37e61ebb2259b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d3d0-ffbb-71e0-b63a-a41dd4fbec6f",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
