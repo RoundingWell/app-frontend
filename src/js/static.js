@@ -2,6 +2,7 @@ const RWELL_NS = '17167534-18f9-5622-81b0-872907d3efa5';
 
 const FORM_RESPONSE_STATUS = {
   DRAFT: 'draft',
+  PENDING: 'pending',
   SUBMITTED: 'submitted',
 };
 
