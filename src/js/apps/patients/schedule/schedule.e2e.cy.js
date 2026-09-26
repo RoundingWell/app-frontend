@@ -62,11 +62,20 @@ function expandFiltersSidebar() {
 context('schedule page', function() {
   specify('preserves filters sidebar across a hidden date refresh', function() {
     cy.viewport(1200, 720);
+    let row;
+    const action = getAction({
+      attributes: { due_date: testDate(), name: 'Retained schedule action' },
+      relationships: { patient: getRelationship(testPatient1), state: getRelationship(stateTodo) },
+    });
 
     cy
-      .routeActions()
+      .routeActions(() => ({ data: [action], included: [testPatient1] }))
       .visit('/schedule')
       .wait('@routeActions');
+
+    cy.get('.schedule-list__day-list-row').then($row => {
+      row = $row[0];
+    });
 
     cy
       .get('.patient-list-page__all-filters-button')
@@ -74,6 +83,8 @@ context('schedule page', function() {
       .should('have.attr', 'aria-expanded', 'true')
       .click()
       .should('have.attr', 'aria-expanded', 'false');
+
+    cy.intercept('GET', '/api/actions?*', { delay: 600, body: { data: [action], included: [testPatient1] } }).as('refreshSchedule');
 
     cy
       .get('[data-date-filter-region]')
@@ -83,8 +94,13 @@ context('schedule page', function() {
     cy
       .get('.app-frame__pop-region')
       .contains('Last Month')
-      .click()
-      .wait('@routeActions');
+      .click();
+    cy.get('.schedule-list__day-list-row .js-patient').focus();
+    cy.wait('@refreshSchedule');
+    cy.get('.schedule-list__day-list-row').should($row => {
+      expect($row[0]).to.equal(row);
+    });
+    cy.get('.schedule-list__day-list-row .js-patient').should('be.focused');
 
     cy
       .get('@filtersButton')

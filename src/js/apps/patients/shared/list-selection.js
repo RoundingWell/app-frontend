@@ -21,7 +21,14 @@ export default MnObject.extend({
   updateSelection() {
     if (!this.editableCollection) return;
 
-    this.selected = this.state.getSelected(this.editableCollection);
+    const selected = this.state.getSelected(this.editableCollection);
+    const unchanged = this.selected?.length === selected.length
+      && selected.every((model, index) => model === this.selected.at(index));
+    if (unchanged) selected.reset();
+    else {
+      this.selected?.reset();
+      this.selected = selected;
+    }
     this.triggerMethod('change', this.selected);
   },
   filter(models) {
@@ -39,6 +46,9 @@ export default MnObject.extend({
   releaseCollections() {
     if (this.filteredCollection) this.stopListening(this.filteredCollection);
     if (this.editableCollection) this.stopListening(this.editableCollection);
+    this.selected?.reset();
+    this.selected = null;
+    this.collection = null;
     this.filteredCollection?.reset();
     this.editableCollection?.reset();
     this.filteredCollection = null;

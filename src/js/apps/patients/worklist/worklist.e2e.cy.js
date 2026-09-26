@@ -2226,6 +2226,12 @@ context('worklist page', function() {
         ]);
       });
 
+    let ownerControl;
+    cy.get('.worklist-list__item [data-owner-region] button').first().then($button => {
+      ownerControl = $button[0];
+    }).click();
+    cy.get('.picklist').should('be.visible');
+
     cy.sendWs({
       category: 'NameChanged',
       resource: {
@@ -2245,6 +2251,12 @@ context('worklist page', function() {
       .first()
       .as('firstRow')
       .should('contain', 'New Name Via Websocket');
+
+    cy.get('.worklist-list__item [data-owner-region] button').first().should($button => {
+      expect($button[0]).to.equal(ownerControl);
+    });
+    cy.get('.picklist').should('be.visible');
+    cy.get('body').type('{esc}');
 
     cy
       .get('@firstRow')

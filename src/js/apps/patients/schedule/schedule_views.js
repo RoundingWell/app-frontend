@@ -1,4 +1,5 @@
-import { debounce, every } from 'underscore';
+import { debounce, every, map, some } from 'underscore';
+import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
 
@@ -131,15 +132,34 @@ const AllFiltersButtonView = ListPageFiltersButtonView.extend({
   label: intl.patients.schedule.scheduleViews.allFiltersButtonView.allFiltersButton,
 });
 
+const DayContentView = View.extend({
+  className: 'schedule-list__day-card js-action-surface',
+  template: DayItemTemplate,
+  regions: { details: '[data-details-region]' },
+  ui: { patient: '.js-patient' },
+  onRender() {
+    if (this.model.get('details')) this.showChildView('details', new ScheduleDetailsTooltip({ model: this.model }));
+  },
+  setPatientSelected(patientId) {
+    const isSelected = this.model.getPatient().id === patientId;
+    const [patient] = this.getUI('patient');
+    patient.classList.toggle('patient-list__patient--selected', isSelected);
+    patient.setAttribute('aria-expanded', String(isSelected));
+  },
+  focusPatient() {
+    this.getUI('patient')[0].focus();
+  },
+});
+
 const DayItemView = View.extend({
   className: 'schedule-list__day-list-row',
   attributes: {
     role: 'listitem',
   },
-  template: DayItemTemplate,
+  template: hbs`<div class="schedule-list__check js-no-click" data-check-region></div><div data-content-region></div>`,
   regions: {
     check: '[data-check-region]',
-    details: '[data-details-region]',
+    content: { el: '[data-content-region]', replaceElement: true },
   },
   templateContext() {
     const state = this.model.getState();
@@ -161,16 +181,14 @@ const DayItemView = View.extend({
     'click .js-form': 'onClickForm',
     'click .js-action-surface': 'onClickSurface',
   },
-  ui: {
-    patient: '.js-patient',
-  },
   modelEvents: {
-    'change': 'render',
+    'change': 'onModelChange',
   },
   initialize({ state, selectedPatientId }) {
     this.state = state;
     this.flow = this.model.getFlow();
     this.selectedPatientId = selectedPatientId;
+    this.bindRelatedModels();
 
     this.listenTo(state, {
       'select:multiple': this.showCheck,
@@ -178,15 +196,52 @@ const DayItemView = View.extend({
     });
   },
   onRender() {
+    this.showChildView('content', new DayContentView({
+      model: this.model,
+      templateContext: () => this.templateContext(),
+    }));
     this.setPatientSelected(this.selectedPatientId);
     const canEdit = this.canEdit;
     this.canEdit = !this.model.isFlowDone() && this.model.canEdit();
 
-    this.showDetailsTooltip();
     this.showCheck();
 
     if (canEdit !== this.canEdit) {
       if (!this.canEdit) this.toggleSelected(false);
+      this.triggerMethod('change:canEdit');
+    }
+  },
+  bindRelatedModels() {
+    if (this.patient) this.stopListening(this.patient);
+    if (this.flow) this.stopListening(this.flow);
+    this.patient = this.model.getPatient();
+    this.flow = this.model.getFlow();
+    this.listenTo(this.patient, 'change:first_name change:last_name', this.updateContent);
+    if (this.flow) {
+      this.listenTo(this.flow, 'change:name', this.updateContent);
+      this.listenTo(this.flow, 'change:_state', this.updateEditability);
+    }
+  },
+  updateContent() {
+    this.getChildView('content').render();
+    this.setPatientSelected(this.selectedPatientId);
+    this.triggerMethod('content:change', this);
+  },
+  onModelChange() {
+    if (this.model.hasChanged('_patient') || this.model.hasChanged('_flow')) this.bindRelatedModels();
+    if (some(['name', 'details', 'due_date', 'due_time', '_state', '_patient', '_flow', '_form', '_comments'], attr => this.model.hasChanged(attr))) {
+      this.flow = this.model.getFlow();
+      this.updateContent();
+    }
+    this.updateEditability();
+    this.triggerMethod('content:change', this);
+  },
+  updateEditability() {
+    const canEdit = !this.model.isFlowDone() && this.model.canEdit();
+    if (canEdit !== this.canEdit) {
+      this.canEdit = canEdit;
+      this.showCheck();
+      if (!canEdit) this.toggleSelected(false);
       this.triggerMethod('change:canEdit');
     }
   },
@@ -195,19 +250,25 @@ const DayItemView = View.extend({
   },
   setPatientSelected(patientId) {
     this.selectedPatientId = patientId;
-    const isSelected = this.model.getPatient().id === patientId;
-    const [patient] = this.getUI('patient');
-    patient.classList.toggle('patient-list__patient--selected', isSelected);
-    patient.setAttribute('aria-expanded', String(isSelected));
+    this.getChildView('content').setPatientSelected(patientId);
   },
   focusPatient() {
-    this.getUI('patient')[0].focus();
+    this.getChildView('content').focusPatient();
   },
   showCheck() {
-    if (!this.canEdit) return;
+    if (!this.canEdit) {
+      this.getRegion('check').empty();
+      return;
+    }
 
     const isSelected = this.state.isSelected(this.model);
     this.toggleSelected(isSelected);
+    const current = this.getChildView('check');
+    if (current) {
+      current.isSelected = isSelected;
+      current.render();
+      return;
+    }
     const checkView = new CheckView({
       deselectLabel: intl.patients.schedule.scheduleViews.dayItemView.deselectAction,
       selectLabel: intl.patients.schedule.scheduleViews.dayItemView.selectAction,
@@ -246,11 +307,7 @@ const DayItemView = View.extend({
 
     Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id, entryTarget);
   },
-  showDetailsTooltip() {
-    if (!this.model.get('details')) return;
 
-    this.showChildView('details', new ScheduleDetailsTooltip({ model: this.model }));
-  },
 });
 
 const DayListView = CollectionView.extend({
@@ -294,6 +351,7 @@ const DayListView = CollectionView.extend({
   },
   childViewTriggers: {
     'render': 'listItem:render',
+    'content:change': 'listItem:render',
     'change:canEdit': 'change:canEdit',
     'select': 'select',
     'click:patient': 'click:patient',
@@ -389,12 +447,37 @@ const ScheduleListView = CollectionView.extend({
 
     return true;
   },
-  initialize({ state, editableCollection, selectedPatientId }) {
+  initialize({ state, editableCollection, selectedPatientId, actions }) {
     this.state = state;
     this.editableCollection = editableCollection;
     this.selectedPatientId = selectedPatientId;
 
+    this.collection = new Backbone.Collection();
+    this.updateActions(actions);
     this.onListItemCanEdit = debounce(this.onListItemCanEdit, 60);
+  },
+  updateActions(actions) {
+    const previous = this.collection.models.slice();
+    const days = map(actions.groupBy('due_date'), (models, date) => {
+      const day = this.collection.get(date);
+      if (day) {
+        day.get('actions').set(models);
+        return day;
+      }
+      return new Backbone.Model({ id: date, date, actions: new actions.constructor(models) });
+    });
+    this.collection.set(days);
+    previous.forEach(day => {
+      if (!this.collection.has(day)) day.get('actions').reset();
+    });
+    this.children.each(view => {
+      view.sort();
+      view.filter();
+    });
+    this.filter();
+  },
+  setLoading(isLoading) {
+    this.el.setAttribute('aria-busy', String(isLoading));
   },
   onListItemCanEdit() {
     // NOTE: debounced in initialize
@@ -413,6 +496,10 @@ const ScheduleListView = CollectionView.extend({
   onBeforeDestroy() {
     this.onListItemCanEdit.cancel();
     this.onChildFilter.cancel();
+  },
+  onDestroy() {
+    this.collection.each(day => day.get('actions').reset());
+    this.collection.reset();
   },
   setVisibleChildren() {
     const visibleActions = this.children.reduce((models, cv) => {

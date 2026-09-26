@@ -1,5 +1,3 @@
-<div class="schedule-list__check js-no-click" data-check-region></div>
-<div class="schedule-list__day-card js-action-surface">
   {{#if due_time}}
     <time class="schedule-list__due-time {{#if isOverdue}}is-overdue{{/if}}" datetime="{{ due_time }}">{{formatDateTime due_time "TIME" inputFormat="HH:mm:ss"}}</time>
   {{else}}
@@ -16,4 +14,3 @@
   </div>
   {{#if commentCount}}<span class="schedule-list__comments" role="img" aria-label="{{formatMessage (intlGet "patients.schedule.scheduleViews.dayItemView.commentsLabel") itemCount=commentCount}}">{{far "comment"}}<span>{{ commentCount }}</span></span>{{/if}}
   <span class="schedule-list__search-helper">{{ state }} {{ flow }}</span>
-</div>

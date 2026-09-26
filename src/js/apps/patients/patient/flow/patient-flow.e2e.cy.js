@@ -2165,6 +2165,68 @@ context('patient flow page', function() {
       .and('contain', 'You must set all actions to a Done state before setting this flow to a Done state.');
   });
 
+  [204, 404].forEach(statusCode => {
+    const outcome = statusCode === 204 ? 'succeeds' : 'fails';
+
+    specify(`keeps the newer flow editor when an old bulk save ${ outcome }`, function() {
+      const patient = getPatient({ attributes: { first_name: 'Bulk', last_name: 'Patient' } });
+      const flows = ['Flow A', 'Flow B'].map(name => getFlow({
+        attributes: { name },
+        relationships: { patient: getRelationship(patient), state: getRelationship(stateInProgress) },
+      }));
+      const actions = flows.map(flow => getAction({
+        attributes: { name: `Action in ${ flow.attributes.name }` },
+        relationships: {
+          patient: getRelationship(patient),
+          flow: getRelationship(flow),
+          state: getRelationship(stateTodo),
+          owner: getRelationship(teamNurse),
+        },
+      }));
+      let finishSave;
+      let newerEditor;
+      cy.routePatient(() => ({ data: patient }))
+        .routePatientFlows(() => ({ data: flows, included: [patient] }))
+        .routePatientActions(() => ({ data: [], included: [] }));
+      flows.forEach((flow, index) => {
+        cy.intercept({ method: 'GET', pathname: `/api/flows/${ flow.id }` }, { body: { data: flow, included: [patient] } });
+        cy.intercept('GET', `/api/flows/${ flow.id }/actions*`, {
+          body: { data: [actions[index]], included: [flow, patient] },
+        });
+      });
+      cy.intercept('PATCH', `/api/actions/${ actions[0].id }`, req => {
+        return new Promise(resolve => {
+          finishSave = () => {
+            req.reply({ statusCode, body: statusCode === 204 ? '' : { errors: [] } });
+            resolve();
+          };
+        });
+      }).as('oldSave');
+      cy.visit(`/patient/${ patient.id }/flow/${ flows[0].id }`);
+      cy.get('.patient-flow__list .action-card .js-select').click();
+      cy.get('.bulk-edit-inline [data-state-region] button').click();
+      cy.get('.picklist').contains('In Progress').click();
+      cy.get('.bulk-edit-inline .js-save').click();
+      cy.wrap(null).should(() => expect(finishSave).to.be.a('function'));
+      cy.get('.patient__context-trail').contains('Bulk Patient').click();
+      cy.get('.workflow-page__list .flow-card').contains('Flow B').click();
+      cy.get('.patient-flow__list .action-card').should('contain', 'Action in Flow B').find('.js-select').click();
+      cy.get('.bulk-edit-inline [data-state-region] button').click();
+      cy.get('.picklist .js-picklist-item').contains('Done').click();
+      cy.get('.bulk-edit-inline').then($editor => {
+        newerEditor = $editor[0];
+      });
+      cy.then(() => finishSave());
+      cy.wait('@oldSave');
+      cy.get('.bulk-edit-inline').should($editor => {
+        expect($editor[0]).to.equal(newerEditor);
+      });
+      cy.get('.bulk-edit-inline [data-state-region]').should('contain', 'Done');
+      cy.get('.patient-flow__list .action-card').should('have.class', 'is-selected');
+      cy.location('pathname').should('contain', flows[1].id);
+    });
+  });
+
   specify('bulk edit actions', function() {
     const testPatient = getPatient();
 

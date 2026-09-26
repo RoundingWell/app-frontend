@@ -100,23 +100,38 @@ export default App.extend({
     this.query = query;
     this.filters = filters;
     this.sortOptions = sortOptions;
+    const view = this.getView().getChildView('list');
+    const retainList = view instanceof ListView && this.isFlowType === isFlowType;
     this.isFlowType = isFlowType;
     this.isRefreshingList = false;
     this.getView().getRegion('status').empty();
-    this.collection = collection;
-    this.getState().setWorklist(collection.getMeta('worklist'));
-    this.filtersState.set('worklist', collection.getMeta('worklist'));
+    if (retainList) {
+      this.collection.meta = collection.meta;
+      this.collection.set(collection.models);
+      collection.reset();
+    } else {
+      this.collection = collection;
+    }
+    this.getState().setWorklist(this.collection.getMeta('worklist'));
+    this.filtersState.set('worklist', this.collection.getMeta('worklist'));
     this.subscribe();
-    this.selection.setCollection(collection, { isFlowList: isFlowType });
-    const view = new ListView({
-      collection,
+    if (retainList) {
+      view.setLoading(false);
+      view.setComparator(this.getComparator());
+      view.filter();
+      this.selection.filter(view.children.map(child => child.model));
+      return;
+    }
+    this.selection.setCollection(this.collection, { isFlowList: isFlowType });
+    const listView = new ListView({
+      collection: this.collection,
       editableCollection: this.selection.editableCollection,
       selectedPatientId: this.patientSidebarPatientId,
       state: this.getState(),
       viewComparator: this.getComparator(),
     });
-    this.listenTo(view, {
-      'destroy': () => this.stopListening(view),
+    this.listenTo(listView, {
+      'destroy': () => this.stopListening(listView),
       'filtered': models => this.selection.filter(models),
       'change:canEdit': () => this.selection.updateEditableCollection(),
       'click:patient': (patient, triggerView) => {
@@ -124,7 +139,7 @@ export default App.extend({
         this.triggerMethod('click:patient', patient);
       },
     });
-    this.getView().showChildView('list', view);
+    this.getView().showChildView('list', listView);
   },
   focusPatientTrigger() {
     const triggerView = this.patientSidebarTrigger;
@@ -168,6 +183,7 @@ export default App.extend({
 
     this.showListError(this.isRefreshingList);
     this.isRefreshingList = false;
+    addError(error);
   },
   showBulkEdit() {
     const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
@@ -196,16 +212,15 @@ export default App.extend({
               const savedCurrentEditor = app.resetChanges(save);
               if (this.isCurrentSelection(saveContext)) this.showUpdateSuccess(itemCount, isFlowType);
               if (savedCurrentEditor && this.isCurrentSelection(saveContext)) this.getState().clearSelected();
-            })
-            .catch(() => {
+            }, () => {
               if (!this.isCurrentRun(saveContext)) return;
               const savedCurrentEditor = app.resetChanges(save);
               if (this.isCurrentSelection(saveContext)) {
                 Radio.request('alert', 'show:error', intl.patients.worklist.worklistApp.bulkEditFailure);
               }
               if (savedCurrentEditor && this.isCurrentSelection(saveContext)) this.getState().clearSelected();
-              this.refreshList();
-            });
+              this.refreshList().catch(addError);
+            }).catch(addError);
         },
       });
     }
@@ -275,7 +290,7 @@ export default App.extend({
       'destroy'() {
         this.stopListening(errorView);
       },
-      'retry': this.refreshList,
+      'retry': () => this.refreshList().catch(addError),
     });
 
     if (isRefresh) {

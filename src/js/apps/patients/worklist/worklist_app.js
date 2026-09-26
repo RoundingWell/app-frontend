@@ -189,7 +189,7 @@ const WorklistApp = App.extend({
 
     this.filterState.set(this.getState().getFiltersState());
     this.refreshControls();
-    return results.refreshList();
+    return results.refreshList().catch(addError);
   },
   onChangeSearchQuery(state) {
     this.currentSearchQuery = state.get('searchQuery');

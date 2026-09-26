@@ -116,20 +116,38 @@ context('worklist loading states', function() {
 
   specify('retains the current cards while the worklist refreshes', function() {
     let requestCount = 0;
+    let card;
+    let ownerControl;
+    const removed = getAction({ attributes: { name: 'Removed on refresh' }, relationships: { patient: getRelationship(patient) } });
+    const added = getAction({ attributes: { name: 'Added on refresh' }, relationships: { patient: getRelationship(patient) } });
 
     cy
       .intercept('GET', '/api/actions?*', req => {
         requestCount += 1;
         req.reply({
           delay: requestCount > 1 ? 1000 : 0,
-          body: getActionsResponse(),
+          body: {
+            ...getActionsResponse(),
+            data: [{
+              ...action,
+              attributes: { ...action.attributes, updated_at: requestCount > 1 ? '2026-09-26T12:00:00Z' : '2026-09-25T12:00:00Z' },
+            }, requestCount > 1 ? added : removed],
+            meta: { actions: { total: 2 }, worklist: uuid() },
+          },
         });
       })
       .as('routeActions')
       .visit('/worklist/owned-by')
       .wait('@routeActions');
 
+    cy.contains('.worklist-list__item', 'Loading State Action').then($card => {
+      card = $card[0];
+    });
+    cy.contains('.worklist-list__item', 'Loading State Action').find('[data-owner-region] button').then($button => {
+      ownerControl = $button[0];
+    });
     chooseLastWeek();
+    cy.contains('.worklist-list__item', 'Loading State Action').find('.js-patient').focus();
 
     cy
       .get('.list-page__list')
@@ -144,7 +162,7 @@ context('worklist loading states', function() {
       .should('contain', 'Updating actions')
       .parents('.patient-list-page__count')
       .should('contain', 'Updating actions')
-      .should('not.contain', '1 Action');
+      .should('not.contain', '2 Actions');
 
     cy
       .wait('@routeActions')
@@ -152,6 +170,15 @@ context('worklist loading states', function() {
       .should('not.have.class', 'is-loading')
       .should('have.attr', 'aria-busy', 'false')
       .should('contain', 'Loading State Action');
+
+    cy.contains('.worklist-list__item', 'Loading State Action').should($card => {
+      expect($card[0]).to.equal(card);
+    });
+    cy.contains('.worklist-list__item', 'Loading State Action').find('[data-owner-region] button').should($button => {
+      expect($button[0]).to.equal(ownerControl);
+    });
+    cy.contains('.worklist-list__item', 'Loading State Action').find('.js-patient').should('be.focused');
+    cy.get('.list-page__list').should('contain', 'Added on refresh').and('not.contain', 'Removed on refresh');
   });
 
   specify('keeps the patient sidebar loader mounted while data loads', function() {

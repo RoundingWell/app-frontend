@@ -42,14 +42,17 @@ export default function createLatestRequest({ load, commit, fail = rethrow }) {
       const releaseSignal = bindAbortSignal(request, signal);
 
       try {
-        const value = await load(input, { signal: request.signal });
+        let value;
+        try {
+          value = await load(input, { signal: request.signal });
+        } catch(error) {
+          if (request.signal.aborted) return false;
+          fail(error, input);
+          return false;
+        }
         if (request.signal.aborted) return false;
         commit(value, input);
         return true;
-      } catch(error) {
-        if (request.signal.aborted) return false;
-        fail(error, input);
-        return false;
       } finally {
         releaseSignal();
         if (pending === request) pending = undefined;

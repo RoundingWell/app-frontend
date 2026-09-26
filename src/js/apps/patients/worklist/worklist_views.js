@@ -308,12 +308,14 @@ const ListView = CollectionView.extend({
   },
   childViewTriggers: {
     'render': 'listItem:render',
+    'content:change': 'listItem:render',
     'change:canEdit': 'listItem:canEdit',
     'select': 'select',
     'click:patient': 'click:patient',
   },
   onListItemRender(view) {
-    view.searchString = view.el.textContent;
+    if (!view.model) return;
+    view.searchString = `${ view.el.textContent } ${ view.model.getState().get('name') } ${ view.model.getOwner().get('name') }`;
   },
   onBeforeDestroy() {
     this.onListItemCanEdit.cancel();

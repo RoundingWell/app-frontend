@@ -77,6 +77,20 @@ context('Latest Request', function() {
     expect(fail).to.have.been.calledOnce;
   });
 
+  specify('rejects commit errors without presenting a retryable load failure', async function() {
+    const error = new Error('Render failed');
+    const fail = cy.stub();
+    const requests = createLatestRequest({
+      load: input => input,
+      commit: () => {
+        throw error;
+      },
+      fail,
+    });
+    expect(await requests.run('data').catch(value => value)).to.equal(error);
+    expect(fail).not.to.have.been.called;
+  });
+
   specify('releases external abort listeners and refuses work after disposal', async function() {
     const pending = deferred();
     const external = new AbortController();

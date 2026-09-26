@@ -42,8 +42,7 @@ export default App.extend({
       load: async(input, { signal }) => {
         await this.stopBulkEdit();
         signal.throwIfAborted();
-        this.selection.releaseCollections();
-        view.showSelectAll(this.selection.getControlState());
+        this.getView().getRegion('status').empty();
         this.getView().getRegion('count').empty();
         this.showListLoading();
         return this.loadResults({ signal });
@@ -98,9 +97,21 @@ export default App.extend({
   showCollection(collection) {
     this.getState().setWorklist(collection.getMeta('worklist'));
     this.filtersState.set('worklist', collection.getMeta('worklist'));
+    const currentView = this.getView().getChildView('list');
+    this.getView().getRegion('status').empty();
+    if (currentView instanceof ScheduleListView) {
+      this.collection.meta = collection.meta;
+      this.collection.set(collection.models);
+      collection.reset();
+      currentView.updateActions(this.collection);
+      currentView.setLoading(false);
+      currentView.setVisibleChildren();
+      return;
+    }
+    this.collection = collection;
     this.selection.setCollection(collection);
     const view = new ScheduleListView({
-      collection: collection.groupByDate(),
+      actions: collection,
       editableCollection: this.selection.editableCollection,
       selectedPatientId: this.patientSidebarPatientId,
       state: this.getState(),
@@ -143,15 +154,26 @@ export default App.extend({
     return this.getChildApp('bulkEditActions')?.stop() || Promise.resolve();
   },
   showListLoading() {
+    const view = this.getView().getChildView('list');
+    if (view instanceof ScheduleListView) {
+      view.setLoading(true);
+      return;
+    }
     this.getView().showChildView('list', new LoadingView({ variant: 'generic' }));
   },
   handleRefreshError(error) {
     const view = new ListErrorView();
     this.listenTo(view, {
       'destroy': () => this.stopListening(view),
-      'retry': this.refreshList,
+      'retry': () => this.refreshList().catch(addError),
     });
-    this.getView().showChildView('list', view);
+    const listView = this.getView().getChildView('list');
+    if (listView instanceof ScheduleListView) {
+      listView.setLoading(false);
+      this.getView().showChildView('status', view);
+    } else {
+      this.getView().showChildView('list', view);
+    }
     addError(error);
   },
   showBulkEdit() {
@@ -184,17 +206,16 @@ export default App.extend({
               }
 
               if (savedCurrentEditor && this.isCurrentSelection(saveContext)) this.getState().clearSelected();
-              if (shouldRefresh) this.refreshList();
-            })
-            .catch(() => {
+              if (shouldRefresh) this.refreshList().catch(addError);
+            }, () => {
               if (!this.isCurrentRun(saveContext)) return;
               const savedCurrentEditor = app.resetChanges(save);
               if (this.isCurrentSelection(saveContext)) {
                 Radio.request('alert', 'show:error', intl.patients.schedule.scheduleApp.bulkEditFailure);
               }
               if (savedCurrentEditor && this.isCurrentSelection(saveContext)) this.getState().clearSelected();
-              this.refreshList();
-            });
+              this.refreshList().catch(addError);
+            }).catch(addError);
         },
       });
     }

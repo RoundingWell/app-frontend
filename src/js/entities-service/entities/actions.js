@@ -1,5 +1,4 @@
-import Backbone from 'backbone';
-import { contains, extend, keys, reduce, size } from 'underscore';
+import { contains, extend, size } from 'underscore';
 import { Radio } from 'marionette';
 import Store from 'backbone.store';
 import dayjs from 'dayjs';
@@ -281,18 +280,6 @@ const Collection = BaseCollection.extend({
   },
   applyOwner(owner) {
     return this.batchInvoke('applyOwner', 20, owner);
-  },
-  groupByDate() {
-    const groupedCollection = this.groupBy('due_date');
-
-    return reduce(keys(groupedCollection), (collection, key) => {
-      collection.add({
-        date: key,
-        actions: new Collection(groupedCollection[key]),
-      });
-
-      return collection;
-    }, new Backbone.Collection([]));
   },
 });
 

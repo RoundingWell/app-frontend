@@ -392,6 +392,9 @@ const ListView = CollectionView.extend({
 
     this.onListItemCanEdit = debounce(this.onListItemCanEdit, 60);
   },
+  onBeforeDestroy() {
+    this.onListItemCanEdit.cancel();
+  },
   onListItemCanEdit() {
     // NOTE: debounced in initialize
     this.triggerMethod('change:canEdit');

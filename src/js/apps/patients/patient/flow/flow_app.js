@@ -56,6 +56,7 @@ export default App.extend({
     throw error;
   },
   onStart(app, { patient }, [flow, actions]) {
+    this.run = {};
     this.flow = flow;
     this.actions = actions;
     this.editableCollection = actions.clone();
@@ -65,7 +66,9 @@ export default App.extend({
 
     this.subscribe();
 
-    this.setView(new LayoutView()).render();
+    const view = this.setView(new LayoutView());
+    this.listenTo(view, 'before:destroy', this.releaseSelection);
+    view.render();
 
     this.updateContext();
 
@@ -94,10 +97,18 @@ export default App.extend({
     this.showView();
   },
   onStop() {
+    this.releaseSelection();
     this.unsubscribe();
-    if (this.editableCollection) this.stopListening(this.editableCollection);
     if (this.actions) this.stopListening(this.actions);
     if (this.flow) this.stopListening(this.flow);
+  },
+  releaseSelection() {
+    this.run = null;
+    if (this.editableCollection) this.stopListening(this.editableCollection);
+    this.editableCollection?.reset();
+    this.selected?.reset();
+    this.editableCollection = null;
+    this.selected = null;
   },
   updateContext() {
     this.trigger('context:change', {
@@ -203,6 +214,8 @@ export default App.extend({
   },
 
   toggleBulkSelect() {
+    if (!this.run) return;
+    this.selected?.reset();
     this.selected = this.getState().getSelected(this.editableCollection);
     this.getView().setEditing(!!this.selected.length);
 
@@ -241,29 +254,23 @@ export default App.extend({
       'applyOwner'(owner) {
         this.selected.applyOwner(owner);
       },
-      'save'(saveData) {
-        const itemCount = this.selected.length;
+      'save'(saveData, save) {
+        const { flow, patient, run, selected } = this;
+        const selection = this.getState().get('actionsSelected');
+        const itemCount = selected.length;
+        const isCurrent = () => this.run === run && this.flow === flow
+          && this.getState().get('actionsSelected') === selection;
 
-        this.selected.save(saveData)
+        selected.save(saveData)
           .then(() => {
-            app.resetChanges();
+            if (!isCurrent() || !app.resetChanges(save)) return;
             this.showUpdateSuccess(itemCount);
             this.getState().clearSelected();
-          })
-          .catch(() => {
-            app.resetChanges();
+          }, () => {
+            if (!isCurrent() || !app.resetChanges(save)) return;
             Radio.request('alert', 'show:error', i18n.bulkEditFailure);
-            this.restart({
-              flowId: this.flow.id,
-              patient: this.patient,
-            }).catch(error => {
-              try {
-                this.showLoadFailure({ patient: this.patient }, error);
-              } catch(unhandledError) {
-                addError(unhandledError);
-              }
-            });
-          });
+            this.restart({ flowId: flow.id, patient }).catch(addError);
+          }).catch(addError);
       },
     });
     return app;
@@ -315,7 +322,9 @@ export default App.extend({
       state: this.getState(),
     });
 
+    const run = this.run;
     this.listenTo(listView, 'change:canEdit', () => {
+      if (this.run !== run) return;
       this.editableCollection.reset(this._getListEditable(listView));
     });
 

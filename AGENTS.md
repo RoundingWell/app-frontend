@@ -140,6 +140,13 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - A stopped app can be stopped without stop notifications; canceling an in-progress start can still invoke `onStop`. Scope listener cleanup by event/callback when its source may not yet be assigned.
 - Internal fetch helpers require the options passed by their current callers. Do not restore hypothetical no-options consumers or removed configuration variants without finding an active caller.
 
+For list and mutation changes, verify these ownership contracts:
+
+- A pending write keeps its original target membership. After navigation or a new selection/editor, old success and failure callbacks cause no UI changes to the newer context.
+- Release owned derived collections with `reset()`, never entity collection `destroy()`. Released selections receive no model notifications; surviving consumers still receive them.
+- Catch loading failures around loading only. Rendering or commit errors reach the application error reporter instead of a retryable loading state.
+- Reconcile refresh results into retained collections. Surviving rows and unrelated controls keep identity, focus, and open state; replace rows when their resource type or Schedule date group changes. Cover these interactions through the UI.
+
 ## Reviewing Changes
 
 - Put findings first.

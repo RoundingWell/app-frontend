@@ -175,7 +175,7 @@ const ScheduleApp = App.extend({
     if (!results.isRunning() || options?.source === results) return;
 
     this.filterState.set(this.getState().getFiltersState());
-    return results.refreshList();
+    return results.refreshList().catch(addError);
   },
   onChangeSearchQuery(state) {
     this.currentSearchQuery = state.get('searchQuery');
