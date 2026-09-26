@@ -1,0 +1,91 @@
+AGENTS.md
+  s_ab1ded1751df69::t_ea6bd9ff81a56b 143-149
+src/js/apps/patients/patient/flow/flow_app.js
+  s_ce7e5ce1e62609::t_d490e3afb78b89 59,69-71,100,105-112,217-218,257-264,266,269-270,272-273,325,327
+src/js/apps/patients/patient/flow/flow_views.js
+  s_ab1ded1751df69::t_e7774bb860c4ed 395-397
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_d7162dce862bc9::t_88d827d5be26ea 2168-2229
+src/js/apps/patients/schedule/schedule-results_app.js
+  s_ce7e5ce1e62609::t_b7f4e2dc9cfe7a 45,100-111,114,157-161,168,170-176,209-210,217-218
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_ab1ded1751df69::t_7c88e5499b9445 65-69,72,76-79,87-88,97-103
+src/js/apps/patients/schedule/schedule_app.js
+  s_ab1ded1751df69::t_468a25325b9391 178
+src/js/apps/patients/schedule/schedule_views.js
+  s_ce7e5ce1e62609::t_661dc7bfcb6025 1-2,135-153,159,162,185,191,199-202,214-247,253,256,259-262,266-271,354,450,455-456,459-481,500-503
+src/js/apps/patients/shared/list-selection.component.cy.js
+  s_ce7e5ce1e62609::t_d999ab8bacfced 1-46
+src/js/apps/patients/shared/list-selection.js
+  s_ce7e5ce1e62609::t_aa67eebc4d4d2a 24-31,49-51
+src/js/apps/patients/worklist/action-copy.hbs
+  s_ce7e5ce1e62609::t_2ca5cd35c46e0f 1-18
+src/js/apps/patients/worklist/action-item.hbs
+  s_ce7e5ce1e62609::t_e892507b86e2d2 6,11,14
+src/js/apps/patients/worklist/action-meta.hbs
+  s_ce7e5ce1e62609::t_b5c1d6bef6aab8 1-10
+src/js/apps/patients/worklist/action_views.js
+  s_ce7e5ce1e62609::t_ce21e57424299b 1,14-15,29-67,75-76,101,109,155-164,181-222,228,231,234-237,240-245
+src/js/apps/patients/worklist/flow-copy.hbs
+  s_ce7e5ce1e62609::t_17e26684f3c69f 1-8
+src/js/apps/patients/worklist/flow-item.hbs
+  s_ce7e5ce1e62609::t_e4e6331f5246c8 6,11-12,14
+src/js/apps/patients/worklist/flow-meta.hbs
+  s_ce7e5ce1e62609::t_60fc19f38e4133 1-4
+src/js/apps/patients/worklist/flow-progress.hbs
+  s_ce7e5ce1e62609::t_d951d341cb5b6d 1-2
+src/js/apps/patients/worklist/flow_views.js
+  s_ce7e5ce1e62609::t_46630441e91d0d 1,16-18,33-47,55-57,70,83,105-120,134-167,173,176,179-182,186-191
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_ce7e5ce1e62609::t_02d11353040c48 119-122,129-136,143-148,150,165,173-181
+src/js/apps/patients/worklist/worklist-results_app.js
+  s_ce7e5ce1e62609::t_06503ad0200e3f 103-104,108-116,118-127,133-134,142,186,215,222-223,293
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_ab1ded1751df69::t_4cf8dc2c34e2a5 2229-2234,2255-2260
+src/js/apps/patients/worklist/worklist_app.js
+  s_ab1ded1751df69::t_a0ad999f29cad5 192
+src/js/apps/patients/worklist/worklist_views.js
+  s_ab1ded1751df69::t_43ad4b8ac89aa3 311,317-318
+src/js/base/collection.component.cy.js
+  s_ce7e5ce1e62609::t_04b18aed7f33c3 1-24
+src/js/base/collection.js
+  s_ce7e5ce1e62609::t_f7505e0c8cba38 46-47,51-52
+src/js/entities-service/entities/actions.js
+  s_ce7e5ce1e62609::t_911b284608f458 1
+src/js/utils/latest-request.component.cy.js
+  s_ce7e5ce1e62609::t_17f1b9f6005845 80-93
+src/js/utils/latest-request.js
+  s_ce7e5ce1e62609::t_91baded6809341 45-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2f60f559a90c7096e109f98ff12672a805dead35",
+  "prompts": {},
+  "sessions": {
+    "s_ab1ded1751df69": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0dc9c-510d-7623-9afd-f938ccabdbf6",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_ce7e5ce1e62609": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0dca5-7952-7d40-9862-e3683427a6be",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_d7162dce862bc9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0dc9d-456a-7b62-a7bd-67cc8801573c",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
