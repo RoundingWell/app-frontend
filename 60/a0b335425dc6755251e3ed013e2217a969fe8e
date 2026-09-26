@@ -1,0 +1,21 @@
+src/js/formservice.e2e.cy.js
+  s_7d9748a0496f68::t_8a08ab71792e9e 11-12,192-230
+src/js/services/dialer.e2e.cy.js
+  s_7d9748a0496f68::t_82ffaaa31436c7 356-358,371-373,647-655,667-669,687-688,698-714,716-725
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "60a0b335425dc6755251e3ed013e2217a969fe8e",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
