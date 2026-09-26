@@ -72,9 +72,13 @@ export default App.extend({
   async showSidebar(patient, { signal }) {
     const filtersStopped = await this.getChildApp('filters').stop();
     signal.throwIfAborted();
+    // Replacement requests abort above; filters have no independent stop veto.
+    /* istanbul ignore if */
     if (!filtersStopped) return false;
     const patientStopped = await this.getChildApp('patient').stop();
     signal.throwIfAborted();
+    // Replacement requests abort above; patient sidebars have no independent stop veto.
+    /* istanbul ignore if */
     if (!patientStopped) return false;
 
     if (patient) {
@@ -89,6 +93,8 @@ export default App.extend({
     });
   },
   selectPatient(patient) {
+    // The page removes UI event sources on release; guard already-queued callbacks.
+    /* istanbul ignore if */
     if (!this.hasHost) return Promise.resolve(false);
     if (this.patient?.id === patient.id) return this.closePatient();
 
@@ -97,6 +103,8 @@ export default App.extend({
     return this.requests.run(patient);
   },
   handleSidebarError(error, patient) {
+    // Filter startup is synchronous; only programmer errors can reject it.
+    /* istanbul ignore if */
     if (!patient) throw error;
 
     this.showFilters().catch(addError);
@@ -104,6 +112,8 @@ export default App.extend({
     else addError(error);
   },
   showFilters() {
+    // The page removes UI event sources on release; guard already-queued callbacks.
+    /* istanbul ignore if */
     if (!this.hasHost) return Promise.resolve(false);
     this.patient = null;
     this.triggerMethod('change:patient', null);

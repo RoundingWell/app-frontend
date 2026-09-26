@@ -81,6 +81,15 @@ context('Patient Action Form', function() {
     cy
       .url()
       .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`);
+    const action = getAction({ relationships: { form: getRelationship(testForm) } });
+    cy.routePatient().routeAction(fx => ({ ...fx, data: action }))
+      .routeFormByAction(fx => ({ ...fx, data: testForm }))
+      .intercept('GET', `/api/actions/${ action.id }*`, req => {
+        if (req.query.include?.includes('form-responses')) req.reply({ statusCode: 410, body: { errors } });
+      })
+      .visit(`/patient/${ routePatientId }/action/${ action.id }`);
+    cy.get('.alert-box__body').should('contain', 'The Action you requested does not exist.');
+    cy.location('pathname').should('equal', '/one/worklist/owned-by');
   });
 
   specify('action deleted while its form is open', function() {
@@ -616,7 +625,7 @@ context('Patient Action Form', function() {
 
     cy
       .get('@metaRegion')
-      .find('.js-save-button')
+      .find('.js-save-button:enabled')
       .should('contain', 'Submit')
       .and('be.enabled');
 
@@ -1932,6 +1941,7 @@ context('Patient Action Form', function() {
         return fx;
       })
       .routeLatestFormResponse()
+      .routeFormResponse(fx => ({ ...fx, data: testFormResponse }))
       .routeFormDefinition()
       .routeFormActionFields()
       .routeActionActivity()
@@ -2506,6 +2516,67 @@ context('Patient Action Form', function() {
         expect(formErrors).to.have.length(2);
         expect(formErrors[1].args.error[0]).to.equal('Invalid request parameters');
       });
+
+    cy.clock().invoke('restore');
+
+    cy.then(() => {
+      const patient = getPatient();
+      const action = getAction({ relationships: {
+        patient: getRelationship(patient), form: getRelationship(testForm), state: getRelationship(stateTodo),
+      } });
+      cy.routesForPatientAction()
+        .routePatient(fx => ({ ...fx, data: patient }))
+        .routeAction(fx => ({ ...fx, data: action }))
+        .routeLatestFormResponse()
+        .intercept('GET', '/api/actions/*/form', { statusCode: 400, body: { errors: [] } }).as('failedForm')
+        .visit(`/patient/${ patient.id }/action/${ action.id }`)
+        .wait('@failedForm');
+      cy.get('.patient-action').should('contain', action.attributes.name);
+      cy.get('[data-form-viewport-iframe]').should('not.exist');
+    });
+
+    cy.then(() => {
+      const testPatient = getPatient();
+      cy.routesForDefault();
+
+      const missingFormAction = getAction({
+        relationships: { form: getRelationship(testForm) },
+      });
+      const missingFormErrors = getErrors({
+        status: '404',
+        title: 'Not Found',
+        detail: 'Cannot find form',
+      });
+
+      cy
+        .routeActionActivity()
+        .routeActionComments()
+        .routeActionFiles()
+        .routeAction(fx => {
+          fx.data = missingFormAction;
+          return fx;
+        })
+        .routePatient()
+        .routeLatestFormResponse()
+        .intercept('GET', '/api/actions/*/form', {
+          statusCode: 404,
+          body: { errors: missingFormErrors },
+        })
+        .as('routeFormByActionError')
+        .visit(`/patient/${ testPatient.id }/action/${ missingFormAction.id }`)
+        .wait('@routeFormByActionError');
+
+      cy
+        .get('.alert-box__body')
+        .should('contain', 'The Action you requested does not exist.');
+
+      cy
+        .wait('@routeAction');
+
+      cy
+        .location('pathname')
+        .should('equal', '/one/worklist/owned-by');
+    });
   });
 
   specify('hidden submit button', function() {

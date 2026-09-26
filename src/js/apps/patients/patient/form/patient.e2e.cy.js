@@ -118,6 +118,56 @@ context('Patient Form', function() {
     cy
       .location('pathname', { timeout: 10000 })
       .should('contain', `/patient/${ testPatient.id }/workflow`);
+
+    cy.then(() => {
+      const patient = getPatient();
+      const response = getFormResponse();
+      let releaseSave;
+      const pendingDraftKey = `form-subm-${ currentClinician.id }-${ patient.id }-${ testForm.id }`;
+
+      cy
+        .clearFormDrafts()
+        .routeWorkspacePatient()
+        .routesForPatientAction()
+        .routeForm(fx => ({ ...fx, data: testForm }))
+        .routeFormDefinition()
+        .routeFormFields()
+        .routeLatestFormResponse()
+        .routePatient(fx => ({ ...fx, data: patient }))
+        .routeActions()
+        .intercept('POST', '/api/form-responses', request => {
+          return new Promise(resolve => {
+            releaseSave = () => {
+              request.reply({ statusCode: 201, body: { data: response } });
+              resolve();
+            };
+          });
+        })
+        .as('saveForm')
+        .visit(`/patient/${ patient.id }/form/${ testForm.id }`)
+        .wait('@routeFormDefinition')
+        .wait('@routeFormFields');
+
+      cy.iframeStub().then(iframe => {
+        iframe.send('submit:form', { response: { data: { familyHistory: 'Saved after navigation' } } });
+      });
+
+      cy.wrap(null).should(() => expect(releaseSave).to.be.a('function'));
+
+      cy.get('.app-nav__link').contains('Owned By').click();
+      cy.wait('@routeActions');
+      cy.location('pathname').should('equal', '/one/worklist/owned-by');
+
+      cy.setFormDraft(pendingDraftKey, { submission: { data: { pending: true } } });
+      cy.then(() => releaseSave());
+      cy.wait('@saveForm');
+      // Wait for the completed save to remove the draft before checking navigation.
+      cy.waitForFormDraft(pendingDraftKey, { exists: false })
+        .should(draft => {
+          expect(draft).to.be.null;
+        });
+      cy.location('pathname').should('equal', '/one/worklist/owned-by');
+    });
   });
 
   specify('storing stored submission', function() {
@@ -433,6 +483,22 @@ context('Patient Form', function() {
 
         expect(response.args.value.formData.fields.foo).to.equal('bar');
       });
+    // Navigating away while draft deletion is pending must not recreate the form.
+    cy.setFormDraft(draftKey, { updated: testTs(), submission: { fields: { foo: 'again' } } });
+    cy.visit(`/patient/${ testPatient.id }/form/${ testForm.id }`).wait('@routeForm');
+    cy.get('.form__actions-icon--draft').click();
+    cy.get('.form__draft-menu .js-discard').click();
+    cy.get('.modal--small .js-submit').then(([submit]) => {
+      const worklist = submit.ownerDocument.querySelector('[data-worklists-region] .app-nav__link');
+      submit.click();
+      worklist.click();
+    });
+    cy.location('pathname').should('equal', '/one/worklist/owned-by');
+    cy.waitForFormDraft(draftKey, { exists: false })
+      .should(draft => {
+        expect(draft).to.be.null;
+      });
+    cy.get('.form__controls').should('not.exist');
   });
 
   specify('read only form', function() {
@@ -810,6 +876,42 @@ context('Patient Form', function() {
 
         expect(formErrors.args.error[0]).to.equal('Insufficient permissions');
       });
+
+    cy.then(() => {
+      const missingFormPatient = getPatient();
+      cy.routesForDefault();
+
+      cy
+        .routePatient(fx => {
+          fx.data = missingFormPatient;
+
+          return fx;
+        })
+        .routeLatestFormResponse()
+        .intercept('GET', `/api/forms/${ testForm.id }*`, {
+          statusCode: 410,
+          body: {
+            errors: getErrors({
+              status: '410',
+              title: 'Not Found',
+              detail: 'Cannot find form',
+            }),
+          },
+        })
+        .as('routeGoneForm')
+        .visit(`/patient/${ missingFormPatient.id }/form/${ testForm.id }`)
+        .wait('@routeGoneForm')
+        .wait('@routePatient')
+        .wait('@routeLatestFormResponse');
+
+      cy
+        .get('.alert-box__body')
+        .should('contain', 'The Form you requested does not exist.');
+
+      cy
+        .location('pathname')
+        .should('equal', '/one/worklist/owned-by');
+    });
   });
 
   specify('hidden submit button', function() {

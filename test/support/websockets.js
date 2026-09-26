@@ -52,3 +52,18 @@ Cypress.Commands.add('errorWs', () => {
     mockServer.simulate('error');
   });
 });
+
+Cypress.Commands.add('closeWs', () => {
+  cy.wrap(socketReady).then(() => {
+    return Cypress.Promise.all(mockServer.clients().map(socket => {
+      return new Cypress.Promise(resolve => {
+        socket.addEventListener('close', resolve, { once: true });
+        socket.close();
+      });
+    }));
+  });
+});
+
+Cypress.Commands.add('getWsClients', () => {
+  return cy.then(() => mockServer.clients());
+});

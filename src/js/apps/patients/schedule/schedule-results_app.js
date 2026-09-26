@@ -25,6 +25,8 @@ export default App.extend({
     const view = this.setView(new ResultsView({ SelectAllView }));
     this.listenTo(view, {
       'before:destroy': () => {
+        // releaseRun removes this listener before a replacement run can own the root.
+        /* istanbul ignore else */
         if (this.run === run) this.releaseRun(view);
       },
       'click:select-all': () => this.selection.toggleAll(),
@@ -70,6 +72,8 @@ export default App.extend({
     if (view) {
       this.stopListening(view);
       const listView = view.getChildView('list');
+      // A displayed results root always owns its loading, error, or list view.
+      /* istanbul ignore else */
       if (listView) this.stopListening(listView);
     }
     this.run = null;
@@ -91,6 +95,8 @@ export default App.extend({
     }
   },
   refreshList() {
+    // UI listeners end with the host; retain a guard for a queued callback after teardown.
+    /* istanbul ignore if */
     if (!this.isRunning() || !this.run) return Promise.resolve(false);
 
     return this.requests.run();

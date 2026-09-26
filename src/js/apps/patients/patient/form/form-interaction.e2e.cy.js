@@ -4,7 +4,7 @@ import { getAction } from 'support/api/actions';
 import { testForm } from 'support/api/forms';
 
 context('Embedded form interaction', function() {
-  beforeEach(function() {
+  specify('pointer activation, keyboard focus, and canceled interactions scroll correctly', function() {
     const action = getAction({
       relationships: {
         'form': getRelationship(testForm),
@@ -67,23 +67,18 @@ context('Embedded form interaction', function() {
       });
       cy.spy(pane, 'scrollTo').as('scrollForm');
     });
-  });
 
-  ['mouse', 'touch'].forEach(pointerType => {
-    const control = pointerType === 'mouse' ? 'tab' : 'checkbox';
-    const title = `activates ${ control } before scrolling on the first ${ pointerType } click`;
+    function resetInteraction() {
+      cy.get('@formBody').then($body => {
+        $body[0].ownerDocument.activeElement?.blur();
+      });
+      cy.window().then(win => {
+        win.document.querySelector('[data-form-viewport-scroll-container]').scrollTop = 0;
+      });
+      cy.get('@scrollForm').then(spy => spy.resetHistory());
+    }
 
-    specify(title, function() {
-      cy.get('@formBody').find(`#${ control }`).trigger('pointerdown', { pointerId: 1, pointerType });
-
-      if (pointerType === 'touch') {
-        // Touch releases before the browser generates mousedown and focus.
-        cy.get('@formBody').find(`#${ control }`).trigger('pointerup', { pointerId: 1, pointerType });
-      }
-
-      cy.get('@formBody').find(`#${ control }`).trigger('mousedown', { button: 0, buttons: 1 }).focus();
-
-      // Flush earlier postMessages while the mouse press is still held.
+    function flushInteraction() {
       cy.get('@formBody').then($body => {
         const frameWindow = $body[0].ownerDocument.defaultView;
         const appWindow = frameWindow.parent;
@@ -99,6 +94,22 @@ context('Embedded form interaction', function() {
           frameWindow.flushFormInteraction();
         });
       });
+    }
+
+    ['mouse', 'touch'].forEach(pointerType => {
+      const control = pointerType === 'mouse' ? 'tab' : 'checkbox';
+      resetInteraction();
+      cy.get('@formBody').find(`#${ control }`).trigger('pointerdown', { pointerId: 1, pointerType });
+
+      if (pointerType === 'touch') {
+        // Touch releases before the browser generates mousedown and focus.
+        cy.get('@formBody').find(`#${ control }`).trigger('pointerup', { pointerId: 1, pointerType });
+      }
+
+      cy.get('@formBody').find(`#${ control }`).trigger('mousedown', { button: 0, buttons: 1 }).focus();
+
+      // Flush earlier postMessages while the mouse press is still held.
+      flushInteraction();
       cy.get('@scrollForm').should('not.have.been.called');
 
       if (pointerType === 'mouse') {
@@ -118,26 +129,17 @@ context('Embedded form interaction', function() {
       }
       cy.get('@scrollForm').should('have.been.calledOnce');
     });
-  });
-
-  specify('scrolls when focus enters without a pointer press', function() {
+    resetInteraction();
     cy.get('@formBody').find('#text').focus().should('be.focused');
     cy.get('@scrollForm').should('have.been.calledOnce');
-  });
 
-  [1, 2].forEach(button => {
-    const title = `preserves focus scrolling for mouse button ${ button }`;
-
-    specify(title, function() {
+    [1, 2].forEach(button => {
+      resetInteraction();
       cy.get('@formBody').find('#text').trigger('mousedown', { button }).focus().should('be.focused');
       cy.get('@scrollForm').should('have.been.calledOnce');
     });
-  });
-
-  ['mouseup', 'keydown', 'blur'].forEach(eventName => {
-    const title = `restores focus scrolling after ${ eventName }`;
-
-    specify(title, function() {
+    ['mouseup', 'keydown', 'blur'].forEach(eventName => {
+      resetInteraction();
       cy.get('@formBody').find('#tab').trigger('mousedown', { button: 0, buttons: 1 });
 
       cy.get('@formBody').then($body => {
@@ -153,5 +155,27 @@ context('Embedded form interaction', function() {
       cy.get('@formBody').find('#text').focus().should('be.focused');
       cy.get('@scrollForm').should('have.been.calledOnce');
     });
+
+    resetInteraction();
+    cy.get('@formBody').find('#text').focus();
+    cy.get('@scrollForm').should('have.been.calledOnce');
+    cy.get('@formBody').find('#checkbox').focus();
+    flushInteraction();
+    cy.get('@scrollForm').should('have.been.calledOnce');
+
+    cy.get('.js-expand-button').click();
+    cy.get('.form__frame--expanded').should('be.visible');
+    resetInteraction();
+    cy.get('@formBody').find('#text').focus();
+    flushInteraction();
+    cy.get('@scrollForm').should('not.have.been.called');
+
+    cy.get('.js-expand-button').click();
+    cy.window().then(win => {
+      win.matchMedia.withArgs('(prefers-reduced-motion: reduce)').returns({ matches: false });
+    });
+    resetInteraction();
+    cy.get('@formBody').find('#text').focus();
+    cy.get('@scrollForm').should('have.been.calledWithMatch', { behavior: 'smooth' });
   });
 });

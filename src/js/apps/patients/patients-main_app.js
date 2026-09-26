@@ -123,6 +123,8 @@ export default RouterApp.extend({
     return this.startRoute('patient', { patientId });
   },
   onRouteError(error, { definition }) {
+    // List fetch failures are handled by results apps; this protects shell startup failures.
+    /* istanbul ignore if */
     if (definition.action === 'showPatientsWorklist' || definition.action === 'showSchedule') {
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
       return;

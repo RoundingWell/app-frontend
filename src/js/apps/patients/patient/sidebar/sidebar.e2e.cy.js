@@ -15,7 +15,7 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
-  specify('uses the sidebar setting for panel membership and order', function() {
+  specify('sidebar settings determine panel order and tolerate missing panels', function() {
     cy
       .routesForPatientWorkflow()
       .routeSettings('sidebar', ['status', 'demographics'])
@@ -54,11 +54,10 @@ context('patient sidebar', function() {
       .should('contain', 'Demographics')
       .and('contain', 'Sex')
       .and('contain', 'Date of Birth');
-  });
 
-  specify('renders available panels when the sidebar setting references a missing panel', function() {
     cy
       .routesForPatientWorkflow()
+      .routePanels()
       .routeSettings('sidebar', ['missing-panel', 'demographics'])
       .visit('/patient/1/workflow')
       .wait('@routePatient');
@@ -67,6 +66,15 @@ context('patient sidebar', function() {
       .get('.patient-sidebar__card')
       .should('have.length', 1)
       .and('contain', 'Demographics');
+    cy.routeSettings('sidebar', null).routePanels(fx => {
+      fx.data.push(getResource({ id: 'status-panel', slug: 'status', name: 'Status', widgets: ['status'] }, 'panels'));
+      return fx;
+    }).visit('/patient/1/workflow').wait('@routePatient');
+    cy
+      .get('.patient-sidebar__card')
+      .should('have.length', 2)
+      .and('contain', 'Demographics')
+      .and('contain', 'Status');
   });
 
   specify('expands and collapses sidebar sections accessibly', function() {
@@ -103,7 +111,9 @@ context('patient sidebar', function() {
       .and('have.attr', 'aria-label', 'Collapse Demographics section')
       .invoke('attr', 'aria-controls')
       .then(regionId => {
-        cy.get(`#${ regionId }`).should('be.visible');
+        cy
+          .get(`#${ regionId }`)
+          .should('be.visible');
       });
 
     cy
@@ -118,7 +128,9 @@ context('patient sidebar', function() {
       .and('have.attr', 'aria-label', 'Collapse Care & Support section')
       .invoke('attr', 'aria-controls')
       .then(regionId => {
-        cy.get(`#${ regionId }`).should('be.visible');
+        cy
+          .get(`#${ regionId }`)
+          .should('be.visible');
       });
 
     cy
@@ -128,7 +140,9 @@ context('patient sidebar', function() {
       .and('have.attr', 'aria-label', 'Expand Demographics section')
       .invoke('attr', 'aria-controls')
       .then(regionId => {
-        cy.get(`#${ regionId }`).should('not.be.visible');
+        cy
+          .get(`#${ regionId }`)
+          .should('not.be.visible');
       });
 
     cy
@@ -154,7 +168,9 @@ context('patient sidebar', function() {
       .and('have.attr', 'aria-label', 'Expand Care & Support section')
       .invoke('attr', 'aria-controls')
       .then(regionId => {
-        cy.get(`#${ regionId }`).should('not.be.visible');
+        cy
+          .get(`#${ regionId }`)
+          .should('not.be.visible');
       });
 
     cy
@@ -164,10 +180,13 @@ context('patient sidebar', function() {
       .and('have.attr', 'aria-label', 'Collapse Care & Support section')
       .invoke('attr', 'aria-controls')
       .then(regionId => {
-        cy.get(`#${ regionId }`).should('be.visible');
+        cy
+          .get(`#${ regionId }`)
+          .should('be.visible');
       });
 
-    cy.viewport(720, 720);
+    cy
+      .viewport(720, 720);
 
     cy
       .get('.patient__frame')
@@ -195,7 +214,8 @@ context('patient sidebar', function() {
       .should('be.focused')
       .and('have.attr', 'aria-expanded', 'false');
 
-    cy.viewport(721, 720);
+    cy
+      .viewport(721, 720);
 
     cy
       .get('.patient__sidebar')
@@ -527,10 +547,14 @@ context('patient sidebar', function() {
       .next('.patient-sidebar__section')
       .should('have.css', 'display', 'none');
 
+    let releaseFormApp;
+    const formAppReady = new Cypress.Promise(resolve => {
+      releaseFormApp = resolve;
+    });
+
     cy
-      .intercept('GET', '/forms/formio/**', {
-        delay: 200,
-        fixture: 'formio-stub.html',
+      .intercept('GET', '/forms/formio/**', req => {
+        return formAppReady.then(() => req.reply({ fixture: 'formio-stub.html' }));
       })
       .as('routeFormApp')
       .get('@patientSidebar')
@@ -541,7 +565,8 @@ context('patient sidebar', function() {
     cy
       .get('.modal--form-large')
       .find('.js-submit')
-      .should('be.disabled');
+      .should('be.disabled')
+      .then(() => releaseFormApp());
 
     cy
       .wait('@routeFormApp')
@@ -632,7 +657,8 @@ context('patient sidebar', function() {
       .trigger('pointerover');
 
     // visitOnClock installs fake timers — tick past the tooltip's setTimeout(0) delay
-    cy.tick(1);
+    cy
+      .tick(1);
 
     cy
       .get('.tooltip')
@@ -655,13 +681,15 @@ context('patient sidebar', function() {
       .trigger('pointerover');
 
     // visitOnClock installs fake timers — tick past the tooltip's setTimeout(0) delay
-    cy.tick(1);
+    cy
+      .tick(1);
 
     cy
       .get('.tooltip')
       .should('not.exist');
 
-    cy.tick(60000);
+    cy
+      .tick(60000);
 
     cy
       .get('.form__draft-menu')
@@ -679,6 +707,14 @@ context('patient sidebar', function() {
       .get('.form__draft-menu')
       .should('contain', 'Last saved a few seconds ago');
 
+    let releaseDiscardForm;
+    const discardFormReady = new Cypress.Promise(resolve => {
+      releaseDiscardForm = resolve;
+    });
+    cy.intercept('GET', '/forms/formio/**', req => {
+      return discardFormReady.then(() => req.reply({ fixture: 'formio-stub.html' }));
+    }).as('routeDiscardFormApp');
+
     cy
       .get('.form__draft-menu')
       .find('.js-discard')
@@ -687,8 +723,7 @@ context('patient sidebar', function() {
     cy
       .get('.modal--small')
       .find('.js-submit')
-      .click()
-      .wait('@routeFormApp');
+      .click();
 
     cy
       .get('@draftStatusButton')
@@ -697,7 +732,46 @@ context('patient sidebar', function() {
     cy
       .get('.modal--form-large')
       .find('.js-submit')
-      .should('be.disabled');
+      .should('be.disabled')
+      .then(() => releaseDiscardForm());
+
+    cy
+      .wait('@routeDiscardFormApp');
+    cy
+      .get('.modal--form-large .js-submit')
+      .should('not.be.disabled');
+
+    cy.iframeStub().then(iframeStub => {
+      iframeStub.send('update:storedSubmission', { familyHistory: 'Discard while closing' });
+    });
+    cy
+      .get('.modal--form-large button:has(.fa-shield-check)')
+      .click();
+    cy
+      .get('.form__draft-menu .js-discard')
+      .click();
+    cy.get('.modal--small .js-submit').then(([submit]) => {
+      const close = submit.ownerDocument.querySelector('.modal--form-large .js-close');
+      submit.click();
+      close.click();
+    });
+    cy
+      .get('.modal--form-large')
+      .should('not.exist');
+    const discardedDraftKey = `form-subm-${ getCurrentClinician().id }-${ testPatient.id }-${ testScriptReducerForm.id }`;
+    cy.waitForFormDraft(discardedDraftKey, { exists: false }).should(draft => {
+      expect(draft).to.be.null;
+    });
+    cy
+      .get('.patient-sidebar .widgets__form-widget')
+      .contains('Test Modal Form')
+      .click();
+    cy
+      .get('.modal--form-large .js-submit')
+      .should('not.be.disabled');
+    cy
+      .get('.modal--form-large button:has(.fa-shield-check)')
+      .should('not.exist');
 
     cy
       .get('.modal--form-large')
@@ -778,7 +852,7 @@ context('patient sidebar', function() {
       .should('contain', `patient/${ testPatient.id }/form/${ testForm.id }`);
   });
 
-  specify('renders patient sidebar when widget values fail', function() {
+  specify('handles widget-value and workspace-patient failures', function() {
     const panelWidgetSlugs = [
       'sex',
       'failingWidget',
@@ -869,6 +943,28 @@ context('patient sidebar', function() {
       .eq(2)
       .should('contain', 'Unknown Widget')
       .should('contain', 'Custom widget value');
+
+    cy.then(() => {
+      const patient = getPatient();
+      const reported = cy.stub().as('reported');
+      cy.on('uncaught:exception', error => {
+        if (!error.message.includes('Error Status: 400')) return;
+        reported(error.message);
+        return false;
+      });
+      cy.routesForPatientAction()
+        .routePanels()
+        .routeWidgets()
+        .routePatient(fx => ({ ...fx, data: patient }))
+        .intercept('GET', '/api/workspace-patients/*', { statusCode: 400, body: { errors: [] } })
+        .visit(`/patient/${ patient.id }/workflow`);
+      cy
+        .get('@reported')
+        .should('have.been.calledWithMatch', 'Error Status: 400');
+      cy
+        .get('.patient-sidebar')
+        .should('not.exist');
+    });
   });
 
   specify('patient workspaces', function() {
@@ -906,10 +1002,19 @@ context('patient sidebar', function() {
     cy
       .routesForPatientWorkflow()
       .routePanels(fx => {
-        fx.data[0].attributes.widgets = ['divider'];
+        fx.data[0].attributes.widgets = ['divider', 'empty-json-widget'];
 
         return fx;
       });
+
+    cy.routeWidgets(fx => ({
+      ...fx,
+      data: [...fx.data, getResource({
+        slug: 'empty-json-widget',
+        category: 'custom',
+        definition: { display_name: 'Empty template' },
+      }, 'widgets')],
+    }));
 
     cy
       .visit('/patient/1/workflow')
@@ -919,9 +1024,11 @@ context('patient sidebar', function() {
       .get('.patient-sidebar')
       .as('patientSidebar')
       .find('.patient-sidebar__section')
-      .should('have.length', 1)
+      .should('have.length', 2)
       .first()
       .find('.widgets__divider');
+    cy.get('.patient-sidebar__section').last().should('contain', 'Empty template')
+      .find('[data-content-region]').should('have.text', '');
   });
 
   specify('edit patient modal', function() {

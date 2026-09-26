@@ -42,13 +42,19 @@ const STATE_VERSION = 'v6';
 function expandFiltersSidebar() {
   cy.get('.list-page').then($layout => {
     if ($layout.hasClass('is-filters-collapsed')) {
-      cy.wrap($layout).find('[data-filters-region] button').click();
+      cy
+        .wrap($layout)
+        .find('[data-filters-region] button')
+        .click();
     }
   });
 
   cy.get('[data-states-filters-region] .list-filters__section').then($section => {
     if ($section.hasClass('is-collapsed')) {
-      cy.wrap($section).find('.list-filters__section-button').click();
+      cy
+        .wrap($section)
+        .find('.list-filters__section-button')
+        .click();
     }
   });
 }
@@ -122,7 +128,9 @@ function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
 }
 
 context('worklist page', function() {
-  specify('ignores URL query strings when selecting the worklist owner', function() {
+  specify('worklist owner selection ignores query strings and recovers saved filters', function() {
+    cy
+      .log('ignores URL query strings when selecting the worklist owner');
     cy
       .routeActions()
       .visit('/worklist/owned-by?ct=1788555349799')
@@ -130,15 +138,10 @@ context('worklist page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[clinicians]=${ currentClinician.id }`);
-  });
 
-  specify('preserves the saved owner when the worklist URL has a query string', function() {
+    cy
+      .log('preserves the saved owner when the worklist URL has a query string');
     const clinician = getClinician();
-
-    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
-      id: 'owned-by',
-      clinicianId: clinician.id,
-    }));
 
     cy
       .routeWorkspaceClinicians(fx => {
@@ -146,25 +149,32 @@ context('worklist page', function() {
         return fx;
       })
       .routeActions()
-      .visit('/worklist/owned-by?ct=1788555349799')
+      .visit('/worklist/owned-by?ct=1788555349799', {
+        onBeforeLoad(win) {
+          win.localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+            id: 'owned-by', clinicianId: clinician.id,
+          }));
+        },
+      })
       .wait('@routeActions')
       .itsUrl()
       .its('search')
       .should('contain', `filter[clinicians]=${ clinician.id }`);
-  });
 
-  specify('recovers a saved invalid owner while preserving date filters', function() {
+    cy
+      .log('recovers a saved invalid owner while preserving date filters');
     const storeKey = `owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`;
-
-    localStorage.setItem(storeKey, JSON.stringify({
-      id: 'owned-by',
-      clinicianId: 'ct=1788555349799',
-      actionsDateFilters: { dateType: 'updated_at', selectedDate: testDate() },
-    }));
 
     cy
       .routeActions()
-      .visit('/worklist/owned-by')
+      .visit('/worklist/owned-by', {
+        onBeforeLoad(win) {
+          win.localStorage.setItem(storeKey, JSON.stringify({
+            id: 'owned-by', clinicianId: 'ct=1788555349799',
+            actionsDateFilters: { dateType: 'updated_at', selectedDate: testDate() },
+          }));
+        },
+      })
       .wait('@routeActions')
       .itsUrl()
       .its('search')
@@ -177,7 +187,8 @@ context('worklist page', function() {
   });
 
   specify('preserves filters sidebar across a hidden date refresh', function() {
-    cy.viewport(1200, 720);
+    cy
+      .viewport(1200, 720);
 
     cy
       .routeActions()
@@ -213,7 +224,8 @@ context('worklist page', function() {
   });
 
   specify('toggle filters sidebar', function() {
-    cy.viewport(2240, 900);
+    cy
+      .viewport(2240, 900);
 
     localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'owned-by',
@@ -235,7 +247,8 @@ context('worklist page', function() {
       .find('.patient-list-page__sidebar')
       .should('be.visible');
 
-    cy.viewport(1200, 720);
+    cy
+      .viewport(1200, 720);
 
     cy
       .get('.patient-list-page__all-filters-button')
@@ -249,7 +262,9 @@ context('worklist page', function() {
       .find('.patient-list-page__active-filter-dot')
       .should('not.be.visible');
 
-    cy.get('@filtersButton').click();
+    cy
+      .get('@filtersButton')
+      .click();
 
     cy
       .get('@layout')
@@ -274,7 +289,8 @@ context('worklist page', function() {
       .find('.patient-list-page__sidebar')
       .should('be.visible');
 
-    cy.viewport(1043, 720);
+    cy
+      .viewport(1043, 720);
 
     cy
       .get('.list-page__topbar')
@@ -284,7 +300,8 @@ context('worklist page', function() {
       .get('@filtersButton')
       .click();
 
-    cy.viewport(641, 720);
+    cy
+      .viewport(641, 720);
 
     cy
       .get('.list-page__topbar')
@@ -309,7 +326,8 @@ context('worklist page', function() {
       .get('@filtersButton')
       .click();
 
-    cy.viewport(640, 720);
+    cy
+      .viewport(640, 720);
 
     cy
       .get('@layout')
@@ -327,7 +345,9 @@ context('worklist page', function() {
       .get('.list-page__list')
       .should('be.visible');
 
-    cy.get('@filtersButton').click();
+    cy
+      .get('@filtersButton')
+      .click();
 
     cy
       .get('@layout')
@@ -356,7 +376,8 @@ context('worklist page', function() {
       .should('be.focused')
       .and('have.attr', 'aria-expanded', 'false');
 
-    cy.viewport(390, 720);
+    cy
+      .viewport(390, 720);
 
     cy
       .get('.list-page__topbar')
@@ -374,13 +395,15 @@ context('worklist page', function() {
       .get('.js-close-sidebar-drawer')
       .click();
 
-    cy.viewport(1200, 720);
+    cy
+      .viewport(1200, 720);
 
     cy
       .get('@layout')
       .should('have.class', 'is-filters-collapsed');
 
-    cy.viewport(2200, 900);
+    cy
+      .viewport(2200, 900);
 
     cy
       .get('.worklist-list__list')
@@ -388,7 +411,8 @@ context('worklist page', function() {
         expect($list[0].getBoundingClientRect().width).to.equal(1440);
       });
 
-    cy.viewport(2240, 900);
+    cy
+      .viewport(2240, 900);
 
     cy
       .get('@layout')
@@ -398,7 +422,8 @@ context('worklist page', function() {
       .get('@filtersButton')
       .should('not.be.visible');
 
-    cy.viewport(2239, 900);
+    cy
+      .viewport(2239, 900);
 
     cy
       .get('@filtersButton')
@@ -410,15 +435,17 @@ context('worklist page', function() {
       .get('@layout')
       .should('have.class', 'is-filters-collapsed');
 
-    cy.viewport(2240, 900);
+    cy
+      .viewport(2240, 900);
 
     cy
       .get('@layout')
       .should('not.have.class', 'is-filters-collapsed');
   });
 
-  specify('patient sidebar desktop cards', function() {
-    cy.viewport(1820, 900);
+  specify('patient sidebar cards remain reachable on desktop and mobile', function() {
+    cy
+      .viewport(1820, 900);
 
     openPatientSidebar(4);
 
@@ -439,12 +466,21 @@ context('worklist page', function() {
         expect(cards.every(card => card.width === 260)).to.be.true;
         expect(Math.max(...cards.map(card => card.left))).to.be.greaterThan(firstCard.right);
       });
-  });
 
-  specify('patient sidebar mobile scrolling', function() {
-    cy.viewport(390, 400);
-
-    openPatientSidebar(4, 'actions');
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+    cy
+      .get('.worklist-list__toggle')
+      .contains('Actions')
+      .click()
+      .wait('@routeActions');
+    cy
+      .viewport(390, 400);
+    cy
+      .get('.worklist-list__item')
+      .contains('Test Patient')
+      .click();
 
     cy
       .get('.patient-list-page__sidebar-content')
@@ -722,7 +758,8 @@ context('worklist page', function() {
       .find('progress.progress-bar')
       .should('have.attr', 'max', '2');
 
-    cy.viewport(1600, 900);
+    cy
+      .viewport(1600, 900);
 
     getFirstRow()
       .should('contain', '0 / 2 Actions')
@@ -731,7 +768,8 @@ context('worklist page', function() {
         expect($row.find('.work-card__meta progress')).to.have.lengthOf(0);
       });
 
-    cy.viewport(1280, 720);
+    cy
+      .viewport(1280, 720);
 
     getFirstRow()
       .find('.fa-circle-exclamation')
@@ -776,7 +814,8 @@ context('worklist page', function() {
       .contains('Test Patient')
       .click();
 
-    cy.wait('@routePatient');
+    cy
+      .wait('@routePatient');
 
     cy
       .location('pathname')
@@ -797,7 +836,8 @@ context('worklist page', function() {
       .should('have.class', 'patient-list__patient--selected')
       .and('have.css', 'color', 'rgb(51, 51, 51)');
 
-    cy.viewport(640, 720);
+    cy
+      .viewport(640, 720);
 
     cy
       .get('.list-page')
@@ -837,7 +877,8 @@ context('worklist page', function() {
       .get('.js-close-sidebar-drawer')
       .should('not.be.visible');
 
-    cy.viewport(1280, 768);
+    cy
+      .viewport(1280, 768);
 
     cy
       .get('.list-page')
@@ -1257,6 +1298,11 @@ context('worklist page', function() {
       .find('[data-state-region] .fa-circle-check');
 
     cy
+      .get('@firstRow')
+      .find('[data-state-region] button')
+      .should('have.attr', 'aria-label', 'Done');
+
+    cy
       .routeFlow(fx => {
         fx.data = testNewStateSocketFlow;
 
@@ -1525,14 +1571,16 @@ context('worklist page', function() {
       .get('@firstRow')
       .should('have.class', 'worklist-list__action-item');
 
-    cy.viewport(390, 720);
+    cy
+      .viewport(390, 720);
 
     cy
       .get('@firstRow')
       .find('.worklist-list__patient-context')
       .should('be.visible');
 
-    cy.viewport(1280, 720);
+    cy
+      .viewport(1280, 720);
 
     cy
       .get('.app-frame__content')
@@ -2390,6 +2438,27 @@ context('worklist page', function() {
         return fx;
       });
 
+    cy.intercept({ method: 'GET', url: `/api/actions/${ testNewSocketAction.id }?*`, times: 1 }, {
+      statusCode: 404,
+      body: { errors: [{ status: '404', detail: 'Action not available yet' }] },
+    }).as('failedSocketAction');
+
+    cy.sendWs({
+      category: 'ResourceCreated',
+      resource: {
+        type: testNewSocketAction.type,
+        id: testNewSocketAction.id,
+      },
+      payload: {},
+    });
+    cy
+      .wait('@failedSocketAction');
+    cy
+      .waitForAppRequests();
+    cy
+      .get('[data-count-region]')
+      .should('contain', '1 Action');
+
     cy.sendWs({
       category: 'ResourceCreated',
       resource: {
@@ -2622,7 +2691,9 @@ context('worklist page', function() {
       .visit('/worklist/owned-by');
 
     cy.window().then(win => {
-      cy.stub(win.console, 'error').as('consoleError');
+      cy
+        .stub(win.console, 'error')
+        .as('consoleError');
     });
 
     cy
@@ -4801,7 +4872,9 @@ context('worklist page', function() {
       .should('have.length', 2);
   });
 
-  specify('empty flows view', function() {
+  specify('empty flow and action worklists', function() {
+    cy
+      .log('empty flows view');
     cy
       .routeFlows(fx => {
         fx.data = [];
@@ -4825,16 +4898,16 @@ context('worklist page', function() {
     cy
       .get('.card-list__empty')
       .contains('No Flows');
-  });
 
-  specify('empty actions view', function() {
+    cy
+      .log('empty actions view');
     cy
       .routeActions(fx => {
         fx.data = [];
 
         return fx;
       })
-      .visit('/worklist/owned-by')
+      .get('.worklist-list__toggle').contains('Actions').click()
       .wait('@routeActions');
 
     cy

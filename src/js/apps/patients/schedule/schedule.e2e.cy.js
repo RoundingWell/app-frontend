@@ -4,7 +4,7 @@ import { v7 as uuidv7, v5 as uuidv5 } from 'uuid';
 
 import formatDate from 'helpers/format-date';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, getErrors } from 'helpers/json-api';
 
 import { getAction, getActions, longActionName } from 'support/api/actions';
 import { getComment } from 'support/api/comments';
@@ -65,6 +65,14 @@ context('schedule page', function() {
 
     cy
       .routeActions()
+      .routeCurrentClinician(fx => {
+        fx.data.attributes.name = 'Al Li';
+        return fx;
+      })
+      .routeWorkspaceClinicians(fx => {
+        fx.data[1].attributes.name = 'Alexandra Montgomery-Smith';
+        return fx;
+      })
       .visit('/schedule')
       .wait('@routeActions');
 
@@ -80,6 +88,16 @@ context('schedule page', function() {
       .should('contain', 'This Month')
       .click();
 
+    cy.get('.app-frame__pop-region').contains('Select from calendar').click();
+    cy.get('.datepicker .js-next').then(([next]) => {
+      const win = next.ownerDocument.defaultView;
+      next.focus();
+      win.dispatchEvent(new win.Event('resize'));
+    });
+    cy.get('.datepicker .js-next').should('be.focused');
+    cy.get('[data-date-filter-region] .js-date').then(([button]) => button.click());
+    cy.get('.app-frame__pop-region').should('have.length', 1);
+
     cy
       .get('.app-frame__pop-region')
       .contains('Last Month')
@@ -94,6 +112,24 @@ context('schedule page', function() {
     cy
       .get('.list-filters__body')
       .should('be.visible');
+
+    cy.viewport(320, 720);
+    cy.get('[data-owner-filter-region]').click();
+    cy.get('.picklist').should(([picker]) => {
+      const bounds = picker.getBoundingClientRect();
+      expect(bounds.left).to.be.at.least(0);
+      expect(bounds.right).to.be.at.most(320);
+    });
+    cy.get('body').type('{esc}');
+    cy.get('[data-date-filter-region] .js-date').click();
+    cy.get('.app-frame__pop-region').should(([picker]) => {
+      const button = picker.ownerDocument.querySelector('[data-date-filter-region] .js-date');
+      const bounds = picker.getBoundingClientRect();
+      // Require right-edge overflow so this checks popup clamping, not just its default position.
+      expect(button.getBoundingClientRect().left + bounds.width).to.be.greaterThan(320);
+      expect(bounds.left).to.be.at.least(0);
+      expect(bounds.right).to.be.at.most(320);
+    });
   });
 
   specify('display schedule', function() {
@@ -694,7 +730,6 @@ context('schedule page', function() {
       .should('contain', 'Try narrowing your filters.');
   });
 
-  // TODO: Move to component test
   specify('filter schedule', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
@@ -778,9 +813,16 @@ context('schedule page', function() {
       .its('search')
       .should('contain', `filter[due_date]=${ testDate() },${ testDate() }`);
 
+    cy.get('[data-date-filter-region]').should('contain', 'Today');
+
+    cy.get('[data-date-filter-region] .js-next').click()
+      .wait('@routeActions').itsUrl().its('search')
+      .should('contain', `filter[due_date]=${ testDateAdd(1) },${ testDateAdd(1) }`);
+    cy.get('[data-date-filter-region] .js-prev').click().wait('@routeActions');
+
     cy
       .get('[data-date-filter-region]')
-      .should('contain', 'Today')
+      .should('contain', formatDate(testDate(), 'MM/DD/YYYY'))
       .click();
 
     cy
@@ -829,6 +871,14 @@ context('schedule page', function() {
       .its('search')
       .should('contain', `filter[due_date]=${ testDate() },${ testDate() }`);
 
+    // Calendar selections can be stepped in either direction without reopening the picker.
+    for (const [direction, offset] of [['prev', -1], ['next', 0]]) {
+      const date = dayjs(testDate()).add(offset, 'day').format('YYYY-MM-DD');
+      cy.get(`[data-date-filter-region] .js-${ direction }`).click()
+        .wait('@routeActions').itsUrl().its('search')
+        .should('contain', `filter[due_date]=${ date },${ date }`);
+    }
+
     cy
       .get('[data-date-filter-region]')
       .should('contain', formatDate(testDate(), 'MM/DD/YYYY'))
@@ -861,6 +911,13 @@ context('schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[due_date]=${ formatDate(dayjs(testDateAdd(1, 'month')).startOf('month'), 'YYYY-MM-DD') },${ formatDate(dayjs(testDateAdd(1, 'month')).endOf('month'), 'YYYY-MM-DD') }`);
+
+    for (const [direction, offset] of [['prev', 0], ['next', 1]]) {
+      const month = dayjs(testDate()).add(offset, 'month');
+      cy.get(`[data-date-filter-region] .js-${ direction }`).click()
+        .wait('@routeActions').itsUrl().its('search')
+        .should('contain', `filter[due_date]=${ month.startOf('month').format('YYYY-MM-DD') },${ month.endOf('month').format('YYYY-MM-DD') }`);
+    }
 
     cy
       .get('[data-date-filter-region]')
@@ -941,6 +998,13 @@ context('schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[due_date]=${ formatDate(dayjs(testDateSubtract(1, 'week')).startOf('week'), 'YYYY-MM-DD') },${ formatDate(dayjs(testDateSubtract(1, 'week')).endOf('week'), 'YYYY-MM-DD') }`);
+
+    for (const [direction, offset] of [['prev', -2], ['next', -1]]) {
+      const week = dayjs(testDate()).add(offset, 'week');
+      cy.get(`[data-date-filter-region] .js-${ direction }`).click()
+        .wait('@routeActions').itsUrl().its('search')
+        .should('contain', `filter[due_date]=${ week.startOf('week').format('YYYY-MM-DD') },${ week.endOf('week').format('YYYY-MM-DD') }`);
+    }
 
     cy
       .get('[data-date-filter-region]')
@@ -1219,6 +1283,13 @@ context('schedule page', function() {
       .get('@layout')
       .should('have.class', 'is-filters-collapsed');
 
+    cy.viewport(2240, 900);
+    cy.get('.patient-list-page__sidebar').should('be.visible').and('contain', 'Filters');
+    cy.get('[data-filters-region] button').should('not.be.visible');
+    cy.viewport(1200, 720);
+    cy.get('[data-filters-region] button').should('be.visible').click();
+    cy.get('@layout').should('have.class', 'is-filters-collapsed');
+
     cy.viewport(1100, 720);
 
     cy
@@ -1341,6 +1412,62 @@ context('schedule page', function() {
       .get('@patientSidebarTrigger')
       .should('be.focused');
 
+    [0, 1, 2, 4, 8, 16].forEach(turns => {
+      cy.get('.patient-list__patient').first().then(async([button]) => {
+        button.click();
+        for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+        button.click();
+      });
+      cy.get('.patient-sidebar').should('not.exist');
+      cy.get('.patient-list__patient').first().click();
+      cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+      cy.get('.patient-sidebar__close').then(async([close]) => {
+        const button = close.ownerDocument.querySelector('.patient-list__patient');
+        close.click();
+        for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+        button.click();
+      });
+      cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+      cy.get('.patient-sidebar__close').click();
+      cy.get('.patient-sidebar').should('not.exist');
+    });
+
+    // A new patient selection supersedes an in-progress responsive sidebar close.
+    cy.get('.patient-list__patient').first().click();
+    cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+    let reopenedAfterResize;
+    cy.window().then(win => {
+      reopenedAfterResize = new Cypress.Promise(resolve => {
+        const observer = new win.MutationObserver(() => {
+          if (win.document.querySelector('.patient-sidebar')) return;
+          observer.disconnect();
+          win.document.querySelector('.patient-list__patient').click();
+          resolve();
+        });
+        observer.observe(win.document.querySelector('.list-page'), { childList: true, subtree: true });
+      });
+    });
+    cy.viewport(640, 720);
+    cy.then(() => reopenedAfterResize);
+    cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+    cy.get('.patient-sidebar__close').then(([close]) => {
+      const doc = close.ownerDocument;
+      close.dispatchEvent(new doc.defaultView.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      doc.querySelector('.patient-list__patient').click();
+    });
+    cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+    cy.get('.patient-sidebar__close').click();
+    cy.get('.patient-sidebar').should('not.exist');
+    cy.viewport(1200, 720);
+
+    // Closing a sidebar after its originating row was refreshed must remain safe.
+    cy.get('.patient-list__patient').first().click();
+    cy.get('.patient-sidebar__card:not(.patient-sidebar__loader-card)').first().should('be.visible');
+    cy.get('[data-date-filter-region] .js-next').click().wait('@routeActions');
+    cy.get('.patient-sidebar__close').click();
+    cy.get('.patient-sidebar').should('not.exist');
+    cy.get('[data-date-filter-region] .js-prev').click().wait('@routeActions');
+
     cy
       .get('.schedule-list__day-list-row')
       .first()
@@ -1364,6 +1491,7 @@ context('schedule page', function() {
 
     const testActions = _.times(20, index => {
       return getAction({
+        attributes: { name: `Bulk Action ${ index + 1 }`, due_date: testDate() },
         relationships: {
           owner: getRelationship(currentClinician),
           state: getRelationship(index % 2 ? stateTodo : stateInProgress),
@@ -1406,6 +1534,33 @@ context('schedule page', function() {
       .get('.bulk-edit-inline')
       .as('bulkEditToolbar')
       .should('be.visible');
+
+    // Refreshing existing models preserves selection and updates derived controls.
+    cy.routeActions(fx => {
+      fx.data = testActions.map((item, index) => ({
+        ...item,
+        attributes: { ...item.attributes, due_date: index ? testDate() : testDateAdd(1) },
+      }));
+      fx.included.push(testFlow);
+      return fx;
+    });
+    cy.get('[data-date-filter-region]').click();
+    cy.get('.app-frame__pop-region').contains('This Week').click().wait('@routeActions');
+    cy.get('.schedule-list__day-list-row.is-selected').should('have.length', 1)
+      .and('contain', 'Bulk Action 1');
+    cy.get('.bulk-edit-inline__heading').should('contain', 'Edit 1 Action');
+    cy.get('.bulk-edit-inline [data-due-date-region]').should('contain', formatDate(testDateAdd(1), 'SHORT'));
+    cy.contains('.schedule-list__action-name', /^Bulk Action 1\u200b?$/)
+      .closest('.schedule-list__list-row').find('.schedule-list__day-heading').should('have.attr', 'datetime', testDateAdd(1));
+    cy.routeActions(fx => {
+      fx.data = testActions;
+      fx.included.push(testFlow);
+      return fx;
+    });
+    cy.get('[data-date-filter-region]').click();
+    cy.get('.app-frame__pop-region').contains('All Time').click().wait('@routeActions');
+    cy.get('.schedule-list__day-list-row.is-selected').should('have.length', 1);
+    cy.get('.bulk-edit-inline [data-due-date-region]').should('contain', formatDate(testDate(), 'SHORT'));
 
     cy
       .get('@bulkEditToolbar')
@@ -1666,6 +1821,109 @@ context('schedule page', function() {
     cy
       .get('.alert-box')
       .should('contain', 'Something went wrong. Please try again.');
+    // Refreshes return server state, including successful patches made below.
+    cy.intercept('GET', '/api/actions?*', req => {
+      req.reply({
+        body: {
+          data: testActions,
+          included: [testFlow],
+          meta: { actions: { total: testActions.length }, worklist: uuidv7() },
+        },
+      });
+    }).as('routeActions');
+
+    // A submitted snapshot must not clear a newer selection or leave Save busy.
+    [204, 400].forEach(statusCode => {
+      let releaseChangedSelectionSave;
+      let changedSelectionSaveRequested = false;
+      const changedSelectionSaveResponse = new Cypress.Promise(resolve => {
+        releaseChangedSelectionSave = resolve;
+      });
+      cy.intercept('PATCH', '/api/actions/*', req => {
+        changedSelectionSaveRequested = true;
+        return changedSelectionSaveResponse.then(() => {
+          if (statusCode === 204) {
+            const savedAction = testActions.find(item => item.id === req.body.data.id);
+            Object.assign(savedAction.attributes, req.body.data.attributes);
+          }
+          req.reply({ statusCode, body: {} });
+        });
+      }).as('changedSelectionSave');
+      cy.contains('.schedule-list__action-name', /^Bulk Action 1\u200b?$/)
+        .closest('.schedule-list__day-list-row').find('.js-select').click();
+      cy.get('.bulk-edit-inline [data-due-date-region]').click();
+      cy.get('.datepicker .js-tomorrow').click();
+      cy.get('.bulk-edit-inline .js-save').click();
+      cy.wrap(null).should(() => expect(changedSelectionSaveRequested).to.equal(true));
+      cy.contains('.schedule-list__action-name', /^Bulk Action 2\u200b?$/)
+        .closest('.schedule-list__day-list-row').find('.js-select').click();
+      cy.get('.bulk-edit-inline__heading').should('contain', 'Edit 2 Actions')
+        .then(() => releaseChangedSelectionSave());
+      cy.wait('@changedSelectionSave').wait('@routeActions');
+      cy.get('.schedule-list__day-list-row.is-selected').should('have.length', 2)
+        .and('contain', 'Bulk Action 1').and('contain', 'Bulk Action 2');
+      cy.get('.bulk-edit-inline .js-save').should('be.enabled');
+      cy.get('.bulk-edit-inline [data-state-region] button').click();
+      cy.get('.picklist').should('be.visible');
+      cy.get('body').type('{esc}');
+      if (statusCode === 204) {
+        cy.contains('.schedule-list__action-name', /^Bulk Action 1\u200b?$/)
+          .closest('.schedule-list__list-row').find('.schedule-list__day-heading').should('have.attr', 'datetime', testDateAdd(1));
+      }
+      cy.get('.bulk-edit-inline .js-cancel').click();
+      cy.get('.schedule-list__day-list-row.is-selected').should('not.exist');
+    });
+
+    // Clearing the date also refreshes grouping and removes the unscheduled row.
+    cy.intercept('GET', '/api/actions?*', req => {
+      req.reply({ body: { data: testActions, included: [testFlow] } });
+    }).as('clearDueDateRefresh');
+    cy.intercept('PATCH', '/api/actions/*', req => {
+      const savedAction = testActions.find(item => item.id === req.body.data.id);
+      Object.assign(savedAction.attributes, req.body.data.attributes);
+      req.reply({ statusCode: 204, body: {} });
+    }).as('clearDueDate');
+    cy.contains('.schedule-list__action-name', /^Bulk Action 1\u200b?$/)
+      .closest('.schedule-list__day-list-row').find('.js-select').click();
+    cy.get('.bulk-edit-inline [data-due-date-region]').click();
+    cy.get('.datepicker').contains('Clear').click();
+    cy.get('.bulk-edit-inline .js-save').click();
+    cy.wait('@clearDueDate').its('request.body.data.attributes.due_date').should('be.null');
+    cy.wait('@clearDueDateRefresh');
+    cy.contains('.schedule-list__action-name', /^Bulk Action 1\u200b?$/).should('not.exist');
+    cy.get('.schedule-list__day-list-row').should('have.length', 19);
+
+    [204, 400].forEach((statusCode, index) => {
+      if (index) {
+        cy.go('back');
+        cy.get('.schedule-list__day-list-row').should('be.visible');
+      }
+      let releaseSave;
+      let saveRequested = false;
+      const saveResponse = new Cypress.Promise(resolve => {
+        releaseSave = resolve;
+      });
+      cy.intercept('PATCH', '/api/actions/*', req => {
+        saveRequested = true;
+        return saveResponse.then(() => req.reply({ statusCode, body: { errors: [] } }));
+      }).as('lateSave');
+      cy.get('.schedule-list__list-row .js-select').first().then($select => {
+        // Returning through history can retain the submitted row's selection.
+        if ($select.attr('aria-checked') !== 'true') cy.wrap($select).click();
+      });
+      cy.get('.bulk-edit-inline [data-owner-region]').click();
+      cy.get('.picklist .js-picklist-item').contains('Nurse').click();
+      cy.get('.bulk-edit-inline .js-save').click();
+      cy.wrap(null).should(() => expect(saveRequested).to.equal(true));
+      cy.routeClinicians();
+      cy.get('.app-nav').contains('Admin Tools').click();
+      cy.get('.picklist').contains('Clinicians').click();
+      cy.get('.card-list').should('be.visible').then(() => releaseSave());
+      cy.wait('@lateSave');
+      cy.waitForAppRequests();
+      cy.location('pathname').should('equal', '/one/clinicians');
+      cy.get('.card-list').should('be.visible');
+    });
   });
 
   specify('empty schedule', function() {
@@ -2532,13 +2790,28 @@ context('schedule page', function() {
         expect(storage.customFilters).to.deep.equal({});
         expect(storage.states).to.deep.equal([stateTodo.id, stateInProgress.id]);
       });
+
+    cy.then(() => {
+      [400, 422].forEach(statusCode => {
+        cy.routesForDefault()
+          .intercept('GET', '/api/actions?*', { statusCode, body: { errors: [] } })
+          .as('failedSchedule')
+          .visit('/schedule')
+          .wait('@failedSchedule');
+        cy.get('.schedule-list__error').should('contain', 'The schedule could not be loaded.');
+        cy.routeActions();
+        cy.get('.schedule-list__error .js-retry').click().wait('@routeActions');
+        cy.get('.schedule-list__error').should('not.exist');
+        cy.get('.schedule-list__list').should('be.visible');
+      });
+    });
   });
 
   specify('500 error', function() {
     cy
       .routesForPatientAction()
       .routeActions()
-      .visit('/schedule')
+      .visitOnClock('/schedule')
       .wait('@routeActions')
       .itsUrl()
       .its('search')
@@ -2567,6 +2840,15 @@ context('schedule page', function() {
       .should('contain', 'include=patient,flow')
       .should('contain', `filter[states]=${ stateInProgress.id }`);
 
+    const storeKey = `schedule_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`;
+    cy.get('.error-page').should('be.visible');
+    cy.window().its('localStorage').invoke('getItem', storeKey).should('be.null');
+    // Flush FiltersStateModel.setFiltersCount's 30ms debounce from the state-filter click.
+    // Its change:filtersCount event must not restore the store invalidated by the error.
+    cy.tick(30);
+    cy.window().its('localStorage').invoke('getItem', storeKey).should('be.null');
+    cy.clock().invoke('restore');
+
     cy
       .routeActions();
 
@@ -2580,5 +2862,49 @@ context('schedule page', function() {
       .itsUrl()
       .its('search')
       .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
+
+    cy.get('.app-nav').contains('Schedule').click().wait('@routeActions');
+    cy.get('.schedule-list__list').should('be.visible');
+
+    cy.then(() => {
+      const patient = getPatient();
+      const action = getAction({
+        attributes: { name: 'Schedule Recovery Action' },
+        relationships: { patient: getRelationship(patient) },
+      });
+
+      function visitSchedule() {
+        cy.routesForPatientAction()
+          .routeActions(fx => ({ ...fx, data: [action], included: [...fx.included, patient] }))
+          .visit('/schedule')
+          .wait('@routeActions');
+      }
+
+      visitSchedule();
+      cy.intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } }).as('failedRefresh');
+      cy.get('[data-date-filter-region]').click();
+      cy.get('.app-frame__pop-region').contains('Last Month').click();
+      cy.wait('@failedRefresh');
+      cy.get('.schedule-list__error').should('contain', 'The schedule could not be loaded.');
+      cy.routeActions(fx => ({ ...fx, data: [action], included: [...fx.included, patient] }));
+      cy.get('.schedule-list__error .js-retry').click().wait('@routeActions');
+      cy.get('.schedule-list__error').should('not.exist');
+      cy.get('.schedule-list__list').should('contain', 'Schedule Recovery Action');
+
+      cy.intercept('GET', '/api/patients/**?*', {
+        statusCode: 410,
+        body: { errors: getErrors({ status: '410', title: 'Not Found', detail: 'Cannot find patient' }) },
+      }).as('failedPatient');
+      cy.get('.patient-list__patient').first().click();
+      cy.wait('@failedPatient');
+      cy.get('.patient-sidebar').should('not.exist');
+      cy.get('.alert-box').should('contain', 'Cannot find patient');
+
+      cy.intercept('GET', '/api/patients/**?*', { forceNetworkError: true }).as('failedPatient');
+      cy.get('.patient-list__patient').first().click();
+      cy.wait('@failedPatient');
+      cy.get('.patient-sidebar').should('not.exist');
+      cy.get('.schedule-list__list').should('contain', 'Schedule Recovery Action');
+    });
   });
 });

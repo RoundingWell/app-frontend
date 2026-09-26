@@ -443,6 +443,11 @@ context('program workflows page', function() {
       .should('contain', 'New Program Flow')
       .as('newFlow');
 
+    cy.get('@newFlow').contains('New Program Flow').click();
+    cy.location('pathname').should('equal', `/one/program/${ testProgram.id }/flow`);
+    cy.get('.sidebar').should('be.visible');
+    cy.get('.program-page__layout .flow-card.is-selected').should('have.length', 1).as('newFlow');
+
     cy
       .get('@newFlow')
       .find('.fa-pen-to-square');

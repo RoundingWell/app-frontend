@@ -44,6 +44,13 @@ context('Picklist', function() {
       item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: null }));
     });
     cy.get('.js-picklist-item').first().should('have.class', 'is-highlighted');
+    // Moving within an item must not override keyboard transport to another item.
+    cy.get('body').type('{downarrow}');
+    cy.get('.js-picklist-item').first().then(([item]) => {
+      item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: item }));
+    });
+    cy.get('.js-picklist-item').eq(1).should('have.class', 'is-highlighted');
+    cy.get('body').type('{uparrow}');
 
     cy
       .get('body')
@@ -244,9 +251,13 @@ context('Picklist', function() {
 
   specify('it should release pending lists when destroyed', function() {
     let resolveLists;
+    let rejectLists;
     let picklist;
     const listsPromise = new Promise(resolve => {
       resolveLists = resolve;
+    });
+    const failedLists = new Promise((resolve, reject) => {
+      rejectLists = reject;
     });
     const createChild = cy.stub().as('createChild');
 
@@ -267,6 +278,21 @@ context('Picklist', function() {
     });
     cy.get('@createChild').should('not.have.been.called');
     cy.then(() => expect(picklist.isDestroyed()).to.equal(true));
+
+    const onError = cy.stub().as('lateLoadError');
+    cy.mount(() => {
+      picklist = new Picklist({ isListsAsync: true, lists: failedLists });
+      picklist.on('load:error', onError);
+      return picklist;
+    });
+    cy.get('.picklist__message-loading').should('exist');
+    cy.then(async() => {
+      picklist.destroy();
+      rejectLists(new Error('Options failed after close'));
+      await failedLists.catch(() => {});
+    });
+    cy.get('@lateLoadError').should('not.have.been.called');
+    cy.get('.picklist').should('not.exist');
   });
 
   specify('it should close failed async lists and report their error', function() {
