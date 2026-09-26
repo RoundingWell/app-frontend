@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import dayjs from 'dayjs';
 
 import App from 'js/base/app';
@@ -8,15 +8,15 @@ import { ActionActivityLoadingView, ActionCommentFormView, LayoutView, Activitie
 
 export default App.extend({
   onBeforeStart() {
-    this.getRegion().show(new ActionActivityLoadingView());
+    this.showView(new ActionActivityLoadingView());
   },
-  beforeStart({ action }) {
-    return [
-      Radio.request('entities', 'fetch:actionEvents:collection', action.id),
-      Radio.request('entities', 'fetch:comments:collection:byAction', action.id),
-    ];
+  prepareStart({ action }, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:actionEvents:collection', action.id, { signal }),
+      Radio.request('entities', 'fetch:comments:collection:byAction', action.id, { signal }),
+    ]);
   },
-  onStart({ action, focusOnLoad }, activity, comments) {
+  onStart(app, { action, focusOnLoad }, [activity, comments]) {
     this.action = action;
     this.comments = comments;
     this.comments.add(action.getComments().filter(comment => comment.has('message')));
@@ -24,20 +24,22 @@ export default App.extend({
 
     this.listenTo(action, 'ws:add:comment', this.onWsAddComment);
 
-    this.showView(new LayoutView());
+    this.setView(new LayoutView());
     this.showActivity();
     this.showNewCommentForm();
     this.subscribe();
+    this.showView();
 
     if (focusOnLoad) this.focus();
   },
   focus() {
     this.getRegion().focus();
   },
-  onBeforeStop() {
+  onStop() {
     if (!this.comments) return;
 
     Radio.request('ws', 'unsubscribe', this.comments.models);
+    this.stopListening(this.action);
   },
   onWsAddComment(model) {
     this.activityCollection.add(model);
@@ -54,7 +56,7 @@ export default App.extend({
       'remove:comment': this.onRemoveComment,
     });
 
-    this.showChildView('activities', activitiesView);
+    this.getView().showChildView('activities', activitiesView);
   },
   showNewCommentForm() {
     const clinician = Radio.request('bootstrap', 'currentUser');
@@ -71,7 +73,7 @@ export default App.extend({
       'cancel:comment': this.showNewCommentForm,
     });
 
-    this.showChildView('comment', newCommentFormView);
+    this.getView().showChildView('comment', newCommentFormView);
   },
   onPostNewComment({ model }) {
     model.isSubmitting = true;

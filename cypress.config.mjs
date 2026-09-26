@@ -4,6 +4,7 @@ import { cypressConfig } from './vite.config.js';
 
 import codeCoverageTask from '@cypress/code-coverage/task';
 import fakerPlugin from './test/plugins/faker-generator.js';
+import { deferCoverageReport } from './scripts/cypress-coverage-events.js';
 
 fakerPlugin();
 
@@ -18,7 +19,7 @@ function setupNodeEvents(on, config) {
     }),
   );
 
-  codeCoverageTask(on, config);
+  codeCoverageTask(deferCoverageReport(on, config), config);
 
   return config;
 }

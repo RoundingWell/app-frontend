@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import 'js/entities-service';
 import { Collection as Teams } from 'js/entities-service/entities/teams';

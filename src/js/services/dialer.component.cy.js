@@ -1,5 +1,5 @@
 import { v5 as uuid } from 'uuid';
-import Radio from 'backbone.radio';
+import { Radio, View } from 'marionette';
 import { RWELL_NS } from 'js/static';
 import DialerService from './dialer';
 
@@ -13,18 +13,18 @@ context('Dialer Service', function() {
         const region = rootView.getRegion('overlay');
         service = new DialerService({ region });
 
-        return '<div></div>';
+        return new View({ template: false });
       })
       .as('root');
   });
 
-  afterEach(function() {
+  afterEach(async function() {
     if (Radio.request.restore) {
       Radio.request.restore();
     }
 
     if (service) {
-      service.destroy();
+      await service.destroy();
       service = null;
     }
   });

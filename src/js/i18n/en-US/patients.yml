@@ -182,6 +182,9 @@ careOptsFrontend:
       scheduleApp:
         bulkEditFailure: Something went wrong. Please try again.
       scheduleViews:
+        errorView:
+          message: The schedule could not be loaded. Please try again.
+          retry: Retry
         allFiltersButtonView:
           allFiltersButton: All Filters
         dayItemView:
@@ -288,16 +291,15 @@ careOptsFrontend:
           postBtn: Post
           saveBtn: Save
       components:
-        dateFilterComponent:
+        dateFilter:
           dateFilterViews:
-            actionView:
+            actionsView:
               month: This Month
               today: Today
               week: This Week
-            defaultTemplate:
+            dateLabelView:
               thisMonth: This Month
-            layoutView:
-              dateLabel: Filter by Date…
+          dateLabel: Filter by Date…
           dateTypeFilter:
             addButton: Added
             dueButton: Due
@@ -313,11 +315,11 @@ careOptsFrontend:
               today {Today}
               yesterday {Yesterday}
               other {}}"
-        dialerComponent:
+        dialerView:
           callLabel: Call
           defaultText: Call Number
           headingText: Phone Numbers
-        dueComponent:
+        dueView:
           defaultText: Select Date...
         durationComponent:
           clear: Clear Duration

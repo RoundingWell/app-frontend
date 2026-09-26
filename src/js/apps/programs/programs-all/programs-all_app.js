@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -10,26 +10,30 @@ export default App.extend({
   childApps: {
     programSidebar: ProgramSidebarApp,
   },
-  viewTriggers: {
-    'click:add': 'click:add',
-  },
   onBeforeStart() {
-    this.showView(new LayoutView());
-    this.getRegion('list').startPreloader({ variant: 'generic' });
+    const view = this.setView(new LayoutView());
+
+    view.render();
+    view.getRegion('list').startPreloader({ variant: 'generic' });
+
+    this.listenTo(view, 'click:add', this.onClickAdd);
+    this.showView();
   },
-  beforeStart() {
-    return Radio.request('entities', 'fetch:programs:collection');
+  prepareStart(options, { signal }) {
+    return Radio.request('entities', 'fetch:programs:collection', { signal });
   },
-  onStart(options, collection) {
+  onStart(app, options, collection) {
     this.programs = collection;
-    this.showChildView('list', new ListView({ collection }));
+    this.getView().showChildView('list', new ListView({ collection }));
   },
-  onClickAdd() {
+  async onClickAdd() {
     const programSidebar = this.getChildApp('programSidebar');
     const program = Radio.request('entities', 'programs:model', {});
-    const sidebar = Radio.request('sidebar', 'start', programSidebar, { program });
+    const started = await Radio.request('sidebar', 'start', programSidebar, { program });
 
-    this.listenTo(sidebar, 'stop', () => {
+    if (!started) return;
+
+    this.listenToOnce(programSidebar, 'stop', () => {
       if (!program.isNew()) this.programs.add(program);
     });
   },

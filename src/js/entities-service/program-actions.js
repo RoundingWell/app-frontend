@@ -13,15 +13,19 @@ const Entity = BaseEntity.extend({
     'fetch:programActions:collection': 'fetchProgramActions',
     'fetch:programActions:collection:byProgramFlow': 'fetchProgramActionsByFlow',
   },
-  fetchProgramActionsByProgram({ programId }) {
+  fetchProgramActionsByProgram({ programId }, options) {
     const url = `/api/programs/${ programId }/actions`;
 
-    return this.fetchCollection({ url });
+    return this.fetchCollection({ ...options, url });
   },
-  fetchProgramActions(behavior = PROGRAM_BEHAVIORS.STANDARD) {
+  fetchProgramActions(behavior = PROGRAM_BEHAVIORS.STANDARD, /* istanbul ignore next */ options = {}) {
     const collection = new this.Entity.Collection();
+    const data = {
+      ...options.data,
+      filter: { ...options.data?.filter, behavior },
+    };
 
-    return collection.fetch({ data: { filter: { behavior } } });
+    return collection.fetch({ ...options, data });
   },
   fetchProgramActionsByFlow(flowId, options) {
     const collection = new Collection([], { flowId });

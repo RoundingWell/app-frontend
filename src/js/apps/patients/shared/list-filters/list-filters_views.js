@@ -1,5 +1,5 @@
-import { View, CollectionView } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
+import { View, CollectionView } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/skeleton.scss';
@@ -8,7 +8,7 @@ import intl, { renderTemplate } from 'js/i18n';
 
 import Droplist from 'js/components/droplist';
 
-import { CheckComponent } from 'js/apps/patients/shared/actions_views';
+import { CheckView } from 'js/apps/patients/shared/actions_views';
 
 import PanelTemplate from './panel.hbs';
 
@@ -28,14 +28,12 @@ const ItemTemplate = hbs`
 
 const CustomFilterDropList = Droplist.extend({
   popWidth() {
-    return this.getView().$el.outerWidth();
+    return this.el.offsetWidth;
   },
-  viewOptions: {
-    className: 'button button--secondary list-filters__custom-filter-button w-100',
-    template: hbs`{{ value }}{{#unless value}}{{ defaultText }}{{/unless}}`,
-    templateContext: {
-      defaultText: i18n.customFilterView.defaultText,
-    },
+  className: 'button button--secondary list-filters__custom-filter-button w-100',
+  template: hbs`{{ value }}{{#unless value}}{{ defaultText }}{{/unless}}`,
+  templateContext: {
+    defaultText: i18n.customFilterView.defaultText,
   },
   picklistOptions() {
     return {
@@ -81,11 +79,11 @@ const CustomFilterView = View.extend({
           collection: withoutTotals,
         },
       ],
-      state: { selected },
+      stateOptions: { selected },
       filterTitle: this.model.get('name'),
     });
 
-    this.listenTo(customFilter.getState(), 'change:selected', (state, newSelected) => {
+    customFilter.listenTo(customFilter.getState(), 'change:selected', (state, newSelected) => {
       if (!newSelected) {
         this.state.setFilter(slug, null);
         return;
@@ -191,17 +189,16 @@ const CustomFiltersView = CollectionView.extend({
   updateCollapsed() {
     const isExpanded = this.state.get('customFiltersExpanded');
 
-    this.ui.customFiltersList.prop('hidden', !isExpanded);
-    this.ui.sectionButton.attr('aria-expanded', String(isExpanded));
+    this.getUI('customFiltersList')[0].hidden = !isExpanded;
+    this.getUI('sectionButton')[0].setAttribute('aria-expanded', String(isExpanded));
   },
   onClickToggle() {
     this.state.set('customFiltersExpanded', !this.state.get('customFiltersExpanded'));
     this.updateCollapsed();
   },
   setLoading(isLoading) {
-    this.$el
-      .attr('aria-busy', String(isLoading))
-      .toggleClass('is-loading', isLoading);
+    this.el.setAttribute('aria-busy', String(isLoading));
+    this.el.classList.toggle('is-loading', isLoading);
   },
   setLoadError(hasLoadError) {
     this.hasLoadError = hasLoadError;
@@ -245,7 +242,7 @@ const StatesFilterView = View.extend({
     this.showCheck();
   },
   toggleSelected(isSelected) {
-    this.$el.toggleClass('is-selected', isSelected);
+    this.el.classList.toggle('is-selected', isSelected);
   },
   showCheck() {
     const stateId = this.model.id;
@@ -255,7 +252,7 @@ const StatesFilterView = View.extend({
     this.toggleSelected(isInitSelected);
 
     const stateName = this.model.get('name');
-    const checkComponent = new CheckComponent({
+    const checkView = new CheckView({
       deselectLabel: renderTemplate(StateFilterSelectLabelTemplate, {
         message: i18n.statesFiltersView.deselectState,
         state: stateName,
@@ -264,17 +261,17 @@ const StatesFilterView = View.extend({
         message: i18n.statesFiltersView.selectState,
         state: stateName,
       }),
-      state: { isSelected: isInitSelected },
+      isSelected: isInitSelected,
     });
 
-    this.listenTo(checkComponent, {
+    this.listenTo(checkView, {
       'change:isSelected': isSelected => {
         this.toggleSelected(isSelected);
         this.triggerMethod('select', stateId, isSelected);
       },
     });
 
-    this.showChildView('check', checkComponent);
+    this.showChildView('check', checkView);
   },
 });
 
@@ -317,8 +314,8 @@ const StateFiltersView = CollectionView.extend({
   updateCollapsed() {
     const isExpanded = this.model.get(this.expandedState);
 
-    this.ui.sectionButton.attr('aria-expanded', String(isExpanded));
-    this.$el.toggleClass('is-collapsed', !isExpanded);
+    this.getUI('sectionButton')[0].setAttribute('aria-expanded', String(isExpanded));
+    this.el.classList.toggle('is-collapsed', !isExpanded);
   },
   expandSection() {
     this.model.set(this.expandedState, true);
@@ -398,12 +395,12 @@ const PanelView = View.extend({
   },
   toggleCollapsed() {
     const isCollapsed = !this.isDrawer && this.model.get('sidebarCollapsed');
-    this.ui.body.prop('hidden', isCollapsed);
-    this.$el.toggleClass('is-collapsed', isCollapsed);
+    this.getUI('body')[0].hidden = isCollapsed;
+    this.el.classList.toggle('is-collapsed', isCollapsed);
   },
   setDrawerMode(isDrawer) {
     this.isDrawer = isDrawer;
-    this.$el.toggleClass('list-filters--drawer', isDrawer);
+    this.el.classList.toggle('list-filters--drawer', isDrawer);
     this.toggleCollapsed();
   },
 });

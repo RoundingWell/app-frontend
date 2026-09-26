@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -10,23 +10,24 @@ import { LayoutView, ListView, AddActionDroplist } from 'js/apps/programs/progra
 import './workflow-actions.scss';
 
 export default App.extend({
-  viewTriggers: {
-    'click:add': 'click:add',
-  },
-  onBeforeStart({ program }) {
+  onBeforeStart(app, { program }) {
     this.program = program;
-    this.showView(new LayoutView({ model: program }));
-    this.getRegion('content').startPreloader({ variant: 'generic' });
+
+    const view = this.setView(new LayoutView({ model: program }));
+
+    view.render();
+    view.getRegion('content').startPreloader({ variant: 'generic' });
+    this.showView();
   },
-  beforeStart({ program }) {
-    return [
-      Radio.request('entities', 'fetch:programActions:collection:byProgram', { programId: program.id }),
-      Radio.request('entities', 'fetch:programFlows:collection:byProgram', { programId: program.id }),
-    ];
+  prepareStart({ program }, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:programActions:collection:byProgram', { programId: program.id }, { signal }),
+      Radio.request('entities', 'fetch:programFlows:collection:byProgram', { programId: program.id }, { signal }),
+    ]);
   },
-  onStart({ program }, actions, flows) {
+  onStart(app, options, [actions, flows]) {
     this.collection = new Backbone.Collection([...actions.models, ...flows.models]);
-    this.showChildView('content', new ListView({ collection: this.collection }));
+    this.getView().showChildView('content', new ListView({ collection: this.collection }));
 
     const actionDroplistMenu = new Backbone.Collection([
       {
@@ -53,7 +54,7 @@ export default App.extend({
       },
     ]);
 
-    this.showChildView('add', new AddActionDroplist({
+    this.getView().showChildView('add', new AddActionDroplist({
       collection: actionDroplistMenu,
     }));
   },

@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import intl from 'js/i18n';
 
@@ -12,7 +12,7 @@ export default App.extend({
   childApps: {
     actionSidebar: ActionSidebarApp,
   },
-  beforeStart({ actionId, programId, flowId }) {
+  prepareStart({ actionId, programId, flowId }, { signal }) {
     if (!actionId) {
       return Radio.request('entities', 'programActions:model', {
         _program: { id: programId, type: 'programs' },
@@ -25,16 +25,15 @@ export default App.extend({
       });
     }
 
-    return Radio.request('entities', 'fetch:programActions:model', actionId);
+    return Radio.request('entities', 'fetch:programActions:model', actionId, { signal });
   },
-  onFail() {
+  handleStartFailure() {
     Radio.request('alert', 'show:error', intl.programs.program.action.actionApp.notFound);
-    this.stop();
   },
-  onStart(options, action) {
+  onStart(app, options, action) {
+    this.action = action;
+
     const actionSidebar = this.getChildApp('actionSidebar');
     Radio.request('sidebar', 'start', actionSidebar, { action });
-
-    this.listenTo(actionSidebar, 'stop', this.stop);
   },
 });

@@ -19,7 +19,8 @@ import './action.scss';
 
 const FocusablePreloadRegion = PreloadRegion.extend({
   focus() {
-    const el = this.getEl(this.el)[0];
+    // Clicking the attachment count before its view loads leaves el as a selector.
+    const el = typeof this.el === 'string' ? this.getEl(this.el) : this.el;
 
     el.scrollIntoView({ block: 'start' });
     el.focus({ preventScroll: true });
@@ -51,7 +52,7 @@ const MenuView = View.extend({
   },
   onClick() {
     const optionlist = new Optionlist({
-      ui: this.$el,
+      anchor: this.el,
       uiView: this,
       headingText: i18n.menuView.menuOptions.headingText,
       itemTemplate: hbs`{{far "trash-can" classes="sidebar__delete-icon"}}<span>{{ @intl.patients.patient.action.actionViews.menuView.menuOptions.delete }}</span>`,
@@ -105,6 +106,9 @@ const LayoutView = View.extend({
   },
   scrollViewportTo(options) {
     this.el.scrollTo(options);
+  },
+  setFormExpanded(isExpanded) {
+    this.el.classList.toggle('patient-action--form-expanded', isExpanded);
   },
 });
 

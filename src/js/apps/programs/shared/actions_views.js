@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
@@ -24,7 +24,7 @@ const OwnerComponent = TeamComponent.extend({
 
     if (isFromFlow) this.defaultText = intl.programs.shared.actionsView.ownerComponent.defaultText;
 
-    this.setState({ selected: owner });
+    this.getState().set({ selected: owner });
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:owner', selected);

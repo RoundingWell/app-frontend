@@ -1,20 +1,20 @@
 import { noop } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
 import { AddButtonView, i18n } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
 export default App.extend({
-  beforeStart() {
-    return [
-      Radio.request('entities', 'fetch:programs:collection'),
-      Radio.request('entities', 'fetch:programActions:collection'),
-      Radio.request('entities', 'fetch:programFlows:collection'),
-    ];
+  prepareStart(options, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:programs:collection', { signal }),
+      Radio.request('entities', 'fetch:programActions:collection', undefined, { signal }),
+      Radio.request('entities', 'fetch:programFlows:collection', undefined, { signal }),
+    ]);
   },
-  onStart(options, programs) {
+  onStart(app, options, [programs]) {
     programs.comparator = 'name';
 
     const addablePrograms = programs.filter(program => {

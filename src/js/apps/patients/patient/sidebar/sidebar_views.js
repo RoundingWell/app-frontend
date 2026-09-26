@@ -1,7 +1,6 @@
-import Radio from 'backbone.radio';
-import Backbone from 'backbone';
-import { View, CollectionView } from 'marionette';
 import hbs from 'handlebars-inline-precompile';
+import { Radio, View, CollectionView } from 'marionette';
+import Backbone from 'backbone';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/loader.scss';
@@ -90,11 +89,11 @@ const SidebarSectionView = View.extend({
     return renderTemplate(labelTemplate, { name: this.model.get('name') });
   },
   updateDisclosure() {
-    this.ui.toggleSection
-      .attr('aria-expanded', String(this.isExpanded))
-      .attr('aria-label', this.getToggleLabel());
-    this.ui.widgets.prop('hidden', !this.isExpanded);
-    this.$el.toggleClass('is-collapsed', !this.isExpanded);
+    const [toggleSection] = this.getUI('toggleSection');
+    toggleSection.setAttribute('aria-expanded', String(this.isExpanded));
+    toggleSection.setAttribute('aria-label', this.getToggleLabel());
+    this.getUI('widgets')[0].hidden = !this.isExpanded;
+    this.el.classList.toggle('is-collapsed', !this.isExpanded);
   },
   templateContext() {
     return {
@@ -168,7 +167,7 @@ const SidebarView = View.extend({
     menu: '.js-menu',
   },
   focusClose() {
-    this.ui.close.trigger('focus');
+    this.getUI('close')[0].focus();
   },
   onClickMenu() {
     const workspacePatient = this.model.getWorkspacePatient();
@@ -198,7 +197,7 @@ const SidebarView = View.extend({
     }
 
     const optionlist = new Optionlist({
-      ui: this.ui.menu,
+      anchor: this.getUI('menu')[0],
       uiView: this,
       headingText: i18n.menuOptions.headingText,
       itemTemplate: hbs`{{ text }}`,

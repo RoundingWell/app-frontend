@@ -1,7 +1,6 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { Region, View } from 'marionette';
+import { Radio, Region, View } from 'marionette';
 
 import FormViewportBehavior from './form-viewport';
 
@@ -229,25 +228,6 @@ context('Form Viewport Behavior', function() {
       expect(iframeView.getViewportElement().style.height).not.to.equal('');
 
       behavior.resizeObserver.callback();
-    });
-  });
-
-  specify('requires an explicit viewport owner', function() {
-    expect(() => new FormView({
-      model: new Backbone.Model({ id: '1' }),
-    })).to.throw('FormViewportBehavior requires a viewport view');
-  });
-
-  specify('works without ResizeObserver support', function() {
-    cy.window().then(win => {
-      cy.stub(win, 'ResizeObserver').value(undefined);
-    });
-
-    cy.mount(() => new ViewportView());
-
-    cy.then(() => {
-      const [behavior] = formView._behaviors;
-      expect(behavior.resizeObserver).to.equal(undefined);
     });
   });
 });

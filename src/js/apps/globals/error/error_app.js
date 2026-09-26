@@ -26,10 +26,6 @@ export default RouterApp.extend({
     'click:back': 'stop',
   },
 
-  onBeforeStop() {
-    this.getRegion().empty();
-  },
-
   handleUnknown() {
     this.start();
     this.show404();

@@ -1,6 +1,6 @@
 import { map, get, debounce } from 'underscore';
 import dayjs from 'dayjs';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 import { getDraft, setDraft, removeDraft } from 'js/services/form-drafts';
@@ -20,7 +20,6 @@ function getClinicians(teamId) {
 }
 
 export default App.extend({
-  startAfterInitialized: true,
   channelName() {
     return `form${ this.getOption('form').id }`;
   },
@@ -39,10 +38,16 @@ export default App.extend({
 
     this.currentUser = Radio.request('bootstrap', 'currentUser');
   },
-  onBeforeDestroy() {
+  releaseEffects() {
     this.updateDraft.cancel();
     this.refreshForm.cancel();
     this.getChannel().reset();
+  },
+  onStop() {
+    this.releaseEffects();
+  },
+  onBeforeDestroy() {
+    this.releaseEffects();
   },
   radioRequests: {
     'ready:form': 'readyForm',

@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { NIL as NIL_UUID } from 'uuid';
 
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import localStore from 'js/utils/local-store';
 
@@ -48,8 +48,6 @@ const StateModel = Backbone.Model.extend({
   },
   initialize() {
     this.on('change', this.onChange);
-
-    this.listenTo(Radio.channel('event-router'), 'unknownError', this.removeStore);
   },
   getStoreKey() {
     return `schedule_${ this.currentClinician.id }_${ this.currentWorkspace.id }-${ STATE_VERSION }`;
@@ -57,16 +55,23 @@ const StateModel = Backbone.Model.extend({
   getStore() {
     return localStore.get(this.getStoreKey());
   },
+  restoreStore() {
+    this.isStoreInvalidated = false;
+  },
   removeStore() {
+    // Retained filter state can still emit debounced changes after an error.
+    this.isStoreInvalidated = true;
     localStore.remove(this.getStoreKey());
   },
   onChange() {
+    if (this.isStoreInvalidated) return;
+
     localStore.set(this.getStoreKey(), omit(this.attributes, 'filtersCount', 'lastSelectedIndex', 'searchQuery'));
   },
   setFiltersSidebarCollapsed(isCollapsed) {
     return this.set('filtersSidebarCollapsed', isCollapsed);
   },
-  setSearchQuery(searchQuery = '') {
+  setSearchQuery(searchQuery) {
     return this.set({
       searchQuery: searchQuery.length > 2 ? searchQuery : '',
       lastSelectedIndex: null,

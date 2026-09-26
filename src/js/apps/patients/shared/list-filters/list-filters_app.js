@@ -1,22 +1,53 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
+
+import createLatestRequest from 'js/utils/latest-request';
+import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
 import { PanelView, LayoutView, HeadingView, MenuView, CustomFiltersLoadingView, CustomFiltersView, StatesFiltersView, FlowStatesFiltersView } from 'js/apps/patients/shared/list-filters/list-filters_views';
 
-const ListFiltersApp = App.extend({
-  onStart({ filtersState }) {
+const ListFiltersPanelApp = App.extend({
+  onBeforeStart(app, options) {
+    const view = this.setView(new PanelView({
+      isDrawer: options.isDrawer,
+      model: options.layoutState,
+    }));
+
+    view.render();
+    view.showChildView('content', new LayoutView());
+  },
+  onStart(app, { filtersState }) {
+    this.customFiltersRequests?.dispose();
+    this.stopListening(this.filtersState);
     this.filtersState = filtersState;
+    this.customFiltersRequests = createLatestRequest({
+      load: (options, { signal }) => Radio.request('entities', 'fetch:filters:customFilters', { ...options, signal }),
+      commit: result => {
+        if (result) this.showCustomFilters(result);
+      },
+      fail: error => {
+        this.showCustomFilters({ filters: this.filters, hasLoadError: true });
+        addError(error);
+      },
+    });
+    const requests = this.customFiltersRequests;
+    const view = this.getView();
+    this.listenTo(view, 'before:destroy', () => {
+      requests.dispose();
+      this.stopListening(filtersState);
+      this.stopListening(view);
+    });
     this.filters = Radio.request('entities', 'filters:customFilters');
     this.isCustomFiltersLoaded = false;
 
     this.showHeadingView();
     this.showMenu();
-    this.showChildView('content', new LayoutView());
     this.showCustomFiltersLoadingView();
     this.loadCustomFilters();
     this.showStatesFiltersView();
     this.showFlowStatesFiltersView();
+    this.showView();
 
     this.listenTo(filtersState, {
       'change:listType'() {
@@ -31,7 +62,7 @@ const ListFiltersApp = App.extend({
   showHeadingView() {
     const headerView = new HeadingView({ model: this.filtersState });
 
-    this.showChildView('heading', headerView);
+    this.getView().showChildView('heading', headerView);
   },
   showMenu() {
     const menuView = new MenuView({ model: this.filtersState });
@@ -40,7 +71,7 @@ const ListFiltersApp = App.extend({
       this.filtersState.setDefaultFilterStates();
     });
 
-    this.showChildView('menu', menuView);
+    this.getView().showChildView('menu', menuView);
   },
   showCustomFiltersLoadingView() {
     const loadingView = new CustomFiltersLoadingView({ filterCount: Math.min(this.filters.length, 2) });
@@ -48,51 +79,35 @@ const ListFiltersApp = App.extend({
     this.showContentView('customFilters', loadingView);
   },
   loadCustomFilters() {
-    this.abortCustomFiltersFetch();
+    const currentView = this.getView().getChildView('content').getChildView('customFilters');
+    if (this.isCustomFiltersLoaded) currentView.setLoading(true);
 
-    const controller = new AbortController();
-    const request = Radio.request('entities', 'fetch:filters:customFilters', {
+    return this.customFiltersRequests.run({
       entityType: this.filtersState.get('listType'),
       worklist: this.filtersState.get('worklist'),
-      signal: controller.signal,
+    });
+  },
+  showCustomFilters({ filters, hasLoadError }) {
+    filters.each(filter => {
+      this.filters.findWhere({ slug: filter.get('slug') }).set(filter.attributes);
     });
 
-    if (!request) return;
-
-    this.customFiltersController = controller;
-    const currentView = this.getChildView('content').getRegion('customFilters').currentView;
-
-    if (this.isCustomFiltersLoaded && currentView && currentView.setLoading) {
-      currentView.setLoading(true);
+    if (!this.isCustomFiltersLoaded) {
+      this.isCustomFiltersLoaded = true;
+      this._showCustomFiltersView({ hasLoadError });
+      return;
     }
 
-    request
-      .then(({ filters, hasLoadError }) => {
-        if (!this.isRunning() || controller.signal.aborted) return;
-        this.customFiltersController = null;
-
-        filters.each(filter => {
-          this.filters.findWhere({ slug: filter.get('slug') }).set(filter.attributes);
-        });
-
-        if (!this.isCustomFiltersLoaded) {
-          this.isCustomFiltersLoaded = true;
-          this._showCustomFiltersView({ hasLoadError });
-          return;
-        }
-
-        const customFiltersView = this.getChildView('content').getRegion('customFilters').currentView;
-
-        customFiltersView.setLoadError(hasLoadError);
-        customFiltersView.setLoading(false);
-      });
-  },
-  abortCustomFiltersFetch() {
-    if (this.customFiltersController) this.customFiltersController.abort();
-    this.customFiltersController = null;
+    const view = this.getView().getChildView('content').getChildView('customFilters');
+    view.setLoadError(hasLoadError);
+    view.setLoading(false);
   },
   onStop() {
-    this.abortCustomFiltersFetch();
+    this.customFiltersRequests?.dispose();
+    this.stopListening(this.filtersState, 'change:listType change:worklist');
+  },
+  onBeforeDestroy() {
+    this.customFiltersRequests?.dispose();
   },
   retryCustomFilters() {
     this.isCustomFiltersLoaded = false;
@@ -110,14 +125,14 @@ const ListFiltersApp = App.extend({
     this.showContentView('customFilters', customFiltersView);
   },
   showContentView(name, view, options) {
-    const region = this.getChildView('content').getRegion(name);
+    const region = this.getView().getChildView('content').getRegion(name);
     region.show(view, options);
     return view;
   },
   showFlowStatesFiltersView() {
     // Filters actions by their flow's state
     if (this.filtersState.isFlowType()) {
-      this.getChildView('content').getRegion('flowStatesFilters').empty();
+      this.getView().getChildView('content').getRegion('flowStatesFilters').empty();
       return;
     }
 
@@ -138,19 +153,6 @@ const ListFiltersApp = App.extend({
     });
 
     this.showContentView('statesFilters', statesFiltersView);
-  },
-});
-
-const ListFiltersPanelApp = ListFiltersApp.extend({
-  onStart(options) {
-    this.showView(new PanelView({
-      isDrawer: options.isDrawer,
-      model: options.layoutState,
-    }));
-
-    if (options.controlsView) this.showChildView('controls', options.controlsView);
-
-    ListFiltersApp.prototype.onStart.call(this, options);
   },
 });
 

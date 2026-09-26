@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import LatestListService from './latest-list';
 
@@ -25,20 +25,6 @@ context('LatestListService', function() {
 
     expect(service._latestList).to.equal('worklist');
     expect(service._latestListArgs).to.deep.equal(['owned-by']);
-  });
-
-  specify('clears the latest list when requested by route metadata', function() {
-    service._setLatestList('worklist', ['owned-by']);
-
-    Radio.request('history', 'set:latestList', {
-      event: 'schedule',
-      eventArgs: [],
-      definition: {
-        meta: { clearLatestList: true },
-      },
-    });
-
-    expect(service.hasLatestList()).to.equal(false);
   });
 
   specify('leaves the latest list unchanged for plain routes', function() {

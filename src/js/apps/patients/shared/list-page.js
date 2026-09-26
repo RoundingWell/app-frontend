@@ -1,13 +1,10 @@
 import { result } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
-
-import SelectionBarTemplate from './selection-bar.hbs';
 
 import './patient-list-page.scss';
 
@@ -17,16 +14,6 @@ const LIST_PAGE_UI = {
   filtersDrawerClose: '.js-close-sidebar-drawer',
   filtersSidebar: '.js-filters-sidebar',
 };
-
-const ListPageSelectionBarView = View.extend({
-  className: 'patient-list-page__filters',
-  template: SelectionBarTemplate,
-  regions: {
-    selectAll: '[data-select-all-region]',
-    bulkEdit: '[data-bulk-edit-region]',
-    count: '[data-count-region]',
-  },
-});
 
 const ListPageView = View.extend({
   className: 'flex-region list-page',
@@ -47,6 +34,7 @@ const ListPageView = View.extend({
       && (this._isFiltersDrawer || this.model.get('filtersSidebarCollapsed'));
 
     this.layoutState = new Backbone.Model({
+      sidebarContent: 'filters',
       filtersExpanded: !sidebarCollapsed,
       sidebarCollapsed,
       sidebarFixed: this._isFiltersSidebarFixed,
@@ -55,20 +43,38 @@ const ListPageView = View.extend({
     this.listenTo(Radio.channel('user-activity'), 'window:resize', this.onListPageWindowResize);
   },
   onRender() {
-    this.showChildView('selectionBar', new ListPageSelectionBarView({ model: this.model }));
     this.renderFiltersSidebarState();
-  },
-  showSelectionBarChildView(regionName, view) {
-    this.getChildView('selectionBar').showChildView(regionName, view);
-  },
-  getSelectionBarRegion(regionName) {
-    return this.getChildView('selectionBar').getRegion(regionName);
   },
   onChangeFiltersSidebarCollapsed() {
     const isCollapsed = !this._isFiltersSidebarFixed
       && (this._isFiltersDrawer || this.model.get('filtersSidebarCollapsed'));
 
-    this.setSidebarLayoutState(isCollapsed, !isCollapsed);
+    this.setSidebarCollapsed(isCollapsed);
+  },
+  setSidebarCollapsed(isCollapsed) {
+    const collapsed = !this.isFiltersSidebarFixed() && isCollapsed;
+    this.setSidebarLayoutState(collapsed, !collapsed && this.layoutState.get('sidebarContent') === 'filters');
+  },
+  showPatientSidebar() {
+    this.layoutState.set('sidebarContent', 'patient');
+    this.setSidebarCollapsed(false);
+  },
+  showFiltersSidebar() {
+    this.layoutState.set('sidebarContent', 'filters');
+    this.setDrawerCloseHidden(false);
+    this.setSidebarCollapsed(this.isFiltersDrawer() || this.model.get('filtersSidebarCollapsed'));
+  },
+  toggleFiltersSidebar() {
+    const isDrawer = this.isFiltersDrawer();
+    const isCollapsed = isDrawer ? this.isFiltersSidebarCollapsed() : this.model.get('filtersSidebarCollapsed');
+    if (isDrawer) {
+      this.setSidebarCollapsed(false);
+      this.focusFiltersDrawer();
+    } else {
+      this.model.setFiltersSidebarCollapsed(!isCollapsed);
+      this.setSidebarCollapsed(!isCollapsed);
+    }
+    return isCollapsed;
   },
   setSidebarLayoutState(isCollapsed, filtersExpanded) {
     this.layoutState.set({
@@ -79,8 +85,8 @@ const ListPageView = View.extend({
   renderFiltersSidebarState() {
     const isCollapsed = this.isFiltersSidebarCollapsed();
 
-    this.$el.toggleClass('is-filters-collapsed', isCollapsed);
-    this.ui.filtersSidebar.attr('aria-hidden', String(isCollapsed));
+    this.el.classList.toggle('is-filters-collapsed', isCollapsed);
+    this.getUI('filtersSidebar')[0].setAttribute('aria-hidden', String(isCollapsed));
   },
   isFiltersSidebarCollapsed() {
     return this.layoutState.get('sidebarCollapsed');
@@ -95,10 +101,10 @@ const ListPageView = View.extend({
     return window.matchMedia(FILTERS_SIDEBAR_FIXED_QUERY).matches;
   },
   focusFiltersDrawer() {
-    this.ui.filtersDrawerClose.trigger('focus');
+    this.getUI('filtersDrawerClose')[0].focus();
   },
   setDrawerCloseHidden(isHidden) {
-    this.ui.filtersDrawerClose.prop('hidden', isHidden);
+    this.getUI('filtersDrawerClose')[0].hidden = isHidden;
   },
   onClickCloseSidebarDrawer() {
     this.triggerMethod('close:sidebar-drawer');
@@ -149,17 +155,17 @@ const ListPageFiltersButtonView = View.extend({
     };
   },
   focus() {
-    this.$el.trigger('focus');
+    this.el.focus();
   },
   updateExpanded() {
-    this.$el.attr('aria-expanded', String(this.layoutState.get('filtersExpanded')));
+    this.el.setAttribute('aria-expanded', String(this.layoutState.get('filtersExpanded')));
   },
   onRender() {
     this.updateExpanded();
     this.updateFixed();
   },
   updateFixed() {
-    this.$el.prop('hidden', this.layoutState.get('sidebarFixed'));
+    this.el.hidden = this.layoutState.get('sidebarFixed');
   },
   template: hbs`<span class="patient-list-page__all-filters-icon">{{far "bars-filter" classes="patient-list-page__all-filters-glyph"}}</span>{{#if filtersCount}}<span class="patient-list-page__active-filter-dot" aria-hidden="true"></span>{{/if}}`,
   triggers: {
@@ -170,121 +176,7 @@ const ListPageFiltersButtonView = View.extend({
   },
 });
 
-const ListPageAppMixin = {
-  setListPageView(layoutView) {
-    this.layoutView = layoutView;
-    this.listenTo(layoutView, {
-      'change:filters-drawer': this.onChangeFiltersDrawer,
-      'change:filters-sidebar-fixed': this.onChangeFiltersSidebarFixed,
-      'close:sidebar-drawer': this.onCloseSidebarDrawer,
-    });
-    this.setView(layoutView);
-
-    if (layoutView.isFiltersSidebarFixed()) this.setSidebarCollapsed(false);
-  },
-  showSelectionBarChildView(regionName, view) {
-    this.layoutView.showSelectionBarChildView(regionName, view);
-  },
-  getSelectionBarRegion(regionName) {
-    return this.layoutView.getSelectionBarRegion(regionName);
-  },
-  onClickFiltersButton() {
-    if (this.isPatientSidebarOpen) {
-      this.showFiltersSidebar();
-      return;
-    }
-
-    this.toggleFiltersSidebar();
-  },
-  restoreFiltersSidebarLayout() {
-    this.layoutView.setDrawerCloseHidden(false);
-    const isCollapsed = !this.layoutView.isFiltersSidebarFixed()
-      && (this.layoutView.isFiltersDrawer() || this.getState('filtersSidebarCollapsed'));
-
-    this.setSidebarLayoutCollapsed(isCollapsed);
-  },
-  onChangeFiltersDrawer(isFiltersDrawer) {
-    if (isFiltersDrawer) {
-      if (this.isPatientSidebarOpen) this.showFiltersSidebar();
-      this.setFiltersSidebarDrawerMode(true);
-      this.setSidebarLayoutCollapsed(true);
-      return;
-    }
-
-    this.setFiltersSidebarDrawerMode(false);
-    this.setSidebarLayoutCollapsed(this.isPatientSidebarOpen ? false : this.getState('filtersSidebarCollapsed'));
-  },
-  onChangeFiltersSidebarFixed(isFixed) {
-    if (isFixed) this.setSidebarCollapsed(false);
-  },
-  onCloseSidebarDrawer() {
-    const wasPatientSidebarOpen = this.isPatientSidebarOpen;
-
-    if (wasPatientSidebarOpen) this.showFiltersSidebar();
-    this.setSidebarLayoutCollapsed(true);
-    if (wasPatientSidebarOpen) {
-      this.focusPatientSidebarTrigger();
-    } else {
-      this.getChildView('filters').focus();
-    }
-  },
-  setSidebarLayoutCollapsed(isCollapsed) {
-    const sidebarCollapsed = !this.layoutView.isFiltersSidebarFixed() && isCollapsed;
-
-    this.layoutView.setSidebarLayoutState(sidebarCollapsed, !sidebarCollapsed && !this.isPatientSidebarOpen);
-  },
-  setFiltersSidebarDrawerMode(isDrawer) {
-    if (this.isPatientSidebarOpen) return;
-
-    this.getChildApp('filtersSidebar').getView().setDrawerMode(isDrawer);
-  },
-  listenToPatientSidebar() {
-    const patientSidebar = this.getChildApp('patientSidebar');
-
-    this.stopListening(patientSidebar, 'close');
-    this.listenTo(patientSidebar, 'close', this.closePatientSidebar);
-  },
-  closePatientSidebar() {
-    this.showFiltersSidebar();
-    this.focusPatientSidebarTrigger();
-  },
-  focusPatientSidebar(patientSidebar) {
-    this.layoutView.setDrawerCloseHidden(true);
-    if (!this.layoutView.isFiltersDrawer()) return;
-
-    patientSidebar.focusClose();
-    this.listenToOnce(patientSidebar, 'sync:data', () => patientSidebar.focusClose());
-  },
-  focusPatientSidebarTrigger() {
-    const trigger = this.patientSidebarTrigger;
-
-    this.patientSidebarTrigger = null;
-    trigger.focus();
-  },
-  setSidebarCollapsed(isCollapsed) {
-    this.getState().setFiltersSidebarCollapsed(isCollapsed);
-    this.setSidebarLayoutCollapsed(isCollapsed);
-  },
-  toggleFiltersSidebar() {
-    const isFiltersDrawer = this.layoutView.isFiltersDrawer();
-    const isCollapsed = isFiltersDrawer ?
-      this.layoutView.isFiltersSidebarCollapsed() :
-      this.getState('filtersSidebarCollapsed');
-    const nextIsCollapsed = !isCollapsed;
-
-    if (isFiltersDrawer) {
-      this.setSidebarLayoutCollapsed(false);
-      this.layoutView.focusFiltersDrawer();
-    } else {
-      this.setSidebarCollapsed(nextIsCollapsed);
-    }
-
-    if (isCollapsed) this.getFiltersState().trigger('expand:sections');
-  },
-};
-
 export {
-  ListPageAppMixin,
   ListPageFiltersButtonView,
   ListPageView,
 };

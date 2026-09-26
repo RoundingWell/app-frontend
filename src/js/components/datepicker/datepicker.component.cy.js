@@ -1,7 +1,7 @@
 import Backbone from 'backbone';
+import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import hbs from 'handlebars-inline-precompile';
 import { testDate, testDateAdd } from 'helpers/test-date';
 
 import formatDate from 'helpers/format-date';
@@ -35,13 +35,17 @@ context('Datepicker', function() {
       'change:date change:selectedMonth': 'render',
     },
     dateState: {},
+    getAnchor() {
+      if (this.getOption('omitAnchor')) return;
+      return this.getUI('button')[0];
+    },
     onClick() {
       const state = this.getOption('dateState');
 
       const datepicker = new Datepicker({
-        ui: this.ui.button,
+        anchor: this.getAnchor(),
         uiView: this,
-        state,
+        stateOptions: state,
         canSelectMonth: this.getOption('canSelectMonth'),
       });
 
@@ -168,7 +172,7 @@ context('Datepicker', function() {
 
     cy
       .then(() => {
-        testView.datepicker.setState('currentMonth', '01/01/2016');
+        testView.datepicker.getState().setCurrentMonth('01/01/2016');
       });
 
     cy
@@ -189,6 +193,7 @@ context('Datepicker', function() {
         Datepicker.setRegion(rootView.getRegion('pop'));
 
         return new TestView({
+          omitAnchor: true,
           model: new Backbone.Model(),
           dateState: {
             beginDate: '02/08/2015',
@@ -304,7 +309,7 @@ context('Datepicker', function() {
       model: new Backbone.Model(),
     });
 
-    testView.$el.css({ position: 'fixed', bottom: '10px' });
+    Object.assign(testView.el.style, { position: 'fixed', bottom: '10px' });
 
     cy
       .mount(rootView => {

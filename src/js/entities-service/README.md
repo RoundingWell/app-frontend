@@ -35,12 +35,12 @@ plus the cached variants `fetchModelCache`, `fetchCollectionCache`, and
 Typical consumption from an app:
 
 ```js
-beforeStart() {
+prepareStart(options, { signal }) {
   const [patientId] = this.getCurrentRoute().eventArgs;
-  return [
-    Radio.request('entities', 'fetch:patients:model', patientId),
-    Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId }),
-  ];
+  return Promise.all([
+    Radio.request('entities', 'fetch:patients:model', patientId, { signal }),
+    Radio.request('entities', 'fetch:actions:collection:byPatient', { patientId }, { signal }),
+  ]);
 }
 ```
 

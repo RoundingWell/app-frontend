@@ -1,7 +1,5 @@
-import { extend, result } from 'underscore';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
@@ -12,10 +10,10 @@ import Tooltip from 'js/components/tooltip';
 import trim from 'js/utils/formatting/trim';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
-import CheckComponent from './components/check_component';
+import CheckView from './components/check_view';
 import StateComponent from './components/state_component';
 import OwnerComponent from './components/owner_component';
-import DueComponent from './components/due_component';
+import DueView from './components/due_view';
 import TimeComponent from './components/time_component';
 import DurationComponent from './components/duration_component';
 
@@ -23,18 +21,12 @@ import './actions.scss';
 
 function createCardControl(Component) {
   return Component.extend({
-    viewOptions() {
-      const options = Component.prototype.viewOptions.call(this);
-
-      return extend({}, options, {
-        className: `${ result(options, 'className') } js-no-click`,
-      });
-    },
+    className: `${ Component.prototype.className } js-no-click`,
   });
 }
 
 const CardOwnerComponent = createCardControl(OwnerComponent);
-const CardDueComponent = createCardControl(DueComponent);
+const CardDueView = createCardControl(DueView);
 const CardTimeComponent = createCardControl(TimeComponent);
 
 const FormButton = View.extend({
@@ -105,7 +97,7 @@ const DetailsTooltip = View.extend({
         details: this._formatDetails(this.model.get('details')),
       }),
       uiView: this,
-      ui: this.$el,
+      anchor: this.el,
       shouldDelay: true,
     });
   },
@@ -117,13 +109,13 @@ const DetailsTooltip = View.extend({
 });
 
 export {
-  CheckComponent,
+  CheckView,
   StateComponent,
   OwnerComponent,
-  DueComponent,
+  DueView,
   TimeComponent,
   CardOwnerComponent,
-  CardDueComponent,
+  CardDueView,
   CardTimeComponent,
   DurationComponent,
   FormButton,

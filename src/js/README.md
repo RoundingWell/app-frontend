@@ -6,7 +6,7 @@ When importing dependencies we loosely follow some general rules and strictly fo
 The canonical ordering list lives in [`/AGENTS.md`](../../AGENTS.md); this is the worked example.
 ```js
 // 3rd party dependencies generally in order or "lowest-level" dependency
-import { extend } from 'underscore'; // underscore is a dependency of marionette so it goes first.
+import { extend } from 'underscore';
 import hbs from 'handlebars-inline-precompile'; // not really a dependency, but indirectly used by Marionette
 import { View } from 'marionette';
 
@@ -68,20 +68,16 @@ These aliases allow for any js file, no matter its location within the js direct
 import { FooView } from 'js/apps/foo/foo_views';
 ```
 
-## Underscore
-
-- Use underscore over native or jQuery
-
-We currently default to underscore API across the board. There are many APIs that have been native for a decade that are replicated in underscore that have small niceties or shorthands added that are useful. This way we don't have to have a list of which functions we use natively and which we use from underscore and we don't have multiple implementations of the functionality throughout the codebase. For the most part all data manipulation documentation can be traced to a single source.
-
 ## Marionette
 
-- Render and attach as many things to a view as possible before showing utilizing toolkit app's `setView` -> `showChildView` -> `showView` pattern.
-- Always use the `ui` hash when possible. If not possible use the locally scoped `$` `view.$()`. Do not query jQuery from the global `$`.
-- Use `onDomRender`/`onDomRemove` when adding things to a view's contents.
-- Use `onAttach`/`onDetach` when adding things to a view's `el`.
-- Prefer `triggerMethod` over `trigger`.
-- Prefer View `triggers` over View `events`.
+See [AGENTS.md](../../AGENTS.md#marionette-application-context) for this app's
+installed contract, integrations, ownership entrypoint, and packaged documentation
+helper. Use the `marionette` skill supplied by Marionette's upstream plugin to
+select the matching framework API guide for the task.
+
+This repo requires template element selectors in the View's `ui` hash and access
+through `getUI`, keeping selector queries out of View methods. The packaged
+`docs/dom.interactions.md` explains the native DOM values and event APIs.
 
 ### Trigger and Event Names
 
@@ -135,6 +131,6 @@ const y = {
 - Use => functions for setting context when possible.  Note that arrow functions do not have an `arguments` variable.
 
 - [Favor object composition over class inheritance](https://medium.com/javascript-scene/10-interview-questions-every-javascript-developer-should-know-6fa6bdf5ad95#.haauzmicp)
-- [Writing Efficient Javascript](http://archive.oreilly.com/pub/a/server-administration/excerpts/even-faster-websites/writing-efficient-javascript.html) (Hint use [underscorejs](underscorejs.org)).
-- [Decoupling with pub/sub](https://msdn.microsoft.com/en-us/magazine/hh201955.aspx)  (Hint use [Backbone.Radio](https://github.com/marionettejs/backbone.radio)).
+- [Writing Efficient Javascript](http://archive.oreilly.com/pub/a/server-administration/excerpts/even-faster-websites/writing-efficient-javascript.html)
+- [Decoupling with pub/sub](https://msdn.microsoft.com/en-us/magazine/hh201955.aspx) (use [Marionette Radio](https://marionettejs.com/docs/radio/)).
 - [Reducing Complexity by Refactoring with Guard Clauses](http://there4.io/2015/06/10/refactoring-with-guard-clauses-php-javascript/)

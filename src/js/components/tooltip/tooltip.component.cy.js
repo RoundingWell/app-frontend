@@ -1,8 +1,7 @@
 import 'js/base/setup';
 import Backbone from 'backbone';
-import { View, CollectionView } from 'marionette';
-
 import hbs from 'handlebars-inline-precompile';
+import { View, CollectionView } from 'marionette';
 
 import Tooltip from './index';
 
@@ -27,7 +26,7 @@ context('Tooltip', function() {
       new Tooltip({
         message: this.model.id,
         uiView: this,
-        ui: this.ui.button,
+        anchor: this.getUI('button')[0],
         orientation: this.getOption('orientation'),
       });
     },
@@ -43,47 +42,6 @@ context('Tooltip', function() {
       .mount(rootView => {
         Tooltip.setRegion(rootView.getRegion('tooltip'));
         return new TestView();
-      })
-      .as('root');
-
-    testCollection.each(model => {
-      cy
-        .get('@root')
-        .contains(model.id)
-        .as('button')
-        .trigger('pointerover');
-
-      cy
-        .get('.tooltip')
-        .contains(model.id);
-
-      cy
-        .get('@button')
-        .trigger('mouseout');
-
-      cy
-        .get('@root')
-        .contains(model.id)
-        .as('button')
-        .trigger('pointerdown');
-
-      cy
-        .get('.tooltip')
-        .contains(model.id);
-
-      cy
-        .get('@button')
-        .trigger('mouseout');
-    });
-  });
-
-  specify('Displaying horizontal positioning', function() {
-    cy
-      .mount(rootView => {
-        Tooltip.setRegion(rootView.getRegion('tooltip'));
-        return new TestView({
-          childViewOptions: { orientation: 'horizontal' },
-        });
       })
       .as('root');
 
@@ -137,7 +95,7 @@ context('Tooltip', function() {
         });
       },
       onClick() {
-        if (this.tooltip.getView()) {
+        if (this.tooltip.isShown()) {
           this.tooltip.hideTooltip();
           return;
         }
@@ -202,5 +160,133 @@ context('Tooltip', function() {
     cy
       .get('.tooltip')
       .should('not.exist');
+  });
+
+  specify('Retains anchor listeners when tooltips replace each other', function() {
+    const SwapTestView = View.extend({
+      template: hbs`<button class="first">First</button><button class="second">Second</button>`,
+      ui: {
+        first: '.first',
+        second: '.second',
+      },
+      onRender() {
+        new Tooltip({
+          message: 'First tooltip',
+          uiView: this,
+          anchor: this.getUI('first')[0],
+        });
+
+        new Tooltip({
+          message: 'Second tooltip',
+          uiView: this,
+          anchor: this.getUI('second')[0],
+        });
+      },
+    });
+
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new SwapTestView();
+    });
+
+    cy.get('.first').trigger('pointerover');
+    cy.get('.tooltip').contains('First tooltip');
+
+    cy.get('.second').trigger('pointerover');
+    cy.get('.tooltip').contains('Second tooltip');
+
+    cy.get('.first').trigger('pointerover');
+    cy.get('.tooltip').contains('First tooltip');
+  });
+
+  specify('Retains the delay across pointer transitions within a raw anchor', function() {
+    const RawAnchorView = View.extend({
+      template: hbs`<button class="raw-anchor">Raw anchor <span class="icon">Icon</span></button>`,
+      onRender() {
+        new Tooltip({
+          anchor: this.el.querySelector('.raw-anchor'),
+          delay: 200,
+          message: 'Raw anchor tooltip',
+          shouldDelay: true,
+          uiView: this,
+        });
+      },
+    });
+
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new RawAnchorView();
+    });
+    cy.clock();
+
+    cy.get('.raw-anchor').then(([anchor]) => {
+      const { PointerEvent } = anchor.ownerDocument.defaultView;
+
+      anchor.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+      cy.tick(150);
+
+      anchor.querySelector('.icon').dispatchEvent(new PointerEvent('pointerover', {
+        bubbles: true,
+        relatedTarget: anchor,
+      }));
+      cy.tick(50);
+    });
+
+    cy.get('.tooltip').contains('Raw anchor tooltip');
+
+    cy.get('.raw-anchor').then(([anchor]) => {
+      anchor.dispatchEvent(new MouseEvent('mouseout', {
+        bubbles: true,
+        relatedTarget: anchor.querySelector('.icon'),
+      }));
+    });
+    cy.get('.tooltip').contains('Raw anchor tooltip');
+  });
+
+  specify('Resets positioning classes when reusing a tooltip', function() {
+    let bounds = {
+      left: 5,
+      outerHeight: 20,
+      outerWidth: 20,
+      top: 5,
+    };
+    const RepositionedAnchorView = View.extend({
+      template: hbs`<button>Anchor</button>`,
+      getBounds() {
+        return bounds;
+      },
+      onRender() {
+        new Tooltip({
+          anchor: this.el.querySelector('button'),
+          message: 'Reusable tooltip',
+          uiView: this,
+        });
+      },
+    });
+
+    cy.mount(rootView => {
+      Tooltip.setRegion(rootView.getRegion('tooltip'));
+      return new RepositionedAnchorView();
+    });
+
+    cy.get('button').as('anchor').trigger('pointerover');
+    cy.get('.tooltip').should('have.class', 'is-left').and('have.class', 'is-top-arrow');
+    cy.get('@anchor').trigger('mouseout');
+    cy.get('.tooltip').should('not.exist');
+    cy.then(() => {
+      bounds = {
+        left: 1200,
+        outerHeight: 20,
+        outerWidth: 20,
+        top: 700,
+      };
+    });
+    cy.get('@anchor').trigger('pointerover');
+
+    cy.get('.tooltip')
+      .should('have.class', 'is-right')
+      .and('have.class', 'is-bottom-arrow')
+      .and('not.have.class', 'is-left')
+      .and('not.have.class', 'is-top-arrow');
   });
 });

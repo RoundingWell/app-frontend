@@ -1,23 +1,30 @@
 import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from 'underscore';
 import Backbone from 'backbone';
-import EventRouter from 'backbone.eventrouter';
-import App from './app';
+import { Radio } from 'marionette';
 
-export default App.extend({
+import { addError } from 'js/datadog';
+
+import RouteBaseApp from './route-base-app';
+import EventRouter from './event-router';
+
+export default RouteBaseApp.extend({
   // Set in router apps for nav selection
   routerAppName: '',
+  startOnRoute: true,
 
   constructor: function(options = {}) {
     this.workspaceSlug = options.workspaceSlug;
+    this.routeRegion = options.routeRegion;
+    this._routeIntent = null;
 
     this.initRouter();
 
     // if the app does not handle a given route, stop
     this.listenTo(this.router, 'noMatch', this.onNoMatch);
 
-    this.on('before:stop', this.stopCurrent);
+    this.on('before:stop', this._clearRouteIntent);
 
-    App.apply(this, arguments);
+    RouteBaseApp.apply(this, arguments);
   },
 
   initRouter() {
@@ -25,7 +32,10 @@ export default App.extend({
 
     const routeTriggers = this.getRouteTriggers();
 
-    this.router = new EventRouter({ routeTriggers });
+    this.router = new EventRouter({
+      channel: Radio.channel('event-router'),
+      routeTriggers,
+    });
 
     this.on('before:destroy', () => this.router.destroy());
 
@@ -33,8 +43,15 @@ export default App.extend({
   },
 
   onNoMatch() {
-    this.stop();
+    const routeContext = this.getCurrentRoute();
+    const stopping = this.stop();
+    const routeIntent = {};
+    this._routeIntent = routeIntent;
     this._currentRoute = null;
+
+    return stopping.catch(error => {
+      if (this._routeIntent === routeIntent) this.triggerMethod('route:error', error, routeContext);
+    });
   },
 
   // For each route in the hash creates a routeTriggers hash,
@@ -81,13 +98,10 @@ export default App.extend({
   // starts this routerapp if necessary
   // triggers before and after events
   routeAction(event, action, ...args) {
-    if (!this.isRunning()) {
-      this.start();
-    }
-
     const definition = this._routes[event];
+    const routeIntent = {};
 
-    this._currentRoute = {
+    const routeContext = {
       event,
       eventArgs: args,
       definition: {
@@ -97,41 +111,61 @@ export default App.extend({
         meta: definition.meta || {},
       },
     };
+    this.invalidateSelection();
+    this._currentRoute = routeContext;
+    this._routeIntent = routeIntent;
 
-    this.triggerMethod('before:appRoute', this, this._currentRoute);
+    return this.activateRoute(routeContext, routeIntent).catch(error => {
+      if (this._routeIntent === routeIntent) this.triggerMethod('route:error', error, routeContext);
+    });
+  },
 
+  async activateRoute(routeContext, routeIntent) {
+    if (this.startOnRoute) {
+      const region = this.routeRegion || this.getRegion();
+      const started = await this.start(region ? { region } : undefined);
+      if (!started || this._routeIntent !== routeIntent) return;
+    }
+
+    return this.dispatchRoute(routeContext);
+  },
+
+  onChildCleanupError(error) {
+    addError(error);
+  },
+
+  onRouteError(error) {
+    window.reportError(error);
+  },
+
+  dispatchRoute(routeContext) {
+    const { definition, eventArgs } = routeContext;
+
+    this.triggerMethod('before:appRoute', this, routeContext);
+
+    let { action } = definition;
     if (!isFunction(action)) {
       action = this[action];
     }
 
-    action.apply(this, args);
+    const activation = action.apply(this, eventArgs);
 
-    this.triggerMethod('appRoute', this, this._currentRoute);
+    this.triggerMethod('appRoute', this, routeContext);
+
+    return activation;
   },
 
-  // handler that ensures one running app
   startCurrent(appName, options) {
-    this.stopCurrent();
-
+    const routeContext = this.getCurrentRoute();
     const child = this.getChildApp(appName);
 
-    // only SubRouterApp children participate in route dispatch and scope identity;
-    // plain list/leaf children (worklist, schedule, programs-all) do neither
-    if (isFunction(child.setCurrentRoute)) {
-      child.setCurrentRoute(this.getCurrentRoute());
-    }
-
-    this._currentAppName = appName;
-    this._currentAppScope = this.getChildScope(child, options);
-    this._current = child;
-
-    // child apps are singletons; ensure exactly one stop listener
-    this.stopListening(child, 'stop');
-    this.listenTo(child, 'stop', this._handleChildStop);
-
-    this.startChildApp(appName, options);
-
-    return child;
+    return this.selectChild(appName, {
+      scope: child && this.getChildScope(child, options),
+      start: app => {
+        if (isFunction(app.setCurrentRoute)) app.setCurrentRoute(routeContext);
+        return app.start({ ...options, region: this.getRegion() });
+      },
+    });
   },
 
   getChildScope(child, options) {
@@ -140,23 +174,19 @@ export default App.extend({
 
   startRoute(appName, options) {
     const child = this.getChildApp(appName);
-    const scope = this.getChildScope(child, options);
-    const current = this.getCurrent();
+    const scope = child && this.getChildScope(child, options);
+    const routeContext = this.getCurrentRoute();
 
-    if (current && this.isCurrent(appName, scope) && (current.isRunning() || current.isLoading())) {
-      return current.startRoute(this.getCurrentRoute());
-    }
-
-    return this.startCurrent(appName, options);
-  },
-
-  getCurrent() {
-    return this._current;
+    return this.selectChild(appName, {
+      scope,
+      reuse: this.isCurrent(appName, scope),
+      start: app => app.startRoute(routeContext, { ...options, region: this.getRegion() }),
+    });
   },
 
   isCurrent(appName, scope) {
-    return (appName === this._currentAppName)
-      && (isEqual(scope, this._currentAppScope));
+    const selection = this.getCurrentSelection();
+    return selection?.appName === appName && isEqual(scope, selection.scope);
   },
 
   getCurrentRoute() {
@@ -167,28 +197,8 @@ export default App.extend({
     return this._currentRoute && this._currentRoute.definition.meta;
   },
 
-  _handleChildStop() {
-    // Preserve the current child through Toolkit restart().
-    if (this._current && this._current.isRestarting()) return;
-
-    this._clearCurrent();
-  },
-
-  stopCurrent() {
-    if (!this._current) return;
-
-    const current = this._current;
-
-    this.stopListening(current, 'stop');
-    this._clearCurrent();
-
-    current.stop();
-  },
-
-  _clearCurrent() {
-    this._current = null;
-    this._currentAppName = null;
-    this._currentAppScope = null;
+  _clearRouteIntent() {
+    this._routeIntent = null;
   },
 
   // takes an event and translates data into the applicable url fragment

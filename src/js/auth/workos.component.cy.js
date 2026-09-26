@@ -34,6 +34,7 @@ context('WorkosAuthProvider', function() {
   let trackAuthEvent;
 
   beforeEach(function() {
+    window.history.pushState({}, '', '/');
     setOnline(true);
     trackAuthEvent = cy.stub();
   });

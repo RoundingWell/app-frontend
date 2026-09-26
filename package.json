@@ -39,11 +39,9 @@
     "coverage": "npm run coverage:clear && npm run coverage:component && npm run coverage:e2e && npm stop",
     "precoverage:e2e": "npm run build -- --mode test",
     "coverage:e2e": "vite preview -m test & VITE_PID=$!; cypress run; status=$?; kill $VITE_PID 2>/dev/null; exit $status",
-    "postcoverage:e2e": "npm run coverage:report",
     "coverage:component": "cypress run --component",
-    "postcoverage:component": "npm run coverage:report",
     "coverage:clear": "rimraf .nyc_output coverage",
-    "coverage:report": "nyc report --reporter=html --reporter=text",
+    "coverage:report": "nyc report --reporter=html --reporter=text --reporter=lcovonly",
     "coverage:report:ci": "nyc report --reporter=lcovonly",
     "dev": "vite -d",
     "test": "vite -m test & cypress open",
@@ -62,6 +60,7 @@
   },
   "browserslist": [
     ">1%",
+    "not ios_saf < 26.2",
     "not op_mini all"
   ],
   "devDependencies": {
@@ -122,6 +121,7 @@
   "dependencies": {
     "@formatjs/intl": "^4.1.8",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@mnjs/adapters": "5.0.0-rc.1",
     "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
     "@roundingwell/care-ops-datadog": "workspace:*",
@@ -131,16 +131,13 @@
     "@roundingwell/care-ops-superset": "workspace:*",
     "animejs": "^4.1.3",
     "backbone": "^1.4.0",
-    "backbone.eventrouter": "^1.0.1",
-    "backbone.marionette": "^4.1.2",
-    "backbone.radio": "^2.0.0",
     "backbone.store": "^2.0.0",
     "dayjs": "^1.10.6",
     "handlebars": "^4.7.9",
     "idb": "^7.1.1",
-    "jquery": "^4.0.0",
     "libphonenumber-js": "^1.10.38",
-    "marionette.toolkit": "^6.2.0",
+    "marionette": "5.0.0-rc.1",
+    "morphdom": "2.7.8",
     "sortablejs": "^1.14.0",
     "underscore": "^1.13.1",
     "uuid": "^14.0.0"

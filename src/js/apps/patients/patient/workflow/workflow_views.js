@@ -1,7 +1,6 @@
 import { animate } from 'animejs';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView, Behavior } from 'marionette';
+import { Radio, View, CollectionView, Behavior } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/loader.scss';
@@ -12,7 +11,7 @@ import 'scss/modules/skeleton.scss';
 import { alphaSort } from 'js/utils/sorting';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
-import { StateComponent, CardOwnerComponent, CardDueComponent, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 
 import ActionItemTemplate from './action-item.hbs';
@@ -89,9 +88,7 @@ const StatusBehavior = Behavior.extend({
       return;
     }
 
-    this.$el.css({
-      opacity: 1,
-    });
+    this.el.style.opacity = 1;
 
     this.view.triggerMethod('change:visible');
   },
@@ -156,7 +153,7 @@ const ActionItemView = View.extend({
       return;
     }
 
-    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -175,8 +172,8 @@ const ActionItemView = View.extend({
     const ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
     });
 
     if (!isDisabled) {
@@ -194,20 +191,20 @@ const ActionItemView = View.extend({
     }
 
     const isDisabled = this.getOption('status') === 'done';
-    const dueDateComponent = new CardDueComponent({
+    const dueDateView = new CardDueView({
       date: this.model.get('due_date'),
-      isCompact: true,
-      state: { isDisabled },
+
+      isDisabled,
       isOverdue: this.model.isOverdue(),
     });
 
     if (!isDisabled) {
-      this.listenTo(dueDateComponent, 'change:due', date => {
+      this.listenTo(dueDateView, 'change:due', date => {
         this.model.saveDueDate(date);
       });
     }
 
-    this.showChildView('dueDate', dueDateComponent);
+    this.showChildView('dueDate', dueDateView);
   },
   showDueTime() {
     if (!this.canEdit) {
@@ -218,8 +215,8 @@ const ActionItemView = View.extend({
     const isDisabled = this.getOption('status') === 'done' || !this.model.get('due_date');
     const dueTimeComponent = new CardTimeComponent({
       time: this.model.get('due_time'),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
       isOverdue: this.model.isOverdue(),
     });
 
@@ -278,7 +275,7 @@ const FlowItemView = View.extend({
       return;
     }
 
-    const stateComponent = new StateComponent({ stateId: this.model.getState().id, isCompact: true });
+    const stateComponent = new StateComponent({ stateId: this.model.getState().id });
 
     this.listenTo(stateComponent, 'change:state', state => {
       this.model.saveState(state);
@@ -297,8 +294,8 @@ const FlowItemView = View.extend({
     const ownerComponent = new CardOwnerComponent({
       owner: this.model.getOwner(),
       workspaces: program.getUserWorkspaces(),
-      isCompact: true,
-      state: { isDisabled },
+
+      stateOptions: { isDisabled },
     });
 
     if (!isDisabled) {

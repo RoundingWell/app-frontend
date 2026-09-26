@@ -6,7 +6,9 @@ pull_request_review:
         `/AGENTS.md` is the canonical source for repo-wide AI guidance. Review the diff with these checkpoints:
 
         - JavaScript only. Do not introduce TypeScript.
-        - Follow Marionette patterns: define `ui`, prefer `triggers` and `triggerMethod`, and keep DOM mutation scoped to the view.
+        - Use the Marionette application context in `/AGENTS.md` and Marionette's version-matched upstream docs.
+        - Define template selectors in `ui`, access them through `getUI`, and keep DOM mutation with its owning View.
+        - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
         - Route data access through `src/js/entities-service/**`.
         - Import SCSS from the module that renders the view. Use BEM naming and do not style `.js-*` hooks.
         - Prefer this import order: third-party libraries, shared SCSS modules, all JavaScript dependencies, templates, app-shared SCSS, shared domain SCSS, then view-local SCSS last. Shared modules load before JavaScript dependencies that may import styles; domain SCSS loads after them.
@@ -14,13 +16,14 @@ pull_request_review:
         - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
         - Component specs live beside their owners as `src/**/*.component.cy.js`.
         - E2E specs live beside their owners as `src/**/*.e2e.cy.js`.
+        - Reserve component specs for generic reusable units; application behavior needs E2E coverage. Verify and remove dead application code rather than preserving it with component specs.
         - Fixtures live in `test/fixtures/**`.
         - Treat `scripts/**` and `packages/care-ops-five9/sdk/**` as sensitive areas and flag manual edits that bypass their helper scripts.
         - Put findings first.
         - Prioritize repo-specific risks first: `scripts/**`, `packages/care-ops-five9/sdk/**`, `src/js/entities-service/**`, Marionette view patterns, and template or SCSS coupling.
         - Keep review comments short, direct, and evidence-based. Explain only when needed.
         - Avoid low-signal comments on tiny mechanical or pure copy-only diffs unless a repo-specific risk is involved.
-        - Do not flag intentional choices: the Backbone/Marionette stack, synchronous string-based Radio requests, underscore over native, and JavaScript over TypeScript (see the Intentional Choices section in `/AGENTS.md`).
+        - Do not flag intentional choices: the Backbone/Marionette stack, synchronous string-based Radio requests, and JavaScript over TypeScript (see the Intentional Choices section in `/AGENTS.md`).
 
 # Local development assistance
 code_generation:
@@ -30,7 +33,9 @@ code_generation:
       prompt: >
         `/AGENTS.md` is the canonical source for repo-wide AI guidance. When generating code:
         - Stay in JavaScript.
-        - Use Marionette patterns: define `ui`, prefer `triggers`, and use `triggerMethod`.
+        - Use the Marionette application context in `/AGENTS.md` and Marionette's version-matched upstream docs.
+        - Define template selectors in `ui`, access them through `getUI`, and keep DOM mutation with its owning View.
+        - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
         - Put data fetching in `src/js/entities-service/**`.
         - Import SCSS from the rendering module and use BEM naming without styling `.js-*` hooks.
         - Prefer this import order: third-party libraries, shared SCSS modules, all JavaScript dependencies, templates, app-shared SCSS, shared domain SCSS, then view-local SCSS last. Shared modules load before JavaScript dependencies that may import styles; domain SCSS loads after them.
@@ -38,6 +43,7 @@ code_generation:
         - Keep template attribute order predictable: class, id or name, src or for or type or href or value, title or alt, role or aria-*, then boolean attributes.
         - Component specs live beside their owners as `src/**/*.component.cy.js`.
         - E2E specs live beside their owners as `src/**/*.e2e.cy.js`.
+        - Reserve component specs for generic reusable units; application behavior needs E2E coverage. Verify and remove dead application code rather than preserving it with component specs.
         - Fixtures live in `test/fixtures/**`.
         - Treat `scripts/**` and `packages/care-ops-five9/sdk/**` as sensitive areas.
         - Keep suggestions short and operational. Put actions before rationale.
@@ -51,8 +57,11 @@ chat:
         `/AGENTS.md` is the canonical source for repo-wide AI guidance.
         Key facts:
         - This is a Marionette.js and Backbone.js frontend built with Vite.
+        - Use the Marionette application context in `/AGENTS.md` and Marionette's version-matched upstream docs.
+        - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
         - Component specs live beside their owners as `src/**/*.component.cy.js`.
         - E2E specs live beside their owners as `src/**/*.e2e.cy.js`.
+        - Reserve component specs for generic reusable units; application behavior needs E2E coverage. Verify and remove dead application code rather than preserving it with component specs.
         - Fixtures live in `test/fixtures/**`.
         - Networking logic belongs in `src/js/entities-service/**`.
         - Sensitive areas include `scripts/**` and `packages/care-ops-five9/sdk/**`.

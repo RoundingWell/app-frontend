@@ -1,9 +1,7 @@
-import { extend } from 'underscore';
+import { extend, isEqual } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
-import { mixinState } from 'marionette.toolkit';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
@@ -40,7 +38,7 @@ const InputView = View.extend({
     {{#unless canEdit}}<span class="patient-modal__locked-icon">{{far "lock"}}</span>{{/unless}}
   `,
   templateContext() {
-    const errors = this.getOption('state').get('errors');
+    const errors = this.errors;
 
     return {
       hasError: errors && errors[this.getOption('errorField')],
@@ -55,16 +53,20 @@ const InputView = View.extend({
   events: {
     'input @ui.input': 'onChange',
   },
-  initialize({ state }) {
-    this.listenTo(state, 'change:errors', this.render);
+  initialize({ errors }) {
+    this.errors = errors;
+  },
+  showErrors(errors) {
+    this.errors = errors;
+    this.render();
   },
   onChange() {
-    const text = this.ui.input.val();
+    const text = this.ui.input[0].value;
     this.model.set(this.getOption('attr'), trim(text));
   },
   onDomRefresh() {
     if (this.getOption('shouldFocus')) {
-      this.ui.input.focus();
+      this.ui.input[0].focus();
     }
   },
 });
@@ -88,12 +90,10 @@ const SexDroplist = Droplist.extend({
       },
     ]);
 
-    this.setState('selected', this.collection.find({ value: patientSex }));
+    this.getState().set('selected', this.collection.find({ value: patientSex }));
   },
-  viewOptions: {
-    className: 'button button--secondary modal__form-component patient-modal__form-component',
-    template: hbs`{{far "user"}}<span>{{ text }}{{#unless text}}{{ @intl.globals.patientModal.patientModalViews.sexDroplist.defaultText }}{{/unless}}</span>`,
-  },
+  className: 'button button--secondary modal__form-component patient-modal__form-component',
+  template: hbs`{{far "user"}}<span>{{ text }}{{#unless text}}{{ @intl.globals.patientModal.patientModalViews.sexDroplist.defaultText }}{{/unless}}</span>`,
 });
 
 const BirthdateView = View.extend({
@@ -110,13 +110,11 @@ const BirthdateView = View.extend({
   },
   onRender() {
     const birthdateSelect = new DateSelectComponent({
-      state: {
+      stateOptions: {
         selectedDate: this.model.get('birth_date'),
         isDisabled: !this.model.canEdit(),
       },
-      viewOptions: {
-        rootClassName: 'modal__form-component patient-modal__form-component',
-      },
+      rootClassName: 'modal__form-component patient-modal__form-component',
     });
 
     this.listenTo(birthdateSelect, 'change:date', this.onChangeDate);
@@ -148,18 +146,12 @@ const PatientModal = View.extend({
     sex: '[data-sex-region]',
     workspaces: '[data-workspaces-region]',
   },
-  modelEvents: {
-    'change': 'onChange',
-  },
   template: PatientModalTemplate,
   templateContext() {
     return {
       isNew: this.model.isNew(),
       canEdit: this.model.canEdit(),
     };
-  },
-  initialize({ state }) {
-    this.initState({ state });
   },
   onRender() {
     this.showFirstNameView();
@@ -171,7 +163,7 @@ const PatientModal = View.extend({
   showFirstNameView() {
     this.showChildView('firstName', new InputView({
       model: this.model,
-      state: this.getState(),
+      errors: this.errors,
       attr: 'first_name',
       placeholder: i18n.patientModal.firstName,
       errorField: 'name',
@@ -181,7 +173,7 @@ const PatientModal = View.extend({
   showLastNameView() {
     this.showChildView('lastName', new InputView({
       model: this.model,
-      state: this.getState(),
+      errors: this.errors,
       attr: 'last_name',
       placeholder: i18n.patientModal.lastName,
       errorField: 'name',
@@ -190,7 +182,7 @@ const PatientModal = View.extend({
   showSexDroplist() {
     const sexDroplist = this.showChildView('sex', new SexDroplist({
       model: this.model,
-      state: {
+      stateOptions: {
         isDisabled: !this.model.canEdit(),
       },
     }));
@@ -204,7 +196,6 @@ const PatientModal = View.extend({
   showBirthDatePicker() {
     const birthDatePicker = this.showChildView('dob', new BirthdateView({
       model: this.model,
-      state: this.getState(),
     }));
 
     this.listenTo(birthDatePicker, {
@@ -224,9 +215,14 @@ const PatientModal = View.extend({
       isDisabled: true,
     }));
   },
-});
+  showErrors(errors) {
+    if (isEqual(this.errors, errors)) return;
 
-mixinState(PatientModal);
+    this.errors = errors;
+    this.getChildView('firstName').showErrors(errors);
+    this.getChildView('lastName').showErrors(errors);
+  },
+});
 
 function getPatientModal(opts) {
   const patient = opts.patient;

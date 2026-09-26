@@ -1,6 +1,5 @@
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
@@ -188,7 +187,7 @@ const SidebarView = View.extend({
   },
   showRole() {
     const isDisabled = !this.model.isEnabled();
-    const roleComponent = new RoleComponent({ role: this.model.getRole(), state: { isDisabled } });
+    const roleComponent = new RoleComponent({ role: this.model.getRole(), stateOptions: { isDisabled } });
 
     this.listenTo(roleComponent, 'change:role', role => {
       this.model.saveRole(role);
@@ -198,7 +197,7 @@ const SidebarView = View.extend({
   },
   showTeam() {
     const isDisabled = !this.model.isEnabled();
-    const teamComponent = new TeamComponent({ team: this.model.getTeam(), state: { isDisabled } });
+    const teamComponent = new TeamComponent({ team: this.model.getTeam(), stateOptions: { isDisabled } });
 
     this.listenTo(teamComponent, 'change:team', team => {
       this.model.saveTeam(team);
@@ -237,7 +236,8 @@ const SidebarView = View.extend({
   },
   showForm() {
     this.cloneClinician();
-    this.listenTo(this.clonedClinician, 'change:name change:email', this.showSave);
+    this.listenTo(this.clonedClinician, 'change:name', this.showSave);
+    this.listenTo(this.clonedClinician, 'change:email', this.showSave);
 
     this.getRegion('save').empty();
 

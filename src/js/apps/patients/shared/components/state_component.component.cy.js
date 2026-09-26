@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import { Collection as States } from 'js/entities-service/entities/states';
 import { Collection as Workspaces, Model as Workspace } from 'js/entities-service/entities/workspaces';
@@ -25,7 +25,7 @@ context('State Component', function() {
       .mount(rootView => {
         StateComponent.setPopRegion(rootView.getRegion('pop'));
 
-        const component = new StateComponent({ stateId: stateInProgress.id });
+        const component = new StateComponent({ showLabel: true, stateId: stateInProgress.id });
 
         component.on('change:state', onChange);
 
@@ -63,7 +63,7 @@ context('State Component', function() {
       });
   });
 
-  specify('isCompact', function() {
+  specify('uses the selected workspace states', function() {
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(1).id });
     });
@@ -72,7 +72,7 @@ context('State Component', function() {
       .mount(rootView => {
         StateComponent.setPopRegion(rootView.getRegion('pop'));
 
-        return new StateComponent({ isCompact: true, stateId: stateInProgress.id });
+        return new StateComponent({ stateId: stateInProgress.id });
       })
       .as('root');
 
@@ -83,8 +83,9 @@ context('State Component', function() {
 
     cy
       .get('@root')
-      .contains('In Progress')
-      .should('exist');
+      .find('.js-picklist-item')
+      .should('have.length', 1)
+      .and('contain', 'In Progress');
   });
 
   specify('compact state with label', function() {
@@ -96,7 +97,7 @@ context('State Component', function() {
       .mount(rootView => {
         StateComponent.setPopRegion(rootView.getRegion('pop'));
 
-        return new StateComponent({ isCompact: true, showLabel: true, stateId: stateInProgress.id });
+        return new StateComponent({ showLabel: true, stateId: stateInProgress.id });
       })
       .find('.action-state')
       .should('contain', 'In Progress');

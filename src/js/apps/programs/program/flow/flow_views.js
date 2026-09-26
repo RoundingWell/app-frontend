@@ -1,11 +1,8 @@
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView } from 'marionette';
+import { Radio, View, CollectionView } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
-
-import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import PreloadRegion from 'js/regions/preload_region';
 import SortableList from 'js/behaviors/sortable-list';
@@ -67,7 +64,7 @@ const HeaderView = View.extend({
     'change': 'render',
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.el.classList.toggle('is-selected', isEditing);
   },
   template: HeaderTemplate,
   regions: {
@@ -143,11 +140,8 @@ const ActionItemView = View.extend({
     owner: '[data-owner-region]',
     due: '[data-due-region]',
   },
-  triggers: {
-    'click': 'click',
-  },
   events: {
-    'click .js-no-click': stopEventPropagation,
+    'click .js-route': 'onClick',
   },
   onClick() {
     if (this.model.isNew()) {
@@ -157,7 +151,7 @@ const ActionItemView = View.extend({
     Radio.trigger('event-router', 'programFlow:action', this.model.getProgramFlow().id, this.model.id);
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.el.classList.toggle('is-selected', isEditing);
   },
   onRender() {
     this.showBehavior();
@@ -166,7 +160,7 @@ const ActionItemView = View.extend({
   },
   showDue() {
     const isDisabled = this.model.isNew();
-    const dueDayComponent = new DueDayComponent({ day: this.model.get('days_until_due'), isCompact: true, state: { isDisabled } });
+    const dueDayComponent = new DueDayComponent({ day: this.model.get('days_until_due'), isCompact: true, stateOptions: { isDisabled } });
 
     this.listenTo(dueDayComponent, 'change:day', day => {
       this.model.save({ days_until_due: day });
@@ -179,7 +173,7 @@ const ActionItemView = View.extend({
     const behaviorComponent = new BehaviorComponent({
       behavior: this.model.get('behavior'),
       isCompact: true,
-      state: { isDisabled },
+      stateOptions: { isDisabled },
     });
 
     this.listenTo(behaviorComponent, 'change:status', ({ behavior }) => {
@@ -191,7 +185,7 @@ const ActionItemView = View.extend({
   showOwner() {
     const isDisabled = this.model.isNew();
     const isFromFlow = !!this.model.getProgramFlow();
-    const ownerComponent = new OwnerComponent({ owner: this.model.getOwner(), isFromFlow, isCompact: true, state: { isDisabled } });
+    const ownerComponent = new OwnerComponent({ owner: this.model.getOwner(), isFromFlow, isCompact: true, stateOptions: { isDisabled } });
 
     this.listenTo(ownerComponent, 'change:owner', owner => {
       this.model.saveOwner(owner);

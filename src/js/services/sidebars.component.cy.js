@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import SidebarsService from './sidebars';
 import WidgetsService from './widgets';
@@ -34,10 +34,10 @@ context('Sidebars Service', function() {
     ]);
   });
 
-  afterEach(function() {
+  afterEach(async function() {
     Radio.reset('settings');
-    sidebarsService.destroy();
-    widgetsService.destroy();
+    await sidebarsService?.destroy();
+    await widgetsService.destroy();
   });
 
   function startService(sidebar) {
