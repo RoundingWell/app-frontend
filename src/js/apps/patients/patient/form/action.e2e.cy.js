@@ -1108,7 +1108,8 @@ context('Patient Action Form', function() {
   });
 
   specify('submitting the form and returning to workflows', function() {
-    const testUpdatedAt = testTsSubtract(1);
+    const testPendingUpdatedAt = testTsSubtract(1);
+    const testUpdatedAt = testTsSubtract(2);
 
     const testPatient = getPatient({
       attributes: {
@@ -1120,7 +1121,7 @@ context('Patient Action Form', function() {
     const testFormResponses = [
       getFormResponse({
         attributes: {
-          updated_at: testUpdatedAt,
+          updated_at: testPendingUpdatedAt,
           status: FORM_RESPONSE_STATUS.PENDING,
           response: {
             data: {
@@ -1271,7 +1272,7 @@ context('Patient Action Form', function() {
     cy
       .get('@metaRegion')
       .find('.form__submission-status')
-      .should('contain', formatDate(testUpdatedAt, 'AT_TIME'))
+      .should('contain', formatDate(testPendingUpdatedAt, 'AT_TIME'))
       .click();
 
     cy
