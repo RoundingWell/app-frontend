@@ -603,7 +603,7 @@ context('Patient Action Form', function() {
           data: getFormResponse({
             id: testDraftResponse.id,
             attributes: {
-              status: FORM_RESPONSE_STATUS.SUBMITTED,
+              status: FORM_RESPONSE_STATUS.PENDING,
               updated_at: testTs(),
               response: {
                 data: { familyHistory: 'Restored draft typing' },
@@ -1034,11 +1034,11 @@ context('Patient Action Form', function() {
       });
   });
 
-  specify('update a form with response field', function() {
+  specify('update a form with a pending response', function() {
     const testFormResponse = getFormResponse({
       attributes: {
         updated_at: testTs(),
-        status: FORM_RESPONSE_STATUS.SUBMITTED,
+        status: FORM_RESPONSE_STATUS.PENDING,
         response: { data: { fields: { foo: 'bar' } } },
       },
     });
@@ -1108,7 +1108,7 @@ context('Patient Action Form', function() {
   });
 
   specify('submitting the form and returning to workflows', function() {
-    const testUpdatedAt = testTs();
+    const testUpdatedAt = testTsSubtract(1);
 
     const testPatient = getPatient({
       attributes: {
@@ -1121,7 +1121,7 @@ context('Patient Action Form', function() {
       getFormResponse({
         attributes: {
           updated_at: testUpdatedAt,
-          status: FORM_RESPONSE_STATUS.SUBMITTED,
+          status: FORM_RESPONSE_STATUS.PENDING,
           response: {
             data: {
               familyHistory: 'Here is some typing',
@@ -1154,11 +1154,18 @@ context('Patient Action Form', function() {
       }),
     ];
 
+    const testDraftResponse = getFormResponse({
+      attributes: {
+        status: FORM_RESPONSE_STATUS.DRAFT,
+        updated_at: testTs(),
+      },
+    });
+
     const testAction = getAction({
       relationships: {
         'flow': getRelationship(),
         'form': getRelationship(testForm),
-        'form-responses': getRelationship([...testFormResponses, getFormResponse()]),
+        'form-responses': getRelationship([testDraftResponse, ...testFormResponses, getFormResponse()]),
         'patient': getRelationship(testPatient),
       },
     });
@@ -1168,7 +1175,7 @@ context('Patient Action Form', function() {
       .routeAction(fx => {
         fx.data = testAction;
 
-        fx.included.push(testPatient, ...testFormResponses);
+        fx.included.push(testPatient, testDraftResponse, ...testFormResponses);
 
         return fx;
       })
@@ -1302,6 +1309,11 @@ context('Patient Action Form', function() {
       .find('.js-current')
       .should('contain', 'Back to Current Version')
       .click();
+
+    cy
+      .get('iframe')
+      .should('have.attr', 'src')
+      .and('contain', `responseId=${ testFormResponses[0].id }`);
 
     cy
       .get('@metaRegion')

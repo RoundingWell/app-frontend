@@ -36,6 +36,11 @@ const _Model = BaseModel.extend({
       submission: this.getResponse(),
     };
   },
+  isSubmitted() {
+    const status = this.get('status');
+
+    return status === FORM_RESPONSE_STATUS.PENDING || status === FORM_RESPONSE_STATUS.SUBMITTED;
+  },
   getResponse() {
     return get(this.get('response'), 'data', {});
   },
@@ -61,11 +66,11 @@ const Collection = BaseCollection.extend({
     return alphaSort('desc', responseA.get('updated_at'), responseB.get('updated_at'));
   },
   getFirstSubmission() {
-    return this.find({ status: FORM_RESPONSE_STATUS.SUBMITTED });
+    return this.find(response => response.isSubmitted());
   },
   filterSubmissions() {
     const clone = this.clone();
-    const submissions = this.filter({ status: FORM_RESPONSE_STATUS.SUBMITTED });
+    const submissions = this.filter(response => response.isSubmitted());
 
     clone.reset(submissions);
 
