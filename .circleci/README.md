@@ -1,8 +1,9 @@
 # CircleCI Pipelines
 
-The project uses three pipeline definitions with separate responsibilities:
+The project uses three active GitHub App pipeline definitions with separate
+responsibilities:
 
-- `CI` uses the GitHub OAuth integration and
+- `CI` uses the GitHub App integration and
   [`.circleci/config.yml`](config.yml). It runs for pull requests, default-branch
   pushes, and tags. The setup config detects `ci:defer-cypress`, then continues
   into [`.circleci/workflows.yml`](workflows.yml).
@@ -12,6 +13,10 @@ The project uses three pipeline definitions with separate responsibilities:
 - `deploy` uses the GitHub App integration and
   [`.circleci/deploy.yml`](deploy.yml). It has no GitHub event trigger; releases
   invoke it manually or through the CircleCI API.
+
+GitHub App pipelines use HTTPS checkout through the installed app; they do not
+require a project SSH checkout key. The old `app-frontend` OAuth definition has
+no event trigger. Use `CI` when manually running pull request checks.
 
 `workflows.yml` is shared so pull request, branch, tag, and nightly jobs reuse
 the same commands and executors. `pipeline.trigger_source` selects either the
