@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio, View } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -11,7 +11,7 @@ import {
 } from 'js/apps/programs/sidebar/flow/flow-sidebar_views';
 
 export default App.extend({
-  onBeforeStart({ flow }) {
+  onBeforeStart(app, { flow }) {
     this.flow = flow;
     this.flow.trigger('editing', true);
 
@@ -19,10 +19,10 @@ export default App.extend({
     this.showMenu();
     this.showTimestamps();
   },
-  beforeStart() {
-    return Radio.request('entities', 'fetch:tags:collection');
+  prepareStart(options, { signal }) {
+    return Radio.request('entities', 'fetch:tags:collection', { signal });
   },
-  onStart(options, tags) {
+  onStart(app, options, tags) {
     const contentView = new SidebarView({
       flow: this.flow,
       tags,
@@ -33,21 +33,21 @@ export default App.extend({
       'close': this.stop,
     });
 
-    this.showChildView('content', contentView);
+    this.getView().showChildView('content', contentView);
   },
   showHeading() {
-    this.showChildView('heading', headingText);
+    this.getView().showChildView('heading', new View({ template: () => headingText }));
   },
   showMenu() {
     const menuView = new MenuView();
 
     this.listenTo(menuView, 'delete', this.onDelete);
 
-    this.showChildView('menu', menuView);
+    this.getView().showChildView('menu', menuView);
   },
   showTimestamps() {
     if (this.flow.isNew()) return;
-    this.showChildView('footer', new TimestampsView({ model: this.flow }));
+    this.getView().showChildView('footer', new TimestampsView({ model: this.flow }));
   },
   onSave({ model }) {
     if (model.isNew()) {

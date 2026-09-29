@@ -1,16 +1,16 @@
-import { isNull, map, range, times } from 'underscore';
+import { compact, isNull, map, range, times } from 'underscore';
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import dayjs from 'dayjs';
+import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
 import intl from 'js/i18n';
 
-import Component from 'js/base/component';
 import Droplist from 'js/components/droplist';
 
-import { LayoutView } from './dateselect_views';
+import DateSelectTemplate from './date-select.hbs';
 
 import './date-select.scss';
 
@@ -34,20 +34,19 @@ const yearsObj = map(yearRange, function(year) {
 });
 
 const SelectList = Droplist.extend({
+  className: 'button button--secondary date-select__button',
   picklistOptions: {
     isSelectlist: true,
   },
   template: hbs`{{ buttonText }}`,
-  viewOptions() {
-    const buttonText = this.getOption('buttonText');
-
-    return {
-      className: 'button button--secondary date-select__button',
-      template: this.getOption('template'),
-      templateContext: {
-        buttonText,
-      },
-    };
+  getTemplate() {
+    return this.getOption('template');
+  },
+  templateContext() {
+    return { buttonText: this.getOption('buttonText') };
+  },
+  onChangeSelected(selected) {
+    this.triggerMethod('change:field', this.getOption('field'), selected);
   },
 });
 
@@ -65,25 +64,59 @@ const StateModel = Backbone.Model.extend({
   },
 });
 
-export default Component.extend({
-  ViewClass: LayoutView,
-  StateModel,
+export default View.extend({
+  className() {
+    return compact([
+      'button-group',
+      'button-group--joined',
+      'date-select',
+      this.getOption('rootClassName'),
+    ]).join(' ');
+  },
+  template: DateSelectTemplate,
+  regions: {
+    selectRegion: {
+      el: '[data-select-region]',
+      replaceElement: true,
+    },
+  },
+  ui: {
+    cancel: '.js-cancel',
+  },
+  triggers: {
+    'click @ui.cancel': 'click:cancel',
+  },
+  childViewEvents: {
+    'change:field': 'onChangeField',
+  },
+  createState() {
+    return new StateModel(this.stateOptions || {});
+  },
+  constructor: function(options) {
+    this.mergeOptions(options, ['stateOptions']);
+
+    View.apply(this, arguments);
+
+    this.syncStateAttributes();
+  },
   stateEvents: {
     'change': 'onChangeState',
     'change:selectedDate': 'onChangeSelectedDate',
-    'change:hasError': 'show',
-  },
-  viewTriggers: {
-    'click:cancel': 'click:cancel',
   },
   onChangeState() {
-    if (this.getState('day') && !this.getState('selectedDate')) {
-      const date = dayjs().year(this.getState('year')).month(this.getState('month')).date(this.getState('day'));
-      this.setState({ selectedDate: date });
+    const state = this.getState();
+
+    if (state.get('day') && !state.get('selectedDate')) {
+      const date = dayjs()
+        .year(state.get('year'))
+        .month(state.get('month'))
+        .date(state.get('day'));
+
+      state.set({ selectedDate: date });
       return;
     }
 
-    this.show();
+    this.render();
   },
   onChangeSelectedDate(state, selectedDate) {
     this.triggerMethod('change:date', state, selectedDate);
@@ -91,32 +124,58 @@ export default Component.extend({
   onClickCancel() {
     this.getState().reset();
   },
-  onShow(dateSelect, view) {
-    if (this.getState('selectedDate')) return;
+  onRender() {
+    this.syncStateAttributes();
 
-    if (!this.getState('year')) {
-      this.showSelectList(this.getYearSelect(), {
-        field: 'year',
-        view,
-      });
+    const state = this.getState();
+
+    if (state.get('selectedDate')) return;
+
+    if (!state.get('year')) {
+      this.showChildView('selectRegion', this.getYearSelect());
       return;
     }
 
-    if (isNull(this.getState('month'))) {
-      this.showSelectList(this.getMonthSelect(), {
-        field: 'month',
-        view,
-      });
+    if (isNull(state.get('month'))) {
+      this.showChildView('selectRegion', this.getMonthSelect());
       return;
     }
 
-    this.showSelectList(this.getDaySelect(), {
-      field: 'day',
-      view,
-    });
+    this.showChildView('selectRegion', this.getDaySelect());
+  },
+  syncStateAttributes() {
+    const state = this.getState();
+    const isPartial = !!state.get('year') && !state.get('selectedDate');
+
+    this.el.classList.toggle('is-partial', isPartial);
+  },
+  formatDate() {
+    const state = this.getState();
+    const selectedDate = state.get('selectedDate');
+
+    if (selectedDate) {
+      return dayjs(selectedDate).format('MMM DD, YYYY');
+    }
+
+    const month = state.get('month');
+    if (!isNull(month)) {
+      return dayjs().month(month).year(state.get('year')).format('MMM YYYY');
+    }
+
+    return state.get('year');
+  },
+  templateContext() {
+    const state = this.getState();
+
+    return {
+      date: this.formatDate(),
+      hasError: state.get('hasError'),
+      isDisabled: state.get('isDisabled'),
+    };
   },
   getYearSelect() {
     return new SelectList({
+      field: 'year',
       collection: new Backbone.Collection(yearsObj),
       buttonText: i18n.yearPlaceholderText,
       template: hbs`{{far "calendar-days"}}<span>{{ buttonText }}</span>`,
@@ -124,27 +183,26 @@ export default Component.extend({
   },
   getMonthSelect() {
     return new SelectList({
+      field: 'month',
       collection: monthsCollection,
       buttonText: i18n.monthPlaceholderText,
-      state: { isActive: true },
+      stateOptions: { isActive: true },
     });
   },
   getDaySelect() {
     return new SelectList({
+      field: 'day',
       collection: this.getDayOpts(),
       buttonText: i18n.dayPlaceholderText,
-      state: { isActive: true },
+      stateOptions: { isActive: true },
     });
   },
-  showSelectList(component, { field, view }) {
-    this.listenTo(component, 'change:selected', model => {
-      this.setState(field, model.get('value'));
-    });
-
-    view.showChildView('selectRegion', component);
+  onChangeField(field, model) {
+    this.getState().set(field, model.get('value'));
   },
   getDayOpts() {
-    const date = dayjs().year(this.getState('year')).month(this.getState('month'));
+    const state = this.getState();
+    const date = dayjs().year(state.get('year')).month(state.get('month'));
 
     const daysInMonth = date.daysInMonth();
     const daysRange = range(1, daysInMonth + 1);

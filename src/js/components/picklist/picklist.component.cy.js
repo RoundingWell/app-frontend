@@ -1,4 +1,5 @@
 import Backbone from 'backbone';
+import { View } from 'marionette';
 
 import keyCodes from 'js/utils/formatting/key-codes';
 
@@ -37,8 +38,12 @@ context('Picklist', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .first()
-      .trigger('mouseover')
-      .should('have.class', 'is-highlighted');
+      .should('not.have.class', 'is-highlighted');
+
+    cy.get('.js-picklist-item').first().then(([item]) => {
+      item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: null }));
+    });
+    cy.get('.js-picklist-item').first().should('have.class', 'is-highlighted');
 
     cy
       .get('body')
@@ -120,14 +125,14 @@ context('Picklist', function() {
         const picklist = new Picklist({
           lists,
           headingText: 'Test Picklist',
-          viewEvents: {
-            'close': onClose,
-            'picklist:group1:select': onSelect1,
-            'picklist:group2:select': onSelect2,
-          },
         });
 
-        picklist.setState('query', 'this item');
+        picklist.on({
+          'close': onClose,
+          'picklist:group1:select': onSelect1,
+          'picklist:group2:select': onSelect2,
+        });
+        picklist.model.set('query', 'this item');
 
         return picklist;
       })
@@ -235,5 +240,54 @@ context('Picklist', function() {
     cy.get('.picklist__message-loading').should('contain', 'Loading Items...');
     cy.then(() => resolveLists([]));
     cy.get('.picklist__message').should('contain', 'No Results Found');
+  });
+
+  specify('it should release pending lists when destroyed', function() {
+    let resolveLists;
+    let picklist;
+    const listsPromise = new Promise(resolve => {
+      resolveLists = resolve;
+    });
+    const createChild = cy.stub().as('createChild');
+
+    cy.mount(() => {
+      picklist = new Picklist({
+        isListsAsync: true,
+        lists: listsPromise,
+        childView: View.extend({ template: false, initialize: createChild }),
+      });
+      return picklist;
+    });
+
+    cy.get('.picklist__message-loading').should('exist');
+    cy.then(() => {
+      picklist.destroy();
+      resolveLists(lists);
+      return listsPromise;
+    });
+    cy.get('@createChild').should('not.have.been.called');
+    cy.then(() => expect(picklist.isDestroyed()).to.equal(true));
+  });
+
+  specify('it should close failed async lists and report their error', function() {
+    let rejectLists;
+    const error = new Error('Unable to load options');
+    const listsPromise = new Promise((resolve, reject) => {
+      rejectLists = reject;
+    });
+    const onError = cy.stub().as('loadError');
+
+    cy.mount(() => {
+      const picklist = new Picklist({ isListsAsync: true, lists: listsPromise });
+      picklist.on('load:error', onError);
+      return picklist;
+    });
+
+    cy.get('.picklist__message-loading').should('exist');
+    cy.then(() => {
+      rejectLists(error);
+    });
+    cy.get('@loadError').should('have.been.calledOnceWith', error);
+    cy.get('.picklist').should('not.exist');
   });
 });

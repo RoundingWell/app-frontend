@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import {
   getAuthConfig,
@@ -48,7 +48,7 @@ async function selectAuthProvider() {
 }
 
 async function getAuthAgent() {
-  if (_TEST_) {
+  if (_TEST_ && !getAuthProvider()) {
     defaultAuthProvider.setToken('test-token');
     return defaultAuthProvider;
   }

@@ -1,4 +1,4 @@
-import { pick } from 'underscore';
+import { extend, pick } from 'underscore';
 import Backbone from 'backbone';
 
 import BulkEditInlineApp from 'js/apps/patients/shared/bulk-edit/inline_app';
@@ -6,29 +6,29 @@ import { BulkEditFlowsInlineView } from 'js/apps/patients/shared/bulk-edit/bulk-
 
 const StateModel = Backbone.Model.extend({
   initialize({ collection }) {
-    const initModel = collection.at(0);
-    this.initBulkState(collection, initModel);
-    this.initBulkOwner(collection, initModel);
+    this.updateCollection(collection);
   },
   updateCollection(collection) {
     const initModel = collection.at(0);
+    const attributes = { collection };
 
-    this.set('collection', collection);
-    if (!this.get('stateChanged')) this.initBulkState(collection, initModel);
-    if (!this.get('ownerChanged')) this.initBulkOwner(collection, initModel);
+    if (!this.get('stateChanged')) extend(attributes, this.getBulkState(collection, initModel));
+    if (!this.get('ownerChanged')) extend(attributes, this.getBulkOwner(collection, initModel));
+
+    return this.set(attributes);
   },
-  initBulkState(collection, initModel) {
+  getBulkState(collection, initModel) {
     const state = initModel.getState().getResource();
     const stateMulti = collection.some(item => {
       return item.getState().id !== state.id;
     });
 
-    this.set({
+    return {
       stateMulti,
       state: stateMulti ? null : state,
-    });
+    };
   },
-  initBulkOwner(collection, initModel) {
+  getBulkOwner(collection, initModel) {
     const owner = initModel.getOwner();
     const program = initModel.getProgram();
     const ownerMulti = collection.some(item => {
@@ -37,11 +37,11 @@ const StateModel = Backbone.Model.extend({
       return differentOwners || differentPrograms;
     });
 
-    this.set({
+    return {
       ownerMulti,
       owner: ownerMulti ? null : owner,
       workspaces: program.getUserWorkspaces(),
-    });
+    };
   },
   setState(state) {
     return this.set({ state: state.getResource(), stateMulti: false, stateChanged: true });

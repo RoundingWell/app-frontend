@@ -1,5 +1,6 @@
-import { partial } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
+
+import { addError } from 'js/datadog';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
@@ -12,45 +13,48 @@ import FlowSidebarApp from 'js/apps/programs/sidebar/flow/flow-sidebar_app';
 
 import { LayoutView } from 'js/apps/programs/program/program_views';
 import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
+import { LoadingView } from 'js/regions/preload_region';
 
 export default SubRouterApp.extend({
   routeScope: ['programId'],
-
-  routeActions() {
-    return {
-      'program:details': partial(this.startCurrent, 'workflows'),
-      'program:action': this.startProgramAction,
-      'program:action:new': this.startProgramAction,
-      'programFlow:new': this.startFlowSidebar,
-    };
-  },
-
   childApps: {
-    workflows: WorkflowsApp,
     action: ActionApp,
+    workflows: WorkflowsApp,
     programSidebar: ProgramSidebarApp,
     flowSidebar: FlowSidebarApp,
   },
 
+  routeActions: {
+    'program:details': 'showWorkflows',
+    'program:action': 'startProgramAction',
+    'program:action:new': 'startProgramAction',
+    'programFlow:new': 'startFlowSidebar',
+  },
+
   currentAppOptions() {
     return {
-      region: this.getRegion('content'),
-      program: this.getOption('program'),
+      program: this.program,
     };
   },
 
+  onBeforeStartRoute() {
+    this.getChildApp('action').stop().catch(addError);
+  },
+
   onBeforeStart() {
-    this.getRegion().startPreloader({ variant: 'generic' });
+    this.showView(new LoadingView({ variant: 'generic' }));
   },
 
-  beforeStart({ programId }) {
-    return Radio.request('entities', 'fetch:programs:model', programId);
+  prepareStart({ programId }, { signal }) {
+    return Radio.request('entities', 'fetch:programs:model', programId, { signal });
   },
 
-  onStart(options, program) {
+  onStart(app, options, program) {
     this.program = program;
 
-    this.setView(new LayoutView({ model: program }));
+    const view = this.setView(new LayoutView({ model: program }));
+
+    view.render();
 
     this.showSidebar();
 
@@ -59,36 +63,57 @@ export default SubRouterApp.extend({
     this.showView();
   },
 
-  startProgramAction(programId, actionId) {
-    const actionApp = this.getChildApp('action');
+  showWorkflows() {
+    const routeContext = this.getCurrentRoute();
 
-    this.listenToOnce(actionApp, {
-      'start'(options, action) {
-        this.editList(action);
-      },
-      'fail'() {
-        this.startCurrent('workflows');
-      },
+    return this.startCurrent('workflows', {
+      region: this.getView().getRegion('content'),
+    }).catch(error => {
+      if (this.getCurrentRoute() !== routeContext) return;
+
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
     });
+  },
 
-    this.startChildApp('action', { actionId, programId });
+  onRouteError(error, { event }) {
+    if (event === 'program:action' || event === 'program:action:new') {
+      this.getChildApp('action').handleStartFailure();
+      return this.showWorkflows();
+    }
+
+    Radio.trigger('event-router', 'unknownError', error?.response?.status);
+  },
+
+  async startProgramAction(programId, actionId) {
+    const actionApp = this.getChildApp('action');
+    const routeContext = this.getCurrentRoute();
+    const stopped = await actionApp.stop();
+
+    if (!stopped || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
+
+    const started = await actionApp.start({ actionId, programId });
+
+    if (!started || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
+
+    this.editList(actionApp.action);
   },
 
   // Triggers event on started workflow for marking the edited item
   editList(item) {
-    const currentWorkflow = this.getCurrent() || this.startCurrent('workflows');
+    const workflows = this.getChildApp('workflows');
 
-    if (!currentWorkflow.isRunning()) {
-      this.listenToOnce(currentWorkflow, 'start', () => {
-        currentWorkflow.triggerMethod('edit:item', item);
+    if (!workflows.isRunning()) {
+      this.showWorkflows().then(current => {
+        current?.triggerMethod('edit:item', item);
       });
       return;
     }
 
-    currentWorkflow.triggerMethod('edit:item', item);
+    workflows.triggerMethod('edit:item', item);
   },
 
-  startFlowSidebar(programId) {
+  async startFlowSidebar(programId) {
+    const routeContext = this.getCurrentRoute();
     const flow = Radio.request('entities', 'programFlows:model', {
       _program: { id: programId, type: 'programs' },
       _owner: null,
@@ -99,7 +124,9 @@ export default SubRouterApp.extend({
 
     const flowSidebar = this.getChildApp('flowSidebar');
 
-    Radio.request('sidebar', 'start', flowSidebar, { flow });
+    const started = await Radio.request('sidebar', 'start', flowSidebar, { flow });
+
+    if (!started || this.getCurrentRoute() !== routeContext) return;
 
     this.editList(flow);
   },
@@ -111,7 +138,7 @@ export default SubRouterApp.extend({
       'edit': this.onEdit,
     });
 
-    this.showChildView('sidebar', sidebarView);
+    this.getView().showChildView('sidebar', sidebarView);
   },
 
   onEdit() {

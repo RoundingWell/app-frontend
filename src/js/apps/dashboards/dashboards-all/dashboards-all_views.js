@@ -1,7 +1,6 @@
 import { every } from 'underscore';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView } from 'marionette';
+import { Radio, View, CollectionView } from 'marionette';
 
 import 'scss/modules/list-pages.scss';
 import 'scss/modules/card-list.scss';
@@ -60,7 +59,7 @@ const ListView = CollectionView.extend({
     this.searchList(null, this.state.get('searchQuery'));
   },
   onListItemRender(view) {
-    view.searchString = view.$el.text();
+    view.searchString = view.el.textContent;
   },
   searchList(state, searchQuery) {
     if (!searchQuery) {

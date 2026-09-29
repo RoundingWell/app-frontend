@@ -1,5 +1,5 @@
 import { get } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import handleErrors from 'js/utils/handle-errors';
 
@@ -11,7 +11,6 @@ import ScheduleApp from 'js/apps/patients/schedule/schedule_app';
 
 export default RouterApp.extend({
   routerAppName: 'PatientsApp',
-
   childApps: {
     patient: PatientApp,
     ownedBy: WorklistApp,
@@ -34,7 +33,7 @@ export default RouterApp.extend({
       meta: { isList: true },
     },
     // Canonical patient-workspace routes. Every route starts the same PatientApp;
-    // PatientApp dispatches the page while its patient shell remains mounted.
+    // PatientApp dispatches the page while its patient shell remains attached.
     // The dashboard/archive aliases below are bookmark compatibility only and
     // are supported until September 2, 2027.
     'patient:workflow': {
@@ -107,17 +106,34 @@ export default RouterApp.extend({
       return;
     }
 
-    this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
+    return this.showListPage(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
   },
 
   showSchedule() {
     this.clearCurrentPatient();
-    this.startCurrent('schedule');
+
+    return this.showListPage('schedule');
   },
 
+  showListPage(appName, options) {
+    return this.startCurrent(appName, options);
+  },
   showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
-    this.startRoute('patient', { patientId });
+    return this.startRoute('patient', { patientId });
+  },
+  onRouteError(error, { definition }) {
+    if (definition.action === 'showPatientsWorklist' || definition.action === 'showSchedule') {
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+      return;
+    }
+
+    if (get(error, ['response', 'status']) === 410) {
+      Radio.trigger('event-router', 'notFound');
+      return;
+    }
+
+    handleErrors(error).catch(reportedError => window.reportError(reportedError));
   },
 
   redirectPatientFlow(flowId) {

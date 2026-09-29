@@ -1,5 +1,5 @@
 import { size, extend } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -14,10 +14,10 @@ import {
 } from 'js/apps/programs/sidebar/action/action-sidebar_views';
 
 export default App.extend(extend({
-  beforeStart() {
-    return Radio.request('entities', 'fetch:tags:collection');
+  prepareStart(options, { signal }) {
+    return Radio.request('entities', 'fetch:tags:collection', { signal });
   },
-  onBeforeStart({ action }) {
+  onBeforeStart(app, { action }) {
     this.action = action;
 
     this.action.trigger('editing', true);
@@ -26,7 +26,7 @@ export default App.extend(extend({
     this.showMenu();
     this.showTimestamps();
   },
-  onStart(options, tags) {
+  onStart(app, options, tags) {
     const contentView = new SidebarView({
       action: this.action,
       tags,
@@ -37,7 +37,7 @@ export default App.extend(extend({
       'close': this.stop,
     });
 
-    this.showChildView('content', contentView);
+    this.getView().showChildView('content', contentView);
 
     this.listenTo(this.action, {
       'change:allowed_uploads': this.showUploadsEnabled,
@@ -46,18 +46,18 @@ export default App.extend(extend({
     this.showUploadsEnabled();
   },
   showHeading() {
-    this.showChildView('heading', new HeadingView());
+    this.getView().showChildView('heading', new HeadingView());
   },
   showMenu() {
     const menuView = new MenuView();
 
     this.listenTo(menuView, 'delete', this.onDelete);
 
-    this.showChildView('menu', menuView);
+    this.getView().showChildView('menu', menuView);
   },
   showTimestamps() {
     if (this.action.isNew()) return;
-    this.showChildView('footer', new TimestampsView({ model: this.action }));
+    this.getView().showChildView('footer', new TimestampsView({ model: this.action }));
   },
   showUploadsEnabled() {
     if (!Radio.request('settings', 'get', 'upload_attachments')) return;
@@ -108,6 +108,7 @@ export default App.extend(extend({
     this.stop();
   },
   onStop() {
+    this.stopListening(this.action);
     this.action.trigger('editing', false);
     if (this.action && this.action.isNew()) this.action.destroy();
   },

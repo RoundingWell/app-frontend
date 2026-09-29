@@ -1,9 +1,9 @@
 import { extend, get } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import intl, { renderTemplate } from 'js/i18n';
-import handleErrors from 'js/utils/handle-errors';
+import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
@@ -19,11 +19,12 @@ import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edi
 import { AddButtonView } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
 export default App.extend({
-  StateModel,
   routerAppName: 'FlowApp',
   childApps: {
     activity: ActivityApp,
-    bulkEditActions: BulkEditActionsApp,
+  },
+  createState() {
+    return new StateModel();
   },
   stateEvents: {
     'change:actionsSelected': 'onChangeSelected',
@@ -32,26 +33,29 @@ export default App.extend({
     this.toggleBulkSelect();
   },
   onBeforeStart() {
-    this.resetStateDefaults();
+    this.getState().clearSelected();
 
-    this.getRegion().show(new FlowLoadingView());
+    this.showView(new FlowLoadingView());
   },
-  beforeStart({ flowId }) {
-    return [
-      Radio.request('entities', 'fetch:flows:model', flowId),
-      Radio.request('entities', 'fetch:actions:collection:byFlow', flowId),
-    ];
+  prepareStart({ flowId }, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:flows:model', flowId, { signal }),
+      Radio.request('entities', 'fetch:actions:collection:byFlow', flowId, { signal }),
+    ]);
   },
-  onFail(options, error) {
+  handleStartFailure(options, error) {
+    return this.showLoadFailure(options, error);
+  },
+  showLoadFailure(options, error) {
     if (get(error, ['response', 'status']) === 410) {
       Radio.request('alert', 'show:error', i18n.notFound);
       Radio.trigger('event-router', 'patient:workflow', options.patient.id);
       return;
     }
 
-    handleErrors(error);
+    throw error;
   },
-  onStart({ patient }, flow, actions) {
+  onStart(app, { patient }, [flow, actions]) {
     this.flow = flow;
     this.actions = actions;
     this.editableCollection = actions.clone();
@@ -61,7 +65,7 @@ export default App.extend({
 
     this.subscribe();
 
-    this.showView(new LayoutView());
+    this.setView(new LayoutView()).render();
 
     this.updateContext();
 
@@ -86,6 +90,14 @@ export default App.extend({
         this.showMenu();
       },
     });
+
+    this.showView();
+  },
+  onStop() {
+    this.unsubscribe();
+    if (this.editableCollection) this.stopListening(this.editableCollection);
+    if (this.actions) this.stopListening(this.actions);
+    if (this.flow) this.stopListening(this.flow);
   },
   updateContext() {
     this.trigger('context:change', {
@@ -96,8 +108,14 @@ export default App.extend({
   },
   subscribe() {
     const filters = { actions: { flow: this.flow.id } };
-    Radio.request('ws', 'subscribe', [this.flow, ...this.actions.models], { filters });
+    Radio.request('ws', 'subscribe', this.getSubscriptionResources(), { filters });
     Radio.request('ws', 'manage:add', this, this.actions, 'patient-actions', { include: ACTION_INCLUDE });
+  },
+  getSubscriptionResources() {
+    return [this.flow, ...(this.actions?.models || [])].filter(Boolean);
+  },
+  unsubscribe() {
+    Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());
   },
   _setFlowProgress() {
     const complete = this.actions.filter(action => action.isDone()).length;
@@ -124,19 +142,19 @@ export default App.extend({
     });
   },
   showHeader() {
-    this.showChildView('header', new HeaderView({ model: this.flow }));
-    this.showChildView('progress', new ProgressView({ model: this.flow }));
+    this.getView().showChildView('header', new HeaderView({ model: this.flow }));
+    this.getView().showChildView('progress', new ProgressView({ model: this.flow }));
   },
   showMenu() {
     if (!this.flow.canDelete()) {
-      this.getRegion('menu').empty();
+      this.getView().getRegion('menu').empty();
       return;
     }
 
     const menuView = new MenuView();
 
     this.listenTo(menuView, 'delete', this.onDelete);
-    this.showChildView('menu', menuView);
+    this.getView().showChildView('menu', menuView);
   },
   onDelete() {
     const modal = Radio.request('modal', 'show:small', extend({
@@ -154,10 +172,10 @@ export default App.extend({
     }, intl.patients.patient.flow.flowViews.deleteModal));
   },
   startActivity() {
-    this.startChildApp('activity', {
-      region: this.getRegion('activity'),
+    this.getChildApp('activity').start({
+      region: this.getView().getRegion('activity'),
       flow: this.flow,
-    });
+    }).catch(addError);
   },
 
   getAddOpts(programFlow) {
@@ -181,7 +199,7 @@ export default App.extend({
       this.triggerMethod('add:programAction', programItem);
     });
 
-    this.showChildView('tools', addButtonView);
+    this.getView().showChildView('tools', addButtonView);
   },
 
   toggleBulkSelect() {
@@ -195,24 +213,28 @@ export default App.extend({
       return;
     }
 
-    this.stopChildApp('bulkEditActions');
+    this.stopBulkEdit();
     this.showAdd();
   },
   onClickBulkCancel() {
     this.getState().clearSelected();
   },
+  stopBulkEdit() {
+    this.getChildApp('bulkEditActions')?.stop().catch(addError);
+  },
   showBulkEdit() {
-    const app = this.getChildApp('bulkEditActions');
+    const app = this.getChildApp('bulkEditActions') || this.addBulkEditApp();
 
-    if (app.isRunning()) {
-      app.updateCollection(this.selected);
-      return;
-    }
-
-    this.startChildApp('bulkEditActions', {
-      region: this.getRegion('tools'),
-      state: { collection: this.selected },
-    });
+    app.updateCollection(this.selected);
+    app.start({
+      collection: this.selected,
+      region: this.getView().getRegion('tools'),
+    }).catch(addError);
+  },
+  addBulkEditApp() {
+    const app = this.addChildApp('bulkEditActions', new BulkEditActionsApp({
+      stateOptions: { collection: this.selected },
+    }));
 
     this.listenTo(app, {
       'cancel': this.onClickBulkCancel,
@@ -224,26 +246,33 @@ export default App.extend({
 
         this.selected.save(saveData)
           .then(() => {
+            app.resetChanges();
             this.showUpdateSuccess(itemCount);
-            app.stop();
             this.getState().clearSelected();
           })
           .catch(() => {
+            app.resetChanges();
             Radio.request('alert', 'show:error', i18n.bulkEditFailure);
-            this.getState().clearSelected();
             this.restart({
               flowId: this.flow.id,
               patient: this.patient,
+            }).catch(error => {
+              try {
+                this.showLoadFailure({ patient: this.patient }, error);
+              } catch(unhandledError) {
+                addError(unhandledError);
+              }
             });
           });
       },
     });
+    return app;
   },
   showUpdateSuccess(itemCount) {
     Radio.request('alert', 'show:success', renderTemplate(BulkEditActionsSuccessTemplate, { itemCount }));
   },
   showDisabledSelectAll() {
-    this.showChildView('selectAll', new SelectAllView({ isDisabled: true }));
+    this.getView().showChildView('selectAll', new SelectAllView({ isDisabled: true }));
   },
   showSelectAll() {
     if (!this.editableCollection.length) {
@@ -258,7 +287,7 @@ export default App.extend({
 
     this.listenTo(selectAllView, 'click', this.onClickBulkSelect);
 
-    this.showChildView('selectAll', selectAllView);
+    this.getView().showChildView('selectAll', selectAllView);
   },
   onClickBulkSelect() {
     if (this.selected.length === this.editableCollection.length) {
@@ -290,7 +319,7 @@ export default App.extend({
       this.editableCollection.reset(this._getListEditable(listView));
     });
 
-    this.showChildView('actionList', listView);
+    this.getView().showChildView('actionList', listView);
     this.editableCollection.reset(this._getListEditable(listView));
   },
 

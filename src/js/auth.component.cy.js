@@ -1,11 +1,17 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
+import { fetchConfig } from '@roundingwell/care-ops-config';
 
 import { auth } from 'js/auth'; // registers the 'auth' channel replies
 import { getDraft, setDraft, clearDrafts } from 'js/services/form-drafts';
 
 context('auth', function() {
+  beforeEach(function() {
+    cy.intercept('GET', '/appconfig.json', { body: { auth: {} } });
+    cy.then(() => fetchConfig());
+  });
+
   context('getUserId', function() {
     afterEach(function() {
       Radio.stopReplying('auth', 'getUserId');

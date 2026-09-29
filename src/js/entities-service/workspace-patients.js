@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import BaseEntity from 'js/base/entity-service';
 import { _Model, Model } from './entities/workspace-patients';
 import { v5 as uuid } from 'uuid';
@@ -9,10 +9,10 @@ const Entity = BaseEntity.extend({
     'get:workspacePatients:model': 'getByPatient',
     'fetch:workspacePatients:byPatient': 'fetchByPatient',
   },
-  fetchByPatient(patientId) {
+  fetchByPatient(patientId, options) {
     const model = this.getByPatient(patientId);
 
-    return model.fetch();
+    return model.fetch(options);
   },
   getByPatient(patientId) {
     const currentWorkspace = Radio.request('workspace', 'current');

@@ -24,7 +24,6 @@ dayjs.extend(utcPlugin);
 
 const resolve = {
   alias: {
-    'marionette': 'backbone.marionette',
     'store': 'store/dist/store.modern',
   },
   mainFields: ['module', 'main', 'browser'],

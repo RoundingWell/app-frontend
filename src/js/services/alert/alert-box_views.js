@@ -6,7 +6,7 @@ import AlertTemplate from './alert-box.hbs';
 
 import './alert-box.scss';
 
-const OPTIONS = ['alertType', 'text', 'html', 'hasUndo'];
+const OPTIONS = ['alertType', 'text', 'html'];
 
 const icons = {
   success: 'circle-check',
@@ -20,7 +20,6 @@ const AlertView = View.extend({
   template: AlertTemplate,
   triggers: {
     'click .js-dismiss': 'click:dismiss',
-    'click .js-undo': 'click:undo',
   },
   initialize(options) {
     this.mergeOptions(options, OPTIONS);
@@ -34,13 +33,6 @@ const AlertView = View.extend({
   },
   onClickDismiss() {
     this.dismiss();
-  },
-  onClickUndo() {
-    if (this.isDismissed) return;
-
-    this._dismiss();
-
-    this.triggerMethod('undo', this);
   },
   _dismiss() {
     this.isDismissed = true;
@@ -63,7 +55,6 @@ const AlertView = View.extend({
       alertType: this.alertType,
       text: this.text,
       html: this.html,
-      hasUndo: this.hasUndo,
       iconType: icons[this.alertType],
     };
   },

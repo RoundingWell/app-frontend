@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -6,12 +6,12 @@ import { ActivitiesView, FlowActivityLoadingView } from 'js/apps/patients/patien
 
 export default App.extend({
   onBeforeStart() {
-    this.getRegion().show(new FlowActivityLoadingView());
+    this.showView(new FlowActivityLoadingView());
   },
-  beforeStart({ flow }) {
-    return Radio.request('entities', 'fetch:flowEvents:collection', flow.id);
+  prepareStart({ flow }, { signal }) {
+    return Radio.request('entities', 'fetch:flowEvents:collection', flow.id, { signal });
   },
-  onStart({ flow }, activity) {
+  onStart(app, { flow }, activity) {
     this.showView(new ActivitiesView({
       collection: activity,
       model: flow,

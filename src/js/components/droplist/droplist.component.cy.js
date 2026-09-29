@@ -22,7 +22,7 @@ context('Droplist', function() {
             headingText,
           },
           collection,
-          state: { isDisabled: true },
+          stateOptions: { isDisabled: true },
         });
 
         return droplist;
@@ -34,7 +34,7 @@ context('Droplist', function() {
       .contains('Choose One...')
       .should('be.disabled')
       .then(() => {
-        droplist.setState({ isDisabled: false });
+        droplist.getState().set({ isDisabled: false });
       });
 
     cy
@@ -57,7 +57,7 @@ context('Droplist', function() {
       .get('@root')
       .contains('Option 1')
       .then(() => {
-        droplist.setState({ selected: null });
+        droplist.getState().set({ selected: null });
       });
 
     cy
@@ -235,5 +235,19 @@ context('Droplist', function() {
       .last()
       .find('.icon')
       .should('not.exist');
+  });
+
+  specify('it should destroy its popup with its owner', function() {
+    let droplist;
+    cy.mount(rootView => {
+      Droplist.setPopRegion(rootView.getRegion('pop'));
+      droplist = new Droplist({ collection });
+      return droplist;
+    });
+
+    cy.contains('Choose One...').click();
+    cy.get('.picklist').should('exist');
+    cy.then(() => droplist.destroy());
+    cy.get('.picklist').should('not.exist');
   });
 });

@@ -1,3 +1,5 @@
+import { Radio } from 'marionette';
+
 import App from 'js/base/app';
 
 import { LayoutView } from 'js/services/sidebar/sidebar_views';
@@ -19,35 +21,77 @@ export default App.extend({
     'start': 'startSidebarApp',
   },
 
-  startSidebarApp(app, appOptions, viewOptions) {
-    if (this.currentApp === app) return this.currentApp;
-
-    this.stopSidebarApp();
+  async startSidebarApp(app, appOptions, viewOptions) {
+    // claim the sidebar before awaiting so an interleaved start supersedes
+    // this one instead of attaching a second layout to the host element
+    const stopping = this.stopSidebarApp();
+    const claim = {};
 
     this.currentApp = app;
+    this.currentClaim = claim;
 
-    app.setRegion(this.getRegion());
-    app.showView(new LayoutView(viewOptions));
+    try {
+      await stopping;
 
-    app.start(appOptions);
+      if (this.currentClaim !== claim) return;
 
-    this.listenTo(app.getView(), 'close', () => {
-      app.triggerMethod('close', app);
-    });
+      await app.stop();
 
-    this.listenTo(app, 'stop', () => {
-      this.getRegion().empty();
+      if (this.currentClaim !== claim) return;
+
+      const view = app.setView(new LayoutView(viewOptions));
+
+      this.listenTo(view, 'close', () => {
+        app.triggerMethod('close', app);
+      });
+
+      this.listenToOnce(app, 'stop', () => {
+        if (this.currentClaim !== claim) return;
+
+        delete this.currentApp;
+        delete this.currentClaim;
+      });
+
+      const started = await app.start({ ...appOptions, region: this.getRegion() });
+
+      if (!started) return;
+
+      app.showView();
+    } catch(error) {
+      // Marionette only rejects the current startup; canceled starts resolve false.
       delete this.currentApp;
+      delete this.currentClaim;
+      await this._trackStop(app.stop());
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+      return;
+    }
+
+    return app;
+  },
+
+  _trackStop(stopping) {
+    const pending = Promise.resolve(stopping).finally(() => {
+      this.pendingStops.delete(pending);
     });
 
-    return this.currentApp;
+    this.pendingStops ||= new Set();
+    this.pendingStops.add(pending);
+    return pending;
   },
 
   stopSidebarApp() {
-    if (!this.currentApp) return;
+    if (!this.currentApp) return Promise.all(this.pendingStops || []);
 
-    this.currentApp.stop();
+    const app = this.currentApp;
 
     delete this.currentApp;
+    delete this.currentClaim;
+
+    this._trackStop(app.stop());
+    return Promise.all(this.pendingStops);
+  },
+
+  prepareStop() {
+    return this.stopSidebarApp();
   },
 });

@@ -1,7 +1,6 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View, Region } from 'marionette';
+import { Radio, View, Region } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
@@ -67,7 +66,7 @@ const FormExpandActionView = View.extend({
     this.expandTooltip = new Tooltip({
       message,
       uiView: this,
-      ui: this.ui.expandButton,
+      anchor: this.getUI('expandButton')[0],
     });
   },
 });
@@ -101,14 +100,14 @@ const LayoutView = View.extend({
     'click @ui.viewportInteract': 'form:interact',
   },
   onRender() {
-    this.$el.toggleClass('form__frame--embedded', !!this.getOption('isActionForm'));
+    this.el.classList.toggle('form__frame--embedded', !!this.getOption('isActionForm'));
     this.setExpanded(this.getOption('isExpanded'));
   },
   templateContext() {
     return { isActionForm: !!this.getOption('isActionForm') };
   },
   setExpanded(isExpanded) {
-    this.$el.toggleClass('form__frame--expanded', !!isExpanded);
+    this.el.classList.toggle('form__frame--expanded', !!isExpanded);
     this.trigger('change:expanded', !!isExpanded);
   },
 });
@@ -188,20 +187,17 @@ const DraftMenuView = View.extend({
 
 const DraftStatusView = Droplist.extend({
   align: 'right',
-  viewOptions: {
-    className: 'button button--icon form__control form__actions-icon form__actions-icon--draft',
-    template: hbs`{{far "cloud-check"}}`,
-  },
+  className: 'button button--icon form__control form__actions-icon form__actions-icon--draft',
+  template: hbs`{{far "cloud-check"}}`,
   initialize({ model }) {
     this.model = model;
   },
-  onShow() {
+  onAttach() {
     this._showTooltip();
 
     this.listenTo(this.getState(), 'change:isActive', (state, isActive) => {
       if (isActive) {
         this._tooltip.destroy();
-        this.getView().$el.off('.tooltip');
         return;
       }
 
@@ -209,13 +205,10 @@ const DraftStatusView = Droplist.extend({
     });
   },
   _showTooltip() {
-    const view = this.getView();
-
-    view.$el.off('.tooltip');
     this._tooltip = new Tooltip({
       message: i18n.draftStatusView.tooltip,
-      uiView: view,
-      ui: view.$el,
+      uiView: this,
+      anchor: this.el,
       orientation: 'vertical',
       shouldDelay: true,
     });
@@ -260,14 +253,12 @@ const SaveButtonTypeDroplist = Droplist.extend({
       },
     ]);
 
-    this.setState('selected', this.collection.find({
+    this.getState().set('selected', this.collection.find({
       value: model.get('saveButtonType'),
     }));
   },
-  viewOptions: {
-    className: 'button button--positive form__submit-choice',
-    template: hbs`{{fas "caret-down"}}`,
-  },
+  className: 'button button--positive form__submit-choice',
+  template: hbs`{{fas "caret-down"}}`,
   picklistOptions() {
     return {
       headingText: i18n.saveView.droplistLabel,
@@ -313,7 +304,7 @@ const SaveView = View.extend({
 
     const saveButtonTypeDroplist = this.showChildView('saveType', new SaveButtonTypeDroplist({
       model: this.model,
-      state: {
+      stateOptions: {
         isDisabled: this.getOption('isDisabled'),
       },
     }));
@@ -338,14 +329,10 @@ const UpdateView = View.extend({
 
 const SubmissionStatusDroplist = Droplist.extend({
   align: 'right',
-  viewOptions() {
-    return {
-      className: 'button form__submission-status',
-      template: hbs`
-        {{far "cloud-check"}}{{formatDateTime updated_at "AT_TIME"}}{{far "angle-down" classes="form__submission-status-arrow"}}
-      `,
-    };
-  },
+  className: 'button form__submission-status',
+  template: hbs`
+    {{far "cloud-check"}}{{formatDateTime updated_at "AT_TIME"}}{{far "angle-down" classes="form__submission-status-arrow"}}
+  `,
   picklistOptions() {
     return {
       itemTemplate: hbs`

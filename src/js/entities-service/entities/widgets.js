@@ -1,5 +1,5 @@
 import { uniqueId } from 'underscore';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
@@ -8,8 +8,8 @@ const TYPE = 'widgets';
 
 const _Model = BaseModel.extend({
   type: TYPE,
-  fetchValues(patientId) {
-    return Radio.request('entities', 'fetch:widgetValues:byPatient', this, patientId);
+  fetchValues(patientId, options) {
+    return Radio.request('entities', 'fetch:widgetValues:byPatient', this, patientId, options);
   },
 });
 

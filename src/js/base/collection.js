@@ -43,12 +43,12 @@ export default Backbone.Collection.extend(extend({
   async batchInvoke(methodName, batchSize, ...args) {
     /* istanbul ignore next: Branch only for testing */
     const size = _TEST_ ? 2 : batchSize;
+    const models = this.models.slice();
     const results = [];
     let count = 0;
 
-    while (count < this.length) {
-      const batch = new this.constructor(this.slice(count, count + size));
-      const batchInvokes = batch.invoke(methodName, ...args);
+    while (count < models.length) {
+      const batchInvokes = invoke(models.slice(count, count + size), methodName, ...args);
       const batchResults = await Promise.all(batchInvokes);
 
       results.push(...batchResults);

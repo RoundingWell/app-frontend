@@ -9,18 +9,15 @@ export function draftKeyPrefix(currentUserId) {
 }
 
 export async function getDraft(key) {
-  if (!key) return null;
   const draft = await idb.get(STORE, key);
   return draft || null;
 }
 
 export async function setDraft(key, draft) {
-  if (!key || !draft) return;
   await idb.put(STORE, key, draft);
 }
 
 export async function removeDraft(key) {
-  if (!key) return;
   await idb.delete(STORE, key);
 }
 

@@ -1,51 +1,54 @@
-import { extend, pick, result } from 'underscore';
-import { normalizeMethods } from 'marionette';
+import { extend, isArray, pick, result } from 'underscore';
+import Backbone from 'backbone';
 
-import App from './app';
+import { addError } from 'js/datadog';
 
-export default App.extend({
+import RouteBaseApp from './route-base-app';
+
+export default RouteBaseApp.extend({
   constructor: function() {
-    this._current = null;
-    this._currentRoute = null;
+    this._runId = 0;
+    this._routeIntent = null;
 
-    this.initRouter();
+    this.on('start', () => this._runId++);
+    this.on('before:stop', this._clearRouteIntent);
 
-    this.on('before:stop', this.stopCurrent);
-    this.on('before:stop', this.clearCurrentRoute);
-
-    App.apply(this, arguments);
+    RouteBaseApp.apply(this, arguments);
   },
 
-  // route actions dispatch a matched route to a local handler
-  // (distinct from RouterApp's `eventRoutes` URL definitions)
-  initRouter() {
-    const routeActions = result(this, 'routeActions', {});
-    this._routeActions = normalizeMethods(this, routeActions);
+  createState() {
+    return new Backbone.Model({ currentRoute: null });
   },
 
-  // declarative scope identity used by a parent RouterApp to decide reuse;
-  // without a declared routeScope, fall back to full-option identity
+  // Explicit resource identity; route-specific startup options never define scope.
   getRouteScope(options = {}) {
     const scope = result(this, 'routeScope');
-    return scope ? pick(options, scope) : options;
+    if (!isArray(scope)) throw new Error('SubRouterApp requires a routeScope array');
+    return pick(options, scope);
   },
 
   setCurrentRoute(routeContext) {
-    this._currentRoute = routeContext;
+    this.invalidateSelection();
+    this.getState().set('currentRoute', routeContext);
   },
 
   getCurrentRoute() {
-    return this._currentRoute;
+    return this.getState().get('currentRoute');
   },
 
-  // records the newest route, dispatching only when already running;
-  // while loading or stopped the route is retained for startCurrentRoute()
-  startRoute(routeContext) {
+  // records the newest route and ensures it is dispatched by the active run
+  async startRoute(routeContext, options) {
+    const runId = this._runId;
+    const routeIntent = {};
     this.setCurrentRoute(routeContext);
+    this._routeIntent = routeIntent;
 
-    if (this.isRunning()) {
-      this.startCurrentRoute();
-    }
+    const started = await this.start(options);
+
+    if (!started || this._routeIntent !== routeIntent) return;
+    if (this._runId === runId) this.startCurrentRoute();
+
+    return this;
   },
 
   // synchronously dispatches the current route to its action
@@ -57,21 +60,39 @@ export default App.extend({
     this.triggerMethod('before:startRoute', currentRoute);
 
     const { event, eventArgs } = currentRoute;
-    const action = this._routeActions[event];
+    const routeActions = this.normalizeMethods(result(this, 'routeActions', {}));
+    const action = routeActions[event];
 
     if (!action) return;
 
-    action.apply(this, eventArgs);
+    const activation = this.invokeRouteAction(action, eventArgs);
+    // onStart notifications do not await returned promises. Observe action
+    // failures here as well as on routes dispatched into an already-active run.
+    const completion = Promise.resolve(activation).catch(error => {
+      if (this.getCurrentRoute() === currentRoute) {
+        this.triggerMethod('route:error', error, currentRoute);
+      }
+    });
 
     this.triggerMethod('startRoute', currentRoute);
+
+    return completion;
   },
 
-  // clears the current route on a normal stop, but preserves it across a
-  // Toolkit restart() so the route can be re-dispatched after re-fetching
-  clearCurrentRoute() {
-    if (!this.isRestarting()) {
-      this._currentRoute = null;
+  invokeRouteAction(action, eventArgs) {
+    try {
+      return action.apply(this, eventArgs);
+    } catch(error) {
+      return Promise.reject(error);
     }
+  },
+
+  onChildCleanupError(error) {
+    addError(error);
+  },
+
+  onRouteError(error) {
+    window.reportError(error);
   },
 
   mixinOptions(options) {
@@ -80,25 +101,13 @@ export default App.extend({
     return extend({}, appOptions, options);
   },
 
-  // handler that ensures one running app per type
   startCurrent(appName, options) {
-    this.stopCurrent();
-
-    const app = this.startChildApp(appName, this.mixinOptions(options));
-
-    this._current = app;
-
-    return app;
+    return this.selectChild(appName, {
+      start: app => app.start(this.mixinOptions(options)),
+    });
   },
 
-  getCurrent() {
-    return this._current;
-  },
-
-  stopCurrent() {
-    if (!this._current) return;
-
-    this._current.stop();
-    this._current = null;
+  _clearRouteIntent() {
+    this._routeIntent = null;
   },
 });

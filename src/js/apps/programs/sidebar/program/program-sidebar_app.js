@@ -1,11 +1,11 @@
-import Radio from 'backbone.radio';
+import { Radio, View } from 'marionette';
 
 import App from 'js/base/app';
 
 import { SidebarView, TimestampsView, headingText } from 'js/apps/programs/sidebar/program/programs-sidebar_views';
 
 export default App.extend({
-  onBeforeStart({ program }) {
+  onBeforeStart(app, { program }) {
     this.program = program;
 
     this.showHeading();
@@ -19,7 +19,7 @@ export default App.extend({
       'close': this.stop,
     });
 
-    this.showChildView('content', contentView);
+    this.getView().showChildView('content', contentView);
     this.showTimestamps();
   },
   onSave({ model }) {
@@ -29,7 +29,7 @@ export default App.extend({
         if (isNew) Radio.request('sidebar', 'stop');
       }, ({ responseData }) => {
         const errors = this.program.parseErrors(responseData);
-        this.getChildView('content').showErrors(errors);
+        this.getView().getChildView('content').showErrors(errors);
       });
   },
   onClose() {
@@ -39,10 +39,10 @@ export default App.extend({
     if (this.program && this.program.isNew()) this.program.destroy();
   },
   showHeading() {
-    this.showChildView('heading', headingText);
+    this.getView().showChildView('heading', new View({ template: () => headingText }));
   },
   showTimestamps() {
     if (this.program.isNew()) return;
-    this.showChildView('footer', new TimestampsView({ model: this.program }));
+    this.getView().showChildView('footer', new TimestampsView({ model: this.program }));
   },
 });

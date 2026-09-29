@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
+import { Radio } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/modals.scss';
@@ -13,6 +13,15 @@ import FormsService from 'js/services/forms';
 
 import { ModalView, SmallModalView, IframeFormView } from 'js/services/modal/modal_views';
 import { DraftStatusView } from 'js/apps/patients/patient/form/form_views';
+
+const ModalDraftStatusView = DraftStatusView.extend({
+  className: 'button button--icon flex flex-align-center u-margin--r-16',
+  template: hbs`{{far "shield-check"}}`,
+  position() {
+    const bounds = this.getBounds();
+    return { ...bounds, outerHeight: bounds.outerHeight + 4 };
+  },
+});
 
 export default App.extend({
   channelName: 'modal',
@@ -81,7 +90,7 @@ export default App.extend({
 
     modal.disableSubmit();
 
-    this.listenTo(draftModel, 'change:updated', (model, updated) => {
+    modal.listenTo(draftModel, 'change:updated', (model, updated) => {
       if (!updated) {
         modal.getRegion('draftStatus').empty();
         return;
@@ -89,31 +98,24 @@ export default App.extend({
 
       if (modal.getRegion('draftStatus').hasView()) return;
 
-      const draftStatusView = new DraftStatusView({
+      const draftStatusView = new ModalDraftStatusView({
         model: draftModel,
-        viewOptions: {
-          className: 'button button--icon flex flex-align-center u-margin--r-16',
-          template: hbs`{{far "shield-check"}}`,
-        },
-        position() {
-          const bounds = this.getView().getBounds();
-          return { ...bounds, outerHeight: bounds.outerHeight + 4 };
-        },
       });
 
       modal.showChildView('draftStatus', draftStatusView);
 
-      this.listenTo(draftStatusView, {
+      modal.listenTo(draftStatusView, {
         async 'discard:submission'() {
           await Radio.request(`form${ form.id }`, 'clear:storedSubmission');
+          if (modal.isDestroyed()) return;
 
-          modal.getChildView('body').render();
+          modal.showChildView('body', new IframeFormView({ model: form }));
           modal.disableSubmit();
         },
       });
     });
 
-    this.listenTo(formService, {
+    modal.listenTo(formService, {
       'update:submission'(updated) {
         draftModel.set('updated', updated);
       },

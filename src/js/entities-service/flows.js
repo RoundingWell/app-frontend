@@ -16,14 +16,19 @@ const Entity = BaseEntity.extend({
     'fetch:flows:collection': 'fetchCollection',
     'fetch:flows:collection:byPatient': 'fetchFlowsByPatient',
   },
-  fetchFlow(id) {
-    return this.fetchModel(id, { data: { include: FLOW_INCLUDE } });
+  fetchFlow(id, options = {}) {
+    const data = { ...options.data, include: FLOW_INCLUDE };
+
+    return this.fetchModel(id, { ...options, data });
   },
-  fetchFlowsByPatient({ patientId, filter }) {
-    const data = { filter };
+  fetchFlowsByPatient({ patientId, filter }, /* istanbul ignore next */ options = {}) {
+    const data = {
+      ...options.data,
+      filter: { ...options.data?.filter, ...filter },
+    };
     const url = `/api/patients/${ patientId }/flows`;
 
-    return this.fetchCollection({ url, data });
+    return this.fetchCollection({ ...options, url, data });
   },
 });
 

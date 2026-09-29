@@ -1,22 +1,12 @@
-import { each, map, values, isArray, isEmpty } from 'underscore';
+import { map, reject, isArray, isEmpty } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { v7 as uuid } from 'uuid';
+
+import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 import fetcher, { handleJSON } from 'js/base/fetch';
-
-const AdderApp = App.extend({
-  restartWithParent: false,
-  beforeStart({ model, dataParams }) {
-    return model.fetch({ data: dataParams });
-  },
-  onStart({ model, collection }) {
-    collection.add(model);
-    Radio.request('ws', 'add', model);
-    this.destroy();
-  },
-});
 
 export default App.extend({
   HEART_BEAT_INTERVAL: 50000,
@@ -35,15 +25,19 @@ export default App.extend({
 
   initialize() {
     this.resources = new Backbone.Collection();
-    this.persistent = {};
+    this.managedAdds = new WeakMap();
     this.ws = {};
+    this.pendingMessages = [];
     this.reconnectAttempts = 0;
   },
 
-  getUrl() {
-    return fetcher('/api/websockets')
+  getUrl({ signal }) {
+    return fetcher('/api/websockets', { signal })
       .then(handleJSON)
-      .then(({ data }) => {
+      .then(response => {
+        if (!response) return;
+
+        const { data } = response;
         if (!data.is_enabled) return;
         const { token, query_parameter: queryParameter } = data.authentication;
 
@@ -53,15 +47,15 @@ export default App.extend({
       });
   },
 
-  beforeStart() {
-    return this.getUrl();
+  prepareStart(options, { signal }) {
+    return this.getUrl({ signal });
   },
 
-  onStart({ data }, url) {
+  onStart(app, options, url) {
     /* istanbul ignore next: Essentially avoid offline */
     if (!url) return;
     this.ws = new WebSocket(url.toString());
-    this.ws.addEventListener('open', this.onOpen.bind(this, data));
+    this.ws.addEventListener('open', this.onOpen.bind(this));
     this.ws.addEventListener('close', this.onClose.bind(this));
     this.ws.addEventListener('message', this.onMessage.bind(this));
   },
@@ -93,17 +87,20 @@ export default App.extend({
       return;
     }
 
+    if (data.name === 'Subscribe') {
+      this.pendingMessages = reject(this.pendingMessages, { name: 'Subscribe' });
+    }
+    this.pendingMessages.push(data);
+
     if (this.ws.readyState === WebSocket.CLOSED) {
-      this.restart({ data });
+      this.restart();
       return;
     }
 
     if (this.ws.readyState !== WebSocket.CONNECTING) {
-      this.start({ data });
+      this.start();
       return;
     }
-
-    this.ws.addEventListener('open', this.onOpen.bind(this, data));
   },
 
   sendData(data) {
@@ -118,10 +115,12 @@ export default App.extend({
     return !!this.resources.length || this._hasFilters();
   },
 
-  onOpen(data) {
+  onOpen() {
     this.stopReconnect();
     this.reconnectAttempts = 0;
-    if (data) this.sendData(data);
+    const messages = this.pendingMessages;
+    this.pendingMessages = [];
+    messages.forEach(message => this.sendData(message));
     this.startHeartbeat();
   },
 
@@ -134,8 +133,6 @@ export default App.extend({
   },
 
   stopHeartbeat() {
-    if (!this.heartBeat) return;
-
     clearInterval(this.heartBeat);
     this.heartBeat = null;
   },
@@ -151,7 +148,6 @@ export default App.extend({
 
     this.reconnect = setTimeout(() => {
       this.reconnect = null;
-      if (!this.isRunning() || !this._hasSubscription()) return;
       this._subscribe();
     }, this._getReconnectDelay());
 
@@ -159,8 +155,6 @@ export default App.extend({
   },
 
   stopReconnect() {
-    if (!this.reconnect) return;
-
     clearTimeout(this.reconnect);
     this.reconnect = null;
   },
@@ -171,7 +165,7 @@ export default App.extend({
     this.startReconnect();
   },
 
-  onBeforeStop() {
+  onStop() {
     this.stopHeartbeat();
     this.stopReconnect();
   },
@@ -185,17 +179,51 @@ export default App.extend({
 
   manageAdd(app, collection, type, dataParams) {
     const channel = this.getChannel();
+    const eventName = `message:${ type }`;
+    const subscriptions = this.managedAdds.get(app) || new Map();
+    subscriptions.get(type)?.();
 
-    app.listenTo(channel, `message:${ type }`, (data, model) => {
-      if (collection.get(model) || data.category === 'ResourceDeleted') return;
+    const requests = new Map();
+    let released = false;
 
-      const appName = `${ model.type }-${ model.id }`;
+    const onMessage = (data, model) => {
+      if (released || collection.get(model) || data.category === 'ResourceDeleted') return;
 
-      if (app.isRunning() && app.getChildApp(appName)) return;
+      const requestId = `${ model.type }-${ model.id }`;
+      if (requests.has(requestId)) return;
 
-      const adderApp = app.addChildApp(appName, AdderApp);
-      adderApp.start({ model, collection, dataParams });
-    });
+      const controller = new AbortController();
+      requests.set(requestId, controller);
+
+      Promise.resolve(model.fetch({ data: dataParams, signal: controller.signal }))
+        .then(() => {
+          if (controller.signal.aborted) return;
+
+          collection.add(model);
+          Radio.request('ws', 'add', model);
+        })
+        .catch(error => {
+          if (!controller.signal.aborted) addError(error);
+        })
+        .finally(() => requests.delete(requestId));
+    };
+    const release = () => {
+      if (released) return;
+      released = true;
+      requests.forEach(controller => controller.abort());
+      requests.clear();
+      app.stopListening(channel, eventName, onMessage);
+      app.off('stop', release);
+      subscriptions.delete(type);
+      if (!subscriptions.size) this.managedAdds.delete(app);
+    };
+
+    subscriptions.set(type, release);
+    this.managedAdds.set(app, subscriptions);
+    app.listenTo(channel, eventName, onMessage);
+    app.once('stop', release);
+
+    return release;
   },
 
   onMessage(event) {
@@ -223,46 +251,19 @@ export default App.extend({
     return map(resources, ({ id, type }) => ({ id, type }));
   },
 
-  // TODO: We likely want to support a more reboust way of maintaining filters
-  subscribe(resources, { shouldPersist, filters } = {}) {
-    resources = this._getResources(resources);
+  subscribe(resources, { filters } = {}) {
     this.filters = filters;
-
-    if (shouldPersist) {
-      each(resources, ({ id, type }) => {
-        this.persistent[id] = { id, type };
-      });
-
-      this.resources.reset(resources);
-      this._subscribe();
-      return;
-    }
-
-    this.resources.reset(resources);
-    this.resources.add(values(this.persistent));
+    this.resources.reset(this._getResources(resources));
     this._subscribe();
   },
 
-  add(resources, { shouldPersist } = {}) {
-    resources = this._getResources(resources);
-
-    if (shouldPersist) {
-      each(resources, ({ id, type }) => {
-        this.persistent[id] = { id, type };
-      });
-    }
-
-    this.resources.add(resources);
+  add(resources) {
+    this.resources.add(this._getResources(resources));
     this._subscribe();
   },
 
   unsubscribe(resources) {
-    resources = this._getResources(resources);
-
-    each(resources, ({ id }) => {
-      delete this.persistent[id];
-    });
-    this.resources.remove(resources);
+    this.resources.remove(this._getResources(resources));
     this._subscribe();
   },
 });

@@ -1,6 +1,5 @@
-import { View } from 'marionette';
-
 import hbs from 'handlebars-inline-precompile';
+import { View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
@@ -62,7 +61,7 @@ const AddButtonView = View.extend({
   onClick() {
     const optionlist = new AddWorkflowOptlist({
       headingText: this.getOption('headingText'),
-      ui: this.$el,
+      anchor: this.el,
       uiView: this,
       lists: this.getOption('lists'),
     });

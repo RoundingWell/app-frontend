@@ -1,19 +1,32 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { Component } from 'marionette.toolkit';
+import { Radio, View } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
 import intl from 'js/i18n';
+import { addError } from 'js/datadog';
 
 import Optionlist from 'js/components/optionlist';
 
 import './dialer-component.scss';
 
-const i18n = intl.patients.shared.components.dialerComponent;
+const i18n = intl.patients.shared.components.dialerView;
 
-export default Component.extend({
+export default View.extend({
+  tagName: 'button',
+  className: 'button button--compact dialer-component__button',
+  attributes() {
+    const attributes = { type: 'button' };
+
+    if (this.getOption('isDisabled')) attributes.disabled = 'disabled';
+
+    return attributes;
+  },
+  template: hbs`{{far "phone"}}<span>{{ @intl.patients.shared.components.dialerView.defaultText }}</span>`,
+  triggers: {
+    'click': 'click',
+  },
   initialize({ action }) {
     this.action = action;
     this.field = this.getField();
@@ -29,52 +42,28 @@ export default Component.extend({
   getLists() {
     if (this._lists) return this._lists;
 
-    this._lists = new Promise(resolve => {
-      this.field.fetch().then(() => {
-        const phones = this.getPhones();
-        resolve([{ collection: phones }]);
-      });
+    this._lists = this.field.fetch().then(() => {
+      return [{ collection: this.getPhones() }];
+    }).catch(error => {
+      this._lists = null;
+      throw error;
     });
 
     return this._lists;
   },
   getPhones() {
-    const phones = new Backbone.Collection(this.field.get('value'), {
+    return new Backbone.Collection(this.field.get('value'), {
       comparator(model) {
         return model.get('preferred') ? 0 : 1;
       },
     });
-
-    return phones;
-  },
-  viewEvents: {
-    'click': 'onClick',
-  },
-  viewOptions() {
-    const isDisabled = this.getState('isDisabled');
-
-    return {
-      tagName: 'button',
-      attributes: {
-        disabled: isDisabled,
-        type: 'button',
-      },
-      className: 'button button--compact dialer-component__button',
-      template: hbs`{{far "phone"}}<span>{{ @intl.patients.shared.components.dialerComponent.defaultText }}</span>`,
-      triggers: {
-        'click': 'click',
-      },
-    };
   },
   onClick() {
-    const view = this.getView();
-    view.$el.blur();
-
-    const lists = this.getLists();
+    this.el.blur();
 
     const optionlist = new Optionlist({
-      ui: view.$el,
-      uiView: view,
+      anchor: this.el,
+      uiView: this,
       headingText: i18n.headingText,
       itemTemplate: hbs`
         <span class="dialer-component__phone-icon">{{far "phone"}}</span>
@@ -82,15 +71,16 @@ export default Component.extend({
         <span class="dialer-component__phone-label">
           <span class="picklist__default-content dialer-component__phone-label-default">{{label}}</span>
           <span class="picklist__highlight-content dialer-component__phone-label-call">
-            {{ @intl.patients.shared.components.dialerComponent.callLabel }}{{far "arrow-up-right-from-square"}}
+            {{ @intl.patients.shared.components.dialerView.callLabel }}{{far "arrow-up-right-from-square"}}
           </span>
         </span>
       `,
-      lists,
+      lists: this.getLists(),
       isListsAsync: true,
       popWidth: 216,
     });
 
+    this.listenTo(optionlist, 'load:error', addError);
     this.listenTo(optionlist, 'select', model => {
       Radio.request('dialer', 'call', model.get('number'), this.action);
     });

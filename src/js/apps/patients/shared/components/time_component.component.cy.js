@@ -17,7 +17,7 @@ context('Time Component', function() {
     const onChange = cy.stub();
 
     mountTime({
-      isCompact: false,
+      showLabel: true,
       time: null,
     }, onChange)
       .as('root');
@@ -59,7 +59,7 @@ context('Time Component', function() {
 
   specify('renders a custom time without selecting it', function() {
     mountTime({
-      isCompact: false,
+      showLabel: true,
       time: '12:31:00',
     }).as('root');
 
@@ -70,7 +70,6 @@ context('Time Component', function() {
 
   specify('renders an empty compact control', function() {
     mountTime({
-      isCompact: true,
       time: null,
     }).as('root');
 
@@ -82,7 +81,6 @@ context('Time Component', function() {
 
   specify('labels an empty compact control when requested', function() {
     mountTime({
-      isCompact: true,
       showLabel: true,
       time: null,
     })

@@ -1,4 +1,6 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
+
+import { addError } from 'js/datadog';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
@@ -22,28 +24,28 @@ export default SubRouterApp.extend({
     'programFlow:action': 'showActionSidebar',
     'programFlow:action:new': 'showActionSidebar',
   },
+  onBeforeStartRoute() {
+    this.getChildApp('action').stop().catch(addError);
+  },
+
   onBeforeStart() {
-    this.showView(new LayoutView());
+    this.setView(new LayoutView()).render();
   },
-  beforeStart({ flowId }) {
-    return [
-      Radio.request('entities', 'fetch:programs:model:byProgramFlow', flowId),
-      Radio.request('entities', 'fetch:programFlows:model', flowId),
-      Radio.request('entities', 'fetch:programActions:collection:byProgramFlow', flowId),
-    ];
+  prepareStart({ flowId }, { signal }) {
+    return Promise.all([
+      Radio.request('entities', 'fetch:programs:model:byProgramFlow', flowId, { signal }),
+      Radio.request('entities', 'fetch:programFlows:model', flowId, { signal }),
+      Radio.request('entities', 'fetch:programActions:collection:byProgramFlow', flowId, { signal }),
+    ]);
   },
-  onFail() {
-    Radio.trigger('event-router', 'notFound');
-    this.stop();
-  },
-  onStart(options, program, flow, actions) {
+  onStart(app, options, [program, flow, actions]) {
     this.program = program;
     this.flow = flow;
     this.actions = actions;
 
     this.maintainFlowActions();
 
-    this.showChildView('contextTrail', new ContextTrailView({
+    this.getView().showChildView('contextTrail', new ContextTrailView({
       model: this.flow,
       program: this.program,
     }));
@@ -54,12 +56,21 @@ export default SubRouterApp.extend({
     this.showProgramSidebar();
 
     this.startCurrentRoute();
+    this.showView();
+  },
+
+  onStop() {
+    if (this.actions) this.stopListening(this.actions);
   },
 
   maintainFlowActions() {
-    this.listenTo(this.actions, 'change:id destroy', () => {
-      this.flow.setActions(this.actions);
+    this.listenTo(this.actions, {
+      'change:id': this.updateFlowActions,
+      'destroy': this.updateFlowActions,
     });
+  },
+  updateFlowActions() {
+    this.flow.setActions(this.actions);
   },
 
   showHeader() {
@@ -71,7 +82,7 @@ export default SubRouterApp.extend({
       'edit': this.onEditFlow,
     });
 
-    this.showChildView('header', headerView);
+    this.getView().showChildView('header', headerView);
   },
 
   showAddAction() {
@@ -83,11 +94,11 @@ export default SubRouterApp.extend({
       },
     });
 
-    this.showChildView('addAction', addActionView);
+    this.getView().showChildView('addAction', addActionView);
   },
 
   showActionList() {
-    this.showChildView('actionList', new ListView({
+    this.getView().showChildView('actionList', new ListView({
       collection: this.actions,
     }));
   },
@@ -99,19 +110,26 @@ export default SubRouterApp.extend({
       'edit': this.onEditProgram,
     });
 
-    this.showChildView('sidebar', sidebarView);
+    this.getView().showChildView('sidebar', sidebarView);
   },
 
-  showActionSidebar(flowId, actionId) {
+  async showActionSidebar(flowId, actionId) {
     const actionApp = this.getChildApp('action');
+    const routeContext = this.getCurrentRoute();
+    const stopped = await actionApp.stop();
 
-    this.listenToOnce(actionApp, {
-      'start'(options, action) {
-        this.editAction(action);
-      },
-    });
+    if (!stopped || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
 
-    this.startChildApp('action', { actionId, flowId });
+    const started = await actionApp.start({ actionId, flowId });
+
+    if (!started || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
+
+    this.editAction(actionApp.action);
+  },
+
+  onRouteError(error) {
+    this.getChildApp('action').handleStartFailure();
+    if (!error?.response) window.reportError(error);
   },
 
   editAction(action) {

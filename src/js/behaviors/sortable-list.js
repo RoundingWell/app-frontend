@@ -21,7 +21,7 @@ export default Behavior.extend({
   },
   updateDisabled() {
     const shouldDisabled = this.shouldDisable();
-    this.view.$el.toggleClass(this.getOption('draggableClass'), !shouldDisabled);
+    this.view.el.classList.toggle(this.getOption('draggableClass'), !shouldDisabled);
     this.sortable.option('disabled', shouldDisabled);
   },
   onRender() {
@@ -44,7 +44,7 @@ export default Behavior.extend({
   },
   onEnd({ oldIndex, newIndex }) {
     const movedModel = this.view.collection.models[oldIndex];
-    this.view.$el.removeClass(this.getOption('draggingClass'));
+    this.view.el.classList.remove(this.getOption('draggingClass'));
 
     this.view.collection.models.splice(oldIndex, 1);
     this.view.collection.models.splice(newIndex, 0, movedModel);
@@ -54,7 +54,7 @@ export default Behavior.extend({
   onStart({ oldIndex }) {
     const movedModel = this.view.collection.models[oldIndex];
 
-    this.view.$el.addClass(this.getOption('draggingClass'));
+    this.view.el.classList.add(this.getOption('draggingClass'));
     this.view.triggerMethod('drag:start', movedModel);
   },
 });

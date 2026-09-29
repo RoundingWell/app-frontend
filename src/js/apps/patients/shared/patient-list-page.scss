@@ -6,7 +6,6 @@
   --patient-list-page-sidebar-display: block;
   --patient-list-page-sidebar-width: 288px;
   --list-page-display: grid;
-  --list-page-header-rows: var(--list-page-header-top-height) minmax(var(--patient-list-page-header-secondary-height), auto);
 
   grid-template-columns: minmax(0, 1fr) var(--patient-list-page-sidebar-column);
   grid-template-rows: minmax(0, 1fr);
@@ -67,6 +66,19 @@
 
 .patient-list-page__all-filters-button:where([aria-expanded='true']) .patient-list-page__active-filter-dot {
   display: none;
+}
+
+.patient-list-page__results {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.patient-list-page__selection-bar {
+  flex: 0 0 auto;
+  padding-inline: 24px;
 }
 
 .patient-list-page__filters {
@@ -173,10 +185,6 @@
 }
 
 @media (width <= 1024px) {
-  .patient-list-page {
-    --list-page-header-rows: var(--list-page-header-top-height) auto;
-  }
-
   .patient-list-page__filters {
     padding-block: var(--patient-list-page-responsive-filters-padding, var(--space-4));
   }
@@ -194,7 +202,7 @@
 
 @media (width <= 720px) {
   .patient-list-page {
-    --list-page-header-rows: auto auto;
+    --list-page-header-rows: auto;
   }
 }
 
@@ -254,6 +262,10 @@
 }
 
 @media (width <= 560px) {
+  .patient-list-page__selection-bar {
+    padding-inline: var(--space-4);
+  }
+
   .patient-list-page__filters {
     flex-wrap: wrap;
     padding-block: var(--space-3);

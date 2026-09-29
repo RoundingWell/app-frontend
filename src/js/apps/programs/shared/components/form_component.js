@@ -1,5 +1,5 @@
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
+import { Radio } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 
@@ -30,25 +30,17 @@ function getForms(workspace) {
 }
 
 export default Droplist.extend({
-  viewOptions() {
-    const selected = this.getState('selected');
-    return {
-      className: 'flex',
-      template: selected ? FormTemplate : NoFormTemplate,
-      templateContext() {
-        return {
-          isDisabled: this.getOption('state').isDisabled,
-        };
-      },
-      tagName: 'div',
-      triggers: {
-        'click .js-button': 'click',
-        'focus .js-button': 'focus',
-      },
-    };
+  className: 'flex',
+  tagName: 'div',
+  getTemplate() {
+    return this.getState().get('selected') ? FormTemplate : NoFormTemplate;
   },
-  viewEvents: {
-    'click': 'onClick',
+  templateContext() {
+    return { isDisabled: this.getState().get('isDisabled') };
+  },
+  triggers: {
+    'click .js-button': 'click',
+    'focus .js-button': 'focus',
   },
   picklistOptions: {
     canClear: true,
@@ -74,10 +66,10 @@ export default Droplist.extend({
 
     this.collection = getForms(currentWorkspace);
 
-    this.setState({ selected: form });
+    this.getState().set({ selected: form });
   },
   popWidth() {
-    return this.getView().$el.outerWidth();
+    return this.el.offsetWidth;
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:form', selected);

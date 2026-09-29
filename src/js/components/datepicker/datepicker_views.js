@@ -1,29 +1,5 @@
-import { times } from 'underscore';
-import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView, Region } from 'marionette';
-
-import LayoutTemplate from './layout.hbs';
-
-import './datepicker.scss';
-
-const LayoutView = View.extend({
-  className: 'datepicker',
-  regionClass: Region.extend({ replaceElement: true }),
-  regions: {
-    calendar: '[data-calendar-region]',
-    monthPicker: '[data-month-picker-region]',
-    actions: '[data-actions-region]',
-  },
-  template: LayoutTemplate,
-  templateContext() {
-    const dayOfWeek = times(7, index => {
-      return dayjs().weekday(index);
-    });
-
-    return { dayOfWeek };
-  },
-});
+import { View, CollectionView } from 'marionette';
 
 const ActionsView = View.extend({
   template: hbs`
@@ -94,7 +70,6 @@ const CalendarView = CollectionView.extend({
 
 export {
   ActionsView,
-  LayoutView,
   MonthPickerView,
   CalendarView,
 };

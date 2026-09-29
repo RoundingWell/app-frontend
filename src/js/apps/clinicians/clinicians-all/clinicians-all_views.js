@@ -1,7 +1,6 @@
 import { every, map, sortBy } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
-import Radio from 'backbone.radio';
-import { View, CollectionView, Behavior } from 'marionette';
+import { Radio, View, CollectionView, Behavior } from 'marionette';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
@@ -30,7 +29,7 @@ const RowBehavior = Behavior.extend({
     this.view.render();
   },
   onEditing(isEditing) {
-    this.$el.toggleClass('is-selected', isEditing);
+    this.el.classList.toggle('is-selected', isEditing);
   },
 });
 
@@ -91,7 +90,7 @@ const ItemView = View.extend({
     const roleComponent = new RoleComponent({
       role: this.model.getRole(),
       isCompact: true,
-      state: { isDisabled: !this.model.isEnabled() },
+      stateOptions: { isDisabled: !this.model.isEnabled() },
     });
 
     this.listenTo(roleComponent, 'change:role', role => {
@@ -104,7 +103,7 @@ const ItemView = View.extend({
     const teamComponent = new TeamComponent({
       team: this.model.getTeam(),
       isCompact: true,
-      state: { isDisabled: !this.model.isEnabled() },
+      stateOptions: { isDisabled: !this.model.isEnabled() },
     });
 
     this.listenTo(teamComponent, 'change:team', team => {
@@ -164,7 +163,7 @@ const ListView = CollectionView.extend({
     this.searchList(null, this.state.get('searchQuery'));
   },
   onListItemRender(view) {
-    view.searchString = view.$el.text();
+    view.searchString = view.el.textContent;
   },
   onRenderChildren() {
     this.triggerMethod('filtered', this.children.pluck('model'));

@@ -1,6 +1,8 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import { version } from 'uuid';
+
+import App from 'js/base/app';
 
 import 'js/entities-service/entities/flows';
 
@@ -10,6 +12,16 @@ let service;
 const clientKey = 'clientKey';
 const workspace = 'workspaceId';
 const endpoint = 'ws://cypress-websocket/ws';
+
+function deferred() {
+  let resolve;
+  let reject;
+  const promise = new Cypress.Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, reject, resolve };
+}
 
 function getWsResponse(token, options = {}) {
   return {
@@ -37,8 +49,8 @@ Cypress.Commands.add('startService', () => {
 
   // Return a promise that resolves when the service starts
   return new Cypress.Promise(resolve => {
-    service.once('start', resolve);
-    service.start();
+    service.once('start', () => service.ws.addEventListener('open', () => resolve(), { once: true }));
+    service.send({ name: 'ping' });
   });
 });
 
@@ -71,7 +83,7 @@ context('WS Service', function() {
   specify('Constructing the websocket', function() {
     const testNotConnected = { name: 'SendTest', data: 'NOTCONNECTED' };
 
-    service.start();
+    service.send({ name: 'ping' });
 
     service.on('start', () => {
       const channel = Radio.channel('ws');
@@ -129,22 +141,19 @@ context('WS Service', function() {
 
     cy
       .get('@startService')
-      .should('be.calledTwice')
-      .then(spy => {
-        const secondCall = spy.getCall(1);
-        expect(secondCall.args[0]).to.deep.equal({
-          state: {},
-          data: {
-            name: 'Subscribe',
-            data: {
-              clientKey,
-              workspace,
-              resources: [closedTest],
-              subscriptionVersion: service.subscriptionVersion,
-            },
-          },
-        });
+      .should('be.calledTwice');
+
+    cy.get('@wsHandleMessage').should(messages => {
+      expect(messages).to.have.been.calledWith({
+        name: 'Subscribe',
+        data: {
+          clientKey,
+          workspace,
+          resources: [closedTest],
+          subscriptionVersion: service.subscriptionVersion,
+        },
       });
+    });
   });
 
   specify('Message handling', function() {
@@ -208,6 +217,193 @@ context('WS Service', function() {
       });
   });
 
+  specify('Replaces managed additions and keeps them through pending stop', function() {
+    cy.then(async() => {
+      const channel = Radio.channel('ws');
+      const firstCollection = new Backbone.Collection();
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'flow-id' });
+      const pendingModel = new Backbone.Model({ id: 'pending-flow-id' });
+      const stoppedModel = new Backbone.Model({ id: 'stopped-flow-id' });
+      const app = new Backbone.Model();
+
+      model.type = 'flows';
+      pendingModel.type = 'flows';
+      stoppedModel.type = 'flows';
+      app.isRunning = cy.stub().returns(true);
+      cy.stub(model, 'fetch').resolves(model);
+      cy.stub(pendingModel, 'fetch').resolves(pendingModel);
+      cy.stub(stoppedModel, 'fetch').resolves(stoppedModel);
+
+      service.manageAdd(app, firstCollection, 'flows');
+      service.manageAdd(app, collection, 'flows');
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+      await Cypress.Promise.resolve();
+
+      expect(firstCollection).to.have.length(0);
+      expect(collection.get(model)).to.equal(model);
+
+      app.trigger('before:stop');
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, pendingModel);
+      await Cypress.Promise.resolve();
+
+      expect(collection.get(pendingModel)).to.equal(pendingModel);
+
+      app.trigger('stop');
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, stoppedModel);
+      await Cypress.Promise.resolve();
+
+      expect(stoppedModel.fetch).to.not.be.called;
+    });
+  });
+
+  specify('Releases one managed result without canceling other owners or resource types', function() {
+    cy.then(async() => {
+      const channel = Radio.channel('ws');
+      const app = new App();
+      const otherApp = new App();
+      const actions = new Backbone.Collection();
+      const flows = new Backbone.Collection();
+      const otherActions = new Backbone.Collection();
+      const action = new Backbone.Model({ id: 'pending-action' });
+      const flow = new Backbone.Model({ id: 'retained-flow' });
+      const actionFetch = deferred();
+      const otherActionFetch = deferred();
+      action.type = 'patient-actions';
+      flow.type = 'flows';
+      const fetchAction = cy.stub(action, 'fetch');
+      fetchAction.onFirstCall().returns(actionFetch.promise);
+      fetchAction.onSecondCall().returns(otherActionFetch.promise);
+      cy.stub(flow, 'fetch').resolves(flow);
+      cy.stub(service, '_subscribe');
+      await app.start();
+      await otherApp.start();
+
+      const releaseActions = channel.request('manage:add', app, actions, 'patient-actions');
+      channel.request('manage:add', app, flows, 'flows');
+      channel.request('manage:add', otherApp, otherActions, 'patient-actions');
+      channel.trigger('message:patient-actions', { category: 'ResourceCreated' }, action);
+      const previousSignal = fetchAction.firstCall.args[0].signal;
+      const otherOwnerSignal = fetchAction.secondCall.args[0].signal;
+
+      releaseActions();
+      releaseActions();
+      expect(previousSignal.aborted).to.be.true;
+      expect(otherOwnerSignal.aborted).to.be.false;
+      actionFetch.resolve(action);
+      await Cypress.Promise.resolve();
+      expect(actions).to.have.length(0);
+      expect(service.resources).to.have.length(0);
+
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, flow);
+      otherActionFetch.resolve(action);
+      await Cypress.Promise.resolve();
+      expect(flows.get(flow)).to.equal(flow);
+      expect(otherActions.get(action)).to.equal(action);
+      expect(service.resources.pluck('id')).to.have.members([flow.id, action.id]);
+
+      // An old release handle must not remove a newer same-type registration.
+      const replacement = new Backbone.Collection();
+      channel.request('manage:add', app, replacement, 'patient-actions');
+      releaseActions();
+      fetchAction.resolves(action);
+      channel.trigger('message:patient-actions', { category: 'ResourceCreated' }, action);
+      await Cypress.Promise.resolve();
+      expect(replacement.get(action)).to.equal(action);
+
+      await app.destroy();
+      await otherApp.destroy();
+    });
+  });
+
+  specify('Aborts a pending managed addition only after stop succeeds', function() {
+    cy.then(async() => {
+      const channel = Radio.channel('ws');
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'flow-id' });
+      const fetch = deferred();
+      const stopPermission = deferred();
+      const Owner = App.extend({
+        prepareStop() {
+          return stopPermission.promise;
+        },
+      });
+      const app = new Owner();
+
+      model.type = 'flows';
+      cy.stub(model, 'fetch').returns(fetch.promise);
+
+      await app.start();
+      service.manageAdd(app, collection, 'flows');
+
+      const stopping = app.stop();
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+      expect(model.fetch).to.be.calledOnce;
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
+
+      stopPermission.resolve();
+      await stopping;
+
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.true;
+
+      fetch.resolve(model);
+      await Cypress.Promise.resolve();
+
+      expect(collection.get(model)).to.be.undefined;
+
+      await app.destroy();
+    });
+  });
+
+  specify('Completes a managed addition when stop is rejected', function() {
+    cy.then(async() => {
+      const channel = Radio.channel('ws');
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'flow-id' });
+      const fetch = deferred();
+      const stopPermission = deferred();
+      const Owner = App.extend({
+        prepareStop() {
+          return stopPermission.promise;
+        },
+      });
+      const app = new Owner();
+
+      model.type = 'flows';
+      cy.stub(model, 'fetch').returns(fetch.promise);
+
+      await app.start();
+      service.manageAdd(app, collection, 'flows');
+
+      const stopping = app.stop();
+      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
+
+      expect(model.fetch).to.be.calledOnce;
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
+
+      stopPermission.reject(new Error('Keep the current run'));
+
+      let stopError;
+      try {
+        await stopping;
+      } catch(error) {
+        stopError = error;
+      }
+      expect(stopError.message).to.equal('Keep the current run');
+      expect(app.isRunning()).to.be.true;
+      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
+
+      fetch.resolve(model);
+      await Cypress.Promise.resolve();
+
+      expect(collection.get(model)).to.equal(model);
+
+      app.prepareStop = undefined;
+      await app.destroy();
+    });
+  });
+
   specify('Heartbeat', function() {
     service.HEART_BEAT_INTERVAL = 10;
 
@@ -238,8 +434,8 @@ context('WS Service', function() {
       })
       .get('@sendData')
       .should('be.calledOnce')
-      .then(() => {
-        service.stop();
+      .then(async() => {
+        await service.stop();
         service.sendData.resetHistory();
       });
 
@@ -281,7 +477,7 @@ context('WS Service', function() {
 
       .then(() => {
         expect(version(service.subscriptionVersion)).to.equal(7);
-        channel.request('add', notifications[1], { shouldPersist: true });
+        channel.request('add', notifications[1]);
       })
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[0], notifications[1]]))
@@ -290,7 +486,7 @@ context('WS Service', function() {
         channel.request('subscribe', notifications[2]);
       })
       .get('@wsHandleMessage')
-      .should('be.calledWith', testData([notifications[2], notifications[1]]))
+      .should('be.calledWith', testData([notifications[2]]))
 
       .then(() => {
         channel.request('unsubscribe', notifications[1]);
@@ -299,7 +495,7 @@ context('WS Service', function() {
       .should('be.calledWith', testData([notifications[2]]))
 
       .then(() => {
-        channel.request('subscribe', [notifications[3]], { shouldPersist: true });
+        channel.request('subscribe', [notifications[3]]);
       })
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[3]]))
@@ -387,22 +583,17 @@ context('WS Service', function() {
     cy
       .get('@startService')
       .should('be.calledTwice')
-      .then(spy => {
-        const secondCall = spy.getCall(1);
-
-        expect(secondCall.args[0]).to.deep.equal({
-          state: {},
+      .then(() => {
+        expect(service.pendingMessages).to.deep.equal([{
+          name: 'Subscribe',
           data: {
-            name: 'Subscribe',
-            data: {
-              clientKey,
-              workspace,
-              resources: [],
-              subscriptionVersion: service.subscriptionVersion,
-              filters,
-            },
+            clientKey,
+            workspace,
+            resources: [],
+            subscriptionVersion: service.subscriptionVersion,
+            filters,
           },
-        });
+        }]);
         expect(service.subscriptionVersion).to.not.equal(subscriptionVersion);
       });
   });
@@ -423,35 +614,11 @@ context('WS Service', function() {
         service.ws.readyState = WebSocket.CLOSED;
         service.onClose();
         // No subscription, so no reconnect was scheduled.
-        expect(service.reconnect).to.be.undefined;
+        expect(service.reconnect).to.be.null;
       })
       .tick(1000)
       .get('@startService')
       .should('be.calledOnce');
-  });
-
-  specify('Skipping scheduled resubscribe after subscriptions clear', function() {
-    cy
-      .startService()
-      .then(() => {
-        service.RECONNECT_BASE_DELAY = 1000;
-        cy.stub(Math, 'random').returns(0);
-        cy.spy(service, '_subscribe').as('_subscribe');
-      });
-
-    cy.clock();
-    cy.then(() => {
-      // Schedule a reconnect with no resources, so the timer is a no-op.
-      service.startReconnect();
-    });
-
-    cy
-      .tick(1000)
-      .get('@_subscribe')
-      .should('not.be.called')
-      .then(() => {
-        expect(service.reconnect).to.be.null;
-      });
   });
 
   specify('Applying reconnect backoff and jitter', function() {
@@ -560,8 +727,7 @@ context('WS Service', function() {
         channel.request('subscribe', resource);
       })
       .get('@wsHandleMessage')
-      .should('have.been.calledTwice')
-      .then(spy => {
+      .should(spy => {
         expect(spy.lastCall.args[0]).to.deep.equal({
           name: 'Subscribe',
           data: {
@@ -579,19 +745,15 @@ context('WS Service', function() {
     cy
       .get('@startService')
       .should('be.calledTwice')
-      .then(spy => {
-        const call = spy.getCall(1);
-
-        expect(call.args[0]).to.deep.equal({
-          state: {},
+      .get('@wsHandleMessage')
+      .should(messages => {
+        expect(messages.lastCall.args[0]).to.deep.equal({
+          name: 'Subscribe',
           data: {
-            name: 'Subscribe',
-            data: {
-              clientKey,
-              workspace,
-              resources: [resource],
-              subscriptionVersion: service.subscriptionVersion,
-            },
+            clientKey,
+            workspace,
+            resources: [resource],
+            subscriptionVersion: service.subscriptionVersion,
           },
         });
       });
@@ -691,5 +853,28 @@ context('WS Service - Disabled', function() {
     channel.request('subscribe', { id: 'foo', type: 'bar' });
 
     expect(disabledService.isRunning()).to.be.false;
+  });
+
+  specify('allows another managed addition after a fetch fails', function() {
+    cy.then(async() => {
+      const app = new App();
+      const collection = new Backbone.Collection();
+      const model = new Backbone.Model({ id: 'retry-flow' });
+      model.type = 'flows';
+      const fetch = cy.stub(model, 'fetch');
+      fetch.onFirstCall().rejects(new Error('Network unavailable'));
+      fetch.onSecondCall().resolves(model);
+      await app.start();
+      const retryService = new WSService();
+      retryService.manageAdd(app, collection, 'flows');
+      Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(collection).to.have.length(0);
+      Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(collection.get(model)).to.equal(model);
+      await app.destroy();
+      await retryService.destroy();
+    });
   });
 });

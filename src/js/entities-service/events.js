@@ -9,11 +9,11 @@ const Entity = BaseEntity.extend({
     'fetch:actionEvents:collection': 'fetchActionEvents',
     'fetch:flowEvents:collection': 'fetchFlowEvents',
   },
-  fetchActionEvents(actionId) {
-    return this.fetchCollection({ url: `/api/actions/${ actionId }/activity` });
+  fetchActionEvents(actionId, options) {
+    return this.fetchCollection({ ...options, url: `/api/actions/${ actionId }/activity` });
   },
-  fetchFlowEvents(flowId) {
-    return this.fetchCollection({ url: `/api/flows/${ flowId }/activity` });
+  fetchFlowEvents(flowId, options) {
+    return this.fetchCollection({ ...options, url: `/api/flows/${ flowId }/activity` });
   },
 });
 

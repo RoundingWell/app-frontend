@@ -1,18 +1,18 @@
 import 'js/base/setup';
 import 'js/i18n';
 
-import $ from 'jquery';
 import { get } from 'underscore';
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
 import { addError } from 'js/datadog';
 
 import 'scss/provider-core.scss';
 import 'scss/app-root.scss';
 
 import initPlatform from 'js/utils/platform';
+import handleErrors from 'js/utils/handle-errors';
 
 import App from 'js/base/app';
+import listenToUserActivity from 'js/utils/user-activity';
 
 import Datepicker from 'js/components/datepicker';
 import Droplist from 'js/components/droplist';
@@ -35,10 +35,12 @@ import ErrorApp from 'js/apps/globals/error/error_app';
 import { RootView } from 'js/apps/globals/app-frame/root_views';
 import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
 
-const $document = $(document);
-
 const Application = App.extend({
   channelName: 'app',
+  childApps: {
+    bootstrap: BootstrapService,
+    dialer: DialerService,
+  },
   radioRequests: {
     'show:pop': 'showPop',
   },
@@ -48,115 +50,112 @@ const Application = App.extend({
   },
 
   // Before the application starts make sure:
-  // - A root layout is attached
+  // - A root layout is shown
   // - Global services are started
   onBeforeStart() {
-    new BootstrapService();
-    this.setView(new RootView());
+    this.showView(new RootView());
     this.configComponents();
     this.startServices();
     this.setListeners();
     // Ensure Error is the first app initialized
-    new ErrorApp({ region: this.getRegion('error') });
+    new ErrorApp({ region: this.getView().getRegion('error') });
   },
 
   configComponents() {
-    Tooltip.setRegion(this.getRegion('tooltip'));
-    const popRegion = this.getRegion('pop');
+    const rootView = this.getView();
+    Tooltip.setRegion(rootView.getRegion('tooltip'));
+    const popRegion = rootView.getRegion('pop');
     Datepicker.setRegion(popRegion);
     Droplist.setPopRegion(popRegion);
     Optionlist.setRegion(popRegion);
   },
 
   showPop(view, opts) {
-    const popRegion = this.getRegion('pop');
+    const popRegion = this.getView().getRegion('pop');
     return popRegion.show(view, opts);
   },
 
   startServices() {
+    const rootView = this.getView();
     new WSService();
-    new AlertService({ region: this.getRegion('alert') });
+    new AlertService({ region: rootView.getRegion('alert') });
     new LastestListService();
     new ModalService({
-      modalRegion: this.getRegion('modal'),
-      modalSmallRegion: this.getRegion('modalSmall'),
+      modalRegion: rootView.getRegion('modal'),
+      modalSmallRegion: rootView.getRegion('modalSmall'),
     });
     new PatientModalService();
-    new DialerService({ region: this.getRegion('overlay') });
   },
 
   setListeners() {
-    $(window).on({
-      'resize.app'() {
-        Radio.trigger('user-activity', 'window:resize');
-      },
-      'beforeunload': /* istanbul ignore next: Unloading the window loses coverage reports */ () => {
-        this.stop();
-      },
-    });
-
-    $document.on('keydown.app', function(evt) {
-      Radio.trigger('user-activity', 'document:keydown', evt);
-    });
-
-    this.setMouseListeners();
-    this.setHotkeyListeners();
-  },
-
-  setMouseListeners() {
-    $document.on('mouseover.app', function(evt) {
-      Radio.trigger('user-activity', 'document:mouseover', evt);
-    });
-
-    /* istanbul ignore next: No need to test jquery functionality */
-    $document.on('mouseleave.app', function(evt) {
-      Radio.trigger('user-activity', 'document:mouseleave', evt);
-    });
-
-    $('body').on('pointerdown.app', function(evt) {
-      Radio.trigger('user-activity', 'body:down', evt);
+    listenToUserActivity();
+    window.addEventListener('beforeunload', /* istanbul ignore next: Unloading the window loses coverage reports */ () => {
+      this.stop();
     });
   },
 
-  setHotkeyListeners() {
-    // https://github.com/jeresig/jquery.hotkeys
-    $document.on('keydown.app', null, '/', function(evt) {
-      Radio.trigger('hotkey', 'search', evt);
-    });
+  async prepareStart(options, { signal }) {
+    const bootstrapService = this.getChildApp('bootstrap');
 
-    $document.on('keydown.app', null, 'esc', function(evt) {
-      Radio.trigger('hotkey', 'close', evt);
-    });
-  },
-
-  beforeStart() {
-    return [
-      Radio.request('bootstrap', 'fetch'),
+    const [, { default: AppFrameApp }] = await Promise.all([
+      bootstrapService.start(),
       import('js/apps/globals/app-frame/app-frame_app'),
-    ];
+    ]);
+
+    signal.throwIfAborted();
+
+    return this.startAppFrame(bootstrapService, AppFrameApp);
   },
 
-  onFail(options, error) {
-    addError(get(error, 'responseData', error));
+  async startAppFrame(bootstrapService, AppFrameApp) {
+    const currentUser = bootstrapService.getCurrentUser();
 
-    if (error === 'No workspaces found' || get(error, ['response', 'status']) === 403) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
-    }
-  },
+    if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
 
-  onStart(options, currentUser, { default: AppFrameApp }) {
-    if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
-      this.getRegion('preloader').show(new PreloaderView({ notSetup: true }));
-      return;
-    }
+    this.getView().getRegion('preloader').empty();
 
-    this.getRegion('preloader').empty();
-
-    const appFrameApp = this.addChildApp('appFrame', AppFrameApp);
-
+    const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
     this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
 
-    appFrameApp.start({ view: this.getView().appView });
+    const appView = this.getView().appView;
+    await this.getChildApp('appFrame').start({
+      contentRegion: appView.getRegion('content'),
+      navRegion: appView.getRegion('nav'),
+      setNavMinimized: appView.setNavMinimized.bind(appView),
+      sidebarRegion: appView.getRegion('sidebar'),
+    });
+
+    return { currentUser };
+  },
+
+  startDialer() {
+    return this.getChildApp('dialer').start({
+      region: this.getView().getRegion('overlay'),
+    });
+  },
+
+  showStartFailure(error) {
+    const isNotSetup = error === 'No workspaces found' || get(error, ['response', 'status']) === 403;
+
+    if (!isNotSetup && this.getChildApp('bootstrap').isRunning()) {
+      return handleErrors(error).catch(reportedError => window.reportError(reportedError));
+    }
+
+    addError(get(error, 'responseData', error));
+
+    if (isNotSetup) {
+      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.showView();
+    }
+  },
+
+  onStart(app, options, { currentUser }) {
+    this.showView();
+    this.startDialer().catch(addError);
+
+    if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
+      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+    }
   },
 
   startHistory() {
@@ -167,12 +166,16 @@ const Application = App.extend({
 });
 
 function startApp() {
-  const app = new Application();
+  const app = new Application({
+    region: {
+      el: '#root',
+      replaceElement: true,
+    },
+  });
 
-  app.start();
+  return app.start().catch(error => app.showStartFailure(error));
 }
 
 export {
   startApp,
-  Application,
 };

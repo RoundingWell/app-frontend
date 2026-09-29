@@ -280,6 +280,7 @@
   }
 
   .button__checkbox-icon {
+    box-sizing: border-box;
     height: 16px;
     width: 16px;
   }
@@ -296,7 +297,6 @@
 .button__checkbox-icon--empty {
   border: 1.5px solid currentcolor;
   border-radius: 2px;
-  box-sizing: border-box;
   color: #{$black-80};
 
   use {

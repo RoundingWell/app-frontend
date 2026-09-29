@@ -43,22 +43,19 @@ These methods should be tested in isolation and exported from the module for tes
 
 For instance if one of our methods accepts a `dayjs()` instance as an argument, we do not need to test that dayjs can handle various ranges of dates, only the values of dayjs that are relevant to the behavior of the function.
 
-**We should limit DOM/view related testing.**
+**Keep DOM tests at the correct boundary.**
 
-Whether a view's template displays the correct DOM, or whether the triggers/events work is more for integration testing than for unit testing. Most DOM/view related testing is mostly Marionette implementation.
+Use colocated Cypress component specs only for generic reusable UI behavior,
+including base infrastructure and genuinely generic components that happen to
+live under `apps/**`. Cover feature and application behavior under `apps/**`
+through E2E flows. A passing component spec does not establish that application
+code is reachable; verify and remove dead code rather than retaining it behind
+component-only coverage.
 
-**...however we may want to unit test portions of a View (even private ones).**
-
-Particularly portions that are complicated such as an algorithm that decides which child view to display in a collection.
-
-We also may want to test `templateContext` directly by mocking the `context` Marionette would give the function and testing the output.
-
-```js
-// where myTestObj is essentially the equivalent of _.clone(fooModel.attributes)
-expect(_.bind(SomeView.prototype.templateHelpers, myTestObj)).to.deep.equal(myExpectedObj);
-```
-
-Even then we want to make sure we are not retesting another utility. For example we do not need to test `return someCount + _.pluralize('foo', someCount);` Testing this `templateContext` would essentially be testing an implementation of `_.pluralize` and little else.
+Test the public behavior owned by this repo, not Marionette's rendering or
+event-delegation implementation. Use Marionette's upstream `marionette` skill to
+read the version-matched `docs/marionette.view.md` and
+`docs/dom.interactions.md` contracts.
 
 ## Testing Priorities
 
@@ -81,6 +78,5 @@ They should be reusable and generic. Collections of models, specifically unique 
 
 * [Mocha Test Framework](https://mochajs.org/)
 * [Chai Assertion Library](https://github.com/chaijs/chai)
-* [Chai jQuery plugin](http://chaijs.com/plugins/chai-jq/)
 * [Sinon spies and stubs](https://github.com/sinonjs/sinon)
 * [Sinon-Chai Assertions](https://github.com/domenic/sinon-chai)

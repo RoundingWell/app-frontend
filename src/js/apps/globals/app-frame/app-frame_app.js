@@ -1,99 +1,48 @@
-import { invoke, some } from 'underscore';
-import Radio from 'backbone.radio';
-import Backbone from 'backbone';
+import { Radio } from 'marionette';
 
-import App from 'js/base/app';
+import { addError } from 'js/datadog';
 
-import SidebarService from 'js/services/sidebar';
+import RouteBaseApp from 'js/base/route-base-app';
 
 import NavApp from 'js/apps/globals/nav/nav_app';
+import WorkspaceApp from './workspace_app';
 
-export default App.extend({
-  routers: [],
-  onBeforeStart() {
-    this.getRegion('content').empty();
-
-    if (this.isRestarting()) return;
-
-    const workspaceCh = Radio.channel('workspace');
-
-    this.listenTo(workspaceCh, 'change:workspace', this.restart);
-
-    this.navApp = new NavApp({ region: this.getRegion('nav') });
-    const navState = this.navApp.getState();
+export default RouteBaseApp.extend({
+  childApps: {
+    nav: NavApp,
+    workspace: WorkspaceApp,
+  },
+  initialize() {
+    const navState = this.getChildApp('nav').getState();
 
     this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
+    this.listenTo(Radio.channel('workspace'), 'change:workspace', this.onChangeWorkspace);
+  },
+  onBeforeStart(app, options) {
+    this.shellOptions = options;
+    const navState = this.getChildApp('nav').getState();
     this.onChangeNavMinimized(navState, navState.get('isMinimized'));
-
-    new SidebarService({ region: this.getRegion('sidebar') });
   },
   onChangeNavMinimized(state, isMinimized) {
-    this.getView().setNavMinimized(isMinimized);
+    this.shellOptions.setNavMinimized(isMinimized);
   },
-  beforeStart() {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
-    const hasDashboards = currentUser.can('dashboards:view');
-    const hasClinicians = currentUser.can('clinicians:manage');
-    const hasPrograms = currentUser.can('programs:manage');
+  async prepareStart(options, { signal }) {
+    await this.getChildApp('nav').start({ region: options.navRegion });
+    signal.throwIfAborted();
 
-    return [
-      Radio.request('workspace', 'fetch'),
-      import('js/apps/patients/patients-main_app'),
-      hasDashboards ?
-        import('js/apps/dashboards/dashboards-main_app.js') :
-        null,
-      hasClinicians ?
-        import('js/apps/clinicians/clinicians-main_app.js') :
-        null,
-      hasPrograms ? import('js/apps/programs/programs-main_app.js') : null,
-    ];
+    return this.startWorkspace(Radio.request('workspace', 'current'));
   },
-  onStart(
-    options,
-    currentWorkspace,
-    PatientsMainApp,
-    DashboardsMainApp,
-    CliniciansMainApp,
-    ProgramsMainApp,
-  ) {
-    this.workspaceSlug = currentWorkspace.get('slug');
-
-    this.initRouter(PatientsMainApp);
-    this.initRouter(DashboardsMainApp);
-    this.initRouter(CliniciansMainApp);
-    this.initRouter(ProgramsMainApp);
-
-    Backbone.history.loadUrl();
-
-    if (!some(this.routers, router => router.isRunning())) {
-      Radio.trigger('event-router', 'notFound');
-    }
+  onChildCleanupError(error) {
+    addError(error);
   },
-  onStop() {
-    invoke(this.routers, 'destroy');
-    this.routers = [];
-
-    if (!this.isRestarting()) this.navApp.destroy();
-  },
-  initRouter(module) {
-    const RouterApp = module?.default;
-    if (!RouterApp) return;
-
-    const router = new RouterApp({
-      region: this.getRegion('content'),
-      workspaceSlug: this.workspaceSlug,
+  startWorkspace(workspace) {
+    return this.selectChild('workspace', {
+      start: app => app.start({ ...this.shellOptions, workspace }),
     });
-
-    this.listenTo(router, 'before:appRoute', this.onBeforeAppRoute);
-
-    this.routers.push(router);
-    return router;
   },
-  onBeforeAppRoute(router, routeContext) {
-    const { event, eventArgs } = routeContext;
+  onChangeWorkspace(workspace) {
+    this.getChildApp('nav').refreshWorkspace();
 
-    Radio.request('nav', 'select', router.routerAppName, event, eventArgs);
-    Radio.request('sidebar', 'stop');
-    Radio.request('history', 'set:latestList', routeContext);
+    this.startWorkspace(workspace).catch(addError);
   },
 });

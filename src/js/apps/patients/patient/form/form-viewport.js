@@ -1,5 +1,4 @@
-import Radio from 'backbone.radio';
-import { Behavior } from 'marionette';
+import { Radio, Behavior } from 'marionette';
 
 const FRAME_BOTTOM_OVERFLOW = 8;
 const FRAME_MIN_HEIGHT = 320;
@@ -11,11 +10,11 @@ const userActivityCh = Radio.channel('user-activity');
 export default Behavior.extend({
   ui: {
     header: '[data-form-viewport-header]',
+    widgets: '[data-widgets-header-region]',
   },
   onInitialize() {
     this.isExpanded = !!this.view.getOption('isExpanded');
     this.viewportView = this.view.getOption('viewportView');
-    if (!this.viewportView) throw new Error('FormViewportBehavior requires a viewport view');
 
     this.channel = Radio.channel(`form${ this.view.model.id }`);
   },
@@ -100,8 +99,6 @@ export default Behavior.extend({
     this.currentHeight = null;
   },
   startResizeObserver() {
-    if (!window.ResizeObserver) return;
-
     this.resizeObserver = new window.ResizeObserver(() => this.scheduleFrameSizing());
     [
       this.viewportView.getViewportElement(),
@@ -111,7 +108,7 @@ export default Behavior.extend({
   },
   getWidgetsElement() {
     const widgetsRegion = this.view.getRegion('widgets');
-    return widgetsRegion.currentView?.el || this.view.el.querySelector('[data-widgets-header-region]');
+    return widgetsRegion.currentView?.el || this.getUI('widgets')[0];
   },
   scheduleFrameSizing() {
     if (this.isExpanded || this.frameSizingFrame != null) return;

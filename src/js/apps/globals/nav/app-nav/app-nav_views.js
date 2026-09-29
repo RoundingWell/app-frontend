@@ -1,6 +1,5 @@
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View, CollectionView } from 'marionette';
+import { Radio, View, CollectionView } from 'marionette';
 
 import intl from 'js/i18n';
 
@@ -49,29 +48,27 @@ function getNavMenuButtonAttributes(label) {
 const MainNavDroplist = Droplist.extend({
   popWidth: 248,
   position() {
-    const { outerHeight } = this.getView().getBounds();
+    const { outerHeight } = this.getBounds();
 
     return {
       top: outerHeight,
       left: 16,
     };
   },
-  viewOptions: {
-    tagName: 'button',
-    className: 'app-nav__header js-nav-menu',
-    attributes() {
-      return getNavMenuButtonAttributes(i18n.mainNavDroplist.workspaceMenu);
-    },
-    template: WorkspaceButtonTemplate,
-    templateContext() {
-      const currentUser = Radio.request('bootstrap', 'currentUser');
-      const currentWorkspace = Radio.request('workspace', 'current');
+  tagName: 'button',
+  className: 'app-nav__header js-nav-menu',
+  attributes() {
+    return getNavMenuButtonAttributes(i18n.mainNavDroplist.workspaceMenu);
+  },
+  template: WorkspaceButtonTemplate,
+  templateContext() {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+    const currentWorkspace = Radio.request('workspace', 'current');
 
-      return {
-        userName: currentUser.get('name'),
-        workspaceName: currentWorkspace.get('name'),
-      };
-    },
+    return {
+      userName: currentUser.get('name'),
+      workspaceName: currentWorkspace.get('name'),
+    };
   },
   picklistOptions() {
     return {
@@ -98,7 +95,7 @@ const MainNavDroplist = Droplist.extend({
 
     if (model.get('event') === 'whats-new') return;
 
-    this.setState('selected', model);
+    this.getState().set('selected', model);
   },
   onSelect({ model }) {
     if (model.get('event') === 'whats-new') {
@@ -116,14 +113,12 @@ const MainNavDroplist = Droplist.extend({
 
 const AdminToolsDroplist = Droplist.extend({
   popWidth: 248,
-  viewOptions: {
-    tagName: 'button',
-    className: 'flex flex-align-center app-nav__bottom-button js-nav-menu',
-    attributes() {
-      return getNavMenuButtonAttributes(i18n.adminToolsDroplist.adminTools);
-    },
-    template: hbs`{{fas "ellipsis"}}<span class="app-nav__label u-text--overflow">{{ @intl.globals.appNav.appNavViews.adminToolsDroplist.adminTools }}</span>`,
+  tagName: 'button',
+  className: 'flex flex-align-center app-nav__bottom-button js-nav-menu',
+  attributes() {
+    return getNavMenuButtonAttributes(i18n.adminToolsDroplist.adminTools);
   },
+  template: hbs`{{fas "ellipsis"}}<span class="app-nav__label u-text--overflow">{{ @intl.globals.appNav.appNavViews.adminToolsDroplist.adminTools }}</span>`,
   picklistOptions() {
     return {
       className: 'picklist app-nav__picklist',
@@ -204,7 +199,7 @@ const BottomNavView = View.extend({
     return i18n.appNavView.minimizeMenu;
   },
   updateMinimizeMenuLabel() {
-    this.ui.minimizeMenu.attr('aria-label', this.getMinimizeMenuLabel());
+    this.ui.minimizeMenu[0].setAttribute('aria-label', this.getMinimizeMenuLabel());
   },
 });
 
@@ -226,8 +221,8 @@ const AppNavView = View.extend({
   events: {
     'focusin': 'onFocusIn',
     'focusout': 'onFocusOut',
-    'pointerenter': 'onPointerEnter',
-    'pointerleave': 'onPointerLeave',
+    'pointerover': 'onPointerEnter',
+    'pointerout': 'onPointerLeave',
   },
   template: LayoutTemplate,
   modelEvents: {
@@ -239,12 +234,16 @@ const AppNavView = View.extend({
     this.updateDisplayState();
   },
   updateDisplayState() {
-    this.$el.attr('class', getAppNavClassName(this.model));
+    this.el.className = getAppNavClassName(this.model);
   },
   onPointerEnter(evt) {
+    if (this.el.contains(evt.relatedTarget)) return;
+
     this.trigger('pointer:enter', evt);
   },
   onPointerLeave(evt) {
+    if (this.el.contains(evt.relatedTarget)) return;
+
     this.trigger('pointer:leave', evt);
   },
   onFocusIn(evt) {
@@ -288,7 +287,7 @@ const NavItemView = View.extend({
     Radio.trigger('event-router', this.model.get('event'), ...this.model.get('eventArgs'));
   },
   updateSelected() {
-    this.$el.toggleClass('is-selected', this.state.get('selectedNav') === this.model);
+    this.el.classList.toggle('is-selected', this.state.get('selectedNav') === this.model);
   },
 });
 
@@ -321,7 +320,7 @@ const PatientsAppNav = View.extend({
   onSearchActive(isActive) {
     /* istanbul ignore if: No need to test safeguard */
     if (this.isDestroyed()) return;
-    this.ui.search.toggleClass('is-active', isActive);
+    this.ui.search[0].classList.toggle('is-active', isActive);
   },
 });
 

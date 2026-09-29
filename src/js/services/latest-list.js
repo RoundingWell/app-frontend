@@ -1,4 +1,4 @@
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
@@ -16,10 +16,7 @@ export default App.extend({
 
     if (meta.isList) {
       this._setLatestList(event, eventArgs);
-      return;
     }
-
-    if (meta.clearLatestList) this._setLatestList(false);
   },
 
   _setLatestList(event,

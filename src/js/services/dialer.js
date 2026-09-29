@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import Radio from 'backbone.radio';
+import { Radio } from 'marionette';
 import parsePhoneNumber from 'libphonenumber-js/min';
 
 import App from 'js/base/app';
@@ -10,7 +10,6 @@ export default App.extend({
   channelName: 'dialer',
   radioRequests: {
     'call': 'call',
-    'init': 'init',
     'showPatientLinks': 'showPatientLinks',
     'five9Call': 'five9Call',
     'ringcentralCall': 'ringcentralCall',
@@ -22,29 +21,58 @@ export default App.extend({
     patients.currentPatientId = patientId;
     patients.trigger('change:currentPatientId');
   },
-  async init() {
-    /* istanbul ignore next: prevent re-initialization */
-    if (this._call) return;
-
+  async prepareStart(options, { signal }) {
     const dialerSetting = Radio.request('settings', 'get', 'dialer');
+    if (!dialerSetting) return;
 
+    const provider = await this.loadProvider(dialerSetting);
+
+    signal.throwIfAborted();
+
+    if (!provider) return;
+
+    if (!this.hasChildApp('provider')) {
+      this.addChildApp('provider', new provider.DialerApp(provider.options));
+    }
+
+    await this.getChildApp('provider').start({ region: this.getRegion() });
+  },
+  async loadProvider(dialerSetting) {
     if (dialerSetting === 'five9') {
       const currentOrg = Radio.request('bootstrap', 'organization');
-      const providerName = currentOrg.get('name');
+      const { default: DialerApp } = await import('@roundingwell/care-ops-five9');
 
-      const { call, init } = await import('@roundingwell/care-ops-five9');
-      this._call = call;
-      init({ region: this.getRegion(), providerName, patients });
+      return {
+        DialerApp,
+        options: { patients, providerName: currentOrg.get('name') },
+      };
     }
 
     if (dialerSetting === 'ringcentral') {
-      const { call, init } = await import('@roundingwell/care-ops-ringcentral');
-      this._call = call;
-      init({ region: this.getRegion(), patients });
+      const { default: DialerApp } = await import('@roundingwell/care-ops-ringcentral');
+
+      return { DialerApp, options: { patients } };
     }
   },
+  onStart() {
+    if (!this._pendingCall) return;
+
+    const { number, action } = this._pendingCall;
+    this._pendingCall = null;
+    this.call(number, action);
+  },
+  onStop() {
+    this._pendingCall = null;
+  },
   call(number, action) {
-    this._call(number, action);
+    const provider = this.getChildApp('provider');
+
+    if (!provider || !this.isRunning()) {
+      this._pendingCall = { number, action };
+      return;
+    }
+
+    provider.call(number, action);
   },
   showPatientLinks(callData) {
     if (!callData) {

@@ -25,18 +25,13 @@ const itemTemplate = hbs`{{formatMessage (intlGet "patients.shared.components.du
 
 export default Droplist.extend({
   collection: new Backbone.Collection(durations),
-  isCompact: false,
+  className: 'button button--compact',
+  popWidth: null,
   getTemplate() {
-    if (!this.getState('selected')) {
+    if (!this.getState().get('selected')) {
       return this.getOption('hideDefaultText') ? IconOnlyNoDurationTemplate : NoDurationTemplate;
     }
     return DurationTemplate;
-  },
-  viewOptions() {
-    return {
-      className: this.getOption('isCompact') ? 'button button--compact' : 'button button--secondary w-100',
-      template: this.getTemplate(),
-    };
   },
   picklistOptions: {
     canClear: true,
@@ -49,10 +44,7 @@ export default Droplist.extend({
   initialize({ duration }) {
     const selected = this.collection.get(duration);
 
-    this.setState({ selected });
-  },
-  popWidth() {
-    return this.getOption('isCompact') ? null : this.getView().$el.outerWidth();
+    this.getState().set({ selected });
   },
   onChangeSelected(selected) {
     const duration = selected ? selected.id : 0;

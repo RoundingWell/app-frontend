@@ -1,6 +1,5 @@
-import Radio from 'backbone.radio';
 import hbs from 'handlebars-inline-precompile';
-import { View } from 'marionette';
+import { Radio, View } from 'marionette';
 
 import PreloadRegion from 'js/regions/preload_region';
 
