@@ -1,0 +1,19 @@
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_7d9748a0496f68::t_4da1cc32eb3bba 370
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7f0f4577a1f0554d131c4b3e9ec4453fba08a3f6",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
