@@ -8,6 +8,11 @@ Cypress.on('window:before:load', function(win) {
 
 /* eslint-disable-next-line mocha/no-top-level-hooks */
 beforeEach(function() {
+  // Register first so endpoint stubs take precedence.
+  cy.intercept('/api/**', req => {
+    throw new Error(`Unstubbed API request: ${ req.method } ${ req.url }`);
+  });
+
   // https://docs.cypress.io/api/commands/intercept#cyintercept-and-request-caching
   cy.intercept(
     '/api/**/*',
