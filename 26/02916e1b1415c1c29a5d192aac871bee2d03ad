@@ -1,0 +1,43 @@
+src/js/apps/patients/patient/flow/flow_app.js
+  s_33bb8cd239820b::t_16c694ca5735e7 58,77,311,313
+src/js/apps/patients/patient/flow/flow_views.js
+  s_33bb8cd239820b::t_596db8006437b5 222-228,402-407
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_33bb8cd239820b::t_333fa23d6d00da 551-682,1438-1444,1449-1453,1460,1462-1466,1468-1470,1472-1475,1477-1480,1482-1488,1490-1500
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_33bb8cd239820b::t_d1f1c6ae52921f 245-253
+src/js/apps/patients/patient/patient_app.js
+  s_33bb8cd239820b::t_65db82d013e9e4 35,111-114
+src/js/apps/patients/patients-main_app.js
+  s_33bb8cd239820b::t_3c82a909cb5c66 64-67
+src/js/apps/patients/schedule/day-item.hbs
+  s_33bb8cd239820b::t_00bf707abd3ad3 18-19
+src/js/apps/patients/schedule/schedule-list.scss
+  s_33bb8cd239820b::t_0f5f43c6625e6b 58,155-186,259,271-279
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_33bb8cd239820b::t_79fb6bce4ddea1 7,517-539,1048-1051,1099,1164-1168,1352-1356
+src/js/apps/patients/schedule/schedule_views.js
+  s_33bb8cd239820b::t_fed78114ee5c11 153,162,235-238
+src/js/apps/patients/worklist/action_views.js
+  s_33bb8cd239820b::t_f6f63e376866da 97
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_33bb8cd239820b::t_e670a649289979 1584-1593,1620-1622
+src/js/base/routing.md
+  s_33bb8cd239820b::t_1d3a898cf2804b 70-79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2602916e1b1415c1c29a5d192aac871bee2d03ad",
+  "prompts": {},
+  "sessions": {
+    "s_33bb8cd239820b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f0cd-bbc3-7263-bd22-4fdeb98ce196",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
