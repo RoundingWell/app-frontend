@@ -2870,6 +2870,10 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         return fx;
       })
       .routePatientByFlow()
+      .routeFormByAction()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow');
 

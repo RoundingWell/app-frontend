@@ -54,6 +54,7 @@ context('Patient Action Form', function() {
 
   specify('deleted action', function() {
     const deletedActionId = uuid();
+    const testPatient = getPatient({ id: routePatientId });
 
     const errors = getErrors({
       status: '410',
@@ -63,6 +64,11 @@ context('Patient Action Form', function() {
 
     cy
       .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
       .intercept('GET', '/api/actions/*', {
         statusCode: 410,
         body: { errors },
@@ -2061,6 +2067,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeFormResponse(fx => {
+        fx.data = testFormResponse;
+
+        return fx;
+      })
       .routeLatestFormResponse()
       .routeFormDefinition()
       .routeFormActionFields()
@@ -2188,7 +2199,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .contains('Update');
+      .contains('Update')
+      .wait('@routeFormResponse');
   });
 
   specify('submit and go back - action without a flow', function() {
