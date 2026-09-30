@@ -1,6 +1,6 @@
 import { findIndex, map, range } from 'underscore';
 
-import { getResource, getRelationship } from 'helpers/json-api';
+import { getRelationship } from 'helpers/json-api';
 
 import { getAction } from 'support/api/actions';
 import { getInteraction } from 'support/api/interactions';
@@ -40,36 +40,8 @@ context('patient interactions', function() {
         discharge_location: 'Home',
       },
     });
-    const createdEvent = getResource({
-      id: '01900000-0000-7000-8000-000000000001',
-      event: { type: 'InteractionCreated' },
-      recorded_at: '2026-09-23T10:00:00Z',
-      channel: 'sms',
-      direction: 'inbound',
-      message: 'Please call us to schedule your follow-up.',
-    }, 'events');
-    const updatedEvent = getResource({
-      id: '01900000-0000-7000-8000-000000000002',
-      event: { type: 'InteractionUpdated' },
-      recorded_at: '2026-09-24T10:00:00Z',
-      note: 'Patient confirmed the appointment.',
-      made_contact: false,
-    }, 'events');
-    cy
-      .intercept('GET', '/api/events?*', req => {
-        const cursor = new URL(req.url).searchParams.get('page[cursor]');
-        req.reply({
-          body: { data: cursor ? [createdEvent] : [updatedEvent], meta: { next_cursor: cursor ? null : 'older-events' } },
-        });
-      })
-      .as('interactionEvents');
-
     cy
       .routesForPatientAction()
-      .routeRoles(fx => ({
-        ...fx,
-        data: map(fx.data, role => role.attributes.name === 'manager' ? { ...role, attributes: { ...role.attributes, name: 'rw' } } : role),
-      }))
       .routePatient(fx => ({ ...fx, data: patient }))
       .routePatientInteractions({ data: [actionInteraction, flowInteraction], included: [action, flow, dischargeFlow] })
       .visit(`/patient/${ patient.id }/interactions`);
@@ -94,64 +66,6 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Please call us to schedule your follow-up.')
       .should('contain', 'Alex Morgan');
-    cy
-      .contains('.patient-interactions__item', 'Please call us to schedule your follow-up.')
-      .contains('Show details')
-      .click();
-    cy
-      .wait('@interactionEvents')
-      .its('request.url')
-      .then(url => {
-        expect(new URL(url).searchParams.get('filter[resource]')).to.equal(actionInteraction.id);
-        expect(new URL(url).searchParams.get('filter[name]')).to.equal('InteractionEvent');
-      });
-    cy.wait('@interactionEvents');
-    cy
-      .get('[role="dialog"]')
-      .within(() => {
-        cy
-          .contains('Interaction created')
-          .should('be.visible');
-        cy
-          .contains('Interaction updated')
-          .should('be.visible');
-        cy
-          .contains('Patient confirmed the appointment.')
-          .should('be.visible');
-        cy
-          .contains('No')
-          .should('be.visible');
-        cy
-          .contains('Done')
-          .click();
-      });
-    cy
-      .get('[role="dialog"]')
-      .should('not.exist');
-    cy.intercept('GET', '/api/events?*', { body: { data: [], meta: { next_cursor: null } } });
-    cy
-      .contains('.patient-interactions__item', 'Please call us to schedule your follow-up.')
-      .contains('Show details')
-      .click();
-    cy
-      .contains('No events recorded for this interaction.')
-      .should('be.visible');
-    cy
-      .get('[role="dialog"]')
-      .contains('Done')
-      .click();
-    cy.intercept('GET', '/api/events?*', { statusCode: 500, body: { errors: [{ title: 'Unavailable' }] } });
-    cy
-      .contains('.patient-interactions__item', 'Please call us to schedule your follow-up.')
-      .contains('Show details')
-      .click();
-    cy
-      .contains('Interaction details could not be loaded.')
-      .should('be.visible');
-    cy
-      .get('[role="dialog"]')
-      .contains('Done')
-      .click();
     cy
       .get('.patient-interactions__action')
       .contains('Team Referral Flow: SMS Outreach')
@@ -188,15 +102,6 @@ context('patient interactions', function() {
     cy
       .get('.patient-interactions__item--continues')
       .should('have.length', 1);
-    cy
-      .contains('.patient-interactions__item', 'Grouped message 1')
-      .contains('Show details')
-      .click();
-    cy
-      .get('[role="dialog"]')
-      .contains('Done')
-      .click();
-
     const history = map(range(80), index => {
       const interaction = getInteraction({ metadata: { message: `Follow-up message ${ index }` } });
       interaction.attributes.occurred_at = new Date(Date.UTC(2026, 4, 1 + index)).toISOString();
@@ -378,9 +283,6 @@ context('patient interactions', function() {
       .should('contain', 'Outbound Call')
       .and('contain', 'Left Voicemail')
       .and('contain', 'Left a message asking the patient to call back.');
-    cy
-      .get('.patient-interactions__item .js-details')
-      .should('not.exist');
     cy
       .contains('.patient-interactions__item', 'I can come in tomorrow morning.')
       .should('contain', patient.attributes.first_name);

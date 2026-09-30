@@ -12,7 +12,6 @@ import Datepicker from 'js/components/datepicker';
 import Optionlist from 'js/components/optionlist';
 
 import { getInteractionPresentation } from './interaction-presentation';
-import { showInteractionDetails } from './interaction-details_app';
 
 import 'js/apps/patients/shared/patient-pages.scss';
 
@@ -51,17 +50,12 @@ const InteractionItemView = View.extend({
         </div>{{/unless}}
         {{#if summary}}<p class="patient-interactions__summary">{{ summary }}</p>{{/if}}
         {{#each details}}<p class="patient-interactions__detail">{{ label }}: {{ value }}</p>{{/each}}
-        {{#if canShowDetails}}<button class="button button--link js-details" type="button">{{ @intl.patients.patient.interactions.showDetails }}</button>{{/if}}
       </div>
     </div>
   `,
-  ui: { action: '.js-action', details: '.js-details' },
+  ui: { action: '.js-action' },
   triggers: {
     'click @ui.action': 'click:action',
-    'click @ui.details': 'click:details',
-  },
-  onClickDetails() {
-    showInteractionDetails(this.model, this);
   },
   setGrouping(continuation, continues) {
     this.el.classList.toggle('patient-interactions__item--continuation', continuation);
@@ -89,7 +83,6 @@ const InteractionItemView = View.extend({
       ...presentation,
       isMessage: presentation.kind === 'message',
       workName: getWorkName(this.model),
-      canShowDetails: Radio.request('bootstrap', 'currentUser').getRole().get('name') === 'rw',
     };
   },
   onRender() {

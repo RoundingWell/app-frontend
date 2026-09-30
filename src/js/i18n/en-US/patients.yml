@@ -60,26 +60,6 @@ careOptsFrontend:
         loading: Loading interactions…
         empty: No interactions yet.
         loadError: Interactions could not be loaded.
-        showDetails: Show details
-        detailsTitle: Interaction details
-        done: Done
-        eventsLoading: Loading interaction details…
-        eventsEmpty: No events recorded for this interaction.
-        eventsError: Interaction details could not be loaded.
-        eventCreated: Interaction created
-        eventScheduled: Interaction scheduled
-        eventCompleted: Interaction completed
-        eventUpdated: Interaction updated
-        eventCommentAdded: Comment added
-        eventDeleted: Interaction deleted
-        eventOther: Interaction event
-        metadataSnapshot: Details recorded with this update
-        note: Note
-        contactMade: Contact made
-        occurredAt: Occurred
-        expectedAt: Scheduled for
-        yes: 'Yes'
-        no: 'No'
       action:
         actionApp:
           notFound: The Action you requested does not exist.
