@@ -9,6 +9,10 @@ context('patient action loading state', function() {
   specify('shows stable action structure without optional sections while loading', function() {
     let releaseActivity;
     let releasePatient;
+    let releaseWorkspacePatient;
+    const workspacePatientResponse = new Cypress.Promise(resolve => {
+      releaseWorkspacePatient = resolve;
+    });
     const activityResponse = new Cypress.Promise(resolve => {
       releaseActivity = resolve;
     });
@@ -53,9 +57,10 @@ context('patient action loading state', function() {
         });
       })
       .as('routeDelayedPatient')
-      .intercept('GET', '/api/workspace-patients/*', {
-        delay: 5000,
-        body: { data: workspacePatient, included: [] },
+      .intercept('GET', '/api/workspace-patients/*', req => {
+        return workspacePatientResponse.then(() => {
+          req.reply({ body: { data: workspacePatient, included: [] } });
+        });
       })
       .as('routeDelayedWorkspacePatient')
       .intercept('GET', `/api/actions/${ action.id }/form`, {
@@ -117,9 +122,11 @@ context('patient action loading state', function() {
       .should('be.visible');
 
     cy
-      .get('.patient-sidebar__sidebars .patient-sidebar__loader')
+      .get('.patient-sidebar__sidebars')
+      .find('.patient-sidebar__loader')
       .should('be.visible')
-      .and('have.attr', 'aria-busy', 'true');
+      .and('have.attr', 'aria-busy', 'true')
+      .then(releaseWorkspacePatient);
 
     cy
       .wait('@routeDelayedAction')
@@ -127,7 +134,8 @@ context('patient action loading state', function() {
       .should('contain', 'Loading State Action');
 
     cy
-      .get('.patient-action__form-region .loader')
+      .get('.patient-action__form-region')
+      .find('.loader')
       .should('not.exist');
 
     cy
@@ -139,7 +147,8 @@ context('patient action loading state', function() {
       .then(releaseActivity);
 
     cy
-      .get('.patient-action__attachments .loader')
+      .get('.patient-action__attachments')
+      .find('.loader')
       .should('not.exist');
 
     cy

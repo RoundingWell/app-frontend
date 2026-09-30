@@ -209,6 +209,8 @@ export default App.extend({
       });
   },
   onActionDestroy() {
+    // Stop removes the model listener; this only protects an already-dispatched callback.
+    /* istanbul ignore if */
     if (!this.isRunning()) return;
 
     this.navigateAfterDelete();

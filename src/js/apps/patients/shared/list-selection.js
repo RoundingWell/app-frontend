@@ -19,6 +19,8 @@ export default MnObject.extend({
     this.updateSelection();
   },
   updateSelection() {
+    // Selection controls are disabled until collection ownership is established.
+    /* istanbul ignore if */
     if (!this.editableCollection) return;
 
     this.selected = this.state.getSelected(this.editableCollection);

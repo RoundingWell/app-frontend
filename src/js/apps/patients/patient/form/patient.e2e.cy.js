@@ -120,6 +120,85 @@ context('Patient Form', function() {
       .should('contain', `/patient/${ testPatient.id }/workflow`);
   });
 
+  specify('a completed save clears its draft without navigating after leaving the form', function() {
+    const patient = getPatient();
+    const response = getFormResponse();
+    let releaseSave;
+    const pendingDraftKey = `form-subm-${ currentClinician.id }-${ patient.id }-${ testForm.id }`;
+
+    cy
+      .clearFormDrafts()
+      .routeWorkspacePatient()
+      .routesForPatientAction()
+      .routeForm(fx => {
+        fx.data = testForm;
+
+        return fx;
+      })
+      .routeFormDefinition()
+      .routeFormFields()
+      .routeLatestFormResponse()
+      .routePatient(fx => {
+        fx.data = patient;
+
+        return fx;
+      })
+      .routeActions()
+      .intercept('POST', '/api/form-responses', request => {
+        return new Cypress.Promise(resolve => {
+          releaseSave = () => {
+            request.reply({ statusCode: 201, body: { data: response } });
+            resolve();
+          };
+        });
+      })
+      .as('saveForm')
+      .visit(`/patient/${ patient.id }/form/${ testForm.id }`)
+      .wait('@routeFormDefinition')
+      .wait('@routeFormFields');
+
+    cy
+      .iframeStub()
+      .then(iframe => {
+        iframe.send('submit:form', { response: { data: { familyHistory: 'Saved after navigation' } } });
+      });
+
+    cy
+      .wrap(null)
+      .should(() => expect(releaseSave).to.be.a('function'));
+
+    cy
+      .get('.app-nav__link')
+      .contains('Owned By')
+      .click();
+
+    cy
+      .wait('@routeActions');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .setFormDraft(pendingDraftKey, { submission: { data: { pending: true } } });
+
+    cy
+      .then(() => releaseSave());
+
+    cy
+      .wait('@saveForm');
+    // Wait for the completed save to remove the draft before checking navigation.
+    cy
+      .waitForFormDraft(pendingDraftKey, { exists: false })
+      .should(draft => {
+        expect(draft).to.be.null;
+      });
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+  });
+
   specify('storing stored submission', function() {
     const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`;
 
@@ -170,7 +249,8 @@ context('Patient Form', function() {
       .trigger('pointerover');
 
     // visitOnClock installs fake timers — tick past the tooltip's setTimeout(0) delay
-    cy.tick(1);
+    cy
+      .tick(1);
 
     cy
       .get('.tooltip')
@@ -193,7 +273,8 @@ context('Patient Form', function() {
       .trigger('pointerover');
 
     // visitOnClock installs fake timers — tick past the tooltip's setTimeout(0) delay
-    cy.tick(1);
+    cy
+      .tick(1);
 
     cy
       .get('.tooltip')
@@ -236,12 +317,13 @@ context('Patient Form', function() {
   });
 
   specify('restoring draft', function() {
-    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, {
-      updated: testTsSubtract(1),
-      submission: {
-        fields: { foo: 'foo' },
-      },
-    });
+    cy
+      .setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, {
+        updated: testTsSubtract(1),
+        submission: {
+          fields: { foo: 'foo' },
+        },
+      });
 
     cy
       .routeForm(fx => {
@@ -295,12 +377,13 @@ context('Patient Form', function() {
   });
 
   specify('restoring stored submission', function() {
-    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, {
-      updated: testTs(),
-      submission: {
-        fields: { foo: 'foo' },
-      },
-    });
+    cy
+      .setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`, {
+        updated: testTs(),
+        submission: {
+          fields: { foo: 'foo' },
+        },
+      });
 
     cy
       .routeForm(fx => {
@@ -356,12 +439,13 @@ context('Patient Form', function() {
   specify('discarding stored submission', function() {
     const draftKey = `form-subm-${ currentClinician.id }-${ testPatient.id }-${ testForm.id }`;
 
-    cy.setFormDraft(draftKey, {
-      updated: testTs(),
-      submission: {
-        fields: { foo: 'foo' },
-      },
-    });
+    cy
+      .setFormDraft(draftKey, {
+        updated: testTs(),
+        submission: {
+          fields: { foo: 'foo' },
+        },
+      });
 
     cy
       .routeForm(fx => {
@@ -433,15 +517,55 @@ context('Patient Form', function() {
 
         expect(response.args.value.formData.fields.foo).to.equal('bar');
       });
+    // Navigating away while draft deletion is pending must not recreate the form.
+    cy
+      .setFormDraft(draftKey, { updated: testTs(), submission: { fields: { foo: 'again' } } });
+
+    cy
+      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }`)
+      .wait('@routeForm');
+
+    cy
+      .get('.form__actions-icon--draft')
+      .click();
+
+    cy
+      .get('.form__draft-menu')
+      .find('.js-discard')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .then($submit => {
+        const worklist = $submit[0].ownerDocument.querySelector('[data-worklists-region] .app-nav__link');
+        $submit[0].click();
+        worklist.click();
+      });
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .waitForFormDraft(draftKey, { exists: false })
+      .should(draft => {
+        expect(draft).to.be.null;
+      });
+
+    cy
+      .get('.form__controls')
+      .should('not.exist');
   });
 
   specify('read only form', function() {
-    cy.setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testReadOnlyForm.id }`, {
-      updated: testTs(),
-      submission: {
-        fields: { foo: 'foo' },
-      },
-    });
+    cy
+      .setFormDraft(`form-subm-${ currentClinician.id }-${ testPatient.id }-${ testReadOnlyForm.id }`, {
+        updated: testTs(),
+        submission: {
+          fields: { foo: 'foo' },
+        },
+      });
 
     cy
       .routePatient(fx => {
@@ -521,6 +645,7 @@ context('Patient Form', function() {
       .routeFormFields()
       .routeWidgetValues(fx => {
         fx.values = { sex: 'f' };
+
         return fx;
       })
       .routeLatestFormResponse()
@@ -559,6 +684,7 @@ context('Patient Form', function() {
       })
       .routeWorkspacePatient(fx => {
         fx.data.attributes.status = 'active';
+
         return fx;
       });
 
@@ -623,9 +749,11 @@ context('Patient Form', function() {
       .wait('@routePatientActions')
       .wait('@routePatientFlows');
 
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:form', testPatient.id, testForm.id);
-    });
+    cy
+      .window()
+      .then(win => {
+        win.Radio.trigger('event-router', 'patient:form', testPatient.id, testForm.id);
+      });
 
     cy
       .wait('@routeForm')

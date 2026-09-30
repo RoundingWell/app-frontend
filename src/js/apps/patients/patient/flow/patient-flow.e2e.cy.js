@@ -124,6 +124,7 @@ context('patient flow page', function() {
       })
       .routePatient(fx => {
         fx.data = testPatient;
+
         return fx;
       })
       .routeFlowActions()
@@ -160,7 +161,9 @@ context('patient flow page', function() {
       .click('bottom')
       .wait('@routeFlow');
 
-    cy.url().as('flowUrl');
+    cy
+      .url()
+      .as('flowUrl');
 
     cy
       .get('.patient__context-trail')
@@ -171,11 +174,16 @@ context('patient flow page', function() {
       .url()
       .should('contain', `/patient/${ testPatient.id }/workflow`);
 
-    cy.go('back');
+    cy
+      .go('back');
 
-    cy.get('@flowUrl').then(flowUrl => {
-      cy.url().should('equal', flowUrl);
-    });
+    cy
+      .get('@flowUrl')
+      .then(flowUrl => {
+        cy
+          .url()
+          .should('equal', flowUrl);
+      });
   });
 
   specify('activity and flow menu', function() {
@@ -326,10 +334,11 @@ context('patient flow page', function() {
     });
 
     const handleActionMessage = message => {
-      cy.getRadio(Radio => {
-        const action = Radio.request('entities', 'actions:model', testFlowAction.id);
-        action.handleMessage(message);
-      });
+      cy
+        .getRadio(Radio => {
+          const action = Radio.request('entities', 'actions:model', testFlowAction.id);
+          action.handleMessage(message);
+        });
     };
 
     cy
@@ -343,6 +352,7 @@ context('patient flow page', function() {
       .routeAction(fx => {
         fx.data = testFlowAction;
         fx.included.push(testProgramAction, testFlow);
+
         return fx;
       })
       .routePatient(fx => {
@@ -645,17 +655,19 @@ context('patient flow page', function() {
       .find('.action-card')
       .should('have.length', 3);
 
-    cy.location('pathname').then(pathname => {
-      cy
-        .get('.patient-flow__list')
-        .find('.action-card')
-        .first()
-        .click(2, 40);
+    cy
+      .location('pathname')
+      .then(pathname => {
+        cy
+          .get('.patient-flow__list')
+          .find('.action-card')
+          .first()
+          .click(2, 40);
 
-      cy
-        .location('pathname')
-        .should('equal', pathname);
-    });
+        cy
+          .location('pathname')
+          .should('equal', pathname);
+      });
 
     cy.viewport(1600, 900);
 
@@ -763,6 +775,24 @@ context('patient flow page', function() {
       .contains('Nurse')
       .click()
       .wait('@routePatchAction');
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
+      .last()
+      .find('[data-due-date-region] button')
+      .click();
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card')
+      .last()
+      .find('[data-due-date-region] button')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .should('not.exist');
 
     cy
       .get('.patient-flow__list')
@@ -1104,10 +1134,12 @@ context('patient flow page', function() {
       })
       .as('routePostAction');
 
-    cy.routeAction(fx => {
-      fx.data = conditionalAction;
-      return fx;
-    });
+    cy
+      .routeAction(fx => {
+        fx.data = conditionalAction;
+
+        return fx;
+      });
 
     cy
       .get('.patient-flow__actions')
@@ -1241,7 +1273,8 @@ context('patient flow page', function() {
   specify('patient-less flow route server error', function() {
     const flowId = uuid();
 
-    cy.on('uncaught:exception', () => false);
+    cy
+      .on('uncaught:exception', () => false);
 
     cy
       .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
@@ -1267,11 +1300,12 @@ context('patient flow page', function() {
     const flowId = uuid();
     const errorStub = cy.stub();
 
-    cy.on('uncaught:exception', error => {
-      errorStub(error);
+    cy
+      .on('uncaught:exception', error => {
+        errorStub(error);
 
-      return false;
-    });
+        return false;
+      });
 
     cy
       .intercept('GET', new RegExp(`/api/flows/${ flowId }\\?`), {
@@ -1316,45 +1350,99 @@ context('patient flow page', function() {
       .as('routeDelayedFlow')
       .visit(`/flow/${ delayedFlow.id }`);
 
-    cy.wrap(null).should(() => {
-      expect(replyToFlow).to.be.a('function');
-    });
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replyToFlow).to.be.a('function');
+      });
 
-    cy.contains('.app-nav__link', 'Schedule').click();
-    cy.wait('@routeActions');
-    cy.location('pathname').should('eq', '/one/schedule');
-    cy.get('.list-page').should('be.visible');
+    cy
+      .contains('.app-nav__link', 'Schedule')
+      .click();
 
-    cy.then(() => replyToFlow());
-    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
-    cy.get('.list-page').should('be.visible');
-    cy.location('pathname').should('eq', '/one/schedule');
+    cy
+      .wait('@routeActions');
 
-    cy.then(() => {
-      replyToFlow = null;
-    });
-    cy.visit(`/flow/${ delayedFlow.id }`);
-    cy.wrap(null).should(() => {
-      expect(replyToFlow).to.be.a('function');
-    });
+    cy
+      .location('pathname')
+      .should('eq', '/one/schedule');
 
-    cy.contains('.app-nav__bottom-button', 'Admin Tools').click();
-    cy.contains('.js-picklist-item', 'Programs').click();
-    cy.wait('@routePrograms');
-    cy.location('pathname').should('eq', '/one/programs');
-    cy.get('.list-page').should('be.visible');
+    cy
+      .get('.list-page')
+      .should('be.visible');
 
-    cy.then(() => replyToFlow());
-    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
-    cy.get('.list-page').should('be.visible');
-    cy.location('pathname').should('eq', '/one/programs');
+    cy
+      .then(() => replyToFlow());
+
+    cy
+      .wait('@routeDelayedFlow')
+      .its('response.statusCode')
+      .should('eq', 200);
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
+
+    cy
+      .location('pathname')
+      .should('eq', '/one/schedule');
+
+    cy
+      .then(() => {
+        replyToFlow = null;
+      });
+
+    cy
+      .visit(`/flow/${ delayedFlow.id }`);
+
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replyToFlow).to.be.a('function');
+      });
+
+    cy
+      .contains('.app-nav__bottom-button', 'Admin Tools')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Programs')
+      .click();
+
+    cy
+      .wait('@routePrograms');
+
+    cy
+      .location('pathname')
+      .should('eq', '/one/programs');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
+
+    cy
+      .then(() => replyToFlow());
+
+    cy
+      .wait('@routeDelayedFlow')
+      .its('response.statusCode')
+      .should('eq', 200);
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
+
+    cy
+      .location('pathname')
+      .should('eq', '/one/programs');
   });
 
   specify('flow server error', function() {
     const testPatient = getPatient();
     const flowId = uuid();
 
-    cy.on('uncaught:exception', () => false);
+    cy
+      .on('uncaught:exception', () => false);
 
     cy
       .routePatient(fx => {
@@ -1391,11 +1479,12 @@ context('patient flow page', function() {
     const flowId = uuid();
     const errorStub = cy.stub();
 
-    cy.on('uncaught:exception', error => {
-      errorStub(error);
+    cy
+      .on('uncaught:exception', error => {
+        errorStub(error);
 
-      return false;
-    });
+        return false;
+      });
 
     cy
       .routePatient(fx => {
@@ -1486,6 +1575,8 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               sequence: 1,
+              due_date: testDate(),
+              due_time: null,
             },
             relationships: {
               state: getRelationship(stateTodo),
@@ -1516,6 +1607,7 @@ context('patient flow page', function() {
           getAction({
             attributes: {
               sequence: 4,
+              details: 'Last action details',
             },
             relationships: {
               state: getRelationship(stateDone),
@@ -1660,6 +1752,71 @@ context('patient flow page', function() {
       .last()
       .find('[data-owner-region]')
       .should('contain', 'NUR');
+
+    cy
+      .routeWorkspaceClinicians(fx => {
+        fx.data = [];
+
+        return fx;
+      });
+
+    cy
+      .visit(`/flow/${ testFlow.id }`)
+      .wait('@routeFlow')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('[data-header-region]')
+      .find('[data-owner-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('be.visible')
+      .and('not.contain', 'Other Clinician');
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .should('not.exist');
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy.viewport(320, 480);
+
+    cy
+      .get('.action-card')
+      .find('[data-due-time-region] button')
+      .first()
+      .click();
+
+    cy
+      .get('.picklist')
+      .should($picker => {
+        const bounds = $picker[0].getBoundingClientRect();
+
+        expect(bounds.left).to.be.at.least(0);
+        expect(bounds.right).to.be.at.most(320);
+      });
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.action-card')
+      .last()
+      .find('.action-details-tooltip')
+      .then($button => {
+        $button[0].scrollIntoView({ block: 'end' });
+      })
+      .trigger('pointerover');
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Last action details');
   });
 
   specify('flow with work:owned:manage permission', function() {
@@ -1825,6 +1982,11 @@ context('patient flow page', function() {
 
         return fx;
       })
+      .routeWorkspaceClinicians(fx => {
+        fx.data = [currentClinician];
+
+        return fx;
+      })
       .routeFlow(fx => {
         fx.data = authoredFlow;
 
@@ -1844,6 +2006,19 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__header-container .js-menu')
       .should('exist');
+
+    cy
+      .get('.patient-flow__owner')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('contain', currentClinician.attributes.name)
+      .and('contain', teamCoordinator.attributes.name);
+
+    cy
+      .get('.picklist')
+      .should('not.contain', teamNurse.attributes.name);
   });
 
   specify('flow not authored by a user with work:authored:delete permission', function() {
@@ -2667,6 +2842,85 @@ context('patient flow page', function() {
       .get('.app-frame__content')
       .find('.action-card')
       .should('have.length', 3);
+
+    [400, 410].forEach(status => {
+      const patient = getPatient();
+      const flow = getFlow({ relationships: { patient: getRelationship(patient), state: getRelationship(stateTodo) } });
+      const action = getAction({ relationships: {
+        patient: getRelationship(patient), flow: getRelationship(flow), state: getRelationship(stateTodo),
+      } });
+
+      cy
+        .routesForPatientAction()
+        .routePatient(fx => {
+          fx.data = patient;
+
+          return fx;
+        })
+        .routeFlow(fx => {
+          fx.data = flow;
+
+          return fx;
+        })
+        .routeFlowActions(fx => {
+          fx.data = [action];
+
+          return fx;
+        })
+        .routeFlowActivity()
+        .visit(`/patient/${ patient.id }/flow/${ flow.id }`)
+        .wait('@routeFlow')
+        .wait('@routeFlowActions');
+
+      cy
+        .get('.patient-flow__list')
+        .find('.action-card .js-select')
+        .should('be.visible');
+
+      cy
+        .intercept('PATCH', '/api/actions/*', { statusCode: 400, body: {} })
+        .as('failedSave');
+
+      cy
+        .intercept('GET', `/api/flows/${ flow.id }?*`, { statusCode: status, body: { errors: [] } })
+        .as('failedReload');
+
+      cy
+        .get('.patient-flow__list')
+        .find('.action-card .js-select')
+        .first()
+        .click();
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('[data-due-time-region] button')
+        .click();
+
+      cy
+        .get('.picklist')
+        .contains('10:00 AM')
+        .click();
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-save')
+        .click();
+
+      cy
+        .wait('@failedSave')
+        .wait('@failedReload');
+
+      cy
+        .get('.alert-box')
+        .should('be.visible');
+      const expectedPath = status === 410 ?
+        `/one/patient/${ patient.id }/workflow` :
+        `/one/patient/${ patient.id }/flow/${ flow.id }`;
+
+      cy
+        .location('pathname')
+        .should('equal', expectedPath);
+    });
   });
 
   specify('click+shift multiselect', function() {
@@ -2699,7 +2953,7 @@ context('patient flow page', function() {
       .wait('@routeWorkspacePatient');
 
     cy
-      .tick(60) // tick past debounce
+      .tick(60)
       .get('.app-frame__content')
       .find('.action-card')
       .should('have.length', 3);
@@ -3099,18 +3353,19 @@ context('patient flow page', function() {
         ]);
       });
 
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Flow Name',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Flow Name',
+          },
+        },
+      });
 
     cy
       .get('[data-header-region]')
@@ -3121,18 +3376,19 @@ context('patient flow page', function() {
       .get('.patient__context-trail')
       .should('contain', 'New Flow Name');
 
-    cy.sendWs({
-      category: 'DetailsChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        attributes: {
-          details: 'New flow details',
+    cy
+      .sendWs({
+        category: 'DetailsChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            details: 'New flow details',
+          },
+        },
+      });
 
     cy
       .get('[data-header-region]')
@@ -3140,18 +3396,19 @@ context('patient flow page', function() {
       .should('be.visible')
       .contains('New flow details');
 
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Action Name',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Action Name',
+          },
+        },
+      });
 
     cy
       .get('.patient-flow__list')
@@ -3168,37 +3425,39 @@ context('patient flow page', function() {
       .find('.action-card [data-details-region]')
       .should('be.empty');
 
-    cy.sendWs({
-      category: 'DetailsChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          details: 'New action details',
+    cy
+      .sendWs({
+        category: 'DetailsChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            details: 'New action details',
+          },
+        },
+      });
 
     cy
       .get('.patient-flow__list')
       .find('.action-card [data-details-region]')
       .should('not.be.empty');
 
-    cy.sendWs({
-      category: 'ActionDueChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          due_date: testDateAdd(1),
-          due_time: '07:00:00',
+    cy
+      .sendWs({
+        category: 'ActionDueChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            due_date: testDateAdd(1),
+            due_time: '07:00:00',
+          },
+        },
+      });
 
     cy
       .get('.patient-flow__list')
@@ -3212,33 +3471,35 @@ context('patient flow page', function() {
       .get('.patient-flow__progress progress')
       .should('have.value', 0);
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        owner: {
-          type: teamCoordinator.type,
-          id: teamCoordinator.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamCoordinator.type,
+            id: teamCoordinator.id,
+          },
+        },
+      });
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        owner: {
-          type: teamCoordinator.type,
-          id: teamCoordinator.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamCoordinator.type,
+            id: teamCoordinator.id,
+          },
+        },
+      });
 
     cy
       .get('[data-header-region]')
@@ -3249,37 +3510,39 @@ context('patient flow page', function() {
       .get('.patient-flow__progress progress')
       .should('have.value', 0);
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateDone.type,
-          id: stateDone.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateDone.type,
+            id: stateDone.id,
+          },
+        },
+      });
 
     cy
       .get('.patient-flow__progress progress')
       .should('have.value', 1);
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        state: {
-          type: stateDone.type,
-          id: stateDone.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateDone.type,
+            id: stateDone.id,
+          },
+        },
+      });
 
     cy
       .get('.patient-flow__list')
@@ -3293,100 +3556,105 @@ context('patient flow page', function() {
       .get('[data-header-region]')
       .find('[data-state-region] .fa-circle-check');
 
-    cy.sendWs({
-      category: 'AttachmentAdded',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        clinician: {
-          type: testClinician.type,
-          id: testClinician.id,
+    cy
+      .sendWs({
+        category: 'AttachmentAdded',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-        file: {
+        payload: {
+          clinician: {
+            type: testClinician.type,
+            id: testClinician.id,
+          },
+          file: {
+            type: 'files',
+            id: testSocketFileId,
+          },
+          attributes: {
+            path: 'patients/1/HRA.pdf',
+            bucket: 'bucket_name',
+            urls: {
+              view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
+              download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+            },
+          },
+        },
+      });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card .fa-paperclip')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .sendWs({
+        category: 'FileRemoved',
+        resource: {
           type: 'files',
           id: testSocketFileId,
         },
-        attributes: {
-          path: 'patients/1/HRA.pdf',
-          bucket: 'bucket_name',
-          urls: {
-            view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-            download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
-          },
-        },
-      },
-    });
-
-    cy
-      .get('.patient-flow__list')
-      .find('.action-card .fa-paperclip')
-      .should('exist')
-      .next()
-      .should('contain', '1');
-
-    cy.sendWs({
-      category: 'FileRemoved',
-      resource: {
-        type: 'files',
-        id: testSocketFileId,
-      },
-      payload: {},
-    });
+        payload: {},
+      });
 
     cy
       .get('.patient-flow__list')
       .find('.action-card .fa-paperclip')
       .should('not.exist');
 
-    cy.sendWs({
-      category: 'ActionCommentAdded',
-      author: getCurrentClinician().id,
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        comment: {
+    cy
+      .sendWs({
+        category: 'ActionCommentAdded',
+        author: getCurrentClinician().id,
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
+        },
+        payload: {
+          comment: {
+            type: testComment.type,
+            id: testComment.id,
+          },
+          attributes: {
+            message: 'New websocket comment.',
+          },
+        },
+      });
+
+    cy
+      .get('.patient-flow__list')
+      .find('.action-card .fa-comment')
+      .should('exist')
+      .next()
+      .should('contain', '1');
+
+    cy
+      .sendWs({
+        category: 'CommentRemoved',
+        resource: {
           type: testComment.type,
           id: testComment.id,
         },
-        attributes: {
-          message: 'New websocket comment.',
-        },
-      },
-    });
-
-    cy
-      .get('.patient-flow__list')
-      .find('.action-card .fa-comment')
-      .should('exist')
-      .next()
-      .should('contain', '1');
-
-    cy.sendWs({
-      category: 'CommentRemoved',
-      resource: {
-        type: testComment.type,
-        id: testComment.id,
-      },
-      payload: {},
-    });
+        payload: {},
+      });
 
     cy
       .get('.patient-flow__list')
       .find('.action-card .fa-comment')
       .should('not.exist');
 
-    cy.sendWs({
-      category: 'ResourceDeleted',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceDeleted',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
+        },
+        payload: {},
+      });
 
     cy
       .get('.card-list__empty')
@@ -3399,30 +3667,32 @@ context('patient flow page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'ResourceCreated',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceCreated',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
+        },
+        payload: {},
+      });
 
     // a notification that is sent for a resource we are currently fetching
     // this notification is queued until model.fetch() is done for that action
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateInProgress.type,
+            id: stateInProgress.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeAction')

@@ -246,6 +246,7 @@ context('Noncontext Form', function() {
       })
       .routePatientField(fx => {
         fx.data = getTestPatientField('foo', [1, 2]);
+
         return fx;
       }, 'foo')
       .routePatientFieldHistory(fx => {
@@ -261,12 +262,14 @@ context('Noncontext Form', function() {
             ],
           },
         };
+
         return fx;
       }, 'foo')
       .routePatientFieldHistory(fx => {
         fx.data = {
           attributes: { values: [{ value: [5, 6] }] },
         };
+
         return fx;
       }, 'bar')
       .intercept('GET', `/api/patients/${ testPatient.id }/fields/bar`, {
@@ -463,9 +466,10 @@ context('Noncontext Form', function() {
         return fx;
       });
 
-    cy.getRadio(Radio => {
-      Radio.trigger('event-router', 'patient:form', testPatient.id, testForm.id);
-    });
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('event-router', 'patient:form', testPatient.id, testForm.id);
+      });
 
     cy
       .wait('@routeFormFields')

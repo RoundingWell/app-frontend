@@ -44,12 +44,10 @@ context('patient page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', 'worklist/owned-by');
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
   });
 
-  // Compatibility coverage for the three legacy patient URL aliases. They must
-  // keep routing until September 2, 2027; delete this spec with the aliases.
   specify('legacy patient URL aliases still route', function() {
     const legacyAction = getAction({
       attributes: { name: 'Legacy Alias Action' },
@@ -95,6 +93,71 @@ context('patient page', function() {
     cy
       .get('.patient-action__name')
       .should('contain', 'Legacy Alias Action');
+  });
+
+  specify('patient routing', function() {
+    cy
+      .viewport(1920, 900)
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .visit(`/patient/${ testPatient.id }/workflow`)
+      .wait('@routePatient');
+
+    cy
+      .get('.patient__layout')
+      .find('.workflow-page__tab.is-selected')
+      .contains('Open');
+
+    cy
+      .get('.workflow-page')
+      .should($page => {
+        expect($page[0].getBoundingClientRect().width).to.equal(1200);
+      });
+
+    cy
+      .get('.patient__layout')
+      .find('.js-workflow-closed')
+      .click();
+
+    cy
+      .get('.patient__layout')
+      .find('.workflow-page__tab.is-selected')
+      .contains('Closed');
+
+    cy
+      .get('.patient__layout')
+      .find('.js-workflow-open')
+      .click();
+
+    cy
+      .get('.patient__layout')
+      .find('.workflow-page__tab.is-selected')
+      .contains('Open');
+  });
+
+  specify('reports unexpected patient load failures', function() {
+    const patient = getPatient();
+    const reported = cy.stub().as('reported');
+
+    cy
+      .on('uncaught:exception', error => {
+        if (!error.message.includes('Error Status: 400')) return;
+        reported(error.message);
+        return false;
+      });
+
+    cy
+      .routesForPatientAction()
+      .intercept('GET', '/api/patients/**?*', { statusCode: 400, body: { errors: [] } })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('@reported')
+      .should('have.been.calledWithMatch', 'Error Status: 400');
   });
 
   specify('uses drawer, collapsible, and fixed wide patient sidebar modes', function() {
@@ -226,50 +289,6 @@ context('patient page', function() {
       .should('not.have.class', 'patient__frame--sidebar-hidden');
   });
 
-  specify('patient routing', function() {
-    cy
-      .viewport(1920, 900)
-      .routesForPatientWorkflow()
-      .routePatient(fx => {
-        fx.data = testPatient;
-
-        return fx;
-      })
-      .visit(`/patient/${ testPatient.id }/workflow`)
-      .wait('@routePatient');
-
-    cy
-      .get('.patient__layout')
-      .find('.workflow-page__tab.is-selected')
-      .contains('Open');
-
-    cy
-      .get('.workflow-page')
-      .should($page => {
-        expect($page[0].getBoundingClientRect().width).to.equal(1200);
-      });
-
-    cy
-      .get('.patient__layout')
-      .find('.js-workflow-closed')
-      .click();
-
-    cy
-      .get('.patient__layout')
-      .find('.workflow-page__tab.is-selected')
-      .contains('Closed');
-
-    cy
-      .get('.patient__layout')
-      .find('.js-workflow-open')
-      .click();
-
-    cy
-      .get('.patient__layout')
-      .find('.workflow-page__tab.is-selected')
-      .contains('Open');
-  });
-
   specify('remembers the patient sidebar across patients and reloads', function() {
     const otherPatient = getPatient();
     const currentClinician = getCurrentClinician();
@@ -292,9 +311,11 @@ context('patient page', function() {
       .get('.patient__frame')
       .should('have.class', 'patient__frame--sidebar-hidden');
 
-    cy.window().then(win => {
-      expect(JSON.parse(win.localStorage.getItem(preferenceKey))).to.be.true;
-    });
+    cy
+      .window()
+      .then(win => {
+        expect(JSON.parse(win.localStorage.getItem(preferenceKey))).to.be.true;
+      });
 
     cy
       .routePatient(fx => {
@@ -317,8 +338,10 @@ context('patient page', function() {
       .get('.patient__sidebar-toggle')
       .click();
 
-    cy.window().then(win => {
-      expect(JSON.parse(win.localStorage.getItem(preferenceKey))).to.be.false;
-    });
+    cy
+      .window()
+      .then(win => {
+        expect(JSON.parse(win.localStorage.getItem(preferenceKey))).to.be.false;
+      });
   });
 });

@@ -23,6 +23,129 @@ import { getFile } from 'support/api/files';
 import { getPatientField } from 'support/api/patient-fields';
 
 context('patient action page', { scrollBehavior: 'center' }, function() {
+  specify('expands a form after canceling the first action load', function() {
+    const action = getAction({
+      relationships: {
+        form: getRelationship(testForm),
+      },
+    });
+    let releaseAction;
+
+    cy
+      .routesForPatientAction()
+      .routeFormByAction()
+      .routeForm()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeFormFields()
+      .routeLatestFormResponse()
+      .routeAction(fx => {
+        fx.data = action;
+
+        return fx;
+      });
+
+    cy
+      .intercept({ method: 'GET', url: '/api/actions/*', times: 1 }, req => {
+        return new Cypress.Promise(resolve => {
+          releaseAction = () => {
+            req.reply({ body: { data: action, included: [] } });
+            resolve();
+          };
+        });
+      });
+
+    cy
+      .visit(`/patient/1/action/${ action.id }`);
+
+    cy
+      .wrap(null)
+      .should(() => expect(releaseAction).to.be.a('function'));
+
+    cy
+      .navigate('/patient/1/workflow');
+
+    cy
+      .get('.patient-action-loading__skeleton')
+      .should('not.exist');
+
+    cy
+      .then(() => releaseAction());
+
+    cy.waitForAppRequests();
+
+    cy
+      .get('.patient-action-loading__skeleton')
+      .should('not.exist');
+
+    cy
+      .get('.patient-action')
+      .should('not.exist');
+
+    // Leaving after the action renders must also cancel its unfinished activity owner.
+    let releaseActivity;
+
+    cy
+      .intercept({ method: 'GET', url: '/api/actions/**/activity*', times: 1 }, req => {
+        return new Cypress.Promise(resolve => {
+          releaseActivity = () => {
+            req.reply({ body: { data: [] } });
+            resolve();
+          };
+        });
+      })
+      .as('canceledActivity');
+
+    cy
+      .navigate(`/patient/1/action/${ action.id }`);
+
+    cy
+      .get('.patient-action__activity-loading')
+      .should('exist');
+
+    cy
+      .wrap(null)
+      .should(() => expect(releaseActivity).to.be.a('function'));
+
+    cy
+      .navigate('/patient/1/workflow');
+
+    cy
+      .get('.patient-action')
+      .should('not.exist')
+      .then(() => releaseActivity());
+
+    cy
+      .wait('@canceledActivity');
+
+    cy.waitForAppRequests();
+
+    cy
+      .get('.patient-action')
+      .should('not.exist');
+
+    cy
+      .navigate(`/patient/1/action/${ action.id }`);
+
+    cy
+      .get('.patient-action')
+      .find('.js-expand-button')
+      .click();
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    cy
+      .get('.patient-action')
+      .find('.js-expand-button')
+      .click();
+
+    cy
+      .get('.patient-action')
+      .should('not.have.class', 'patient-action--form-expanded');
+  });
+
   specify('display patient action', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 
@@ -403,7 +526,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('.patient-action')
       .find('[data-save-region]')
       .contains('Cancel')
-      // Need force because Cypress does not recognize the element is typeable
       .type('{enter}', { force: true });
 
     cy
@@ -654,7 +776,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .get('[data-activity-region]')
-      // source = 'api' activity events
       .should('contain', 'Clinician McTester (Nurse) added this action')
       .should('contain', 'Clinician McTester (Nurse) changed the owner to Another Clinician')
       .should('contain', 'Clinician McTester (Nurse) updated the details of this action')
@@ -670,7 +791,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', 'Clinician McTester (Nurse) worked on the form Test Form')
       .should('contain', 'Clinician McTester (Nurse) changed the due time to 11:12 AM')
       .should('contain', 'Clinician McTester (Nurse) cleared the due time')
-      // source = 'system' activity events
       .should('contain', 'Owner changed to Another Clinician')
       .should('contain', 'Action details updated')
       .should('contain', 'Due Date changed to Sep 10, 2019')
@@ -768,7 +888,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         return fx;
       })
       .routePatientByFlow()
-
       .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeFlow');
 
@@ -787,11 +906,79 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .as('routePatchFlow');
 
     cy
+      .intercept({ method: 'GET', url: '/api/patients/**/fields/phones', times: 1 }, {
+        statusCode: 422,
+        body: { errors: [{ status: '422', title: 'Unable to load phone numbers' }] },
+      })
+      .as('failedPhones');
+
+    cy
       .get('.patient-action')
       .find('[data-dialer-region] button')
       .as('actionDialerButton')
-      .click()
-      .wait('@routePatientField');
+      .click();
+
+    cy
+      .wait('@failedPhones');
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('@actionDialerButton')
+      .should('be.enabled');
+
+    let releasePhones;
+    let markPhonesRequested;
+    const phonesRequested = new Cypress.Promise(resolve => {
+      markPhonesRequested = resolve;
+    });
+    const phonesResponse = new Cypress.Promise(resolve => {
+      releasePhones = resolve;
+    });
+
+    cy
+      .intercept({ method: 'GET', url: '/api/patients/**/fields/phones', times: 1 }, req => {
+        markPhonesRequested();
+        req.on('response', () => phonesResponse);
+      })
+      .as('delayedPhones');
+
+    cy
+      .get('@actionDialerButton')
+      .click();
+
+    cy
+      .then(() => phonesRequested);
+
+    cy
+      .get('.picklist__message-loading')
+      .should('be.visible');
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .then(() => releasePhones());
+
+    cy
+      .wait('@delayedPhones');
+
+    cy.waitForAppRequests();
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('@actionDialerButton')
+      .click();
 
     cy
       .get('.picklist')
@@ -874,7 +1061,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('be.disabled');
   });
 
-  specify('action attachments', function() {
+  specify('action attachments', { defaultCommandTimeout: 10000 }, function() {
     const testPatient = getPatient();
 
     const testProgramAction = getProgramAction({
@@ -1096,7 +1283,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             },
           },
         });
-      }).as('routePutFile');
+      })
+      .as('routePutFile');
 
     cy
       .intercept('PUT', '/upload-test', req => {
@@ -1104,7 +1292,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
           statusCode: 200,
           throttleKbps: 10,
         });
-      }).as('routeUploadFile');
+      })
+      .as('routeUploadFile');
 
     cy
       .intercept('GET', '/api/files/*', req => {
@@ -1124,7 +1313,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             },
           },
         });
-      }).as('routeGetFile');
+      })
+      .as('routeGetFile');
 
     cy
       .get('#upload-attachment')
@@ -1146,7 +1336,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         req.reply({
           statusCode: 400,
         });
-      }).as('routeUploadFail');
+      })
+      .as('routeUploadFail');
 
     cy
       .get('#upload-attachment')
@@ -1167,6 +1358,71 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .then(pathname => {
         expect(pathname).to.contain(`/api/files/${ fileId }`);
       });
+
+    let releaseUpload;
+
+    cy
+      .intercept('PUT', '/upload-test', req => {
+        return new Cypress.Promise(resolve => {
+          releaseUpload = () => {
+            req.reply({ statusCode: 200 });
+            resolve();
+          };
+        });
+      });
+
+    cy
+      .get('#upload-attachment')
+      .selectFile({
+        contents: Cypress.Buffer.from('late upload'),
+        fileName: 'test-copy.pdf',
+      }, { force: true });
+
+    cy
+      .wrap(null)
+      .should(() => expect(releaseUpload).to.be.a('function'));
+
+    const nextAction = getAction({
+      attributes: { name: 'Next Action' },
+      relationships: { patient: getRelationship(testPatient) },
+    });
+
+    cy
+      .routeAction(fx => {
+        fx.data = nextAction;
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [];
+
+        return fx;
+      });
+
+    cy
+      .navigate(`/patient/${ testPatient.id }/action/${ nextAction.id }`);
+
+    cy
+      .get('.patient-action__name')
+      .should('contain', 'Next Action');
+
+    cy
+      .get('.patient-action')
+      .find('.js-attachments')
+      .should('not.exist');
+
+    cy
+      .then(() => releaseUpload());
+
+    cy
+      .wait('@routeGetFile');
+
+    cy.waitForAppRequests();
+
+    cy
+      .get('.patient-action')
+      .find('.js-attachments')
+      .should('not.exist');
   });
 
   specify('action attachment count focus while the attachments are still loading', function() {
@@ -1203,7 +1459,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('be.focused')
       .and('be.empty');
 
-    cy.wait('@routeDelayedActionFiles');
+    cy
+      .wait('@routeDelayedActionFiles');
 
     cy
       .get('[data-attachments-region]')
@@ -1260,132 +1517,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('not.exist');
   });
 
-  specify('action attachments become read-only when the flow is done', function() {
-    const testFile = getFile();
-    const testProgramAction = getProgramAction({
-      attributes: { allowed_uploads: ['pdf'] },
-    });
-    const testFlow = getFlow({
-      relationships: { state: getRelationship(stateTodo) },
-    });
-    const testAction = getAction({
-      relationships: {
-        'files': getRelationship([testFile]),
-        'flow': getRelationship(testFlow),
-        'program-action': getRelationship(testProgramAction),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeSettings('upload_attachments', true)
-      .routeFlow(fx => {
-        fx.data = testFlow;
-        return fx;
-      })
-      .routeAction(fx => {
-        fx.data = testAction;
-        fx.included.push(testProgramAction);
-        return fx;
-      })
-      .routeActionFiles(fx => {
-        fx.data = [testFile];
-        return fx;
-      })
-      .routePatientByFlow()
-      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
-      .wait('@routeFlow')
-      .wait('@routeActionFiles');
-
-    cy
-      .get('[data-attachments-files-region]')
-      .children()
-      .should('have.length', 1)
-      .find('.js-remove')
-      .should('exist');
-
-    cy
-      .get('[data-attachments-region] .js-add')
-      .should('exist');
-
-    cy
-      .get('@wsHandleMessage')
-      .should('have.been.called');
-
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: { type: testFlow.type, id: testFlow.id },
-      payload: {
-        state: { type: stateDone.type, id: stateDone.id },
-        attributes: {},
-      },
-    });
-
-    cy
-      .get('[data-attachments-files-region] .js-remove')
-      .should('not.exist');
-
-    cy
-      .get('[data-attachments-region] .js-add')
-      .should('not.exist');
-  });
-
-  specify('flow action context trail updates when the flow or action is renamed', function() {
-    const testFlow = getFlow();
-    const testAction = getAction({
-      relationships: {
-        'flow': getRelationship(testFlow),
-      },
-    });
-
-    cy
-      .routesForPatientAction()
-      .routeFlow(fx => {
-        fx.data = testFlow;
-        return fx;
-      })
-      .routeAction(fx => {
-        fx.data = testAction;
-        return fx;
-      })
-      .routePatientByFlow()
-      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
-      .wait('@routeFlow')
-      .wait('@routeAction');
-
-    cy
-      .get('.patient__context-trail')
-      .should('contain', testFlow.attributes.name);
-
-    cy
-      .get('@wsHandleMessage')
-      .should('have.been.called');
-
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: { type: testFlow.type, id: testFlow.id },
-      payload: {
-        attributes: { name: 'New Flow Name' },
-      },
-    });
-
-    cy
-      .get('.patient__context-trail')
-      .should('contain', 'New Flow Name');
-
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: { type: testAction.type, id: testAction.id },
-      payload: {
-        attributes: { name: 'New Action Name' },
-      },
-    });
-
-    cy
-      .get('.patient__context-trail')
-      .should('contain', 'New Action Name');
-  });
-
   specify('action attachments - uploads not allowed without edit permission', function() {
     const testFile = getFile();
     const testProgramAction = getProgramAction({
@@ -1410,15 +1541,18 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             role: getRelationship(roleNoFilterEmployee),
           },
         });
+
         return fx;
       })
       .routeAction(fx => {
         fx.data = testAction;
         fx.included.push(testProgramAction);
+
         return fx;
       })
       .routeActionFiles(fx => {
         fx.data = [testFile];
+
         return fx;
       })
       .visit(`/patient/1/action/${ testAction.id }`)
@@ -1462,7 +1596,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
         return fx;
       })
-
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeActionFiles');
@@ -1480,7 +1613,143 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('not.exist');
   });
 
+  specify('action attachments become read-only when the flow is done', function() {
+    const testFile = getFile();
+    const testProgramAction = getProgramAction({
+      attributes: { allowed_uploads: ['pdf'] },
+    });
+    const testFlow = getFlow({
+      relationships: { state: getRelationship(stateTodo) },
+    });
+    const testAction = getAction({
+      relationships: {
+        'files': getRelationship([testFile]),
+        'flow': getRelationship(testFlow),
+        'program-action': getRelationship(testProgramAction),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeSettings('upload_attachments', true)
+      .routeFlow(fx => {
+        fx.data = testFlow;
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+        fx.included.push(testProgramAction);
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [testFile];
+
+        return fx;
+      })
+      .routePatientByFlow()
+      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeFlow')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('[data-attachments-files-region]')
+      .children()
+      .should('have.length', 1)
+      .find('.js-remove')
+      .should('exist');
+
+    cy
+      .get('[data-attachments-region] .js-add')
+      .should('exist');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: { type: testFlow.type, id: testFlow.id },
+        payload: {
+          state: { type: stateDone.type, id: stateDone.id },
+          attributes: {},
+        },
+      });
+
+    cy
+      .get('[data-attachments-files-region] .js-remove')
+      .should('not.exist');
+
+    cy
+      .get('[data-attachments-region] .js-add')
+      .should('not.exist');
+  });
+
+  specify('flow action context trail updates when the flow or action is renamed', function() {
+    const testFlow = getFlow();
+    const testAction = getAction({
+      relationships: {
+        'flow': getRelationship(testFlow),
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeFlow(fx => {
+        fx.data = testFlow;
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routePatientByFlow()
+      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeFlow')
+      .wait('@routeAction');
+
+    cy
+      .get('.patient__context-trail')
+      .should('contain', testFlow.attributes.name);
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: { type: testFlow.type, id: testFlow.id },
+        payload: {
+          attributes: { name: 'New Flow Name' },
+        },
+      });
+
+    cy
+      .get('.patient__context-trail')
+      .should('contain', 'New Flow Name');
+
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: { type: testAction.type, id: testAction.id },
+        payload: {
+          attributes: { name: 'New Action Name' },
+        },
+      });
+
+    cy
+      .get('.patient__context-trail')
+      .should('contain', 'New Action Name');
+  });
+
   specify('action comments', function() {
+    cy.viewport(1280, 480);
+
     cy
       .routesForPatientAction()
       .routeActionActivity(fx => {
@@ -1512,7 +1781,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             attributes: {
               edited_at: testTs(),
               created_at: testTsSubtract(1),
-              message: 'Most Recent Message from Clinician McTester',
+              message: 'Most Recent Message from Clinician McTester\n',
             },
             relationships: {
               clinician: getRelationship(getCurrentClinician()),
@@ -1520,7 +1789,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
           }),
           getComment({
             attributes: {
-              edited_at: null,
+              edited_at: testTs(),
               created_at: testTsSubtract(4),
               message: 'Message from Someone Else',
             },
@@ -1535,6 +1804,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .visit('/patient/1/action/1')
       .wait('@routeActionActivity')
       .wait('@routeActionComments');
+
+    cy
+      .get('.app-nav')
+      .contains('Minimize Menu')
+      .click();
 
     cy
       .get('[data-activity-region]')
@@ -1590,9 +1864,9 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .eq(0)
       .should('not.contain', 'CM')
       .should('not.contain', 'Clinician McTester')
-      .should('not.contain', 'Edit')
       .should('contain', 'Message from Someone Else')
-      .should('not.contain', '(Edited)');
+      .should('contain', '(Edited)')
+      .should('not.have.descendants', '.js-edit');
 
     cy
       .get('@activityComment')
@@ -2041,18 +2315,20 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
           .should('equal', activityCount);
       });
 
-    cy.getRadio(Radio => {
-      Radio.trigger('event-router', 'patient:form', '1', testForm.id);
-    });
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('event-router', 'patient:form', '1', testForm.id);
+      });
 
     cy
       .wait('@routeForm')
       .url()
       .should('contain', `/patient/1/form/${ testForm.id }`);
 
-    cy.getRadio(Radio => {
-      Radio.trigger('event-router', 'patient:action', '1', testAction.id);
-    });
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('event-router', 'patient:action', '1', testAction.id);
+      });
 
     cy
       .get('.patient-action .js-expand-button')
@@ -2142,10 +2418,12 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('.patient__frame')
       .should('not.have.class', 'patient__frame--sidebar-hidden');
 
-    cy.window().then(win => {
-      expect(JSON.parse(win.sessionStorage.getItem(preferenceKey))).to.be.false;
-      expect(JSON.parse(win.localStorage.getItem(`isPatientSidebarHidden_${ getCurrentClinician().id }`))).to.be.true;
-    });
+    cy
+      .window()
+      .then(win => {
+        expect(JSON.parse(win.sessionStorage.getItem(preferenceKey))).to.be.false;
+        expect(JSON.parse(win.localStorage.getItem(`isPatientSidebarHidden_${ getCurrentClinician().id }`))).to.be.true;
+      });
 
     cy
       .get('.js-expand-button')
@@ -2231,7 +2509,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
   specify('action server error', function() {
     const testPatient = getPatient({ id: '1' });
 
-    cy.on('uncaught:exception', () => false);
+    cy
+      .on('uncaught:exception', () => false);
 
     cy
       .routesForPatientAction()
@@ -2263,11 +2542,12 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     const testPatient = getPatient({ id: '1' });
     const errorStub = cy.stub();
 
-    cy.on('uncaught:exception', error => {
-      errorStub(error);
+    cy
+      .on('uncaught:exception', error => {
+        errorStub(error);
 
-      return false;
-    });
+        return false;
+      });
 
     cy
       .routesForPatientWorkflow()
@@ -2314,10 +2594,12 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .routesForPatientAction()
       .routeAction(fx => {
         fx.data = testAction;
+
         return fx;
       })
       .routeActionFiles(fx => {
         fx.data = [];
+
         return fx;
       })
       .intercept('GET', '/api/actions/**/comments', {
@@ -2338,99 +2620,105 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('@wsHandleMessage')
       .should('have.been.called');
 
-    cy.sendWs({
-      category: 'ActionCommentAdded',
-      author: currentClinician.id,
-      resource: { type: testAction.type, id: testAction.id },
-      payload: {
-        comment: { type: 'comments', id: commentId },
-        attributes: { message: 'Comment delivered live' },
-      },
-    });
+    cy
+      .sendWs({
+        category: 'ActionCommentAdded',
+        author: currentClinician.id,
+        resource: { type: testAction.type, id: testAction.id },
+        payload: {
+          comment: { type: 'comments', id: commentId },
+          attributes: { message: 'Comment delivered live' },
+        },
+      });
 
     cy
       .get('[data-activity-region]')
       .should('contain', 'Comment delivered live');
 
-    cy.sendWs({
-      category: 'ActionCommentAdded',
-      author: currentClinician.id,
-      resource: { type: testAction.type, id: testAction.id },
-      payload: {
-        comment: { type: 'comments', id: secondCommentId },
-        attributes: { message: 'Second comment delivered live' },
-      },
-    });
+    cy
+      .sendWs({
+        category: 'ActionCommentAdded',
+        author: currentClinician.id,
+        resource: { type: testAction.type, id: testAction.id },
+        payload: {
+          comment: { type: 'comments', id: secondCommentId },
+          attributes: { message: 'Second comment delivered live' },
+        },
+      });
 
     cy
       .get('[data-activity-region]')
       .should('contain', 'Second comment delivered live');
 
-    cy.sendWs({
-      category: 'CommentEdited',
-      resource: { type: 'comments', id: commentId },
-      payload: {
-        attributes: { message: 'Comment updated live' },
-      },
-    });
+    cy
+      .sendWs({
+        category: 'CommentEdited',
+        resource: { type: 'comments', id: commentId },
+        payload: {
+          attributes: { message: 'Comment updated live' },
+        },
+      });
 
     cy
       .get('[data-activity-region]')
       .should('contain', 'Comment updated live')
       .and('contain', '(Edited)');
 
-    cy.sendWs({
-      category: 'AttachmentAdded',
-      resource: { type: testAction.type, id: testAction.id },
-      payload: {
-        file: { type: 'files', id: fileId },
-        attributes: {
-          path: 'patient/live-file.pdf',
-          urls: {
-            view: '/files/live-file/view',
-            download: '/files/live-file/download',
+    cy
+      .sendWs({
+        category: 'AttachmentAdded',
+        resource: { type: testAction.type, id: testAction.id },
+        payload: {
+          file: { type: 'files', id: fileId },
+          attributes: {
+            path: 'patient/live-file.pdf',
+            urls: {
+              view: '/files/live-file/view',
+              download: '/files/live-file/download',
+            },
           },
         },
-      },
-    });
+      });
 
     cy
       .get('[data-attachments-region]')
       .should('contain', 'live-file.pdf');
 
-    cy.sendWs({
-      category: 'FileReplaced',
-      resource: { type: 'files', id: fileId },
-      payload: {
-        attributes: {
-          path: 'patient/replaced-live-file.pdf',
-          urls: {
-            view: '/files/replaced-live-file/view',
-            download: '/files/replaced-live-file/download',
+    cy
+      .sendWs({
+        category: 'FileReplaced',
+        resource: { type: 'files', id: fileId },
+        payload: {
+          attributes: {
+            path: 'patient/replaced-live-file.pdf',
+            urls: {
+              view: '/files/replaced-live-file/view',
+              download: '/files/replaced-live-file/download',
+            },
           },
         },
-      },
-    });
+      });
 
     cy
       .get('[data-attachments-region]')
       .contains('a', 'replaced-live-file.pdf')
       .should('have.attr', 'href', '/files/replaced-live-file/view');
 
-    cy.sendWs({
-      category: 'AttachmentAdded',
-      resource: { type: testAction.type, id: testAction.id },
-      payload: {
-        file: { type: 'files', id: uuid() },
-        attributes: {
-          path: 'patient/second-live-file.pdf',
-          urls: {
-            view: '/files/second-live-file/view',
-            download: '/files/second-live-file/download',
+    cy
+      .sendWs({
+        category: 'AttachmentAdded',
+        resource: { type: testAction.type, id: testAction.id },
+        payload: {
+          file: { type: 'files', id: uuid() },
+          attributes: {
+            path: 'patient/second-live-file.pdf',
+            urls: {
+              view: '/files/second-live-file/view',
+              download: '/files/second-live-file/download',
+            },
           },
         },
-      },
-    });
+      });
 
     cy
       .get('[data-attachments-region]')
@@ -2462,7 +2750,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .routesForPatientAction()
-      // NOTE: Tests upload attachments with canEdit permissions
       .routeSettings('upload_attachments', true)
       .routeSettings('dialer', 'five9')
       .routeCurrentClinician(fx => {
@@ -2471,6 +2758,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             role: getRelationship(roleNoFilterEmployee),
           },
         });
+
         return fx;
       })
       .routeAction(fx => {
@@ -2894,6 +3182,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       })
       .routeAction(fx => {
         fx.data = ownedByAnotherTeamAction;
+
         return fx;
       })
       .routePatientByFlow()
@@ -2908,6 +3197,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .routeAction(fx => {
         fx.data = ownedByNonTeamMemberAction;
+
         return fx;
       })
       .window()
@@ -2932,6 +3222,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
   // startup and is not in the dashboard list, so the dispatch must fetch it on demand
   // rather than report it missing.
   specify('loads an action navigated to while the patient is still loading', function() {
+    let releasePatient;
     const testPatient = getPatient({
       attributes: {
         first_name: 'Test',
@@ -2972,19 +3263,33 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         return fx;
       });
 
-    // delay the patient model so PatientApp stays in its loading state
-    cy.intercept('GET', '/api/patients/**?*', {
-      body: { data: testPatient, included: [] },
-      delay: 1000,
-    });
+    cy
+      .intercept('GET', '/api/patients/**?*', req => {
+        return new Cypress.Promise(resolve => {
+          releasePatient = () => {
+            req.reply({ body: { data: testPatient, included: [] } });
+            resolve();
+          };
+        });
+      });
 
-    cy.visit(`/patient/${ testPatient.id }/workflow`);
+    cy
+      .visit(`/patient/${ testPatient.id }/workflow`);
 
-    // while PatientApp is loading (preloader shown), navigate to the action
-    cy.get('.loader').should('exist');
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, testAction.id);
-    });
+    // Wait for this patient's request, not the shell's earlier loading indicator.
+    cy
+      .wrap(null)
+      .should(() => expect(releasePatient).to.be.a('function'));
+
+    cy
+      .get('.loader')
+      .should('exist');
+
+    cy
+      .navigate(`/patient/${ testPatient.id }/action/${ testAction.id }`);
+
+    cy
+      .then(() => releasePatient());
 
     // the action is fetched on demand and the sidebar renders (rather than "not found")
     cy
@@ -3070,9 +3375,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .visit(`/patient/${ testPatient.id }/workflow`)
       .wait('@routePatient');
 
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
-    });
+    cy
+      .window()
+      .then(win => {
+        win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
+      });
 
     cy
       .wrap(null)
@@ -3080,9 +3387,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         expect(replyToStaleAction).to.be.a('function');
       });
 
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
-    });
+    cy
+      .window()
+      .then(win => {
+        win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
+      });
 
     cy
       .wait('@routeCurrentAction')
@@ -3092,9 +3401,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .get('.patient-action__name')
       .should('contain', 'Current Action');
 
-    cy.then(() => replyToStaleAction());
+    cy
+      .then(() => replyToStaleAction());
 
-    cy.wait('@routeStaleAction');
+    cy
+      .wait('@routeStaleAction');
 
     cy
       .get('.alert-box__body')
@@ -3156,7 +3467,6 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .routeActionActivity()
       .routeActionComments()
       .routeActionFiles()
-      // the stale fetch succeeds, but resolves after the newer route
       .intercept('GET', `/api/actions/${ staleAction.id }*`, req => new Cypress.Promise(resolve => {
         replyToStaleAction = () => {
           req.reply({ body: { data: staleAction, included: [] } });
@@ -3173,9 +3483,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .visit(`/patient/${ testPatient.id }/workflow`)
       .wait('@routePatient');
 
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
-    });
+    cy
+      .window()
+      .then(win => {
+        win.Radio.trigger('event-router', 'patient:action', testPatient.id, staleAction.id);
+      });
 
     cy
       .wrap(null)
@@ -3183,19 +3495,24 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         expect(replyToStaleAction).to.be.a('function');
       });
 
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
-    });
+    cy
+      .window()
+      .then(win => {
+        win.Radio.trigger('event-router', 'patient:action', testPatient.id, currentAction.id);
+      });
 
-    cy.wait('@routeCurrentAction');
+    cy
+      .wait('@routeCurrentAction');
 
     cy
       .get('.patient-action__name')
       .should('contain', 'Current Action');
 
-    cy.then(() => replyToStaleAction());
+    cy
+      .then(() => replyToStaleAction());
 
-    cy.wait('@routeStaleAction');
+    cy
+      .wait('@routeStaleAction');
 
     // the stale fetch resolved last, but its sidebar is suppressed
     cy
@@ -3250,9 +3567,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .visit(`/patient/${ testPatient.id }/workflow`)
       .wait('@routePatient');
 
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:action', testPatient.id, '1');
-    });
+    cy
+      .window()
+      .then(win => {
+        win.Radio.trigger('event-router', 'patient:action', testPatient.id, '1');
+      });
 
     cy
       .wait('@routeGoneAction');
@@ -3330,9 +3649,11 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .visit(`/patient/${ testPatient.id }/workflow`)
       .wait('@routePatient');
 
-    cy.window().then(win => {
-      win.Radio.trigger('event-router', 'patient:flow:action', testPatient.id, testFlow.id, 'deleted-action');
-    });
+    cy
+      .window()
+      .then(win => {
+        win.Radio.trigger('event-router', 'patient:flow:action', testPatient.id, testFlow.id, 'deleted-action');
+      });
 
     cy
       .wait('@routeGoneAction');

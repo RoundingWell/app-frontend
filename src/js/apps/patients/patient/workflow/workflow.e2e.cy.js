@@ -90,10 +90,12 @@ context('patient workflow page', function() {
       })
       .as('routePostAction');
 
-    cy.routeAction(fx => {
-      fx.data = actionData;
-      return fx;
-    });
+    cy
+      .routeAction(fx => {
+        fx.data = actionData;
+
+        return fx;
+      });
 
     return actionData.id;
   }
@@ -224,6 +226,7 @@ context('patient workflow page', function() {
       })
       .routeAction(fx => {
         fx.data = testAction;
+
         return fx;
       })
       .visitOnClock(`/patient/${ testPatient.id }/workflow`, { now: testTime, functionNames: ['Date'] })
@@ -514,16 +517,17 @@ context('patient workflow page', function() {
       .find('.fa-comment')
       .should('not.exist');
 
-    cy.routeAction(fx => {
-      fx.data = mergeJsonApi(testAction, {
-        relationships: {
-          'form': getRelationship(),
-          'form-responses': getRelationship([]),
-        },
-      });
+    cy
+      .routeAction(fx => {
+        fx.data = mergeJsonApi(testAction, {
+          relationships: {
+            'form': getRelationship(),
+            'form-responses': getRelationship([]),
+          },
+        });
 
-      return fx;
-    });
+        return fx;
+      });
 
     cy
       .contains('.action-card', 'First In List')
@@ -1374,18 +1378,19 @@ context('patient workflow page', function() {
         ]);
       });
 
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Name Via Websocket',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Name Via Websocket',
+          },
+        },
+      });
 
     cy
       .get('.app-frame__content')
@@ -1399,40 +1404,42 @@ context('patient workflow page', function() {
       .find('.work-card__meta')
       .should('contain', formatDate(testDateTime, 'TIME_OR_DAY'));
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        owner: {
-          type: teamNurse.type,
-          id: teamNurse.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamNurse.type,
+            id: teamNurse.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-owner-region]')
       .should('contain', 'NU');
 
-    cy.sendWs({
-      category: 'FlowProgressChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        attributes: {
-          progress: {
-            complete: 1,
-            total: 3,
+    cy
+      .sendWs({
+        category: 'FlowProgressChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
+        },
+        payload: {
+          attributes: {
+            progress: {
+              complete: 1,
+              total: 3,
+            },
           },
         },
-      },
-    });
+      });
 
     cy
       .get('@firstRow')
@@ -1441,22 +1448,24 @@ context('patient workflow page', function() {
       .should('have.attr', 'max', 3);
 
     // state was set to done, which means it's removed from the list
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        state: {
-          type: stateDone.type,
-          id: stateDone.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateDone.type,
+            id: stateDone.id,
+          },
+        },
+      });
 
     // wait for fade-out animation to completely finish
-    cy.tick(1000);
+    cy
+      .tick(1000);
 
     cy
       .get('.card-list__empty')
@@ -1469,14 +1478,15 @@ context('patient workflow page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'ResourceCreated',
-      resource: {
-        type: testNewSocketFlow.type,
-        id: testNewSocketFlow.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceCreated',
+        resource: {
+          type: testNewSocketFlow.type,
+          id: testNewSocketFlow.id,
+        },
+        payload: {},
+      });
 
     cy
       .wait('@routeFlow')
@@ -1508,35 +1518,37 @@ context('patient workflow page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewStateSocketFlow.type,
-        id: testNewStateSocketFlow.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewStateSocketFlow.type,
+          id: testNewStateSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateInProgress.type,
+            id: stateInProgress.id,
+          },
+        },
+      });
 
     // a notification that is sent for a resource we are currently fetching
     // this notification is queued until model.fetch() is done for that flow
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testNewStateSocketFlow.type,
-        id: testNewStateSocketFlow.id,
-      },
-      payload: {
-        owner: {
-          type: teamNurse.type,
-          id: teamNurse.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testNewStateSocketFlow.type,
+          id: testNewStateSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamNurse.type,
+            id: teamNurse.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeFlow')
@@ -1553,31 +1565,33 @@ context('patient workflow page', function() {
       .should('contain', 'NU');
 
     // ensures we subscribe correctly to models added to the worklist via ws
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testNewStateSocketFlow.type,
-        id: testNewStateSocketFlow.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Name Via Websocket',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testNewStateSocketFlow.type,
+          id: testNewStateSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Name Via Websocket',
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .should('contain', 'New Name Via Websocket');
 
-    cy.sendWs({
-      category: 'ResourceDeleted',
-      resource: {
-        type: testNewStateSocketFlow.type,
-        id: testNewStateSocketFlow.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceDeleted',
+        resource: {
+          type: testNewStateSocketFlow.type,
+          id: testNewStateSocketFlow.id,
+        },
+        payload: {},
+      });
 
     cy
       .get('.app-frame__content')
@@ -1670,18 +1684,19 @@ context('patient workflow page', function() {
         ]);
       });
 
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Name Via Websocket',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Name Via Websocket',
+          },
+        },
+      });
 
     cy
       .get('.app-frame__content')
@@ -1695,56 +1710,59 @@ context('patient workflow page', function() {
       .find('.work-card__meta')
       .should('contain', formatDate(testDateTime, 'TIME_OR_DAY'));
 
-    cy.sendWs({
-      category: 'DetailsChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          details: '',
+    cy
+      .sendWs({
+        category: 'DetailsChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            details: '',
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-details-region]')
       .should('be.empty');
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        owner: {
-          type: teamNurse.type,
-          id: teamNurse.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamNurse.type,
+            id: teamNurse.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-owner-region]')
       .should('contain', 'NU');
 
-    cy.sendWs({
-      category: 'ActionDueChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          due_date: testDateAdd(1),
-          due_time: '07:00:00',
+    cy
+      .sendWs({
+        category: 'ActionDueChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            due_date: testDateAdd(1),
+            due_time: '07:00:00',
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
@@ -1753,23 +1771,24 @@ context('patient workflow page', function() {
         expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
       });
 
-    cy.sendWs({
-      category: 'ActionCommentAdded',
-      author: currentClinician.id,
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        comment: {
-          type: testSocketComment.type,
-          id: testSocketComment.id,
+    cy
+      .sendWs({
+        category: 'ActionCommentAdded',
+        author: currentClinician.id,
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-        attributes: {
-          message: 'New websocket comment.',
+        payload: {
+          comment: {
+            type: testSocketComment.type,
+            id: testSocketComment.id,
+          },
+          attributes: {
+            message: 'New websocket comment.',
+          },
         },
-      },
-    });
+      });
 
     cy
       .get('@firstRow')
@@ -1778,31 +1797,32 @@ context('patient workflow page', function() {
       .next()
       .should('contain', '1');
 
-    cy.sendWs({
-      category: 'AttachmentAdded',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        clinician: {
-          type: currentClinician.type,
-          id: currentClinician.id,
+    cy
+      .sendWs({
+        category: 'AttachmentAdded',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-        file: {
-          type: 'files',
-          id: testSocketFileId,
-        },
-        attributes: {
-          path: 'patients/1/HRA.pdf',
-          bucket: 'bucket_name',
-          urls: {
-            view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
-            download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+        payload: {
+          clinician: {
+            type: currentClinician.type,
+            id: currentClinician.id,
+          },
+          file: {
+            type: 'files',
+            id: testSocketFileId,
+          },
+          attributes: {
+            path: 'patients/1/HRA.pdf',
+            bucket: 'bucket_name',
+            urls: {
+              view: 'https://www.bucket_name.s3.amazonaws.com/patients/1/view/HRA.pdf',
+              download: 'https://www.bucket_name.s3.amazonaws.com/patients/1/download/HRA.pdf',
+            },
           },
         },
-      },
-    });
+      });
 
     cy
       .get('@firstRow')
@@ -1812,22 +1832,24 @@ context('patient workflow page', function() {
       .should('contain', '1');
 
     // state was set to done, which means it's removed from the list
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateDone.type,
-          id: stateDone.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateDone.type,
+            id: stateDone.id,
+          },
+        },
+      });
 
     // wait for fade-out animation to completely finish
-    cy.tick(1000);
+    cy
+      .tick(1000);
 
     cy
       .get('.card-list__empty')
@@ -1840,14 +1862,15 @@ context('patient workflow page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'ResourceCreated',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceCreated',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
+        },
+        payload: {},
+      });
 
     cy
       .wait('@routeAction')
@@ -1879,35 +1902,37 @@ context('patient workflow page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewStateSocketAction.type,
-        id: testNewStateSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewStateSocketAction.type,
+          id: testNewStateSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateInProgress.type,
+            id: stateInProgress.id,
+          },
+        },
+      });
 
     // a notification that is sent for a resource we are currently fetching
     // this notification is queued until model.fetch() is done for that flow
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testNewStateSocketAction.type,
-        id: testNewStateSocketAction.id,
-      },
-      payload: {
-        owner: {
-          type: teamNurse.type,
-          id: teamNurse.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testNewStateSocketAction.type,
+          id: testNewStateSocketAction.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamNurse.type,
+            id: teamNurse.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeAction')
@@ -1924,31 +1949,33 @@ context('patient workflow page', function() {
       .should('contain', 'NU');
 
     // ensures we subscribe correctly to models added to the worklist via ws
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testNewStateSocketAction.type,
-        id: testNewStateSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Name Via Websocket',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testNewStateSocketAction.type,
+          id: testNewStateSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Name Via Websocket',
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .should('contain', 'New Name Via Websocket');
 
-    cy.sendWs({
-      category: 'ResourceDeleted',
-      resource: {
-        type: testNewStateSocketAction.type,
-        id: testNewStateSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceDeleted',
+        resource: {
+          type: testNewStateSocketAction.type,
+          id: testNewStateSocketAction.id,
+        },
+        payload: {},
+      });
 
     cy
       .get('.app-frame__content')
@@ -2230,5 +2257,29 @@ context('patient workflow page', function() {
     cy
       .url()
       .should('contain', '/404');
+  });
+
+  specify('returns to the workspace after workflow actions fail', function() {
+    cy
+      .routesForPatientWorkflow()
+      .intercept('GET', '/api/patients/*/actions*', {
+        statusCode: 500,
+        body: { errors: [] },
+      })
+      .visit('/patient/1/workflow');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 500.')
+      .contains('Back to Your Workspace')
+      .click();
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
   });
 });

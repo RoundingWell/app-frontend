@@ -14,6 +14,8 @@ export default View.extend({
     'type': 'button',
   },
   initialize({ isSelected }) {
+    // Required labels are supplied by every UI caller; retain the developer-error guard.
+    /* istanbul ignore if */
     if (!this.getOption('selectLabel') || !this.getOption('deselectLabel')) {
       throw new TypeError('CheckView requires selectLabel and deselectLabel');
     }

@@ -135,6 +135,9 @@ export default SubRouterApp.extend({
     });
   },
   handleContentStartFailure(pageApp, options, error) {
+    // Workflow has no local handler; supported load errors route globally before this fallback.
+    // Retain reporting for unexpected workflow errors, such as invalid request construction.
+    /* istanbul ignore if */
     if (!pageApp.handleStartFailure) return handleErrors(error);
 
     try {

@@ -40,17 +40,28 @@ const testPatient2 = getPatient({
 const STATE_VERSION = 'v6';
 
 function expandFiltersSidebar() {
-  cy.get('.list-page').then($layout => {
-    if ($layout.hasClass('is-filters-collapsed')) {
-      cy.wrap($layout).find('[data-filters-region] button').click();
-    }
-  });
+  cy
+    .get('.list-page')
+    .then($layout => {
+      if ($layout.hasClass('is-filters-collapsed')) {
+        cy
+          .wrap($layout)
+          .find('[data-filters-region] button')
+          .click();
+      }
+    });
 
-  cy.get('[data-states-filters-region] .list-filters__section').then($section => {
-    if ($section.hasClass('is-collapsed')) {
-      cy.wrap($section).find('.list-filters__section-button').click();
-    }
-  });
+  cy
+    .get('[data-states-filters-region]')
+    .find('.list-filters__section')
+    .then($section => {
+      if ($section.hasClass('is-collapsed')) {
+        cy
+          .wrap($section)
+          .find('.list-filters__section-button')
+          .click();
+      }
+    });
 }
 
 function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
@@ -77,10 +88,12 @@ function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
     .routeFlows(fx => {
       fx.data = [testFlow];
       fx.included.push(testPatient1);
+
       return fx;
     })
     .routePatient(fx => {
       fx.data = testPatient1;
+
       return fx;
     })
     .routeSettings('sidebar', panelSlugs)
@@ -102,6 +115,7 @@ function openPatientSidebar(sidebarCount = 1, listType = 'flows') {
     .routeActions(fx => {
       fx.data = [testAction];
       fx.included.push(testPatient1);
+
       return fx;
     })
     .visit('/worklist/owned-by')
@@ -135,18 +149,20 @@ context('worklist page', function() {
   specify('preserves the saved owner when the worklist URL has a query string', function() {
     const clinician = getClinician();
 
-    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
-      id: 'owned-by',
-      clinicianId: clinician.id,
-    }));
-
     cy
       .routeWorkspaceClinicians(fx => {
         fx.data.push(clinician);
+
         return fx;
       })
       .routeActions()
-      .visit('/worklist/owned-by?ct=1788555349799')
+      .visit('/worklist/owned-by?ct=1788555349799', {
+        onBeforeLoad(win) {
+          win.localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+            id: 'owned-by', clinicianId: clinician.id,
+          }));
+        },
+      })
       .wait('@routeActions')
       .itsUrl()
       .its('search')
@@ -156,24 +172,27 @@ context('worklist page', function() {
   specify('recovers a saved invalid owner while preserving date filters', function() {
     const storeKey = `owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`;
 
-    localStorage.setItem(storeKey, JSON.stringify({
-      id: 'owned-by',
-      clinicianId: 'ct=1788555349799',
-      actionsDateFilters: { dateType: 'updated_at', selectedDate: testDate() },
-    }));
-
     cy
       .routeActions()
-      .visit('/worklist/owned-by')
+      .visit('/worklist/owned-by', {
+        onBeforeLoad(win) {
+          win.localStorage.setItem(storeKey, JSON.stringify({
+            id: 'owned-by', clinicianId: 'ct=1788555349799',
+            actionsDateFilters: { dateType: 'updated_at', selectedDate: testDate() },
+          }));
+        },
+      })
       .wait('@routeActions')
       .itsUrl()
       .its('search')
       .should('contain', `filter[clinicians]=${ currentClinician.id }`)
       .should('contain', `filter[updated_at]=${ dayjs(testDate()).startOf('day').format() },${ dayjs(testDate()).endOf('day').format() }`);
 
-    cy.window().then(win => {
-      expect(JSON.parse(win.localStorage.getItem(storeKey)).clinicianId).to.equal(currentClinician.id);
-    });
+    cy
+      .window()
+      .then(win => {
+        expect(JSON.parse(win.localStorage.getItem(storeKey)).clinicianId).to.equal(currentClinician.id);
+      });
   });
 
   specify('preserves filters sidebar across a hidden date refresh', function() {
@@ -249,7 +268,9 @@ context('worklist page', function() {
       .find('.patient-list-page__active-filter-dot')
       .should('not.be.visible');
 
-    cy.get('@filtersButton').click();
+    cy
+      .get('@filtersButton')
+      .click();
 
     cy
       .get('@layout')
@@ -327,7 +348,9 @@ context('worklist page', function() {
       .get('.list-page__list')
       .should('be.visible');
 
-    cy.get('@filtersButton').click();
+    cy
+      .get('@filtersButton')
+      .click();
 
     cy
       .get('@layout')
@@ -470,10 +493,12 @@ context('worklist page', function() {
       .routeActions(fx => {
         fx.data = [testAction];
         fx.included.push(testPatient1);
+
         return fx;
       })
       .routePatient(fx => {
         fx.data = testPatient1;
+
         return fx;
       })
       .routePanels()
@@ -593,6 +618,7 @@ context('worklist page', function() {
       })
       .routePatient(fx => {
         fx.data = testPatient1;
+
         return fx;
       })
       .routeActions()
@@ -604,7 +630,7 @@ context('worklist page', function() {
       .wait('@routeActions');
 
     cy
-      .get('.js-patient') // Wait for list to render
+      .get('.js-patient')
       .should(() => {
         const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
         expect(storage.actionsWorklist).to.exist;
@@ -621,7 +647,7 @@ context('worklist page', function() {
       .should('not.contain', 'fields[flows]=name,state');
 
     cy
-      .get('.js-patient') // Wait for list to render
+      .get('.js-patient')
       .should(() => {
         const storage = JSON.parse(localStorage.getItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`));
         expect(storage.flowsWorklist).to.exist;
@@ -776,7 +802,8 @@ context('worklist page', function() {
       .contains('Test Patient')
       .click();
 
-    cy.wait('@routePatient');
+    cy
+      .wait('@routePatient');
 
     cy
       .location('pathname')
@@ -1088,18 +1115,19 @@ context('worklist page', function() {
         ]);
       });
 
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Name Via Websocket',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Name Via Websocket',
+          },
+        },
+      });
 
     cy
       .get('.app-frame__content')
@@ -1115,58 +1143,61 @@ context('worklist page', function() {
       .find('.work-card__timestamps > span')
       .should('have.length', 2);
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateInProgress.type,
+            id: stateInProgress.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-state-region] .fa-circle-dot');
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        owner: {
-          type: teamCoordinator.type,
-          id: teamCoordinator.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamCoordinator.type,
+            id: teamCoordinator.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-owner-region]')
       .should('contain', 'CO');
 
-    cy.sendWs({
-      category: 'FlowProgressChanged',
-      resource: {
-        type: testSocketFlow.type,
-        id: testSocketFlow.id,
-      },
-      payload: {
-        attributes: {
-          progress: {
-            complete: 1,
-            total: 3,
+    cy
+      .sendWs({
+        category: 'FlowProgressChanged',
+        resource: {
+          type: testSocketFlow.type,
+          id: testSocketFlow.id,
+        },
+        payload: {
+          attributes: {
+            progress: {
+              complete: 1,
+              total: 3,
+            },
           },
         },
-      },
-    });
+      });
 
     cy
       .get('@firstRow')
@@ -1181,30 +1212,32 @@ context('worklist page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'ResourceCreated',
-      resource: {
-        type: testNewSocketFlow.type,
-        id: testNewSocketFlow.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceCreated',
+        resource: {
+          type: testNewSocketFlow.type,
+          id: testNewSocketFlow.id,
+        },
+        payload: {},
+      });
 
     // a notification that is sent for a resource we are currently fetching
     // this notification is queued until model.fetch() is done for that flow
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewSocketFlow.type,
-        id: testNewSocketFlow.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewSocketFlow.type,
+          id: testNewSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateInProgress.type,
+            id: stateInProgress.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeFlow')
@@ -1238,23 +1271,29 @@ context('worklist page', function() {
       .find('[data-state-region] .fa-circle-dot');
 
     // ensures we subscribe correctly to models added to the worklist via ws
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewSocketFlow.type,
-        id: testNewSocketFlow.id,
-      },
-      payload: {
-        state: {
-          type: stateDone.type,
-          id: stateDone.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewSocketFlow.type,
+          id: testNewSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateDone.type,
+            id: stateDone.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-state-region] .fa-circle-check');
+
+    cy
+      .get('@firstRow')
+      .find('[data-state-region] button')
+      .should('have.attr', 'aria-label', 'Done');
 
     cy
       .routeFlow(fx => {
@@ -1263,19 +1302,20 @@ context('worklist page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewStateSocketFlow.type,
-        id: testNewStateSocketFlow.id,
-      },
-      payload: {
-        state: {
-          type: stateTodo.type,
-          id: stateTodo.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewStateSocketFlow.type,
+          id: testNewStateSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateTodo.type,
+            id: stateTodo.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeFlow')
@@ -1293,19 +1333,20 @@ context('worklist page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testNewOwnerSocketFlow.type,
-        id: testNewOwnerSocketFlow.id,
-      },
-      payload: {
-        owner: {
-          type: currentClinician.type,
-          id: currentClinician.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testNewOwnerSocketFlow.type,
+          id: testNewOwnerSocketFlow.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: currentClinician.type,
+            id: currentClinician.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeFlow')
@@ -1316,14 +1357,15 @@ context('worklist page', function() {
       .get('@firstRow')
       .should('contain', 'New Flow - Owner Updated to Match Current Worklist Filter');
 
-    cy.sendWs({
-      category: 'ResourceDeleted',
-      resource: {
-        type: testNewOwnerSocketFlow.type,
-        id: testNewOwnerSocketFlow.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceDeleted',
+        resource: {
+          type: testNewOwnerSocketFlow.type,
+          id: testNewOwnerSocketFlow.id,
+        },
+        payload: {},
+      });
 
     cy
       .get('[data-count-region]')
@@ -1668,6 +1710,7 @@ context('worklist page', function() {
     cy
       .routeAction(fx => {
         fx.data = testActions[2];
+
         return fx;
       });
 
@@ -1743,6 +1786,7 @@ context('worklist page', function() {
     cy
       .routeAction(fx => {
         fx.data = testActions[1];
+
         return fx;
       });
 
@@ -2017,6 +2061,7 @@ context('worklist page', function() {
     cy
       .routeAction(fx => {
         fx.data = testActions[2];
+
         return fx;
       });
 
@@ -2226,18 +2271,19 @@ context('worklist page', function() {
         ]);
       });
 
-    cy.sendWs({
-      category: 'NameChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          name: 'New Name Via Websocket',
+    cy
+      .sendWs({
+        category: 'NameChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            name: 'New Name Via Websocket',
+          },
+        },
+      });
 
     cy
       .get('.app-frame__content')
@@ -2251,74 +2297,78 @@ context('worklist page', function() {
       .find('.work-card__meta')
       .should('contain', formatDate(testTs(), 'TIME_OR_DAY'));
 
-    cy.sendWs({
-      category: 'DetailsChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          details: '',
+    cy
+      .sendWs({
+        category: 'DetailsChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            details: '',
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-details-region]')
       .should('be.empty');
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateInProgress.type,
+            id: stateInProgress.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-state-region] .fa-circle-dot');
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        owner: {
-          type: teamCoordinator.type,
-          id: teamCoordinator.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: teamCoordinator.type,
+            id: teamCoordinator.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-owner-region]')
       .should('contain', 'CO');
 
-    cy.sendWs({
-      category: 'ActionDueChanged',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        attributes: {
-          due_date: testDateAdd(1),
-          due_time: '07:00:00',
+    cy
+      .sendWs({
+        category: 'ActionDueChanged',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-      },
-    });
+        payload: {
+          attributes: {
+            due_date: testDateAdd(1),
+            due_time: '07:00:00',
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
@@ -2327,23 +2377,24 @@ context('worklist page', function() {
         expect($action.find('[data-due-time-region]')).to.contain('7:00 AM');
       });
 
-    cy.sendWs({
-      category: 'ActionCommentAdded',
-      author: currentClinician.id,
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        comment: {
-          type: testComment.type,
-          id: testComment.id,
+    cy
+      .sendWs({
+        category: 'ActionCommentAdded',
+        author: currentClinician.id,
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-        attributes: {
-          message: 'New websocket comment.',
+        payload: {
+          comment: {
+            type: testComment.type,
+            id: testComment.id,
+          },
+          attributes: {
+            message: 'New websocket comment.',
+          },
         },
-      },
-    });
+      });
 
     cy
       .get('@firstRow')
@@ -2352,31 +2403,32 @@ context('worklist page', function() {
       .next()
       .should('contain', '1');
 
-    cy.sendWs({
-      category: 'AttachmentAdded',
-      resource: {
-        type: testSocketAction.type,
-        id: testSocketAction.id,
-      },
-      payload: {
-        clinician: {
-          type: currentClinician.type,
-          id: currentClinician.id,
+    cy
+      .sendWs({
+        category: 'AttachmentAdded',
+        resource: {
+          type: testSocketAction.type,
+          id: testSocketAction.id,
         },
-        file: {
-          type: 'files',
-          id: testSocketFileId,
-        },
-        attributes: {
-          path: 'patients/1/HRA.pdf',
-          bucket: 'bucket_name',
-          urls: {
-            view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient1.id }/view/HRA.pdf`,
-            download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient1.id }/download/HRA.pdf`,
+        payload: {
+          clinician: {
+            type: currentClinician.type,
+            id: currentClinician.id,
+          },
+          file: {
+            type: 'files',
+            id: testSocketFileId,
+          },
+          attributes: {
+            path: 'patients/1/HRA.pdf',
+            bucket: 'bucket_name',
+            urls: {
+              view: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient1.id }/view/HRA.pdf`,
+              download: `https://www.bucket_name.s3.amazonaws.com/patients/${ testPatient1.id }/download/HRA.pdf`,
+            },
           },
         },
-      },
-    });
+      });
 
     cy
       .get('@firstRow')
@@ -2390,30 +2442,58 @@ context('worklist page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'ResourceCreated',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .intercept({ method: 'GET', url: `/api/actions/${ testNewSocketAction.id }?*`, times: 1 }, {
+        statusCode: 404,
+        body: { errors: [{ status: '404', detail: 'Action not available yet' }] },
+      })
+      .as('failedSocketAction');
+
+    cy
+      .sendWs({
+        category: 'ResourceCreated',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
+        },
+        payload: {},
+      });
+
+    cy
+      .wait('@failedSocketAction');
+
+    cy.waitForAppRequests();
+
+    cy
+      .get('[data-count-region]')
+      .should('contain', '1 Action');
+
+    cy
+      .sendWs({
+        category: 'ResourceCreated',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
+        },
+        payload: {},
+      });
 
     // a notification that is sent for a resource we are currently fetching
     // this notification is queued until model.fetch() is done for that action
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateInProgress.type,
-          id: stateInProgress.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateInProgress.type,
+            id: stateInProgress.id,
+          },
+        },
+      });
 
     // verify the new action is added to the ws subscription resources
     cy
@@ -2447,32 +2527,34 @@ context('worklist page', function() {
       .find('[data-state-region] .fa-circle-dot');
 
     // ensures we subscribe correctly to models added to the worklist via ws
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateDone.type,
-          id: stateDone.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateDone.type,
+            id: stateDone.id,
+          },
+        },
+      });
 
     cy
       .get('@firstRow')
       .find('[data-state-region] .fa-circle-check');
 
-    cy.sendWs({
-      category: 'ResourceDeleted',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceDeleted',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
+        },
+        payload: {},
+      });
 
     cy
       .get('[data-count-region]')
@@ -2485,14 +2567,15 @@ context('worklist page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'ResourceCreated',
-      resource: {
-        type: testNewSocketAction.type,
-        id: testNewSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceCreated',
+        resource: {
+          type: testNewSocketAction.type,
+          id: testNewSocketAction.id,
+        },
+        payload: {},
+      });
 
     cy
       .wait('@routeAction')
@@ -2514,19 +2597,20 @@ context('worklist page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'StateChanged',
-      resource: {
-        type: testNewStateSocketAction.type,
-        id: testNewStateSocketAction.id,
-      },
-      payload: {
-        state: {
-          type: stateTodo.type,
-          id: stateTodo.id,
+    cy
+      .sendWs({
+        category: 'StateChanged',
+        resource: {
+          type: testNewStateSocketAction.type,
+          id: testNewStateSocketAction.id,
         },
-      },
-    });
+        payload: {
+          state: {
+            type: stateTodo.type,
+            id: stateTodo.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeAction')
@@ -2544,19 +2628,20 @@ context('worklist page', function() {
         return fx;
       });
 
-    cy.sendWs({
-      category: 'OwnerChanged',
-      resource: {
-        type: testNewOwnerSocketAction.type,
-        id: testNewOwnerSocketAction.id,
-      },
-      payload: {
-        owner: {
-          type: currentClinician.type,
-          id: currentClinician.id,
+    cy
+      .sendWs({
+        category: 'OwnerChanged',
+        resource: {
+          type: testNewOwnerSocketAction.type,
+          id: testNewOwnerSocketAction.id,
         },
-      },
-    });
+        payload: {
+          owner: {
+            type: currentClinician.type,
+            id: currentClinician.id,
+          },
+        },
+      });
 
     cy
       .wait('@routeAction')
@@ -2567,14 +2652,15 @@ context('worklist page', function() {
       .get('@firstRow')
       .should('contain', 'New Action - Owner Updated to Match Current Worklist Filter');
 
-    cy.sendWs({
-      category: 'ResourceDeleted',
-      resource: {
-        type: testNewOwnerSocketAction.type,
-        id: testNewOwnerSocketAction.id,
-      },
-      payload: {},
-    });
+    cy
+      .sendWs({
+        category: 'ResourceDeleted',
+        resource: {
+          type: testNewOwnerSocketAction.type,
+          id: testNewOwnerSocketAction.id,
+        },
+        payload: {},
+      });
 
     cy
       .get('[data-count-region]')
@@ -2621,9 +2707,13 @@ context('worklist page', function() {
       })
       .visit('/worklist/owned-by');
 
-    cy.window().then(win => {
-      cy.stub(win.console, 'error').as('consoleError');
-    });
+    cy
+      .window()
+      .then(win => {
+        cy
+          .stub(win.console, 'error')
+          .as('consoleError');
+      });
 
     cy
       .wait('@routeActions')
@@ -3278,6 +3368,7 @@ context('worklist page', function() {
             role: getRelationship(roleAdmin),
           },
         });
+
         return fx;
       })
       .routeActions()
@@ -4301,6 +4392,7 @@ context('worklist page', function() {
       })
       .routePatient(fx => {
         fx.data = testPatient1;
+
         return fx;
       })
       .routePatientByAction()
@@ -4609,7 +4701,7 @@ context('worklist page', function() {
       .wait('@routeActions');
 
     cy
-      .tick(60) // tick past debounce
+      .tick(60)
       .get('.app-frame__content')
       .find('.worklist-list__item')
       .first()
@@ -4888,6 +4980,7 @@ context('worklist page', function() {
             role: getRelationship(roleNoFilterEmployee),
           },
         });
+
         return fx;
       })
       .routeActions(fx => {
@@ -4967,6 +5060,7 @@ context('worklist page', function() {
             role: getRelationship(roleNoFilterEmployee),
           },
         });
+
         return fx;
       })
       .routeFlows(fx => {
@@ -5227,6 +5321,7 @@ context('worklist page', function() {
           testCurrentClinician,
           testNonTeamMemberClinician,
         ];
+
         return fx;
       })
       .routeFlows(fx => {
@@ -5379,8 +5474,7 @@ context('worklist page', function() {
       .its('search')
       .should('contain', `filter[states]=${ stateInProgress.id }`);
 
-    cy
-      .routeActions();
+    cy.routeActions();
 
     cy
       .get('.error-page')

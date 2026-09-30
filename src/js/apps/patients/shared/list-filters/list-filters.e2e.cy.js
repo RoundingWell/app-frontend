@@ -21,19 +21,29 @@ function getActiveFiltersDot() {
 }
 
 function expandFiltersSidebar() {
-  cy.get('.list-page').then($layout => {
-    if ($layout.hasClass('is-filters-collapsed')) {
-      cy.wrap($layout).find('[data-filters-region] button').click();
-    }
-  });
+  cy
+    .get('.list-page')
+    .then($layout => {
+      if ($layout.hasClass('is-filters-collapsed')) {
+        cy
+          .wrap($layout)
+          .find('[data-filters-region] button')
+          .click();
+      }
+    });
 }
 
 function expandFilterSection(region) {
-  cy.get(`${ region } .list-filters__section`).then($section => {
-    if ($section.hasClass('is-collapsed')) {
-      cy.wrap($section).find('.list-filters__section-button').click();
-    }
-  });
+  cy
+    .get(`${ region } .list-filters__section`)
+    .then($section => {
+      if ($section.hasClass('is-collapsed')) {
+        cy
+          .wrap($section)
+          .find('.list-filters__section-button')
+          .click();
+      }
+    });
 }
 
 context('list filters', function() {
@@ -573,7 +583,8 @@ context('list filters', function() {
     expandFiltersSidebar();
 
     cy
-      .intercept('GET', '/api/filters/**').as('filterReRequest');
+      .intercept('GET', '/api/filters/**')
+      .as('filterReRequest');
 
     cy
       .get('[data-filters-region]')
