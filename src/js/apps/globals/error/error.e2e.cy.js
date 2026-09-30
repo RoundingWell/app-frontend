@@ -6,6 +6,8 @@ context('Global Error Page', function() {
   });
 
   specify('404 not found', function() {
+    cy.log('404 not found');
+
     cy
       .visit('/route-does-not-exist');
 
@@ -25,6 +27,8 @@ context('Global Error Page', function() {
   });
 
   specify('404 not found - root routes', function() {
+    cy.log('404 not found - root routes');
+
     cy
       .visit('/route-does-not-exist', { isRoot: true });
 
@@ -82,9 +86,10 @@ context('Global Error Page', function() {
   });
 
   specify('workspace error', function() {
-    cy.on('uncaught:exception', () => {
-      return false;
-    });
+    cy
+      .on('uncaught:exception', () => {
+        return false;
+      });
 
     cy
       .intercept('GET', '/api/states', {
@@ -103,11 +108,12 @@ context('Global Error Page', function() {
   specify('500 error', function() {
     const errorStub = cy.stub();
 
-    cy.on('uncaught:exception', () => {
-      errorStub();
+    cy
+      .on('uncaught:exception', () => {
+        errorStub();
 
-      return false;
-    });
+        return false;
+      });
 
     cy
       .intercept('GET', '/api/workspaces/**/clinicians*', {

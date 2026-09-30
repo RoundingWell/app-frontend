@@ -135,18 +135,27 @@ context('Patient Quick Search', function() {
       .find('.patient-search__input')
       .type('Test');
 
-    cy.wrap(null).should(() => {
-      expect(replies.Test).to.be.a('function');
-    });
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replies.Test).to.be.a('function');
+      });
 
-    cy.get('@searchModal').find('.patient-search__input').type(' 2');
-    cy.wrap(null).should(() => {
-      expect(replies['Test 2']).to.be.a('function');
-    });
+    cy
+      .get('@searchModal')
+      .find('.patient-search__input')
+      .type(' 2');
+    cy
+      .wrap(null)
+      .should(() => {
+        expect(replies['Test 2']).to.be.a('function');
+      });
 
     cy.then(() => replies.Test());
     cy.wait('@supersededSearch');
-    cy.get('.patient-search__no-results').should('have.text', 'Searching...');
+    cy
+      .get('.patient-search__no-results')
+      .should('have.text', 'Searching...');
     cy.then(() => replies['Test 2']());
 
     cy
@@ -287,19 +296,21 @@ context('Patient Quick Search', function() {
       .get('@searchModal')
       .should('contain', 'Search by');
 
-    cy.intercept({
-      method: 'GET',
-      url: '/api/patients?filter*',
-    }, {
-      body: {
-        data: [{
-          ...searchResults[0],
-          attributes: { ...searchResults[0].attributes, match: { label: 'Birth Date', value: '2008-01-16' } },
-        }],
-        included: [getResource(patients[0], 'patients')],
-      },
-      delay: 300,
-    }).as('routePatientSearch');
+    cy
+      .intercept({
+        method: 'GET',
+        url: '/api/patients?filter*',
+      }, {
+        body: {
+          data: [{
+            ...searchResults[0],
+            attributes: { ...searchResults[0].attributes, match: { label: 'Birth Date', value: '2008-01-16' } },
+          }],
+          included: [getResource(patients[0], 'patients')],
+        },
+        delay: 300,
+      })
+      .as('routePatientSearch');
 
     cy
       .get('@searchModal')
@@ -345,16 +356,18 @@ context('Patient Quick Search', function() {
       },
     };
 
-    cy.intercept({
-      method: 'GET',
-      url: '/api/patients?filter*',
-    }, {
-      body: {
-        data: [searchResult],
-        included: [getResource(testPatient, 'patients')],
-      },
-      delay: 300,
-    }).as('routePatientSearch');
+    cy
+      .intercept({
+        method: 'GET',
+        url: '/api/patients?filter*',
+      }, {
+        body: {
+          data: [searchResult],
+          included: [getResource(testPatient, 'patients')],
+        },
+        delay: 300,
+      })
+      .as('routePatientSearch');
 
     cy
       .routesForPatientWorkflow()
@@ -411,16 +424,18 @@ context('Patient Quick Search', function() {
       },
     };
 
-    cy.intercept({
-      method: 'GET',
-      url: '/api/patients?filter*',
-    }, {
-      body: {
-        data: [searchResult],
-        included: [getResource(testPatient, 'patients')],
-      },
-      delay: 300,
-    }).as('routePatientSearch');
+    cy
+      .intercept({
+        method: 'GET',
+        url: '/api/patients?filter*',
+      }, {
+        body: {
+          data: [searchResult],
+          included: [getResource(testPatient, 'patients')],
+        },
+        delay: 300,
+      })
+      .as('routePatientSearch');
 
     cy
       .routesForPatientWorkflow()
@@ -448,19 +463,21 @@ context('Patient Quick Search', function() {
       .parents('.js-picklist-item')
       .should('contain', 'Phone Number');
 
-    cy.intercept({
-      method: 'GET',
-      url: '/api/patients?filter*',
-    }, {
-      body: {
-        data: [{
-          ...searchResult,
-          attributes: { ...searchResult.attributes, match: { label: 'Name', value: `${ first_name } ${ last_name }` } },
-        }],
-        included: [getResource(testPatient, 'patients')],
-      },
-      delay: 300,
-    }).as('routePatientSearch');
+    cy
+      .intercept({
+        method: 'GET',
+        url: '/api/patients?filter*',
+      }, {
+        body: {
+          data: [{
+            ...searchResult,
+            attributes: { ...searchResult.attributes, match: { label: 'Name', value: `${ first_name } ${ last_name }` } },
+          }],
+          included: [getResource(testPatient, 'patients')],
+        },
+        delay: 300,
+      })
+      .as('routePatientSearch');
 
     // list view should re-render when users copy/paste/replace a search input
     cy
@@ -490,12 +507,14 @@ context('Patient Quick Search', function() {
   });
 
   specify('No Results with Patient Add', function() {
-    cy.intercept({
-      method: 'GET',
-      url: '/api/patients?filter*',
-    }, {
-      body: { data: [] },
-    }).as('routeEmptyPatientSearch');
+    cy
+      .intercept({
+        method: 'GET',
+        url: '/api/patients?filter*',
+      }, {
+        body: { data: [] },
+      })
+      .as('routeEmptyPatientSearch');
 
     cy
       .routeSettings('manual_patient_creation', true)

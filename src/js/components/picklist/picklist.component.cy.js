@@ -40,10 +40,33 @@ context('Picklist', function() {
       .first()
       .should('not.have.class', 'is-highlighted');
 
-    cy.get('.js-picklist-item').first().then(([item]) => {
-      item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: null }));
-    });
-    cy.get('.js-picklist-item').first().should('have.class', 'is-highlighted');
+    cy
+      .get('.js-picklist-item')
+      .first()
+      .then(([item]) => {
+        item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: null }));
+      });
+    cy
+      .get('.js-picklist-item')
+      .first()
+      .should('have.class', 'is-highlighted');
+    // Moving within an item must not override keyboard transport to another item.
+    cy
+      .get('body')
+      .type('{downarrow}');
+    cy
+      .get('.js-picklist-item')
+      .first()
+      .then(([item]) => {
+        item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: item }));
+      });
+    cy
+      .get('.js-picklist-item')
+      .eq(1)
+      .should('have.class', 'is-highlighted');
+    cy
+      .get('body')
+      .type('{uparrow}');
 
     cy
       .get('body')
@@ -186,7 +209,7 @@ context('Picklist', function() {
 
   specify('it should show loading then render promise lists', function() {
     let resolveLists;
-    const listsPromise = new Promise(resolve => {
+    const listsPromise = new Cypress.Promise(resolve => {
       resolveLists = resolve;
     });
 
@@ -199,17 +222,25 @@ context('Picklist', function() {
       }))
       .as('root');
 
-    cy.get('.picklist__message-loading').should('contain', 'Loading Items...');
+    cy
+      .get('.picklist__message-loading')
+      .should('contain', 'Loading Items...');
 
     cy.then(() => resolveLists(lists));
 
-    cy.get('.picklist__message').should('not.exist');
-    cy.get('.picklist').find('.js-picklist-item').its('length').should('be.greaterThan', 0);
+    cy
+      .get('.picklist__message')
+      .should('not.exist');
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .its('length')
+      .should('be.greaterThan', 0);
   });
 
   specify('it should support custom loading text', function() {
     let resolveLists;
-    const listsPromise = new Promise(resolve => {
+    const listsPromise = new Cypress.Promise(resolve => {
       resolveLists = resolve;
     });
 
@@ -219,14 +250,18 @@ context('Picklist', function() {
       loadingText: 'Please Wait...',
     }));
 
-    cy.get('.picklist__message-loading').should('contain', 'Please Wait...');
+    cy
+      .get('.picklist__message-loading')
+      .should('contain', 'Please Wait...');
     cy.then(() => resolveLists(lists));
-    cy.get('.picklist__message-loading').should('not.exist');
+    cy
+      .get('.picklist__message-loading')
+      .should('not.exist');
   });
 
   specify('it should show no results when promise resolves empty', function() {
     let resolveLists;
-    const listsPromise = new Promise(resolve => {
+    const listsPromise = new Cypress.Promise(resolve => {
       resolveLists = resolve;
     });
 
@@ -237,16 +272,24 @@ context('Picklist', function() {
       noResultsText: 'No Results Found',
     }));
 
-    cy.get('.picklist__message-loading').should('contain', 'Loading Items...');
+    cy
+      .get('.picklist__message-loading')
+      .should('contain', 'Loading Items...');
     cy.then(() => resolveLists([]));
-    cy.get('.picklist__message').should('contain', 'No Results Found');
+    cy
+      .get('.picklist__message')
+      .should('contain', 'No Results Found');
   });
 
   specify('it should release pending lists when destroyed', function() {
     let resolveLists;
+    let rejectLists;
     let picklist;
-    const listsPromise = new Promise(resolve => {
+    const listsPromise = new Cypress.Promise(resolve => {
       resolveLists = resolve;
+    });
+    const failedLists = new Cypress.Promise((resolve, reject) => {
+      rejectLists = reject;
     });
     const createChild = cy.stub().as('createChild');
 
@@ -259,20 +302,45 @@ context('Picklist', function() {
       return picklist;
     });
 
-    cy.get('.picklist__message-loading').should('exist');
+    cy
+      .get('.picklist__message-loading')
+      .should('exist');
     cy.then(() => {
       picklist.destroy();
       resolveLists(lists);
       return listsPromise;
     });
-    cy.get('@createChild').should('not.have.been.called');
+    cy
+      .get('@createChild')
+      .should('not.have.been.called');
     cy.then(() => expect(picklist.isDestroyed()).to.equal(true));
+
+    const onError = cy.stub().as('lateLoadError');
+    cy.mount(() => {
+      picklist = new Picklist({ isListsAsync: true, lists: failedLists });
+      picklist.on('load:error', onError);
+      return picklist;
+    });
+    cy
+      .get('.picklist__message-loading')
+      .should('exist');
+    cy.then(async() => {
+      picklist.destroy();
+      rejectLists(new Error('Options failed after close'));
+      await failedLists.catch(() => {});
+    });
+    cy
+      .get('@lateLoadError')
+      .should('not.have.been.called');
+    cy
+      .get('.picklist')
+      .should('not.exist');
   });
 
   specify('it should close failed async lists and report their error', function() {
     let rejectLists;
     const error = new Error('Unable to load options');
-    const listsPromise = new Promise((resolve, reject) => {
+    const listsPromise = new Cypress.Promise((resolve, reject) => {
       rejectLists = reject;
     });
     const onError = cy.stub().as('loadError');
@@ -283,11 +351,17 @@ context('Picklist', function() {
       return picklist;
     });
 
-    cy.get('.picklist__message-loading').should('exist');
+    cy
+      .get('.picklist__message-loading')
+      .should('exist');
     cy.then(() => {
       rejectLists(error);
     });
-    cy.get('@loadError').should('have.been.calledOnceWith', error);
-    cy.get('.picklist').should('not.exist');
+    cy
+      .get('@loadError')
+      .should('have.been.calledOnceWith', error);
+    cy
+      .get('.picklist')
+      .should('not.exist');
   });
 });

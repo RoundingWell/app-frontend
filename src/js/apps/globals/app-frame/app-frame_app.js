@@ -32,6 +32,8 @@ export default RouteBaseApp.extend({
 
     return this.startWorkspace(Radio.request('workspace', 'current'));
   },
+  // Product children do not reject cleanup; preserve reporting for unexpected teardown errors.
+  /* istanbul ignore next */
   onChildCleanupError(error) {
     addError(error);
   },

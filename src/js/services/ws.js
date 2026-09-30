@@ -87,6 +87,8 @@ export default App.extend({
       return;
     }
 
+    // UI callers queue subscriptions only; heartbeat messages use sendData directly.
+    /* istanbul ignore else */
     if (data.name === 'Subscribe') {
       this.pendingMessages = reject(this.pendingMessages, { name: 'Subscribe' });
     }
@@ -208,6 +210,8 @@ export default App.extend({
         .finally(() => requests.delete(requestId));
     };
     const release = () => {
+      // Release unregisters itself; retain idempotence for an already-queued cleanup.
+      /* istanbul ignore if */
       if (released) return;
       released = true;
       requests.forEach(controller => controller.abort());

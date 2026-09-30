@@ -103,6 +103,39 @@ context('App Nav', function() {
       .should('have.attr', 'href')
       .and('contain', '/logout');
 
+    // Resize preserves a focused menu and closes an unfocused menu.
+    cy
+      .get('.picklist')
+      .find('a')
+      .first()
+      .focus();
+
+    cy.viewport(1300, 768);
+
+    cy
+      .get('.picklist')
+      .should('be.visible');
+
+    cy
+      .get('.picklist')
+      .find('a')
+      .first()
+      .blur();
+
+    cy
+      .get('.picklist')
+      .should('be.visible');
+
+    cy.viewport(1280, 768);
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('@mainNav')
+      .click();
+
     // NOTE: this closes the main nav droplist so it doesn't cover other nav links
     cy
       .get('.picklist')
@@ -303,7 +336,8 @@ context('App Nav', function() {
           const announcementRect = $announcement[0].getBoundingClientRect();
 
           cy
-            .get('.app-nav__bottom .app-nav__link')
+            .get('.app-nav__bottom')
+            .find('.app-nav__link')
             .first()
             .then($menuLink => {
               const menuLinkRect = $menuLink[0].getBoundingClientRect();
@@ -359,6 +393,21 @@ context('App Nav', function() {
       .get('.app-nav')
       .find('.js-add-patient');
 
+    let releaseWorkspace;
+    let workspaceRequested;
+    const requested = new Cypress.Promise(resolve => {
+      workspaceRequested = resolve;
+    });
+    const response = new Cypress.Promise(resolve => {
+      releaseWorkspace = resolve;
+    });
+
+    cy
+      .intercept({ method: 'GET', url: '/api/states', times: 1 }, req => {
+        workspaceRequested();
+        req.on('response', () => response);
+      });
+
     cy
       .get('.app-nav__header')
       .as('mainNav')
@@ -372,6 +421,62 @@ context('App Nav', function() {
       .should('have.class', 'is-selected')
       .next()
       .should('not.have.class', 'is-selected')
+      .click();
+
+    cy
+      .then(() => requested)
+      .get('.app-nav')
+      .should('be.visible')
+      .find('.app-nav__header')
+      .should('contain', 'Workspace Two');
+
+    // A second choice while the first workspace is loading must fetch that choice.
+    cy
+      .intercept('GET', `/api/workspaces/${ workspaceOne.id }/programs*`)
+      .as('latestWorkspacePrograms');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group .picklist__item')
+      .first()
+      .click();
+
+    cy
+      .wait('@latestWorkspacePrograms');
+
+    cy
+      .wait('@routeActions')
+      .its('request.headers')
+      .should('have.property', 'workspace', workspaceOne.id);
+
+    cy
+      .get('.app-nav__header')
+      .should('contain', 'Workspace One')
+      .then(() => releaseWorkspace());
+
+    cy.waitForAppRequests();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.app-nav')
+      .find('.js-add-patient')
+      .should('be.visible');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group .picklist__item')
+      .eq(1)
       .click();
 
     cy
@@ -734,6 +839,78 @@ context('App Nav', function() {
       .should('not.have.class', 'is-full-nav-visible');
   });
 
+  specify('expands a minimized nav only for mouse hover', function() {
+    localStorage.setItem(navMinimizedKey, true);
+
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible')
+      .then($nav => {
+        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
+
+        $nav[0].dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'touch' }));
+        $nav[0].dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerType: 'touch' }));
+      });
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .window()
+      .then(win => {
+        const nativeMatchMedia = win.matchMedia.bind(win);
+
+        cy
+          .stub(win, 'matchMedia')
+          .callsFake(query => {
+            if (query !== '(hover: hover) and (pointer: fine)') return nativeMatchMedia(query);
+
+            return {
+              addEventListener() {},
+              addListener() {},
+              dispatchEvent() {
+                return true;
+              },
+              matches: true,
+              media: query,
+              onchange: null,
+              removeEventListener() {},
+              removeListener() {},
+            };
+          });
+      });
+
+    cy
+      .get('.app-nav')
+      .then($nav => {
+        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
+
+        $nav[0].dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }));
+      });
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav')
+      .then($nav => {
+        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
+
+        $nav[0].dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerType: 'mouse' }));
+      });
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-full-nav-visible');
+  });
+
   specify('navigation controls use native buttons', function() {
     cy
       .routePrograms()
@@ -790,6 +967,90 @@ context('App Nav', function() {
       .get('.app-nav')
       .should('have.class', 'is-minimized')
       .should('not.have.class', 'is-full-nav-visible');
+  });
+
+  specify('responds to global navigation and viewport changes', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('event-router', 'default');
+      });
+
+    cy
+      .url()
+      .should('contain', '/one/worklist/owned-by');
+
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('hotkey', 'search', { preventDefault() {} });
+      });
+
+    cy
+      .get('.patient-search__modal')
+      .find('.js-close')
+      .click();
+
+    cy
+      .viewport(800, 768);
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-narrow');
+
+    cy
+      .viewport(1280, 768);
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-narrow');
+  });
+
+  specify('nav radio minimize requests are covered through e2e', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('nav', 'setMinimized', true);
+      });
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('nav', 'setMinimized', false);
+      });
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-minimized')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('nav', 'setMinimized', true);
+      });
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('.js-picklist-item', 'Workspace Two')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .should('not.have.class', 'is-minimized')
+      .should('have.class', 'is-full-nav-visible');
   });
 
   specify('narrow nav opens as a touch drawer and closes without pinning', function() {
@@ -857,115 +1118,6 @@ context('App Nav', function() {
       .should('not.have.class', 'is-full-nav-visible');
   });
 
-  specify('responds to global navigation and viewport changes', function() {
-    cy
-      .routePrograms()
-      .visit();
-
-    cy
-      .getRadio(Radio => {
-        Radio.trigger('event-router', 'default');
-      });
-
-    cy
-      .url()
-      .should('contain', '/one/worklist/owned-by');
-
-    cy
-      .getRadio(Radio => {
-        Radio.trigger('hotkey', 'search', { preventDefault() {} });
-      });
-
-    cy
-      .get('.patient-search__modal')
-      .find('.js-close')
-      .click();
-
-    cy
-      .viewport(800, 768);
-
-    cy
-      .get('.app-nav')
-      .should('have.class', 'is-narrow');
-
-    cy
-      .viewport(1280, 768);
-
-    cy
-      .get('.app-nav')
-      .should('not.have.class', 'is-narrow');
-  });
-
-  specify('expands a minimized nav only for mouse hover', function() {
-    localStorage.setItem(navMinimizedKey, true);
-
-    cy
-      .routePrograms()
-      .visit();
-
-    cy
-      .get('.app-nav')
-      .should('have.class', 'is-minimized')
-      .should('not.have.class', 'is-full-nav-visible')
-      .then($nav => {
-        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
-
-        $nav[0].dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'touch' }));
-        $nav[0].dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerType: 'touch' }));
-      });
-
-    cy
-      .get('.app-nav')
-      .should('not.have.class', 'is-full-nav-visible');
-
-    cy
-      .window()
-      .then(win => {
-        const nativeMatchMedia = win.matchMedia.bind(win);
-
-        cy.stub(win, 'matchMedia').callsFake(query => {
-          if (query !== '(hover: hover) and (pointer: fine)') return nativeMatchMedia(query);
-
-          return {
-            addEventListener() {},
-            addListener() {},
-            dispatchEvent() {
-              return true;
-            },
-            matches: true,
-            media: query,
-            onchange: null,
-            removeEventListener() {},
-            removeListener() {},
-          };
-        });
-      });
-
-    cy
-      .get('.app-nav')
-      .then($nav => {
-        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
-
-        $nav[0].dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }));
-      });
-
-    cy
-      .get('.app-nav')
-      .should('have.class', 'is-full-nav-visible');
-
-    cy
-      .get('.app-nav')
-      .then($nav => {
-        const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
-
-        $nav[0].dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerType: 'mouse' }));
-      });
-
-    cy
-      .get('.app-nav')
-      .should('not.have.class', 'is-full-nav-visible');
-  });
-
   specify('closes a narrow drawer after clicking outside', function() {
     cy
       .viewport(800, 768)
@@ -988,51 +1140,6 @@ context('App Nav', function() {
     cy
       .get('.app-nav')
       .should('not.have.class', 'is-full-nav-visible');
-  });
-
-  specify('nav radio minimize requests are covered through e2e', function() {
-    cy
-      .routePrograms()
-      .visit();
-
-    cy
-      .getRadio(Radio => {
-        Radio.request('nav', 'setMinimized', true);
-      });
-
-    cy
-      .get('.app-nav')
-      .should('have.class', 'is-minimized')
-      .should('not.have.class', 'is-full-nav-visible');
-
-    cy
-      .getRadio(Radio => {
-        Radio.request('nav', 'setMinimized', false);
-      });
-
-    cy
-      .get('.app-nav')
-      .should('not.have.class', 'is-minimized')
-      .should('have.class', 'is-full-nav-visible');
-
-    cy
-      .getRadio(Radio => {
-        Radio.request('nav', 'setMinimized', true);
-      });
-
-    cy
-      .get('.app-nav__header')
-      .click();
-
-    cy
-      .get('.picklist')
-      .contains('.js-picklist-item', 'Workspace Two')
-      .click();
-
-    cy
-      .get('.app-nav')
-      .should('not.have.class', 'is-minimized')
-      .should('have.class', 'is-full-nav-visible');
   });
 
   specify('add patient success', function() {
@@ -1571,5 +1678,42 @@ context('App Nav', function() {
       .wait('@routeLatestFormResponse')
       .wait('@routeFormDefinition')
       .wait('@routeFormFields');
+  });
+
+  specify('opens patient search only for an unmodified shortcut outside an input', function() {
+    cy
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('body')
+      .type('{ctrl}/');
+
+    cy
+      .get('.patient-search__modal')
+      .should('not.exist');
+
+    cy
+      .get('body')
+      .type('/');
+
+    cy
+      .get('.patient-search__modal')
+      .should('have.length', 1)
+      .find('.patient-search__input')
+      .type('/')
+      .should('have.value', '/');
+
+    cy
+      .get('.patient-search__modal')
+      .should('have.length', 1);
+
+    cy
+      .get('body')
+      .type('{esc}');
+
+    cy
+      .get('.patient-search__modal')
+      .should('not.exist');
   });
 });

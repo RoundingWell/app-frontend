@@ -31,6 +31,8 @@ export default App.extend({
 
     if (!provider) return;
 
+    // The root starts this service once; retain provider reuse for an explicit restart.
+    /* istanbul ignore else */
     if (!this.hasChildApp('provider')) {
       this.addChildApp('provider', new provider.DialerApp(provider.options));
     }
