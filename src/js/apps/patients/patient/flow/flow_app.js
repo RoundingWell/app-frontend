@@ -55,7 +55,7 @@ export default App.extend({
 
     throw error;
   },
-  onStart(app, { patient }, [flow, actions]) {
+  onStart(app, { patient, focusActionId }, [flow, actions]) {
     this.flow = flow;
     this.actions = actions;
     this.editableCollection = actions.clone();
@@ -74,7 +74,7 @@ export default App.extend({
 
     this.showHeader();
     this.showMenu();
-    this.showActionList();
+    this.showActionList(focusActionId);
     this.startActivity();
 
     this.listenTo(this.actions, {
@@ -308,8 +308,9 @@ export default App.extend({
     });
   },
 
-  showActionList() {
+  showActionList(focusActionId) {
     const listView = new ListView({
+      focusActionId,
       collection: this.actions,
       editableCollection: this.editableCollection,
       state: this.getState(),

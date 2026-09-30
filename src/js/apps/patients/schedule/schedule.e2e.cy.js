@@ -4,7 +4,7 @@ import { v7 as uuidv7, v5 as uuidv5 } from 'uuid';
 
 import formatDate from 'helpers/format-date';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, mergeJsonApi } from 'helpers/json-api';
 
 import { getAction, getActions, longActionName } from 'support/api/actions';
 import { getComment } from 'support/api/comments';
@@ -228,6 +228,7 @@ context('schedule page', function() {
       })
       .routeFlow()
       .routeFlowActions()
+      .routeFlowActivity()
       .routePatientByFlow()
       .routeFormByAction()
       .routeFormDefinition()
@@ -500,8 +501,10 @@ context('schedule page', function() {
 
     cy
       .get('.patient-sidebar')
-      .should('contain', 'Test Patient')
-      .find('.patient-sidebar__close')
+      .should('contain', 'Test Patient');
+
+    cy
+      .get('.patient-sidebar__close')
       .click();
 
     cy
@@ -511,6 +514,29 @@ context('schedule page', function() {
     cy
       .get('.list-filters')
       .should('be.visible');
+
+    restoreSchedule();
+
+    cy
+      .routeFlow(fx => {
+        fx.data = testFlow;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [testActions[1]];
+
+        return fx;
+      });
+
+    cy.get('@actionList').contains('Last Action').parents('.schedule-list__day-list-row').find('.js-flow').should('not.exist');
+    cy.get('@actionList').contains(longActionName).parents('.schedule-list__day-list-row').find('.js-flow')
+      .should('contain', 'Parent Flow')
+      .click()
+      .wait(['@routeFlow', '@routeFlowActions']);
+
+    cy.location('pathname').should('eq', `/one/patient/${ testPatient2.id }/flow/${ testFlow.id }/focus/${ testActions[1].id }`);
+    cy.contains('.patient-flow__action-item .js-primary', longActionName).should('be.focused');
 
     restoreSchedule();
 
@@ -1022,6 +1048,10 @@ context('schedule page', function() {
   specify('responsive card layout and accessible controls', function() {
     cy.viewport(1200, 720);
 
+    const longFlow = mergeJsonApi(testFlow, {
+      attributes: { name: _.times(12, () => 'Long Flow Name').join(' ') },
+    });
+
     const testActions = [
       getAction({
         attributes: {
@@ -1069,7 +1099,7 @@ context('schedule page', function() {
       })
       .routeActions(fx => {
         fx.data = testActions;
-        fx.included.push(testPatient1, testPatient2, testFlow);
+        fx.included.push(testPatient1, testPatient2, longFlow);
 
         return fx;
       })
@@ -1133,6 +1163,14 @@ context('schedule page', function() {
       .last()
       .find('.schedule-list__comments')
       .should('not.exist');
+
+    cy.get('.schedule-list__day-list-row').each($row => {
+      expect($row[0].scrollWidth).to.be.at.most($row[0].clientWidth);
+      const stateBounds = $row.find('.schedule-list__action-state')[0].getBoundingClientRect();
+      const actionBounds = $row.find('.schedule-list__action-name')[0].getBoundingClientRect();
+      expect(stateBounds.right).to.be.at.most(actionBounds.left);
+    });
+    cy.get('.schedule-list__flow').should('be.visible').and('have.attr', 'title', longFlow.attributes.name);
 
     cy.viewport(721, 720);
 
@@ -1316,6 +1354,11 @@ context('schedule page', function() {
     cy
       .get('.js-close-sidebar-drawer')
       .should('not.be.visible');
+
+    cy.get('.schedule-list__day-list-row').each($row => {
+      expect($row[0].scrollWidth).to.be.at.most($row[0].clientWidth);
+    });
+    cy.get('.schedule-list__flow').should('be.visible').and('have.attr', 'title', longFlow.attributes.name);
 
     cy.viewport(1200, 720);
 

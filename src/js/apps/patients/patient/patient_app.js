@@ -32,6 +32,7 @@ export default SubRouterApp.extend({
       'patient:workflow:closed': this.showClosedWorkflow,
       'patient:action': this.showPatientAction,
       'patient:flow': this.showFlow,
+      'patient:flow:focus': this.showFlowFocus,
       'patient:flow:action': this.showFlowAction,
       'patient:form': this.showPatientForm,
     };
@@ -105,6 +106,10 @@ export default SubRouterApp.extend({
 
   showFlow(patientId, flowId) {
     return this.startContent('flow', { flowId });
+  },
+
+  showFlowFocus(patientId, flowId, focusActionId) {
+    return this.startContent('flow', { flowId, focusActionId });
   },
 
   showFlowAction(patientId, flowId, actionId, entryTarget) {

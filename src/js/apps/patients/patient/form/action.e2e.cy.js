@@ -54,6 +54,7 @@ context('Patient Action Form', function() {
 
   specify('deleted action', function() {
     const deletedActionId = uuid();
+    const testPatient = getPatient({ id: routePatientId });
 
     const errors = getErrors({
       status: '410',
@@ -62,12 +63,17 @@ context('Patient Action Form', function() {
     });
 
     cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
       .intercept('GET', '/api/actions/*', {
         statusCode: 410,
         body: { errors },
       })
       .as('routeActionError')
-      .routePatient()
       .routeFormByAction()
       .routeLatestFormResponse()
       .visit(`/patient/${ routePatientId }/action/${ deletedActionId }`)
@@ -79,8 +85,9 @@ context('Patient Action Form', function() {
       .should('contain', 'The Action you requested does not exist.');
 
     cy
-      .url()
-      .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`);
+      .location('pathname')
+      .should('eq', `/one/patient/${ testPatient.id }/workflow`)
+      .wait(['@routePatientActions', '@routePatientFlows', '@routePrograms', '@routeAllProgramActions', '@routeAllProgramFlows']);
   });
 
   specify('action deleted while its form is open', function() {
@@ -94,6 +101,7 @@ context('Patient Action Form', function() {
     });
 
     cy
+      .routesForPatientWorkflow()
       .routeAction(fx => {
         fx.data = testAction;
 
@@ -136,8 +144,9 @@ context('Patient Action Form', function() {
     });
 
     cy
-      .url()
-      .should('contain', `/patient/${ testPatient.id }/workflow`);
+      .location('pathname')
+      .should('eq', `/one/patient/${ testPatient.id }/workflow`)
+      .wait(['@routePatientActions', '@routePatientFlows', '@routePrograms', '@routeAllProgramActions', '@routeAllProgramFlows']);
   });
 
   specify('update a form', function() {
@@ -1944,6 +1953,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
+      .routeFormResponse(fx => {
+        fx.data = testFormResponse;
+
+        return fx;
+      })
       .routeLatestFormResponse()
       .routeFormDefinition()
       .routeFormActionFields()
@@ -2071,7 +2085,8 @@ context('Patient Action Form', function() {
 
     cy
       .get('.form__controls')
-      .contains('Update');
+      .contains('Update')
+      .wait('@routeFormResponse');
   });
 
   specify('submit and go back - action without a flow', function() {
