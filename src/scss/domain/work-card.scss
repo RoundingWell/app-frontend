@@ -112,6 +112,15 @@
   outline-offset: 2px;
 }
 
+.work-card--focus-surface:not(.is-selected):has(.work-card__title:focus) .work-card__surface {
+  outline: 1px solid var(--color-interactive);
+  outline-offset: -1px;
+}
+
+.work-card--focus-surface:not(.is-selected) .work-card__title:focus-visible {
+  outline: none;
+}
+
 .work-card__context {
   align-items: center;
   display: flex;

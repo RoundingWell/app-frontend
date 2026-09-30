@@ -61,6 +61,10 @@ export default RouterApp.extend({
       action: 'showPatient',
       route: 'patient/:patientId/flow/:flowId',
     },
+    'patient:flow:focus': {
+      action: 'showPatient',
+      route: 'patient/:patientId/flow/:flowId/focus/:actionId',
+    },
     'patient:flow:action': {
       action: 'showPatient',
       route: 'patient/:patientId/flow/:flowId/action/:actionId',

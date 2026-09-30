@@ -94,7 +94,7 @@ const ActionItemView = View.extend({
   },
   onClickFlow(event) {
     event.stopImmediatePropagation();
-    Radio.trigger('event-router', 'patient:flow', this.model.getPatient().id, this.flow.id);
+    Radio.trigger('event-router', 'patient:flow:focus', this.model.getPatient().id, this.flow.id, this.model.id);
   },
   onClickPrimary(event) {
     event.stopImmediatePropagation();

@@ -67,6 +67,16 @@ until September 2, 2027. New code, and routine test setup, must use the
 canonical route or the event name; a legacy alias appears only in the one
 compatibility spec that proves the aliases still route.
 
+### Patient flow action targets
+
+`patient:flow:focus` generates `patient/:patientId/flow/:flowId/focus/:actionId`.
+It opens the flow page and focuses the matching action after the list attaches.
+PatientApp passes `focusActionId` separately from action-detail context. A target
+missing from the fetched flow collection leaves the normal flow page visible.
+Direct loads, refresh, and browser history apply the URL target on each page
+activation; live updates do not reapply it. Plain `patient:flow` links have no
+target. `patient:flow:action` continues to open the action detail page.
+
 ## Route context
 
 Each match is normalized before any hook runs:

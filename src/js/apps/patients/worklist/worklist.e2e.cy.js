@@ -1581,8 +1581,16 @@ context('worklist page', function() {
       .should('contain', 'Flows');
 
     cy
-      .routeFlow()
-      .routeFlowActions()
+      .routeFlow(fx => {
+        fx.data = testFlow;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [testActions[0]];
+
+        return fx;
+      })
       .routeFlowActivity()
       .routePatientByFlow();
 
@@ -1608,9 +1616,10 @@ context('worklist page', function() {
       .wait('@routeFlow');
 
     cy
-      .url()
-      .should('contain', `flow/${ testFlow.id }`)
-      .should('not.contain', `/action/${ testActions[0].id }`);
+      .location('pathname')
+      .should('eq', `/one/patient/${ testActions[0].relationships.patient.data.id }/flow/${ testFlow.id }/focus/${ testActions[0].id }`);
+
+    cy.contains('.patient-flow__action-item .js-primary', testActions[0].attributes.name).should('be.focused');
 
     cy
       .visit('/worklist/owned-by')

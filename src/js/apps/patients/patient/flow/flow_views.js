@@ -174,7 +174,7 @@ const EmptyView = View.extend({
 });
 
 const ActionItemView = View.extend({
-  className: 'work-card action-card patient-flow__action-item',
+  className: 'work-card work-card--focus-surface action-card patient-flow__action-item',
   attributes: {
     role: 'listitem',
   },
@@ -218,6 +218,13 @@ const ActionItemView = View.extend({
     'click .js-comments': 'onClickComments',
     'click .js-no-click': stopEventPropagation,
     'click .js-action-surface': 'onClickSurface',
+  },
+  ui: {
+    primary: '.js-primary',
+  },
+  focus() {
+    this.el.scrollIntoView({ block: 'center', behavior: 'instant' });
+    this.getUI('primary')[0].focus({ preventScroll: true });
   },
   navigateToAction(entryTarget) {
     Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id, entryTarget);
@@ -391,6 +398,12 @@ const ListView = CollectionView.extend({
     this.editableCollection = editableCollection;
 
     this.onListItemCanEdit = debounce(this.onListItemCanEdit, 60);
+  },
+  onAttach() {
+    const action = this.collection.get(this.getOption('focusActionId'));
+    if (!action) return;
+
+    this.children.findByModel(action)?.focus();
   },
   onListItemCanEdit() {
     // NOTE: debounced in initialize
