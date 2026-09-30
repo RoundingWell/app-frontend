@@ -548,6 +548,148 @@ context('patient flow page', function() {
       .should('be.focused');
   });
 
+  specify('links to an action within the flow', function() {
+    const patient = getPatient();
+    const flow = getFlow({
+      relationships: {
+        patient: getRelationship(patient),
+        state: getRelationship(stateTodo),
+      },
+    });
+    const actions = _.times(16, sequence => getAction({
+      attributes: { name: `Flow Action ${ sequence }`, sequence },
+      relationships: {
+        patient: getRelationship(patient),
+        flow: getRelationship(flow),
+        state: getRelationship(stateTodo),
+      },
+    }));
+    const target = _.last(actions);
+    const otherAction = getAction();
+    const flowUrl = `/patient/${ patient.id }/flow/${ flow.id }`;
+    const targetUrl = `${ flowUrl }/focus/${ target.id }`;
+    const targetTitle = () => cy.contains('.patient-flow__action-item .js-primary', target.attributes.name);
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = patient;
+        fx.included.push(otherAction);
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = flow;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = actions;
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = target;
+
+        return fx;
+      })
+      .visit(targetUrl)
+      .wait(['@routeFlow', '@routeFlowActions']);
+
+    targetTitle()
+      .should('be.focused')
+      .then($title => {
+        const title = $title[0].getBoundingClientRect();
+        const viewport = $title.closest('.patient-flow__frame')[0].getBoundingClientRect();
+
+        expect(title.top).to.be.at.least(viewport.top);
+        expect(title.bottom).to.be.at.most(viewport.bottom);
+      });
+
+    targetTitle().parents('.patient-flow__action-item')
+      .find('.work-card__surface').should('have.css', 'outline-style', 'solid');
+
+    cy.get('.patient__context-trail').should('contain', flow.attributes.name);
+    cy.get('.patient__context-trail .js-action').should('not.exist');
+
+    cy.get('@wsHandleMessage').should('have.been.called');
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: { type: target.type, id: target.id },
+      payload: { attributes: { name: 'Updated Target Action' } },
+    });
+
+    cy.contains('.patient-flow__action-item .js-primary', 'Updated Target Action')
+      .should('be.focused')
+      .parents('.patient-flow__action-item')
+      .find('.js-select')
+      .click();
+
+    cy.contains('.patient-flow__action-item', 'Updated Target Action')
+      .should('have.class', 'is-selected')
+      .find('.js-primary').focus().should('be.focused');
+
+    cy.contains('.patient-flow__action-item', 'Updated Target Action')
+      .find('.work-card__surface').should('have.css', 'outline-style', 'none');
+
+    cy.get('.patient-flow__actions .bulk-edit-inline__cancel').click();
+    // Live updates must not reacquire focus after the user leaves the target.
+    cy.get('[data-header-region] button').first().focus();
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: { type: target.type, id: target.id },
+      payload: { attributes: { name: 'Target Updated Again' } },
+    });
+
+    cy.contains('.patient-flow__action-item .js-primary', 'Target Updated Again').should('not.be.focused');
+    cy.contains('.patient-flow__action-item', 'Target Updated Again')
+      .find('.work-card__surface').should('have.css', 'outline-style', 'none');
+
+    cy.reload().wait(['@routeFlow', '@routeFlowActions']);
+    targetTitle().should('be.focused').typeEnter().wait('@routeAction');
+    cy.location('pathname').should('eq', `/one${ flowUrl }/action/${ target.id }`);
+
+    cy.go('back').wait(['@routeFlow', '@routeFlowActions']);
+    targetTitle().should('be.focused');
+    cy.go('forward').wait('@routeAction');
+    cy.go('back').wait(['@routeFlow', '@routeFlowActions']);
+    targetTitle().should('be.focused');
+
+    cy.navigate(`${ flowUrl }/focus/${ actions[3].id }`).wait(['@routeFlow', '@routeFlowActions']);
+    cy.contains('.patient-flow__action-item .js-primary', actions[3].attributes.name).should('be.focused');
+
+    cy.navigate(`${ flowUrl }/focus/${ uuid() }`).wait(['@routeFlow', '@routeFlowActions']);
+    cy.get('.patient-flow__list').should('be.visible');
+    cy.get('.patient-flow__action-item .js-primary').should('not.be.focused');
+
+    cy.navigate(`${ flowUrl }/focus/${ otherAction.id }`).wait(['@routeFlow', '@routeFlowActions']);
+    cy.get('.patient-flow__action-item .js-primary').should('not.be.focused');
+
+    cy.navigate(flowUrl).wait(['@routeFlow', '@routeFlowActions']);
+    cy.get('.patient-flow__action-item .js-primary').should('not.be.focused');
+
+    cy.routeFlow(fx => {
+      fx.data = mergeJsonApi(flow, { relationships: { state: getRelationship(stateDone) } });
+
+      return fx;
+    });
+
+    cy.visit(targetUrl).wait(['@routeFlow', '@routeFlowActions']);
+    targetTitle().should('be.focused').parents('.patient-flow__action-item').find('.js-select').should('not.exist');
+
+    cy.get('@wsHandleMessage').should('have.been.called');
+
+    cy.sendWs({
+      category: 'ResourceDeleted',
+      resource: { type: target.type, id: target.id },
+    });
+
+    targetTitle().should('not.exist');
+    cy.get('.patient-flow__list').should('be.visible');
+  });
+
   specify('flow actions list', function() {
     const testListAction = mergeJsonApi(testAction, {
       attributes: {
@@ -1303,51 +1445,69 @@ context('patient flow page', function() {
         patient: getRelationship(testPatient),
       },
     });
+    const target = getAction({
+      relationships: {
+        flow: getRelationship(delayedFlow),
+        patient: getRelationship(testPatient),
+      },
+    });
+    const targetUrl = `/patient/${ testPatient.id }/flow/${ delayedFlow.id }/focus/${ target.id }`;
     let replyToFlow;
 
     cy
       .routeActions()
+      .routeFlowActions(fx => {
+        fx.data = [target];
+
+        return fx;
+      })
       .intercept('GET', new RegExp(`/api/flows/${ delayedFlow.id }\\?`), req => new Cypress.Promise(resolve => {
         replyToFlow = () => {
           req.reply({ body: { data: delayedFlow, included: [testPatient] } });
           resolve();
         };
       }))
-      .as('routeDelayedFlow')
-      .visit(`/flow/${ delayedFlow.id }`);
+      .as('routeDelayedFlow');
 
-    cy.wrap(null).should(() => {
-      expect(replyToFlow).to.be.a('function');
+    _.each([`/flow/${ delayedFlow.id }`, targetUrl], url => {
+      cy.then(() => {
+        replyToFlow = null;
+      });
+      cy.visit(url);
+
+      cy.wrap(null).should(() => {
+        expect(replyToFlow).to.be.a('function');
+      });
+
+      cy.contains('.app-nav__link', 'Schedule').click();
+      cy.wait('@routeActions');
+      cy.location('pathname').should('eq', '/one/schedule');
+      cy.get('.list-page').should('be.visible');
+
+      cy.then(() => replyToFlow());
+      cy.wait('@routeDelayedFlow');
+      cy.get('.list-page').should('be.visible');
+      cy.location('pathname').should('eq', '/one/schedule');
+
+      cy.then(() => {
+        replyToFlow = null;
+      });
+      cy.visit(url);
+      cy.wrap(null).should(() => {
+        expect(replyToFlow).to.be.a('function');
+      });
+
+      cy.contains('.app-nav__bottom-button', 'Admin Tools').click();
+      cy.contains('.js-picklist-item', 'Programs').click();
+      cy.wait('@routePrograms');
+      cy.location('pathname').should('eq', '/one/programs');
+      cy.get('.list-page').should('be.visible');
+
+      cy.then(() => replyToFlow());
+      cy.wait('@routeDelayedFlow');
+      cy.get('.list-page').should('be.visible');
+      cy.location('pathname').should('eq', '/one/programs');
     });
-
-    cy.contains('.app-nav__link', 'Schedule').click();
-    cy.wait('@routeActions');
-    cy.location('pathname').should('eq', '/one/schedule');
-    cy.get('.list-page').should('be.visible');
-
-    cy.then(() => replyToFlow());
-    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
-    cy.get('.list-page').should('be.visible');
-    cy.location('pathname').should('eq', '/one/schedule');
-
-    cy.then(() => {
-      replyToFlow = null;
-    });
-    cy.visit(`/flow/${ delayedFlow.id }`);
-    cy.wrap(null).should(() => {
-      expect(replyToFlow).to.be.a('function');
-    });
-
-    cy.contains('.app-nav__bottom-button', 'Admin Tools').click();
-    cy.contains('.js-picklist-item', 'Programs').click();
-    cy.wait('@routePrograms');
-    cy.location('pathname').should('eq', '/one/programs');
-    cy.get('.list-page').should('be.visible');
-
-    cy.then(() => replyToFlow());
-    cy.wait('@routeDelayedFlow').its('response.statusCode').should('eq', 200);
-    cy.get('.list-page').should('be.visible');
-    cy.location('pathname').should('eq', '/one/programs');
   });
 
   specify('flow server error', function() {

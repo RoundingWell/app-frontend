@@ -56,7 +56,7 @@ export default App.extend({
 
     throw error;
   },
-  onStart(app, { patient }, [flow, actions]) {
+  onStart(app, { patient, focusActionId }, [flow, actions]) {
     const hasLayout = this.getView() instanceof LayoutView;
     this.releaseDataListeners();
     this.flow = flow;
@@ -79,7 +79,7 @@ export default App.extend({
     this.toggleBulkSelect();
 
     this.showMenu();
-    this.showActionList();
+    this.showActionList(focusActionId);
     if (!hasLayout) this.startActivity();
 
     this.listenTo(this.actions, {
@@ -316,8 +316,9 @@ export default App.extend({
     });
   },
 
-  showActionList() {
+  showActionList(focusActionId) {
     const listView = new ListView({
+      focusActionId,
       collection: this.actions,
       editableCollection: this.editableCollection,
       state: this.getState(),
