@@ -248,6 +248,10 @@ context('clinicians modal', function() {
       .contains('Workspace One')
       .click();
 
+    // Pause alert expiry; the DOM assertions still wait for real dismissal animations.
+    cy
+      .clock(Date.now(), ['setTimeout', 'clearTimeout']);
+
     const errors = getErrors([
       { detail: 'name error', sourceKeys: 'attributes/name' },
       { detail: 'email error', sourceKeys: 'attributes/email' },
@@ -281,5 +285,44 @@ context('clinicians modal', function() {
       .get('@modal')
       .find('[data-email-region] .js-input')
       .should('have.css', 'border-top-color', stateColors.error);
+
+    // Complete the input focus transition while alert expiry remains paused.
+    cy
+      .tick(30);
+
+    cy
+      .get('@modal')
+      .find('[data-name-region] .js-input')
+      .type(' Updated');
+
+    cy
+      .get('@modal')
+      .find('.js-submit')
+      .click()
+      .wait('@routePostClinicianError');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'name error, email error');
+
+    cy
+      .get('.alert-box')
+      .find('.js-dismiss')
+      .first()
+      .then($button => {
+        $button[0].click();
+        $button[0].click();
+      });
+
+    cy
+      .get('.alert-box')
+      .should('have.length', 1);
+
+    cy
+      .tick(4000);
+
+    cy
+      .get('.alert-box')
+      .should('not.exist');
   });
 });

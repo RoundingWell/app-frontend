@@ -50,24 +50,8 @@ context('dashboards all list', function() {
       .should('contain', `dashboards/${ testDashboards[2].id }`);
   });
 
-  specify('empty dashboards list', function() {
-    cy
-      .routeDashboards(fx => {
-        fx.data = [];
-
-        return fx;
-      })
-      .routeDashboard()
-      .visit('/dashboards')
-      .wait('@routeDashboards');
-
-    cy
-      .get('.card-list__empty')
-      .contains('No Dashboards');
-  });
-
   specify('find in list', function() {
-    const testDashboards = [
+    const searchDashboards = [
       getDashboard({
         attributes: { name: 'Daily Dashboards' },
       }),
@@ -78,12 +62,12 @@ context('dashboards all list', function() {
 
     cy
       .routeDashboards(fx => {
-        fx.data = testDashboards;
+        fx.data = searchDashboards;
 
         return fx;
       })
       .routeDashboard(fx => {
-        fx.data = testDashboards[0];
+        fx.data = searchDashboards[0];
 
         return fx;
       })
@@ -158,5 +142,64 @@ context('dashboards all list', function() {
       .should('have.length', 1)
       .first()
       .should('contain', 'Daily Dashboards');
+  });
+
+  specify('empty dashboards list', function() {
+    cy
+      .routeDashboards(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .routeDashboard()
+      .visit('/dashboards')
+      .wait('@routeDashboards');
+
+    cy
+      .get('.card-list__empty')
+      .contains('No Dashboards');
+  });
+
+  specify('returns to the worklist after the dashboard list fails', function() {
+    const label = 'Dashboards';
+    const url = '/api/dashboards*';
+
+    cy
+      .routesForDefault()
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .intercept('GET', url, { statusCode: 400, body: {} })
+      .as('failedRoute');
+
+    cy
+      .get('.app-nav__link')
+      .contains(label)
+      .click();
+
+    cy
+      .wait('@failedRoute');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 400.');
+
+    cy
+      .get('.error-page')
+      .contains('Back to Your Workspace')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.worklist-list__list')
+      .should('be.visible');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
   });
 });

@@ -6,7 +6,7 @@ import { getRelationship, mergeJsonApi, getErrors } from 'helpers/json-api';
 
 import { getProgramFlow } from 'support/api/program-flows';
 import { getProgram } from 'support/api/programs';
-import { getProgramActions, getProgramAction } from 'support/api//program-actions';
+import { getProgramActions, getProgramAction } from 'support/api/program-actions';
 import { testForm } from 'support/api/forms';
 import { teamNurse, teamCoordinator } from 'support/api/teams';
 
@@ -53,10 +53,12 @@ context('program flow page', function() {
     cy
       .routeProgramFlow(fx => {
         fx.data = testProgramFlow;
+
         return fx;
       })
       .routeProgramFlowActions(fx => {
         fx.data = testProgramFlowActions;
+
         return fx;
       })
       .routeProgramByProgramFlow(fx => {
@@ -67,8 +69,36 @@ context('program flow page', function() {
       .routeProgram()
       .routePrograms()
       .routeProgramActions()
-      .routeProgramFlows()
-      .visit(`/program-flow/${ testProgramFlowId }`)
+      .routeProgramFlows();
+
+    let releaseFlow;
+
+    cy
+      .intercept({ method: 'GET', url: `/api/program-flows/${ testProgramFlowId }`, times: 1 }, req => {
+        return new Cypress.Promise(resolve => {
+          releaseFlow = () => {
+            req.reply({ body: { data: testProgramFlow, included: [] } });
+            resolve();
+          };
+        });
+      });
+
+    cy
+      .visit(`/program-flow/${ testProgramFlowId }`);
+
+    cy
+      .wrap(null)
+      .should(() => expect(releaseFlow).to.be.a('function'));
+
+    cy
+      .navigate('/programs')
+      .wait('@routePrograms');
+
+    cy
+      .then(() => releaseFlow());
+
+    cy
+      .navigate(`/program-flow/${ testProgramFlowId }`)
       .wait('@routeProgramFlow')
       .wait('@routeProgramFlowActions')
       .wait('@routeProgramByProgramFlow');
@@ -351,6 +381,7 @@ context('program flow page', function() {
             attributes: {
               sequence: 0,
               name: 'First In List',
+              days_until_due: 1,
               updated_at: testTs(),
             },
             relationships: {
@@ -714,6 +745,10 @@ context('program flow page', function() {
   });
 
   specify('route directly to flow action', function() {
+    const actions = testProgramFlowActions.map((action, index) => mergeJsonApi(action, {
+      attributes: { name: `Selection ${ index + 1 }` },
+    }));
+
     cy
       .routeTags()
       .routeForm()
@@ -724,18 +759,18 @@ context('program flow page', function() {
         return fx;
       })
       .routeProgramFlowActions(fx => {
-        fx.data = testProgramFlowActions;
+        fx.data = actions;
 
         return fx;
       })
       .routeProgramAction(fx => {
-        fx.data = testProgramFlowActions[0];
+        fx.data = actions[0];
 
         return fx;
       })
       .routePrograms()
       .routeProgramByProgramFlow()
-      .visit(`/program-flow/${ testProgramFlowId }/action/${ testProgramFlowActions[0].id }`)
+      .visit(`/program-flow/${ testProgramFlowId }/action/${ actions[0].id }`)
       .wait('@routeProgramFlow')
       .wait('@routeProgramAction')
       .wait('@routeProgramFlowActions')
@@ -744,5 +779,193 @@ context('program flow page', function() {
     cy
       .get('.sidebar')
       .should('exist');
+
+    cy
+      .get('.sidebar')
+      .find('.js-close')
+      .first()
+      .click();
+    let releaseSupersededAction;
+    let supersededRequested = false;
+    const supersededResponse = new Cypress.Promise(resolve => {
+      releaseSupersededAction = resolve;
+    });
+
+    cy
+      .intercept({ method: 'GET', url: `/api/program-actions/${ actions[0].id }*`, times: 1 }, req => {
+        supersededRequested = true;
+        return supersededResponse.then(() => req.reply({ body: { data: actions[0] } }));
+      })
+      .as('supersededFlowAction');
+
+    cy
+      .intercept('GET', `/api/program-actions/${ actions[1].id }*`, {
+        body: { data: actions[1] },
+      })
+      .as('latestFlowAction');
+
+    cy
+      .get('.action-card')
+      .contains('Selection 1')
+      .click();
+
+    cy
+      .wrap(null)
+      .should(() => expect(supersededRequested).to.equal(true));
+
+    cy
+      .get('.action-card')
+      .contains('Selection 2')
+      .click();
+
+    cy
+      .wait('@latestFlowAction');
+
+    cy
+      .get('.sidebar')
+      .find('[data-name-region] textarea')
+      .should('have.value', 'Selection 2');
+
+    cy
+      .then(() => releaseSupersededAction());
+
+    cy
+      .wait('@supersededFlowAction');
+
+    cy.waitForAppRequests();
+
+    cy
+      .get('.sidebar')
+      .find('[data-name-region] textarea')
+      .should('have.value', 'Selection 2');
+
+    cy
+      .get('.sidebar')
+      .find('.js-close')
+      .first()
+      .click();
+    // Exercise child-stop microtask boundaries before network responses can run.
+    // The held-request scenario above covers the later fetch boundary.
+    [0, 1, 2, 4].forEach(turns => {
+      cy
+        .get('.action-card')
+        .then(async cards => {
+          [...cards].find(card => card.textContent.includes('Selection 1')).querySelector('.js-route').click();
+          for (let turn = 0; turn < turns; turn++) await Promise.resolve();
+          [...cards].find(card => card.textContent.includes('Selection 2')).querySelector('.js-route').click();
+        });
+
+      cy
+        .get('.sidebar')
+        .find('[data-name-region] textarea')
+        .should('have.value', 'Selection 2');
+
+      cy
+        .get('.sidebar')
+        .find('.js-close')
+        .first()
+        .click();
+    });
+    let releaseAction;
+    let requested = false;
+    const response = new Cypress.Promise(resolve => {
+      releaseAction = resolve;
+    });
+
+    cy
+      .intercept('GET', `/api/program-actions/${ actions[0].id }*`, req => {
+        requested = true;
+        return response.then(() => req.reply({ body: { data: actions[0] } }));
+      })
+      .as('heldFlowAction');
+
+    cy
+      .get('.action-card')
+      .contains('Selection 1')
+      .click();
+
+    cy
+      .wrap(null)
+      .should(() => expect(requested).to.equal(true));
+
+    cy
+      .get('.app-nav')
+      .contains('Admin Tools')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Programs')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/programs');
+
+    cy
+      .get('.card-list')
+      .should('be.visible')
+      .then(() => releaseAction());
+
+    cy
+      .wait('@heldFlowAction');
+
+    cy.waitForAppRequests();
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
+
+    [false, true].forEach(networkFailure => {
+      // Register the synchronous stub/listener only when this phase reaches the queue.
+      cy
+        .then(() => {
+          const program = getProgram();
+          const flow = getProgramFlow({ relationships: { program: getRelationship(program) } });
+          const action = getProgramAction({ relationships: {
+            'program': getRelationship(program), 'program-flow': getRelationship(flow),
+          } });
+          const reported = cy.stub().as('reported');
+          if (networkFailure) {
+            cy
+              .on('uncaught:exception', error => {
+                if (!error.message.includes('Failed to fetch')) return;
+                reported(error.message);
+                return false;
+              });
+          }
+          cy
+            .routeProgramByProgramFlow(fx => {
+              fx.data = program;
+
+              return fx;
+            })
+            .routeProgramFlow(fx => {
+              fx.data = flow;
+
+              return fx;
+            })
+            .routeProgramFlowActions(fx => {
+              fx.data = [action];
+
+              return fx;
+            })
+            .intercept('GET', `/api/program-actions/${ action.id }*`, networkFailure ?
+              { forceNetworkError: true } :
+              { statusCode: 400, body: { errors: [] } })
+            .as('failedAction')
+            .visit(`/program-flow/${ flow.id }/action/${ action.id }`)
+            .wait('@failedAction');
+
+          cy
+            .get('.alert-box')
+            .should('be.visible');
+          if (networkFailure) {
+            cy
+              .get('@reported')
+              .should('have.been.calledWithMatch', 'Failed to fetch');
+          }
+        });
+    });
   });
 });

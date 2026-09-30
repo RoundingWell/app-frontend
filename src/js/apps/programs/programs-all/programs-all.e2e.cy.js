@@ -66,16 +66,24 @@ context('program all list', function() {
       .get('.card-list__item')
       .first()
       .within(() => {
-        cy.get('[data-testid="program-list-name"]').should('contain', 'First in List');
-        cy.contains('On');
+        cy
+          .get('[data-testid="program-list-name"]')
+          .should('contain', 'First in List');
+
+        cy
+          .contains('On');
       });
 
     cy
       .get('.card-list__item')
       .eq(1)
       .within(() => {
-        cy.get('[data-testid="program-list-name"]').should('contain', 'Second in List, Not Published');
-        cy.contains('Off');
+        cy
+          .get('[data-testid="program-list-name"]')
+          .should('contain', 'Second in List, Not Published');
+
+        cy
+          .contains('Off');
       });
 
     cy
@@ -89,5 +97,88 @@ context('program all list', function() {
     cy
       .location('pathname')
       .should('contain', `/program/${ firstProgram.id }`);
+  });
+
+  specify('opens one program editor after repeated Add clicks during activation', function() {
+    cy
+      .routePrograms()
+      .routeWorkspacePrograms()
+      .visit('/programs')
+      .wait('@routePrograms');
+
+    // Repeated Add clicks during activation leave one usable program editor.
+    cy
+      .get('.js-add')
+      .then($button => {
+        $button[0].click();
+        $button[0].click();
+      });
+
+    cy
+      .get('.sidebar')
+      .should('have.length', 1);
+
+    cy
+      .get('.sidebar')
+      .find('[data-name-region] textarea')
+      .should('be.enabled');
+
+    cy
+      .get('.sidebar')
+      .find('.js-close')
+      .first()
+      .click();
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
+  });
+
+  specify('returns to the worklist after the program list fails', function() {
+    const label = 'Programs';
+    const url = '/api/programs';
+
+    cy
+      .routesForDefault()
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .intercept('GET', url, { statusCode: 400, body: {} })
+      .as('failedRoute');
+
+    cy
+      .get('.app-nav__bottom-button')
+      .contains('Admin Tools')
+      .click();
+
+    cy
+      .get('.js-picklist-item')
+      .contains(label)
+      .click();
+
+    cy
+      .wait('@failedRoute');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 400.');
+
+    cy
+      .get('.error-page')
+      .contains('Back to Your Workspace')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.worklist-list__list')
+      .should('be.visible');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
   });
 });

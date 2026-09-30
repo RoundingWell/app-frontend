@@ -170,21 +170,6 @@ context('clinicians list', function() {
       .should('have.class', 'is-selected');
   });
 
-  specify('empty clinicians list', function() {
-    cy
-      .routeClinicians(fx => {
-        fx.data = [];
-
-        return fx;
-      })
-      .visit('/clinicians')
-      .wait('@routeClinicians');
-
-    cy
-      .get('.card-list__empty')
-      .contains('No Clinicians');
-  });
-
   specify('find in list', function() {
     cy
       .routeClinicians(fx => {
@@ -306,5 +291,68 @@ context('clinicians list', function() {
     cy
       .get('@listSearch')
       .should('have.attr', 'value', 'Employee');
+  });
+
+  specify('empty clinicians list', function() {
+    cy
+      .routeClinicians(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visit('/clinicians')
+      .wait('@routeClinicians');
+
+    cy
+      .get('.card-list__empty')
+      .contains('No Clinicians');
+  });
+
+  specify('returns to the worklist after the clinician list fails', function() {
+    const label = 'Clinicians';
+    const url = '/api/clinicians*';
+
+    cy
+      .routesForDefault()
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .intercept('GET', url, { statusCode: 400, body: {} })
+      .as('failedRoute');
+
+    cy
+      .get('.app-nav__bottom-button')
+      .contains('Admin Tools')
+      .click();
+
+    cy
+      .get('.js-picklist-item')
+      .contains(label)
+      .click();
+
+    cy
+      .wait('@failedRoute');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 400.');
+
+    cy
+      .get('.error-page')
+      .contains('Back to Your Workspace')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.worklist-list__list')
+      .should('be.visible');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
   });
 });
