@@ -14,11 +14,17 @@ context('Modal Views', function() {
 
     cy.mount(() => new SmallModalView({ headingText: 'Small modal' }));
 
-    cy.get('.modal--small').last().find('.js-close').first().click();
+    cy
+      .get('.modal--small')
+      .last()
+      .find('.js-close')
+      .first()
+      .click();
 
     cy.mount(() => new IframeFormView({ model: form }));
 
-    cy.get('.modal__form-iframe iframe')
+    cy
+      .get('.modal__form-iframe iframe')
       .should('have.attr', 'src', '/forms/example')
       .then(() => {
         expect(getFormUrl).to.have.been.calledWith({ modal: 1 });
@@ -33,21 +39,25 @@ context('Modal Views', function() {
       headingText: 'Small form',
     }))());
 
-    cy.get('.modal--form-small').then($modal => {
-      const bounds = $modal[0].getBoundingClientRect();
-      expect(bounds.width).to.equal(640);
-      expect(bounds.height).to.equal(560);
-    });
+    cy
+      .get('.modal--form-small')
+      .then($modal => {
+        const bounds = $modal[0].getBoundingClientRect();
+        expect(bounds.width).to.equal(640);
+        expect(bounds.height).to.equal(560);
+      });
 
     cy.mount(() => new (ModalView.extend({
       className: 'modal modal--form modal--form-large',
       headingText: 'Large form',
     }))());
 
-    cy.get('.modal--form-large').then($modal => {
-      const bounds = $modal[0].getBoundingClientRect();
-      expect(bounds.width).to.equal(1120);
-      expect(bounds.height).to.equal(800);
-    });
+    cy
+      .get('.modal--form-large')
+      .then($modal => {
+        const bounds = $modal[0].getBoundingClientRect();
+        expect(bounds.width).to.equal(1120);
+        expect(bounds.height).to.equal(800);
+      });
   });
 });

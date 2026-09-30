@@ -21,7 +21,7 @@ function neverSettlingRequest() {
 // guard, Promise.race) resolves correctly regardless of when it subscribed.
 function pendingRequest() {
   let resolveOpen;
-  const opened = new Promise(resolve => {
+  const opened = new Cypress.Promise(resolve => {
     resolveOpen = resolve;
   });
   return {
@@ -124,7 +124,9 @@ context('cache/idb', function() {
 
   specify('operations fail soft when the open is blocked and never settles', function() {
     idb.__reset();
-    cy.stub(window.indexedDB, 'open').returns(neverSettlingRequest());
+    cy
+      .stub(window.indexedDB, 'open')
+      .returns(neverSettlingRequest());
 
     cy.clock();
     const result = {};
@@ -132,14 +134,18 @@ context('cache/idb', function() {
       result.op = idb.get('entities', 'k');
     });
     cy.tick(5000);
-    cy.then(() => result.op).then(value => {
-      expect(value).to.be.undefined;
-    });
+    cy
+      .then(() => result.op)
+      .then(value => {
+        expect(value).to.be.undefined;
+      });
   });
 
   specify('stays unavailable after a blocked open times out, without re-waiting', function() {
     idb.__reset();
-    cy.stub(window.indexedDB, 'open').returns(neverSettlingRequest());
+    cy
+      .stub(window.indexedDB, 'open')
+      .returns(neverSettlingRequest());
 
     cy.clock();
     const result = {};
@@ -147,23 +153,29 @@ context('cache/idb', function() {
       result.first = idb.get('entities', 'k');
     });
     cy.tick(5000);
-    cy.then(() => result.first).then(value => {
-      expect(value).to.be.undefined;
-      // A second read must resolve WITHOUT advancing the clock again — the
-      // timed-out open is memoized as unavailable, so callers fail fast rather
-      // than each paying another timeout.
-      result.second = idb.get('entities', 'k');
-    });
-    cy.then(() => result.second).then(value => {
-      expect(value).to.be.undefined;
-    });
+    cy
+      .then(() => result.first)
+      .then(value => {
+        expect(value).to.be.undefined;
+        // A second read must resolve WITHOUT advancing the clock again — the
+        // timed-out open is memoized as unavailable, so callers fail fast rather
+        // than each paying another timeout.
+        result.second = idb.get('entities', 'k');
+      });
+    cy
+      .then(() => result.second)
+      .then(value => {
+        expect(value).to.be.undefined;
+      });
   });
 
   specify('closes a connection that finishes opening after the timeout', function() {
     idb.__reset();
     const request = pendingRequest();
     const lateClose = cy.stub();
-    cy.stub(window.indexedDB, 'open').returns(request);
+    cy
+      .stub(window.indexedDB, 'open')
+      .returns(request);
 
     cy.clock();
     const result = {};
@@ -171,9 +183,11 @@ context('cache/idb', function() {
       result.op = idb.get('entities', 'k');
     });
     cy.tick(5000);
-    cy.then(() => result.op).then(value => {
-      expect(value).to.be.undefined;
-    });
+    cy
+      .then(() => result.op)
+      .then(value => {
+        expect(value).to.be.undefined;
+      });
     cy.then(() => {
       // The open completes only after we gave up: the orphaned connection must
       // be closed so it cannot linger or block a later upgrade.
@@ -201,16 +215,18 @@ context('cache/idb', function() {
     cy.then(() => {
       request.resolveWith(ctx.conn.db);
     });
-    cy.then(() => ctx.first).then(() => {
-      expect(open).to.be.calledOnce;
-      // Another tab starts a newer-version upgrade: versionchange fires
-      // blocking(), which must close our connection so the upgrade proceeds...
-      ctx.conn.fire('versionchange');
-      expect(ctx.conn.close).to.be.calledOnce;
-      // ...and drop the memo so the next read reopens instead of reusing it.
-      ctx.second = idb.get('entities', 'k');
-      expect(open).to.be.calledTwice;
-    });
+    cy
+      .then(() => ctx.first)
+      .then(() => {
+        expect(open).to.be.calledOnce;
+        // Another tab starts a newer-version upgrade: versionchange fires
+        // blocking(), which must close our connection so the upgrade proceeds...
+        ctx.conn.fire('versionchange');
+        expect(ctx.conn.close).to.be.calledOnce;
+        // ...and drop the memo so the next read reopens instead of reusing it.
+        ctx.second = idb.get('entities', 'k');
+        expect(open).to.be.calledTwice;
+      });
   });
 
   specify('terminated() drops the memo so the next read reopens', function() {
@@ -228,13 +244,15 @@ context('cache/idb', function() {
     cy.then(() => {
       request.resolveWith(ctx.conn.db);
     });
-    cy.then(() => ctx.first).then(() => {
-      expect(open).to.be.calledOnce;
-      // The connection closes underneath us: terminated() drops the memo so a
-      // later read reopens rather than handing back a dead connection.
-      ctx.conn.fire('close');
-      ctx.second = idb.get('entities', 'k');
-      expect(open).to.be.calledTwice;
-    });
+    cy
+      .then(() => ctx.first)
+      .then(() => {
+        expect(open).to.be.calledOnce;
+        // The connection closes underneath us: terminated() drops the memo so a
+        // later read reopens rather than handing back a dead connection.
+        ctx.conn.fire('close');
+        ctx.second = idb.get('entities', 'k');
+        expect(open).to.be.calledTwice;
+      });
   });
 });

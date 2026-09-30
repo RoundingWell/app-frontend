@@ -106,59 +106,75 @@ context('Form Viewport Behavior', function() {
   specify('uses smooth scrolling when matchMedia has no result', function() {
     cy.mount(() => new ViewportView());
 
-    cy.window().then(win => {
-      const scrollViewportTo = cy.stub(viewportView, 'scrollViewportTo');
+    cy
+      .window()
+      .then(win => {
+        const scrollViewportTo = cy.stub(viewportView, 'scrollViewportTo');
 
-      cy.stub(win, 'matchMedia').returns(undefined);
-      cy.stub(viewportView, 'getViewportMetrics').returns({
-        height: 200,
-        scrollTop: 0,
-        top: 0,
+        cy
+          .stub(win, 'matchMedia')
+          .returns(undefined);
+        cy
+          .stub(viewportView, 'getViewportMetrics')
+          .returns({
+            height: 200,
+            scrollTop: 0,
+            top: 0,
+          });
+        cy
+          .stub(formView.el, 'getBoundingClientRect')
+          .returns({ height: 80, top: 40 });
+
+        Radio.request('form1', 'form:interact');
+
+        expect(scrollViewportTo).to.have.been.calledOnce;
+        expect(scrollViewportTo.firstCall.args[0]).to.include({ behavior: 'smooth' });
       });
-      cy.stub(formView.el, 'getBoundingClientRect').returns({ height: 80, top: 40 });
-
-      Radio.request('form1', 'form:interact');
-
-      expect(scrollViewportTo).to.have.been.calledOnce;
-      expect(scrollViewportTo.firstCall.args[0]).to.include({ behavior: 'smooth' });
-    });
   });
 
   specify('responds to viewport state and semantic header triggers', function() {
     cy.mount(() => new ViewportView());
 
-    cy.window().then(win => {
-      const header = formView.el.querySelector('[data-form-viewport-header]');
-      const headerTitle = header.querySelector('.form__header-title');
-      const scrollViewportTo = cy.stub(viewportView, 'scrollViewportTo');
+    cy
+      .window()
+      .then(win => {
+        const header = formView.el.querySelector('[data-form-viewport-header]');
+        const headerTitle = header.querySelector('.form__header-title');
+        const scrollViewportTo = cy.stub(viewportView, 'scrollViewportTo');
 
-      cy.stub(win, 'matchMedia').returns({ matches: true });
-      cy.stub(viewportView, 'getViewportMetrics').returns({
-        height: 200,
-        scrollTop: 0,
-        top: 0,
+        cy
+          .stub(win, 'matchMedia')
+          .returns({ matches: true });
+        cy
+          .stub(viewportView, 'getViewportMetrics')
+          .returns({
+            height: 200,
+            scrollTop: 0,
+            top: 0,
+          });
+        cy
+          .stub(formView.el, 'getBoundingClientRect')
+          .returns({ height: 80, top: 40 });
+
+        header.querySelector('button').click();
+        expect(scrollViewportTo).not.to.have.been.called;
+
+        headerTitle.click();
+        expect(scrollViewportTo).to.have.been.calledOnce;
+        expect(scrollViewportTo.firstCall.args[0]).to.include({ behavior: 'auto' });
+
+        formView.setExpanded(true);
+
+        Radio.request('form1', 'form:interact');
+        expect(scrollViewportTo).to.have.been.calledOnce;
+
+        formView.setExpanded(true);
+        formView.setExpanded(false);
+        const [behavior] = formView._behaviors;
+        Radio.trigger('user-activity', 'window:resize');
+        expect(behavior.frameSizingFrame).to.be.a('number');
+        behavior.clearScheduledSizing();
       });
-      cy.stub(formView.el, 'getBoundingClientRect').returns({ height: 80, top: 40 });
-
-      header.querySelector('button').click();
-      expect(scrollViewportTo).not.to.have.been.called;
-
-      headerTitle.click();
-      expect(scrollViewportTo).to.have.been.calledOnce;
-      expect(scrollViewportTo.firstCall.args[0]).to.include({ behavior: 'auto' });
-
-      formView.setExpanded(true);
-
-      Radio.request('form1', 'form:interact');
-      expect(scrollViewportTo).to.have.been.calledOnce;
-
-      formView.setExpanded(true);
-      formView.setExpanded(false);
-      const [behavior] = formView._behaviors;
-      Radio.trigger('user-activity', 'window:resize');
-      expect(behavior.frameSizingFrame).to.be.a('number');
-      behavior.clearScheduledSizing();
-    });
   });
 
   specify('keeps the embedded form at a usable minimum height', function() {
@@ -167,13 +183,19 @@ context('Form Viewport Behavior', function() {
     cy.then(() => {
       const [behavior] = formView._behaviors;
 
-      cy.stub(viewportView, 'getViewportMetrics').returns({
-        height: 200,
-        scrollTop: 0,
-        top: 0,
-      });
-      cy.stub(formView.el, 'getBoundingClientRect').returns({ height: 100, top: 0 });
-      cy.stub(iframeView, 'getViewportHeight').returns(50);
+      cy
+        .stub(viewportView, 'getViewportMetrics')
+        .returns({
+          height: 200,
+          scrollTop: 0,
+          top: 0,
+        });
+      cy
+        .stub(formView.el, 'getBoundingClientRect')
+        .returns({ height: 100, top: 0 });
+      cy
+        .stub(iframeView, 'getViewportHeight')
+        .returns(50);
 
       behavior.applyFrameSizing();
 
@@ -182,16 +204,20 @@ context('Form Viewport Behavior', function() {
   });
 
   specify('observes owner view elements and refreshes when the iframe view changes', function() {
-    cy.window().then(win => {
-      const observe = cy.stub();
-      const disconnect = cy.stub();
+    cy
+      .window()
+      .then(win => {
+        const observe = cy.stub();
+        const disconnect = cy.stub();
 
-      cy.stub(win, 'ResizeObserver').callsFake(function(callback) {
-        this.callback = callback;
-        this.observe = observe;
-        this.disconnect = disconnect;
+        cy
+          .stub(win, 'ResizeObserver')
+          .callsFake(function(callback) {
+            this.callback = callback;
+            this.observe = observe;
+            this.disconnect = disconnect;
+          });
       });
-    });
 
     cy.mount(() => new ViewportView());
 

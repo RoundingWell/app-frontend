@@ -5,6 +5,8 @@ import chaiFriendly from 'eslint-plugin-chai-friendly';
 import cypress from 'eslint-plugin-cypress';
 import stylistic from '@stylistic/eslint-plugin';
 
+import cypressCommandLayout from './eslint-rules/cypress-command-layout.js';
+
 const TEST_FILES = [
   'test/**',
   '**/*.cy.js',
@@ -123,6 +125,21 @@ export default [
     rules: {
       'cypress/no-unnecessary-waiting': 'off',
       'cypress/unsafe-to-chain-command': 'off',
+    },
+  },
+  {
+    name: 'Cypress spec conventions',
+    files: ['**/*.cy.js'],
+    plugins: {
+      local: { rules: { 'cypress-command-layout': cypressCommandLayout } },
+    },
+    rules: {
+      'local/cypress-command-layout': 'error',
+      '@stylistic/no-extra-semi': 'error',
+      'no-restricted-syntax': ['error', {
+        selector: 'NewExpression[callee.name="Promise"]',
+        message: 'Use Cypress.Promise in Cypress specs.',
+      }],
     },
   },
   {

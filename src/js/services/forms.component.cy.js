@@ -32,13 +32,17 @@ context('Forms Service', function() {
     });
 
     const channel = formService.getChannel();
-    cy.spy(channel, 'reset').as('reset');
+    cy
+      .spy(channel, 'reset')
+      .as('reset');
 
     cy.then(() => {
       formService.destroy();
       formService = null;
     });
 
-    cy.get('@reset').should('have.been.calledOnce');
+    cy
+      .get('@reset')
+      .should('have.been.calledOnce');
   });
 });

@@ -3,7 +3,7 @@ import createLatestRequest from './latest-request';
 function deferred() {
   let resolve;
   let reject;
-  const promise = new Promise((resolvePromise, rejectPromise) => {
+  const promise = new Cypress.Promise((resolvePromise, rejectPromise) => {
     resolve = resolvePromise;
     reject = rejectPromise;
   });

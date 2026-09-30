@@ -21,7 +21,8 @@ context('InputWatcherBehavior', function() {
       return view;
     });
 
-    cy.get('.js-input')
+    cy
+      .get('.js-input')
       .type(' value')
       .then(() => expect(onChange).to.be.calledWith('Initial value'));
   });

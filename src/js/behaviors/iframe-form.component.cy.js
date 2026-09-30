@@ -46,39 +46,41 @@ context('Iframe Form Behavior', function() {
       .get('iframe')
       .should('have.length', 2);
 
-    cy.window().then(win => {
-      const [firstIframe, secondIframe] = win.document.querySelectorAll('iframe');
+    cy
+      .window()
+      .then(win => {
+        const [firstIframe, secondIframe] = win.document.querySelectorAll('iframe');
 
-      win.dispatchEvent(new win.MessageEvent('message', {
-        data: {
-          message: 'fetch:form:data',
-          args: { patientId: 'patient-1' },
-          requestId: 'req_1',
-        },
-        origin: win.origin,
-        source: firstIframe.contentWindow,
-      }));
+        win.dispatchEvent(new win.MessageEvent('message', {
+          data: {
+            message: 'fetch:form:data',
+            args: { patientId: 'patient-1' },
+            requestId: 'req_1',
+          },
+          origin: win.origin,
+          source: firstIframe.contentWindow,
+        }));
 
-      expect(requests).to.deep.equal([
-        ['form1', { patientId: 'patient-1' }, 'req_1'],
-      ]);
+        expect(requests).to.deep.equal([
+          ['form1', { patientId: 'patient-1' }, 'req_1'],
+        ]);
 
-      requests.length = 0;
+        requests.length = 0;
 
-      win.dispatchEvent(new win.MessageEvent('message', {
-        data: {
-          message: 'fetch:form:data',
-          args: { patientId: 'patient-2' },
-          requestId: 'req_2',
-        },
-        origin: win.origin,
-        source: secondIframe.contentWindow,
-      }));
+        win.dispatchEvent(new win.MessageEvent('message', {
+          data: {
+            message: 'fetch:form:data',
+            args: { patientId: 'patient-2' },
+            requestId: 'req_2',
+          },
+          origin: win.origin,
+          source: secondIframe.contentWindow,
+        }));
 
-      expect(requests).to.deep.equal([
-        ['form2', { patientId: 'patient-2' }, 'req_2'],
-      ]);
-    });
+        expect(requests).to.deep.equal([
+          ['form2', { patientId: 'patient-2' }, 'req_2'],
+        ]);
+      });
   });
 
   specify('reports iframe interactions as user activity', function() {
@@ -91,16 +93,18 @@ context('Iframe Form Behavior', function() {
       .get('iframe')
       .should('have.length', 2);
 
-    cy.window().then(win => {
-      const [firstIframe] = win.document.querySelectorAll('iframe');
+    cy
+      .window()
+      .then(win => {
+        const [firstIframe] = win.document.querySelectorAll('iframe');
 
-      win.dispatchEvent(new win.MessageEvent('message', {
-        data: { message: 'form:interact' },
-        origin: win.origin,
-        source: firstIframe.contentWindow,
-      }));
+        win.dispatchEvent(new win.MessageEvent('message', {
+          data: { message: 'form:interact' },
+          origin: win.origin,
+          source: firstIframe.contentWindow,
+        }));
 
-      expect(focusedIframes).to.deep.equal([firstIframe]);
-    });
+        expect(focusedIframes).to.deep.equal([firstIframe]);
+      });
   });
 });

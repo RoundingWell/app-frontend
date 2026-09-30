@@ -143,17 +143,19 @@ context('WS Service', function() {
       .get('@startService')
       .should('be.calledTwice');
 
-    cy.get('@wsHandleMessage').should(messages => {
-      expect(messages).to.have.been.calledWith({
-        name: 'Subscribe',
-        data: {
-          clientKey,
-          workspace,
-          resources: [closedTest],
-          subscriptionVersion: service.subscriptionVersion,
-        },
+    cy
+      .get('@wsHandleMessage')
+      .should(messages => {
+        expect(messages).to.have.been.calledWith({
+          name: 'Subscribe',
+          data: {
+            clientKey,
+            workspace,
+            resources: [closedTest],
+            subscriptionVersion: service.subscriptionVersion,
+          },
+        });
       });
-    });
   });
 
   specify('Message handling', function() {
@@ -231,9 +233,15 @@ context('WS Service', function() {
       pendingModel.type = 'flows';
       stoppedModel.type = 'flows';
       app.isRunning = cy.stub().returns(true);
-      cy.stub(model, 'fetch').resolves(model);
-      cy.stub(pendingModel, 'fetch').resolves(pendingModel);
-      cy.stub(stoppedModel, 'fetch').resolves(stoppedModel);
+      cy
+        .stub(model, 'fetch')
+        .resolves(model);
+      cy
+        .stub(pendingModel, 'fetch')
+        .resolves(pendingModel);
+      cy
+        .stub(stoppedModel, 'fetch')
+        .resolves(stoppedModel);
 
       service.manageAdd(app, firstCollection, 'flows');
       service.manageAdd(app, collection, 'flows');
@@ -274,7 +282,9 @@ context('WS Service', function() {
       const fetchAction = cy.stub(action, 'fetch');
       fetchAction.onFirstCall().returns(actionFetch.promise);
       fetchAction.onSecondCall().returns(otherActionFetch.promise);
-      cy.stub(flow, 'fetch').resolves(flow);
+      cy
+        .stub(flow, 'fetch')
+        .resolves(flow);
       cy.stub(service, '_subscribe');
       await app.start();
       await otherApp.start();
@@ -331,7 +341,9 @@ context('WS Service', function() {
       const app = new Owner();
 
       model.type = 'flows';
-      cy.stub(model, 'fetch').returns(fetch.promise);
+      cy
+        .stub(model, 'fetch')
+        .returns(fetch.promise);
 
       await app.start();
       service.manageAdd(app, collection, 'flows');
@@ -371,7 +383,9 @@ context('WS Service', function() {
       const app = new Owner();
 
       model.type = 'flows';
-      cy.stub(model, 'fetch').returns(fetch.promise);
+      cy
+        .stub(model, 'fetch')
+        .returns(fetch.promise);
 
       await app.start();
       service.manageAdd(app, collection, 'flows');
@@ -424,7 +438,9 @@ context('WS Service', function() {
       .startService()
       .then(() => {
         service.HEART_BEAT_INTERVAL = 10;
-        cy.spy(service, 'sendData').as('sendData');
+        cy
+          .spy(service, 'sendData')
+          .as('sendData');
       });
 
     cy.clock();
@@ -548,7 +564,9 @@ context('WS Service', function() {
       .startService()
       .then(() => {
         service.RECONNECT_BASE_DELAY = 1000;
-        cy.stub(Math, 'random').returns(0);
+        cy
+          .stub(Math, 'random')
+          .returns(0);
         channel.request('subscribe', [], { filters });
       })
       .get('@wsHandleMessage')
@@ -650,7 +668,9 @@ context('WS Service', function() {
       .then(() => {
         service.RECONNECT_BASE_DELAY = 1000;
         service.reconnectAttempts = 3;
-        cy.spy(service, '_subscribe').as('_subscribe');
+        cy
+          .spy(service, '_subscribe')
+          .as('_subscribe');
       });
 
     cy.clock();
@@ -868,10 +888,10 @@ context('WS Service - Disabled', function() {
       const retryService = new WSService();
       retryService.manageAdd(app, collection, 'flows');
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Cypress.Promise(resolve => setTimeout(resolve, 0));
       expect(collection).to.have.length(0);
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await new Cypress.Promise(resolve => setTimeout(resolve, 0));
       expect(collection.get(model)).to.equal(model);
       await app.destroy();
       await retryService.destroy();

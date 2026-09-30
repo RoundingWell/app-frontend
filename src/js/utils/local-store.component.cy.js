@@ -18,7 +18,9 @@ function useFakeStorage(overrides) {
     ...overrides,
   };
 
-  cy.stub(window, 'localStorage').value(fake);
+  cy
+    .stub(window, 'localStorage')
+    .value(fake);
 }
 
 context('localStore', function() {

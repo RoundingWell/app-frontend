@@ -6,7 +6,8 @@ import DueView from './due_view';
 
 context('Due View', function() {
   specify('names an empty icon-only control', function() {
-    cy.mount(() => new DueView({ date: null }))
+    cy
+      .mount(() => new DueView({ date: null }))
       .find('.due-component')
       .should('have.attr', 'aria-label', 'Select Date...');
   });

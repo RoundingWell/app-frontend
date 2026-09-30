@@ -34,8 +34,12 @@ context('auth', function() {
     });
 
     specify('clears form drafts on explicit logout', function() {
-      cy.stub(AuthProvider.prototype, 'auth').callsFake(success => success());
-      cy.stub(AuthProvider.prototype, 'getUserId').resolves('user_A');
+      cy
+        .stub(AuthProvider.prototype, 'auth')
+        .callsFake(success => success());
+      cy
+        .stub(AuthProvider.prototype, 'getUserId')
+        .resolves('user_A');
 
       return setDraft('form-subm-user_A-patient-form', { updated: 'a' })
         .then(() => {
@@ -49,8 +53,12 @@ context('auth', function() {
     });
 
     specify('keeps current-user drafts and prunes other-user drafts on auth', function() {
-      cy.stub(AuthProvider.prototype, 'auth').callsFake(success => success());
-      cy.stub(AuthProvider.prototype, 'getUserId').resolves('user_A');
+      cy
+        .stub(AuthProvider.prototype, 'auth')
+        .callsFake(success => success());
+      cy
+        .stub(AuthProvider.prototype, 'getUserId')
+        .resolves('user_A');
 
       return Promise.all([
         setDraft('form-subm-user_A-patient-form', { updated: 'a' }),

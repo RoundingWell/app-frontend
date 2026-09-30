@@ -88,7 +88,9 @@ context('cache/form-drafts', function() {
 
   specify('operations fail soft when IndexedDB is unavailable', function() {
     idb.__reset();
-    cy.stub(window.indexedDB, 'open').throws(new DOMException('blocked', 'SecurityError'));
+    cy
+      .stub(window.indexedDB, 'open')
+      .throws(new DOMException('blocked', 'SecurityError'));
 
     return setDraft('form-subm-user_A-patient-form', { updated: 'a' })
       .then(() => getDraft('form-subm-user_A-patient-form'))

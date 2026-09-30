@@ -119,24 +119,26 @@ context('Dialer Service', function() {
     const fetchSearch = cy.stub().as('fetchSearch');
     const request = Radio.request;
 
-    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
-      if (channelName === 'entities' && requestName === 'actions:model') {
-        return {
-          getPatient() {
-            return null;
-          },
-        };
-      }
+    cy
+      .stub(Radio, 'request')
+      .callsFake((channelName, requestName, ...args) => {
+        if (channelName === 'entities' && requestName === 'actions:model') {
+          return {
+            getPatient() {
+              return null;
+            },
+          };
+        }
 
-      if (channelName === 'entities' && requestName === 'searchPatients:collection') {
-        return {
-          fetch: fetchSearch,
-          each() {},
-        };
-      }
+        if (channelName === 'entities' && requestName === 'searchPatients:collection') {
+          return {
+            fetch: fetchSearch,
+            each() {},
+          };
+        }
 
-      return request.call(Radio, channelName, requestName, ...args);
-    });
+        return request.call(Radio, channelName, requestName, ...args);
+      });
 
     cy.then(() => {
       service.showPatientLinks({

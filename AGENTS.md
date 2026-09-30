@@ -177,14 +177,38 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - Read [`.circleci/README.md`](.circleci/README.md) before changing CircleCI
   pipeline definitions, config paths, or schedule triggers.
 
+## Writing Cypress Tests
+
+Applies to `src/**/*.cy.js` and Cypress helpers under `test/support/**`.
+
+- Stub every application API and external-service request before triggering it, using existing route helpers or explicit intercepts/stubs. Include initial loads, background refreshes, retries, and failure paths; do not use spy-only intercepts or pass through to real services. Locally served test pages and static assets may load normally. `cy.waitForAppRequests()` observes settlement; it does not prove a request was stubbed.
+- Match the owning spec's steps: one command per line in a chained `cy` statement, with a blank line between steps and none inside a chain. Scope descendant queries with `.get(parent).find(child)`. Use jQuery subjects such as `$picker[0]` in DOM callbacks. Standalone commands and assigned spies/stubs may stay on one line.
+- Mutate fixture callbacks with `fx.data = …`, then a blank line and `return fx`; follow the fixture's existing shape. Use `Cypress.Promise` for held responses and other promises constructed in specs.
+- Queue ordinary Cypress commands directly. Use `cy.then()` when a value, response release, listener, or state change must happen at that point in the queue; do not wrap commands merely to group steps.
+- Preserve existing scenario boundaries when adding coverage. Extend a scenario only for the same behavior; use a separate `specify` for a distinct behavior or error contract, or when intercepts, clocks, or listeners need independent setup. Name each test for the behavior it verifies. Do not merge existing scenarios to reduce run count. During review, flag intercepts, clocks, or exception handlers that leak across scenarios.
+- Hold responses with an explicit release gate when asserting a loading state; release after that assertion. Before checking that a late response leaves UI unchanged, wait for application response processing, not just proxy receipt. Use `cy.waitForAppRequests()` for browser fetch settlement where applicable.
+- Make absence assertions meaningful: assert the item or stored value exists before removal and assert the polling helper's returned result. Give an action-triggered request a fresh alias when older unconsumed requests could satisfy its wait. Keep expiry timers and animation completion distinct; DOM assertions may wait for real animations through Cypress retries.
+
+Chained steps follow this shape:
+
+```js
+cy
+  .get('.patient-flow__list')
+  .find('.action-card')
+  .should('have.length', 2);
+
+cy
+  .location('pathname')
+  .should('equal', expectedPath);
+```
+
 ## Validation
 
-- Cover behavior that users can exercise through the UI with E2E tests. Do not substitute component tests that stub application methods or state for those flows; reserve component tests for behavior that cannot be meaningfully exercised through the UI. Prefer extending an existing E2E scenario for the same flow; add a separate `specify` only when the scenario needs its own isolation.
+- Cover behavior that users can exercise through the UI with E2E tests. Do not substitute component tests that stub application methods or state for those flows; reserve component tests for behavior that cannot be meaningfully exercised through the UI.
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.
 - Do not make incidental presentation a Cypress contract. Avoid exact assertions for alignment, spacing, typography, dimensions, colors, or computed CSS unless the presentation itself communicates product state or the geometry proves functional behavior such as a breakpoint mode, overflow prevention, reachability, popup direction, or layout stability during a state change.
-- Keep related Cypress scenarios consolidated when their setup can be reset explicitly. Do not recommend splitting solely because an earlier assertion failure skips later steps; that is normal test behavior. Flag actual leaked intercepts, clocks, or exception handlers instead.
 - During review, flag newly added visual assertions that would fail for an equally valid design implementation without changing state or behavior. Use design review or manual visual inspection for ordinary visual fidelity.
 - Iterate with single specs; they are much faster than the full suites:
   - Component: `npx cypress run --component --spec src/js/base/routerapp.component.cy.js`

@@ -116,7 +116,7 @@ context('WorkosAuthProvider', function() {
 
   specify('coalesces concurrent getToken calls into a single AuthKit request', function() {
     let resolveToken;
-    const tokenPromise = new Promise(resolve => {
+    const tokenPromise = new Cypress.Promise(resolve => {
       resolveToken = resolve;
     });
     const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
@@ -242,7 +242,7 @@ context('WorkosAuthProvider', function() {
 
   specify('coordinates concurrent 401 recovery and prompts only once', function() {
     let resolveRecovery;
-    const recoveryPromise = new Promise(resolve => {
+    const recoveryPromise = new Cypress.Promise(resolve => {
       resolveRecovery = resolve;
     });
     const provider = new WorkosAuthProvider({}, null, trackAuthEvent);
@@ -354,35 +354,42 @@ context('WorkosAuthProvider', function() {
     let refreshCount = 0;
 
     localStorage.setItem('workos:refresh-token:client', 'refresh-token');
-    cy.intercept('POST', '**/user_management/authenticate', req => {
-      refreshCount += 1;
-      req.reply(refreshCount === 1 ?
-        {
-          statusCode: 200,
-          body: {
-            user: { id: 'user' },
-            access_token: mockAccessToken({ iat: now, exp: now }),
-            refresh_token: 'refresh-token',
-          },
-        } :
-        {
-          statusCode: 400,
-          body: {
-            error: 'invalid_grant',
-            error_description: 'Session has already ended.',
-          },
-        });
-    }).as('authRefresh');
+    cy
+      .intercept('POST', '**/user_management/authenticate', req => {
+        refreshCount += 1;
+        req.reply(refreshCount === 1 ?
+          {
+            statusCode: 200,
+            body: {
+              user: { id: 'user' },
+              access_token: mockAccessToken({ iat: now, exp: now }),
+              refresh_token: 'refresh-token',
+            },
+          } :
+          {
+            statusCode: 400,
+            body: {
+              error: 'invalid_grant',
+              error_description: 'Session has already ended.',
+            },
+          });
+      })
+      .as('authRefresh');
 
-    cy.wrap(provider._initClient('client', cy.stub()))
+    cy
+      .wrap(provider._initClient('client', cy.stub()))
       .then(client => {
         provider.client = client;
-        cy.stub(client, 'signIn').as('signIn');
+        cy
+          .stub(client, 'signIn')
+          .as('signIn');
       });
 
     cy.wait('@authRefresh');
     cy.wait('@authRefresh');
-    cy.get('@signIn').should('have.been.calledWith', { state: '/' });
+    cy
+      .get('@signIn')
+      .should('have.been.calledWith', { state: '/' });
 
     cy.then(() => {
       expectAuthEvent(trackAuthEvent, 'AUTH_REFRESH_FAILED', {

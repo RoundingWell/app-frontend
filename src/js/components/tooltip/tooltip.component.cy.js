@@ -189,14 +189,26 @@ context('Tooltip', function() {
       return new SwapTestView();
     });
 
-    cy.get('.first').trigger('pointerover');
-    cy.get('.tooltip').contains('First tooltip');
+    cy
+      .get('.first')
+      .trigger('pointerover');
+    cy
+      .get('.tooltip')
+      .contains('First tooltip');
 
-    cy.get('.second').trigger('pointerover');
-    cy.get('.tooltip').contains('Second tooltip');
+    cy
+      .get('.second')
+      .trigger('pointerover');
+    cy
+      .get('.tooltip')
+      .contains('Second tooltip');
 
-    cy.get('.first').trigger('pointerover');
-    cy.get('.tooltip').contains('First tooltip');
+    cy
+      .get('.first')
+      .trigger('pointerover');
+    cy
+      .get('.tooltip')
+      .contains('First tooltip');
   });
 
   specify('Retains the delay across pointer transitions within a raw anchor', function() {
@@ -219,28 +231,36 @@ context('Tooltip', function() {
     });
     cy.clock();
 
-    cy.get('.raw-anchor').then(([anchor]) => {
-      const { PointerEvent } = anchor.ownerDocument.defaultView;
+    cy
+      .get('.raw-anchor')
+      .then(([anchor]) => {
+        const { PointerEvent } = anchor.ownerDocument.defaultView;
 
-      anchor.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
-      cy.tick(150);
+        anchor.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+        cy.tick(150);
 
-      anchor.querySelector('.icon').dispatchEvent(new PointerEvent('pointerover', {
-        bubbles: true,
-        relatedTarget: anchor,
-      }));
-      cy.tick(50);
-    });
+        anchor.querySelector('.icon').dispatchEvent(new PointerEvent('pointerover', {
+          bubbles: true,
+          relatedTarget: anchor,
+        }));
+        cy.tick(50);
+      });
 
-    cy.get('.tooltip').contains('Raw anchor tooltip');
+    cy
+      .get('.tooltip')
+      .contains('Raw anchor tooltip');
 
-    cy.get('.raw-anchor').then(([anchor]) => {
-      anchor.dispatchEvent(new MouseEvent('mouseout', {
-        bubbles: true,
-        relatedTarget: anchor.querySelector('.icon'),
-      }));
-    });
-    cy.get('.tooltip').contains('Raw anchor tooltip');
+    cy
+      .get('.raw-anchor')
+      .then(([anchor]) => {
+        anchor.dispatchEvent(new MouseEvent('mouseout', {
+          bubbles: true,
+          relatedTarget: anchor.querySelector('.icon'),
+        }));
+      });
+    cy
+      .get('.tooltip')
+      .contains('Raw anchor tooltip');
   });
 
   specify('Resets positioning classes when reusing a tooltip', function() {
@@ -269,10 +289,20 @@ context('Tooltip', function() {
       return new RepositionedAnchorView();
     });
 
-    cy.get('button').as('anchor').trigger('pointerover');
-    cy.get('.tooltip').should('have.class', 'is-left').and('have.class', 'is-top-arrow');
-    cy.get('@anchor').trigger('mouseout');
-    cy.get('.tooltip').should('not.exist');
+    cy
+      .get('button')
+      .as('anchor')
+      .trigger('pointerover');
+    cy
+      .get('.tooltip')
+      .should('have.class', 'is-left')
+      .and('have.class', 'is-top-arrow');
+    cy
+      .get('@anchor')
+      .trigger('mouseout');
+    cy
+      .get('.tooltip')
+      .should('not.exist');
     cy.then(() => {
       bounds = {
         left: 1200,
@@ -281,9 +311,12 @@ context('Tooltip', function() {
         top: 700,
       };
     });
-    cy.get('@anchor').trigger('pointerover');
+    cy
+      .get('@anchor')
+      .trigger('pointerover');
 
-    cy.get('.tooltip')
+    cy
+      .get('.tooltip')
       .should('have.class', 'is-right')
       .and('have.class', 'is-bottom-arrow')
       .and('not.have.class', 'is-left')

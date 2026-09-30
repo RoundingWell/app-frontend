@@ -67,6 +67,8 @@ context('PreloadRegion', function() {
       .get('.loader__indicator')
       .should('be.visible');
 
-    cy.get('.loader__skeleton').should('not.exist');
+    cy
+      .get('.loader__skeleton')
+      .should('not.exist');
   });
 });

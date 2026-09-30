@@ -245,9 +245,15 @@ context('Droplist', function() {
       return droplist;
     });
 
-    cy.contains('Choose One...').click();
-    cy.get('.picklist').should('exist');
+    cy
+      .contains('Choose One...')
+      .click();
+    cy
+      .get('.picklist')
+      .should('exist');
     cy.then(() => droplist.destroy());
-    cy.get('.picklist').should('not.exist');
+    cy
+      .get('.picklist')
+      .should('not.exist');
   });
 });
