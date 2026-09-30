@@ -42,7 +42,7 @@ const InteractionItemView = View.extend({
     <span class="patient-interactions__marker" aria-hidden="true">{{far icon}}</span>
     <div class="patient-interactions__activity-body">
       <div class="patient-interactions__activity-line">
-        <span class="patient-interactions__activity-description">{{#if actor}}<strong>{{ actor }}</strong> {{/if}}{{ activityLabel }} <span class="patient-interactions__time">{{#if viaLabel}}{{ viaLabel }} · {{/if}}<time datetime="{{ timestamp }}">{{ displayTime }}</time></span></span>
+        <span class="patient-interactions__activity-description">{{#if actor}}<strong>{{ actor }}</strong> {{/if}}<span class="patient-interactions__activity-label">{{ activityLabel }}</span> <span class="patient-interactions__time">{{#if viaLabel}}{{ viaLabel }} · {{/if}}<time datetime="{{ timestamp }}">{{ displayTime }}</time></span></span>
         {{#if workName}}<button class="patient-interactions__action js-action" type="button">{{ workName }} {{far "angle-right"}}</button>{{/if}}
       </div>
       <div class="patient-interactions__card">
@@ -62,6 +62,10 @@ const InteractionItemView = View.extend({
   },
   onClickDetails() {
     showInteractionDetails(this.model, this);
+  },
+  setGrouping(continuation, continues) {
+    this.el.classList.toggle('patient-interactions__item--continuation', continuation);
+    this.el.classList.toggle('patient-interactions__item--continues', continues);
   },
   onClickAction() {
     const action = this.model.getAction();
@@ -112,6 +116,16 @@ const InteractionsDayListView = CollectionView.extend({
     };
   },
   viewComparator: false,
+  onRenderChildren() {
+    this.children.each(view => {
+      const index = this.collection.indexOf(view.model);
+      const channel = view.model.get('channel');
+      view.setGrouping(
+        index > 0 && this.collection.at(index - 1).get('channel') === channel,
+        this.collection.at(index + 1)?.get('channel') === channel,
+      );
+    });
+  },
 });
 
 const InteractionDateModalView = View.extend({

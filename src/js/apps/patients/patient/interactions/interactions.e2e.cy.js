@@ -169,6 +169,34 @@ context('patient interactions', function() {
       .location('pathname')
       .should('include', `/patient/${ patient.id }/flow/${ dischargeFlow.id }`);
 
+    const grouped = map(['sms', 'sms', 'voice', 'sms', 'sms'], (channel, index) => {
+      const interaction = getInteraction({ channel, metadata: { message: `Grouped message ${ index }`, note: `Grouped call ${ index }` } });
+      interaction.attributes.occurred_at = new Date(Date.UTC(2026, 8, index === 4 ? 25 : 24, 10, index)).toISOString();
+      return interaction;
+    });
+    cy.routePatientInteractions({ data: [...grouped].reverse() });
+    cy.visit(`/patient/${ patient.id }/interactions`);
+    cy
+      .contains('.patient-interactions__item', 'Grouped message 0')
+      .should('have.class', 'patient-interactions__item--continues');
+    cy
+      .contains('.patient-interactions__item', 'Grouped message 1')
+      .should('have.class', 'patient-interactions__item--continuation');
+    cy
+      .get('.patient-interactions__item--continuation')
+      .should('have.length', 1);
+    cy
+      .get('.patient-interactions__item--continues')
+      .should('have.length', 1);
+    cy
+      .contains('.patient-interactions__item', 'Grouped message 1')
+      .contains('Show details')
+      .click();
+    cy
+      .get('[role="dialog"]')
+      .contains('Done')
+      .click();
+
     const history = map(range(80), index => {
       const interaction = getInteraction({ metadata: { message: `Follow-up message ${ index }` } });
       interaction.attributes.occurred_at = new Date(Date.UTC(2026, 4, 1 + index)).toISOString();
