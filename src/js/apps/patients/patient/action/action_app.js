@@ -15,13 +15,14 @@ import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_vie
 import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
-import { InteractionsPreviewView } from 'js/apps/patients/patient/interactions/interactions_views';
+import InteractionsPreviewApp from 'js/apps/patients/patient/interactions/interactions-preview_app';
 
 export default App.extend({
   childApps: {
     activity: ActivityApp,
     attachments: AttachmentsApp,
     form: FormApp,
+    interactions: InteractionsPreviewApp,
   },
   initialize() {
     this.listenTo(this.getChildApp('form'), 'toggle:expanded', this.onToggleFormExpanded);
@@ -158,10 +159,11 @@ export default App.extend({
     this.showForm();
   },
   showInteractions() {
-    this.getView().showChildView('interactions', new InteractionsPreviewView({
-      model: this.patient,
+    this.getChildApp('interactions').start({
+      region: this.getView().getRegion('interactions'),
+      patient: this.patient,
       actionId: this.action.id,
-    }));
+    }).catch(addError);
   },
   showAction() {
     const hasDialer = !!Radio.request('settings', 'get', 'dialer');

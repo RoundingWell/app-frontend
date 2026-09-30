@@ -9,34 +9,16 @@ import 'scss/modules/buttons.scss';
 import i18n from 'js/i18n';
 
 import Datepicker from 'js/components/datepicker';
+import Optionlist from 'js/components/optionlist';
+
+import { getInteractionPresentation } from './interaction-presentation';
+import { showInteractionDetails } from './interaction-details_app';
+
+import 'js/apps/patients/shared/patient-pages.scss';
 
 import './interactions.scss';
 
 const intl = i18n.patients.patient.interactions;
-const CHANNEL_LABELS = {
-  sms: intl.message,
-  email: intl.email,
-  mail: intl.mail,
-  fax: intl.fax,
-  voice: intl.call,
-  voicemail: intl.voicemail,
-  video: intl.videoCall,
-  appointment: intl.appointment,
-  visit: intl.visit,
-};
-
-const ACTIVITY_LABELS = {
-  sms: intl.sentMessage,
-  email: intl.sentMessage,
-  mail: intl.sentMessage,
-  fax: intl.sentMessage,
-  voice: intl.loggedCall,
-  voicemail: intl.loggedCall,
-  video: intl.loggedCall,
-  appointment: intl.addedAppointment,
-  visit: intl.addedVisit,
-};
-
 function getTimestamp(model) {
   return model.get('occurred_at') || model.get('expected_at');
 }
@@ -45,33 +27,10 @@ function getDate(model) {
   return dayjs(getTimestamp(model)).format('YYYY-MM-DD');
 }
 
-function getSummary(model) {
-  const metadata = model.get('metadata') || {};
-  const summary = metadata.message || metadata.event || metadata.status || model.get('reference');
-  return typeof summary === 'string' ? summary : '';
-}
-
-function getActor(model, patientName) {
-  const metadata = model.get('metadata') || {};
-  return metadata.sender || (model.get('direction') === 'inbound' ? patientName : intl.careTeam);
-}
-
-function getMarker(model, patientName) {
-  if (contains(['appointment', 'visit'], model.get('channel'))) return '';
-  return getActor(model, patientName).split(' ').map(name => name[0]).slice(0, 2).join('').toUpperCase();
-}
-
-function getCardTitle(model) {
-  const channel = model.get('channel');
-  const direction = model.get('direction') === 'inbound' ? intl.inbound : intl.outbound;
-  const status = model.get('metadata')?.status;
-  return `${ direction } ${ CHANNEL_LABELS[channel] || channel }${ status ? ` · ${ status }` : '' }`;
-}
-
 function getWorkName(model) {
   const action = model.getAction();
   const flow = action?.getFlow() || model.getFlow();
-  return action?.get('name') || flow?.get('name');
+  return action && flow ? `${ flow.get('name') }: ${ action.get('name') }` : action?.get('name') || flow?.get('name');
 }
 
 const InteractionItemView = View.extend({
@@ -80,26 +39,29 @@ const InteractionItemView = View.extend({
     return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
   },
   template: hbs`
-    <div class="patient-interactions__activity">
-      <span class="patient-interactions__marker" aria-hidden="true">{{ marker }}</span>
-      <div class="patient-interactions__activity-body">
-        <div class="patient-interactions__activity-line">
-          <span>{{#if actor}}{{ actor }} {{/if}}{{ activityLabel }}</span>
-          <time datetime="{{ timestamp }}">{{ relativeTime }}</time>
-        </div>
-        <div class="patient-interactions__card">
-          <div class="patient-interactions__item-heading">
-            <span class="patient-interactions__channel">{{ cardTitle }}</span>
-            <time datetime="{{ timestamp }}">{{ displayTime }}</time>
-          </div>
-          {{#if summary}}<p class="patient-interactions__summary">{{ summary }}</p>{{/if}}
-          {{#if workName}}<button class="patient-interactions__action js-action" type="button">↳ {{ workName }}</button>{{/if}}
-        </div>
+    <span class="patient-interactions__marker" aria-hidden="true">{{far icon}}</span>
+    <div class="patient-interactions__activity-body">
+      <div class="patient-interactions__activity-line">
+        <span class="patient-interactions__activity-description">{{#if actor}}<strong>{{ actor }}</strong> {{/if}}{{ activityLabel }} <span class="patient-interactions__time">{{#if viaLabel}}{{ viaLabel }} · {{/if}}<time datetime="{{ timestamp }}">{{ displayTime }}</time></span></span>
+        {{#if workName}}<button class="patient-interactions__action js-action" type="button">{{ workName }} {{far "angle-right"}}</button>{{/if}}
+      </div>
+      <div class="patient-interactions__card">
+        {{#unless isMessage}}<div class="patient-interactions__item-heading">
+          <span class="patient-interactions__channel">{{ title }}</span>{{#if status}}<span class="patient-interactions__separator">·</span><span>{{ status }}</span>{{/if}}
+        </div>{{/unless}}
+        {{#if summary}}<p class="patient-interactions__summary">{{ summary }}</p>{{/if}}
+        {{#each details}}<p class="patient-interactions__detail">{{ label }}: {{ value }}</p>{{/each}}
+        {{#if canShowDetails}}<button class="button button--link js-details" type="button">{{ @intl.patients.patient.interactions.showDetails }}</button>{{/if}}
       </div>
     </div>
   `,
+  ui: { action: '.js-action', details: '.js-details' },
   triggers: {
-    'click .js-action': 'click:action',
+    'click @ui.action': 'click:action',
+    'click @ui.details': 'click:details',
+  },
+  onClickDetails() {
+    showInteractionDetails(this.model, this);
   },
   onClickAction() {
     const action = this.model.getAction();
@@ -118,19 +80,12 @@ const InteractionItemView = View.extend({
     Radio.trigger('event-router', 'patient:action', patientId, action.id);
   },
   templateContext() {
-    const timestamp = getTimestamp(this.model);
-    const channel = this.model.get('channel');
-
+    const presentation = getInteractionPresentation(this.model, this.getOption('patientName'));
     return {
-      actor: contains(['appointment', 'visit'], channel) ? '' : getActor(this.model, this.getOption('patientName')),
-      activityLabel: ACTIVITY_LABELS[channel] || intl.addedInteraction,
-      marker: getMarker(this.model, this.getOption('patientName')),
-      cardTitle: getCardTitle(this.model),
-      timestamp,
-      displayTime: timestamp ? dayjs(timestamp).format('h:mm A') : '',
-      relativeTime: timestamp ? dayjs(timestamp).fromNow() : '',
-      summary: getSummary(this.model),
+      ...presentation,
+      isMessage: presentation.kind === 'message',
       workName: getWorkName(this.model),
+      canShowDetails: Radio.request('bootstrap', 'currentUser').getRole().get('name') === 'rw',
     };
   },
   onRender() {
@@ -170,7 +125,8 @@ const InteractionDateModalView = View.extend({
     <div data-calendar-region></div>
   `,
   regions: { calendar: '[data-calendar-region]' },
-  triggers: { 'click .js-close': 'close' },
+  ui: { close: '.js-close' },
+  triggers: { 'click @ui.close': 'close' },
   events: { keydown: 'onKeyDown' },
   onAttach() {
     const datepicker = new Datepicker({
@@ -199,36 +155,27 @@ const InteractionsDayView = View.extend({
   className: 'patient-interactions__day',
   template: hbs`
     <div class="patient-interactions__date-divider">
-      <button class="patient-interactions__date-button js-date-button" type="button" aria-label="{{ @intl.patients.patient.interactions.jumpToDate }} {{ dateLabel }}" aria-expanded="false">
-        {{ dateLabel }} <span aria-hidden="true">⌄</span>
+      <button class="patient-interactions__date-button js-date-button" type="button" aria-label="{{ @intl.patients.patient.interactions.jumpToDate }} {{ dateLabel }}" aria-haspopup="listbox" aria-expanded="false">
+        {{ dateLabel }} {{far "angle-down"}}
       </button>
-      <div class="patient-interactions__date-menu js-date-menu" hidden>
-        <span>{{ @intl.patients.patient.interactions.jumpTo }}</span>
-        <button class="js-jump" type="button" data-jump="today">{{ @intl.patients.patient.interactions.today }}</button>
-        <button class="js-jump" type="button" data-jump="yesterday">{{ @intl.patients.patient.interactions.yesterday }}</button>
-        <button class="js-jump" type="button" data-jump="lastWeek">{{ @intl.patients.patient.interactions.lastWeek }}</button>
-        <button class="js-jump" type="button" data-jump="lastMonth">{{ @intl.patients.patient.interactions.lastMonth }}</button>
-        <button class="js-jump" type="button" data-jump="beginning">{{ @intl.patients.patient.interactions.beginning }}</button>
-        <button class="js-specific-date" type="button">{{ @intl.patients.patient.interactions.specificDate }}</button>
-      </div>
     </div>
     <div data-content-region></div>
   `,
   regions: { content: '[data-content-region]' },
   ui: {
     dateButton: '.js-date-button',
-    menu: '.js-date-menu',
-    jump: '.js-jump',
-    specificDate: '.js-specific-date',
   },
-  events: {
-    'click @ui.dateButton': 'onDateButtonClick',
-    'click @ui.jump': 'onJumpClick',
-    'click @ui.specificDate': 'onSpecificDateClick',
+  triggers: {
+    'click @ui.dateButton': 'date:button:click',
   },
   templateContext() {
     const date = this.model.id;
     return { dateLabel: dayjs(date).format('dddd, MMM D').toUpperCase() };
+  },
+  initialize() {
+    this.listenTo(this.model, 'change:interactions', () => {
+      this.getChildView('content')?.collection.set(this.model.get('interactions'));
+    });
   },
   onRender() {
     this.showChildView('content', new InteractionsDayListView({
@@ -238,18 +185,42 @@ const InteractionsDayView = View.extend({
       interactionId: this.getOption('interactionId'),
     }));
   },
-  closeMenu() {
-    this.getUI('menu')[0].hidden = true;
-    this.getUI('dateButton')[0].setAttribute('aria-expanded', 'false');
-  },
   onDateButtonClick() {
-    const menu = this.getUI('menu')[0];
-    menu.hidden = !menu.hidden;
-    this.getUI('dateButton')[0].setAttribute('aria-expanded', String(!menu.hidden));
+    if (this.dateMenu) {
+      this.dateMenu.destroy();
+      return;
+    }
+    const anchor = this.getUI('dateButton')[0];
+    const menu = new Optionlist({
+      anchor,
+      uiView: this,
+      headingText: intl.jumpTo,
+      popWidth: 220,
+      lists: [{ collection: new Backbone.Collection([
+        { id: 'today', text: intl.today },
+        { id: 'yesterday', text: intl.yesterday },
+        { id: 'lastWeek', text: intl.lastWeek },
+        { id: 'lastMonth', text: intl.lastMonth },
+        { id: 'beginning', text: intl.beginning },
+        { id: 'specificDate', text: intl.specificDate, hasDivider: true },
+      ]) }],
+    });
+    this.dateMenu = menu;
+    this.listenTo(menu, 'select', this.onJumpSelect);
+    this.listenTo(menu, 'destroy', () => {
+      this.dateMenu = null;
+      anchor.setAttribute('aria-expanded', 'false');
+      this.stopListening(menu);
+    });
+    menu.show();
+    anchor.setAttribute('aria-expanded', 'true');
   },
-  onJumpClick(event) {
-    const jump = event.target.dataset.jump;
-    this.closeMenu();
+  onJumpSelect(model) {
+    const jump = model.id;
+    if (jump === 'specificDate') {
+      this.showDateCalendar();
+      return;
+    }
     if (jump === 'beginning') {
       this.triggerMethod('beginning:selected');
       return;
@@ -258,8 +229,7 @@ const InteractionsDayView = View.extend({
     const [amount, unit] = offsets[jump] || [0, 'day'];
     this.triggerMethod('date:selected', dayjs().subtract(amount, unit).format('YYYY-MM-DD'));
   },
-  onSpecificDateClick() {
-    this.closeMenu();
+  showDateCalendar() {
     const modal = new InteractionDateModalView({ date: this.model.id });
     this.listenTo(modal, 'date:selected', date => this.triggerMethod('date:selected', date));
     Radio.request('modal', 'show:custom', modal);
@@ -286,8 +256,8 @@ const InteractionsListView = CollectionView.extend({
     'beginning:selected': 'onChildBeginningSelect',
   },
   initialize() {
-    this.listenTo(this.getOption('interactions'), 'reset', () => {
-      this.collection.reset(groupInteractions(this.getOption('interactions')));
+    this.listenTo(this.getOption('interactions'), 'update reset', () => {
+      this.collection.set(groupInteractions(this.getOption('interactions')));
     });
   },
   onChildDateSelect(view, date) {
@@ -314,12 +284,20 @@ const InteractionsLoadingView = View.extend({
   template: hbs`{{ @intl.patients.patient.interactions.loading }}`,
 });
 
+const InteractionsErrorView = View.extend({
+  className: 'patient-interactions__status',
+  attributes: { role: 'alert' },
+  template: hbs`{{ @intl.patients.patient.interactions.loadError }}`,
+});
+
 const InteractionsPreviewItemView = View.extend({
   tagName: 'li',
-  className: 'patient-interactions-preview__item',
+  className() {
+    return `patient-interactions-preview__item patient-interactions-preview__item--${ this.model.get('channel') }`;
+  },
   template: hbs`
     <button class="patient-interactions-preview__link js-interaction" type="button">
-      <span class="patient-interactions-preview__symbol" aria-hidden="true">{{ marker }}</span>
+      <span class="patient-interactions-preview__symbol" aria-hidden="true">{{far icon}}</span>
       <span class="patient-interactions-preview__details">
         <strong>{{ cardTitle }}</strong>
         <span class="patient-interactions-preview__sender">{{ actor }}</span>
@@ -327,18 +305,17 @@ const InteractionsPreviewItemView = View.extend({
       </span>
     </button>
   `,
-  triggers: { 'click .js-interaction': 'click:interaction' },
+  ui: { interaction: '.js-interaction' },
+  triggers: { 'click @ui.interaction': 'click:interaction' },
   onClickInteraction() {
     Radio.trigger('event-router', 'patient:interaction', this.getOption('patientId'), this.model.id);
   },
   templateContext() {
-    const timestamp = getTimestamp(this.model);
+    const presentation = getInteractionPresentation(this.model, this.getOption('patientName'));
     return {
-      cardTitle: getCardTitle(this.model),
-      actor: getActor(this.model, this.getOption('patientName')),
-      marker: this.model.get('direction') === 'inbound' ? '←' : '↗',
-      timestamp,
-      displayTime: timestamp ? dayjs(timestamp).format('MMM D, h:mm A') : '',
+      ...presentation,
+      cardTitle: presentation.previewTitle,
+      displayTime: presentation.timestamp ? dayjs(presentation.timestamp).format('MMM D, YYYY h:mm A') : '',
     };
   },
 });
@@ -366,46 +343,31 @@ const InteractionsPreviewView = View.extend({
     return `patient-interactions-preview${ actionClass }`;
   },
   template: hbs`
-    <div class="patient-interactions-preview__heading">
-      {{#if showHeading}}<h2>{{ @intl.patients.patient.interactions.interactionsTab }}</h2>{{/if}}
-      <button class="patient-interactions-preview__all js-all" type="button">{{ @intl.patients.patient.interactions.viewAll }}</button>
-    </div>
+    {{#if showHeading}}<h2 class="patient-interactions-preview__heading">{{ @intl.patients.patient.interactions.interactionsTab }}</h2>{{/if}}
     <div data-content-region></div>
+    <button class="patient-interactions-preview__all js-all" type="button">{{far "arrow-right-arrow-left"}} {{ @intl.patients.patient.interactions.interactionsTab }}</button>
   `,
   templateContext() {
     return { showHeading: !!this.getOption('actionId') };
   },
   regions: { content: '[data-content-region]' },
-  triggers: { 'click .js-all': 'click:all' },
+  ui: { all: '.js-all' },
+  triggers: { 'click @ui.all': 'click:all' },
   onClickAll() {
     Radio.trigger('event-router', 'patient:interactions', this.model.id);
   },
-  onRender() {
+  showLoading() {
     this.showChildView('content', new InteractionsLoadingView());
-    this.requestController = new AbortController();
-    const signal = this.requestController.signal;
-
-    Radio.request('entities', 'fetch:interactions:collection:byPatient', {
-      patientId: this.model.id,
-      actionId: this.getOption('actionId'),
-      limit: 3,
-    }, { signal }).then(collection => {
-      if (signal.aborted || this.isDestroyed()) return;
-      this.showChildView('content', new InteractionsPreviewListView({
-        collection,
-        patientId: this.model.id,
-        patientName: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
-      }));
-    }).catch(() => {
-      if (signal.aborted || this.isDestroyed()) return;
-      this.showChildView('content', new View({
-        attributes: { 'role': 'alert' },
-        template: hbs`{{ @intl.patients.patient.interactions.loadError }}`,
-      }));
-    });
   },
-  onBeforeDestroy() {
-    this.requestController?.abort();
+  showInteractions(collection) {
+    this.showChildView('content', new InteractionsPreviewListView({
+      collection,
+      patientId: this.model.id,
+      patientName: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
+    }));
+  },
+  showError() {
+    this.showChildView('content', new InteractionsErrorView());
   },
 });
 
@@ -413,9 +375,9 @@ const InteractionsPageView = View.extend({
   className: 'patient__content patient__content--scroll patient-interactions',
   template: hbs`
     <div class="patient-interactions__body">
-      <nav class="patient-interactions__pages" aria-label="{{ @intl.patients.patient.interactions.pagesLabel }}">
-        <button class="button patient-interactions__page js-workflow" type="button">{{ @intl.patients.patient.interactions.workflowTab }}</button>
-        <span class="button patient-interactions__page is-selected" aria-current="page">{{ @intl.patients.patient.interactions.interactionsTab }}</span>
+      <nav class="patient-pages" aria-label="{{ @intl.patients.patient.interactions.pagesLabel }}">
+        <button class="patient-pages__tab js-workflow" type="button">{{far "folder"}} {{ @intl.patients.patient.interactions.workflowTab }}</button>
+        <span class="patient-pages__tab is-selected" aria-current="page">{{far "arrow-right-arrow-left"}} {{ @intl.patients.patient.interactions.interactionsTab }}</span>
       </nav>
       <div class="patient-interactions__filters" role="group" aria-label="{{ @intl.patients.patient.interactions.typesLabel }}">
         <button class="button js-filter" type="button" data-filter="messages">{{ @intl.patients.patient.interactions.messages }}</button>
@@ -423,17 +385,50 @@ const InteractionsPageView = View.extend({
         <button class="button js-filter" type="button" data-filter="appointments">{{ @intl.patients.patient.interactions.appointments }}</button>
         <button class="button js-filter" type="button" data-filter="visits">{{ @intl.patients.patient.interactions.visits }}</button>
       </div>
+      <div class="patient-interactions__paging-status js-paging-error" role="alert" hidden>
+        {{ @intl.patients.patient.interactions.pagingError }}
+        <button class="button button--link js-retry" type="button">{{ @intl.patients.patient.interactions.retry }}</button>
+      </div>
       <div data-content-region></div>
-      <button class="button patient-interactions__older js-older" type="button" hidden>{{ @intl.patients.patient.interactions.loadOlder }}</button>
+      <div class="patient-interactions__paging-status js-paging-loading" role="status" hidden>{{ @intl.patients.patient.interactions.loading }}</div>
     </div>
   `,
   regions: { content: '[data-content-region]' },
-  ui: { filters: '.js-filter', older: '.js-older' },
+  ui: { filters: '.js-filter', workflow: '.js-workflow', pagingError: '.js-paging-error', pagingLoading: '.js-paging-loading', retry: '.js-retry' },
   triggers: {
-    'click .js-workflow': 'click:workflow',
-    'click @ui.older': 'click:loadOlder',
+    'click @ui.workflow': 'click:workflow',
+    'click @ui.retry': 'retry:paging',
   },
-  events: { 'click @ui.filters': 'onFilterClick' },
+  events: { 'click @ui.filters': 'onFilterClick', 'scroll': 'onScroll' },
+  onScroll() {
+    const top = this.el.scrollTop;
+    this.scrollDirection = top < this.previousScrollTop ? 'older' : 'newer';
+    this.previousScrollTop = top;
+    this.checkEdges();
+  },
+  onAttach() {
+    this.scheduleEdgeCheck();
+  },
+  onBeforeDestroy() {
+    cancelAnimationFrame(this.edgeFrame);
+  },
+  scheduleEdgeCheck() {
+    cancelAnimationFrame(this.edgeFrame);
+    this.edgeFrame = requestAnimationFrame(() => this.checkEdges());
+  },
+  checkEdges() {
+    if (!this.isAttached() || this.pagingLoading || this.pagingError) return;
+    const direction = this.getEdgeDirection();
+    if (!direction) return;
+    this.triggerMethod('load:edge', direction);
+  },
+  getEdgeDirection() {
+    const older = this.hasOlder && this.el.scrollTop <= 200;
+    const newer = this.hasNewer && this.el.scrollHeight - this.el.scrollTop - this.el.clientHeight <= 200;
+    if (this.scrollDirection === 'older' && older) return 'older';
+    if (newer) return 'newer';
+    if (older) return 'older';
+  },
   onClickWorkflow() {
     Radio.trigger('event-router', 'patient:workflow', this.model.id);
   },
@@ -448,8 +443,37 @@ const InteractionsPageView = View.extend({
       button.setAttribute('aria-pressed', String(contains(groups, button.dataset.filter)));
     }
   },
-  setCanLoadOlder(canLoadOlder) {
-    this.getUI('older')[0].hidden = !canLoadOlder;
+  setPaging({ hasOlder = this.hasOlder, hasNewer = this.hasNewer, loading }) {
+    const errorHeight = this.getUI('pagingError')[0].offsetHeight;
+    this.hasOlder = hasOlder;
+    this.hasNewer = hasNewer;
+    this.pagingLoading = loading;
+    this.pagingError = false;
+    this.getUI('pagingError')[0].hidden = true;
+    this.el.scrollTop = Math.max(0, this.el.scrollTop - errorHeight);
+    this.getUI('pagingLoading')[0].hidden = !loading;
+    if (!loading) this.scheduleEdgeCheck();
+  },
+  showPagingError() {
+    this.pagingLoading = false;
+    this.pagingError = true;
+    this.getUI('pagingLoading')[0].hidden = true;
+    this.getUI('pagingError')[0].hidden = false;
+    this.el.scrollTop += this.getUI('pagingError')[0].offsetHeight;
+  },
+  getScrollPosition() {
+    return { top: this.el.scrollTop, height: this.el.scrollHeight };
+  },
+  restoreScrollPosition({ top, height }, prepend) {
+    this.el.scrollTop = top + (prepend ? this.el.scrollHeight - height : 0);
+    this.previousScrollTop = this.el.scrollTop;
+  },
+  scrollToLatest() {
+    this.el.scrollTop = this.el.scrollHeight;
+    this.previousScrollTop = this.el.scrollTop;
+  },
+  showLoading() {
+    this.showChildView('content', new InteractionsLoadingView());
   },
   showInteractions(collection) {
     const list = new InteractionsListView({
@@ -459,6 +483,8 @@ const InteractionsPageView = View.extend({
       patientName: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
       interactionId: this.getOption('interactionId'),
     });
+    const previous = this.getChildView('content');
+    if (previous) this.stopListening(previous);
     this.listenTo(list, 'date:selected', date => this.triggerMethod('date:selected', date));
     this.listenTo(list, 'beginning:selected', () => this.triggerMethod('beginning:selected'));
     this.showChildView('content', list);
@@ -467,12 +493,10 @@ const InteractionsPageView = View.extend({
     this.getChildView('content')?.scrollToDate(date);
   },
   showError() {
-    this.showChildView('content', new View({
-      className: 'patient-interactions__status',
-      attributes: { 'role': 'alert' },
-      template: hbs`{{ @intl.patients.patient.interactions.loadError }}`,
-    }));
+    const previous = this.getChildView('content');
+    if (previous) this.stopListening(previous);
+    this.showChildView('content', new InteractionsErrorView());
   },
 });
 
-export { InteractionsPageView, InteractionsLoadingView, InteractionsListView, InteractionsPreviewView };
+export { InteractionsPageView, InteractionsPreviewView };

@@ -1,20 +1,22 @@
 import { isEmpty } from 'underscore';
 
+import { getUrl } from 'js/base/fetch';
 import BaseEntity from 'js/base/entity-service';
 
 import { _Model, Model, Collection } from './entities/interactions';
 
 function getFilter(actionId, channels) {
   const filter = {};
-  if (actionId) filter.actionId = actionId;
+  if (actionId) filter.action = actionId;
   if (channels) filter.channel = channels.join(',');
   return filter;
 }
 
-function getPage(at, before, limit) {
+function getPage(at, before, after, limit) {
   const page = {};
   if (at) page.at = at;
   if (before) page.before = before;
+  if (after) page.after = after;
   if (limit) page.limit = limit;
   return page;
 }
@@ -30,15 +32,16 @@ const Entity = BaseEntity.extend({
     'interactions:collection': 'getCollection',
     'fetch:interactions:collection:byPatient': 'fetchByPatient',
   },
-  fetchByPatient({ patientId, actionId, channels, at, before, limit }, options = {}) {
-    const data = { ...options.data, include: 'action.flow,flow' };
+  fetchByPatient({ patientId, actionId, channels, at, before, after, limit }, options = {}) {
+    const { data: requestData, ...requestOptions } = options;
+    const data = { ...requestData, include: 'action.flow,flow' };
     addParams(data, 'filter', getFilter(actionId, channels));
-    addParams(data, 'page', getPage(at, before, limit));
+    addParams(data, 'page', getPage(at, before, after, limit));
 
     return this.fetchCollection({
-      ...options,
-      url: `/api/patients/${ patientId }/interactions`,
-      data,
+      ...requestOptions,
+      // Page and preview requests share an endpoint but have independent results.
+      url: getUrl(`/api/patients/${ patientId }/interactions`, data),
     });
   },
 });
