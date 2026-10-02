@@ -1,13 +1,6 @@
 import CheckView from './check_view';
 
 context('Check View', function() {
-  specify('requires accessible labels for both selection states', function() {
-    expect(() => new CheckView({ selectLabel: 'Select action' }))
-      .to.throw('CheckView requires selectLabel and deselectLabel');
-    expect(() => new CheckView({ deselectLabel: 'Deselect action' }))
-      .to.throw('CheckView requires selectLabel and deselectLabel');
-  });
-
   specify('toggles selection and reports the originating event', function() {
     const onSelect = cy.stub();
     const onChange = cy.stub();

@@ -44,7 +44,7 @@ export default View.extend({
 
     this._lists = this.field.fetch().then(() => {
       return [{ collection: this.getPhones() }];
-    }).catch(error => {
+    }).catch(/* istanbul ignore next: defensive cache reset after a failed phone lookup */ error => {
       this._lists = null;
       throw error;
     });

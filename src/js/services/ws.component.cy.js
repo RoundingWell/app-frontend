@@ -316,19 +316,13 @@ context('WS Service', function() {
     });
   });
 
-  specify('Aborts a pending managed addition only after stop succeeds', function() {
+  specify('Aborts a pending managed addition synchronously on stop', function() {
     cy.then(async() => {
       const channel = Radio.channel('ws');
       const collection = new Backbone.Collection();
       const model = new Backbone.Model({ id: 'flow-id' });
       const fetch = deferred();
-      const stopPermission = deferred();
-      const Owner = App.extend({
-        prepareStop() {
-          return stopPermission.promise;
-        },
-      });
-      const app = new Owner();
+      const app = new App();
 
       model.type = 'flows';
       cy.stub(model, 'fetch').returns(fetch.promise);
@@ -336,70 +330,20 @@ context('WS Service', function() {
       await app.start();
       service.manageAdd(app, collection, 'flows');
 
-      const stopping = app.stop();
       channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
 
       expect(model.fetch).to.be.calledOnce;
       expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
 
-      stopPermission.resolve();
-      await stopping;
+      expect(app.stop()).to.equal(true);
 
       expect(model.fetch.firstCall.args[0].signal.aborted).to.be.true;
 
-      fetch.resolve(model);
+      fetch.reject(new DOMException('The operation was aborted', 'AbortError'));
       await Cypress.Promise.resolve();
 
       expect(collection.get(model)).to.be.undefined;
 
-      await app.destroy();
-    });
-  });
-
-  specify('Completes a managed addition when stop is rejected', function() {
-    cy.then(async() => {
-      const channel = Radio.channel('ws');
-      const collection = new Backbone.Collection();
-      const model = new Backbone.Model({ id: 'flow-id' });
-      const fetch = deferred();
-      const stopPermission = deferred();
-      const Owner = App.extend({
-        prepareStop() {
-          return stopPermission.promise;
-        },
-      });
-      const app = new Owner();
-
-      model.type = 'flows';
-      cy.stub(model, 'fetch').returns(fetch.promise);
-
-      await app.start();
-      service.manageAdd(app, collection, 'flows');
-
-      const stopping = app.stop();
-      channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
-
-      expect(model.fetch).to.be.calledOnce;
-      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
-
-      stopPermission.reject(new Error('Keep the current run'));
-
-      let stopError;
-      try {
-        await stopping;
-      } catch(error) {
-        stopError = error;
-      }
-      expect(stopError.message).to.equal('Keep the current run');
-      expect(app.isRunning()).to.be.true;
-      expect(model.fetch.firstCall.args[0].signal.aborted).to.be.false;
-
-      fetch.resolve(model);
-      await Cypress.Promise.resolve();
-
-      expect(collection.get(model)).to.equal(model);
-
-      app.prepareStop = undefined;
       await app.destroy();
     });
   });

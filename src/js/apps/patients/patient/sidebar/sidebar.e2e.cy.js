@@ -15,6 +15,32 @@ import { getForm, testForm } from 'support/api/forms';
 import { getFormResponse } from 'support/api/form-responses';
 
 context('patient sidebar', function() {
+  specify('removes the sidebar when preparation fails', function() {
+    cy.on('uncaught:exception', error => {
+      expect(error.message).to.contain('Error Status: 422');
+
+      return false;
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .intercept('GET', '/api/workspace-patients/*', {
+        statusCode: 422,
+        body: { errors: [] },
+      })
+      .as('routeWorkspacePatientError')
+      .visit('/patient/1/workflow')
+      .wait('@routeWorkspacePatientError');
+
+    cy
+      .get('.workflow-page')
+      .should('be.visible');
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+  });
+
   specify('uses the sidebar setting for panel membership and order', function() {
     cy
       .routesForPatientWorkflow()
@@ -54,6 +80,19 @@ context('patient sidebar', function() {
       .should('contain', 'Demographics')
       .and('contain', 'Sex')
       .and('contain', 'Date of Birth');
+
+    cy
+      .routeSettings('sidebar', null)
+      .reload()
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar__card')
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'Demographics')
+      .next()
+      .should('contain', 'Status');
   });
 
   specify('renders available panels when the sidebar setting references a missing panel', function() {
@@ -395,9 +434,8 @@ context('patient sidebar', function() {
           }),
           addWidget({
             slug: 'hbsNoRegionWidget',
-            category: 'widget',
+            category: 'custom',
             definition: {
-              template: 'Content that will not appear because the region is missing',
               // Missing <div data-content-region> on purpose
               wrapperTemplate: '<div class="no-region-wrapper">No region defined</div>',
             },

@@ -455,6 +455,19 @@ context('worklist page', function() {
 
         expect(sidebarContent.scrollTop).to.be.greaterThan(0);
       });
+
+    cy
+      .get('.patient-sidebar__close')
+      .type('{esc}');
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.worklist-list__item')
+      .find('.js-patient')
+      .should('be.focused');
   });
 
   specify('keeps patient sidebar mounted while list refreshes', function() {
@@ -3143,6 +3156,23 @@ context('worklist page', function() {
       .get('.worklist-list__toggle')
       .find('.js-toggle-actions')
       .click()
+      .should('be.focused')
+      .and('have.attr', 'aria-pressed', 'true')
+      .wait('@routeActions');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-prev')
+      .click()
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[created_at]=${ dayjs(filterDate).subtract(1, 'day').startOf('day').format() },${ dayjs(filterDate).subtract(1, 'day').endOf('day').format() }`);
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-next')
+      .click()
       .wait('@routeActions');
 
     cy
@@ -3192,8 +3222,22 @@ context('worklist page', function() {
 
     cy
       .get('[data-date-filter-region]')
+      .find('.js-prev')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-prev')
+      .click()
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[updated_at]=${ dayjs(testDate()).subtract(2, 'months').startOf('month').format() },${ dayjs(testDate()).subtract(2, 'months').endOf('month').format() }`);
+
+    cy
+      .get('[data-date-filter-region]')
       .should('contain', 'Updated:')
-      .should('contain', 'This Month')
       .click();
 
     cy
@@ -3216,6 +3260,21 @@ context('worklist page', function() {
 
     cy
       .get('[data-date-filter-region] .js-prev')
+      .click()
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[due_date]=${ dayjs(testDate()).subtract(1, 'week').startOf('week').format('YYYY-MM-DD') },${ dayjs(testDate()).subtract(1, 'week').endOf('week').format('YYYY-MM-DD') }`);
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-prev')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-next')
       .click()
       .wait('@routeActions')
       .itsUrl()
@@ -3741,6 +3800,129 @@ context('worklist page', function() {
       .should('contain', 'Patient Field 2');
   });
 
+  specify('keeps newer selections and navigation when a bulk save finishes late', function() {
+    const action = getAction({
+      attributes: { name: 'Pending bulk save', due_date: testDate() },
+      relationships: {
+        owner: getRelationship(currentClinician),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routeActions(fx => {
+        fx.data = [action];
+
+        return fx;
+      })
+      .routeDashboards()
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    _.each([204, 422], statusCode => {
+      cy.log(`Late bulk save: ${ statusCode }`);
+
+      let releaseSelectionSave;
+      const selectionSave = new Cypress.Promise(resolve => {
+        releaseSelectionSave = resolve;
+      });
+
+      cy
+        .intercept({ method: 'PATCH', url: `/api/actions/${ action.id }`, times: 1 }, req => {
+          return selectionSave.then(() => {
+            req.reply({ statusCode, body: { errors: [] } });
+          });
+        })
+        .as('selectionSave');
+
+      cy
+        .get('.worklist-list__item')
+        .find('.js-select')
+        .click();
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-save')
+        .click()
+        .should('be.disabled');
+
+      cy
+        .get('.worklist-list__item')
+        .find('.js-select')
+        .click();
+
+      cy
+        .get('.worklist-list__item')
+        .find('.js-select')
+        .click();
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-save')
+        .should('be.enabled')
+        .then(() => releaseSelectionSave());
+
+      cy
+        .wait('@selectionSave');
+
+      if (statusCode === 422) {
+        cy
+          .wait('@routeActions');
+      }
+
+      cy
+        .get('.worklist-list__item')
+        .find('.js-select')
+        .should('have.attr', 'aria-checked', 'true');
+
+      let releaseDepartedSave;
+      const departedSave = new Cypress.Promise(resolve => {
+        releaseDepartedSave = resolve;
+      });
+
+      cy
+        .intercept({ method: 'PATCH', url: `/api/actions/${ action.id }`, times: 1 }, req => {
+          return departedSave.then(() => {
+            req.reply({ statusCode, body: { errors: [] } });
+          });
+        })
+        .as('departedSave');
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-save')
+        .click()
+        .should('be.disabled');
+
+      cy
+        .get('.app-nav__link')
+        .contains('Dashboards')
+        .click()
+        .wait('@routeDashboards');
+
+      cy
+        .get('.list-page__title')
+        .should('contain', 'Dashboards')
+        .then(() => releaseDepartedSave());
+
+      cy
+        .wait('@departedSave');
+
+      cy
+        .get('.alert-box')
+        .should('not.exist');
+
+      cy
+        .go('back')
+        .wait('@routeActions');
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-cancel')
+        .click();
+    });
+  });
+
   specify('action sorting - preload', function() {
     localStorage.setItem(`shared-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
       id: 'shared-by',
@@ -3836,6 +4018,10 @@ context('worklist page', function() {
       },
     ];
 
+    localStorage.setItem(`shared-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      actionsSortId: 'sortNotExisting',
+    }));
+
     cy
       .routesForPatientAction()
       .routeActions(fx => {
@@ -3851,6 +4037,11 @@ context('worklist page', function() {
         return fx;
       })
       .visit('/worklist/shared-by');
+
+    cy
+      .get('.worklist-list__item')
+      .first()
+      .should('contain', 'Created Most Recent');
 
     cy
       .get('.worklist-list__filter-sort')
@@ -5351,7 +5542,7 @@ context('worklist page', function() {
     cy
       .routesForPatientAction()
       .routeActions()
-      .visit('/worklist/owned-by')
+      .visitOnClock('/worklist/owned-by')
       .wait('@routeActions')
       .itsUrl()
       .its('search')
@@ -5363,6 +5554,9 @@ context('worklist page', function() {
         body: {},
       })
       .as('routeActions');
+
+    cy
+      .tick(60); // Flush the initial filter count before changing filters.
 
     expandFiltersSidebar();
 
@@ -5381,6 +5575,17 @@ context('worklist page', function() {
 
     cy
       .routeActions();
+
+    cy
+      .get('.error-page')
+      .should('be.visible');
+
+    cy
+      .tick(60); // Flush the pending filter change after storage is invalidated.
+
+    cy
+      .clock()
+      .invoke('restore');
 
     cy
       .get('.error-page')

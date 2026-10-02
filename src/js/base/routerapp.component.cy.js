@@ -195,29 +195,17 @@ context('RouterApp', function() {
   });
 
   describe('unmatched route failures', function() {
-    specify('reports a rejected stop for the current departure', async function() {
+    specify('reports a throwing stop for the current departure', async function() {
       const failure = new Error('cannot stop');
       const reported = cy.stub();
       app = new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' });
       await app.routeAction('schedule', 'showSchedule');
       const route = app.getCurrentRoute();
-      const stop = cy.stub(app, 'stop').rejects(failure);
+      const stop = cy.stub(app, 'stop').throws(failure);
       await app.onNoMatch();
       stop.restore();
       expect(reported).to.have.been.calledOnceWith(failure, route);
-    });
-
-    specify('ignores an already-rejected stop after a newer route takes over', async function() {
-      const failure = new Error('obsolete stop failure');
-      const reported = cy.stub();
-      app = new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' });
-      await app.routeAction('schedule', 'showSchedule');
-      const stop = cy.stub(app, 'stop').rejects(failure);
-      const leaving = app.onNoMatch();
-      const routing = app.routeAction('worklist', 'showWorklist', 'w1');
-      stop.restore();
-      await Promise.all([leaving, routing]);
-      expect(reported).not.to.have.been.called;
+      expect(app.getCurrentRoute()).to.equal(null);
     });
   });
 
@@ -286,28 +274,15 @@ context('RouterApp', function() {
       expect(child.isRunning()).to.equal(false);
     });
 
-    specify('dispatches the newest route after a pending stop is superseded', async function() {
-      const stopReadiness = deferred();
-      const PendingRouter = Router.extend({
-        prepareStop() {
-          return stopReadiness.promise;
-        },
-      });
-      app = new PendingRouter({ workspaceSlug: 'test-ws' });
-
+    specify('dispatches the newest route after synchronous stop', async function() {
+      app = new Router({ workspaceSlug: 'test-ws' });
       await trigger(app, 'patient:workflow', 'p1');
       await app.routePromise;
       const child = app.getCurrent();
-      const stopping = app.stop();
-      const routed = trigger(app, 'patient:action', 'p1', 'a1');
-
-      expect(child.routes).to.deep.equal(['patient:workflow']);
-
-      stopReadiness.resolve();
-      expect(await stopping).to.equal(false);
-      await routed;
+      expect(app.stop()).to.equal(true);
+      expect(child.isRunning()).to.be.false;
+      await trigger(app, 'patient:action', 'p1', 'a1');
       await app.routePromise;
-
       expect(child.routes).to.deep.equal(['patient:workflow', 'patient:action']);
     });
 

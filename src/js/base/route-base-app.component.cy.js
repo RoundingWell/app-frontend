@@ -28,97 +28,30 @@ function deferred() {
       await owner.destroy();
     });
 
-    specify('waits for stop permission and starts only the latest replacement', async function() {
-      const permission = deferred();
-      const stopping = deferred();
-      const current = owner.addChildApp('current', new (App.extend({
-        prepareStop() {
-          stopping.resolve();
-          return permission.promise;
-        },
-      }))());
+    specify('stops the old child synchronously and completes only the latest replacement', async function() {
+      const current = owner.addChildApp('current', new App());
       const first = owner.addChildApp('first', new App());
       const latest = owner.addChildApp('latest', new App());
       await owner.startCurrent('current');
-
       const firstStart = owner.startCurrent('first');
-      await stopping.promise;
+      expect(current.isRunning()).to.be.false;
       const latestStart = owner.startCurrent('latest');
-      await Promise.resolve();
-
-      expect(owner.getCurrent()).to.equal(current);
-      expect(first.isRunning()).to.be.false;
-      expect(latest.isRunning()).to.be.false;
-      permission.resolve();
-
       expect(await firstStart).to.equal(undefined);
       expect(await latestStart).to.equal(latest);
-      expect(current.isRunning()).to.be.false;
       expect(first.isRunning()).to.be.false;
       expect(owner.getCurrent()).to.equal(latest);
     });
 
-    specify('retains a child that rejects stop permission and permits a later retry', async function() {
-      const refusal = new Error('stay on this page');
-      const current = owner.addChildApp('current', new App());
-      const next = owner.addChildApp('next', new App());
-      await owner.startCurrent('current');
-      current.prepareStop = () => Promise.reject(refusal);
-
-      const failure = await owner.startCurrent('next').catch(error => error);
-      expect(failure).to.equal(refusal);
-      expect(owner.getCurrent()).to.equal(current);
-      expect(current.isRunning()).to.be.true;
-      expect(next.isRunning()).to.be.false;
-
-      current.prepareStop = () => {};
-      expect(await owner.startCurrent('next')).to.equal(next);
-      expect(current.isRunning()).to.be.false;
-    });
-
-    specify('does not replace a child whose stop was superseded', async function() {
-      const permission = deferred();
-      const stopping = deferred();
-      const current = owner.addChildApp('current', new (App.extend({
-        prepareStop() {
-          stopping.resolve();
-          return permission.promise;
-        },
-      }))());
-      const next = owner.addChildApp('next', new App());
-      await owner.startCurrent('current');
+    specify('cancels replacement preparation when its owner stops', async function() {
+      const ready = deferred();
+      const next = owner.addChildApp('next', new (App.extend({ prepareStart() {
+        return ready.promise;
+      } }))());
       const replacing = owner.startCurrent('next');
-      await stopping.promise;
-      const resuming = current.start();
-      permission.resolve();
-
+      expect(owner.stop()).to.equal(true);
+      ready.resolve();
       expect(await replacing).to.equal(undefined);
-      await resuming;
-      expect(owner.getCurrent()).to.equal(current);
-      expect(current.isRunning()).to.be.true;
       expect(next.isRunning()).to.be.false;
-    });
-
-    specify('invalidates a queued replacement when its owner stops', async function() {
-      const permission = deferred();
-      const stopping = deferred();
-      owner.addChildApp('current', new (App.extend({
-        prepareStop() {
-          stopping.resolve();
-          return permission.promise;
-        },
-      }))());
-      const next = owner.addChildApp('next', new App());
-      const started = cy.spy(next, 'start');
-      await owner.startCurrent('current');
-      const replacing = owner.startCurrent('next');
-      await stopping.promise;
-      const shutdown = owner.stop();
-      permission.resolve();
-
-      await shutdown;
-      expect(await replacing).to.equal(undefined);
-      expect(started).not.to.have.been.called;
       expect(owner.getCurrent()).to.equal(null);
     });
 
@@ -130,7 +63,8 @@ function deferred() {
       await owner.stop();
 
       expect(await selecting).to.equal(undefined);
-      expect(started).not.to.have.been.called;
+      expect(started).to.have.been.calledOnce;
+      expect(child.isRunning()).to.be.false;
     });
 
     specify('clears a live child selected beneath an already-stopped owner', async function() {
@@ -181,7 +115,7 @@ function deferred() {
       expect(await owner.startCurrent('next')).to.equal(next);
     });
 
-    specify('preserves the activation error when cleanup rejects', async function() {
+    specify('preserves the activation error when cleanup throws', async function() {
       const failure = { resource: 'action', error: { response: { status: 410 } } };
       const cleanupFailure = new Error('cleanup failed');
       const reported = cy.stub(owner, 'onChildCleanupError');
@@ -190,18 +124,18 @@ function deferred() {
         async prepareStart() {
           const nested = this.getChildApp('nested');
           await nested.start();
-          nested.prepareStop = () => Promise.reject(cleanupFailure);
+          nested.onBeforeStop = () => {
+            throw cleanupFailure;
+          };
           throw failure;
         },
       }))());
 
       const result = await owner.startCurrent('child').catch(error => error);
-      child.getChildApp('nested').prepareStop = () => {};
+      child.getChildApp('nested').onBeforeStop = () => {};
       expect(result).to.equal(failure);
       expect(reported).to.have.been.calledOnceWith(cleanupFailure, child);
       expect(owner.getCurrent()).to.equal(child);
-      await owner.stopCurrent();
-      expect(owner.getCurrent()).to.equal(null);
     });
 
     specify('reports cleanup separately without turning cancellation into activation failure', async function() {
@@ -210,10 +144,12 @@ function deferred() {
       const child = owner.addChildApp('child', new App({ childApps: { nested: App } }));
       const nested = child.getChildApp('nested');
       await nested.start();
-      nested.prepareStop = () => Promise.reject(cleanupFailure);
+      nested.onBeforeStop = () => {
+        throw cleanupFailure;
+      };
 
       const result = await owner.selectChild('child', { start: () => false });
-      nested.prepareStop = () => {};
+      nested.onBeforeStop = () => {};
       expect(result).to.equal(undefined);
       expect(reported).to.have.been.calledOnceWith(cleanupFailure, child);
       expect(owner.getCurrent()).to.equal(child);

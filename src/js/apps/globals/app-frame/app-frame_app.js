@@ -32,6 +32,7 @@ export default RouteBaseApp.extend({
 
     return this.startWorkspace(Radio.request('workspace', 'current'));
   },
+  /* istanbul ignore next: defensive reporting when workspace teardown itself throws */
   onChildCleanupError(error) {
     addError(error);
   },

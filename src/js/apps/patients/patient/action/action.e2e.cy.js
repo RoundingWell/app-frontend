@@ -494,6 +494,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .find('.is-overdue')
       .should('not.exist');
 
+    cy.viewport(320, 720);
+
     cy
       .get('.patient-action')
       .find('[data-due-time-region]')
@@ -501,6 +503,12 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .get('.picklist')
+      .should($picklist => {
+        const bounds = $picklist[0].getBoundingClientRect();
+
+        expect(bounds.left).to.be.at.least(0);
+        expect(bounds.right).to.be.at.most(320);
+      })
       .contains('7:00 AM')
       .click();
 
@@ -511,10 +519,23 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         expect(data.attributes.due_time).to.equal('07:00:00');
       });
 
+    cy.viewport(1280, 720);
+
     cy
       .get('.patient-action')
       .find('[data-due-date-region]')
       .contains(formatDate(testDateSubtract(2), 'SHORT'))
+      .click()
+      .click();
+
+    cy
+      .get('.datepicker')
+      .should('not.exist');
+
+    cy
+      .get('.patient-action')
+      .find('[data-due-date-region]')
+      .find('.due-component')
       .click();
 
     cy
@@ -692,11 +713,32 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       });
 
     cy
+      .routeWorkspaceClinicians(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .reload()
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action')
+      .find('[data-owner-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('contain', 'No results found');
+
+    cy
       .intercept('DELETE', `/api/actions/${ testAction.id }`, {
         statusCode: 204,
         body: {},
       })
       .as('routeDeleteFlowAction');
+
+    cy.viewport(260, 720);
 
     cy
       .get('.patient-action__menu')
@@ -2660,6 +2702,34 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .get('[data-action-region]')
       .should('contain', 'You are not able to change settings on this action.');
+
+    const ownTeamAction = getAction({
+      relationships: {
+        owner: getRelationship(teamCoordinator),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routeAction(fx => {
+        fx.data = ownTeamAction;
+
+        return fx;
+      })
+      .visit(`/patient/1/action/${ ownTeamAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action')
+      .find('[data-owner-region]')
+      .find('button')
+      .should('not.be.disabled')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('contain', teamCoordinator.attributes.name)
+      .and('not.contain', 'Non Team Member');
   });
 
   specify('action with work:authored:delete permission', function() {

@@ -25,20 +25,23 @@ context('Forms Service', function() {
     expect(formService.channelName()).to.equal('form1');
   });
 
-  specify('resets its channel when destroyed', function() {
+  specify('releases its replies while preserving other channel owners', function() {
     formService = new FormsService({
       form: new Backbone.Model({ id: '1' }),
       patient: new Backbone.Model({ id: 'patient-1' }),
     });
 
     const channel = formService.getChannel();
-    cy.spy(channel, 'reset').as('reset');
+    const refresh = cy.spy(formService, 'refreshForm');
+    const viewport = {};
+    const interact = cy.stub().returns('interacted');
+    channel.reply('form:interact', interact, viewport);
 
-    cy.then(() => {
-      formService.destroy();
-      formService = null;
-    });
+    formService.destroy();
+    formService = null;
 
-    cy.get('@reset').should('have.been.calledOnce');
+    expect(channel.request('form:interact')).to.equal('interacted');
+    channel.request('ready:form');
+    expect(refresh).not.to.have.been.called;
   });
 });

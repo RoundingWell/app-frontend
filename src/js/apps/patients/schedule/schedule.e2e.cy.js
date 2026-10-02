@@ -96,6 +96,58 @@ context('schedule page', function() {
       .should('be.visible');
   });
 
+  specify('retries failed schedule requests', function() {
+    cy
+      .intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } })
+      .as('routeActionsError')
+      .visit('/schedule')
+      .wait('@routeActionsError');
+
+    cy
+      .get('.schedule-list__error')
+      .should('be.visible');
+
+    cy
+      .routeActions();
+
+    cy
+      .get('.schedule-list__error')
+      .find('button')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.schedule-list__list')
+      .should('be.visible');
+
+    cy
+      .intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } })
+      .as('routeActionsError');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-next')
+      .click()
+      .wait('@routeActionsError');
+
+    cy
+      .get('.schedule-list__error')
+      .should('be.visible');
+
+    cy
+      .routeActions();
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-next')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.schedule-list__list')
+      .should('be.visible');
+  });
+
   specify('display schedule', function() {
     const testActions = [
       getAction({
@@ -608,6 +660,77 @@ context('schedule page', function() {
       .eq(1)
       .find('[data-details-region]')
       .should('be.empty');
+
+    cy
+      .viewport(320, 480);
+
+    cy
+      .get('[data-date-filter-region]')
+      .click();
+
+    cy
+      .get('.app-frame__pop-region')
+      .contains('Select from calendar')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .find('.js-next')
+      .focus();
+
+    cy
+      .window()
+      .then(win => {
+        win.addEventListener('resize', cy.stub().as('resize'), { once: true });
+      });
+
+    cy
+      .viewport(360, 480);
+
+    cy
+      .get('@resize')
+      .should('have.been.calledOnce');
+
+    cy
+      .get('.datepicker')
+      .should('be.visible')
+      .find('.js-next')
+      .should('be.focused');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-date')
+      .focus();
+
+    cy
+      .viewport(320, 480);
+
+    cy
+      .get('.datepicker')
+      .should('not.exist');
+
+    let detailsTop;
+
+    cy
+      .get('@actionList')
+      .find('.schedule-list__day-list-row')
+      .last()
+      .find('.action-details-tooltip')
+      .then($button => {
+        $button[0].scrollIntoView({ block: 'end' });
+        detailsTop = $button[0].getBoundingClientRect().top;
+      })
+      .trigger('pointerover', { scrollBehavior: false });
+
+    cy
+      .get('.tooltip')
+      .should('contain', 'Last Action Details')
+      .should($tooltip => {
+        const bounds = $tooltip[0].getBoundingClientRect();
+
+        expect(bounds.top).to.be.at.least(0);
+        expect(bounds.bottom).to.be.at.most(detailsTop);
+      });
   });
 
   specify('maximum list count reached', function() {
@@ -1342,6 +1465,39 @@ context('schedule page', function() {
       .should('be.focused');
 
     cy
+      .get('@patientSidebarTrigger')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('be.visible');
+
+    cy
+      .get('[data-filters-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('@layout')
+      .should('have.class', 'is-filters-collapsed');
+
+    cy.viewport(2240, 900);
+
+    cy
+      .get('@layout')
+      .should('not.have.class', 'is-filters-collapsed');
+
+    cy
+      .get('.list-filters')
+      .should('be.visible');
+
+    cy.viewport(1200, 720);
+
+    cy
       .get('.schedule-list__day-list-row')
       .first()
       .find('.js-select')
@@ -1357,6 +1513,157 @@ context('schedule page', function() {
       .should('have.attr', 'aria-checked', 'true')
       .and('have.attr', 'aria-label', 'Deselect action')
       .click();
+
+    cy
+      .get('.schedule-list__day-list-row')
+      .first()
+      .find('.js-patient')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('be.visible');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-next')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.patient-sidebar__close')
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+
+    cy
+      .get('.schedule-list__day-list-row')
+      .should('be.visible');
+  });
+
+  specify('keeps newer selections and navigation when a bulk save finishes late', function() {
+    const action = getAction({
+      attributes: { name: 'Pending bulk save', due_date: testDate() },
+      relationships: {
+        owner: getRelationship(currentClinician),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    cy
+      .routeActions(fx => {
+        fx.data = [action];
+
+        return fx;
+      })
+      .routeDashboards()
+      .visit('/schedule')
+      .wait('@routeActions');
+
+    _.each([204, 422], statusCode => {
+      cy.log(`Late bulk save: ${ statusCode }`);
+
+      let releaseSelectionSave;
+      const selectionSave = new Cypress.Promise(resolve => {
+        releaseSelectionSave = resolve;
+      });
+
+      cy
+        .intercept({ method: 'PATCH', url: `/api/actions/${ action.id }`, times: 1 }, req => {
+          return selectionSave.then(() => {
+            req.reply({ statusCode, body: { errors: [] } });
+          });
+        })
+        .as('selectionSave');
+
+      cy
+        .get('.schedule-list__day-list-row')
+        .find('.js-select')
+        .click();
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-save')
+        .click()
+        .should('be.disabled');
+
+      cy
+        .get('.schedule-list__day-list-row')
+        .find('.js-select')
+        .click();
+
+      cy
+        .get('.schedule-list__day-list-row')
+        .find('.js-select')
+        .click();
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-save')
+        .should('be.enabled')
+        .then(() => releaseSelectionSave());
+
+      cy
+        .wait('@selectionSave');
+
+      if (statusCode === 422) {
+        cy
+          .wait('@routeActions');
+      }
+
+      cy
+        .get('.schedule-list__day-list-row')
+        .find('.js-select')
+        .should('have.attr', 'aria-checked', 'true');
+
+      let releaseDepartedSave;
+      const departedSave = new Cypress.Promise(resolve => {
+        releaseDepartedSave = resolve;
+      });
+
+      cy
+        .intercept({ method: 'PATCH', url: `/api/actions/${ action.id }`, times: 1 }, req => {
+          return departedSave.then(() => {
+            req.reply({ statusCode, body: { errors: [] } });
+          });
+        })
+        .as('departedSave');
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-save')
+        .click()
+        .should('be.disabled');
+
+      cy
+        .get('.app-nav__link')
+        .contains('Dashboards')
+        .click()
+        .wait('@routeDashboards');
+
+      cy
+        .get('.list-page__title')
+        .should('contain', 'Dashboards')
+        .then(() => releaseDepartedSave());
+
+      cy
+        .wait('@departedSave');
+
+      cy
+        .get('.alert-box')
+        .should('not.exist');
+
+      cy
+        .go('back')
+        .wait('@routeActions');
+
+      cy
+        .get('.bulk-edit-inline')
+        .find('.js-cancel')
+        .click();
+    });
   });
 
   specify('bulk edit', function() {
@@ -2538,7 +2845,7 @@ context('schedule page', function() {
     cy
       .routesForPatientAction()
       .routeActions()
-      .visit('/schedule')
+      .visitOnClock('/schedule')
       .wait('@routeActions')
       .itsUrl()
       .its('search')
@@ -2550,6 +2857,9 @@ context('schedule page', function() {
         body: {},
       })
       .as('routeActions');
+
+    cy
+      .tick(60); // Flush the initial filter count before changing filters.
 
     expandFiltersSidebar();
 
@@ -2569,6 +2879,17 @@ context('schedule page', function() {
 
     cy
       .routeActions();
+
+    cy
+      .get('.error-page')
+      .should('be.visible');
+
+    cy
+      .tick(60); // Flush the pending filter change after storage is invalidated.
+
+    cy
+      .clock()
+      .invoke('restore');
 
     cy
       .get('.error-page')

@@ -40,10 +40,16 @@ context('Picklist', function() {
       .first()
       .should('not.have.class', 'is-highlighted');
 
-    cy.get('.js-picklist-item').first().then(([item]) => {
-      item.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, relatedTarget: null }));
-    });
-    cy.get('.js-picklist-item').first().should('have.class', 'is-highlighted');
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .first()
+      .trigger('mouseover')
+      .should('have.class', 'is-highlighted')
+      .then($item => {
+        cy.wrap($item).trigger('mouseover', { relatedTarget: $item[0] });
+      })
+      .should('have.class', 'is-highlighted');
 
     cy
       .get('body')
@@ -289,5 +295,37 @@ context('Picklist', function() {
     });
     cy.get('@loadError').should('have.been.calledOnceWith', error);
     cy.get('.picklist').should('not.exist');
+  });
+
+  specify('it should ignore failed lists after closing', function() {
+    let rejectLists;
+    let picklist;
+    const listsPromise = new Cypress.Promise((resolve, reject) => {
+      rejectLists = reject;
+    });
+    const onError = cy.stub().as('loadError');
+
+    cy
+      .mount(() => {
+        picklist = new Picklist({ isListsAsync: true, lists: listsPromise });
+        picklist.on('load:error', onError);
+        return picklist;
+      });
+
+    cy
+      .get('.picklist__message-loading')
+      .should('exist')
+      .then(() => {
+        picklist.destroy();
+        rejectLists(new Error('Unable to load options'));
+      });
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('@loadError')
+      .should('not.have.been.called');
   });
 });

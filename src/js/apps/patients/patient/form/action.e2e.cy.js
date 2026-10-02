@@ -62,12 +62,12 @@ context('Patient Action Form', function() {
     });
 
     cy
+      .routesForPatientWorkflow()
       .intercept('GET', '/api/actions/*', {
         statusCode: 410,
         body: { errors },
       })
       .as('routeActionError')
-      .routePatient()
       .routeFormByAction()
       .routeLatestFormResponse()
       .visit(`/patient/${ routePatientId }/action/${ deletedActionId }`)
@@ -80,7 +80,10 @@ context('Patient Action Form', function() {
 
     cy
       .url()
-      .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`);
+      .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`)
+      .wait(['@routePatientActions', '@routePatientFlows'])
+      .get('.workflow-page')
+      .should('be.visible');
   });
 
   specify('action deleted while its form is open', function() {
@@ -94,6 +97,7 @@ context('Patient Action Form', function() {
     });
 
     cy
+      .routesForPatientWorkflow()
       .routeAction(fx => {
         fx.data = testAction;
 
@@ -137,7 +141,10 @@ context('Patient Action Form', function() {
 
     cy
       .url()
-      .should('contain', `/patient/${ testPatient.id }/workflow`);
+      .should('contain', `/patient/${ testPatient.id }/workflow`)
+      .wait(['@routePatientActions', '@routePatientFlows'])
+      .get('.workflow-page')
+      .should('be.visible');
   });
 
   specify('update a form', function() {
@@ -778,6 +785,59 @@ context('Patient Action Form', function() {
         expect(data.id).to.not.equal(formResponse.id);
         expect(data.attributes.status).to.equal(FORM_RESPONSE_STATUS.DRAFT);
       });
+
+    let releaseDraftWrite;
+
+    // Draft helpers await completion; hold a real write transaction so the
+    // discard stays pending while the user leaves the form.
+    cy
+      .window()
+      .then(win => new Cypress.Promise(resolve => {
+        const opening = win.indexedDB.open('careops-cache');
+        opening.onsuccess = () => {
+          const db = opening.result;
+          const transaction = db.transaction('formDrafts', 'readwrite');
+          const store = transaction.objectStore('formDrafts');
+          let pending = true;
+          const hold = () => {
+            store.get(draftKey).onsuccess = () => {
+              if (pending) hold();
+            };
+          };
+          hold();
+          transaction.oncomplete = () => db.close();
+          releaseDraftWrite = () => {
+            pending = false;
+          };
+          resolve();
+        };
+      }));
+
+    cy
+      .get('.form__draft-menu')
+      .find('.js-discard')
+      .click();
+
+    cy
+      .get('.modal--small')
+      .find('.js-submit')
+      .click();
+
+    cy
+      .get('.app-nav')
+      .contains('Owned By')
+      .click();
+
+    cy
+      .then(() => releaseDraftWrite());
+
+    cy
+      .waitForFormDraft(draftKey, { exists: false })
+      .should('be.null');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 
   specify('prefill a form with latest submission by flow', function() {
@@ -1823,6 +1883,8 @@ context('Patient Action Form', function() {
   });
 
   specify('embedded form keeps action content reachable', function() {
+    let reducedMotion = true;
+
     cy.viewport(900, 720);
 
     const testAction = getAction({
@@ -1879,7 +1941,7 @@ context('Patient Action Form', function() {
 
       cy.spy(pane, 'scrollTo').as('formPaneScroll');
       cy.stub(win, 'matchMedia').callsFake(query => {
-        if (query === '(prefers-reduced-motion: reduce)') return { matches: true };
+        if (query === '(prefers-reduced-motion: reduce)') return { matches: reducedMotion };
 
         return nativeMatchMedia(query);
       });
@@ -1898,11 +1960,44 @@ context('Patient Action Form', function() {
       });
 
     cy
+      .get('.js-expand-button')
+      .click();
+
+    cy
+      .get('@formPaneScroll')
+      .invoke('resetHistory');
+
+    cy
+      .iframeStub()
+      .then(iframeStub => {
+        iframeStub.send('form:interact');
+      });
+
+    cy
+      .get('@formPaneScroll')
+      .should('not.have.been.called');
+
+    cy
+      .get('.js-expand-button')
+      .click();
+
+    cy
       .get('.patient-action__attachments-content')
       .scrollIntoView()
       .should('be.visible')
       .find('.patient-action__attachment')
       .should('be.visible');
+
+    cy
+      .iframeStub()
+      .then(iframeStub => {
+        reducedMotion = false;
+        iframeStub.send('form:interact');
+      });
+
+    cy
+      .get('@formPaneScroll')
+      .should('have.been.calledWithMatch', { behavior: 'smooth' });
 
     cy
       .get('.patient-action__activity')
@@ -3160,6 +3255,11 @@ context('Patient Action Form', function() {
     });
 
     cy
+      .routeFormByAction(fx => {
+        fx.data = { ...testForm, attributes: { ...testForm.attributes, name: 'Updated Form' } };
+
+        return fx;
+      })
       .routeFormResponse(fx => {
         fx.data = submission;
 
@@ -3190,5 +3290,10 @@ context('Patient Action Form', function() {
 
         expect(formResponse.args.value.formSubmission.familyHistory).to.equal('Form work submitted in another tab.');
       });
+
+    cy
+      .get('.form__frame')
+      .find('.form__title')
+      .should('contain', 'Updated Form');
   });
 });
