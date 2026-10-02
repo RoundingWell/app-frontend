@@ -143,7 +143,7 @@ A `SubRouterApp` separates "record the route" from "dispatch the route":
   do **not** read `currentRoute` from startup options.
 - `startRoute(routeContext, options)` — records the newest route and passes options
   to the idempotent Application `start()`. A stable active run dispatches the route;
-  while loading or stopping, the newest route waits for successful activation and
+  while loading, the newest route waits for successful activation and
   is dispatched once by that run's `onStart()`. A later stop invalidates pending
   route dispatch, so route and stop ordering remains latest-intent-wins.
 - `startCurrentRoute()` — synchronously dispatches the current route to its
@@ -176,21 +176,17 @@ It has no URL, Radio-channel, resource-scope comparison, or error-presentation
 policy. Keep those concerns in the routing adapters and application subclasses;
 this boundary allows future extraction without adding a second routing backend.
 
-- Selection retains the previous child until its stop resolves `true`. Overlapping
-  replacements share that stop, and only the newest selection can activate.
-- A rejected stop keeps the selection and propagates the error. A stop resolving
-  `false` is superseded/canceled and does not authorize a replacement. Returning
-  `false` from `prepareStop` is not a veto; stop permission must reject or throw.
+- Selection stops the previous child synchronously before starting the replacement.
+  Startup remains asynchronous, and only the newest selection can complete.
 - Owner stop, restart, and destroy invalidate pending selection even when the owner
-  is already stopped. A failed child startup cleans up partially started descendants
-  before clearing the selection. If cleanup fails, selection is retained for retry. Cleanup errors are reported
-  separately through `child:cleanup:error` (Datadog by default); callers still
-  receive the original activation error or canceled result.
-- This is application-selection policy, not browser navigation blocking. It does
-  not roll back the URL or guarantee atomic teardown of an entire child tree.
-
-- RouterApp starts and stops its selected child asynchronously. A newer route wins
-  if it arrives while the prior child is stopping or preparing.
+  is already stopped. A failed child startup stops partially started descendants
+  before clearing the selection. Cleanup errors are reported separately through
+  `child:cleanup:error`; callers receive the original activation error.
+- Navigation permission and required saves happen before teardown. Synchronous
+  teardown failures abort the operation. Failed cleanup retains the selected child
+  so a later selection can retry teardown.
+- RouterApp stops its selected child synchronously and starts it asynchronously.
+  A newer route cancels prior preparation.
 - Route children are registered as owned Application instances. Owner stop and
   destruction clean them up; RouterApp clears its selection after its own stop.
   A selected child that stopped independently is restarted when the next matching
@@ -198,9 +194,10 @@ this boundary allows future extraction without adding a second routing backend.
 - Area routers register their children explicitly and supply per-route startup
   data through the Application lifecycle. Keep ownership and startup data together
   when extending a route tree.
-- A `SubRouterApp` owns its current route in Marionette state. Application state
-  persists while stopped and across `restart()`, so the route re-dispatches after
-  re-fetching without restart flags or threading `currentRoute` through options.
+- A `SubRouterApp` owns its current route in Marionette state. State persists while
+  stopped and across `restart()`. Restart repeats preparation while retaining the
+  root and children; use it only when `onStart` commits into that retained shell.
+  Resource or host changes use explicit stop/start to reconstruct the feature.
 
 ## Async ownership
 

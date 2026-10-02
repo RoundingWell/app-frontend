@@ -55,10 +55,10 @@ work. It selects the version-matched framework docs; this file records the app's
 integration choices and verification policy.
 
 - Contract: the repository root's `package.json` and `package-lock.json` pin
-  `marionette` and `@mnjs/adapters` to published `5.0.0-rc.1` packages.
-- Packaged docs: `node_modules/marionette/dist/docs`, version `5.0.0-rc.1`, source
-  `469e790fea03993a5c063e39028445ac3610c9e4`, `sourceDirty: false`, content
-  SHA-256 `64ac5cf775715975ac62d3373b4618f833b9376d406dd0128f151132945e3a98`.
+  `marionette` and `@mnjs/adapters` to published `5.0.0-rc.2` packages.
+- Packaged docs: `node_modules/marionette/docs`, version `5.0.0-rc.2`, source
+  `f4243b8334cafe0bd1b06eba85d87e2310cb3618`, `sourceDirty: false`, content
+  SHA-256 `33e25b34b7de8097aedad992ba19af5f381a282cc9f1a14a124dc8f6b69384de`.
   Verify the installed package against this release before relying on its APIs.
 - Runtime: the shared named exports from `marionette`; `src/js/base/setup.js`
   registers Backbone for DataApi and StateApi, and Morphdom for DomApi. DOM event
@@ -76,8 +76,9 @@ integration choices and verification policy.
   from the results Application. Each page and results app extends `App` directly;
   shared selection and sidebar objects live under `src/js/apps/patients/shared`.
   Loading, grouping, sorting, and error policy stay with their feature.
-  `src/js/utils/latest-request.js` coordinates replaceable data requests without
-  restarting the page.
+  Results use retained `restart()` to repeat `prepareStart` and commit the current
+  collection in `onStart`. Page controls remain active while results load.
+  Independent operations, such as bulk saves, keep their own completion policy.
 - Verification: run this repo's commands from the root using the boundaries in
   **Validation** below; generic units use component specs, app flows use E2E.
 
@@ -137,7 +138,9 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 ## Lifecycle Review
 
 - Verify cancellation claims against the installed Marionette version and actual callers. Superseded startup operations resolve false, but code inside an async `prepareStart` still needs `signal.throwIfAborted()` before manually starting children after awaits.
-- A stopped app can be stopped without stop notifications; canceling an in-progress start can still invoke `onStop`. Scope listener cleanup by event/callback when its source may not yet be assigned.
+- Use retained `restart()` for readiness changes that keep the active root and children. Construct retained UI once and commit prepared data in `onStart`. Use explicit `stop(); start(options)` for reconstruction or a new host.
+- `stop()`, `destroy()`, and `removeChildApp()` are synchronous. There is no `prepareStop` or `prepareDestroy`; complete required asynchronous business work before teardown. A stopped owner still cleans descendants without repeating stop notifications.
+- Prefer `viewEvents` for the Application's selected root. Keep nested View events with their actual owner. Native View destruction releases incoming listeners; retain explicit cleanup for surviving external sources.
 - Internal fetch helpers require the options passed by their current callers. Do not restore hypothetical no-options consumers or removed configuration variants without finding an active caller.
 
 ## Reviewing Changes
@@ -180,6 +183,9 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 ## Validation
 
 - Cover behavior that users can exercise through the UI with E2E tests. Do not substitute component tests that stub application methods or state for those flows; reserve component tests for behavior that cannot be meaningfully exercised through the UI. Prefer extending an existing E2E scenario for the same flow; add a separate `specify` only when the scenario needs its own isolation.
+
+- Keep test changes focused on the edited behavior; do not combine coverage work with unrelated test consolidation. Match surrounding Cypress style: one command per line in chained steps, blank lines between steps, scoped `get`/`find`, jQuery DOM subjects, and fixture callbacks that mutate `fx` then return it. Do not wrap queued Cypress commands in unnecessary `cy.then`; use `Cypress.Promise` for explicit response gates.
+- For changed application code, inspect branch coverage from E2E. Investigate unreachable branches as dead code and remove unsupported paths rather than adding synthetic app-method tests or coverage ignores. Generic/base contracts and services may use component tests. Use narrowly scoped, explained Istanbul ignores for defensive service branches that are impractical to test.
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.

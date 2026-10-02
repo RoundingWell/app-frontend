@@ -54,8 +54,8 @@ component-only coverage.
 
 Test the public behavior owned by this repo, not Marionette's rendering or
 event-delegation implementation. Use Marionette's upstream `marionette` skill to
-read the version-matched `docs/marionette.view.md` and
-`docs/dom.interactions.md` contracts.
+read the version-matched `docs/api/view.md` and
+`docs/api/shared/view-bindings.md` contracts.
 
 ## Testing Priorities
 
