@@ -153,6 +153,12 @@ export default RouterApp.extend({
   stateEvents: {
     'change:currentApp': 'onChangeCurrentApp',
   },
+  viewEvents: {
+    'focus:in': 'onFocusIn',
+    'focus:out': 'onFocusOut',
+    'pointer:enter': 'onPointerEnter',
+    'pointer:leave': 'onPointerLeave',
+  },
   createState() {
     return new StateModel();
   },
@@ -208,16 +214,7 @@ export default RouterApp.extend({
     this._narrowQuery.removeEventListener('change', this._onNarrowQueryChange);
   },
   onStart() {
-    // Rebuild the shell every start so it's bound to the current state — a
-    // restart otherwise leaves a preserved view wired to a stale model.
-    const view = this.setView(new AppNavView({ model: this.getState() }));
-
-    this.listenTo(view, {
-      'focus:in': this.onFocusIn,
-      'focus:out': this.onFocusOut,
-      'pointer:enter': this.onPointerEnter,
-      'pointer:leave': this.onPointerLeave,
-    });
+    this.setView(new AppNavView({ model: this.getState() }));
 
     this.updateCanPatientCreate();
     this.showMainNavDroplist();

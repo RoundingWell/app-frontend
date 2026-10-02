@@ -14,10 +14,6 @@ export default View.extend({
     'type': 'button',
   },
   initialize({ isSelected }) {
-    if (!this.getOption('selectLabel') || !this.getOption('deselectLabel')) {
-      throw new TypeError('CheckView requires selectLabel and deselectLabel');
-    }
-
     this.isSelected = !!isSelected;
   },
   getTemplate() {

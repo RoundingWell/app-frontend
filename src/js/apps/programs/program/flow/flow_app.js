@@ -1,7 +1,5 @@
 import { Radio } from 'marionette';
 
-import { addError } from 'js/datadog';
-
 import SubRouterApp from 'js/base/subrouterapp';
 
 import ActionApp from 'js/apps/programs/program/action/action_app';
@@ -25,11 +23,11 @@ export default SubRouterApp.extend({
     'programFlow:action:new': 'showActionSidebar',
   },
   onBeforeStartRoute() {
-    this.getChildApp('action').stop().catch(addError);
+    this.getChildApp('action').stop();
   },
 
   onBeforeStart() {
-    this.setView(new LayoutView()).render();
+    this.setView(new LayoutView());
   },
   prepareStart({ flowId }, { signal }) {
     return Promise.all([
@@ -116,9 +114,7 @@ export default SubRouterApp.extend({
   async showActionSidebar(flowId, actionId) {
     const actionApp = this.getChildApp('action');
     const routeContext = this.getCurrentRoute();
-    const stopped = await actionApp.stop();
-
-    if (!stopped || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
+    actionApp.stop();
 
     const started = await actionApp.start({ actionId, flowId });
 

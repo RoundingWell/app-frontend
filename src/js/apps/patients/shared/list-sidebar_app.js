@@ -1,7 +1,6 @@
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
-import createLatestRequest from 'js/utils/latest-request';
 import App from 'js/base/app';
 
 import { ListFiltersPanelApp } from './list-filters/list-filters_app';
@@ -18,35 +17,42 @@ export default App.extend({
       'show:sidebar': () => this.triggerMethod('show:patient'),
     });
   },
-  onBeforeStart(app, { region, filtersState, layoutState, isDrawer }) {
-    this.releaseHost();
+  onBeforeStart(app, { region, filtersState, layoutState, isDrawer, ControlsView, controlsOptions }) {
+    if (this.hasHost) return;
+
     this.hasHost = true;
     this.sidebarRegion = region;
     this.filtersState = filtersState;
     this.layoutState = layoutState;
     this.isDrawer = isDrawer;
+    this.ControlsView = ControlsView;
+    this.controlsOptions = controlsOptions;
     this.patient = null;
-    this.requests = createLatestRequest({
-      load: (patient, context) => this.showSidebar(patient, context),
-      fail: (error, patient) => this.handleSidebarError(error, patient),
-      commit: (shown, patient) => {
-        if (shown && !patient) this.triggerMethod('show:filters');
-      },
-    });
   },
-  prepareStart(options, { signal }) {
-    return this.requests.run(null, { signal });
+  prepareStart({ patient = null }, { signal }) {
+    this.getChildApp('filters').stop();
+    signal.throwIfAborted();
+    this.getChildApp('patient').stop();
+    signal.throwIfAborted();
+
+    if (patient) {
+      return this.getChildApp('patient').start({ patient, region: this.sidebarRegion });
+    }
+
+    const filters = this.getChildApp('filters');
+    filters.start({
+      filtersState: this.filtersState,
+      layoutState: this.layoutState,
+      isDrawer: this.isDrawer,
+      ControlsView: this.ControlsView,
+      controlsOptions: this.controlsOptions,
+      region: this.sidebarRegion,
+    }).catch(addError);
+    this.triggerMethod('show:filters');
   },
   onStop() {
-    this.releaseHost();
-    this.patient = null;
-  },
-  onBeforeDestroy() {
-    this.releaseHost();
-  },
-  releaseHost() {
     this.hasHost = false;
-    this.requests?.dispose();
+    this.patient = null;
   },
   isPatientOpen() {
     return !!this.patient;
@@ -55,59 +61,31 @@ export default App.extend({
     this.isDrawer = isDrawer;
     this.getChildApp('filters').getView()?.setDrawerMode(isDrawer);
   },
-  showControls(view) {
-    this.getChildApp('filters').getView().showChildView('controls', view);
-  },
   focusPatientClose() {
     this.getChildApp('patient').focusClose();
   },
   closePatient() {
-    return this.showFilters()
-      .then(shown => {
-        if (shown) this.triggerMethod('close');
-        return shown;
-      })
-      .catch(addError);
-  },
-  async showSidebar(patient, { signal }) {
-    const filtersStopped = await this.getChildApp('filters').stop();
-    signal.throwIfAborted();
-    if (!filtersStopped) return false;
-    const patientStopped = await this.getChildApp('patient').stop();
-    signal.throwIfAborted();
-    if (!patientStopped) return false;
-
-    if (patient) {
-      return this.getChildApp('patient').start({ patient, region: this.sidebarRegion });
-    }
-
-    return this.getChildApp('filters').start({
-      filtersState: this.filtersState,
-      layoutState: this.layoutState,
-      isDrawer: this.isDrawer,
-      region: this.sidebarRegion,
-    });
+    this.showFilters();
+    this.triggerMethod('close');
   },
   selectPatient(patient) {
-    if (!this.hasHost) return Promise.resolve(false);
     if (this.patient?.id === patient.id) return this.closePatient();
 
     this.patient = patient;
     this.triggerMethod('change:patient', patient);
-    return this.requests.run(patient);
+    return this.restart({ patient }).catch(error => {
+      this.handleSidebarError(error);
+      return false;
+    });
   },
-  handleSidebarError(error, patient) {
-    if (!patient) throw error;
-
-    this.showFilters().catch(addError);
+  handleSidebarError(error) {
+    this.showFilters();
     if (error?.responseData) Radio.request('alert', 'show:apiError', error.responseData);
     else addError(error);
   },
   showFilters() {
-    if (!this.hasHost) return Promise.resolve(false);
     this.patient = null;
     this.triggerMethod('change:patient', null);
-    return this.requests.run(null)
-      .then(committed => committed && !this.patient && this.getChildApp('filters').isRunning());
+    this.restart({ patient: null }).catch(addError);
   },
 });

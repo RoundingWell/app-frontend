@@ -54,6 +54,7 @@ export default App.extend({
   onStart(app, options, url) {
     /* istanbul ignore next: Essentially avoid offline */
     if (!url) return;
+    this.stopReconnect();
     this.ws = new WebSocket(url.toString());
     this.ws.addEventListener('open', this.onOpen.bind(this));
     this.ws.addEventListener('close', this.onClose.bind(this));

@@ -34,6 +34,7 @@ export default App.extend({
   },
   onBeforeStart() {
     this.getState().clearSelected();
+    if (this.isRunning()) return;
 
     this.showView(new FlowLoadingView());
   },
@@ -56,6 +57,8 @@ export default App.extend({
     throw error;
   },
   onStart(app, { patient }, [flow, actions]) {
+    const hasLayout = this.getView() instanceof LayoutView;
+    this.releaseDataListeners();
     this.flow = flow;
     this.actions = actions;
     this.editableCollection = actions.clone();
@@ -65,17 +68,19 @@ export default App.extend({
 
     this.subscribe();
 
-    this.setView(new LayoutView()).render();
+    if (!hasLayout) {
+      this.setView(new LayoutView()).render();
+      this.showHeader();
+    }
 
     this.updateContext();
 
     this.listenTo(this.editableCollection, 'reset', this.toggleBulkSelect);
     this.toggleBulkSelect();
 
-    this.showHeader();
     this.showMenu();
     this.showActionList();
-    this.startActivity();
+    if (!hasLayout) this.startActivity();
 
     this.listenTo(this.actions, {
       'add': this.onAddAction,
@@ -95,6 +100,9 @@ export default App.extend({
   },
   onStop() {
     this.unsubscribe();
+    this.releaseDataListeners();
+  },
+  releaseDataListeners() {
     if (this.editableCollection) this.stopListening(this.editableCollection);
     if (this.actions) this.stopListening(this.actions);
     if (this.flow) this.stopListening(this.flow);
@@ -220,7 +228,7 @@ export default App.extend({
     this.getState().clearSelected();
   },
   stopBulkEdit() {
-    this.getChildApp('bulkEditActions')?.stop().catch(addError);
+    this.getChildApp('bulkEditActions')?.stop();
   },
   showBulkEdit() {
     const app = this.getChildApp('bulkEditActions') || this.addBulkEditApp();

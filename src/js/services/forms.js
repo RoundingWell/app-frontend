@@ -41,7 +41,6 @@ export default App.extend({
   releaseEffects() {
     this.updateDraft.cancel();
     this.refreshForm.cancel();
-    this.getChannel().reset();
   },
   onStop() {
     this.releaseEffects();

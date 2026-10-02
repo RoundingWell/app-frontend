@@ -15,6 +15,12 @@ export default View.extend({
     status: '[data-list-status-region]',
     list: { el: '[data-list-region]', replaceElement: true },
   },
+  childViewTriggers: {
+    'filtered': 'filtered',
+    'change:canEdit': 'change:canEdit',
+    'click:patient': 'click:patient',
+    'retry': 'retry',
+  },
   showSelectAll(options) {
     const SelectAllView = this.getOption('SelectAllView');
     const view = new SelectAllView(options);

@@ -2,8 +2,10 @@ import { get, union, map, uniq, compact } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
+import intl from 'js/i18n';
 import { alphaSort, numSort } from 'js/utils/sorting';
-import { i18n } from 'js/apps/patients/worklist/worklist_views';
+
+const i18n = intl.patients.worklist.worklistViews;
 
 // Casts values to String for alpha sort
 function getEntityFieldValue(entity, fieldName, keys) {

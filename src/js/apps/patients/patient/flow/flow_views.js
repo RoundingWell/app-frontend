@@ -61,7 +61,7 @@ const FlowHeaderReadOnlyOwnerView = ReadOnlyOwnerView.extend({
 const HeaderView = View.extend({
   className: 'patient-flow__header',
   modelEvents: {
-    'change': 'render',
+    'change:name change:details change:_owner change:_state': 'render',
   },
   template: HeaderTemplate,
   regions: {

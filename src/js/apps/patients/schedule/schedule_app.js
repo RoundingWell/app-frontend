@@ -29,6 +29,12 @@ const ScheduleApp = App.extend({
     'change:flowStates': 'refreshList',
     'change:searchQuery': 'onChangeSearchQuery',
   },
+  viewEvents: {
+    'change:filters-drawer': 'onChangeFiltersDrawer',
+    'change:filters-sidebar-fixed': 'onChangeFiltersSidebarFixed',
+    'close:sidebar-drawer': 'onCloseSidebarDrawer',
+    'before:destroy': 'onBeforeDestroyPageView',
+  },
   initialize() {
     const results = this.addChildApp('results', new ResultsApp({ state: this.getState() }));
     const sidebar = this.getChildApp('sidebar');
@@ -53,14 +59,7 @@ const ScheduleApp = App.extend({
     this.initListState();
 
     const view = this.setView(new LayoutView({ model: this.getState() }));
-    this.listenTo(view, {
-      'change:filters-drawer': this.onChangeFiltersDrawer,
-      'change:filters-sidebar-fixed': this.onChangeFiltersSidebarFixed,
-      'close:sidebar-drawer': this.onCloseSidebarDrawer,
-      'before:destroy': this.onBeforeDestroyPageView,
-    });
     this.expandFixedFiltersSidebar(view.isFiltersSidebarFixed());
-    view.render();
 
     this.showSearchView();
     this.showFiltersButtonView();
@@ -69,22 +68,19 @@ const ScheduleApp = App.extend({
 
     this.showView();
   },
-  async prepareStart(options, { signal }) {
+  onStart() {
     const view = this.getView();
-    const [resultsStarted, sidebarStarted] = await Promise.all([
-      this.getChildApp('results').start({
-        region: view.getRegion('results'),
-        filtersState: this.filterState,
-      }),
-      this.getChildApp('sidebar').start({
-        region: view.getRegion('filtersSidebar'),
-        filtersState: this.filterState,
-        layoutState: view.getLayoutState(),
-        isDrawer: view.isFiltersDrawer(),
-      }),
-    ]);
-    signal.throwIfAborted();
-    return resultsStarted && sidebarStarted && !view.isDestroyed();
+    const results = this.getChildApp('results');
+    results.start({
+      region: view.getRegion('results'),
+      filtersState: this.filterState,
+    }).catch(error => results.handleRefreshError(error));
+    this.getChildApp('sidebar').start({
+      region: view.getRegion('filtersSidebar'),
+      filtersState: this.filterState,
+      layoutState: view.getLayoutState(),
+      isDrawer: view.isFiltersDrawer(),
+    }).catch(addError);
   },
   onStop() {
     this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
@@ -131,13 +127,8 @@ const ScheduleApp = App.extend({
   expandFixedFiltersSidebar(isFixed) {
     if (isFixed) this.getState().setFiltersSidebarCollapsed(false);
   },
-  onBeforeDestroyPageView(view) {
-    const results = this.getChildApp('results');
-    const sidebar = this.getChildApp('sidebar');
-    sidebar.releaseHost();
-    results.stop().catch(addError);
-    sidebar.stop().catch(addError);
-    this.stopListening(view);
+  onBeforeDestroyPageView() {
+    this.stop();
   },
   onShowFilters() {
     this.getView().showFiltersSidebar();
@@ -145,26 +136,23 @@ const ScheduleApp = App.extend({
   onClickFilters() {
     const sidebar = this.getChildApp('sidebar');
     if (sidebar.isPatientOpen()) {
-      sidebar.showFilters().catch(addError);
+      sidebar.showFilters();
       return;
     }
     if (this.getView().toggleFiltersSidebar()) this.filterState.trigger('expand:sections');
   },
-  async onChangeFiltersDrawer(isDrawer) {
+  onChangeFiltersDrawer(isDrawer) {
     const view = this.getView();
     const sidebar = this.getChildApp('sidebar');
-    if (isDrawer && sidebar.isPatientOpen()) {
-      if (!await sidebar.showFilters().catch(addError) || view.isDestroyed()) return;
-      isDrawer = view.isFiltersDrawer();
-    }
     sidebar.setDrawerMode(isDrawer);
+    if (isDrawer && sidebar.isPatientOpen()) sidebar.showFilters();
     view.setSidebarCollapsed(isDrawer || (!sidebar.isPatientOpen() && this.getState().get('filtersSidebarCollapsed')));
   },
-  async onCloseSidebarDrawer() {
+  onCloseSidebarDrawer() {
     const view = this.getView();
     const sidebar = this.getChildApp('sidebar');
     const wasPatientOpen = sidebar.isPatientOpen();
-    if (wasPatientOpen && (!await sidebar.showFilters().catch(addError) || view.isDestroyed())) return;
+    if (wasPatientOpen) sidebar.showFilters();
 
     view.setSidebarCollapsed(true);
     if (wasPatientOpen) this.getChildApp('results').focusPatientTrigger();
@@ -172,7 +160,7 @@ const ScheduleApp = App.extend({
   },
   refreshList(state, value, options) {
     const results = this.getChildApp('results');
-    if (!results.isRunning() || options?.source === results) return;
+    if (options?.source === results) return;
 
     this.filterState.set(this.getState().getFiltersState());
     return results.refreshList();

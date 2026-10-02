@@ -2,6 +2,8 @@ import { Radio, View } from 'marionette';
 
 import App from 'js/base/app';
 
+import { LayoutView } from 'js/services/sidebar/sidebar_views';
+
 import {
   SidebarView,
   headingText,
@@ -11,7 +13,11 @@ import {
 } from 'js/apps/programs/sidebar/flow/flow-sidebar_views';
 
 export default App.extend({
+  viewEvents: {
+    'close': 'stop',
+  },
   onBeforeStart(app, { flow }) {
+    this.setView(new LayoutView());
     this.flow = flow;
     this.flow.trigger('editing', true);
 
@@ -34,6 +40,7 @@ export default App.extend({
     });
 
     this.getView().showChildView('content', contentView);
+    this.showView();
   },
   showHeading() {
     this.getView().showChildView('heading', new View({ template: () => headingText }));
@@ -73,9 +80,6 @@ export default App.extend({
         modal.destroy();
       },
     }));
-  },
-  onClose() {
-    this.stop();
   },
   onStop() {
     if (this.flow && this.flow.isNew()) this.flow.destroy();

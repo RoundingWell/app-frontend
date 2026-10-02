@@ -7,6 +7,14 @@ import App from 'js/base/app';
 import { AddButtonView, i18n } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
 export default App.extend({
+  viewEvents: {
+    'add:programAction'(programItem) {
+      this.triggerMethod('add:programAction', programItem);
+    },
+    'add:programFlow'(programItem) {
+      this.triggerMethod('add:programFlow', programItem);
+    },
+  },
   prepareStart(options, { signal }) {
     return Promise.all([
       Radio.request('entities', 'fetch:programs:collection', { signal }),
@@ -26,20 +34,9 @@ export default App.extend({
 
     programs.reset(addablePrograms);
 
-    const addButtonView = new AddButtonView({
+    this.showView(new AddButtonView({
       lists: this.getProgramsOpts(programs),
-    });
-
-    this.listenTo(addButtonView, {
-      'add:programAction'(programItem) {
-        this.triggerMethod('add:programAction', programItem);
-      },
-      'add:programFlow'(programItem) {
-        this.triggerMethod('add:programFlow', programItem);
-      },
-    });
-
-    this.showView(addButtonView);
+    }));
   },
   getProgramsOpts(programs) {
     return programs.map(program => {
