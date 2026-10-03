@@ -194,10 +194,9 @@ this boundary allows future extraction without adding a second routing backend.
 - Area routers register their children explicitly and supply per-route startup
   data through the Application lifecycle. Keep ownership and startup data together
   when extending a route tree.
-- A `SubRouterApp` owns its current route in Marionette state. State persists while
-  stopped and across `restart()`. Restart repeats preparation while retaining the
-  root and children; use it only when `onStart` commits into that retained shell.
-  Resource or host changes use explicit stop/start to reconstruct the feature.
+- A `SubRouterApp` owns its current route in Marionette state and re-dispatches it
+  after restarting. For framework lifecycle contracts, use the upstream
+  `marionette` skill.
 
 ## Async ownership
 
