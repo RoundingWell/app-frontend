@@ -15,12 +15,14 @@ import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_vie
 import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
+import InteractionsPreviewApp from 'js/apps/patients/patient/interactions/interactions-preview_app';
 
 export default App.extend({
   childApps: {
     activity: ActivityApp,
     attachments: AttachmentsApp,
     form: FormApp,
+    interactions: InteractionsPreviewApp,
   },
   initialize() {
     this.listenTo(this.getChildApp('form'), 'toggle:expanded', this.onToggleFormExpanded);
@@ -124,6 +126,7 @@ export default App.extend({
     this.renderFormExpandedState();
 
     this.showContent();
+    this.showInteractions();
     this.showMenu();
     this.activityApp = this.startActivity(entryTarget?.section);
     this.attachmentsApp = this.startAttachments(entryTarget?.section);
@@ -154,6 +157,14 @@ export default App.extend({
   showContent() {
     this.showAction();
     this.showForm();
+  },
+  showInteractions() {
+    const app = this.getChildApp('interactions');
+    app.start({
+      region: this.getView().getRegion('interactions'),
+      patient: this.patient,
+      actionId: this.action.id,
+    }).catch(error => app.handleStartFailure(error));
   },
   showAction() {
     const hasDialer = !!Radio.request('settings', 'get', 'dialer');

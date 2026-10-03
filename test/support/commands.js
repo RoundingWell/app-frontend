@@ -40,6 +40,7 @@ Cypress.Commands.add('routesForPatientWorkflow', () => {
     .routePatient()
     .routePatientActions()
     .routePatientFlows()
+    .routePatientInteractions()
     .routeWidgetValues()
     .routeWorkspacePatient()
     .routePrograms()
