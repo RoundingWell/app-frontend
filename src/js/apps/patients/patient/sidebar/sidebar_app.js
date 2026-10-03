@@ -19,32 +19,23 @@ function getPatientSidebarRequests(patient, sidebars, options) {
 }
 
 export default App.extend({
-  setSidebarView(options) {
-    const currentView = this.getView();
-    if (currentView) this.stopListening(currentView);
-
-    const view = this.setView(new SidebarView(options));
-
-    this.listenTo(view, {
-      'click:close': this.onClickClose,
-      'click:patient': this.onClickPatient,
-      'click:patientEdit': this.showPatientModal,
-      'click:patientView': this.showPatientModal,
-      'click:activeStatus': this.toggleActiveStatus,
-      'click:archivedStatus': this.archivePatient,
-    });
-
-    return view;
+  viewEvents: {
+    'click:close': 'onClickClose',
+    'click:patient': 'onClickPatient',
+    'click:patientEdit': 'showPatientModal',
+    'click:patientView': 'showPatientModal',
+    'click:activeStatus': 'toggleActiveStatus',
+    'click:archivedStatus': 'archivePatient',
   },
   onBeforeStart(app, { patient, isClosable, isListSidebar }) {
     this.patient = patient;
     this.sidebars = Radio.request('sidebars', 'patient');
 
-    const view = this.setSidebarView({
+    const view = this.setView(new SidebarView({
       model: patient,
       isClosable,
       isListSidebar,
-    }).render();
+    }));
 
     view.showChildView('sidebars', new SidebarLoadingView());
     this.showView();
@@ -52,15 +43,8 @@ export default App.extend({
   prepareStart({ patient }, { signal }) {
     return Promise.all(getPatientSidebarRequests(patient, this.sidebars, { signal }));
   },
-  onStart(app, { isClosable, isListSidebar }) {
-    this.setSidebarView({
-      model: this.patient,
-      collection: this.sidebars,
-      isClosable,
-      isListSidebar,
-    });
-
-    this.showView();
+  onStart() {
+    this.getView().showSidebars(this.sidebars);
   },
   onClickClose() {
     this.trigger('close');

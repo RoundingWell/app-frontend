@@ -44,6 +44,22 @@ context('program page', function() {
       .should('contain', `program/${ testProgram.id }`);
 
     cy
+      .intercept('GET', '/api/program-actions/*', {
+        delay: 2000,
+        body: { data: getProgramAction(), included: [] },
+      })
+      .as('pendingAction');
+
+    cy
+      .get('.action-card')
+      .first()
+      .click('bottom');
+
+    cy
+      .get('@pendingAction.all')
+      .should('have.length', 1);
+
+    cy
       .get('.program-page__context-trail')
       .should('contain', 'Test Program')
       .contains('Back to List')
@@ -52,6 +68,42 @@ context('program page', function() {
     cy
       .url()
       .should('contain', 'programs');
+
+    cy
+      .intercept('GET', '/api/tags', { delay: 2000, body: { data: [] } })
+      .as('pendingTags');
+
+    cy
+      .get('.card-list__item')
+      .contains('Test Program')
+      .click();
+
+    cy
+      .get('[data-add-region]')
+      .contains('Add')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('New Flow')
+      .click();
+
+    cy
+      .get('@pendingTags.all')
+      .should('have.length', 1);
+
+    cy
+      .get('.program-page__context-trail')
+      .contains('Back to List')
+      .click();
+
+    cy
+      .get('.card-list__item')
+      .should('contain', 'Test Program');
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
   });
 
   specify('read only sidebar', function() {
@@ -222,5 +274,25 @@ context('program page', function() {
       .should('have.length', 2)
       .contains('Conditional')
       .should('not.exist');
+  });
+
+  specify('shows an error when program workflows cannot load', function() {
+    const program = getProgram();
+
+    cy
+      .routeProgram(fx => {
+        fx.data = program;
+
+        return fx;
+      })
+      .routeProgramFlows()
+      .intercept('GET', `/api/programs/${ program.id }/actions*`, { statusCode: 400, body: { errors: [] } })
+      .as('routeProgramActionsError')
+      .visit(`/program/${ program.id }`)
+      .wait('@routeProgramActionsError');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 400.');
   });
 });

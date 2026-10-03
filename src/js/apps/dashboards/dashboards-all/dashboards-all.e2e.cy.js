@@ -159,4 +159,16 @@ context('dashboards all list', function() {
       .first()
       .should('contain', 'Daily Dashboards');
   });
+
+  specify('shows an error when dashboards cannot load', function() {
+    cy
+      .intercept('GET', '/api/dashboards', { statusCode: 400, body: { errors: [] } })
+      .as('routeDashboardsError')
+      .visit('/dashboards')
+      .wait('@routeDashboardsError');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 400.');
+  });
 });

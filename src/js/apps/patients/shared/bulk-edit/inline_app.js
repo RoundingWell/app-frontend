@@ -1,6 +1,11 @@
 import App from 'js/base/app';
 
 export default App.extend({
+  viewEvents: {
+    'destroy': 'onViewDestroy',
+    'cancel': 'onClickCancel',
+    'save': 'onSubmit',
+  },
   createState({ stateOptions }) {
     return new this.StateModel(stateOptions);
   },
@@ -13,16 +18,10 @@ export default App.extend({
       model: this.getState(),
     });
 
-    this.listenTo(view, {
-      'destroy': () => {
-        this.pendingSave = null;
-        this.stopListening(view);
-      },
-      'cancel': this.onClickCancel,
-      'save': this.onSubmit,
-    });
-
     this.showView(view);
+  },
+  onViewDestroy() {
+    this.pendingSave = null;
   },
   onStop() {
     this.pendingSave = null;

@@ -11,6 +11,8 @@ import intl from 'js/i18n';
 import underscored from 'js/utils/formatting/underscored';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 
+import { getSortOptions } from './worklist_sort';
+
 import Droplist from 'js/components/droplist';
 
 import { ListPageFiltersButtonView, ListPageView } from 'js/apps/patients/shared/list-page';
@@ -62,24 +64,17 @@ const LayoutView = ListPageView.extend({
   },
 });
 
-const SidebarControlsView = View.extend({
-  className: 'worklist-list__sidebar-controls',
-  template: SidebarControlsTemplate,
-  regions: {
-    sort: '[data-sort-region]',
-    toggle: '[data-toggle-region]',
-    ownerToggle: '[data-owner-toggle-region]',
-  },
-});
-
 const TypeToggleView = View.extend({
+  modelEvents: {
+    'change:listType': 'render',
+  },
   className: 'worklist-list__type-toggle',
   template: hbs`
     <button class="button worklist-list__sidebar-button js-toggle-actions" type="button" aria-pressed="{{ actionsPressed }}">{{far "file-lines"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.actionsButton }}</span></button>{{~ remove_whitespace ~}}
     <button class="button worklist-list__sidebar-button js-toggle-flows" type="button" aria-pressed="{{ flowsPressed }}">{{far "folder-closed"}}<span>{{ @intl.patients.worklist.worklistViews.typeToggleView.flowsButton }}</span></button>
   `,
   templateContext() {
-    const isFlowList = this.getOption('isFlowList');
+    const isFlowList = this.model.isFlowType();
 
     return {
       actionsPressed: String(!isFlowList),
@@ -87,11 +82,12 @@ const TypeToggleView = View.extend({
     };
   },
   triggers: {
-    'click .js-toggle-actions': 'click:toggleActions',
-    'click .js-toggle-flows': 'click:toggleFlows',
+    'click @ui.actions': 'click:toggleActions',
+    'click @ui.flows': 'click:toggleFlows',
   },
   ui: {
-    buttons: 'button',
+    actions: '.js-toggle-actions',
+    flows: '.js-toggle-flows',
   },
   onClickToggleActions() {
     this.triggerMethod('toggle:listType', 'actions');
@@ -103,6 +99,9 @@ const TypeToggleView = View.extend({
 
 const NoOwnerToggleView = View.extend({
   className: 'worklist-list__owner-toggle',
+  modelEvents: {
+    'change:noOwner': 'render',
+  },
   template: hbs`
     <button class="button worklist-list__sidebar-button worklist-list__owner-toggle-button" type="button" aria-pressed="{{ noOwner }}">
       {{ @intl.patients.worklist.worklistViews.noOwnerToggleView.noOwner }}{{#if noOwner}}{{far "xmark" classes="worklist-list__owner-toggle-icon"}}{{/if}}
@@ -377,6 +376,46 @@ const SortDroplist = Droplist.extend({
   template: hbs`{{far "arrow-down-arrow-up" classes="worklist-list__sort-icon"}}{{ text }}`,
 });
 
+const SidebarControlsView = View.extend({
+  className: 'worklist-list__sidebar-controls',
+  template: SidebarControlsTemplate,
+  regions: {
+    sort: '[data-sort-region]',
+    toggle: '[data-toggle-region]',
+    ownerToggle: '[data-owner-toggle-region]',
+  },
+  modelEvents: {
+    'change:listType': 'showSort',
+  },
+  onRender() {
+    const typeToggle = new TypeToggleView({ model: this.model });
+    this.listenTo(typeToggle, 'toggle:listType', listType => this.model.setType(listType));
+    this.showChildView('toggle', typeToggle);
+
+    const currentClinician = Radio.request('bootstrap', 'currentUser');
+    if (this.model.id === 'shared-by' && currentClinician.can('app:worklist:clinician_filter')) {
+      const ownerToggle = new NoOwnerToggleView({ model: this.model });
+      this.listenTo(ownerToggle, 'click', () => this.model.set('noOwner', !this.model.get('noOwner')));
+      this.showChildView('ownerToggle', ownerToggle);
+    }
+
+    this.showSort();
+  },
+  showSort() {
+    const sortOptions = getSortOptions(this.model.getType());
+    const selected = sortOptions.get(this.model.getSort())
+      || sortOptions.get(this.model.defaults()[`${ this.model.getType() }SortId`]);
+    const sortSelect = new SortDroplist({
+      collection: sortOptions,
+      stateOptions: { selected },
+    });
+    sortSelect.listenTo(sortSelect.getState(), 'change:selected', (state, option) => {
+      this.model.setSort(option.id);
+    });
+    this.showChildView('sort', sortSelect);
+  },
+});
+
 export {
   LayoutView,
   ListTitleView,
@@ -388,8 +427,4 @@ export {
   ListUpdatingView,
   ListView,
   SidebarControlsView,
-  SortDroplist,
-  TypeToggleView,
-  i18n,
-  NoOwnerToggleView,
 };

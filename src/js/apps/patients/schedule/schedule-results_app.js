@@ -3,7 +3,6 @@ import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 import intl, { renderTemplate } from 'js/i18n';
-import createLatestRequest from 'js/utils/latest-request';
 
 import App from 'js/base/app';
 
@@ -17,18 +16,33 @@ import { LoadingView } from 'js/regions/preload_region';
 import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 
 export default App.extend({
-  onBeforeStart(app, { filtersState }) {
-    this.releaseRun();
+  viewEvents: {
+    'before:destroy': 'onBeforeDestroyView',
+    'click:select-all': 'onSelectAll',
+    'filtered': 'onFilter',
+    'change:canEdit': 'onChangeCanEdit',
+    'click:patient': 'selectPatient',
+    'retry': 'refreshList',
+  },
+  onBeforeStart(app, { filtersState } = {}) {
+    if (!this.getView()) this.showResults(filtersState);
+
+    this.stopBulkEdit();
+    this.selection.releaseCollections();
+    this.getView().showSelectAll(this.selection.getControlState());
+    this.getView().getRegion('count').empty();
+    this.showListLoading();
+  },
+  prepareStart(options, { signal }) {
+    return this.loadResults({ signal });
+  },
+  onStart(app, options, collection) {
+    this.showCollection(collection);
+  },
+  showResults(filtersState) {
     this.filtersState = filtersState;
     this.run = {};
-    const run = this.run;
     const view = this.setView(new ResultsView({ SelectAllView }));
-    this.listenTo(view, {
-      'before:destroy': () => {
-        if (this.run === run) this.releaseRun(view);
-      },
-      'click:select-all': () => this.selection.toggleAll(),
-    });
     this.selection = new ListSelection({ state: this.getState() });
     this.listenTo(this.selection, 'filter', (collection, filteredCollection) => {
       view.showCount({ collection, filteredCollection, isFlowList: this.getState().getType() === 'flows' });
@@ -36,46 +50,36 @@ export default App.extend({
     this.listenTo(this.selection, 'change', selected => {
       view.showSelectAll(this.selection.getControlState());
       if (selected.length) this.showBulkEdit();
-      else this.stopBulkEdit().catch(addError);
-    });
-    this.requests = createLatestRequest({
-      load: async(input, { signal }) => {
-        await this.stopBulkEdit();
-        signal.throwIfAborted();
-        this.selection.releaseCollections();
-        view.showSelectAll(this.selection.getControlState());
-        this.getView().getRegion('count').empty();
-        this.showListLoading();
-        return this.loadResults({ signal });
-      },
-      commit: collection => this.showCollection(collection),
-      fail: error => this.handleRefreshError(error),
+      else this.stopBulkEdit();
     });
     view.showSelectAll(this.selection.getControlState());
-    this.showListLoading();
     this.showView();
   },
-  onStart() {
-    this.refreshList().catch(addError);
+  onBeforeDestroyView() {
+    this.releaseRun();
+    this.stop();
+  },
+  onSelectAll() {
+    this.selection.toggleAll();
+  },
+  onFilter(models) {
+    this.selection.filter(models);
+  },
+  onChangeCanEdit() {
+    this.selection.updateEditableCollection();
+  },
+  selectPatient(patient, triggerView) {
+    this.patientSidebarTrigger = triggerView;
+    this.triggerMethod('click:patient', patient);
   },
   onStop() {
-    this.releaseRun();
     this.patientSidebarPatientId = null;
   },
-  onBeforeDestroy() {
-    this.releaseRun();
-  },
-  releaseRun(view = this.getView()) {
-    this.requests?.dispose();
-    if (view) {
-      this.stopListening(view);
-      const listView = view.getChildView('list');
-      if (listView) this.stopListening(listView);
-    }
+  releaseRun() {
     this.run = null;
     this.patientSidebarTrigger = null;
-    if (this.selection) this.stopListening(this.selection);
-    this.selection?.destroy();
+    this.stopListening(this.selection);
+    this.selection.destroy();
     this.selection = null;
   },
   async loadResults({ signal }) {
@@ -91,9 +95,10 @@ export default App.extend({
     }
   },
   refreshList() {
-    if (!this.isRunning() || !this.run) return Promise.resolve(false);
-
-    return this.requests.run();
+    return this.restart().catch(error => {
+      this.handleRefreshError(error);
+      return false;
+    });
   },
   showCollection(collection) {
     this.getState().setWorklist(collection.getMeta('worklist'));
@@ -104,15 +109,6 @@ export default App.extend({
       editableCollection: this.selection.editableCollection,
       selectedPatientId: this.patientSidebarPatientId,
       state: this.getState(),
-    });
-    this.listenTo(view, {
-      'destroy': () => this.stopListening(view),
-      'filtered': models => this.selection.filter(models),
-      'change:canEdit': () => this.selection.updateEditableCollection(),
-      'click:patient': (patient, triggerView) => {
-        this.patientSidebarTrigger = triggerView;
-        this.triggerMethod('click:patient', patient);
-      },
     });
     this.getView().showChildView('list', view);
   },
@@ -140,17 +136,13 @@ export default App.extend({
       && this.getState().get(`${ context.type }Selected`) === context.selection;
   },
   stopBulkEdit() {
-    return this.getChildApp('bulkEditActions')?.stop() || Promise.resolve();
+    this.getChildApp('bulkEditActions')?.stop();
   },
   showListLoading() {
     this.getView().showChildView('list', new LoadingView({ variant: 'generic' }));
   },
   handleRefreshError(error) {
     const view = new ListErrorView();
-    this.listenTo(view, {
-      'destroy': () => this.stopListening(view),
-      'retry': this.refreshList,
-    });
     this.getView().showChildView('list', view);
     addError(error);
   },

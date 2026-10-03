@@ -19,13 +19,14 @@ export default SubRouterApp.extend({
     'clinician': 'showClinicianSidebar',
     'clinicians:all': 'hideCliniciansSidebar',
   },
+  viewEvents: {
+    'click:addClinician': 'showAddModal',
+  },
   onBeforeStart() {
     const view = this.setView(new LayoutView());
 
     view.render();
     view.getRegion('list').startPreloader({ variant: 'generic' });
-
-    this.listenTo(view, 'click:addClinician', this.showAddModal);
 
     this.showSearchView();
     this.showView();

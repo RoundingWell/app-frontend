@@ -1,9 +1,9 @@
-import { size, extend } from 'underscore';
+import { size } from 'underscore';
 import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
-import { SidebarMixin } from 'js/services/sidebar';
+import { LayoutView } from 'js/services/sidebar/sidebar_views';
 
 import {
   SidebarView,
@@ -13,11 +13,15 @@ import {
   UploadsEnabledView,
 } from 'js/apps/programs/sidebar/action/action-sidebar_views';
 
-export default App.extend(extend({
+export default App.extend({
+  viewEvents: {
+    'close': 'stop',
+  },
   prepareStart(options, { signal }) {
     return Radio.request('entities', 'fetch:tags:collection', { signal });
   },
   onBeforeStart(app, { action }) {
+    this.setView(new LayoutView());
     this.action = action;
 
     this.action.trigger('editing', true);
@@ -44,6 +48,7 @@ export default App.extend(extend({
     });
 
     this.showUploadsEnabled();
+    this.showView();
   },
   showHeading() {
     this.getView().showChildView('heading', new HeadingView());
@@ -75,7 +80,7 @@ export default App.extend(extend({
       this.action.disableAttachmentUploads();
     });
 
-    this.showContentView('allowUploads', uploadsEnabledView);
+    this.getView().getChildView('content').showChildView('allowUploads', uploadsEnabledView);
   },
   onSave({ model }) {
     if (model.isNew()) {
@@ -104,12 +109,9 @@ export default App.extend(extend({
         Radio.request('alert', 'show:apiError', responseData);
       });
   },
-  onClose() {
-    this.stop();
-  },
   onStop() {
     this.stopListening(this.action);
     this.action.trigger('editing', false);
     if (this.action && this.action.isNew()) this.action.destroy();
   },
-}, SidebarMixin));
+});

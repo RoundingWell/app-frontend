@@ -90,4 +90,16 @@ context('program all list', function() {
       .location('pathname')
       .should('contain', `/program/${ firstProgram.id }`);
   });
+
+  specify('shows an error when programs cannot load', function() {
+    cy
+      .intercept('GET', '/api/programs', { statusCode: 400, body: { errors: [] } })
+      .as('routeProgramsError')
+      .visit('/programs')
+      .wait('@routeProgramsError');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 400.');
+  });
 });

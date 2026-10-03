@@ -26,6 +26,12 @@ export default SubRouterApp.extend({
     patientSidebar: PatientSidebarApp,
   },
 
+  viewEvents: {
+    'change:sidebar-layout': 'onChangeSidebarLayout',
+    'click:sidebarButton': 'togglePatientSidebar',
+    'close:sidebar-drawer': 'closePatientSidebarDrawer',
+  },
+
   routeActions() {
     return {
       'patient:workflow': this.showWorkflow,
@@ -77,11 +83,6 @@ export default SubRouterApp.extend({
       layoutState: this.layoutState,
     });
 
-    this.listenTo(layout, {
-      'change:sidebar-layout': this.onChangeSidebarLayout,
-      'click:sidebarButton': this.togglePatientSidebar,
-      'close:sidebar-drawer': this.closePatientSidebarDrawer,
-    });
     this.setView(layout);
     layout.render();
 
@@ -254,8 +255,8 @@ export default SubRouterApp.extend({
     sidebar.start({
       patient: this.patient,
       region: this.getView().getRegion('sidebar'),
-    }).catch(async error => {
-      await sidebar.stop();
+    }).catch(error => {
+      sidebar.stop();
       handleErrors(error);
     });
   },

@@ -1,5 +1,5 @@
 import { v5 as uuid } from 'uuid';
-import { Radio, View } from 'marionette';
+import { Application, Radio, View } from 'marionette';
 import { RWELL_NS } from 'js/static';
 import DialerService from './dialer';
 
@@ -19,6 +19,8 @@ context('Dialer Service', function() {
   });
 
   afterEach(async function() {
+    Radio.stopReplying('settings', 'get');
+
     if (Radio.request.restore) {
       Radio.request.restore();
     }
@@ -27,6 +29,41 @@ context('Dialer Service', function() {
       await service.destroy();
       service = null;
     }
+  });
+
+  specify('does not create a provider for an unknown dialer setting', function() {
+    Radio.reply('settings', 'get', () => 'unknown');
+
+    cy.then(async() => {
+      await service.start();
+
+      expect(service.isRunning()).to.equal(true);
+      expect(service.hasChildApp('provider')).to.equal(false);
+    });
+  });
+
+  specify('delivers the latest queued call before and after stopping', function() {
+    const call = cy.stub();
+    const action = { id: 'action-1' };
+    const DialerApp = Application.extend({ call });
+
+    Radio.reply('settings', 'get', () => 'ringcentral');
+    cy.stub(service, 'loadProvider').resolves({ DialerApp });
+
+    cy.then(async() => {
+      service.call('15555550100', action);
+      service.call('15555550101', action);
+      await service.start();
+
+      expect(call).to.have.been.calledOnceWithExactly('15555550101', action);
+
+      service.stop();
+      service.call('15555550102', action);
+      await service.start();
+
+      expect(call).to.have.been.calledTwice;
+      expect(call.lastCall.args).to.deep.equal(['15555550102', action]);
+    });
   });
 
   specify('five9Call', function() {

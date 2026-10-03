@@ -1,6 +1,5 @@
 import { Radio } from 'marionette';
 
-import createLatestRequest from 'js/utils/latest-request';
 import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
@@ -8,43 +7,40 @@ import App from 'js/base/app';
 import { PanelView, LayoutView, HeadingView, MenuView, CustomFiltersLoadingView, CustomFiltersView, StatesFiltersView, FlowStatesFiltersView } from 'js/apps/patients/shared/list-filters/list-filters_views';
 
 const ListFiltersPanelApp = App.extend({
-  onBeforeStart(app, options) {
-    const view = this.setView(new PanelView({
-      isDrawer: options.isDrawer,
-      model: options.layoutState,
-    }));
-
-    view.render();
-    view.showChildView('content', new LayoutView());
+  viewEvents: {
+    'before:destroy': 'onBeforeDestroyView',
   },
-  onStart(app, { filtersState }) {
-    this.customFiltersRequests?.dispose();
-    this.stopListening(this.filtersState);
+  onBeforeStart(app, options) {
+    if (!this.getView()) this.showPanel(options);
+
+    const currentView = this.getView().getChildView('content').getChildView('customFilters');
+    if (this.isCustomFiltersLoaded) currentView.setLoading(true);
+  },
+  prepareStart(options, { signal }) {
+    return Radio.request('entities', 'fetch:filters:customFilters', {
+      entityType: this.filtersState.get('listType'),
+      worklist: this.filtersState.get('worklist'),
+      signal,
+    });
+  },
+  onStart(app, options, result) {
+    if (result) this.showCustomFilters(result);
+  },
+  showPanel({ filtersState, layoutState, isDrawer, ControlsView, controlsOptions }) {
     this.filtersState = filtersState;
-    this.customFiltersRequests = createLatestRequest({
-      load: (options, { signal }) => Radio.request('entities', 'fetch:filters:customFilters', { ...options, signal }),
-      commit: result => {
-        if (result) this.showCustomFilters(result);
-      },
-      fail: error => {
-        this.showCustomFilters({ filters: this.filters, hasLoadError: true });
-        addError(error);
-      },
-    });
-    const requests = this.customFiltersRequests;
-    const view = this.getView();
-    this.listenTo(view, 'before:destroy', () => {
-      requests.dispose();
-      this.stopListening(filtersState);
-      this.stopListening(view);
-    });
     this.filters = Radio.request('entities', 'filters:customFilters');
     this.isCustomFiltersLoaded = false;
+
+    const view = this.setView(new PanelView({
+      isDrawer,
+      model: layoutState,
+    }));
+    view.showChildView('content', new LayoutView());
+    if (ControlsView) view.showChildView('controls', new ControlsView(controlsOptions));
 
     this.showHeadingView();
     this.showMenu();
     this.showCustomFiltersLoadingView();
-    this.loadCustomFilters();
     this.showStatesFiltersView();
     this.showFlowStatesFiltersView();
     this.showView();
@@ -54,10 +50,12 @@ const ListFiltersPanelApp = App.extend({
         this.showFlowStatesFiltersView();
         this.loadCustomFilters();
       },
-      'change:worklist'() {
-        this.loadCustomFilters();
-      },
+      'change:worklist': this.loadCustomFilters,
     });
+  },
+  onBeforeDestroyView() {
+    this.stopListening(this.filtersState, 'change:listType change:worklist');
+    this.stop();
   },
   showHeadingView() {
     const headerView = new HeadingView({ model: this.filtersState });
@@ -79,13 +77,7 @@ const ListFiltersPanelApp = App.extend({
     this.showContentView('customFilters', loadingView);
   },
   loadCustomFilters() {
-    const currentView = this.getView().getChildView('content').getChildView('customFilters');
-    if (this.isCustomFiltersLoaded) currentView.setLoading(true);
-
-    return this.customFiltersRequests.run({
-      entityType: this.filtersState.get('listType'),
-      worklist: this.filtersState.get('worklist'),
-    });
+    return this.restart().catch(addError);
   },
   showCustomFilters({ filters, hasLoadError }) {
     filters.each(filter => {
@@ -101,13 +93,6 @@ const ListFiltersPanelApp = App.extend({
     const view = this.getView().getChildView('content').getChildView('customFilters');
     view.setLoadError(hasLoadError);
     view.setLoading(false);
-  },
-  onStop() {
-    this.customFiltersRequests?.dispose();
-    this.stopListening(this.filtersState, 'change:listType change:worklist');
-  },
-  onBeforeDestroy() {
-    this.customFiltersRequests?.dispose();
   },
   retryCustomFilters() {
     this.isCustomFiltersLoaded = false;

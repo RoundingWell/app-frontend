@@ -11,7 +11,7 @@ export function deferCoverageReport(on, config) {
         combineCoverage(sentCoverage) {
           const coverage = JSON.parse(sentCoverage);
           for (const path of Object.keys(coverage)) {
-            if (/(?:^|\/)src\/js\/(?:apps|entities-service|services)\//.test(path.replaceAll('\\', '/'))) {
+            if (/(?:^|\/)src\/js\/(?:apps|entities-service)\//.test(path.replaceAll('\\', '/'))) {
               delete coverage[path];
             }
           }

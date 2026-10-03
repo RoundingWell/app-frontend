@@ -744,5 +744,95 @@ context('program flow page', function() {
     cy
       .get('.sidebar')
       .should('exist');
+
+    cy.on('uncaught:exception', error => {
+      expect(error.message).to.contain('Failed to fetch');
+
+      return false;
+    });
+
+    cy
+      .intercept('GET', `/api/program-actions/${ testProgramFlowActions[0].id }`, {
+        statusCode: 410,
+        body: { errors: [] },
+      })
+      .as('routeActionError')
+      .reload()
+      .wait('@routeActionError');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .intercept('GET', `/api/program-actions/${ testProgramFlowActions[0].id }`, { forceNetworkError: true })
+      .as('routeActionNetworkError')
+      .reload()
+      .wait('@routeActionNetworkError');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .get('.program-flow__header')
+      .should('contain', 'Test Flow');
+
+    cy
+      .routeProgram()
+      .routeProgramActions()
+      .routeProgramFlows()
+      .intercept('GET', `/api/program-actions/${ testProgramFlowActions[0].id }`, {
+        delay: 2000,
+        body: { data: testProgramFlowActions[0], included: [] },
+      })
+      .as('pendingAction')
+      .reload();
+
+    cy
+      .get('@pendingAction.all')
+      .should('have.length', 1);
+
+    cy
+      .get('.program-page__context-trail')
+      .find('.js-program')
+      .click()
+      .wait('@routeProgramActions');
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
+  });
+
+  specify('leaves a flow while its initial data is loading', function() {
+    cy
+      .routePrograms()
+      .routeProgramByProgramFlow()
+      .routeProgramFlowActions()
+      .intercept('GET', `/api/program-flows/${ testProgramFlowId }`, {
+        delay: 2000,
+        body: { data: testProgramFlow, included: [] },
+      })
+      .as('pendingFlow')
+      .visit(`/program-flow/${ testProgramFlowId }`);
+
+    cy
+      .get('@pendingFlow.all')
+      .should('have.length', 1);
+
+    cy
+      .get('.app-nav__bottom')
+      .contains('Admin Tools')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Programs')
+      .click()
+      .wait('@routePrograms');
+
+    cy
+      .get('.card-list__item')
+      .should('be.visible');
   });
 });

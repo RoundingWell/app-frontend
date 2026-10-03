@@ -6,10 +6,6 @@ export default App.extend({
   constructor: function() {
     this._selectedChild = null;
     this._selectionIntent = null;
-    this._stoppingChild = null;
-    this.on('stop', () => {
-      this._selectedChild = null;
-    });
 
     App.apply(this, arguments);
   },
@@ -19,8 +15,7 @@ export default App.extend({
   },
 
   getCurrentSelection() {
-    // A child being retired cannot be reused by a new selection.
-    return this._stoppingChild ? null : this._selectedChild;
+    return this._selectedChild;
   },
 
   invalidateSelection() {
@@ -34,9 +29,9 @@ export default App.extend({
     const intent = {};
     this._selectionIntent = intent;
 
-    if (!reuse || this._stoppingChild) {
-      const stopped = await this._stopSelectedChild();
-      if (!stopped || this._selectionIntent !== intent) return;
+    if (!reuse) {
+      this._stopSelectedChild();
+      if (this._selectionIntent !== intent) return;
     }
 
     const selection = { app, appName, scope };
@@ -53,7 +48,7 @@ export default App.extend({
       if (!started) {
         // A superseding child restart may still own a live run. Retain it so
         // the next selection can stop it before activating another child.
-        if (!app.isRunning()) await this._cleanupSelectedChild(app);
+        if (!app.isRunning()) this._cleanupSelectedChild(app);
         return;
       }
 
@@ -62,15 +57,15 @@ export default App.extend({
       if (this._selectionIntent !== intent) return;
 
       // Failed preparation can leave owned descendants running. Clean those
-      // up before forgetting the selection; rejected cleanup retains it.
-      await this._cleanupSelectedChild(app);
+      // up before forgetting the selection; failed cleanup retains it.
+      this._cleanupSelectedChild(app);
       throw error;
     }
   },
 
-  async _cleanupSelectedChild(app) {
+  _cleanupSelectedChild(app) {
     try {
-      await this._stopSelectedChild();
+      this._stopSelectedChild();
     } catch(error) {
       // Cleanup is observable independently; it must not replace the original
       // activation failure or turn canceled activation into a failure.
@@ -84,21 +79,12 @@ export default App.extend({
   },
 
   _stopSelectedChild() {
-    if (this._stoppingChild) return this._stoppingChild;
     const selection = this._selectedChild;
-    if (!selection) return Promise.resolve(true);
+    if (!selection) return true;
 
-    const stopping = Promise.resolve().then(() => selection.app.stop())
-      .then(stopped => {
-        if (stopped && this._selectedChild === selection) this._selectedChild = null;
-        return stopped;
-      })
-      .finally(() => {
-        if (this._stoppingChild === stopping) this._stoppingChild = null;
-      });
-
-    this._stoppingChild = stopping;
-    return stopping;
+    selection.app.stop();
+    if (this._selectedChild === selection) this._selectedChild = null;
+    return true;
   },
 
   // Invalidate even for an already-stopped owner: Marionette intentionally
@@ -108,13 +94,10 @@ export default App.extend({
     return this._observeSelectionStop(App.prototype.stop.apply(this, arguments));
   },
 
-  _observeSelectionStop(operation) {
+  _observeSelectionStop(stopped) {
     // Already-stopped owners clean up descendants without emitting stop again.
-    // Preserve Marionette's shared operation promise and any newer selection.
-    operation.then(stopped => {
-      if (stopped && !this._selectionIntent) this._selectedChild = null;
-    }, () => {});
-    return operation;
+    if (stopped && !this._selectionIntent) this._selectedChild = null;
+    return stopped;
   },
 
   restart() {

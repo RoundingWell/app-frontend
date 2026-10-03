@@ -162,7 +162,7 @@ const PopRegionView = TopRegionView.extend({
   onWindowResize(popOptions) {
     const view = this.region.currentView;
 
-    if (view && view.Dom.hasEl(view.el, document.activeElement)) {
+    if (view.Dom.hasEl(view.el, document.activeElement)) {
       this.setLocation(popOptions);
       return;
     }

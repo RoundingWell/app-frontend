@@ -1,7 +1,5 @@
 import { Radio } from 'marionette';
 
-import { addError } from 'js/datadog';
-
 import SubRouterApp from 'js/base/subrouterapp';
 
 import { PROGRAM_BEHAVIORS } from 'js/static';
@@ -38,7 +36,7 @@ export default SubRouterApp.extend({
   },
 
   onBeforeStartRoute() {
-    this.getChildApp('action').stop().catch(addError);
+    this.getChildApp('action').stop();
   },
 
   onBeforeStart() {
@@ -52,9 +50,7 @@ export default SubRouterApp.extend({
   onStart(app, options, program) {
     this.program = program;
 
-    const view = this.setView(new LayoutView({ model: program }));
-
-    view.render();
+    this.setView(new LayoutView({ model: program }));
 
     this.showSidebar();
 
@@ -64,32 +60,22 @@ export default SubRouterApp.extend({
   },
 
   showWorkflows() {
-    const routeContext = this.getCurrentRoute();
-
     return this.startCurrent('workflows', {
       region: this.getView().getRegion('content'),
     }).catch(error => {
-      if (this.getCurrentRoute() !== routeContext) return;
-
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
     });
   },
 
-  onRouteError(error, { event }) {
-    if (event === 'program:action' || event === 'program:action:new') {
-      this.getChildApp('action').handleStartFailure();
-      return this.showWorkflows();
-    }
-
-    Radio.trigger('event-router', 'unknownError', error?.response?.status);
+  onRouteError() {
+    this.getChildApp('action').handleStartFailure();
+    return this.showWorkflows();
   },
 
   async startProgramAction(programId, actionId) {
     const actionApp = this.getChildApp('action');
     const routeContext = this.getCurrentRoute();
-    const stopped = await actionApp.stop();
-
-    if (!stopped || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
+    actionApp.stop();
 
     const started = await actionApp.start({ actionId, programId });
 

@@ -10,13 +10,15 @@ export default App.extend({
   childApps: {
     programSidebar: ProgramSidebarApp,
   },
+  viewEvents: {
+    'click:add': 'onClickAdd',
+  },
   onBeforeStart() {
     const view = this.setView(new LayoutView());
 
     view.render();
     view.getRegion('list').startPreloader({ variant: 'generic' });
 
-    this.listenTo(view, 'click:add', this.onClickAdd);
     this.showView();
   },
   prepareStart(options, { signal }) {
@@ -26,12 +28,10 @@ export default App.extend({
     this.programs = collection;
     this.getView().showChildView('list', new ListView({ collection }));
   },
-  async onClickAdd() {
+  onClickAdd() {
     const programSidebar = this.getChildApp('programSidebar');
     const program = Radio.request('entities', 'programs:model', {});
-    const started = await Radio.request('sidebar', 'start', programSidebar, { program });
-
-    if (!started) return;
+    Radio.request('sidebar', 'start', programSidebar, { program });
 
     this.listenToOnce(programSidebar, 'stop', () => {
       if (!program.isNew()) this.programs.add(program);

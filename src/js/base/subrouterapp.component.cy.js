@@ -247,30 +247,14 @@ context('SubRouterApp', function() {
       expect(app.calls).to.deep.equal([['workflow', 'p1'], ['workflow', 'p1']]);
     });
 
-    specify('dispatches a route after a pending stop is superseded', async function() {
-      const PendingApp = SyncApp.extend({
-        prepareStop() {
-          return this.stopReadiness.promise;
-        },
-      });
-      app = new PendingApp();
-      app.stopReadiness = deferred();
+    specify('dispatches a route after synchronous stop', async function() {
+      app = new SyncApp();
       app.setCurrentRoute(workflow);
       await app.start();
-
-      const stopping = app.stop();
-      const routing = app.startRoute(action);
-
-      expect(app.calls).to.deep.equal([['workflow', 'p1']]);
-
-      app.stopReadiness.resolve();
-      expect(await stopping).to.equal(false);
-      await routing;
-
-      expect(app.calls).to.deep.equal([
-        ['workflow', 'p1'],
-        ['action', 'p1', 'a1'],
-      ]);
+      expect(app.stop()).to.equal(true);
+      expect(app.isRunning()).to.be.false;
+      await app.startRoute(action);
+      expect(app.calls).to.deep.equal([['workflow', 'p1'], ['action', 'p1', 'a1']]);
     });
 
     specify('does not dispatch a route overtaken by a later stop', async function() {
@@ -367,12 +351,7 @@ context('SubRouterApp', function() {
     });
 
     specify('serializes overlapping child replacements', async function() {
-      const stopReadiness = deferred();
-      const current = new (App.extend({
-        prepareStop() {
-          return stopReadiness.promise;
-        },
-      }))();
+      const current = new App();
       const first = new App();
       const latest = new App();
 
@@ -388,8 +367,6 @@ context('SubRouterApp', function() {
 
       expect(first.isRunning()).to.be.false;
       expect(latest.isRunning()).to.be.false;
-
-      stopReadiness.resolve();
 
       expect(await firstStart).to.equal(undefined);
       expect(await latestStart).to.equal(latest);

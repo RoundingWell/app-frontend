@@ -170,7 +170,7 @@ context('clinicians list', function() {
       .should('have.class', 'is-selected');
   });
 
-  specify('empty clinicians list', function() {
+  specify('empty and failed clinicians list', function() {
     cy
       .routeClinicians(fx => {
         fx.data = [];
@@ -183,6 +183,19 @@ context('clinicians list', function() {
     cy
       .get('.card-list__empty')
       .contains('No Clinicians');
+
+    cy
+      .intercept('GET', '/api/clinicians', {
+        statusCode: 422,
+        body: { errors: [] },
+      })
+      .as('routeCliniciansError')
+      .visit('/clinicians')
+      .wait('@routeCliniciansError');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 422.');
   });
 
   specify('find in list', function() {
