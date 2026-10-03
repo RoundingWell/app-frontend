@@ -3,14 +3,13 @@ import dayjs from 'dayjs';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
-import createLatestRequest from 'js/utils/latest-request';
 
 import App from 'js/base/app';
 
 import { InteractionsPageView } from './interactions_views';
 
 const GROUP_CHANNELS = {
-  messages: ['sms', 'email', 'mail', 'fax'],
+  messages: ['sms', 'email', 'mail', 'fax', 'portal'],
   calls: ['voice', 'voicemail', 'video'],
   appointments: ['appointment'],
   visits: ['visit'],
@@ -19,60 +18,64 @@ const GROUP_CHANNELS = {
 const PAGE_SIZE = 25;
 
 export default App.extend({
-  onBeforeStart(app, { patient, interactionId }) {
-    this.releaseRun();
-    this.patient = patient;
-    this.interactionId = interactionId;
-    this.selectedGroups = keys(GROUP_CHANNELS);
-    const view = this.setView(new InteractionsPageView({
-      model: patient,
-      interactionId,
-      selectedGroups: this.selectedGroups,
-    })).render();
-
-    this.listenTo(view, {
-      'before:destroy': () => this.releaseRun(view),
-      'change:filter': this.toggleFilter,
-      'load:edge': this.loadEdge,
-      'retry:paging': this.retryRequest,
-      'date:selected': this.jumpToDate,
-      'beginning:selected': this.jumpToBeginning,
-    });
-    this.requests = createLatestRequest({
-      load: (input, context) => this.loadInteractions(input, context),
-      commit: (result, input) => this.showInteractions(result, input),
-      fail: (error, input) => {
-        this.isLoading = false;
-        if (input.kind === 'replace') {
-          this.collection = null;
-          this.hasOlder = false;
-          this.hasNewer = false;
-          view.setPaging({ hasOlder: false, hasNewer: false, loading: false });
-          view.showError(error);
-          return;
-        }
-        view.showPagingError();
-      },
-    });
-    view.showLoading();
-    this.showView();
+  viewEvents: {
+    'before:destroy': 'onBeforeDestroyView',
+    'change:filter': 'toggleFilter',
+    'load:edge': 'loadEdge',
+    'retry:paging': 'retryRequest',
+    'date:selected': 'jumpToDate',
+    'beginning:selected': 'jumpToBeginning',
   },
-  prepareStart(options, { signal }) {
-    return this.requests.run(this.getRequest('replace'), { signal });
+  onBeforeStart(app, { patient, interactionId, kind = 'replace', date }) {
+    if (!this.getView()) {
+      this.patient = patient;
+      this.interactionId = interactionId;
+      this.selectedGroups = keys(GROUP_CHANNELS);
+      this.setView(new InteractionsPageView({
+        model: patient,
+        interactionId,
+        selectedGroups: this.selectedGroups,
+      })).render();
+      this.getView().showLoading();
+      this.showView();
+    }
+    this.isLoading = true;
+    this.lastRequest = { kind, date };
+    if (kind === 'replace') {
+      this.hasOlder = false;
+      this.hasNewer = false;
+    }
+    this.getView().setPaging({ hasOlder: this.hasOlder, hasNewer: this.hasNewer, loading: true });
   },
-  onStart() {
+  async prepareStart({ kind = 'replace', date }, { signal }) {
+    const input = this.getRequest(kind, date);
+    const result = await this.loadInteractions(input, { signal });
+    signal.throwIfAborted();
+    return { result, input };
+  },
+  onStart(app, options, { result, input }) {
+    this.showInteractions(result, input);
     this.triggerMethod('context:change', { page: 'interactions' });
   },
+  handleStartFailure({ kind = 'replace' }, error) {
+    this.isLoading = false;
+    const view = this.getView();
+    if (kind === 'replace') {
+      this.collection = null;
+      this.hasOlder = false;
+      this.hasNewer = false;
+      view.setPaging({ hasOlder: false, hasNewer: false, loading: false });
+      view.showError();
+    } else {
+      view.showPagingError();
+    }
+    addError(error);
+    return false;
+  },
+  onBeforeDestroyView() {
+    this.stop();
+  },
   onStop() {
-    this.releaseRun();
-  },
-  onBeforeDestroy() {
-    this.releaseRun();
-  },
-  releaseRun(view = this.getView()) {
-    this.requests?.dispose();
-    if (view) this.stopListening(view);
-    this.requests = null;
     this.collection = null;
     this.hasOlder = false;
     this.hasNewer = false;
@@ -91,30 +94,27 @@ export default App.extend({
     };
   },
   toggleFilter(group) {
-    if (!this.requests) return;
     if (contains(this.selectedGroups, group)) this.selectedGroups = without(this.selectedGroups, group);
     else this.selectedGroups = [...this.selectedGroups, group];
     this.getView().setSelectedGroups(this.selectedGroups);
     this.requestInteractions('replace');
   },
   requestInteractions(kind, date) {
-    this.isLoading = true;
-    this.getView().setPaging({ loading: true });
-    this.lastRequest = this.getRequest(kind, date);
-    this.requests.run(this.lastRequest).catch(addError);
+    const options = { kind, date };
+    return this.restart(options).catch(error => this.handleStartFailure(options, error));
   },
   retryRequest() {
-    if (!this.requests || this.isLoading || !this.lastRequest) return;
+    if (this.isLoading || !this.lastRequest) return;
     this.requestInteractions(this.lastRequest.kind, this.lastRequest.date);
   },
   loadEdge(direction) {
-    if (!this.requests || this.isLoading) return;
+    if (this.isLoading) return;
     if (direction === 'older' && !this.hasOlder) return;
     if (direction === 'newer' && !this.hasNewer) return;
     this.requestInteractions(direction);
   },
   jumpToDate(date) {
-    if (!this.requests || this.isLoading || !this.collection.length) return;
+    if (this.isLoading || !this.collection.length) return;
     this.requestInteractions('date', date);
   },
   jumpToBeginning() {

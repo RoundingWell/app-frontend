@@ -159,11 +159,12 @@ export default App.extend({
     this.showForm();
   },
   showInteractions() {
-    this.getChildApp('interactions').start({
+    const app = this.getChildApp('interactions');
+    app.start({
       region: this.getView().getRegion('interactions'),
       patient: this.patient,
       actionId: this.action.id,
-    }).catch(addError);
+    }).catch(error => app.handleStartFailure(error));
   },
   showAction() {
     const hasDialer = !!Radio.request('settings', 'get', 'dialer');

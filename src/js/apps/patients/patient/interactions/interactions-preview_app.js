@@ -1,36 +1,36 @@
 import { Radio } from 'marionette';
 
-import createLatestRequest from 'js/utils/latest-request';
+import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
 import { InteractionsPreviewView } from './interactions_views';
 
 export default App.extend({
+  viewEvents: {
+    'before:destroy': 'onBeforeDestroyView',
+  },
   onBeforeStart(app, { patient, actionId }) {
-    this.releaseRun();
-    const view = this.setView(new InteractionsPreviewView({ model: patient, actionId })).render();
-    this.listenTo(view, 'before:destroy', () => this.releaseRun(view));
-    this.requests = createLatestRequest({
-      load: (input, options) => Radio.request('entities', 'fetch:interactions:collection:byPatient', input, options),
-      commit: collection => view.showInteractions(collection),
-      fail: () => view.showError(),
-    });
-    view.showLoading();
-    this.showView();
+    if (!this.getView()) {
+      this.setView(new InteractionsPreviewView({ model: patient, actionId })).render();
+      this.showView();
+    }
+    this.getView().showLoading();
   },
   prepareStart({ patient, actionId }, { signal }) {
-    return this.requests.run({ patientId: patient.id, actionId, limit: 3 }, { signal });
+    return Radio.request('entities', 'fetch:interactions:collection:byPatient', {
+      patientId: patient.id, actionId, limit: 3,
+    }, { signal });
   },
-  onStop() {
-    this.releaseRun();
+  onStart(app, options, collection) {
+    this.getView().showInteractions(collection);
   },
-  onBeforeDestroy() {
-    this.releaseRun();
+  handleStartFailure(error) {
+    this.getView().showError();
+    addError(error);
+    return false;
   },
-  releaseRun(view = this.getView()) {
-    this.requests?.dispose();
-    if (view) this.stopListening(view);
-    this.requests = null;
+  onBeforeDestroyView() {
+    this.stop();
   },
 });

@@ -1,8 +1,6 @@
 import hbs from 'handlebars-inline-precompile';
 import { View } from 'marionette';
 
-import { addError } from 'js/datadog';
-
 import InteractionsPreviewApp from 'js/apps/patients/patient/interactions/interactions-preview_app';
 
 export default View.extend({
@@ -12,12 +10,13 @@ export default View.extend({
     this.previewApp = new InteractionsPreviewApp();
   },
   onRender() {
-    this.previewApp.restart({
+    this.previewApp.stop();
+    this.previewApp.start({
       patient: this.model,
       region: this.getRegion('preview'),
-    }).catch(addError);
+    }).catch(error => this.previewApp.handleStartFailure(error));
   },
   onBeforeDestroy() {
-    this.previewApp.destroy().catch(addError);
+    this.previewApp.destroy();
   },
 });

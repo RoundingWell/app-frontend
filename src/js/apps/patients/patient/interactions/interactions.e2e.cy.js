@@ -375,7 +375,10 @@ context('patient interactions', function() {
       .should('exist');
     cy.intercept('GET', '/api/patients/*/interactions*', req => {
       const channels = new URL(req.url).searchParams.get('filter[channel]');
-      if (!channels) return req.continue();
+      if (!channels) {
+        req.reply({ body: { data: [interaction, sameDay, previousDay], included: [action] } });
+        return;
+      }
       req.alias = channels.includes('voice') ? 'callInteractions' : 'filteredInteractions';
       req.reply({ body: { data: channels.includes('voice') ? [interaction] : [], included: [action] } });
     });
@@ -416,5 +419,94 @@ context('patient interactions', function() {
       .get('.patient-interactions__item')
       .should('have.length', 1)
       .and('contain', 'Left a message asking the patient to call back.');
+
+    const portalInteraction = getInteraction({
+      channel: 'portal',
+      metadata: { message: 'Your care plan is available in the patient portal.' },
+    });
+    let releaseFiltered;
+    let filteredStarted = false;
+    const filteredResponse = new Cypress.Promise(resolve => {
+      releaseFiltered = resolve;
+    });
+    cy.intercept('GET', '/api/patients/*/interactions*', req => {
+      const channels = new URL(req.url).searchParams.get('filter[channel]');
+      if (channels?.includes('voice')) {
+        filteredStarted = true;
+        return filteredResponse.then(() => {
+          req.reply({ body: { data: [interaction], included: [action] } });
+        });
+      }
+      req.alias = 'portalInteractions';
+      req.reply({ body: { data: [portalInteraction] } });
+    });
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click();
+    cy
+      .get('.js-paging-loading')
+      .should('be.visible')
+      .should(() => {
+        expect(filteredStarted).to.equal(true);
+      });
+    cy
+      .get('.patient-interactions__item')
+      .should('contain', 'Left a message asking the patient to call back.');
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+    cy
+      .wait('@portalInteractions')
+      .its('request.url')
+      .then(url => {
+        expect(new URL(url).searchParams.get('filter[channel]')).to.equal('sms,email,mail,fax,portal');
+      });
+    cy
+      .focused()
+      .should('have.attr', 'data-filter', 'calls');
+    cy
+      .get('.patient-interactions__item')
+      .should('have.length', 1)
+      .and('contain', 'Your care plan is available in the patient portal.')
+      .then(releaseFiltered);
+    cy
+      .get('.patient-interactions__item')
+      .should('have.length', 1)
+      .and('contain', 'Your care plan is available in the patient portal.');
+
+    let releaseLeaving;
+    let leavingStarted = false;
+    const leavingResponse = new Cypress.Promise(resolve => {
+      releaseLeaving = resolve;
+    });
+    cy.intercept('GET', '/api/patients/*/interactions*', req => {
+      if (new URL(req.url).searchParams.get('page[limit]') === '3') {
+        req.reply({ body: { data: [interaction], included: [action] } });
+        return;
+      }
+      leavingStarted = true;
+      return leavingResponse.then(() => {
+        req.reply({ body: { data: [interaction], included: [action] } });
+      });
+    });
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+    cy
+      .get('.js-paging-loading')
+      .should('be.visible')
+      .should(() => {
+        expect(leavingStarted).to.equal(true);
+      });
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+    cy
+      .get('.patient-pages .js-interactions')
+      .should('be.visible')
+      .then(releaseLeaving);
+    cy
+      .location('pathname')
+      .should('include', `/patient/${ patient.id }/workflow`);
   });
 });
