@@ -4,10 +4,6 @@ import { View, CollectionView } from 'marionette';
 import 'scss/modules/loader.scss';
 import 'scss/modules/skeleton.scss';
 
-import { alphaSort } from 'js/utils/sorting';
-
-import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
-
 import './patient-flow.scss';
 
 const ProgramStartedTemplate = hbs`
@@ -116,16 +112,7 @@ const ActivityView = View.extend({
 });
 
 const ActivitiesView = CollectionView.extend({
-  childView(model) {
-    return model.type === 'interactions' ? InteractionItemView : ActivityView;
-  },
-  childViewOptions() {
-    return { tagName: 'div', activity: true, patientId: this.getOption('patientId') };
-  },
-  viewComparator(viewA, viewB) {
-    const date = model => model.get('occurred_at') || model.get('expected_at') || model.get('date');
-    return alphaSort('asc', date(viewA.model), date(viewB.model));
-  },
+  childView: ActivityView,
 });
 
 export { ActivitiesView, FlowActivityLoadingView };

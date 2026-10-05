@@ -241,7 +241,7 @@ context('patient interactions', function() {
       .contains('.patient-interactions__date-button', 'MAY 4')
       .should('be.visible')
       .then($date => {
-        cy.get('.patient-pages-controls').then($controls => {
+        cy.get('.patient-interactions__controls').then($controls => {
           expect($date[0].getBoundingClientRect().top).to.be.at.least($controls[0].getBoundingClientRect().bottom);
         });
       });
@@ -261,7 +261,7 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Follow-up message 79')
       .should('be.visible');
     cy
-      .get('.patient-pages-controls')
+      .get('.patient-interactions__controls')
       .should('be.visible');
     cy
       .get('.js-filter')
@@ -277,7 +277,7 @@ context('patient interactions', function() {
       .should('be.visible');
   });
 
-  specify('opens from workflow and a configured sidebar, then links through an action', function() {
+  specify('opens a direct interaction URL, filters, and links to its action', function() {
     const patient = getPatient();
     const action = getAction({
       attributes: { name: 'Call patient' },
@@ -311,38 +311,8 @@ context('patient interactions', function() {
       .routePatientActions(fx => ({ ...fx, data: [action] }))
       .routeAction(fx => ({ ...fx, data: action }))
       .routePatientInteractions({ data: [interaction, sameDay, previousDay], included: [action] })
-      .routeSettings('sidebar', ['interactions'])
-      .routePanels(fx => ({
-        ...fx,
-        data: [{
-          id: 'interactions',
-          type: 'panels',
-          attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] },
-        }],
-      }))
-      .routeWidgets(fx => ({
-        ...fx,
-        data: [{
-          id: 'interactions',
-          type: 'widgets',
-          attributes: { category: 'interactions', slug: 'interactions', definition: {} },
-        }],
-      }))
-      .visit(`/patient/${ patient.id }/workflow`);
+      .visit(`/patient/${ patient.id }/interactions/${ interaction.id }`);
 
-    cy
-      .wait('@routePatientInteractions')
-      .its('request.url')
-      .then(url => {
-        expect(new URL(url).searchParams.get('page[limit]')).to.equal('3');
-      });
-    cy
-      .get('.patient-interactions-preview__link')
-      .first()
-      .should('contain', 'Outbound Call')
-      .and('contain', 'Left Voicemail')
-      .and('contain', 'Alex Morgan')
-      .click();
     cy
       .wait('@routePatientInteractions')
       .its('request.url')
@@ -357,22 +327,6 @@ context('patient interactions', function() {
       .should('contain', 'Outbound Call')
       .and('contain', 'Left Voicemail')
       .and('contain', 'Left a message asking the patient to call back.');
-    let timelineElement;
-    let navigationRequests = 0;
-    cy.intercept('GET', '/api/patients/*/interactions*', req => {
-      if (new URL(req.url).searchParams.has('page[at]')) navigationRequests += 1;
-    });
-    cy.get('.patient-interactions').then($el => {
-      timelineElement = $el[0];
-    });
-    cy.get('.patient-interactions-preview__link').eq(1).click();
-    cy.get('.patient-interactions__item.is-selected').should('contain', 'I can come in tomorrow morning.');
-    cy.get('.patient-interactions').should($el => {
-      expect($el[0]).to.equal(timelineElement);
-      expect(navigationRequests).to.equal(0);
-    });
-    cy.get('.patient-interactions-preview__link').first().click();
-    cy.get('.patient-interactions__item.is-selected').should('contain', 'Left a message asking the patient to call back.');
     cy
       .contains('.patient-interactions__item', 'I can come in tomorrow morning.')
       .should('contain', patient.attributes.first_name);
@@ -438,31 +392,8 @@ context('patient interactions', function() {
     cy
       .location('pathname')
       .should('include', `/patient/${ patient.id }/action/${ action.id }`);
-    cy
-      .wait('@routePatientInteractions')
-      .its('request.url')
-      .then(url => {
-        expect(new URL(url).searchParams.get('filter[action]')).to.equal(action.id);
-      });
-    cy
-      .get('.patient-action__activity .js-interaction')
-      .first()
-      .click();
-    cy
-      .location('pathname')
-      .should('include', `/patient/${ patient.id }/interactions/${ interaction.id }`);
-    cy
-      .get('.patient-pages .js-workflow')
-      .click();
-    cy
-      .get('.patient-pages .js-interactions')
-      .click();
-    cy
-      .location('pathname')
-      .should('include', `/patient/${ patient.id }/interactions`);
-    cy
-      .get('.patient-interactions__item')
-      .should('exist');
+    cy.visit(`/patient/${ patient.id }/interactions`);
+
     cy.intercept('GET', '/api/patients/*/interactions*', req => {
       const channels = new URL(req.url).searchParams.get('filter[channel]');
       if (!channels) {
@@ -574,10 +505,6 @@ context('patient interactions', function() {
       releaseLeaving = resolve;
     });
     cy.intercept('GET', '/api/patients/*/interactions*', req => {
-      if (new URL(req.url).searchParams.get('page[limit]') === '3') {
-        req.reply({ body: { data: [interaction], included: [action] } });
-        return;
-      }
       leavingStarted = true;
       return leavingResponse.then(() => {
         req.reply({ body: { data: [interaction], included: [action] } });
@@ -592,11 +519,9 @@ context('patient interactions', function() {
       .should(() => {
         expect(leavingStarted).to.equal(true);
       });
+    cy.visit(`/patient/${ patient.id }/workflow`);
     cy
-      .get('.patient-pages .js-workflow')
-      .click();
-    cy
-      .get('.patient-pages .js-interactions')
+      .get('.patient__content')
       .should('be.visible')
       .then(releaseLeaving);
     cy

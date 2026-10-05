@@ -14,17 +14,16 @@ function getWorkName(model) {
 const InteractionItemView = View.extend({
   tagName: 'li',
   className() {
-    const activityClass = this.getOption('activity') ? ' patient-interactions__item--activity' : '';
-    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }${ activityClass }`;
+    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
   },
   template: hbs`
     <span class="patient-interactions__marker" aria-hidden="true">{{far icon}}</span>
     <div class="patient-interactions__activity-body">
       <div class="patient-interactions__activity-line">
-        <span class="patient-interactions__activity-description">{{#if subject}}<strong>{{ subject }}</strong> {{/if}}{{#if actor}}<strong>{{ actor }}</strong> {{/if}}<span class="patient-interactions__activity-label">{{ activityLabel }}</span> <span class="patient-interactions__time">{{#if viaLabel}}{{ viaLabel }}{{#if displayTime}} · {{/if}}{{/if}}<time datetime="{{ timestamp }}">{{#if activity}}{{formatDateTime timestamp "AT_TIME"}}{{else}}{{ displayTime }}{{/if}}</time></span></span>
-        {{#if activity}}<button class="patient-interactions__action js-interaction" type="button">{{ @intl.patients.patient.interactions.viewInteraction }} {{far "angle-right"}}</button>{{else}}{{#if workName}}<button class="patient-interactions__action js-action" type="button">{{ workName }} {{far "angle-right"}}</button>{{/if}}{{/if}}
+        <span class="patient-interactions__activity-description">{{#if subject}}<strong>{{ subject }}</strong> {{/if}}{{#if actor}}<strong>{{ actor }}</strong> {{/if}}<span class="patient-interactions__activity-label">{{ activityLabel }}</span> <span class="patient-interactions__time">{{#if viaLabel}}{{ viaLabel }}{{#if displayTime}} · {{/if}}{{/if}}<time datetime="{{ timestamp }}">{{ displayTime }}</time></span></span>
+        {{#if workName}}<button class="patient-interactions__action js-action" type="button">{{ workName }} {{far "angle-right"}}</button>{{/if}}
       </div>
-      <div class="{{#if activity}}patient-interactions__activity-content{{else}}patient-interactions__card{{/if}}">
+      <div class="patient-interactions__card">
         {{#if isVisit}}
           {{#if hasVisitHeading}}<div class="patient-interactions__item-heading">
             {{#if title}}<span class="patient-interactions__channel">{{ title }}</span>{{/if}}{{#if status}}{{#if title}}<span class="patient-interactions__separator">·</span>{{/if}}<span>{{ status }}</span>{{/if}}
@@ -39,18 +38,14 @@ const InteractionItemView = View.extend({
       </div>
     </div>
   `,
-  ui: { action: '.js-action', interaction: '.js-interaction' },
+  ui: { action: '.js-action' },
   triggers: {
     'click @ui.action': 'click:action',
-    'click @ui.interaction': 'click:interaction',
   },
   modelEvents: { change: 'render' },
   setGrouping(continuation, continues) {
     this.el.classList.toggle('patient-interactions__item--continuation', continuation);
     this.el.classList.toggle('patient-interactions__item--continues', continues);
-  },
-  onClickInteraction() {
-    Radio.trigger('event-router', 'patient:interaction', this.getOption('patientId'), this.model.id);
   },
   onClickAction() {
     const action = this.model.getAction();
@@ -75,7 +70,6 @@ const InteractionItemView = View.extend({
       isMessage: presentation.kind === 'message',
       isVisit: presentation.kind === 'visit',
       hasVisitHeading: presentation.title || presentation.status,
-      activity: this.getOption('activity'),
       workName: getWorkName(this.model),
     };
   },

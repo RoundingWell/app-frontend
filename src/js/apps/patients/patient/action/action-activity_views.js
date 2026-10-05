@@ -16,8 +16,6 @@ import { renderTemplate } from 'js/i18n';
 
 import Tooltip from 'js/components/tooltip';
 
-import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
-
 import { CommentFormView, PostCommentView } from 'js/apps/patients/shared/comments_views';
 
 import './action.scss';
@@ -299,11 +297,7 @@ const ActivitiesView = CollectionView.extend({
   `,
   childViewContainer: '[data-activities-region]',
   childView(model) {
-    if (model.type === 'interactions') return InteractionItemView;
     return (model.type === 'events') ? ActivityView : CommentView;
-  },
-  childViewOptions() {
-    return { tagName: 'div', activity: true, patientId: this.getOption('patientId') };
   },
   childViewTriggers: {
     'remove:comment': 'remove:comment',
@@ -318,7 +312,6 @@ const ActivitiesView = CollectionView.extend({
     return alphaSort('asc', this._getSortDate(viewA.model), this._getSortDate(viewB.model));
   },
   _getSortDate(model) {
-    if (model.type === 'interactions') return model.get('occurred_at') || model.get('expected_at');
     if (model.get('date')) return model.get('date');
 
     return model.get('created_at');

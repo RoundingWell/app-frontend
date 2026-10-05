@@ -5,10 +5,8 @@ import BaseEntity from 'js/base/entity-service';
 
 import { _Model, Model, Collection } from './entities/interactions';
 
-function getFilter(actionId, flowId, channels) {
+function getFilter(channels) {
   const filter = {};
-  if (actionId) filter.action = actionId;
-  if (flowId) filter.flow = flowId;
   if (channels) filter.channel = channels.join(',');
   return filter;
 }
@@ -33,15 +31,14 @@ const Entity = BaseEntity.extend({
     'interactions:collection': 'getCollection',
     'fetch:interactions:collection:byPatient': 'fetchByPatient',
   },
-  fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit }, options = {}) {
+  fetchByPatient({ patientId, channels, at, before, after, limit }, options = {}) {
     const { data: requestData, ...requestOptions } = options;
     const data = { ...requestData, include: 'action.flow,flow' };
-    addParams(data, 'filter', getFilter(actionId, flowId, channels));
+    addParams(data, 'filter', getFilter(channels));
     addParams(data, 'page', getPage(at, before, after, limit));
 
     return this.fetchCollection({
       ...requestOptions,
-      // Page and preview requests share an endpoint but have independent results.
       url: getUrl(`/api/patients/${ patientId }/interactions`, data),
     });
   },

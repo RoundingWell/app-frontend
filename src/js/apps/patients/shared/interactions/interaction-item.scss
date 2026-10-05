@@ -9,20 +9,15 @@
 
 .patient-interactions__item--voice,
 .patient-interactions__item--voicemail,
-.patient-interactions__item--video,
-.patient-interactions-preview__item--voice,
-.patient-interactions-preview__item--voicemail,
-.patient-interactions-preview__item--video {
+.patient-interactions__item--video {
   --interaction-color: #{color(purple)};
 }
 
-.patient-interactions__item--appointment,
-.patient-interactions-preview__item--appointment {
+.patient-interactions__item--appointment {
   --interaction-color: #{color(green)};
 }
 
-.patient-interactions__item--visit,
-.patient-interactions-preview__item--visit {
+.patient-interactions__item--visit {
   --interaction-color: #{color(orange)};
 }
 
@@ -180,31 +175,5 @@
 .patient-interactions__card {
   font-size: 14px;
   font-weight: 400;
-  line-height: 20px;
-}
-
-.patient-interactions__item--activity {
-  color: #{$black-20};
-  font-size: 14px;
-  gap: 8px;
-  padding-bottom: 16px;
-
-  .patient-interactions__marker {
-    flex-basis: 32px;
-    height: 32px;
-  }
-
-  .patient-interactions__activity-line {
-    margin: 0;
-  }
-
-  .patient-interactions__time {
-    color: #{$black-60};
-    font-size: 12px;
-    margin-left: 4px;
-  }
-}
-
-.patient-interactions__activity-content {
   line-height: 20px;
 }

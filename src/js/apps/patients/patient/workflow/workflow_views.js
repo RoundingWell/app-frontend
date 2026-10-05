@@ -26,8 +26,6 @@ import 'scss/domain/action-card.scss';
 import 'scss/domain/flow-card.scss';
 import 'scss/domain/patient-list.scss';
 import '../patient.scss';
-import 'js/apps/patients/shared/patient-pages.scss';
-
 import './workflow-page.scss';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
@@ -365,12 +363,8 @@ const LayoutView = View.extend({
     return LayoutTemplate;
   },
   triggers: {
-    'click .js-interactions': 'click:interactions',
     'click .js-workflow-closed': 'click:closed',
     'click .js-workflow-open': 'click:open',
-  },
-  onClickInteractions() {
-    Radio.trigger('event-router', 'patient:interactions', this.model.id);
   },
   onClickClosed() {
     Radio.trigger('event-router', 'patient:workflow:closed', this.model.id);

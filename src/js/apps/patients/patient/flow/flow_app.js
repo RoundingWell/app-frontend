@@ -183,7 +183,6 @@ export default App.extend({
     this.getChildApp('activity').start({
       region: this.getView().getRegion('activity'),
       flow: this.flow,
-      patient: this.patient,
     }).catch(addError);
   },
 

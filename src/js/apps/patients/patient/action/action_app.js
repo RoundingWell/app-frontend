@@ -274,7 +274,6 @@ export default App.extend({
     activityApp.start({
       region: this.getView().getRegion('activity'),
       action: this.action,
-      patient: this.patient,
       focusOnLoad: initialSection === 'comments',
     }).catch(addError);
 
@@ -286,7 +285,6 @@ export default App.extend({
     attachmentsApp.start({
       region: this.getView().getRegion('attachments'),
       action: this.action,
-      patient: this.patient,
       focusOnLoad: initialSection === 'attachments',
     }).catch(addError);
 

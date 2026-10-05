@@ -4,27 +4,23 @@ import dayjs from 'dayjs';
 
 import App from 'js/base/app';
 
-import loadActivityInteractions from 'js/apps/patients/shared/interactions/load-activity-interactions';
-
 import { ActionActivityLoadingView, ActionCommentFormView, LayoutView, ActivitiesView } from 'js/apps/patients/patient/action/action-activity_views';
 
 export default App.extend({
   onBeforeStart() {
     this.showView(new ActionActivityLoadingView());
   },
-  prepareStart({ action, patient }, { signal }) {
+  prepareStart({ action }, { signal }) {
     return Promise.all([
       Radio.request('entities', 'fetch:actionEvents:collection', action.id, { signal }),
       Radio.request('entities', 'fetch:comments:collection:byAction', action.id, { signal }),
-      loadActivityInteractions({ patientId: patient.id, actionId: action.id }, { signal }),
     ]);
   },
-  onStart(app, { action, patient, focusOnLoad }, [activity, comments, interactions]) {
+  onStart(app, { action, focusOnLoad }, [activity, comments]) {
     this.action = action;
-    this.patient = patient;
     this.comments = comments;
     this.comments.add(action.getComments().filter(comment => comment.has('message')));
-    this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models, ...interactions]);
+    this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
 
     this.listenTo(action, 'ws:add:comment', this.onWsAddComment);
 
@@ -55,7 +51,6 @@ export default App.extend({
     const activitiesView = new ActivitiesView({
       collection: this.activityCollection,
       model: this.action,
-      patientId: this.patient.id,
     });
     this.listenTo(activitiesView, {
       'remove:comment': this.onRemoveComment,

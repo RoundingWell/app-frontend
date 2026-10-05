@@ -13,10 +13,7 @@ import i18n from 'js/i18n';
 import Datepicker from 'js/components/datepicker';
 import Optionlist from 'js/components/optionlist';
 
-import { getInteractionPresentation } from 'js/apps/patients/shared/interactions/interaction-presentation';
 import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
-
-import 'js/apps/patients/shared/patient-pages.scss';
 
 import './interactions.scss';
 
@@ -251,79 +248,6 @@ const InteractionsErrorView = View.extend({
   template: hbs`{{ @intl.patients.patient.interactions.loadError }}`,
 });
 
-const InteractionsPreviewItemView = View.extend({
-  tagName: 'li',
-  className() {
-    return `patient-interactions-preview__item patient-interactions-preview__item--${ this.model.get('channel') }`;
-  },
-  template: hbs`
-    <button class="patient-interactions-preview__link js-interaction" type="button">
-      <span class="patient-interactions-preview__symbol" aria-hidden="true">{{far icon}}</span>
-      <span class="patient-interactions-preview__details">
-        <strong>{{ cardTitle }}</strong>
-        <span class="patient-interactions-preview__sender">{{ actor }}</span>
-        <time datetime="{{ timestamp }}">{{ displayTime }}</time>
-      </span>
-    </button>
-  `,
-  ui: { interaction: '.js-interaction' },
-  triggers: { 'click @ui.interaction': 'click:interaction' },
-  onClickInteraction() {
-    Radio.trigger('event-router', 'patient:interaction', this.getOption('patientId'), this.model.id);
-  },
-  templateContext() {
-    const presentation = getInteractionPresentation(this.model, this.getOption('patientName'));
-    return {
-      ...presentation,
-      cardTitle: presentation.previewTitle,
-      displayTime: presentation.timestamp ? dayjs(presentation.timestamp).format('MMM D, YYYY h:mm A') : '',
-    };
-  },
-});
-
-const InteractionsPreviewListView = CollectionView.extend({
-  tagName: 'ul',
-  className: 'patient-interactions-preview__list',
-  childView: InteractionsPreviewItemView,
-  childViewOptions() {
-    return {
-      patientId: this.getOption('patientId'),
-      patientName: this.getOption('patientName'),
-    };
-  },
-  emptyView: View.extend({
-    tagName: 'li',
-    template: hbs`{{ @intl.patients.patient.interactions.empty }}`,
-  }),
-});
-
-const InteractionsPreviewView = View.extend({
-  className: 'patient-interactions-preview',
-  template: hbs`
-    <div data-content-region></div>
-    <button class="patient-interactions-preview__all js-all" type="button">{{far "right-left-large"}} {{ @intl.patients.patient.interactions.interactionsTab }}</button>
-  `,
-  regions: { content: '[data-content-region]' },
-  ui: { all: '.js-all' },
-  triggers: { 'click @ui.all': 'click:all' },
-  onClickAll() {
-    Radio.trigger('event-router', 'patient:interactions', this.model.id);
-  },
-  showLoading() {
-    this.showChildView('content', new InteractionsLoadingView());
-  },
-  showInteractions(collection) {
-    this.showChildView('content', new InteractionsPreviewListView({
-      collection,
-      patientId: this.model.id,
-      patientName: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
-    }));
-  },
-  showError() {
-    this.showChildView('content', new InteractionsErrorView());
-  },
-});
-
 const InteractionsPageView = View.extend({
   className: 'patient__content patient__content--scroll patient-interactions',
   childViewTriggers: {
@@ -332,11 +256,8 @@ const InteractionsPageView = View.extend({
   },
   template: hbs`
     <div class="patient-interactions__body">
-      <div class="patient-pages-controls js-controls">
-        <nav class="patient-pages" aria-label="{{ @intl.patients.patient.interactions.pagesLabel }}">
-          <button class="patient-pages__tab js-workflow" type="button">{{far "folder-closed"}} {{ @intl.patients.patient.interactions.workflowTab }}</button>
-          <span class="patient-pages__tab is-selected" aria-current="page">{{far "right-left-large"}} {{ @intl.patients.patient.interactions.interactionsTab }}</span>
-        </nav>
+      <div class="patient-interactions__controls js-controls">
+        <h1 class="patient-interactions__heading">{{ @intl.patients.patient.interactions.interactionsTab }}</h1>
         <div class="patient-interactions__filters" role="group" aria-label="{{ @intl.patients.patient.interactions.typesLabel }}">
           <button class="button js-filter" type="button" data-filter="messages">{{ @intl.patients.patient.interactions.messages }}</button>
           <button class="button js-filter" type="button" data-filter="calls">{{ @intl.patients.patient.interactions.calls }}</button>
@@ -359,9 +280,8 @@ const InteractionsPageView = View.extend({
     </div>
   `,
   regions: { content: '[data-content-region]' },
-  ui: { controls: '.js-controls', filters: '.js-filter', workflow: '.js-workflow', pagingError: '.js-paging-error', pagingLoading: '.js-paging-loading', retry: '.js-retry' },
+  ui: { controls: '.js-controls', filters: '.js-filter', pagingError: '.js-paging-error', pagingLoading: '.js-paging-loading', retry: '.js-retry' },
   triggers: {
-    'click @ui.workflow': 'click:workflow',
     'click @ui.retry': 'retry:paging',
   },
   events: { 'click @ui.filters': 'onFilterClick', 'scroll': 'onScroll' },
@@ -405,9 +325,7 @@ const InteractionsPageView = View.extend({
     if (newer) return 'newer';
     if (older) return 'older';
   },
-  onClickWorkflow() {
-    Radio.trigger('event-router', 'patient:workflow', this.model.id);
-  },
+
   onFilterClick(event) {
     this.triggerMethod('change:filter', event.target.dataset.filter);
   },
@@ -472,4 +390,4 @@ const InteractionsPageView = View.extend({
   },
 });
 
-export { InteractionsPageView, InteractionsPreviewView };
+export { InteractionsPageView };

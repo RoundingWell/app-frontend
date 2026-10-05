@@ -1,24 +1,18 @@
 <div class="workflow-page">
-  <div class="patient-pages-controls">
-    <nav class="patient-pages" aria-label="{{ @intl.patients.patient.interactions.pagesLabel }}">
-      <span class="patient-pages__tab is-selected" aria-current="page">{{far "folder-closed"}} {{ @intl.patients.patient.interactions.workflowTab }}</span>
-      <button class="patient-pages__tab js-interactions" type="button">{{far "right-left-large"}} {{ @intl.patients.patient.interactions.interactionsTab }}</button>
-    </nav>
-    <div class="workflow-page__toolbar">
-      <div class="workflow-page__tabs" role="group" aria-label="{{ @intl.patients.patient.workflow.workflowViews.tabsLabel }}">
-        <button class="workflow-page__tab is-selected js-workflow-open" type="button" aria-pressed="true">
-          {{~ @intl.patients.patient.workflow.workflowViews.openBtn ~}}
-        </button>
-        <button class="workflow-page__tab js-workflow-closed" type="button" aria-pressed="false">
-          {{~ @intl.patients.patient.workflow.workflowViews.closedBtn ~}}
-        </button>
-      </div>
-      <div class="workflow-page__actions" data-add-workflow-region>
-        <span class="button button--outline button--pill add-workflow__button js-loading">
-          {{far "circle-plus"}}
-          <span>{{ @intl.patients.patient.workflow.workflowViews.actionLoading }}</span>
-        </span>
-      </div>
+  <div class="workflow-page__toolbar">
+    <div class="workflow-page__tabs" role="group" aria-label="{{ @intl.patients.patient.workflow.workflowViews.tabsLabel }}">
+      <button class="workflow-page__tab is-selected js-workflow-open" type="button" aria-pressed="true">
+        {{~ @intl.patients.patient.workflow.workflowViews.openBtn ~}}
+      </button>
+      <button class="workflow-page__tab js-workflow-closed" type="button" aria-pressed="false">
+        {{~ @intl.patients.patient.workflow.workflowViews.closedBtn ~}}
+      </button>
+    </div>
+    <div class="workflow-page__actions" data-add-workflow-region>
+      <span class="button button--outline button--pill add-workflow__button js-loading">
+        {{far "circle-plus"}}
+        <span>{{ @intl.patients.patient.workflow.workflowViews.actionLoading }}</span>
+      </span>
     </div>
   </div>
   <div data-content-region></div>

@@ -27,12 +27,8 @@ Cypress.Commands.add('routePatientInteractions', (body = { data: [], included: [
   cy.intercept('GET', '/api/patients/*/interactions*', request => {
     const query = new URL(request.url).searchParams;
     const channels = query.get('filter[channel]')?.split(',');
-    const actionId = query.get('filter[action]');
-    const flowId = query.get('filter[flow]');
     let data = body.data;
     if (channels) data = filter(data, interaction => contains(channels, interaction.attributes.channel));
-    if (actionId) data = filter(data, interaction => interaction.relationships.action.data?.id === actionId);
-    if (flowId) data = filter(data, interaction => interaction.relationships.flow.data?.id === flowId);
     request.reply({ body: { ...body, data } });
   }).as('routePatientInteractions');
 });

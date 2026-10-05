@@ -3,9 +3,7 @@ careOptsFrontend:
   patients:
     patient:
       interactions:
-        workflowTab: Workflows
         interactionsTab: Interactions
-        pagesLabel: Patient pages
         typesLabel: Interaction types
         message: Message
         email: Email
@@ -36,7 +34,6 @@ careOptsFrontend:
         via: via
         noDischarge: No discharge received
         lengthOfStay: 'LOS {days, plural, one {# day} other {# days}}'
-        viewInteraction: View interaction
         viaSms: via SMS
         viaEmail: via email
         viaMail: via mail

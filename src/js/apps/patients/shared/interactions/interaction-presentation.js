@@ -1,4 +1,4 @@
-import { compact, contains, extend, filter, has, isString } from 'underscore';
+import { contains, extend, filter, has, isString } from 'underscore';
 import dayjs from 'dayjs';
 
 import i18n from 'js/i18n';
@@ -38,7 +38,6 @@ function getMessagePresentation({ channel, metadata, inbound, clinician, patient
     viaLabel: channelLabels[channel] || '',
     title: intl.message,
     summary: text(metadata.message) || text(metadata.note),
-    previewTitle: `${ inbound ? intl.inbound : intl.outbound } ${ intl.message }`,
   };
 }
 
@@ -54,7 +53,6 @@ function getCallPresentation({ channel, metadata, inbound, clinician }) {
     title,
     status,
     summary: text(metadata.note),
-    previewTitle: compact([title, status]).join(' · '),
   };
 }
 
@@ -72,7 +70,6 @@ function getAppointmentPresentation({ model, metadata, timestamp, clinician }) {
       { label: intl.appointmentDate, value: formatDate(timestamp) },
       { label: intl.clinician, value: clinician },
     ], detail => detail.value),
-    previewTitle: compact([intl.appointment, status]).join(' · '),
   };
 }
 
@@ -100,7 +97,6 @@ function getVisitDates(metadata) {
 function getVisitPresentation({ metadata }) {
   const classes = { E: intl.emergency, I: intl.inpatient, O: intl.outpatient, V: intl.observation, Obs: intl.observation };
   const dates = getVisitDates(metadata);
-  const title = dates.hasDischarge ? intl.discharged : intl.admitted;
   const source = text(metadata.source);
 
   return {
@@ -114,7 +110,6 @@ function getVisitPresentation({ metadata }) {
     status: text(metadata.facility),
     admitReason: text(metadata.admit_reason),
     dischargeDisposition: text(metadata.discharge_disposition),
-    previewTitle: compact([title, text(metadata.facility)]).join(' · '),
   };
 }
 
