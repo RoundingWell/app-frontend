@@ -1,0 +1,53 @@
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_7d9748a0496f68::t_2a4942ab2e13e3 191,202,218,222,321,334,342,426-432,434-458,460-462,492-494,507-549
+  s_7d9748a0496f68::t_fe3671ac774979 7,39,47,52,120,125,150-190,192-201,203-208,210-217,219-221,223-251,253-255,258,312-320,322-333,335-341,343,349-351,379,387-390,407-411,416
+  s_7d9748a0496f68::t_1838f9ddb19072 344-348
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_7d9748a0496f68::t_271f4740802dda 774-777,1493-1494,1525,1670-1687,1853,1873-1876,2700-2725,2730-2732
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_7d9748a0496f68::t_49f92f3c929f56 125-135,137-158,160-182,427-429,431,433-437,439-444,446-450,452-456,458-461,463,465-467,1269-1270,2405-2418,2420-2421,4833-4859,4861-4865,4867-4870,4872-4874,4876-4879
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_7d9748a0496f68::t_3c4f1aa9f51989 7,68-75,91-100,115-122,817-821,824,873-880,914-920,1001-1007,1414-1433,1493,1537-1563,1823-1894,1925,2792-2806,2863-2906
+  s_7d9748a0496f68::t_374d88bb32070b 1285-1291,1434-1469,1895-1921,1923-1924
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_7d9748a0496f68::t_d8da77a494f495 1218
+  s_7d9748a0496f68::t_bb5b861db7d647 1155-1214,1216-1217
+src/js/services/ws.e2e.cy.js
+  s_7d9748a0496f68::t_2edd9be9c7a939 48,55
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_7d9748a0496f68::t_be6254af2aeab8 792-800
+src/js/apps/programs/program/program.e2e.cy.js
+  s_7d9748a0496f68::t_9a062a399906cd 256-258,261-269
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_267e7a791356aa::t_9fd21e90d9b815 81-90
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_7d9748a0496f68::t_d317101ca4227c 62-78
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_7d9748a0496f68::t_aa6509902dbae0 150
+src/js/components/picklist/picklist.component.cy.js
+  s_7d9748a0496f68::t_23c19cdcc9b873 47-53,254,259-261,281-295
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e5d00f52782610e6cc7ad78943f1bd30e8f7e847",
+  "prompts": {},
+  "sessions": {
+    "s_267e7a791356aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08689-8981-7cf3-a3c5-0ee0a88b599c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

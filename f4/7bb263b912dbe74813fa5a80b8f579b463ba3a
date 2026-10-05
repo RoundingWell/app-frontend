@@ -1,0 +1,23 @@
+packages/care-ops-ringcentral/index.js
+  s_7d9748a0496f68::t_7bae1c51e29646 1
+packages/care-ops-ringcentral/ringcentral_app.js
+  s_7d9748a0496f68::t_7ce7e019e72970 1,9-16,21-23,34-36,42-44,46-62,64-67,69-83,85-89,91-93,96-100,102-103,106,108,113-114,116,119,121,123
+packages/care-ops-ringcentral/ringcentral_views.js
+  s_7d9748a0496f68::t_d2d275134c1246 78,99,121-132,134,139-141
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f47bb263b912dbe74813fa5a80b8f579b463ba3a",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

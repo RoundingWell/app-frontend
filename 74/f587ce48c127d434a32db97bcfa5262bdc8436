@@ -1,0 +1,12 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "74f587ce48c127d434a32db97bcfa5262bdc8436",
+  "prompts": {},
+  "humans": {
+    "h_447dd16e2f0674": {
+      "author": "Paul Falgout"
+    }
+  }
+}

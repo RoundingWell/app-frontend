@@ -1,0 +1,41 @@
+src/js/apps/patients/shared/patient-readonly.scss
+  s_d04385ebae28ca::t_fafc2dfe298d21 5
+  s_d04385ebae28ca::t_48a7ada57ae810 46,51
+  s_d04385ebae28ca::t_9478a9b7b600a2 47-50,52-54
+src/js/apps/patients/patient/form/form.scss
+  s_d04385ebae28ca::t_3bfc2d0bd66810 244
+src/js/components/picklist/index.js
+  s_d04385ebae28ca::t_9478a9b7b600a2 162
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_d04385ebae28ca::t_993234ff870084 68-71
+src/js/components/picklist/picklist.scss
+  s_d04385ebae28ca::t_9478a9b7b600a2 120
+src/js/apps/patients/patient/patient.scss
+  s_d04385ebae28ca::t_993234ff870084 50
+src/js/apps/patients/patient/action/action.scss
+  s_d04385ebae28ca::t_9478a9b7b600a2 241,381-384,469,479
+  s_d04385ebae28ca::t_124f9129f3089f 242
+  s_d04385ebae28ca::t_fafc2dfe298d21 197,210
+  s_d04385ebae28ca::t_993234ff870084 193,204,206,213,229-231,235-240
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_d04385ebae28ca::t_993234ff870084 119,130,133,135
+  s_d04385ebae28ca::t_fafc2dfe298d21 123,134
+src/scss/modules/buttons.scss
+  s_d04385ebae28ca::t_fafc2dfe298d21 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "8f9cdc268ff48912f29ce9157f0e920e83712e14",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,44 @@
+src/js/entities-service/events.js
+  s_85aebd1623278c::t_19fdb9461a6ee7 15-16
+src/js/apps/patients/shared/bulk-edit/inline_app.js
+  s_85aebd1623278c::t_c136b970ab300f 21
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_e5bf0a4bbd61b1 150
+  s_85aebd1623278c::t_55aa9e33de8f1f 123
+  s_85aebd1623278c::t_de8c6202a3a83a 24,114,118-122,124-125,131-135
+  s_85aebd1623278c::t_3b394dc0774c03 126-127
+  s_85aebd1623278c::t_72839b44eca8b8 136-149
+src/js/apps/patients/shared/bulk-edit/bulk-edit-actions_app.js
+  s_85aebd1623278c::t_d5be6e8196e779 20
+src/js/apps/patients/patient/flow/flow_views.js
+  s_85aebd1623278c::t_a1155ed742ddbd 260
+  s_85aebd1623278c::t_3680efbea58f5d 221
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  s_85aebd1623278c::t_a1155ed742ddbd 10,16,22,28,34,40,100
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_19fdb9461a6ee7 45-46,49
+src/js/apps/patients/patient/flow/flow_app.js
+  s_85aebd1623278c::t_1be6e95a89c5b6 25-27
+  s_85aebd1623278c::t_19fdb9461a6ee7 6,36,38,40-44,46,53,55,65,90-97,111-113,139-140,144,151,169-170,172,197,211,217,219-229,233-234,247,249,269,273,277-283,289,304,336
+  s_85aebd1623278c::t_c136b970ab300f 218,231-232,236-239,243-246,274-276
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  s_85aebd1623278c::t_19fdb9461a6ee7 9,11-12,14
+src/js/components/tooltip/index.js
+  s_85aebd1623278c::t_d5be6e8196e779 61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "9cf08c63edf24b603c372ad34844aaf2f949498c",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

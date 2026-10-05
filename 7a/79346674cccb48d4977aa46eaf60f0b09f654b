@@ -1,0 +1,23 @@
+packages/care-ops-five9/five9_app.js
+  s_932355d3ceb435::t_44782d632b9698 2,4,20-22,30-32,37-44,59,64-68,70-79,81,83,85-122,124-126,129-130,133,135,141-143,145,147,151,153-154,164,166
+packages/care-ops-five9/five9_views.js
+  s_932355d3ceb435::t_e938e2e8c4165f 133,141-143,155
+packages/care-ops-five9/index.js
+  s_932355d3ceb435::t_b593e08e2faff8 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7a79346674cccb48d4977aa46eaf60f0b09f654b",
+  "prompts": {},
+  "sessions": {
+    "s_932355d3ceb435": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ccb7-194c-72d2-b859-443afa9808ef",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

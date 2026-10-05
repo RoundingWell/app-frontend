@@ -1,0 +1,31 @@
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_49c211c5eb89ae::t_65a1ae292b6da5 338-341
+  s_49c211c5eb89ae::t_bd9e96c612663a 2045-2056
+  s_49c211c5eb89ae::t_4116322ded9b51 2043
+  s_49c211c5eb89ae::t_e08df1770d3ac1 334-337,1986-1990,2041-2042,2044,2057
+  s_49c211c5eb89ae::t_c1628202741ea3 2449-2452
+src/js/apps/patients/patient/action/action-details_views.js
+  s_49c211c5eb89ae::t_172d55e59046ff 11,21-39,41-47,55-57,60,94-96,165-167
+  s_49c211c5eb89ae::t_4116322ded9b51 48-54
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_49c211c5eb89ae::t_69e1015602a74c 8
+src/js/apps/patients/patient/action/action.scss
+  s_49c211c5eb89ae::t_172d55e59046ff 40,42-43,87-92,94
+  s_49c211c5eb89ae::t_9e5ffc4f725242 41,49,93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "1aed6c2960288ad6e502aa05fc4da11228deb463",
+  "prompts": {},
+  "sessions": {
+    "s_49c211c5eb89ae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fac4d-88ab-7a20-ba89-1042953ff388",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

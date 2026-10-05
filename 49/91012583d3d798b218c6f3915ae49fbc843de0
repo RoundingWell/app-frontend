@@ -1,0 +1,23 @@
+src/js/index.js
+  s_183c10637573b8::t_797870ccc6cf08 49-51
+packages/care-ops-config/index.js
+  s_183c10637573b8::t_797870ccc6cf08 4
+src/js/views/globals/prelogin/prelogin.scss
+  s_183c10637573b8::t_797870ccc6cf08 7,15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "4991012583d3d798b218c6f3915ae49fbc843de0",
+  "prompts": {},
+  "sessions": {
+    "s_183c10637573b8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5eac-2ac5-7e70-b484-2705102e8f5d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

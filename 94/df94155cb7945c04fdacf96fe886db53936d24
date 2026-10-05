@@ -1,0 +1,63 @@
+.nycrc.json
+  ffc0931798fef4c5 7
+test/unit/vitest-babel-coverage/index.js
+  ffc0931798fef4c5 1-45
+vitest.config.mjs
+  ffc0931798fef4c5 4,7-9,15-16
+test/unit/vitest-babel-coverage/provider.js
+  ffc0931798fef4c5 1-41
+src/js/entities-service/forms.test.js
+  ffc0931798fef4c5 3,7
+vite.config.js
+  ffc0931798fef4c5 38-62,125-127,129-130,132,134-141,161
+package.json
+  ffc0931798fef4c5 38
+src/js/services/dialer.test.js
+  ffc0931798fef4c5 5,11-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "94df94155cb7945c04fdacf96fe886db53936d24",
+  "prompts": {
+    "0cd185e3ffcc934a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9c37-5a7a-7031-b58a-a724d7e57a47",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 5,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "b155a2b4034d5bcb": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9bf2-1704-74c1-8870-18dd65e8d3cc",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 328,
+      "total_deletions": 227,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "ffc0931798fef4c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d887c-a471-7792-b22f-876b2e5dd6f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 145,
+      "total_deletions": 570,
+      "accepted_lines": 145,
+      "overriden_lines": 0
+    }
+  }
+}

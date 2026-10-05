@@ -1,0 +1,33 @@
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_d04385ebae28ca::t_8c941de2c64632 2
+src/js/apps/patients/patient/flow/flow_app.js
+  s_d04385ebae28ca::t_19ffe7700a78ee 14
+src/js/apps/patients/patient/flow/flow_views.js
+  s_d04385ebae28ca::t_71fda15fe8cfb0 224,228,231-233,236
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_d04385ebae28ca::t_d9f390a90d72a9 587-598,620,640,652,683,694,707,726,739,1471,1474,1481,1488,1495,1520,1527,1534,1541,1566,1573,1580,1587
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_d04385ebae28ca::t_97ed7f5ba7974f 119,123,130,133-135
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_d04385ebae28ca::t_16018b34f0e5e1 2,167,213-264
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_d04385ebae28ca::t_baccf2a901d8f5 579-583,598-603
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_d04385ebae28ca::t_947c73da48e10c 131-133,138,262-264,269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "e561872ae1527489f60a27d1a14c7b64761d90df",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

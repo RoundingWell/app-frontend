@@ -1,0 +1,21 @@
+src/scss/core/_fonts.scss
+  s_422f705f89ada4::t_ade3468683808e 2,11,19
+src/scss/core/_typography.scss
+  s_422f705f89ada4::t_595ba60b1e74a8 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "27c9b925518348b32573a746fe329e0cd433995a",
+  "prompts": {},
+  "sessions": {
+    "s_422f705f89ada4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01021-963c-7ef2-aa6b-45016ce1d453",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

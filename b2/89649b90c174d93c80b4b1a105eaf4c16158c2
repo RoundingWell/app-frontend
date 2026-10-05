@@ -1,0 +1,39 @@
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_5665e89ff436c0::t_b438deced0336e 678
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_5665e89ff436c0::t_b438deced0336e 49
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_5665e89ff436c0::t_b438deced0336e 179,309,1077
+src/js/apps/patients/patient/action/action_app.js
+  s_5665e89ff436c0::t_b438deced0336e 220,226
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_5665e89ff436c0::t_b438deced0336e 125
+src/js/entities-service/entities/program-actions.js
+  s_5665e89ff436c0::t_b438deced0336e 10
+src/js/apps/patients/shared/add-workflow/add-workflow_views.js
+  s_5665e89ff436c0::t_b438deced0336e 38
+src/js/apps/patients/schedule/day-item.hbs
+  s_5665e89ff436c0::t_b438deced0336e 15
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_5665e89ff436c0::t_b438deced0336e 78
+src/js/apps/programs/program/flow/action-item.hbs
+  s_5665e89ff436c0::t_b438deced0336e 8
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_5665e89ff436c0::t_b438deced0336e 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b289649b90c174d93c80b4b1a105eaf4c16158c2",
+  "prompts": {},
+  "sessions": {
+    "s_5665e89ff436c0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3c4d3f25-5816-4a52-8aa3-870083de58ef",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

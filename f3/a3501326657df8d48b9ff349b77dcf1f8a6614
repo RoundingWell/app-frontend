@@ -1,0 +1,67 @@
+src/js/apps/patients/patient/flow/flow_app.js
+  s_98141a3add0497::t_87a7eb054e31d1 17-18,37,123,173,190,194,200-207,212
+src/js/apps/patients/patient/patient_views.js
+  s_98141a3add0497::t_87a7eb054e31d1 23-26,28-31,34-37,40-43,87-89,91-92,94,110-113,115,123,125-131
+src/js/apps/patients/patient/workflow/layout.hbs
+  s_98141a3add0497::t_87a7eb054e31d1 1-16,18,20
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_98141a3add0497::t_87a7eb054e31d1 2-3,5-6,9-26,30-41,44-46,48-49,53-65,69-74,76-84,92-94,96-101
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_98141a3add0497::t_87a7eb054e31d1 21-22,26,31,33-34,37,45-47,50,53-55,57-58,66,71,76,84-85,107-108,728-819
+src/js/i18n/en-US/patients.yml
+  s_98141a3add0497::t_87a7eb054e31d1 198
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_98141a3add0497::t_87a7eb054e31d1 1-32
+src/js/apps/patients/patient/patient.scss
+  s_98141a3add0497::t_87a7eb054e31d1 2-3,5-10,14,18-21,25-60,64-65,75-77,80-90,92-95,98-100,103-106,109-122,124,126-129,131-133,135,138-142,146-147,151,155
+src/js/apps/patients/shared/actions_views.js
+  s_98141a3add0497::t_87a7eb054e31d1 30-42,45,53
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_98141a3add0497::t_87a7eb054e31d1 2-6,9,16,23,25-28,33-38,42-43,45-54,57-58,63,65-67,69-70,77-104,106-112,114-123,126-137,141-173,177-179,181-192,196-216
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_98141a3add0497::t_87a7eb054e31d1 27,30-35,111-114,116-121,136-137,143-151,154,157
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_98141a3add0497::t_87a7eb054e31d1 1-19
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_98141a3add0497::t_87a7eb054e31d1 9-10,16-23,35,39-40,43-48,51-55
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_98141a3add0497::t_87a7eb054e31d1 30-82,107-111,215-220,247,258,261-294,311,314,319,321-322,326,329,334,337,342,348,359,370-375,379-380,399-400,420-421,440-441,452-453,464,466-468,471-474,478,506,512,518,525,536,539-541,544,559,567,1101,1105,1109-1114,1146,1150,1154-1159,1185,1189-1192,1199,1235,1343,1350,1413,1535,1639,1646,1761-1763
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_98141a3add0497::t_87a7eb054e31d1 8-10,25,28,33,37-66,111,125,240,260,306
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  s_98141a3add0497::t_87a7eb054e31d1 9
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_98141a3add0497::t_87a7eb054e31d1 73-76,88-89,91-92,95,97,102,105-109,111,114-115,120-126,173,176-202,233,270-276,285-286,290,301-305,307,313,317,331,336,341,355,360,365,379,383,397,402,407,421,423,426,520,525,536,543,546,552,555-557,562,566,575,578,607,616-618,621,623,633,635,638,640,657,663,665,673,694,696,719,721,728-729,921-925,928,976,1009-1010,1050,1141,1148,1155,1162,1187,1194,1201,1208,1233,1240,1247,1254,1293-1298,1386,1389,1458,1467-1468,1475,1483-1484,1491,1499-1500,1507,1516-1517,1520,1529-1530,1537,1546-1547,1644-1676,1678-1679,1682-1688,1690-1691,1694-1697,1700-1703,1717-1718,1722-1723,1726,1747,1770-1771,1774-1794,1799,1803,1807,1811,1816,1820-1821,1825,1830,1835,1840,1845,1874-1875,1885-1886,1896-1897,1912-1913,1923,1928,1933-1934,1943,1949,1955-1956,1966-1971,1976-1977,2026,2039-2040,2050-2051,2060-2061,2074,2110-2115,2122,2129,2133,2137,2143,2150,2157,2161,2257,2264,2266,2271-2278,2280,2285,2287,2292,2730,2766
+src/js/apps/patients/patient/workflow/done-layout.hbs
+  s_98141a3add0497::t_87a7eb054e31d1 1-12
+src/js/apps/patients/patient/patient_app.js
+  s_98141a3add0497::t_87a7eb054e31d1 50,73,75,78-85,144,146,158-162,171-176,190,197
+src/js/apps/patients/patient/workflow/action-item.hbs
+  s_98141a3add0497::t_87a7eb054e31d1 1-31
+src/js/apps/patients/patient/flow/header.hbs
+  s_98141a3add0497::t_87a7eb054e31d1 1,5-13
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  s_98141a3add0497::t_87a7eb054e31d1 4-5,10,15,20,25,30,35,38-48,67-71
+src/js/apps/patients/shared/add-workflow/add-workflow_views.js
+  s_98141a3add0497::t_87a7eb054e31d1 49,51-56
+src/js/apps/patients/patient/workflow/workflow_app.js
+  s_98141a3add0497::t_87a7eb054e31d1 12,37
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_98141a3add0497::t_87a7eb054e31d1 61-62,71-72,81-82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "f3a3501326657df8d48b9ff349b77dcf1f8a6614",
+  "prompts": {},
+  "sessions": {
+    "s_98141a3add0497": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa3d5-b074-7972-8c1c-0ef07df7968e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

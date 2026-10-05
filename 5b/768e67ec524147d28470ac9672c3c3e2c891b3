@@ -1,0 +1,23 @@
+src/js/base/routerapp.component.cy.js
+  s_7d9748a0496f68::t_d3b0999fd0ce7c 28-29,36,40-42,49,51-59,65-66,76,92,119,129,139,147,155,157,162-223,225,227-228,231-232,239,241-242,245-246,251,253,255,262,264-265,268-283,286-311,314,316-318,321-322,324-327
+src/js/base/routerapp.js
+  s_7d9748a0496f68::t_dc8cb7ec7dba59 5-7,10,13,17-18,25,27,46-49,51-54,102,104,114-116,118-121,123-127,130-131,133-134,137-139,141-144,146-148,151,153,155-156,158-168,177-178,180-184,188-189,200-201
+src/js/regions/preload_region.js
+  s_7d9748a0496f68::t_32ac3d2ffe7de6 28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5b768e67ec524147d28470ac9672c3c3e2c891b3",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

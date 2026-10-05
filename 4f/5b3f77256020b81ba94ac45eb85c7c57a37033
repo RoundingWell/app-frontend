@@ -1,0 +1,40 @@
+src/js/apps/patients/patient/archive/archive_app.js
+  s_f01dc3efe975c9::t_4e49c679ac4b8d 7-9
+  s_f01dc3efe975c9::t_2ba49d6d8cf318 47-48
+src/js/apps/patients/patient/flow/flow_app.js
+  s_f01dc3efe975c9::t_a611a5e344162c 10-11
+  s_f01dc3efe975c9::t_e89c3ffa467f3b 110
+src/js/apps/patients/patient/dashboard/dashboard_app.js
+  s_f01dc3efe975c9::t_b3458b38c0d985 7-9
+  s_4fb06412cf7174::t_4986c38c525501 63-64
+test/support/api/actions.js
+  s_f01dc3efe975c9::t_4929c9d2453de7 141
+src/js/entities-service/actions.js
+  s_f01dc3efe975c9::t_4a15d70aef55b5 4-8,21,34,40,43
+src/js/entities-service/flows.js
+  s_f01dc3efe975c9::t_cfa934c94a4cf6 4-9,20,23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "4f5b3f77256020b81ba94ac45eb85c7c57a37033",
+  "prompts": {},
+  "sessions": {
+    "s_4fb06412cf7174": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b07-77d6-7830-a0b1-2388fef5777a",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    },
+    "s_f01dc3efe975c9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "afccbc22-d10f-4842-abc3-49d6b9cfcaea",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": null
+    }
+  }
+}

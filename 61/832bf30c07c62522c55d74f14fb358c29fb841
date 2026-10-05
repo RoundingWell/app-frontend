@@ -1,0 +1,21 @@
+src/scss/README.md
+  s_dd6683eb15cd0c::t_96f4720474249a 140-142
+src/js/apps/README.md
+  s_dd6683eb15cd0c::t_96f4720474249a 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "61832bf30c07c62522c55d74f14fb358c29fb841",
+  "prompts": {},
+  "sessions": {
+    "s_dd6683eb15cd0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eec43-b45a-77b2-bb2d-9a20794178b0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

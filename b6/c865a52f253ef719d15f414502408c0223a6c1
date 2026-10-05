@@ -1,0 +1,56 @@
+src/js/components/optionlist/index.js
+  s_85aebd1623278c::t_a8cfe5f0942e5c 31-32,47,54-56
+  s_85aebd1623278c::t_86f9b0da3ccb33 50
+  s_85aebd1623278c::t_37f3f37e45e4c4 9,35,39
+  s_85aebd1623278c::t_27f3a5236523e1 57
+src/js/components/picklist/picklist.component.cy.js
+  s_85aebd1623278c::t_a8cfe5f0942e5c 125-130
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 143
+src/js/apps/patients/shared/components/dialer_view.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 64
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_8510d360a76446 46-47,51-52
+  s_85aebd1623278c::t_73b1ce7aff5c56 15,30-35,40-41,45,48-50,68-76
+src/js/components/droplist/index.js
+  s_85aebd1623278c::t_a8cfe5f0942e5c 135,140-141
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 192
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_85aebd1623278c::t_a8cfe5f0942e5c 217
+  s_85aebd1623278c::t_86f9b0da3ccb33 218
+src/js/components/optionlist/optionlist.component.cy.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 20
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 201
+src/js/apps/patients/shared/add-workflow/add-workflow_views.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 66
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_85aebd1623278c::t_a8cfe5f0942e5c 107
+src/js/apps/patients/patient/flow/flow_views.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 158
+src/js/behaviors/picklist-transport.js
+  s_85aebd1623278c::t_e9c07285ba4c0b 16,158
+src/js/components/picklist/index.js
+  s_85aebd1623278c::t_a8cfe5f0942e5c 2,116,150-161,197-198,224,245-247,267
+src/js/apps/programs/program/sidebar/sidebar-views.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 46
+src/js/apps/patients/patient/action/action_views.js
+  s_85aebd1623278c::t_37f3f37e45e4c4 54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b6c865a52f253ef719d15f414502408c0223a6c1",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

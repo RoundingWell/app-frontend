@@ -1,0 +1,36 @@
+.circleci/config.yml
+  s_3e7a7157d1653a::t_3084da59893f2e 23-36,65,78,83,144-145,149
+packages/care-ops-datadog/package.json
+  3e7a7157d1653aec 11-12
+package.json
+  3e7a7157d1653aec 84,89,109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "4e7929f54d21409b76b735aba6a2d93dda7cdf60",
+  "prompts": {
+    "3e7a7157d1653aec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dfda8-4fc4-7122-9b49-5bf578a84cfd",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>",
+      "total_additions": 111,
+      "total_deletions": 110,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_3e7a7157d1653a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dfda8-4fc4-7122-9b49-5bf578a84cfd",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

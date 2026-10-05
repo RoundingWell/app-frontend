@@ -1,0 +1,21 @@
+docs/superpowers/specs/2026-05-28-indexdb-cache-design.md
+  s_4f8dcbf2626875::t_d2b3a4f3263767 183,185-197
+  s_4f8dcbf2626875::t_69432461c4c379 266
+  s_4f8dcbf2626875::t_626f385f4b1617 166-167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "aa4a032373a4816b99ec7c89675236799d07b85c",
+  "prompts": {},
+  "sessions": {
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

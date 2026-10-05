@@ -1,0 +1,49 @@
+src/js/apps/patients/shared/components/check_view.component.cy.js
+  s_932355d3ceb435::t_349186a79d2fcd 1,3,10,13,16,21
+src/js/apps/patients/shared/components/check_view.js
+  s_932355d3ceb435::t_8879e8c72380a2 2,6-17,19-20,22-23,25-26,28-29,32-34
+src/js/apps/patients/shared/components/date-filter/date-filter_state.component.cy.js
+  s_932355d3ceb435::t_31305093730928 5,56,67-87
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_932355d3ceb435::t_e5491d70739e7a 16,19,27,36,40,51,53,55-58,61-66,69-70,73-74,76,83-85,94,97,105-112,118,124-125,131-132
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_932355d3ceb435::t_1a7694ef0bffb0 3-7,11,13,18-19,24-30,55-56,59-90,92,94-104,106-107,110-124,126-184,187-190,192-199,213,223,228-232,234-239,241,246-270
+src/js/apps/patients/shared/components/dialer_view.js
+  s_932355d3ceb435::t_c5f1e3a9ceb7f5 2,13,15-28,54,61,64-65,73,77
+src/js/apps/patients/shared/components/due_view.component.cy.js
+  s_932355d3ceb435::t_a8a725e0e632ad 5,7,13,15,29,31,34,36,58-91
+src/js/apps/patients/shared/components/due_view.js
+  s_932355d3ceb435::t_e62d7cbe516d4d 2,12,20-24,26,28,30-31,33-36,39-41,43-56,59-62,67-69,78-80
+src/js/apps/patients/shared/components/duration_component.component.cy.js
+  s_932355d3ceb435::t_cee3ce0cbcd431 13
+src/js/apps/patients/shared/components/duration_component.js
+  s_932355d3ceb435::t_808979a55934db 28-29,31,47
+src/js/apps/patients/shared/components/owner_component.component.cy.js
+  s_932355d3ceb435::t_b59714432eb51f 111
+src/js/apps/patients/shared/components/owner_component.js
+  s_932355d3ceb435::t_ec2b375e898fdc 63-64,94-96,99-100,118,146
+src/js/apps/patients/shared/components/state_component.component.cy.js
+  s_932355d3ceb435::t_0a812e9340ad74 28,66,75,99
+src/js/apps/patients/shared/components/state_component.js
+  s_932355d3ceb435::t_0d0a055c9f79d4 44-46,56,60-63,68-69,71
+src/js/apps/patients/shared/components/time_component.component.cy.js
+  s_932355d3ceb435::t_81663a110eee12 20,62
+src/js/apps/patients/shared/components/time_component.js
+  s_932355d3ceb435::t_56b69e4cafdf8a 35-38,40-43,48,54,56-57,75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "eaeef433e2161bf943a138d138ae9d35a186e4e2",
+  "prompts": {},
+  "sessions": {
+    "s_932355d3ceb435": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ccb7-194c-72d2-b859-443afa9808ef",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

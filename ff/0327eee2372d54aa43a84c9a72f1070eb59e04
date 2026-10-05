@@ -1,0 +1,132 @@
+src/scss/modules/card-list.scss
+  s_2326781df73def::t_72120f2947cb8b 5-6,24,42,49,52,58,67,71-77
+src/scss/modules/forms.scss
+  s_2326781df73def::t_72120f2947cb8b 1,4-7,10,14,29-32,35,38,40-42
+src/js/components/datepicker/datepicker.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 14
+src/js/services/patient-modal/patient-modal_views.js
+  s_2326781df73def::t_72120f2947cb8b 8-9,39,94,118
+src/js/components/dateselect/date-select.hbs
+  s_2326781df73def::t_72120f2947cb8b 3-4
+src/js/regions/preload.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-19
+src/scss/domain/action-card.scss
+  s_2326781df73def::t_72120f2947cb8b 1-293
+src/js/services/sidebar/sidebar.hbs
+  s_2326781df73def::t_72120f2947cb8b 8
+src/scss/domain/patient-list.scss
+  s_2326781df73def::t_72120f2947cb8b 1-75
+src/js/components/team/index.js
+  s_2326781df73def::t_72120f2947cb8b 46,56
+src/js/services/modal/modal_views.js
+  s_2326781df73def::t_72120f2947cb8b 53,55,119-121,129
+src/js/components/optionlist/optionlist.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 10
+src/js/components/tooltip/tooltip.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 22,127
+src/js/components/datepicker/datepicker_views.js
+  s_2326781df73def::t_72120f2947cb8b 6-7,18
+src/js/services/sidebar.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-30
+src/js/regions/preload_region.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 49,55-56,62,68
+src/js/services/modal/modal.hbs
+  s_2326781df73def::t_72120f2947cb8b 1,5,15
+src/js/i18n/en-US/shared.yml
+  s_2326781df73def::t_72120f2947cb8b 9
+src/js/utils/stop-event-propagation.js
+  s_2326781df73def::t_72120f2947cb8b 1-3
+src/scss/modules/textarea-flex.scss
+  s_2326781df73def::t_72120f2947cb8b 1-4,15,22-37
+src/js/components/picklist/index.js
+  s_2326781df73def::t_72120f2947cb8b 16-17,163
+src/js/components/dateselect/index.js
+  s_2326781df73def::t_72120f2947cb8b 6-7,45
+src/js/services/modal.js
+  s_2326781df73def::t_72120f2947cb8b 4-7,67,93,149
+src/js/components/datepicker/layout.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-6
+src/js/services/widgets.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 2,7,53-73
+  s_2326781df73def::t_5f4ed141e6ccc6 74
+src/js/services/modal/modal.e2e.cy.js
+  s_2326781df73def::t_72120f2947cb8b 68,135,144,158,161,186
+src/js/services/modal/modal_views.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-58
+src/js/behaviors/form-viewport.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 9-11,15-16,21,30,32-34,61-137
+src/js/components/droplist/index.js
+  s_2326781df73def::t_72120f2947cb8b 39
+src/js/services/dialer.e2e.cy.js
+  s_2326781df73def::t_72120f2947cb8b 231,264,490,523
+src/js/services/patient-modal/patient-modal.scss
+  s_2326781df73def::t_72120f2947cb8b 20-23,44
+src/scss/core/_tokens.scss
+  s_2326781df73def::t_72120f2947cb8b 41
+src/scss/modules/progress-bar.scss
+  s_2326781df73def::t_72120f2947cb8b 2,4-6,8,12-13,17-18,22-23,27,29
+src/js/entities-service/entities/entity-messages.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-46
+src/js/utils/stop-event-propagation.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-11
+src/scss/modules/buttons.scss
+  s_2326781df73def::t_72120f2947cb8b 6,11,13,20,44-47,64,81,86,94,97-98,104,107-108,118-120,123-125,141-143,157-159,173-175,179,187,197,199-200,214,216,231,233-234,236,241-254,265,270,274,277,279-286,290-293
+  s_2326781df73def::t_c8c6a2de30f952 294
+src/scss/domain/action-icons.scss
+  s_2326781df73def::t_72120f2947cb8b 1-4
+src/js/regions/preload_region.js
+  s_2326781df73def::t_72120f2947cb8b 4,6,19-23
+src/js/components/dateselect/dateselect_views.js
+  s_2326781df73def::t_72120f2947cb8b 2,8-16
+packages/care-ops-ringcentral/ringcentral.scss
+  s_2326781df73def::t_72120f2947cb8b 8-15
+src/scss/modules/list-pages.scss
+  s_2326781df73def::t_72120f2947cb8b 1,9-11,13,19,29,34-37,40-47,63,66,77,80-83,91,98,102,113,117,123-124,126
+src/js/components/list-search/list-search-component.scss
+  s_2326781df73def::t_72120f2947cb8b 2,4
+src/scss/modules/modals.scss
+  s_2326781df73def::t_72120f2947cb8b 2-3,12,126
+src/scss/modules/fill-window.scss
+  s_2326781df73def::t_72120f2947cb8b 8-11
+src/js/components/list-search/list-search_views.js
+  s_2326781df73def::t_72120f2947cb8b 13
+src/scss/modules/skeleton.scss
+  s_2326781df73def::t_72120f2947cb8b 1-43
+src/scss/modules/loader.scss
+  s_2326781df73def::t_72120f2947cb8b 6-8,22-24
+src/js/components/dateselect/date-select.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 18-22,35-39,84-88,99-103,182
+src/js/components/dateselect/date-select.scss
+  s_2326781df73def::t_72120f2947cb8b 1-9,22-40
+  s_2326781df73def::t_2cd343d256c91a 41
+src/js/base/helpers.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 46
+src/scss/domain/flow-card.scss
+  s_2326781df73def::t_72120f2947cb8b 1-267
+src/js/components/workspaces-manager/index.js
+  s_2326781df73def::t_72120f2947cb8b 4,16,51
+src/js/components/picklist/picklist.scss
+  s_2326781df73def::t_72120f2947cb8b 70-81
+packages/care-ops-five9/five9.scss
+  s_2326781df73def::t_72120f2947cb8b 8-15
+src/js/components/team/team-component.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 56,76,102,128
+src/js/behaviors/sortable-list.js
+  s_2326781df73def::t_72120f2947cb8b 6-8,24,35,47,57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "ff0327eee2372d54aa43a84c9a72f1070eb59e04",
+  "prompts": {},
+  "sessions": {
+    "s_2326781df73def": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffef4-6532-7662-9084-64d1a2c60264",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

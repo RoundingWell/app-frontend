@@ -1,0 +1,33 @@
+src/js/apps/programs/program/workflows/flow-item.hbs
+  s_09e8292bb4bcb3::t_d1b1fc360d8875 1-16,18,20-23
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_09e8292bb4bcb3::t_642adff458e664 121
+  s_09e8292bb4bcb3::t_28ced171948e40 9
+  s_09e8292bb4bcb3::t_133cfc71d90b43 30
+  s_09e8292bb4bcb3::t_72ce6c01182a14 51
+  s_09e8292bb4bcb3::t_047d4a2eea13e6 160
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_09e8292bb4bcb3::t_9940e4525b1ae6 113
+  s_09e8292bb4bcb3::t_4adee229b1d31d 97,103,109,117,123,128,146,164,172,190,201,269,386,505
+  s_09e8292bb4bcb3::t_aac74d843cfb81 98,104,110,118,165,208,213,219,226,270
+src/js/apps/programs/program/workflows/layout.hbs
+  s_09e8292bb4bcb3::t_7189a03de25d8d 7
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_09e8292bb4bcb3::t_9d5f2a9d50b0e2 1-18,21-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "bb158019f703c680bbc5a17d36429f1b0bcfcea7",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

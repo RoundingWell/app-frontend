@@ -1,0 +1,19 @@
+src/js/apps/patients/schedule/schedule_views.js
+  s_09e8292bb4bcb3::t_e7d9e0b6fd940c 168,170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "c8c2e06b3ee092ce642b1fdd2ff67f29884804e3",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

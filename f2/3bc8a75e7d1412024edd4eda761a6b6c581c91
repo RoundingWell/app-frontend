@@ -1,0 +1,65 @@
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_c7369b14ca0138::t_eec14873faa5e1 42,63,96,436,766,847,875,913,943,1027,1127
+  s_c7369b14ca0138::t_5d0c6123010e6f 20,61,74,264,794,874,905,933,1006,1104
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 14,76,205,253
+  s_c7369b14ca0138::t_eec14873faa5e1 21,108,211,259,278
+  s_c7369b14ca0138::t_4f11c237e8e3b0 49-72
+  s_c7369b14ca0138::t_496ae7b6491e65 227,237
+test/support/commands.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 38,52
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 37,1967,2003,2153
+  s_c7369b14ca0138::t_eec14873faa5e1 45,234,240,469,540,557,998,1159,1205,1242,1359,1655,1985,2084,2200,2229
+  s_c7369b14ca0138::t_88303693edcac0 1469,1840
+  s_c7369b14ca0138::t_496ae7b6491e65 63,448,2120
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 4249
+src/js/apps/patients/patient/workflow/layout.hbs
+  s_c7369b14ca0138::t_6c74bc8e45e391 4-5,7-8
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 1528,1771,1923,2003,2093
+  s_c7369b14ca0138::t_eec14873faa5e1 2542,2719
+src/js/apps/patients/patient/workflow/done-layout.hbs
+  s_c7369b14ca0138::t_6c74bc8e45e391 4-5,7-8
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 47,1724
+  s_c7369b14ca0138::t_eec14873faa5e1 1769
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 11,46
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_c7369b14ca0138::t_26cbdeddfafe36 369-370,372,375
+src/js/services/dialer.e2e.cy.js
+  s_c7369b14ca0138::t_496ae7b6491e65 205,216,464,475
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 1059
+src/js/apps/patients/patient/form/patient.e2e.cy.js
+  s_c7369b14ca0138::t_eec14873faa5e1 620,688
+  s_c7369b14ca0138::t_5d0c6123010e6f 592
+src/js/i18n/en-US/patients.yml
+  s_c7369b14ca0138::t_fd95a40f4884dd 104-107
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 63,339,405,481
+src/js/base/routing.md
+  s_c7369b14ca0138::t_90211868be5c86 55-60
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_c7369b14ca0138::t_5d0c6123010e6f 2061,2139,3060,3172,3252,3319,3403
+  s_c7369b14ca0138::t_b9190977514908 2999-3025
+  s_c7369b14ca0138::t_eec14873faa5e1 2981,3097,3200,3277,3357
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "f23bc8a75e7d1412024edd4eda761a6b6c581c91",
+  "prompts": {},
+  "sessions": {
+    "s_c7369b14ca0138": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f51eacee-b35d-4bd2-b6cc-d2fc3b11c924",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
