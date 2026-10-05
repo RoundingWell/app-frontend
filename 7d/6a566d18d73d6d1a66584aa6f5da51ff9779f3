@@ -1,0 +1,29 @@
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_7d9748a0496f68::t_d97774823c4707 17-18,20,29,40,49,56,60,111
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_7d9748a0496f68::t_e164ad500bf7ad 4,64-65,76,90-91,169,249-250,300,312,322,332
+src/js/apps/programs/sidebar/flow/flow-sidebar_app.js
+  s_7d9748a0496f68::t_eaae46f4ee4dc2 14,22-23,25,36,39,46,50
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_7d9748a0496f68::t_e8250c56482ed3 5,68-69,80,94-95,142,213-214,262,273
+src/js/apps/programs/sidebar/program/program-sidebar_app.js
+  s_7d9748a0496f68::t_410b56958caf0a 8,22,32,42,46
+src/js/apps/programs/sidebar/program/programs-sidebar_views.js
+  s_7d9748a0496f68::t_5c17d5b5ae4af2 60-61,73,87-88,159-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7d6a566d18d73d6d1a66584aa6f5da51ff9779f3",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

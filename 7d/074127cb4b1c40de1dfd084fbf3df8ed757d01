@@ -1,0 +1,21 @@
+src/js/services/modal/modal.e2e.cy.js
+  s_70d6b69a3b5d9e::t_ff7567d669b041 159
+src/js/services/modal/modal_views.js
+  s_70d6b69a3b5d9e::t_34e991bb0eec2a 67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7d074127cb4b1c40de1dfd084fbf3df8ed757d01",
+  "prompts": {},
+  "sessions": {
+    "s_70d6b69a3b5d9e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01688-306f-7b13-91d4-20c3ecb71cfa",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

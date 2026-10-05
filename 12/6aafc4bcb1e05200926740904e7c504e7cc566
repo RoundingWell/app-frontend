@@ -1,0 +1,21 @@
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_a062e60a2cb959::t_545b0170263e46 4-5,7-9,11-12
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_a062e60a2cb959::t_eabf2fcc3ec878 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "126aafc4bcb1e05200926740904e7c504e7cc566",
+  "prompts": {},
+  "sessions": {
+    "s_a062e60a2cb959": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a010fd-0579-70c1-a679-6357617afbaf",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

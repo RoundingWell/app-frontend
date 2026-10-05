@@ -1,0 +1,35 @@
+src/js/apps/programs/program/action/action_app.js
+  s_7d9748a0496f68::t_f0b41896a6eee7 15,28,30,33-35
+src/js/apps/programs/program/flow/action-item.hbs
+  s_7d9748a0496f68::t_25299f3b5b69c1 2,16,23-24
+src/js/apps/programs/program/flow/flow_app.js
+  s_7d9748a0496f68::t_b802b806edf33f 26,28-33,35,42,53-57,61-63,66-68,79,91,95,107,112,114-120,122-124
+src/js/apps/programs/program/flow/flow_views.js
+  s_7d9748a0496f68::t_97b6c6d025102f 2,67,144,154,163,176,188
+src/js/apps/programs/program/program_app.js
+  s_7d9748a0496f68::t_0d25fee4941c25 14,20,25-31,34,39,42-43,46,49-51,60-72,75,77-79,81-82,87,89-91,96,99-100,111-113,125
+src/js/apps/programs/program/program_views.js
+  s_7d9748a0496f68::t_a6dd3a6ada8dc8 2
+src/js/apps/programs/program/sidebar/sidebar-views.js
+  s_7d9748a0496f68::t_785e2e03ee42fb 46
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_7d9748a0496f68::t_fd5067dd458c41 13,15-20,22-26,28,30,57
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_7d9748a0496f68::t_fd53b795801a30 1,46,49,93,105,115,157,203-204
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6a475e4101d2f26a6efb38cea4ef8b9bd98bd53c",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

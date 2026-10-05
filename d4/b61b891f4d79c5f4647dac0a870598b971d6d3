@@ -1,0 +1,19 @@
+test/integration/patients/sidebar/action-sidebar.js
+  s_44c886cd8fd84f::t_0aade6e6df713e 26-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "d4b61b891f4d79c5f4647dac0a870598b971d6d3",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

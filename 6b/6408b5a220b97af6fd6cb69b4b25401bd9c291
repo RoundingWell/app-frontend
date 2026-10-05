@@ -1,0 +1,29 @@
+src/js/apps/patients/shared/components/check_view.component.cy.js
+  s_7d9748a0496f68::t_b74a95a4236a63 1,3,17,20,23,28
+src/js/apps/patients/shared/components/check_view.js
+  s_7d9748a0496f68::t_6fafea046e2245 2,6-16,21,23-24,26-27,29-30,32-33,36-38
+src/js/apps/patients/shared/components/dialer_view.js
+  s_7d9748a0496f68::t_193352f4fb215e 13,15-28,54,61,64-65,73,77
+src/js/apps/patients/shared/components/due_view.component.cy.js
+  s_7d9748a0496f68::t_c6aa844c65baf2 5,7,19,21,35,37,40,42,64-97
+src/js/apps/patients/shared/components/due_view.js
+  s_7d9748a0496f68::t_cf29aa4286f498 2,12,20-24,26,28,30-31,33-36,39-41,43-44,48-59,62-65,70-72,81-83
+src/js/i18n/en-US/patients.yml
+  s_7d9748a0496f68::t_1feb28021766c9 316,320
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6b6408b5a220b97af6fd6cb69b4b25401bd9c291",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

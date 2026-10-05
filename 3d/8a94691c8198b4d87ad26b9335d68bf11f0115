@@ -1,0 +1,23 @@
+src/js/apps/patients/schedule/day-item.hbs
+  s_33bb8cd239820b::t_9b4207bbaf3b6a 14,17
+src/js/apps/patients/schedule/schedule-list.scss
+  s_33bb8cd239820b::t_2cc980735d18b5 58,155-167,175-181,184,193-194,210,276,282,285,288-290,293-294
+src/js/apps/patients/worklist/worklist-list.scss
+  s_33bb8cd239820b::t_1f790705918307 91,102-107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3d8a94691c8198b4d87ad26b9335d68bf11f0115",
+  "prompts": {},
+  "sessions": {
+    "s_33bb8cd239820b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f0cd-bbc3-7263-bd22-4fdeb98ce196",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

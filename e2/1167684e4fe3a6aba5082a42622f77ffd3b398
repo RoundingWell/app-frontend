@@ -1,0 +1,83 @@
+src/js/entities-service/workspace-patients.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,15
+src/js/apps/patients/patient/action/action-details_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 125,130
+src/js/apps/patients/patient/action/action_views.js
+  s_85aebd1623278c::t_447647e7a1a406 22
+  s_85aebd1623278c::t_a3fcf71e266ab6 109-111
+src/js/apps/patients/patient/form/form_app.js
+  s_85aebd1623278c::t_447647e7a1a406 45,78
+  s_85aebd1623278c::t_8f7607bf18d072 43
+  s_85aebd1623278c::t_899ae093931bf4 42,55-56,58,62-66,217-218,247,251,338-340,343,347,350
+  s_85aebd1623278c::t_e3ef32db9d5350 2,6,14,33-35,39,49,59,76-77,83,98,122,141,155,180,195,204,213,229,243,256,258,264,285,293,295,298,301,304,306,315,317,321,325,330,333,337,362,366,375,386
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 53
+  s_85aebd1623278c::t_f8fcfa2604d51a 52
+  s_85aebd1623278c::t_d132db48676a59 80,248-250,254
+  s_85aebd1623278c::t_3944b39741556e 81
+  s_85aebd1623278c::t_f320c5997ab973 68
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_5993d3362bd802 20,103
+  s_85aebd1623278c::t_f522eeba27c6c0 110-114,544-556
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_85aebd1623278c::t_0fe91cd4de930c 26,32,38,44,50,60,70,80,86,96,102,108,114,120,301
+src/js/entities-service/events.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12-13
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11-12,14,37
+  s_85aebd1623278c::t_cbe0f12c0f6867 17,23,38
+src/js/entities-service/files.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,13,15
+src/js/entities-service/entities/widgets.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11-12
+src/js/entities-service/forms.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 42-43
+src/js/entities-service/form-responses.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 18-20,22,25
+src/js/apps/patients/patient/form/widgets/widgets_header_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 8-9,11,13,15
+src/js/apps/patients/shared/components/dialer_view.js
+  s_85aebd1623278c::t_a4e2406ff1b832 19-23
+src/js/apps/patients/patient/patient_app.js
+  s_85aebd1623278c::t_d132db48676a59 128
+  s_85aebd1623278c::t_899ae093931bf4 129-132
+src/js/apps/patients/shared/widgets/widgets.js
+  s_85aebd1623278c::t_f8fcfa2604d51a 138
+  s_85aebd1623278c::t_899ae093931bf4 134,137,139-140
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11,13-17,19,27,31,42,59,76
+src/js/entities-service/widget-values.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,21
+src/js/entities-service/comments.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,14
+src/js/entities-service/flows.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 19-22
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 104,111
+src/js/apps/patients/shared/components/due_view.js
+  s_85aebd1623278c::t_a4e2406ff1b832 30-34
+src/js/apps/patients/patient/action/action_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 2,6,23-28,33,58,96,106,141,156-157,169,202,204,251,253,256,275,298-301,304,309-312,315,320
+  s_85aebd1623278c::t_35479938c99de5 130
+  s_85aebd1623278c::t_d132db48676a59 153,252,254-255,262-263,265
+  s_85aebd1623278c::t_f320c5997ab973 75,82
+  s_85aebd1623278c::t_26b38907fd0a7b 155
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 60-65,67,69-71,73-74,76-77
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 20-23,25,27,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e21167684e4fe3a6aba5082a42622f77ffd3b398",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

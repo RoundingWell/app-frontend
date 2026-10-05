@@ -1,0 +1,21 @@
+src/js/apps/globals/nav/whats-new/whats-new.scss
+  s_2d91c07b8aa12c::t_15dff461a70e14 40
+src/js/apps/globals/nav/whats-new/announcement.hbs
+  s_2d91c07b8aa12c::t_15dff461a70e14 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "0d59d0e49a6447fd14234c1901bda63cb682a196",
+  "prompts": {},
+  "sessions": {
+    "s_2d91c07b8aa12c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a046dd-e987-7010-815b-e2ec94d7f5d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

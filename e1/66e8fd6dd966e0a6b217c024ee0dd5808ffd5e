@@ -1,0 +1,19 @@
+test/integration/patients/sidebar/action-sidebar.js
+  s_2f5d775ddb4a37::t_e2d13fefa2f299 2846-2847
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "e166e8fd6dd966e0a6b217c024ee0dd5808ffd5e",
+  "prompts": {},
+  "sessions": {
+    "s_2f5d775ddb4a37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "97d5b7b3-3d60-4064-90fb-56ac3e4bc258",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

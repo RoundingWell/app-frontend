@@ -1,0 +1,297 @@
+packages/care-ops-five9/five9_app.js
+  s_7d9748a0496f68::t_caa9326590a09b 2
+packages/care-ops-five9/five9_views.js
+  s_7d9748a0496f68::t_393d27619265ec 5
+packages/care-ops-ringcentral/ringcentral_app.js
+  s_7d9748a0496f68::t_cbf696a58038ba 1
+packages/care-ops-ringcentral/ringcentral_views.js
+  s_7d9748a0496f68::t_a10e4f46dbac72 5
+src/js/app.js
+  s_7d9748a0496f68::t_f10c92fbcf156d 7
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_7d9748a0496f68::t_aef7f085775530 3
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_7d9748a0496f68::t_3d9287e1884ff3 2
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_7d9748a0496f68::t_6c88abe7fe13ce 3
+src/js/apps/clinicians/shared/clinicians_views.js
+  s_7d9748a0496f68::t_01b2d30024255a 2
+src/js/apps/clinicians/shared/components/role_component.js
+  s_7d9748a0496f68::t_be851eedaadccf 2
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_app.js
+  s_7d9748a0496f68::t_0cca6fe267e8f4 1
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_7d9748a0496f68::t_9b09071b7ae7f8 2
+src/js/apps/dashboards/dashboard/dashboard_app.js
+  s_7d9748a0496f68::t_1e6212cac2b2ee 1
+src/js/apps/dashboards/dashboard/dashboard_views.js
+  s_7d9748a0496f68::t_f6d60c408d7db7 3
+src/js/apps/dashboards/dashboards-all/dashboards-all_app.js
+  s_7d9748a0496f68::t_9951c84cf89258 1
+src/js/apps/dashboards/dashboards-all/dashboards-all_views.js
+  s_7d9748a0496f68::t_2dcf0bc5e6a9ec 3
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_7d9748a0496f68::t_b1a289a79fd37d 2
+src/js/apps/globals/app-frame/root_views.js
+  s_7d9748a0496f68::t_0b1d503e7e216c 3
+src/js/apps/globals/error/error_views.js
+  s_7d9748a0496f68::t_9411d9fb8aed58 1
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_7d9748a0496f68::t_735f552e226d22 2
+src/js/apps/globals/nav/nav_app.js
+  s_7d9748a0496f68::t_fd976c267ec3ae 3
+src/js/apps/globals/nav/whats-new/whats-new_views.js
+  s_7d9748a0496f68::t_6310d63bdef0c8 1
+src/js/apps/globals/search/patient-search_views.js
+  s_7d9748a0496f68::t_81ff090a28a589 3
+src/js/apps/globals/search/search_app.js
+  s_7d9748a0496f68::t_f9276ff1fdc6e1 1
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_7d9748a0496f68::t_aebdb7e8248fe7 2
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_7d9748a0496f68::t_605bc12a2aa913 5
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_7d9748a0496f68::t_0873d8a0314ef9 1
+src/js/apps/patients/patient/action/action-attachments_views.js
+  s_7d9748a0496f68::t_5ae72fdcc1848f 2
+src/js/apps/patients/patient/action/action_app.js
+  s_7d9748a0496f68::t_59c4b751ab256e 2
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  s_7d9748a0496f68::t_517dbe01b49a47 1
+src/js/apps/patients/patient/flow/flow_app.js
+  s_7d9748a0496f68::t_c63a7dcd685a89 3
+src/js/apps/patients/patient/flow/flow_views.js
+  s_7d9748a0496f68::t_0d4d1f3a4d9ff3 4
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_7d9748a0496f68::t_b2449a7753b374 3
+src/js/apps/patients/patient/form/form-viewport.js
+  s_7d9748a0496f68::t_85faff7a704ac8 1
+src/js/apps/patients/patient/form/form_app.js
+  s_7d9748a0496f68::t_700ae3f2bd12f5 2
+src/js/apps/patients/patient/form/form_views.js
+  s_7d9748a0496f68::t_231773dd40bb4b 3
+src/js/apps/patients/patient/form/widgets/widgets_header_app.js
+  s_7d9748a0496f68::t_7c2bb5c1b28b51 1
+src/js/apps/patients/patient/patient_app.js
+  s_7d9748a0496f68::t_5ab8fae9b69346 3
+src/js/apps/patients/patient/patient_views.js
+  s_7d9748a0496f68::t_29fccdb57d7cc5 1
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_7d9748a0496f68::t_f3e6be7ac04c87 1
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_7d9748a0496f68::t_9a643a84f7905f 2
+src/js/apps/patients/patient/workflow/add-workflow_app.js
+  s_7d9748a0496f68::t_e49b8e24f37af5 3
+src/js/apps/patients/patient/workflow/workflow_app.js
+  s_7d9748a0496f68::t_fe3a11ae40b8d8 2
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_7d9748a0496f68::t_4c6234dfb5f93c 3
+src/js/apps/patients/patients-main_app.js
+  s_7d9748a0496f68::t_81ec6b4318a07e 2
+src/js/apps/patients/schedule/schedule_app.js
+  s_7d9748a0496f68::t_422314feb461cf 2
+src/js/apps/patients/schedule/schedule_state.js
+  s_7d9748a0496f68::t_734ff15e110967 6
+src/js/apps/patients/schedule/schedule_views.js
+  s_7d9748a0496f68::t_04f9b1479c6cf8 2
+src/js/apps/patients/shared/actions_views.js
+  s_7d9748a0496f68::t_51a06f4468c89b 3
+src/js/apps/patients/shared/bulk-edit/bulk-edit_views.js
+  s_7d9748a0496f68::t_8ee2c7908c0b9c 5
+src/js/apps/patients/shared/comments_views.js
+  s_7d9748a0496f68::t_af75b9adabf5b2 2
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_7d9748a0496f68::t_b2e08a72c2a06f 3
+src/js/apps/patients/shared/components/owner_component.component.cy.js
+  s_7d9748a0496f68::t_9440c59f1088d1 1
+src/js/apps/patients/shared/components/owner_component.js
+  s_7d9748a0496f68::t_01ff123049c34f 2
+src/js/apps/patients/shared/components/state_component.component.cy.js
+  s_7d9748a0496f68::t_383f848beed5f5 1
+src/js/apps/patients/shared/components/state_component.js
+  s_7d9748a0496f68::t_fdd88f5b58d5a7 2
+src/js/apps/patients/shared/filters_state.js
+  s_7d9748a0496f68::t_45b94ea3ff6d2c 4
+src/js/apps/patients/shared/flows_views.js
+  s_7d9748a0496f68::t_d5ccb2a00a3480 1
+src/js/apps/patients/shared/list-filters/list-filters_app.js
+  s_7d9748a0496f68::t_7c5c3f71c8f66b 1
+src/js/apps/patients/shared/list-page.js
+  s_7d9748a0496f68::t_506228f5e15cf1 4
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_7d9748a0496f68::t_569413536cd08f 1
+src/js/apps/patients/shared/widgets/widgets.js
+  s_7d9748a0496f68::t_d1121b51f6396a 2
+src/js/apps/patients/worklist/action_views.js
+  s_7d9748a0496f68::t_b62eb9fb4bf95a 2
+src/js/apps/patients/worklist/flow_views.js
+  s_7d9748a0496f68::t_fd3acfb58c6a02 2
+src/js/apps/patients/worklist/worklist_app.js
+  s_7d9748a0496f68::t_d6aa73ef642ff4 2
+src/js/apps/patients/worklist/worklist_sort.js
+  s_7d9748a0496f68::t_a9157861a9dfa8 3
+src/js/apps/patients/worklist/worklist_state.js
+  s_7d9748a0496f68::t_46a5ed7ff56c70 6
+src/js/apps/patients/worklist/worklist_views.js
+  s_7d9748a0496f68::t_18bca35166e58c 3
+src/js/apps/programs/program/action/action_app.js
+  s_7d9748a0496f68::t_596c7c8c0c2a1f 1
+src/js/apps/programs/program/flow/flow_app.js
+  s_7d9748a0496f68::t_92424b9faf748a 1
+src/js/apps/programs/program/flow/flow_views.js
+  s_7d9748a0496f68::t_38d82b046abc6e 2
+src/js/apps/programs/program/program_app.js
+  s_7d9748a0496f68::t_047b35f88d9196 2
+src/js/apps/programs/program/program_views.js
+  s_7d9748a0496f68::t_7c2c649bab355c 2
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_7d9748a0496f68::t_48ef5a81c5d71b 2
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_7d9748a0496f68::t_19e0d987111135 3
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_7d9748a0496f68::t_a664072e446e51 1
+src/js/apps/programs/programs-all/programs-all_views.js
+  s_7d9748a0496f68::t_055927865ef853 2
+src/js/apps/programs/shared/actions_views.js
+  s_7d9748a0496f68::t_c6472ca96aed26 1
+src/js/apps/programs/shared/components/form_component.js
+  s_7d9748a0496f68::t_c7c2330a6acf38 1
+src/js/apps/programs/shared/components/tags-manager_component.js
+  s_7d9748a0496f68::t_1ca24834d76656 2
+src/js/apps/programs/shared/flows_views.js
+  s_7d9748a0496f68::t_b39776b04e3e1b 1
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_7d9748a0496f68::t_7375249782d8b0 2
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_7d9748a0496f68::t_748bbadd24e203 4
+src/js/apps/programs/sidebar/flow/flow-sidebar_app.js
+  s_7d9748a0496f68::t_5465bc0d251d48 1
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_7d9748a0496f68::t_0e1510cc129bca 5
+src/js/apps/programs/sidebar/program/program-sidebar_app.js
+  s_7d9748a0496f68::t_13ef8cf7ec02eb 1
+src/js/auth.component.cy.js
+  s_7d9748a0496f68::t_edbbef0aa87221 1
+src/js/auth.js
+  s_7d9748a0496f68::t_102db475cec506 1
+src/js/base/cache/response-cache.component.cy.js
+  s_7d9748a0496f68::t_8014e7859adfd1 1
+src/js/base/entity-service.js
+  s_7d9748a0496f68::t_f06df2a71730de 4
+src/js/base/fetch.component.cy.js
+  s_7d9748a0496f68::t_8443574341320c 1
+src/js/base/fetch.js
+  s_7d9748a0496f68::t_9efb641bc29cc6 3
+src/js/base/model.js
+  s_7d9748a0496f68::t_db14ca48806eb0 3
+src/js/base/routerapp.js
+  s_7d9748a0496f68::t_6e16ca01b10bc8 3
+src/js/behaviors/iframe-form.component.cy.js
+  s_7d9748a0496f68::t_29cc870c37f9f4 4
+src/js/behaviors/iframe-form.js
+  s_7d9748a0496f68::t_f51b7e41347b1a 3
+src/js/behaviors/key-listener.js
+  s_7d9748a0496f68::t_6685d52eca223d 2
+src/js/behaviors/top-region.js
+  s_7d9748a0496f68::t_781578ccb0c846 2
+src/js/components/team/index.js
+  s_7d9748a0496f68::t_a4b72cd9b4d8b6 2
+src/js/components/team/team-component.component.cy.js
+  s_7d9748a0496f68::t_7989745f4d61a8 1
+src/js/entities-service/clinicians.js
+  s_7d9748a0496f68::t_aeac8074918d69 3
+src/js/entities-service/entities/actions.js
+  s_7d9748a0496f68::t_7571c98e7dd411 3
+src/js/entities-service/entities/clinicians.js
+  s_7d9748a0496f68::t_f2c81f135c3641 2
+src/js/entities-service/entities/events.js
+  s_7d9748a0496f68::t_4f157ac1ca86f1 1
+src/js/entities-service/entities/files.js
+  s_7d9748a0496f68::t_f82af6afd6332c 3
+src/js/entities-service/entities/flows.js
+  s_7d9748a0496f68::t_2cc3c915a28dd7 2
+src/js/entities-service/entities/forms.js
+  s_7d9748a0496f68::t_2a414ead8e26d8 2
+src/js/entities-service/entities/panels.js
+  s_7d9748a0496f68::t_806481bbec2033 1
+src/js/entities-service/entities/patients.js
+  s_7d9748a0496f68::t_32f2d27cf6db41 2
+src/js/entities-service/entities/program-actions.js
+  s_7d9748a0496f68::t_d644af5b137a4d 2
+src/js/entities-service/entities/program-flows.js
+  s_7d9748a0496f68::t_9b7e64982fbefa 2
+src/js/entities-service/entities/programs.js
+  s_7d9748a0496f68::t_f553a9a2063d47 2
+src/js/entities-service/entities/teams.js
+  s_7d9748a0496f68::t_74d2a324f2d22d 1
+src/js/entities-service/entities/widgets.js
+  s_7d9748a0496f68::t_35b8d2d94b3d58 2
+src/js/entities-service/entities/workspace-patients.js
+  s_7d9748a0496f68::t_c1985dddbafa46 1
+src/js/entities-service/entities/workspaces.js
+  s_7d9748a0496f68::t_7211ba20ff1522 1
+src/js/entities-service/filters.js
+  s_7d9748a0496f68::t_ae0bf301d9f72c 2
+src/js/entities-service/workspace-patients.js
+  s_7d9748a0496f68::t_2d5fc2410d9492 1
+src/js/formservice.js
+  s_7d9748a0496f68::t_35700eda5bda9b 5
+src/js/mixins/multiselect-state_mixin.js
+  s_7d9748a0496f68::t_2325fd4179bded 3
+src/js/services/alert.component.cy.js
+  s_7d9748a0496f68::t_5c748ccaa428e1 1
+src/js/services/bootstrap.js
+  s_7d9748a0496f68::t_4d89386baed5ca 3
+src/js/services/dialer.component.cy.js
+  s_7d9748a0496f68::t_44edb0260a6ee9 2
+src/js/services/dialer.js
+  s_7d9748a0496f68::t_d70f93a4fb97e7 2
+src/js/services/forms.component.cy.js
+  s_7d9748a0496f68::t_5065be32b46220 2
+src/js/services/forms.js
+  s_7d9748a0496f68::t_50a4fa67913c29 3
+src/js/services/latest-list.component.cy.js
+  s_7d9748a0496f68::t_63c9bb39ac28a9 1
+src/js/services/latest-list.js
+  s_7d9748a0496f68::t_2eb5cd90ed2c94 1
+src/js/services/modal.js
+  s_7d9748a0496f68::t_879bfc7b26d75e 2
+src/js/services/patient-modal.js
+  s_7d9748a0496f68::t_ef207da0ee93aa 1
+src/js/services/patient-modal/patient-modal_views.js
+  s_7d9748a0496f68::t_c675a6ff9bd0d2 4
+src/js/services/settings.component.cy.js
+  s_7d9748a0496f68::t_36d0d4558311ee 1
+src/js/services/settings.js
+  s_7d9748a0496f68::t_a705aacabd920b 2
+src/js/services/sidebars.component.cy.js
+  s_7d9748a0496f68::t_ddb96bb0036d2c 1
+src/js/services/sidebars.js
+  s_7d9748a0496f68::t_41088ee0201141 2
+src/js/services/widgets.component.cy.js
+  s_7d9748a0496f68::t_2d3c598c2775ef 1
+src/js/services/widgets.js
+  s_7d9748a0496f68::t_30f7d730fd2ec9 2
+src/js/services/workspace.js
+  s_7d9748a0496f68::t_9fd443be6b336c 2
+src/js/services/ws.component.cy.js
+  s_7d9748a0496f68::t_93eca164e6f702 2
+src/js/services/ws.js
+  s_7d9748a0496f68::t_198dae79cec756 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6ab99f5d92e5509025a315b8eb0fbab6235b97eb",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

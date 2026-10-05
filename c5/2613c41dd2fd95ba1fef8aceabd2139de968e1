@@ -1,0 +1,29 @@
+src/js/auth.component.cy.js
+  s_7d9748a0496f68::t_362d3f54ad5ce0 4,10-14
+src/js/auth.js
+  s_7d9748a0496f68::t_20114270ee405f 51
+src/js/auth/prelogin/prelogin.component.cy.js
+  s_7d9748a0496f68::t_994cc20c2b4a43 1-23
+src/js/auth/prelogin/prelogin_views.js
+  s_7d9748a0496f68::t_d0322b41572270 24-26
+src/js/auth/workos.component.cy.js
+  s_7d9748a0496f68::t_c97b990afe5e92 37
+src/js/index.js
+  s_7d9748a0496f68::t_d3c9f82e48286a 29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c52613c41dd2fd95ba1fef8aceabd2139de968e1",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

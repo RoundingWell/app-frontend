@@ -1,0 +1,26 @@
+src/js/base/cache/entity-cache.cy.js
+  s_4f8dcbf2626875::t_1ea0535de805e4 1,3-9,14-60
+  s_4f8dcbf2626875::t_f41d22d86b177c 2,10-13
+src/js/base/cache/entity-cache.js
+  s_4f8dcbf2626875::t_5a092e47379c20 55-57,60
+  s_4f8dcbf2626875::t_5f9b9e94fb2cf9 31-48
+  s_4f8dcbf2626875::t_65fd2771b08e5d 63,72
+  s_4f8dcbf2626875::t_7290c44201a37c 1,5-30,49-54,58-59,61-62,64-71,73-89
+  s_4f8dcbf2626875::t_5d37eb61fc063b 2-4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "900a21032a0e7dca261fae55c9f0304caf1d8185",
+  "prompts": {},
+  "sessions": {
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

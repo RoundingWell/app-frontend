@@ -1,0 +1,59 @@
+src/js/views/globals/modal/modal_views.js
+  s_5a146704f00d9c::t_dee6045b96cec1 65
+src/js/README.md
+  s_5a146704f00d9c::t_dee6045b96cec1 6,24-25
+test/README.md
+  s_5a146704f00d9c::t_dee6045b96cec1 98
+src/js/apps/globals/app-frame_app.cy.js
+  s_5a146704f00d9c::t_dee6045b96cec1 1-65
+src/js/base/routing.md
+  s_5a146704f00d9c::t_dee6045b96cec1 12-18,43-44,65-66,69-70,73-75,78-82,174-175
+src/scss/modules/buttons.scss
+  s_5a146704f00d9c::t_dee6045b96cec1 268-269
+src/js/services/ws.cy.js
+  s_5a146704f00d9c::t_dee6045b96cec1 11-30,50-51,53-55,59,598-645,649,667
+test/support/defaults.js
+  s_5a146704f00d9c::t_dee6045b96cec1 43-48
+.github/copilot-instructions.md
+  s_5a146704f00d9c::t_dee6045b96cec1 13,31
+src/js/entities-service/README.md
+  s_5a146704f00d9c::t_dee6045b96cec1 1,3-5,7-104
+src/js/services/modal.js
+  s_5a146704f00d9c::t_dee6045b96cec1 1,3,11,64-65,82-113,115-117,129-133
+src/js/base/routerapp.js
+  s_5a146704f00d9c::t_dee6045b96cec1 10-12,55-57,59,101,109
+src/js/base/routerapp.cy.js
+  s_5a146704f00d9c::t_dee6045b96cec1 60,75,83-103,109-110,115,119,127-130,132-137,139-140,143-146,152,164,174,185,196
+src/js/services/ws.js
+  s_5a146704f00d9c::t_dee6045b96cec1 48-52,57,60,62-63
+src/js/services/latest-list.cy.js
+  s_5a146704f00d9c::t_dee6045b96cec1 1-70
+.github/copilot.yaml
+  s_5a146704f00d9c::t_dee6045b96cec1 12,23,36
+src/js/views/globals/modal/modal.hbs
+  s_5a146704f00d9c::t_dee6045b96cec1 4
+AGENTS.md
+  s_5a146704f00d9c::t_dee6045b96cec1 13,42-60,70,72-79,105-112,116-123,128-129,131-134,143
+test/integration/patients/patient/sidebar.js
+  s_5a146704f00d9c::t_dee6045b96cec1 7,240,416-480
+package.json
+  s_5a146704f00d9c::t_dee6045b96cec1 90
+src/js/services/latest-list.js
+  s_5a146704f00d9c::t_dee6045b96cec1 14-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "29cdbee58623baa0550ace0993f2db23f6871f3a",
+  "prompts": {},
+  "sessions": {
+    "s_5a146704f00d9c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b99-b4a2-7582-bd31-5b23242fc748",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

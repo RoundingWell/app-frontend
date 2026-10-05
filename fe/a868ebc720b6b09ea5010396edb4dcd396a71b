@@ -1,0 +1,23 @@
+src/js/apps/patients/shared/list-filters/list-filters_app.js
+  s_7d9748a0496f68::t_38a06d9437939e 10,12
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_7d9748a0496f68::t_38a06d9437939e 19,37
+src/js/apps/patients/shared/list-sidebar_app.js
+  s_7d9748a0496f68::t_38a06d9437939e 16-19,33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fea868ebc720b6b09ea5010396edb4dcd396a71b",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+src/js/apps/patients/patient/form/form_views.js
+  s_5cb787676df08f::t_91b5d860243726 22,27,40,48,51-52,54
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_5cb787676df08f::t_240b04fcc5e585 1965-1972,1979-2042,2044-2046
+  s_5cb787676df08f::t_1dfb7b3791e7d8 2043,2047-2048
+src/js/apps/patients/patient/form/form_app.js
+  s_75d71698654ae6::t_6d8c7a9356f45c 35,39,43,45,50,215,220-228
+src/js/apps/patients/patient/patient_app.js
+  s_5cb787676df08f::t_12f618c0aa4451 25,28,79,96-99,108-111,117,123,125-127,131-147
+src/js/apps/patients/patient/patient_views.js
+  s_bf038f572e8bda::t_ff62d477da6569 102-104
+src/js/apps/patients/patient/patient.scss
+  s_5cb787676df08f::t_77fb138797a6fa 21-25
+  s_5cb787676df08f::t_88cd4706615595 26
+src/js/apps/patients/patient/action/action_views.js
+  s_5cb787676df08f::t_fddfda02f2b7db 54-57
+src/js/apps/patients/patient/action/action_app.js
+  s_5cb787676df08f::t_fe9c9cb5b38ab3 95,104,125-126,203,208,210-251
+src/js/apps/patients/patient/action/action.scss
+  s_5cb787676df08f::t_2ddf5634adf3e7 50
+  s_5cb787676df08f::t_9b94be491c68ea 51-53
+  s_5cb787676df08f::t_371111ee0c23b1 54-80
+src/js/apps/patients/patients-main_app.js
+  s_5cb787676df08f::t_394fc65d2188ad 59-62,71-74,129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "fd84ac225782e6f4f72f676bcf45e4781a13b29f",
+  "prompts": {},
+  "sessions": {
+    "s_5cb787676df08f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f380a-6030-7862-907a-777090f3c585",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_75d71698654ae6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5c2a-b3c8-7691-8399-34693be77aa7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_bf038f572e8bda": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f235b-3bd8-7db3-a6cf-2a9360e7463e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

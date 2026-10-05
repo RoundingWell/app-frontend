@@ -1,0 +1,28 @@
+.circleci/config.yml
+  s_3e1030f43ca60f::t_c5430a3c0c7afc 188-193,197-210
+  s_3e1030f43ca60f::t_8806312b1a64bc 7
+  s_3e1030f43ca60f::t_62ae8ff32850a2 467-468,471
+  s_3e1030f43ca60f::t_393fc5a47505f3 454-455,459
+  s_3e1030f43ca60f::t_f925f3572cb367 429-430,434
+  s_3e1030f43ca60f::t_8f313322512c83 417-418,421
+  s_3e1030f43ca60f::t_ec79a20d73de92 442-443,446
+  s_3e1030f43ca60f::t_6ff4b7595a2837 479-480,484
+  s_3e1030f43ca60f::t_372d4ca8a22043 194-196
+  s_3e1030f43ca60f::t_0415dea1c3cc60 123-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "f6c0ea4e05bb67648ee6f137419ee6bb115a7643",
+  "prompts": {},
+  "sessions": {
+    "s_3e1030f43ca60f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "59ce727e-dcc6-47dc-ab0c-374600d5d0d9",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

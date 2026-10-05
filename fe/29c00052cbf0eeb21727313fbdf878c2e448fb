@@ -1,0 +1,67 @@
+src/js/apps/patients/patients-main_app.component.cy.js
+  s_e9c4ebfa58429b::t_c7b31c9b3406f1 31-33,37
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_e9c4ebfa58429b::t_db5d848c57eaa7 54-58,188
+  s_e9c4ebfa58429b::t_5373e7eea13059 276-277,296-297,317-318,337-338,349-350,1000,1004,1009-1012,1045,1049,1054-1057,1084,1088-1091,1113,1133
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  s_e9c4ebfa58429b::t_acd0b17f9e9dd5 163
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_e9c4ebfa58429b::t_acd0b17f9e9dd5 235,286
+src/js/services/dialer.e2e.cy.js
+  s_e9c4ebfa58429b::t_5a648b963fdd74 144,248,397,501
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_e9c4ebfa58429b::t_18967648fbb0ec 3050,3107
+  s_e9c4ebfa58429b::t_9ef23b581c5b97 2026
+  s_e9c4ebfa58429b::t_aafc75d3c97049 1942-1943,1962,2033-2037,2270-2271,2279,2299-2303
+  s_e9c4ebfa58429b::t_f0cdc130fb757b 930,937-938,1579,1589-1590,1595-1596,1609,1615,1626-1627,1645-1646,1693,1839
+  s_e9c4ebfa58429b::t_00ba10efc32b9e 2092-2122
+  s_e9c4ebfa58429b::t_cc7c7588a86363 2024
+  s_e9c4ebfa58429b::t_3b7732fb6d81fb 2237-2243,2253-2259,2293,2512,2529,2609,2685-2686,2758-2762,2765-2766,2774-2789
+  s_e9c4ebfa58429b::t_3e1d96540dac04 2022-2023
+  s_e9c4ebfa58429b::t_e1c686bb65d7c8 2046,2312
+  s_e9c4ebfa58429b::t_f701691fb2d683 2001
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_e9c4ebfa58429b::t_dcb3de07eb0bbc 124
+  s_e9c4ebfa58429b::t_7c4f91c58a53f0 976,992
+  s_e9c4ebfa58429b::t_acd0b17f9e9dd5 304,963
+  s_e9c4ebfa58429b::t_5a648b963fdd74 286,913,919,4476,4499
+src/js/apps/globals/error/error.e2e.cy.js
+  s_e9c4ebfa58429b::t_03955c75e96678 27
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_e9c4ebfa58429b::t_02adff9d81c8cd 1435
+  s_e9c4ebfa58429b::t_a6a97493146179 1457
+  s_e9c4ebfa58429b::t_3d3fd452eef004 1463-1467
+  s_e9c4ebfa58429b::t_312f1728a049ff 1432
+  s_e9c4ebfa58429b::t_9916c97805f1db 1458
+  s_e9c4ebfa58429b::t_f3852389bb3c7c 1462
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_e9c4ebfa58429b::t_00ba10efc32b9e 1230-1308
+  s_e9c4ebfa58429b::t_5f746b41556e8d 2333,2338-2340,2354-2358
+  s_e9c4ebfa58429b::t_c0d5e34e12f560 1979,2000,2024,2036,2040,2044,2048,2053,2057
+  s_e9c4ebfa58429b::t_a8c2ff63c80523 282,300,305,324,329,348,366,371,602,627,855,892,917
+  s_e9c4ebfa58429b::t_b2d38f5aeff467 606,621,624
+  s_e9c4ebfa58429b::t_f6c2626ac6ac0b 2269
+  s_e9c4ebfa58429b::t_a3592e69ca88b9 73-77,94,99,106,116,257,275,619,623,662,716,1061,1095,1320,1328,1360,1415,1564,1568,1639,1669,1702,1730,1762,1926,1949,2344,2348,2490,2493,2645,2648,2723,2735
+  s_e9c4ebfa58429b::t_0e0c87f7d11990 203,251-252,268-273,276
+  s_e9c4ebfa58429b::t_63b6767f8a34ef 815-816,819,831,833,836,861,871,926-927
+  s_e9c4ebfa58429b::t_b8f06b51336759 1211-1212
+  s_e9c4ebfa58429b::t_bb21b4991946dc 1120-1125,1178
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_e9c4ebfa58429b::t_acd0b17f9e9dd5 685
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "fe29c00052cbf0eeb21727313fbdf878c2e448fb",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

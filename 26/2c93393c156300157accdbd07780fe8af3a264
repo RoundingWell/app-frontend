@@ -1,0 +1,24 @@
+src/js/base/routing.md
+  s_e728c93c2a45c9::t_ea33dce9348b2d 146,179-180,182-188,196-199
+src/js/utils/README.md
+  s_e728c93c2a45c9::t_fdc0de72cef04c 57-58
+AGENTS.md
+  s_e728c93c2a45c9::t_affa754e33f834 58-61,79-81,141-143,187-188
+  s_e728c93c2a45c9::t_ccf6b8afe2b1e1 189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "262c93393c156300157accdbd07780fe8af3a264",
+  "prompts": {},
+  "sessions": {
+    "s_e728c93c2a45c9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0fc9d-b486-7b12-b825-4d526635e2c4",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

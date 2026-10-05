@@ -1,0 +1,124 @@
+src/js/apps/patients/shared/list_views.js
+  s_85aebd1623278c::t_ae1a69383b4d2f 67-68
+src/js/apps/programs/shared/components/behavior_component.js
+  s_85aebd1623278c::t_1d5ea0d5e20a91 74
+  s_85aebd1623278c::t_396c32f926d6c6 54
+  s_85aebd1623278c::t_0f286b1489151d 64,66-72
+src/js/apps/patients/patient/form/form_app.js
+  s_85aebd1623278c::t_dd2222e850c25e 294
+src/js/apps/clinicians/shared/components/role_component.js
+  s_85aebd1623278c::t_6f8d5ef2d6406e 21,27-30,32-36
+  s_85aebd1623278c::t_396c32f926d6c6 42
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_75c6ad8811a930 15,33-36,40,47-52,82-87
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_85aebd1623278c::t_9f68f12443f817 95,107,117,159
+  s_85aebd1623278c::t_ae1a69383b4d2f 205-206
+src/js/apps/patients/worklist/worklist_app.js
+  s_85aebd1623278c::t_1d5ea0d5e20a91 486,489
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_85aebd1623278c::t_ae1a69383b4d2f 31,33-36
+  s_85aebd1623278c::t_1d5ea0d5e20a91 82,86
+src/js/apps/patients/shared/components/state_component.js
+  s_85aebd1623278c::t_396c32f926d6c6 55
+  s_85aebd1623278c::t_0f286b1489151d 63,65-69,71
+src/js/components/workspaces-manager/index.js
+  s_85aebd1623278c::t_396c32f926d6c6 58
+  s_85aebd1623278c::t_13e32fb4f58778 45,48,50-51,55,60
+  s_85aebd1623278c::t_68f0c0f555fbed 59
+src/js/apps/patients/worklist/worklist_views.js
+  s_85aebd1623278c::t_ae1a69383b4d2f 377-378
+src/js/apps/patients/shared/bulk-edit/bulk-edit_views.js
+  s_85aebd1623278c::t_f6c0511818b2ed 172-173,181-182,191-192,226-227,252-253,361-362,371-372,381-382
+  s_85aebd1623278c::t_b1895fe4bd9491 77,82,133,171,180,190,200,225,239,251,260,360,370,380,390
+  s_85aebd1623278c::t_26932af95a119a 34-35,47-48
+  s_85aebd1623278c::t_70140c6a9b4291 1
+src/js/apps/patients/shared/components/duration_component.js
+  s_85aebd1623278c::t_0f286b1489151d 35-36,52
+  s_85aebd1623278c::t_396c32f926d6c6 49
+  s_85aebd1623278c::t_1d5ea0d5e20a91 30
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_85aebd1623278c::t_9f68f12443f817 335,345,355
+src/js/components/droplist/droplist.component.cy.js
+  s_85aebd1623278c::t_1d5ea0d5e20a91 25,37,60
+src/js/apps/clinicians/shared/clinicians_views.js
+  s_85aebd1623278c::t_13e32fb4f58778 81,89-93
+  s_85aebd1623278c::t_396c32f926d6c6 97
+src/js/components/team/index.js
+  s_85aebd1623278c::t_654b8e5e996085 28,40-43,49-51,56-58
+  s_85aebd1623278c::t_9edfcefc457354 61
+  s_85aebd1623278c::t_396c32f926d6c6 64
+src/js/apps/patients/shared/components/owner_component.js
+  s_85aebd1623278c::t_9edfcefc457354 98
+  s_85aebd1623278c::t_1d5ea0d5e20a91 106,163
+  s_85aebd1623278c::t_396c32f926d6c6 135
+  s_85aebd1623278c::t_26932af95a119a 71,97,99-102,110-111,116-117
+src/js/apps/patients/shared/components/time_component.js
+  s_85aebd1623278c::t_0f286b1489151d 56,58-62,67-71,73-74
+  s_85aebd1623278c::t_1d5ea0d5e20a91 57,64
+  s_85aebd1623278c::t_396c32f926d6c6 92
+  s_85aebd1623278c::t_f044798a9f4ee4 45
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_85aebd1623278c::t_9f68f12443f817 191,201
+src/js/components/droplist/index.js
+  s_85aebd1623278c::t_6f373a240e3674 16-17,27-30
+  s_85aebd1623278c::t_7583a3edcf9de9 44,48-50,57-59,69,71-77,82,85,101-102,108,116,120,136,140,158,160-164
+  s_85aebd1623278c::t_a2f3a3e014eeb1 94
+  s_85aebd1623278c::t_79f933f36f2a01 100
+  s_85aebd1623278c::t_1f43b04d05c882 1,127-133
+  s_85aebd1623278c::t_e710b2a1a6375b 18-19,26,45-47,63,65,70,83,88,90-93,96-99,103,112-115,122,155,159
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_26932af95a119a 197-199,205,211-212,215,218-219,228,268-269,338-341
+  s_85aebd1623278c::t_396c32f926d6c6 264,266
+  s_85aebd1623278c::t_1d5ea0d5e20a91 202
+  s_85aebd1623278c::t_dd2222e850c25e 315
+src/js/apps/programs/shared/components/tags-manager_component.js
+  s_85aebd1623278c::t_6320b6349b681d 2,58,75,78,130
+  s_85aebd1623278c::t_26932af95a119a 59,62,64-65
+src/js/apps/globals/nav/nav_app.js
+  s_85aebd1623278c::t_1d5ea0d5e20a91 293,381-382,409,421,499,509
+  s_85aebd1623278c::t_dd2222e850c25e 418,506
+src/js/apps/programs/program/flow/flow_views.js
+  s_85aebd1623278c::t_9f68f12443f817 170,195
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_85aebd1623278c::t_9f68f12443f817 273
+src/js/apps/patients/patient/action/action-details_views.js
+  s_85aebd1623278c::t_9f68f12443f817 334,364,379
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_85aebd1623278c::t_9f68f12443f817 94,107
+src/js/apps/programs/shared/components/form_component.js
+  s_85aebd1623278c::t_1d5ea0d5e20a91 36,40
+  s_85aebd1623278c::t_396c32f926d6c6 71
+  s_85aebd1623278c::t_0f286b1489151d 33-35,37-38,43-45,74
+src/js/services/patient-modal/patient-modal_views.js
+  s_85aebd1623278c::t_396c32f926d6c6 94
+  s_85aebd1623278c::t_dd2222e850c25e 188
+  s_85aebd1623278c::t_13e32fb4f58778 96-97
+src/js/apps/programs/shared/components/dueday_component.js
+  s_85aebd1623278c::t_396c32f926d6c6 61
+  s_85aebd1623278c::t_0f286b1489151d 41-44,49,66
+  s_85aebd1623278c::t_f044798a9f4ee4 30
+  s_85aebd1623278c::t_1d5ea0d5e20a91 46
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_85aebd1623278c::t_b17ede0a57b6e1 52,59-71,116-118,120
+  s_85aebd1623278c::t_1d5ea0d5e20a91 98
+src/js/components/dateselect/index.js
+  s_85aebd1623278c::t_1d5ea0d5e20a91 127,134
+  s_85aebd1623278c::t_13e32fb4f58778 40,42-45,47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2f3e622dfe4f43f99115c8a52c90f0076adda7cf",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

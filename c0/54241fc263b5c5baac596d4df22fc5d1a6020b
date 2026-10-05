@@ -1,0 +1,53 @@
+src/js/base/state.js
+  s_85aebd1623278c::t_b6d5df4cf61c78 87-89
+  s_85aebd1623278c::t_9df5d9a442b744 1-86,90-94
+src/js/base/component.js
+  s_85aebd1623278c::t_fea555923128db 20
+  s_85aebd1623278c::t_477feefc25d89a 108
+  s_85aebd1623278c::t_cf9e01eb3bfd2f 3,9,17,26,31-33,38,43,45-50,54-55,57,59-60,62-66,69,71,75-76,78-79,81-82,84,87,95-96,98,100,102,105-107
+  s_85aebd1623278c::t_9df5d9a442b744 1-2,4-8,10-16,18-19,21-25,27-30,34-37,39-42,44,51-53,56,58,61,67-68,70,72-74,77,80,83,85-86,88-94,97,99,101,103-104,109-112
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_85aebd1623278c::t_6b9c34fe6df50b 11
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_0fb14169175286 22
+  s_85aebd1623278c::t_d0bccd33b5b284 23
+  s_85aebd1623278c::t_1007a49e8016f1 20
+  s_85aebd1623278c::t_c9142e44604fea 1-19,21,24-29
+src/js/apps/patients/shared/components/check_component.js
+  s_85aebd1623278c::t_6b9c34fe6df50b 2
+src/js/apps/patients/shared/components/due_component.js
+  s_85aebd1623278c::t_6b9c34fe6df50b 2
+src/js/apps/patients/shared/components/dialer_component.js
+  s_85aebd1623278c::t_6b9c34fe6df50b 4
+src/js/base/view-events.js
+  s_85aebd1623278c::t_9df5d9a442b744 1-29
+src/js/base/setup.js
+  s_85aebd1623278c::t_6b9c34fe6df50b 7
+src/js/base/running-events.js
+  s_85aebd1623278c::t_0ba4fdd5e5700b 1-43
+src/js/services/patient-modal/patient-modal_views.js
+  s_85aebd1623278c::t_6b9c34fe6df50b 17
+src/js/base/child-apps.js
+  s_85aebd1623278c::t_0ba4fdd5e5700b 1-150
+src/js/base/app.js
+  s_85aebd1623278c::t_fea555923128db 32
+  s_85aebd1623278c::t_cff65e011210f0 70,74,210-214
+  s_85aebd1623278c::t_0ba4fdd5e5700b 1-2,5-31,33-69,71-73,75-83,127-205,207-209,215-227,229-238
+  s_85aebd1623278c::t_b6d5df4cf61c78 206
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c054241fc263b5c5baac596d4df22fc5d1a6020b",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

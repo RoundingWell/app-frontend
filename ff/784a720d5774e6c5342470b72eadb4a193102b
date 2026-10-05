@@ -1,0 +1,19 @@
+docs/superpowers/plans/2026-06-25-card-responsive-dark-mode.md
+  s_09e8292bb4bcb3::t_f38a002b9362e4 1-1467
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "ff784a720d5774e6c5342470b72eadb4a193102b",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

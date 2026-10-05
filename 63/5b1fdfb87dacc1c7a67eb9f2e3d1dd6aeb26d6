@@ -1,0 +1,27 @@
+.gitignore
+  ffc0931798fef4c5 22
+test/unit/normalize-coverage-paths.mjs
+  ffc0931798fef4c5 1-54
+.circleci/config.yml
+  ffc0931798fef4c5 252
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "635b1fdfb87dacc1c7a67eb9f2e3d1dd6aeb26d6",
+  "prompts": {
+    "ffc0931798fef4c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d887c-a471-7792-b22f-876b2e5dd6f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 57,
+      "total_deletions": 0,
+      "accepted_lines": 57,
+      "overriden_lines": 0
+    }
+  }
+}

@@ -1,0 +1,25 @@
+src/js/apps/patients/shared/actions_views.js
+  s_7d9748a0496f68::t_f76bb0681f80d2 2
+src/js/apps/patients/shared/add-workflow/add-workflow_views.js
+  s_7d9748a0496f68::t_f306875a483e2a 2
+src/js/apps/patients/shared/widgets/widgets.js
+  s_7d9748a0496f68::t_52a2ef6f280ad9 2
+src/js/apps/patients/shared/widgets/widgets_views.js
+  s_7d9748a0496f68::t_6011e0775d9511 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "619cdabd6109d4f29179e12c994a1f34357654bd",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

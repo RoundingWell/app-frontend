@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "314b6d9327b3f278130a42d36f06374608861580",
+  "prompts": {
+    "ffc0931798fef4c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d887c-a471-7792-b22f-876b2e5dd6f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 188,
+      "overriden_lines": 0
+    }
+  }
+}

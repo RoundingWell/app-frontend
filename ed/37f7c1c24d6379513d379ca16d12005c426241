@@ -1,0 +1,31 @@
+src/js/components/list-search/index.js
+  s_267e7a791356aa::t_448e7426294fac 3
+src/js/components/list-search/list-search_views.js
+  s_267e7a791356aa::t_ea7dedd246c4a0 11-13,26,31,40,44-45,51-54,57-61
+src/js/components/workspaces-manager/index.js
+  s_932355d3ceb435::t_3810deb8e6b1f6 45,48,50-51,55-58,61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ed37f7c1c24d6379513d379ca16d12005c426241",
+  "prompts": {},
+  "sessions": {
+    "s_267e7a791356aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08689-8981-7cf3-a3c5-0ee0a88b599c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_932355d3ceb435": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0ccb7-194c-72d2-b859-443afa9808ef",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

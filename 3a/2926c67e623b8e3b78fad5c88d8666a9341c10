@@ -1,0 +1,23 @@
+src/js/base/helpers.component.cy.js
+  s_7d9748a0496f68::t_bbf40297899e04 105
+test/support/commands.js
+  s_7d9748a0496f68::t_94e6bc57b14ecd 112
+test/support/component.js
+  s_7d9748a0496f68::t_448e0a634c0260 9-11,13-14,18-19,23-47,54-55,60-62,72-73,75-79,81-82,84-85,87,89,91,93-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3a2926c67e623b8e3b78fad5c88d8666a9341c10",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

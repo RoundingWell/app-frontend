@@ -1,0 +1,21 @@
+src/js/services/dialer.component.cy.js
+  s_7d9748a0496f68::t_bf9698108fc0d6 2,16,21,27
+src/js/services/dialer.js
+  s_7d9748a0496f68::t_1b854707ee577a 24,26-32,34-38,41,43-46,50-52,55-64,66-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e9875b44b06e05c08e158ddb2733fb58109688da",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

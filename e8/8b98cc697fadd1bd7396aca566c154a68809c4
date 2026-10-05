@@ -1,0 +1,43 @@
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_c864d1d39887a8 224
+src/js/components/tooltip/tooltip.component.cy.js
+  s_85aebd1623278c::t_c864d1d39887a8 140
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_fb696eb258b2e7 88-92
+  s_85aebd1623278c::t_05310686779be0 15,42-46,51-54,82-87
+src/js/apps/patients/shared/actions_views.js
+  s_85aebd1623278c::t_c864d1d39887a8 112
+src/js/components/tooltip/index.js
+  s_85aebd1623278c::t_ab7f979c098d33 89
+  s_85aebd1623278c::t_c864d1d39887a8 8-11,27,36-38,71-81,96-97,109-112,115-116,122-125
+  s_e4fe7fd5d6a6e7::t_7d3380f30b8d8d 39
+  s_85aebd1623278c::t_17e49c0034318e 40-59,85-88,90-94
+  s_85aebd1623278c::t_28bcf676e159cb 30,32-33
+  s_85aebd1623278c::t_481d75017ca129 64,101-106,117-121
+src/js/apps/globals/app-frame/root_views.js
+  s_85aebd1623278c::t_fc4492e886b070 250,254,258,272,274,280,299,301,307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e88b98cc697fadd1bd7396aca566c154a68809c4",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_e4fe7fd5d6a6e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3da1009a-cc91-45bd-af25-dc358b23a8d4",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
