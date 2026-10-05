@@ -1,0 +1,39 @@
+src/js/apps/patients/shared/interactions/interaction-item.scss
+  s_37e61ebb2259b1::t_811a1636464ac3 4,187-189
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  s_37e61ebb2259b1::t_305e84bcebf3a2 123
+src/js/apps/patients/patient/interactions/interactions_views.js
+  s_37e61ebb2259b1::t_23c92216a29861 323
+  s_37e61ebb2259b1::t_f06ccdf03fa179 232
+  s_37e61ebb2259b1::t_b3f215f377365c 19-21
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_37e61ebb2259b1::t_953155fe274c5c 306
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  s_37e61ebb2259b1::t_7f8d8a6d0b60a9 448
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  s_37e61ebb2259b1::t_bebb7af13e5bef 18,53-54
+  s_37e61ebb2259b1::t_c9ff124e703dac 20
+  s_37e61ebb2259b1::t_88040b22362b11 5-6
+src/js/apps/patients/patient/interactions/layout.hbs
+  s_37e61ebb2259b1::t_fd8997ec2fcafd 1-26
+src/js/apps/patients/patient/interactions/loading.hbs
+  s_37e61ebb2259b1::t_361d4ae8bb024d 1-12
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  s_37e61ebb2259b1::t_9bcb7b8b3f5380 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0b8bf5c8eab177cd686a38ba0839a5fdaa2a4dae",
+  "prompts": {},
+  "sessions": {
+    "s_37e61ebb2259b1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0d3d0-ffbb-71e0-b63a-a41dd4fbec6f",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
