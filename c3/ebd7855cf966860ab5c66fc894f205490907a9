@@ -1,0 +1,40 @@
+packages/care-ops-fontawesome/manifest.json
+  h_0f06c286dda36f 54
+src/js/apps/patients/patient/action/action-activity_app.js
+  h_0f06c286dda36f 13,19,23
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  h_0f06c286dda36f 115
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  h_0f06c286dda36f 11-12,14,16
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  h_0f06c286dda36f 226
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 244,264,280,314,395-396,522,524
+src/js/apps/patients/patient/interactions/interactions.scss
+  h_0f06c286dda36f 197-208
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 259-260,283,328,393
+src/js/apps/patients/patient/workflow/closed-layout.hbs
+  h_0f06c286dda36f 2-9
+src/js/apps/patients/patient/workflow/layout.hbs
+  h_0f06c286dda36f 2-15
+src/js/apps/patients/shared/interactions/interaction-item.scss
+  h_0f06c286dda36f 12,16,20
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  h_0f06c286dda36f 17,23-24,26,41
+src/js/apps/patients/shared/interactions/interaction-presentation.js
+  h_0f06c286dda36f 1
+src/js/entities-service/interactions.js
+  h_0f06c286dda36f 8,34,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c3ebd7855cf966860ab5c66fc894f205490907a9",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
