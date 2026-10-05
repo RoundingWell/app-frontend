@@ -2,6 +2,64 @@
 careOptsFrontend:
   patients:
     patient:
+      interactions:
+        workflowTab: Workflows
+        interactionsTab: Interactions
+        pagesLabel: Patient pages
+        typesLabel: Interaction types
+        message: Message
+        email: Email
+        mail: Mail
+        fax: Fax
+        call: Call
+        voicemail: Voicemail
+        videoCall: Video call
+        appointment: Appointment
+        visit: Visit
+        messages: Messages
+        calls: Calls
+        appointments: Appointments
+        visits: Visits
+        inbound: Inbound
+        outbound: Outbound
+        madeContact: Successful
+        noContact: Unsuccessful
+        scheduled: Scheduled
+        appointmentDate: Appointment
+        clinician: Clinician
+        admitted: Admitted
+        discharged: Discharged
+        emergency: Emergency
+        inpatient: Inpatient
+        outpatient: Outpatient
+        observation: Observation
+        via: via
+        noDischarge: No discharge received
+        lengthOfStay: 'LOS {days, plural, one {# day} other {# days}}'
+        viewInteraction: View interaction
+        viaSms: via SMS
+        viaEmail: via email
+        viaMail: via mail
+        viaFax: via fax
+        viaPortal: via portal
+        careTeam: Care Team
+        sentMessage: sent a message.
+        loggedCall: logged a call.
+        added: added
+        jumpToDate: Jump to date
+        jumpTo: Jump to...
+        today: Today
+        yesterday: Yesterday
+        lastWeek: Last week
+        lastMonth: Last month
+        beginning: The very beginning
+        specificDate: Jump to a specific date
+        closeDate: Close calendar
+        pagingError: More interactions could not be loaded.
+        retry: Retry
+        loading: Loading interactions…
+        empty: No interactions yet.
+        loadError: Interactions could not be loaded.
       action:
         actionApp:
           notFound: The Action you requested does not exist.

@@ -1,0 +1,184 @@
+.patient-interactions__item {
+  --interaction-color: #{color(blue)};
+
+  display: flex;
+  gap: 12px;
+  padding: 0 0 24px;
+  position: relative;
+}
+
+.patient-interactions__item--voice,
+.patient-interactions__item--voicemail,
+.patient-interactions__item--video,
+.patient-interactions-preview__item--voice,
+.patient-interactions-preview__item--voicemail,
+.patient-interactions-preview__item--video {
+  --interaction-color: #{color(purple)};
+}
+
+.patient-interactions__item--appointment,
+.patient-interactions-preview__item--appointment {
+  --interaction-color: #{color(green)};
+}
+
+.patient-interactions__item--visit,
+.patient-interactions-preview__item--visit {
+  --interaction-color: #{color(orange)};
+}
+
+.patient-interactions__marker {
+  align-items: center;
+  background: color-mix(in srgb, var(--interaction-color) 10%, var(--color-surface));
+  border-radius: 50%;
+  color: var(--interaction-color);
+  display: flex;
+  flex: 0 0 28px;
+  height: 28px;
+  justify-content: center;
+}
+
+.patient-interactions__activity-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.patient-interactions__activity-line {
+  align-items: baseline;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin: 4px 0 9px;
+}
+
+.patient-interactions__time {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.patient-interactions__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  padding: 12px 16px;
+}
+
+.patient-interactions__item--continues {
+  padding-bottom: 0;
+
+  .patient-interactions__card {
+    border-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.patient-interactions__item--continuation {
+  .patient-interactions__marker {
+    visibility: hidden;
+  }
+
+  .patient-interactions__activity-label {
+    display: none;
+  }
+
+  .patient-interactions__activity-line {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-bottom: 0;
+    margin: 0;
+    padding: 12px 16px 0;
+  }
+
+  .patient-interactions__card {
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.patient-interactions__item.is-selected .patient-interactions__card {
+  border-color: color(blue);
+}
+
+.patient-interactions__item-heading {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.patient-interactions__channel {
+  color: var(--interaction-color);
+  font-weight: 500;
+}
+
+.patient-interactions__summary {
+  line-height: 1.45;
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.patient-interactions__item-heading + .patient-interactions__summary,
+.patient-interactions__item-heading + .patient-interactions__detail {
+  margin-top: 8px;
+}
+
+.patient-interactions__detail {
+  line-height: 1.5;
+  margin: 0;
+}
+
+.patient-interactions__separator {
+  color: var(--color-text-secondary);
+}
+
+.patient-interactions__time {
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+.patient-interactions__action {
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: auto;
+  padding: 0;
+  text-align: right;
+}
+
+@media (width <= 1000px) {
+  .patient-interactions__activity-line {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .patient-interactions__action {
+    margin-left: 0;
+    text-align: left;
+  }
+}
+
+.patient-interactions__activity-description strong {
+  font-weight: 600;
+}
+
+.patient-interactions__marker .icon {
+  font-size: 16px;
+}
+
+.patient-interactions__activity-description {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.patient-interactions__card {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}

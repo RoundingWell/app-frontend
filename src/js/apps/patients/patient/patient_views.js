@@ -47,11 +47,12 @@ const ContextTrailView = View.extend({
   },
   templateContext() {
     const context = this.contextTrail.get('context') || {};
-    const { flowName, actionName, formName } = context;
+    const { page, flowName, actionName, formName } = context;
 
     return {
       hasLatestList: Radio.request('history', 'has:latestList'),
-      isPatientCurrent: !flowName && !actionName && !formName,
+      isInteractions: page === 'interactions',
+      isPatientCurrent: page !== 'interactions' && !flowName && !actionName && !formName,
       isFlowCurrent: !!flowName && !actionName && !formName,
       ...context,
     };

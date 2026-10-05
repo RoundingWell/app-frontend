@@ -115,9 +115,12 @@ Below is an example of a more advanced wrapper template:
 
 * dob
 * sex
+* interactions
 * status
 * divider
 * workspaces
+
+The `interactions` category renders a patient interaction preview and a link to the full page. Add an `interactions` widget slug to a patient panel listed in the `sidebar` setting. It does not require widget `values`; the preview fetches the patient's interactions directly.
 
 ### Form Widget
 

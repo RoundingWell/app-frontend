@@ -20,6 +20,7 @@ import { workspaceOne } from 'support/api/workspaces';
 import { getComment } from 'support/api/comments';
 import { getFile } from 'support/api/files';
 import { getActivity } from 'support/api/events';
+import { getInteraction } from 'support/api/interactions';
 
 const tomorrow = testDateAdd(1);
 
@@ -190,6 +191,11 @@ context('patient flow page', function() {
       },
     });
 
+    const visit = getInteraction({
+      channel: 'visit', flow: testPageFlow,
+      metadata: { patient_class: 'E', facility: 'Example Medical Center', admitted_at: '2026-09-23T10:00:00Z' },
+    });
+
     cy
       .routeFlow(fx => {
         fx.data = testPageFlow;
@@ -201,6 +207,7 @@ context('patient flow page', function() {
 
         return fx;
       })
+      .routePatientInteractions({ data: [visit], included: [testPageFlow] })
       .routeFlowActions()
       .routeFlowActivity(fx => {
         fx.data = [
@@ -223,7 +230,15 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__activity')
       .should('contain', 'Activity')
-      .and('contain', 'Flow name updated from Previous Flow to Test Flow');
+      .and('contain', 'Flow name updated from Previous Flow to Test Flow')
+      .and('contain', 'Emergency')
+      .and('contain', 'Example Medical Center')
+      .and('contain', 'No discharge received');
+    cy.wait('@routePatientInteractions').its('request.url').then(url => {
+      const query = new URL(url).searchParams;
+      expect(query.get('filter[flow]')).to.equal(testPageFlow.id);
+      expect(query.get('filter[channel]')).to.equal('voice,voicemail,video,appointment,visit');
+    });
 
     cy
       .intercept('DELETE', `/api/flows/${ testPageFlow.id }`, {

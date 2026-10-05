@@ -8,6 +8,7 @@ import sessionStore from 'js/utils/session-store';
 import SubRouterApp from 'js/base/subrouterapp';
 
 import WorkflowPageApp from 'js/apps/patients/patient/workflow/workflow_app';
+import InteractionsPageApp from 'js/apps/patients/patient/interactions/interactions_app';
 import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
 import ActionApp from 'js/apps/patients/patient/action/action_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
@@ -20,6 +21,7 @@ export default SubRouterApp.extend({
   routeScope: ['patientId'],
   childApps: {
     workflow: WorkflowPageApp,
+    interactions: InteractionsPageApp,
     flow: FlowPageApp,
     action: ActionApp,
     form: FormApp,
@@ -36,6 +38,8 @@ export default SubRouterApp.extend({
     return {
       'patient:workflow': this.showWorkflow,
       'patient:workflow:closed': this.showClosedWorkflow,
+      'patient:interactions': this.showInteractions,
+      'patient:interaction': this.showInteraction,
       'patient:action': this.showPatientAction,
       'patient:flow': this.showFlow,
       'patient:flow:action': this.showFlowAction,
@@ -98,6 +102,14 @@ export default SubRouterApp.extend({
 
   showClosedWorkflow() {
     return this.startContent('workflow', { status: 'done' });
+  },
+
+  showInteractions() {
+    return this.startContent('interactions', {});
+  },
+
+  showInteraction(patientId, interactionId) {
+    return this.startContent('interactions', { interactionId });
   },
 
   showPatientAction(patientId, actionId, entryTarget) {

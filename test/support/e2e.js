@@ -25,6 +25,7 @@ import './api/clinicians';
 import './api/comments';
 import './api/dashboards';
 import './api/events';
+import './api/interactions';
 import './api/files';
 import './api/filters';
 import './api/flows';
