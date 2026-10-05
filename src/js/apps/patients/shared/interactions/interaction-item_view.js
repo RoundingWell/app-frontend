@@ -79,13 +79,27 @@ const InteractionItemView = View.extend({
       workName: getWorkName(this.model),
     };
   },
+  initialize() {
+    const selection = this.getOption('selection');
+    if (selection) this.listenTo(selection, 'change:interactionId', this.updateSelection);
+  },
+  isSelectedInteraction() {
+    return this.model.id === this.getOption('selection')?.get('interactionId');
+  },
   onRender() {
-    if (this.model.id !== this.getOption('interactionId')) return;
-    this.el.classList.add('is-selected');
-    this.el.tabIndex = -1;
+    this.updateSelection();
+  },
+  updateSelection() {
+    const selected = this.isSelectedInteraction();
+    this.el.classList.toggle('is-selected', selected);
+    if (selected) this.el.tabIndex = -1;
+    else this.el.removeAttribute('tabindex');
   },
   onAttach() {
-    if (this.didFocusInteraction || this.model.id !== this.getOption('interactionId')) return;
+    if (this.didFocusInteraction || !this.isSelectedInteraction()) return;
+    this.focusInteraction();
+  },
+  focusInteraction() {
     this.didFocusInteraction = true;
     this.el.scrollIntoView({ block: 'center' });
     this.el.focus({ preventScroll: true });

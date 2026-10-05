@@ -1,4 +1,5 @@
-import { contains, flatten, keys, map, without } from 'underscore';
+import Backbone from 'backbone';
+import { contains, find, flatten, keys, map, without } from 'underscore';
 import dayjs from 'dayjs';
 import { Radio } from 'marionette';
 
@@ -18,6 +19,9 @@ const GROUP_CHANNELS = {
 const PAGE_SIZE = 25;
 
 export default App.extend({
+  createState() {
+    return new Backbone.Model();
+  },
   viewEvents: {
     'before:destroy': 'onBeforeDestroyView',
     'change:filter': 'toggleFilter',
@@ -31,12 +35,12 @@ export default App.extend({
       this.patient = patient;
       this.interactionId = interactionId;
       this.selectedGroups = keys(GROUP_CHANNELS);
+      this.getState().set({ interactionId });
       this.setView(new InteractionsPageView({
         model: patient,
-        interactionId,
+        selection: this.getState(),
         selectedGroups: this.selectedGroups,
       })).render();
-      this.getView().showLoading();
       this.showView();
     }
     this.isLoading = true;
@@ -44,6 +48,7 @@ export default App.extend({
     if (kind === 'replace') {
       this.hasOlder = false;
       this.hasNewer = false;
+      this.getView().showLoading();
     }
     this.getView().setPaging({ hasOlder: this.hasOlder, hasNewer: this.hasNewer, loading: true });
   },
@@ -93,10 +98,30 @@ export default App.extend({
       limit: PAGE_SIZE,
     };
   },
+  enableInteractionGroup(interactionId) {
+    const target = Radio.request('entities', 'interactions:model', interactionId);
+    const group = target && find(keys(GROUP_CHANNELS), key => contains(GROUP_CHANNELS[key], target.get('channel')));
+    if (!group || contains(this.selectedGroups, group)) return false;
+    this.selectedGroups = [...this.selectedGroups, group];
+    this.getView().setSelectedGroups(this.selectedGroups);
+    return true;
+  },
+  navigateToInteraction(interactionId) {
+    const changedGroups = interactionId && this.enableInteractionGroup(interactionId);
+    this.interactionId = interactionId;
+    this.getState().set({ interactionId });
+    const pendingFilter = this.isLoading && this.lastRequest.kind === 'replace';
+    const loaded = this.collection && (!interactionId || this.collection.get(interactionId));
+    if (!loaded || pendingFilter || changedGroups) return this.requestInteractions('replace');
+    this.getView().focusInteraction(this.collection.get(interactionId));
+    return Promise.resolve(true);
+  },
   toggleFilter(group) {
     if (contains(this.selectedGroups, group)) this.selectedGroups = without(this.selectedGroups, group);
     else this.selectedGroups = [...this.selectedGroups, group];
     this.getView().setSelectedGroups(this.selectedGroups);
+    this.interactionId = undefined;
+    this.getState().set({ interactionId: undefined });
     this.requestInteractions('replace');
   },
   requestInteractions(kind, date) {

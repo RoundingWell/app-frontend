@@ -357,6 +357,22 @@ context('patient interactions', function() {
       .should('contain', 'Outbound Call')
       .and('contain', 'Left Voicemail')
       .and('contain', 'Left a message asking the patient to call back.');
+    let timelineElement;
+    let navigationRequests = 0;
+    cy.intercept('GET', '/api/patients/*/interactions*', req => {
+      if (new URL(req.url).searchParams.has('page[at]')) navigationRequests += 1;
+    });
+    cy.get('.patient-interactions').then($el => {
+      timelineElement = $el[0];
+    });
+    cy.get('.patient-interactions-preview__link').eq(1).click();
+    cy.get('.patient-interactions__item.is-selected').should('contain', 'I can come in tomorrow morning.');
+    cy.get('.patient-interactions').should($el => {
+      expect($el[0]).to.equal(timelineElement);
+      expect(navigationRequests).to.equal(0);
+    });
+    cy.get('.patient-interactions-preview__link').first().click();
+    cy.get('.patient-interactions__item.is-selected').should('contain', 'Left a message asking the patient to call back.');
     cy
       .contains('.patient-interactions__item', 'I can come in tomorrow morning.')
       .should('contain', patient.attributes.first_name);
@@ -463,7 +479,11 @@ context('patient interactions', function() {
       .wait('@filteredInteractions')
       .its('request.url')
       .then(url => {
-        expect(new URL(url).searchParams.get('filter[channel]')).not.to.include('voice');
+        const query = new URL(url).searchParams;
+        expect(query.get('filter[channel]')).not.to.include('voice');
+        expect(query.has('page[at]')).to.equal(false);
+        expect(query.has('page[before]')).to.equal(false);
+        expect(query.has('page[after]')).to.equal(false);
       });
     cy
       .get('.patient-interactions__empty')
@@ -518,14 +538,14 @@ context('patient interactions', function() {
       .get('.patient-interactions__filters [data-filter="messages"]')
       .click();
     cy
-      .get('.js-paging-loading')
+      .get('.patient-interactions-loading[role="status"]')
       .should('be.visible')
       .should(() => {
         expect(filteredStarted).to.equal(true);
       });
     cy
-      .get('.patient-interactions__item')
-      .should('contain', 'Left a message asking the patient to call back.');
+      .get('.js-paging-loading')
+      .should('not.be.visible');
     cy
       .get('.patient-interactions__filters [data-filter="calls"]')
       .click();
@@ -567,7 +587,7 @@ context('patient interactions', function() {
       .get('.patient-interactions__filters [data-filter="calls"]')
       .click();
     cy
-      .get('.js-paging-loading')
+      .get('.patient-interactions-loading[role="status"]')
       .should('be.visible')
       .should(() => {
         expect(leavingStarted).to.equal(true);

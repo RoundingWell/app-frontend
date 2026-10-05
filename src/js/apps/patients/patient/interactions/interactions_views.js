@@ -1,10 +1,12 @@
 import Backbone from 'backbone';
-import { contains, groupBy, map } from 'underscore';
+import { contains, groupBy, map, range } from 'underscore';
 import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
 
 import 'scss/modules/buttons.scss';
+import 'scss/modules/loader.scss';
+import 'scss/modules/skeleton.scss';
 
 import i18n from 'js/i18n';
 
@@ -35,7 +37,7 @@ const InteractionsDayListView = CollectionView.extend({
     return {
       patientId: this.getOption('patientId'),
       patientName: this.getOption('patientName'),
-      interactionId: this.getOption('interactionId'),
+      selection: this.getOption('selection'),
     };
   },
   onRenderChildren() {
@@ -118,7 +120,7 @@ const InteractionsDayView = View.extend({
       collection: new Backbone.Collection(this.model.get('interactions')),
       patientId: this.getOption('patientId'),
       patientName: this.getOption('patientName'),
-      interactionId: this.getOption('interactionId'),
+      selection: this.getOption('selection'),
     }));
   },
   onDateButtonClick() {
@@ -192,7 +194,7 @@ const InteractionsListView = CollectionView.extend({
     return {
       patientId: this.getOption('patientId'),
       patientName: this.getOption('patientName'),
-      interactionId: this.getOption('interactionId'),
+      selection: this.getOption('selection'),
     };
   },
   childViewTriggers: {
@@ -203,6 +205,12 @@ const InteractionsListView = CollectionView.extend({
     this.listenTo(this.getOption('interactions'), 'update reset', () => {
       this.collection.set(groupInteractions(this.getOption('interactions')));
     });
+  },
+  focusInteraction(model) {
+    if (!model) return;
+    const day = this.collection.get(getDate(model));
+    const item = this.children.findByModel(day)?.getChildView('content')?.children.findByModel(model);
+    item?.focusInteraction();
   },
   scrollToDate(date) {
     const day = this.collection.find(model => model.id >= date) || this.collection.last();
@@ -216,9 +224,25 @@ const InteractionsListView = CollectionView.extend({
 });
 
 const InteractionsLoadingView = View.extend({
-  className: 'patient-interactions__status',
+  className: 'patient-interactions-loading skeleton-loading',
   attributes: { 'role': 'status', 'aria-busy': 'true' },
-  template: hbs`{{ @intl.patients.patient.interactions.loading }}`,
+  template: hbs`
+    <span class="loader__text">{{ @intl.patients.patient.interactions.loading }}</span>
+    <div aria-hidden="true">
+      {{#each items}}
+        <div class="patient-interactions-loading__item">
+          <span class="skeleton-loading__shape patient-interactions-loading__marker"></span>
+          <div class="patient-interactions-loading__body">
+            <span class="skeleton-loading__shape patient-interactions-loading__heading"></span>
+            <span class="skeleton-loading__shape patient-interactions-loading__card"></span>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  `,
+  templateContext() {
+    return { items: range(3) };
+  },
 });
 
 const InteractionsErrorView = View.extend({
@@ -325,7 +349,13 @@ const InteractionsPageView = View.extend({
         <button class="button button--link js-retry" type="button">{{ @intl.patients.patient.interactions.retry }}</button>
       </div>
       <div data-content-region></div>
-      <div class="patient-interactions__paging-status js-paging-loading" role="status" hidden>{{ @intl.patients.patient.interactions.loading }}</div>
+      <div class="patient-interactions__paging-status js-paging-loading" role="status" hidden>
+        <span class="loader__text">{{ @intl.patients.patient.interactions.loading }}</span>
+        <div class="patient-interactions-loading skeleton-loading" aria-hidden="true">
+          <span class="skeleton-loading__shape patient-interactions-loading__heading"></span>
+          <span class="skeleton-loading__shape patient-interactions-loading__card"></span>
+        </div>
+      </div>
     </div>
   `,
   regions: { content: '[data-content-region]' },
@@ -397,7 +427,7 @@ const InteractionsPageView = View.extend({
     this.pagingError = false;
     this.getUI('pagingError')[0].hidden = true;
     this.el.scrollTop = Math.max(0, this.el.scrollTop - errorHeight);
-    this.getUI('pagingLoading')[0].hidden = !loading;
+    this.getUI('pagingLoading')[0].hidden = !loading || this.getChildView('content') instanceof InteractionsLoadingView;
     if (!loading) this.scheduleEdgeCheck();
   },
   showPagingError() {
@@ -427,9 +457,12 @@ const InteractionsPageView = View.extend({
       interactions: collection,
       patientId: this.model.id,
       patientName: `${ this.model.get('first_name') } ${ this.model.get('last_name') }`,
-      interactionId: this.getOption('interactionId'),
+      selection: this.getOption('selection'),
     });
     this.showChildView('content', list);
+  },
+  focusInteraction(model) {
+    this.getChildView('content')?.focusInteraction(model);
   },
   scrollToDate(date) {
     this.getChildView('content')?.scrollToDate(date);

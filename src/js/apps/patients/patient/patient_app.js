@@ -105,10 +105,16 @@ export default SubRouterApp.extend({
   },
 
   showInteractions() {
-    return this.startContent('interactions', {});
+    return this.showInteraction();
   },
 
   showInteraction(patientId, interactionId) {
+    if (this.getCurrentSelection()?.appName === 'interactions' && this.getCurrent().isRunning()) {
+      return this.selectChild('interactions', {
+        reuse: true,
+        start: app => app.navigateToInteraction(interactionId),
+      });
+    }
     return this.startContent('interactions', { interactionId });
   },
 

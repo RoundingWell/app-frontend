@@ -231,3 +231,41 @@
 .patient-interactions-preview__all .icon {
   margin-right: 6px;
 }
+
+.patient-interactions-loading {
+  padding: 24px 0;
+}
+
+.patient-interactions-loading__item {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.patient-interactions-loading__marker {
+  border-radius: 50%;
+  flex: 0 0 28px;
+  height: 28px;
+}
+
+.patient-interactions-loading__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.patient-interactions-loading__heading {
+  height: 16px;
+  margin-bottom: 12px;
+  max-width: 240px;
+  width: 60%;
+}
+
+.patient-interactions-loading__card {
+  border-radius: 8px;
+  height: 72px;
+}
+
+.patient-interactions-preview .patient-interactions-loading__card {
+  height: 16px;
+  width: 80%;
+}
