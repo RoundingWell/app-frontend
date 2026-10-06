@@ -1,0 +1,43 @@
+packages/care-ops-five9/update-sdk.js
+  s_3e7a7157d1653a::t_a5ab5c7b3e953e 121
+  s_3e7a7157d1653a::t_40f8a661f8e173 67-76
+packages/care-ops-datadog/package.json
+  3e7a7157d1653aec 11-12
+packages/care-ops-five9/README.md
+  s_3e7a7157d1653a::t_40f8a661f8e173 59-62,75,77,81
+package.json
+  3e7a7157d1653aec 84,89,109
+packages/care-ops-five9/sdk/five9.crm.sdk.js
+  s_3e7a7157d1653a::t_40f8a661f8e173 13-14
+.circleci/config.yml
+  s_3e7a7157d1653a::t_3084da59893f2e 23-36,65,78,83,144-145,149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "b3551fa54cefa758ec39e12289df11b6ce2f2954",
+  "prompts": {
+    "3e7a7157d1653aec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dfda8-4fc4-7122-9b49-5bf578a84cfd",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>",
+      "total_additions": 111,
+      "total_deletions": 110,
+      "accepted_lines": 10,
+      "overriden_lines": 0
+    }
+  },
+  "sessions": {
+    "s_3e7a7157d1653a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019dfda8-4fc4-7122-9b49-5bf578a84cfd",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

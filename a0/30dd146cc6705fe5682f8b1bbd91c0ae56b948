@@ -1,0 +1,50 @@
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_85aebd1623278c::t_fcba3268410046 13,15-20,22-26,28,30,57
+src/js/services/sidebar.js
+  s_85aebd1623278c::t_23b53bdbdcde2e 44,46,56-57,59-69
+src/js/apps/programs/sidebar/flow/flow-sidebar_app.js
+  s_85aebd1623278c::t_99a0622e802ddb 14,22-23,25,36,39,46,50
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_85aebd1623278c::t_c107f0a36faee7 10-13,16-22,24-25,27,29
+src/js/apps/programs/program/flow/flow_app.js
+  s_85aebd1623278c::t_cd8fe324ff1001 114,116-118,120-122
+  s_85aebd1623278c::t_8983858db9fd6a 15-22,30,32-39,41,48,59,63-65,68-70,81,93,97,109
+src/js/apps/programs/sidebar/program/program-sidebar_app.js
+  s_85aebd1623278c::t_fc41219f9e5283 8,22,32,42,46
+src/js/apps/programs/program/action/action_app.js
+  s_85aebd1623278c::t_921e3d7cacc8f4 12-15,17,30-35,37
+  s_85aebd1623278c::t_df6f8129c35c1c 38-39
+src/js/apps/programs/program/program_app.js
+  s_85aebd1623278c::t_37beb9df98c6e6 18-25,28-32,37,45-48,51,54-60,69-77,79-84,87,89-91,93-97,99,104,106,108,113,139
+  s_85aebd1623278c::t_d519758f97bed7 78,98,107
+src/js/apps/programs/programs-main_app.js
+  s_85aebd1623278c::t_6b323438304f08 1-2,12-17,56-65,67-76,78-87
+src/js/entities-service/program-actions.js
+  s_85aebd1623278c::t_265c7bfaa8e753 16,19
+src/js/entities-service/programs.js
+  s_85aebd1623278c::t_265c7bfaa8e753 14-15
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_e93cf7e8ddc11c 79,85-91,96-97
+src/js/entities-service/program-flows.js
+  s_85aebd1623278c::t_265c7bfaa8e753 15,18
+src/js/entities-service/tags.js
+  s_85aebd1623278c::t_265c7bfaa8e753 13,16
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_85aebd1623278c::t_c92334d514b29c 18-19,21,30,41,51,58,62
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a030dd146cc6705fe5682f8b1bbd91c0ae56b948",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+src/js/base/fetch.cy.js
+  fa4165694154abf7 1-81
+src/js/auth/workos.cy.js
+  fa4165694154abf7 1-337
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "0ca35280437914664ede821d624fd00a0ff01d62",
+  "prompts": {
+    "fa4165694154abf7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019da1d9-e57c-7ad1-87f8-705a84cb5cb5",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 418,
+      "total_deletions": 387,
+      "accepted_lines": 418,
+      "overriden_lines": 0
+    }
+  }
+}

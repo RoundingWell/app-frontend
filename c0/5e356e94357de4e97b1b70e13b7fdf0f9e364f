@@ -1,0 +1,20 @@
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_d04385ebae28ca::t_63d975f3f5406c 289,293-299
+  s_d04385ebae28ca::t_b6f7846c88318b 300-301
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "c05e356e94357de4e97b1b70e13b7fdf0f9e364f",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

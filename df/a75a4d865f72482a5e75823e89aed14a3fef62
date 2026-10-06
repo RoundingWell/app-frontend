@@ -1,0 +1,20 @@
+src/js/sw.js
+  s_bc26609bf5ffd8::t_3be0c583e6cb0c 21-22,33
+  s_bc26609bf5ffd8::t_41d97fc0963023 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "dfa75a4d865f72482a5e75823e89aed14a3fef62",
+  "prompts": {},
+  "sessions": {
+    "s_bc26609bf5ffd8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a05d3f-b685-74e1-853d-e4d30a417fa2",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

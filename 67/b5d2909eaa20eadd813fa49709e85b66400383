@@ -1,0 +1,21 @@
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_7d9748a0496f68::t_8fa604cfa203d6 2
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_7d9748a0496f68::t_2ca607496fa984 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "67b5d2909eaa20eadd813fa49709e85b66400383",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

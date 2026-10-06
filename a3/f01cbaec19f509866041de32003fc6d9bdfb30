@@ -1,0 +1,38 @@
+src/js/apps/patients/patient/workflow/action-item.hbs
+  s_09e8292bb4bcb3::t_6ceb6c0957eb6e 22
+  s_09e8292bb4bcb3::t_2512d984dbfa24 1-21,23-24
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_09e8292bb4bcb3::t_8dffb3aa076a33 1-15
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_09e8292bb4bcb3::t_55d33d99c1c34d 10
+  s_09e8292bb4bcb3::t_5e0b979c7be1fe 80
+  s_09e8292bb4bcb3::t_36b85ded849f9c 27,32
+  s_09e8292bb4bcb3::t_aa8d70d1f5b30d 209
+  s_09e8292bb4bcb3::t_9baed1dd8e0a93 281
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_09e8292bb4bcb3::t_95703e72cb6bf5 194,213,221,227,235,243,249,260,379,447,462,1306,1498,1602,1867,1987,2085
+  s_09e8292bb4bcb3::t_7c60ac60eb4a73 1313,1609
+  s_09e8292bb4bcb3::t_029d73883b9f49 466,472,478,485,496,502,517
+  s_09e8292bb4bcb3::t_fe8d4dbdf52424 216,230,238
+  s_09e8292bb4bcb3::t_3f49c7228d5a35 1376,1745
+src/js/apps/patients/patient/workflow/layout.hbs
+  s_09e8292bb4bcb3::t_1898d1f18575a8 19
+src/js/apps/patients/patient/workflow/done-layout.hbs
+  s_09e8292bb4bcb3::t_ea5b0c1498d1c9 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "a3f01cbaec19f509866041de32003fc6d9bdfb30",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+src/js/apps/patients/patient/form/form.scss
+  s_68eb4121d9a9bc::t_9e0f4483c17689 27,29-31,33-37,39-41,43,45-47,49-51,53-55,57-59,61-70,72-73,75-77,79-81,83-91,93-94,96-99,101-111,113-115,117-120,122-124,126-127,129,131,132,133-134
+  s_68eb4121d9a9bc::t_f399239211b403 293
+  s_68eb4121d9a9bc::t_a387657ec80970 294
+  s_68eb4121d9a9bc::t_cdb6401950eb15 42,71,92,128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "91f2a7cbda2e0b8ef32e14c3783f1619e6006d5c",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

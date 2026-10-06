@@ -1,0 +1,19 @@
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_7d9748a0496f68::t_2eadf0705da8ea 29,32-34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "981dc336fa6edbfe787b2bc963ae18c40df4b6cf",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

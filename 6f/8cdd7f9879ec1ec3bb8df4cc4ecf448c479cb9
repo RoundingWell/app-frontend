@@ -1,0 +1,58 @@
+AGENTS.md
+  s_85aebd1623278c::t_66b9da61aca0e2 36
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_85aebd1623278c::t_986c5d6fecb2f4 227
+src/js/components/tooltip/tooltip.component.cy.js
+  s_85aebd1623278c::t_c864d1d39887a8 140
+  s_85aebd1623278c::t_054b60cda91d3d 206-242
+  s_85aebd1623278c::t_986c5d6fecb2f4 30
+src/js/apps/globals/app-frame/root_views.js
+  s_85aebd1623278c::t_fc4492e886b070 250,254,258,272,274,280,299,301,307
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_986c5d6fecb2f4 70,224
+src/js/components/tooltip/index.js
+  s_85aebd1623278c::t_ab7f979c098d33 106
+  s_85aebd1623278c::t_d6000720ef35f2 87,126
+  s_85aebd1623278c::t_986c5d6fecb2f4 9,22-23,25,47,103,118-122,125,128,133
+  s_e4fe7fd5d6a6e7::t_7d3380f30b8d8d 50
+  s_85aebd1623278c::t_c864d1d39887a8 32,48-49,82-86,88-89,96-98,113-114,127,136-139
+  s_85aebd1623278c::t_17e49c0034318e 51-70,102,104-105,107-111
+  s_85aebd1623278c::t_98c549b4309b33 33
+  s_85aebd1623278c::t_054b60cda91d3d 90-95
+  s_85aebd1623278c::t_66b9da61aca0e2 24,26-29,31,35,42-43
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_85aebd1623278c::t_986c5d6fecb2f4 128,134
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_932b8cc731954a 125-127
+  s_85aebd1623278c::t_054b60cda91d3d 132-135
+  s_85aebd1623278c::t_66b9da61aca0e2 128-131
+  s_85aebd1623278c::t_05310686779be0 15,42-46,51-54,82-87
+  s_85aebd1623278c::t_d6000720ef35f2 56,67
+  s_85aebd1623278c::t_fb696eb258b2e7 88-92
+src/js/apps/patients/shared/actions_views.js
+  s_85aebd1623278c::t_986c5d6fecb2f4 112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6f8cdd7f9879ec1ec3bb8df4cc4ecf448c479cb9",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_e4fe7fd5d6a6e7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3da1009a-cc91-45bd-af25-dc358b23a8d4",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

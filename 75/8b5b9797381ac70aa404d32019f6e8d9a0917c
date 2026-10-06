@@ -1,0 +1,31 @@
+src/js/apps/patients/patient/action/action-forms_views.js
+  s_97851b2b544b0c::t_63aef7c758c055 92,109-111,113,115-117
+  s_97851b2b544b0c::t_e8a0fd6e6a0995 114,121
+src/js/behaviors/form-frame-proto.js
+  s_97851b2b544b0c::t_a05399ae5a41e7 314-321,323-327
+  s_97851b2b544b0c::t_a8fc816d8e12f7 10,202
+  s_97851b2b544b0c::t_e8a0fd6e6a0995 274,278,284-295,328-330
+  s_97851b2b544b0c::t_63aef7c758c055 8-9,11-12,25-27,35-36,38-39,48-49,53,74-75,147,155,162,182,184-185,193,197-201,203,243,245-247,250-255,261-273,275-277,279-283,296-313,331-335,337-340,342-367
+  s_97851b2b544b0c::t_7bb39d63959090 244,249,256-257,259-260,322
+  s_97851b2b544b0c::t_be7cc98d962a6f 248,258,336,341
+src/js/apps/patients/patient/action/action.scss
+  s_97851b2b544b0c::t_63aef7c758c055 255-274
+src/js/apps/patients/patient/action/action_app.js
+  s_97851b2b544b0c::t_63aef7c758c055 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "758b5b9797381ac70aa404d32019f6e8d9a0917c",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,35 @@
+src/js/apps/patients/patient/patient.scss
+  s_d04385ebae28ca::t_1363f8b4aca55a 50
+src/js/apps/patients/patient/patient_app.js
+  s_d04385ebae28ca::t_433cc3beb6a2a7 6,77-78,80-81,83,112-113,120-121,135-136,167-172,180,185-191,195,206
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_d04385ebae28ca::t_fdff1ab176dfa9 68-71,150-153
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_d04385ebae28ca::t_9ed2593ceccf1b 18-60,99-103,233-251,255-257,286,321,535,576,582,595,602,622,691,696,719,724,729,741,753-757,759,773-777,788-790,792
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_d04385ebae28ca::t_a64294df38738d 57
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_d04385ebae28ca::t_67b141af128c01 58-120,323-324,326,329-332,336,338-339,342-343,345-348,350,353-355,357,359,1560-1565,1933-1938,1942-1985
+src/js/entities-service/entities/sidebars.js
+  s_d04385ebae28ca::t_8bfe31d72db0dc 3,13-16
+src/js/services/sidebars.component.cy.js
+  s_d04385ebae28ca::t_023a333821d830 1-45
+src/js/services/sidebars.js
+  s_d04385ebae28ca::t_3496a151a3b20a 1-2,14-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "b02b2e6bb0a073c55009bc5fcdfa10931fab80e9",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

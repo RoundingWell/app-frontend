@@ -1,0 +1,21 @@
+src/js/apps/patients/patient/action/action-loading.e2e.cy.js
+  s_5cb787676df08f::t_5d401cc092d419 11-14,47-50,93-94
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_5cb787676df08f::t_26e4e2a4e7f497 2144-2147
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "739440345b887784b29b25687e28dc5d2dbc9129",
+  "prompts": {},
+  "sessions": {
+    "s_5cb787676df08f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f380a-6030-7862-907a-777090f3c585",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

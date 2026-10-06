@@ -1,0 +1,30 @@
+src/js/apps/patients/schedule/schedule_views.js
+  s_09e8292bb4bcb3::t_032c0f4ad57b69 176,178-184,186-196
+  s_09e8292bb4bcb3::t_ca1d4ab9e36dc4 13
+  s_09e8292bb4bcb3::t_fc3697dc049ec5 166
+  s_09e8292bb4bcb3::t_76bfdcc0da5914 367,374
+  s_09e8292bb4bcb3::t_5718d69c4f9e5a 378
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_09e8292bb4bcb3::t_4064ee206da938 1125
+  s_09e8292bb4bcb3::t_07df63082e7068 187,791,799,831,836,850,855,907,948,1010,1377,1621,1632,1767
+src/js/apps/patients/schedule/schedule-list.scss
+  s_09e8292bb4bcb3::t_2bd3917c35f618 20-23,53-55
+src/js/apps/patients/schedule/layout.hbs
+  s_09e8292bb4bcb3::t_569e7bbd3bc455 14-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "ef69f704b774cf0eba68fde39b22128e25187c05",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

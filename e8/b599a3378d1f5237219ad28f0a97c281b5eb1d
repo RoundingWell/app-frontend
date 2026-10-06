@@ -1,0 +1,25 @@
+packages/care-ops-fontawesome/template-manifest.json
+  s_44c886cd8fd84f::t_84aeebf9e924ea 5,7
+config/vite-plugin-fontawesome-icons.js
+  s_44c886cd8fd84f::t_84aeebf9e924ea 2-56
+src/scss/README.md
+  s_44c886cd8fd84f::t_84aeebf9e924ea 169
+packages/care-ops-fontawesome/package.json
+  s_44c886cd8fd84f::t_84aeebf9e924ea 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "e8b599a3378d1f5237219ad28f0a97c281b5eb1d",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

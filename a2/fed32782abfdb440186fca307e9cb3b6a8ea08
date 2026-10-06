@@ -1,0 +1,22 @@
+src/js/apps/globals/app-frame/root_views.js
+  s_422f705f89ada4::t_45abc199d7af08 152,163-171
+  s_422f705f89ada4::t_da5a23971bc0fc 172
+src/js/components/droplist/droplist.component.cy.js
+  s_422f705f89ada4::t_45abc199d7af08 148-191
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a2fed32782abfdb440186fca307e9cb3b6a8ea08",
+  "prompts": {},
+  "sessions": {
+    "s_422f705f89ada4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01021-963c-7ef2-aa6b-45016ce1d453",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

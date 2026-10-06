@@ -1,0 +1,28 @@
+src/js/apps/patients/patient/action/action_app.js
+  s_97851b2b544b0c::t_63aef7c758c055 17
+src/js/behaviors/form-frame-proto.js
+  s_97851b2b544b0c::t_e8a0fd6e6a0995 267,271,277-288,309-311
+  s_97851b2b544b0c::t_63aef7c758c055 8-11,24-26,34-35,37-38,47-48,52,74-75,147,155,162,183,185-186,194,198-204,244-266,268-270,272-276,289-308,312-346
+  s_97851b2b544b0c::t_3f175be8e452cd 53,182
+src/js/apps/patients/patient/action/action.scss
+  s_97851b2b544b0c::t_63aef7c758c055 255-274
+src/js/apps/patients/patient/action/action-forms_views.js
+  s_97851b2b544b0c::t_e8a0fd6e6a0995 114,121
+  s_97851b2b544b0c::t_63aef7c758c055 92,109-111,113,115-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "7f7fa51ae401be446a711d47ea70c28ccc6511af",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,30 @@
+src/js/base/event-router.LICENSE
+  s_85aebd1623278c::t_c2df894fd63b1b 1-21
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_4e8762ce80a8ec 26-28
+  s_85aebd1623278c::t_84482002ec04b2 1-25,29-39
+src/js/base/event-router.js
+  s_85aebd1623278c::t_18859a4057e860 20
+  s_85aebd1623278c::t_ebdc72360d95e4 1-19,21-113
+src/js/base/routerapp.js
+  s_85aebd1623278c::t_ebdc72360d95e4 3-4,6,30-33
+src/js/base/routing.md
+  s_85aebd1623278c::t_84482002ec04b2 11,55-57
+  s_85aebd1623278c::t_29ba9c7a0b6034 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e4dff0598335c60e66f9cbcea02165b499a3aa12",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

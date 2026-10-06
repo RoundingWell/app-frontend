@@ -1,0 +1,23 @@
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_a90413db91afe6::t_79a126602cdd36 7,29-35,43
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_a90413db91afe6::t_79a126602cdd36 7-20,30,32,36,41,45-46,48,50-52,76-77
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_a90413db91afe6::t_79a126602cdd36 200,245,259
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "06cb292a4c59b29938f23319786567a54cb89012",
+  "prompts": {},
+  "sessions": {
+    "s_a90413db91afe6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f6630-fbeb-7391-bc7d-23f1504cadd6",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

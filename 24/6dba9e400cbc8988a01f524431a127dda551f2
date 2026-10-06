@@ -1,0 +1,23 @@
+src/js/services/sidebar.component.cy.js
+  s_4071d1618c057a::t_96cabb8e6f7ae8 36-63
+docs/marionette-v5-migration.md
+  s_4071d1618c057a::t_19a18f62460a7c 297-302
+src/js/services/sidebar.js
+  s_4071d1618c057a::t_cce1d1e3cda4ff 34-36,40-43,58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "246dba9e400cbc8988a01f524431a127dda551f2",
+  "prompts": {},
+  "sessions": {
+    "s_4071d1618c057a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7fb702ed-238b-4f50-afad-3364d3d7e0c2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+src/js/base/user-activity.js
+  s_85aebd1623278c::t_0f5041a791f421 1-37
+src/js/services/alert.component.cy.js
+  s_85aebd1623278c::t_5bfb01e1f64805 1-2,16-18,23,25
+src/js/apps/globals/app-frame/root_views.js
+  s_85aebd1623278c::t_1d7d7a7b025780 242-244
+src/js/components/tooltip/tooltip.component.cy.js
+  s_85aebd1623278c::t_5d44ed84a735f2 30,218,224
+test/support/component.js
+  s_85aebd1623278c::t_bc095b15c40b11 13
+  s_85aebd1623278c::t_c22ce5f5e92800 9-11
+  s_85aebd1623278c::t_0a96262c0b4566 18,76-79,82,84-85
+  s_85aebd1623278c::t_fc239a259723ba 14
+  s_85aebd1623278c::t_0f5041a791f421 19,25,30-31,35-40,75
+  s_85aebd1623278c::t_5d44ed84a735f2 26-29,32-34,98
+src/js/services/sidebars.component.cy.js
+  s_85aebd1623278c::t_5bfb01e1f64805 37,39-40
+src/js/services/dialer.component.cy.js
+  s_85aebd1623278c::t_5bfb01e1f64805 2,16,21,27
+src/js/services/widgets.component.cy.js
+  s_85aebd1623278c::t_5bfb01e1f64805 20-21
+src/js/app.js
+  s_85aebd1623278c::t_0f5041a791f421 14,91,94
+src/js/behaviors/top-region.js
+  s_85aebd1623278c::t_013e4df0c7aaf9 40
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_85aebd1623278c::t_5d44ed84a735f2 238
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_85aebd1623278c::t_5d44ed84a735f2 132,138
+src/js/apps/patients/shared/components/state_component.js
+  s_85aebd1623278c::t_5d44ed84a735f2 45,55
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_5d44ed84a735f2 69
+src/js/components/team/index.js
+  s_85aebd1623278c::t_5d44ed84a735f2 63,66
+src/js/components/tooltip/index.js
+  s_85aebd1623278c::t_5d44ed84a735f2 119
+  s_85aebd1623278c::t_1d7d7a7b025780 123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "c3ed550a56508d4ed7481378b2128ce158336b04",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

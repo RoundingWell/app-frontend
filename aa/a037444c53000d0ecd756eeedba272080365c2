@@ -1,0 +1,63 @@
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_422f705f89ada4::t_837bf8c5908449 273-277
+  s_c5b8a5726ffd55::t_e792a4ef13f0ac 842-843
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 693-695,844-861
+  s_c5b8a5726ffd55::t_877b2d3abea598 692
+src/js/apps/globals/nav/whats-new/whats-new_views.js
+  s_422f705f89ada4::t_f1f8df4da89a7c 12,30-32
+src/js/apps/globals/nav/whats-new/whats-new.component.cy.js
+  s_422f705f89ada4::t_f1f8df4da89a7c 48,55
+src/js/apps/globals/nav/whats-new/guide.hbs
+  s_422f705f89ada4::t_f1f8df4da89a7c 12,21
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_c5b8a5726ffd55::t_e792a4ef13f0ac 199
+  s_c5b8a5726ffd55::t_dd94b4ed22da6e 198,202
+src/js/apps/globals/nav/nav_state.js
+  s_c5b8a5726ffd55::t_29b8447ef8256c 17-18,21-23,27
+  s_c5b8a5726ffd55::t_094d698dac5344 19-20,24-26
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 1,64,66-68
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 22-23,75-76
+src/js/apps/globals/nav/nav_app.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 173,175,181-182,217-219,351-354
+  s_c5b8a5726ffd55::t_b8fb99cb4eb23d 355
+src/js/apps/globals/nav/nav_state.component.cy.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 1-20
+src/js/apps/globals/nav/app-nav/app-nav.scss
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 245
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 147,345-350
+  s_c5b8a5726ffd55::t_17bf00070e60d8 351
+src/js/apps/patients/worklist/worklist_app.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 74-75
+index.html
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 18
+src/js/apps/patients/shared/components/time_component.component.cy.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 3,7-11,17-18,22,33-38,47-57
+src/js/behaviors/form-viewport.component.cy.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 49,52,54-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "aaa037444c53000d0ecd756eeedba272080365c2",
+  "prompts": {},
+  "sessions": {
+    "s_422f705f89ada4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01021-963c-7ef2-aa6b-45016ce1d453",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_c5b8a5726ffd55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0111f-1ea8-7582-8386-8677a05f56ed",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_95c744f3bea79b::t_035e64d50a2331 230-232,244-247,278-295
+src/js/apps/patients/patient/patient_app.js
+  s_95c744f3bea79b::t_e75f7c1c691295 86,90,94,98,102,106
+src/js/base/current-child-app.component.cy.js
+  s_95c744f3bea79b::t_edff95a3abf5ca 1-215
+src/js/base/current-child-app.js
+  s_95c744f3bea79b::t_03123bfbe5f438 1-119
+src/js/base/routerapp.component.cy.js
+  s_95c744f3bea79b::t_93a11e5937a8a2 162-196
+src/js/base/routerapp.js
+  s_95c744f3bea79b::t_dfa3aa3b608178 7,10,27,46-47,108,112-115,117-122,124-125,127-128,130,141,144-145,148,152-158,165,167-168,170-174,178-179
+src/js/base/routing.md
+  s_95c744f3bea79b::t_af1d4ee004aa36 108,162-177,196-201
+src/js/base/subrouterapp.component.cy.js
+  s_95c744f3bea79b::t_58865a4434a475 46,88,90,132-152
+src/js/base/subrouterapp.js
+  s_95c744f3bea79b::t_91e4e24abab201 1,4,6-8,16,23,26-27,31,68-73,75,77,79,82-83,86-87,89,92-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f8b3c1ebe6cbec260d0e99bed6af8fc2c878a42b",
+  "prompts": {},
+  "sessions": {
+    "s_95c744f3bea79b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c3e7-5dfa-75c1-9015-cadfef4ae9ce",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
