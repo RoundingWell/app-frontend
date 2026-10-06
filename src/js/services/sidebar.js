@@ -11,13 +11,17 @@ export default App.extend({
   },
 
   async startSidebarApp(app, appOptions) {
-    this.stopSidebarApp();
+    const outgoing = this.currentApp;
     const claim = {};
 
     this.currentApp = app;
     this.currentClaim = claim;
 
     try {
+      outgoing?.stop();
+
+      if (this.currentClaim !== claim) return;
+
       app.stop();
 
       if (this.currentClaim !== claim) return;

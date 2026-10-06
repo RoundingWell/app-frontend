@@ -98,6 +98,39 @@ context('Sidebar Service', function() {
     });
   });
 
+  specify('yields to a sidebar started while stopping the outgoing app', function() {
+    cy.document().then(async document => {
+      const element = document.createElement('div');
+      document.body.append(element);
+      const service = new SidebarService({ region: new Region({ el: element }) });
+      const other = new SidebarApp();
+      const incoming = new SidebarApp();
+      let replacing;
+      const outgoing = new (SidebarApp.extend({
+        onStop() {
+          replacing ||= service.startSidebarApp(other, {});
+        },
+      }))();
+      try {
+        await service.start();
+        await service.startSidebarApp(outgoing, {});
+
+        expect(await service.startSidebarApp(incoming, {})).to.equal(undefined);
+        expect(await replacing).to.equal(other);
+        expect(service.currentApp).to.equal(other);
+        expect(other.isRunning()).to.be.true;
+        expect(incoming.isRunning()).to.be.false;
+        expect(element.contains(other.getView().el)).to.be.true;
+      } finally {
+        service.destroy();
+        other.destroy();
+        incoming.destroy();
+        outgoing.destroy();
+        element.remove();
+      }
+    });
+  });
+
   specify('yields to a sidebar started while stopping the incoming app', function() {
     cy.document().then(async document => {
       const element = document.createElement('div');
