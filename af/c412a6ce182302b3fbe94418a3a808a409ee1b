@@ -1,0 +1,21 @@
+src/js/base/fetch.js
+  s_40e12f2c95ab47::t_bed894d2c6cca1 82
+src/js/base/fetch.component.cy.js
+  s_40e12f2c95ab47::t_bed894d2c6cca1 173-190
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "afc412a6ce182302b3fbe94418a3a808a409ee1b",
+  "prompts": {},
+  "sessions": {
+    "s_40e12f2c95ab47": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04bf7-d783-7cb2-8d20-5e20d8587b42",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

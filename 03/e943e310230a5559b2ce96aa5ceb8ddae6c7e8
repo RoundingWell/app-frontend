@@ -1,0 +1,22 @@
+packages/care-ops-forms/index.js
+  s_97851b2b544b0c::t_f5aa50dfa796a4 336,339,366-370,381
+src/js/behaviors/form-auto-height.js
+  s_97851b2b544b0c::t_f5aa50dfa796a4 50,62,108-118,245-257
+  s_97851b2b544b0c::t_dacb37723f08f8 34,194,236-237,239-241,331-333,335
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "03e943e310230a5559b2ce96aa5ceb8ddae6c7e8",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

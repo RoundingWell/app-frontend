@@ -1,0 +1,32 @@
+src/js/apps/patients/patient/form/form_app.js
+  s_97851b2b544b0c::t_a43f0e73f34bce 38,226,239-247,279
+  s_97851b2b544b0c::t_b0f85a38c797b9 222
+packages/care-ops-forms/index.js
+  s_97851b2b544b0c::t_f5aa50dfa796a4 336,339,366-370,381
+src/js/apps/patients/patient/form/form_views.js
+  s_97851b2b544b0c::t_3e7edaf98754c7 24
+  s_97851b2b544b0c::t_a43f0e73f34bce 23,25,31,35,38,40,47,60,63,68,72-74,82,98-104,106
+  s_97851b2b544b0c::t_5b3b04b213c7b3 105
+packages/care-ops-fontawesome/manifest.json
+  s_97851b2b544b0c::t_3e7edaf98754c7 7
+src/js/behaviors/form-auto-height.js
+  s_97851b2b544b0c::t_dacb37723f08f8 35,217,259,266-268,358-360,362
+  s_97851b2b544b0c::t_f5aa50dfa796a4 52,64,110-113,115-121,272-284
+  s_97851b2b544b0c::t_a43f0e73f34bce 33,41,114,134-153,260-264
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8e67af29f0766534e48370ac0fcb556ab3decda3",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,56 @@
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_e9c4ebfa58429b::t_cab4d129455e25 92-93,107-109
+  s_e9c4ebfa58429b::t_a9898a1f495604 110
+packages/care-ops-five9/five9_views.js
+  s_e9c4ebfa58429b::t_dc4a9329931851 64
+packages/care-ops-ringcentral/ringcentral_views.js
+  s_e9c4ebfa58429b::t_7e5f8dbde53057 47
+src/js/apps/patients/patient/patient_app.js
+  s_e9c4ebfa58429b::t_f363ca381048bc 1-2,9-12,15,22-28,33-37,43-44,53,55,71,73-76,78,83-88,91-92,95-97,99-101,103-105,107-108,111-112,114,116-117,119-128,131-135,137,140-142,144-145,147-148,150-151,153-160,163-164
+src/js/apps/patients/patient/patient_views.js
+  s_e9c4ebfa58429b::t_c273b74044da78 21-34,38-40,48-66,70,97-100
+src/js/apps/patients/patient/sidebar/sidebar_app.js
+  s_e9c4ebfa58429b::t_99305f069a48bf 36
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_e9c4ebfa58429b::t_a02e7d7f71419a 301
+src/js/apps/patients/schedule/schedule_views.js
+  s_e9c4ebfa58429b::t_e88ecdd6e080dc 262,265-271,275,280
+src/js/apps/patients/shared/actions_views.js
+  s_e9c4ebfa58429b::t_a17ebac86c8652 28-34
+src/js/apps/patients/shared/widgets/widgets.js
+  s_e9c4ebfa58429b::t_215f05c17c77ba 145
+src/js/apps/patients/sidebar/patient/patient-sidebar_app.js
+  s_e9c4ebfa58429b::t_9dca4a3502b7e2 41
+src/js/apps/patients/worklist/action_views.js
+  s_e9c4ebfa58429b::t_f0ebada6991ec4 69,74,81
+src/js/apps/patients/worklist/flow_views.js
+  s_e9c4ebfa58429b::t_6e730a6d923bb9 56,59
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_e9c4ebfa58429b::t_ad3cfeed4e4050 1239
+src/js/base/routerapp.component.cy.js
+  s_e9c4ebfa58429b::t_55a9472af2685d 8,33,61,68,77-78,80,117,120,123,135,153,160,165,168,186,197
+src/js/base/routing.md
+  s_e9c4ebfa58429b::t_d2031f3134f5e4 31,33-36,61,140-141
+src/js/base/subrouterapp.component.cy.js
+  s_e9c4ebfa58429b::t_0cec9e8b4337de 20,59
+src/js/services/latest-list.component.cy.js
+  s_e9c4ebfa58429b::t_fb3f5998a308ed 48
+src/js/apps/patients/patients-main_app.js
+  s_e9c4ebfa58429b::t_f564704d5ef4ba 1,4-5,31-38,40-43,45,47-50,54-57,59,61,63-65,67-69,71-73,75-84,89,92-93,97-98,116,119-166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "36b56478a688bf11457390ae634b1f7bbaf50b62",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

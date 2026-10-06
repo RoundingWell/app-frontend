@@ -1,0 +1,33 @@
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_68eb4121d9a9bc::t_9d97485c2cd20d 918,1189-1190,1192-1193
+  s_68eb4121d9a9bc::t_eaa095f5418269 1081
+  s_68eb4121d9a9bc::t_c00ded9cc288f6 1154-1158
+  s_68eb4121d9a9bc::t_32ee82fe5e47f7 1319,1321
+  s_68eb4121d9a9bc::t_549d0ff1ae372b 1320,1322
+src/js/apps/patients/schedule/day-item.hbs
+  s_68eb4121d9a9bc::t_29e5c70266f234 15
+src/js/apps/patients/schedule/schedule-list.scss
+  s_68eb4121d9a9bc::t_29e5c70266f234 90-109,162,242,244,248
+  s_68eb4121d9a9bc::t_a387657ec80970 9,294,319
+  s_68eb4121d9a9bc::t_9d97485c2cd20d 1-4
+  s_68eb4121d9a9bc::t_c6723950c4bec3 70
+  s_68eb4121d9a9bc::t_c00ded9cc288f6 41-42,46
+src/js/apps/patients/schedule/layout.hbs
+  s_68eb4121d9a9bc::t_29e5c70266f234 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "8c7e676442d3755b465cc79257292e6e430803d6",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

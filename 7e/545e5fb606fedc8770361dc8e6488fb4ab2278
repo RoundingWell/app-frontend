@@ -1,0 +1,38 @@
+src/js/services/ws.js
+  s_8899d171cff30f::t_350233d2531202 147,150-155,160-162
+  s_8899d171cff30f::t_3552d005bf2ecf 25
+  s_8899d171cff30f::t_99af475c61b230 126,148,156-157,165-169,174-180
+  s_6d0dd6537d3367::t_2be09405d5caf3 163-164
+  s_6d0dd6537d3367::t_8bed579e30b1ac 158-159,170-171
+src/js/services/ws.cy.js
+  s_8899d171cff30f::t_ab2ab1636ca393 438,446,453-455,459,473-474,482,495-516
+  s_6d0dd6537d3367::t_5359b75554d625 206-229,231-234,460-472,475-481
+  s_6d0dd6537d3367::t_5437dda1288a21 406,483-485
+  s_8899d171cff30f::t_fdc5a7d1a34a79 230
+  s_6d0dd6537d3367::t_2be09405d5caf3 444-445,448-452,456-458
+  s_8899d171cff30f::t_c202fef3295d15 519-540
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "7e545e5fb606fedc8770361dc8e6488fb4ab2278",
+  "prompts": {},
+  "sessions": {
+    "s_6d0dd6537d3367": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e88d2-72c6-71c1-b061-e5c5e2252ff3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_8899d171cff30f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f35d6479-d60c-4d49-9d52-1c9575fb8713",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}

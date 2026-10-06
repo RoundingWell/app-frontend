@@ -1,0 +1,11 @@
+src/js/base/model.js
+  ai_agent 129,133
+src/js/base/model.cy.js
+  ai_agent 1-133
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "8126bacaa3d2dfd2a8b55c596332dd84848b041e",
+  "prompts": {}
+}

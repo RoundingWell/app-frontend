@@ -1,0 +1,29 @@
+AGENTS.md
+  s_377efbce3348c3::t_c2febc32accfbd 127-128
+.circleci/README.md
+  s_377efbce3348c3::t_b27c891efe34fb 5
+  s_377efbce3348c3::t_5d324836ff12d7 12
+  s_377efbce3348c3::t_c2febc32accfbd 1-4,6-11,13-23
+.circleci/workflows.yml
+  s_377efbce3348c3::t_c2febc32accfbd 1-559
+.circleci/config.yml
+  s_377efbce3348c3::t_c2febc32accfbd 17
+docs/deploy.md
+  s_377efbce3348c3::t_c2febc32accfbd 111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "0bea3849aecf94275e812347b41e45c1bd151b93",
+  "prompts": {},
+  "sessions": {
+    "s_377efbce3348c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5a54-58b9-7b33-90df-8957eb006d4e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

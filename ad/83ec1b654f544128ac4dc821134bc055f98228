@@ -1,0 +1,22 @@
+src/js/entities-service/entities/actions.js
+  s_4fb06412cf7174::t_1c40845542fb6d 108-121
+  s_4fb06412cf7174::t_6458446a1ed6af 107
+test/integration/patients/patient/patient-flow.js
+  s_4fb06412cf7174::t_56a812cf37da44 187-227
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.11",
+  "base_commit_sha": "ad83ec1b654f544128ac4dc821134bc055f98228",
+  "prompts": {},
+  "sessions": {
+    "s_4fb06412cf7174": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4b07-77d6-7830-a0b1-2388fef5777a",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

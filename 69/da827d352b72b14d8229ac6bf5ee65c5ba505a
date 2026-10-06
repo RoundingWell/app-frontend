@@ -1,0 +1,19 @@
+src/js/apps/patients/patient/workflow/add-workflow_app.js
+  s_d04385ebae28ca::t_7f85be636de3cf 7,56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "69da827d352b72b14d8229ac6bf5ee65c5ba505a",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

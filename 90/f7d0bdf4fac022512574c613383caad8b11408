@@ -1,0 +1,25 @@
+src/js/components/dateselect/date-select.component.cy.js
+  s_98141a3add0497::t_c99124b4131598 160,162-163
+src/scss/modules/buttons.scss
+  s_98141a3add0497::t_c289b4f5064471 390,394
+  s_98141a3add0497::t_07ac768785875a 315-319,323-324,326-333
+  s_98141a3add0497::t_549923b06e8a1c 389,393,397
+src/scss/modules/list-pages.scss
+  s_98141a3add0497::t_903de933fef6ab 277-280
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "90f7d0bdf4fac022512574c613383caad8b11408",
+  "prompts": {},
+  "sessions": {
+    "s_98141a3add0497": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa3d5-b074-7972-8c1c-0ef07df7968e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,102 @@
+src/js/apps/patients/patient/flow/flow_views.js
+  s_d04385ebae28ca::t_24f0f768f4af9a 224
+  s_d04385ebae28ca::t_268d73696e0e1f 231
+  s_d04385ebae28ca::t_5218cb07eef0d1 228,232-233,236
+src/js/apps/patients/schedule/day-item.hbs
+  s_d04385ebae28ca::t_450d6ec1c32d1b 2
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_d04385ebae28ca::t_14b6e5975b627e 588-593,595-598
+  s_d04385ebae28ca::t_b7641f1795a317 594,599
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_d04385ebae28ca::t_ab12b6ec2a3f84 60-61,344-360
+  s_d04385ebae28ca::t_6ecb15b34d6703 361
+  s_d04385ebae28ca::t_4e2b17ab4738d5 446-452
+  s_d04385ebae28ca::t_1e108487caf7e4 453
+  s_d04385ebae28ca::t_64876bd0889daf 2703,2723-2725
+  s_d04385ebae28ca::t_ceda567d63aef6 2114-2115,2198-2199,2237-2238,2250-2251
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_d04385ebae28ca::t_ceda567d63aef6 598-603
+  s_d04385ebae28ca::t_c9629bd9b09983 579-583
+src/scss/domain/work-card.scss
+  s_d04385ebae28ca::t_396f33b1dc9b99 13,28
+src/scss/domain/action-card.scss
+  s_d04385ebae28ca::t_993234ff870084 47-60
+src/js/apps/patients/patient/action/action_app.js
+  s_d04385ebae28ca::t_7b2b659d79b5a6 98
+  s_d04385ebae28ca::t_9f476d945631a8 249
+  s_d04385ebae28ca::t_c389b80965aed4 99
+  s_d04385ebae28ca::t_46ff87c99595bd 150,153-156,168,175-176,179-180
+  s_d04385ebae28ca::t_04b50237185acb 112-114,121,177-178
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_d04385ebae28ca::t_ab12b6ec2a3f84 1937-1955
+  s_d04385ebae28ca::t_ceda567d63aef6 1555-1560,1928-1933
+src/js/apps/patients/worklist/action_views.js
+  s_d04385ebae28ca::t_7b2b659d79b5a6 81,83,87,113
+  s_d04385ebae28ca::t_5218cb07eef0d1 90,102
+  s_d04385ebae28ca::t_24f0f768f4af9a 70,88,105-106,110-112
+  s_d04385ebae28ca::t_268d73696e0e1f 89
+  s_d04385ebae28ca::t_46ff87c99595bd 75-76,103-104,107-109
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_d04385ebae28ca::t_24f0f768f4af9a 2
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_d04385ebae28ca::t_ceda567d63aef6 473-474,477-480,491-492,495-497
+  s_d04385ebae28ca::t_57943dc91bafa9 498
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_d04385ebae28ca::t_ab12b6ec2a3f84 2,213-263
+  s_d04385ebae28ca::t_396f33b1dc9b99 167
+  s_d04385ebae28ca::t_d34a529d9b4605 264
+src/js/apps/patients/patient/action/layout.hbs
+  s_d04385ebae28ca::t_46ff87c99595bd 6-7
+src/js/apps/patients/patient/patient_app.js
+  s_d04385ebae28ca::t_9f476d945631a8 80-81,135-136
+  s_d04385ebae28ca::t_7b2b659d79b5a6 112-113,120-121
+  s_d04385ebae28ca::t_69dd720d28d8ce 206
+  s_d04385ebae28ca::t_81ce4dc7b6732c 195
+  s_d04385ebae28ca::t_3bfc2d0bd66810 6,77-78,83,167-172,180,185-191
+src/js/apps/patients/schedule/schedule_views.js
+  s_d04385ebae28ca::t_7776697276cf5e 155,226-228
+  s_d04385ebae28ca::t_52ad9a75da7523 222
+  s_d04385ebae28ca::t_7b2b659d79b5a6 225,230,232,236
+src/js/apps/patients/worklist/flow_views.js
+  s_d04385ebae28ca::t_52ad9a75da7523 71-73,82
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_d04385ebae28ca::t_ceda567d63aef6 149,152-154,1524-1525,1531-1532,1536-1540,1828,1834-1836,2080
+  s_d04385ebae28ca::t_ab12b6ec2a3f84 2064,2066-2068,2073-2079
+  s_d04385ebae28ca::t_b7641f1795a317 2071-2072
+src/js/apps/patients/patient/action/read-only.hbs
+  s_d04385ebae28ca::t_46ff87c99595bd 11
+src/js/apps/patients/worklist/action-item.hbs
+  s_d04385ebae28ca::t_79e7edeea48c8e 42
+  s_d04385ebae28ca::t_24f0f768f4af9a 2
+  s_d04385ebae28ca::t_46ff87c99595bd 39-41,43
+src/js/apps/patients/patient/action/action-details_views.js
+  s_d04385ebae28ca::t_46ff87c99595bd 80-104,152-159,168,194-196,211-212,225-228,285,396-398
+src/js/apps/patients/patient/action/action_views.js
+  s_d04385ebae28ca::t_04b50237185acb 69-70,103-117
+  s_d04385ebae28ca::t_fbe91f7a36025e 68
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_d04385ebae28ca::t_52ad9a75da7523 131-133,138,262-264,269
+src/js/apps/patients/shared/actions_views.js
+  s_d04385ebae28ca::t_7b2b659d79b5a6 36,45,55
+  s_d04385ebae28ca::t_52ad9a75da7523 41,52
+src/js/apps/patients/schedule/schedule-list.scss
+  s_d04385ebae28ca::t_450d6ec1c32d1b 76,92
+src/js/apps/patients/patient/action/action-edit.hbs
+  s_d04385ebae28ca::t_46ff87c99595bd 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "2ba724948447aef458ee8867408fd9370622ba17",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

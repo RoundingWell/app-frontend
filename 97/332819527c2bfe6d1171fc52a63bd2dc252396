@@ -1,0 +1,28 @@
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_79009b838f7c4e::t_a3450780c86be7 1-295
+src/js/apps/patients/shared/list-filters/list-filters_app.js
+  s_79009b838f7c4e::t_335dbeadd94c6c 7,67-71,98
+  s_79009b838f7c4e::t_a3450780c86be7 1-6,8-66,72-97,99-112
+src/js/apps/patients/shared/list-filters/list-filters.e2e.cy.js
+  s_79009b838f7c4e::t_a3450780c86be7 1-1081
+src/js/apps/patients/schedule/schedule_app.js
+  s_79009b838f7c4e::t_a3450780c86be7 12,35
+src/js/apps/patients/worklist/worklist_app.js
+  s_79009b838f7c4e::t_a3450780c86be7 13,38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "97332819527c2bfe6d1171fc52a63bd2dc252396",
+  "prompts": {},
+  "sessions": {
+    "s_79009b838f7c4e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ef94b-7f2c-70c0-a599-3cf57143c046",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

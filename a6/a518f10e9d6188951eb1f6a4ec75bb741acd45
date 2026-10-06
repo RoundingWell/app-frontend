@@ -1,0 +1,95 @@
+src/js/apps/globals/error/error.e2e.cy.js
+  s_e409610ec8685a::t_c372d07c5408dd 9-10,30-31,89-92,111-113
+  s_e409610ec8685a::t_372ad646688941 115-116
+src/js/services/ws.e2e.cy.js
+  s_e409610ec8685a::t_7e298df7e0d319 5-6,206-213
+  s_930f3c9a37745c::t_7cf8e279574a6f 9-116,118-205,214-230,232-359,361-372
+  s_267e7a791356aa::t_79090e5a6c78dd 117,360
+  s_7d9748a0496f68::t_a55b758ee690b5 2-3,231
+  s_e409610ec8685a::t_4f63ff34ea95c7 1,4,7-8,373-375
+src/js/services/dialer.js
+  s_7d9748a0496f68::t_133c21e50b21fd 34-35
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_7d9748a0496f68::t_f733e012495997 35-36
+test/support/websockets.js
+  s_7d9748a0496f68::t_f821acdf306c8d 65-69
+  s_7d9748a0496f68::t_7c7c3ab44369de 55-64
+test/support/requests.js
+  s_7d9748a0496f68::t_58253259de45d4 1-56
+src/js/services/ws.js
+  s_7d9748a0496f68::t_5d45f2721fd2c5 90-91,213-214
+src/js/auth.e2e.cy.js
+  s_930f3c9a37745c::t_627a652ac31ff9 9-75
+  s_e409610ec8685a::t_c89daec4ea1e62 1-8,76-77
+test/support/e2e.js
+  s_7d9748a0496f68::t_d79cf51bdede29 19
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  s_e409610ec8685a::t_6d40dbf5152076 138-142,144-152,156-158,299-313,359-370,427-438,466-480,510-517
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_9b1b3939109fa4::t_c7ff0ee31aed22 106
+  s_930f3c9a37745c::t_adccce1a4217a4 108-109,112-114,118,120-121,124,128-130,134,438,472,1042
+  h_0f06c286dda36f 107,110-111,115-117,119,122-123,125-127,131-133,135-137,396-398
+  s_e409610ec8685a::t_26cf622c0692f0 138,339-340,399-410,426-437,439-471,473-481,842-913,1011,1017-1018,1023,1027-1028,1033-1034,1036-1038,1043,1046-1048,1052-1053,1056,1062-1067,1071-1072,1077,1081-1082,1086-1087,1091-1092,1095-1097,1100-1103,1106-1111,1116-1119,1121,1123-1125,1128-1129,1133-1138,1142,1682-1718
+src/js/components/picklist/picklist.component.cy.js
+  s_e409610ec8685a::t_2c6c5a30eb99a3 43-52,54-69,212,225-227,231-238,243,253-255,257-259,264,275-277,279-281,288,291,305-307,313-315,324-326,332-337,343,354-356,360-365
+  s_7d9748a0496f68::t_23c19cdcc9b873 53,286,292-293,317-323,327-331
+src/js/services/dialer.e2e.cy.js
+  s_930f3c9a37745c::t_af520ff8eae6eb 161-165,169,363-381,388-392,672-676,678-680,690,694,698-716,739,762-763,793-802,806
+  s_e409610ec8685a::t_17a5374a687c24 168,332-342,627-637,654-671,677,681-686,720-738,740-761,764-792
+  s_7d9748a0496f68::t_82ffaaa31436c7 360-362,382-384,687-689,691-693,695-697,717-719,803-805,807-809
+  s_7d9748a0496f68::t_b839d118c34d64 393-394
+  s_930f3c9a37745c::t_47fcd7d70767db 1,81,150-160,166-167,359,395,810-814
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a6a518f10e9d6188951eb1f6a4ec75bb741acd45",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_267e7a791356aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08689-8981-7cf3-a3c5-0ee0a88b599c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_930f3c9a37745c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0e76a-023f-7740-a6fe-9b6e8dfa8ece",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_9b1b3939109fa4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c929-2fdb-7951-82db-c927ebfd8781",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_e409610ec8685a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0eeb9-ce2f-7691-8403-ba571c2bdced",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+src/js/apps/patients/patient/form/form_app.js
+  s_e9c4ebfa58429b::t_4d969c509fdab3 66
+src/js/services/history.js
+  s_e9c4ebfa58429b::t_78b0250ad8a5d8 53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "8a10bb9efdeba761d2b7e56944a281f183a9db85",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

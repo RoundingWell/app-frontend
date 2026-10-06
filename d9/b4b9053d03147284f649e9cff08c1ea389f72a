@@ -1,0 +1,133 @@
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_1bf45839d4ebf2::t_4f37a19001ae1a 15-16,18,20-21,35
+  s_1bf45839d4ebf2::t_8aa8593fd4b97d 53,57,125,130,133,172-173,177-181,225-234,242-243,245,249,252,254-261,263-268,270-271,273-274,276-277,279-282,284-288,290-294,302-304,307-308,320-322,333-338,356-357,367-369,378-381,383
+  s_1bf45839d4ebf2::t_8524adc0959413 253,262,269,272,275,278,283,289,295,382
+  s_1bf45839d4ebf2::t_09a1c56d21a0e4 13-14,17,19,22-25,212,250
+  s_1bf45839d4ebf2::t_923cb1bba19e85 244
+  s_1bf45839d4ebf2::t_be666c8e89dfca 52,129
+  s_1bf45839d4ebf2::t_362a43bc85bd5e 51,58-60,62-64,128
+  s_1bf45839d4ebf2::t_f6c7594f4d41c6 189-195,197-199,202,207
+  s_1bf45839d4ebf2::t_78c52b459ac669 246-248
+  s_09e8292bb4bcb3::t_227b4ac957d8e4 196,200-201,203-206
+  s_1bf45839d4ebf2::t_f87d994b106d78 305-306
+  s_1bf45839d4ebf2::t_c2fedc6c097a2f 26-32,54,131
+  s_1bf45839d4ebf2::t_10063f6edec36a 33,37-40,122
+  s_1bf45839d4ebf2::t_78c72f7b1a9f41 238,354
+  s_1bf45839d4ebf2::t_31dffa27e9ce23 34,36
+  s_1bf45839d4ebf2::t_d1cca32786eeee 315
+src/js/apps/globals/nav/app-nav/app-nav.scss
+  s_1bf45839d4ebf2::t_923cb1bba19e85 29-30,36-42,44
+  s_1bf45839d4ebf2::t_3594805042aa3e 203,213
+  s_1bf45839d4ebf2::t_fa31c1f877d847 132,262,272,277,282,287,316
+  s_1bf45839d4ebf2::t_5373dc0b4e6393 130-131,133,138-139,168,309-312
+  s_1bf45839d4ebf2::t_1f98328b4e198e 21,301
+  s_1bf45839d4ebf2::t_50f4965eaf1e59 4-7,9,11,43,136-137,220,222-223,234,238,251-252,257,259,315,318
+  s_1bf45839d4ebf2::t_4cb238d82b36d8 216,250
+  s_1bf45839d4ebf2::t_ccdb990c11ab4e 202,205-207,324
+  s_1bf45839d4ebf2::t_dde3de9f26c7fb 218
+  s_ddcbbefeb5f845::t_15b6106446b9ca 186
+  s_1bf45839d4ebf2::t_c039260f27e83d 3,147
+  s_1bf45839d4ebf2::t_363c203aca4c02 46-50
+  s_1bf45839d4ebf2::t_d1cca32786eeee 211
+  s_1bf45839d4ebf2::t_ae3f30bf07fe56 10,159-160
+  s_1bf45839d4ebf2::t_a83ab9ba5ae2a2 129
+  s_1bf45839d4ebf2::t_64c6a275b6d2a1 241
+  s_1bf45839d4ebf2::t_2fc57fc2f51086 224
+  s_1bf45839d4ebf2::t_0bc77b0efab76a 221
+  s_1bf45839d4ebf2::t_bda9027e7ce8ae 235,266-267
+  s_1bf45839d4ebf2::t_687d3f44394b6d 176
+  s_1bf45839d4ebf2::t_f78a80430ecdad 307
+  s_1bf45839d4ebf2::t_e0380cb821b604 8,135,169,204,219
+  s_1bf45839d4ebf2::t_345e07efc9e3e0 2
+  s_1bf45839d4ebf2::t_c6dcac0b924227 208-210,212,225,232-233,236-237,244,246-249,258,317
+  s_1bf45839d4ebf2::t_33e02052b8931d 14,23,26-28,31-35,45,146,157-158,161-167,170-175,198-199,240,306,320,322-323,325-342
+  s_5bc9cc1ce7547e::t_01fd517a9b9910 15
+  s_1bf45839d4ebf2::t_1bacdc60a5a69d 270-271
+  s_1bf45839d4ebf2::t_0af28631e7d645 18
+  s_1bf45839d4ebf2::t_15a0d1d7e2f6b7 214
+  s_1bf45839d4ebf2::t_735ec184c4d666 16-17,20,239,269,293,295,297,302-305
+src/js/i18n/en-US/globals.yml
+  s_1bf45839d4ebf2::t_155fe5e89cc801 17-18,26
+src/js/apps/globals/app-frame/app-frame.scss
+  s_1bf45839d4ebf2::t_d1cca32786eeee 3
+  s_9bbdacebb067ff::t_219d3e3b27b6ea 51
+  s_1bf45839d4ebf2::t_147e47c3c25ada 2,4,13,16,18,23-28,30-32
+  s_1bf45839d4ebf2::t_e9334ac8e69a0a 29
+  s_09e8292bb4bcb3::t_a5b5d1e761db0a 71-73
+src/js/apps/globals/nav/nav_app.js
+  s_1bf45839d4ebf2::t_2f380a28a42e3a 20,206-210,259-260,264-268,272-274,276-280,283-286,288-289,300,302,318,320,322,329,331-332,335-336,338,344-349,352-355,357,360,362,364,378,395,397-399,407,410-411,413,415,429-431,433-436
+  s_9bbdacebb067ff::t_b967fb5d22fa18 270-271,361,423
+  s_1bf45839d4ebf2::t_83b9ccad459915 380-381,383-388,391-394,520-525,527
+  s_1bf45839d4ebf2::t_923cb1bba19e85 22,303,305-308,310-311,316-317,414
+  s_09e8292bb4bcb3::t_63b52f09acf004 221-223
+  s_1bf45839d4ebf2::t_4d582e5361d635 389
+  s_1bf45839d4ebf2::t_815b724fcbf6b3 281,287,290,295-299,301,313-315,326-328,339,421
+  s_1bf45839d4ebf2::t_363c203aca4c02 321,323-324,333,350,358
+  s_1bf45839d4ebf2::t_cdef3c44edf712 484-486
+  s_9bbdacebb067ff::t_39c449d520eb2d 197
+  s_1bf45839d4ebf2::t_63bf5fa40f2935 65-66,74,83-84
+  s_09e8292bb4bcb3::t_96c6d572ca0240 249-255
+  s_1bf45839d4ebf2::t_51da911246ef95 14
+  s_09e8292bb4bcb3::t_030eb2c5405a0a 12,16
+  s_09e8292bb4bcb3::t_386ddc7feeff20 1
+  s_1bf45839d4ebf2::t_569b4bbabcea5c 13,275,400,402-406,408-409,437-438
+  s_1bf45839d4ebf2::t_be666c8e89dfca 365-366,368-377,422
+  s_1bf45839d4ebf2::t_ef8076c38d0349 487,516,518
+  s_1bf45839d4ebf2::t_559bf223373c25 15,282,291-294,304,309,312,319,325,334,351,356,359,363,367,379,382,390,396,401,412,494,526
+  s_09e8292bb4bcb3::t_013fcaf9628438 256-258,261-263,269,420,424-426,432
+  s_1bf45839d4ebf2::t_bfb13d613b579f 330,337
+  s_1bf45839d4ebf2::t_ae1bc7d6786bdb 517
+  s_1bf45839d4ebf2::t_129c1a815716ef 519
+  s_09e8292bb4bcb3::t_a32cd4cdcd1c0d 340-343
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_1bf45839d4ebf2::t_4f664d33f5eeb0 350
+  s_1bf45839d4ebf2::t_60b53444818a51 349
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "d9b4b9053d03147284f649e9cff08c1ea389f72a",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    },
+    "s_1bf45839d4ebf2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f18e0-4c13-78a0-80de-dcff52a401d4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_5bc9cc1ce7547e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed59c-909a-7bf3-8869-883000e2afbb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_9bbdacebb067ff": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f179d-c3b2-7ad0-b571-02aa3cd725b8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_ddcbbefeb5f845": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019efddd-0c32-7661-a277-166740bde329",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

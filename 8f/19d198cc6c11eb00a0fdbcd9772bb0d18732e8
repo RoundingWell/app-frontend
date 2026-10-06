@@ -1,0 +1,25 @@
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  s_09e8292bb4bcb3::t_b016f0ffb5d0b4 63
+  s_09e8292bb4bcb3::t_37c2596c1bd63b 35-36
+  s_09e8292bb4bcb3::t_008d540532100a 124,138,155
+  s_09e8292bb4bcb3::t_4f76cbfc73c714 106,108
+src/js/apps/dashboards/dashboards-all/dashboards-all_views.js
+  s_09e8292bb4bcb3::t_b9d0cb199e7682 94
+  s_09e8292bb4bcb3::t_f7aa7f8eed9b11 6-7,14-18,20,33,40,45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "8f19d198cc6c11eb00a0fdbcd9772bb0d18732e8",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

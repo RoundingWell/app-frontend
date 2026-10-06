@@ -1,0 +1,119 @@
+src/js/apps/patients/shared/bulk-edit/bulk-edit_views.js
+  s_2326781df73def::t_72120f2947cb8b 8-9,12,16-17,31,47,118,174,176,186,200,222,225,250,257-258,275,349,390,401,412,454
+src/js/apps/patients/shared/selection-bar.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-5
+src/js/i18n/en-US/patients.yml
+  s_2326781df73def::t_72120f2947cb8b 234-239,244,386-408
+src/js/apps/patients/shared/components/owner_component.js
+  s_2326781df73def::t_72120f2947cb8b 15,105,114
+src/js/apps/patients/shared/patient-list-page.scss
+  s_2326781df73def::t_72120f2947cb8b 1-250
+src/js/apps/patients/shared/list-filters/panel.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-10
+src/js/apps/patients/shared/bulk-edit/bulk-edit.scss
+  s_2326781df73def::t_72120f2947cb8b 66-69
+src/js/apps/patients/shared/read-only_views.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-103
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_2326781df73def::t_72120f2947cb8b 6-7,13-14,19-22,25-26,65,72-73,184-186
+src/js/apps/patients/shared/read-only_views.js
+  s_2326781df73def::t_72120f2947cb8b 10-11,15,24,36,51,57,60,73
+src/js/apps/patients/shared/components/time_component.js
+  s_2326781df73def::t_72120f2947cb8b 40,43
+src/js/apps/patients/shared/add-workflow/add-workflow.scss
+  s_2326781df73def::t_72120f2947cb8b 1-5
+src/js/apps/patients/shared/components/dialer-component.scss
+  s_2326781df73def::t_72120f2947cb8b 1-14
+src/js/apps/patients/shared/add-workflow/add-workflow_views.js
+  s_2326781df73def::t_72120f2947cb8b 32,49-52
+src/js/apps/patients/shared/components/time_component.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-61
+src/js/apps/patients/shared/widgets/widgets.js
+  s_2326781df73def::t_72120f2947cb8b 10-11,60,115,131,136
+src/js/apps/patients/shared/components/select-all_view.js
+  s_2326781df73def::t_72120f2947cb8b 12,33-40
+src/js/apps/patients/shared/components/state_component.js
+  s_2326781df73def::t_72120f2947cb8b 16,73,77
+src/js/apps/patients/shared/actions_views.js
+  s_2326781df73def::t_72120f2947cb8b 7-8,12,24,26-29,59,68-69
+src/js/apps/patients/shared/filters_state.js
+  s_2326781df73def::t_72120f2947cb8b 81
+src/js/apps/patients/shared/list_views.js
+  s_2326781df73def::t_72120f2947cb8b 7,9,72
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_2326781df73def::t_72120f2947cb8b 5-7,13,17,23,34,56,58,102,109-110,112,114-116,129,136-137,140,142-144,152-155,178-179,195,212,215-216,276,278,286-288,303,340,353-354,360-361,371-372,382,387,393
+src/js/apps/patients/shared/bulk-edit/actions-inline.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-19
+src/js/apps/patients/shared/components/due-component.scss
+  s_2326781df73def::t_72120f2947cb8b 14
+src/js/apps/patients/shared/components/due_component.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-44
+src/js/apps/patients/shared/list-views.scss
+  s_2326781df73def::t_72120f2947cb8b 1-23
+src/js/apps/patients/shared/components/owner_component.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 152
+src/js/apps/patients/shared/patient-sidebar.scss
+  s_2326781df73def::t_72120f2947cb8b 2-5,7,15-16,19-20
+src/js/apps/patients/shared/widgets/widgets.scss
+  s_2326781df73def::t_72120f2947cb8b 1-7,17-21,24-25,47-50,52-62
+src/js/apps/patients/shared/list-filters/list-filters.scss
+  s_2326781df73def::t_72120f2947cb8b 1,9,11-12,16,18-21,24-27,30,42,47,53,57,66-68,76,82-83,89-90,100,110,114,118,122,124,126-128,130-138,140-147,150,154,159,166,172,176,181,187,192,202,212,214-216,219,223-224,228-232,237,241-242,245,253-256
+src/js/apps/patients/shared/components/check_component.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-48
+src/js/apps/patients/shared/components/date-filter/date-filter.scss
+  s_2326781df73def::t_72120f2947cb8b 32-35,39-40,45-58,60-61,85-86,88-89,116,121-129
+src/js/apps/patients/shared/components/owner-component.scss
+  s_2326781df73def::t_72120f2947cb8b 10,12
+src/js/apps/patients/shared/components/due_component.js
+  s_2326781df73def::t_72120f2947cb8b 52,56,59
+src/js/apps/patients/shared/components/state_component.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 38-39,53-58,88-90,96,99,108,110-113
+src/js/apps/patients/shared/patient-readonly.scss
+  s_2326781df73def::t_72120f2947cb8b 2-4,7,10,12,18,28-29,32,37-41
+src/js/apps/patients/shared/list-filters/list-filters.e2e.cy.js
+  s_2326781df73def::t_72120f2947cb8b 14-15,20,24,32,34,163,165,180,185,190,195,204,284,313,334,340,415,450,485,520,554,580,589,628,668,701,777,779,824,853,874,907,931,954,977,993,1016,1026,1034,1093-1094
+src/js/apps/patients/shared/list-page.js
+  s_2326781df73def::t_72120f2947cb8b 1-257
+src/js/apps/patients/shared/components/check_component.js
+  s_2326781df73def::t_72120f2947cb8b 21-23,27
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_2326781df73def::t_72120f2947cb8b 13-14,21-23,54-59,62
+src/js/apps/patients/shared/bulk-edit/flows-inline.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-14
+src/js/apps/patients/shared/flows_views.js
+  s_2326781df73def::t_72120f2947cb8b 40
+src/js/apps/patients/shared/comments.scss
+  s_2326781df73def::t_72120f2947cb8b 1-100
+src/js/apps/patients/shared/action-state.scss
+  s_2326781df73def::t_72120f2947cb8b 1-11,15,19,23,27,31
+src/js/apps/patients/shared/components/date-filter/date-filter_state.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-66
+src/js/apps/patients/shared/components/duration_component.component.cy.js
+  s_2326781df73def::t_72120f2947cb8b 1-47
+src/js/apps/patients/shared/components/time-component.scss
+  s_2326781df73def::t_72120f2947cb8b 5
+src/js/apps/patients/shared/comments_views.js
+  s_2326781df73def::t_72120f2947cb8b 5-7,14-15,19,26-27,60-62,93,101,111
+src/js/apps/patients/shared/components/duration_component.js
+  s_2326781df73def::t_72120f2947cb8b 37
+src/js/apps/patients/shared/components/dialer_component.js
+  s_2326781df73def::t_72120f2947cb8b 8-9,60,62,83-84
+src/js/apps/patients/shared/actions.scss
+  s_2326781df73def::t_72120f2947cb8b 9,23-24,36-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3df92438d1a7d42525675b7d36f7c6eec3f557f5",
+  "prompts": {},
+  "sessions": {
+    "s_2326781df73def": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffef4-6532-7662-9084-64d1a2c60264",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

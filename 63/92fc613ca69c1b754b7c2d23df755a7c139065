@@ -1,0 +1,21 @@
+src/js/base/route-base-app.component.cy.js
+  s_7d9748a0496f68::t_85fbffff732e6d 1-253
+src/js/base/route-base-app.js
+  s_7d9748a0496f68::t_e1ff3532b89d8f 1-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6392fc613ca69c1b754b7c2d23df755a7c139065",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

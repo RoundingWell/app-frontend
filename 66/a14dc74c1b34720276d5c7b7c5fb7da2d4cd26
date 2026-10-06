@@ -1,0 +1,21 @@
+src/js/apps/patients/shared/patient-list-page.scss
+  s_8300066960e1ec::t_bc0e92c358215c 169
+src/js/apps/patients/shared/list-filters/list-filters.scss
+  s_8300066960e1ec::t_bc0e92c358215c 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "66a14dc74c1b34720276d5c7b7c5fb7da2d4cd26",
+  "prompts": {},
+  "sessions": {
+    "s_8300066960e1ec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01569-89c2-7c60-b8b5-827eeffa78fe",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

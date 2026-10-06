@@ -1,0 +1,21 @@
+src/js/apps/patients/schedule/schedule-list.scss
+  s_70d6b69a3b5d9e::t_1e0c667a48808b 21-26,49-52
+src/js/apps/patients/schedule/day-list.hbs
+  s_70d6b69a3b5d9e::t_1e0c667a48808b 1,3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e3feb328e1ec985a67fa6cf1d7be7ef9bcba1483",
+  "prompts": {},
+  "sessions": {
+    "s_70d6b69a3b5d9e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01688-306f-7b13-91d4-20c3ecb71cfa",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

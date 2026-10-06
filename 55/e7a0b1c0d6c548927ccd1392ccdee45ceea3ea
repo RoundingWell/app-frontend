@@ -1,0 +1,29 @@
+packages/care-ops-forms/index.js
+  s_eedda65bb693c6::t_982e2ba12a7f0c 25-32,36-41,48-52,58-62
+src/js/apps/patients/patient/form/form-interaction.e2e.cy.js
+  s_ef625bac9f77ea::t_f9f356ad31aa05 1-149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "55e7a0b1c0d6c548927ccd1392ccdee45ceea3ea",
+  "prompts": {},
+  "sessions": {
+    "s_eedda65bb693c6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08995-a806-7672-815b-0397ab2f2b4b",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_ef625bac9f77ea": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08719-c650-7963-a1af-b00dcf33bc76",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

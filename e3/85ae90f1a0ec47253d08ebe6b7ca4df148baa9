@@ -1,0 +1,35 @@
+src/js/apps/patients/patient/form/form_views.js
+  s_97851b2b544b0c::t_72a4d7041ccc7d 141-145
+  s_97851b2b544b0c::t_5acfb088295be2 157
+  s_97851b2b544b0c::t_852e2fbc8a17f1 16,136,155-156
+src/js/apps/patients/patient/patient.scss
+  s_97851b2b544b0c::t_53b696e9b10ec9 112-123,136-139
+packages/care-ops-forms/index.js
+  s_97851b2b544b0c::t_72b0a14ba18a86 14,22-41,105-106
+src/js/apps/patients/patient/action/action.scss
+  s_97851b2b544b0c::t_8c222f311bdb60 202
+  s_97851b2b544b0c::t_852e2fbc8a17f1 203-218
+src/js/behaviors/form-viewport.js
+  s_97851b2b544b0c::t_5bacd5e1120842 1-126
+src/js/apps/patients/patient/form/form_app.js
+  s_97851b2b544b0c::t_852e2fbc8a17f1 47,72,77,79,190-191,201,227,231-235,261
+  s_97851b2b544b0c::t_182f732318a469 262
+src/js/apps/patients/patient/form/form.scss
+  s_97851b2b544b0c::t_a2d3a7f1453a48 63-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "e385ae90f1a0ec47253d08ebe6b7ca4df148baa9",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

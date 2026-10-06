@@ -1,0 +1,23 @@
+package.json
+  ffc0931798fef4c5 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "50c1e20e417deccd19801d55fee436ce86d29c47",
+  "prompts": {
+    "ffc0931798fef4c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d887c-a471-7792-b22f-876b2e5dd6f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 193,
+      "total_deletions": 5,
+      "accepted_lines": 191,
+      "overriden_lines": 0
+    }
+  }
+}

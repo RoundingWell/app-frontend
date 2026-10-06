@@ -1,0 +1,31 @@
+AGENTS.md
+  s_377efbce3348c3::t_1910b4bf138d59 115-127
+.circleci/continue.yml
+  s_377efbce3348c3::t_3b444e0a39bfb8 467-470
+  s_377efbce3348c3::t_01f49194712456 367-368,390-391,405-406,414-415,427-428,448-449,462-463
+  s_377efbce3348c3::t_1910b4bf138d59 3-7,366,369,389,392,394-404,407-413,416-426,429,447,450,455-461,464
+  s_377efbce3348c3::t_66dd2ad1060b1a 1-2,8-365,370-388,393,430-446,451-454,465-466,471-559
+.circleci/config.yml
+  s_377efbce3348c3::t_01f49194712456 23,26
+  s_377efbce3348c3::t_1910b4bf138d59 3,5-6,9-10,14-18,21
+.circleci/detect-cypress-defer.sh
+  s_377efbce3348c3::t_1910b4bf138d59 1-14,17-29,32-49
+  s_377efbce3348c3::t_e82981ef43f62a 30-31
+  s_377efbce3348c3::t_4e09f49dab4e51 15-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "83405e53e2c02c407054f0cac37cfbd2e35decef",
+  "prompts": {},
+  "sessions": {
+    "s_377efbce3348c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5a54-58b9-7b33-90df-8957eb006d4e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
