@@ -1960,6 +1960,18 @@ context('Patient Action Form', function() {
       });
 
     cy
+      .get('@formPaneScroll')
+      .invoke('resetHistory');
+
+    cy
+      .get('.js-viewport-interact')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('@formPaneScroll')
+      .should('not.have.been.called');
+
+    cy
       .get('.js-expand-button')
       .click();
 
@@ -1967,11 +1979,21 @@ context('Patient Action Form', function() {
       .get('@formPaneScroll')
       .invoke('resetHistory');
 
-    cy
-      .iframeStub()
-      .then(iframeStub => {
-        iframeStub.send('form:interact');
+    cy.window().then(win => {
+      return cy.iframeStub().then(iframeStub => {
+        return new Cypress.Promise(resolve => {
+          // This listener runs after the form's handler for the same message.
+          const onInteract = event => {
+            if (event.data?.message !== 'form:interact') return;
+
+            win.removeEventListener('message', onInteract);
+            resolve();
+          };
+          win.addEventListener('message', onInteract);
+          iframeStub.send('form:interact');
+        });
       });
+    });
 
     cy
       .get('@formPaneScroll')

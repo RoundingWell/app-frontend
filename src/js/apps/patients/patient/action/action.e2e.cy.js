@@ -746,6 +746,12 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .get('.picklist')
+      .should($picklist => {
+        const bounds = $picklist[0].getBoundingClientRect();
+
+        expect(bounds.left).to.be.at.least(0);
+        expect(bounds.right).to.be.at.most(260);
+      })
       .find('.js-picklist-item')
       .contains('Delete Action')
       .click()
@@ -2729,7 +2735,8 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .get('.picklist')
       .should('contain', teamCoordinator.attributes.name)
-      .and('not.contain', 'Non Team Member');
+      .and('not.contain', 'Non Team Member')
+      .and('not.contain', teamNurse.attributes.name);
   });
 
   specify('action with work:authored:delete permission', function() {

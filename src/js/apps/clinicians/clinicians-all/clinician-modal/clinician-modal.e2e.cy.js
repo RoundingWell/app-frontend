@@ -283,6 +283,15 @@ context('clinicians modal', function() {
       .should('have.css', 'border-top-color', stateColors.error);
 
     cy
+      .get('.alert-box')
+      .find('.js-dismiss')
+      .click();
+
+    cy
+      .get('.alert-box')
+      .should('not.exist');
+
+    cy
       .get('@modal')
       .find('[data-name-region]')
       .find('.js-input')
@@ -294,6 +303,16 @@ context('clinicians modal', function() {
       .find('.js-submit')
       .click()
       .wait('@routePostClinicianError');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'name error, email error');
+
+    cy
+      .get('@modal')
+      .find('[data-name-region] .js-input')
+      .should('not.be.focused')
+      .and('have.value', 'Test Clinician Updated');
 
     cy
       .get('@modal')

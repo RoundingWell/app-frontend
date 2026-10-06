@@ -20,7 +20,6 @@ export default App.extend({
     try {
       app.stop();
 
-      /* istanbul ignore if: defensive reentry from a sidebar's synchronous stop handler */
       if (this.currentClaim !== claim) return;
 
       this.listenToOnce(app, 'stop', () => {

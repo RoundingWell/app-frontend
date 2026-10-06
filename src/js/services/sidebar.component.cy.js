@@ -98,6 +98,36 @@ context('Sidebar Service', function() {
     });
   });
 
+  specify('yields to a sidebar started while stopping the incoming app', function() {
+    cy.document().then(async document => {
+      const element = document.createElement('div');
+      const outsideElement = document.createElement('div');
+      document.body.append(element, outsideElement);
+      const service = new SidebarService({ region: new Region({ el: element }) });
+      const other = new SidebarApp();
+      let replacing;
+      const incoming = new (SidebarApp.extend({
+        onStop() {
+          replacing ||= service.startSidebarApp(other, {});
+        },
+      }))();
+      await service.start();
+      await incoming.start({ region: new Region({ el: outsideElement }) });
+
+      expect(await service.startSidebarApp(incoming, {})).to.equal(undefined);
+      expect(await replacing).to.equal(other);
+      expect(service.currentApp).to.equal(other);
+      expect(other.isRunning()).to.be.true;
+      expect(incoming.isRunning()).to.be.false;
+      expect(element.contains(other.getView().el)).to.be.true;
+      service.destroy();
+      other.destroy();
+      incoming.destroy();
+      element.remove();
+      outsideElement.remove();
+    });
+  });
+
   specify('stops the active sidebar synchronously during service shutdown', function() {
     cy.document().then(async document => {
       const element = document.createElement('div');

@@ -61,7 +61,6 @@ context('patient page', function() {
     cy
       .routesForPatientWorkflow()
       .routeActions()
-      .routePatient()
       .intercept('GET', '/api/patients/*/actions*', {
         statusCode: 422,
         body: { errors: getErrors({ status: '422', detail: 'Cannot load patient actions' }) },

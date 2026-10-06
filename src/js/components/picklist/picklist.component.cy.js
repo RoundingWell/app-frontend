@@ -45,10 +45,6 @@ context('Picklist', function() {
       .find('.js-picklist-item')
       .first()
       .trigger('mouseover')
-      .should('have.class', 'is-highlighted')
-      .then($item => {
-        cy.wrap($item).trigger('mouseover', { relatedTarget: $item[0] });
-      })
       .should('have.class', 'is-highlighted');
 
     cy
@@ -71,6 +67,17 @@ context('Picklist', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .first()
+      .next()
+      .should('have.class', 'is-highlighted');
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .first()
+      .then($item => {
+        cy.wrap($item).trigger('mouseover', { relatedTarget: $item[0] });
+      })
+      .should('not.have.class', 'is-highlighted')
       .next()
       .should('have.class', 'is-highlighted');
   });
