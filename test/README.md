@@ -1,5 +1,8 @@
 # Cypress
 
+Read [the agent validation policy](../AGENTS.md#validation) when authoring or
+reviewing tests. This document describes how to collect evidence for that policy.
+
 ## Coverage
 
 Use `npm run coverage` for both suites, `npm run coverage:component` for components,
@@ -15,6 +18,33 @@ with E2E coverage in Coveralls. See [the CI documentation](../.circleci/README.m
 
 Reports can be found in `coverage/`.
 
+The configured source scope comes from [`.nycrc.json`](../.nycrc.json), shared
+through [`config/coverage.cjs`](../config/coverage.cjs) with Vite instrumentation.
+Component collection additionally drops `src/js/apps/**` and
+`src/js/entities-service/**` in
+[`scripts/cypress-coverage-events.js`](../scripts/cypress-coverage-events.js).
+Component totals therefore describe a narrower scope. Full coverage combines
+E2E and component data; application and entity-service coverage must come from
+E2E. Neither an executed branch nor 100% coverage proves a meaningful assertion.
+
+For full local verification, start with clean coverage output and run
+`npm run coverage`, which clears `.nyc_output` and `coverage`, runs both suites,
+and generates reports. Do not mix partial runs, stale data, or different source
+revisions into a full-coverage claim. Inspect the complete configured aggregate
+report, including covered/total lines and branches and uncovered locations;
+require 100% of both, not just the changed files. The current NYC configuration
+and report commands do not enforce a numeric 100% threshold automatically.
+Do not narrow the scope or add ignores to reach that result without explicit
+maintainer approval as required by `AGENTS.md`.
+
+Distinguish focused iteration from full local verification and remote results.
+Record the exact tested commit, any uncommitted changes, commands, suite/spec
+scope, test results, and coverage counts. For remote verification, match the
+current PR head to the pipeline SHA and confirm all required component/E2E
+workers, coverage uploads, and the combined finalizer succeeded. A nonempty LCOV
+upload or an older green pipeline alone does not establish full coverage or
+validation of the current head.
+
 Related scenarios may share a `specify`, including multiple visits. The coverage
 plugin retains coverage from each loaded window and merges it after each test.
 Reset scenario-specific intercepts, clocks, and exception handlers when reusing a
@@ -22,8 +52,9 @@ test. Keep a separate `specify` when a scenario needs independent isolation.
 
 ## What is a Cypress Test?
 
-A Cypress test is a functional test testing the built app from the user interface.
-Our current usage of cypress stubs all server data so these are not end-to-end tests.
+E2E specs exercise the built app through its user interface with stubbed server
+data; they do not verify integration with the live backend. Component specs mount
+isolated reusable units. Use E2E for behavior users can exercise through the UI.
 
 ## Organization
 
@@ -104,6 +135,42 @@ We should be testing the **business logic: how data (and interfaces) can be crea
 
 It is important to test all various data scenarios. What does it do when no results are returned? When the logged in user is only in a single group? When a value is null?
 
+## Behavior Evidence
+
+For each new or changed regression test, identify the behavioral contract and
+assert its result. Confirm a narrow controlled break of that behavior fails at
+the intended assertion, then restore the implementation and confirm a passing
+run. Record both results and remove the temporary break. A broad mutation
+campaign requires its own agreed scope. Failures in setup or
+unrelated assertions do not demonstrate detection. If removing a guard leaves
+the test green, that shows the test did not detect its removal; it does not prove
+the guard redundant. Trace supported callers and lifecycle ordering before
+removing a path or requesting an ignore.
+
+Use realistic fixtures, actual controls, and sufficient content to reach the
+state under test. For scrolling, overflow, and responsive behavior, use real
+browser layout and a viewport appropriate to the scenario. Do not override
+`scrollHeight`, `clientHeight`, bounding rectangles, or production layout solely
+to hit a branch. Assert the functional result rather than incidental dimensions.
+Cypress actions can scroll elements into view, and clicks can change
+focus: capture and assert the application's automatic scroll or focus result
+before a test action can produce it. When needed, disable the action's Cypress
+scrolling and observe the owning scroll container and active element directly.
+
+Before an asynchronous negative assertion, prove the operation that could cause
+the forbidden effect has completed. Use an aliased response plus an observable
+completion state, or an explicit response gate and completion signal; an initially
+absent element or untouched spy may pass before the work runs. Avoid arbitrary
+sleeps as completion evidence. For late-response races, hold the old response,
+transition through the UI, release it, wait for completion, and assert both the
+absence of stale effects and the presence of the correct current state.
+
+For lifecycle changes, exercise incoming startup, outgoing host teardown, and
+reentry where those transitions affect the contract. Verify that delayed work
+from the outgoing owner cannot commit after its host is lost, and that the new
+or reentered owner still functions. Use the version-matched upstream Marionette
+docs for framework contracts; test this application's reachable ownership flow.
+
 ## Fixtures
 
 Fixtures should be json files loaded in `test/fixtures/`.
@@ -133,7 +200,7 @@ And a mutator function is passed to the command such that the data for the endpo
 ## State Colors
 
 When checking for states like errors, rather than checking for the existence of a class, use stateColors.
-The available state colors are defined in [`./state-colors.js`](./state-colors.js).
+The available state colors are defined in [`./helpers/state-colors.js`](./helpers/state-colors.js).
 
 ```js
 context('Clinician Profile', function() {

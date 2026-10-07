@@ -2,6 +2,9 @@
 
 `/AGENTS.md` is the canonical source for AI guidance in this repository.
 
+For test authoring, review, or coverage validation, read `/AGENTS.md#validation` and
+`test/README.md` for behavior proof and complete coverage evidence.
+
 Load a scoped overlay only when your change touches `scripts/**` or `packages/care-ops-five9/**`.
 
 ## Key Rules

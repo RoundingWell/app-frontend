@@ -7,6 +7,7 @@ Start here. Load additional docs only when referenced below.
 
 Load a scoped overlay only when the task touches:
 
+- test authoring, test review, or coverage validation -> `test/README.md`
 - `scripts/**` -> `scripts/AGENTS.md`
 - `packages/care-ops-five9/**` -> `packages/care-ops-five9/AGENTS.md`
 - routing infrastructure (`src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`) or application route definitions -> `src/js/base/routing.md`
@@ -181,7 +182,10 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - Cover behavior that users can exercise through the UI with E2E tests. Do not substitute component tests that stub application methods or state for those flows; reserve component tests for behavior that cannot be meaningfully exercised through the UI. Prefer extending an existing E2E scenario for the same flow; add a separate `specify` only when the scenario needs its own isolation.
 
 - Keep test changes focused on the edited behavior; do not combine coverage work with unrelated test consolidation. Match surrounding Cypress style: one command per line in chained steps, blank lines between steps, scoped `get`/`find`, jQuery DOM subjects, and fixture callbacks that mutate `fx` then return it. Do not wrap queued Cypress commands in unnecessary `cy.then`; use `Cypress.Promise` for explicit response gates.
-- For changed application code, inspect branch coverage from E2E. Investigate unreachable branches as dead code and remove unsupported paths rather than adding synthetic app-method tests or coverage ignores. Generic/base contracts and services may use component tests. Use narrowly scoped, explained Istanbul ignores for defensive service branches that are impractical to test.
+- For changed application code, inspect branch coverage from E2E. Investigate unreachable branches as dead code and remove unsupported paths rather than adding synthetic app-method tests or coverage ignores. Generic/base contracts and services may use component tests. Do not add or broaden Istanbul ignores, coverage exclusions, or lower thresholds to make coverage pass. A defensive branch being difficult to test is not an exemption: obtain explicit maintainer approval for each proposed ignore, with its reachability analysis and reason. Removing a guard without a failing test does not prove it redundant; establish the supported caller and lifecycle contract first.
+
+- Require meaningful assertions for the changed behavior, not just execution of its lines or branches. For a new or changed regression test, make a narrow, reversible break in the targeted behavior and confirm the test fails at the intended assertion; restore the implementation and confirm it passes. A setup error, timeout before the assertion, or unrelated failure is not proof. Record the break, failing assertion, and restored result; keep this proof local and scoped; a broad mutation campaign requires its own agreed scope.
+- Use realistic user-reachable E2E setup for UI behavior. Do not fabricate DOM geometry, force application state, or invoke private app methods to make a branch execute. For asynchronous absence, scrolling/focus, and lifecycle transitions, follow the evidence requirements in `test/README.md`.
 
 - Use `npm run lint` for code changes that affect files covered by the repo lint setup.
 - Test the current product contract, not its implementation history. When a control, class, route, or behavior is removed, delete tests whose only purpose is to prove the obsolete implementation remains absent. Keep negative assertions only when absence is a current user-facing contract, such as permissions, availability, filtering, deletion, or a state transition.
@@ -196,7 +200,9 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
   - `npm run coverage:component` for component behavior
   - `npm run coverage:e2e` for app flows
   - `npm run coverage` runs both; do not stack it with the individual commands.
-- Never claim validation passed unless you actually ran the command.
+- For full coverage verification, require 100% lines and branches across the complete configured aggregate scope, with covered/total counts and zero uncovered locations. A changed-file report or component-only report is not full coverage. Preserve the configured scope; see `test/README.md` for collection boundaries and clean-run evidence.
+- Report focused checks, full local validation, and remote verification separately, with commands, scope, exact tested commit, and any uncommitted changes. Remote results must match the current PR head and include all required workers and coverage finalization; a prior head's green result is stale.
+- Never claim validation passed unless you actually ran the command. Documentation-only changes need only appropriate cheap documentation checks; they do not establish runtime validation.
 
 ## Common Commands
 
