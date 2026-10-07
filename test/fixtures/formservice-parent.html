@@ -10,6 +10,12 @@
       const iframe = document.createElement('iframe');
       const origin = window.location.origin;
 
+      window.pdfMessages = [];
+      window.addEventListener('message', function(event) {
+        if (event.origin !== origin || event.source !== iframe.contentWindow || event.data?.message !== 'form:pdf') return;
+        window.pdfMessages.push(event.data);
+      });
+
       iframe.src = origin + params.get('serviceUrl');
       document.body.appendChild(iframe);
     });
