@@ -1557,7 +1557,8 @@ context('patient flow page', function() {
       cy.then(() => {
         replyToFlow = null;
       });
-      cy.visit(url);
+      cy
+        .visit(url);
 
       cy
         .wrap(null)
@@ -1568,7 +1569,8 @@ context('patient flow page', function() {
       cy
         .contains('.app-nav__link', 'Schedule')
         .click();
-      cy.wait('@routeActions');
+      cy
+        .wait('@routeActions');
       cy
         .location('pathname')
         .should('eq', '/one/schedule');
@@ -1577,7 +1579,8 @@ context('patient flow page', function() {
         .should('be.visible');
 
       cy.then(() => replyToFlow());
-      cy.wait('@routeDelayedFlow');
+      cy
+        .wait('@routeDelayedFlow');
       cy
         .get('.list-page')
         .should('be.visible');
@@ -1588,7 +1591,8 @@ context('patient flow page', function() {
       cy.then(() => {
         replyToFlow = null;
       });
-      cy.visit(url);
+      cy
+        .visit(url);
       cy
         .wrap(null)
         .should(() => {
@@ -1601,7 +1605,8 @@ context('patient flow page', function() {
       cy
         .contains('.js-picklist-item', 'Programs')
         .click();
-      cy.wait('@routePrograms');
+      cy
+        .wait('@routePrograms');
       cy
         .location('pathname')
         .should('eq', '/one/programs');
@@ -1610,13 +1615,30 @@ context('patient flow page', function() {
         .should('be.visible');
 
       cy.then(() => replyToFlow());
-      cy.wait('@routeDelayedFlow');
+      cy
+        .wait('@routeDelayedFlow');
       cy
         .get('.list-page')
         .should('be.visible');
       cy
         .location('pathname')
         .should('eq', '/one/programs');
+
+      cy
+        .intercept({ method: 'GET', url: new RegExp(`/api/flows/${ delayedFlow.id }\\?`), times: url === targetUrl ? 1 : 2 }, {
+          body: { data: delayedFlow, included: [testPatient] },
+        })
+        .as('routeReenteredFlow')
+        .go('back')
+        .wait(['@routeReenteredFlow', '@routeFlowActions']);
+
+      cy
+        .get('.patient-flow__list')
+        .should('be.visible');
+
+      cy
+        .contains('.patient-flow__action-item .js-primary', target.attributes.name)
+        .should(url === targetUrl ? 'be.focused' : 'not.be.focused');
     });
   });
 
