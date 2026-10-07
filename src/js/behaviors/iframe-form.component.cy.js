@@ -68,6 +68,18 @@ context('Iframe Form Behavior', function() {
       win.dispatchEvent(new win.MessageEvent('message', {
         data: {
           message: 'fetch:form:data',
+          args: { patientId: 'wrong-origin' },
+          requestId: 'wrong-origin',
+        },
+        origin: 'https://untrusted.invalid',
+        source: firstIframe.contentWindow,
+      }));
+
+      expect(requests, 'wrong-origin messages must not reach the form service').to.deep.equal([]);
+
+      win.dispatchEvent(new win.MessageEvent('message', {
+        data: {
+          message: 'fetch:form:data',
           args: { patientId: 'patient-2' },
           requestId: 'req_2',
         },
