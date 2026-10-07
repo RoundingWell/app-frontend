@@ -159,10 +159,6 @@
   grid-column: 5;
   justify-content: flex-end;
   min-width: 0;
-
-  &:empty {
-    display: none;
-  }
 }
 
 .schedule-list__flow {

@@ -403,7 +403,7 @@ const ListView = CollectionView.extend({
     const action = this.collection.get(this.getOption('focusActionId'));
     if (!action) return;
 
-    this.children.findByModel(action)?.focus();
+    this.children.findByModel(action).focus();
   },
   onListItemCanEdit() {
     // NOTE: debounced in initialize

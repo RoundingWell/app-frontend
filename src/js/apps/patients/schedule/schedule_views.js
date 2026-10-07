@@ -143,6 +143,8 @@ const DayItemView = View.extend({
   },
   templateContext() {
     const state = this.model.getState();
+    const flowName = this.flow && this.flow.get('name');
+    const commentCount = this.model.commentCount();
 
     return {
       isOverdue: this.model.isOverdue(),
@@ -150,8 +152,9 @@ const DayItemView = View.extend({
       stateOptions: state.get('options'),
       patient: this.model.getPatient().attributes,
       form: this.model.getForm(),
-      flowName: this.model.getFlow() && this.model.getFlow().get('name'),
-      commentCount: this.model.commentCount(),
+      flowName,
+      commentCount,
+      hasContext: !!(flowName || commentCount),
     };
   },
   events: {

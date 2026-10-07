@@ -1632,7 +1632,9 @@ context('worklist page', function() {
       .location('pathname')
       .should('eq', `/one/patient/${ testActions[0].relationships.patient.data.id }/flow/${ testFlow.id }/focus/${ testActions[0].id }`);
 
-    cy.contains('.patient-flow__action-item .js-primary', testActions[0].attributes.name).should('be.focused');
+    cy
+      .contains('.patient-flow__action-item .js-primary', testActions[0].attributes.name)
+      .should('be.focused');
 
     cy
       .visit('/worklist/owned-by')

@@ -78,7 +78,7 @@
 }
 
 .worklist-list__flow-context {
-  align-items: center;
+  align-items: baseline;
   appearance: none;
   background: transparent;
   border: 0;
@@ -93,14 +93,15 @@
   line-height: inherit;
   padding: 0;
   text-transform: uppercase;
-  vertical-align: middle;
   white-space: nowrap;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     color: color(blue);
   }
 
   .icon {
+    align-self: center;
     flex: none;
     font-size: 12px;
     width: 12px;

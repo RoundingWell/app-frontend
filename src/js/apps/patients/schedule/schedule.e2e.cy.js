@@ -581,14 +581,28 @@ context('schedule page', function() {
         return fx;
       });
 
-    cy.get('@actionList').contains('Last Action').parents('.schedule-list__day-list-row').find('.js-flow').should('not.exist');
-    cy.get('@actionList').contains(longActionName).parents('.schedule-list__day-list-row').find('.js-flow')
+    cy
+      .get('@actionList')
+      .contains('Last Action')
+      .parents('.schedule-list__day-list-row')
+      .find('.schedule-list__context')
+      .should('not.exist');
+
+    cy
+      .get('@actionList')
+      .contains(longActionName)
+      .parents('.schedule-list__day-list-row')
+      .find('.js-flow')
       .should('contain', 'Parent Flow')
       .click()
       .wait(['@routeFlow', '@routeFlowActions']);
 
-    cy.location('pathname').should('eq', `/one/patient/${ testPatient2.id }/flow/${ testFlow.id }/focus/${ testActions[1].id }`);
-    cy.contains('.patient-flow__action-item .js-primary', longActionName).should('be.focused');
+    cy
+      .location('pathname')
+      .should('eq', `/one/patient/${ testPatient2.id }/flow/${ testFlow.id }/focus/${ testActions[1].id }`);
+    cy
+      .contains('.patient-flow__action-item .js-primary', longActionName)
+      .should('be.focused');
 
     restoreSchedule();
 
@@ -1293,7 +1307,10 @@ context('schedule page', function() {
       const actionBounds = $row.find('.schedule-list__action-name')[0].getBoundingClientRect();
       expect(stateBounds.right).to.be.at.most(actionBounds.left);
     });
-    cy.get('.schedule-list__flow').should('be.visible').and('have.attr', 'title', longFlow.attributes.name);
+    cy
+      .get('.schedule-list__flow')
+      .should('be.visible')
+      .and('have.attr', 'title', longFlow.attributes.name);
 
     cy.viewport(721, 720);
 
@@ -1481,7 +1498,10 @@ context('schedule page', function() {
     cy.get('.schedule-list__day-list-row').each($row => {
       expect($row[0].scrollWidth).to.be.at.most($row[0].clientWidth);
     });
-    cy.get('.schedule-list__flow').should('be.visible').and('have.attr', 'title', longFlow.attributes.name);
+    cy
+      .get('.schedule-list__flow')
+      .should('be.visible')
+      .and('have.attr', 'title', longFlow.attributes.name);
 
     cy.viewport(1200, 720);
 

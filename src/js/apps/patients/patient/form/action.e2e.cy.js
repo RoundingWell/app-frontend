@@ -85,8 +85,8 @@ context('Patient Action Form', function() {
       .should('contain', 'The Action you requested does not exist.');
 
     cy
-      .url()
-      .should('not.contain', `/patient/${ routePatientId }/action/${ deletedActionId }`)
+      .location('pathname')
+      .should('eq', `/one/patient/${ testPatient.id }/workflow`)
       .wait(['@routePatientActions', '@routePatientFlows'])
       .get('.workflow-page')
       .should('be.visible');
@@ -146,8 +146,8 @@ context('Patient Action Form', function() {
     });
 
     cy
-      .url()
-      .should('contain', `/patient/${ testPatient.id }/workflow`)
+      .location('pathname')
+      .should('eq', `/one/patient/${ testPatient.id }/workflow`)
       .wait(['@routePatientActions', '@routePatientFlows'])
       .get('.workflow-page')
       .should('be.visible');
