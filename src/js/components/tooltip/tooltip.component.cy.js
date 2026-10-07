@@ -223,15 +223,23 @@ context('Tooltip', function() {
       const { PointerEvent } = anchor.ownerDocument.defaultView;
 
       anchor.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
-      cy.tick(150);
+    });
+
+    cy.tick(150);
+
+    cy.get('.raw-anchor').then(([anchor]) => {
+      const { PointerEvent } = anchor.ownerDocument.defaultView;
 
       anchor.querySelector('.icon').dispatchEvent(new PointerEvent('pointerover', {
         bubbles: true,
         relatedTarget: anchor,
       }));
-      cy.tick(50);
     });
 
+    cy.tick(49);
+    cy.get('.tooltip').should('not.exist');
+
+    cy.tick(1);
     cy.get('.tooltip').contains('Raw anchor tooltip');
 
     cy.get('.raw-anchor').then(([anchor]) => {
