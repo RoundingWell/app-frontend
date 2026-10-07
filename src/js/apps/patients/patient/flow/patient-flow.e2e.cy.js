@@ -652,6 +652,7 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__actions .bulk-edit-inline__cancel')
       .click();
+
     // Live updates must not reacquire focus after the user leaves the target.
     cy
       .get('[data-header-region] button')
@@ -667,6 +668,7 @@ context('patient flow page', function() {
     cy
       .contains('.patient-flow__action-item .js-primary', 'Target Updated Again')
       .should('not.be.focused');
+
     cy.contains('.patient-flow__action-item', 'Target Updated Again')
       .find('.work-card__surface')
       .should('have.css', 'outline-style', 'none');
@@ -1557,6 +1559,7 @@ context('patient flow page', function() {
       cy.then(() => {
         replyToFlow = null;
       });
+
       cy
         .visit(url);
 
@@ -1569,21 +1572,27 @@ context('patient flow page', function() {
       cy
         .contains('.app-nav__link', 'Schedule')
         .click();
+
       cy
         .wait('@routeActions');
+
       cy
         .location('pathname')
         .should('eq', '/one/schedule');
+
       cy
         .get('.list-page')
         .should('be.visible');
 
       cy.then(() => replyToFlow());
+
       cy
         .wait('@routeDelayedFlow');
+
       cy
         .get('.list-page')
         .should('be.visible');
+
       cy
         .location('pathname')
         .should('eq', '/one/schedule');
@@ -1591,8 +1600,10 @@ context('patient flow page', function() {
       cy.then(() => {
         replyToFlow = null;
       });
+
       cy
         .visit(url);
+
       cy
         .wrap(null)
         .should(() => {
@@ -1602,24 +1613,31 @@ context('patient flow page', function() {
       cy
         .contains('.app-nav__bottom-button', 'Admin Tools')
         .click();
+
       cy
         .contains('.js-picklist-item', 'Programs')
         .click();
+
       cy
         .wait('@routePrograms');
+
       cy
         .location('pathname')
         .should('eq', '/one/programs');
+
       cy
         .get('.list-page')
         .should('be.visible');
 
       cy.then(() => replyToFlow());
+
       cy
         .wait('@routeDelayedFlow');
+
       cy
         .get('.list-page')
         .should('be.visible');
+
       cy
         .location('pathname')
         .should('eq', '/one/programs');

@@ -600,6 +600,7 @@ context('schedule page', function() {
     cy
       .location('pathname')
       .should('eq', `/one/patient/${ testPatient2.id }/flow/${ testFlow.id }/focus/${ testActions[1].id }`);
+
     cy
       .contains('.patient-flow__action-item .js-primary', longActionName)
       .should('be.focused');
@@ -1307,6 +1308,7 @@ context('schedule page', function() {
       const actionBounds = $row.find('.schedule-list__action-name')[0].getBoundingClientRect();
       expect(stateBounds.right).to.be.at.most(actionBounds.left);
     });
+
     cy
       .get('.schedule-list__flow')
       .should('be.visible')
@@ -1498,6 +1500,7 @@ context('schedule page', function() {
     cy.get('.schedule-list__day-list-row').each($row => {
       expect($row[0].scrollWidth).to.be.at.most($row[0].clientWidth);
     });
+
     cy
       .get('.schedule-list__flow')
       .should('be.visible')
