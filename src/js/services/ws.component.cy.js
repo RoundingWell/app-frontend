@@ -785,18 +785,33 @@ context('WS Service - Disabled', function() {
     Radio.stopReplying('workspace', 'current');
   });
 
-  specify('ws not enabled', function() {
-    const disabledService = new WSService();
+  specify('settles disabled startup without constructing a socket', function() {
+    cy.then(async() => {
+      const disabledService = new WSService();
 
-    disabledService.start();
+      try {
+        expect(await disabledService.start(), 'disabled startup settled').to.be.true;
+        expect(disabledService.ws, 'disabled startup must not construct a socket').to.deep.equal({});
 
-    cy.wait('@websocketsApiDisabled');
+        Radio.request('ws', 'subscribe', { id: 'foo', type: 'bar' });
 
-    const channel = Radio.channel('ws');
+        expect(disabledService.ws, 'disabled subscription must not construct a socket').to.deep.equal({});
 
-    channel.request('subscribe', { id: 'foo', type: 'bar' });
+        await disabledService.stop();
+        expect(disabledService.isRunning()).to.be.false;
 
-    expect(disabledService.isRunning()).to.be.false;
+        expect(await disabledService.start(), 'disabled reentry settled').to.be.true;
+        expect(disabledService.ws, 'disabled reentry must not construct a socket').to.deep.equal({});
+      } finally {
+        await disabledService.destroy();
+      }
+
+      expect(disabledService.isDestroyed()).to.be.true;
+    });
+
+    cy
+      .get('@websocketsApiDisabled.all')
+      .should('have.length', 2);
   });
 
   specify('allows another managed addition after a fetch fails', function() {
