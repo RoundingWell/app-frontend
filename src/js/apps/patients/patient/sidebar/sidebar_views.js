@@ -141,12 +141,11 @@ const SidebarView = View.extend({
     this.showChildView('name', new NameView({
       model: this.model,
     }));
-
-    if (!this.collection) return;
-
+  },
+  showSidebars(collection) {
     this.showChildView('sidebars', new SidebarsView({
       model: this.model,
-      collection: this.collection,
+      collection,
     }));
   },
   templateContext() {

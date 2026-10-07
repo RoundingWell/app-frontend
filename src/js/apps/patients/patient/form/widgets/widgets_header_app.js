@@ -15,7 +15,10 @@ export default App.extend({
   onStart(app, { patient, form }) {
     const widgets = form.getWidgets();
 
-    if (!widgets.length) return;
+    if (!widgets.length) {
+      this.getRegion().empty();
+      return;
+    }
 
     this.showView(new FormWidgetsHeaderView({
       model: patient,

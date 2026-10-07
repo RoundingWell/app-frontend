@@ -55,7 +55,7 @@ test('report failures reject run completion instead of silently dropping coverag
   await assert.rejects(events['after:run'], /report failed/);
 });
 
-test('only E2E contributes coverage for apps, entity services, and services', () => {
+test('only E2E contributes coverage for apps and entity services', () => {
   const coverage = {
     '/workspace/src/js/apps/patients/example.js': { s: { 0: 1 } },
     'src/js/entities-service/actions.js': { s: { 0: 1 } },
@@ -78,7 +78,7 @@ test('only E2E contributes coverage for apps, entity services, and services', ()
       coverageReport: () => null,
     });
     assert.equal(events.task.combineCoverage(JSON.stringify(coverage)), null);
-    const expected = testingType === 'component' ? Object.keys(coverage).slice(3) : Object.keys(coverage);
+    const expected = testingType === 'component' ? Object.keys(coverage).slice(2) : Object.keys(coverage);
     assert.deepEqual(Object.keys(collected), expected);
   }
 });

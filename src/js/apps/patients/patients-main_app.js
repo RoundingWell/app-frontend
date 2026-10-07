@@ -106,28 +106,20 @@ export default RouterApp.extend({
       return;
     }
 
-    return this.showListPage(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
+    return this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
   },
 
   showSchedule() {
     this.clearCurrentPatient();
 
-    return this.showListPage('schedule');
+    return this.startCurrent('schedule');
   },
 
-  showListPage(appName, options) {
-    return this.startCurrent(appName, options);
-  },
   showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
     return this.startRoute('patient', { patientId });
   },
-  onRouteError(error, { definition }) {
-    if (definition.action === 'showPatientsWorklist' || definition.action === 'showSchedule') {
-      Radio.trigger('event-router', 'unknownError', error?.response?.status);
-      return;
-    }
-
+  onRouteError(error) {
     if (get(error, ['response', 'status']) === 410) {
       Radio.trigger('event-router', 'notFound');
       return;

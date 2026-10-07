@@ -120,7 +120,7 @@ export default App.extend({
     });
     this.listenTo(this.layoutState, 'change:formExpanded', this.renderFormExpandedState);
 
-    this.setView(new LayoutView()).render();
+    this.setView(new LayoutView());
     this.renderFormExpandedState();
 
     this.showContent();
@@ -165,7 +165,7 @@ export default App.extend({
       });
 
       this.listenToActionSectionLinks(actionView);
-      this.showContentView('action', actionView);
+      this.getView().showChildView('action', actionView);
       return;
     }
 
@@ -179,7 +179,7 @@ export default App.extend({
     });
     this.listenToActionSectionLinks(actionView);
 
-    this.showContentView('action', actionView);
+    this.getView().showChildView('action', actionView);
   },
   onSave({ model }) {
     this.action.save({ details: model.get('details') });
@@ -200,7 +200,7 @@ export default App.extend({
 
     const menuView = new MenuView();
     this.listenTo(menuView, 'delete', this.onDelete);
-    this.showContentView('menu', menuView);
+    this.getView().showChildView('menu', menuView);
   },
   onDelete() {
     this.action.destroy({ wait: true })
@@ -209,8 +209,6 @@ export default App.extend({
       });
   },
   onActionDestroy() {
-    if (!this.isRunning()) return;
-
     this.navigateAfterDelete();
   },
   navigateAfterDelete() {
@@ -227,7 +225,7 @@ export default App.extend({
   showForm() {
     if (!this.action.hasForm()) return;
 
-    const formView = this.showContentView('form', new FormLayoutView({
+    const formView = this.getView().showChildView('form', new FormLayoutView({
       model: this.action,
     }));
 
@@ -291,10 +289,5 @@ export default App.extend({
     }).catch(addError);
 
     return attachmentsApp;
-  },
-  showContentView(name, view, options) {
-    const region = this.getView().getRegion(name);
-    region.show(view, options);
-    return view;
   },
 });

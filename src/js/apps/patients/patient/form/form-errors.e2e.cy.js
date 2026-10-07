@@ -14,7 +14,7 @@ context('Patient Form Errors', function() {
       .routesForDefault();
   });
 
-  specify('deleted standalone form', function() {
+  specify('standalone form load failures', function() {
     cy
       .routePatient(fx => {
         fx.data = testPatient;
@@ -45,6 +45,38 @@ context('Patient Form Errors', function() {
     cy
       .location('pathname')
       .should('equal', '/one/worklist/owned-by');
+
+    const errorStub = cy.stub().as('readinessError');
+
+    cy.on('uncaught:exception', error => {
+      if (!error.message.includes('Error Status: 422')) return;
+
+      errorStub(error);
+      return false;
+    });
+
+    cy
+      .routeForm()
+      .intercept('GET', '/api/clinicians/me/form-responses/latest*', {
+        statusCode: 422,
+        body: { errors: getErrors({ status: '422', detail: 'Cannot load form responses' }) },
+      })
+      .as('routeResponseError')
+      .visit(`/patient/${ testPatient.id }/form/${ testForm.id }`)
+      .wait('@routeResponseError');
+
+    cy
+      .get('@readinessError')
+      .should('have.been.calledOnce');
+
+    cy
+      .get('.app-nav')
+      .contains('Owned By')
+      .click();
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 
   specify('action form cannot load', function() {
@@ -85,5 +117,55 @@ context('Patient Form Errors', function() {
     cy
       .location('pathname')
       .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .routeFormByAction()
+      .intercept({ method: 'GET', pathname: '/api/actions/*', query: { include: '*form-responses*' } }, {
+        statusCode: 410,
+        body: { errors: getErrors({ status: '410', detail: 'Action no longer exists' }) },
+      })
+      .as('routeGoneAction')
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeGoneAction');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .intercept('GET', '/api/actions/*/form', {
+        statusCode: 422,
+        body: { errors: getErrors({ status: '422', detail: 'Cannot load form' }) },
+      })
+      .as('routeFormError')
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`, {
+        onBeforeLoad(win) {
+          cy.spy(win.console, 'error').as('formError');
+        },
+      })
+      .wait('@routeFormError');
+
+    cy
+      .get('@formError')
+      .should('have.been.calledWithMatch', { response: { status: 422 } });
+
+    cy
+      .get('.app-nav')
+      .contains('Owned By')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 });

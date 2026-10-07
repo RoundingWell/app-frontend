@@ -2667,6 +2667,57 @@ context('patient flow page', function() {
       .get('.app-frame__content')
       .find('.action-card')
       .should('have.length', 3);
+
+    cy
+      .window()
+      .then(win => {
+        cy.spy(win.console, 'error').as('flowError');
+      });
+
+    cy
+      .intercept({ method: 'GET', pathname: `/api/flows/${ testFlow.id }` }, {
+        statusCode: 422,
+        body: { errors: getErrors({ status: '422', detail: 'Cannot reload flow' }) },
+      })
+      .as('failedRecoveryFlow');
+
+    cy
+      .get('.app-frame__content')
+      .find('.action-card')
+      .first()
+      .find('.js-select')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region] button')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .contains('Today')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('.js-save')
+      .click()
+      .wait('@failedRecoveryFlow');
+
+    cy
+      .get('@flowError')
+      .should('have.been.calledWithMatch', { response: { status: 422 } });
+
+    cy
+      .routeActions()
+      .get('.app-nav')
+      .contains('Owned By')
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 
   specify('click+shift multiselect', function() {

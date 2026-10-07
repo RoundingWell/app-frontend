@@ -8,6 +8,7 @@ const Entity = BaseEntity.extend({
   radioRequests: {
     'save:artifacts:model': 'saveModel',
   },
+  /* istanbul ignore next: exercised by dialer component tests, excluded from entity-service aggregation */
   saveModel({ artifact, identifier, values }) {
     const id = uuid(`${ artifact }:${ identifier }`, RWELL_NS);
     const model = this.getModel({ artifact, identifier, id, values });

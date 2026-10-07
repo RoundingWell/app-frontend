@@ -18,8 +18,7 @@ export default App.extend({
   },
   async prepareStart(options, { signal }) {
     for (const router of this.routers) {
-      await this.removeChildApp(router.getName());
-      signal.throwIfAborted();
+      this.removeChildApp(router.getName());
     }
     this.routers = [];
 

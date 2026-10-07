@@ -8,6 +8,10 @@ import intl from 'js/i18n';
 import { AttachmentsView } from 'js/apps/patients/patient/action/action-attachments_views';
 
 export default App.extend({
+  viewEvents: {
+    'add:attachment': 'onAddAttachment',
+    'remove:attachment': 'onRemoveAttachment',
+  },
   prepareStart({ action }, { signal }) {
     return Radio.request('entities', 'fetch:files:collection:byAction', action.id, { signal });
   },
@@ -57,11 +61,6 @@ export default App.extend({
       collection: this.attachments,
       canUploadAttachments,
       canRemoveAttachments: canEdit,
-    });
-
-    this.listenTo(attachmentsView, {
-      'add:attachment': this.onAddAttachment,
-      'remove:attachment': this.onRemoveAttachment,
     });
 
     this.showView(attachmentsView);

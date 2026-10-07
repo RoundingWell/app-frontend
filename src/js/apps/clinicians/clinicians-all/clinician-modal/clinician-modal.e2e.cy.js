@@ -281,5 +281,43 @@ context('clinicians modal', function() {
       .get('@modal')
       .find('[data-email-region] .js-input')
       .should('have.css', 'border-top-color', stateColors.error);
+
+    cy
+      .get('.alert-box')
+      .find('.js-dismiss')
+      .click();
+
+    cy
+      .get('.alert-box')
+      .should('not.exist');
+
+    cy
+      .get('@modal')
+      .find('[data-name-region]')
+      .find('.js-input')
+      .type(' Updated');
+
+    cy
+      .get('@modal')
+      .find('[data-footer-region]')
+      .find('.js-submit')
+      .click()
+      .wait('@routePostClinicianError');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'name error, email error');
+
+    cy
+      .get('@modal')
+      .find('[data-name-region] .js-input')
+      .should('not.be.focused')
+      .and('have.value', 'Test Clinician Updated');
+
+    cy
+      .get('@modal')
+      .find('[data-email-region]')
+      .find('.js-input')
+      .should('have.class', 'has-error');
   });
 });

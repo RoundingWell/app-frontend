@@ -1,4 +1,4 @@
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, getErrors } from 'helpers/json-api';
 import { getAction } from 'support/api/actions';
 import { getPatient } from 'support/api/patients';
 import { getCurrentClinician } from 'support/api/clinicians';
@@ -46,6 +46,45 @@ context('patient page', function() {
     cy
       .url()
       .should('contain', 'worklist/owned-by');
+  });
+
+  specify('can leave a workflow that failed to load', function() {
+    const errorStub = cy.stub().as('readinessError');
+
+    cy.on('uncaught:exception', error => {
+      if (!error.message.includes('Error Status: 422')) return;
+
+      errorStub(error);
+      return false;
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .routeActions()
+      .intercept('GET', '/api/patients/*/actions*', {
+        statusCode: 422,
+        body: { errors: getErrors({ status: '422', detail: 'Cannot load patient actions' }) },
+      })
+      .as('routeActionsError')
+      .visit(`/patient/${ testPatient.id }/workflow`)
+      .wait('@routeActionsError');
+
+    cy
+      .get('@readinessError')
+      .should('have.been.calledOnce');
+
+    cy
+      .get('.app-nav')
+      .contains('Owned By')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 
   // Compatibility coverage for the three legacy patient URL aliases. They must

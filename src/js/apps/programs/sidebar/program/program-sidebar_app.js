@@ -2,10 +2,16 @@ import { Radio, View } from 'marionette';
 
 import App from 'js/base/app';
 
+import { LayoutView } from 'js/services/sidebar/sidebar_views';
+
 import { SidebarView, TimestampsView, headingText } from 'js/apps/programs/sidebar/program/programs-sidebar_views';
 
 export default App.extend({
+  viewEvents: {
+    'close': 'stop',
+  },
   onBeforeStart(app, { program }) {
+    this.setView(new LayoutView());
     this.program = program;
 
     this.showHeading();
@@ -22,6 +28,9 @@ export default App.extend({
     this.getView().showChildView('content', contentView);
     this.showTimestamps();
   },
+  onStart() {
+    this.showView();
+  },
   onSave({ model }) {
     const isNew = this.program.isNew();
     this.program.save(model.pick('name', 'details'))
@@ -31,9 +40,6 @@ export default App.extend({
         const errors = this.program.parseErrors(responseData);
         this.getView().getChildView('content').showErrors(errors);
       });
-  },
-  onClose() {
-    this.stop();
   },
   onStop() {
     if (this.program && this.program.isNew()) this.program.destroy();

@@ -12,9 +12,7 @@ import ListSidebarApp from 'js/apps/patients/shared/list-sidebar_app';
 import DateFilter from 'js/apps/patients/shared/components/date-filter';
 import SearchView from 'js/components/list-search';
 
-import { getSortOptions } from './worklist_sort';
-
-import { LayoutView, ListTitleView, SidebarControlsView, SortDroplist, TypeToggleView, NoOwnerToggleView, AllFiltersButtonView } from 'js/apps/patients/worklist/worklist_views';
+import { LayoutView, ListTitleView, SidebarControlsView, AllFiltersButtonView } from 'js/apps/patients/worklist/worklist_views';
 
 const WorklistApp = App.extend({
   childApps: {
@@ -34,6 +32,12 @@ const WorklistApp = App.extend({
     'change:actionsDateFilters': 'refreshList',
     'change:flowsDateFilters': 'refreshList',
     'change:searchQuery': 'onChangeSearchQuery',
+  },
+  viewEvents: {
+    'change:filters-drawer': 'onChangeFiltersDrawer',
+    'change:filters-sidebar-fixed': 'onChangeFiltersSidebarFixed',
+    'close:sidebar-drawer': 'onCloseSidebarDrawer',
+    'before:destroy': 'onBeforeDestroyPageView',
   },
   initialize() {
     const results = this.addChildApp('results', new ResultsApp({ state: this.getState() }));
@@ -62,14 +66,7 @@ const WorklistApp = App.extend({
     this.initListState();
 
     const view = this.setView(new LayoutView({ model: this.getState() }));
-    this.listenTo(view, {
-      'change:filters-drawer': this.onChangeFiltersDrawer,
-      'change:filters-sidebar-fixed': this.onChangeFiltersSidebarFixed,
-      'close:sidebar-drawer': this.onCloseSidebarDrawer,
-      'before:destroy': this.onBeforeDestroyPageView,
-    });
     this.expandFixedFiltersSidebar(view.isFiltersSidebarFixed());
-    view.render();
 
     this.showSearchView();
     this.showFiltersButtonView();
@@ -78,22 +75,21 @@ const WorklistApp = App.extend({
 
     this.showView();
   },
-  async prepareStart(options, { signal }) {
+  onStart() {
     const view = this.getView();
-    const [resultsStarted, sidebarStarted] = await Promise.all([
-      this.getChildApp('results').start({
-        region: view.getRegion('results'),
-        filtersState: this.filterState,
-      }),
-      this.getChildApp('sidebar').start({
-        region: view.getRegion('filtersSidebar'),
-        filtersState: this.filterState,
-        layoutState: view.getLayoutState(),
-        isDrawer: view.isFiltersDrawer(),
-      }),
-    ]);
-    signal.throwIfAborted();
-    return resultsStarted && sidebarStarted && !view.isDestroyed();
+    const results = this.getChildApp('results');
+    results.start({
+      region: view.getRegion('results'),
+      filtersState: this.filterState,
+    }).catch(error => results.handleRefreshError(error));
+    this.getChildApp('sidebar').start({
+      region: view.getRegion('filtersSidebar'),
+      filtersState: this.filterState,
+      layoutState: view.getLayoutState(),
+      isDrawer: view.isFiltersDrawer(),
+      ControlsView: SidebarControlsView,
+      controlsOptions: { model: this.getState() },
+    }).catch(addError);
   },
   onStop() {
     this.stopListening(Radio.channel('event-router'), 'unknownError', this.onUnknownError);
@@ -141,43 +137,32 @@ const WorklistApp = App.extend({
   expandFixedFiltersSidebar(isFixed) {
     if (isFixed) this.getState().setFiltersSidebarCollapsed(false);
   },
-  onBeforeDestroyPageView(view) {
-    const results = this.getChildApp('results');
-    const sidebar = this.getChildApp('sidebar');
-    sidebar.releaseHost();
-    results.stop().catch(addError);
-    sidebar.stop().catch(addError);
-    this.stopListening(view);
+  onBeforeDestroyPageView() {
+    this.stop();
   },
   onShowFilters() {
-    this.sidebarControlsView = new SidebarControlsView();
-    this.getChildApp('sidebar').showControls(this.sidebarControlsView);
-    this.showSidebarControls();
     this.getView().showFiltersSidebar();
   },
   onClickFilters() {
     const sidebar = this.getChildApp('sidebar');
     if (sidebar.isPatientOpen()) {
-      sidebar.showFilters().catch(addError);
+      sidebar.showFilters();
       return;
     }
     if (this.getView().toggleFiltersSidebar()) this.filterState.trigger('expand:sections');
   },
-  async onChangeFiltersDrawer(isDrawer) {
+  onChangeFiltersDrawer(isDrawer) {
     const view = this.getView();
     const sidebar = this.getChildApp('sidebar');
-    if (isDrawer && sidebar.isPatientOpen()) {
-      if (!await sidebar.showFilters().catch(addError) || view.isDestroyed()) return;
-      isDrawer = view.isFiltersDrawer();
-    }
     sidebar.setDrawerMode(isDrawer);
+    if (isDrawer && sidebar.isPatientOpen()) sidebar.showFilters();
     view.setSidebarCollapsed(isDrawer || (!sidebar.isPatientOpen() && this.getState().get('filtersSidebarCollapsed')));
   },
-  async onCloseSidebarDrawer() {
+  onCloseSidebarDrawer() {
     const view = this.getView();
     const sidebar = this.getChildApp('sidebar');
     const wasPatientOpen = sidebar.isPatientOpen();
-    if (wasPatientOpen && (!await sidebar.showFilters().catch(addError) || view.isDestroyed())) return;
+    if (wasPatientOpen) sidebar.showFilters();
 
     view.setSidebarCollapsed(true);
     if (wasPatientOpen) this.getChildApp('results').focusPatientTrigger();
@@ -185,7 +170,7 @@ const WorklistApp = App.extend({
   },
   refreshList(state, value, options) {
     const results = this.getChildApp('results');
-    if (!results.isRunning() || options?.source === results) return;
+    if (options?.source === results) return;
 
     this.filterState.set(this.getState().getFiltersState());
     this.refreshControls();
@@ -216,20 +201,11 @@ const WorklistApp = App.extend({
     this.getView().showChildView('filters', filtersButtonView);
   },
   refreshControls() {
-    this.showFiltersButtonView();
-    this.showTypeViews();
-  },
-  showTypeViews() {
-    this.showListTitle();
-    this.showDateFilter();
-    this.showSidebarControls();
-  },
-  showSidebarControls() {
-    if (this.getChildApp('sidebar').isPatientOpen() || !this.sidebarControlsView || this.sidebarControlsView.isDestroyed()) return;
+    const state = this.getState();
+    if (state.hasChanged('clinicianId') || state.hasChanged('teamId')) this.showListTitle();
+    if (!state.hasChanged('listType')) return;
 
-    this.showTypeToggleView();
-    this.showNoOwnerToggleView();
-    this.showSortDroplist();
+    this.showDateFilter();
   },
   showDateFilter() {
     if (this.getState().getStaticDateFilter()) return;
@@ -247,20 +223,6 @@ const WorklistApp = App.extend({
 
     this.getView().showChildView('dateFilter', dateFilter);
   },
-  showSortDroplist() {
-    this.sortOptions = getSortOptions(this.getState().getType());
-
-    const sortSelect = new SortDroplist({
-      collection: this.sortOptions,
-      stateOptions: { selected: this.getChildApp('results').getSortOption(this.getState().getSort()) },
-    });
-
-    sortSelect.listenTo(sortSelect.getState(), 'change:selected', (state, selected) => {
-      this.getState().setSort(selected.id);
-    });
-
-    this.sidebarControlsView.showChildView('sort', sortSelect);
-  },
   showListTitle() {
     const listTitleView = new ListTitleView({ model: this.getState() });
 
@@ -275,31 +237,6 @@ const WorklistApp = App.extend({
     });
 
     this.getView().showChildView('title', listTitleView);
-  },
-  showNoOwnerToggleView() {
-    const currentClinician = Radio.request('bootstrap', 'currentUser');
-    if (this.getState().id !== 'shared-by' || !currentClinician.can('app:worklist:clinician_filter')) return;
-
-    const ownerToggleView = new NoOwnerToggleView({
-      model: this.getState(),
-    });
-
-    this.listenTo(ownerToggleView, 'click', () => {
-      this.getState().set('noOwner', !this.getState().get('noOwner'));
-    });
-
-    this.sidebarControlsView.showChildView('ownerToggle', ownerToggleView);
-  },
-  showTypeToggleView() {
-    const typeToggleView = new TypeToggleView({
-      isFlowList: this.getState().isFlowType(),
-    });
-
-    this.listenTo(typeToggleView, 'toggle:listType', listType => {
-      this.getState().setType(listType);
-    });
-
-    this.sidebarControlsView.showChildView('toggle', typeToggleView);
   },
 });
 

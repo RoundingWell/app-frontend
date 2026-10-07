@@ -5,7 +5,6 @@ export default MnObject.extend({
   constructor: function({ state }) {
     MnObject.apply(this, arguments);
     this.state = state;
-    this.listenTo(state, 'change:actionsSelected change:flowsSelected', this.updateSelection);
   },
   setCollection(collection, { isFlowList = false } = {}) {
     this.releaseCollections();
@@ -13,14 +12,13 @@ export default MnObject.extend({
     this.isFlowList = isFlowList;
     this.filteredCollection = collection.clone();
     this.editableCollection = collection.clone();
+    this.listenTo(this.state, 'change:actionsSelected change:flowsSelected', this.updateSelection);
     this.listenTo(this.filteredCollection, 'reset', this.notifyFilter);
     this.listenTo(this.editableCollection, 'reset', this.updateSelection);
     this.notifyFilter();
     this.updateSelection();
   },
   updateSelection() {
-    if (!this.editableCollection) return;
-
     this.selected = this.state.getSelected(this.editableCollection);
     this.triggerMethod('change', this.selected);
   },
@@ -37,6 +35,7 @@ export default MnObject.extend({
     this.releaseCollections();
   },
   releaseCollections() {
+    this.stopListening(this.state, 'change:actionsSelected change:flowsSelected', this.updateSelection);
     if (this.filteredCollection) this.stopListening(this.filteredCollection);
     if (this.editableCollection) this.stopListening(this.editableCollection);
     this.filteredCollection?.reset();

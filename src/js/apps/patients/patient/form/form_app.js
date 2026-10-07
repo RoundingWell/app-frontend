@@ -1,4 +1,4 @@
-import { get } from 'underscore';
+import { get, isEqual } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
@@ -45,13 +45,14 @@ export default App.extend({
     });
   },
   onBeforeStart(app, options) {
+    if (this.isRunning()) return;
+
     this.currentUser = Radio.request('bootstrap', 'currentUser');
     this.layoutState = options.layoutState;
     if (!options.actionId) this.showView(new LoadingView({ variant: 'generic' }));
     this.initFormState(options);
   },
-  async prepareStart(options, { signal }) {
-    await this.removeChildApp('formsService');
+  prepareStart(options, { signal }) {
     const { patient, formId, actionId } = options;
     if (!actionId) {
       return Promise.all([
@@ -83,30 +84,43 @@ export default App.extend({
     Radio.trigger('event-router', 'default');
   },
   onStop() {
-    const formService = this.getChildApp('formsService');
-    if (formService) this.unbindEvents(formService, this.serviceEvents);
+    this.removeChildApp('formsService');
     this._draftStatusRequest = null;
     this._discardRequest = null;
-    this.stopListening(this.layoutState);
+    this.stopListening(this.layoutState, 'change:formExpanded', this.renderExpandedState);
   },
   onStart(app, { patient, viewportView }, [form, action, latestResponse]) {
+    this.removeChildApp('formsService');
+    this._draftStatusRequest = null;
+    this._discardRequest = null;
     this.viewportView = viewportView;
     this.setFormContext({ patient, form, action, latestResponse });
+    this.stopListening(this.layoutState, 'change:formExpanded', this.renderExpandedState);
     if (this.action) this.listenTo(this.layoutState, 'change:formExpanded', this.renderExpandedState);
     this.startFormService();
-    this.setView(new LayoutView({
-      model: this.form,
-      isActionForm: !!this.action,
-      isExpanded: !!this.action && this.layoutState.get('formExpanded'),
-      viewportView,
-    })).render();
+
+    const formLayoutData = form.pick('id', 'name');
+    const hasLayout = this.getView() instanceof LayoutView && isEqual(this._formLayoutData, formLayoutData);
+    const widgetHeader = this.getChildApp('widgetHeader');
+    if (!hasLayout) {
+      widgetHeader.stop();
+      this._formLayoutData = formLayoutData;
+      this.setView(new LayoutView({
+        model: this.form,
+        isActionForm: !!this.action,
+        isExpanded: !!this.action && this.layoutState.get('formExpanded'),
+        viewportView,
+      })).render();
+      if (this.action) this.showExpandAction();
+    }
     if (!this.action) this.triggerContextChange();
-    this.getChildApp('widgetHeader').start({
+    const widgetOptions = {
       region: this.getView().getRegion('widgets'),
       patient: this.patient,
       form: this.form,
-    }).catch(addError);
-    if (this.action) this.showExpandAction();
+    };
+    const widgetsReady = hasLayout ? widgetHeader.restart(widgetOptions) : widgetHeader.start(widgetOptions);
+    widgetsReady.catch(addError);
     this.showInitialForm();
     this.showView();
   },
@@ -128,10 +142,12 @@ export default App.extend({
     });
   },
   showInitialForm() {
-    if (this.action) {
-      this.getState().set({ responseId: get(this.responses.getFirstSubmission(), 'id') });
-      return;
-    }
+    const state = this.getState();
+    state.set({ updated: undefined });
+    const responseId = this.action ? get(this.responses.getFirstSubmission(), 'id') : null;
+    const isSameResponse = state.get('responseId') === responseId;
+    state.set({ responseId });
+    if (!isSameResponse) return;
 
     this.showFormActions();
     this.showContent();

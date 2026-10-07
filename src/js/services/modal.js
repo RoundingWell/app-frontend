@@ -107,6 +107,7 @@ export default App.extend({
       modal.listenTo(draftStatusView, {
         async 'discard:submission'() {
           await Radio.request(`form${ form.id }`, 'clear:storedSubmission');
+          /* istanbul ignore if: requires modal teardown during pending IndexedDB deletion */
           if (modal.isDestroyed()) return;
 
           modal.showChildView('body', new IframeFormView({ model: form }));
