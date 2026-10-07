@@ -1,0 +1,16 @@
+src/js/apps/patients/worklist/worklist-list.scss
+  h_0f06c286dda36f 88,95,97,99
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  h_0f06c286dda36f 1548-1560
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "af040ca80b54fb23497a4200a7d42bebd0d69694",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
