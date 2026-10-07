@@ -9,7 +9,7 @@ import browserslistToEsbuild from 'browserslist-to-esbuild';
 import { babel } from '@rollup/plugin-babel';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { VitePWA } from 'vite-plugin-pwa';
-import { COVER_INCLUDE, COVER_EXCLUDE } from './config/coverage.cjs';
+import { coverageBabelOptions } from './config/coverage.cjs';
 import {
   ROOT_SHARED_RUNTIME_MODULE_IDS,
   ROOT_SHARED_RUNTIME_MODULES,
@@ -115,19 +115,9 @@ const css = {
 const babelPlugin = babel({
   babelHelpers: 'bundled',
 
-  plugins: [
-    [
-      'istanbul',
-      {
-        include: COVER_INCLUDE,
-        exclude: COVER_EXCLUDE,
-      },
-    ],
-  ],
+  ...coverageBabelOptions(),
   exclude: ['node_modules/**', 'test/**'],
   extensions: ['.js'],
-  babelrc: false,
-  configFile: false,
 });
 
 export const cypressConfig = defineConfig({

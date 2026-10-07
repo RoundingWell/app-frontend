@@ -15,6 +15,26 @@ with E2E coverage in Coveralls. See [the CI documentation](../.circleci/README.m
 
 Reports can be found in `coverage/`.
 
+`coverage:report` and `coverage:report:ci` now enumerate the configured source
+inventory before reporting, using the same Babel/Istanbul options as Vite.
+Eligible files absent from collected coverage receive accurate zero-hit maps;
+existing exclusions and inline Istanbul ignores remain in effect. Import/export
+barrels with no executable statements remain inventory entries with zero totals.
+Collected files retain their hit counts, and incompatible source maps fail rather
+than silently combining coverage from changed source.
+
+Reporting normalizes checkout paths, merges collected E2E/component records, and
+uses a temporary complete map without modifying `.nyc_output`. Component
+collection still drops application and entity-service execution coverage; their
+eligible source appears at zero until E2E contributes hits. A component-only or
+focused run is not full aggregate validation. Start a full run with clean output
+and collect both suites before claiming complete coverage. Inventory completeness
+is enforced by reporting; numeric 100% thresholds are not added by this change.
+
+Run the adjacent tooling tests with
+`node --test scripts/report-coverage.test.js scripts/cypress-coverage-events.test.js`.
+These tests exercise reporting and collection boundaries, not application UI.
+
 Related scenarios may share a `specify`, including multiple visits. The coverage
 plugin retains coverage from each loaded window and merges it after each test.
 Reset scenario-specific intercepts, clocks, and exception handlers when reusing a
