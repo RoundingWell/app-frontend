@@ -14,7 +14,7 @@
         {{#if flowName}}
         <div class="work-card__context">
           <span class="worklist-list__patient-context worklist-list__patient-context--action">
-            <button class="worklist-list__flow-context js-flow" type="button">{{ flowName }}</button>{{#if patient.segment}} · {{/if}}{{#if patient.segment}}<span class="worklist-list__underline">{{ patient.segment }}</span>{{/if}}&#8203;
+            <button class="worklist-list__flow-context js-flow" type="button">{{far "folder-closed"}}{{ flowName }}</button>{{#if patient.segment}} · {{/if}}{{#if patient.segment}}<span class="worklist-list__underline">{{ patient.segment }}</span>{{/if}}&#8203;
           </span>
         </div>
         {{else}}{{#if patient.segment}}

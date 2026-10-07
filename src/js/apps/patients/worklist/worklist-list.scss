@@ -78,22 +78,36 @@
 }
 
 .worklist-list__flow-context {
+  align-items: baseline;
   appearance: none;
   background: transparent;
   border: 0;
   color: var(--color-text-secondary);
   cursor: pointer;
+  display: inline-flex;
+  flex-wrap: wrap;
   font-family: inherit;
   font-size: 11px;
   font-weight: 600;
+  gap: var(--space-1);
   letter-spacing: 0.06px;
   line-height: inherit;
+  max-width: 100%;
   padding: 0;
+  text-align: left;
   text-transform: uppercase;
-  white-space: nowrap;
+  white-space: normal;
 
-  &:hover {
+  &:hover,
+  &:focus-visible {
     color: color(blue);
+  }
+
+  .icon {
+    align-self: center;
+    flex: none;
+    font-size: 12px;
+    width: 12px;
   }
 }
 

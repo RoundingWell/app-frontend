@@ -143,6 +143,8 @@ const DayItemView = View.extend({
   },
   templateContext() {
     const state = this.model.getState();
+    const flowName = this.flow && this.flow.get('name');
+    const commentCount = this.model.commentCount();
 
     return {
       isOverdue: this.model.isOverdue(),
@@ -150,8 +152,9 @@ const DayItemView = View.extend({
       stateOptions: state.get('options'),
       patient: this.model.getPatient().attributes,
       form: this.model.getForm(),
-      flow: this.model.getFlow() && this.model.getFlow().get('name'),
-      commentCount: this.model.commentCount(),
+      flowName,
+      commentCount,
+      hasContext: !!(flowName || commentCount),
     };
   },
   events: {
@@ -159,6 +162,7 @@ const DayItemView = View.extend({
     'click .js-action': 'onClickAction',
     'click .js-patient': 'onClickPatient',
     'click .js-form': 'onClickForm',
+    'click .js-flow': 'onClickFlow',
     'click .js-action-surface': 'onClickSurface',
   },
   ui: {
@@ -230,6 +234,10 @@ const DayItemView = View.extend({
   onClickAction(event) {
     event.stopImmediatePropagation();
     this.navigateToAction();
+  },
+  onClickFlow(event) {
+    event.stopImmediatePropagation();
+    Radio.trigger('event-router', 'patient:flow:focus', this.model.getPatient().id, this.flow.id, this.model.id);
   },
   onClickForm(event) {
     event.stopImmediatePropagation();

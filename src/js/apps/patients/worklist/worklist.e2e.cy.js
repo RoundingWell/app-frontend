@@ -1545,6 +1545,19 @@ context('worklist page', function() {
       .find('.worklist-list__patient-context')
       .should('be.visible');
 
+    cy
+      .get('@firstRow')
+      .find('.js-flow')
+      .should($button => {
+        const button = $button[0];
+        const surface = $button.closest('.work-card__surface')[0];
+        const bounds = button.getBoundingClientRect();
+
+        expect(bounds.right).to.be.at.most(surface.getBoundingClientRect().right);
+        expect(button.scrollWidth).to.be.at.most(button.clientWidth);
+        expect(bounds.height).to.be.greaterThan(parseFloat(getComputedStyle(button).lineHeight));
+      });
+
     cy.viewport(1280, 720);
 
     cy
@@ -1594,8 +1607,16 @@ context('worklist page', function() {
       .should('contain', 'Flows');
 
     cy
-      .routeFlow()
-      .routeFlowActions()
+      .routeFlow(fx => {
+        fx.data = testFlow;
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [testActions[0]];
+
+        return fx;
+      })
       .routeFlowActivity()
       .routePatientByFlow();
 
@@ -1621,9 +1642,12 @@ context('worklist page', function() {
       .wait('@routeFlow');
 
     cy
-      .url()
-      .should('contain', `flow/${ testFlow.id }`)
-      .should('not.contain', `/action/${ testActions[0].id }`);
+      .location('pathname')
+      .should('eq', `/one/patient/${ testActions[0].relationships.patient.data.id }/flow/${ testFlow.id }/focus/${ testActions[0].id }`);
+
+    cy
+      .contains('.patient-flow__action-item .js-primary', testActions[0].attributes.name)
+      .should('be.focused');
 
     cy
       .visit('/worklist/owned-by')
