@@ -1,0 +1,22 @@
+packages/care-ops-config/index.js
+  h_0f06c286dda36f 33-40,71-72
+src/js/apps/patients/appointment-demo/appointment-demo.js
+  h_0f06c286dda36f 1-80
+src/js/apps/patients/appointment-demo/appointment-demo.scss
+  h_0f06c286dda36f 1-31
+src/js/i18n/en-US/patients.yml
+  h_0f06c286dda36f 4-8
+src/js/index.js
+  h_0f06c286dda36f 5,46-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "2f4a9e6b86a0f819c6e7cc0fb942a0a642396a6a",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
