@@ -1545,6 +1545,19 @@ context('worklist page', function() {
       .find('.worklist-list__patient-context')
       .should('be.visible');
 
+    cy
+      .get('@firstRow')
+      .find('.js-flow')
+      .should($button => {
+        const button = $button[0];
+        const surface = $button.closest('.work-card__surface')[0];
+        const bounds = button.getBoundingClientRect();
+
+        expect(bounds.right).to.be.at.most(surface.getBoundingClientRect().right);
+        expect(button.scrollWidth).to.be.at.most(button.clientWidth);
+        expect(bounds.height).to.be.greaterThan(parseFloat(getComputedStyle(button).lineHeight));
+      });
+
     cy.viewport(1280, 720);
 
     cy
