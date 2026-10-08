@@ -99,7 +99,7 @@ export default View.extend({
   },
   onRender() {
     this.showChildView('monthPicker', this.getMonthPickerView());
-    this.showChildView('actions', this.getActionsView());
+    if (!this.getOption('hideActions')) this.showChildView('actions', this.getActionsView());
     this.showChildView('calendar', this.getCalendarView());
   },
   getMonthPickerView() {
