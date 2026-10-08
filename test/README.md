@@ -52,7 +52,7 @@ test. Keep a separate `specify` when a scenario needs independent isolation.
 
 ## What is a Cypress Test?
 
-Both runners register a fallback for `/api` and `/api/**` before endpoint
+Both runners register an app-origin fallback for `/api` and `/api/**` before endpoint
 stubs. An unmatched request fails with its method, path, and instructions to add
 a matching `cy.intercept()` response stub before triggering the request.
 Query values, origins, headers, and bodies are omitted from the error.
