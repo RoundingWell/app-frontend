@@ -2,7 +2,12 @@ import handleErrors from './handle-errors';
 
 context('handleErrors', function() {
   specify('thrown error', function() {
-    return handleErrors(new Error('test error')).catch(error => {
+    const thrownError = new Error('test error');
+
+    return handleErrors(thrownError).then(() => {
+      throw new Error('Expected the thrown error to reject');
+    }, error => {
+      expect(error).to.equal(thrownError);
       expect(error.message).to.equal('test error');
     });
   });
@@ -32,7 +37,9 @@ context('handleErrors', function() {
   });
 
   specify('unknown error', function() {
-    return handleErrors({ foo: 'error' }).catch(error => {
+    return handleErrors({ foo: 'error' }).then(() => {
+      throw new Error('Expected the unknown error to reject');
+    }, error => {
       expect(error.message).to.equal('{"foo":"error"}');
     });
   });
