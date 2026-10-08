@@ -56,6 +56,11 @@ E2E specs exercise the built app through its user interface with stubbed server
 data; they do not verify integration with the live backend. Component specs mount
 isolated reusable units. Use E2E for behavior users can exercise through the UI.
 
+Both runners register an app-origin fallback for `/api` and `/api/**` before endpoint
+stubs. An unmatched request fails with its method, path, and instructions to add
+a matching `cy.intercept()` response stub before triggering the request.
+Query values, origins, headers, and bodies are omitted from the error.
+
 ## Organization
 
 Cypress specs live beside the source they exercise:

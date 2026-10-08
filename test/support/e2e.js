@@ -14,6 +14,7 @@
 // ***********************************************************
 import 'js/base/dayjs';
 
+import './api-guard';
 import './defaults';
 import './commands';
 import './form-drafts';

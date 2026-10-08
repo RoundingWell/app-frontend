@@ -6,6 +6,7 @@ import {
 } from '@cypress/mount-utils';
 
 import '@cypress/code-coverage/support';
+import './api-guard';
 import './websockets';
 
 import 'scss/provider-core.scss';
