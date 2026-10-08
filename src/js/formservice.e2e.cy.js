@@ -1,6 +1,9 @@
 import { getAction } from 'support/api/actions';
+import { getFormFields } from 'support/api/form-fields';
 import { getFormResponse } from 'support/api/form-responses';
 import { getForm } from 'support/api/forms';
+
+import fxFormDefinition from 'fixtures/test/form-definition';
 
 function syncIframeCoverage() {
   cy
@@ -12,7 +15,40 @@ function syncIframeCoverage() {
     });
 }
 
+function assertPdfPayload({ formData, responseData, formSubmission, options, definition }) {
+  const valueKeys = ['formData', 'responseData', 'formSubmission', 'options'];
+  if (definition) valueKeys.push('definition');
+
+  cy
+    .window()
+    .its('pdfMessages')
+    .should('have.length', 1)
+    .its('0.args.value')
+    .should(value => {
+      expect(value).to.have.all.keys(valueKeys);
+      expect(value.formData).to.deep.include(formData);
+      expect(value.responseData).to.deep.equal(responseData);
+      expect(value.formSubmission).to.deep.equal(formSubmission);
+      expect(value.options).to.deep.equal(options);
+      if (definition) expect(value.definition).to.deep.equal(definition);
+    });
+}
+
 context('Formservice', function() {
+  beforeEach(function() {
+    this.form = getForm({ attributes: { options: { is_report: true } } });
+    this.formFields = getFormFields({ attributes: {
+      patient: { first_name: 'PDF patient', last_name: 'Example' },
+      fields: { weight: 175 },
+    } });
+    this.submission = { familyHistory: 'Submitted PDF response', submit: true };
+    this.responseData = { metadata: { timezone: 'Etc/UTC' }, state: 'submitted' };
+    this.response = getFormResponse({ attributes: {
+      response: { ...this.responseData, data: this.submission },
+    } });
+    this.definition = fxFormDefinition;
+  });
+
   afterEach(function() {
     syncIframeCoverage();
   });
@@ -21,20 +57,14 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/actions/1/form', {
         statusCode: 200,
-        body: { data: getForm({
-          attributes: {
-            options: {
-              is_report: true,
-            },
-          },
-        }) },
+        body: { data: this.form },
       })
       .as('routeFormModelByAction');
 
     cy
       .intercept('GET', '/api/actions/1/form/fields', {
         statusCode: 200,
-        body: { data: [] },
+        body: { data: this.formFields },
       })
       .as('routeActionFormFields');
 
@@ -48,7 +78,7 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/patients/**/form-responses/submitted*', {
         statusCode: 200,
-        body: { data: getFormResponse() },
+        body: { data: this.response },
       })
       .as('routeLatestFormSubmission');
 
@@ -63,9 +93,18 @@ context('Formservice', function() {
       .wait('@routeActionFormFields')
       .wait('@routeAction')
       .wait('@routeLatestFormSubmission');
+
+    assertPdfPayload({
+      formData: { id: this.formFields.id, ...this.formFields.attributes },
+      responseData: this.responseData,
+      formSubmission: this.submission,
+      options: this.form.attributes.options,
+    });
   });
 
   specify('action formservice fetches submitted responses by action tag', function() {
+    this.form.attributes.options.prefill_action_tag = 'foo-tag';
+
     const testAction = getAction({
       attributes: {
         tags: ['prefill-latest-response'],
@@ -75,21 +114,14 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/actions/1/form', {
         statusCode: 200,
-        body: { data: getForm({
-          attributes: {
-            options: {
-              is_report: true,
-              prefill_action_tag: 'foo-tag',
-            },
-          },
-        }) },
+        body: { data: this.form },
       })
       .as('routeFormModelByAction');
 
     cy
       .intercept('GET', '/api/actions/1/form/fields', {
         statusCode: 200,
-        body: { data: [] },
+        body: { data: this.formFields },
       })
       .as('routeActionFormFields');
 
@@ -103,7 +135,7 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/patients/**/form-responses/submitted*', {
         statusCode: 200,
-        body: { data: getFormResponse() },
+        body: { data: this.response },
       })
       .as('routeLatestFormSubmission');
 
@@ -123,33 +155,34 @@ context('Formservice', function() {
       .its('request.url')
       .should('include', 'filter[action_tags]=foo-tag')
       .and('not.include', 'filter[actions]=');
+
+    assertPdfPayload({
+      formData: { id: this.formFields.id, ...this.formFields.attributes },
+      responseData: this.responseData,
+      formSubmission: this.submission,
+      options: this.form.attributes.options,
+    });
   });
 
   specify('action formservice adds form definition for formio', function() {
     cy
       .intercept('GET', '/api/actions/1/form', {
         statusCode: 200,
-        body: { data: getForm({
-          attributes: {
-            options: {
-              is_report: true,
-            },
-          },
-        }) },
+        body: { data: this.form },
       })
       .as('routeFormModelByAction');
 
     cy
       .intercept('GET', '/api/actions/1/form/definition', {
         statusCode: 200,
-        body: { data: {} },
+        body: this.definition,
       })
       .as('routeFormDefinitionByAction');
 
     cy
       .intercept('GET', '/api/actions/1/form/fields', {
         statusCode: 200,
-        body: { data: [] },
+        body: { data: this.formFields },
       })
       .as('routeActionFormFields');
 
@@ -163,7 +196,7 @@ context('Formservice', function() {
     cy
       .intercept('GET', '/api/patients/**/form-responses/submitted*', {
         statusCode: 200,
-        body: { data: getFormResponse() },
+        body: { data: this.response },
       })
       .as('routeLatestFormSubmission');
 
@@ -179,34 +212,44 @@ context('Formservice', function() {
       .wait('@routeActionFormFields')
       .wait('@routeAction')
       .wait('@routeLatestFormSubmission');
+
+    assertPdfPayload({
+      formData: { id: this.formFields.id, ...this.formFields.attributes },
+      responseData: this.responseData,
+      formSubmission: this.submission,
+      options: this.form.attributes.options,
+      definition: this.definition,
+    });
   });
 
   specify('formservice adds form definition for formio', function() {
+    this.form = getForm();
+
     cy
       .intercept('GET', '/api/forms/1', {
         statusCode: 200,
-        body: { data: getForm() },
+        body: { data: this.form },
       })
       .as('routeFormModel');
 
     cy
       .intercept('GET', '/api/forms/1/definition', {
         statusCode: 200,
-        body: { data: {} },
+        body: this.definition,
       })
       .as('routeFormDefinition');
 
     cy
       .intercept('GET', '/api/forms/1/fields*', {
         statusCode: 200,
-        body: { data: [] },
+        body: { data: this.formFields },
       })
       .as('routeFormFields');
 
     cy
       .intercept('GET', '/api/form-responses/1', {
         statusCode: 200,
-        body: { data: getFormResponse() },
+        body: { data: this.response },
       })
       .as('routeFormResponse');
 
@@ -221,5 +264,13 @@ context('Formservice', function() {
       .wait('@routeFormDefinition')
       .wait('@routeFormFields')
       .wait('@routeFormResponse');
+
+    assertPdfPayload({
+      formData: { id: this.formFields.id, ...this.formFields.attributes },
+      responseData: this.responseData,
+      formSubmission: this.submission,
+      options: this.form.attributes.options,
+      definition: this.definition,
+    });
   });
 });
