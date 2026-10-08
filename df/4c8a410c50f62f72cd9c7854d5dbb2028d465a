@@ -1,0 +1,14 @@
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  h_0f06c286dda36f 84-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "df4c8a410c50f62f72cd9c7854d5dbb2028d465a",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
