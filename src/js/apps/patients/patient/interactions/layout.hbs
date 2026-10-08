@@ -1,0 +1,30 @@
+<div class="patient-interactions__body">
+  <div class="patient-pages-controls patient-interactions__controls js-controls">
+    <nav class="patient-pages patient-pages--inline" aria-label="{{ @intl.patients.shared.patientPages.pagesLabel }}">
+      <button class="patient-pages__tab js-workflow" type="button">{{far "folder-closed"}} {{ @intl.patients.shared.patientPages.workflowTab }}</button>
+      <span class="patient-pages__tab is-selected" aria-current="page">{{far "right-left-large"}} {{ @intl.patients.shared.patientPages.interactionsTab }}</span>
+    </nav>
+    <div class="patient-interactions__toolbar-date" data-date-region></div>
+    <div class="patient-interactions__filters" role="group" aria-label="{{ @intl.patients.patient.interactions.interactionsViews.typesLabel }}">
+      <button class="button patient-interactions__filter patient-interactions__filter--messages js-filter" type="button" aria-label="{{ @intl.patients.patient.interactions.interactionsViews.messages }}" data-filter="messages">{{far "paper-plane-top"}}</button>
+      <button class="button patient-interactions__filter patient-interactions__filter--calls js-filter" type="button" aria-label="{{ @intl.patients.patient.interactions.interactionsViews.calls }}" data-filter="calls">{{far "phone-arrow-up-right"}}</button>
+      <button class="button patient-interactions__filter patient-interactions__filter--appointments js-filter" type="button" aria-label="{{ @intl.patients.patient.interactions.interactionsViews.appointments }}" data-filter="appointments">{{far "calendar-day"}}</button>
+      <button class="button patient-interactions__filter patient-interactions__filter--visits js-filter" type="button" aria-label="{{ @intl.patients.patient.interactions.interactionsViews.visits }}" data-filter="visits">{{far "hospital"}}</button>
+    </div>
+  </div>
+  <div class="patient-interactions__paging-status js-paging-error" role="alert" hidden>
+    {{ @intl.patients.patient.interactions.interactionsViews.pagingError }}
+    <button class="button button--link js-retry" type="button">{{ @intl.patients.patient.interactions.interactionsViews.retry }}</button>
+  </div>
+  <div data-content-region></div>
+  <div class="patient-interactions__paging-status js-paging-loading" role="status" hidden>
+    <span class="loader__text">{{ @intl.patients.patient.interactions.interactionsViews.loading }}</span>
+    <div class="patient-interactions-loading skeleton-loading" aria-hidden="true">
+      <span class="skeleton-loading__shape patient-interactions-loading__heading"></span>
+      <span class="skeleton-loading__shape patient-interactions-loading__card"></span>
+    </div>
+  </div>
+  <div class="patient-interactions__today-position">
+    <button class="patient-interactions__today js-today" type="button" aria-label="{{ @intl.patients.patient.interactions.interactionsViews.jumpToToday }}" hidden>{{ @intl.patients.patient.interactions.interactionsViews.today }} <span aria-hidden="true">↓</span></button>
+  </div>
+</div>

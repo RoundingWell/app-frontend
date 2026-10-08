@@ -8,6 +8,7 @@ import sessionStore from 'js/utils/session-store';
 import SubRouterApp from 'js/base/subrouterapp';
 
 import WorkflowPageApp from 'js/apps/patients/patient/workflow/workflow_app';
+import InteractionsPageApp from 'js/apps/patients/patient/interactions/interactions_app';
 import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
 import ActionApp from 'js/apps/patients/patient/action/action_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
@@ -20,6 +21,7 @@ export default SubRouterApp.extend({
   routeScope: ['patientId'],
   childApps: {
     workflow: WorkflowPageApp,
+    interactions: InteractionsPageApp,
     flow: FlowPageApp,
     action: ActionApp,
     form: FormApp,
@@ -36,6 +38,8 @@ export default SubRouterApp.extend({
     return {
       'patient:workflow': this.showWorkflow,
       'patient:workflow:closed': this.showClosedWorkflow,
+      'patient:interactions': this.showInteractions,
+      'patient:interaction': this.showInteraction,
       'patient:action': this.showPatientAction,
       'patient:flow': this.showFlow,
       'patient:flow:focus': this.showFlowFocus,
@@ -101,6 +105,23 @@ export default SubRouterApp.extend({
     return this.startContent('workflow', { status: 'done' });
   },
 
+  showInteractions() {
+    return this.showInteraction();
+  },
+
+  showInteraction(patientId, interactionId) {
+    if (this.getCurrentSelection()?.appName === 'interactions') {
+      return this.selectChild('interactions', {
+        reuse: true,
+        start: app => {
+          app.navigateToInteraction(interactionId);
+          return true;
+        },
+      });
+    }
+    return this.startContent('interactions', { interactionId });
+  },
+
   showPatientAction(patientId, actionId, entryTarget) {
     return this.startContent('action', { actionId, entryTarget });
   },
@@ -132,9 +153,19 @@ export default SubRouterApp.extend({
 
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
 
-    return this.startCurrent(appName, {
+    const startOptions = this.mixinOptions({
       ...options,
       region: this.getView().getRegion('content'),
+    });
+    return this.selectChild(appName, {
+      start: app => {
+        const started = app.start(startOptions);
+        if (appName !== 'interactions') return started;
+        // The feed owns its loading/error shell; host selection must retain it
+        // through initial request supersession and recoverable failures.
+        started.catch(error => this.handleContentStartFailure(app, startOptions, error));
+        return true;
+      },
     }).catch(error => {
       // Failure handlers receive the same shared context as application startup.
       return this.handleContentStartFailure(pageApp, this.mixinOptions(options), error);

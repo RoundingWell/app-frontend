@@ -1,0 +1,55 @@
+.patient-pages-controls {
+  background: var(--color-page-bg);
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.patient-pages {
+  border-bottom: 1px solid var(--color-divider);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 0;
+}
+
+// The 5px tab gap and vertical padding preserve the approved pill alignment.
+.patient-pages__tab {
+  align-items: center;
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 16px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  color: var(--color-text);
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 600;
+  gap: 5px;
+  line-height: 20px;
+  min-height: 32px;
+  padding: 5px 12px;
+}
+
+.patient-pages__tab:hover {
+  background: #{$black-95};
+  color: var(--color-text);
+}
+
+.patient-pages__tab.is-selected {
+  background: var(--color-control-background);
+  color: var(--color-text);
+}
+
+.patient-pages__tab .icon {
+  font-size: 16px;
+}
+
+.patient-pages--inline {
+  border-bottom: 0;
+  padding: 0;
+}
+
+.patient-pages__tab:focus-visible {
+  outline: 2px solid #{color(blue)};
+  outline-offset: 2px;
+}

@@ -50,6 +50,14 @@ export default RouterApp.extend({
         'patient/archive/:patientId',
       ],
     },
+    'patient:interactions': {
+      action: 'showPatient',
+      route: 'patient/:patientId/interactions',
+    },
+    'patient:interaction': {
+      action: 'showPatient',
+      route: 'patient/:patientId/interactions/:interactionId',
+    },
     'patient:action': {
       action: 'showPatient',
       route: [
