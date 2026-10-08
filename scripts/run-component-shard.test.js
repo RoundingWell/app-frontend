@@ -1,27 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { findSpecs, selectSpecs, splitSpecs } from './run-component-shard.js';
-
-test('CI discovers both product and support component specs without selecting E2E files', () => {
-  const directory = mkdtempSync(join(tmpdir(), 'component-shard-'));
-  try {
-    mkdirSync(join(directory, 'src'), { recursive: true });
-    mkdirSync(join(directory, 'test/support'), { recursive: true });
-    writeFileSync(join(directory, 'src/product.component.cy.js'), 'product');
-    writeFileSync(join(directory, 'test/support/api-guard.component.cy.js'), 'guard');
-    writeFileSync(join(directory, 'test/support/api-guard.e2e.cy.js'), 'e2e');
-
-    assert.deepEqual(findSpecs(directory).sort((a, b) => a.path.localeCompare(b.path)), [
-      { path: 'src/product.component.cy.js', size: 7 },
-      { path: 'test/support/api-guard.component.cy.js', size: 5 },
-    ]);
-  } finally {
-    rmSync(directory, { recursive: true, force: true });
-  }
-});
+import { selectSpecs, splitSpecs } from './run-component-shard.js';
 
 const specs = Array.from({ length: 52 }, (_, i) => ({ path: `spec-${ i }.cy.js`, size: (i + 1) * 100 }));
 

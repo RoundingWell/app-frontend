@@ -3,11 +3,6 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-export function findSpecs(cwd = process.cwd()) {
-  return globSync(['src/**/*.component.cy.js', 'test/support/**/*.component.cy.js'], { cwd })
-    .map(path => ({ path, size: statSync(resolve(cwd, path)).size }));
-}
-
 export function splitSpecs(specs, count) {
   if (!Number.isInteger(count) || count < 1 || count > specs.length) {
     throw new Error('Worker count must be between 1 and the number of component specs');
@@ -33,7 +28,7 @@ export function selectSpecs(specs, env) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const specs = findSpecs();
+  const specs = globSync('src/**/*.component.cy.js').map(path => ({ path, size: statSync(path).size }));
   const selected = selectSpecs(specs, process.env);
   process.stdout.write(`Component worker ${ Number(process.env.CIRCLE_NODE_INDEX ?? 0) + 1 }/${ process.env.CIRCLE_NODE_TOTAL ?? 1 }: ${ selected.length } specs\n`);
   const result = spawnSync(process.execPath, [

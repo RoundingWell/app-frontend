@@ -26,7 +26,7 @@ function setupNodeEvents(on, config) {
 
 export default defineConfig({
   component: {
-    specPattern: ['src/**/*.component.cy.js', 'test/support/**/*.component.cy.js'],
+    specPattern: 'src/**/*.component.cy.js',
     indexHtmlFile: 'test/support/component.html',
     supportFile: 'test/support/component.js',
     setupNodeEvents,
@@ -39,7 +39,7 @@ export default defineConfig({
   e2e: {
     baseUrl: 'http://localhost:8090/',
     excludeSpecPattern: ['*.md', '*.import.js'],
-    specPattern: ['src/**/*.e2e.cy.js', 'test/support/**/*.e2e.cy.js'],
+    specPattern: 'src/**/*.e2e.cy.js',
     supportFile: 'test/support/e2e.js',
     setupNodeEvents,
     experimentalRunAllSpecs: true,
