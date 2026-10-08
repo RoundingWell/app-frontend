@@ -13,13 +13,23 @@ context('auth', function() {
   });
 
   context('getUserId', function() {
-    afterEach(function() {
-      Radio.stopReplying('auth', 'getUserId');
-    });
+    specify('exposes the authenticated user synchronously and updates it on reauthentication', function() {
+      cy.stub(AuthProvider.prototype, 'auth').callsFake(success => success());
+      const getUserId = cy.stub(AuthProvider.prototype, 'getUserId');
+      getUserId.onFirstCall().resolves('user_A');
+      getUserId.onSecondCall().resolves('user_B');
 
-    specify('exposes a synchronous getUserId reply that consumers can override', function() {
-      Radio.reply('auth', 'getUserId', () => 'user_test');
-      expect(Radio.request('auth', 'getUserId')).to.equal('user_test');
+      cy
+        .then(() => auth())
+        .then(() => {
+          expect(Radio.request('auth', 'getUserId'), 'production synchronous identity').to.equal('user_A');
+        });
+
+      cy
+        .then(() => auth())
+        .then(() => {
+          expect(Radio.request('auth', 'getUserId'), 'updated synchronous identity').to.equal('user_B');
+        });
     });
   });
 
