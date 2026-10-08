@@ -1,0 +1,58 @@
+src/js/apps/patients/patient/action/action-activity_app.js
+  h_0f06c286dda36f 5-7,20-24,27,42-46
+src/js/apps/patients/patient/action/action-activity_views.js
+  h_0f06c286dda36f 306
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  h_0f06c286dda36f 123
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  h_0f06c286dda36f 4-6,18-22,25,31-35
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  h_0f06c286dda36f 303-325
+src/js/apps/patients/patient/interactions/date-control_view.js
+  h_0f06c286dda36f 64
+src/js/apps/patients/patient/interactions/interactions-results_app.js
+  h_0f06c286dda36f 1-231
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 32-34,40,44,63,78-81,162,239-240,244-246,252-258,260-288,291-318,345,359-385,529,553,569,572,589,600,631,913-947,1056-1057,1094-1095,1118,1206,1219,1234-1245,1251,1331
+src/js/apps/patients/patient/interactions/interactions.scss
+  h_0f06c286dda36f 144
+src/js/apps/patients/patient/interactions/interactions_app.js
+  h_0f06c286dda36f 3,6-10,14
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 2,15-17,21,29,146-152,154,197,204,221-222,235-236,241-242,244-246,249,253,257,279,284
+src/js/apps/patients/patient/interactions/scroll-edges_behavior.js
+  h_0f06c286dda36f 1-67
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  h_0f06c286dda36f 7,10,19,23,27-28,32
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  h_0f06c286dda36f 20,64-65,68-72,76,87,89,122-126
+src/js/apps/patients/shared/interactions/interactions-status.scss
+  h_0f06c286dda36f 1-32
+src/js/apps/patients/shared/interactions/interactions-status_views.js
+  h_0f06c286dda36f 1-35
+src/js/apps/patients/shared/widgets/README.md
+  h_0f06c286dda36f 123
+src/js/apps/patients/shared/widgets/interactions_view.js
+  h_0f06c286dda36f 4,10,13-14,17,20
+src/js/apps/patients/shared/widgets/recent-interactions.scss
+  h_0f06c286dda36f 1-75
+src/js/apps/patients/shared/widgets/recent-interactions_app.js
+  h_0f06c286dda36f 7,15
+src/js/apps/patients/shared/widgets/recent-interactions_views.js
+  h_0f06c286dda36f 1-81
+src/js/entities-service/entities/interactions.js
+  h_0f06c286dda36f 13-25
+test/support/api/interactions.js
+  h_0f06c286dda36f 2,27,30-41,45-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0254b70a0385aeca11ab3644f9919d188bfb9457",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
