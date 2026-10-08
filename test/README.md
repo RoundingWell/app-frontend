@@ -52,6 +52,24 @@ test. Keep a separate `specify` when a scenario needs independent isolation.
 
 ## What is a Cypress Test?
 
+Both runners fail API requests without a response stub. The shared guard in
+`support/api-guard.js` covers `/api` and `/api/**`, including query strings.
+It runs after endpoint stubs and reports the method, a redacted path, the test
+title, and the missing-stub fix. Query values, origins, request headers, and
+bodies are not included in the guard message; resource identifiers and unknown
+path segments are redacted.
+
+Register the matching `cy.intercept()` before the triggering action. Supply a
+static response or call `req.reply({ body: ... })`; a spy-only intercept is not
+a stub. API handlers that call `req.continue()` or `req.reply()` without a
+response fail before reaching an upstream server. Existing specs do not need
+live API requests, so there are no pass-through exemptions. `cy.request()` is
+outside Cypress browser interception and is not covered by this guard.
+
+The support contract specs run in both modes from `test/support/**`; CircleCI
+component discovery includes them. Intercepts and expected-failure listeners
+are installed per test, retaining Cypress's normal reset and teardown.
+
 E2E specs exercise the built app through its user interface with stubbed server
 data; they do not verify integration with the live backend. Component specs mount
 isolated reusable units. Use E2E for behavior users can exercise through the UI.
