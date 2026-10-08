@@ -1,0 +1,23 @@
+docs/deploy.md
+  s_3938556df407a8::t_09e73ada217af5 226
+scripts/deploy.test.js
+  s_3938556df407a8::t_4f6d2b7fb46392 282-290
+scripts/deploy.js
+  s_3938556df407a8::t_8d1af609068db8 420,433-434
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "13b3d682ef7faa0ac0f0aa5d646f5aa70f069c85",
+  "prompts": {},
+  "sessions": {
+    "s_3938556df407a8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed40a-0924-7f13-ad06-2c924ef26ccc",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

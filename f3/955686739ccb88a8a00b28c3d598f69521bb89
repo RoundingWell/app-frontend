@@ -1,0 +1,25 @@
+src/js/apps/patients/patient/patient_app.js
+  s_2f5d775ddb4a37::t_a8e22ac0f56dcc 66-67
+  s_2f5d775ddb4a37::t_40a6b714cb87a4 69-71,74,77
+  s_2f5d775ddb4a37::t_e122b4cbf2286f 138-140
+  s_2f5d775ddb4a37::t_66f1e76aa33b58 1
+  s_2f5d775ddb4a37::t_7c443afe459b9e 57-60
+test/integration/patients/sidebar/action-sidebar.js
+  s_2f5d775ddb4a37::t_c2a01b143c0685 798-812,815-816
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "f3955686739ccb88a8a00b28c3d598f69521bb89",
+  "prompts": {},
+  "sessions": {
+    "s_2f5d775ddb4a37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "97d5b7b3-3d60-4064-90fb-56ac3e4bc258",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

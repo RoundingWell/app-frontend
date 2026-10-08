@@ -1,0 +1,21 @@
+src/js/views/globals/prelogin/prelogin.scss
+  s_183c10637573b8::t_edc947f64e8dcb 4,12
+package.json
+  s_183c10637573b8::t_79608bf8af145f 114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "05f4c91a72846b236ea1919e065d90da6bb934de",
+  "prompts": {},
+  "sessions": {
+    "s_183c10637573b8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e5eac-2ac5-7e70-b484-2705102e8f5d",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

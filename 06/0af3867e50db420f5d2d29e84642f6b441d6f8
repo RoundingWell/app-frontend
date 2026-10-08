@@ -1,0 +1,21 @@
+AGENTS.md
+  s_7d9748a0496f68::t_d0b88787c2d8dd 72-76
+src/js/base/routing.md
+  s_7d9748a0496f68::t_ce8b25e6ee4ff0 17-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "060af3867e50db420f5d2d29e84642f6b441d6f8",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

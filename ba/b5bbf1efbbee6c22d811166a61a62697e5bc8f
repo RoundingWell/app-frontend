@@ -1,0 +1,39 @@
+src/js/base/fontawesome.js
+  s_44c886cd8fd84f::t_d42ab105467841 8-12
+  s_44c886cd8fd84f::t_a918375dc8618f 4
+package.json
+  s_44c886cd8fd84f::t_6eba92e52bfb19 97,111
+test/unit/fontawesome-package.test.js
+  s_44c886cd8fd84f::t_e12beb80f70957 10-65
+config/shared-runtime.js
+  s_44c886cd8fd84f::t_237b1471856844 14-17,29
+packages/care-ops-fontawesome/styles.css
+  s_44c886cd8fd84f::t_237b1471856844 1-11
+src/scss/README.md
+  s_44c886cd8fd84f::t_e12beb80f70957 165,167,169
+packages/care-ops-fontawesome/package.json
+  s_44c886cd8fd84f::t_237b1471856844 11-14,16-18
+vite.config.js
+  s_44c886cd8fd84f::t_237b1471856844 32
+packages/care-ops-fontawesome/index.js
+  s_44c886cd8fd84f::t_237b1471856844 4-5,8-21
+  s_44c886cd8fd84f::t_a918375dc8618f 2,27-86
+packages/care-ops-fontawesome/fixture-symbols.js
+  s_44c886cd8fd84f::t_a918375dc8618f 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "bab5bbf1efbbee6c22d811166a61a62697e5bc8f",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

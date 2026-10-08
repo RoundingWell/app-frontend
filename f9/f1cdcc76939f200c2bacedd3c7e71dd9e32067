@@ -1,0 +1,196 @@
+src/scss/modules/card-list.scss
+  s_09e8292bb4bcb3::t_e9e17592fbade7 58
+  s_09e8292bb4bcb3::t_d807dcc0670623 1-57,59-97
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_09e8292bb4bcb3::t_09fe113377fa78 56,60,68,76
+src/js/apps/programs/program/flow/flow_views.js
+  s_09e8292bb4bcb3::t_f55410593e98d3 14
+  s_09e8292bb4bcb3::t_7f2ab3645a3539 206
+  s_09e8292bb4bcb3::t_87f48abbe0ba59 112
+  s_09e8292bb4bcb3::t_33e483bd288fc0 224-225
+  s_09e8292bb4bcb3::t_56b7117c72a045 122
+src/js/apps/patients/schedule/layout.hbs
+  s_09e8292bb4bcb3::t_569e7bbd3bc455 14-15
+src/js/apps/patients/patient/workflow/action-item.hbs
+  s_09e8292bb4bcb3::t_2512d984dbfa24 1-21,23-24
+  s_09e8292bb4bcb3::t_6ceb6c0957eb6e 22
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_09e8292bb4bcb3::t_91d348781a2b90 255,267,279
+  s_09e8292bb4bcb3::t_ef95a0d9906e3b 63-64,68,70
+  s_09e8292bb4bcb3::t_0bf68a120503a2 225
+  s_09e8292bb4bcb3::t_b24c779707672b 163
+  s_09e8292bb4bcb3::t_b26108bcfe8465 241
+  s_09e8292bb4bcb3::t_b6d7b6a24aa079 94-95
+  s_09e8292bb4bcb3::t_5fc5df6f502e9d 114-115
+  s_09e8292bb4bcb3::t_f772c5730ff850 178
+  s_09e8292bb4bcb3::t_48bcc982b15292 41-42,47-48,52,54
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_09e8292bb4bcb3::t_885ee1d317e19c 77,84,129,136,191,198,275,503,508,625,918,923,1025,1093,1215,1223,1383
+src/js/apps/programs/program/program.e2e.cy.js
+  s_09e8292bb4bcb3::t_73f63f31301e60 38
+  s_09e8292bb4bcb3::t_4c3e50b8c30087 198,211
+src/js/services/dialer.e2e.cy.js
+  s_09e8292bb4bcb3::t_a8ee2a3f4a4fb6 232,265,492,525
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  s_09e8292bb4bcb3::t_008d540532100a 124,138,155
+  s_09e8292bb4bcb3::t_b016f0ffb5d0b4 63
+  s_09e8292bb4bcb3::t_37c2596c1bd63b 35-36
+  s_09e8292bb4bcb3::t_4f76cbfc73c714 106,108
+src/js/apps/patients/worklist/worklist_app.js
+  s_09e8292bb4bcb3::t_885ee1d317e19c 21
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_09e8292bb4bcb3::t_885ee1d317e19c 163,173,181,191,200,214,218-219,241,246,275,440,447,505,666,706-707,845,851,856,859,864,867,898,921,978,1170,1177,1193,1368,1375,1709,1760,2921,2927,2940,2946,2959,2965,2978,2984,3048,3054,3067,3073,3154,3160,3173,3179,3276,3282,3295,3301,3428,3434,3447,3453,3466,3472,3485,3498,3511,3518,3533,3540,3555,3561,3574,3580,3586,3600,3656,3662,3675,3681,3759,3765,3778,3784,3905,3924,3937,3956,3974,3984,4017,4056,4077,4093,4107,4166,4174,4182,4207,4237,4262,4294,4326,4354,4380,4399,4469,4471,4477,4479,4554,4695,4702,4709,4717,4804,4811,4819
+src/js/apps/patients/schedule/schedule_views.js
+  s_09e8292bb4bcb3::t_032c0f4ad57b69 176,178-184,186-196
+  s_09e8292bb4bcb3::t_76bfdcc0da5914 367,374
+  s_09e8292bb4bcb3::t_ca1d4ab9e36dc4 13
+  s_09e8292bb4bcb3::t_fc3697dc049ec5 166
+  s_09e8292bb4bcb3::t_5718d69c4f9e5a 378
+  s_09e8292bb4bcb3::t_e7d9e0b6fd940c 168,170
+src/scss/provider-variables.scss
+  s_09e8292bb4bcb3::t_52182ad5e820c7 83-113
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_09e8292bb4bcb3::t_55d33d99c1c34d 8
+  s_09e8292bb4bcb3::t_5e0b979c7be1fe 80
+  s_09e8292bb4bcb3::t_36b85ded849f9c 27,32
+  s_09e8292bb4bcb3::t_aa8d70d1f5b30d 209
+  s_09e8292bb4bcb3::t_9baed1dd8e0a93 281
+  s_09e8292bb4bcb3::t_420bbaedaaa868 10
+src/js/apps/patients/patient/workflow/done-layout.hbs
+  s_09e8292bb4bcb3::t_ea5b0c1498d1c9 9
+src/js/apps/programs/program/workflows/flow-item.hbs
+  s_09e8292bb4bcb3::t_cdd8eaa0ef0ae3 14,17
+  s_09e8292bb4bcb3::t_d1b1fc360d8875 1-13,15-16,18,20-23
+src/js/apps/patients/patient/flow/flow_views.js
+  s_09e8292bb4bcb3::t_829d52f522098c 8,125,130,312,354
+src/scss/modules/list-pages.scss
+  s_09e8292bb4bcb3::t_78d0e9287932dd 40
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_09e8292bb4bcb3::t_4064ee206da938 1125
+  s_09e8292bb4bcb3::t_07df63082e7068 187,791,799,831,836,850,855,907,948,1010,1377,1621,1632,1767
+src/js/apps/patients/patient/workflow/layout.hbs
+  s_09e8292bb4bcb3::t_1898d1f18575a8 19
+src/js/apps/programs/sidebar/action/action-sidebar.e2e.cy.js
+  s_09e8292bb4bcb3::t_09bdfaa5b3e73a 210,269,297
+  s_09e8292bb4bcb3::t_ed7413647fb27a 211,270,298
+src/js/apps/patients/worklist/flow_views.js
+  s_09e8292bb4bcb3::t_885ee1d317e19c 5,19,24
+src/js/apps/patients/worklist/layout.hbs
+  s_09e8292bb4bcb3::t_885ee1d317e19c 18
+src/js/apps/programs/program/workflows/layout.hbs
+  s_09e8292bb4bcb3::t_7189a03de25d8d 7
+src/js/apps/patients/schedule/schedule-list.scss
+  s_09e8292bb4bcb3::t_2bd3917c35f618 16-19,49-51
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_09e8292bb4bcb3::t_d4d6032c8c07e8 249-250
+  s_09e8292bb4bcb3::t_a6c2194c899b44 199-200,202
+src/js/apps/patients/patient/action/action.scss
+  s_09e8292bb4bcb3::t_ccdc5bab330fd9 44-56
+src/js/apps/dashboards/dashboards-all/dashboards-all_views.js
+  s_09e8292bb4bcb3::t_b9d0cb199e7682 94
+  s_09e8292bb4bcb3::t_f7aa7f8eed9b11 6-7,14-18,20,33,40,45
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_09e8292bb4bcb3::t_9940e4525b1ae6 113
+  s_09e8292bb4bcb3::t_aac74d843cfb81 98,104,110,118,165,208,213,219,226,270
+  s_09e8292bb4bcb3::t_4adee229b1d31d 97,103,109,117,123,128,146,164,172,190,201,269,386,505
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_09e8292bb4bcb3::t_829d52f522098c 1-25
+src/js/apps/patients/worklist/flow-item.hbs
+  s_09e8292bb4bcb3::t_885ee1d317e19c 1-7,9-16,18
+  s_09e8292bb4bcb3::t_ebf05d155d7b7d 17
+src/js/apps/patients/worklist/action-item.hbs
+  s_09e8292bb4bcb3::t_395a100fa4e8f1 5,21,25-27
+  s_09e8292bb4bcb3::t_885ee1d317e19c 1-4,6-9,11-20,22-24,28
+src/js/apps/programs/sidebar/program/program-sidebar.e2e.cy.js
+  s_09e8292bb4bcb3::t_172d909038da17 161
+src/js/apps/patients/worklist/worklist-list.scss
+  s_09e8292bb4bcb3::t_b26ab34c6e5002 44-47
+src/js/apps/patients/worklist/worklist_views.js
+  s_09e8292bb4bcb3::t_492ec3679a26b8 256
+  s_09e8292bb4bcb3::t_885ee1d317e19c 12,251
+src/js/apps/patients/worklist/action_views.js
+  s_09e8292bb4bcb3::t_84e891edd23085 45
+  s_09e8292bb4bcb3::t_885ee1d317e19c 5,18,23
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_09e8292bb4bcb3::t_8dffb3aa076a33 1-15
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_09e8292bb4bcb3::t_9d5f2a9d50b0e2 1-18,21-23
+  s_09e8292bb4bcb3::t_2df76c36533c69 20
+docs/superpowers/specs/2026-06-25-card-responsive-dark-mode-design.md
+  s_09e8292bb4bcb3::t_9677bd3b3ebbb2 3-4
+  s_09e8292bb4bcb3::t_b21039bf26e6cb 262-269
+  s_09e8292bb4bcb3::t_73cfff0f60a0d0 1,11,21,23,29,68-79,134,194,197-203,207-208,211-212,222,225-230,233-241,247,249-255,261,270,272,278,280-288,296-301,305,307,317-321,327-332,349,368,373,381-382
+  s_09e8292bb4bcb3::t_1baf55d11ea04a 2,5-10,12-20,22,24-28,30-67,80-133,135-193,195-196,204-206,209-210,213-221,223-224,242-246,248,256-260,271,273-277,279,289-295,302-304,306,308-316,322-326,333-348,350-367,369-372,374-380,383
+  s_09e8292bb4bcb3::t_99ec7d6fbf9232 231-232
+src/js/apps/patients/patient/action/action-details_views.js
+  s_09e8292bb4bcb3::t_7e33ddb946a374 62
+  s_09e8292bb4bcb3::t_03c0cfab64af19 124
+  s_09e8292bb4bcb3::t_c7e88af6e479b2 125
+  s_09e8292bb4bcb3::t_84289e0d4fd7db 53-57,59-61,64-71
+  s_09e8292bb4bcb3::t_b45f55dd0fc631 115-123
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_09e8292bb4bcb3::t_fe8d4dbdf52424 216,230,238
+  s_09e8292bb4bcb3::t_029d73883b9f49 466,472,478,485,496,502,517
+  s_09e8292bb4bcb3::t_7c60ac60eb4a73 1313,1609
+  s_09e8292bb4bcb3::t_3f49c7228d5a35 1376,1745
+  s_09e8292bb4bcb3::t_95703e72cb6bf5 194,213,221,227,235,243,249,260,379,447,462,1306,1498,1602,1867,1987,2085
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_09e8292bb4bcb3::t_72ce6c01182a14 51
+  s_09e8292bb4bcb3::t_133cfc71d90b43 30
+  s_09e8292bb4bcb3::t_28ced171948e40 9
+  s_09e8292bb4bcb3::t_047d4a2eea13e6 160
+  s_09e8292bb4bcb3::t_642adff458e664 121
+docs/superpowers/plans/2026-06-25-card-responsive-dark-mode.md
+  s_09e8292bb4bcb3::t_f38a002b9362e4 1-1467
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_09e8292bb4bcb3::t_2b3b148ab7688d 1383-1384
+  s_09e8292bb4bcb3::t_d082cbb6062d3b 2225,2266,2402,2443,2484
+src/js/apps/programs/programs-all/programs-all_views.js
+  s_09e8292bb4bcb3::t_33409d11c37062 56
+  s_09e8292bb4bcb3::t_b45e51990eec31 19,21,23-29
+  s_09e8292bb4bcb3::t_a65a58ed76fe71 71
+  s_09e8292bb4bcb3::t_2583cafccfa3cc 14
+  s_09e8292bb4bcb3::t_e1db6a2fd7d19f 22
+  s_09e8292bb4bcb3::t_6b6e1131737755 10
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_09e8292bb4bcb3::t_22d1e28b1f575d 1259,1325,1343,1789,1822,1854,1879,2138,2151,2415,2498,2689
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_09e8292bb4bcb3::t_829d52f522098c 85-86,88,720,725,736,743,746,758,762,771,774,803,812-813,929,1254,1346,1353,1360,1367,1392,1399,1406,1413,1438,1445,1452,1459,1586,1589,1622,1693,1709,1724,1739,1751,1767,1783,1785,1896,1929,2254,2309,2346,2353,2360,2375,2382,2389,2491,2498,2505,2512,2519,2526,2533,2644,2796,2801,2806,2824,2843,2924,2962,2976,2999,3015,3028,3084
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_09e8292bb4bcb3::t_372129fdc72514 33-38
+src/js/i18n/en-US/patients.yml
+  s_09e8292bb4bcb3::t_ef72ad70d7b7af 409-410
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_09e8292bb4bcb3::t_ced66672346840 482
+  s_09e8292bb4bcb3::t_61b14d16ea1d77 398
+  s_09e8292bb4bcb3::t_6a24291d7c7bbb 634,640
+  s_09e8292bb4bcb3::t_28c9eaae8df8d7 405,410,416,418
+  s_09e8292bb4bcb3::t_d49428858b691c 664,666
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_09e8292bb4bcb3::t_789afe24a2e5f5 47
+  s_09e8292bb4bcb3::t_9e73a290be036f 13
+  s_09e8292bb4bcb3::t_636a369e161044 160
+  s_09e8292bb4bcb3::t_cfaafb58a9ddad 139
+  s_09e8292bb4bcb3::t_273bbd9cf5682f 34,39
+  s_09e8292bb4bcb3::t_16271c79bda7ea 58-71
+src/js/apps/dashboards/dashboard/dashboard.e2e.cy.js
+  s_09e8292bb4bcb3::t_3bf7464650ba68 52-53
+src/js/apps/programs/program/flow/action-item.hbs
+  s_09e8292bb4bcb3::t_60a5c5946f5953 1-18,20-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "f9f1cdcc76939f200c2bacedd3c7e71dd9e32067",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

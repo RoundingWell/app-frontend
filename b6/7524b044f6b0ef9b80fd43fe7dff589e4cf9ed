@@ -1,0 +1,28 @@
+src/js/apps/patients/patient/form/form_views.js
+  s_68eb4121d9a9bc::t_45347928b49f45 74-76,79,123
+src/js/behaviors/form-viewport.js
+  s_68eb4121d9a9bc::t_45347928b49f45 7-15,26-29,32,71,104-105,143-156
+  s_68eb4121d9a9bc::t_6bd1cf21f2033e 139
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_68eb4121d9a9bc::t_70ce99ff3f4033 1717,1719,1722,1732,1734,1741-1752,1760-1766,1768
+src/js/apps/patients/patient/action/action_views.js
+  s_68eb4121d9a9bc::t_45347928b49f45 49-51
+src/js/behaviors/form-viewport.component.cy.js
+  s_68eb4121d9a9bc::t_11472562bcbac0 1-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b67524b044f6b0ef9b80fd43fe7dff589e4cf9ed",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

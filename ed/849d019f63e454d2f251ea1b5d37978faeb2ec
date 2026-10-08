@@ -1,0 +1,20 @@
+src/js/apps/patients/shared/components/check_view.component.cy.js
+  h_0f06c286dda36f 4-10
+src/js/apps/patients/shared/components/check_view.js
+  h_0f06c286dda36f 17-20
+src/js/apps/patients/shared/components/due_view.component.cy.js
+  h_0f06c286dda36f 8-13
+src/js/apps/patients/shared/components/due_view.js
+  h_0f06c286dda36f 45-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ed849d019f63e454d2f251ea1b5d37978faeb2ec",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

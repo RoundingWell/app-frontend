@@ -1,0 +1,24 @@
+package-lock.json
+  s_85aebd1623278c::t_85d97b29a9d422 24,40,4356-4358,4369,4394-4396,4399,4406-4408,12305-12307,12314-12315
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_4423c14827e33b 535-538
+  s_85aebd1623278c::t_dc74a09f677652 5-12,103,532-534
+package.json
+  s_85aebd1623278c::t_72722891b0aa5b 126,142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bf5d94cc2110ff13c795c853bdc97054e1d180e2",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,68 @@
+src/js/apps/patients/shared/list-results_views.js
+  s_7d9748a0496f68::t_334f3b958d662c 5-6,10
+  s_7d9748a0496f68::t_84534887174eb2 1-4,7-9,11-27
+src/js/apps/patients/shared/list-page.js
+  s_7d9748a0496f68::t_0d524998735e5d 37,52-77
+src/js/apps/patients/shared/list-selection.js
+  s_7d9748a0496f68::t_84534887174eb2 3,5,16,18,47-53,55,57,65-66
+  s_7d9748a0496f68::t_334f3b958d662c 42-43
+src/js/apps/patients/shared/list-results.hbs
+  s_7d9748a0496f68::t_334f3b958d662c 1-11
+src/js/apps/patients/shared/list-sidebar_app.js
+  s_7d9748a0496f68::t_0d524998735e5d 16,18-20,22-24,34-35,37-39,41-42,44-46,48-49,51-53,55-56,58-59,61-62,64-65,82-84,88-90,104
+src/js/apps/patients/shared/list-filters/list-filters_app.js
+  s_7d9748a0496f68::t_0d524998735e5d 36
+  s_7d9748a0496f68::t_1ffd8d984cd6fe 37-42
+src/js/apps/patients/shared/patient-list-page.scss
+  s_7d9748a0496f68::t_b778370b9d6ec1 71-83,205,265-268
+src/js/apps/patients/shared/bulk-edit/inline_app.js
+  s_7d9748a0496f68::t_0a668dba5be6be 16
+src/js/apps/patients/worklist/layout.hbs
+  s_7d9748a0496f68::t_b778370b9d6ec1 16
+src/js/apps/patients/worklist/worklist-results_app.js
+  s_7d9748a0496f68::t_b4ecdb68528522 60-61,101,152,317-318
+  s_7d9748a0496f68::t_84534887174eb2 15-16,21,25-36,38,52,54,73,75-79,111,133,142,166,169,217,254-256,259,269-270,283,287-288,319
+  s_7d9748a0496f68::t_a359e2d7ec847a 81,128-131,135-138
+src/js/apps/patients/worklist/worklist_app.js
+  s_7d9748a0496f68::t_85ca046f5b3952 80-81,86-89,91-92,94,96-98
+  s_7d9748a0496f68::t_b778370b9d6ec1 82
+  s_7d9748a0496f68::t_0d524998735e5d 3-4,41-54,90,155-188,218
+  s_7d9748a0496f68::t_bef8b7d5050737 64-70,72,142,146-154
+  s_7d9748a0496f68::t_e3f7237bc3634b 71,143-145
+src/js/apps/patients/worklist/worklist_views.js
+  s_7d9748a0496f68::t_b778370b9d6ec1 43-44
+src/js/apps/patients/schedule/schedule_views.js
+  s_7d9748a0496f68::t_b778370b9d6ec1 35-36
+src/js/apps/patients/schedule/schedule_app.js
+  s_7d9748a0496f68::t_0d524998735e5d 3-4,35-48,81,145-175,204
+  s_7d9748a0496f68::t_85ca046f5b3952 71-72,77-80,82-83,85,87-89
+  s_7d9748a0496f68::t_b778370b9d6ec1 73
+  s_7d9748a0496f68::t_ef441ebe4cb574 55-61,63,132,136-144
+  s_7d9748a0496f68::t_1a3b5453a8d867 62,133-135
+src/js/apps/patients/schedule/schedule-results_app.js
+  s_7d9748a0496f68::t_b4ecdb68528522 63-64,101,144
+  s_7d9748a0496f68::t_84534887174eb2 13-14,20,24-35,37,47-48,55,57,75,77-81,125,134,151,205
+  s_7d9748a0496f68::t_a359e2d7ec847a 83,120-123,127-130
+src/js/apps/patients/schedule/layout.hbs
+  s_7d9748a0496f68::t_b778370b9d6ec1 16
+AGENTS.md
+  s_7d9748a0496f68::t_1ffd8d984cd6fe 38
+src/scss/modules/buttons.scss
+  s_7d9748a0496f68::t_6f7bc1ec4aea92 283
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7cf98420d6d4d447c978b1648cedef700495b8ac",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

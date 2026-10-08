@@ -1,0 +1,31 @@
+src/js/base/subrouterapp.cy.js
+  s_2f5d775ddb4a37::t_087902689c71fd 85-89
+src/js/base/routing.md
+  s_2f5d775ddb4a37::t_2e5519fadf4a6f 65
+src/js/base/README.md
+  s_2f5d775ddb4a37::t_3b48d4c0610a25 7-12
+AGENTS.md
+  s_2f5d775ddb4a37::t_3b48d4c0610a25 12
+src/js/base/routerapp.cy.js
+  s_2f5d775ddb4a37::t_6787549d14f09d 96-98
+src/js/base/subrouterapp.js
+  s_2f5d775ddb4a37::t_ed41c6734f08f3 26-30
+src/js/base/routerapp.js
+  s_2f5d775ddb4a37::t_4cf3004187accf 93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "22dbfb86848ca8c4c745c788b6354b2c540a020b",
+  "prompts": {},
+  "sessions": {
+    "s_2f5d775ddb4a37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "97d5b7b3-3d60-4064-90fb-56ac3e4bc258",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

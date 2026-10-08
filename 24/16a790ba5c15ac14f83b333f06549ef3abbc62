@@ -1,0 +1,26 @@
+scripts/deploy.js
+  s_377efbce3348c3::t_bef681901a151f 247
+  s_377efbce3348c3::t_3c2f85ec038ec6 166,169-170,192
+  s_377efbce3348c3::t_88ad9618cac0c9 167-168
+  s_377efbce3348c3::t_f4e1931de2757d 241
+scripts/deploy.test.js
+  s_377efbce3348c3::t_b190f63876a95b 16,425-450
+  s_377efbce3348c3::t_81987d2f0f06c4 451-453
+  s_377efbce3348c3::t_01b77df2104954 454
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2416a790ba5c15ac14f83b333f06549ef3abbc62",
+  "prompts": {},
+  "sessions": {
+    "s_377efbce3348c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5a54-58b9-7b33-90df-8957eb006d4e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

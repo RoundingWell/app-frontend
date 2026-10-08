@@ -1,0 +1,21 @@
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_7d9748a0496f68::t_d1c32e9a675bcc 733-735,746,751,757,767-787,794,796,798
+src/js/apps/programs/program/program.e2e.cy.js
+  s_7d9748a0496f68::t_b3c2feb386c89f 200-204,213,255-275
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "65fe491b3c9926e44d868f836d6093ff6f9dd111",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

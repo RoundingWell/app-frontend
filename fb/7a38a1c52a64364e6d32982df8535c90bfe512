@@ -1,0 +1,54 @@
+src/js/apps/patients/patient/patient_app.js
+  s_85aebd1623278c::t_189f3a69eb6357 91-93,123,140-154
+  s_85aebd1623278c::t_ac78695587d778 48-49,52,76-80,85-90,121,135-139,262,264
+src/js/apps/patients/patient/workflow/workflow_app.js
+  s_85aebd1623278c::t_be2bc75bacbe67 36,67-68
+  s_85aebd1623278c::t_ac78695587d778 5-6,17,26,29,32,35,41,44,47,50,60,70-74,93,99-100
+  s_85aebd1623278c::t_a26258b64c602d 37
+  s_85aebd1623278c::t_e65d836ade32c8 45-46,65-66
+  s_85aebd1623278c::t_9d25cced4e4643 38
+src/js/entities-service/flows.js
+  s_85aebd1623278c::t_e65d836ade32c8 22,29
+  s_85aebd1623278c::t_232965590c6096 23-26
+src/js/services/ws.component.cy.js
+  s_85aebd1623278c::t_21033ab2e5e974 210-234
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_de39feaaf0a7a9 453-460,467-470
+  s_85aebd1623278c::t_c428e6c86fbd22 461-466
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_e65d836ade32c8 33,40
+  s_85aebd1623278c::t_232965590c6096 34-37
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_85aebd1623278c::t_ac78695587d778 91
+src/js/entities-service/program-actions.js
+  s_85aebd1623278c::t_e65d836ade32c8 23-26,28
+  s_85aebd1623278c::t_9d25cced4e4643 21
+src/js/entities-service/program-flows.js
+  s_85aebd1623278c::t_9d25cced4e4643 20
+  s_85aebd1623278c::t_e65d836ade32c8 22-25,27
+src/js/services/ws.js
+  s_85aebd1623278c::t_a26258b64c602d 190,192,201-204
+src/js/apps/patients/patient/workflow/add-workflow_app.js
+  s_85aebd1623278c::t_9d25cced4e4643 13-14
+  s_85aebd1623278c::t_ac78695587d778 10-12,15,17
+src/js/apps/patients/patients-main_app.js
+  s_85aebd1623278c::t_ac78695587d778 136,138-151
+src/js/apps/patients/patient/patient_views.js
+  s_85aebd1623278c::t_ac78695587d778 116,163
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fb7a38a1c52a64364e6d32982df8535c90bfe512",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

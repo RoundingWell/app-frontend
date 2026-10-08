@@ -1,0 +1,19 @@
+src/js/apps/patients/patient/action/action_app.js
+  s_7d9748a0496f68::t_cd9e8eea6295a6 119,211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d115ce41b7f802295aa3e4900c7b53b02baa85b1",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+src/js/i18n/en-US/patients.yml
+  s_bfcf57b8ebfba4::t_1219b3c1916c9b 226,228-229,234-235,247,250
+  s_98141a3add0497::t_0fe826461c801f 209-211
+  s_98141a3add0497::t_292fef9d99ab1d 362,364
+  s_98141a3add0497::t_6712261aa60edf 248-249,251-252,409,418,420
+  s_98141a3add0497::t_3b6952f768a77c 481-482
+  s_98141a3add0497::t_2dd4e7f68d5fc5 360-361,363
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d2a7ed77e6d231a4c6c13b1c909aaba815cd535a",
+  "prompts": {},
+  "sessions": {
+    "s_98141a3add0497": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa3d5-b074-7972-8c1c-0ef07df7968e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_bfcf57b8ebfba4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa3d4-9afe-77e3-9a95-47c84bece0c0",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

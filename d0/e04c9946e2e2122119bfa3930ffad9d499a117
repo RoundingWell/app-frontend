@@ -1,0 +1,22 @@
+src/js/apps/patients/worklist/action-item.hbs
+  h_0f06c286dda36f 2,39-43
+src/js/apps/patients/worklist/action_views.js
+  h_0f06c286dda36f 70,75-76,81,83,87-90,102-113
+src/js/apps/patients/worklist/flow-item.hbs
+  h_0f06c286dda36f 10
+src/js/apps/patients/worklist/flow_views.js
+  h_0f06c286dda36f 71-73,82
+src/js/apps/patients/worklist/worklist_app.js
+  h_0f06c286dda36f 11-12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "d0e04c9946e2e2122119bfa3930ffad9d499a117",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

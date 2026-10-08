@@ -1,0 +1,19 @@
+AGENTS.md
+  s_e409610ec8685a::t_3c30e167834616 184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "236a0c9f75d0b8dbdd1a785c97db22f1085163d6",
+  "prompts": {},
+  "sessions": {
+    "s_e409610ec8685a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0eeb9-ce2f-7691-8403-ba571c2bdced",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

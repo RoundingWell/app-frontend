@@ -1,0 +1,19 @@
+src/js/apps/patients/shared/components/date-filter/date-filter_state.component.cy.js
+  s_7d9748a0496f68::t_c71c11bdb5bd18 68,70-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "58cdd3b4621ba63c22849c263991a4b620989937",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

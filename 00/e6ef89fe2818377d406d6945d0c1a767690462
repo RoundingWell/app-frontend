@@ -1,0 +1,21 @@
+src/js/apps/patients/worklist/action-item.hbs
+  s_33bb8cd239820b::t_4006438a01facc 17
+src/js/apps/patients/worklist/worklist-list.scss
+  s_33bb8cd239820b::t_ba1e645ea525d8 81,87,91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "00e6ef89fe2818377d406d6945d0c1a767690462",
+  "prompts": {},
+  "sessions": {
+    "s_33bb8cd239820b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f0cd-bbc3-7263-bd22-4fdeb98ce196",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
