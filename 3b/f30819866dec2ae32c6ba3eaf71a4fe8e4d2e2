@@ -1,0 +1,14 @@
+src/js/apps/patients/shared/interactions/appointment-presentation.js
+  h_0f06c286dda36f 3,7-8,16,19-20,28-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3bf30819866dec2ae32c6ba3eaf71a4fe8e4d2e2",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
