@@ -1,0 +1,20 @@
+.github/copilot-instructions.md
+  h_0f06c286dda36f 5-7
+AGENTS.md
+  h_0f06c286dda36f 10,185-188,203-205
+scripts/AGENTS.md
+  h_0f06c286dda36f 14
+test/README.md
+  h_0f06c286dda36f 3-5,21-47,55-57,138-173,203
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d7016db7938f8c59e077b842f75507a368d1066d",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+src/js/services/sidebar.component.cy.js
+  h_0f06c286dda36f 101-133
+src/js/services/sidebar.js
+  h_0f06c286dda36f 14,21-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f3cd201fad81c802cfc0faf8bad44dcbe6731b98",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

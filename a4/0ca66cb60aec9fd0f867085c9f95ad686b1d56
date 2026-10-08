@@ -1,0 +1,17 @@
+src/js/formservice.e2e.cy.js
+  h_0f06c286dda36f 2,6-7,18-33,38-51,60,67,81,96-102,106-107,117,124,138,158-164,171,178,185,199,215-222,226-227,231,238,245,252,267-274
+  h_0f06c286dda36f 34-36
+test/fixtures/formservice-parent.html
+  h_0f06c286dda36f 13-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a40ca66cb60aec9fd0f867085c9f95ad686b1d56",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

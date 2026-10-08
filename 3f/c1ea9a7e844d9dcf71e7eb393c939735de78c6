@@ -1,0 +1,14 @@
+src/js/base/cache/response-cache.component.cy.js
+  h_0f06c286dda36f 1,56,58,61,66-68,70-71,77-79,86-91,93-149,151-152
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3fc1ea9a7e844d9dcf71e7eb393c939735de78c6",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
