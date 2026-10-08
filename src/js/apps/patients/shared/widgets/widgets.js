@@ -8,6 +8,8 @@ import Handlebars from 'handlebars/dist/cjs/handlebars';
 
 import 'scss/modules/buttons.scss';
 
+import InteractionsWidgetView from './interactions_view';
+
 import './widgets.scss';
 
 function getWrapperTemplate(definition) {
@@ -81,6 +83,7 @@ const widgets = {
     },
     template: hbs`{{formatMessage (intlGet "patients.widgets.widgets.sex") sex=sex}}`,
   },
+  interactions: InteractionsWidgetView,
   status: View.extend({
     template: hbs`<span class="widgets__status-{{ status }}">{{formatMessage (intlGet "patients.widgets.widgets.status") status=status}}</span>`,
     initialize() {
