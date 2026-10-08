@@ -217,30 +217,52 @@ context('Tooltip', function() {
       Tooltip.setRegion(rootView.getRegion('tooltip'));
       return new RawAnchorView();
     });
+
     cy.clock();
 
-    cy.get('.raw-anchor').then(([anchor]) => {
-      const { PointerEvent } = anchor.ownerDocument.defaultView;
+    cy
+      .get('.raw-anchor')
+      .trigger('pointerover');
 
-      anchor.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
-      cy.tick(150);
+    cy.tick(150);
 
-      anchor.querySelector('.icon').dispatchEvent(new PointerEvent('pointerover', {
-        bubbles: true,
-        relatedTarget: anchor,
-      }));
-      cy.tick(50);
-    });
+    cy
+      .get('.raw-anchor')
+      .then($anchor => {
+        const anchor = $anchor[0];
+        const { PointerEvent } = anchor.ownerDocument.defaultView;
 
-    cy.get('.tooltip').contains('Raw anchor tooltip');
+        anchor.querySelector('.icon').dispatchEvent(new PointerEvent('pointerover', {
+          bubbles: true,
+          relatedTarget: anchor,
+        }));
+      });
 
-    cy.get('.raw-anchor').then(([anchor]) => {
-      anchor.dispatchEvent(new MouseEvent('mouseout', {
-        bubbles: true,
-        relatedTarget: anchor.querySelector('.icon'),
-      }));
-    });
-    cy.get('.tooltip').contains('Raw anchor tooltip');
+    cy.tick(49);
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
+
+    cy.tick(1);
+
+    cy
+      .get('.tooltip')
+      .contains('Raw anchor tooltip');
+
+    cy
+      .get('.raw-anchor')
+      .then($anchor => {
+        const anchor = $anchor[0];
+        anchor.dispatchEvent(new MouseEvent('mouseout', {
+          bubbles: true,
+          relatedTarget: anchor.querySelector('.icon'),
+        }));
+      });
+
+    cy
+      .get('.tooltip')
+      .contains('Raw anchor tooltip');
   });
 
   specify('Resets positioning classes when reusing a tooltip', function() {

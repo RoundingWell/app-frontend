@@ -798,6 +798,13 @@ context('App Nav', function() {
       .routePrograms()
       .visit();
 
+    // Initial route selection dismisses transient overlays; finish it before opening the drawer.
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .should('have.class', 'is-selected');
+
     cy
       .get('.app-nav')
       .should('have.class', 'is-narrow')

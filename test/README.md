@@ -108,24 +108,30 @@ If groups of steps are not explicitly linked or dependent on each other, separat
 ```js
 cy
   .get('@thingy') // Identifies the item or region this chunk is focusing on
-  .find('.something').last() // logically groups commands finding an element (no need for .last() to be on its own line here)
+  .find('.something')
+  .last()
   .click() // Explicit action
-  .wait('@forSomething') // Another explicit action
-  .then(function() { // And another
-    cy.routeFoo(fx => {
-      return {
-        data: { foo: '1', },
-      };
-    });
-  });
+  .wait('@forSomething'); // Another explicit action
+
+cy
+  .get('@thingy')
+  .find('.something')
+  .last()
+  .should('contain', 'Expected result');
+
+cy.routeFoo(fx => {
+  fx.data.foo = '1';
+  return fx;
+});
 ```
 
 A new `cy` should be added for new parent commands, as that is implicitly what is happening under-the-hood.
 ```js
 cy
   .get('@thingy')
-  .find('.something').last()
-  .click() // Explicit action
+  .find('.something')
+  .last()
+  .click(); // Explicit action
 
 // This `get` would reset the chain
 // and nothing would know about `.something` or the click
@@ -169,6 +175,14 @@ absent element or untouched spy may pass before the work runs. Avoid arbitrary
 sleeps as completion evidence. For late-response races, hold the old response,
 transition through the UI, release it, wait for completion, and assert both the
 absence of stale effects and the presence of the correct current state.
+
+Teardown must release held responses and await the actual background work and
+persistence before resetting shared stores or replies, even when an assertion
+fails. A cached replay promise or an intercepted response may settle before the
+refresh, parsing, or write it started. Observe those completion promises or the
+resulting state with existing scoped tools; do not build a general async harness
+for one test. Keep fixtures complete for both sides of a guard, and record a
+behavioral failure rather than an exception caused by missing fixture fields.
 
 For lifecycle changes, exercise incoming startup, outgoing host teardown, and
 reentry where those transitions affect the contract. Verify that delayed work
