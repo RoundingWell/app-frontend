@@ -1,0 +1,52 @@
+src/js/apps/patients/patient/action/action-activity_app.js
+  h_0f06c286dda36f 9-10,45
+src/js/apps/patients/patient/context-trail.hbs
+  h_0f06c286dda36f 27
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  h_0f06c286dda36f 8-9,35
+src/js/apps/patients/patient/interactions/date-control_view.js
+  h_0f06c286dda36f 12,19-20,27,49
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 161,303,318,365,398,530-531,590,601-602,613-720,740,805,831,846,902,1002,1026,1332
+src/js/apps/patients/patient/interactions/interactions_app.js
+  h_0f06c286dda36f 1-6,9-11,14-103,106-175
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 27,140
+src/js/apps/patients/patient/interactions/layout.hbs
+  h_0f06c286dda36f 3-5,8-12,16-17,21,28
+src/js/apps/patients/patient/patient_app.js
+  h_0f06c286dda36f 113,116-119,156,159-168
+src/js/apps/patients/patient/workflow/closed-layout.hbs
+  h_0f06c286dda36f 3-5
+src/js/apps/patients/patient/workflow/layout.hbs
+  h_0f06c286dda36f 3-5
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  h_0f06c286dda36f 5-8,10,14,19,21-23,26-27,30
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  h_0f06c286dda36f 13
+src/js/apps/patients/shared/interactions/interactions-status_views.js
+  h_0f06c286dda36f 8-9,14-15,29-30
+src/js/apps/patients/shared/interactions/loading.hbs
+  h_0f06c286dda36f 1
+src/js/apps/patients/shared/widgets/recent-interactions.scss
+  h_0f06c286dda36f 21-26
+src/js/apps/patients/shared/widgets/recent-interactions_views.js
+  h_0f06c286dda36f 18,51,59
+src/js/entities-service/interactions.js
+  h_0f06c286dda36f 1-2,37-41,50-52,57-100
+src/js/i18n/en-US/patients.yml
+  h_0f06c286dda36f 6-27,237-296
+test/support/api/interactions.js
+  h_0f06c286dda36f 44-49,57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dd936a544f3bf472a3ce45655dcbaf71c4e40456",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
