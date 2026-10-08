@@ -82,6 +82,10 @@ context('patient sidebar', function() {
       .and('contain', 'Date of Birth');
 
     cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledWithMatch', { name: 'Subscribe' });
+
+    cy
       .routeSettings('sidebar', null)
       .reload()
       .wait('@routePatient');
