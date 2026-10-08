@@ -1,0 +1,19 @@
+src/js/base/cache/response-cache.component.cy.js
+  h_0f06c286dda36f 1,58,60,63,68-70,73,81,88-92,95-107,109-135,137-149
+  h_0f06c286dda36f 8-9,11,71,74-75,82-87,150-178,184-193,201-210
+AGENTS.md
+  h_0f06c286dda36f 188
+test/README.md
+  h_0f06c286dda36f 106-107,110-115,122-124,169-176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0c5a07ce738cf707377b21a566e650768920703d",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
