@@ -143,14 +143,6 @@ context('list filters', function() {
       .should('contain', `filter[flow_states]=${ stateTodo.id },${ stateInProgress.id }`);
 
     cy
-      .get('.worklist-list__toggle')
-      .contains('Flows')
-      .click()
-      .wait('@routeFlows');
-
-    expandFiltersSidebar();
-
-    cy
       .wait('@routeFilterError')
       .then(interception => {
         // Verify the error response
@@ -158,6 +150,14 @@ context('list filters', function() {
         expect(interception.response.body.errors[0].title).to.equal('Not Found');
         expect(interception.response.body.errors[0].detail).to.equal('Cannot find filter');
       });
+
+    cy
+      .get('.worklist-list__toggle')
+      .contains('Flows')
+      .click()
+      .wait('@routeFlows');
+
+    expandFiltersSidebar();
 
     cy
       .get('[data-states-filters-region] .list-filters__section-button')

@@ -746,7 +746,7 @@ context('program flow page', function() {
       .should('exist');
 
     cy.on('uncaught:exception', error => {
-      expect(error.message).to.contain('Failed to fetch');
+      expect(error.message).to.match(/Failed to fetch|NetworkError when attempting to fetch resource\./);
 
       return false;
     });
