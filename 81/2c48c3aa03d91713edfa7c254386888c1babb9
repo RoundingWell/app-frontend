@@ -1,0 +1,26 @@
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 480
+src/js/apps/patients/patient/interactions/interactions.scss
+  h_0f06c286dda36f 20,22,32-37,108,110
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 375
+src/js/apps/patients/patient/interactions/layout.hbs
+  h_0f06c286dda36f 8-11
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  h_0f06c286dda36f 4,10,12-13,15
+src/js/apps/patients/shared/interactions/interaction-item.scss
+  h_0f06c286dda36f 7,61,63,89
+src/js/apps/patients/shared/interactions/interaction-presentation.js
+  h_0f06c286dda36f 56,74,116
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "812c48c3aa03d91713edfa7c254386888c1babb9",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

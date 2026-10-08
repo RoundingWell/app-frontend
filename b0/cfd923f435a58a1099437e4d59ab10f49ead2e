@@ -1,0 +1,22 @@
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.e2e.cy.js
+  h_0f06c286dda36f 285-293,307-316
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  h_0f06c286dda36f 749-754,2738-2739
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  h_0f06c286dda36f 1962-1973,1982-1994,1996
+src/js/components/picklist/picklist.component.cy.js
+  h_0f06c286dda36f 72-82
+src/js/services/sidebar.component.cy.js
+  h_0f06c286dda36f 101-130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b0cfd923f435a58a1099437e4d59ab10f49ead2e",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
