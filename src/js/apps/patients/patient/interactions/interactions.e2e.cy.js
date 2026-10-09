@@ -1,6 +1,7 @@
 import { findIndex, map, range } from 'underscore';
 
 import { getRelationship } from 'helpers/json-api';
+import formatDate from 'helpers/format-date';
 
 import { getAction } from 'support/api/actions';
 import { getInteraction } from 'support/api/interactions';
@@ -222,6 +223,12 @@ context('patient interactions', function() {
         cy
           .contains('Discharged to home')
           .should('be.visible');
+
+        for (const [label, timestamp] of [['Admitted', flowInteraction.attributes.metadata.admitted_at], ['Discharged', flowInteraction.attributes.metadata.discharged_at]]) {
+          cy
+            .contains('.patient-interactions__detail', label)
+            .should('contain', `${ label } ${ formatDate(timestamp, 'DATE') } at ${ formatDate(timestamp, 'TIME') }`);
+        }
       });
 
     cy
@@ -235,7 +242,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', `/patient/${ patient.id }/flow/${ flow.id }/action/${ action.id }`);
+      .should('equal', `/one/patient/${ patient.id }/flow/${ flow.id }/action/${ action.id }`);
 
     cy
       .get('.patient-action__header')
@@ -261,7 +268,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', `/patient/${ patient.id }/flow/${ dischargeFlow.id }`);
+      .should('equal', `/one/patient/${ patient.id }/flow/${ dischargeFlow.id }`);
 
     cy
       .get('.patient-flow__header-container')
@@ -370,7 +377,7 @@ context('patient interactions', function() {
       .should('have.class', 'patient-interactions__item--continues');
 
     cy
-      .contains('.patient-interactions__item', 'Grouped message 1')
+      .contains('.patient-interactions__item', /Grouped message 1(?!\d)/)
       .should('have.class', 'patient-interactions__item--continuation')
       .find('.patient-interactions__activity-line')
       .scrollIntoView()
@@ -387,12 +394,12 @@ context('patient interactions', function() {
       .should('have.length', 2);
     for (const index of [6, 7, 9, 10]) {
       cy
-        .contains('.patient-interactions__item', `Grouped message ${ index }`)
+        .contains('.patient-interactions__item', new RegExp(`Grouped message ${ index }(?!\\d)`))
         .should('not.have.class', 'patient-interactions__item--continuation');
     }
     for (const index of [0, 1]) {
       cy
-        .contains('.patient-interactions__item', `Grouped message ${ index }`)
+        .contains('.patient-interactions__item', new RegExp(`Grouped message ${ index }(?!\\d)`))
         .should('contain', index ? 'Inbound' : 'Alex Morgan')
         .find('time')
         .should('have.attr', 'datetime', grouped[index].attributes.occurred_at);
@@ -991,7 +998,7 @@ context('patient interactions', function() {
     const sparsePreview = [
       getInteraction({ attributes: { channel: 'voice', direction: 'inbound', metadata: { note: 'Inbound callback' } } }),
       getInteraction({ attributes: { metadata: null } }),
-      getInteraction({ attributes: { channel: 'appointment', metadata: { appointment_type: 'Consultation' } } }),
+      getInteraction({ attributes: { channel: 'appointment', occurred_at: null, metadata: { appointment_type: 'Consultation' } } }),
     ];
 
     cy
@@ -1010,6 +1017,11 @@ context('patient interactions', function() {
       .and($titles => {
         expect($titles.toArray().map(title => title.textContent)).to.include('Appointment');
       });
+
+    cy
+      .get('.patient-interactions-preview__item--appointment')
+      .find('time')
+      .should('not.exist');
 
     cy
       .routePatientInteractions(fx => {
@@ -1043,7 +1055,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', `/patient/${ patient.id }/interactions/${ interaction.id }`);
+      .should('equal', `/one/patient/${ patient.id }/interactions/${ interaction.id }`);
 
     cy
       .get('.patient-interactions__item.is-selected')
@@ -1095,7 +1107,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('match', new RegExp(`/patient/${ patient.id }/interactions$`));
+      .should('equal', `/one/patient/${ patient.id }/interactions`);
 
     cy
       .get('.patient-interactions__item.is-selected')
@@ -1337,7 +1349,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', `/patient/${ patient.id }/action/${ action.id }`);
+      .should('equal', `/one/patient/${ patient.id }/action/${ action.id }`);
 
     cy
       .wait('@activityInteractions')
@@ -1400,6 +1412,11 @@ context('patient interactions', function() {
       },
     });
 
+    const undatedVisit = getInteraction({
+      attributes: { channel: 'visit', occurred_at: null, metadata: { source: 'Visit details pending' } },
+      relationships: { action: getRelationship(action) },
+    });
+
     const inboundCall = getInteraction({
       attributes: {
         channel: 'voice',
@@ -1423,7 +1440,7 @@ context('patient interactions', function() {
 
     cy
       .routePatientInteractions(fx => {
-        fx.data = [interaction, sameDay, previousDay, undatedAppointment, inboundCall, missingMetadata];
+        fx.data = [interaction, sameDay, previousDay, undatedAppointment, undatedVisit, inboundCall, missingMetadata];
         fx.included = [action];
         return fx;
       })
@@ -1436,7 +1453,14 @@ context('patient interactions', function() {
     cy
       .contains('.patient-action__activity .patient-interactions__item', 'Appointment details pending')
       .should('contain', 'Appointment')
-      .and('not.contain', 'Invalid Date');
+      .and('not.contain', 'Invalid Date')
+      .find('time')
+      .should('not.exist');
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Visit details pending')
+      .find('time')
+      .should('not.exist');
 
     cy
       .contains('.patient-action__activity .patient-interactions__item', 'Inbound callback')
@@ -1445,6 +1469,7 @@ context('patient interactions', function() {
 
     cy
       .get('.patient-action__activity .patient-interactions__item--sms')
+      .should('contain', 'Outbound Message')
       .find('.patient-interactions__activity-description strong')
       .should('not.exist');
 
@@ -1462,7 +1487,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', `/patient/${ patient.id }/interactions/${ interaction.id }`);
+      .should('equal', `/one/patient/${ patient.id }/interactions/${ interaction.id }`);
 
     cy
       .get('.patient-interactions__item.is-selected')
@@ -1479,7 +1504,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', `/patient/${ patient.id }/interactions`);
+      .should('equal', `/one/patient/${ patient.id }/interactions`);
 
     cy
       .get('.patient-interactions__item')
@@ -1498,6 +1523,24 @@ context('patient interactions', function() {
 
     cy
       .viewport(700, 900);
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Jump to a specific date')
+      .click();
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('be.visible')
+      .find('.js-close')
+      .click();
+
+    cy
+      .focused()
+      .should('have.class', 'patient-interactions__date-button');
 
     cy
       .get('.patient-interactions__filters [data-filter="calls"]')
@@ -1836,7 +1879,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', `/patient/${ patient.id }/workflow`);
+      .should('equal', `/one/patient/${ patient.id }/workflow`);
 
     cy
       .get('.patient-interactions')
@@ -1980,7 +2023,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('include', '/worklist/');
+      .should('equal', '/one/worklist/owned-by');
 
     cy
       .get('.patient-interactions-preview')

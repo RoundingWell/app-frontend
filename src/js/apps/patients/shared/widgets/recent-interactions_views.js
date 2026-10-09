@@ -25,7 +25,7 @@ const RecentInteractionsItemView = View.extend({
       <span class="patient-interactions-preview__details">
         <strong class="patient-interactions-preview__title">{{ title }}</strong>
         <span class="patient-interactions-preview__sender">{{#if (isValue direction "inbound")}}{{ metadata.from }}{{else}}{{ metadata.clinician_name }}{{/if}}</span>
-        <time class="patient-interactions-preview__time" datetime="{{ timestamp }}">{{formatDateTime timestamp "AT_TIME"}}</time>
+        {{#if timestamp}}<time class="patient-interactions-preview__time" datetime="{{ timestamp }}">{{formatDateTime timestamp "AT_TIME"}}</time>{{/if}}
       </span>
     </button>
   `,

@@ -311,7 +311,7 @@ context('patient flow page', function() {
       .click();
     cy
       .location('pathname')
-      .should('include', `/patient/${ testPatient.id }/interactions/${ visit.id }`);
+      .should('equal', `/one/patient/${ testPatient.id }/interactions/${ visit.id }`);
     cy
       .get('.patient-interactions__item.is-selected')
       .should('contain', 'Example Medical Center')
