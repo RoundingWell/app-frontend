@@ -31,7 +31,7 @@
 }
 
 .patient-pages__tab:hover {
-  background: #{$black-95};
+  background: var(--patient-pages-tab-hover-background, #{$black-95});
   color: var(--color-text);
 }
 
