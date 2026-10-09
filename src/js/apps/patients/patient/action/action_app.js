@@ -274,6 +274,7 @@ export default App.extend({
     activityApp.start({
       region: this.getView().getRegion('activity'),
       action: this.action,
+      patient: this.patient,
       focusOnLoad: initialSection === 'comments',
     }).catch(addError);
 

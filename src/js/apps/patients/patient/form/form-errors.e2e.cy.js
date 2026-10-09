@@ -11,6 +11,7 @@ context('Patient Form Errors', function() {
     cy
       .clearFormDrafts()
       .routeWorkspacePatient()
+      .routePatientInteractions()
       .routesForDefault();
   });
 

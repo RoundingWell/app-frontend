@@ -47,6 +47,7 @@ context('Datepicker', function() {
         uiView: this,
         stateOptions: state,
         canSelectMonth: this.getOption('canSelectMonth'),
+        hideActions: this.getOption('hideActions'),
       });
 
       this.datepicker = datepicker;
@@ -185,6 +186,50 @@ context('Datepicker', function() {
         state.setSelectedDate('01/05/2016');
         expect(state.get('selectedDate').format('MM/DD/YYYY')).to.equal('01/05/2016');
       });
+  });
+
+  specify('Selecting a date without quick actions', function() {
+    cy
+      .mount(rootView => {
+        Datepicker.setRegion(rootView.getRegion('pop'));
+
+        return new TestView({
+          model: new Backbone.Model(),
+          hideActions: true,
+          dateState: {},
+        });
+      })
+      .as('root');
+
+    cy
+      .get('@root')
+      .contains('Select Date')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .find('.js-today, .js-tomorrow, .js-clear')
+      .should('not.exist');
+
+    cy
+      .get('.datepicker')
+      .find('.js-next')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .should('contain', formatDate(testDateAdd(1, 'month'), 'MMM YYYY'))
+      .find('.datepicker__days li a')
+      .contains(/^10$/)
+      .click();
+
+    cy
+      .get('@root')
+      .should('contain', formatDate(`${ testDateAdd(1, 'month').slice(0, 7) }-10`, 'LONG'));
+
+    cy
+      .get('.datepicker')
+      .should('not.exist');
   });
 
   specify('Previous month days', function() {

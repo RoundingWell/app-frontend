@@ -1,0 +1,227 @@
+// Preserve the approved pill geometry: 18px radii, 10px padding/gaps, and 6px icon gaps are optical exceptions.
+.patient-interactions {
+  background: var(--color-page-bg);
+  overflow-anchor: none;
+  scroll-padding-bottom: 64px;
+  scroll-padding-top: calc(var(--patient-interactions-controls-height) + 16px);
+}
+
+.patient-interactions__body {
+  margin: 0 auto;
+  padding-bottom: 80px;
+  width: var(--content-detail-width);
+}
+
+.patient-interactions__controls {
+  align-items: center;
+  border-bottom: 1px solid var(--color-divider);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  padding: 16px 0;
+}
+
+.patient-interactions__filters {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  justify-self: end;
+  max-width: 100%;
+}
+
+.patient-interactions__filter {
+  --button-background: var(--color-surface);
+  --button-border-color: var(--color-border-subtle);
+  --button-border-radius: 50%;
+  --button-box-shadow: 0 1px 0 rgb(77 77 77 / 15%);
+  --button-padding: 0;
+  --button-width: 32px;
+
+  color: var(--color-text-secondary);
+  height: 32px;
+  min-width: 32px;
+  transition: color 0.15s linear;
+}
+
+.patient-interactions__filter[aria-pressed='true'] {
+  --button-background: color-mix(in srgb, var(--interaction-color) 12%, var(--color-surface));
+  --button-border-color: var(--interaction-color);
+
+  color: var(--interaction-color);
+}
+
+.patient-interactions__filter:focus-visible {
+  outline: 2px solid #{color(blue)};
+  outline-offset: 2px;
+}
+
+@media (width <= 1000px) {
+  .patient-interactions__controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .patient-interactions__toolbar-date {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+  }
+
+  .patient-interactions__filters {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+.patient-interactions__filter--messages {
+  --interaction-color: #{color(blue)};
+}
+
+.patient-interactions__filter--calls {
+  --interaction-color: #{color(purple)};
+}
+
+.patient-interactions__filter--appointments {
+  --interaction-color: #{color(green)};
+}
+
+.patient-interactions__filter--visits {
+  --interaction-color: #{color(orange)};
+}
+
+.patient-interactions__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 24px;
+}
+
+.patient-interactions__day,
+.patient-interactions__day-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.patient-interactions__date-divider {
+  align-items: center;
+  background: var(--color-page-bg);
+  display: flex;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 16px 0;
+}
+
+.patient-interactions__date-divider::before,
+.patient-interactions__date-divider::after {
+  background: var(--color-divider);
+  content: '';
+  flex: 1;
+  height: 1px;
+}
+
+.patient-interactions__date-button {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
+
+.patient-interactions__calendar-modal {
+  padding: 20px;
+  width: 288px;
+}
+
+.patient-interactions__calendar-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  // Optical heading-to-calendar spacing from the approved design.
+  margin-bottom: 18px;
+}
+
+.patient-interactions__calendar-title {
+  font-size: 16px;
+  margin: 0;
+}
+
+.patient-interactions__calendar-close {
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.patient-interactions__status,
+.patient-interactions__empty {
+  padding: 16px 0;
+}
+
+.patient-interactions__paging-status {
+  padding: 12px 0;
+}
+
+.patient-interactions__date-control.is-today .patient-interactions__date-button {
+  border-color: color(blue);
+  color: color(blue);
+}
+
+.patient-interactions__date-control.is-today .icon {
+  color: var(--color-text-secondary);
+}
+
+.patient-interactions__date-divider:has(.is-today)::before,
+.patient-interactions__date-divider:has(.is-today)::after {
+  background: color(blue);
+}
+
+.patient-interactions__today-position {
+  align-items: flex-end;
+  bottom: 24px;
+  display: flex;
+  height: 0;
+  justify-content: center;
+  pointer-events: none;
+  position: sticky;
+  z-index: 1;
+}
+
+.patient-interactions__today {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid #{color(blue)};
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  color: color(blue);
+  cursor: pointer;
+  display: flex;
+  font-size: 11px;
+  font-weight: 600;
+  gap: 6px;
+  padding: 4px 10px;
+  pointer-events: auto;
+  text-transform: uppercase;
+
+  &[hidden] {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #{color(blue)};
+    outline-offset: 2px;
+  }
+}
+
+.patient-interactions__date-button:focus-visible,
+.patient-interactions__calendar-close:focus-visible {
+  outline: 2px solid #{color(blue)};
+  outline-offset: 2px;
+}
