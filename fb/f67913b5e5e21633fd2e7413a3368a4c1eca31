@@ -1,0 +1,24 @@
+config/coverage.cjs
+  h_0f06c286dda36f 6-22
+package.json
+  h_0f06c286dda36f 44-45
+scripts/report-coverage.js
+  h_0f06c286dda36f 1-109
+scripts/report-coverage.test.js
+  h_0f06c286dda36f 1-149
+test/README.md
+  h_0f06c286dda36f 18-37
+vite.config.js
+  h_0f06c286dda36f 12,118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fbf67913b5e5e21633fd2e7413a3368a4c1eca31",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

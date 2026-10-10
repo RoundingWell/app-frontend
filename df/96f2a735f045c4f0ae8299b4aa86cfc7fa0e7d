@@ -1,0 +1,14 @@
+src/js/auth.component.cy.js
+  h_0f06c286dda36f 16-20,22-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "df96f2a735f045c4f0ae8299b4aa86cfc7fa0e7d",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

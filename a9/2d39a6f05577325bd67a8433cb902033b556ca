@@ -1,0 +1,16 @@
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  h_0f06c286dda36f 655,671,1562,1575,1578,1582,1588,1591,1595,1603,1606,1616,1620,1623,1627,1633,1636,1640
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  h_0f06c286dda36f 603,1311,1503
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a92d39a6f05577325bd67a8433cb902033b556ca",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
