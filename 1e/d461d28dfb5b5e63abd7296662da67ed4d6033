@@ -1,0 +1,35 @@
+src/js/apps/patients/shared/read-only_views.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 5
+src/js/apps/patients/shared/components/state_component.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 12
+src/js/apps/programs/shared/components/behavior_component.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 12
+src/js/apps/patients/worklist/flow_views.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 13
+src/js/apps/patients/patient/dashboard/dashboard_views.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 22
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_dd6683eb15cd0c::t_4e0e3f2363cbc6 10
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 17
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 25
+src/js/apps/patients/sidebar/patient/patient-sidebar_views.js
+  s_dd6683eb15cd0c::t_6177619e9f814a 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.9",
+  "base_commit_sha": "1ed461d28dfb5b5e63abd7296662da67ed4d6033",
+  "prompts": {},
+  "sessions": {
+    "s_dd6683eb15cd0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eec43-b45a-77b2-bb2d-9a20794178b0",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

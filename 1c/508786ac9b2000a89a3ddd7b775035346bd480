@@ -1,0 +1,19 @@
+src/js/base/cache/entity-cache.js
+  s_4f8dcbf2626875::t_64ea38505bc961 50-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "1c508786ac9b2000a89a3ddd7b775035346bd480",
+  "prompts": {},
+  "sessions": {
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

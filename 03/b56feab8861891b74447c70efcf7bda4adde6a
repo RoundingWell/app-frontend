@@ -1,0 +1,16 @@
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  h_0f06c286dda36f 19
+src/js/apps/patients/shared/patient-pages.scss
+  h_0f06c286dda36f 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "03b56feab8861891b74447c70efcf7bda4adde6a",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

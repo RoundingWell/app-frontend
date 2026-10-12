@@ -1,0 +1,22 @@
+src/js/apps/globals/search/patient-search_views.js
+  s_85aebd1623278c::t_6e96a55028b0a1 2,117,135,155-157,193-196,198,200,203,208,212
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_0baafdfbfea073 41-43
+  s_85aebd1623278c::t_6e96a55028b0a1 15,28-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dbd0ae19d23efce0868082104ed38903063be525",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+src/js/services/modal.js
+  s_ac479aa708f14b::t_066de102d70564 52-57
+src/js/services/modal/modal.e2e.cy.js
+  s_228806e6ca3efa::t_9df4c12c6b615c 1-2,192-224
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "0e7f7887ed333783d32e9060002f782c393418e6",
+  "prompts": {},
+  "sessions": {
+    "s_228806e6ca3efa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4a5a313a-45b7-437a-9d57-2f73fe513775",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_ac479aa708f14b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "488d9df5-515f-4c50-8d84-1543e4653720",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

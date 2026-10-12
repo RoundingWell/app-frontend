@@ -1,0 +1,38 @@
+src/js/services/ws.component.cy.js
+  s_85aebd1623278c::t_d2f8e10e312988 237,247,273
+  s_85aebd1623278c::t_54bb4eed3c546b 277,279
+  s_85aebd1623278c::t_394bd482f39803 223
+  s_85aebd1623278c::t_cd6d330826d4b3 7-8,248-272,274-276,278,280-285
+  s_85aebd1623278c::t_2915330fdae835 218
+  s_85aebd1623278c::t_3789e8173ad2a4 286-287
+src/js/apps/patients/shared/list-filters/list-filters_app.js
+  s_85aebd1623278c::t_b391b1b5ee34e2 108
+src/js/services/ws.js
+  s_85aebd1623278c::t_d2f8e10e312988 207-210,212,214
+  s_85aebd1623278c::t_b391b1b5ee34e2 6-7,211
+src/js/services/sidebar.component.cy.js
+  s_85aebd1623278c::t_b391b1b5ee34e2 134-174
+src/js/apps/patients/patient/form/form_app.js
+  s_85aebd1623278c::t_b391b1b5ee34e2 28
+  s_85aebd1623278c::t_dbe677ac9fc89c 82-86
+src/js/services/sidebar.js
+  s_85aebd1623278c::t_b391b1b5ee34e2 100-101
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_4d4c0cd29647d5 529-537
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a0b14b3d358b267dc958e3e0e3002186b77dffeb",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

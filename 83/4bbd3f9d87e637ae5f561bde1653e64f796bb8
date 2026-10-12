@@ -1,0 +1,156 @@
+.github/copilot-instructions.md
+  s_d04385ebae28ca::t_0849fc08a5a945 14,20,35
+.github/copilot.yaml
+  s_d04385ebae28ca::t_25d68e696e66f5 12,36
+AGENTS.md
+  s_d04385ebae28ca::t_9fea3e2a1a2c92 81-83,135-137
+src/js/README.md
+  s_d04385ebae28ca::t_c6b166eacd0158 40,43-46,51-58
+src/js/apps/patients/shared/widgets/README.md
+  s_d04385ebae28ca::t_8293611d97ee3e 139
+src/js/components/picklist/index.js
+  s_d04385ebae28ca::t_483a5aff5736d1 162
+src/js/components/picklist/picklist.scss
+  s_d04385ebae28ca::t_4b92f6d7a033ba 120
+src/js/services/modal.js
+  s_d04385ebae28ca::t_0d8a07ef9e60e2 50-51,53,56,63,134,136
+src/js/services/modal/modal_views.component.cy.js
+  s_d04385ebae28ca::t_71da92b366fad5 36,45,47,52,54-60,62-77
+src/js/services/modal/modal_views.js
+  s_d04385ebae28ca::t_5a2a263bef4d5e 126
+src/scss/README.md
+  s_d04385ebae28ca::t_41d8e6fcab54a5 3,21,33,35-36,42,70-74,85,87-89,91-92,114-115,147,149,151-153,155-156
+src/scss/domain/action-card.scss
+  s_d04385ebae28ca::t_70fc8c37e76ade 47-60
+src/scss/domain/flow-card.scss
+  s_d04385ebae28ca::t_5bb165a907dfed 16-22
+src/scss/domain/work-card.scss
+  s_d04385ebae28ca::t_93b1b1d0a2c04a 13,28
+src/scss/modules/buttons.scss
+  s_d04385ebae28ca::t_d8d862ce703cf8 8
+src/scss/modules/modals.scss
+  s_d04385ebae28ca::t_8c697a78c797f3 23-49,126-127,157-161
+src/js/apps/patients/shared/actions_views.js
+  s_d04385ebae28ca::t_02df9d47bf2384 36,41,45,52,55
+src/js/apps/patients/shared/list-filters/list-filters.e2e.cy.js
+  s_d04385ebae28ca::t_dcf10226f3ee2d 43-54,219-225
+src/js/apps/patients/shared/list-filters/list-filters.scss
+  s_d04385ebae28ca::t_8d8bf7ad4eec12 57-67
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_d04385ebae28ca::t_2a44e96126d1b2 128-137,144,172-176
+src/js/apps/patients/shared/patient-readonly.scss
+  s_d04385ebae28ca::t_d5ed7d9aad9021 5,46-54
+src/js/apps/patients/shared/bulk-edit/bulk-edit.scss
+  s_d04385ebae28ca::t_19ee55799659b8 57,60,64,68-70,72,76,84,95-97,99,107
+src/js/apps/patients/worklist/worklist-list.scss
+  s_d04385ebae28ca::t_fbad2480d3c36f 107,128-129,132-133
+src/js/i18n/en-US/patients.yml
+  s_d04385ebae28ca::t_d3f3c88f1643be 399
+src/js/apps/patients/worklist/action-item.hbs
+  h_0f06c286dda36f 2,39-43
+src/js/apps/patients/worklist/action_views.js
+  h_0f06c286dda36f 70,75-76,81,83,87-90,102-113
+src/js/apps/patients/worklist/flow-item.hbs
+  h_0f06c286dda36f 10
+src/js/apps/patients/worklist/flow_views.js
+  h_0f06c286dda36f 71-73,82
+src/js/apps/patients/worklist/worklist_app.js
+  h_0f06c286dda36f 11-12
+src/js/apps/patients/schedule/day-item.hbs
+  s_d04385ebae28ca::t_7615226a206b31 2
+src/js/apps/patients/schedule/schedule-list.scss
+  s_d04385ebae28ca::t_796a26f8b68133 76,92
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_d04385ebae28ca::t_cc822a8f56de1d 473-474,477-480,491-492,495-498,1134-1137,1351,1382,1390,1400
+src/js/apps/patients/schedule/schedule_app.js
+  s_d04385ebae28ca::t_41d5fd11efa5e8 11
+src/js/apps/patients/schedule/schedule_views.js
+  s_d04385ebae28ca::t_d5461b791ff881 155,222,225-228,230,232,236
+src/js/apps/patients/patient/patient.scss
+  s_d04385ebae28ca::t_1363f8b4aca55a 50
+src/js/apps/patients/patient/patient_app.js
+  s_d04385ebae28ca::t_433cc3beb6a2a7 6,77-78,80-81,83,112-113,120-121,135-136,167-172,180,185-191,195,206
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_d04385ebae28ca::t_fdff1ab176dfa9 68-71,150-153
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_d04385ebae28ca::t_9ed2593ceccf1b 18-60,99-103,233-251,255-257,286,321,535,576,582,595,602,622,691,696,719,724,729,741,753-757,759,773-777,788-790,792
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_d04385ebae28ca::t_a64294df38738d 57
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_d04385ebae28ca::t_67b141af128c01 58-120,323-324,326,329-332,336,338-339,342-343,345-348,350,353-355,357,359,1560-1565,1933-1938,1942-1985
+src/js/entities-service/entities/sidebars.js
+  s_d04385ebae28ca::t_8bfe31d72db0dc 3,13-16
+src/js/services/sidebars.component.cy.js
+  s_d04385ebae28ca::t_023a333821d830 1-45
+src/js/services/sidebars.js
+  s_d04385ebae28ca::t_3496a151a3b20a 1-2,14-16
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_d04385ebae28ca::t_8c941de2c64632 2
+  s_d04385ebae28ca::t_7aaff1eb8c8117 24-26,28
+  s_d04385ebae28ca::t_a92a75eaa4b2e8 27
+src/js/apps/patients/patient/flow/flow_app.js
+  s_d04385ebae28ca::t_19ffe7700a78ee 14
+src/js/apps/patients/patient/flow/flow_views.js
+  s_d04385ebae28ca::t_71fda15fe8cfb0 224,233-235,238
+  s_d04385ebae28ca::t_7aaff1eb8c8117 227-228,230-231,240-247
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_d04385ebae28ca::t_d9f390a90d72a9 645-656,678,698,710,741,752,765,784,797,1529,1532,1539,1546,1553,1578,1585,1592,1599,1624,1631,1638,1645
+  s_d04385ebae28ca::t_a92a75eaa4b2e8 490-547
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_d04385ebae28ca::t_97ed7f5ba7974f 119,123,130,133-135
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_d04385ebae28ca::t_16018b34f0e5e1 2,167,213-264
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_d04385ebae28ca::t_baccf2a901d8f5 579-583,598-603
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_d04385ebae28ca::t_947c73da48e10c 131-133,138,262-264,269
+src/js/apps/patients/patient/action/action-details_views.js
+  s_d04385ebae28ca::t_59f363856741fa 80-83,85-86,88-104,124,152-159,168,194-196,211-212,225-228,285,396-398
+  s_d04385ebae28ca::t_7aaff1eb8c8117 84,87
+src/js/apps/patients/patient/action/action-edit.hbs
+  s_d04385ebae28ca::t_30010c0863c4f1 13
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_d04385ebae28ca::t_f8b1d3dc28a8e1 60-61,344-361,446-453,1833-1834,1917-1918,1956-1957,1969-1970,2229,2422,2442-2444
+src/js/apps/patients/patient/action/action.scss
+  s_d04385ebae28ca::t_26a2c0606e95a4 193,197,204,206,210,213,229-231,235-239,247,255-256,301-304,395-398
+  s_d04385ebae28ca::t_7aaff1eb8c8117 240-246,248-254,483,493
+src/js/apps/patients/patient/action/action_app.js
+  s_d04385ebae28ca::t_cc1b7cb6ea519d 98-99,112-114,119-120,149,152-155,167,174-179,248,276-277,280,282-283,285-286,289,291-292
+src/js/apps/patients/patient/action/action_views.js
+  s_d04385ebae28ca::t_3cb697225737f4 20-26,87,91
+src/js/apps/patients/patient/action/layout.hbs
+  s_d04385ebae28ca::t_956a802a57c87f 6-7
+src/js/apps/patients/patient/action/read-only.hbs
+  s_d04385ebae28ca::t_f47cd8ad35c76c 11
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_d04385ebae28ca::t_023412eb983a4f 114-117,149,152-154,1524-1525,1531-1532,1536-1540,1828,1834-1836,2064,2066-2068,2071-2080
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_d04385ebae28ca::t_233fbbcbfb89b7 35,49
+src/js/apps/patients/patient/form/form.scss
+  s_d04385ebae28ca::t_fd31cb0ddda710 244
+src/js/apps/patients/patient/form/form_views.js
+  s_d04385ebae28ca::t_63f0b133a6305f 99
+src/js/apps/patients/patient/form/layout.hbs
+  s_d04385ebae28ca::t_8850ac5d456bc8 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "834bbd3f9d87e637ae5f561bde1653e64f796bb8",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

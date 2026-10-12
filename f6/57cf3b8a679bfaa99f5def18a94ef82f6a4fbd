@@ -1,0 +1,30 @@
+src/scss/README.md
+  s_44c886cd8fd84f::t_6fba0d430be7c0 169
+config/vite-plugin-fontawesome-dynamic-icons.js
+  s_44c886cd8fd84f::t_a67007e683417e 75,82
+  s_44c886cd8fd84f::t_6fba0d430be7c0 1-17,20,22,29-31,35-36,41,47,49-74,76-81,83-99
+  s_44c886cd8fd84f::t_ed49e59e6ee107 18-19,21,23-28,32-34,37-40,42-46,48
+config/vite-plugin-fontawesome-app-icons.js
+  s_44c886cd8fd84f::t_6fba0d430be7c0 1-27,29-35,37-41
+  s_44c886cd8fd84f::t_a67007e683417e 28,36
+packages/care-ops-fontawesome/package.json
+  s_44c886cd8fd84f::t_5e6d60fa0917c4 20-21,23-25
+vite.config.js
+  s_44c886cd8fd84f::t_6fba0d430be7c0 21-22,135-136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "f657cf3b8a679bfaa99f5def18a94ef82f6a4fbd",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,19 @@
+.circleci/detect-cypress-defer.sh
+  s_377efbce3348c3::t_e82981ef43f62a 29-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.12",
+  "base_commit_sha": "917508fab8edadf5cdc5595d52e174051a7b9c42",
+  "prompts": {},
+  "sessions": {
+    "s_377efbce3348c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5a54-58b9-7b33-90df-8957eb006d4e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+src/js/apps/patients/shared/comments_views.js
+  s_d04385ebae28ca::t_5da992797e54dd 35-36,56
+  s_d04385ebae28ca::t_a9534398b2cd94 37
+  s_d04385ebae28ca::t_b5d498ef0134ea 32-34
+src/js/behaviors/iframe-form.js
+  s_d04385ebae28ca::t_5da992797e54dd 31-34
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_d04385ebae28ca::t_5da992797e54dd 71-74,87-88
+src/js/apps/patients/patient/action/action-details_views.js
+  s_d04385ebae28ca::t_eb708a69184df1 88-89
+  s_d04385ebae28ca::t_41843bed208084 90-93
+src/js/behaviors/iframe-form.component.cy.js
+  s_d04385ebae28ca::t_5da992797e54dd 37,89-111
+  s_156de0c6f42c6e::t_dc54eb1fe79655 112-113
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_d04385ebae28ca::t_5da992797e54dd 165-184
+src/js/apps/patients/patient/form/form-viewport.js
+  s_d04385ebae28ca::t_5da992797e54dd 5,83
+src/js/apps/patients/patient/action/action.scss
+  s_d04385ebae28ca::t_5da992797e54dd 129-133,136-141,143-145
+  s_d04385ebae28ca::t_41843bed208084 128,134-135,142
+  s_d04385ebae28ca::t_25c477879d916a 163,478
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_d04385ebae28ca::t_f6f230d80d1c66 399-400,404-405
+  s_d04385ebae28ca::t_5da992797e54dd 1762,1773-1777,1784-1787
+  s_d04385ebae28ca::t_aa7b43724ca818 401-403
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7c05b7e480abcad7a66e1f74a8208730a0fd2fc7",
+  "prompts": {},
+  "sessions": {
+    "s_156de0c6f42c6e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01b94-500e-7381-aeab-9545c30a2dc1",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,122 @@
+src/js/apps/patients/worklist/flow_views.js
+  s_534c2b6810f4ee::t_1e3d0f1e6c3642 12,67,70-72,76-77,82-83,85,95,105-107,121
+  s_534c2b6810f4ee::t_2c74e03bf84773 66
+src/js/apps/patients/shared/components/date-filter/date-filter.scss
+  s_534c2b6810f4ee::t_cc394fe6736c59 81-84,133-136,147-153
+src/scss/domain/work-card.scss
+  s_534c2b6810f4ee::t_0f305aef39de78 14-18,81-89,96-107,247-250,265-321
+src/js/apps/patients/schedule/schedule_views.js
+  s_534c2b6810f4ee::t_2c74e03bf84773 171
+  s_534c2b6810f4ee::t_ef1ca341583098 21,172,182,192-194,208,222-223,228-229,233-235,248-250
+src/js/apps/patients/sidebar/bulk-edit/bulk-edit-actions_app.js
+  s_534c2b6810f4ee::t_c39b678576ac03 5,146
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_534c2b6810f4ee::t_cc394fe6736c59 6,10,89,102-119
+  s_534c2b6810f4ee::t_090792702fdaca 120
+src/js/apps/patients/shared/bulk-edit/inline_app.js
+  s_534c2b6810f4ee::t_c6fccb51ea0c96 1-2,6-9,14-15,18,22-26,29-31,34-35,50-52,54-62
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_534c2b6810f4ee::t_cc394fe6736c59 62-63,65-66,79-81,132,140-204,224,229,254
+src/js/apps/patients/schedule/layout.hbs
+  s_534c2b6810f4ee::t_cc394fe6736c59 8
+src/js/i18n/en-US/patients.yml
+  s_534c2b6810f4ee::t_21715801a39331 242,244,248,250,390-395
+src/js/apps/patients/shared/bulk-edit/bulk-edit_views.js
+  s_534c2b6810f4ee::t_4266c86a5a9348 9,13,369-379,487-497,504,506
+src/js/mixins/multiselect-state_mixin.js
+  s_534c2b6810f4ee::t_d1b70113e0d66a 8-14
+src/js/apps/patients/patient/flow/layout.hbs
+  s_534c2b6810f4ee::t_d98fedbe72cb78 7-10,12-15,19-20
+src/js/apps/patients/shared/selection-bar.hbs
+  s_534c2b6810f4ee::t_9af4f408fb535b 1-8,10,13
+src/js/apps/patients/worklist/layout.hbs
+  s_534c2b6810f4ee::t_cc394fe6736c59 8
+src/js/apps/patients/schedule/schedule_app.js
+  s_534c2b6810f4ee::t_906626b6a110e9 20,48,248-261,265,268-279,281,285-290,294,299,314,319,323
+src/js/apps/patients/schedule/schedule-list.scss
+  s_534c2b6810f4ee::t_d836fea7acce57 77-80,231-232,237-238,260,267-277,280-282,285-288,291-294
+  s_534c2b6810f4ee::t_8369819baf4ede 289-290
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_534c2b6810f4ee::t_eb1dc70c67051d 2211,2213
+  s_534c2b6810f4ee::t_2c6b7b289a41a1 2180-2182,2190-2205,2207-2208,2210,2218,2227-2258,2288,2342,2346,2350,2359
+  s_534c2b6810f4ee::t_a3dc033c7aa2f0 2206
+  s_534c2b6810f4ee::t_2c74e03bf84773 2212
+  s_534c2b6810f4ee::t_d3d71750ae5e56 2209,2214-2217,2219-2226
+src/js/apps/patients/worklist/worklist-list.scss
+  s_534c2b6810f4ee::t_a20adcaa68e950 437-490
+src/js/apps/patients/schedule/day-item.hbs
+  s_534c2b6810f4ee::t_8369819baf4ede 1
+src/js/apps/patients/worklist/worklist_state.js
+  s_534c2b6810f4ee::t_68c0d9e15cc87d 43,80
+src/js/apps/patients/worklist/action-item.hbs
+  s_534c2b6810f4ee::t_8369819baf4ede 1
+  s_534c2b6810f4ee::t_c9ecad754d0c73 8-16
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_534c2b6810f4ee::t_b31fcb2867e400 232-238,268-392,458-476
+src/js/apps/patients/patient/flow/flow_state.js
+  s_534c2b6810f4ee::t_ecf27f23dee6a5 11
+src/js/apps/patients/shared/list-page.js
+  s_534c2b6810f4ee::t_5d7e4f899e8a39 10-13,23,33-73,103-106,140,148-150,231
+src/js/apps/patients/shared/bulk-edit/bulk-edit.scss
+  s_534c2b6810f4ee::t_cca51195e38429 118-164
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_534c2b6810f4ee::t_a60ecd7c269555 6-19
+  s_534c2b6810f4ee::t_8369819baf4ede 1
+src/js/apps/patients/schedule/schedule_state.js
+  s_534c2b6810f4ee::t_3f7edbd2292115 30,65
+src/js/apps/patients/worklist/action_views.js
+  s_534c2b6810f4ee::t_4d028b86b90d07 12,64,82-84,93-94,99-100,105-106,108,123,133-135,148
+  s_534c2b6810f4ee::t_2c74e03bf84773 63
+src/js/apps/patients/worklist/flow-item.hbs
+  s_534c2b6810f4ee::t_8369819baf4ede 1
+  s_534c2b6810f4ee::t_7aba7e10c47c59 8-12
+src/js/apps/patients/shared/selection-mode.js
+  s_534c2b6810f4ee::t_bee9519c08c9d7 1-103
+src/js/apps/patients/shared/patient-list-page.scss
+  s_534c2b6810f4ee::t_ff3e04f38b6c51 225,229,232-234,238-240,262,445-446,478
+  s_534c2b6810f4ee::t_8369819baf4ede 320,324,326,330,332-335,339-341,344-345
+  s_534c2b6810f4ee::t_cc394fe6736c59 224,226-228,230-231,235-237,241-261,263-264
+  s_534c2b6810f4ee::t_f6d53072d7d677 102-108,272-276,298,301-303,306-319,346-444,447-465
+  s_534c2b6810f4ee::t_2c74e03bf84773 321-323,325,327-329,331,336-338,342-343
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_534c2b6810f4ee::t_2c74e03bf84773 2010
+  s_534c2b6810f4ee::t_c7bdcb36137797 183-185,228-233,242-247,389-397,1953-1992,1994-2003,2005-2006,2008,2014-2016,2024-2123
+  s_534c2b6810f4ee::t_0a2bfaac946ec6 225
+  s_534c2b6810f4ee::t_a3dc033c7aa2f0 1993,2004
+  s_534c2b6810f4ee::t_d3d71750ae5e56 2007,2012-2013,2017-2023
+  s_534c2b6810f4ee::t_eb1dc70c67051d 2009,2011
+  s_534c2b6810f4ee::t_bd449c021ebee4 207-224
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_534c2b6810f4ee::t_a3dc033c7aa2f0 1281,1289-1305
+  s_534c2b6810f4ee::t_16fb60a29a3ddf 1240-1280,1282-1288,1306-1313,1315,1321-1323,1332-1371,1374-1379,1384-1389,1458-1460,1468-1470
+  s_534c2b6810f4ee::t_cef61538d451e3 1202-1231,1234
+  s_534c2b6810f4ee::t_ddf93fcca79d41 1232-1233
+  s_534c2b6810f4ee::t_d3d71750ae5e56 1314,1319-1320,1324-1331
+  s_534c2b6810f4ee::t_eb1dc70c67051d 1316,1318
+  s_534c2b6810f4ee::t_2c74e03bf84773 1317
+src/js/apps/patients/patient/flow/flow_views.js
+  s_534c2b6810f4ee::t_81e6ffc93e7d73 13,22,54,199,232-234,238-239,241,254,264-266,273,443-463,467-483
+  s_534c2b6810f4ee::t_2c74e03bf84773 198
+src/js/apps/patients/patient/flow/flow_app.js
+  s_534c2b6810f4ee::t_5c09c0edac8733 20,30,65-66,190-204,208,211-222,224,228-233,237,242,255,259
+src/js/apps/patients/sidebar/bulk-edit/bulk-edit-flows_app.js
+  s_534c2b6810f4ee::t_8233ee92180cf0 5,76
+src/js/apps/patients/worklist/worklist_app.js
+  s_534c2b6810f4ee::t_5bc5584a6353cc 20,54,353-354,358-370,373-379,381-386,388-389,391-394,399-404,408,413,426,430
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "97fa200c6e87fe6aebbeffc017c5b0dd7df69bbd",
+  "prompts": {},
+  "sessions": {
+    "s_534c2b6810f4ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a23-001e-7b23-9454-44a54672d14d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
