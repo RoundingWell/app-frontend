@@ -20,6 +20,7 @@ import { workspaceOne } from 'support/api/workspaces';
 import { getComment } from 'support/api/comments';
 import { getFile } from 'support/api/files';
 import { getActivity } from 'support/api/events';
+import { getInteraction } from 'support/api/interactions';
 
 const tomorrow = testDateAdd(1);
 
@@ -190,6 +191,40 @@ context('patient flow page', function() {
       },
     });
 
+    const visit = getInteraction({
+      attributes: {
+        channel: 'visit',
+        metadata: {
+          patient_class: 'E',
+          facility: 'Example Medical Center',
+          admitted_at: '2026-09-23T10:00:00Z',
+        },
+      },
+      relationships: {
+        flow: getRelationship(testPageFlow),
+      },
+    });
+
+    const messages = _.times(100, index => {
+      const interaction = getInteraction({
+        attributes: {
+          channel: 'sms',
+          direction: 'inbound',
+          metadata: {
+            body: `Flow reply ${ index }`,
+            from: '+16155550102',
+          },
+          occurred_at: new Date(Date.UTC(2026, 8, 24, 9, 0, index)).toISOString(),
+        },
+        relationships: {
+          flow: getRelationship(testPageFlow),
+        },
+      });
+
+      return interaction;
+    });
+    let activityRequests = 0;
+
     cy
       .routeFlow(fx => {
         fx.data = testPageFlow;
@@ -201,10 +236,19 @@ context('patient flow page', function() {
 
         return fx;
       })
+      .routePatientInteractions(fx => {
+        fx.data = [...messages, visit];
+        fx.included = [testPageFlow];
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.has('filter[flow]')) activityRequests += 1;
+      })
       .routeFlowActions()
       .routeFlowActivity(fx => {
         fx.data = [
           getActivity({
+            date: '2026-09-24T09:00:45.500Z',
             event_type: 'FlowNameUpdated',
             source: 'system',
             previous: 'Previous Flow',
@@ -223,7 +267,83 @@ context('patient flow page', function() {
     cy
       .get('.patient-flow__activity')
       .should('contain', 'Activity')
-      .and('contain', 'Flow name updated from Previous Flow to Test Flow');
+      .and('contain', 'Flow name updated from Previous Flow to Test Flow')
+      .and('contain', 'Emergency')
+      .and('contain', 'Example Medical Center')
+      .and('contain', 'No discharge received');
+    cy
+      .wait('@routePatientInteractions')
+      .its('request.url')
+      .then(url => {
+        const query = new URL(url).searchParams;
+        expect(query.get('page[limit]')).to.equal('100');
+        expect(query.has('page[before]')).to.equal(false);
+        expect(query.has('page[after]')).to.equal(false);
+        expect(query.get('filter[flow]')).to.equal(testPageFlow.id);
+        expect(query.get('filter[channel]').split(',')).to.have.members(['sms', 'email', 'mail', 'fax', 'portal', 'voice', 'voicemail', 'video', 'appointment', 'visit']);
+      });
+
+    cy
+      .get('.patient-flow__activity .patient-interactions__item')
+      .should('have.length', 100);
+
+    cy
+      .get('.patient-flow__activity')
+      .should('not.contain', 'Flow reply 0')
+      .and('contain', 'Flow reply 1')
+      .and('contain', '+16155550102')
+      .find('.patient-interactions__item, .patient-flow__activity-item')
+      .then($items => {
+        const text = $items.toArray().map(item => item.textContent);
+        const before = text.findIndex(value => value.includes('Flow reply 45'));
+        const event = text.findIndex(value => value.includes('Flow name updated'));
+        const after = text.findIndex(value => value.includes('Flow reply 46'));
+        expect(before).to.be.at.least(0);
+        expect(event).to.equal(before + 1);
+        expect(after).to.equal(event + 1);
+        expect(activityRequests).to.equal(1);
+      });
+
+    cy
+      .get('.patient-flow__activity')
+      .contains('.patient-interactions__item', 'Example Medical Center')
+      .contains('.js-interaction', 'View on Interactions')
+      .click();
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/interactions/${ visit.id }`);
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Example Medical Center')
+      .and('be.focused');
+    cy
+      .go('back');
+    cy
+      .get('.patient-flow__activity')
+      .should('contain', 'Example Medical Center');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (!new URL(req.url).searchParams.has('filter[flow]')) return;
+        req.alias = 'failedFlowInteractions';
+        req.reply({ statusCode: 422, body: { errors: [{ title: 'Unavailable' }] } });
+      })
+      .visit(`/patient/${ testPatient.id }/flow/${ testPageFlow.id }`);
+
+    cy
+      .wait('@failedFlowInteractions');
+
+    cy
+      .get('.patient-flow__activity')
+      .should('contain', 'Flow name updated from Previous Flow to Test Flow')
+      .find('.patient-interactions__item')
+      .should('not.exist');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'Interactions could not be loaded.')
+      .find('.js-dismiss')
+      .click();
 
     cy
       .intercept('DELETE', `/api/flows/${ testPageFlow.id }`, {

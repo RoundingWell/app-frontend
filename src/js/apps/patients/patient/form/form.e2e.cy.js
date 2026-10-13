@@ -27,6 +27,7 @@ context('Noncontext Form', function() {
       .routeActionActivity()
       .routeActionComments()
       .routeActionFiles()
+      .routePatientInteractions()
       .routesForDefault();
   });
 

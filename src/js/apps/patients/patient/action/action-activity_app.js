@@ -2,6 +2,9 @@ import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import dayjs from 'dayjs';
 
+import { addError } from 'js/datadog';
+import intl from 'js/i18n';
+
 import App from 'js/base/app';
 
 import { ActionActivityLoadingView, ActionCommentFormView, LayoutView, ActivitiesView } from 'js/apps/patients/patient/action/action-activity_views';
@@ -10,17 +13,23 @@ export default App.extend({
   onBeforeStart() {
     this.showView(new ActionActivityLoadingView());
   },
-  prepareStart({ action }, { signal }) {
+  prepareStart({ action, patient }, { signal }) {
     return Promise.all([
       Radio.request('entities', 'fetch:actionEvents:collection', action.id, { signal }),
       Radio.request('entities', 'fetch:comments:collection:byAction', action.id, { signal }),
+      Radio.request('entities', 'fetch:interactions:models:forActivity', { patientId: patient.id, actionId: action.id }, { signal })
+        .then(models => ({ models }), error => {
+          signal.throwIfAborted();
+          return { models: [], error };
+        }),
     ]);
   },
-  onStart(app, { action, focusOnLoad }, [activity, comments]) {
+  onStart(app, { action, patient, focusOnLoad }, [activity, comments, { models: interactions, error }]) {
     this.action = action;
+    this.patient = patient;
     this.comments = comments;
     this.comments.add(action.getComments().filter(comment => comment.has('message')));
-    this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models]);
+    this.activityCollection = new Backbone.Collection([...activity.models, ...comments.models, ...interactions]);
 
     this.listenTo(action, 'ws:add:comment', this.onWsAddComment);
 
@@ -29,6 +38,11 @@ export default App.extend({
     this.showNewCommentForm();
     this.subscribe();
     this.showView();
+
+    if (error) {
+      addError(error);
+      Radio.request('alert', 'show:error', intl.patients.shared.interactions.interactionsStatusViews.loadError);
+    }
 
     if (focusOnLoad) this.focus();
   },
@@ -51,6 +65,7 @@ export default App.extend({
     const activitiesView = new ActivitiesView({
       collection: this.activityCollection,
       model: this.action,
+      patientId: this.patient.id,
     });
     this.listenTo(activitiesView, {
       'remove:comment': this.onRemoveComment,
