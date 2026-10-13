@@ -23,6 +23,74 @@ import { getFile } from 'support/api/files';
 import { getPatientField } from 'support/api/patient-fields';
 
 context('patient action page', { scrollBehavior: 'center' }, function() {
+  specify('cancels pending websocket startup when reloading an action', function() {
+    let releaseResponse;
+    let startupSignal;
+    const responseGate = new Cypress.Promise(resolve => {
+      releaseResponse = resolve;
+    });
+
+    cy.on('window:before:load', win => {
+      const fetch = win.fetch.bind(win);
+      cy.stub(win, 'fetch').callsFake((url, options) => {
+        if (new URL(url, win.location.origin).pathname === '/api/websockets' && !startupSignal) {
+          startupSignal = options.signal;
+        }
+        return fetch(url, options);
+      });
+    });
+
+    cy
+      .intercept({ method: 'GET', url: '/api/websockets*', times: 1 }, req => {
+        return responseGate.then(() => req.reply({
+          body: {
+            data: {
+              is_enabled: true,
+              endpoint: 'ws://cypress-websocket/ws',
+              authentication: {
+                type: 'connect-token',
+                token: 'connect-token',
+                query_parameter: 'connect_token',
+                expires_in: 60,
+              },
+            },
+          },
+        }));
+      })
+      .routesForPatientAction()
+      .visit('/patient/1/action/1')
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action')
+      .should('be.visible')
+      .should(() => {
+        expect(startupSignal, 'websocket startup request').to.exist;
+        expect(startupSignal.aborted).to.be.false;
+      });
+
+    cy
+      .window()
+      .then(win => {
+        win.addEventListener('beforeunload', () => {
+          releaseResponse();
+          expect(startupSignal.aborted, 'root unload cancels websocket startup').to.be.true;
+        }, { once: true });
+      });
+
+    cy
+      .reload()
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action')
+      .should('be.visible');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledWithMatch', { name: 'Subscribe' });
+  });
+
   specify('display patient action', function() {
     const testTime = dayjs(testDate()).hour(12).valueOf();
 

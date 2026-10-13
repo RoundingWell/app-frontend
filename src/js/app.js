@@ -40,6 +40,7 @@ const Application = App.extend({
   childApps: {
     bootstrap: BootstrapService,
     dialer: DialerService,
+    ws: WSService,
   },
   radioRequests: {
     'show:pop': 'showPop',
@@ -77,7 +78,6 @@ const Application = App.extend({
 
   startServices() {
     const rootView = this.getView();
-    new WSService();
     new AlertService({ region: rootView.getRegion('alert') });
     new LastestListService();
     new ModalService({
