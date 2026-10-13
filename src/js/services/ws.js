@@ -93,12 +93,12 @@ export default App.extend({
     this.pendingMessages.push(data);
 
     if (this.ws.readyState === WebSocket.CLOSED) {
-      this.restart();
+      this.restart().catch(addError);
       return;
     }
 
     if (this.ws.readyState !== WebSocket.CONNECTING) {
-      this.start();
+      this.start().catch(addError);
       return;
     }
   },

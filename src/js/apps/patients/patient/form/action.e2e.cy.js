@@ -442,7 +442,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .routeFormByAction()
+      .routeFormByAction(fx => {
+        fx.data = testForm;
+
+        return fx;
+      })
       .routeLatestFormResponse(() => {
         return {
           data: formResponse,
@@ -487,13 +491,23 @@ context('Patient Action Form', function() {
       });
 
     cy
+      .get('@routeFormByAction')
+      .its('response.body.data.id')
+      .then(formId => {
+        cy.getRadio(Radio => {
+          cy.spy(Radio.channel(`form${ formId }`), 'request').as('formRequest');
+        });
+      });
+
+    cy
       .iframeStub()
       .then(iframeStub => {
         iframeStub.send('update:storedSubmission', { fields: { foo: 'baz' } });
       });
 
     cy
-      .wait(0);
+      .get('@formRequest')
+      .should('have.been.calledWithMatch', 'update:storedSubmission', { fields: { foo: 'baz' } });
 
     cy
       .tick(15000);
