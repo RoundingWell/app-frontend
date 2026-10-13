@@ -97,6 +97,54 @@ context('WS Service', function() {
       .should('be.calledWith', testNotConnected);
   });
 
+  specify('reports failed startup and preserves queued messages for another send', function() {
+    const message = { name: 'SendAfterFailure' };
+
+    cy.spy(console, 'error').as('startupError');
+    cy.intercept('GET', '/api/websockets', { forceNetworkError: true });
+    cy.then(() => service.send(message));
+
+    cy
+      .get('@startupError')
+      .should('have.been.calledOnce')
+      .its('firstCall.args.0.message')
+      .should('match', /Failed to fetch|NetworkError when attempting to fetch resource\./);
+
+    cy.then(() => {
+      expect(service.isRunning()).to.be.false;
+    });
+
+    cy.intercept('GET', '/api/websockets', getWsResponse('recovered-start'));
+    cy.startService();
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledWith', message);
+  });
+
+  specify('reports failed closed-socket restart and preserves queued messages', function() {
+    const message = { name: 'SendAfterRestartFailure' };
+
+    cy.startService();
+    cy.spy(console, 'error').as('restartError');
+    cy.intercept('GET', '/api/websockets', { statusCode: 503, body: { errors: [{ status: '503' }] } });
+    cy.then(() => {
+      service.ws.readyState = WebSocket.CLOSED;
+      service.send(message);
+    });
+
+    cy
+      .get('@restartError')
+      .should('have.been.calledOnce')
+      .its('firstCall.args.0.response.status')
+      .should('equal', 503);
+
+    cy.intercept('GET', '/api/websockets', getWsResponse('recovered-restart'));
+    cy.startService();
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledWith', message);
+  });
+
   specify('Connecting the websocket', function() {
     const channel = Radio.channel('ws');
     const testConnecting = { name: 'SendTest', data: 'CONNECTING' };

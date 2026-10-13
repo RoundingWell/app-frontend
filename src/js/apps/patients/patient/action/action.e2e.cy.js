@@ -23,12 +23,33 @@ import { getFile } from 'support/api/files';
 import { getPatientField } from 'support/api/patient-fields';
 
 context('patient action page', { scrollBehavior: 'center' }, function() {
+  let cleanupStartup;
+
+  afterEach(function() {
+    const cleanup = cleanupStartup;
+    cleanupStartup = undefined;
+    return cleanup?.();
+  });
+
   specify('cancels pending websocket startup when reloading an action', function() {
     let releaseResponse;
     let startupSignal;
     const responseGate = new Cypress.Promise(resolve => {
       releaseResponse = resolve;
     });
+
+    cy.on('fail', error => {
+      releaseResponse();
+      throw error;
+    });
+    cleanupStartup = () => {
+      releaseResponse();
+      if (startupSignal && !startupSignal.aborted) {
+        return cy
+          .get('@wsHandleMessage')
+          .should('have.been.calledWithMatch', { name: 'Subscribe' });
+      }
+    };
 
     cy.on('window:before:load', win => {
       const fetch = win.fetch.bind(win);
@@ -41,22 +62,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     });
 
     cy
-      .intercept({ method: 'GET', url: '/api/websockets*', times: 1 }, req => {
-        return responseGate.then(() => req.reply({
-          body: {
-            data: {
-              is_enabled: true,
-              endpoint: 'ws://cypress-websocket/ws',
-              authentication: {
-                type: 'connect-token',
-                token: 'connect-token',
-                query_parameter: 'connect_token',
-                expires_in: 60,
-              },
-            },
-          },
-        }));
-      })
+      .intercept({ method: 'GET', url: '/api/websockets*', times: 1 }, () => responseGate)
       .routesForPatientAction()
       .visit('/patient/1/action/1')
       .wait('@routeAction');

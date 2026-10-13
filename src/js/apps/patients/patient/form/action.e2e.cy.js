@@ -442,7 +442,11 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .routeFormByAction()
+      .routeFormByAction(fx => {
+        fx.data = testForm;
+
+        return fx;
+      })
       .routeLatestFormResponse(() => {
         return {
           data: formResponse,
