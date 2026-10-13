@@ -1,5 +1,5 @@
 src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
-  h_0f06c286dda36f 1-9,10-738,740,752-764,766-767,769-772,775-776,778-795,801,803-806,808-812,820,822-831,835-841,843-845,847-852,892,893
+  h_0f06c286dda36f 1-9,10-738,739,740,741-751,752-764,765,766-767,768,769-772,773-774,775-776,777,778-795,796-800,801,802,803-806,807,808-812,813-819,820,821,822-831,832-834,835-841,842,843-845,846,847-852,853-891,892,893
   h_0f06c286dda36f 739,741-751,765,768,773-774,777,796-800,802,807,813-819,821,832-834,842,846,853-891
 src/js/apps/patients/patient/interactions/interactions.scss
   h_0f06c286dda36f 1-236
@@ -26,7 +26,7 @@ src/js/apps/patients/patient/interactions/date-control_view.js
 src/js/apps/patients/shared/interactions/interaction-item.scss
   h_0f06c286dda36f 1-195
 src/js/apps/patients/patient/interactions/interactions_views.js
-  h_0f06c286dda36f 1-198,202-204,206,208-303
+  h_0f06c286dda36f 1-198,199-201,202-204,205,206,207,208-303
   h_0f06c286dda36f 199-201,205,207
 src/js/apps/patients/patient/workflow/layout.hbs
   h_0f06c286dda36f 2-21
@@ -49,7 +49,7 @@ src/js/apps/patients/patient/workflow/workflow_views.js
 src/js/apps/patients/patient/patient_views.js
   h_0f06c286dda36f 50,54-55
 test/support/api/interactions.js
-  h_0f06c286dda36f 1,3-20,26-31,33,35,39,42,45-63
+  h_0f06c286dda36f 1,3-20,26-31,32,33,35,39,42,45-63
   h_0f06c286dda36f 32
 src/js/entities-service/entities/interactions.js
   h_0f06c286dda36f 1-53
@@ -58,7 +58,7 @@ src/js/apps/patients/shared/interactions/loading.hbs
 src/js/apps/patients/shared/interactions/interaction-item_view.js
   h_0f06c286dda36f 1-137
 src/js/apps/patients/patient/interactions/interactions_app.js
-  h_0f06c286dda36f 1-42,44-53,55-60,66-83,85-119,124-172
+  h_0f06c286dda36f 1-42,43,44-53,55-60,66-83,84,85-119,120-123,124-172
   h_0f06c286dda36f 43,84,120-123
 src/js/apps/patients/shared/interactions/interactions-status_views.js
   h_0f06c286dda36f 1-35
