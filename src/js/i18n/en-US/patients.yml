@@ -2,6 +2,29 @@
 careOptsFrontend:
   patients:
     patient:
+      interactions:
+        interactionsViews:
+          typesLabel: Interaction types
+          messages: Messages
+          calls: Calls
+          appointments: Appointments
+          visits: Visits
+          today: Today
+          jumpToToday: Jump to today
+          pagingError: More interactions could not be loaded.
+          retry: Retry
+          loading: Loading interactions…
+          empty: No interactions yet.
+        dateControlView:
+          jumpToDate: Jump to date
+          jumpTo: Jump to...
+          today: Today
+          yesterday: Yesterday
+          lastWeek: Last week
+          lastMonth: Last month
+          beginning: The very beginning
+          specificDate: Jump to a specific date
+          closeDate: Close calendar
       action:
         actionApp:
           notFound: The Action you requested does not exist.
@@ -211,6 +234,66 @@ careOptsFrontend:
           label: Schedule for
           title: Schedule for { owner }
     shared:
+      interactions:
+        interactionItemView:
+          viewOnInteractions: View on Interactions
+          message: Message
+          call: Call
+          voicemail: Voicemail
+          videoCall: Video call
+          appointment: Appointment
+          appointmentStatuses:
+            scheduled: scheduled
+            checked_in: checked in
+            completed: completed
+            cancelled: cancelled
+          appointmentDuration: '{minutes} min'
+          appointmentWith: With
+          appointmentAt: at
+          appointmentAtStart: At
+          appointmentCancelled: Cancelled
+          visit: Visit
+          inbound: Inbound
+          outbound: Outbound
+          admitted: Admitted
+          discharged: Discharged
+          emergency: Emergency
+          inpatient: Inpatient
+          outpatient: Outpatient
+          observation: Observation
+          via: via
+          noDischarge: No discharge received
+          lengthOfStay: 'LOS {days, plural, one {# day} other {# days}}'
+          viaSms: via SMS
+          viaEmail: via email
+          viaMail: via mail
+          viaFax: via fax
+          viaPortal: via portal
+          loggedCall: logged a call.
+          added: added
+        interactionsStatusViews:
+          retry: Retry
+          loading: Loading interactions…
+          loadError: Interactions could not be loaded.
+      widgets:
+        recentInteractionsViews:
+          interactionsTab: Interactions
+          message: Message
+          appointment: Appointment
+          appointmentStatuses:
+            scheduled: scheduled
+            checked_in: checked in
+            completed: completed
+            cancelled: cancelled
+          inbound: Inbound
+          outbound: Outbound
+          admitted: Admitted
+          discharged: Discharged
+          empty: No interactions yet.
+      patientPages:
+        workflowTab: Workflows
+        interactionsTab: Interactions
+        pagesLabel: Patient pages
       attachmentsLabel: "{itemCount, plural, one {# attachment} other {# attachments}}"
       actionCard:
         added: "Added"
