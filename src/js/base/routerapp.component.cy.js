@@ -1,3 +1,5 @@
+import RouterRadioService from 'js/services/router-radio';
+
 import RouterApp from './routerapp';
 import SubRouterApp from './subrouterapp';
 
@@ -47,9 +49,11 @@ const Router = RouterApp.extend({
 
 function trigger(app, event, ...args) {
   const routed = new Cypress.Promise(resolve => app.once('appRoute', resolve));
-  app.router.getChannel().trigger(event, ...args);
+  app.routeEvent(event, ...args);
   return routed;
 }
+
+const getDefinition = (app, name) => app.getRouteDefinitions().find(definition => definition.name === name);
 
 function deferred() {
   let resolve;
@@ -61,16 +65,22 @@ function deferred() {
 
 context('RouterApp', function() {
   let app;
+  let routerRadio;
+
+  beforeEach(function() {
+    routerRadio = new RouterRadioService();
+  });
 
   afterEach(async function() {
     if (app) await app.destroy();
     app = null;
+    routerRadio.destroy();
   });
 
   describe('route triggers and aliases', function() {
     specify('prefixes the workspace slug onto non-root routes', function() {
       app = new Router({ workspaceSlug: 'test-ws' });
-      expect(app.router.getDefaultRoute('patient:workflow')).to.equal('test-ws/patient/:id/workflow');
+      expect(getDefinition(app, 'patient:workflow').path).to.equal('/test-ws/patient/:id/workflow');
     });
 
     specify('registers every alias and treats the first as canonical', async function() {
@@ -79,15 +89,24 @@ context('RouterApp', function() {
           return {
             'patient:workflow': {
               action: 'showPatient',
-              route: ['patient/:id/workflow', 'patient/:id/legacy-alias'],
+              route: [
+                'patient/:id/workflow',
+                'patient/:id/legacy-alias',
+                { path: 'patient/:id/dated-alias', until: '2027-09-02' },
+              ],
             },
           };
         },
       });
       app = new AliasRouter({ workspaceSlug: 'test-ws' });
 
-      expect(app.router.getDefaultRoute('patient:workflow')).to.equal('test-ws/patient/:id/workflow');
-      expect(app.translateEvent('patient:workflow', 'p1')).to.equal('test-ws/patient/p1/workflow');
+      expect(getDefinition(app, 'patient:workflow')).to.deep.include({
+        path: '/test-ws/patient/:id/workflow',
+        aliases: [
+          { path: '/test-ws/patient/:id/legacy-alias' },
+          { path: '/test-ws/patient/:id/dated-alias', until: '2027-09-02' },
+        ],
+      });
 
       await trigger(app, 'patient:workflow', 'p1');
       expect(app.getCurrentRoute().definition.route).to.equal('patient/:id/workflow');
@@ -111,7 +130,7 @@ context('RouterApp', function() {
 
       app = new RootRouter();
 
-      expect(app.router.getDefaultRoute('root')).to.equal('');
+      expect(getDefinition(app, 'root').path).to.equal('/');
     });
   });
 
@@ -183,7 +202,7 @@ context('RouterApp', function() {
           dispatchedRoute.resolve();
         });
 
-        const routing = app.routeAction('schedule', 'showSchedule');
+        const routing = app.routeEvent('schedule');
         await dispatchedRoute.promise;
         expect(dispatched).to.have.been.calledOnce;
         expect(errorHandler).not.to.have.been.called;
@@ -199,7 +218,7 @@ context('RouterApp', function() {
       const failure = new Error('cannot stop');
       const reported = cy.stub();
       app = new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' });
-      await app.routeAction('schedule', 'showSchedule');
+      await app.routeEvent('schedule');
       const route = app.getCurrentRoute();
       const stop = cy.stub(app, 'stop').throws(failure);
       await app.onNoMatch();
@@ -293,7 +312,7 @@ context('RouterApp', function() {
       await app.routePromise;
       const child = app.getCurrent();
 
-      const routing = app.routeAction('patient:action', 'showPatient', 'p1', 'a1');
+      const routing = app.routeEvent('patient:action', 'p1', 'a1');
       const stopping = app.stop();
 
       await Promise.all([routing, stopping]);

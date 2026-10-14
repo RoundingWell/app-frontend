@@ -1,3 +1,5 @@
+import RouterRadioService from 'js/services/router-radio';
+
 import App from './app';
 import RouterApp from './routerapp';
 import SubRouterApp from './subrouterapp';
@@ -18,14 +20,17 @@ function deferred() {
 
   context(title, function() {
     let owner;
+    let routerRadio;
 
     beforeEach(async function() {
+      routerRadio = new RouterRadioService();
       owner = new Router({ workspaceSlug: 'test-ws' });
       await owner.start();
     });
 
     afterEach(async function() {
       await owner.destroy();
+      routerRadio.destroy();
     });
 
     specify('stops the old child synchronously and completes only the latest replacement', async function() {

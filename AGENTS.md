@@ -66,10 +66,11 @@ belong to this application.
   delegation uses Marionette's native default.
 - Renderer: `src/js/i18n/index.js` registers the Handlebars renderer with `@intl`
   template data. `src/js/app.js` imports both setup modules before app consumers.
-- Events/routing: use `Radio` from `marionette`. The local
-  `src/js/base/event-router.js` extends `Backbone.Router`; `Backbone.history` owns
-  URL/history handling. AppFrame and the local RouterApp/SubRouterApp classes own
-  feature selection and loading; see `src/js/base/routing.md` for app policy.
+- Events/routing: use `Radio` from `marionette`. The `@mnjs/router` Router in
+  `src/js/router.js` owns URL/history handling over the Navigation API;
+  `src/js/services/router-radio.js` bridges the `event-router` Radio channel to it.
+  AppFrame and the local RouterApp/SubRouterApp classes own feature selection and
+  loading; see `src/js/base/routing.md` for app policy.
 - Ownership entrypoint: `src/js/app.js` owns the `#root` Region, RootView, and
   bootstrap/dialer/app-frame child Applications. It configures shared popup Regions
   and owns its document/window listeners. Follow each feature's existing owner.

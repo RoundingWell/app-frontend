@@ -1,4 +1,4 @@
-import { compact, isEqual, noop, partial, defer } from 'underscore';
+import { compact, isEqual, noop, partial } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
@@ -163,12 +163,6 @@ export default RouterApp.extend({
     return new StateModel();
   },
   initialize() {
-    this.listenTo(Radio.channel('event-router'), 'default', () => {
-      defer(() => {
-        Backbone.history.navigate(this.getDefaultRoute(), { trigger: true });
-      });
-    });
-
     this._narrowQuery = window.matchMedia(NAV_COLLAPSE_QUERY);
     this._onNarrowQueryChange = () => {
       this.getState().set('isNarrow', this._narrowQuery.matches);
@@ -234,18 +228,18 @@ export default RouterApp.extend({
     const workspaces = currentUser.getWorkspaces();
 
     const rootRoute = {
-      action: 'setWorkspace',
+      redirect: 'getDefaultRoute',
       route: '',
       root: true,
     };
 
-    // Add a root route for each user workspace
+    // Add a root route for each user workspace, including any deeper path
     return workspaces.reduce((routes, workspace) => {
       const route = workspace.get('slug');
       routes[`workspace:${ route }`] = {
         action: partial(this.setWorkspace, route),
         root: true,
-        route: [route, `${ route }/*route`],
+        route: `${ route }{/*}?`,
       };
       return routes;
     }, { 'root': rootRoute });
@@ -256,9 +250,7 @@ export default RouterApp.extend({
 
     if (!workspaceSlug || route) return;
 
-    defer(() => {
-      this.replaceUrl(this.getDefaultRoute());
-    });
+    Radio.request('router', 'navigate', this.getDefaultRoute(), { history: 'replace' });
   },
   getDefaultRoute() {
     const workspace = Radio.request('workspace', 'current');

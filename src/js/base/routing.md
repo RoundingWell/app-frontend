@@ -8,8 +8,8 @@ definitions.
 
 - **RouterApp** (`src/js/base/routerapp.js`) — owns URL ↔ event mapping for a
   top-level area (Patients, Programs, Clinicians, Dashboards, Forms, Nav, Error).
-  It registers routes with the local EventRouter, builds a normalized route
-  context on each match, manages the single current child app, and fires the
+  It mounts its routes on the app Router (`src/js/router.js`), builds a normalized
+  route context on each match, manages the single current child app, and fires the
   `before:appRoute` / `appRoute` lifecycle hooks.
 - **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns the
   persistent navigation and a workspace content Application. Workspace switches
@@ -52,13 +52,24 @@ begin with `/`.
 
 ### Aliases
 
-`route` may be an array. Every alias is registered (each prefixed with the workspace
-slug unless `root`), and the **first** alias is canonical for URL generation
-(`translateEvent` / `replaceRoute`). EventRouter supports this natively.
+`route` may be an array. Every alias is mounted (each prefixed with the workspace
+slug unless `root`), and the **first** entry is canonical. An alias is a string or
+`{ path, until }`; the Router replaces an alias URL with the canonical URL before
+dispatch. Parameter names must be unique within a route and an alias must declare the
+same names as its canonical path (`program/:programId/action/:actionId`).
 
-The local EventRouter is a Backbone.Router adapter. RouterApp supplies the
-application's `event-router` Radio channel; the adapter must not import or bridge
-a separate Radio singleton.
+An event with no `route` renders in place and has no URL (`notFound`, `unknownError`).
+A `redirect` (method name or function, `(match, { signal }) => target`) resolves the
+route to another route instead of dispatching an `action` (legacy flow URLs).
+
+### Radio bridge
+
+`Radio.trigger('event-router', name, ...args)` only requests navigation: the
+router-radio service maps positional `args` to the route's parameter names (the rest
+become trailing handler arguments through `info.args`) and calls `router.navigate`.
+RouterApps are dispatched from the Router's `route` event, never from the trigger, and
+every other RouterApp receives `no:match`. `default` navigates to `root`;
+`notFound` and `unknownError` render in place without navigating.
 
 Non-canonical aliases exist only to keep old bookmarks working during a stated
 compatibility window. The patient app carries three — `patient/dashboard/:id`,

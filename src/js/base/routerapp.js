@@ -1,11 +1,9 @@
-import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from 'underscore';
-import Backbone from 'backbone';
+import { has, isArray, isEqual, isFunction, isString, map, reduce, result } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
 import RouteBaseApp from './route-base-app';
-import EventRouter from './event-router';
 
 export default RouteBaseApp.extend({
   // Set in router apps for nav selection
@@ -19,29 +17,22 @@ export default RouteBaseApp.extend({
 
     this.initRouter();
 
-    // if the app does not handle a given route, stop
-    this.listenTo(this.router, 'noMatch', this.onNoMatch);
-
     this.on('before:stop', this._clearRouteIntent);
 
     RouteBaseApp.apply(this, arguments);
   },
 
+  // Mounts this app's routes with the router. The router-radio service
+  // dispatches matches back through routeEvent.
   initRouter() {
     this._routes = result(this, 'eventRoutes');
 
-    const routeTriggers = this.getRouteTriggers();
+    const unmountRoutes = Radio.request('router', 'mount', this);
 
-    this.router = new EventRouter({
-      channel: Radio.channel('event-router'),
-      routeTriggers,
-    });
-
-    this.on('before:destroy', () => this.router.destroy());
-
-    this.bindRouteEvents();
+    this.on('before:destroy', unmountRoutes);
   },
 
+  // if the app does not handle a given route, stop
   onNoMatch() {
     const routeContext = this.getCurrentRoute();
     this._currentRoute = null;
@@ -52,51 +43,59 @@ export default RouteBaseApp.extend({
     }
   },
 
-  // For each route in the hash creates a routeTriggers hash,
-  // prefixing every (non-root) route or alias with the workspace slug
-  getRouteTriggers() {
-    return reduce(this._routes, (routeTriggers, { route, root }, eventName) => {
-      routeTriggers[eventName] = isArray(route) ?
-        map(route, pattern => this._prefixRoute(pattern, root)) :
-        this._prefixRoute(route, root);
+  // Events without a `route` render in place and have no URL.
+  // Every other route or alias is prefixed with the workspace slug unless `root`.
+  getRouteDefinitions() {
+    return reduce(this._routes, (definitions, { route, root, meta, redirect }, name) => {
+      if (route === undefined) return definitions;
 
-      return routeTriggers;
-    }, {});
+      const [path, ...aliases] = isArray(route) ? route : [route];
+
+      definitions.push({
+        name,
+        path: this._prefixRoute(path, root),
+        aliases: map(aliases, alias => this._prefixAlias(alias, root)),
+        meta,
+        redirect: redirect && ((...args) => this._resolveAction(redirect).apply(this, args)),
+      });
+
+      return definitions;
+    }, []);
+  },
+
+  _prefixAlias(alias, root) {
+    const { path, ...options } = isString(alias) ? { path: alias } : alias;
+
+    return { ...options, path: this._prefixRoute(path, root) };
   },
 
   _prefixRoute(route, root) {
-    if (root) return route;
+    if (root) return `/${ route }`;
 
     if (!this.workspaceSlug) {
       throw new Error('RouterApp requires workspaceSlug for non-root routes');
     }
 
-    return route ? `${ this.workspaceSlug }/${ route }` : this.workspaceSlug;
+    return `/${ this.workspaceSlug }/${ route }`;
   },
 
-  getEventActions(eventRoutes, routeAction) {
-    return reduce(eventRoutes, function(eventActions, { action }, eventName) {
-      eventActions[eventName] = partial(routeAction, eventName, action);
-
-      return eventActions;
-    }, {});
+  _resolveAction(action) {
+    return isFunction(action) ? action : this[action];
   },
 
-  // handle route events
-  // accepts a hash of 'some:event' : 'actionFunction'
-  // listens to the router channel and calls the appropriate
-  // action via the routeAction handler
-  bindRouteEvents() {
-    const eventActions = this.getEventActions(this._routes, this.routeAction);
-
-    this.listenTo(this.router.getChannel(), eventActions);
+  hasRoute(event) {
+    return has(this._routes, event);
   },
 
   // applies the route's action
   // starts this routerapp if necessary
   // triggers before and after events
-  routeAction(event, action, ...args) {
+  routeEvent(event, ...args) {
     const definition = this._routes[event];
+
+    // Redirect-only routes resolve to another route and have nothing to apply
+    if (!definition.action) return;
+
     const routeIntent = {};
 
     const routeContext = {
@@ -141,12 +140,7 @@ export default RouteBaseApp.extend({
 
     this.triggerMethod('before:appRoute', this, routeContext);
 
-    let { action } = definition;
-    if (!isFunction(action)) {
-      action = this[action];
-    }
-
-    const activation = action.apply(this, eventArgs);
+    const activation = this._resolveAction(definition.action).apply(this, eventArgs);
 
     this.triggerMethod('appRoute', this, routeContext);
 
@@ -197,29 +191,5 @@ export default RouteBaseApp.extend({
 
   _clearRouteIntent() {
     this._routeIntent = null;
-  },
-
-  // takes an event and translates data into the applicable url fragment
-  translateEvent(event) {
-    const route = this.router.getDefaultRoute(event);
-
-    return this.router.translateRoute(route, rest(arguments));
-  },
-
-  // takes an event and changes the URL without triggering or adding to the history
-  replaceRoute() {
-    const url = this.translateEvent.apply(this, arguments);
-
-    this.replaceUrl(url);
-  },
-
-  navigateRoute() {
-    const url = this.translateEvent.apply(this, arguments);
-
-    Backbone.history.navigate(url, { trigger: false });
-  },
-
-  replaceUrl(url) {
-    Backbone.history.navigate(url, { trigger: false, replace: true });
   },
 });

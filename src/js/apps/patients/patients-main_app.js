@@ -9,6 +9,9 @@ import PatientApp from 'js/apps/patients/patient/patient_app';
 import WorklistApp from 'js/apps/patients/worklist/worklist_app';
 import ScheduleApp from 'js/apps/patients/schedule/schedule_app';
 
+// End of the compatibility window for the legacy dashboard/archive aliases
+const LEGACY_ALIAS_UNTIL = '2027-09-02';
+
 export default RouterApp.extend({
   routerAppName: 'PatientsApp',
   childApps: {
@@ -40,14 +43,14 @@ export default RouterApp.extend({
       action: 'showPatient',
       route: [
         'patient/:patientId/workflow',
-        'patient/dashboard/:patientId',
+        { path: 'patient/dashboard/:patientId', until: LEGACY_ALIAS_UNTIL },
       ],
     },
     'patient:workflow:closed': {
       action: 'showPatient',
       route: [
         'patient/:patientId/workflow/closed',
-        'patient/archive/:patientId',
+        { path: 'patient/archive/:patientId', until: LEGACY_ALIAS_UNTIL },
       ],
     },
     'patient:interactions': {
@@ -62,7 +65,7 @@ export default RouterApp.extend({
       action: 'showPatient',
       route: [
         'patient/:patientId/action/:actionId',
-        'patient/archive/:patientId/action/:actionId',
+        { path: 'patient/archive/:patientId/action/:actionId', until: LEGACY_ALIAS_UNTIL },
       ],
     },
     'patient:flow': {
@@ -82,14 +85,14 @@ export default RouterApp.extend({
       route: 'patient/:patientId/form/:formId',
     },
     'legacy:patient:flow': {
-      action: 'redirectPatientFlow',
+      redirect: 'redirectPatientFlow',
       route: [
         'flow/:flowId',
         'flow/:flowId/details',
       ],
     },
     'legacy:patient:flow:action': {
-      action: 'redirectPatientFlowAction',
+      redirect: 'redirectPatientFlowAction',
       route: 'flow/:flowId/action/:actionId',
     },
   },
@@ -140,46 +143,29 @@ export default RouterApp.extend({
     handleErrors(error).catch(reportedError => window.reportError(reportedError));
   },
 
-  redirectPatientFlow(flowId) {
-    return this.resolveFlowPatient('patient:flow', flowId);
+  redirectPatientFlow({ params }, context) {
+    return this.resolveFlowPatient('patient:flow', params, context);
   },
 
-  redirectPatientFlowAction(flowId, actionId) {
-    return this.resolveFlowPatient('patient:flow:action', flowId, actionId);
+  redirectPatientFlowAction({ params }, context) {
+    return this.resolveFlowPatient('patient:flow:action', params, context);
   },
 
-  resolveFlowPatient(event, flowId, actionId) {
-    const sourceRoute = this.getCurrentRoute();
-
-    return Radio.request('entities', 'fetch:flows:model', flowId)
-      .then(flow => {
-        const patientId = flow.getPatient().id;
-        const routeArgs = actionId ?
-          [patientId, flowId, actionId] :
-          [patientId, flowId];
-
-        this.redirectResolvedRoute(sourceRoute, event, ...routeArgs);
-      })
-      .catch(error => this.failResolvedRoute(sourceRoute, error));
+  resolveFlowPatient(name, params, { signal }) {
+    return Radio.request('entities', 'fetch:flows:model', params.flowId, { signal })
+      .then(flow => ({ name, params: { ...params, patientId: flow.getPatient().id } }))
+      .catch(error => this.failResolvedRoute(error, signal));
   },
 
-  redirectResolvedRoute(sourceRoute, event, ...eventArgs) {
-    // Ignore a resolver that completed after the user navigated elsewhere.
-    if (!this.isRunning() || this.getCurrentRoute() !== sourceRoute) return;
-
-    // Replace the legacy URL without dispatching, then route the canonical event.
-    this.replaceRoute(event, ...eventArgs);
-    Radio.trigger('event-router', event, ...eventArgs);
-  },
-
-  failResolvedRoute(sourceRoute, error) {
-    if (!this.isRunning() || this.getCurrentRoute() !== sourceRoute) return;
+  // The legacy URL stays in place and the error renders over it
+  failResolvedRoute(error, signal) {
+    if (signal.aborted) return;
 
     if (get(error, ['response', 'status']) === 410) {
       Radio.trigger('event-router', 'notFound');
       return;
     }
 
-    return handleErrors(error);
+    return handleErrors(error).catch(reportedError => window.reportError(reportedError));
   },
 });

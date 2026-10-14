@@ -22,31 +22,31 @@ export default RouterApp.extend({
     },
     'program:details': {
       action: 'showProgram',
-      route: 'program/:id',
+      route: 'program/:programId',
     },
     'program:action': {
       action: 'showProgram',
-      route: 'program/:id/action/:id',
+      route: 'program/:programId/action/:actionId',
     },
     'program:action:new': {
       action: 'showProgram',
-      route: 'program/:id/action',
+      route: 'program/:programId/action',
     },
     'programFlow:new': {
       action: 'showProgram',
-      route: 'program/:id/flow',
+      route: 'program/:programId/flow',
     },
     'programFlow': {
       action: 'showProgramFlow',
-      route: 'program-flow/:id',
+      route: 'program-flow/:flowId',
     },
     'programFlow:action': {
       action: 'showProgramFlow',
-      route: 'program-flow/:id/action/:id',
+      route: 'program-flow/:flowId/action/:actionId',
     },
     'programFlow:action:new': {
       action: 'showProgramFlow',
-      route: 'program-flow/:id/action',
+      route: 'program-flow/:flowId/action',
     },
   },
 

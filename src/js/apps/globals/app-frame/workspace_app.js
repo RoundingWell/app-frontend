@@ -1,8 +1,9 @@
 import { some } from 'underscore';
 import { Radio } from 'marionette';
-import Backbone from 'backbone';
 
 import App from 'js/base/app';
+
+import router from 'js/router';
 
 import SidebarService from 'js/services/sidebar';
 
@@ -17,8 +18,8 @@ export default App.extend({
     this.shellOptions = options;
   },
   async prepareStart(options, { signal }) {
-    for (const router of this.routers) {
-      this.removeChildApp(router.getName());
+    for (const routerApp of this.routers) {
+      this.removeChildApp(routerApp.getName());
     }
     this.routers = [];
 
@@ -63,9 +64,11 @@ export default App.extend({
     this.initRouter(CliniciansMainApp);
     this.initRouter(ProgramsMainApp);
 
-    Backbone.history.loadUrl();
+    const match = router.match(window.location.href);
 
-    if (!some(this.routers, router => router.getCurrentRoute())) {
+    if (some(this.routers, routerApp => routerApp.hasRoute(match?.name))) {
+      router.refresh();
+    } else {
       Radio.trigger('event-router', 'notFound');
     }
   },
@@ -73,22 +76,22 @@ export default App.extend({
     const RouterApp = module?.default;
     if (!RouterApp) return;
 
-    const router = new RouterApp({
+    const routerApp = new RouterApp({
       routeRegion: this.shellOptions.contentRegion,
       workspaceSlug: this.workspaceSlug,
     });
 
-    this.addChildApp(router.routerAppName, router);
+    this.addChildApp(routerApp.routerAppName, routerApp);
 
-    this.listenTo(router, 'before:appRoute', this.onBeforeAppRoute);
+    this.listenTo(routerApp, 'before:appRoute', this.onBeforeAppRoute);
 
-    this.routers.push(router);
-    return router;
+    this.routers.push(routerApp);
+    return routerApp;
   },
-  onBeforeAppRoute(router, routeContext) {
+  onBeforeAppRoute(routerApp, routeContext) {
     const { event, eventArgs } = routeContext;
 
-    Radio.request('nav', 'select', router.routerAppName, event, eventArgs);
+    Radio.request('nav', 'select', routerApp.routerAppName, event, eventArgs);
     Radio.request('sidebar', 'stop');
     Radio.request('history', 'set:latestList', routeContext);
   },

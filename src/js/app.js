@@ -2,7 +2,6 @@ import 'js/base/setup';
 import 'js/i18n';
 
 import { get } from 'underscore';
-import Backbone from 'backbone';
 import { addError } from 'js/datadog';
 
 import 'scss/provider-core.scss';
@@ -21,12 +20,15 @@ import Tooltip from 'js/components/tooltip';
 
 import 'js/entities-service';
 
+import router from 'js/router';
+
 import AlertService from 'js/services/alert';
 import BootstrapService from 'js/services/bootstrap';
 import HistoryService from 'js/services/history';
 import LastestListService from 'js/services/latest-list';
 import ModalService from 'js/services/modal';
 import PatientModalService from 'js/services/patient-modal';
+import RouterRadioService from 'js/services/router-radio';
 import WSService from 'js/services/ws';
 import DialerService from 'js/services/dialer';
 
@@ -78,6 +80,7 @@ const Application = App.extend({
 
   startServices() {
     const rootView = this.getView();
+    new RouterRadioService();
     new AlertService({ region: rootView.getRegion('alert') });
     new LastestListService();
     new ModalService({
@@ -159,9 +162,9 @@ const Application = App.extend({
   },
 
   startHistory() {
-    Backbone.history.start({ pushState: true });
-
     new HistoryService();
+
+    router.start();
   },
 });
 
