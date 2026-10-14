@@ -1,46 +1,29 @@
 import App from './app';
-import { createChildSelection } from './routing/child-selection';
+import { bindRouteApplication } from './routing/application-binding';
 
-// Optional Application adapter; selection is also usable by plain Applications.
+// Optional selection-only shorthand, also used by nonrouting owners such as
+// AppFrame. Consumers can instead bind a plain Application in initialize.
 export default App.extend({
   constructor: function() {
-    this.selection = createChildSelection({
-      getChild: name => this.getChildApp(name),
-      onCleanupError: (error, app) => this.triggerMethod('child:cleanup:error', error, app),
+    this.routing = bindRouteApplication(this, {
+      dispatchOnStart: false,
+      onCleanupError: (error, child) => this.triggerMethod('child:cleanup:error', error, child),
     });
     App.apply(this, arguments);
   },
   getCurrent() {
-    return this.selection.getCurrent();
+    return this.routing.getCurrent();
   },
   getCurrentSelection() {
-    return this.selection.getSelection();
+    return this.routing.getSelection();
   },
   invalidateSelection() {
-    this.selection.invalidate();
+    this.routing.invalidate();
   },
-  selectChild(appName, options) {
-    return this.selection.select(appName, options);
+  selectChild(name, options) {
+    return this.routing.select(name, options);
   },
   stopCurrent() {
-    return this.selection.stop();
-  },
-  // Public overrides are required for already-stopped owners, which do not emit
-  // stop again. Mandatory invalidation cannot depend on subclass lifecycle hooks.
-  stop() {
-    this.invalidateSelection();
-    const stopped = App.prototype.stop.apply(this, arguments);
-    if (stopped) this.selection.clear();
-    return stopped;
-  },
-  restart() {
-    this.invalidateSelection();
-    return App.prototype.restart.apply(this, arguments);
-  },
-  destroy() {
-    this.invalidateSelection();
-    const destroyed = App.prototype.destroy.apply(this, arguments);
-    if (destroyed) this.selection.clear();
-    return destroyed;
+    return this.routing.stopCurrent();
   },
 });

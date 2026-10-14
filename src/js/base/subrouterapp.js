@@ -1,81 +1,72 @@
-import { extend, isArray, mapObject, pick, result } from 'underscore';
+import { isArray, mapObject, pick, result } from 'underscore';
 import Backbone from 'backbone';
 
 import { addError } from 'js/datadog';
 
-import RouteBaseApp from './route-base-app';
-import { createRouteDelivery } from './routing/route-delivery';
-import { createRouteActions } from './routing/route-actions';
+import App from './app';
+import { bindRouteApplication } from './routing/application-binding';
 
-export default RouteBaseApp.extend({
+// Optional scoped-detail shorthand. This adapter owns no URLs or transport.
+export default App.extend({
   constructor: function() {
-    this.dispatchCurrentRoute = createRouteActions({
+    this.routing = bindRouteApplication(this, {
+      getScope: options => this.getRouteScope(options),
       getActions: () => mapObject(this.normalizeMethods(result(this, 'routeActions', {})), action => action.bind(this)),
-      before: route => this.triggerMethod('before:startRoute', route),
-      after: route => this.triggerMethod('startRoute', route),
+      getChildOptions: options => this.mixinOptions(options),
+      readRoute: () => this.getState().get('currentRoute'),
+      writeRoute: route => this.getState().set('currentRoute', route),
+      beforeDispatch: route => this.triggerMethod('before:startRoute', route),
+      afterDispatch: route => this.triggerMethod('startRoute', route),
       onError: (error, route) => this.triggerMethod('route:error', error, route),
-      isCurrent: route => this.getCurrentRoute() === route,
+      onCleanupError: (error, child) => this.triggerMethod('child:cleanup:error', error, child),
     });
-    this.routeDelivery = createRouteDelivery({
-      start: options => this.start(options),
-      read: () => this.getCurrentRoute(),
-      write: route => this.setCurrentRoute(route),
-      dispatch: () => this.startCurrentRoute(),
-    });
-    this.on('start', () => this.routeDelivery.activated());
-    this.on('before:stop', () => this.routeDelivery.invalidate());
-
-    RouteBaseApp.apply(this, arguments);
+    App.apply(this, arguments);
   },
-
   createState() {
     return new Backbone.Model({ currentRoute: null });
   },
-
-  // Explicit resource identity; route-specific startup options never define scope.
   getRouteScope(options = {}) {
     const scope = result(this, 'routeScope');
     if (!isArray(scope)) throw new Error('SubRouterApp requires a routeScope array');
     return pick(options, scope);
   },
-
-  setCurrentRoute(routeContext) {
-    this.invalidateSelection();
-    this.getState().set('currentRoute', routeContext);
+  setCurrentRoute(route) {
+    this.routing.setRoute(route);
   },
-
   getCurrentRoute() {
-    return this.getState().get('currentRoute');
+    return this.routing.getRoute();
   },
-
-  // records the newest route and ensures it is dispatched by the active run
-  async startRoute(routeContext, options) {
-    const started = await this.routeDelivery.accept(routeContext, options);
-    if (started) return this;
+  startRoute(route, options) {
+    return this.routing.accept(route, options);
   },
-
-  // synchronously dispatches the current route to its action
   startCurrentRoute() {
-    return this.dispatchCurrentRoute(this.getCurrentRoute());
+    return this.routing.dispatchCurrent();
   },
-
   onChildCleanupError(error) {
     addError(error);
   },
-
   onRouteError(error) {
     window.reportError(error);
   },
-
   mixinOptions(options) {
-    const appOptions = result(this, 'currentAppOptions');
-
-    return extend({}, appOptions, options);
+    return { ...result(this, 'currentAppOptions'), ...options };
   },
-
-  startCurrent(appName, options) {
-    return this.selectChild(appName, {
-      start: app => app.start(this.mixinOptions(options)),
-    });
+  startCurrent(name, options) {
+    return this.routing.startCurrent(name, options);
+  },
+  getCurrent() {
+    return this.routing.getCurrent();
+  },
+  getCurrentSelection() {
+    return this.routing.getSelection();
+  },
+  invalidateSelection() {
+    this.routing.invalidate();
+  },
+  selectChild(name, options) {
+    return this.routing.select(name, options);
+  },
+  stopCurrent() {
+    return this.routing.stopCurrent();
   },
 });

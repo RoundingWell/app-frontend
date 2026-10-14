@@ -5,6 +5,8 @@ import {
   extend,
   isArray,
   isEqual,
+  isFunction,
+  isRegExp,
   pick,
   reject,
   result,
@@ -16,8 +18,9 @@ import { translateRoute } from './routing/route-table.js';
 
 export default Backbone.Router.extend({
   constructor: function(options = {}) {
-    extend(this, pick(options, ['channel', 'routeTriggers']));
+    extend(this, pick(options, ['channel', 'routeTriggers', 'history']));
 
+    this.history = this.history || Backbone.history;
     this.cid = uniqueId('eventrouter');
     this._ch = this.channel;
     this._routeArgs = [];
@@ -45,25 +48,35 @@ export default Backbone.Router.extend({
     });
   },
 
+  // Backbone's route semantics, borrowing the explicitly supplied history owner.
   route(route, name, callback) {
-    const addRoute = Backbone.Router.prototype.route;
-
-    const wrappedCallback = bind(function() {
-      const args = drop(arguments, 0);
-
+    const pattern = isRegExp(route) ? route : this._routeToRegExp(route);
+    if (isFunction(name)) {
+      callback = name;
+      name = '';
+    }
+    callback = callback || this[name];
+    this.history.route(pattern, fragment => {
+      const args = this._extractParameters(pattern, fragment);
       this._routeArgs.push([name, ...args]);
-
+      let executed;
       try {
-        callback.apply(this, args);
+        executed = this.execute(callback, args, name);
       } finally {
         this._routeArgs.pop();
       }
-    }, this);
+      if (executed === false) return;
+      this.trigger(`route:${ name }`, ...args);
+      this.trigger('route', name, args);
+      this.history.trigger('route', this, name, args);
+    });
+    this.history.handlers[0].cid = this.cid;
+    return this;
+  },
 
-    const router = addRoute.call(this, route, name, wrappedCallback);
-
-    Backbone.history.handlers[0].cid = this.cid;
-    return router;
+  navigate(fragment, options) {
+    this.history.navigate(fragment, options);
+    return this;
   },
 
   navigateFromEvent(event) {
@@ -91,7 +104,7 @@ export default Backbone.Router.extend({
   },
 
   destroy() {
-    Backbone.history.handlers = reject(Backbone.history.handlers, { cid: this.cid });
+    this.history.handlers = reject(this.history.handlers, { cid: this.cid });
     this.stopListening();
     this.trigger('destroy', this);
     return this;

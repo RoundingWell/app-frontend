@@ -45,7 +45,7 @@
     "coverage:report:ci": "nyc report --reporter=lcovonly",
     "dev": "vite -d",
     "test": "vite -m test & cypress open",
-    "test:routing": "node --test src/js/base/routing/routing.test.js",
+    "test:routing": "node --test src/js/base/routing/*.test.js",
     "lint": "npm run eslint && npm run stylelint && npm run editorconfig",
     "lint:fix": "npm run eslint:fix && npm run stylelint:fix",
     "eslint": "eslint src/js test --max-warnings=0",

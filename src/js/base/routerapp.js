@@ -1,189 +1,93 @@
-import { isEqual, isFunction, partial, reduce, result } from 'underscore';
-import Backbone from 'backbone';
+import { isFunction, result } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
-import RouteBaseApp from './route-base-app';
-import EventRouter from './event-router';
-import { createRouteTable } from './routing/route-table';
-import { createRouteDispatch } from './routing/route-dispatch';
+import App from './app';
+import { bindApplicationRouter } from './routing/application-router';
+import { createBackboneRouteTransport } from './routing/backbone-transport';
 
-export default RouteBaseApp.extend({
-  // Set in router apps for nav selection
+// Optional declarative shorthand over the composition API. Domain Applications
+// can install the same binding in initialize without extending this adapter.
+export default App.extend({
   routerAppName: '',
   startOnRoute: true,
-
   constructor: function(options = {}) {
     this.workspaceSlug = options.workspaceSlug;
     this.routeRegion = options.routeRegion;
-    this.routeDispatch = createRouteDispatch({
-      prepare: () => this.prepareRoute(),
-      dispatch: ({ route }) => this.dispatchRoute(route),
+    this.initRouter(options);
+    // Mandatory setup precedes consumer initialize: ErrorApp registers its
+    // catch-all there. preinitialize/initialize remain safe extension points.
+    App.apply(this, arguments);
+  },
+  initRouter(options = {}) {
+    this.routing = bindApplicationRouter(this, {
+      definitions: result(this, 'eventRoutes'),
+      workspaceSlug: this.workspaceSlug,
+      region: this.routeRegion,
+      transport: options.transport || createBackboneRouteTransport({ channel: Radio.channel('event-router') }),
+      startOnRoute: this.startOnRoute,
+      resolveAction: action => (isFunction(action) ? action : this[action]).bind(this),
+      beforeDispatch: route => this.triggerMethod('before:appRoute', this, route),
+      afterDispatch: route => this.triggerMethod('appRoute', this, route),
       onError: (error, route) => this.triggerMethod('route:error', error, route),
+      onCleanupError: (error, child) => this.triggerMethod('child:cleanup:error', error, child),
+      onNoMatch: () => this.onNoMatch(),
     });
-
-    this.initRouter();
-
-    // if the app does not handle a given route, stop
-    this.listenTo(this.router, 'noMatch', this.onNoMatch);
-
-    this.on('before:stop', () => this.routeDispatch.invalidate());
-    this.on('before:destroy', () => this.routeDispatch.dispose());
-
-    RouteBaseApp.apply(this, arguments);
+    this.router = this.routing.connection.router;
   },
-
-  initRouter() {
-    this._routes = result(this, 'eventRoutes');
-
-    this.routeTable = createRouteTable(this._routes, { workspaceSlug: this.workspaceSlug });
-    const routeTriggers = this.getRouteTriggers();
-
-    this.router = new EventRouter({
-      channel: Radio.channel('event-router'),
-      routeTriggers,
-    });
-
-    this.on('before:destroy', () => this.router.destroy());
-
-    this.bindRouteEvents();
-  },
-
   onNoMatch() {
-    const routeContext = this.getCurrentRoute();
-    this._currentRoute = null;
-    this.routeDispatch.invalidate();
-    try {
-      this.stop();
-    } catch(error) {
-      this.triggerMethod('route:error', error, routeContext);
-    }
+    return this.routing.leave();
   },
-
   getRouteTriggers() {
-    return this.routeTable.triggers;
+    return this.routing.table.triggers;
   },
-
-  getEventActions(eventRoutes, routeAction) {
-    return reduce(eventRoutes, function(eventActions, { action }, eventName) {
-      eventActions[eventName] = partial(routeAction, eventName, action);
-
-      return eventActions;
-    }, {});
-  },
-
-  // handle route events
-  // accepts a hash of 'some:event' : 'actionFunction'
-  // listens to the router channel and calls the appropriate
-  // action via the routeAction handler
-  bindRouteEvents() {
-    const eventActions = this.getEventActions(this._routes, this.routeAction);
-
-    this.listenTo(this.router.getChannel(), eventActions);
-  },
-
-  // applies the route's action
-  // starts this routerapp if necessary
-  // triggers before and after events
   routeAction(event, action, ...args) {
-    const routeContext = this.routeTable.context(event, args);
-    this.invalidateSelection();
-    this._currentRoute = routeContext;
-    return this.routeDispatch.accept(routeContext);
+    return this.routing.accept(this.routing.table.context(event, args));
   },
-
-  prepareRoute() {
-    if (!this.startOnRoute) return true;
-    const region = this.routeRegion || this.getRegion();
-    return this.start(region ? { region } : undefined);
-  },
-
   onChildCleanupError(error) {
     addError(error);
   },
-
   onRouteError(error) {
     window.reportError(error);
   },
-
-  dispatchRoute(routeContext) {
-    const { definition, eventArgs } = routeContext;
-
-    this.triggerMethod('before:appRoute', this, routeContext);
-
-    let { action } = definition;
-    if (!isFunction(action)) {
-      action = this[action];
-    }
-
-    const activation = action.apply(this, eventArgs);
-
-    this.triggerMethod('appRoute', this, routeContext);
-
-    return activation;
+  startCurrent(name, options) {
+    return this.routing.startCurrent(name, options);
   },
-
-  startCurrent(appName, options) {
-    const routeContext = this.getCurrentRoute();
-    const child = this.getChildApp(appName);
-
-    return this.selectChild(appName, {
-      scope: child && this.getChildScope(child, options),
-      start: app => {
-        if (isFunction(app.setCurrentRoute)) app.setCurrentRoute(routeContext);
-        return app.start({ ...options, region: this.getRegion() });
-      },
-    });
+  startRoute(name, options) {
+    return this.routing.startRoute(name, options);
   },
-
-  getChildScope(child, options) {
-    return isFunction(child.getRouteScope) ? child.getRouteScope(options) : undefined;
+  selectChild(name, options) {
+    return this.routing.select(name, options);
   },
-
-  startRoute(appName, options) {
-    const child = this.getChildApp(appName);
-    const scope = child && this.getChildScope(child, options);
-    const routeContext = this.getCurrentRoute();
-
-    return this.selectChild(appName, {
-      scope,
-      reuse: this.isCurrent(appName, scope),
-      start: app => app.startRoute(routeContext, { ...options, region: this.getRegion() }),
-    });
+  invalidateSelection() {
+    this.routing.invalidate();
   },
-
-  isCurrent(appName, scope) {
-    const selection = this.getCurrentSelection();
-    return selection?.appName === appName && isEqual(scope, selection.scope);
+  getCurrent() {
+    return this.routing.getCurrent();
   },
-
+  getCurrentSelection() {
+    return this.routing.getSelection();
+  },
+  stopCurrent() {
+    return this.routing.stopCurrent();
+  },
   getCurrentRoute() {
-    return this._currentRoute;
+    return this.routing.getRoute();
   },
-
   getCurrentRouteMeta() {
-    return this._currentRoute && this._currentRoute.definition.meta;
+    return this.getCurrentRoute()?.definition.meta;
   },
-
   translateEvent(event, ...args) {
-    return this.routeTable.href(event, ...args);
+    return this.routing.href(event, ...args);
   },
-
-  // takes an event and changes the URL without triggering or adding to the history
-  replaceRoute() {
-    const url = this.translateEvent.apply(this, arguments);
-
-    this.replaceUrl(url);
+  replaceRoute(event, ...args) {
+    return this.routing.replaceRoute(event, ...args);
   },
-
-  navigateRoute() {
-    const url = this.translateEvent.apply(this, arguments);
-
-    Backbone.history.navigate(url, { trigger: false });
+  navigateRoute(event, ...args) {
+    return this.routing.navigateRoute(event, ...args);
   },
-
   replaceUrl(url) {
-    Backbone.history.navigate(url, { trigger: false, replace: true });
+    return this.routing.write(url, { replace: true });
   },
 });
