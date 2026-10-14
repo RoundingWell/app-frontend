@@ -270,7 +270,8 @@ context('patient page', function() {
       .getRadio(Radio => {
         Radio.trigger('event-router', 'patient:workflow', secondPatient.id);
       })
-      .wait('@routeSecondPatient');
+      .wait('@routeSecondPatient')
+      .wait('@routePatientActions');
 
     cy
       .get('.patient__context-trail')
@@ -282,14 +283,29 @@ context('patient page', function() {
       })
       .wait('@routeDelayedFirstPatient');
 
+    // A later round trip lets any stale first-patient activation finish before asserting.
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('event-router', 'patient:workflow:closed', secondPatient.id);
+      })
+      .wait('@routePatientActions');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ secondPatient.id }/workflow/closed`);
+
     cy
       .get('.patient__context-trail')
       .should('contain', 'Second Bravo')
       .and('not.contain', 'First Alpha');
 
     cy
-      .location('pathname')
-      .should('equal', `/one/patient/${ secondPatient.id }/workflow`);
+      .get('@routePatientActions.all')
+      .then(interceptions => {
+        const firstPatientRequests = interceptions.filter(({ request }) => request.url.includes(firstPatient.id));
+
+        expect(firstPatientRequests).to.have.length(0);
+      });
   });
 
   specify('uses drawer, collapsible, and fixed wide patient sidebar modes', function() {

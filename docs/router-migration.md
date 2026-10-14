@@ -208,6 +208,12 @@ Scope: `src/js/base/event-router.js`, `routerapp.js`, `src/js/app.js`,
   reentrancy guard). Keep the `noMatch` behavior for now.
 - Aliases via the router (D2 canonicalize); legacy flow redirects via async `redirect`.
 - D3: notFound/unknownError in place. Remove `*unknown`, `/404`, `/unknown-error`.
+  Extend the not-found and unknown-error specs (`error`, `worklist` non-existent
+  worklist, `workflow` 404, `program-flow` 410) to assert `location.pathname` is still
+  the requested URL and that `go('back')` returns to the previous page without looping.
+- I18: confirm the attachment download spec fails against a temporarily broken
+  intercept predicate (one that ignores `downloadRequest`). If it still passes (the link
+  also has `target="_blank"`), add a same-window `download` link case that does fail.
 - HistoryService: `change:route` from router `route`; `go:back` via `router.back()`.
 - `cy.navigate` → `win.navigation.navigate`.
 - Delete `Backbone.history.start`. `Backbone.Router` must no longer be imported.

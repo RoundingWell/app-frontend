@@ -600,8 +600,38 @@ context('App Nav', function() {
       .should('contain', 'Workspace One');
 
     cy
+      .wait('@routeDelayedWorkspaceTwoPrograms');
+
+    // A later round trip lets any stale workspace-two activation finish before asserting.
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .click();
+
+    cy
+      .wait('@routeActions')
+      .its('request.headers')
+      .should('have.property', 'workspace', workspaceOne.id);
+
+    cy
+      .url()
+      .should('contain', '/one/worklist/shared-by');
+
+    cy
+      .get('.app-nav__header')
+      .should('contain', 'Workspace One');
+
+    cy
       .get('.app-nav')
       .find('.js-add-patient');
+
+    cy
+      .get('@routeActions.all')
+      .then(interceptions => {
+        const workspaceTwoRequests = interceptions.filter(({ request }) => request.headers.workspace === workspaceTwo.id);
+
+        expect(workspaceTwoRequests).to.have.length(0);
+      });
 
     cy
       .window()
