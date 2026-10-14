@@ -608,6 +608,44 @@ context('patient workflow page', function() {
     cy
       .get('.patient-action')
       .should('have.class', 'patient-action--form-expanded');
+
+    cy
+      .go('back')
+      .wait('@routePatientActions');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow`);
+
+    cy
+      .go('forward')
+      .wait('@routeAction')
+      .wait('@routeFormByAction');
+
+    cy
+      .get('.patient-action__name')
+      .should('be.visible');
+
+    cy
+      .get('.patient-action')
+      .should('not.have.class', 'patient-action--form-expanded');
+
+    cy
+      .get('.action-card')
+      .should('not.exist');
+
+    cy
+      .reload()
+      .wait('@routeAction')
+      .wait('@routeFormByAction');
+
+    cy
+      .get('.patient-action__name')
+      .should('be.visible');
+
+    cy
+      .get('.patient-action')
+      .should('not.have.class', 'patient-action--form-expanded');
   });
 
   specify('add action and flow', function() {
@@ -2226,9 +2264,5 @@ context('patient workflow page', function() {
       .get('.error-page')
       .should('contain', 'Something went wrong.')
       .and('contain', ' This page doesn\'t exist.');
-
-    cy
-      .url()
-      .should('contain', '/404');
   });
 });

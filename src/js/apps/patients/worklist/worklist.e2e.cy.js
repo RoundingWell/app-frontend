@@ -2839,9 +2839,11 @@ context('worklist page', function() {
 
   specify('non-existent worklist', function() {
     cy
-      .visit('/worklist/test')
-      .url()
-      .should('contain', '404');
+      .visit('/worklist/test');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'This page doesn\'t exist.');
   });
 
   specify('clinician filtering', function() {

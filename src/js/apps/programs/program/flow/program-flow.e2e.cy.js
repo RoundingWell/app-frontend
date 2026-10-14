@@ -320,8 +320,8 @@ context('program flow page', function() {
       .wait('@routeFlow410');
 
     cy
-      .url()
-      .should('contain', '404');
+      .get('.error-page')
+      .should('contain', 'This page doesn\'t exist.');
   });
 
   specify('flow actions list', function() {

@@ -61,10 +61,11 @@ Non-root routes are prefixed with the workspace slug today.
 | `schedule` | `schedule` | PatientsMainApp | `meta.isList` |
 | `patient:workflow` | `patient/:patientId/workflow`; alias `patient/dashboard/:patientId` | PatientApp | alias until 2027-09-02 |
 | `patient:workflow:closed` | `patient/:patientId/workflow/closed`; alias `patient/archive/:patientId` | PatientApp | alias until 2027-09-02 |
-| `patient:interactions` | `patient/:patientId/interactions` | PatientApp | |
-| `patient:interaction` | `patient/:patientId/interactions/:interactionId` | PatientApp | |
+| `patient:interactions` | `patient/:patientId/interactions` | PatientApp | Not on this base (lives on `feature/patient-interactions`); add its E2E when it merges |
+| `patient:interaction` | `patient/:patientId/interactions/:interactionId` | PatientApp | Not on this base; same |
 | `patient:action` | `patient/:patientId/action/:actionId`; alias `patient/archive/:patientId/action/:actionId` | PatientApp | extra `entryTarget` arg → `info` |
 | `patient:flow` | `patient/:patientId/flow/:flowId` | PatientApp | |
+| `patient:flow:focus` | `patient/:patientId/flow/:flowId/focus/:actionId` | PatientApp | opens the flow and focuses the action (see `routing.md`) |
 | `patient:flow:action` | `patient/:patientId/flow/:flowId/action/:actionId` | PatientApp | extra `entryTarget` arg → `info` |
 | `patient:form` | `patient/:patientId/form/:formId` | PatientApp | |
 | `legacy:patient:flow` | `flow/:flowId`, `flow/:flowId/details` | PatientsMainApp | async redirect → `patient:flow` |
@@ -96,8 +97,8 @@ Paths the app must **not** intercept: `/login`, `/logout`, `/authenticated`, `/r
 | I2 | Each legacy alias routes to its page; after Phase 2 the URL is canonical (D2). |
 | I3 | Legacy flow URLs resolve to the patient flow/action route with the URL replaced. |
 | I4 | Back/forward within a workspace and across a workspace switch restore the right page and workspace. |
-| I5 | Switching workspace while the previous one loads: the latest choice wins (existing spec). |
-| I6 | Unknown path under a workspace and unknown slug show not-found (D3: at that URL after Phase 2). |
+| I5 | Switching workspace while the previous one loads: the latest choice wins. |
+| I6 | Unknown path under a workspace and unknown slug show not-found. Specs assert the error page, not the URL, so D3 does not break them. |
 | I7 | `/logout` link performs a full document navigation. |
 | I8 | Clicking the current nav item re-dispatches (list reloads). |
 | I9 | Form button opens the action with the form expanded (`entryTarget`); reload/back do not force it. |
@@ -161,7 +162,8 @@ Every phase:
 
 Scope: `src/**/*.e2e.cy.js`, `test/support/**`. No runtime changes.
 
-- Add or extend E2E coverage for I1–I18 where missing. Use canonical routes and event
+- Add or extend E2E coverage for I1–I18 where missing. Specs must not assert `/404` or
+  `/unknown-error` URLs (D3); assert the error page instead. Use canonical routes and event
   names except in the single alias compatibility spec.
 - Add a spec asserting no alias is past its `until` date (it reads the alias list from a
   route module once one exists; for now, assert the three aliases and their date).
@@ -298,7 +300,12 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
 
 ## Status
 
-- Phase 0: not started
+- Phase 0: done, awaiting review gate. Specs: `default-route` (I8, I11, I14, I17),
+  `app-nav` (I4, I5, I7, I13), `patient` (alias window guard, I3, I15, closed-workflow
+  direct load), `workflow` (I9 back/forward/reload), `action` (I18); existing specs cover
+  I1, I2, I6, I10, I12, I16. Three `/404` URL assertions replaced by error-page
+  assertions (D3). Not asserted yet, by design: alias URL canonicalization (Phase 2),
+  I10 reload survival (Phase 3b). Interactions routes are not on this base.
 - Phase 1: not started
 - Phase 2: not started
 - Phase 3a: not started

@@ -2559,6 +2559,86 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', 'second-live-file.pdf');
   });
 
+  specify('attachment download links are not routed by the app', function() {
+    const testPatient = getPatient();
+    const testFile = getFile({
+      attributes: {
+        path: `patients/${ testPatient.id }/HRA.pdf`,
+        created_at: testTs(),
+      },
+      meta: {
+        view: '/files/same-origin-file/view',
+        download: '/files/same-origin-file/download',
+      },
+    });
+    const testAction = getAction({
+      relationships: {
+        files: getRelationship([testFile]),
+        patient: getRelationship(testPatient),
+      },
+    });
+    const actionPath = `/one/patient/${ testPatient.id }/action/${ testAction.id }`;
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routeActionFiles(fx => {
+        fx.data = [testFile];
+
+        return fx;
+      })
+      .intercept('GET', '/files/same-origin-file/download', {
+        headers: {
+          'content-type': 'application/pdf',
+          'content-disposition': 'attachment; filename="HRA.pdf"',
+        },
+        body: 'test',
+      })
+      .as('routeDownload')
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routeActionFiles');
+
+    cy
+      .window()
+      .then(win => {
+        win.appDocumentMarker = true;
+      });
+
+    cy
+      .get('[data-attachments-files-region]')
+      .find('.js-download')
+      .click();
+
+    cy
+      .wait('@routeDownload');
+
+    cy
+      .location('pathname')
+      .should('equal', actionPath);
+
+    cy
+      .window()
+      .should('have.property', 'appDocumentMarker', true);
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy
+      .get('.patient-action__name')
+      .should('be.visible');
+  });
+
   specify('action with work:owned:manage permission', function() {
     const testFile = getFile();
 

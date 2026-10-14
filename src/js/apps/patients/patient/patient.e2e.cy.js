@@ -1,7 +1,17 @@
-import { getRelationship, getErrors } from 'helpers/json-api';
+import dayjs from 'dayjs';
+
+import { getRelationship, getErrors, mergeJsonApi } from 'helpers/json-api';
 import { getAction } from 'support/api/actions';
+import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
 import { getCurrentClinician } from 'support/api/clinicians';
+
+// Legacy patient URL aliases with the end of their compatibility window.
+const legacyAliases = {
+  dashboard: { until: '2027-09-02', getPath: patientId => `/patient/dashboard/${ patientId }` },
+  archive: { until: '2027-09-02', getPath: patientId => `/patient/archive/${ patientId }` },
+  archiveAction: { until: '2027-09-02', getPath: (patientId, actionId) => `/patient/archive/${ patientId }/action/${ actionId }` },
+};
 
 context('patient page', function() {
   const testPatient = getPatient({
@@ -110,7 +120,7 @@ context('patient page', function() {
 
     // patient/dashboard/:patientId -> Open workflow
     cy
-      .visit(`/patient/dashboard/${ testPatient.id }`)
+      .visit(legacyAliases.dashboard.getPath(testPatient.id))
       .wait('@routePatient');
 
     cy
@@ -119,7 +129,7 @@ context('patient page', function() {
 
     // patient/archive/:patientId -> Closed workflow
     cy
-      .visit(`/patient/archive/${ testPatient.id }`)
+      .visit(legacyAliases.archive.getPath(testPatient.id))
       .wait('@routePatient');
 
     cy
@@ -128,12 +138,158 @@ context('patient page', function() {
 
     // patient/archive/:patientId/action/:actionId -> Action
     cy
-      .visit(`/patient/archive/${ testPatient.id }/action/${ legacyAction.id }`)
+      .visit(legacyAliases.archiveAction.getPath(testPatient.id, legacyAction.id))
       .wait('@routeAction');
 
     cy
       .get('.patient-action__name')
       .should('contain', 'Legacy Alias Action');
+  });
+
+  specify('legacy patient URL aliases are removed after their compatibility window', function() {
+    expect(Object.keys(legacyAliases)).to.have.length(3);
+
+    Object.entries(legacyAliases).forEach(([name, { until }]) => {
+      expect(dayjs().isAfter(dayjs(until).endOf('day')), `alias ${ name } is past ${ until }; remove it and this spec`).to.be.false;
+    });
+  });
+
+  specify('legacy flow URLs resolve to the patient flow routes', function() {
+    const legacyFlow = getFlow({
+      relationships: { patient: getRelationship(testPatient) },
+    });
+    const legacyFlowAction = getAction({
+      relationships: {
+        flow: getRelationship(legacyFlow),
+        patient: getRelationship(testPatient),
+      },
+    });
+    const patientFlowPath = `/one/patient/${ testPatient.id }/flow/${ legacyFlow.id }`;
+
+    cy
+      .routesForPatientAction()
+      .routeActions()
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = mergeJsonApi(legacyFlow, {
+          relationships: { patient: getRelationship(testPatient) },
+        });
+        fx.included = [testPatient];
+
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [legacyFlowAction];
+
+        return fx;
+      })
+      .routeFlowActivity()
+      .routeAction(fx => {
+        fx.data = legacyFlowAction;
+        fx.included.push(legacyFlow);
+
+        return fx;
+      })
+      .visit(`/flow/${ legacyFlow.id }`)
+      .wait('@routeFlow');
+
+    cy
+      .location('pathname')
+      .should('equal', patientFlowPath);
+
+    cy
+      .visit(`/flow/${ legacyFlow.id }/details`)
+      .wait('@routeFlow');
+
+    cy
+      .location('pathname')
+      .should('equal', patientFlowPath);
+
+    cy
+      .visit(`/flow/${ legacyFlow.id }/action/${ legacyFlowAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .location('pathname')
+      .should('equal', `${ patientFlowPath }/action/${ legacyFlowAction.id }`);
+
+    cy
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .navigate(`/flow/${ legacyFlow.id }`);
+
+    cy
+      .location('pathname')
+      .should('equal', patientFlowPath);
+
+    cy.go('back');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+  });
+
+  specify('quickly routing from one patient to another renders only the latest', function() {
+    let releaseFirstPatient;
+    const firstPatientResponse = new Cypress.Promise(resolve => {
+      releaseFirstPatient = resolve;
+    });
+    const firstPatient = getPatient({
+      attributes: { first_name: 'First', last_name: 'Alpha' },
+    });
+    const secondPatient = getPatient({
+      attributes: { first_name: 'Second', last_name: 'Bravo' },
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .routeActions()
+      .intercept('GET', new RegExp(`/api/patients/${ firstPatient.id }\\?`), req => {
+        return firstPatientResponse.then(() => {
+          req.reply({ body: { data: firstPatient, included: [] } });
+        });
+      })
+      .as('routeDelayedFirstPatient')
+      .intercept('GET', new RegExp(`/api/patients/${ secondPatient.id }\\?`), {
+        body: { data: secondPatient, included: [] },
+      })
+      .as('routeSecondPatient')
+      .visit(`/patient/${ firstPatient.id }/workflow`);
+
+    cy
+      .get('@routeDelayedFirstPatient.all')
+      .should('have.length', 1);
+
+    cy
+      .getRadio(Radio => {
+        Radio.trigger('event-router', 'patient:workflow', secondPatient.id);
+      })
+      .wait('@routeSecondPatient');
+
+    cy
+      .get('.patient__context-trail')
+      .should('contain', 'Second Bravo');
+
+    cy
+      .then(() => {
+        releaseFirstPatient();
+      })
+      .wait('@routeDelayedFirstPatient');
+
+    cy
+      .get('.patient__context-trail')
+      .should('contain', 'Second Bravo')
+      .and('not.contain', 'First Alpha');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ secondPatient.id }/workflow`);
   });
 
   specify('uses drawer, collapsible, and fixed wide patient sidebar modes', function() {
@@ -292,6 +448,19 @@ context('patient page', function() {
       .get('.patient__layout')
       .find('.js-workflow-closed')
       .click();
+
+    cy
+      .get('.patient__layout')
+      .find('.workflow-page__tab.is-selected')
+      .contains('Closed');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow/closed`);
+
+    cy
+      .reload()
+      .wait('@routePatient');
 
     cy
       .get('.patient__layout')

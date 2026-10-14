@@ -6,6 +6,7 @@ import { getRelationship, getErrors } from 'helpers/json-api';
 import { testTs } from 'helpers/test-timestamp';
 
 import { workspaceOne, workspaceTwo, getWorkspace } from 'support/api/workspaces';
+import { getPrograms } from 'support/api/programs';
 import { getClinician, getCurrentClinician, fxCurrentClinician } from 'support/api/clinicians';
 import { roleAdmin, roleEmployee } from 'support/api/roles';
 import { teamCoordinator } from 'support/api/teams';
@@ -437,6 +438,296 @@ context('App Nav', function() {
       .should('have.class', 'is-selected')
       .next()
       .should('not.have.class', 'is-selected');
+  });
+
+  specify('history restores the workspace and page', function() {
+    cy
+      .routeWorkspaces(fx => {
+        fx.data = [
+          getWorkspace({ attributes: { settings: { manual_patient_creation: true } } }, { id: workspaceOne.id }),
+          getWorkspace({ attributes: { settings: { manual_patient_creation: false } } }, { id: workspaceTwo.id }),
+        ];
+
+        return fx;
+      })
+      .visit('/worklist/shared-by')
+      .wait('@routeActions');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .find('.picklist__item')
+      .eq(1)
+      .click();
+
+    cy
+      .wait('@routeActions')
+      .its('request.headers')
+      .should('have.property', 'workspace', workspaceTwo.id);
+
+    cy
+      .url()
+      .should('contain', '/two/worklist/owned-by');
+
+    cy
+      .get('.app-nav__header')
+      .should('contain', 'Workspace Two');
+
+    cy
+      .get('.app-nav')
+      .find('.js-add-patient')
+      .should('not.exist');
+
+    cy.go('back');
+
+    cy
+      .wait('@routeActions')
+      .its('request.headers')
+      .should('have.property', 'workspace', workspaceOne.id);
+
+    cy
+      .url()
+      .should('contain', '/one/worklist/shared-by');
+
+    cy
+      .get('.app-nav__header')
+      .should('contain', 'Workspace One');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('.app-nav')
+      .find('.js-add-patient');
+
+    cy.go('forward');
+
+    cy
+      .wait('@routeActions')
+      .its('request.headers')
+      .should('have.property', 'workspace', workspaceTwo.id);
+
+    cy
+      .url()
+      .should('contain', '/two/worklist/owned-by');
+
+    cy
+      .get('.app-nav__header')
+      .should('contain', 'Workspace Two');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .should('have.class', 'is-selected');
+  });
+
+  specify('the latest workspace choice wins while a workspace loads', function() {
+    let releaseWorkspaceTwoPrograms;
+    const workspaceTwoPrograms = new Cypress.Promise(resolve => {
+      releaseWorkspaceTwoPrograms = resolve;
+    });
+
+    cy
+      .routeWorkspaces(fx => {
+        fx.data = [
+          getWorkspace({ attributes: { settings: { manual_patient_creation: true } } }, { id: workspaceOne.id }),
+          getWorkspace({ attributes: { settings: { manual_patient_creation: false } } }, { id: workspaceTwo.id }),
+        ];
+
+        return fx;
+      })
+      .intercept('GET', `/api/workspaces/${ workspaceTwo.id }/programs*`, req => {
+        return workspaceTwoPrograms.then(() => {
+          req.reply({ body: { data: getPrograms(), included: [] } });
+        });
+      })
+      .as('routeDelayedWorkspaceTwoPrograms')
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .find('.picklist__item')
+      .eq(1)
+      .click();
+
+    cy
+      .get('@routeDelayedWorkspaceTwoPrograms.all')
+      .should('have.length', 1);
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .find('.picklist__item')
+      .first()
+      .click()
+      .then(() => {
+        releaseWorkspaceTwoPrograms();
+      });
+
+    cy
+      .wait('@routeActions')
+      .its('request.headers')
+      .should('have.property', 'workspace', workspaceOne.id);
+
+    cy
+      .url()
+      .should('contain', '/one/worklist/owned-by');
+
+    cy
+      .get('.app-nav__header')
+      .should('contain', 'Workspace One');
+
+    cy
+      .get('.app-nav')
+      .find('.js-add-patient');
+
+    cy
+      .window()
+      .then(win => {
+        expect(JSON.parse(win.localStorage.getItem('currentWorkspace'))).to.equal(workspaceOne.id);
+      });
+  });
+
+  specify('nav selection follows direct loads and history', function() {
+    cy
+      .routePrograms()
+      .routeDashboards()
+      .routeClinicians()
+      .visit('/worklist/shared-by')
+      .wait('@routeActions');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Owned By"]')
+      .click()
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .should('not.have.class', 'is-selected');
+
+    cy.go('back');
+
+    cy
+      .url()
+      .should('contain', '/worklist/shared-by');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Owned By"]')
+      .should('not.have.class', 'is-selected');
+
+    cy.go('forward');
+
+    cy
+      .url()
+      .should('contain', '/worklist/owned-by');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Owned By"]')
+      .should('have.class', 'is-selected');
+
+    cy
+      .visit('/dashboards')
+      .wait('@routeDashboards');
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.app-nav__link')
+      .first()
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link.is-selected')
+      .should('not.exist');
+
+    cy
+      .visit('/programs');
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.app-nav__bottom-button')
+      .contains('Admin Tools')
+      .click();
+
+    cy
+      .get('.js-picklist-item')
+      .first()
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('.app-nav__bottom')
+      .find('.app-nav__link')
+      .first()
+      .should('not.have.class', 'is-selected');
+  });
+
+  specify('the sign out link performs a full document navigation', function() {
+    cy
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .window()
+      .then(win => {
+        win.appDocumentMarker = true;
+      });
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .contains('Sign Out')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/logout');
+
+    cy
+      .window()
+      .should('not.have.property', 'appDocumentMarker');
+
+    cy
+      .get('.app-nav')
+      .should('not.exist');
   });
 
   specify('minimized nav menu', function() {
