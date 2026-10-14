@@ -47,7 +47,7 @@
     "test": "vite -m test & cypress open",
     "lint": "npm run eslint && npm run stylelint && npm run editorconfig",
     "lint:fix": "npm run eslint:fix && npm run stylelint:fix",
-    "eslint": "eslint src/js test --max-warnings=0",
+    "eslint": "eslint src/js test packages/router --max-warnings=0",
     "eslint:fix": "eslint --fix src/js/ && eslint --fix test/",
     "stylelint": "stylelint --max-warnings=0 \"src/**/*.scss\"",
     "stylelint:fix": "stylelint --fix \"src/**/*.scss\"",

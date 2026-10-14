@@ -15,7 +15,7 @@ if (_PRODUCTION_ && 'serviceWorker' in navigator) {
 
 async function startFormService() {
   const { startFormServiceApp } = await import('./formservice');
-  startFormServiceApp();
+  return startFormServiceApp();
 }
 
 async function startAuth() {

@@ -107,6 +107,9 @@ jobs:
       - run:
           name: Stylelint
           command: npm run stylelint
+      - run:
+          name: Router package tests
+          command: npm test -w packages/router
 
   run-cypress:
     parameters:

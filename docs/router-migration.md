@@ -189,8 +189,9 @@ Then one integration pass: wire `index.js`/`outlet.js` exports, port formservice
 core `Router` (no Backbone), and add a Cypress component spec in the app that runs the
 driver conformance suite against the real Navigation API.
 
-- Exit: package tests green on Node 24 (`npm test -w packages/router`; `node --test <directory>` does not work on Node 24); `npx eslint packages/router` and `npm run lint` green (the root lint script does not cover `packages/`); formservice
-  E2E/manual check; conformance component spec green in Chrome and Firefox (CI).
+- Exit: package tests green on Node 24 (`npm test -w packages/router`; `node --test <directory>` does not work on Node 24); `npm run lint` green (its eslint step covers
+  `packages/router`; CI's lint job also runs the package tests); formservice
+  E2E/manual check; driver and router conformance component spec green in Chrome and Firefox (CI).
 - Review gate (Opus): package API and outlet semantics before any app depends on them.
 
 ### Phase 2 — swap the URL layer (parity)
@@ -316,12 +317,19 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   suite, Router, outlet) with 229 `node:test` tests green on Node 24.15; `formservice.js`
   runs on the core Router. Verified: `npm test -w packages/router`, `npx eslint packages/router`,
   `npm run lint` (eslint and stylelint), conformance component spec 21/21 in Electron, Chrome
-  and Firefox, `formservice.e2e.cy.js` 4/4. Not verified: Safari/WebKit, Edge, the Router
-  against the real Navigation API (redirect/alias replace-navigations inside the navigate
-  listener, nested `navigate()` from a handler), the outlet in a browser. Resolved
-  ambiguities are recorded in DESIGN.md. Follow-ups: `npm run eslint` does not lint
-  `packages/`; `editorconfig-checker` binary was unavailable locally (new files checked
-  manually); CLAUDE.md names marionette `5.0.0-rc.1` but the repo pins `5.0.0`.
+  and Firefox, `formservice.e2e.cy.js` 4/4. Resolved ambiguities are recorded in DESIGN.md.
+  Review-gate fixes: CI's lint job runs the package tests and `npm run eslint` covers
+  `packages/router`; a router conformance suite (named navigation, sync/async redirects,
+  alias canonicalization, supersession, handler failure, initial redirect, back, refresh,
+  entry state) runs on the memory driver (240 package tests) and the real Navigation API
+  (component spec 31/31 in Electron, Chrome, Firefox); `start()` no longer swallows
+  initial failures and resolves `false` when a superseded initial dispatch fails;
+  formservice propagates startup failures. Not verified: Safari/WebKit, Edge, the outlet
+  in a browser. Follow-ups: `editorconfig-checker` binary was unavailable locally (new
+  files checked manually); CLAUDE.md names marionette `5.0.0-rc.1` but the repo pins
+  `5.0.0`; review findings 4–8 (notFound params with `persistParams`, `match.signal`
+  after finish, outlet owner patching, outlet async-stop code under 5.0.0's synchronous
+  `stop()`, memory-driver abort ordering) are open.
 - Phase 2: not started
 - Phase 3a: not started
 - Phase 3b: not started

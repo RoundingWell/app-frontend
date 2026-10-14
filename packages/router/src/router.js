@@ -151,7 +151,6 @@ export class Router {
     this.#session = session;
     driver.addEventListener('navigate', event => this.#onNavigate(event), { signal: session.controller.signal });
     session.initial = this.#dispatchInitial(session);
-    session.initial.catch(noop);
     return session.initial;
   }
 
@@ -357,7 +356,12 @@ export class Router {
     const plan = this.#plan(nav);
     if (!plan) return false;
     if (plan.hop) return this.#hop(plan.hop, nav).finished;
-    await this.#run(plan, nav);
+    try {
+      await this.#run(plan, nav);
+    } catch(error) {
+      if (!this.#isCurrent(nav)) return false;
+      throw error;
+    }
     return nav.chain.followUp ? nav.chain.followUp.finished : this.#isCurrent(nav);
   }
 
