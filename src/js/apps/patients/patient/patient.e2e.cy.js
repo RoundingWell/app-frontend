@@ -127,6 +127,10 @@ context('patient page', function() {
       .get('.workflow-page__tab.is-selected')
       .contains('Open');
 
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow`);
+
     // patient/archive/:patientId -> Closed workflow
     cy
       .visit(legacyAliases.archive.getPath(testPatient.id))
@@ -136,6 +140,10 @@ context('patient page', function() {
       .get('.workflow-page__tab.is-selected')
       .contains('Closed');
 
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow/closed`);
+
     // patient/archive/:patientId/action/:actionId -> Action
     cy
       .visit(legacyAliases.archiveAction.getPath(testPatient.id, legacyAction.id))
@@ -144,6 +152,10 @@ context('patient page', function() {
     cy
       .get('.patient-action__name')
       .should('contain', 'Legacy Alias Action');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/action/${ legacyAction.id }`);
   });
 
   specify('legacy patient URL aliases are removed after their compatibility window', function() {

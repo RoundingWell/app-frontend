@@ -15,6 +15,10 @@ context('Global Error Page', function() {
       .and('contain', ' This page doesn\'t exist.');
 
     cy
+      .location('pathname')
+      .should('equal', '/one/route-does-not-exist');
+
+    cy
       .get('.error-page')
       .contains('Back to Your Workspace')
       .click();
@@ -32,6 +36,10 @@ context('Global Error Page', function() {
       .get('.error-page')
       .should('contain', 'Something went wrong.')
       .and('contain', ' This page doesn\'t exist.');
+
+    cy
+      .location('pathname')
+      .should('equal', '/route-does-not-exist');
 
     cy
       .get('.error-page')

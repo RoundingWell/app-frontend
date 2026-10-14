@@ -2253,16 +2253,43 @@ context('patient workflow page', function() {
 
   specify('410 patient not found error', function() {
     cy
+      .routesForDefault()
+      .visit('/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
+
+    cy
       .intercept('GET', '/api/patients/1*', {
         statusCode: 410,
         body: {},
       })
       .as('routePatient')
-      .visit('/patient/1/workflow');
+      .navigate('/patient/1/workflow');
 
     cy
       .get('.error-page')
       .should('contain', 'Something went wrong.')
       .and('contain', ' This page doesn\'t exist.');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/patient/1/workflow');
+
+    cy
+      .go('back');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 });

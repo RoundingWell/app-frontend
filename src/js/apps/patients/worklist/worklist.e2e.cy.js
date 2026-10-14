@@ -2837,13 +2837,40 @@ context('worklist page', function() {
       .should('contain', 'Try narrowing your filters.');
   });
 
-  specify('non-existent worklist', function() {
+  specify('non-existent worklist renders not found in place', function() {
     cy
-      .visit('/worklist/test');
+      .routesForDefault()
+      .visit('/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
+
+    cy
+      .navigate('/worklist/test');
 
     cy
       .get('.error-page')
       .should('contain', 'This page doesn\'t exist.');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/test');
+
+    cy
+      .go('back');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 
   specify('clinician filtering', function() {

@@ -308,6 +308,14 @@ context('program flow page', function() {
     });
 
     cy
+      .routesForDefault()
+      .visit('/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
+
+    cy
       .routeProgramByProgramFlow()
       .routeProgramFlowActions()
       .intercept('GET', '/api/program-flows/1', {
@@ -315,13 +323,32 @@ context('program flow page', function() {
         body: { errors },
       })
       .as('routeFlow410')
-      .visit('/program-flow/1')
+      .navigate('/program-flow/1')
       .wait('@routeProgramByProgramFlow')
       .wait('@routeFlow410');
 
     cy
       .get('.error-page')
       .should('contain', 'This page doesn\'t exist.');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/program-flow/1');
+
+    cy
+      .go('back');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 
   specify('flow actions list', function() {

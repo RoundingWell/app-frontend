@@ -79,10 +79,23 @@ Cypress.Commands.overwrite('visit', (originalFn, url = '/', options = {}) => {
     url = `/one${ url }`;
   }
 
-  // pageLoadTimeout for visit is 60000ms
+  cy.mockWs('ws://cypress-websocket/ws');
+
+  // The router intercepts same-origin navigations, so a loaded app would handle
+  // the visit in place. Blank the document first to force a real load. This
+  // must follow mockWs: reversed, the websocket mock misses the new page.
+  cy
+    .window({ log: false })
+    .then(win => {
+      if (win.location.href !== 'about:blank') win.location.href = 'about:blank';
+    })
+    .location({ log: false })
+    .should('have.property', 'href', 'about:blank');
+
+  // pageLoadTimeout for visit is 60000ms. originalFn visits immediately, so it
+  // runs from a command to stay behind the blanking.
   return cy
-    .mockWs('ws://cypress-websocket/ws')
-    .wrap(originalFn(url, options), { timeout: 60000 })
+    .then({ timeout: 60000 }, () => originalFn(url, options))
     .wait(waits);
 });
 
@@ -100,9 +113,8 @@ Cypress.Commands.add('visitOnClock', (url, options = {}) => {
 Cypress.Commands.add('navigate', (url, workspace = 'one') => {
   cy
     .window()
-    .its('Backbone')
-    .its('history')
-    .invoke('navigate', `${ workspace }${ url }`, { trigger: true });
+    .its('navigation')
+    .invoke('navigate', `/${ workspace }${ url }`);
 });
 
 Cypress.Commands.add('iframe', (getSelector = 'iframe') => {

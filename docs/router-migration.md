@@ -9,7 +9,7 @@ When reality contradicts it, update this file in the same commit.
 
 | # | Decision |
 | --- | --- |
-| D1 | `Radio.trigger('event-router', name, ...args)` stays the primary fire-and-forget navigation API. A `router` request channel is added for results: `url`, `navigate` (returns the navigation promise), `current`, `back`. |
+| D1 | `Radio.trigger('event-router', name, ...args)` stays the primary fire-and-forget navigation API, as a navigation request only. A `router` request channel is added for results: `navigate` (returns the navigation promise) and `back` in Phase 2; `url` arrives with its first caller (Phase 3d) and `current` with its first caller (Phase 3b), since every line needs an E2E-reachable caller. |
 | D2 | Aliases are a first-class, reusable router feature with an `until` date. The three patient aliases stay until 2027-09-02, default policy `canonicalize` (URL is replaced with the canonical URL). A spec fails once any alias is past `until`. Legacy flow URLs use async `redirect`. |
 | D3 | `notFound` and `unknownError` render at the current URL. No `/404` or `/unknown-error` pushes. |
 | D4 | The intercept handler awaits activation, so `navigation.transition.finished` / `router.navigate().finished` mean the page is ready. |
@@ -141,11 +141,20 @@ Deleted by the end: `event-router.js`, `routerapp.js`, `subrouterapp.js`,
   remaining args become `info.args`. Pushes a new entry.
 - `default` → navigate to `root` (redirects to the default list).
 - `notFound` / `unknownError` (status) → ErrorApp renders in place; no URL change.
-- `Radio.request('router', 'url', name, params, { query })` → string.
 - `Radio.request('router', 'navigate', name, params, { history, query, info, state })` →
-  `finished` promise (`false` when superseded).
-- `Radio.request('router', 'current')` → match. `Radio.request('router', 'back', fallback)`.
+  `finished` promise (`false` when superseded). Also accepts a URL: `(url, { history })`.
+- `Radio.request('router', 'back', fallback)` → `router.back()`, or `fallback()` when the
+  router owns no previous entry.
+- Phase 3d adds `Radio.request('router', 'url', name, params, { query })` → string;
+  Phase 3b adds `Radio.request('router', 'current')` → match.
 - Callers needing query params (D5) or replace use the request form.
+- RouterApps are dispatched only from the router's `route` event. A trigger never
+  dispatches, or every navigation would dispatch twice. The bridge
+  (`src/js/services/router-radio.js`) owns the channel: triggers become
+  `router.navigate`; `route` events become RouterApp dispatch, and `no:match` for the
+  other RouterApps.
+- The router never intercepts `reload` navigations (`location.reload()` must reload the
+  document); `refresh()` is the soft reload.
 
 ## Phases
 
@@ -203,10 +212,17 @@ Scope: `src/js/base/event-router.js`, `routerapp.js`, `src/js/app.js`,
 `test/support/commands.js`, affected specs.
 
 - Create the app `Router` (intercept/notFound predicates from the reserved-path list).
-- Re-implement EventRouter on the router: each RouterApp `mount()`s its prefixed routes
-  (unmount on destroy); router `route` → Radio `event-router` trigger with positional
-  params + `info.args` (no trailing query arg); Radio trigger → `router.navigate` (with
-  reentrancy guard). Keep the `noMatch` behavior for now.
+- Replace EventRouter with the router: each RouterApp `mount()`s its prefixed routes
+  (unmount on destroy). `router-radio.js` turns a Radio trigger into `router.navigate`
+  only, and a router `route` into RouterApp dispatch (positional params + `info.args`,
+  no trailing query arg) with `noMatch` for the others. RouterApps never dispatch from
+  the trigger, so there is no reentrancy guard. `event-router.js` is deleted here, not
+  in 3c. Keep the `noMatch` behavior for now.
+- Area routes mount with the literal workspace slug (`/one/worklist/:worklistId`), not
+  `/:workspace`; `persistParams` and the `/:workspace` tree arrive in Phase 3a. NavApp
+  mounts `root` (sync redirect to the default list) and `/<slug>{/*}?` per workspace.
+  `WorkspaceApp.onStart` checks `router.match(location)` against its RouterApps, then
+  `router.refresh()`, or triggers `notFound` when no area owns the URL.
 - Aliases via the router (D2 canonicalize); legacy flow redirects via async `redirect`.
 - D3: notFound/unknownError in place. Remove `*unknown`, `/404`, `/unknown-error`.
   Extend the not-found and unknown-error specs (`error`, `worklist` non-existent
@@ -330,7 +346,39 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   `5.0.0`; review findings 4–8 (notFound params with `persistParams`, `match.signal`
   after finish, outlet owner patching, outlet async-stop code under 5.0.0's synchronous
   `stop()`, memory-driver abort ordering) are open.
-- Phase 2: not started
+- Phase 2: done, awaiting review gate. `src/js/router.js` (app Router; reserved roots
+  `login logout authenticated rw formservice api` are neither intercepted nor
+  not-found), `services/router-radio.js` (Radio bridge, `router` requests `mount`,
+  `navigate`, `back`), RouterApp mounts routes and exposes `routeEvent`/`hasRoute`;
+  `event-router.js`, `Backbone.history` and `Backbone.Router` are gone from the app.
+  Program routes renamed (`:programId`, `:flowId`, `:actionId`); patient aliases carry
+  `until: 2027-09-02` and canonicalize; legacy flow URLs use async `redirect`;
+  `notFound`/`unknownError` render in place (D3); HistoryService emits `change:route`
+  from `route` (not for a replace without `info`, i.e. `refresh()` and redirect hops) and
+  `go:back` uses `router.back()`; `cy.navigate` uses `win.navigation.navigate`.
+  Package changes made on the way: not-found keeps prefix params; each match owns an
+  AbortController; reload navigations are never intercepted (found when `cy.reload()` and
+  `location.reload()` in `services/forms.js` were swallowed). `cy.visit` blanks the AUT
+  first so a visit is a real load (about 0 to 30 ms per visit, within noise of a ~240 ms
+  visit); it must stay after `mockWs`. I18: the existing download spec fails against an
+  intercept predicate that ignores `downloadRequest`, so no same-window case was added.
+  D3 specs now assert the pathname is unchanged and `back` returns without looping
+  (`worklist` non-existent, `workflow` 410, `program-flow` 410; `error` asserts the
+  pathname for direct loads). Alias spec asserts canonical URLs. Verified: package tests
+  251/251, router-driver component spec 33/33 (Electron, Chrome, Firefox), routerapp /
+  route-base-app / subrouterapp / latest-list / sidebar component specs, `npm run
+  eslint` and `stylelint` (editorconfig-checker binary unavailable), and single E2E
+  specs: default-route, error, app-nav, patient, workflow, action, worklist, program-flow,
+  clinician-sidebar, dashboard, dashboards-all, formservice, program, workflows,
+  programs-all, action/flow/program sidebars, patient-flow, schedule, patient sidebar,
+  clinicians-all, patient-quick-search, all green. Not verified: the full suite (needs a
+  PR), Safari 26.2 (I1, I4, I7, I18), Edge, Datadog RUM view changes (RUM follows
+  history API calls; intercepted Navigation API navigations may not register, so decide
+  between a dev-build check and manual `startView` from `route`). Known, pre-existing
+  and unchanged: traversing back onto an entry whose URL no route owns (for example
+  `/one/bogus`) shows nothing, because the per-workspace wildcard matches; Phase 3a's
+  single tree fixes it. Cut until a caller exists: `router` requests `url` (3d) and
+  `current` (3b).
 - Phase 3a: not started
 - Phase 3b: not started
 - Phase 3c: not started
