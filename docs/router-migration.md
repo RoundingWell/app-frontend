@@ -174,7 +174,7 @@ Scope: `src/**/*.e2e.cy.js`, `test/support/**`. No runtime changes.
 Scope: `packages/router/**`, root `package.json` (workspace entry), `eslint.config.mjs`
 (boundary rule), `src/js/formservice.js`.
 
-Parallel tracks after interfaces in DESIGN.md are frozen (use worktree isolation):
+Parallel tracks after interfaces in DESIGN.md are frozen (the lead commits interface stubs first; tracks run in the same worktree on disjoint files, without isolated worktrees, which may branch from `develop`; 1C starts after 1A and 1B):
 
 - **1A matcher**: tree compile, URLPattern, ranking, decode/encode, aliases,
   `url()`, `getParamNames()`, query.
@@ -189,7 +189,7 @@ Then one integration pass: wire `index.js`/`outlet.js` exports, port formservice
 core `Router` (no Backbone), and add a Cypress component spec in the app that runs the
 driver conformance suite against the real Navigation API.
 
-- Exit: `node --test packages/router/test` green on Node 24; lint green; formservice
+- Exit: package tests green on Node 24 (`npm test -w packages/router`; `node --test <directory>` does not work on Node 24); `npx eslint packages/router` and `npm run lint` green (the root lint script does not cover `packages/`); formservice
   E2E/manual check; conformance component spec green in Chrome and Firefox (CI).
 - Review gate (Opus): package API and outlet semantics before any app depends on them.
 
@@ -293,7 +293,7 @@ Start a Claude Code session in this worktree (model Sonnet, high effort) and giv
 
 > Read `docs/router-migration.md` and `packages/router/DESIGN.md`, then AGENTS.md and
 > `src/js/base/routing.md`. Execute Phase N only. Use subagents for the parallel tracks
-> the phase lists (worktree isolation, one track per agent, each prompt naming this doc,
+> the phase lists (same worktree, one track per agent, each prompt naming this doc,
 > the track, its file scope, and exit criteria). Integrate, run lint and the targeted
 > single specs, commit, update the Status section, push, and stop at the review gate
 > with a summary of what changed, what was verified, and what was not.
@@ -312,7 +312,16 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   I1, I2, I6, I10, I12, I16. Three `/404` URL assertions replaced by error-page
   assertions (D3). Not asserted yet, by design: alias URL canonicalization (Phase 2),
   I10 reload survival (Phase 3b). Interactions routes are not on this base.
-- Phase 1: not started
+- Phase 1: done, awaiting review gate. `packages/router` (matcher, drivers + conformance
+  suite, Router, outlet) with 229 `node:test` tests green on Node 24.15; `formservice.js`
+  runs on the core Router. Verified: `npm test -w packages/router`, `npx eslint packages/router`,
+  `npm run lint` (eslint and stylelint), conformance component spec 21/21 in Electron, Chrome
+  and Firefox, `formservice.e2e.cy.js` 4/4. Not verified: Safari/WebKit, Edge, the Router
+  against the real Navigation API (redirect/alias replace-navigations inside the navigate
+  listener, nested `navigate()` from a handler), the outlet in a browser. Resolved
+  ambiguities are recorded in DESIGN.md. Follow-ups: `npm run eslint` does not lint
+  `packages/`; `editorconfig-checker` binary was unavailable locally (new files checked
+  manually); CLAUDE.md names marionette `5.0.0-rc.1` but the repo pins `5.0.0`.
 - Phase 2: not started
 - Phase 3a: not started
 - Phase 3b: not started

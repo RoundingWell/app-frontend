@@ -100,6 +100,10 @@ Rules:
 
 - Parameter names are unique within a branch (URLPattern rejects duplicate group
   names). `program/:id/action/:id` must become `program/:programId/action/:actionId`.
+- A malformed percent-escape in a matched segment makes `match()` return `null`.
+- Unmounting a parent route deactivates mounts nested under it; they return if a
+  parent with that name is mounted again.
+- `branch[].path` is the node's full resolved path.
 - Parameter values are decoded with `decodeURIComponent` on match and encoded with
   `encodeURIComponent` when building URLs.
 - Optional segments use URLPattern groups: `{/:responseId}?`.
@@ -132,8 +136,14 @@ pattern.
 ### Redirects
 
 - A synchronous `redirect` resolves before dispatch; the router replaces the URL and
-  matches the target instead. Redirect chains are capped (default 5) and throw
-  beyond that.
+  matches the target instead. Redirect chains are capped (`maxRedirects`, default 5);
+  beyond that the last source match emits `route` then `route:error` and `finished`
+  rejects. A throwing synchronous `redirect` is reported as `route:error`.
+- Redirects and canonicalizing aliases are performed as a `replace` navigation, because
+  an intercept handler cannot rewrite its own URL. The original navigation is
+  superseded by the driver; the router resolves the caller's `committed`/`finished`
+  with the outcome of the final hop, so they mean "the final page is ready", not
+  `false`. `back()` does not follow redirect chains.
 - An asynchronous `redirect` (returns a Promise) runs inside the intercept handler after
   commit with the navigation's `signal`. On resolution the router navigates to the
   target with `history: 'replace'`. A superseded navigation discards the result; a
@@ -183,18 +193,23 @@ the target route declares them and the caller did not supply them.
 
 | Member | Behavior |
 | --- | --- |
-| `start()` | Matches the current URL, applies alias/redirect policy, dispatches with `initial: true`. Resolves the initial `Promise<boolean>` outcome. Navigation does not emit `navigate` for the initial document load; `start()` is the only initial dispatch. |
+| `start()` | Matches the current URL, applies alias/redirect policy, dispatches with `initial: true` (`navigationType` is `'push'`; `initial` carries through redirect hops). Resolves the initial `Promise<boolean>` outcome: `false` when superseded or stopped, and also without dispatching when the URL is not the router's (`intercept` false, or no route outside the not-found scope). Rejects with the handler failure after emitting `route:error`. Idempotent while started; may be called again after `stop()`. Navigation does not emit `navigate` for the initial document load; `start()` is the only initial dispatch. |
 | `stop()` | Removes driver listeners, aborts the in-flight navigation signal. Idempotent. |
-| `navigate(nameOrUrl, params?, options?)` | Options: `history` (`'auto' \| 'push' \| 'replace'`), `query`, `info`, `state`. Returns `{ committed, finished }`; both resolve `false` when superseded or aborted and never reject with `AbortError`. `finished` resolves `true` after the handler resolves and rejects with handler failure. |
+| `navigate(nameOrUrl, params?, options?)` | A string starting with `/` or a scheme plus `//` is a URL and the second argument is `options` (`navigate(url, options)`); anything else is a route name (`navigate(name, params, options)`), since names such as `patient:flow` look like schemes. Options: `history` (`'auto' \| 'push' \| 'replace'`), `query`, `info`, `state`. Returns `{ committed, finished }`; both resolve `false` when superseded or aborted and never reject with `AbortError`. `finished` resolves `true` after the handler resolves and rejects with handler failure. |
 | `url(name, params?, { query })` | Canonical URL string. Throws for unknown names or missing params. |
-| `match(url)` | Pure match (no redirect side effects). Returns a match or `null`. |
+| `match(url)` | Pure match (no redirect side effects) of routes and aliases; the not-found scope is dispatch policy and is not included. Returns a match or `null`. Navigation-only fields (`navigationType`, `signal`) are `null`, `initial` is `false`, `key` is `''`. |
 | `getCurrent()` | The committed current match. |
 | `refresh()` | Re-matches the current URL and dispatches with `navigationType: 'replace'` without adding an entry. Use after the route table changes. |
 | `mount(routes, { parent })` | Adds routes (optionally under a named parent) and returns `unmount()`. Mounting does not dispatch; call `refresh()` if needed. |
 | `getAliases()` | `[{ name, path, until, policy }]`. |
 | `getParamNames(name)` | Parameter names of the canonical path, in path order (for positional bridges). |
 | `canGoBack` / `back()` | Only counts entries this router created or dispatched (marked in entry state), so pre-application entries such as auth redirects are excluded. `back()` resolves `false` when there is no router-owned entry. |
-| `updateState(state)` | Merges into the current entry's persisted state. |
+| `updateState(state)` | Merges into the current entry's persisted state. State must be a plain object. |
+
+The router marks entries it creates or dispatches with a reserved `'@mnjs/router'` key
+in entry state (merged, never overwriting caller keys). The key is stripped from
+`match.state`; a marked entry without caller state reports `{}`. `canGoBack` is true
+only when the entry before the current one is marked.
 
 Events (`Events` from `@mnjs/utils`, so `listenTo(router, …)` works):
 
@@ -214,6 +229,7 @@ The router intercepts a `navigate` event only when all of the following hold:
 - The destination is same-origin and `intercept(url)` returns true.
 - The destination matches a route, alias, or falls `within` the not-found scope.
 
+A `downloadRequest` of `''` (a bare `download` attribute) counts as a download.
 Everything else proceeds as ordinary browser navigation. A router whose `intercept`
 excludes `/logout` therefore lets `<a href="/logout">` perform a full document load.
 `history.pushState`/`replaceState` calls also fire `navigate`; they are subject to the
@@ -233,7 +249,9 @@ environment. Shipped: `navigationDriver(window.navigation)` and
 
 ```js
 driver = {
-  capabilities: { cancelTraverse: boolean, interceptsLinks: boolean },
+  capabilities: { cancelTraverse: boolean, interceptsLinks: boolean }, // navigationDriver: cancelTraverse false
+                                                // (browsers cancel traversals only with user
+                                                // activation; read event.cancelable)
   currentEntry: { url, key, index, getState() },
   entries(),                                    // same shape as currentEntry
   navigate(url, { history, state, info }),      // → { committed, finished } (native promises)
@@ -249,6 +267,13 @@ driver = {
 `userInitiated`, `info`, `signal`, `cancelable`, `preventDefault()`,
 `intercept({ handler, focusReset, scroll })`.
 
+- `entry.url` and `destination.url` are absolute URL strings, as in the native API.
+  `destination.key` is `''` and `destination.index` is `-1` for non-traverse
+  navigations; read `driver.currentEntry` after commit. Superseded or canceled
+  navigations reject with an error named `AbortError`.
+- The memory driver also offers test helpers `simulate(url, opts)` (link click,
+  `pushState`, form submission) and `documentNavigations` (URLs no listener
+  intercepted). It does not record `focusReset`/`scroll`.
 - The memory driver implements the same event sequence synchronously enough for
   deterministic tests, including supersession (a new `navigate` aborts the previous
   event's `signal`) and traversal.
@@ -299,7 +324,8 @@ showPage(match) {
   `RouteState` seeded with `match` and start the child with `{ ...options, route }`.
 - Newest call wins. Overlapping replacements share the in-flight stop; superseded calls
   resolve `undefined`.
-- A stop resolving `false` does not authorize replacement. A rejected stop keeps the
+- Only a stop resolving exactly `true` authorizes replacement. A stop resolving `false`
+  keeps the selection and `show` resolves `undefined`. A rejected stop keeps the
   selection and rejects.
 - Startup failure: stop partially started descendants, clear the selection, then reject
   with the original error. Cleanup failures go to the `onCleanupError(error, app)`
@@ -311,6 +337,12 @@ showPage(match) {
   Application or `null`.
 - Rejections only reach the caller for the newest selection, so callers handle errors
   with an ordinary `.catch` instead of an `onRouteError` hook.
+
+`onCleanupError` defaults to a no-op. The outlet wraps `owner.stop`, `owner.restart` and
+`owner.destroy` to invalidate pending selections, since Marionette emits no event when
+an already-stopped owner is stopped. Owner restart invalidates pending selection but
+leaves the selected child running. Key equality is structural (primitives, arrays,
+plain objects).
 
 Child Applications use no base class. Error, loading, and refresh policy stay in each
 Application.

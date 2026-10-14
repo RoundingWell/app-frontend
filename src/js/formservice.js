@@ -1,7 +1,7 @@
 import 'js/base/setup';
 
 import { get } from 'underscore';
-import Backbone from 'backbone';
+import { Router } from '@mnjs/router';
 import { Radio } from 'marionette';
 
 import App from 'js/base/app';
@@ -69,26 +69,25 @@ const FormApp = App.extend({
   },
 });
 
-const Router = Backbone.Router.extend({
-  routes: {
-    'formservice/action/:actionId': 'startActionFormService',
-    'formservice/:formId/:patientId(/:responseId)': 'startFormService',
-  },
-  startActionFormService(actionId) {
-    const app = new ActionFormApp();
+const routes = [
+  { name: 'action', path: '/formservice/action/:actionId' },
+  { name: 'form', path: '/formservice/:formId/:patientId{/:responseId}?' },
+];
 
-    app.start({ actionId });
-  },
-  startFormService(formId, patientId, responseId) {
-    const app = new FormApp();
-
-    app.start({ formId, patientId, responseId });
-  },
-});
+const apps = {
+  action: ActionFormApp,
+  form: FormApp,
+};
 
 function startFormServiceApp() {
-  new Router();
-  Backbone.history.start({ pushState: true });
+  const router = new Router({
+    routes,
+    handler({ name, params }) {
+      return new apps[name]().start(params);
+    },
+  });
+
+  return router.start();
 }
 
 export {
