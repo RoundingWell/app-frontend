@@ -180,6 +180,22 @@ describe('Router intercept rules', () => {
     assert.deepEqual(context.driver.documentNavigations, ['http://localhost/elsewhere/page']);
   });
 
+  it('leaves a reload navigation to the browser and keeps refresh() as the soft reload', async() => {
+    const context = await started();
+    const url = context.driver.currentEntry.url;
+    const logged = context.log.length;
+
+    context.driver.reload();
+    await tick();
+
+    assert.equal(context.log.length, logged);
+    assert.deepEqual(context.driver.documentNavigations, [url]);
+
+    assert.equal(await context.router.refresh(), true);
+    assert.equal(context.log.length, logged + 3);
+    assert.equal(lastRoute(context).navigationType, 'replace');
+  });
+
   it('leaves unmatched URLs alone when no notFound is configured', async() => {
     const context = await started({ notFound: undefined });
 

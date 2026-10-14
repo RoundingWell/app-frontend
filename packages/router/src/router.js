@@ -16,7 +16,7 @@ const noop = () => {};
  * @property {object} meta
  * @property {import('./matcher.js').BranchEntry[]} branch
  * @property {string | null} alias
- * @property {'push' | 'replace' | 'traverse' | 'reload'} navigationType
+ * @property {'push' | 'replace' | 'traverse'} navigationType
  * @property {boolean} initial True for the start() dispatch.
  * @property {any} info Per-navigation transient data.
  * @property {any} state Persisted entry state.
@@ -308,7 +308,7 @@ export class Router {
   }
 
   #intercepts(event, url) {
-    if (!event.canIntercept || event.hashChange) return false;
+    if (!event.canIntercept || event.hashChange || event.navigationType === 'reload') return false;
     if (event.downloadRequest !== null || event.formData !== null) return false;
     return url.origin === new URL(this.#driver.currentEntry.url).origin;
   }

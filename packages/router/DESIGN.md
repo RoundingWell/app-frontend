@@ -160,7 +160,7 @@ pattern.
   meta,                             // merged root → leaf
   branch,                           // [{ name, path, params (own), meta (own) }, …] root → leaf
   alias,                            // matched alias path or null
-  navigationType,                   // 'push' | 'replace' | 'traverse' | 'reload'
+  navigationType,                   // 'push' | 'replace' | 'traverse'; never 'reload' (see Intercept rules)
   initial,                          // true for the start() dispatch
   info,                             // per-navigation transient data (not persisted)
   state,                            // persisted entry state (driver getState())
@@ -229,12 +229,14 @@ Superseded navigations emit nothing after their `route`.
 
 The router intercepts a `navigate` event only when all of the following hold:
 
-- `canIntercept` is true; not `hashChange`; no `downloadRequest`; no `formData`.
+- `canIntercept` is true; not `hashChange`; not `navigationType: 'reload'`; no `downloadRequest`; no `formData`.
 - The destination is same-origin and `intercept(url)` returns true.
 - The destination matches a route, alias, or falls `within` the not-found scope.
 
 A `downloadRequest` of `''` (a bare `download` attribute) counts as a download.
-Everything else proceeds as ordinary browser navigation. A router whose `intercept`
+A `reload` navigation (`location.reload()`, `navigation.reload()`) asks for a new
+document, so it is never intercepted; `refresh()` is the router's soft reload and
+navigates with `replace`. Everything else proceeds as ordinary browser navigation. A router whose `intercept`
 excludes `/logout` therefore lets `<a href="/logout">` perform a full document load.
 `history.pushState`/`replaceState` calls also fire `navigate`; they are subject to the
 same URL-based rules.
@@ -361,7 +363,7 @@ their DOM). Recommended application policy:
 - push/replace to a new page: after `route:ready`, focus the page heading or main region
   (`tabindex="-1"`) and scroll the content region to the top; honor `#fragment`.
 - in-place navigation (e.g. opening a sidebar): per-route `meta.focus` decides.
-- traverse/reload: restore region scroll positions saved per entry `key`.
+- traverse: restore region scroll positions saved per entry `key`.
 
 ## Testing strategy
 

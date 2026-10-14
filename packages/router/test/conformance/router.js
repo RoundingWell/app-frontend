@@ -261,6 +261,42 @@ export function routerConformance({ name, createDriver, describe, it, assert }) 
       assert.equal(h.driver.currentEntry.getState()['@mnjs/router'], true);
     });
 
+    // The browser would reload the spec document, so a real driver cancels the
+    // reload after the router has seen it. The memory driver hands each listener
+    // its own event, so it reports a missed reload through documentNavigations.
+    scenario('does not intercept a reload navigation', async h => {
+      const listeners = new AbortController();
+      const seen = { reloads: 0, intercepted: false };
+      const isMemory = Array.isArray(h.driver.documentNavigations);
+      h.driver.addEventListener('navigate', event => {
+        if (event.navigationType !== 'reload') return;
+        seen.reloads += 1;
+        const intercept = event.intercept.bind(event);
+        event.intercept = options => {
+          seen.intercepted = true;
+          return intercept(options);
+        };
+      }, { signal: listeners.signal });
+      await h.moveTo('start');
+      await h.router.start();
+      await h.router.navigate('page', { run: h.run, id: 'reload' }).finished;
+      if (!isMemory) {
+        h.driver.addEventListener('navigate', event => {
+          if (event.navigationType === 'reload') event.preventDefault();
+        }, { signal: listeners.signal });
+      }
+      const logged = h.log.length;
+
+      const reload = h.driver.reload();
+      await reload.finished.then(() => {}, () => {});
+      listeners.abort();
+
+      assert.equal(seen.reloads, 1);
+      assert.equal(seen.intercepted, false);
+      assert.equal(h.log.length, logged);
+      if (isMemory) assert.deepEqual(h.driver.documentNavigations.at(-1), h.driver.currentEntry.url);
+    });
+
     scenario('aborts a finished match signal when the next match commits and when the router stops', async h => {
       await h.moveTo('start');
       await h.router.start();
