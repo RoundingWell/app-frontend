@@ -6,6 +6,8 @@ import 'scss/modules/fill-window.scss';
 
 import px from 'js/utils/formatting/px';
 
+import router from 'js/router';
+
 import PreloadRegion from 'js/regions/preload_region';
 import TopRegionBehavior from 'js/behaviors/top-region';
 
@@ -28,6 +30,7 @@ const AppView = View.extend({
   template: LayoutTemplate,
   ui: {
     nav: '.js-nav',
+    content: '[data-content-region]',
   },
   regions: {
     nav: '[data-nav-region]',
@@ -37,8 +40,18 @@ const AppView = View.extend({
     },
     sidebar: '[data-app-sidebar-region]',
   },
+  initialize() {
+    this.listenTo(router, 'route:ready', this.onRouteReady);
+  },
   setNavMinimized(isMinimized) {
     this.getUI('nav')[0].classList.toggle('is-minimized', isMinimized);
+  },
+  // A new page takes focus in the content, so keyboard and screen reader users
+  // land on it. The initial load announces itself.
+  onRouteReady({ initial }) {
+    if (initial) return;
+
+    this.getUI('content')[0].focus();
   },
 });
 

@@ -37,6 +37,7 @@
 .app-frame__content {
   background-color: var(--color-page-bg);
   opacity: 0;
+  outline: none;
   overflow: hidden auto;
 
   &:not(:empty) {
