@@ -128,6 +128,8 @@ const connection = transport.connect(table, {
 No URL nesting creates an Application owner or requires a superclass. Scope is
 resource identity, excluding detail IDs. Bound retained destinations declare
 `getScope`; SubRouterApp supplies it from `routeScope` (`[]` means global).
+Unconditional `startCurrent` never resolves scope: a bound plain page needs no
+`getScope`. Retained `startRoute` still requires the scope contract.
 Workspace creates fresh area instances, partitioning equal resource IDs across
 workspaces. The navigation signal must not stop shared same-resource preparation.
 

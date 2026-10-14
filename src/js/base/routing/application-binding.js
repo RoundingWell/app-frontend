@@ -128,9 +128,7 @@ export function bindRouteApplication(application, configuration = {}) {
     },
     startCurrent(name, options) {
       const route = read();
-      const child = application.getChildApp(name);
       return selection.select(name, {
-        scope: child && getChildScope(child, options),
         start: app => {
           setChildRoute(app, route);
           return app.start(getChildOptions(options));

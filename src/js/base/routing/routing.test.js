@@ -510,3 +510,31 @@ test('terminal bound applications ignore new deliveries without writing route st
   assert.equal(area.routing.getRoute(), undefined);
   assert.equal(transport.disposed, true);
 });
+
+test('assembled parent starts an unscoped bound child unconditionally but retained selection requires scope', async() => {
+  let runs = 0;
+  const Child = Application.extend({
+    initialize() {
+      this.routing = bindRouteApplication(this, {
+        getActions: () => ({ detail: () => {} }),
+      });
+    },
+    onStart() {
+      runs++;
+    },
+  });
+  const parent = new Application({ childApps: { child: Child } });
+  const routing = bindRouteApplication(parent, { dispatchOnStart: false });
+  const child = parent.getChildApp('child');
+  try {
+    assert.equal(await routing.startCurrent('child'), child);
+    assert.equal(child.isRunning(), true);
+    assert.equal(await routing.startCurrent('child'), child);
+    assert.equal(runs, 2);
+    assert.throws(() => routing.startRoute('child'), /requires getScope/);
+    assert.equal(child.isRunning(), true);
+    assert.equal(routing.getCurrent(), child);
+  } finally {
+    parent.destroy();
+  }
+});
