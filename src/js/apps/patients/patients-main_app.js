@@ -1,15 +1,37 @@
-import { get } from 'underscore';
+import { get, isFunction } from 'underscore';
 import { Radio } from 'marionette';
 
 import handleErrors from 'js/utils/handle-errors';
+import { addError } from 'js/datadog';
 
-import RouterApp from 'js/base/routerapp';
+import App from 'js/base/app';
+import { bindApplicationRouter } from 'js/base/routing/application-router';
+import { createBackboneRouteTransport } from 'js/base/routing/backbone-transport';
 
 import PatientApp from 'js/apps/patients/patient/patient_app';
 import WorklistApp from 'js/apps/patients/worklist/worklist_app';
 import ScheduleApp from 'js/apps/patients/schedule/schedule_app';
 
-export default RouterApp.extend({
+export default App.extend({
+  initialize(options = {}) {
+    this.routing = bindApplicationRouter(this, {
+      definitions: this.eventRoutes,
+      workspaceSlug: options.workspaceSlug,
+      region: options.routeRegion,
+      transport: options.transport || createBackboneRouteTransport({ channel: Radio.channel('event-router') }),
+      resolveAction: action => (isFunction(action) ? action : this[action]).bind(this),
+      beforeDispatch: route => this.triggerMethod('before:appRoute', this, route),
+      afterDispatch: route => this.triggerMethod('appRoute', this, route),
+      onError: (error, route) => this.triggerMethod('route:error', error, route),
+      onCleanupError: (error, child) => this.triggerMethod('child:cleanup:error', error, child),
+    });
+  },
+  onChildCleanupError(error) {
+    addError(error);
+  },
+  getCurrentRoute() {
+    return this.routing.getRoute();
+  },
   routerAppName: 'PatientsApp',
   childApps: {
     patient: PatientApp,
@@ -110,18 +132,18 @@ export default RouterApp.extend({
       return;
     }
 
-    return this.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
+    return this.routing.startCurrent(worklistsById[worklistId], { worklistId, clinicianId: options?.clinicianId });
   },
 
   showSchedule() {
     this.clearCurrentPatient();
 
-    return this.startCurrent('schedule');
+    return this.routing.startCurrent('schedule');
   },
 
   showPatient(patientId) {
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
-    return this.startRoute('patient', { patientId });
+    return this.routing.startRoute('patient', { patientId });
   },
   onRouteError(error) {
     if (get(error, ['response', 'status']) === 410) {
@@ -160,7 +182,7 @@ export default RouterApp.extend({
     if (!this.isRunning() || this.getCurrentRoute() !== sourceRoute) return;
 
     // Replace the legacy URL without dispatching, then route the canonical event.
-    this.replaceRoute(event, ...eventArgs);
+    this.routing.replaceRoute(event, ...eventArgs);
     Radio.trigger('event-router', event, ...eventArgs);
   },
 

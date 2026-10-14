@@ -1,13 +1,12 @@
-import { compact, each, isEqual, partial, defer, result } from 'underscore';
+import { compact, isEqual, partial, defer, result } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
 import localStore from 'js/utils/local-store';
 
 import App from 'js/base/app';
-import EventRouter from 'js/base/event-router';
-import { createRouteTable } from 'js/base/routing/route-table';
-import { createRouteDispatch } from 'js/base/routing/route-dispatch';
+import { bindApplicationRouter } from 'js/base/routing/application-router';
+import { createBackboneRouteTransport } from 'js/base/routing/backbone-transport';
 
 import SearchApp from 'js/apps/globals/search/search_app';
 import StateModel from 'js/apps/globals/nav/nav_state';
@@ -143,30 +142,6 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
 // Navigation is a persistent Application with a URL adapter, independent of the
 // workspace's selected content lifetime. Unrelated routes never stop its shell.
 export default App.extend({
-  constructor: function() {
-    const table = createRouteTable(result(this, 'eventRoutes'));
-    this.router = new EventRouter({
-      channel: Radio.channel('event-router'),
-      routeTriggers: table.triggers,
-    });
-    this.routeDispatch = createRouteDispatch({
-      dispatch: ({ route: { definition, eventArgs } }) => definition.action(...eventArgs),
-      onError: error => window.reportError(error),
-    });
-    each(table.triggers, (patterns, event) => {
-      this.listenTo(this.router.getChannel(), event, (...args) => {
-        this.routeDispatch.accept(table.context(event, args));
-      });
-    });
-    this.on('before:destroy', () => {
-      this.routeDispatch.dispose();
-      this.router.destroy();
-    });
-    App.apply(this, arguments);
-  },
-  replaceUrl(url) {
-    Backbone.history.navigate(url, { trigger: false, replace: true });
-  },
   channelName: 'nav',
   childApps: {
     search: SearchApp,
@@ -189,6 +164,14 @@ export default App.extend({
     return new StateModel();
   },
   initialize() {
+    this.routing = bindApplicationRouter(this, {
+      definitions: result(this, 'eventRoutes'),
+      transport: createBackboneRouteTransport({ channel: Radio.channel('event-router') }),
+      startOnRoute: false,
+      resolveAction: action => action,
+      onError: error => window.reportError(error),
+      onNoMatch: () => {},
+    });
     this.listenTo(Radio.channel('event-router'), 'default', () => {
       defer(() => {
         Backbone.history.navigate(this.getDefaultRoute(), { trigger: true });
@@ -283,7 +266,7 @@ export default App.extend({
     if (!workspaceSlug || route) return;
 
     defer(() => {
-      this.replaceUrl(this.getDefaultRoute());
+      this.routing.write(this.getDefaultRoute(), { replace: true });
     });
   },
   getDefaultRoute() {

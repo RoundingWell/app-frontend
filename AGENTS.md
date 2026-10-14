@@ -70,7 +70,8 @@ belong to this application.
   `src/js/base/event-router.js` extends `Backbone.Router`; `Backbone.history` owns
   URL/history handling. Independent objects in `src/js/base/routing/**` supply
   route dispatch, shared detail delivery and child selection. RouterApp/SubRouterApp
-  are optional adapters; Nav and Patient compose plain Applications. See
+  are optional adapters; Nav, Patient and PatientsMain install optional bindings
+  in initialize on plain Applications. Transport is explicitly supplied. See
   `src/js/base/routing.md` for app policy and show/specify/verify examples.
 - Ownership entrypoint: `src/js/app.js` owns the `#root` Region, RootView, and
   bootstrap/dialer/app-frame child Applications. It configures shared popup Regions
