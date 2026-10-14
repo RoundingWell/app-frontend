@@ -278,6 +278,9 @@ driver = {
   `destination.key` is `''` and `destination.index` is `-1` for non-traverse
   navigations; read `driver.currentEntry` after commit. Superseded or canceled
   navigations reject with an error named `AbortError`.
+- A new navigation aborts the ongoing navigation's `signal` before its own `navigate`
+  event dispatches, even if a listener then cancels the new navigation (shared
+  conformance scenario).
 - The memory driver also offers test helpers `simulate(url, opts)` (link click,
   `pushState`, form submission) and `documentNavigations` (URLs no listener
   intercepted). It does not record `focusReset`/`scroll`.
@@ -325,31 +328,39 @@ showPage(match) {
 `show(appName, { key, match, restart, options })` → `Promise<Application | undefined>`:
 
 - The child must be registered with the owner (`childApps` / `addChildApp`).
-- **Reuse**: same `appName`, `isEqual(key)`, `restart` false, and not currently being
-  retired → `routeState.set(match)`; start the child if it stopped independently.
-- **Replace**: stop the current child; only after its stop resolves `true` create a new
-  `RouteState` seeded with `match` and start the child with `{ ...options, route }`.
-- Newest call wins. Overlapping replacements share the in-flight stop; superseded calls
-  resolve `undefined`.
-- Only a stop resolving exactly `true` authorizes replacement. A stop resolving `false`
-  keeps the selection and `show` resolves `undefined`. A rejected stop keeps the
-  selection and rejects.
+- **Reuse**: same `appName`, `isEqual(key)`, `restart` false → `routeState.set(match)`; start the child if it stopped independently.
+- **Replace**: stop the current child, create a new `RouteState` seeded with `match`,
+  and start the child with `{ ...options, route }`. Marionette 5.0.0 `stop()` is
+  synchronous and returns `true`, so replacement never waits for the old child; only
+  starting is asynchronous.
+- Newest call wins; superseded calls resolve `undefined`, including a call made
+  obsolete re-entrantly while the old child stops.
+- A `stop()` that throws (for example an `onBeforeStop` hook) keeps the selection and
+  rejects the newest `show`.
 - Startup failure: stop partially started descendants, clear the selection, then reject
   with the original error. Cleanup failures go to the `onCleanupError(error, app)`
   option and never replace the original error. Failed cleanup retains the selection.
-- Owner stop, restart, and destroy invalidate pending selection, even when the owner is
-  already stopped (Marionette permits explicit child activation beneath a stopped,
-  nonterminal owner).
+- Owner lifecycle events invalidate pending selection: `before:stop`, `before:destroy`,
+  and `before:start` of a running owner (a restart). The owner's `stop` clears the
+  selection; its `destroy` clears it and destroys the outlet.
 - `stop()` invalidates and stops the current child. `getCurrent()` returns the selected
   Application or `null`.
 - Rejections only reach the caller for the newest selection, so callers handle errors
   with an ordinary `.catch` instead of an `onRouteError` hook.
 
-`onCleanupError` defaults to a no-op. The outlet wraps `owner.stop`, `owner.restart` and
-`owner.destroy` to invalidate pending selections, since Marionette emits no event when
-an already-stopped owner is stopped. Owner restart invalidates pending selection but
-leaves the selected child running. Key equality is structural (primitives, arrays,
-plain objects).
+`onCleanupError` defaults to a no-op. The outlet only listens to the owner and never
+replaces its methods. Owner restart invalidates pending selection but leaves the
+selected child running. Key equality is structural (primitives, arrays, plain objects).
+
+Known gaps of event-based invalidation:
+
+- Stopping an already-stopped owner emits nothing. Marionette still stops its children,
+  which cancels their pending starts (so a pending `show` resolves `undefined`), but the
+  outlet keeps its stopped selection; the next `show` reuses or replaces it like any
+  independently stopped child.
+- Starting a stopped owner emits the same `before:start` as restarting it, so only a
+  restart of a running owner invalidates; a `show` begun from the owner's own
+  `onBeforeStart` is not canceled.
 
 Child Applications use no base class. Error, loading, and refresh policy stay in each
 Application.

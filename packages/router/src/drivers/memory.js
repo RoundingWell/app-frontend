@@ -1,7 +1,8 @@
 /**
  * In-memory Driver for tests (contract: see ./navigation.js). Events fire in the
  * same order as the native API with deterministic timing, including supersession
- * (a new navigation aborts the previous event's signal) and traversal.
+ * (a new navigation aborts the previous event's signal before its own event
+ * dispatches, even if a listener then cancels it) and traversal.
  *
  * Test-only extensions on the returned object:
  * - `simulate(url, { navigationType, userInitiated, canIntercept, hashChange,
@@ -331,6 +332,7 @@ class MemoryHistory {
   }
 
   #start(init, navigation = new Navigation()) {
+    this.#supersedeOthers(navigation);
     this.#active.add(navigation);
     navigation.dispatching = true;
     this.#dispatch(createEvent(navigation, init, this.#destination(init)));
@@ -339,7 +341,6 @@ class MemoryHistory {
     if (navigation.canceled) navigation.abort();
     if (navigation.settled) return navigation.result;
 
-    this.#supersedeOthers(navigation);
     const entry = this.#commit(init);
     navigation.committed.resolve(entry);
     this.#finish(navigation, entry);

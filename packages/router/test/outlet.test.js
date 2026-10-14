@@ -303,16 +303,55 @@ describe('RouteOutlet', () => {
       assert.equal(child.isRunning(), false);
     });
 
-    it('clears a live child selected beneath an already-stopped owner', async() => {
+    it('leaves a live child selected beneath an already-stopped owner stopped and reusable', async() => {
       owner.stop();
       const child = addPage('child');
       await show('child');
+      const [{ route }] = child.runs;
       assert.equal(child.isRunning(), true);
 
       owner.stop();
 
       assert.equal(child.isRunning(), false);
+      assert.equal(outlet.getCurrent(), child);
+      assert.equal(await show('child'), child);
+      assert.equal(child.runs[1].route, route);
+    });
+
+    it('leaves the owner methods untouched', () => {
+      for (const method of ['stop', 'restart', 'destroy']) {
+        assert.equal(Object.hasOwn(owner, method), false);
+      }
+    });
+
+    it('clears the selection when a running owner stops', async() => {
+      const child = addPage('child');
+      await show('child');
+      const [{ route }] = child.runs;
+
+      owner.stop();
+
+      assert.equal(child.isRunning(), false);
       assert.equal(outlet.getCurrent(), null);
+      assert.equal(route.isDestroyed(), true);
+    });
+
+    it('does not invalidate a selection begun while its owner starts', async() => {
+      const Owner = Application.extend({
+        childApps: { page: RecordingPage },
+        initialize() {
+          this.outlet = new RouteOutlet({ owner: this });
+        },
+        onBeforeStart() {
+          this.shown = this.outlet.show('page', { match: createMatch('page') });
+        },
+      });
+      const starting = new Owner();
+
+      await starting.start();
+
+      assert.equal(await starting.shown, starting.getChildApp('page'));
+      starting.destroy();
     });
 
     it('cancels child preparation when its owner is destroyed', async() => {
@@ -429,6 +468,38 @@ describe('RouteOutlet', () => {
       assert.equal(outlet.getCurrent(), child);
     });
 
+    it('keeps the selection and rejects when stopping the current child throws', async() => {
+      const failure = new Error('stop failed');
+      const current = addPage('current');
+      const next = addPage('next');
+      await show('current');
+      current.onBeforeStop = () => {
+        throw failure;
+      };
+
+      await assert.rejects(show('next'), failure);
+      current.onBeforeStop = () => {};
+
+      assert.equal(outlet.getCurrent(), current);
+      assert.equal(next.isRunning(), false);
+    });
+
+    it('ignores a replacement made obsolete while the current child stops', async() => {
+      const current = addPage('current');
+      const first = addPage('first');
+      const latest = addPage('latest');
+      await show('current');
+      let latestShow;
+      current.on('stop', () => {
+        latestShow = show('latest');
+      });
+
+      assert.equal(await show('first'), undefined);
+      assert.equal(await latestShow, latest);
+      assert.equal(first.isRunning(), false);
+      assert.equal(outlet.getCurrent(), latest);
+    });
+
     it('clears the selection when a canceled child start leaves it stopped', async() => {
       addPage('child', Application.extend({ start: () => Promise.resolve(false) }));
 
@@ -479,117 +550,6 @@ describe('RouteOutlet', () => {
       assert.equal(await first, undefined);
       await assert.rejects(second, failure);
       assert.equal(outlet.getCurrent(), null);
-    });
-  });
-
-  describe('asynchronous child stop', () => {
-    function addStubbornPage(name, stop) {
-      const page = addPage(name);
-      const stopPage = page.stop;
-      page.stop = () => {
-        stopPage.call(page);
-        return stop();
-      };
-      return page;
-    }
-
-    it('shares one in-flight stop between overlapping replacements', async() => {
-      const gate = deferred();
-      let stops = 0;
-      addStubbornPage('slow', () => {
-        stops++;
-        return gate.promise;
-      });
-      const first = addPage('first');
-      const latest = addPage('latest');
-      await show('slow');
-
-      const firstShow = show('first');
-      const latestShow = show('latest');
-      gate.resolve(true);
-
-      assert.equal(await firstShow, undefined);
-      assert.equal(await latestShow, latest);
-      assert.equal(stops, 1);
-      assert.equal(first.isRunning(), false);
-      assert.equal(outlet.getCurrent(), latest);
-    });
-
-    it('does not reuse a child that is being retired', async() => {
-      const gate = deferred();
-      const slow = addStubbornPage('slow', () => gate.promise);
-      addPage('next');
-      await show('slow', {}, { key: { id: 1 } });
-
-      const leaving = show('next');
-      const returning = show('slow', {}, { key: { id: 1 } });
-      gate.resolve(true);
-
-      assert.equal(await leaving, undefined);
-      assert.equal(await returning, slow);
-      assert.equal(slow.runs.length, 2);
-    });
-
-    it('does not authorize replacement when the stop resolves false', async() => {
-      const gate = deferred();
-      const slow = addStubbornPage('slow', () => gate.promise);
-      const next = addPage('next');
-      await show('slow');
-
-      const replacing = show('next');
-      gate.resolve(false);
-
-      assert.equal(await replacing, undefined);
-      assert.equal(next.isRunning(), false);
-      assert.equal(outlet.getCurrent(), slow);
-    });
-
-    it('keeps the selection and rejects the newest call when the stop rejects', async() => {
-      const gate = deferred();
-      const failure = new Error('stop failed');
-      const slow = addStubbornPage('slow', () => gate.promise);
-      addPage('first');
-      const latest = addPage('latest');
-      await show('slow');
-
-      const firstShow = show('first');
-      const latestShow = show('latest');
-      gate.reject(failure);
-
-      assert.equal(await firstShow, undefined);
-      await assert.rejects(latestShow, failure);
-      assert.equal(latest.isRunning(), false);
-      assert.equal(outlet.getCurrent(), slow);
-    });
-
-    it('keeps the selection and rejects when the stop throws', async() => {
-      const failure = new Error('stop failed');
-      let failing = false;
-      const slow = addStubbornPage('slow', () => {
-        if (failing) throw failure;
-        return true;
-      });
-      addPage('next');
-      await show('slow');
-      failing = true;
-
-      await assert.rejects(show('next'), failure);
-      failing = false;
-
-      assert.equal(outlet.getCurrent(), slow);
-    });
-
-    it('returns the in-flight stop from stop()', async() => {
-      const gate = deferred();
-      const slow = addStubbornPage('slow', () => gate.promise);
-      await show('slow');
-
-      const stopping = outlet.stop();
-      gate.resolve(true);
-
-      assert.equal(await stopping, true);
-      assert.equal(outlet.getCurrent(), null);
-      assert.equal(slow.isRunning(), false);
     });
   });
 });

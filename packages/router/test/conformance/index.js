@@ -94,6 +94,7 @@ export function driverConformance({ name, createDriver, describe, it, assert }) 
     return {
       driver,
       events,
+      controller,
       behavior,
       stop: () => controller.abort(),
       handleNext: handler => queuedHandlers.push(handler),
@@ -380,6 +381,29 @@ export function driverConformance({ name, createDriver, describe, it, assert }) 
       gate.open();
       await delay(0);
       assert.equal(driver.currentEntry.key, secondEntry.key);
+    });
+
+    scenario('a new navigation aborts the ongoing one before its event dispatches, even if it is then canceled', async h => {
+      const { driver } = h;
+      const gate = createGate();
+      h.handleNext(() => gate.promise);
+      const first = driver.navigate(h.url('first'));
+      await first.committed;
+      const committedKey = driver.currentEntry.key;
+      const [ongoing] = h.events.slice(-1);
+      const observed = [];
+      h.driver.addEventListener('navigate', () => observed.push(ongoing.signal.aborted), { signal: h.controller.signal });
+      h.behavior.prevent = true;
+
+      const second = driver.navigate(h.url('second'));
+      const [committed, finished] = await Promise.allSettled([second.committed, second.finished]);
+
+      assert.deepEqual(observed, [true]);
+      assert.equal(committed.status, 'rejected');
+      assert.equal(finished.status, 'rejected');
+      assert.equal((await failureOf(() => first)).name, 'AbortError');
+      assert.equal(driver.currentEntry.key, committedKey);
+      gate.open();
     });
 
     scenario('preventDefault rejects both promises with AbortError and commits nothing', async h => {

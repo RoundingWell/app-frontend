@@ -2,10 +2,6 @@ import { MnObject } from 'marionette';
 import { RouteState } from './route-state.js';
 import { isEqual } from './is-equal.js';
 
-function isThenable(value) {
-  return typeof value?.then === 'function';
-}
-
 /**
  * Keeps exactly one selected child Application of `owner`. Semantics: DESIGN.md
  * "RouteOutlet"; ported from src/js/base/route-base-app.js.
@@ -15,7 +11,6 @@ export class RouteOutlet extends MnObject {
   #onCleanupError;
   #selection = null;
   #intent = null;
-  #stopping = null;
 
   /**
    * @param {{ owner: object, onCleanupError?: (error: Error, app: object) => void }} options
@@ -24,7 +19,7 @@ export class RouteOutlet extends MnObject {
     super(options);
     this.#owner = options.owner;
     this.#onCleanupError = options.onCleanupError ?? (() => {});
-    this.#guardOwner();
+    this.#listenToOwner();
   }
 
   /**
@@ -47,10 +42,11 @@ export class RouteOutlet extends MnObject {
     }
   }
 
-  /** @returns {Promise<boolean> | boolean} Invalidates pending selection and stops the current child. */
+  /** @returns {boolean} Invalidates pending selection and stops the current child. */
   stop() {
     this.#invalidate();
-    return this.#stopSelection();
+    this.#stopSelection();
+    return true;
   }
 
   /** @returns {object | null} */
@@ -62,33 +58,31 @@ export class RouteOutlet extends MnObject {
     this.#invalidate();
   }
 
-  // Marionette emits no notifications when an already-stopped owner is stopped
-  // again, so the owner's methods are the only reliable invalidation point.
-  #guardOwner() {
-    const owner = this.#owner;
-    const { stop, restart, destroy } = owner;
-
-    owner.stop = (...args) => {
-      this.#invalidate();
-      return this.#afterOwnerStop(stop.apply(owner, args));
-    };
-
-    owner.restart = (...args) => {
-      this.#invalidate();
-      return restart.apply(owner, args);
-    };
-
-    owner.destroy = (...args) => {
-      this.#invalidate();
-      const result = this.#afterOwnerStop(destroy.apply(owner, args));
-      this.destroy();
-      return result;
-    };
+  // An owner that is already stopped emits nothing when stopped again; Marionette
+  // still stops its children, which cancels their pending starts.
+  #listenToOwner() {
+    this.listenTo(this.#owner, {
+      'before:start': this.#onOwnerBeforeStart,
+      'before:stop': this.#invalidate,
+      'stop': this.#onOwnerStop,
+      'before:destroy': this.#invalidate,
+      'destroy': this.#onOwnerDestroy,
+    });
   }
 
-  #afterOwnerStop(stopped) {
-    if (stopped && !this.#intent) this.#clearSelection();
-    return stopped;
+  // Restarting a running owner invalidates pending selection. A first start is
+  // indistinguishable from a restart of a stopped owner, so it must not.
+  #onOwnerBeforeStart(owner) {
+    if (owner.isRunning()) this.#invalidate();
+  }
+
+  #onOwnerStop() {
+    if (!this.#intent) this.#clearSelection();
+  }
+
+  #onOwnerDestroy() {
+    this.#clearSelection();
+    this.destroy();
   }
 
   #invalidate() {
@@ -102,9 +96,8 @@ export class RouteOutlet extends MnObject {
       return this.#activate(intent, current, options);
     }
 
-    const stopped = this.#stopSelection();
-    const authorized = isThenable(stopped) ? await stopped : stopped;
-    if (this.#intent !== intent || authorized !== true) return;
+    this.#stopSelection();
+    if (this.#intent !== intent) return;
 
     const selected = { app, appName, key, route: new RouteState(match) };
     this.#selection = selected;
@@ -113,7 +106,7 @@ export class RouteOutlet extends MnObject {
 
   #canReuse(appName, key) {
     const current = this.#selection;
-    return !this.#stopping && current?.appName === appName && isEqual(current.key, key);
+    return current?.appName === appName && isEqual(current.key, key);
   }
 
   async #activate(intent, selection, options) {
@@ -126,19 +119,19 @@ export class RouteOutlet extends MnObject {
 
       // A superseding child restart may still own a live run; keep it selected
       // so the next selection can stop it.
-      if (!app.isRunning()) await this.#cleanup(selection);
+      if (!app.isRunning()) this.#cleanup(selection);
     } catch(error) {
       if (this.#intent !== intent) return;
 
       // Failed preparation can leave started descendants running.
-      await this.#cleanup(selection);
+      this.#cleanup(selection);
       throw error;
     }
   }
 
-  async #cleanup({ app }) {
+  #cleanup({ app }) {
     try {
-      await this.#stopSelection();
+      this.#stopSelection();
     } catch(error) {
       this.#onCleanupError(error, app);
     }
@@ -146,24 +139,10 @@ export class RouteOutlet extends MnObject {
 
   #stopSelection() {
     const selection = this.#selection;
-    if (!selection) return true;
-    if (this.#stopping?.selection === selection) return this.#stopping.result;
+    if (!selection) return;
 
-    const result = selection.app.stop();
-    if (!isThenable(result)) return this.#finishStop(selection, result);
-
-    const tracked = Promise.resolve(result)
-      .then(stopped => this.#finishStop(selection, stopped))
-      .finally(() => {
-        if (this.#stopping?.selection === selection) this.#stopping = null;
-      });
-    this.#stopping = { selection, result: tracked };
-    return tracked;
-  }
-
-  #finishStop(selection, stopped) {
-    if (stopped === true && this.#selection === selection) this.#clearSelection();
-    return stopped;
+    selection.app.stop();
+    if (this.#selection === selection) this.#clearSelection();
   }
 
   #clearSelection() {

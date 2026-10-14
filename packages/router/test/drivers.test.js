@@ -157,29 +157,26 @@ describe('memoryDriver', () => {
     assert.equal(driver.entries().length, 1);
   });
 
-  it('keeps the earlier navigation when the superseding one is canceled', async() => {
+  it('aborts the previous navigation even when the superseding one is canceled', async() => {
     const driver = memoryDriver();
-    let gate;
-    const held = new Promise(resolve => {
-      gate = resolve;
-    });
     const events = [];
     driver.addEventListener('navigate', event => {
-      events.push(event);
+      events.push({ event, previousAborted: events[0]?.event.signal.aborted });
       if (event.destination.url.endsWith('/blocked')) {
         event.preventDefault();
         return;
       }
-      event.intercept({ handler: () => held });
+      event.intercept({ handler: () => new Promise(() => {}) });
     });
 
     const first = driver.navigate('/first');
     const blocked = driver.navigate('/blocked');
-    assert.equal((await rejectionOf(blocked.finished)).name, 'AbortError');
-    assert.equal(events[0].signal.aborted, false);
 
-    gate();
-    assert.equal((await first.finished).url, 'http://localhost/first');
+    assert.equal((await rejectionOf(blocked.finished)).name, 'AbortError');
+    assert.equal((await rejectionOf(first.finished)).name, 'AbortError');
+    assert.equal(events[1].previousAborted, true);
+    assert.equal(events[0].event.signal.aborted, true);
+    assert.equal(driver.currentEntry.url, 'http://localhost/first');
   });
 
   it('restricts intercept() to the dispatch of interceptable events', async() => {
