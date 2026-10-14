@@ -126,6 +126,39 @@ export default [
     },
   },
   {
+    name: 'Router package boundary (core)',
+    files: ['packages/router/**/*.js'],
+    ignores: [
+      'packages/router/outlet.js',
+      'packages/router/src/outlet/**',
+      'packages/router/test/outlet.test.js',
+    ],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          { group: ['backbone', 'underscore', 'marionette'], message: 'The router core depends only on @mnjs/utils.' },
+          { group: ['js/*', '@roundingwell/*', '**/src/js/**'], message: 'The router package must not import application code.' },
+        ],
+      }],
+    },
+  },
+  {
+    name: 'Router package boundary (outlet)',
+    files: [
+      'packages/router/outlet.js',
+      'packages/router/src/outlet/**/*.js',
+      'packages/router/test/outlet.test.js',
+    ],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          { group: ['backbone', 'underscore'], message: 'The outlet layer depends only on marionette and @mnjs/utils.' },
+          { group: ['js/*', '@roundingwell/*', '**/src/js/**'], message: 'The router package must not import application code.' },
+        ],
+      }],
+    },
+  },
+  {
     ignores: [
       'public/**',
       'dist/**',

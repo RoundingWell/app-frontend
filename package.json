@@ -15,7 +15,8 @@
     "packages/care-ops-five9",
     "packages/care-ops-quicksight",
     "packages/care-ops-ringcentral",
-    "packages/care-ops-superset"
+    "packages/care-ops-superset",
+    "packages/router"
   ],
   "scripts": {
     "analyze": "npx vite-bundle-visualizer",
