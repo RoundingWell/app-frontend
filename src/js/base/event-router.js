@@ -6,14 +6,13 @@ import {
   isArray,
   isEqual,
   pick,
-  reduce,
   reject,
   result,
   uniqueId,
 } from 'underscore';
 import Backbone from 'backbone';
 
-const namedParamRegex = /(\(\?)?:\w+/;
+import { translateRoute } from './routing/route-table.js';
 
 export default Backbone.Router.extend({
   constructor: function(options = {}) {
@@ -88,9 +87,7 @@ export default Backbone.Router.extend({
   },
 
   translateRoute(route, eventArgs) {
-    return reduce(eventArgs, (translatedRoute, arg) => {
-      return translatedRoute.replace(namedParamRegex, arg);
-    }, route);
+    return translateRoute(route, eventArgs);
   },
 
   destroy() {

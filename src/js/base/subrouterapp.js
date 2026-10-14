@@ -1,17 +1,29 @@
-import { extend, isArray, pick, result } from 'underscore';
+import { extend, isArray, mapObject, pick, result } from 'underscore';
 import Backbone from 'backbone';
 
 import { addError } from 'js/datadog';
 
 import RouteBaseApp from './route-base-app';
+import { createRouteDelivery } from './routing/route-delivery';
+import { createRouteActions } from './routing/route-actions';
 
 export default RouteBaseApp.extend({
   constructor: function() {
-    this._runId = 0;
-    this._routeIntent = null;
-
-    this.on('start', () => this._runId++);
-    this.on('before:stop', this._clearRouteIntent);
+    this.dispatchCurrentRoute = createRouteActions({
+      getActions: () => mapObject(this.normalizeMethods(result(this, 'routeActions', {})), action => action.bind(this)),
+      before: route => this.triggerMethod('before:startRoute', route),
+      after: route => this.triggerMethod('startRoute', route),
+      onError: (error, route) => this.triggerMethod('route:error', error, route),
+      isCurrent: route => this.getCurrentRoute() === route,
+    });
+    this.routeDelivery = createRouteDelivery({
+      start: options => this.start(options),
+      read: () => this.getCurrentRoute(),
+      write: route => this.setCurrentRoute(route),
+      dispatch: () => this.startCurrentRoute(),
+    });
+    this.on('start', () => this.routeDelivery.activated());
+    this.on('before:stop', () => this.routeDelivery.invalidate());
 
     RouteBaseApp.apply(this, arguments);
   },
@@ -38,53 +50,13 @@ export default RouteBaseApp.extend({
 
   // records the newest route and ensures it is dispatched by the active run
   async startRoute(routeContext, options) {
-    const runId = this._runId;
-    const routeIntent = {};
-    this.setCurrentRoute(routeContext);
-    this._routeIntent = routeIntent;
-
-    const started = await this.start(options);
-
-    if (!started || this._routeIntent !== routeIntent) return;
-    if (this._runId === runId) this.startCurrentRoute();
-
-    return this;
+    const started = await this.routeDelivery.accept(routeContext, options);
+    if (started) return this;
   },
 
   // synchronously dispatches the current route to its action
   startCurrentRoute() {
-    const currentRoute = this.getCurrentRoute();
-
-    if (!currentRoute) return;
-
-    this.triggerMethod('before:startRoute', currentRoute);
-
-    const { event, eventArgs } = currentRoute;
-    const routeActions = this.normalizeMethods(result(this, 'routeActions', {}));
-    const action = routeActions[event];
-
-    if (!action) return;
-
-    const activation = this.invokeRouteAction(action, eventArgs);
-    // onStart notifications do not await returned promises. Observe action
-    // failures here as well as on routes dispatched into an already-active run.
-    const completion = Promise.resolve(activation).catch(error => {
-      if (this.getCurrentRoute() === currentRoute) {
-        this.triggerMethod('route:error', error, currentRoute);
-      }
-    });
-
-    this.triggerMethod('startRoute', currentRoute);
-
-    return completion;
-  },
-
-  invokeRouteAction(action, eventArgs) {
-    try {
-      return action.apply(this, eventArgs);
-    } catch(error) {
-      return Promise.reject(error);
-    }
+    return this.dispatchCurrentRoute(this.getCurrentRoute());
   },
 
   onChildCleanupError(error) {
@@ -105,9 +77,5 @@ export default RouteBaseApp.extend({
     return this.selectChild(appName, {
       start: app => app.start(this.mixinOptions(options)),
     });
-  },
-
-  _clearRouteIntent() {
-    this._routeIntent = null;
   },
 });

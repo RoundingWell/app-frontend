@@ -1,4 +1,4 @@
-import { isArray, isEqual, isFunction, map, partial, reduce, rest, result } from 'underscore';
+import { isEqual, isFunction, partial, reduce, result } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
@@ -6,6 +6,8 @@ import { addError } from 'js/datadog';
 
 import RouteBaseApp from './route-base-app';
 import EventRouter from './event-router';
+import { createRouteTable } from './routing/route-table';
+import { createRouteDispatch } from './routing/route-dispatch';
 
 export default RouteBaseApp.extend({
   // Set in router apps for nav selection
@@ -15,14 +17,19 @@ export default RouteBaseApp.extend({
   constructor: function(options = {}) {
     this.workspaceSlug = options.workspaceSlug;
     this.routeRegion = options.routeRegion;
-    this._routeIntent = null;
+    this.routeDispatch = createRouteDispatch({
+      prepare: () => this.prepareRoute(),
+      dispatch: ({ route }) => this.dispatchRoute(route),
+      onError: (error, route) => this.triggerMethod('route:error', error, route),
+    });
 
     this.initRouter();
 
     // if the app does not handle a given route, stop
     this.listenTo(this.router, 'noMatch', this.onNoMatch);
 
-    this.on('before:stop', this._clearRouteIntent);
+    this.on('before:stop', () => this.routeDispatch.invalidate());
+    this.on('before:destroy', () => this.routeDispatch.dispose());
 
     RouteBaseApp.apply(this, arguments);
   },
@@ -30,6 +37,7 @@ export default RouteBaseApp.extend({
   initRouter() {
     this._routes = result(this, 'eventRoutes');
 
+    this.routeTable = createRouteTable(this._routes, { workspaceSlug: this.workspaceSlug });
     const routeTriggers = this.getRouteTriggers();
 
     this.router = new EventRouter({
@@ -45,6 +53,7 @@ export default RouteBaseApp.extend({
   onNoMatch() {
     const routeContext = this.getCurrentRoute();
     this._currentRoute = null;
+    this.routeDispatch.invalidate();
     try {
       this.stop();
     } catch(error) {
@@ -52,26 +61,8 @@ export default RouteBaseApp.extend({
     }
   },
 
-  // For each route in the hash creates a routeTriggers hash,
-  // prefixing every (non-root) route or alias with the workspace slug
   getRouteTriggers() {
-    return reduce(this._routes, (routeTriggers, { route, root }, eventName) => {
-      routeTriggers[eventName] = isArray(route) ?
-        map(route, pattern => this._prefixRoute(pattern, root)) :
-        this._prefixRoute(route, root);
-
-      return routeTriggers;
-    }, {});
-  },
-
-  _prefixRoute(route, root) {
-    if (root) return route;
-
-    if (!this.workspaceSlug) {
-      throw new Error('RouterApp requires workspaceSlug for non-root routes');
-    }
-
-    return route ? `${ this.workspaceSlug }/${ route }` : this.workspaceSlug;
+    return this.routeTable.triggers;
   },
 
   getEventActions(eventRoutes, routeAction) {
@@ -96,36 +87,16 @@ export default RouteBaseApp.extend({
   // starts this routerapp if necessary
   // triggers before and after events
   routeAction(event, action, ...args) {
-    const definition = this._routes[event];
-    const routeIntent = {};
-
-    const routeContext = {
-      event,
-      eventArgs: args,
-      definition: {
-        action: definition.action,
-        route: isArray(definition.route) ? definition.route[0] : definition.route,
-        root: definition.root,
-        meta: definition.meta || {},
-      },
-    };
+    const routeContext = this.routeTable.context(event, args);
     this.invalidateSelection();
     this._currentRoute = routeContext;
-    this._routeIntent = routeIntent;
-
-    return this.activateRoute(routeContext, routeIntent).catch(error => {
-      if (this._routeIntent === routeIntent) this.triggerMethod('route:error', error, routeContext);
-    });
+    return this.routeDispatch.accept(routeContext);
   },
 
-  async activateRoute(routeContext, routeIntent) {
-    if (this.startOnRoute) {
-      const region = this.routeRegion || this.getRegion();
-      const started = await this.start(region ? { region } : undefined);
-      if (!started || this._routeIntent !== routeIntent) return;
-    }
-
-    return this.dispatchRoute(routeContext);
+  prepareRoute() {
+    if (!this.startOnRoute) return true;
+    const region = this.routeRegion || this.getRegion();
+    return this.start(region ? { region } : undefined);
   },
 
   onChildCleanupError(error) {
@@ -195,15 +166,8 @@ export default RouteBaseApp.extend({
     return this._currentRoute && this._currentRoute.definition.meta;
   },
 
-  _clearRouteIntent() {
-    this._routeIntent = null;
-  },
-
-  // takes an event and translates data into the applicable url fragment
-  translateEvent(event) {
-    const route = this.router.getDefaultRoute(event);
-
-    return this.router.translateRoute(route, rest(arguments));
+  translateEvent(event, ...args) {
+    return this.routeTable.href(event, ...args);
   },
 
   // takes an event and changes the URL without triggering or adding to the history

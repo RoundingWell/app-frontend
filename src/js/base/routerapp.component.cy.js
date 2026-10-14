@@ -94,7 +94,7 @@ context('RouterApp', function() {
     });
 
     specify('requires a workspace slug for non-root routes', function() {
-      expect(() => new Router()).to.throw('RouterApp requires workspaceSlug for non-root routes');
+      expect(() => new Router()).to.throw('Routing requires workspaceSlug for non-root routes');
     });
 
     specify('does not require a workspace slug for root routes', function() {
