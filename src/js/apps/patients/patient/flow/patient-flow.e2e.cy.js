@@ -1675,13 +1675,14 @@ context('patient flow page', function() {
       }))
       .as('routeDelayedFlow');
 
-    _.each([`/flow/${ delayedFlow.id }`, targetUrl], url => {
+    // The legacy URL resolves its patient before the workspace loads, so only the target waits for workspace data
+    _.each([`/flow/${ delayedFlow.id }`, targetUrl], (url, index) => {
       cy.then(() => {
         replyToFlow = null;
       });
 
       cy
-        .visit(url);
+        .visit(url, { noWait: index === 0 });
 
       cy
         .wrap(null)
@@ -1722,7 +1723,7 @@ context('patient flow page', function() {
       });
 
       cy
-        .visit(url);
+        .visit(url, { noWait: index === 0 });
 
       cy
         .wrap(null)

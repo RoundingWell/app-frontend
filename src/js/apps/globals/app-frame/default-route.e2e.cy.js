@@ -101,6 +101,137 @@ context('default routes', function() {
       .should('contain', 'one/worklist/owned-by');
   });
 
+  specify('unmatched workspace paths render not-found, including on back navigation', function() {
+    cy
+      .routesForDefault()
+      .visit();
+
+    cy
+      .get('.list-page')
+      .should('exist');
+
+    cy
+      .navigate('/not-a-page');
+
+    cy
+      .get('.error-page')
+      .should('contain', ' This page doesn\'t exist.');
+
+    cy
+      .get('.list-page')
+      .should('not.exist');
+
+    cy
+      .get('.error-page')
+      .contains('Back to Your Workspace')
+      .click();
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy
+      .go('back');
+
+    cy
+      .get('.error-page')
+      .should('contain', ' This page doesn\'t exist.');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/not-a-page');
+
+    cy
+      .go('forward');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy
+      .get('.list-page')
+      .should('exist');
+  });
+
+  specify('the latest navigation wins when two arrive together', function() {
+    cy
+      .routesForDefault()
+      .routePrograms()
+      .visit();
+
+    cy
+      .get('.list-page')
+      .should('exist');
+
+    cy
+      .window()
+      .then(win => {
+        win.navigation.navigate('/one/programs');
+        win.navigation.navigate('/one/worklist/shared-by');
+      });
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/shared-by');
+
+    cy
+      .get('.list-page__title')
+      .should('contain', 'Shared By');
+
+    // A later round trip lets any stale programs activation reach the API before asserting.
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .click();
+
+    cy
+      .get('.list-page__title')
+      .should('contain', 'Owned By');
+
+    cy
+      .get('@routePrograms.all')
+      .should('have.length', 0);
+  });
+
+  specify('a navigation finishes once its page is ready', function() {
+    cy
+      .routesForDefault()
+      .visit();
+
+    cy
+      .window()
+      .then(win => {
+        return win.navigation.navigate('/one/schedule').finished.then(() => {
+          return !!win.document.querySelector('.schedule-list-page');
+        });
+      })
+      .should('be.true');
+  });
+
+  specify('focuses the content after navigating to a new page', function() {
+    cy
+      .routesForDefault()
+      .visit();
+
+    cy
+      .get('.list-page')
+      .should('exist');
+
+    cy
+      .get('[data-content-region]')
+      .should('not.be.focused');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .click();
+
+    cy
+      .get('[data-content-region]')
+      .should('be.focused');
+  });
+
   specify('back to list returns to the last list with its arguments', function() {
     cy
       .routesForDefault()

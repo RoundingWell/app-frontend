@@ -1,98 +1,91 @@
-import { some } from 'underscore';
 import { Radio } from 'marionette';
+import { RouteOutlet } from '@mnjs/router/outlet';
+
+import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
-import router from 'js/router';
-
 import SidebarService from 'js/services/sidebar';
+
+const AREAS = {
+  patients: {
+    load: () => import('js/apps/patients/patients-main_app'),
+  },
+  dashboards: {
+    permission: 'dashboards:view',
+    load: () => import('js/apps/dashboards/dashboards-main_app'),
+  },
+  clinicians: {
+    permission: 'clinicians:manage',
+    load: () => import('js/apps/clinicians/clinicians-main_app'),
+  },
+  programs: {
+    permission: 'programs:manage',
+    load: () => import('js/apps/programs/programs-main_app'),
+  },
+};
 
 export default App.extend({
   childApps: {
     sidebar: SidebarService,
   },
   initialize() {
-    this.routers = [];
+    this.areas = new RouteOutlet({ owner: this, onCleanupError: addError });
+
+    // An error replaces the area content
+    this.listenTo(Radio.channel('event-router'), {
+      notFound: this.stopArea,
+      unknownError: this.stopArea,
+    });
   },
   onBeforeStart(app, options) {
     this.shellOptions = options;
   },
   async prepareStart(options, { signal }) {
-    for (const routerApp of this.routers) {
-      this.removeChildApp(routerApp.getName());
-    }
-    this.routers = [];
-
     const currentUser = Radio.request('bootstrap', 'currentUser');
-    const hasDashboards = currentUser.can('dashboards:view');
-    const hasClinicians = currentUser.can('clinicians:manage');
-    const hasPrograms = currentUser.can('programs:manage');
+    const areaNames = Object.keys(AREAS).filter(name => {
+      const { permission } = AREAS[name];
 
-    const results = await Promise.all([
+      return !permission || currentUser.can(permission);
+    });
+
+    // Areas load together, as one set, so their stylesheets always apply in the same order
+    const [, ...modules] = await Promise.all([
       Radio.request('workspace', 'fetch', { workspace: options.workspace, signal }),
-      import('js/apps/patients/patients-main_app'),
-      hasDashboards ?
-        import('js/apps/dashboards/dashboards-main_app.js') :
-        null,
-      hasClinicians ?
-        import('js/apps/clinicians/clinicians-main_app.js') :
-        null,
-      hasPrograms ? import('js/apps/programs/programs-main_app.js') : null,
+      ...areaNames.map(name => AREAS[name].load()),
     ]);
 
     signal.throwIfAborted();
 
-    await this.getChildApp('sidebar').start({ region: options.sidebarRegion });
-
-    return results;
-  },
-  onStart(
-    app,
-    options,
-    [
-      currentWorkspace,
-      PatientsMainApp,
-      DashboardsMainApp,
-      CliniciansMainApp,
-      ProgramsMainApp,
-    ],
-  ) {
-    this.workspaceSlug = currentWorkspace.get('slug');
-
-    this.initRouter(PatientsMainApp);
-    this.initRouter(DashboardsMainApp);
-    this.initRouter(CliniciansMainApp);
-    this.initRouter(ProgramsMainApp);
-
-    const match = router.match(window.location.href);
-
-    if (some(this.routers, routerApp => routerApp.hasRoute(match?.name))) {
-      router.refresh();
-    } else {
-      Radio.trigger('event-router', 'notFound');
-    }
-  },
-  initRouter(module) {
-    const RouterApp = module?.default;
-    if (!RouterApp) return;
-
-    const routerApp = new RouterApp({
-      routeRegion: this.shellOptions.contentRegion,
-      workspaceSlug: this.workspaceSlug,
+    areaNames.forEach((name, index) => {
+      if (!this.hasChildApp(name)) this.addChildApp(name, new modules[index].default());
     });
 
-    this.addChildApp(routerApp.routerAppName, routerApp);
-
-    this.listenTo(routerApp, 'before:appRoute', this.onBeforeAppRoute);
-
-    this.routers.push(routerApp);
-    return routerApp;
+    await this.getChildApp('sidebar').start({ region: options.sidebarRegion });
   },
-  onBeforeAppRoute(routerApp, routeContext) {
-    const { event, eventArgs } = routeContext;
+  stopArea() {
+    this.areas.stop();
+  },
+  // Shows the area that owns the match. Matches without an area (unmatched path,
+  // failed redirect) leave no area content; an area the user may not use is not found.
+  async showRoute(match) {
+    const { area } = match.meta;
 
-    Radio.request('nav', 'select', routerApp.routerAppName, event, eventArgs);
-    Radio.request('sidebar', 'stop');
-    Radio.request('history', 'set:latestList', routeContext);
+    if (!area) {
+      this.stopArea();
+      return;
+    }
+
+    if (!this.hasChildApp(area)) {
+      Radio.trigger('event-router', 'notFound');
+      return;
+    }
+
+    await this.areas.show(area, {
+      match,
+      options: { region: this.shellOptions.contentRegion },
+    });
+
+    return this.getChildApp(area).showRoute(match);
   },
 });

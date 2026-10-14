@@ -20,8 +20,6 @@ import Tooltip from 'js/components/tooltip';
 
 import 'js/entities-service';
 
-import router from 'js/router';
-
 import AlertService from 'js/services/alert';
 import BootstrapService from 'js/services/bootstrap';
 import HistoryService from 'js/services/history';
@@ -60,7 +58,6 @@ const Application = App.extend({
     this.configComponents();
     this.startServices();
     this.setListeners();
-    // Ensure Error is the first app initialized
     new ErrorApp({ region: this.getView().getRegion('error') });
   },
 
@@ -117,8 +114,8 @@ const Application = App.extend({
 
     this.getView().getRegion('preloader').empty();
 
-    const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
-    this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
+    this.addChildApp('appFrame', new AppFrameApp());
+    new HistoryService();
 
     const appView = this.getView().appView;
     await this.getChildApp('appFrame').start({
@@ -159,12 +156,6 @@ const Application = App.extend({
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
       this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
     }
-  },
-
-  startHistory() {
-    new HistoryService();
-
-    router.start();
   },
 });
 

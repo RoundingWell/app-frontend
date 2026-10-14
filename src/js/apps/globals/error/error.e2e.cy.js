@@ -30,7 +30,7 @@ context('Global Error Page', function() {
 
   specify('404 not found - root routes', function() {
     cy
-      .visit('/route-does-not-exist', { isRoot: true });
+      .visit('/route-does-not-exist', { isRoot: true, noWait: true });
 
     cy
       .get('.error-page')
@@ -129,7 +129,7 @@ context('Global Error Page', function() {
       .get('.error-page')
       .should('contain', 'Error code: 500.');
 
-    cy.routeStates();
+    cy.routeWorkspaceClinicians();
 
     cy
       .get('.error-page')
