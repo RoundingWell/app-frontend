@@ -154,6 +154,35 @@ context('worklist loading states', function() {
       .should('contain', 'Loading State Action');
   });
 
+  specify('leaving a worklist filter refresh keeps the selected schedule visible', function() {
+    let releaseRefresh;
+    let requests = 0;
+    const refresh = new Cypress.Promise(resolve => {
+      releaseRefresh = resolve;
+    });
+    cy
+      .intercept('GET', '/api/actions?*', req => {
+        requests++;
+        if (requests === 2) {
+          req.alias = 'delayedFilterRefresh';
+          return refresh.then(() => req.reply({ body: getActionsResponse() }));
+        }
+        req.reply({ body: getActionsResponse() });
+      })
+      .as('actions')
+      .visit('/worklist/owned-by')
+      .wait('@actions');
+
+    chooseLastWeek();
+    cy.get('.list-page__list').should('have.attr', 'aria-busy', 'true');
+    cy.get('.app-nav').contains('Schedule').click();
+    cy.location('pathname').should('equal', '/one/schedule');
+    cy.get('.schedule-list-page').should('be.visible').then(releaseRefresh);
+    cy.wait('@delayedFilterRefresh');
+    cy.get('.schedule-list-page').should('be.visible');
+    cy.get('.worklist-list-page').should('not.exist');
+  });
+
   specify('keeps the patient sidebar loader mounted while data loads', function() {
     let loadingElement;
     const workspacePatient = getWorkspacePatient();

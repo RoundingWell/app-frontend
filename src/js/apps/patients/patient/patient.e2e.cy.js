@@ -87,6 +87,29 @@ context('patient page', function() {
       .should('be.visible');
   });
 
+  specify('leaving patient preparation prevents a late patient response from replacing the list', function() {
+    let releasePatient;
+    const response = new Cypress.Promise(resolve => {
+      releasePatient = resolve;
+    });
+    cy
+      .routesForPatientWorkflow()
+      .routeActions()
+      .intercept('GET', '/api/patients/**?*', req => {
+        return response.then(() => req.reply({ body: { data: testPatient, included: [] } }));
+      })
+      .as('delayedPatient')
+      .visit(`/patient/${ testPatient.id }/workflow`);
+
+    cy.get('.loader__indicator').should('be.visible');
+    cy.get('.app-nav').contains('Owned By').click();
+    cy.location('pathname').should('equal', '/one/worklist/owned-by');
+    cy.get('.list-page').should('be.visible').then(releasePatient);
+    cy.wait('@delayedPatient');
+    cy.get('.list-page').should('be.visible');
+    cy.get('.patient__frame').should('not.exist');
+  });
+
   // Compatibility coverage for the three legacy patient URL aliases. They must
   // keep routing until September 2, 2027; delete this spec with the aliases.
   specify('legacy patient URL aliases still route', function() {
@@ -266,6 +289,8 @@ context('patient page', function() {
   });
 
   specify('patient routing', function() {
+    let shell;
+    let sidebar;
     cy
       .viewport(1920, 900)
       .routesForPatientWorkflow()
@@ -276,6 +301,13 @@ context('patient page', function() {
       })
       .visit(`/patient/${ testPatient.id }/workflow`)
       .wait('@routePatient');
+
+    cy.get('.patient__frame').then($shell => {
+      shell = $shell[0];
+    });
+    cy.get('.patient-sidebar').then($sidebar => {
+      sidebar = $sidebar[0];
+    });
 
     cy
       .get('.patient__layout')
@@ -307,6 +339,17 @@ context('patient page', function() {
       .get('.patient__layout')
       .find('.workflow-page__tab.is-selected')
       .contains('Open');
+
+    cy.go('back');
+    cy.get('.workflow-page__tab.is-selected').contains('Closed');
+    cy.go('forward');
+    cy.get('.workflow-page__tab.is-selected').contains('Open');
+    cy.get('.patient__frame').should($shell => {
+      expect($shell[0]).to.equal(shell);
+    });
+    cy.get('.patient-sidebar').should($sidebar => {
+      expect($sidebar[0]).to.equal(sidebar);
+    });
   });
 
   specify('remembers the patient sidebar across patients and reloads', function() {

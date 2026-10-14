@@ -1,11 +1,16 @@
+import { mapObject } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
 import handleErrors from 'js/utils/handle-errors';
 import localStore from 'js/utils/local-store';
 import sessionStore from 'js/utils/session-store';
+import { addError } from 'js/datadog';
 
-import SubRouterApp from 'js/base/subrouterapp';
+import App from 'js/base/app';
+import { createChildSelection } from 'js/base/routing/child-selection';
+import { createRouteDelivery } from 'js/base/routing/route-delivery';
+import { createRouteActions } from 'js/base/routing/route-actions';
 
 import WorkflowPageApp from 'js/apps/patients/patient/workflow/workflow_app';
 import FlowPageApp from 'js/apps/patients/patient/flow/flow_app';
@@ -16,8 +21,85 @@ import { LoadingView } from 'js/regions/preload_region';
 
 import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
-export default SubRouterApp.extend({
-  routeScope: ['patientId'],
+export default App.extend({
+  constructor: function() {
+    this.selection = createChildSelection({
+      getChild: name => this.getChildApp(name),
+      onCleanupError: (error, app) => this.triggerMethod('child:cleanup:error', error, app),
+    });
+    this.dispatchRoute = createRouteActions({
+      getActions: () => mapObject(this.routeActions(), action => action.bind(this)),
+      before: route => this.triggerMethod('before:startRoute', route),
+      after: route => this.triggerMethod('startRoute', route),
+      onError: (error, route) => this.triggerMethod('route:error', error, route),
+      isCurrent: route => this.getCurrentRoute() === route,
+    });
+    this.routeDelivery = createRouteDelivery({
+      start: options => this.start(options),
+      read: () => this.getCurrentRoute(),
+      write: route => this.setCurrentRoute(route),
+      dispatch: route => this.dispatchRoute(route),
+    });
+    this.on('start', () => this.routeDelivery.activated());
+    this.on('before:stop', () => {
+      this.routeDelivery.invalidate();
+      this.selection.invalidate();
+    });
+    this.on('stop', () => this.selection.clear());
+    this.on('before:start', () => this.selection.invalidate());
+    App.apply(this, arguments);
+  },
+  // These three overrides also cover stopped owners, which emit no stop event.
+  stop() {
+    this.routeDelivery.invalidate();
+    this.selection.invalidate();
+    const stopped = App.prototype.stop.apply(this, arguments);
+    if (stopped) this.selection.clear();
+    return stopped;
+  },
+  restart() {
+    this.selection.invalidate();
+    return App.prototype.restart.apply(this, arguments);
+  },
+  destroy() {
+    this.routeDelivery.invalidate();
+    this.selection.invalidate();
+    const destroyed = App.prototype.destroy.apply(this, arguments);
+    if (destroyed) this.selection.clear();
+    return destroyed;
+  },
+  onRouteError(error) {
+    window.reportError(error);
+  },
+  onChildCleanupError(error) {
+    addError(error);
+  },
+  createState() {
+    return new Backbone.Model({ currentRoute: null });
+  },
+  getRouteScope({ patientId } = {}) {
+    return { patientId };
+  },
+  setCurrentRoute(route) {
+    this.selection.invalidate();
+    this.getState().set('currentRoute', route);
+  },
+  getCurrentRoute() {
+    return this.getState().get('currentRoute');
+  },
+  async startRoute(route, options) {
+    const started = await this.routeDelivery.accept(route, options);
+    if (started) return this;
+  },
+  startCurrentRoute() {
+    return this.dispatchRoute(this.getCurrentRoute());
+  },
+  mixinOptions(options) {
+    return { ...this.currentAppOptions(), ...options };
+  },
+  startCurrent(name, options) {
+    return this.selection.select(name, { start: app => app.start(this.mixinOptions(options)) });
+  },
   childApps: {
     workflow: WorkflowPageApp,
     flow: FlowPageApp,

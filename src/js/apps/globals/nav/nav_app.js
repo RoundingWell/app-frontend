@@ -1,10 +1,13 @@
-import { compact, isEqual, noop, partial, defer } from 'underscore';
+import { compact, each, isEqual, partial, defer, result } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
 import localStore from 'js/utils/local-store';
 
-import RouterApp from 'js/base/routerapp';
+import App from 'js/base/app';
+import EventRouter from 'js/base/event-router';
+import { createRouteTable } from 'js/base/routing/route-table';
+import { createRouteDispatch } from 'js/base/routing/route-dispatch';
 
 import SearchApp from 'js/apps/globals/search/search_app';
 import StateModel from 'js/apps/globals/nav/nav_state';
@@ -137,10 +140,33 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
   },
 ]);
 
-export default RouterApp.extend({
-  // NOTE: Don't stop this app on no match
-  onNoMatch: noop,
-  startOnRoute: false,
+// Navigation is a persistent Application with a URL adapter, independent of the
+// workspace's selected content lifetime. Unrelated routes never stop its shell.
+export default App.extend({
+  constructor: function() {
+    const table = createRouteTable(result(this, 'eventRoutes'));
+    this.router = new EventRouter({
+      channel: Radio.channel('event-router'),
+      routeTriggers: table.triggers,
+    });
+    this.routeDispatch = createRouteDispatch({
+      dispatch: ({ route: { definition, eventArgs } }) => definition.action(...eventArgs),
+      onError: error => window.reportError(error),
+    });
+    each(table.triggers, (patterns, event) => {
+      this.listenTo(this.router.getChannel(), event, (...args) => {
+        this.routeDispatch.accept(table.context(event, args));
+      });
+    });
+    this.on('before:destroy', () => {
+      this.routeDispatch.dispose();
+      this.router.destroy();
+    });
+    App.apply(this, arguments);
+  },
+  replaceUrl(url) {
+    Backbone.history.navigate(url, { trigger: false, replace: true });
+  },
   channelName: 'nav',
   childApps: {
     search: SearchApp,
@@ -234,7 +260,7 @@ export default RouterApp.extend({
     const workspaces = currentUser.getWorkspaces();
 
     const rootRoute = {
-      action: 'setWorkspace',
+      action: this.setWorkspace.bind(this),
       route: '',
       root: true,
     };
@@ -243,7 +269,7 @@ export default RouterApp.extend({
     return workspaces.reduce((routes, workspace) => {
       const route = workspace.get('slug');
       routes[`workspace:${ route }`] = {
-        action: partial(this.setWorkspace, route),
+        action: partial(this.setWorkspace.bind(this), route),
         root: true,
         route: [route, `${ route }/*route`],
       };
