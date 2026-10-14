@@ -1,0 +1,12 @@
+<span class="loader__text">{{ @intl.patients.shared.interactions.interactionsStatusViews.loading }}</span>
+<div aria-hidden="true">
+  {{#each items}}
+    <div class="patient-interactions-loading__item">
+      <span class="skeleton-loading__shape patient-interactions-loading__marker"></span>
+      <div class="patient-interactions-loading__body">
+        <span class="skeleton-loading__shape patient-interactions-loading__heading"></span>
+        <span class="skeleton-loading__shape patient-interactions-loading__card"></span>
+      </div>
+    </div>
+  {{/each}}
+</div>
