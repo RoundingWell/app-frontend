@@ -1,25 +1,49 @@
-# Routing: RouterApp and SubRouterApp
+# Routing: route tree, shell, RouterApp and SubRouterApp
 
 How URL routing maps to running apps in this codebase. Read this before changing
-`src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`, or any application route
-definitions.
+`src/js/routes.js`, `src/js/router.js`, `src/js/base/routerapp.js`,
+`src/js/base/subrouterapp.js`, or the app frame's route handling.
 
 ## Responsibilities
 
-- **RouterApp** (`src/js/base/routerapp.js`) — owns URL ↔ event mapping for a
-  top-level area (Patients, Programs, Clinicians, Dashboards, Forms, Nav, Error).
-  It mounts its routes on the app Router (`src/js/router.js`), builds a normalized
-  route context on each match, manages the single current child app, and fires the
-  `before:appRoute` / `appRoute` lifecycle hooks.
-- **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns the
-  persistent navigation and a workspace content Application. Workspace switches
-  refresh navigation controls without stopping or removing the navigation shell.
-  Its shared child selector cancels superseded workspace activation; WorkspaceApp
-  receives the selected workspace explicitly and owns the data-loading signal.
-- **WorkspaceApp** (`src/js/apps/globals/app-frame/workspace_app.js`) — owns the
-  transient sidebar and area RouterApps. It reloads workspace data and replaces
-  those routers on workspace changes, supplies their workspace slug, and forwards
-  route transitions to navigation, sidebar, and latest-list services.
+- **Route tree** (`src/js/routes.js`) — the single static tree. Route names are the
+  event strings (`patient:flow:action`, `programs:all`, ...). `meta.area` selects the
+  area, `meta.isList` marks list routes for "Back to list". `root` and
+  `workspace` (`/:workspace`) redirect to the default list. Legacy flow URLs redirect
+  asynchronously. Aliases carry an `until` date.
+- **Router** (`src/js/router.js`) — the app `Router`. It intercepts and owns `/` and
+  URLs whose first segment is one of the user's workspace slugs. Server-owned paths
+  (`/forms/**`, `/shared/**`, `/api/**`, ...) are neither intercepted nor claimed by
+  not-found. `persistParams: ['workspace']` fills the workspace from the current match.
+  AppFrame registers the activation `handler` through `setRouteHandler`.
+- **Radio bridge** (`src/js/services/router-radio.js`) — `Radio.trigger('event-router',
+  name, ...args)` requests navigation: positional `args` map to the route's params in
+  path order (the current workspace fills `workspace`, except for the `workspace`
+  route itself, whose arg is the slug) and the rest become `info.args`. `default`
+  navigates to `root`. Names that are not routes (`notFound`, `unknownError`) are
+  handled by their listeners. `Radio.request('router', 'navigate' | 'back', ...)`
+  returns results.
+- **AppFrameApp** (`apps/globals/app-frame/app-frame_app.js`) — plain App. It starts
+  the persistent navigation, starts the router, and owns the route handler: a
+  `RouteOutlet` keyed `{ workspace }` selects WorkspaceApp and the handler then awaits
+  `WorkspaceApp.showRoute`. The handler awaits the whole chain, so `navigate().finished`
+  and `router.start()` mean the page is ready. A URL the router does not own renders
+  not-found at the current URL.
+- **WorkspaceApp** (`apps/globals/app-frame/workspace_app.js`) — plain App. It owns
+  the transient sidebar and a `RouteOutlet` keyed by `meta.area`. It imports the areas
+  the user may use together with the workspace data (one set keeps stylesheet order
+  stable) and registers them once. A match without an area (unmatched path, failed
+  redirect) stops the area content; an area the user may not use renders not-found. An error
+  (`notFound`, `unknownError`) stops the area content too.
+- **Workspace service** (`services/workspace.js`) — reflects the route's `workspace`
+  param as the current workspace. It does not drive routing.
+- **Route listeners** — NavApp (selection), SidebarService (stop), LatestListService
+  (stores `match.url` and `match.info`; "Back to list" navigates to that URL),
+  HistoryService (`change:route`) and ErrorApp listen to the router's `route` event.
+- **RouterApp** (`src/js/base/routerapp.js`) — temporary adapter for an area (Patients,
+  Programs, Clinicians, Dashboards) until the area is converted to outlets (Phase 3b).
+  `showRoute(match)` calls the action registered in `eventRoutes` with the route's
+  params by position, then `info.args`. It owns no URLs.
 - **SubRouterApp** (`src/js/base/subrouterapp.js`) — a child app that dispatches a
   route to a local handler without owning any URLs. It carries declarative scope
   identity, retains the latest route while loading, and re-dispatches after its
@@ -28,55 +52,31 @@ definitions.
   It renders a view and has no route dispatch or scope. RouterApp starts these via
   `startCurrent` and never asks them for a route or scope.
 
-## Route definitions (RouterApp `eventRoutes`)
+## Area actions (RouterApp `eventRoutes`)
 
 ```js
 eventRoutes: {
-  'patient:workflow': {
-    action: 'showPatient',          // method name or function (positional handler)
-    route: [                        // first route is canonical
-      'patient/:id/workflow',
-      'patient/:id/legacy-alias',
-    ],
-    // root: true,                  // skip the workspace-slug prefix
-    meta: { isList: true },         // behavioral flags live under meta
-  },
-}
+  'patient:workflow': { action: 'showPatient' },   // method name
+},
 ```
 
-Structural fields: `action`, `route`, `root`. Behavioral flags go under `meta`
-(`isList`). `action` is a method name (resolved on the RouterApp)
-or a function; `route` is a string or a non-empty array of alias strings; non-root
-routes are prefixed with the `workspaceSlug` supplied by WorkspaceApp, so they must not
-begin with `/`.
+The path lives in `routes.js`. An area's `eventRoutes` maps every route name with
+`meta.area` equal to the area to the method that handles it. Handlers take the route's
+params by position (`showPatient(patientId)`), then the trailing `info.args`.
 
 ### Aliases
 
-`route` may be an array. Every alias is mounted (each prefixed with the workspace
-slug unless `root`), and the **first** entry is canonical. An alias is a string or
-`{ path, until }`; the Router replaces an alias URL with the canonical URL before
-dispatch. Parameter names must be unique within a route and an alias must declare the
-same names as its canonical path (`program/:programId/action/:actionId`).
+An alias is a full path in `routes.js` (`aliases: [{ path: '/:workspace/...', until }]`)
+that declares the same params as its canonical path. The router replaces an alias URL
+with the canonical URL before dispatch. The patient app carries three —
+`patient/dashboard/:patientId`, `patient/archive/:patientId`, and
+`patient/archive/:patientId/action/:actionId` — supported until September 2, 2027.
+New code, and routine test setup, must use the canonical route or the event name; a
+legacy alias appears only in the one compatibility spec that proves the aliases still
+route.
 
-An event with no `route` renders in place and has no URL (`notFound`, `unknownError`).
-A `redirect` (method name or function, `(match, { signal }) => target`) resolves the
-route to another route instead of dispatching an `action` (legacy flow URLs).
-
-### Radio bridge
-
-`Radio.trigger('event-router', name, ...args)` only requests navigation: the
-router-radio service maps positional `args` to the route's parameter names (the rest
-become trailing handler arguments through `info.args`) and calls `router.navigate`.
-RouterApps are dispatched from the Router's `route` event, never from the trigger, and
-every other RouterApp receives `no:match`. `default` navigates to `root`;
-`notFound` and `unknownError` render in place without navigating.
-
-Non-canonical aliases exist only to keep old bookmarks working during a stated
-compatibility window. The patient app carries three — `patient/dashboard/:id`,
-`patient/archive/:id`, and `patient/archive/:id/action/:actionId` — supported
-until September 2, 2027. New code, and routine test setup, must use the
-canonical route or the event name; a legacy alias appears only in the one
-compatibility spec that proves the aliases still route.
+An event with no route, `notFound` and `unknownError`, renders in place with no URL
+change: ErrorApp shows the error over the current URL and removes it on the next route.
 
 ### Patient flow action targets
 
@@ -88,36 +88,30 @@ Direct loads, refresh, and browser history apply the URL target on each page
 activation; live updates do not reapply it. Plain `patient:flow` links have no
 target. `patient:flow:action` continues to open the action detail page.
 
+## Focus
+
+The router intercepts with manual focus and scroll. `AppView` (the owner of the content
+region) focuses the region on `route:ready` for a new page, not on the initial load.
+Scroll is not managed by the shell: pages scroll inside their own regions, so restoring
+scroll on back/forward belongs to the Views that own those regions.
+
 ## Route context
 
-Each match is normalized before any hook runs:
+Each match is normalized before its action runs:
 
 ```js
 {
   event,            // 'patient:workflow'
   eventArgs,        // ['patient-id', ...] — positional, as the action receives them
-  definition: { action, route, root, meta },
+  definition: { action },
 }
 ```
 
-- `getCurrentRoute()` returns this object; `getCurrentRouteMeta()` returns its `meta`.
-- `before:appRoute` and `appRoute` receive the RouterApp followed by the context
-  object: `(router, routeContext)`.
-- Action handlers still receive **positional** arguments (`showPatient(patientId)`).
+- `getCurrentRoute()` returns this object.
+- Action handlers receive **positional** arguments (`showPatient(patientId)`).
 
-Side-effect order during an area route transition (deliberate — the current route
-is set first so it is observable in `before:appRoute`):
-
-```text
-set current route → before:appRoute
-  → WorkspaceApp selects nav, stops sidebar, applies latest-list metadata
-  → action handler → appRoute
-```
-
-Router-specific `onBeforeAppRoute` / `onAppRoute` hooks use the same
-`(router, routeContext)` signature. Root/workspace routing in `NavApp` and global
-error routing are not coordinated by WorkspaceApp because they are not area routers
-instantiated through `WorkspaceApp.initRouter()`.
+Shell effects of a route (nav selection, sidebar stop, latest-list metadata) are
+router `route` listeners; areas do not coordinate them.
 
 ## Route failures
 
@@ -125,7 +119,9 @@ Return the activation promise from top-level route handlers. Put user-facing err
 presentation in `onRouteError(error, routeContext)`: RouterApp invokes it only for
 the current route, including failures that finish cleanup after navigation.
 Avoid duplicating route-identity checks in individual handler catches. If an error
-hook starts asynchronous reporting, handle that promise's rejection explicitly.
+hook starts asynchronous reporting, handle that promise's rejection explicitly. A
+workspace load failure rejects the router handler; Radio-triggered navigations report
+it with `addError`.
 
 ## Scope identity (which child is "the same")
 
@@ -192,10 +188,11 @@ routeActions: {
 
 ## Stop and restart
 
-Both router classes use the internal `RouteBaseApp` base for child selection.
-It has no URL, Radio-channel, resource-scope comparison, or error-presentation
-policy. Keep those concerns in the routing adapters and application subclasses;
-this boundary allows future extraction without adding a second routing backend.
+RouterApp and SubRouterApp use the internal `RouteBaseApp` base for child selection
+(until Phase 3b replaces it with `RouteOutlet`). AppFrame and WorkspaceApp select their
+children with `RouteOutlet` from `@mnjs/router/outlet`. Neither has URL, Radio-channel,
+resource-scope comparison, or error-presentation policy; keep those concerns in the
+routing adapters and application subclasses.
 
 - Selection stops the previous child synchronously before starting the replacement.
   Startup remains asynchronous, and only the newest selection can complete.
@@ -223,13 +220,12 @@ this boundary allows future extraction without adding a second routing backend.
 
 Async loading belongs in `prepareStart(options, { signal })`. Return the prepared
 value for `onStart(app, options, result)`, and pass the lifecycle signal through to
-cancelable requests. Route dispatch stays synchronous — do not add another async
-layer. Route handlers should return their activation promise. Route completion
-notifications still fire synchronously after invoking the handler; they do not
-mean that async content is ready. Synchronous throws and returned async failures are observed through
+cancelable requests. Route handlers should return their activation promise, which the
+router handler awaits. Code after an `await` in a route handler checks the match
+`signal` (`signal.throwIfAborted()`) before starting children. Synchronous throws and returned async failures are observed through
 `onRouteError(error, routeContext)` (the browser error channel by default, also observed by Datadog), including initial
 SubRouterApp dispatch from `onStart`. Domain handlers may handle expected errors
-before returning. Radio dispatch remains synchronous.
+before returning. Radio stays synchronous: a trigger only requests navigation.
 
 ## Common mistakes
 
@@ -238,19 +234,16 @@ before returning. Radio dispatch remains synchronous.
 - Reading `currentRoute` from startup options. Use `getCurrentRoute()`.
 - Forgetting `startCurrentRoute()` in a `SubRouterApp`'s `onStart()` — the route never
   dispatches.
-- Accessing the private `_routes` / `_currentRoute` instead of `getCurrentRoute()` /
-  `getCurrentRouteMeta()`.
-- A non-root `route` beginning with `/` (the workspace slug is prepended, producing a
-  double slash).
-- Leaving `isList` at the top level of a definition instead of
-  under `meta` (silently stops updating the latest-list history).
-- Adding global shell effects directly to RouterApp. WorkspaceApp owns nav selection,
-  transient-sidebar cleanup, and latest-list metadata handling for area routes.
+- Accessing the private `_routes` / `_currentRoute` instead of `getCurrentRoute()`.
+- Leaving `isList` or `area` out of a route's `meta` in `routes.js`: the list is not
+  remembered for "Back to list", or the route renders nothing.
+- Adding global shell effects directly to RouterApp. Nav selection, sidebar cleanup,
+  and latest-list metadata are `route` listeners in their services.
 
 ## AI checklist for adding or changing a route
 
-1. Add/extend the `RouterApp` `eventRoutes` entry: `action`, `route` (string or alias
-   array), and `meta` for any behavioral flag. Keep IDs out of `meta`.
+1. Add the route to `src/js/routes.js` (name, path, aliases, `meta.area`, `meta.isList`) and its action to the area `RouterApp` `eventRoutes`. Keep IDs out
+   of `meta`.
 2. Declare static children with `childApps`; use `addChildApp()` for configured or
    dynamically created instances. Implement the positional
    action handler and return `startRoute(appName, options)` (scoped child) or

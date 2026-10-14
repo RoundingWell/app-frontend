@@ -118,11 +118,11 @@ Prefer extending existing specs (`default-route.e2e.cy.js`, `app-nav.e2e.cy.js`,
 ## Target application shape (end of Phase 3)
 
 ```text
-src/js/routes.js                    static route tree (names = D6), meta { area, isList, focus }
+src/js/routes.js                    static route tree (names = D6), meta { area, isList }
 src/js/router.js                    new Router(...), intercept/notFound predicates, persistParams ['workspace']
 src/js/services/router-radio.js     event-router trigger bridge + 'router' request channel
 AppFrameApp                         router.handler owner → RouteOutlet keyed { workspace }
-  WorkspaceApp                      route: RouteState; RouteOutlet keyed by meta.area (lazy import)
+  WorkspaceApp                      route: RouteState; RouteOutlet keyed by meta.area (areas imported as one set)
     PatientsArea / ProgramsArea …   plain App + RouteOutlet; explicit name → child map; .catch error policy
       PatientApp / ProgramApp …     plain App; reads options.route; nested RouteOutlet
 NavApp, SidebarService, LatestList, HistoryService  listenTo(router, 'route')
@@ -142,17 +142,19 @@ Deleted by the end: `event-router.js`, `routerapp.js`, `subrouterapp.js`,
 - `default` → navigate to `root` (redirects to the default list).
 - `notFound` / `unknownError` (status) → ErrorApp renders in place; no URL change.
 - `Radio.request('router', 'navigate', name, params, { history, query, info, state })` →
-  `finished` promise (`false` when superseded). Also accepts a URL: `(url, { history })`.
+  `finished` promise (`false` when superseded). Also accepts a URL: `(url, { history, info })`.
+  Positional trigger args skip `workspace` (the current workspace fills it); the
+  `workspace` route takes the slug: `Radio.trigger('event-router', 'workspace', slug)`.
 - `Radio.request('router', 'back', fallback)` → `router.back()`, or `fallback()` when the
   router owns no previous entry.
 - Phase 3d adds `Radio.request('router', 'url', name, params, { query })` → string;
   Phase 3b adds `Radio.request('router', 'current')` → match.
 - Callers needing query params (D5) or replace use the request form.
-- RouterApps are dispatched only from the router's `route` event. A trigger never
-  dispatches, or every navigation would dispatch twice. The bridge
+- Area RouterApps are never dispatched from a trigger. The router handler (AppFrame →
+  WorkspaceApp, awaited, D4) calls `RouterApp.showRoute(match)`. The bridge
   (`src/js/services/router-radio.js`) owns the channel: triggers become
-  `router.navigate`; `route` events become RouterApp dispatch, and `no:match` for the
-  other RouterApps.
+  `router.navigate`; names that are not routes (`notFound`, `unknownError`) are left to
+  ErrorApp and WorkspaceApp, which listen to the channel.
 - The router never intercepts `reload` navigations (`location.reload()` must reload the
   document); `refresh()` is the soft reload.
 
@@ -251,7 +253,7 @@ Scope: `src/js/routes.js` (new, full tree), `src/js/router.js`,
 - AppFrame owns `router.handler`: RouteOutlet keyed `{ workspace }` selects WorkspaceApp
   (passes `route`). The workspace service reflects the route param; it no longer drives
   routing. Unknown or inaccessible workspace slug → not-found.
-- WorkspaceApp: RouteOutlet keyed by `meta.area`, lazy `import()` per area, permission
+- WorkspaceApp: RouteOutlet keyed by `meta.area`, dynamic `import()` of the areas the user may use (one set, for stylesheet order), permission
   check → not-found. Area RouterApps receive `route` through a temporary adapter that
   calls their existing action handlers.
 - Nav, sidebar stop, latest-list (stores `match.url`), HistoryService:
@@ -389,7 +391,72 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   `/one/bogus`) shows nothing, because the per-workspace wildcard matches; Phase 3a's
   single tree fixes it. Cut until a caller exists: `router` requests `url` (3d) and
   `current` (3b).
-- Phase 3a: not started
+- Phase 3a: done, awaiting review gate (not pushed to CI yet; see Not verified).
+  Step 1 (package, commit `9276e3988`): `RouteOutlet` matches Marionette 5.0.0's
+  synchronous `stop()` (thenable-stop tracking and its tests removed), listens to owner
+  `before:start`/`before:stop`/`stop`/`before:destroy`/`destroy` instead of overwriting
+  `owner.stop/restart/destroy` (two gaps documented in DESIGN.md: an already-stopped
+  owner emits nothing, and a first start and a restart of a stopped owner both emit
+  `before:start`); the memory driver aborts the ongoing navigation before dispatching
+  the new `navigate` event, even if that one is canceled, pinned in the conformance
+  suite (passes on the native API in Chrome and Firefox). Review findings 6–8 are
+  resolved.
+  Step 2: `src/js/routes.js` is the single static tree (`/:workspace` parent, names =
+  D6, `meta.area|isList`, aliases with `until`, legacy flow async redirects moved
+  out of PatientsMainApp); `src/js/router.js` has `persistParams: ['workspace']`, the
+  allowlist predicate (`/` and the user's workspace slugs) and `setRouteHandler`.
+  AppFrame is a plain App that owns the handler with a `RouteOutlet` keyed `{ workspace }`
+  and starts the router once it is running, without blocking the shell on the first page
+  (a start failure goes to `handleErrors` as before); WorkspaceApp is a plain App with a
+  `RouteOutlet` keyed by `meta.area`. It `import()`s the areas the user may use together
+  with the workspace data and registers them once; an area the user may not use renders
+  not-found. The handler awaits AppFrame → WorkspaceApp → area (D4). Deviation from the
+  Phase 3a bullet: areas are not imported on demand at route time. Importing only the
+  routed area changed the stylesheet order (the programs area's `display: flex` lost to
+  the shared `work-card.scss` `display: grid`, breaking `program-flow` and `workflows`
+  specs against the Phase 2 baseline), so the areas still load as one set. `RouterApp` is now only the temporary
+  adapter (`showRoute(match)` → positional args + `info.args`); `mount`, `refresh`,
+  `noMatch`, `startOnRoute`, `before:appRoute`/`appRoute`, the bridge `dispatch` and the
+  two-pass dispatch are gone. NavApp (plain App), SidebarService, LatestListService (stores
+  `match.url` and `match.info`), ErrorApp (plain App; shows at the current URL, stops on
+  the next route) and the workspace service (reflects the route param) listen to the router.
+  The workspace menu triggers `workspace` with the slug. `/one/bogus` renders not-found
+  on back/forward. AppView focuses the content region on `route:ready` for a new page
+  (not on the initial load). The `meta.focus` opt-out was not needed: no spec showed a
+  route losing a focus target to it, so no route sets it.
+  Behavior changes, all consequences of the static tree and allowlist, none changing a
+  URL: a URL outside `/` and the user's workspaces (for example `/route-does-not-exist`)
+  renders not-found without loading a workspace; "Back to Your Workspace" after a failed
+  workspace load retries the load; a legacy `/flow/:id` URL resolves its patient before
+  the workspace loads (the router runs an async redirect before the handler); a nav click during a workspace load navigates
+  instead of being ignored (the latest navigation wins); an area the user may not use
+  renders not-found.
+  Limits: the content region never scrolls (every page scrolls in its own region), so no
+  scroll restoration was added; traversing back onto an entry whose first path segment
+  is not a workspace slug (for example a directly loaded `/bogus` entry) is not
+  intercepted, so it shows nothing new; `initial: true` for the direct-load page match
+  is not directly observable in the UI (the focus policy depends on it and is covered by
+  the focus spec).
+  Verified (Node 24.15, preview on a private port): `npm run eslint`, `stylelint`, package
+  tests 252/252, router-driver component spec 34/34 in Chrome and Firefox, routerapp /
+  latest-list / subrouterapp / route-base-app / sidebar component specs, and all 35 E2E
+  specs run one at a time (I4, I5, I6, I13 in `app-nav`, `error`, `default-route`). Guards
+  were removed one at a time and the targeted spec failed each time: the initial-load
+  focus skip, the unclaimed-URL not-found, the `hasRoute` bridge guard, ErrorApp stopping
+  on the next route, the not-found stop of area content, the inaccessible-area not-found,
+  the area permission filter and register-once. Not provable in E2E: the
+  `signal.throwIfAborted()` after the workspace outlet in AppFrame (a superseded
+  navigation only reports a swallowed error); the matching check after the area outlet
+  was removed because the area start has no async gap until Phase 3b. Not verified: CI
+  full suite, Safari, Edge, Datadog RUM view changes, `editorconfig-checker` (binary
+  unavailable). Environment note: another session may serve a preview on port 8090;
+  Cypress `localhost` can then hit the wrong app, so runs used `--config baseUrl` with a
+  private port.
+  Specs changed: `patient-flow` (the legacy URL visit does not wait for workspace data), `error` (root unknown path without waiting for a workspace; the retry
+  after a failed workspace load), `app-nav` (I5 now ends on the latest navigation;
+  inaccessible areas render not-found), `default-route` (not-found on back/forward,
+  `finished` means ready, content focus, latest navigation wins while an area loads),
+  `routerapp` and `latest-list` component specs rewritten.
 - Phase 3b: not started
 - Phase 3c: not started
 - Phase 4: not started

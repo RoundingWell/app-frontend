@@ -10,7 +10,7 @@ Load a scoped overlay only when the task touches:
 - test authoring, test review, or coverage validation -> `test/README.md`
 - `scripts/**` -> `scripts/AGENTS.md`
 - `packages/care-ops-five9/**` -> `packages/care-ops-five9/AGENTS.md`
-- routing infrastructure (`src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`) or application route definitions -> `src/js/base/routing.md`
+- routing infrastructure (`src/js/routes.js`, `src/js/router.js`, `src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`) or application route definitions -> `src/js/base/routing.md`
 - data access, entities, or `src/js/entities-service/**` -> `src/js/entities-service/README.md`
 
 ## Instruction Priority

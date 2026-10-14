@@ -374,8 +374,18 @@ their DOM). Recommended application policy:
 
 - push/replace to a new page: after `route:ready`, focus the page heading or main region
   (`tabindex="-1"`) and scroll the content region to the top; honor `#fragment`.
-- in-place navigation (e.g. opening a sidebar): per-route `meta.focus` decides.
-- traverse: restore region scroll positions saved per entry `key`.
+  Not on the initial load, where the document load already announces the page.
+- in-place navigation (e.g. opening a sidebar): per-route `meta.focus: false` opts out
+  of the focus move; the route owns focus.
+- traverse: restore region scroll positions saved per entry `key` (owned by the Views
+  that scroll).
+
+app-frontend v1 (`AppView`) implements the focus part for the content region as the main
+region: a new page takes focus there except on the initial load. No route needs the
+`meta.focus` opt-out yet (pages that focus their own targets do so after `route:ready`).
+Scroll is not managed: every page scrolls inside its own region, never the content
+region, so per-entry scroll restoration belongs to the Views that own those regions.
+Fragment handling is not implemented.
 
 ## Testing strategy
 
