@@ -28,9 +28,31 @@
 
 /**
  * Adapts `window.navigation` to the Driver contract.
+ *
+ * `cancelTraverse` states what the HTML specification allows (a programmatic
+ * traversal fires a cancelable `navigate` event); the event's own `cancelable`
+ * remains authoritative, since a traversal started from browser UI without user
+ * activation is not cancelable.
+ *
  * @param {object} [navigation] Defaults to `window.navigation`.
  * @returns {Driver}
  */
-export function navigationDriver(navigation) {
-  throw new Error('Not implemented');
+export function navigationDriver(navigation = globalThis.navigation) {
+  if (!navigation) {
+    throw new TypeError('navigationDriver requires the Navigation API');
+  }
+
+  return {
+    capabilities: { cancelTraverse: true, interceptsLinks: true },
+    get currentEntry() {
+      return navigation.currentEntry;
+    },
+    entries: () => navigation.entries(),
+    navigate: (url, options) => navigation.navigate(url, options),
+    reload: options => navigation.reload(options),
+    back: () => navigation.back(),
+    traverseTo: key => navigation.traverseTo(key),
+    updateCurrentEntry: options => navigation.updateCurrentEntry(options),
+    addEventListener: (type, listener, options) => navigation.addEventListener(type, listener, options),
+  };
 }
