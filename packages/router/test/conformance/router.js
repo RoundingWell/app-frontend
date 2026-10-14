@@ -260,5 +260,22 @@ export function routerConformance({ name, createDriver, describe, it, assert }) 
       assert.deepEqual(h.router.getCurrent().state, { scroll: 4, focus: 'main' });
       assert.equal(h.driver.currentEntry.getState()['@mnjs/router'], true);
     });
+
+    scenario('aborts a finished match signal when the next match commits and when the router stops', async h => {
+      await h.moveTo('start');
+      await h.router.start();
+      await h.router.navigate('page', { run: h.run, id: 'one' }).finished;
+      const first = h.last().signal;
+      assert.equal(first.aborted, false);
+
+      await h.router.navigate('page', { run: h.run, id: 'two' }).finished;
+      const second = h.last().signal;
+
+      assert.equal(first.aborted, true);
+      assert.equal(second.aborted, false);
+
+      h.router.stop();
+      assert.equal(second.aborted, true);
+    });
   });
 }

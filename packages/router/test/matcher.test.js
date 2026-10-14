@@ -591,3 +591,41 @@ describe('Matcher: mount', () => {
     assert.equal(names(matcher, '/outer/inner'), 'inner');
   });
 });
+
+describe('Matcher: matchPrefix', () => {
+  const matcher = () => new Matcher([
+    { name: 'root', path: '/' },
+    {
+      path: '/:workspace',
+      children: [
+        { name: 'schedule', path: 'schedule' },
+        { path: 'patient/:patientId', children: [{ name: 'patient:workflow', path: 'workflow' }] },
+      ],
+    },
+  ]);
+
+  it('returns the params of the deepest unnamed prefix node containing the path', () => {
+    assert.deepEqual(matcher().matchPrefix('/w1/unknown'), { workspace: 'w1' });
+    assert.deepEqual(matcher().matchPrefix('/w1/patient/p1/unknown'), { workspace: 'w1', patientId: 'p1' });
+    assert.deepEqual(matcher().matchPrefix('/w1'), { workspace: 'w1' });
+  });
+
+  it('decodes params and ignores a malformed escape', () => {
+    assert.deepEqual(matcher().matchPrefix('/a%20b/x'), { workspace: 'a b' });
+    assert.deepEqual(matcher().matchPrefix('/%E0%A4%A/x'), {});
+  });
+
+  it('returns no params when no prefix node contains the path', () => {
+    assert.deepEqual(new Matcher([{ name: 'root', path: '/' }]).matchPrefix('/x/y'), {});
+    assert.deepEqual(matcher().matchPrefix('/'), {});
+  });
+
+  it('follows mounts and unmounts', () => {
+    const target = new Matcher([]);
+    assert.deepEqual(target.matchPrefix('/w1/x'), {});
+    const unmount = target.mount([{ path: '/:workspace', children: [{ name: 'a', path: 'a' }] }]);
+    assert.deepEqual(target.matchPrefix('/w1/x'), { workspace: 'w1' });
+    unmount();
+    assert.deepEqual(target.matchPrefix('/w1/x'), {});
+  });
+});

@@ -384,10 +384,30 @@ describe('Router dispatch and events', () => {
 
     const match = lastRoute(context);
     assert.equal(match.name, 'notFound');
-    assert.deepEqual(match.params, {});
+    assert.deepEqual(match.params, { workspace: 'w1' });
     assert.equal(match.query.get('x'), '1');
     assert.equal(context.driver.currentEntry.url, 'http://localhost/w1/does-not-exist?x=1');
     assert.deepEqual(context.log, ['route:notFound', 'handler:notFound', 'ready:notFound']);
+  });
+
+  it('gives notFound the params of the deepest unnamed prefix so persistParams still apply', async() => {
+    const context = await started({ url: 'http://localhost/w1/does-not-exist/deeper' });
+
+    assert.equal(context.router.getCurrent().name, 'notFound');
+    assert.deepEqual(context.router.getCurrent().params, { workspace: 'w1' });
+    assert.equal(context.router.url('schedule'), '/w1/schedule');
+
+    await context.router.navigate('schedule').finished;
+    assert.equal(context.driver.currentEntry.url, 'http://localhost/w1/schedule');
+  });
+
+  it('gives notFound no params outside every prefix node', async() => {
+    const context = await started({ url: 'http://localhost/', routes: [{ name: 'root', path: '/' }] });
+
+    assert.equal(await context.router.navigate('/nowhere/x').finished, true);
+
+    assert.equal(context.router.getCurrent().name, 'notFound');
+    assert.deepEqual(context.router.getCurrent().params, {});
   });
 
   it('returns from a notFound entry with back() without looping', async() => {
@@ -893,6 +913,29 @@ describe('Router.stop', () => {
 
     assert.deepEqual(context.log, []);
     assert.deepEqual(context.driver.documentNavigations, ['http://localhost/w1/worklist/a']);
+  });
+
+  it('aborts a finished match signal when the next match commits', async() => {
+    const context = await started();
+    await context.router.navigate('worklist', { worklistId: 'a' }).finished;
+    const first = lastRoute(context);
+    assert.equal(first.signal.aborted, false);
+
+    await context.router.navigate('worklist', { worklistId: 'b' }).finished;
+
+    assert.equal(first.signal.aborted, true);
+    assert.equal(lastRoute(context).signal.aborted, false);
+  });
+
+  it('aborts a finished match signal when the router stops', async() => {
+    const context = await started();
+    await context.router.navigate('worklist', { worklistId: 'a' }).finished;
+    const { signal } = lastRoute(context);
+    assert.equal(signal.aborted, false);
+
+    context.router.stop();
+
+    assert.equal(signal.aborted, true);
   });
 
   it('aborts the in-flight signal and suppresses later events', async() => {

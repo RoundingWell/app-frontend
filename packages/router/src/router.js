@@ -88,8 +88,8 @@ function outcome(promise) {
   });
 }
 
-function notFoundBase(name, url) {
-  return { name, params: {}, query: new URLSearchParams(url.search), url, meta: {}, branch: [], alias: null };
+function notFoundBase(name, params, url) {
+  return { name, params, query: new URLSearchParams(url.search), url, meta: {}, branch: [], alias: null };
 }
 
 function toMatch(base, nav, key, rawState) {
@@ -124,6 +124,7 @@ export class Router {
   #local = null;
   #chain = null;
   #current = null;
+  #currentController = null;
 
   /** @param {RouterOptions} options */
   constructor(options) {
@@ -156,6 +157,7 @@ export class Router {
 
   stop() {
     this.#abortLocal();
+    this.#abortCurrent();
     this.#session?.controller.abort();
     this.#session = null;
   }
@@ -300,6 +302,11 @@ export class Router {
     this.#local = null;
   }
 
+  #abortCurrent() {
+    this.#currentController?.abort();
+    this.#currentController = null;
+  }
+
   #intercepts(event, url) {
     if (!event.canIntercept || event.hashChange) return false;
     if (event.downloadRequest !== null || event.formData !== null) return false;
@@ -323,10 +330,12 @@ export class Router {
   }
 
   #navigationFor(event, url, chain) {
+    const controller = new AbortController();
     return {
       url,
       chain,
-      signal: AbortSignal.any([event.signal, this.#session.controller.signal]),
+      controller,
+      signal: AbortSignal.any([event.signal, this.#session.controller.signal, controller.signal]),
       navigationType: event.navigationType,
       initial: chain.initial,
       info: event.info,
@@ -340,11 +349,13 @@ export class Router {
   async #dispatchInitial(session) {
     const entry = this.#driver.currentEntry;
     const local = new AbortController();
+    const controller = new AbortController();
     this.#local = local;
     const nav = {
       url: new URL(entry.url),
       chain: newChain(true),
-      signal: AbortSignal.any([local.signal, session.controller.signal]),
+      controller,
+      signal: AbortSignal.any([local.signal, session.controller.signal, controller.signal]),
       navigationType: 'push',
       initial: true,
       info: undefined,
@@ -384,7 +395,7 @@ export class Router {
   #notFoundPlan(url) {
     const { notFound } = this.#options;
     if (!notFound?.within(url)) return null;
-    return { base: notFoundBase(notFound.name, url), pending: null };
+    return { base: notFoundBase(notFound.name, this.#matcher.matchPrefix(url), url), pending: null };
   }
 
   #redirectPlan(result, nav) {
@@ -459,6 +470,8 @@ export class Router {
 
   #commit(base, nav) {
     const entry = this.#driver.currentEntry;
+    this.#abortCurrent();
+    this.#currentController = nav.controller;
     const match = toMatch(base, nav, entry.key, this.#mark(entry));
     nav.match = match;
     this.#current = match;

@@ -356,6 +356,7 @@ function compileNode(definition, parent, state, scope) {
     branch: [...parent.branch, entry],
   };
   if (definition.name !== undefined) registerRoute(definition, node, tokens, state, scope);
+  else state.prefixes.push({ names, depth: node.branch.length, pattern: createPattern(`${ path }{/*}?`, path) });
   for (const child of definition.children ?? []) compileNode(child, node, state, scope);
 }
 
@@ -367,7 +368,7 @@ function compileMount(mount, state) {
 
 // Mounts whose parent is not (or no longer) registered stay inactive until it returns.
 function compile(mounts) {
-  const state = { byName: new Map(), entries: [], aliases: [] };
+  const state = { byName: new Map(), entries: [], aliases: [], prefixes: [] };
   let pending = mounts.map((mount, index) => ({ ...mount, index }));
   while (pending.length) {
     const ready = pending.filter(mount => mount.parent === undefined || state.byName.has(mount.parent));
@@ -459,6 +460,21 @@ export class Matcher {
       return params && toResult(entry, params, target);
     }
     return null;
+  }
+
+  /**
+   * Params of the deepest unnamed prefix node that contains `url.pathname`, for
+   * URLs no route matches. Returns {} when no prefix node matches.
+   * @param {URL | string} url
+   * @returns {Record<string, string>}
+   */
+  matchPrefix(url) {
+    const pathname = normalizePathname(toURL(url).pathname);
+    const containing = this.#compiled().prefixes
+      .filter(prefix => prefix.pattern.test({ pathname }))
+      .sort((a, b) => b.depth - a.depth)[0];
+    if (!containing) return {};
+    return decodeParams(containing.names, containing.pattern.exec({ pathname }).pathname.groups) ?? {};
   }
 
   /**

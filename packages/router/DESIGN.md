@@ -165,12 +165,16 @@ pattern.
   info,                             // per-navigation transient data (not persisted)
   state,                            // persisted entry state (driver getState())
   key,                              // history entry key
-  signal,                           // aborted when superseded or the router stops
+  signal,                           // aborted when the next match commits, the navigation is
+                                    // superseded, or the router stops (also after `finished`)
   userInitiated,
 }
 ```
 
-`notFound` matches have `name` equal to the configured not-found name and empty params.
+`notFound` matches have `name` equal to the configured not-found name, empty `meta`
+and `branch`, and the params of the deepest unnamed prefix node whose path contains the
+URL (`workspace` for `/w1/unknown` under `/:workspace`), so `persistParams` keeps
+working while not-found is current. Without a containing prefix node, `params` is empty.
 
 ## Router API
 
