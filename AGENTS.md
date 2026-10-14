@@ -68,8 +68,10 @@ belong to this application.
   template data. `src/js/app.js` imports both setup modules before app consumers.
 - Events/routing: use `Radio` from `marionette`. The local
   `src/js/base/event-router.js` extends `Backbone.Router`; `Backbone.history` owns
-  URL/history handling. AppFrame and the local RouterApp/SubRouterApp classes own
-  feature selection and loading; see `src/js/base/routing.md` for app policy.
+  URL/history handling. Independent objects in `src/js/base/routing/**` supply
+  route dispatch, shared detail delivery and child selection. RouterApp/SubRouterApp
+  are optional adapters; Nav and Patient compose plain Applications. See
+  `src/js/base/routing.md` for app policy and show/specify/verify examples.
 - Ownership entrypoint: `src/js/app.js` owns the `#root` Region, RootView, and
   bootstrap/dialer/app-frame child Applications. It configures shared popup Regions
   and owns its document/window listeners. Follow each feature's existing owner.

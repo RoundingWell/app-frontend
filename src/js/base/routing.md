@@ -1,254 +1,168 @@
-# Routing: RouterApp and SubRouterApp
+# Routing: show, specify, verify
 
-How URL routing maps to running apps in this codebase. Read this before changing
-`src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`, or any application route
-definitions.
+## Show
 
-## Responsibilities
+Routing is composed from independent objects under `base/routing/`:
 
-- **RouterApp** (`src/js/base/routerapp.js`) — owns URL ↔ event mapping for a
-  top-level area (Patients, Programs, Clinicians, Dashboards, Forms, Nav, Error).
-  It registers routes with the local EventRouter, builds a normalized route
-  context on each match, manages the single current child app, and fires the
-  `before:appRoute` / `appRoute` lifecycle hooks.
-- **AppFrameApp** (`src/js/apps/globals/app-frame/app-frame_app.js`) — owns the
-  persistent navigation and a workspace content Application. Workspace switches
-  refresh navigation controls without stopping or removing the navigation shell.
-  Its shared child selector cancels superseded workspace activation; WorkspaceApp
-  receives the selected workspace explicitly and owns the data-loading signal.
-- **WorkspaceApp** (`src/js/apps/globals/app-frame/workspace_app.js`) — owns the
-  transient sidebar and area RouterApps. It reloads workspace data and replaces
-  those routers on workspace changes, supplies their workspace slug, and forwards
-  route transitions to navigation, sidebar, and latest-list services.
-- **SubRouterApp** (`src/js/base/subrouterapp.js`) — a child app that dispatches a
-  route to a local handler without owning any URLs. It carries declarative scope
-  identity, retains the latest route while loading, and re-dispatches after its
-  async startup completes.
-- **page App** — a plain `js/base/app` (e.g. worklist, schedule, dashboard, form).
-  It renders a view and has no route dispatch or scope. RouterApp starts these via
-  `startCurrent` and never asks them for a route or scope.
+| Object | Responsibility | Depends on an Application? |
+| --- | --- | --- |
+| `createRouteTable` | Workspace prefix, canonical generation, aliases, route context | No |
+| `EventRouter` | Backbone matching, raw query/splat arguments, synchronous Radio bridge | No |
+| `createRouteDispatch` | Latest navigation authority, optional preparation, error policy | No |
+| `createChildSelection` | Single selected destination, replacement, cleanup | No; takes public child callbacks |
+| `createRouteDelivery` | Latest detail over shared resource readiness | No; takes start/read/write/dispatch callbacks |
+| `createRouteActions` | Bound action dispatch and synchronous before/after notifications | No |
 
-## Route definitions (RouterApp `eventRoutes`)
+`NavApp` and `PatientApp` are real plain Applications using these objects.
+`RouterApp`, `SubRouterApp`, and `RouteBaseApp` remain optional convenience adapters
+for the other areas. They delegate to the same objects; consumers may use the
+objects directly or supply their own selection/readiness policy. No URL nesting
+creates an Application owner or requires a particular superclass.
+
+For a plain Application, build definitions separately, bind actions explicitly,
+and connect the URL adapter to dispatch:
 
 ```js
+const table = createRouteTable({
+  'patient:workflow': {
+    route: ['patient/:patientId/workflow', 'patient/dashboard/:patientId'],
+    action: patientId => patient.start({ patientId, region }),
+  },
+}, { workspaceSlug });
+const dispatch = createRouteDispatch({
+  dispatch: ({ route }) => route.definition.action(...route.eventArgs),
+  onError: showRouteError,
+});
+const router = new EventRouter({ channel, routeTriggers: table.triggers });
+router.listenTo(channel, 'patient:workflow', (...args) => {
+  dispatch.accept(table.context('patient:workflow', args));
+});
+// The containing lifetime explicitly disposes both objects:
+// dispatch.dispose(); router.destroy();
+```
+
+The example chooses unconditional `start`. For retained resource loading, use
+`createRouteDelivery`, as PatientApp does. Connect `activated()` to the
+Application's `start` event, `invalidate()` to departure/stop, and dispatch the
+current route from `onStart` after building its shell. Same-resource detail changes
+join one preparation and dispatch the newest route once. Do not connect the
+navigation signal to that shared preparation's stop method.
+
+The optional adapters retain the existing declarative shorthand:
+
+```js
+// RouterApp
+childApps: { patient: PatientApp },
 eventRoutes: {
   'patient:workflow': {
-    action: 'showPatient',          // method name or function (positional handler)
-    route: [                        // first route is canonical
-      'patient/:id/workflow',
-      'patient/:id/legacy-alias',
-    ],
-    // root: true,                  // skip the workspace-slug prefix
-    meta: { isList: true },         // behavioral flags live under meta
+    action: 'showPatient',
+    route: 'patient/:patientId/workflow',
   },
-}
+},
+showPatient(patientId) {
+  return this.startRoute('patient', { patientId });
+},
 ```
 
-Structural fields: `action`, `route`, `root`. Behavioral flags go under `meta`
-(`isList`). `action` is a method name (resolved on the RouterApp)
-or a function; `route` is a string or a non-empty array of alias strings; non-root
-routes are prefixed with the `workspaceSlug` supplied by WorkspaceApp, so they must not
-begin with `/`.
+A scoped child supplies `getRouteScope(options)` and `startRoute(context, options)`;
+SubRouterApp supplies these from `routeScope` and `routeActions`. Plain PatientApp
+supplies them explicitly using route delivery. Plain pages use `startCurrent`.
+Use `routeScope: []` for a deliberately global scope; an omitted scope is an error
+in SubRouterApp. Resource scope excludes detail IDs. The workspace owns fresh area
+instances, so equal resource IDs in different workspaces cannot share old state.
 
-### Aliases
+## Specify
 
-`route` may be an array. Every alias is registered (each prefixed with the workspace
-slug unless `root`), and the **first** alias is canonical for URL generation
-(`translateEvent` / `replaceRoute`). EventRouter supports this natively.
+Baseline: develop `7f191c52e`. This change preserves the following product contract.
 
-The local EventRouter is a Backbone.Router adapter. RouterApp supplies the
-application's `event-router` Radio channel; the adapter must not import or bridge
-a separate Radio singleton.
+| Behavior | Existing owner and preserved result |
+| --- | --- |
+| Boot/auth | Auth handles full-document provider paths before main routing; formservice is a separate entrypoint/router |
+| Workspace roots/splats | Nav registers `''`, workspace slug and `slug/*route`; a root workspace selection chooses its default worklist |
+| Workspace transition | AppFrame retains Nav, replaces Workspace; Workspace fetches resources, rebuilds area routers, replays the URL |
+| Permissions | Workspace only registers dashboards/clinicians/programs when permitted; unmatched protected paths reach error routing |
+| Precedence | Backbone's existing reverse registration order; available area routes precede Nav's workspace splat and Error's catch-all |
+| Patient routes | Workflow/open/closed, action, flow, flow focus/action and form all retain the same patient shell within scope |
+| Patient flow | Plain page App; page replacement is distinct from shared patient preparation. Program flow remains scoped by flow ID |
+| Program/clinician/dashboard | Existing page/sidebar selection, program/flow scope, clinician global scope and domain error mapping |
+| Aliases | Three patient bookmark aliases remain supported through September 2, 2027; generation uses first/canonical route |
+| Legacy flow URLs | Fetch patient identity, replace legacy URL, dispatch canonical event; obsolete resolvers cannot redirect |
+| Radio arguments | Synchronous string events; positional IDs and transient `entryTarget`/clinician options remain intact |
+| Query/encoding | Backbone extracts decoded positional path/splat arguments and a final raw query or null; filters are not query state |
+| History | Backbone is the sole native owner. Event writes do not redispatch; matching URL callbacks do not create another entry |
+| Silent writes | `replaceRoute` replaces without dispatch; `navigateRoute` pushes without dispatch. Existing product HistoryService still observes writes |
+| Return to list | `meta.isList` feeds LatestListService; its named event/args differ from HistoryService's custom submit-back stack |
+| Transition effects | Set current route → before:appRoute → nav/sidebar/latest-list effects → action → appRoute, before async readiness |
+| Cancellation/errors | Latest selection wins; stop cancels Application preparation. Current route failures use domain policy; stale failures are observed and ignored |
+| Unsaved work | Existing editor save/draft policies remain local. There is no new universal veto, URL rollback or automatic save on navigation |
+| Focus/scroll | Views retain existing flow focus, missing-target fallback, sidebar focus and scroll policy; routing adds no global restoration |
 
-Non-canonical aliases exist only to keep old bookmarks working during a stated
-compatibility window. The patient app carries three — `patient/dashboard/:id`,
-`patient/archive/:id`, and `patient/archive/:id/action/:actionId` — supported
-until September 2, 2027. New code, and routine test setup, must use the
-canonical route or the event name; a legacy alias appears only in the one
-compatibility spec that proves the aliases still route.
+Route contexts retain `{ event, eventArgs, definition: { action, route, root, meta } }`.
+`getCurrentRoute()` and `getCurrentRouteMeta()` remain the adapter accessors.
+Before/after adapter notifications still receive `(routerApp, routeContext)`.
+They report dispatch, not page readiness. Return activation promises from handlers.
+Put route failure presentation in `onRouteError`; keep async reporter failures
+observed. Subroute notifications preserve their existing `(routeContext)` shape.
 
-### Patient flow action targets
+Selection stops the previous child synchronously before preparing a replacement.
+Failed teardown retains the selection for retry. Failed activation cleans partially
+started descendants; cleanup errors are reported separately from the activation
+error. Owner stop/restart/destroy invalidates pending selection, including stopped
+owners. RouteBaseApp supplies the mandatory lifecycle wrappers; direct users must
+connect this policy themselves. PatientApp shows explicit wrappers because stopped
+Applications do not repeat stop notifications. Constructors establish internal
+objects without requiring subclasses to call preinitialize/initialize hooks.
 
-`patient:flow:focus` generates `patient/:patientId/flow/:flowId/focus/:actionId`.
-It opens the flow page and focuses the matching action after the list attaches.
-PatientApp passes `focusActionId` separately from action-detail context. A target
-missing from the fetched flow collection leaves the normal flow page visible.
-Direct loads, refresh, and browser history apply the URL target on each page
-activation; live updates do not reapply it. Plain `patient:flow` links have no
-target. `patient:flow:action` continues to open the action detail page.
+Navigation authority, Application readiness and host lifetime are distinct.
+`createRouteDispatch` supplies `{ route, signal, isCurrent }`; check `isCurrent()`
+after awaits before effects outside Application preparation. The abort signal
+invalidates route work; it does not stop a same-resource Application. Install new
+authority before aborting old work so a synchronous abort callback can navigate.
+Host/Region destruction still belongs to its existing owner; no generic root
+View-destruction hook or speculative automatic restart has been added.
 
-## Route context
+### Later extraction into mnjs/router
 
-Each match is normalized before any hook runs:
+The inspected prototype is `950e4c6dc67ca3e6e378267a95845dc6965eeaa4`.
+Its independent route/history/router primitives are the intended package boundary;
+its `test/router/owner.mjs` is an ownership sketch, not an exported coordinator.
+This app change does not add a dependency on unpublished code or change that repo.
 
-```js
-{
-  event,            // 'patient:workflow'
-  eventArgs,        // ['patient-id', ...] — positional, as the action receives them
-  definition: { action, route, root, meta },
-}
+Extract the independent authority and lifecycle objects only after their consumer
+contracts settle. Keep workspace prefixes, Radio positional compatibility, route
+meta and domain recovery in the app adapter. Align canonical definitions with the
+prototype's named params/aliases when the package supports this app's splats and
+optional paths. The current table deliberately retains repeated positional `:id`
+patterns and Backbone grammar. Keep selection and shared route delivery optional.
+
+A package history driver must replace Backbone's native ownership once, together
+with HistoryService/registration/replay. Do not run two native history drivers.
+Navigation API/URLPattern are not required by this implementation. Adopting them,
+changing query/filter precedence, native versus product Back, unsaved guards,
+refresh scope or entry scroll restoration requires a separate product decision
+and browser verification. Current History API support remains unchanged.
+
+## Verify
+
+Helper/lifecycle checks (no browser and no Cypress):
+
+```sh
+npm run test:routing
+npm run lint
+npm run build -- --mode test
 ```
 
-- `getCurrentRoute()` returns this object; `getCurrentRouteMeta()` returns its `meta`.
-- `before:appRoute` and `appRoute` receive the RouterApp followed by the context
-  object: `(router, routeContext)`.
-- Action handlers still receive **positional** arguments (`showPatient(patientId)`).
+The Node tests use real Marionette 5.0.0 Applications for shared preparation,
+replacement and cleanup, and cover authority reentrancy/error suppression. They do
+not validate UI/history behavior.
 
-Side-effect order during an area route transition (deliberate — the current route
-is set first so it is observable in `before:appRoute`):
+Patient E2E coverage extends the existing routing scenario with Back/Forward and
+retained shell/sidebar identity, and adds departure while a patient request is
+pending. Existing flow-focus, aliases, worklist loading/filter races, workspace,
+permissions, error and submit-back scenarios remain applicable. Generic adapter
+component specs remain applicable too.
 
-```text
-set current route → before:appRoute
-  → WorkspaceApp selects nav, stops sidebar, applies latest-list metadata
-  → action handler → appRoute
-```
-
-Router-specific `onBeforeAppRoute` / `onAppRoute` hooks use the same
-`(router, routeContext)` signature. Root/workspace routing in `NavApp` and global
-error routing are not coordinated by WorkspaceApp because they are not area routers
-instantiated through `WorkspaceApp.initRouter()`.
-
-## Route failures
-
-Return the activation promise from top-level route handlers. Put user-facing error
-presentation in `onRouteError(error, routeContext)`: RouterApp invokes it only for
-the current route, including failures that finish cleanup after navigation.
-Avoid duplicating route-identity checks in individual handler catches. If an error
-hook starts asynchronous reporting, handle that promise's rejection explicitly.
-
-## Scope identity (which child is "the same")
-
-Every `SubRouterApp` reached through `RouterApp.startRoute()` declares a `routeScope`:
-
-```js
-routeScope: ['patientId']   // PatientApp
-routeScope: ['flowId']      // PatientFlowApp, ProgramFlowApp
-routeScope: ['programId']   // ProgramApp
-routeScope: []              // CliniciansAllApp — always "the same" instance
-```
-
-An omitted or non-array `routeScope` is an error; use `[]` for a global scope.
-`getRouteScope(options = {})` returns `pick(options, routeScope)`. RouterApp compares
-scope objects with `isEqual` — **never** the full startup options:
-
-- **Same app + equal scope** → reuse the selected child; forward the newest route
-  and start it if it was stopped.
-- **Different app or scope** → stop the current child and start the replacement.
-
-Scope identity is workspace/resource identity, **not** route-specific detail. Put the
-ID that determines "same workspace" in `routeScope` (the patient, the flow). Do not
-put action IDs or sub-route detail there — those change within a scope and must not
-force a restart.
-
-`startCurrent()` is the unconditional path (always stop + start); it does not consult
-scope. Plain page Apps are always started this way.
-
-## Loading and dispatch (SubRouterApp)
-
-A `SubRouterApp` separates "record the route" from "dispatch the route":
-
-- `setCurrentRoute(routeContext)` / `getCurrentRoute()` — RouterApp sets the route on
-  the child before starting it, so it is available throughout preparation and
-  startup. Read route data via `getCurrentRoute().eventArgs`;
-  do **not** read `currentRoute` from startup options.
-- `startRoute(routeContext, options)` — records the newest route and passes options
-  to the idempotent Application `start()`. A stable active run dispatches the route;
-  while loading, the newest route waits for successful activation and
-  is dispatched once by that run's `onStart()`. A later stop invalidates pending
-  route dispatch, so route and stop ordering remains latest-intent-wins.
-- `startCurrentRoute()` — synchronously dispatches the current route to its
-  `routeActions` handler. **Subclasses call this from `onStart()` after building
-  their shell.**
-
-This is why same-scope navigation arriving during an in-flight load does not restart
-the app: the route is retained and dispatched once `onStart` runs.
-
-```js
-onStart(app, options, data) {
-  // build the shared shell / set views
-  this.startCurrentRoute();
-}
-```
-
-`routeActions` (not `eventRoutes`) maps a route event to a local dispatch handler:
-
-```js
-routeActions: {
-  'patient:flow:action': 'showAction',
-  'patient:flow': 'showFlow',
-}
-```
-
-## Stop and restart
-
-Both router classes use the internal `RouteBaseApp` base for child selection.
-It has no URL, Radio-channel, resource-scope comparison, or error-presentation
-policy. Keep those concerns in the routing adapters and application subclasses;
-this boundary allows future extraction without adding a second routing backend.
-
-- Selection stops the previous child synchronously before starting the replacement.
-  Startup remains asynchronous, and only the newest selection can complete.
-- Owner stop, restart, and destroy invalidate pending selection even when the owner
-  is already stopped. A failed child startup stops partially started descendants
-  before clearing the selection. Cleanup errors are reported separately through
-  `child:cleanup:error`; callers receive the original activation error.
-- Navigation permission and required saves happen before teardown. Synchronous
-  teardown failures abort the operation. Failed cleanup retains the selected child
-  so a later selection can retry teardown.
-- RouterApp stops its selected child synchronously and starts it asynchronously.
-  A newer route cancels prior preparation.
-- Route children are registered as owned Application instances. Owner stop and
-  destruction clean them up; RouterApp clears its selection after its own stop.
-  A selected child that stopped independently is restarted when the next matching
-  route arrives.
-- Area routers register their children explicitly and supply per-route startup
-  data through the Application lifecycle. Keep ownership and startup data together
-  when extending a route tree.
-- A `SubRouterApp` owns its current route in Marionette state and re-dispatches it
-  after restarting. For framework lifecycle contracts, use the upstream
-  `marionette` skill.
-
-## Async ownership
-
-Async loading belongs in `prepareStart(options, { signal })`. Return the prepared
-value for `onStart(app, options, result)`, and pass the lifecycle signal through to
-cancelable requests. Route dispatch stays synchronous — do not add another async
-layer. Route handlers should return their activation promise. Route completion
-notifications still fire synchronously after invoking the handler; they do not
-mean that async content is ready. Synchronous throws and returned async failures are observed through
-`onRouteError(error, routeContext)` (the browser error channel by default, also observed by Datadog), including initial
-SubRouterApp dispatch from `onStart`. Domain handlers may handle expected errors
-before returning. Radio dispatch remains synchronous.
-
-## Common mistakes
-
-- Putting route-specific IDs (action IDs, sub-route detail) in `routeScope`. Scope is
-  resource identity; extra keys force needless restarts or block legitimate ones.
-- Reading `currentRoute` from startup options. Use `getCurrentRoute()`.
-- Forgetting `startCurrentRoute()` in a `SubRouterApp`'s `onStart()` — the route never
-  dispatches.
-- Accessing the private `_routes` / `_currentRoute` instead of `getCurrentRoute()` /
-  `getCurrentRouteMeta()`.
-- A non-root `route` beginning with `/` (the workspace slug is prepended, producing a
-  double slash).
-- Leaving `isList` at the top level of a definition instead of
-  under `meta` (silently stops updating the latest-list history).
-- Adding global shell effects directly to RouterApp. WorkspaceApp owns nav selection,
-  transient-sidebar cleanup, and latest-list metadata handling for area routes.
-
-## AI checklist for adding or changing a route
-
-1. Add/extend the `RouterApp` `eventRoutes` entry: `action`, `route` (string or alias
-   array), and `meta` for any behavioral flag. Keep IDs out of `meta`.
-2. Declare static children with `childApps`; use `addChildApp()` for configured or
-   dynamically created instances. Implement the positional
-   action handler and return `startRoute(appName, options)` (scoped child) or
-   `startCurrent(appName, options)` (plain page app).
-3. If the child is a `SubRouterApp`: declare `routeScope`, add the event to
-   `routeActions`, read route data via `getCurrentRoute()`, and call
-   `startCurrentRoute()` in `onStart()`.
-4. Do not change existing URLs unless that is the explicit task.
-5. Add/extend specs in `src/js/base/*.component.cy.js` for generic base-class behavior
-   and E2E scenarios for the affected application flow. Use the focused Cypress
-   commands and full-suite validation boundary in [AGENTS.md](../../../AGENTS.md#validation),
-   plus `npm run lint`.
+Cypress is held by explicit task instruction. Do not run Cypress or approve its CI
+hold without fresh approval. After approval, run focused patient/default-route/
+filter specs first, then the relevant full E2E and component suites under AGENTS.md.
+Do not claim UI behavior validated from Node checks, build or source review.
