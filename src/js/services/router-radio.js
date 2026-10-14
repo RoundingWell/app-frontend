@@ -1,9 +1,9 @@
 import { find, object, without } from 'underscore';
 import { Radio } from 'marionette';
 
-import router from 'js/router';
-
 import App from 'js/base/app';
+
+import router from 'js/router';
 
 // Radio names that render in place instead of navigating
 const IN_PLACE_EVENTS = ['notFound', 'unknownError'];
@@ -31,7 +31,7 @@ export default App.extend({
 
     return () => {
       unmount();
-      this.routerApps.splice(this.routerApps.indexOf(app), 1);
+      this.routerApps = without(this.routerApps, app);
     };
   },
 
@@ -57,6 +57,9 @@ export default App.extend({
       this.dispatch(name, args);
       return;
     }
+
+    // A workspace switch unmounts area routes until the new workspace loads
+    if (!router.hasRoute(name)) return;
 
     const paramNames = router.getParamNames(name);
 

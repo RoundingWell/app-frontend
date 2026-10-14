@@ -114,6 +114,18 @@ describe('Router construction', () => {
     assert.equal(router.getCurrent(), null);
   });
 
+  it('reports whether a route name is mounted', () => {
+    const router = new Router({ routes: [] });
+
+    assert.equal(router.hasRoute('extra'), false);
+
+    const unmount = router.mount([{ name: 'extra', path: '/extra' }]);
+    assert.equal(router.hasRoute('extra'), true);
+
+    unmount();
+    assert.equal(router.hasRoute('extra'), false);
+  });
+
   it('throws on start without a driver when the Navigation API is missing', () => {
     const router = new Router({ routes: baseRoutes() });
 

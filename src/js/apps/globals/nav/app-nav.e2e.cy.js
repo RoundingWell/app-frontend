@@ -572,6 +572,16 @@ context('App Nav', function() {
       .get('@routeDelayedWorkspaceTwoPrograms.all')
       .should('have.length', 1);
 
+    // List routes are unmounted while the workspace loads, so the request is ignored
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/two/worklist/owned-by');
+
     cy
       .get('.app-nav__header')
       .click();

@@ -245,6 +245,53 @@ context('patient page', function() {
     cy
       .location('pathname')
       .should('equal', '/one/worklist/owned-by');
+
+    // Leaving a legacy URL while its flow loads cancels the lookup without an error
+    const pendingFlow = getFlow({
+      relationships: { patient: getRelationship(testPatient) },
+    });
+    let releasePendingFlow;
+    const pendingFlowResponse = new Cypress.Promise(resolve => {
+      releasePendingFlow = resolve;
+    });
+
+    cy
+      .intercept('GET', `/api/flows/${ pendingFlow.id }*`, req => {
+        return pendingFlowResponse.then(() => {
+          req.reply({ statusCode: 500, body: {} });
+        });
+      })
+      .as('routePendingFlow');
+
+    cy
+      .navigate(`/flow/${ pendingFlow.id }`);
+
+    cy
+      .get('@routePendingFlow.all')
+      .should('have.length', 1);
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/shared-by');
+
+    cy
+      .then(() => {
+        releasePendingFlow();
+      })
+      .wait('@routeActions');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/shared-by');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
   });
 
   specify('quickly routing from one patient to another renders only the latest', function() {

@@ -213,21 +213,6 @@ context('RouterApp', function() {
     });
   });
 
-  describe('unmatched route failures', function() {
-    specify('reports a throwing stop for the current departure', async function() {
-      const failure = new Error('cannot stop');
-      const reported = cy.stub();
-      app = new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' });
-      await app.routeEvent('schedule');
-      const route = app.getCurrentRoute();
-      const stop = cy.stub(app, 'stop').throws(failure);
-      await app.onNoMatch();
-      stop.restore();
-      expect(reported).to.have.been.calledOnceWith(failure, route);
-      expect(app.getCurrentRoute()).to.equal(null);
-    });
-  });
-
   describe('scope identity', function() {
     specify('reuses the child and forwards the route for an equal scope', async function() {
       app = new Router({ workspaceSlug: 'test-ws' });

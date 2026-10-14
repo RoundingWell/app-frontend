@@ -34,13 +34,8 @@ export default RouteBaseApp.extend({
 
   // if the app does not handle a given route, stop
   onNoMatch() {
-    const routeContext = this.getCurrentRoute();
     this._currentRoute = null;
-    try {
-      this.stop();
-    } catch(error) {
-      this.triggerMethod('route:error', error, routeContext);
-    }
+    this.stop();
   },
 
   // Events without a `route` render in place and have no URL.

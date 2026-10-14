@@ -207,6 +207,7 @@ the target route declares them and the caller did not supply them.
 | `mount(routes, { parent })` | Adds routes (optionally under a named parent) and returns `unmount()`. Mounting does not dispatch; call `refresh()` if needed. |
 | `getAliases()` | `[{ name, path, until, policy }]`. |
 | `getParamNames(name)` | Parameter names of the canonical path, in path order (for positional bridges). |
+| `hasRoute(name)` | Whether a mounted route has this name. |
 | `canGoBack` / `back()` | Only counts entries this router created or dispatched (marked in entry state), so pre-application entries such as auth redirects are excluded. `back()` resolves `false` when there is no router-owned entry. |
 | `updateState(state)` | Merges into the current entry's persisted state. State must be a plain object. |
 

@@ -233,6 +233,14 @@ export class Router {
     return this.#matcher.getParamNames(name);
   }
 
+  /**
+   * @param {string} name
+   * @returns {boolean} True when a mounted route has this name.
+   */
+  hasRoute(name) {
+    return this.#matcher.has(name);
+  }
+
   /** @returns {boolean} */
   get canGoBack() {
     const driver = this.#driver;

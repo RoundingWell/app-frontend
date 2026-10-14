@@ -258,6 +258,16 @@ Scope: `src/js/routes.js` (new, full tree), `src/js/router.js`,
   `listenTo(router, 'route')`. Remove `before:appRoute` coordination, Nav root routes,
   `defer(replaceUrl)`, `noMatch`, `mount`/`refresh` usage.
 - D4: handler awaits the outlet chain.
+- Replace the `isAppUrl` denylist with an allowlist: `/` and `/:workspace/**` for the
+  user's workspace slugs. Server-owned paths (`/forms/**`, `/shared/**`, `/fonts/**`,
+  `/images/**`, `/appconfig.json`, new server routes) must not be intercepted or claimed
+  by not-found.
+- Remove the Phase 2 two-pass dispatch (`router.match` + `refresh()` in WorkspaceApp).
+  Until then, a direct load's first area match reports `navigationType: 'replace'` and
+  `initial: false`; nothing (focus/scroll policy, view tracking) may rely on those values.
+  After 3a, the direct-load page match must have `initial: true`.
+- Fix the pre-existing gap: traversing back onto a workspace URL no route owns
+  (`/one/bogus`) must render not-found.
 - Focus/scroll policy v1 per DESIGN.md (content region, `meta.focus`, per-entry scroll).
 - Exit: CI green; I4, I5, I13 explicitly re-verified. Review gate (Opus).
 
