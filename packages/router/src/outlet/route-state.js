@@ -6,42 +6,49 @@ import { MnObject } from 'marionette';
  * changes.
  */
 export class RouteState extends MnObject {
+  #match;
+
   /** @param {import('../router.js').Match} match */
   constructor(match) {
-    throw new Error('Not implemented');
+    super();
+    this.#match = match;
   }
 
   getMatch() {
-    throw new Error('Not implemented');
+    return this.#match;
   }
 
   getName() {
-    throw new Error('Not implemented');
+    return this.#match.name;
   }
 
   getParams() {
-    throw new Error('Not implemented');
+    return this.#match.params;
   }
 
   getQuery() {
-    throw new Error('Not implemented');
+    return this.#match.query;
   }
 
   getMeta() {
-    throw new Error('Not implemented');
+    return this.#match.meta;
   }
 
   getInfo() {
-    throw new Error('Not implemented');
+    return this.#match.info;
   }
 
   /** @param {string} name True when the match branch contains a node named `name`. */
   includes(name) {
-    throw new Error('Not implemented');
+    return this.#match.branch.some(node => node.name === name);
   }
 
   /** @param {import('../router.js').Match} match */
   set(match) {
-    throw new Error('Not implemented');
+    const previous = this.#match;
+    if (this.isDestroyed() || match === previous) return;
+
+    this.#match = match;
+    this.triggerMethod('change', this, match, previous);
   }
 }
