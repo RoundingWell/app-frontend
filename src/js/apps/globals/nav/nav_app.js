@@ -1,10 +1,12 @@
-import { compact, isEqual, noop, partial } from 'underscore';
+import { isEqual } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
 import localStore from 'js/utils/local-store';
 
-import RouterApp from 'js/base/routerapp';
+import App from 'js/base/app';
+
+import router from 'js/router';
 
 import SearchApp from 'js/apps/globals/search/search_app';
 import StateModel from 'js/apps/globals/nav/nav_state';
@@ -34,7 +36,7 @@ const whatsNewMenu = new Backbone.Collection([{
 
 const adminNavMenu = new Backbone.Collection([
   {
-    id: 'ProgramsApp',
+    id: 'programs',
     text: i18n.adminNav.programs,
     icon: {
       type: 'far',
@@ -43,7 +45,7 @@ const adminNavMenu = new Backbone.Collection([
     event: 'programs:all',
   },
   {
-    id: 'CliniciansApp',
+    id: 'clinicians',
     text: i18n.adminNav.clinicians,
     icon: {
       type: 'far',
@@ -137,10 +139,7 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
   },
 ]);
 
-export default RouterApp.extend({
-  // NOTE: Don't stop this app on no match
-  onNoMatch: noop,
-  startOnRoute: false,
+export default App.extend({
   channelName: 'nav',
   childApps: {
     search: SearchApp,
@@ -148,7 +147,6 @@ export default RouterApp.extend({
   radioRequests: {
     search: 'showSearch',
     setMinimized: 'setTemporarilyMinimized',
-    select: 'selectNav',
   },
   stateEvents: {
     'change:currentApp': 'onChangeCurrentApp',
@@ -170,16 +168,18 @@ export default RouterApp.extend({
 
     this.listenTo(Radio.channel('user-activity'), 'body:down', this.onBodyDown);
     this.listenTo(Radio.channel('hotkey'), 'close', () => this.getState().closeOverlay());
+    this.listenTo(Radio.channel('workspace'), 'change:workspace', this.refreshWorkspace);
+    this.listenTo(router, 'route', this.onRoute);
 
     // Drop admin items the current user can't access — permissions are stable.
     const currentUser = Radio.request('bootstrap', 'currentUser');
 
     if (!currentUser.can('clinicians:manage')) {
-      adminNavMenu.remove('CliniciansApp');
+      adminNavMenu.remove('clinicians');
     }
 
     if (!currentUser.can('programs:manage')) {
-      adminNavMenu.remove('ProgramsApp');
+      adminNavMenu.remove('programs');
     }
 
     const storedState = localStore.get(this.getNavMenuMinimizedKey());
@@ -223,59 +223,25 @@ export default RouterApp.extend({
     this.showMainNavDroplist();
     this.showBottomNavView();
   },
-  eventRoutes() {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
-    const workspaces = currentUser.getWorkspaces();
+  onRoute({ name, params, meta }) {
+    if (!meta.area) return;
 
-    const rootRoute = {
-      redirect: 'getDefaultRoute',
-      route: '',
-      root: true,
-    };
-
-    // Add a root route for each user workspace, including any deeper path
-    return workspaces.reduce((routes, workspace) => {
-      const route = workspace.get('slug');
-      routes[`workspace:${ route }`] = {
-        action: partial(this.setWorkspace, route),
-        root: true,
-        route: `${ route }{/*}?`,
-      };
-      return routes;
-    }, { 'root': rootRoute });
-  },
-  setWorkspace(slug, route) {
-    const workspace = Radio.request('workspace', 'current', slug);
-    const workspaceSlug = workspace && workspace.get('slug');
-
-    if (!workspaceSlug || route) return;
-
-    Radio.request('router', 'navigate', this.getDefaultRoute(), { history: 'replace' });
-  },
-  getDefaultRoute() {
-    const workspace = Radio.request('workspace', 'current');
-    const workspaceSlug = workspace.get('slug');
-
-    return `/${ workspaceSlug }/worklist/owned-by`;
-  },
-  selectNav(appName, event, eventArgs) {
-    this.getState().set('currentApp', appName);
-
-    const selectedNav = this.findNavItem(event, compact(eventArgs));
-
-    this.getState().set('selectedNav', selectedNav);
+    this.getState().set({
+      currentApp: meta.area,
+      selectedNav: this.findNavItem(name, params.worklistId),
+    });
 
     // Navigating dismisses any transient expansion without changing the
     // persisted minimized preference.
     this.getState().closeOverlay();
   },
-  findNavItem(event, eventArgs) {
+  findNavItem(event, worklistId) {
     if (event === 'dashboards:all') return dashboardsNav;
 
     return patientsAppWorkflowsNav.find(model => {
       return (
         model.get('event') === event
-        && isEqual(model.get('eventArgs')[0], eventArgs[0])
+        && isEqual(model.get('eventArgs')[0], worklistId)
       );
     });
   },
@@ -393,7 +359,8 @@ export default RouterApp.extend({
           id: workspace.id,
           text: workspace.get('name'),
           icon: { type: 'far', icon: 'window' },
-          event: `workspace:${ workspace.get('slug') }`,
+          event: 'workspace',
+          slug: workspace.get('slug'),
         };
       }),
     );

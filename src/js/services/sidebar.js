@@ -2,12 +2,23 @@ import { Radio } from 'marionette';
 
 import App from 'js/base/app';
 
+import router from 'js/router';
+
 export default App.extend({
   channelName: 'sidebar',
 
   radioRequests: {
     'stop': 'stopSidebarApp',
     'start': 'startSidebarApp',
+  },
+
+  initialize() {
+    this.listenTo(router, 'route', this.onRoute);
+  },
+
+  // A sidebar belongs to the page it was opened from
+  onRoute() {
+    this.stopSidebarApp();
   },
 
   async startSidebarApp(app, appOptions) {

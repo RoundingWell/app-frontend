@@ -51,6 +51,21 @@ context('App Nav', function() {
       .find('.app-nav__bottom')
       .contains('Admin Tools')
       .should('not.exist');
+
+    ['/dashboards', '/programs', '/clinicians'].forEach(path => {
+      cy
+        .navigate(path);
+
+      cy
+        .get('.error-page')
+        .should('contain', ' This page doesn\'t exist.')
+        .contains('Back to Your Workspace')
+        .click();
+
+      cy
+        .get('.error-page')
+        .should('not.exist');
+    });
   });
 
   specify('display nav', function() {
@@ -572,7 +587,6 @@ context('App Nav', function() {
       .get('@routeDelayedWorkspaceTwoPrograms.all')
       .should('have.length', 1);
 
-    // List routes are unmounted while the workspace loads, so the request is ignored
     cy
       .get('[data-worklists-region]')
       .find('.app-nav__link[aria-label="Shared By"]')
@@ -580,7 +594,7 @@ context('App Nav', function() {
 
     cy
       .location('pathname')
-      .should('equal', '/two/worklist/owned-by');
+      .should('equal', '/two/worklist/shared-by');
 
     cy
       .get('.app-nav__header')

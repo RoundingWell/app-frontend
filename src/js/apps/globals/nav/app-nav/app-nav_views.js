@@ -107,7 +107,7 @@ const MainNavDroplist = Droplist.extend({
 
     if (model.id === currentWorkspace.id) return;
 
-    Radio.trigger('event-router', model.get('event'));
+    Radio.trigger('event-router', model.get('event'), model.get('slug'));
   },
 });
 

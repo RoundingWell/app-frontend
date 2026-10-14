@@ -1,29 +1,27 @@
 import { Radio } from 'marionette';
 
+import { addError } from 'js/datadog';
+
 import App from 'js/base/app';
+
+import router from 'js/router';
 
 export default App.extend({
   channelName: 'history',
 
   radioRequests: {
-    'set:latestList': 'setLatestList',
     'has:latestList': 'hasLatestList',
     'go:latestList': 'goLatestList',
   },
 
-  setLatestList(routeContext) {
-    const { event, eventArgs, definition: { meta } } = routeContext;
-
-    if (meta.isList) {
-      this._setLatestList(event, eventArgs);
-    }
+  initialize() {
+    this.listenTo(router, 'route', this.onRoute);
   },
 
-  _setLatestList(event,
-    /* istanbul ignore next */
-    eventArgs = []) {
-    this._latestList = event;
-    this._latestListArgs = eventArgs;
+  onRoute({ url, info, meta }) {
+    if (!meta.isList) return;
+
+    this._latestList = { url, info };
   },
 
   hasLatestList() {
@@ -31,8 +29,8 @@ export default App.extend({
   },
 
   goLatestList() {
-    /* istanbul ignore if */
-    if (!this.hasLatestList()) return;
-    Radio.trigger('event-router', this._latestList, ...this._latestListArgs);
+    const { url, info } = this._latestList;
+
+    Radio.request('router', 'navigate', url.href, { info }).catch(addError);
   },
 });

@@ -5,6 +5,8 @@ import localStore from 'js/utils/local-store';
 
 import App from 'js/base/app';
 
+import router from 'js/router';
+
 export default App.extend({
   channelName: 'workspace',
   radioRequests: {
@@ -21,8 +23,8 @@ export default App.extend({
       || workspaces.find({ id: localStore.get('currentWorkspace') })
       || workspaces.at(0);
   },
-  _setCurrentWorkspace(route) {
-    const workspace = this._getWorkspace(route);
+  _setCurrentWorkspace(slug) {
+    const workspace = this._getWorkspace(slug);
 
     if (workspace.id !== get(this.currentWorkspace, 'id')) {
       localStore.set('currentWorkspace', workspace.id);
@@ -32,11 +34,7 @@ export default App.extend({
 
     return workspace;
   },
-  getCurrentWorkspace(route) {
-    if (route) {
-      return this._setCurrentWorkspace(route);
-    }
-
+  getCurrentWorkspace() {
     return this.currentWorkspace;
   },
   _getSharedWorkspaces(programs) {
@@ -52,6 +50,12 @@ export default App.extend({
   },
   initialize({ route }) {
     this._setCurrentWorkspace(route);
+
+    this.listenTo(router, 'route', this.onRoute);
+  },
+  // The workspace follows the route
+  onRoute({ params }) {
+    this._setCurrentWorkspace(params.workspace);
   },
   async fetchWorkspace({ workspace, signal }) {
     const [programs] = await Promise.all([

@@ -1,6 +1,12 @@
 import { Radio } from 'marionette';
 
+import router from 'js/router';
+
 import LatestListService from './latest-list';
+
+function route(path, meta, info) {
+  router.trigger('route', { url: new URL(path, window.location.origin), info, meta });
+}
 
 context('LatestListService', function() {
   let service;
@@ -15,42 +21,34 @@ context('LatestListService', function() {
   });
 
   specify('records list routes from route metadata', function() {
-    Radio.request('history', 'set:latestList', {
-      event: 'worklist',
-      eventArgs: ['owned-by'],
-      definition: {
-        meta: { isList: true },
-      },
-    });
+    expect(Radio.request('history', 'has:latestList')).to.be.false;
 
-    expect(service._latestList).to.equal('worklist');
-    expect(service._latestListArgs).to.deep.equal(['owned-by']);
+    route('/one/worklist/owned-by', { isList: true });
+
+    expect(Radio.request('history', 'has:latestList')).to.be.true;
   });
 
   specify('leaves the latest list unchanged for plain routes', function() {
-    service._setLatestList('worklist', ['owned-by']);
+    const navigate = cy.stub().resolves(true);
+    Radio.reply('router', 'navigate', navigate);
 
-    Radio.request('history', 'set:latestList', {
-      event: 'patient:workflow',
-      eventArgs: ['patient-id'],
-      definition: {
-        meta: {},
-      },
-    });
-
-    expect(service._latestList).to.equal('worklist');
-    expect(service._latestListArgs).to.deep.equal(['owned-by']);
-  });
-
-  specify('routes back to the latest list', function() {
-    const eventRouter = Radio.channel('event-router');
-    const worklist = cy.stub();
-
-    service.listenTo(eventRouter, 'worklist', worklist);
-    service._setLatestList('worklist', ['owned-by']);
+    route('/one/worklist/owned-by', { isList: true });
+    route('/one/patient/1/workflow', {});
 
     Radio.request('history', 'go:latestList');
 
-    expect(worklist).to.have.been.calledWith('owned-by');
+    expect(navigate).to.have.been.calledOnceWith(`${ window.location.origin }/one/worklist/owned-by`);
+  });
+
+  specify('routes back to the latest list with its info', function() {
+    const navigate = cy.stub().resolves(true);
+    const info = { args: [{ clinicianId: 'c1' }] };
+    Radio.reply('router', 'navigate', navigate);
+
+    route('/one/worklist/owned-by', { isList: true }, info);
+
+    Radio.request('history', 'go:latestList');
+
+    expect(navigate).to.have.been.calledOnceWith(`${ window.location.origin }/one/worklist/owned-by`, { info });
   });
 });
