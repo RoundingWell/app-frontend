@@ -288,6 +288,7 @@ export function routerConformance({ name, createDriver, describe, it, assert }) 
       const logged = h.log.length;
 
       const reload = h.driver.reload();
+      reload.committed.catch(() => {});
       await reload.finished.then(() => {}, () => {});
       listeners.abort();
 
