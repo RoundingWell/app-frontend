@@ -41,15 +41,27 @@ const AppView = View.extend({
     sidebar: '[data-app-sidebar-region]',
   },
   initialize() {
-    this.listenTo(router, 'route:ready', this.onRouteReady);
+    this.listenTo(router, {
+      'route': this.onRoute,
+      'route:ready': this.onRouteReady,
+    });
   },
   setNavMinimized(isMinimized) {
     this.getUI('nav')[0].classList.toggle('is-minimized', isMinimized);
   },
+  onRoute() {
+    this._focusAtRoute = document.activeElement;
+  },
   // A new page takes focus in the content, so keyboard and screen reader users
-  // land on it. The initial load announces itself.
+  // land on it. The initial load announces itself, and a page that moved focus
+  // while loading (a selected item, a sidebar input) keeps it, as the Navigation
+  // API's own focus reset does.
   onRouteReady({ initial }) {
     if (initial) return;
+
+    const { activeElement } = document;
+
+    if (activeElement !== this._focusAtRoute && activeElement !== document.body) return;
 
     this.getUI('content')[0].focus();
   },

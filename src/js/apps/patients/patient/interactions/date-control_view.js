@@ -5,6 +5,9 @@ import hbs from 'handlebars-inline-precompile';
 import { Radio, View } from 'marionette';
 
 import i18n from 'js/i18n';
+
+import router from 'js/router';
+
 import Datepicker from 'js/components/datepicker';
 import Optionlist from 'js/components/optionlist';
 
@@ -142,10 +145,13 @@ const InteractionDateControlView = View.extend({
   },
   showDateCalendar() {
     const modal = new InteractionDateModalView({ date: this.model.id });
+    const route = router.getCurrent();
     this.dateModal = modal;
     this.listenTo(modal, 'select:date', date => this.triggerMethod('select:date', date));
     this.listenToOnce(modal, 'destroy', () => {
       this.dateModal = null;
+      // A navigation closes the modal before this page is torn down
+      if (router.getCurrent() !== route) return;
       this.focusDate();
     });
     Radio.request('modal', 'show:custom', modal);
