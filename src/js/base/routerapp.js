@@ -1,125 +1,46 @@
-import { has, isArray, isEqual, isFunction, isString, map, reduce, result } from 'underscore';
-import { Radio } from 'marionette';
+import { isEqual, isFunction, result } from 'underscore';
 
 import { addError } from 'js/datadog';
 
+import { getPositionalParamNames } from 'js/router';
+
 import RouteBaseApp from './route-base-app';
 
+// An area of the app. WorkspaceApp selects it by route and shows the match
+// through `showRoute`, which calls the area's action handlers.
 export default RouteBaseApp.extend({
-  // Set in router apps for nav selection
-  routerAppName: '',
-  startOnRoute: true,
-
-  constructor: function(options = {}) {
-    this.workspaceSlug = options.workspaceSlug;
-    this.routeRegion = options.routeRegion;
+  constructor: function() {
+    this._routes = result(this, 'eventRoutes');
     this._routeIntent = null;
-
-    this.initRouter();
 
     this.on('before:stop', this._clearRouteIntent);
 
     RouteBaseApp.apply(this, arguments);
   },
 
-  // Mounts this app's routes with the router. The router-radio service
-  // dispatches matches back through routeEvent.
-  initRouter() {
-    this._routes = result(this, 'eventRoutes');
-
-    const unmountRoutes = Radio.request('router', 'mount', this);
-
-    this.on('before:destroy', unmountRoutes);
-  },
-
-  // if the app does not handle a given route, stop
-  onNoMatch() {
-    this._currentRoute = null;
-    this.stop();
-  },
-
-  // Events without a `route` render in place and have no URL.
-  // Every other route or alias is prefixed with the workspace slug unless `root`.
-  getRouteDefinitions() {
-    return reduce(this._routes, (definitions, { route, root, meta, redirect }, name) => {
-      if (route === undefined) return definitions;
-
-      const [path, ...aliases] = isArray(route) ? route : [route];
-
-      definitions.push({
-        name,
-        path: this._prefixRoute(path, root),
-        aliases: map(aliases, alias => this._prefixAlias(alias, root)),
-        meta,
-        redirect: redirect && ((...args) => this._resolveAction(redirect).apply(this, args)),
-      });
-
-      return definitions;
-    }, []);
-  },
-
-  _prefixAlias(alias, root) {
-    const { path, ...options } = isString(alias) ? { path: alias } : alias;
-
-    return { ...options, path: this._prefixRoute(path, root) };
-  },
-
-  _prefixRoute(route, root) {
-    if (root) return `/${ route }`;
-
-    if (!this.workspaceSlug) {
-      throw new Error('RouterApp requires workspaceSlug for non-root routes');
-    }
-
-    return `/${ this.workspaceSlug }/${ route }`;
-  },
-
-  _resolveAction(action) {
-    return isFunction(action) ? action : this[action];
-  },
-
-  hasRoute(event) {
-    return has(this._routes, event);
-  },
-
-  // applies the route's action
-  // starts this routerapp if necessary
-  // triggers before and after events
-  routeEvent(event, ...args) {
-    const definition = this._routes[event];
-
-    // Redirect-only routes resolve to another route and have nothing to apply
-    if (!definition.action) return;
-
+  // Dispatches a match to the action registered for its route name. Handlers
+  // take the route's params by position, then the trailing `info.args`.
+  showRoute({ name, params, info }) {
+    const args = [...getPositionalParamNames(name).map(paramName => params[paramName]), ...(info?.args || [])];
+    const definition = this._routes[name];
     const routeIntent = {};
-
     const routeContext = {
-      event,
+      event: name,
       eventArgs: args,
-      definition: {
-        action: definition.action,
-        route: isArray(definition.route) ? definition.route[0] : definition.route,
-        root: definition.root,
-        meta: definition.meta || {},
-      },
+      definition: { action: definition.action },
     };
+
     this.invalidateSelection();
     this._currentRoute = routeContext;
     this._routeIntent = routeIntent;
 
-    return this.activateRoute(routeContext, routeIntent).catch(error => {
+    return this.activateRoute(routeContext).catch(error => {
       if (this._routeIntent === routeIntent) this.triggerMethod('route:error', error, routeContext);
     });
   },
 
-  async activateRoute(routeContext, routeIntent) {
-    if (this.startOnRoute) {
-      const region = this.routeRegion || this.getRegion();
-      const started = await this.start(region ? { region } : undefined);
-      if (!started || this._routeIntent !== routeIntent) return;
-    }
-
-    return this.dispatchRoute(routeContext);
+  async activateRoute({ definition, eventArgs }) {
+    return this[definition.action](...eventArgs);
   },
 
   onChildCleanupError(error) {
@@ -128,18 +49,6 @@ export default RouteBaseApp.extend({
 
   onRouteError(error) {
     window.reportError(error);
-  },
-
-  dispatchRoute(routeContext) {
-    const { definition, eventArgs } = routeContext;
-
-    this.triggerMethod('before:appRoute', this, routeContext);
-
-    const activation = this._resolveAction(definition.action).apply(this, eventArgs);
-
-    this.triggerMethod('appRoute', this, routeContext);
-
-    return activation;
   },
 
   startCurrent(appName, options) {
@@ -178,10 +87,6 @@ export default RouteBaseApp.extend({
 
   getCurrentRoute() {
     return this._currentRoute;
-  },
-
-  getCurrentRouteMeta() {
-    return this._currentRoute && this._currentRoute.definition.meta;
   },
 
   _clearRouteIntent() {

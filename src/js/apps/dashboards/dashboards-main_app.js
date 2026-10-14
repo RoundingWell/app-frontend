@@ -8,7 +8,6 @@ import DashboardsAllApp from 'js/apps/dashboards/dashboards-all/dashboards-all_a
 import DashboardApp from 'js/apps/dashboards/dashboard/dashboard_app';
 
 export default RouterApp.extend({
-  routerAppName: 'DashboardsApp',
   childApps: {
     dashboardsAll: DashboardsAllApp,
     dashboard: DashboardApp,
@@ -17,12 +16,9 @@ export default RouterApp.extend({
   eventRoutes: {
     'dashboards:all': {
       action: 'showDashboardsAll',
-      route: 'dashboards',
-      meta: { isList: true },
     },
     'dashboard': {
       action: 'showDashboard',
-      route: 'dashboards/:id',
     },
   },
 

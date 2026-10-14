@@ -7,7 +7,6 @@ import ProgramApp from 'js/apps/programs/program/program_app';
 import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
 
 export default RouterApp.extend({
-  routerAppName: 'ProgramsApp',
   childApps: {
     programsAll: ProgramsAllApp,
     program: ProgramApp,
@@ -17,36 +16,27 @@ export default RouterApp.extend({
   eventRoutes: {
     'programs:all': {
       action: 'showProgramsAll',
-      route: 'programs',
-      meta: { isList: true },
     },
     'program:details': {
       action: 'showProgram',
-      route: 'program/:programId',
     },
     'program:action': {
       action: 'showProgram',
-      route: 'program/:programId/action/:actionId',
     },
     'program:action:new': {
       action: 'showProgram',
-      route: 'program/:programId/action',
     },
     'programFlow:new': {
       action: 'showProgram',
-      route: 'program/:programId/flow',
     },
     'programFlow': {
       action: 'showProgramFlow',
-      route: 'program-flow/:flowId',
     },
     'programFlow:action': {
       action: 'showProgramFlow',
-      route: 'program-flow/:flowId/action/:actionId',
     },
     'programFlow:action:new': {
       action: 'showProgramFlow',
-      route: 'program-flow/:flowId/action',
     },
   },
 
