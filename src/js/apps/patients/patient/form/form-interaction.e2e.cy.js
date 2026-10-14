@@ -14,6 +14,7 @@ context('Embedded form interaction', function() {
 
     cy
       .viewport(900, 720)
+      .routePatientInteractions()
       .routesForDefault()
       .routeWorkspacePatient()
       .routeActionActivity()

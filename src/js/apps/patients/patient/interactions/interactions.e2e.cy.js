@@ -1,10 +1,15 @@
 import { contains, filter, map, range } from 'underscore';
+
 import { getRelationship } from 'helpers/json-api';
 import formatDate from 'helpers/format-date';
+
 import { getAction } from 'support/api/actions';
 import { getInteraction, getPage } from 'support/api/interactions';
 import { getFlow } from 'support/api/flows';
 import { getPatient } from 'support/api/patients';
+import { getActivity } from 'support/api/events';
+import { getComment } from 'support/api/comments';
+import { getCurrentClinician } from 'support/api/clinicians';
 
 function assertFeedEnd($item) {
   const container = $item.closest('.patient-interactions')[0];
@@ -1015,5 +1020,1371 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Today message 10')
       .should('be.visible');
+  });
+
+  specify('keeps a loaded sidebar target focused when it supersedes a date request', function() {
+    const patient = getPatient();
+    const history = map(range(80), index => {
+      const interaction = getInteraction({
+        attributes: {
+          metadata: {
+            message: `Navigation message ${ index }`,
+          },
+          occurred_at: new Date(Date.UTC(2026, 4, index + 1)).toISOString(),
+        },
+      });
+
+      return interaction;
+    });
+    const older = createResponseGate(pendingResponses);
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+
+        return fx;
+      })
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = history;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (!new URL(req.url).searchParams.has('page[before]')) return;
+        return older.reply(req, { data: getPage(history, new URL(req.url).searchParams, history) });
+      })
+      .visit(`/patient/${ patient.id }/interactions/${ history[67].id }`);
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Navigation message 67')
+      .and('be.focused');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .click({ scrollBehavior: false });
+
+    cy
+      .contains('.js-picklist-item', 'The very beginning')
+      .click();
+
+    cy
+      .get('.patient-interactions .js-paging-loading')
+      .should('not.have.attr', 'hidden')
+      .should(() => {
+        expect(older.started).to.equal(true);
+      });
+
+    cy
+      .get('.patient-interactions-preview__link')
+      .last()
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Navigation message 79')
+      .and('be.focused')
+      .then(() => {
+        older.release();
+      });
+
+    cy
+      .then(() => Cypress.Promise.all([older.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions .js-paging-loading')
+      .should('have.attr', 'hidden');
+
+    cy
+      .get('.patient-interactions__item')
+      .should('have.length', 25);
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Navigation message 79')
+      .and('be.focused')
+      .and('be.visible');
+  });
+
+  specify('opens from workflow and a configured sidebar, then links through an action', function() {
+    const patient = getPatient();
+    const action = getAction({
+      attributes: { name: 'Call patient' },
+      relationships: { patient: getRelationship(patient) },
+    });
+    const interaction = getInteraction({
+      attributes: {
+        channel: 'voice',
+        metadata: {
+          clinician_name: 'Alex Morgan',
+          disposition: 'Left Voicemail',
+          made_contact: false,
+          note: 'Left a message asking the patient to call back.',
+        },
+      },
+      relationships: {
+        action: getRelationship(action),
+      },
+    });
+    const sameDay = getInteraction({
+      attributes: {
+        channel: 'sms',
+        direction: 'inbound',
+        metadata: {
+          body: 'I can come in tomorrow morning.',
+          from: '+16155550101',
+        },
+        occurred_at: '2026-09-24T09:59:00Z',
+      },
+    });
+
+    const previousDay = getInteraction({
+      attributes: {
+        channel: 'appointment',
+        metadata: {
+          status: 'scheduled',
+          appointment_type: 'Follow-up appointment.',
+          provider: 'Taylor Lee',
+        },
+        occurred_at: '2026-09-23T10:00:00+00:00',
+      },
+    });
+
+    const olderPreview = getInteraction({
+      attributes: {
+        metadata: { message: 'Older fourth interaction' },
+        occurred_at: '2026-09-22T10:00:00Z',
+      },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = patient;
+
+        return fx;
+      })
+      .routePatientByAction(fx => {
+        fx.data = patient;
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [action];
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = action;
+
+        return fx;
+      })
+      .routeActionActivity(fx => {
+        fx.data = [getActivity({ date: '2026-09-24T10:01:00Z', event_type: 'ActionDetailsUpdated', source: 'system' })];
+
+        return fx;
+      })
+      .routeActionComments(fx => {
+        fx.data = [getComment({
+          attributes: { created_at: '2026-09-24T10:00:30Z', message: 'Patient follow-up comment', edited_at: null },
+          relationships: { clinician: getRelationship(getCurrentClinician()) },
+        })];
+
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [olderPreview, interaction, sameDay, previousDay];
+        fx.included = [action];
+        return fx;
+      })
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{
+          id: 'interactions',
+          type: 'panels',
+          attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] },
+        }];
+
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{
+          id: 'interactions',
+          type: 'widgets',
+          attributes: { category: 'interactions', slug: 'interactions', definition: {} },
+        }];
+
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', {
+        statusCode: 422,
+        body: { errors: [{ title: 'Unavailable' }] },
+      })
+      .as('failedPreview')
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .wait('@failedPreview');
+
+    cy
+      .get('.patient-interactions-preview [role="alert"]')
+      .should('contain', 'Interactions could not be loaded.');
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('.patient-interactions-preview')
+      .should('contain', 'No interactions yet.');
+
+    const visits = map([
+      { admitted_at: '2026-09-24T08:00:00Z', facility: 'Clinic <b>East</b> & West' },
+      { discharged_at: '2026-09-24T09:00:00Z', facility: 'Example Medical Center' },
+      { admitted_at: '2026-09-24T10:00:00Z' },
+    ], metadata => getInteraction({ attributes: { channel: 'visit', metadata } }));
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = visits;
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('.patient-interactions-preview')
+      .should('contain', 'Admitted • Clinic <b>East</b> & West')
+      .and('contain', 'Discharged • Example Medical Center')
+      .find('.patient-interactions-preview__title')
+      .should('have.length', 3)
+      .and($titles => {
+        expect($titles.toArray().map(title => title.textContent)).to.include('Admitted');
+      });
+
+    cy
+      .get('.patient-interactions-preview__title b')
+      .should('not.exist');
+
+    const sparsePreview = [
+      getInteraction({ attributes: { channel: 'voice', direction: 'inbound', metadata: { note: 'Inbound callback' } } }),
+      getInteraction({ attributes: { metadata: null } }),
+      getInteraction({ attributes: { channel: 'appointment', occurred_at: null, metadata: { appointment_type: 'Consultation' } } }),
+    ];
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = sparsePreview;
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('.patient-interactions-preview')
+      .should('contain', 'Inbound Call')
+      .and('contain', 'Outbound Message')
+      .find('.patient-interactions-preview__title')
+      .should('have.length', 3)
+      .and($titles => {
+        expect($titles.toArray().map(title => title.textContent)).to.include('Appointment');
+      });
+
+    cy
+      .get('.patient-interactions-preview__item--appointment')
+      .find('time')
+      .should('not.exist');
+
+    const inheritedStatuses = map(['toString', 'constructor'], status => getInteraction({
+      attributes: { channel: 'appointment', metadata: { status } },
+    }));
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = inheritedStatuses;
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('.patient-interactions-preview__title')
+      .should('have.length', 2)
+      .each($title => {
+        expect($title.text()).to.equal('Appointment');
+      });
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [olderPreview, interaction, sameDay, previousDay];
+        fx.included = [action];
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .wait('@previewInteractions')
+      .its('request.url')
+      .then(url => {
+        expect(new URL(url).searchParams.get('page[limit]')).to.equal('3');
+      });
+
+    cy
+      .get('.patient-interactions-preview__time')
+      .should('have.length', 3)
+      .and($times => {
+        const timestamps = $times.toArray().map(time => time.getAttribute('datetime'));
+        expect(timestamps).to.deep.equal([previousDay.attributes.occurred_at, sameDay.attributes.occurred_at, interaction.attributes.occurred_at]);
+        expect(timestamps).not.to.include(olderPreview.attributes.occurred_at);
+      });
+
+    cy
+      .get('.patient-interactions-preview__link')
+      .last()
+      .should('contain', 'Outbound Call')
+      .and('contain', 'Left Voicemail')
+      .and('contain', 'Alex Morgan')
+      .click();
+
+    cy
+      .wait('@anchoredPatientInteractions')
+      .its('request.url')
+      .then(url => {
+        expect(new URL(url).searchParams.get('page[at]')).to.equal(interaction.id);
+      });
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/interactions/${ interaction.id }`);
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Outbound Call')
+      .and('contain', 'Left Voicemail')
+      .and('contain', 'Left a message asking the patient to call back.');
+    let timelineElement;
+    let navigationRequests = 0;
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.has('page[at]')) navigationRequests += 1;
+      });
+
+    cy
+      .get('.patient-interactions')
+      .then($el => {
+        timelineElement = $el[0];
+      });
+
+    cy
+      .get('.patient-interactions-preview__link')
+      .eq(1)
+      .click();
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'I can come in tomorrow morning.')
+      .and('be.focused');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should($el => {
+        expect($el[0]).to.equal(timelineElement);
+        expect(navigationRequests).to.equal(0);
+      });
+
+    cy
+      .get('.patient-interactions-preview__link')
+      .last()
+      .click();
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Left a message asking the patient to call back.');
+
+    cy
+      .get('.patient-interactions-preview__all')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/interactions`);
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('not.exist');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .get('.patient-interactions__item--voice')
+      .should('not.exist');
+
+    cy
+      .get('.patient-interactions-preview__link')
+      .last()
+      .click();
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .should('have.attr', 'aria-pressed', 'true');
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Left a message asking the patient to call back.')
+      .and('be.focused');
+
+    const targetFilter = createResponseGate(pendingResponses);
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (!query.has('filter[channel]') || query.get('page[limit]') === '3' || query.has('page[before]') || query.has('page[after]') || targetFilter.started) return;
+        return targetFilter.reply(req, { data: [interaction, previousDay], included: [action] });
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should('be.visible')
+      .should(() => {
+        expect(targetFilter.started).to.equal(true);
+      });
+
+    cy
+      .get('.patient-interactions-preview__link')
+      .last()
+      .click();
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Left a message asking the patient to call back.')
+      .and('be.focused');
+
+    cy
+      .get('.patient-interactions .js-paging-loading')
+      .should('have.attr', 'hidden')
+      .then(() => {
+        targetFilter.release();
+      });
+
+    cy
+      .then(() => Cypress.Promise.all([targetFilter.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .contains('.patient-interactions__item', 'I can come in tomorrow morning.')
+      .should('not.exist');
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Left a message asking the patient to call back.')
+      .and('be.focused');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'I can come in tomorrow morning.')
+      .should('contain', '+16155550101');
+
+    cy
+      .contains('.patient-interactions__item', 'Follow-up appointment.')
+      .should('contain', 'Taylor Lee');
+
+    cy
+      .contains('.patient-interactions__item', 'Older fourth interaction')
+      .should('exist');
+
+    cy
+      .get('.patient-interactions__date-divider')
+      .should('have.length', 3);
+
+    cy
+      .get('.patient-interactions__controls')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__date-button')
+      .first()
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('be.visible')
+      .within(() => {
+        cy
+          .contains('Today')
+          .should('be.visible');
+
+        cy
+          .contains('Yesterday')
+          .should('be.visible');
+
+        cy
+          .contains('Last week')
+          .should('be.visible');
+
+        cy
+          .contains('Last month')
+          .should('be.visible');
+
+        cy
+          .contains('The very beginning')
+          .should('be.visible');
+
+        cy
+          .contains('.js-picklist-item', 'Jump to a specific date')
+          .click();
+      });
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('be.visible')
+      .and('be.focused')
+      .trigger('keydown', { eventConstructor: 'KeyboardEvent', key: 'Tab', shiftKey: true });
+
+    cy
+      .focused()
+      .should('have.class', 'js-next');
+
+    cy
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
+      .should('have.class', 'patient-interactions__calendar-close')
+      .trigger('keydown', { eventConstructor: 'KeyboardEvent', key: 'Tab', shiftKey: true });
+
+    cy
+      .focused()
+      .should('have.class', 'js-next');
+
+    cy
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
+      .should('have.class', 'js-prev');
+
+    cy
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
+      .should('have.class', 'js-next');
+
+    cy
+      .press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
+      .should('have.class', 'patient-interactions__calendar-close')
+      .click();
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('not.exist');
+
+    cy
+      .focused()
+      .should('have.class', 'patient-interactions__date-button')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Jump to a specific date')
+      .click();
+
+    cy
+      .press(Cypress.Keyboard.Keys.ESC);
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('not.exist');
+
+    cy
+      .focused()
+      .should('have.class', 'patient-interactions__date-button');
+
+    cy
+      .get('.patient-interactions__toolbar-date .patient-interactions__date-button')
+      .click();
+
+    cy
+      .get('.patient-interactions__toolbar-date .patient-interactions__date-button')
+      .should('have.attr', 'aria-expanded', 'true')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('.patient-interactions__toolbar-date .patient-interactions__date-button')
+      .should('have.attr', 'aria-expanded', 'false')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Jump to a specific date')
+      .click();
+
+    cy
+      .get('.patient-interactions__calendar-modal .datepicker__days a')
+      .contains(/^23$/)
+      .click();
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('not.exist');
+
+    cy
+      .get('.patient-interactions__date-button')
+      .eq(1)
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('be.visible')
+      .and('contain', 'The very beginning');
+
+    cy
+      .get('.patient-interactions__action')
+      .should('contain', 'Call patient')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/action/${ action.id }`);
+
+    cy
+      .wait('@activityInteractions')
+      .its('request.url')
+      .then(url => {
+        expect(new URL(url).searchParams.get('filter[action]')).to.equal(action.id);
+      });
+
+    cy
+      .get('.patient-action__activity .patient-interactions__card')
+      .should('contain', 'Left a message asking the patient to call back.');
+
+    cy
+      .get('.patient-action__activity-items')
+      .children()
+      .should('have.length', 3)
+      .then($items => {
+        expect($items.eq(0)).to.contain('Left a message asking the patient to call back.');
+        expect($items.eq(1)).to.contain('Patient follow-up comment');
+        expect($items.eq(2)).to.have.class('patient-action__activity-item');
+      });
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (!new URL(req.url).searchParams.has('filter[action]')) return;
+        req.alias = 'failedActionInteractions';
+        req.reply({ statusCode: 422, body: { errors: [{ title: 'Unavailable' }] } });
+      })
+      .visit(`/patient/${ patient.id }/action/${ action.id }`);
+
+    cy
+      .wait('@failedActionInteractions');
+
+    cy
+      .get('.patient-action__activity-items')
+      .should('contain', 'Patient follow-up comment')
+      .children()
+      .should('have.length', 2);
+
+    cy
+      .get('.patient-action__comment-form .js-input')
+      .should('be.visible');
+
+    cy
+      .get('.alert-box')
+      .should('contain', 'Interactions could not be loaded.')
+      .find('.js-dismiss')
+      .click();
+
+    const undatedAppointment = getInteraction({
+      attributes: {
+        channel: 'appointment',
+        metadata: {
+          appointment_type: 'Appointment details pending',
+        },
+        occurred_at: null,
+      },
+      relationships: {
+        action: getRelationship(action),
+      },
+    });
+
+    const undatedVisit = getInteraction({
+      attributes: { channel: 'visit', occurred_at: null, metadata: { source: 'Visit details pending' } },
+      relationships: { action: getRelationship(action) },
+    });
+
+    const inboundCall = getInteraction({
+      attributes: {
+        channel: 'voice',
+        direction: 'inbound',
+        metadata: {
+          note: 'Inbound callback',
+        },
+      },
+      relationships: {
+        action: getRelationship(action),
+      },
+    });
+    const missingMetadata = getInteraction({
+      attributes: {
+        metadata: null,
+      },
+      relationships: {
+        action: getRelationship(action),
+      },
+    });
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [interaction, sameDay, previousDay, undatedAppointment, undatedVisit, inboundCall, missingMetadata];
+        fx.included = [action];
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/action/${ action.id }`);
+
+    cy
+      .get('.patient-action__activity .patient-interactions__card')
+      .should('contain', 'Left a message asking the patient to call back.');
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Appointment details pending')
+      .should('contain', 'Appointment')
+      .and('not.contain', 'Invalid Date')
+      .find('time')
+      .should('not.exist');
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Visit details pending')
+      .find('time')
+      .should('not.exist');
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Inbound callback')
+      .find('.patient-interactions__marker use')
+      .should('have.attr', 'href', '#far-fa-phone-arrow-down-left');
+
+    cy
+      .get('.patient-action__activity .patient-interactions__item--sms')
+      .should('contain', 'Outbound Message')
+      .find('.patient-interactions__activity-description strong')
+      .should('not.exist');
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [interaction, sameDay, previousDay];
+        fx.included = [action];
+        return fx;
+      });
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Left a message asking the patient to call back.')
+      .contains('.js-interaction', 'View on Interactions')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/interactions/${ interaction.id }`);
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('contain', 'Left a message asking the patient to call back.')
+      .and('be.focused');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/interactions`);
+
+    cy
+      .get('.patient-interactions__item')
+      .should('exist');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const channels = new URL(req.url).searchParams.get('filter[channel]');
+        if (!channels) {
+          req.reply({ body: { data: [interaction, sameDay, previousDay], included: [action] } });
+          return;
+        }
+        req.alias = channels.includes('voice') ? 'callInteractions' : 'filteredInteractions';
+        req.reply({ body: { data: channels.includes('voice') ? [interaction] : [], included: [action] } });
+      });
+
+    cy
+      .viewport(700, 900);
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Jump to a specific date')
+      .click();
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('be.visible')
+      .find('.js-close')
+      .click();
+
+    cy
+      .focused()
+      .should('have.class', 'patient-interactions__date-button');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .should('be.visible')
+      .and('have.attr', 'aria-pressed', 'true')
+
+      .focus();
+
+    cy
+      .press(Cypress.Keyboard.Keys.SPACE);
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .should('have.attr', 'aria-pressed', 'false');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .should('have.attr', 'aria-pressed', 'true');
+
+    cy
+      .wait('@filteredInteractions')
+      .its('request.url')
+      .then(url => {
+        const query = new URL(url).searchParams;
+        expect(query.get('filter[channel]')).not.to.include('voice');
+        expect([interaction.id, sameDay.id, previousDay.id]).to.include(query.get('page[at]'));
+        expect(query.has('page[before]')).to.equal(false);
+        expect(query.has('page[after]')).to.equal(false);
+      });
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click();
+
+    cy
+      .get('.patient-interactions__filters [data-filter="appointments"]')
+      .click();
+
+    cy
+      .get('.patient-interactions__filters [data-filter="visits"]')
+      .click();
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .wait('@callInteractions')
+      .its('request.url')
+      .then(url => {
+        expect(new URL(url).searchParams.get('filter[channel]').split(',')).to.have.members(['voice', 'voicemail', 'video']);
+      });
+
+    cy
+      .get('.patient-interactions__item')
+      .should('have.length', 1)
+      .and('contain', 'Left a message asking the patient to call back.');
+
+    const carePlanMessage = getInteraction({
+      attributes: {
+        channel: 'sms',
+        metadata: {
+          message: 'Your care plan is available in the patient portal.',
+        },
+      },
+    });
+
+    const filtered = createResponseGate(pendingResponses);
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const channels = new URL(req.url).searchParams.get('filter[channel]');
+        if (channels?.includes('voice')) {
+          return filtered.reply(req, { data: [interaction], included: [action] });
+        }
+        req.alias = 'carePlanMessages';
+        req.reply({ body: { data: [carePlanMessage] } });
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should('be.visible')
+      .should(() => {
+        expect(filtered.started).to.equal(true);
+      });
+
+    cy
+      .get('.js-paging-loading')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .wait('@carePlanMessages')
+      .its('request.url')
+      .then(url => {
+        expect(new URL(url).searchParams.get('filter[channel]').split(',')).to.have.members(['sms', 'email', 'mail', 'fax', 'portal']);
+      });
+
+    cy
+      .get('.patient-interactions__item')
+      .should('have.length', 1)
+      .and('contain', 'Your care plan is available in the patient portal.')
+      .then(() => {
+        filtered.release();
+      });
+
+    cy
+      .then(() => Cypress.Promise.all([filtered.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions__item')
+      .should('have.length', 1)
+      .and('contain', 'Your care plan is available in the patient portal.');
+
+    cy
+      .focused()
+      .should('have.attr', 'data-filter', 'calls');
+
+    cy
+      .get('.patient-interactions [role="alert"]')
+      .should('not.be.visible');
+
+    const dateFilter = createResponseGate(pendingResponses);
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') === '3' || dateFilter.started) return;
+        return dateFilter.reply(req, { data: [] });
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should('be.visible')
+      .should(() => {
+        expect(dateFilter.started).to.equal(true);
+      });
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('be.visible')
+      .then(() => {
+        dateFilter.release();
+      });
+
+    cy
+      .then(() => Cypress.Promise.all([dateFilter.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible');
+
+    cy
+      .contains('.js-picklist-item', 'Today')
+      .should('be.visible')
+      .click();
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible');
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [carePlanMessage];
+        return fx;
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
+      .should('be.visible');
+
+    const dateIntent = createResponseGate(pendingResponses);
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') === '3' || dateIntent.started) return;
+        return dateIntent.reply(req, { data: [] });
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should('be.visible')
+      .should(() => {
+        expect(dateIntent.started).to.equal(true);
+      });
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Yesterday')
+      .click();
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible')
+      .then(() => {
+        dateIntent.release();
+      });
+
+    cy
+      .then(() => Cypress.Promise.all([dateIntent.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions .js-paging-loading')
+      .should('have.attr', 'hidden');
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [carePlanMessage];
+        return fx;
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
+      .should('be.visible');
+
+    const leaving = createResponseGate(pendingResponses);
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') === '3') {
+          req.reply({ body: { data: [interaction], included: [action] } });
+          return;
+        }
+        return leaving.reply(req, { data: [interaction], included: [action] });
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should('be.visible')
+      .should(() => {
+        expect(leaving.started).to.equal(true);
+      });
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .should('be.visible')
+      .then(() => {
+        leaving.release();
+      });
+
+    cy
+      .then(() => Cypress.Promise.all([leaving.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('.patient-interactions')
+      .should('not.exist');
+
+    cy
+      .get('.alert-box')
+      .should('not.exist');
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [carePlanMessage];
+        return fx;
+      });
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
+      .should('be.visible');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') === '3') {
+          req.reply({ body: { data: [carePlanMessage] } });
+          return;
+        }
+        req.alias = 'failedTimeline';
+        req.reply({ statusCode: 422, body: { errors: [{ title: 'Unavailable' }] } });
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    cy
+      .wait('@failedTimeline');
+
+    cy
+      .get('.patient-interactions [role="alert"]')
+      .should('contain', 'Interactions could not be loaded.');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .click();
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [carePlanMessage];
+        return fx;
+      });
+
+    cy
+      .contains('.js-picklist-item', 'Yesterday')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
+      .should('be.visible');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') !== '25') return;
+        req.alias = 'failedRetryTimeline';
+        req.reply({ statusCode: 422, body: { errors: [{ title: 'Unavailable' }] } });
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    cy
+      .wait('@failedRetryTimeline');
+
+    cy
+      .get('.patient-interactions [role="alert"]')
+      .should('contain', 'Interactions could not be loaded.');
+
+    cy
+      .get('.patient-interactions .js-paging-loading')
+      .should('have.attr', 'hidden');
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [carePlanMessage];
+        return fx;
+      });
+
+    cy
+      .get('.patient-interactions__status .js-retry')
+      .should('be.visible')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
+      .should('be.visible');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [carePlanMessage];
+        return fx;
+      });
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
+      .should('be.visible');
+
+    cy
+      .viewport(1280, 900);
+
+    const preview = createResponseGate(pendingResponses);
+
+    cy
+      .routesForDefault()
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        return preview.reply(req, { data: [interaction], included: [action] });
+      })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('.patient-interactions-preview [role="status"]')
+      .should('be.visible')
+      .should(() => {
+        expect(preview.started).to.equal(true);
+      });
+
+    cy
+      .get('.patient-interactions-preview .patient-interactions-loading__card')
+      .should('be.visible');
+
+    cy
+      .get('.app-nav__content .app-nav__link')
+      .first()
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('.patient-interactions-preview')
+      .should('not.exist')
+      .then(() => {
+        preview.release();
+      });
+
+    cy
+      .then(() => Cypress.Promise.all([preview.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions-preview')
+      .should('not.exist');
+
+    cy
+      .get('.alert-box')
+      .should('not.exist');
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [carePlanMessage];
+        return fx;
+      })
+      .go('back');
+
+    cy
+      .get('.patient-interactions-preview__link')
+      .should('contain', 'Outbound Message')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Jump to a specific date')
+      .click();
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('be.visible')
+      .and('be.focused');
+
+    const teardownFocus = [];
+    const onTeardownFocus = event => {
+      if (event.target.classList.contains('patient-interactions__date-button')) teardownFocus.push(event.target);
+    };
+
+    cy
+      .window()
+      .then(win => {
+        win.document.addEventListener('focusin', onTeardownFocus);
+      });
+
+    cy
+      .go('back');
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__calendar-modal')
+      .should('not.exist');
+
+    cy
+      .window()
+      .then(win => {
+        win.document.removeEventListener('focusin', onTeardownFocus);
+        expect(teardownFocus).to.have.length(0);
+      });
   });
 });

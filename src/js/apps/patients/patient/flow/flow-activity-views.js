@@ -4,6 +4,10 @@ import { View, CollectionView } from 'marionette';
 import 'scss/modules/loader.scss';
 import 'scss/modules/skeleton.scss';
 
+import { alphaSort } from 'js/utils/sorting';
+
+import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
+
 import './patient-flow.scss';
 
 const ProgramStartedTemplate = hbs`
@@ -67,7 +71,7 @@ const FlowActivityLoadingView = View.extend({
 });
 
 const ActivityView = View.extend({
-  className: 'patient-flow__activity-item',
+  className: 'patient-flow__activity-item patient-interactions__feed-event',
   getTemplate() {
     const type = this.model.get('event_type');
 
@@ -112,7 +116,16 @@ const ActivityView = View.extend({
 });
 
 const ActivitiesView = CollectionView.extend({
-  childView: ActivityView,
+  childView(model) {
+    return model.type === 'interactions' ? InteractionItemView : ActivityView;
+  },
+  childViewOptions() {
+    return { tagName: 'div', activity: true, patientId: this.getOption('patientId') };
+  },
+  viewComparator(viewA, viewB) {
+    const date = model => model.type === 'interactions' ? model.getTimestamp() : model.get('date');
+    return alphaSort('asc', date(viewA.model), date(viewB.model));
+  },
 });
 
 export { ActivitiesView, FlowActivityLoadingView };

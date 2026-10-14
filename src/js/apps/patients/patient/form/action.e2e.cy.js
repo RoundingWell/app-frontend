@@ -30,6 +30,7 @@ context('Patient Action Form', function() {
       .routeActionActivity()
       .routeActionComments()
       .routeActionFiles()
+      .routePatientInteractions()
       .routesForDefault();
   });
 
