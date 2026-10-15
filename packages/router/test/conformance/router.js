@@ -298,6 +298,51 @@ export function routerConformance({ name, createDriver, describe, it, assert }) 
       if (isMemory) assert.deepEqual(h.driver.documentNavigations.at(-1), h.driver.currentEntry.url);
     });
 
+    scenario('lets a navigation started from the previous match abort listener win', async h => {
+      await h.moveTo('start');
+      await h.router.start();
+      await h.router.navigate('page', { run: h.run, id: 'one' }).finished;
+      let latest;
+      h.last().signal.addEventListener('abort', () => {
+        latest = h.router.navigate('page', { run: h.run, id: 'three' });
+      }, { once: true });
+
+      const superseded = h.router.navigate('page', { run: h.run, id: 'two' });
+
+      assert.equal(await superseded.finished, false);
+      assert.equal(await latest.finished, true);
+      assert.equal(h.driver.currentEntry.url, h.href('page/three'));
+      assert.equal(h.router.getCurrent().params.id, 'three');
+      assert.equal(h.log.some(entry => entry.endsWith(':page:two')), false);
+    });
+
+    scenario('lets a navigation started from a route listener win', async h => {
+      await h.moveTo('start');
+      await h.router.start();
+      let latest;
+      h.router.once('route', () => {
+        latest = h.router.navigate('page', { run: h.run, id: 'three' });
+      });
+
+      const superseded = h.router.navigate('page', { run: h.run, id: 'two' });
+
+      assert.equal(await superseded.finished, false);
+      assert.equal(await latest.finished, true);
+      assert.equal(h.driver.currentEntry.url, h.href('page/three'));
+      assert.deepEqual(h.log, ['route:page:two', 'route:page:three', 'handler:page:three', 'ready:page:three']);
+    });
+
+    scenario('runs no handler when stop() is called from a route listener', async h => {
+      await h.moveTo('start');
+      await h.router.start();
+      h.router.once('route', () => h.router.stop());
+
+      const stopped = h.router.navigate('page', { run: h.run, id: 'two' });
+
+      assert.equal(await stopped.finished, false);
+      assert.deepEqual(h.log, ['route:page:two']);
+    });
+
     scenario('aborts a finished match signal when the next match commits and when the router stops', async h => {
       await h.moveTo('start');
       await h.router.start();
