@@ -3,13 +3,13 @@
   <div class="patient-interactions__activity-line">
     <span class="patient-interactions__activity-description">
       {{#if description.name}}<strong>{{ description.name }}</strong>{{/if}}{{#if description.text}} {{ description.text }}{{/if}}
-      <span class="patient-interactions__time">
+      <span class="patient-interactions__time{{#if (isValue group "appointments")}} patient-interactions__time--appointment{{/if}}">
         {{#if viaLabel}}{{ viaLabel }}{{/if}}{{#if timestamp}}{{#if timeSeparator}} • {{/if}}<time datetime="{{ timestamp }}">{{formatDateTime timeDate timeFormat}}{{#if appointmentTimezone}} {{ appointmentTimezone }}{{/if}}</time>{{/if}}
       </span>
     </span>
     {{#if activity}}<button class="patient-interactions__action js-interaction" type="button">{{ @intl.patients.shared.interactions.interactionItemView.viewOnInteractions }} {{far "angle-right"}}</button>{{else if workName}}<button class="patient-interactions__action js-action" type="button">{{ workName }} {{far "angle-right"}}</button>{{/if}}
   </div>
-  <div class="patient-interactions__card">
+  {{#if hasCardContent}}<div class="patient-interactions__card">
     {{#if (isValue group "appointments")}}
       {{#if metadata.appointment_type}}<div class="patient-interactions__item-heading"><span class="patient-interactions__appointment-type">{{ metadata.appointment_type }}</span></div>{{/if}}
       {{#if appointmentDate}}
@@ -39,5 +39,5 @@
       <div class="patient-interactions__item-heading"><span class="patient-interactions__channel">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.interactions.interactionItemView.inbound }}{{else}}{{ @intl.patients.shared.interactions.interactionItemView.outbound }}{{/if}} {{ channelLabel }}</span>{{#if metadata.disposition}}<span class="patient-interactions__separator">•</span><span>{{ metadata.disposition }}</span>{{/if}}</div>
     {{/if}}
     {{#if summary}}<p class="patient-interactions__summary">{{ summary }}</p>{{/if}}
-  </div>
+  </div>{{/if}}
 </div>

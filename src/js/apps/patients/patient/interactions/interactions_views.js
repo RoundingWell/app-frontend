@@ -13,6 +13,7 @@ import i18n from 'js/i18n';
 import Tooltip from 'js/components/tooltip';
 
 import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
+import { hasInteractionCardContent } from 'js/apps/patients/shared/interactions/display';
 
 import ScrollEdgesBehavior from './scroll-edges_behavior';
 
@@ -38,6 +39,7 @@ function getRelationIdentity(model) {
 
 function canGroupInteractions(left, right) {
   if (!left || !right || getDate(left) !== getDate(right)) return false;
+  if (!hasInteractionCardContent(left) || !hasInteractionCardContent(right)) return false;
   if (left.getChannelGroup() !== right.getChannelGroup()) return false;
   const relation = getRelationIdentity(left);
   return !!relation && relation === getRelationIdentity(right);

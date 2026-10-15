@@ -166,6 +166,11 @@ context('patient interactions', function() {
       })
       .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-06T12:00:00Z' });
 
+    cy
+      .contains('.patient-interactions__item', 'Clinic - Initial Visit (0)')
+      .find('.patient-interactions__marker use')
+      .should('have.attr', 'href', '#far-fa-calendar-day');
+
     const labels = ['scheduled', 'completed', 'cancelled', 'scheduled', 'cancelled', 'checked in', '', '', '', 'scheduled', 'scheduled', 'scheduled', 'scheduled'];
     for (const [index, label] of labels.entries()) {
       cy
@@ -179,6 +184,10 @@ context('patient interactions', function() {
               if (label) expect($description).to.contain(`Appointment ${ label }`);
               else expect($description.text()).not.to.match(/scheduled|completed|cancelled|checked in/);
             });
+
+          cy
+            .get('.patient-interactions__activity-description strong')
+            .should('have.text', 'Appointment');
 
           cy
             .get('.patient-interactions__card')
@@ -305,6 +314,7 @@ context('patient interactions', function() {
       attributes: {
         metadata: {
           message: 'Please call us to schedule your follow-up.',
+          note: 'Outbound message fallback',
           clinician_name: 'Alex Morgan',
         },
         occurred_at: '2026-09-24T11:00:00Z',
@@ -334,6 +344,15 @@ context('patient interactions', function() {
       },
     });
 
+    const emptyMessage = getInteraction({
+      attributes: { channel: 'sms', occurred_at: '2026-09-24T10:59:00Z', metadata: { note: null, disposition: 'Text Sent' } },
+      relationships: { action: getRelationship(action) },
+    });
+    const emptyVisit = getInteraction({
+      attributes: { channel: 'visit', occurred_at: '2026-09-24T10:01:00Z', metadata: null },
+      relationships: { flow: getRelationship(dischargeFlow) },
+    });
+
     cy
       .routesForPatientAction()
       .routePatient(fx => {
@@ -359,7 +378,7 @@ context('patient interactions', function() {
       })
       .routeFlowActivity()
       .routePatientInteractions(fx => {
-        fx.data = [actionInteraction, flowInteraction];
+        fx.data = [actionInteraction, flowInteraction, emptyMessage, emptyVisit];
         fx.included = [action, flow, dischargeFlow];
         return fx;
       })
@@ -379,6 +398,10 @@ context('patient interactions', function() {
 
         cy
           .contains('via Collective');
+
+        cy
+          .get('.patient-interactions__marker use')
+          .should('have.attr', 'href', '#far-fa-hospital');
 
         cy
           .contains('LOS 1 day');
@@ -404,7 +427,44 @@ context('patient interactions', function() {
 
     cy
       .contains('.patient-interactions__item', 'Please call us to schedule your follow-up.')
-      .should('contain', 'Alex Morgan');
+      .should('contain', 'Alex Morgan')
+      .and('not.contain', 'Outbound message fallback')
+      .find('.patient-interactions__marker use')
+      .should('have.attr', 'href', '#far-fa-paper-plane-top');
+
+    cy
+      .contains('.patient-interactions__activity-description', 'Outbound Message')
+      .scrollIntoView()
+      .should('be.visible')
+      .closest('.patient-interactions__item')
+      .within(() => {
+        cy
+          .contains('.js-action', 'Team Referral Flow: SMS Outreach')
+          .should('be.visible');
+
+        cy
+          .get('.patient-interactions__card')
+          .should('not.exist');
+      });
+
+    cy
+      .get('.patient-interactions__item--visit time[datetime="2026-09-24T10:01:00Z"]')
+      .closest('.patient-interactions__item')
+      .scrollIntoView()
+      .within(() => {
+        cy
+          .get('.patient-interactions__activity-description')
+          .should('be.visible')
+          .and('contain', 'Visit added');
+
+        cy
+          .contains('.js-action', 'TCM - ER Discharge')
+          .should('be.visible');
+
+        cy
+          .get('.patient-interactions__card')
+          .should('not.exist');
+      });
 
     cy
       .get('.patient-interactions__action')
@@ -547,6 +607,7 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', /Grouped message 1(?!\d)/)
       .should('have.class', 'patient-interactions__item--continuation')
+      .and('contain', 'Inbound Message')
       .find('.patient-interactions__activity-line')
       .scrollIntoView()
       .should('be.visible')
@@ -1143,6 +1204,8 @@ context('patient interactions', function() {
         direction: 'inbound',
         metadata: {
           body: 'I can come in tomorrow morning.',
+          message: 'Outgoing message must not replace a patient reply.',
+          note: 'Incoming message fallback',
           from: '+16155550101',
         },
         occurred_at: '2026-09-24T09:59:00Z',
@@ -1163,7 +1226,7 @@ context('patient interactions', function() {
 
     const olderPreview = getInteraction({
       attributes: {
-        metadata: { message: 'Older fourth interaction' },
+        metadata: { note: 'Older fourth interaction' },
         occurred_at: '2026-09-22T10:00:00Z',
       },
     });
@@ -1372,7 +1435,10 @@ context('patient interactions', function() {
       .get('.patient-interactions__item.is-selected')
       .should('contain', 'Outbound Call')
       .and('contain', 'Left Voicemail')
-      .and('contain', 'Left a message asking the patient to call back.');
+      .and('contain', 'Left a message asking the patient to call back.')
+      .and('contain', 'Alex Morgan')
+      .find('.patient-interactions__marker use')
+      .should('have.attr', 'href', '#far-fa-phone-arrow-up-right');
     let timelineElement;
     let navigationRequests = 0;
 
@@ -1502,7 +1568,9 @@ context('patient interactions', function() {
 
     cy
       .contains('.patient-interactions__item', 'I can come in tomorrow morning.')
-      .should('contain', '+16155550101');
+      .should('contain', '+16155550101')
+      .and('not.contain', 'Outgoing message must not replace a patient reply.')
+      .and('not.contain', 'Incoming message fallback');
 
     cy
       .contains('.patient-interactions__item', 'Follow-up appointment.')
@@ -1743,7 +1811,7 @@ context('patient interactions', function() {
 
     const inboundCall = getInteraction({
       attributes: {
-        channel: 'voice',
+        channel: 'voicemail',
         direction: 'inbound',
         metadata: {
           note: 'Inbound callback',
@@ -1761,10 +1829,18 @@ context('patient interactions', function() {
         action: getRelationship(action),
       },
     });
+    const videoCall = getInteraction({
+      attributes: { channel: 'video', direction: 'outbound', metadata: { note: 'Video consultation completed.' } },
+      relationships: { action: getRelationship(action) },
+    });
+    const email = getInteraction({
+      attributes: { channel: 'email', direction: 'outbound', metadata: { note: 'Follow-up email instructions.', message: 'SMS-only content' } },
+      relationships: { action: getRelationship(action) },
+    });
 
     cy
       .routePatientInteractions(fx => {
-        fx.data = [interaction, sameDay, previousDay, undatedAppointment, undatedVisit, inboundCall, missingMetadata];
+        fx.data = [interaction, sameDay, previousDay, undatedAppointment, undatedVisit, inboundCall, missingMetadata, videoCall, email];
         fx.included = [action];
         return fx;
       })
@@ -1788,8 +1864,18 @@ context('patient interactions', function() {
 
     cy
       .contains('.patient-action__activity .patient-interactions__item', 'Inbound callback')
+      .should('contain', 'Inbound Voicemail')
       .find('.patient-interactions__marker use')
       .should('have.attr', 'href', '#far-fa-phone-arrow-down-left');
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Video consultation completed.')
+      .should('contain', 'Outbound Video call');
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Follow-up email instructions.')
+      .should('contain', 'via email')
+      .and('not.contain', 'SMS-only content');
 
     cy
       .get('.patient-action__activity .patient-interactions__item--sms')
