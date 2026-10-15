@@ -61,8 +61,8 @@ Non-root routes are prefixed with the workspace slug today.
 | `schedule` | `schedule` | PatientsMainApp | `meta.isList` |
 | `patient:workflow` | `patient/:patientId/workflow`; alias `patient/dashboard/:patientId` | PatientApp | alias until 2027-09-02 |
 | `patient:workflow:closed` | `patient/:patientId/workflow/closed`; alias `patient/archive/:patientId` | PatientApp | alias until 2027-09-02 |
-| `patient:interactions` | `patient/:patientId/interactions` | PatientApp | Not on this base (lives on `feature/patient-interactions`); add its E2E when it merges |
-| `patient:interaction` | `patient/:patientId/interactions/:interactionId` | PatientApp | Not on this base; same |
+| `patient:interactions` | `patient/:patientId/interactions` | PatientApp | merged from `develop`; covered by `interactions.e2e.cy.js` |
+| `patient:interaction` | `patient/:patientId/interactions/:interactionId` | PatientApp | same |
 | `patient:action` | `patient/:patientId/action/:actionId`; alias `patient/archive/:patientId/action/:actionId` | PatientApp | extra `entryTarget` arg → `info` |
 | `patient:flow` | `patient/:patientId/flow/:flowId` | PatientApp | |
 | `patient:flow:focus` | `patient/:patientId/flow/:flowId/focus/:actionId` | PatientApp | opens the flow and focuses the action (see `routing.md`) |
@@ -122,9 +122,9 @@ src/js/routes.js                    static route tree (names = D6), meta { area,
 src/js/router.js                    new Router(...), intercept/notFound predicates, persistParams ['workspace']
 src/js/services/router-radio.js     event-router trigger bridge + 'router' request channel
 AppFrameApp                         router.handler owner → RouteOutlet keyed { workspace }
-  WorkspaceApp                      route: RouteState; RouteOutlet keyed by meta.area (areas imported as one set)
+  WorkspaceApp                      RouteOutlet keyed by meta.area (each area imported on first use)
     PatientsArea / ProgramsArea …   plain App + RouteOutlet; explicit name → child map; .catch error policy
-      PatientApp / ProgramApp …     plain App; reads options.route; nested RouteOutlet
+      PatientApp / ProgramApp …     plain App; plain options; showRoute(match) for per-match detail; nested RouteOutlet
 NavApp, SidebarService, LatestList, HistoryService  listenTo(router, 'route')
 ErrorApp                            renders notFound / unknownError at the current URL
 ```
@@ -132,7 +132,8 @@ ErrorApp                            renders notFound / unknownError at the curre
 Deleted by the end: `event-router.js`, `routerapp.js`, `subrouterapp.js`,
 `route-base-app.js`, their component specs, `Backbone.history` usage, Nav root routes,
 `WorkspaceApp.initRouter`/`loadUrl`, `routeScope`, `startCurrentRoute`,
-`currentAppOptions` (replaced by explicit options).
+`currentAppOptions` (replaced by explicit options), and `RouteState` (no page follows
+the route; each area calls the page's `showRoute(match)`).
 
 ### Radio contract (D1)
 
@@ -150,8 +151,8 @@ Deleted by the end: `event-router.js`, `routerapp.js`, `subrouterapp.js`,
   router owns no previous entry.
 - Phase 3d adds `Radio.request('router', 'url', name, params, { query })` → string.
 - Callers needing query params (D5) or replace use the request form.
-- Area RouterApps are never dispatched from a trigger. The router handler (AppFrame →
-  WorkspaceApp, awaited, D4) calls `RouterApp.showRoute(match)`. The bridge
+- Area Apps are never dispatched from a trigger. The router handler (AppFrame →
+  WorkspaceApp, awaited, D4) calls the area's `showRoute(match)`. The bridge
   (`src/js/services/router-radio.js`) owns the channel: triggers become
   `router.navigate`; names that are not routes (`notFound`, `unknownError`) are left to
   ErrorApp and WorkspaceApp, which listen to the channel.
@@ -289,9 +290,13 @@ RouterApp to a plain App + RouteOutlet and its SubRouterApps to plain Apps that 
 ### Phase 3c — delete and document
 
 - Delete `event-router.js`, `routerapp.js`, `subrouterapp.js`, `route-base-app.js` and
-  their component specs; remove the `backbone` router usage entirely.
-- Rewrite `src/js/base/routing.md` for routes/outlets/RouteState; update the routing
-  overlay pointer in `AGENTS.md`/`CLAUDE.md`.
+  their component specs; remove the `backbone` router usage entirely (done in 3b).
+- Clinicians follows the D4 completion contract: the area returns the page's
+  `showRoute(match)`. With no page reading `options.route`, `RouteState` leaves the outlet.
+- The action `entryTarget` travels as `info.entryTarget` through the `router` request;
+  the trigger bridge maps positional args to params only.
+- Rewrite `src/js/base/routing.md` for the current system; update the routing overlay
+  pointer in `AGENTS.md`/`CLAUDE.md`.
 - Exit: lint, CI green; no references to removed modules.
 
 ### Phase 3d (optional) — real links
@@ -553,7 +558,42 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   Firefox, auth component spec 6/6, `npm run eslint`; each new test fails at its
   assertion against a narrow break and passes when restored. Open: Clinicians opens its
   sidebar from a `change` listener, so `finished` does not wait for the clinician sidebar.
-- Phase 3c: partly done in 3b (adapters, base classes and component specs deleted,
-  `routing.md` rewritten, `AGENTS.md` pointers updated); remaining: confirm nothing
-  references removed modules after review.
+- Phase 3c: done, awaiting review gate (pushed; not run in CI yet). Merged `develop`
+  at `1bb42694e` (no new routes). (1) Clinicians follows D4: the area awaits the list,
+  then returns `CliniciansAllApp.showRoute(match)`, which settles when the clinician
+  sidebar is ready; the `change` listener and `options.route` are gone. With no page
+  reading `options.route`, `RouteState` was removed from `@mnjs/router/outlet` (decided
+  at the 3c stop-and-ask): `RouteOutlet.show(appName, { key, restart, options })` starts
+  the child with the caller's options, and hosts no longer pass `match`. (2) The action
+  form button and the list, schedule and flow action cards navigate with
+  `Radio.request('router', 'navigate', name, params, { info: { entryTarget } })`;
+  PatientApp reads `match.info?.entryTarget`. No trigger passes extra positional args, so
+  the bridge maps them to params only and `info.args` is gone; Latest list no longer
+  stores `info`, which no list route receives. (3) The sweep found two stale references
+  (the base README and the RouteOutlet docblock); the remaining hits are this document's
+  history, the `routeActions` Cypress API command (unrelated) and the bridge's
+  `onEventRouter` handler. (4) `routing.md` and DESIGN.md describe the current system.
+  Verified (Node 24.15, private preview on 8097): `npm run eslint` and `stylelint`
+  (editorconfig-checker binary unavailable; changed files checked by hand), package tests
+  278/278 (284 minus the six RouteState tests), router-driver component spec 37/37 in
+  Chrome and Firefox, latest-list component spec 3/3, and single E2E specs:
+  clinicians-all, clinician-sidebar, clinician-modal, default-route, app-nav, error,
+  dashboard, dashboards-all, programs-all, program, program-flow, workflows, worklist,
+  schedule, patient, workflow, action, form action, form, patient-flow, interactions and
+  patient sidebar, all green on each item's tree.
+  Behavior evidence: the new `clinician-sidebar` step records the sidebar and content
+  focus when `finished` settles. It fails at that assertion
+  (`{ hasSidebar: false, isContentFocused: true }`) when the area starts the sidebar from
+  a `setTimeout` instead of returning it, and passes when restored. It stays green when
+  only the `return` is dropped, and against the 3b `change`-listener code: the sidebar
+  start has no async work, so it renders a microtask after the list starts, before
+  `finished` settles either way. The awaited chain is therefore not observable in the
+  UI today; it guards any future async sidebar work. I9: reading the old
+  `match.info?.args?.[0]` fails `workflow` at the form-expanded assertion; restored, it
+  passes. Latest list: dropping the query fails both navigate assertions; restored, 3/3.
+  Not verified: CI full suite and coverage, Safari, Edge, Firefox E2E, Datadog RUM view
+  changes, `editorconfig-checker`.
+  Remaining: the CI full-suite and coverage run; manual Safari 26.2 smoke (I1, I4, I7,
+  I18); Edge; Datadog RUM view changes (dev-build check or manual `startView` from
+  `route`); optional Phase 3d real links; Phase 4.
 - Phase 4: not started

@@ -1,7 +1,7 @@
 # @mnjs/router — design (incubating in app-frontend)
 
-Status: incubating at `packages/router`; to be extracted to the Marionette monorepo
-as `@mnjs/router` once app-frontend's Patients area runs on it. The application
+Status: incubating at `packages/router`; every app-frontend area runs on it. Extraction
+to the Marionette monorepo as `@mnjs/router` is Phase 4 of the migration. The application
 migration plan lives in [`docs/router-migration.md`](../../docs/router-migration.md).
 
 ## Goals
@@ -433,6 +433,5 @@ Fragment handling is not implemented.
 - Unit: `node --test packages/router/test` with `memoryDriver`.
 - Driver conformance: shared suite, run against `memoryDriver` in Node and
   `navigationDriver` in real browsers.
-- Outlet: `node --test` with Marionette Applications that have no Region. If Marionette
-  cannot run there without a DOM, stop and decide before adding a DOM shim.
+- Outlet: `node --test` with Marionette Applications that have no Region (no DOM shim).
 - Application behavior: app E2E (the app's invariants, not the package's).
