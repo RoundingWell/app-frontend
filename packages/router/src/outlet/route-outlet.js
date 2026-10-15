@@ -3,7 +3,7 @@ import { isEqual } from './is-equal.js';
 
 /**
  * Keeps exactly one selected child Application of `owner`. Semantics: DESIGN.md
- * "RouteOutlet"; ported from src/js/base/route-base-app.js.
+ * "RouteOutlet".
  */
 export class RouteOutlet extends MnObject {
   #owner;
