@@ -39,8 +39,6 @@ export default App.extend({
 
     if (!router.hasRoute(name)) return;
 
-    const paramNames = getPositionalParamNames(name);
-
-    this.navigate(name, object(paramNames, args), { info: { args: args.slice(paramNames.length) } }).catch(addError);
+    this.navigate(name, object(getPositionalParamNames(name), args)).catch(addError);
   },
 });

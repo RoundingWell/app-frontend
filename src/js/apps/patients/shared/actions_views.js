@@ -4,6 +4,7 @@ import { Radio, View } from 'marionette';
 import 'scss/modules/buttons.scss';
 
 import intl, { renderTemplate } from 'js/i18n';
+import { addError } from 'js/datadog';
 
 import Tooltip from 'js/components/tooltip';
 
@@ -45,24 +46,18 @@ const FormButton = View.extend({
     const entryTarget = { formExpanded: true };
 
     if (flow) {
-      Radio.trigger(
-        'event-router',
-        'patient:flow:action',
-        this.model.getPatient().id,
-        flow.id,
-        this.model.id,
-        entryTarget,
-      );
+      Radio.request('router', 'navigate', 'patient:flow:action', {
+        patientId: this.model.getPatient().id,
+        flowId: flow.id,
+        actionId: this.model.id,
+      }, { info: { entryTarget } }).catch(addError);
       return;
     }
 
-    Radio.trigger(
-      'event-router',
-      'patient:action',
-      this.model.getPatient().id,
-      this.model.id,
-      entryTarget,
-    );
+    Radio.request('router', 'navigate', 'patient:action', {
+      patientId: this.model.getPatient().id,
+      actionId: this.model.id,
+    }, { info: { entryTarget } }).catch(addError);
   },
 });
 

@@ -10,6 +10,7 @@ import 'scss/modules/progress-bar.scss';
 import 'scss/modules/skeleton.scss';
 
 import intl from 'js/i18n';
+import { addError } from 'js/datadog';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 import Optionlist from 'js/components/optionlist';
 
@@ -227,7 +228,11 @@ const ActionItemView = View.extend({
     this.getUI('primary')[0].focus({ preventScroll: true });
   },
   navigateToAction(entryTarget) {
-    Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.model.getFlow().id, this.model.id, entryTarget);
+    Radio.request('router', 'navigate', 'patient:flow:action', {
+      patientId: this.model.getPatient().id,
+      flowId: this.model.getFlow().id,
+      actionId: this.model.id,
+    }, { info: { entryTarget } }).catch(addError);
   },
   onClickSurface() {
     this.navigateToAction();

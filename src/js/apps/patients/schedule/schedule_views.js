@@ -9,6 +9,7 @@ import 'scss/modules/list-pages.scss';
 
 import { alphaSort } from 'js/utils/sorting';
 import intl from 'js/i18n';
+import { addError } from 'js/datadog';
 import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
@@ -248,11 +249,18 @@ const DayItemView = View.extend({
   },
   navigateToAction(entryTarget) {
     if (this.flow) {
-      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id, entryTarget);
+      Radio.request('router', 'navigate', 'patient:flow:action', {
+        patientId: this.model.getPatient().id,
+        flowId: this.flow.id,
+        actionId: this.model.id,
+      }, { info: { entryTarget } }).catch(addError);
       return;
     }
 
-    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id, entryTarget);
+    Radio.request('router', 'navigate', 'patient:action', {
+      patientId: this.model.getPatient().id,
+      actionId: this.model.id,
+    }, { info: { entryTarget } }).catch(addError);
   },
   showDetailsTooltip() {
     if (!this.model.get('details')) return;

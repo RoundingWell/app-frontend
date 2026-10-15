@@ -138,7 +138,8 @@ Deleted by the end: `event-router.js`, `routerapp.js`, `subrouterapp.js`,
 
 - `Radio.trigger('event-router', name, ...args)`: positional `args` map to
   `router.getParamNames(name)` in order; `workspace` is filled by `persistParams`;
-  remaining args become `info.args`. Pushes a new entry.
+  extra args are ignored. Pushes a new entry. Per-navigation data goes through the
+  request form: the action form button passes `{ info: { entryTarget } }`.
 - `default` → navigate to `root` (redirects to the default list).
 - `notFound` / `unknownError` (status) → ErrorApp renders in place; no URL change.
 - `Radio.request('router', 'navigate', name, params, { history, query, info, state })` →

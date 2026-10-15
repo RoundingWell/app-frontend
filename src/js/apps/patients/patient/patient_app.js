@@ -119,7 +119,7 @@ export default App.extend({
   showPatientAction(match) {
     const { actionId } = match.params;
 
-    return this.startContent('action', { actionId, entryTarget: match.info?.args?.[0] });
+    return this.startContent('action', { actionId, entryTarget: match.info?.entryTarget });
   },
 
   showFlow(match) {
@@ -135,7 +135,7 @@ export default App.extend({
   showFlowAction(match) {
     const { flowId, actionId } = match.params;
 
-    return this.startContent('action', { flowId, actionId, entryTarget: match.info?.args?.[0] });
+    return this.startContent('action', { flowId, actionId, entryTarget: match.info?.entryTarget });
   },
 
   showPatientForm(match) {

@@ -5,6 +5,7 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/card-list.scss';
 
 import intl from 'js/i18n';
+import { addError } from 'js/datadog';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
@@ -79,11 +80,18 @@ const ActionItemView = View.extend({
   },
   navigateToAction(entryTarget) {
     if (this.flow) {
-      Radio.trigger('event-router', 'patient:flow:action', this.model.getPatient().id, this.flow.id, this.model.id, entryTarget);
+      Radio.request('router', 'navigate', 'patient:flow:action', {
+        patientId: this.model.getPatient().id,
+        flowId: this.flow.id,
+        actionId: this.model.id,
+      }, { info: { entryTarget } }).catch(addError);
       return;
     }
 
-    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id, entryTarget);
+    Radio.request('router', 'navigate', 'patient:action', {
+      patientId: this.model.getPatient().id,
+      actionId: this.model.id,
+    }, { info: { entryTarget } }).catch(addError);
   },
   onClickSurface() {
     this.navigateToAction();

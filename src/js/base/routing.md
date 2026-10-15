@@ -19,10 +19,10 @@ route handling.
 - **Radio bridge** (`src/js/services/router-radio.js`) — `Radio.trigger('event-router',
   name, ...args)` requests navigation: positional `args` map to the route's params in
   path order (the current workspace fills `workspace`, except for the `workspace`
-  route itself, whose arg is the slug) and the rest become `info.args`. `default`
-  navigates to `root`. Names that are not routes (`notFound`, `unknownError`) are
-  handled by their listeners. `Radio.request('router', 'navigate' | 'back', ...)`
-  returns results.
+  route itself, whose arg is the slug). Extra args are ignored. `default` navigates to
+  `root`. Names that are not routes (`notFound`, `unknownError`) are handled by their
+  listeners. `Radio.request('router', 'navigate' | 'back', ...)` returns results; use
+  `navigate` for a query, `info` or `history: 'replace'`.
 - **AppFrameApp** (`apps/globals/app-frame/app-frame_app.js`) — plain App. It starts
   the persistent navigation, starts the router, and owns the route handler: a
   `RouteOutlet` keyed `{ workspace }` selects WorkspaceApp and the handler then awaits
@@ -39,8 +39,8 @@ route handling.
 - **Workspace service** (`services/workspace.js`) — reflects the route's `workspace`
   param as the current workspace. It does not drive routing.
 - **Route listeners** — NavApp (selection), SidebarService (stop), LatestListService
-  (stores the list's route name, params without `workspace`, and `match.info`; "Back to
-  list" navigates by name, so the current workspace is kept),
+  (stores the list's route name, params without `workspace`, and query; "Back to list"
+  navigates by name, so the current workspace is kept),
   HistoryService (`change:route`) and ErrorApp listen to the router's `route` event.
 - **Area App** (`apps/<domain>/<domain>-main_app.js`) — plain App with a `RouteOutlet`
   and an explicit route-name → child-name map. `showRoute(match)` shows the page with
@@ -96,9 +96,14 @@ is ready.
 A query parameter is part of the URL and survives a reload. The worklist reads
 `clinicianId` from `match.query`; the clinician sidebar navigates with
 `Radio.request('router', 'navigate', 'worklist', { worklistId: 'owned-by' }, { query: { clinicianId } })`.
-LatestListService stores the list's name, params without `workspace`, query and info, so
-"Back to list" keeps the filter. `info` is per navigation and is not restored by reload
-or traversal (the action `entryTarget` rides in `info.args[0]` from a trigger).
+LatestListService stores the list's name, params without `workspace` and query, so
+"Back to list" keeps the filter.
+
+`info` is per navigation and is not restored by reload or traversal. The action form
+button opens the action with its form expanded through `info`:
+`Radio.request('router', 'navigate', 'patient:action', { patientId, actionId }, { info: { entryTarget: { formExpanded: true } } })`.
+PatientApp passes `match.info?.entryTarget` to the action page, so a reload or back to
+that entry opens it without forcing the form.
 
 ## Aliases
 
