@@ -1201,12 +1201,20 @@ describe('Router entry state on navigate', () => {
     assert.deepEqual(lastRoute(context).state, { kept: true });
   });
 
-  it('keeps the existing state when an explicit replace changes the URL', async() => {
+  it('keeps the existing state when a replace changes only the query', async() => {
+    const context = await withEntryState({ kept: true });
+
+    await context.router.navigate('schedule', {}, { history: 'replace', query: { day: '1' } }).finished;
+
+    assert.deepEqual(context.driver.currentEntry.getState(), { kept: true, [MARKER]: true });
+  });
+
+  it('gives a replace to another path only the marker', async() => {
     const context = await withEntryState({ kept: true });
 
     await context.router.navigate('worklist', { worklistId: 'a' }, { history: 'replace' }).finished;
 
-    assert.deepEqual(context.driver.currentEntry.getState(), { kept: true, [MARKER]: true });
+    assert.deepEqual(context.driver.currentEntry.getState(), { [MARKER]: true });
   });
 
   it('gives a pushed entry only the marker', async() => {

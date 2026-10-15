@@ -180,13 +180,16 @@ export class Router {
   }
 
   // Explicit state replaces the entry's state. Omitted, a navigation that replaces the
-  // current entry (explicit replace, or auto to the same URL) keeps its plain-object state.
+  // current entry (explicit replace, or auto to the same URL) on the same path keeps
+  // its plain-object state; a replace to another path starts empty, as the native API does.
   #entryState(href, history, state) {
     if (state !== undefined) return withMarker(state);
 
     const entry = this.#driver.currentEntry;
-    const replaces = history === 'replace' || (history === 'auto' && new URL(href, entry.url).href === new URL(entry.url).href);
-    const existing = replaces ? entry.getState() : undefined;
+    const current = new URL(entry.url);
+    const target = new URL(href, current);
+    const replaces = history === 'replace' || (history === 'auto' && target.href === current.href);
+    const existing = replaces && target.pathname === current.pathname ? entry.getState() : undefined;
 
     return withMarker(isObject(existing) ? existing : undefined);
   }
