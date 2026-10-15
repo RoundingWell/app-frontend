@@ -987,7 +987,14 @@ context('patient interactions', function() {
       .get('@routePatientInteractions.all')
       .its('length')
       .then(requestCount => {
-        cy.navigate(`/patient/${ otherPatient.id }/interactions`);
+        cy
+          .window()
+          .then(win => {
+            return win.navigation.navigate(`/one/patient/${ otherPatient.id }/interactions`).finished.then(() => {
+              return win.document.querySelectorAll('.patient-interactions__item').length;
+            });
+          })
+          .should('equal', history.length);
 
         cy
           .get('@routePatientInteractions.all')
@@ -997,6 +1004,16 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Message 0')
       .should('be.visible');
+
+    // Moving between interactions of the open feed finishes once it is focused
+    cy
+      .window()
+      .then(win => {
+        return win.navigation.navigate(`/one/patient/${ otherPatient.id }/interactions/${ history[1].id }`).finished.then(() => {
+          return win.document.querySelectorAll('.patient-interactions__item').length;
+        });
+      })
+      .should('equal', history.length);
   });
 
   specify('starts plain arrival at Today and preserves the viewed range through filtering and empty results', function() {

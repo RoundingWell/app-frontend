@@ -42,39 +42,48 @@ export default App.extend({
   },
 
   showRoute(match) {
-    // The fetch layer presents every other failure
-    return this.showPage(match).catch(error => {
-      if (get(error, ['response', 'status']) === 410) Radio.trigger('event-router', 'notFound');
+    if (match.params.patientId) return this.showPatient(match);
+
+    return this.showList(match);
+  },
+
+  showList(match) {
+    const region = this.getRegion();
+    const { worklistId } = match.params;
+
+    this.clearCurrentPatient();
+
+    if (match.name === 'schedule') return this.pages.show('schedule', { match, restart: true, options: { region } });
+
+    if (!WORKLISTS[worklistId]) {
+      Radio.trigger('event-router', 'notFound');
+      return Promise.resolve();
+    }
+
+    return this.pages.show(WORKLISTS[worklistId], {
+      match,
+      restart: true,
+      options: { worklistId, clinicianId: match.query.get('clinicianId'), region },
     });
   },
 
-  showPage(match) {
-    const region = this.getRegion();
-    const { patientId, worklistId } = match.params;
-
-    if (match.name === 'schedule') {
-      this.clearCurrentPatient();
-
-      return this.pages.show('schedule', { match, restart: true, options: { region } });
-    }
-
-    if (match.name === 'worklist') {
-      this.clearCurrentPatient();
-
-      if (!WORKLISTS[worklistId]) {
-        Radio.trigger('event-router', 'notFound');
-        return Promise.resolve();
-      }
-
-      return this.pages.show(WORKLISTS[worklistId], {
-        match,
-        restart: true,
-        options: { worklistId, clinicianId: match.query.get('clinicianId'), region },
-      });
-    }
+  // Shell (the patient) first, then the page the match selects
+  async showPatient(match) {
+    const { patientId } = match.params;
 
     Radio.trigger('dialer', 'change:currentPatientId', patientId);
 
-    return this.pages.show('patient', { key: { patientId }, match, options: { patientId, region } });
+    // The fetch layer presents every other failure
+    const patientApp = await this.pages.show('patient', {
+      key: { patientId },
+      match,
+      options: { patientId, region: this.getRegion() },
+    }).catch(error => {
+      if (get(error, ['response', 'status']) === 410) Radio.trigger('event-router', 'notFound');
+    });
+
+    if (!patientApp) return;
+
+    return patientApp.showRoute(match);
   },
 });

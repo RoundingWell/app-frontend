@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { getRelationship, getErrors, mergeJsonApi } from 'helpers/json-api';
 import { getAction } from 'support/api/actions';
 import { getFlow } from 'support/api/flows';
+import { stateInProgress } from 'support/api/states';
 import { getPatient } from 'support/api/patients';
 import { getCurrentClinician } from 'support/api/clinicians';
 
@@ -292,6 +293,157 @@ context('patient page', function() {
     cy
       .get('.error-page')
       .should('not.exist');
+  });
+
+  specify('a navigation finishes and focuses the content once its detail page is ready', function() {
+    let releaseAction;
+    let heldAction;
+    const holdAction = () => {
+      heldAction = new Cypress.Promise(resolve => {
+        releaseAction = resolve;
+      });
+    };
+    const action = getAction({ relationships: { state: getRelationship(stateInProgress) } });
+
+    cy
+      .routesForPatientAction()
+      .routeActions()
+      .intercept('GET', '/api/actions/*', req => {
+        return heldAction.then(() => req.reply({ body: { data: action, included: [] } }));
+      })
+      .as('routeHeldAction')
+      .visit('/patient/1/workflow')
+      .wait('@routePatient');
+
+    cy
+      .get('.workflow-page')
+      .should('be.visible');
+
+    cy
+      .window()
+      .then(win => {
+        holdAction();
+        win.isActionReady = false;
+        win.navigation.navigate('/one/patient/1/action/1').finished.then(() => {
+          win.isActionReady = true;
+        });
+      });
+
+    cy
+      .get('@routeHeldAction.all')
+      .should('have.length', 1);
+
+    cy
+      .get('[data-content-region]')
+      .should('not.be.focused');
+
+    cy
+      .window()
+      .its('isActionReady')
+      .should('be.false');
+
+    cy
+      .then(() => {
+        releaseAction();
+      });
+
+    cy
+      .get('.patient-action')
+      .should('be.visible');
+
+    cy
+      .window()
+      .its('isActionReady')
+      .should('be.true');
+
+    cy
+      .get('[data-content-region]')
+      .should('be.focused');
+
+    // Selecting another detail while a detail loads leaves no stale page or focus
+    cy
+      .window()
+      .then(win => {
+        holdAction();
+        win.navigation.navigate('/one/patient/1/action/2');
+      });
+
+    cy
+      .get('@routeHeldAction.all')
+      .should('have.length', 2);
+
+    cy
+      .window()
+      .then(win => {
+        return win.navigation.navigate('/one/patient/1/workflow').finished;
+      });
+
+    cy
+      .get('.workflow-page')
+      .should('be.visible');
+
+    cy
+      .then(() => {
+        releaseAction();
+      });
+
+    // The stale action response has been released; let it settle before asserting
+    cy
+      .window()
+      .then(win => new Cypress.Promise(resolve => win.setTimeout(resolve, 250)));
+
+    cy
+      .get('.patient-action')
+      .should('not.exist');
+
+    cy
+      .get('[data-content-region]')
+      .should('be.focused');
+
+    cy
+      .focused()
+      .closest('.patient-action')
+      .should('not.exist');
+
+    // Leaving the patient while a detail loads leaves no stale page or focus
+    cy
+      .window()
+      .then(win => {
+        holdAction();
+        win.navigation.navigate('/one/patient/1/action/3');
+      });
+
+    cy
+      .get('@routeHeldAction.all')
+      .should('have.length', 3);
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .click();
+
+    cy
+      .get('.list-page')
+      .should('be.visible')
+      .then(() => {
+        releaseAction();
+      });
+
+    cy
+      .window()
+      .then(win => new Cypress.Promise(resolve => win.setTimeout(resolve, 250)));
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/shared-by');
+
+    cy
+      .get('.patient-action')
+      .should('not.exist');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
   });
 
   specify('quickly routing from one patient to another renders only the latest', function() {

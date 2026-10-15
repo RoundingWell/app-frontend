@@ -375,6 +375,152 @@ context('program page', function() {
       });
   });
 
+  specify('a navigation finishes once the program action is ready', function() {
+    let releaseAction;
+    const heldAction = new Cypress.Promise(resolve => {
+      releaseAction = resolve;
+    });
+    const testProgram = getProgram();
+    const testProgramAction = getProgramAction({
+      attributes: { name: 'Test Action' },
+      relationships: {
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    cy
+      .routeTags()
+      .routeProgram(fx => {
+        fx.data = testProgram;
+
+        return fx;
+      })
+      .routeProgramFlows(fx => [])
+      .routeProgramActions(fx => {
+        fx.data = [testProgramAction];
+
+        return fx;
+      })
+      .routeProgramAction(fx => {
+        fx.data = testProgramAction;
+
+        return fx;
+      })
+      .intercept('GET', `/api/program-actions/${ testProgramAction.id }*`, req => {
+        return heldAction.then(() => req.reply({ body: { data: testProgramAction, included: [] } }));
+      })
+      .as('routeHeldProgramAction')
+      .visit(`/program/${ testProgram.id }`)
+      .wait('@routeProgramActions');
+
+    cy
+      .window()
+      .then(win => {
+        win.isActionReady = false;
+        win.navigation.navigate(`/one/program/${ testProgram.id }/action/${ testProgramAction.id }`).finished.then(() => {
+          win.isActionReady = true;
+        });
+      });
+
+    cy
+      .get('@routeHeldProgramAction.all')
+      .should('have.length', 1);
+
+    cy
+      .window()
+      .its('isActionReady')
+      .should('be.false');
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
+
+    cy
+      .then(() => {
+        releaseAction();
+      });
+
+    cy
+      .get('.sidebar')
+      .should('exist');
+
+    cy
+      .window()
+      .its('isActionReady')
+      .should('be.true');
+  });
+
+  specify('a navigation to a program action from elsewhere finishes once the workflows are ready', function() {
+    let releaseWorkflows;
+    const heldWorkflows = new Cypress.Promise(resolve => {
+      releaseWorkflows = resolve;
+    });
+    const testProgram = getProgram();
+    const testProgramAction = getProgramAction({
+      attributes: { name: 'Test Action' },
+      relationships: {
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    cy
+      .routeTags()
+      .routeProgram(fx => {
+        fx.data = testProgram;
+
+        return fx;
+      })
+      .routeProgramFlows(fx => [])
+      .routeProgramAction(fx => {
+        fx.data = testProgramAction;
+
+        return fx;
+      })
+      .routeActions()
+      .intercept('GET', `/api/programs/${ testProgram.id }/actions*`, req => {
+        return heldWorkflows.then(() => req.reply({ body: { data: [testProgramAction], included: [] } }));
+      })
+      .as('routeHeldWorkflows')
+      .visit('/worklist/owned-by');
+
+    cy
+      .get('.list-page')
+      .should('be.visible');
+
+    cy
+      .window()
+      .then(win => {
+        win.isProgramReady = false;
+        win.navigation.navigate(`/one/program/${ testProgram.id }/action/${ testProgramAction.id }`).finished.then(() => {
+          win.isProgramReady = true;
+        });
+      });
+
+    cy
+      .get('@routeHeldWorkflows.all')
+      .should('have.length', 1);
+
+    cy
+      .window()
+      .its('isProgramReady')
+      .should('be.false');
+
+    cy
+      .then(() => {
+        releaseWorkflows();
+      });
+
+    cy
+      .get('.action-card')
+      .contains('Test Action')
+      .should('be.visible');
+
+    cy
+      .window()
+      .its('isProgramReady')
+      .should('be.true');
+  });
+
   specify('shows an error when workflows cannot load behind an action', function() {
     const testProgram = getProgram();
     const testProgramAction = getProgramAction({

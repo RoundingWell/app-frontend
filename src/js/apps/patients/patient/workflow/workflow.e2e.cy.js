@@ -2266,7 +2266,11 @@ context('patient workflow page', function() {
         body: {},
       })
       .as('routePatient')
-      .navigate('/patient/1/workflow');
+      .window()
+      .then(win => {
+        return win.navigation.navigate('/one/patient/1/workflow').finished.then(() => 'finished', () => 'failed');
+      })
+      .should('equal', 'finished');
 
     cy
       .get('.error-page')

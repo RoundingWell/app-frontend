@@ -29,10 +29,11 @@ export default App.extend({
   initialize() {
     this.pages = new RouteOutlet({ owner: this, onCleanupError: addError });
   },
-  showRoute(match) {
+  // The list is ready once started. A program or flow shows the detail of the match next.
+  async showRoute(match) {
     const page = PAGES[match.name];
 
-    return this.pages.show(page, this.getPageSelection(page, match)).catch(error => {
+    const pageApp = await this.pages.show(page, this.getPageSelection(page, match)).catch(error => {
       if (page === 'programflow') {
         Radio.trigger('event-router', 'notFound');
         return;
@@ -40,6 +41,10 @@ export default App.extend({
 
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
     });
+
+    if (!pageApp || page === 'programsAll') return;
+
+    return pageApp.showRoute(match);
   },
   getPageSelection(page, match) {
     const { programId, flowId } = match.params;

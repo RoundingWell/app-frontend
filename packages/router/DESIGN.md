@@ -307,6 +307,15 @@ A child Application reads `options.route` in `prepareStart` and `onStart` (alway
 latest match) and listens to `change` while running. There is no "remember the route,
 then dispatch from `onStart`" protocol: the route is state seeded before start.
 
+A child with a resource shell and an asynchronous per-match detail (a patient and its
+action) does not follow `change`. `show` resolves with the running child once the shell
+is ready; the host then calls an explicit method on it with the match
+(`child.showRoute(match)`) and returns that promise. The router handler awaits it, so
+`finished` settles when the detail is ready. A `show` that resolves `undefined` was
+superseded; the host returns without calling the method. Supersession of the detail is
+the child's own outlet or lifecycle (starting a newer detail, or stopping the child), so
+an obsolete detail never commits DOM or focus.
+
 ### `RouteOutlet`
 
 A focused object owned by an Application that keeps exactly one selected child

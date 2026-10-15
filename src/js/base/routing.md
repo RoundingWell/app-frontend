@@ -130,24 +130,45 @@ region) focuses the region on `route:ready` for a new page, not on the initial l
 Scroll is not managed by the shell: pages scroll inside their own regions, so restoring
 scroll on back/forward belongs to the Views that own those regions.
 
-## Following the route (Page Apps)
+## Shell and detail (Patient, Program, Program flow)
 
-A page that must react to route changes while it runs reads `options.route`, a
-`RouteState` (`getName()`, `getParams()`, `getQuery()`, `getInfo()`, `getMatch()`):
+A page with a resource shell and per-match detail separates the two. The outlet
+selects the shell by `key` (the patient, program or flow) and resolves with the running
+App; the area then calls the App's `showRoute(match)` and returns its promise:
+
+```js
+const patientApp = await this.pages.show('patient', { key: { patientId }, match, options })
+  .catch(error => { /* shell failure policy */ });
+
+if (!patientApp) return;
+
+return patientApp.showRoute(match);
+```
+
+- The shell (`prepareStart`/`onStart`: fetch the resource, render its layout) is
+  prepared once per key. It does not show a detail.
+- `showRoute(match)` activates the detail for one match and returns a promise that
+  settles when that detail is ready. The router handler awaits it, so
+  `navigation.transition.finished` and the content focus wait for the detail.
+- A `show` that resolves `undefined` was superseded or its owner stopped; return without
+  touching the DOM. A newer `showRoute` supersedes an older one inside the shell's own
+  outlet (or by stopping the child it started), so an obsolete detail never renders.
+- Nothing listens to route changes: reuse is the area calling `showRoute` again.
+
+## Following the route (Clinicians)
+
+A page that must react to route changes while it runs, with no async detail to wait
+for, reads `options.route`, a `RouteState` (`getName()`, `getParams()`, `getQuery()`,
+`getInfo()`, `getMatch()`):
 
 ```js
 onStart(app, { route }, data) {
   this.route = route;
   this.listenTo(route, 'change', this.showRoute);
-  // build the shell, then show the current route
   this.showRoute();
 },
 onStop() {
   this.stopListening(this.route);
-},
-showRoute() {
-  const name = this.route.getName();
-  // dispatch by route name; handle failures where the page is shown
 },
 ```
 
@@ -190,6 +211,8 @@ requests navigation.
 - Forgetting `restart: true` for a list page: re-selecting the current nav item no longer
   reloads it.
 - Forgetting `stopListening(this.route)` in `onStop` for a page that listens to its route.
+- Starting a detail without returning its promise: `navigation.transition.finished` and
+  focus then fire before the page is ready.
 - Leaving `isList` or `area` out of a route's `meta` in `routes.js`: the list is not
   remembered for "Back to list", or the route renders nothing.
 - Adding global shell effects to an area. Nav selection, sidebar cleanup and latest-list
@@ -202,7 +225,8 @@ requests navigation.
    and its name to the area App's page map. Keep IDs out of `meta`.
 2. Register the page as a child App of the area and show it from `showRoute` with the
    right `key` / `restart` and explicit `options`.
-3. If the page follows the route, read `options.route` and listen to its `change`.
+3. If the page has a resource shell, give it `showRoute(match)` for the detail and call it
+   from the area after `show`; if it only follows the route, read `options.route`.
 4. Do not change existing URLs unless that is the explicit task.
 5. Cover the flow with E2E scenarios (see [AGENTS.md](../../../AGENTS.md#validation)),
    plus `npm run lint`.

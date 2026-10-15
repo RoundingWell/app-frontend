@@ -57,7 +57,6 @@ export default App.extend({
 
   onStop() {
     this.isInteractionsSelected = false;
-    this.stopListening(this.route);
     if (this.layoutState) this.stopListening(this.layoutState);
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
     Radio.request('nav', 'setMinimized', false);
@@ -67,8 +66,7 @@ export default App.extend({
     return Radio.request('entities', 'fetch:patients:model', patientId, { signal });
   },
 
-  onStart(app, { route }, patient) {
-    this.route = route;
+  onStart(app, options, patient) {
     this.patient = patient;
     this.contextTrail = new Backbone.Model();
     this.currentUser = Radio.request('bootstrap', 'currentUser');
@@ -91,55 +89,60 @@ export default App.extend({
 
     this.renderFormExpandedState();
     this.showPatientSidebar();
-    this.listenTo(route, 'change', this.showRoute);
-    this.showRoute();
     this.showView();
   },
 
-  showRoute() {
-    const { params, info } = this.route.getMatch();
-
-    return this[ROUTE_ACTIONS[this.route.getName()]](params, info?.args?.[0]);
+  // Activates the detail page of a match. The returned promise settles when the
+  // page is ready. The shell above is prepared once per patient.
+  showRoute(match) {
+    return this[ROUTE_ACTIONS[match.name]](match);
   },
 
-  showWorkflow() {
-    return this.startContent('workflow', { status: 'notDone' });
+  showWorkflow(match) {
+    return this.startContent('workflow', match, { status: 'notDone' });
   },
 
-  showClosedWorkflow() {
-    return this.startContent('workflow', { status: 'done' });
+  showClosedWorkflow(match) {
+    return this.startContent('workflow', match, { status: 'done' });
   },
 
-  showInteraction({ interactionId }) {
+  showInteraction(match) {
+    const { interactionId } = match.params;
+
     if (this.isInteractionsSelected) {
-      this.getChildApp('interactions').navigateToInteraction(interactionId);
-      return;
+      return this.getChildApp('interactions').navigateToInteraction(interactionId);
     }
 
-    return this.startContent('interactions', { interactionId });
+    return this.startContent('interactions', match, { interactionId });
   },
 
-  showPatientAction({ actionId }, entryTarget) {
-    return this.startContent('action', { actionId, entryTarget });
+  showPatientAction(match) {
+    const { actionId } = match.params;
+
+    return this.startContent('action', match, { actionId, entryTarget: match.info?.args?.[0] });
   },
 
-  showFlow({ flowId }) {
-    return this.startContent('flow', { flowId });
+  showFlow(match) {
+    return this.startContent('flow', match, { flowId: match.params.flowId });
   },
 
-  showFlowFocus({ flowId, actionId }) {
-    return this.startContent('flow', { flowId, focusActionId: actionId });
+  showFlowFocus(match) {
+    const { flowId, actionId } = match.params;
+
+    return this.startContent('flow', match, { flowId, focusActionId: actionId });
   },
 
-  showFlowAction({ flowId, actionId }, entryTarget) {
-    return this.startContent('action', { flowId, actionId, entryTarget });
+  showFlowAction(match) {
+    const { flowId, actionId } = match.params;
+
+    return this.startContent('action', match, { flowId, actionId, entryTarget: match.info?.args?.[0] });
   },
 
-  showPatientForm({ formId }) {
-    return this.startContent('form', { formId });
+  showPatientForm(match) {
+    return this.startContent('form', match, { formId: match.params.formId });
   },
 
-  startContent(appName, options) {
+  startContent(appName, match, options) {
     const pageApp = this.getChildApp(appName);
 
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
@@ -163,7 +166,7 @@ export default App.extend({
     this.stopInteractions();
 
     return this.content.show(appName, {
-      match: this.route.getMatch(),
+      match,
       restart: true,
       options: startOptions,
     }).catch(error => {
@@ -178,7 +181,7 @@ export default App.extend({
     this.content.stop();
     this.isInteractionsSelected = true;
 
-    interactionsApp.start(options).catch(error => this.handleContentStartFailure(interactionsApp, options, error));
+    return interactionsApp.start(options).catch(error => this.handleContentStartFailure(interactionsApp, options, error));
   },
   stopInteractions() {
     this.isInteractionsSelected = false;

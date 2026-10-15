@@ -363,7 +363,11 @@ context('program flow page', function() {
         body: { errors },
       })
       .as('routeFlow410')
-      .navigate('/program-flow/1')
+      .window()
+      .then(win => {
+        return win.navigation.navigate('/one/program-flow/1').finished.then(() => 'finished', () => 'failed');
+      })
+      .should('equal', 'finished')
       .wait('@routeProgramByProgramFlow')
       .wait('@routeFlow410');
 
@@ -778,6 +782,77 @@ context('program flow page', function() {
       .find('.js-picklist-item')
       .contains('Delete Program Action')
       .click();
+  });
+
+  specify('a navigation finishes once the flow action is ready', function() {
+    let releaseAction;
+    const heldAction = new Cypress.Promise(resolve => {
+      releaseAction = resolve;
+    });
+
+    cy
+      .routeTags()
+      .routeForm()
+      .routeAction()
+      .routeProgramFlow(fx => {
+        fx.data = testProgramFlow;
+
+        return fx;
+      })
+      .routeProgramFlowActions(fx => {
+        fx.data = testProgramFlowActions;
+
+        return fx;
+      })
+      .routeProgramAction(fx => {
+        fx.data = testProgramFlowActions[0];
+
+        return fx;
+      })
+      .routePrograms()
+      .routeProgramByProgramFlow()
+      .intercept('GET', `/api/program-actions/${ testProgramFlowActions[0].id }*`, req => {
+        return heldAction.then(() => req.reply({ body: { data: testProgramFlowActions[0], included: [] } }));
+      })
+      .as('routeHeldFlowAction')
+      .visit(`/program-flow/${ testProgramFlowId }`)
+      .wait('@routeProgramFlowActions');
+
+    cy
+      .window()
+      .then(win => {
+        win.isActionReady = false;
+        win.navigation.navigate(`/one/program-flow/${ testProgramFlowId }/action/${ testProgramFlowActions[0].id }`).finished.then(() => {
+          win.isActionReady = true;
+        });
+      });
+
+    cy
+      .get('@routeHeldFlowAction.all')
+      .should('have.length', 1);
+
+    cy
+      .window()
+      .its('isActionReady')
+      .should('be.false');
+
+    cy
+      .get('.sidebar')
+      .should('not.exist');
+
+    cy
+      .then(() => {
+        releaseAction();
+      });
+
+    cy
+      .get('.sidebar')
+      .should('exist');
+
+    cy
+      .window()
+      .its('isActionReady')
+      .should('be.true');
   });
 
   specify('route directly to flow action', function() {

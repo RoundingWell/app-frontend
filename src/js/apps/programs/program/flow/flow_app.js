@@ -26,8 +26,7 @@ export default App.extend({
       Radio.request('entities', 'fetch:programActions:collection:byProgramFlow', flowId, { signal }),
     ]);
   },
-  onStart(app, { route }, [program, flow, actions]) {
-    this.route = route;
+  onStart(app, options, [program, flow, actions]) {
     this.program = program;
     this.flow = flow;
     this.actions = actions;
@@ -44,23 +43,22 @@ export default App.extend({
     this.showActionList();
     this.showProgramSidebar();
 
-    this.listenTo(route, 'change', this.showRoute);
-    this.showRoute();
     this.showView();
   },
 
   onStop() {
-    this.stopListening(this.route);
     if (this.actions) this.stopListening(this.actions);
   },
 
-  showRoute() {
-    const { flowId, actionId } = this.route.getParams();
+  // Activates the detail of a match. The returned promise settles when the
+  // detail is ready. The shell above is prepared once per flow.
+  showRoute(match) {
+    const { flowId, actionId } = match.params;
     const actionApp = this.getChildApp('action');
 
     actionApp.stop();
 
-    if (this.route.getName() === 'programFlow') return;
+    if (match.name === 'programFlow') return;
 
     return this.showActionSidebar(flowId, actionId).catch(error => {
       actionApp.handleStartFailure();
