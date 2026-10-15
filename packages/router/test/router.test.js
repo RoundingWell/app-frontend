@@ -1184,6 +1184,56 @@ describe('Router history ownership', () => {
   });
 });
 
+describe('Router entry state on navigate', () => {
+  async function withEntryState(entryState) {
+    const context = setup();
+    context.driver.navigate('http://localhost/w1/schedule', { state: entryState });
+    await context.router.start();
+    return context;
+  }
+
+  it('keeps the existing state when the same URL is navigated again', async() => {
+    const context = await withEntryState({ kept: true });
+
+    assert.equal(await context.router.navigate('/w1/schedule').finished, true);
+
+    assert.deepEqual(context.driver.currentEntry.getState(), { kept: true, [MARKER]: true });
+    assert.deepEqual(lastRoute(context).state, { kept: true });
+  });
+
+  it('keeps the existing state when an explicit replace changes the URL', async() => {
+    const context = await withEntryState({ kept: true });
+
+    await context.router.navigate('worklist', { worklistId: 'a' }, { history: 'replace' }).finished;
+
+    assert.deepEqual(context.driver.currentEntry.getState(), { kept: true, [MARKER]: true });
+  });
+
+  it('gives a pushed entry only the marker', async() => {
+    const context = await withEntryState({ kept: true });
+
+    await context.router.navigate('worklist', { worklistId: 'a' }).finished;
+
+    assert.deepEqual(context.driver.currentEntry.getState(), { [MARKER]: true });
+  });
+
+  it('replaces the existing state with an explicit state', async() => {
+    const context = await withEntryState({ kept: true });
+
+    await context.router.navigate('/w1/schedule', { state: { only: 1 } }).finished;
+
+    assert.deepEqual(context.driver.currentEntry.getState(), { only: 1, [MARKER]: true });
+  });
+
+  it('drops existing state that is not a plain object when state is omitted', async() => {
+    const context = await withEntryState('foreign');
+
+    assert.equal(await context.router.navigate('/w1/schedule').finished, true);
+
+    assert.deepEqual(context.driver.currentEntry.getState(), { [MARKER]: true });
+  });
+});
+
 describe('Router.updateState', () => {
   it('merges into the current entry state and the current match', async() => {
     const context = await started();

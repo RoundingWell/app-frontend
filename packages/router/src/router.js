@@ -176,7 +176,19 @@ export class Router {
     const navigateOptions = (isUrl ? params : options) ?? {};
     const href = isUrl ? this.#urlTarget(nameOrUrl, navigateOptions) : this.url(nameOrUrl, params, navigateOptions);
     const { history = 'auto', info, state } = navigateOptions;
-    return this.#navigateDriver(href, { history, info, state: withMarker(state) }, newChain());
+    return this.#navigateDriver(href, { history, info, state: this.#entryState(href, history, state) }, newChain());
+  }
+
+  // Explicit state replaces the entry's state. Omitted, a navigation that replaces the
+  // current entry (explicit replace, or auto to the same URL) keeps its plain-object state.
+  #entryState(href, history, state) {
+    if (state !== undefined) return withMarker(state);
+
+    const entry = this.#driver.currentEntry;
+    const replaces = history === 'replace' || (history === 'auto' && new URL(href, entry.url).href === new URL(entry.url).href);
+    const existing = replaces ? entry.getState() : undefined;
+
+    return withMarker(isObject(existing) ? existing : undefined);
   }
 
   /**

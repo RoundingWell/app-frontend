@@ -199,7 +199,7 @@ the target route declares them and the caller did not supply them.
 | --- | --- |
 | `start()` | Matches the current URL, applies alias/redirect policy, dispatches with `initial: true` (`navigationType` is `'push'`; `initial` carries through redirect hops). Resolves the initial `Promise<boolean>` outcome: `false` when superseded or stopped, and also without dispatching when the URL is not the router's (`intercept` false, or no route outside the not-found scope). Rejects with the handler failure after emitting `route:error`. Idempotent while started; may be called again after `stop()`. Navigation does not emit `navigate` for the initial document load; `start()` is the only initial dispatch. |
 | `stop()` | Removes driver listeners, aborts the in-flight navigation signal. Idempotent. |
-| `navigate(nameOrUrl, params?, options?)` | A string starting with `/` or a scheme plus `//` is a URL and the second argument is `options` (`navigate(url, options)`); anything else is a route name (`navigate(name, params, options)`), since names such as `patient:flow` look like schemes. Options: `history` (`'auto' \| 'push' \| 'replace'`), `query`, `info`, `state`. Returns `{ committed, finished }`; both resolve `false` when superseded or aborted and never reject with `AbortError`. `finished` resolves `true` after the handler resolves and rejects with handler failure. |
+| `navigate(nameOrUrl, params?, options?)` | A string starting with `/` or a scheme plus `//` is a URL and the second argument is `options` (`navigate(url, options)`); anything else is a route name (`navigate(name, params, options)`), since names such as `patient:flow` look like schemes. Options: `history` (`'auto' \| 'push' \| 'replace'`), `query`, `info`, `state`. Omitted `state` on a navigation that replaces the current entry (explicit `replace`, or `auto` to the same URL) keeps that entry's plain-object state and adds only the router marker; a push starts with the marker alone; explicit `state` replaces the entry's state (see [Entry state](#entry-state)). Returns `{ committed, finished }`; both resolve `false` when superseded or aborted and never reject with `AbortError`. `finished` resolves `true` after the handler resolves and rejects with handler failure. |
 | `url(name, params?, { query })` | Canonical URL string. Throws for unknown names or missing params. |
 | `match(url)` | Pure match (no redirect side effects) of routes and aliases; the not-found scope is dispatch policy and is not included. Returns a match or `null`. Navigation-only fields (`navigationType`, `signal`) are `null`, `initial` is `false`, `key` is `''`. |
 | `getCurrent()` | The committed current match. |
@@ -232,6 +232,18 @@ the previous match or from a `route` listener therefore supersedes the navigatio
 committed: the router rechecks that it is still current after the abort and after the
 `route` event, skips the handler and `route:ready`, and settles `finished` as `false`
 (an `AbortError` thrown from the intercept handler).
+
+### Entry state
+
+Entry state is a plain object persisted by the driver per history entry. The router
+reserves one marker key (`'@mnjs/router'`) and never exposes it in `match.state`.
+
+- `navigate()` with `state` stores exactly that state (plus the marker).
+- `navigate()` without `state` keeps the existing state when the navigation replaces the
+  current entry (explicit `history: 'replace'`, or `auto` to the same URL), so a repeat
+  or replace does not wipe what `updateState()` or an earlier navigation saved. State
+  that is not a plain object is dropped. A push creates a new entry with the marker only.
+- `refresh()` and redirect hops carry the entry's state through.
 
 ### Intercept rules
 
