@@ -49,6 +49,21 @@ context('auth', function() {
       expect(loginPrompt).to.have.been.calledOnceWith('/one/worklist/owned-by?clinicianId=c1#top', 'auth_required');
     });
 
+    specify('a signed-out load returns to its path, query and hash after sign-in', function() {
+      const provider = new WorkosAuthProvider();
+      const loginPrompt = cy.stub(provider, 'loginPrompt');
+      cy.stub(provider, 'frameBust');
+      cy.stub(provider, '_initClient').resolves({ getUser: cy.stub().resolves(null) });
+
+      window.history.pushState({}, '', '/one/worklist/owned-by?clinicianId=c1#top');
+
+      cy
+        .then(() => provider.auth(cy.stub()))
+        .then(() => {
+          expect(loginPrompt).to.have.been.calledOnceWith('/one/worklist/owned-by?clinicianId=c1#top');
+        });
+    });
+
     specify('an authenticated load keeps its query and hash, and leaves the login path', function() {
       const provider = new AuthProvider();
       const replaceState = cy.stub(provider, 'replaceState');

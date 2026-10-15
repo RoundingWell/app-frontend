@@ -195,6 +195,7 @@ export class WorkosAuthProvider extends AuthProvider {
     }
 
     const pathName = location.pathname;
+    const returnPath = pathName + location.search + location.hash;
 
     const { clientId } = this.config;
 
@@ -241,7 +242,7 @@ export class WorkosAuthProvider extends AuthProvider {
     const isAuthenticated = await this.client.getUser();
 
     if (!isAuthenticated) {
-      this.loginPrompt(pathName);
+      this.loginPrompt(returnPath);
       return;
     }
 
