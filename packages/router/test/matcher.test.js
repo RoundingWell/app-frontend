@@ -400,6 +400,117 @@ describe('Matcher: url()', () => {
   });
 });
 
+describe('Matcher: url() then match() round trips', () => {
+  function roundTripRoutes() {
+    return [
+      ...inventory(),
+      { name: 'item', path: '/:workspace/item/:id(\\d+)' },
+      { name: 'files', path: '/:workspace/files/:path+' },
+      { name: 'star', path: '/:workspace/star/*' },
+    ];
+  }
+
+  const cases = [
+    ['nested params', 'patient:flow:action', { workspace: 'w', patientId: 'p1', flowId: 'f1', actionId: 'a1' }],
+    ['optional segment omitted', 'patient:form', { workspace: 'w', patientId: 'p1', formId: 'f1' }],
+    ['optional segment supplied', 'patient:form', { workspace: 'w', patientId: 'p1', formId: 'f1', responseId: 'r 1' }],
+    ['canonical URL of an aliased route', 'patient:workflow', { workspace: 'w', patientId: 'p1' }],
+    ['canonical URL of a preserved alias route', 'patient:workflow:closed', { workspace: 'w', patientId: 'p1' }],
+    ['value equal to a static segment', 'worklist', { workspace: 'w', worklistId: 'programs' }],
+    ['value that looks like another route', 'patient:flow', { workspace: 'w', patientId: 'worklist', flowId: 'flow' }],
+    ['encoded reserved characters', 'worklist', { workspace: 'a b', worklistId: 'x/y?z#q%1&=+' }],
+    ['unicode and percent signs', 'worklist', { workspace: 'wé 1', worklistId: '100%' }],
+    ['repeated wildcard', 'catchAll', { workspace: 'w', rest: 'a b/c/é?' }],
+    ['regex constrained param', 'item', { workspace: 'w', id: '42' }],
+    ['one or more segments', 'files', { workspace: 'w', path: 'a/b c/d' }],
+  ];
+
+  for (const [label, name, params] of cases) {
+    it(`gives the same route and params: ${ label }`, () => {
+      const matcher = new Matcher(roundTripRoutes());
+
+      const result = matcher.match(matcher.url(name, params));
+
+      assert.equal(result.name, name);
+      assert.deepEqual(result.params, params);
+      assert.equal(result.alias, null);
+    });
+  }
+
+  it('keeps the query out of the match', () => {
+    const matcher = new Matcher(roundTripRoutes());
+    const params = { workspace: 'w', worklistId: 'owned-by' };
+
+    const result = matcher.match(matcher.url('worklist', params, { query: { clinicianId: 'c1' } }));
+
+    assert.deepEqual(result.params, params);
+    assert.equal(result.query.get('clinicianId'), 'c1');
+  });
+
+  it('matches an alias URL to the canonical name and params', () => {
+    const matcher = new Matcher(roundTripRoutes());
+    const params = { workspace: 'w', patientId: 'p 1' };
+
+    const result = matcher.match('/w/patient/dashboard/p%201');
+
+    assert.equal(result.name, 'patient:workflow');
+    assert.deepEqual(result.params, params);
+    assert.equal(result.alias, '/:workspace/patient/dashboard/:patientId');
+    assert.equal(matcher.url(result.name, result.params), '/w/patient/p%201/workflow');
+  });
+
+  it('round-trips every named route with generated params', () => {
+    const matcher = new Matcher(roundTripRoutes());
+    for (const name of ['worklist', 'schedule', 'patient:flow', 'program:action', 'programs:all', 'legacy:patient:flow', 'item', 'files', 'star']) {
+      const params = Object.fromEntries(matcher.getParamNames(name).map(param => [param, param === 'id' ? '7' : `${ param } v`]));
+      const result = matcher.match(matcher.url(name, params));
+
+      assert.equal(result.name, name, name);
+      assert.deepEqual(result.params, params, name);
+    }
+  });
+});
+
+describe('Matcher: url() rejects values that would not round trip', () => {
+  function rejectRoutes() {
+    return [
+      { name: 'item', path: '/:workspace/item/:id(\\d+)' },
+      { name: 'optionalItem', path: '/:workspace/optional{/:id(\\d+)}?' },
+      { name: 'files', path: '/:workspace/files/:path+' },
+      { name: 'any', path: '/:workspace/any/:value' },
+    ];
+  }
+
+  it('rejects dot segments', () => {
+    const matcher = new Matcher(rejectRoutes());
+
+    assert.throws(() => matcher.url('any', { workspace: 'w', value: '.' }), /"\."/);
+    assert.throws(() => matcher.url('any', { workspace: 'w', value: '..' }), /"\.\."/);
+    assert.throws(() => matcher.url('any', { workspace: '..', value: 'x' }), /"\.\."/);
+    assert.throws(() => matcher.url('files', { workspace: 'w', path: 'a/../b' }), /"\.\."/);
+    assert.throws(() => matcher.url('files', { workspace: 'w', path: './a' }), /"\."/);
+  });
+
+  it('accepts values that only contain dots', () => {
+    const matcher = new Matcher(rejectRoutes());
+
+    assert.equal(matcher.url('any', { workspace: 'w', value: '...' }), '/w/any/...');
+    assert.equal(matcher.url('any', { workspace: 'w', value: 'a.b' }), '/w/any/a.b');
+    assert.equal(matcher.url('any', { workspace: 'w', value: '%2E' }), '/w/any/%252E');
+  });
+
+  it('rejects values that fail the param regex', () => {
+    const matcher = new Matcher(rejectRoutes());
+
+    assert.equal(matcher.url('item', { workspace: 'w', id: 12 }), '/w/item/12');
+    assert.throws(() => matcher.url('item', { workspace: 'w', id: 'abc' }), /param "id".*\\d\+/);
+    assert.throws(() => matcher.url('item', { workspace: 'w', id: '12a' }), /param "id"/);
+    assert.throws(() => matcher.url('optionalItem', { workspace: 'w', id: 'x' }), /param "id"/);
+    assert.equal(matcher.url('optionalItem', { workspace: 'w', id: '5' }), '/w/optional/5');
+    assert.equal(matcher.url('optionalItem', { workspace: 'w' }), '/w/optional');
+  });
+});
+
 describe('Matcher: getParamNames, has', () => {
   it('lists canonical param names in path order', () => {
     const matcher = new Matcher(inventory());

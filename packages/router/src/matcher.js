@@ -94,9 +94,15 @@ function skipRegex(state) {
   throw new Error(`Unterminated "(" in path "${ state.path }"`);
 }
 
+function readRegex(state) {
+  const start = state.pos + 1;
+  skipRegex(state);
+  return state.path.slice(start, state.pos - 1);
+}
+
 function paramToken(state, name, wildcard) {
-  if (!wildcard && state.path[state.pos] === '(') skipRegex(state);
-  return { type: 'param', name, prefix: '', wildcard, modifier: readModifier(state) };
+  const regex = !wildcard && state.path[state.pos] === '(' ? readRegex(state) : undefined;
+  return { type: 'param', name, prefix: '', wildcard, regex, modifier: readModifier(state) };
 }
 
 function readNamed(state) {
@@ -249,9 +255,25 @@ function isOptional(token) {
   return token.modifier === '?' || token.modifier === '*' || token.wildcard === true;
 }
 
-function encodeValue(token, value) {
-  if (!token.wildcard && token.modifier !== '*' && token.modifier !== '+') return encodeURIComponent(value);
-  return value.split('/').map(encodeURIComponent).join('/');
+function isRepeated(token) {
+  return token.wildcard || token.modifier === '*' || token.modifier === '+';
+}
+
+// A dot segment would be resolved away by URL parsing and name another route.
+function encodeSegment(token, route, segment) {
+  if (segment === '.' || segment === '..') {
+    throw new Error(`Route "${ route.name }" param "${ token.name }" cannot contain the dot segment "${ segment }"`);
+  }
+  const encoded = encodeURIComponent(segment);
+  if (token.regex !== undefined && !new RegExp(`^(?:${ token.regex })$`).test(encoded)) {
+    throw new Error(`Route "${ route.name }" param "${ token.name }" must match (${ token.regex }): "${ segment }"`);
+  }
+  return encoded;
+}
+
+function encodeValue(token, route, value) {
+  if (!isRepeated(token)) return encodeSegment(token, route, value);
+  return value.split('/').map(segment => encodeSegment(token, route, segment)).join('/');
 }
 
 function buildParam(token, params, route) {
@@ -259,7 +281,7 @@ function buildParam(token, params, route) {
     if (isOptional(token)) return '';
     throw new Error(`Route "${ route.name }" is missing param "${ token.name }"`);
   }
-  return token.prefix + encodeValue(token, String(params[token.name]));
+  return token.prefix + encodeValue(token, route, String(params[token.name]));
 }
 
 function buildGroup(group, params, route) {
