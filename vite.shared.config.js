@@ -19,6 +19,8 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    // Resolve emitted assets beside the shared module, including on nested routes.
+    base: mode === 'shared-datadog' ? './' : '/',
     publicDir: false,
     build: {
       target,
@@ -38,7 +40,7 @@ export default defineConfig(({ mode }) => {
           paths: sharedRuntimeBuild.paths || {},
           entryFileNames: sharedRuntimeBuild.fileName,
           chunkFileNames: sharedRuntimeBuild.fileName,
-          assetFileNames: '[name][extname]',
+          assetFileNames: mode === 'shared-datadog' ? 'assets/[name]-[hash][extname]' : '[name][extname]',
         },
       },
     },

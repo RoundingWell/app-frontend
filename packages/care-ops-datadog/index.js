@@ -1,5 +1,6 @@
 import { datadogRum } from '@datadog/browser-rum';
 import { datadogLogs } from '@datadog/browser-logs';
+import workerUrl from '@datadog/browser-worker?url&no-inline';
 
 let rumReady = false;
 
@@ -50,6 +51,7 @@ export function initRum({
     applicationId,
     service,
     version,
+    workerUrl,
     useSecureSessionCookie: true,
     usePartitionedCrossSiteSessionCookie: true,
     allowedTracingUrls: [window.origin],
