@@ -4,8 +4,8 @@ import router from 'js/router';
 
 import LatestListService from './latest-list';
 
-function route(path, meta, info) {
-  router.trigger('route', { url: new URL(path, window.location.origin), info, meta });
+function route(name, params, meta, info) {
+  router.trigger('route', { name, params, info, meta });
 }
 
 context('LatestListService', function() {
@@ -23,7 +23,7 @@ context('LatestListService', function() {
   specify('records list routes from route metadata', function() {
     expect(Radio.request('history', 'has:latestList')).to.be.false;
 
-    route('/one/worklist/owned-by', { isList: true });
+    route('worklist', { workspace: 'one', worklistId: 'owned-by' }, { isList: true });
 
     expect(Radio.request('history', 'has:latestList')).to.be.true;
   });
@@ -32,23 +32,23 @@ context('LatestListService', function() {
     const navigate = cy.stub().resolves(true);
     Radio.reply('router', 'navigate', navigate);
 
-    route('/one/worklist/owned-by', { isList: true });
-    route('/one/patient/1/workflow', {});
+    route('worklist', { workspace: 'one', worklistId: 'owned-by' }, { isList: true });
+    route('patient:workflow', { workspace: 'one', patientId: '1' }, {});
 
     Radio.request('history', 'go:latestList');
 
-    expect(navigate).to.have.been.calledOnceWith(`${ window.location.origin }/one/worklist/owned-by`);
+    expect(navigate).to.have.been.calledOnceWith('worklist', { worklistId: 'owned-by' }, { info: undefined });
   });
 
-  specify('routes back to the latest list with its info', function() {
+  specify('routes back to the latest list by name with its info', function() {
     const navigate = cy.stub().resolves(true);
     const info = { args: [{ clinicianId: 'c1' }] };
     Radio.reply('router', 'navigate', navigate);
 
-    route('/one/worklist/owned-by', { isList: true }, info);
+    route('worklist', { workspace: 'one', worklistId: 'owned-by' }, { isList: true }, info);
 
     Radio.request('history', 'go:latestList');
 
-    expect(navigate).to.have.been.calledOnceWith(`${ window.location.origin }/one/worklist/owned-by`, { info });
+    expect(navigate).to.have.been.calledOnceWith('worklist', { worklistId: 'owned-by' }, { info });
   });
 });

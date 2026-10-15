@@ -548,6 +548,120 @@ context('App Nav', function() {
       .should('have.class', 'is-selected');
   });
 
+  specify('back to list stays in the current workspace after history returns to a page', function() {
+    cy
+      .routesForPatientWorkflow()
+      .routeWorkspaces(fx => {
+        fx.data = [
+          getWorkspace({}, { id: workspaceOne.id }),
+          getWorkspace({}, { id: workspaceTwo.id }),
+        ];
+
+        return fx;
+      })
+      .visit('/patient/1/workflow')
+      .wait('@routePatient');
+
+    cy
+      .get('.patient__context-trail')
+      .should('not.contain', 'Back to List');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .find('.picklist__item')
+      .eq(1)
+      .click();
+
+    cy
+      .url()
+      .should('contain', '/two/worklist/owned-by');
+
+    cy
+      .go('back')
+      .wait('@routePatient');
+
+    cy
+      .url()
+      .should('contain', '/one/patient/1/workflow');
+
+    cy
+      .get('.patient__context-trail')
+      .contains('Back to List')
+      .click();
+
+    cy
+      .url()
+      .should('contain', '/one/worklist/owned-by');
+  });
+
+  specify('the latest of two cross-area navigations wins while a workspace loads', function() {
+    let releaseWorkspaceTwoPrograms;
+    const workspaceTwoPrograms = new Cypress.Promise(resolve => {
+      releaseWorkspaceTwoPrograms = resolve;
+    });
+
+    cy
+      .routeWorkspaces(fx => {
+        fx.data = [
+          getWorkspace({}, { id: workspaceOne.id }),
+          getWorkspace({}, { id: workspaceTwo.id }),
+        ];
+
+        return fx;
+      })
+      .routePrograms()
+      .routeDashboards()
+      .intercept('GET', `/api/workspaces/${ workspaceTwo.id }/programs*`, req => {
+        return workspaceTwoPrograms.then(() => {
+          req.reply({ body: { data: getPrograms(), included: [] } });
+        });
+      })
+      .as('routeDelayedWorkspaceTwoPrograms')
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .window()
+      .then(win => {
+        win.navigation.navigate('/two/programs');
+        win.navigation.navigate('/two/dashboards');
+      });
+
+    cy
+      .get('@routeDelayedWorkspaceTwoPrograms.all')
+      .should('have.length', 1)
+      .then(() => {
+        releaseWorkspaceTwoPrograms();
+      });
+
+    cy
+      .wait('@routeDashboards');
+
+    cy
+      .location('pathname')
+      .should('equal', '/two/dashboards');
+
+    // A later round trip lets any stale programs activation reach the API before asserting.
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/two/worklist/owned-by');
+
+    cy
+      .get('@routePrograms.all')
+      .should('have.length', 0);
+  });
+
   specify('the latest workspace choice wins while a workspace loads', function() {
     let releaseWorkspaceTwoPrograms;
     const workspaceTwoPrograms = new Cypress.Promise(resolve => {

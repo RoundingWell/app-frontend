@@ -11,7 +11,6 @@ import { LayoutView, ContextTrailView, HeaderView, AddActionView, ListView } fro
 import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
 
 export default SubRouterApp.extend({
-  routerAppName: 'ProgramFlowApp',
   childApps: {
     action: ActionApp,
     programSidebar: ProgramSidebarApp,

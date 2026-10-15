@@ -5,6 +5,7 @@ import { Radio } from 'marionette';
 import routes from 'js/routes';
 
 let handler;
+let workspaceSlugs;
 
 // The root and the user's workspaces. Anything else, such as paths the server
 // owns, is neither intercepted nor claimed by not-found.
@@ -13,7 +14,10 @@ function isAppUrl(url) {
 
   if (!root) return true;
 
-  return !!Radio.request('bootstrap', 'workspaces').find({ slug: root });
+  // Workspaces are fixed for the session
+  workspaceSlugs ||= new Set(Radio.request('bootstrap', 'workspaces').pluck('slug'));
+
+  return workspaceSlugs.has(root);
 }
 
 // The owner of activation: one handler, set by the app frame.

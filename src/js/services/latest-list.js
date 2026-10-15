@@ -1,3 +1,4 @@
+import { omit } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -18,10 +19,10 @@ export default App.extend({
     this.listenTo(router, 'route', this.onRoute);
   },
 
-  onRoute({ url, info, meta }) {
+  onRoute({ name, params, info, meta }) {
     if (!meta.isList) return;
 
-    this._latestList = { url, info };
+    this._latestList = { name, params: omit(params, 'workspace'), info };
   },
 
   hasLatestList() {
@@ -29,8 +30,8 @@ export default App.extend({
   },
 
   goLatestList() {
-    const { url, info } = this._latestList;
+    const { name, params, info } = this._latestList;
 
-    Radio.request('router', 'navigate', url.href, { info }).catch(addError);
+    Radio.request('router', 'navigate', name, params, { info }).catch(addError);
   },
 });

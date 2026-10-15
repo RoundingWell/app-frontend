@@ -42,29 +42,25 @@ export default App.extend({
     this.shellOptions = options;
   },
   async prepareStart(options, { signal }) {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
-    const areaNames = Object.keys(AREAS).filter(name => {
-      const { permission } = AREAS[name];
-
-      return !permission || currentUser.can(permission);
-    });
-
-    // Areas load together, as one set, so their stylesheets always apply in the same order
-    const [, ...modules] = await Promise.all([
-      Radio.request('workspace', 'fetch', { workspace: options.workspace, signal }),
-      ...areaNames.map(name => AREAS[name].load()),
-    ]);
+    await Radio.request('workspace', 'fetch', { workspace: options.workspace, signal });
 
     signal.throwIfAborted();
-
-    areaNames.forEach((name, index) => {
-      if (!this.hasChildApp(name)) this.addChildApp(name, new modules[index].default());
-    });
 
     await this.getChildApp('sidebar').start({ region: options.sidebarRegion });
   },
   stopArea() {
     this.areas.stop();
+  },
+  canUseArea(name) {
+    const { permission } = AREAS[name];
+
+    return !permission || Radio.request('bootstrap', 'currentUser').can(permission);
+  },
+  // An area loads the first time a route needs it
+  async loadArea(name) {
+    const { default: AreaApp } = await AREAS[name].load();
+
+    if (!this.hasChildApp(name)) this.addChildApp(name, new AreaApp());
   },
   // Shows the area that owns the match. Matches without an area (unmatched path,
   // failed redirect) leave no area content; an area the user may not use is not found.
@@ -76,10 +72,14 @@ export default App.extend({
       return;
     }
 
-    if (!this.hasChildApp(area)) {
+    if (!this.canUseArea(area)) {
       Radio.trigger('event-router', 'notFound');
       return;
     }
+
+    await this.loadArea(area);
+
+    if (match.signal.aborted) return;
 
     await this.areas.show(area, {
       match,

@@ -194,6 +194,62 @@ context('default routes', function() {
       .should('have.length', 0);
   });
 
+  specify('a navigation superseded while its area loads never renders its page', function() {
+    let releaseProgramsArea;
+    const programsArea = new Cypress.Promise(resolve => {
+      releaseProgramsArea = resolve;
+    });
+
+    cy
+      .routesForDefault()
+      .routePrograms()
+      .intercept('GET', '**/*-programs-main_app-*.js', req => {
+        return programsArea.then(() => req.continue());
+      })
+      .as('routeProgramsArea')
+      .visit();
+
+    cy
+      .get('.list-page')
+      .should('exist');
+
+    cy
+      .window()
+      .then(win => {
+        win.navigation.navigate('/one/programs');
+      });
+
+    cy
+      .get('@routeProgramsArea.all')
+      .should('have.length', 1);
+
+    cy
+      .navigate('/schedule');
+
+    cy
+      .get('.schedule-list-page')
+      .should('exist')
+      .then(() => {
+        releaseProgramsArea();
+      });
+
+    cy
+      .wait('@routeProgramsArea');
+
+    // Gives the stale programs activation time to resume before asserting.
+    cy
+      .window()
+      .then(win => new Cypress.Promise(resolve => win.setTimeout(resolve, 250)));
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/schedule');
+
+    cy
+      .get('.schedule-list-page')
+      .should('exist');
+  });
+
   specify('a navigation finishes once its page is ready', function() {
     cy
       .routesForDefault()

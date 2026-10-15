@@ -37,8 +37,8 @@
   width: var(--content-expanded-width);
 }
 
-.workflows__action-controls,
-.workflows__flow-controls {
+.work-card__controls.workflows__action-controls,
+.work-card__controls.workflows__flow-controls {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;

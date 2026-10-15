@@ -30,15 +30,17 @@ How URL routing maps to running apps in this codebase. Read this before changing
   and `router.start()` mean the page is ready. A URL the router does not own renders
   not-found at the current URL.
 - **WorkspaceApp** (`apps/globals/app-frame/workspace_app.js`) — plain App. It owns
-  the transient sidebar and a `RouteOutlet` keyed by `meta.area`. It imports the areas
-  the user may use together with the workspace data (one set keeps stylesheet order
-  stable) and registers them once. A match without an area (unmatched path, failed
+  the transient sidebar and a `RouteOutlet` keyed by `meta.area`. It imports the routed
+  area the first time a route needs it and registers it once; a navigation superseded
+  while the area loads returns without showing its page. Area styles must not depend on
+  load order. A match without an area (unmatched path, failed
   redirect) stops the area content; an area the user may not use renders not-found. An error
   (`notFound`, `unknownError`) stops the area content too.
 - **Workspace service** (`services/workspace.js`) — reflects the route's `workspace`
   param as the current workspace. It does not drive routing.
 - **Route listeners** — NavApp (selection), SidebarService (stop), LatestListService
-  (stores `match.url` and `match.info`; "Back to list" navigates to that URL),
+  (stores the list's route name, params without `workspace`, and `match.info`; "Back to
+  list" navigates by name, so the current workspace is kept),
   HistoryService (`change:route`) and ErrorApp listen to the router's `route` event.
 - **RouterApp** (`src/js/base/routerapp.js`) — temporary adapter for an area (Patients,
   Programs, Clinicians, Dashboards) until the area is converted to outlets (Phase 3b).

@@ -19,7 +19,6 @@ import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edi
 import { AddButtonView } from 'js/apps/patients/shared/add-workflow/add-workflow_views';
 
 export default App.extend({
-  routerAppName: 'FlowApp',
   childApps: {
     activity: ActivityApp,
   },

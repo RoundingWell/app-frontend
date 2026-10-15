@@ -10,7 +10,6 @@ import { ListView, LayoutView, notFound } from 'js/apps/clinicians/clinicians-al
 import { getClinicianModal } from 'js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views';
 
 export default SubRouterApp.extend({
-  routerAppName: 'CliniciansApp',
   routeScope: [],
   childApps: {
     sidebar: ClinicianSidebarApp,
