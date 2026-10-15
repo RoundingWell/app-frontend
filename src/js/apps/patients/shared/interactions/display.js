@@ -1,4 +1,4 @@
-import { has } from 'underscore';
+import { has, some } from 'underscore';
 
 import i18n from 'js/i18n';
 
@@ -35,6 +35,15 @@ export function getInteractionSummary(model) {
   return message || metadata.note;
 }
 
+export function hasInteractionCardContent(model) {
+  const group = model.getChannelGroup();
+  if (group === 'calls' || group === 'appointments' || getInteractionSummary(model)) return true;
+  if (group !== 'visits') return false;
+  const metadata = model.get('metadata') || {};
+  return some([metadata.patient_class, metadata.facility, metadata.admitted_at,
+    metadata.admit_reason, metadata.discharged_at], Boolean);
+}
+
 function getMessageDescription(model, metadata) {
   const inbound = model.get('direction') === 'inbound';
   const name = inbound ? metadata.from : metadata.clinician_name;
@@ -45,8 +54,7 @@ export function getInteractionDescription(model) {
   const group = model.getChannelGroup();
   const metadata = model.get('metadata') || {};
   if (group === 'appointments') {
-    const status = getAppointmentStatusLabel(model);
-    return { name: status ? `${ intl.appointment } ${ status }` : intl.appointment };
+    return { name: intl.appointment, text: getAppointmentStatusLabel(model) };
   }
   if (group === 'visits') return { name: intl.visit, text: intl.added };
   if (group === 'messages') return getMessageDescription(model, metadata);

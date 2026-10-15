@@ -181,6 +181,10 @@ context('patient interactions', function() {
             });
 
           cy
+            .get('.patient-interactions__activity-description strong')
+            .should('have.text', 'Appointment');
+
+          cy
             .get('.patient-interactions__card')
             .should('contain', index === 4 ? 'Oct 6 at 11:40 AM' : 'Oct 8 at 2:00 PM')
             .and('contain', 'With UHP-Bundu at UHP_MD-HDG');
@@ -334,6 +338,15 @@ context('patient interactions', function() {
       },
     });
 
+    const emptyMessage = getInteraction({
+      attributes: { channel: 'sms', occurred_at: '2026-09-24T10:59:00Z', metadata: { note: null, disposition: 'Text Sent' } },
+      relationships: { action: getRelationship(action) },
+    });
+    const emptyVisit = getInteraction({
+      attributes: { channel: 'visit', occurred_at: '2026-09-24T10:01:00Z', metadata: { source: 'Import' } },
+      relationships: { flow: getRelationship(dischargeFlow) },
+    });
+
     cy
       .routesForPatientAction()
       .routePatient(fx => {
@@ -359,7 +372,7 @@ context('patient interactions', function() {
       })
       .routeFlowActivity()
       .routePatientInteractions(fx => {
-        fx.data = [actionInteraction, flowInteraction];
+        fx.data = [actionInteraction, flowInteraction, emptyMessage, emptyVisit];
         fx.included = [action, flow, dischargeFlow];
         return fx;
       })
@@ -405,6 +418,36 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Please call us to schedule your follow-up.')
       .should('contain', 'Alex Morgan');
+
+    cy
+      .contains('.patient-interactions__activity-description', 'Outbound Message')
+      .scrollIntoView()
+      .should('be.visible')
+      .closest('.patient-interactions__item')
+      .within(() => {
+        cy
+          .contains('.js-action', 'Team Referral Flow: SMS Outreach')
+          .should('be.visible');
+
+        cy
+          .get('.patient-interactions__card')
+          .should('not.exist');
+      });
+
+    cy
+      .contains('.patient-interactions__activity-description', 'via Import')
+      .scrollIntoView()
+      .should('be.visible')
+      .closest('.patient-interactions__item')
+      .within(() => {
+        cy
+          .contains('.js-action', 'TCM - ER Discharge')
+          .should('be.visible');
+
+        cy
+          .get('.patient-interactions__card')
+          .should('not.exist');
+      });
 
     cy
       .get('.patient-interactions__action')

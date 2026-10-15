@@ -25,7 +25,7 @@ context('interaction display', function() {
     }
     const cancelled = new Interaction({ channel: 'appointment', cancelled_at: '2026-10-08T12:00:00Z', metadata: { status: 'scheduled' } });
     expect(getAppointmentStatusLabel(cancelled)).to.equal('cancelled');
-    expect(getInteractionDescription(cancelled)).to.deep.equal({ name: 'Appointment cancelled' });
+    expect(getInteractionDescription(cancelled)).to.deep.equal({ name: 'Appointment', text: 'cancelled' });
   });
 
   specify('preserves inbound and outbound SMS body precedence and note fallbacks', function() {

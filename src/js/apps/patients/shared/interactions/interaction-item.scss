@@ -53,6 +53,10 @@
   white-space: nowrap;
 }
 
+.patient-interactions__time--appointment {
+  margin-left: 0;
+}
+
 .patient-interactions__card {
   background: var(--color-surface);
   border: 0.5px solid var(--color-border-subtle);
