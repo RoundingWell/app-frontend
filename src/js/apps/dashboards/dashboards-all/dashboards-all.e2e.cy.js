@@ -160,6 +160,28 @@ context('dashboards all list', function() {
       .should('contain', 'Daily Dashboards');
   });
 
+  specify('selecting the dashboards nav item reloads the list', function() {
+    cy
+      .routeDashboards()
+      .visit('/dashboards')
+      .wait('@routeDashboards');
+
+    cy
+      .get('@routeDashboards.all')
+      .its('length')
+      .then(requestCount => {
+        cy
+          .get('.app-nav__bottom')
+          .find('.app-nav__link')
+          .first()
+          .click();
+
+        cy
+          .get('@routeDashboards.all')
+          .should('have.length', requestCount + 1);
+      });
+  });
+
   specify('shows an error when dashboards cannot load', function() {
     cy
       .intercept('GET', '/api/dashboards', { statusCode: 400, body: { errors: [] } })
