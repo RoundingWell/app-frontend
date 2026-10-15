@@ -299,6 +299,46 @@ context('program flow page', function() {
       .contains('NUR');
   });
 
+  specify('navigating to another flow loads it', function() {
+    const otherFlow = getProgramFlow({
+      attributes: { name: 'Other Flow' },
+      relationships: {
+        'program-actions': getRelationship(testProgramFlowActions),
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    cy
+      .routeProgramFlowActions(fx => {
+        fx.data = testProgramFlowActions;
+
+        return fx;
+      })
+      .routeProgramByProgramFlow(fx => {
+        fx.data = testProgram;
+
+        return fx;
+      })
+      .intercept('GET', `/api/program-flows/${ testProgramFlowId }`, {
+        body: { data: testProgramFlow, included: [] },
+      })
+      .intercept('GET', `/api/program-flows/${ otherFlow.id }`, {
+        body: { data: otherFlow, included: [] },
+      })
+      .visit(`/program-flow/${ testProgramFlowId }`);
+
+    cy
+      .get('.program-flow__header')
+      .should('contain', 'Test Flow');
+
+    cy
+      .navigate(`/program-flow/${ otherFlow.id }`);
+
+    cy
+      .get('.program-flow__header')
+      .should('contain', 'Other Flow');
+  });
+
   specify('Flow does not exist', function() {
     const errors = getErrors({
       status: '410',
@@ -772,8 +812,11 @@ context('program flow page', function() {
       .get('.sidebar')
       .should('exist');
 
+    let reportedErrors = 0;
+
     cy.on('uncaught:exception', error => {
       expect(error.message).to.match(/Failed to fetch|NetworkError when attempting to fetch resource\./);
+      reportedErrors++;
 
       return false;
     });
@@ -800,6 +843,11 @@ context('program flow page', function() {
     cy
       .get('.alert-box')
       .should('contain', 'The Action you requested does not exist.');
+
+    cy
+      .then(() => {
+        expect(reportedErrors).to.equal(1);
+      });
 
     cy
       .get('.program-flow__header')

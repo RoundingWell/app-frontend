@@ -1,8 +1,11 @@
 import { Radio } from 'marionette';
+import { RouteOutlet } from '@mnjs/router/outlet';
 
-import SubRouterApp from 'js/base/subrouterapp';
+import { addError } from 'js/datadog';
 
 import { PROGRAM_BEHAVIORS } from 'js/static';
+
+import App from 'js/base/app';
 
 import WorkflowsApp from 'js/apps/programs/program/workflows/workflows_app';
 import ActionApp from 'js/apps/programs/program/action/action_app';
@@ -13,8 +16,7 @@ import { LayoutView } from 'js/apps/programs/program/program_views';
 import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
 import { LoadingView } from 'js/regions/preload_region';
 
-export default SubRouterApp.extend({
-  routeScope: ['programId'],
+export default App.extend({
   childApps: {
     action: ActionApp,
     workflows: WorkflowsApp,
@@ -22,21 +24,8 @@ export default SubRouterApp.extend({
     flowSidebar: FlowSidebarApp,
   },
 
-  routeActions: {
-    'program:details': 'showWorkflows',
-    'program:action': 'startProgramAction',
-    'program:action:new': 'startProgramAction',
-    'programFlow:new': 'startFlowSidebar',
-  },
-
-  currentAppOptions() {
-    return {
-      program: this.program,
-    };
-  },
-
-  onBeforeStartRoute() {
-    this.getChildApp('action').stop();
+  initialize() {
+    this.content = new RouteOutlet({ owner: this, onCleanupError: addError });
   },
 
   onBeforeStart() {
@@ -47,39 +36,59 @@ export default SubRouterApp.extend({
     return Radio.request('entities', 'fetch:programs:model', programId, { signal });
   },
 
-  onStart(app, options, program) {
+  onStart(app, { route }, program) {
+    this.route = route;
     this.program = program;
+    this.listenTo(route, 'change', this.showRoute);
 
     this.setView(new LayoutView({ model: program }));
 
     this.showSidebar();
 
-    this.startCurrentRoute();
+    this.showRoute();
 
     this.showView();
   },
 
+  onStop() {
+    this.stopListening(this.route);
+  },
+
+  showRoute() {
+    const name = this.route.getName();
+    const { programId, actionId } = this.route.getParams();
+    const actionApp = this.getChildApp('action');
+
+    actionApp.stop();
+
+    if (name === 'program:details') return this.showWorkflows();
+    if (name === 'programFlow:new') return this.startFlowSidebar(programId);
+
+    return this.startProgramAction(programId, actionId).catch(() => {
+      actionApp.handleStartFailure();
+      return this.showWorkflows();
+    });
+  },
+
   showWorkflows() {
-    return this.startCurrent('workflows', {
-      region: this.getView().getRegion('content'),
+    return this.content.show('workflows', {
+      match: this.route.getMatch(),
+      restart: true,
+      options: {
+        program: this.program,
+        region: this.getView().getRegion('content'),
+      },
     }).catch(error => {
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
     });
   },
 
-  onRouteError() {
-    this.getChildApp('action').handleStartFailure();
-    return this.showWorkflows();
-  },
-
   async startProgramAction(programId, actionId) {
     const actionApp = this.getChildApp('action');
-    const routeContext = this.getCurrentRoute();
-    actionApp.stop();
 
     const started = await actionApp.start({ actionId, programId });
 
-    if (!started || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
+    if (!started) return;
 
     this.editList(actionApp.action);
   },
@@ -99,7 +108,6 @@ export default SubRouterApp.extend({
   },
 
   async startFlowSidebar(programId) {
-    const routeContext = this.getCurrentRoute();
     const flow = Radio.request('entities', 'programFlows:model', {
       _program: { id: programId, type: 'programs' },
       _owner: null,
@@ -112,7 +120,7 @@ export default SubRouterApp.extend({
 
     const started = await Radio.request('sidebar', 'start', flowSidebar, { flow });
 
-    if (!started || this.getCurrentRoute() !== routeContext) return;
+    if (!started) return;
 
     this.editList(flow);
   },

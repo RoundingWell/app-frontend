@@ -106,6 +106,33 @@ context('program page', function() {
       .should('not.exist');
   });
 
+  specify('navigating to another program loads it', function() {
+    const programA = getProgram({ attributes: { name: 'Program A' } });
+    const programB = getProgram({ attributes: { name: 'Program B' } });
+
+    cy
+      .routeProgramActions()
+      .routeProgramFlows()
+      .intercept('GET', `/api/programs/${ programA.id }`, {
+        body: { data: programA, included: [] },
+      })
+      .intercept('GET', `/api/programs/${ programB.id }`, {
+        body: { data: programB, included: [] },
+      })
+      .visit(`/program/${ programA.id }`);
+
+    cy
+      .get('.program-page__context-trail')
+      .should('contain', 'Program A');
+
+    cy
+      .navigate(`/program/${ programB.id }`);
+
+    cy
+      .get('.program-page__context-trail')
+      .should('contain', 'Program B');
+  });
+
   specify('read only sidebar', function() {
     const testProgram = getProgram({
       attributes: {
@@ -289,6 +316,89 @@ context('program page', function() {
       .intercept('GET', `/api/programs/${ program.id }/actions*`, { statusCode: 400, body: { errors: [] } })
       .as('routeProgramActionsError')
       .visit(`/program/${ program.id }`)
+      .wait('@routeProgramActionsError');
+
+    cy
+      .get('.error-page')
+      .should('contain', 'Error code: 400.');
+  });
+
+  specify('returning to the program reloads its workflows', function() {
+    const testProgram = getProgram();
+    const testProgramAction = getProgramAction({
+      attributes: { name: 'Test Action' },
+      relationships: {
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    cy
+      .routeTags()
+      .routeProgram(fx => {
+        fx.data = testProgram;
+
+        return fx;
+      })
+      .routeProgramFlows(fx => [])
+      .routeProgramActions(fx => {
+        fx.data = [testProgramAction];
+
+        return fx;
+      })
+      .routeProgramAction(fx => {
+        fx.data = testProgramAction;
+
+        return fx;
+      })
+      .visit(`/program/${ testProgram.id }`)
+      .wait('@routeProgramActions');
+
+    cy
+      .get('.action-card')
+      .contains('Test Action')
+      .click();
+
+    cy
+      .get('.sidebar')
+      .should('exist');
+
+    cy
+      .get('@routeProgramActions.all')
+      .its('length')
+      .then(requestCount => {
+        cy
+          .go('back');
+
+        cy
+          .get('@routeProgramActions.all')
+          .should('have.length', requestCount + 1);
+      });
+  });
+
+  specify('shows an error when workflows cannot load behind an action', function() {
+    const testProgram = getProgram();
+    const testProgramAction = getProgramAction({
+      relationships: {
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    cy
+      .routeTags()
+      .routeProgram(fx => {
+        fx.data = testProgram;
+
+        return fx;
+      })
+      .routeProgramFlows()
+      .routeProgramAction(fx => {
+        fx.data = testProgramAction;
+
+        return fx;
+      })
+      .intercept('GET', `/api/programs/${ testProgram.id }/actions*`, { statusCode: 400, body: { errors: [] } })
+      .as('routeProgramActionsError')
+      .visit(`/program/${ testProgram.id }/action/${ testProgramAction.id }`)
       .wait('@routeProgramActionsError');
 
     cy

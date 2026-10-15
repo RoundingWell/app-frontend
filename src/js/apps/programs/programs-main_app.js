@@ -1,60 +1,53 @@
 import { Radio } from 'marionette';
+import { RouteOutlet } from '@mnjs/router/outlet';
 
-import RouterApp from 'js/base/routerapp';
+import { addError } from 'js/datadog';
+
+import App from 'js/base/app';
 
 import ProgramsAllApp from 'js/apps/programs/programs-all/programs-all_app';
 import ProgramApp from 'js/apps/programs/program/program_app';
 import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
 
-export default RouterApp.extend({
+const PAGES = {
+  'programs:all': 'programsAll',
+  'program:details': 'program',
+  'program:action': 'program',
+  'program:action:new': 'program',
+  'programFlow:new': 'program',
+  'programFlow': 'programflow',
+  'programFlow:action': 'programflow',
+  'programFlow:action:new': 'programflow',
+};
+
+export default App.extend({
   childApps: {
     programsAll: ProgramsAllApp,
     program: ProgramApp,
     programflow: ProgramFlowApp,
   },
+  initialize() {
+    this.pages = new RouteOutlet({ owner: this, onCleanupError: addError });
+  },
+  showRoute(match) {
+    const page = PAGES[match.name];
 
-  eventRoutes: {
-    'programs:all': {
-      action: 'showProgramsAll',
-    },
-    'program:details': {
-      action: 'showProgram',
-    },
-    'program:action': {
-      action: 'showProgram',
-    },
-    'program:action:new': {
-      action: 'showProgram',
-    },
-    'programFlow:new': {
-      action: 'showProgram',
-    },
-    'programFlow': {
-      action: 'showProgramFlow',
-    },
-    'programFlow:action': {
-      action: 'showProgramFlow',
-    },
-    'programFlow:action:new': {
-      action: 'showProgramFlow',
-    },
-  },
+    return this.pages.show(page, this.getPageSelection(page, match)).catch(error => {
+      if (page === 'programflow') {
+        Radio.trigger('event-router', 'notFound');
+        return;
+      }
 
-  showProgramsAll() {
-    return this.startCurrent('programsAll');
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    });
   },
-  showProgram(programId) {
-    return this.startRoute('program', { programId });
-  },
-  showProgramFlow(flowId) {
-    return this.startRoute('programflow', { flowId });
-  },
-  onRouteError(error, { definition }) {
-    if (definition.action === 'showProgramFlow') {
-      Radio.trigger('event-router', 'notFound');
-      return;
-    }
+  getPageSelection(page, match) {
+    const { programId, flowId } = match.params;
+    const region = this.getRegion();
 
-    Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    if (page === 'program') return { key: { programId }, match, options: { programId, region } };
+    if (page === 'programflow') return { key: { flowId }, match, options: { flowId, region } };
+
+    return { match, restart: true, options: { region } };
   },
 });

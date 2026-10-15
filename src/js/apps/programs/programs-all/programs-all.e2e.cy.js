@@ -91,6 +91,34 @@ context('program all list', function() {
       .should('contain', `/program/${ firstProgram.id }`);
   });
 
+  specify('selecting the programs nav item reloads the list', function() {
+    cy
+      .routePrograms()
+      .routeProgramActions()
+      .routeProgramFlows()
+      .visit('/programs')
+      .wait('@routePrograms');
+
+    cy
+      .get('@routePrograms.all')
+      .its('length')
+      .then(requestCount => {
+        cy
+          .get('.app-nav__bottom')
+          .contains('Admin Tools')
+          .click();
+
+        cy
+          .get('.picklist')
+          .contains('Programs')
+          .click();
+
+        cy
+          .get('@routePrograms.all')
+          .should('have.length', requestCount + 1);
+      });
+  });
+
   specify('shows an error when programs cannot load', function() {
     cy
       .intercept('GET', '/api/programs', { statusCode: 400, body: { errors: [] } })
