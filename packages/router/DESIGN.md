@@ -200,7 +200,7 @@ the target route declares them and the caller did not supply them.
 | --- | --- |
 | `start()` | Matches the current URL, applies alias/redirect policy, dispatches with `initial: true` (`navigationType` is `'push'`; `initial` carries through redirect hops). Resolves the initial `Promise<boolean>` outcome: `false` when superseded or stopped, and also without dispatching when the URL is not the router's (`intercept` false, or no route outside the not-found scope). Rejects with the handler failure after emitting `route:error`. Idempotent while started; may be called again after `stop()`. Navigation does not emit `navigate` for the initial document load; `start()` is the only initial dispatch. |
 | `stop()` | Removes driver listeners, aborts the in-flight navigation signal. Idempotent. |
-| `navigate(nameOrUrl, params?, options?)` | A string starting with `/` or a scheme plus `//` is a URL and the second argument is `options` (`navigate(url, options)`); anything else is a route name (`navigate(name, params, options)`), since names such as `patient:flow` look like schemes. Options: `history` (`'auto' \| 'push' \| 'replace'`), `query`, `info`, `state`. Omitted `state` on a navigation that replaces the current entry (explicit `replace`, or `auto` to the same URL) keeps that entry's plain-object state and adds only the router marker; a push starts with the marker alone; explicit `state` replaces the entry's state (see [Entry state](#entry-state)). Returns `{ committed, finished }`; both resolve `false` when superseded or aborted and never reject with `AbortError`. `finished` resolves `true` after the handler resolves and rejects with handler failure. |
+| `navigate(nameOrUrl, params?, options?)` | A string starting with `/` or a scheme plus `//` is a URL and the second argument is `options` (`navigate(url, options)`); anything else is a route name (`navigate(name, params, options)`), since names such as `patient:flow` look like schemes. Options: `history` (`'auto' \| 'push' \| 'replace'`), `query`, `info`, `state`. Omitted `state` on a navigation that replaces the current entry (explicit `replace`, or `auto` to the same URL) on the same path keeps that entry's plain-object state and adds only the router marker; a push starts with the marker alone; explicit `state` replaces the entry's state (see [Entry state](#entry-state)). Returns `{ committed, finished }`; both resolve `false` when superseded or aborted and never reject with `AbortError`. `finished` resolves `true` after the handler resolves and rejects with handler failure. |
 | `url(name, params?, { query })` | Canonical URL string. Throws for unknown names, missing params, a value that is the dot segment `.` or `..` (URL parsing would resolve it away and name another route; wildcard values are checked per segment) and a value whose encoded form fails the param's own regex (`:id(\\d+)`). What `url()` builds, `match()` returns as the same route and params (aliases excepted: an alias URL matches the canonical name and `url()` builds the canonical path). |
 | `match(url)` | Pure match (no redirect side effects) of routes and aliases; the not-found scope is dispatch policy and is not included. Returns a match or `null`. Navigation-only fields (`navigationType`, `signal`) are `null`, `initial` is `false`, `key` is `''`. |
 | `getCurrent()` | The committed current match. |
@@ -258,8 +258,10 @@ reserves one marker key (`'@mnjs/router'`) and never exposes it in `match.state`
 
 - `navigate()` with `state` stores exactly that state (plus the marker).
 - `navigate()` without `state` keeps the existing state when the navigation replaces the
-  current entry (explicit `history: 'replace'`, or `auto` to the same URL), so a repeat
-  or replace does not wipe what `updateState()` or an earlier navigation saved. State
+  current entry (explicit `history: 'replace'`, or `auto` to the same URL) and stays on the
+  same path, so a repeat or a query/hash update does not wipe what `updateState()` or an
+  earlier navigation saved. A replace to another path starts with the marker only, as the
+  native API clears state, so one page's state never follows the user to another. State
   that is not a plain object is dropped. A push creates a new entry with the marker only.
 - `refresh()` and redirect hops carry the entry's state through.
 
@@ -340,15 +342,16 @@ An `MnObject` that holds the current match for one outlet's subtree.
   match object changes.
 - Created by `RouteOutlet` per selected child; passed to the child as `options.route`.
 
-A child Application reads `options.route` in `prepareStart` and `onStart` (always the
-latest match) and listens to `change` while running. There is no "remember the route,
-then dispatch from `onStart`" protocol: the route is state seeded before start.
+RouteState is for following the route, not for activation. A child may read
+`options.route` in `prepareStart` and `onStart` (always the latest match) and follow
+`change` to reflect the match, but RouteOutlet does not await `change` listeners: any
+asynchronous work started there settles after `finished`. Use it only for synchronous
+updates; page work that `finished` must cover goes through the explicit call below.
 
-A child with a resource shell and an asynchronous per-match detail (a patient and its
-action) does not follow `change`. `show` resolves with the running child once the shell
-is ready; the host then calls an explicit method on it with the match
-(`child.showRoute(match)`) and returns that promise. The router handler awaits it, so
-`finished` settles when the detail is ready. A `show` that resolves `undefined` was
+Activation is an explicit, awaited call. `show` resolves with the running child once its
+shell is ready (a patient, a program); the host then calls an explicit method on it with
+the match (`child.showRoute(match)`) and returns that promise. The router handler awaits
+it, so `finished` settles when the detail is ready. A `show` that resolves `undefined` was
 superseded; the host returns without calling the method. Supersession of the detail is
 the child's own outlet or lifecycle (starting a newer detail, or stopping the child), so
 an obsolete detail never commits DOM or focus.

@@ -542,6 +542,16 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   and entry-state tests on the real Navigation API (they run on the memory driver only),
   `editorconfig-checker`, `packages/care-ops-auth` lint (the package is outside the
   lint scope and already fails `eslint`).
+  Review fixes: a signed-out deep link keeps its query and hash through sign-in; a
+  replace to another path starts with empty entry state (same-path replaces and repeats
+  keep it); `url()` checks param regexes in Unicode mode, as URLPattern does; the
+  reentrancy scenarios (navigation from an abort or `route` listener, `stop()` from a
+  `route` listener) run in the router conformance suite on the real Navigation API;
+  DESIGN.md and `routing.md` limit RouteState `change` to synchronous following.
+  Verified: package tests 284/284, router-driver component spec 37/37 in Chrome and
+  Firefox, auth component spec 6/6, `npm run eslint`; each new test fails at its
+  assertion against a narrow break and passes when restored. Open: Clinicians opens its
+  sidebar from a `change` listener, so `finished` does not wait for the clinician sidebar.
 - Phase 3c: partly done in 3b (adapters, base classes and component specs deleted,
   `routing.md` rewritten, `AGENTS.md` pointers updated); remaining: confirm nothing
   references removed modules after review.

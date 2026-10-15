@@ -173,7 +173,9 @@ onStop() {
 ```
 
 A route change that arrives while the page loads is not lost: `onStart` reads the latest
-match. A page that selects among child pages owns its own `RouteOutlet`; it passes the
+match. The outlet does not await `change` listeners, so `navigation.transition.finished`
+does not cover work started from one; anything the navigation must wait for belongs in
+`showRoute(match)` instead. A page that selects among child pages owns its own `RouteOutlet`; it passes the
 options the children need explicitly. A child that restarts itself during its first
 start (the patient interactions feed) is started directly by its host instead of
 through an outlet, because an outlet stops a child whose first start is superseded.
