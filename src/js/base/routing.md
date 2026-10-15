@@ -43,30 +43,31 @@ route handling.
   list" navigates by name, so the current workspace is kept),
   HistoryService (`change:route`) and ErrorApp listen to the router's `route` event.
 - **Area App** (`apps/<domain>/<domain>-main_app.js`) — plain App with a `RouteOutlet`
-  and an explicit route-name → child-name map. `showRoute(match)` returns
-  `this.pages.show(childName, { key, match, restart, options })` and handles the area's
-  error policy with `.catch` at that call.
-- **Page App** — a plain App. A page that depends only on its resource reads plain
-  options (`worklistId`, `dashboardId`); a page that follows the route while it runs
-  (Patient, Program, Program flow, Clinicians) reads `options.route`.
+  and an explicit route-name → child-name map. `showRoute(match)` shows the page with
+  `this.pages.show(childName, { key, restart, options })`, handles the area's error
+  policy with `.catch` at that call, and returns the page's own `showRoute(match)` when
+  the page has per-match detail.
+- **Page App** — a plain App that receives plain options (`worklistId`, `dashboardId`,
+  `patientId`). A page with per-match detail (Patient, Program, Program flow,
+  Clinicians) has `showRoute(match)`.
 
 ## Area Apps
 
 ```js
 const PAGES = {
-  'clinicians:all': 'cliniciansAll',
-  'clinician': 'cliniciansAll',
+  'dashboards:all': 'dashboardsAll',
+  'dashboard': 'dashboard',
 };
 
 export default App.extend({
-  childApps: { cliniciansAll: CliniciansAllApp },
+  childApps: { dashboardsAll: DashboardsAllApp, dashboard: DashboardApp },
   initialize() {
     this.pages = new RouteOutlet({ owner: this, onCleanupError: addError });
   },
   showRoute(match) {
     return this.pages.show(PAGES[match.name], {
-      match,
-      options: { region: this.getRegion() },
+      restart: true,
+      options: { region: this.getRegion(), dashboardId: match.params.dashboardId },
     }).catch(error => {
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
     });
@@ -81,8 +82,8 @@ Route params arrive as `match.params` (named, see `routes.js`), the query as
 is ready.
 
 - **`key`** is resource identity (`{ patientId }`, `{ programId }`, `{ flowId }`). The
-  same page and an equal key reuses the running child and forwards the newest match
-  through its `RouteState`. Omit it when the page is always "the same".
+  same page and an equal key keeps the running child; the area then hands it the newest
+  match through its `showRoute(match)`. Omit it when the page is always "the same".
 - **`restart: true`** stops and starts the child on every call. List pages use it so
   selecting the current nav item reloads the list.
 - Put route-specific detail (action ids, sub-routes) in the page's route handling, never
@@ -130,14 +131,14 @@ region) focuses the region on `route:ready` for a new page, not on the initial l
 Scroll is not managed by the shell: pages scroll inside their own regions, so restoring
 scroll on back/forward belongs to the Views that own those regions.
 
-## Shell and detail (Patient, Program, Program flow)
+## Shell and detail (Patient, Program, Program flow, Clinicians)
 
 A page with a resource shell and per-match detail separates the two. The outlet
 selects the shell by `key` (the patient, program or flow) and resolves with the running
 App; the area then calls the App's `showRoute(match)` and returns its promise:
 
 ```js
-const patientApp = await this.pages.show('patient', { key: { patientId }, match, options })
+const patientApp = await this.pages.show('patient', { key: { patientId }, options })
   .catch(error => { /* shell failure policy */ });
 
 if (!patientApp) return;
@@ -145,8 +146,9 @@ if (!patientApp) return;
 return patientApp.showRoute(match);
 ```
 
-- The shell (`prepareStart`/`onStart`: fetch the resource, render its layout) is
-  prepared once per key. It does not show a detail.
+- The shell (`prepareStart`/`onStart`: fetch the resource or list, render its layout)
+  is prepared once per key. It does not show a detail. The Clinicians list is the shell
+  and the clinician sidebar its detail.
 - `showRoute(match)` activates the detail for one match and returns a promise that
   settles when that detail is ready. The router handler awaits it, so
   `navigation.transition.finished` and the content focus wait for the detail.
@@ -155,27 +157,9 @@ return patientApp.showRoute(match);
   outlet (or by stopping the child it started), so an obsolete detail never renders.
 - Nothing listens to route changes: reuse is the area calling `showRoute` again.
 
-## Following the route (Clinicians)
+## Pages with child pages
 
-A page that must react to route changes while it runs, with no async detail to wait
-for, reads `options.route`, a `RouteState` (`getName()`, `getParams()`, `getQuery()`,
-`getInfo()`, `getMatch()`):
-
-```js
-onStart(app, { route }, data) {
-  this.route = route;
-  this.listenTo(route, 'change', this.showRoute);
-  this.showRoute();
-},
-onStop() {
-  this.stopListening(this.route);
-},
-```
-
-A route change that arrives while the page loads is not lost: `onStart` reads the latest
-match. The outlet does not await `change` listeners, so `navigation.transition.finished`
-does not cover work started from one; anything the navigation must wait for belongs in
-`showRoute(match)` instead. A page that selects among child pages owns its own `RouteOutlet`; it passes the
+A page that selects among child pages owns its own `RouteOutlet`; it passes the
 options the children need explicitly. A child that restarts itself during its first
 start (the patient interactions feed) is started directly by its host instead of
 through an outlet, because an outlet stops a child whose first start is superseded.
@@ -212,7 +196,6 @@ requests navigation.
   blocks a legitimate restart.
 - Forgetting `restart: true` for a list page: re-selecting the current nav item no longer
   reloads it.
-- Forgetting `stopListening(this.route)` in `onStop` for a page that listens to its route.
 - Starting a detail without returning its promise: `navigation.transition.finished` and
   focus then fire before the page is ready.
 - Leaving `isList` or `area` out of a route's `meta` in `routes.js`: the list is not
@@ -227,8 +210,8 @@ requests navigation.
    and its name to the area App's page map. Keep IDs out of `meta`.
 2. Register the page as a child App of the area and show it from `showRoute` with the
    right `key` / `restart` and explicit `options`.
-3. If the page has a resource shell, give it `showRoute(match)` for the detail and call it
-   from the area after `show`; if it only follows the route, read `options.route`.
+3. If the page has per-match detail, give it `showRoute(match)` and return it from the
+   area after `show` resolves.
 4. Do not change existing URLs unless that is the explicit task.
 5. Cover the flow with E2E scenarios (see [AGENTS.md](../../../AGENTS.md#validation)),
    plus `npm run lint`.

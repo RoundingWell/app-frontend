@@ -256,6 +256,22 @@ context('clinician sidebar', function() {
       .url()
       .should('contain', 'clinicians')
       .should('not.contain', `clinicians/${ testClinician.id }`);
+
+    // The navigation finishes once the sidebar is ready, and the new page takes focus
+    cy
+      .window()
+      .then(win => {
+        return win.navigation.navigate(`/one/clinicians/${ testClinician.id }`).finished.then(() => ({
+          hasSidebar: !!win.document.querySelector('.sidebar'),
+          isContentFocused: win.document.activeElement.matches('[data-content-region]'),
+        }));
+      })
+      .should('deep.equal', { hasSidebar: true, isContentFocused: true });
+
+    cy
+      .get('.sidebar')
+      .find('[data-name-region] .js-input')
+      .should('have.value', 'Test Clinician');
   });
 
   specify('link to owned by worklist', function() {

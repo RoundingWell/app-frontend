@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Application } from 'marionette';
-import { RouteOutlet, RouteState } from '../outlet.js';
+import { RouteOutlet } from '../outlet.js';
 
 function deferred() {
   const result = {};
@@ -12,18 +12,6 @@ function deferred() {
   return result;
 }
 
-function createMatch(name, params = {}, extra = {}) {
-  return {
-    name,
-    params,
-    query: new URLSearchParams(),
-    meta: {},
-    branch: [{ name }],
-    info: undefined,
-    ...extra,
-  };
-}
-
 const RecordingPage = Application.extend({
   initialize() {
     this.runs = [];
@@ -31,76 +19,6 @@ const RecordingPage = Application.extend({
   onStart(app, options) {
     this.runs.push(options);
   },
-});
-
-describe('RouteState', () => {
-  it('exposes the parts of its match', () => {
-    const query = new URLSearchParams('a=1');
-    const match = createMatch('patient:flow', { patientId: '1' }, {
-      query,
-      meta: { area: 'patients' },
-      info: { entryTarget: 'form' },
-      branch: [{ name: 'patient' }, { name: 'patient:flow' }],
-    });
-    const route = new RouteState(match);
-
-    assert.equal(route.getMatch(), match);
-    assert.equal(route.getName(), 'patient:flow');
-    assert.deepEqual(route.getParams(), { patientId: '1' });
-    assert.equal(route.getQuery(), query);
-    assert.deepEqual(route.getMeta(), { area: 'patients' });
-    assert.deepEqual(route.getInfo(), { entryTarget: 'form' });
-  });
-
-  it('includes a name found anywhere in the match branch', () => {
-    const route = new RouteState(createMatch('patient:flow', {}, {
-      branch: [{ name: undefined }, { name: 'patient' }, { name: 'patient:flow' }],
-    }));
-
-    assert.equal(route.includes('patient'), true);
-    assert.equal(route.includes('patient:flow'), true);
-    assert.equal(route.includes('worklist'), false);
-  });
-
-  it('triggers change with the new and previous match when the match changes', () => {
-    const first = createMatch('worklist');
-    const second = createMatch('schedule');
-    const route = new RouteState(first);
-    const changes = [];
-    route.on('change', (...args) => changes.push(args));
-
-    route.set(second);
-
-    assert.equal(route.getMatch(), second);
-    assert.equal(route.getName(), 'schedule');
-    assert.deepEqual(changes, [[route, second, first]]);
-  });
-
-  it('does not trigger change for the same match object', () => {
-    const match = createMatch('worklist');
-    const route = new RouteState(match);
-    let changes = 0;
-    route.on('change', () => changes++);
-
-    route.set(match);
-    route.set({ ...match });
-
-    assert.equal(changes, 1);
-  });
-
-  it('ignores set after it is destroyed and releases its listeners', () => {
-    const first = createMatch('worklist');
-    const route = new RouteState(first);
-    let changes = 0;
-    route.on('change', () => changes++);
-
-    route.destroy();
-    route.set(createMatch('schedule'));
-
-    assert.equal(route.isDestroyed(), true);
-    assert.equal(route.getMatch(), first);
-    assert.equal(changes, 0);
-  });
 });
 
 describe('RouteOutlet', () => {
@@ -123,25 +41,21 @@ describe('RouteOutlet', () => {
     return owner.addChildApp(name, new Page());
   }
 
-  function show(name, params = {}, selection = {}) {
-    return outlet.show(name, { match: createMatch(name, params), ...selection });
+  function show(name, selection = {}) {
+    return outlet.show(name, selection);
   }
 
   describe('selection', () => {
-    it('starts the child with a route seeded with the match and the caller options', async() => {
+    it('starts the child with the caller options', async() => {
       const page = addPage('page');
-      const match = createMatch('page', { id: '1' });
-      const feature = {};
+      const options = { feature: {} };
 
-      const shown = await outlet.show('page', { match, options: { feature } });
+      const shown = await outlet.show('page', { options });
 
       assert.equal(shown, page);
       assert.equal(outlet.getCurrent(), page);
       assert.equal(page.isRunning(), true);
-      const [{ route, feature: passed }] = page.runs;
-      assert.ok(route instanceof RouteState);
-      assert.equal(route.getMatch(), match);
-      assert.equal(passed, feature);
+      assert.deepEqual(page.runs, [options]);
     });
 
     it('rejects an unknown child without retiring the selected child', async() => {
@@ -170,40 +84,25 @@ describe('RouteOutlet', () => {
       assert.equal(outlet.getCurrent(), latest);
     });
 
-    it('creates a new route for a replacement and destroys the replaced route', async() => {
-      const first = addPage('first');
-      const second = addPage('second');
-      await show('first');
-      const [{ route: firstRoute }] = first.runs;
-
-      await show('second');
-      const [{ route: secondRoute }] = second.runs;
-
-      assert.equal(first.isRunning(), false);
-      assert.notEqual(secondRoute, firstRoute);
-      assert.equal(firstRoute.isDestroyed(), true);
-      assert.equal(secondRoute.isDestroyed(), false);
-    });
-
     it('replaces the child when the key changes', async() => {
       const page = addPage('page');
-      await show('page', { id: '1' }, { key: { id: '1' } });
-      const [{ route: firstRoute }] = page.runs;
+      await show('page', { key: { id: '1' }, options: { id: '1' } });
+      let stops = 0;
+      page.on('stop', () => stops++);
 
-      await show('page', { id: '2' }, { key: { id: '2' } });
+      await show('page', { key: { id: '2' }, options: { id: '2' } });
 
-      assert.equal(page.runs.length, 2);
-      assert.notEqual(page.runs[1].route, firstRoute);
-      assert.equal(page.runs[1].route.getParams().id, '2');
+      assert.equal(stops, 1);
+      assert.deepEqual(page.runs, [{ id: '1' }, { id: '2' }]);
     });
 
     it('replaces the child when restart is requested', async() => {
       const page = addPage('page');
-      await show('page', {}, { key: { id: '1' } });
+      await show('page', { key: { id: '1' } });
       let stops = 0;
       page.on('stop', () => stops++);
 
-      await show('page', {}, { key: { id: '1' }, restart: true });
+      await show('page', { key: { id: '1' }, restart: true });
 
       assert.equal(stops, 1);
       assert.equal(page.runs.length, 2);
@@ -211,63 +110,51 @@ describe('RouteOutlet', () => {
   });
 
   describe('reuse', () => {
-    it('updates the route of the running child when the key is equal', async() => {
+    it('keeps the running child when the key is equal', async() => {
       const page = addPage('page');
-      await show('page', { id: '1' }, { key: { id: '1', scope: ['a'] } });
-      const [{ route }] = page.runs;
-      const changes = [];
-      route.on('change', (...args) => changes.push(args));
-      const next = createMatch('page', { id: '1' }, { query: new URLSearchParams('tab=2') });
+      await show('page', { key: { id: '1', scope: ['a'] } });
+      let stops = 0;
+      page.on('stop', () => stops++);
 
-      const shown = await outlet.show('page', { key: { id: '1', scope: ['a'] }, match: next });
+      const shown = await show('page', { key: { id: '1', scope: ['a'] } });
 
       assert.equal(shown, page);
+      assert.equal(stops, 0);
       assert.equal(page.runs.length, 1);
-      assert.equal(route.getMatch(), next);
-      assert.equal(changes.length, 1);
     });
 
     it('reuses the child when the key is omitted', async() => {
       const page = addPage('page');
-      await show('page', { id: '1' });
-      const second = createMatch('page', { id: '2' });
+      await show('page');
 
-      await outlet.show('page', { match: second });
-
+      assert.equal(await show('page'), page);
       assert.equal(page.runs.length, 1);
-      assert.equal(page.runs[0].route.getMatch(), second);
     });
 
-    it('starts a reused child that stopped independently, with the retained route', async() => {
+    it('starts a reused child that stopped independently, with the new options', async() => {
       const page = addPage('page');
-      await show('page');
-      const [{ route }] = page.runs;
+      await show('page', { options: { id: '1' } });
       page.stop();
-      const next = createMatch('page', { id: '2' });
 
-      const shown = await outlet.show('page', { match: next });
+      const shown = await show('page', { options: { id: '2' } });
 
       assert.equal(shown, page);
       assert.equal(page.isRunning(), true);
-      assert.equal(page.runs.length, 2);
-      assert.equal(page.runs[1].route, route);
-      assert.equal(route.getMatch(), next);
+      assert.deepEqual(page.runs, [{ id: '1' }, { id: '2' }]);
     });
 
-    it('gives a still-preparing child the latest match before it starts', async() => {
+    it('resolves only the latest selection of a still-preparing child', async() => {
       const ready = deferred();
       const Slow = RecordingPage.extend({ prepareStart: () => ready.promise });
       const page = addPage('page', Slow);
       const first = show('page');
-      const latest = createMatch('page', { id: '2' });
 
-      const second = outlet.show('page', { match: latest });
+      const second = show('page');
       ready.resolve();
 
       assert.equal(await first, undefined);
       assert.equal(await second, page);
       assert.equal(page.runs.length, 1);
-      assert.equal(page.runs[0].route.getMatch(), latest);
     });
   });
 
@@ -307,7 +194,6 @@ describe('RouteOutlet', () => {
       owner.stop();
       const child = addPage('child');
       await show('child');
-      const [{ route }] = child.runs;
       assert.equal(child.isRunning(), true);
 
       owner.stop();
@@ -315,7 +201,7 @@ describe('RouteOutlet', () => {
       assert.equal(child.isRunning(), false);
       assert.equal(outlet.getCurrent(), child);
       assert.equal(await show('child'), child);
-      assert.equal(child.runs[1].route, route);
+      assert.equal(child.runs.length, 2);
     });
 
     it('leaves the owner methods untouched', () => {
@@ -327,13 +213,11 @@ describe('RouteOutlet', () => {
     it('clears the selection when a running owner stops', async() => {
       const child = addPage('child');
       await show('child');
-      const [{ route }] = child.runs;
 
       owner.stop();
 
       assert.equal(child.isRunning(), false);
       assert.equal(outlet.getCurrent(), null);
-      assert.equal(route.isDestroyed(), true);
     });
 
     it('does not invalidate a selection begun while its owner starts', async() => {
@@ -343,7 +227,7 @@ describe('RouteOutlet', () => {
           this.outlet = new RouteOutlet({ owner: this });
         },
         onBeforeStart() {
-          this.shown = this.outlet.show('page', { match: createMatch('page') });
+          this.shown = this.outlet.show('page');
         },
       });
       const starting = new Owner();

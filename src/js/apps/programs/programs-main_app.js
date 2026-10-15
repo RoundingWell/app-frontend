@@ -50,9 +50,9 @@ export default App.extend({
     const { programId, flowId } = match.params;
     const region = this.getRegion();
 
-    if (page === 'program') return { key: { programId }, match, options: { programId, region } };
-    if (page === 'programflow') return { key: { flowId }, match, options: { flowId, region } };
+    if (page === 'program') return { key: { programId }, options: { programId, region } };
+    if (page === 'programflow') return { key: { flowId }, options: { flowId, region } };
 
-    return { match, restart: true, options: { region } };
+    return { restart: true, options: { region } };
   },
 });

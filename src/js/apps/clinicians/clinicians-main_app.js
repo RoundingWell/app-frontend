@@ -19,12 +19,16 @@ export default App.extend({
   initialize() {
     this.pages = new RouteOutlet({ owner: this, onCleanupError: addError });
   },
-  showRoute(match) {
-    return this.pages.show(PAGES[match.name], {
-      match,
+  // The list is ready once started. The page then shows the sidebar of the match.
+  async showRoute(match) {
+    const pageApp = await this.pages.show(PAGES[match.name], {
       options: { region: this.getRegion() },
     }).catch(error => {
       Radio.trigger('event-router', 'unknownError', error?.response?.status);
     });
+
+    if (!pageApp) return;
+
+    return pageApp.showRoute(match);
   },
 });

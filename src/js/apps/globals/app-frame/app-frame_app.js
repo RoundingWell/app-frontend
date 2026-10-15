@@ -51,7 +51,6 @@ export default App.extend({
 
     const workspaceApp = await this.workspaces.show('workspace', {
       key: { workspace: workspace.id },
-      match,
       options: { ...this.shellOptions, workspace },
     });
 

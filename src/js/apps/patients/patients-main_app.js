@@ -53,7 +53,7 @@ export default App.extend({
 
     this.clearCurrentPatient();
 
-    if (match.name === 'schedule') return this.pages.show('schedule', { match, restart: true, options: { region } });
+    if (match.name === 'schedule') return this.pages.show('schedule', { restart: true, options: { region } });
 
     if (!WORKLISTS[worklistId]) {
       Radio.trigger('event-router', 'notFound');
@@ -61,7 +61,6 @@ export default App.extend({
     }
 
     return this.pages.show(WORKLISTS[worklistId], {
-      match,
       restart: true,
       options: { worklistId, clinicianId: match.query.get('clinicianId'), region },
     });
@@ -76,7 +75,6 @@ export default App.extend({
     // The fetch layer presents every other failure
     const patientApp = await this.pages.show('patient', {
       key: { patientId },
-      match,
       options: { patientId, region: this.getRegion() },
     }).catch(error => {
       if (get(error, ['response', 'status']) === 410) Radio.trigger('event-router', 'notFound');

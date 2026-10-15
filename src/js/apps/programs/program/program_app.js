@@ -54,18 +54,17 @@ export default App.extend({
 
     actionApp.stop();
 
-    if (match.name === 'program:details') return this.showWorkflows(match);
-    if (match.name === 'programFlow:new') return this.startFlowSidebar(match, programId);
+    if (match.name === 'program:details') return this.showWorkflows();
+    if (match.name === 'programFlow:new') return this.startFlowSidebar(programId);
 
-    return this.startProgramAction(match, programId, actionId).catch(() => {
+    return this.startProgramAction(programId, actionId).catch(() => {
       actionApp.handleStartFailure();
-      return this.showWorkflows(match);
+      return this.showWorkflows();
     });
   },
 
-  showWorkflows(match) {
+  showWorkflows() {
     return this.content.show('workflows', {
-      match,
       restart: true,
       options: {
         program: this.program,
@@ -76,22 +75,22 @@ export default App.extend({
     });
   },
 
-  async startProgramAction(match, programId, actionId) {
+  async startProgramAction(programId, actionId) {
     const actionApp = this.getChildApp('action');
 
     const started = await actionApp.start({ actionId, programId });
 
     if (!started) return;
 
-    return this.editList(match, actionApp.action);
+    return this.editList(actionApp.action);
   },
 
   // Triggers event on started workflow for marking the edited item
-  async editList(match, item) {
+  async editList(item) {
     const workflows = this.getChildApp('workflows');
 
     if (!workflows.isRunning()) {
-      const current = await this.showWorkflows(match);
+      const current = await this.showWorkflows();
 
       current?.triggerMethod('edit:item', item);
       return;
@@ -100,7 +99,7 @@ export default App.extend({
     workflows.triggerMethod('edit:item', item);
   },
 
-  async startFlowSidebar(match, programId) {
+  async startFlowSidebar(programId) {
     const flow = Radio.request('entities', 'programFlows:model', {
       _program: { id: programId, type: 'programs' },
       _owner: null,
@@ -115,7 +114,7 @@ export default App.extend({
 
     if (!started) return;
 
-    return this.editList(match, flow);
+    return this.editList(flow);
   },
 
   showSidebar() {

@@ -98,12 +98,12 @@ export default App.extend({
     return this[ROUTE_ACTIONS[match.name]](match);
   },
 
-  showWorkflow(match) {
-    return this.startContent('workflow', match, { status: 'notDone' });
+  showWorkflow() {
+    return this.startContent('workflow', { status: 'notDone' });
   },
 
-  showClosedWorkflow(match) {
-    return this.startContent('workflow', match, { status: 'done' });
+  showClosedWorkflow() {
+    return this.startContent('workflow', { status: 'done' });
   },
 
   showInteraction(match) {
@@ -113,36 +113,36 @@ export default App.extend({
       return this.getChildApp('interactions').navigateToInteraction(interactionId);
     }
 
-    return this.startContent('interactions', match, { interactionId });
+    return this.startContent('interactions', { interactionId });
   },
 
   showPatientAction(match) {
     const { actionId } = match.params;
 
-    return this.startContent('action', match, { actionId, entryTarget: match.info?.args?.[0] });
+    return this.startContent('action', { actionId, entryTarget: match.info?.args?.[0] });
   },
 
   showFlow(match) {
-    return this.startContent('flow', match, { flowId: match.params.flowId });
+    return this.startContent('flow', { flowId: match.params.flowId });
   },
 
   showFlowFocus(match) {
     const { flowId, actionId } = match.params;
 
-    return this.startContent('flow', match, { flowId, focusActionId: actionId });
+    return this.startContent('flow', { flowId, focusActionId: actionId });
   },
 
   showFlowAction(match) {
     const { flowId, actionId } = match.params;
 
-    return this.startContent('action', match, { flowId, actionId, entryTarget: match.info?.args?.[0] });
+    return this.startContent('action', { flowId, actionId, entryTarget: match.info?.args?.[0] });
   },
 
   showPatientForm(match) {
-    return this.startContent('form', match, { formId: match.params.formId });
+    return this.startContent('form', { formId: match.params.formId });
   },
 
-  startContent(appName, match, options) {
+  startContent(appName, options) {
     const pageApp = this.getChildApp(appName);
 
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
@@ -166,7 +166,6 @@ export default App.extend({
     this.stopInteractions();
 
     return this.content.show(appName, {
-      match,
       restart: true,
       options: startOptions,
     }).catch(error => {

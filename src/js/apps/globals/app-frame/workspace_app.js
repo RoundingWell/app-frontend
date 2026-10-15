@@ -82,7 +82,6 @@ export default App.extend({
     if (match.signal.aborted) return;
 
     await this.areas.show(area, {
-      match,
       options: { region: this.shellOptions.contentRegion },
     });
 

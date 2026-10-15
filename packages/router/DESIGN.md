@@ -11,8 +11,7 @@ migration plan lives in [`docs/router-migration.md`](../../docs/router-migration
   and [URLPattern](https://developer.mozilla.org/en-US/docs/Web/API/URLPattern).
 - Simple applications use only the core `Router`.
 - Applications composed of many asynchronous Marionette Applications use the optional
-  `@mnjs/router/outlet` layer (`RouteOutlet`, `RouteState`) — composition, not base
-  classes.
+  `@mnjs/router/outlet` layer (`RouteOutlet`) — composition, not base classes.
 - Follow Marionette v5 conventions: `Promise<boolean>` where `false` means
   superseded/canceled, `Events` + `listenTo` lifetimes, explicit ownership.
 
@@ -39,7 +38,7 @@ migration plan lives in [`docs/router-migration.md`](../../docs/router-migration
 packages/router/
   package.json        name "@mnjs/router", type module, private until extraction
   index.js            core: Router, memoryDriver, navigationDriver
-  outlet.js           Marionette layer: RouteOutlet, RouteState (optional peer dep: marionette)
+  outlet.js           Marionette layer: RouteOutlet (optional peer dep: marionette)
   src/**              implementation
   test/**             node:test suites (run with `node --test`)
   DESIGN.md
@@ -332,56 +331,37 @@ driver = {
 
 ## Marionette layer: `@mnjs/router/outlet`
 
-### `RouteState`
-
-An `MnObject` that holds the current match for one outlet's subtree.
-
-- `getMatch()`, `getName()`, `getParams()`, `getQuery()`, `getMeta()`, `getInfo()`,
-  `includes(name)` (branch contains a node named `name`).
-- `set(match)` triggers `change` with `(routeState, match, previousMatch)` when the
-  match object changes.
-- Created by `RouteOutlet` per selected child; passed to the child as `options.route`.
-
-RouteState is for following the route, not for activation. A child may read
-`options.route` in `prepareStart` and `onStart` (always the latest match) and follow
-`change` to reflect the match, but RouteOutlet does not await `change` listeners: any
-asynchronous work started there settles after `finished`. Use it only for synchronous
-updates; page work that `finished` must cover goes through the explicit call below.
-
-Activation is an explicit, awaited call. `show` resolves with the running child once its
-shell is ready (a patient, a program); the host then calls an explicit method on it with
-the match (`child.showRoute(match)`) and returns that promise. The router handler awaits
-it, so `finished` settles when the detail is ready. A `show` that resolves `undefined` was
-superseded; the host returns without calling the method. Supersession of the detail is
-the child's own outlet or lifecycle (starting a newer detail, or stopping the child), so
-an obsolete detail never commits DOM or focus.
-
 ### `RouteOutlet`
 
 A focused object owned by an Application that keeps exactly one selected child
-Application. It is the extraction of app-frontend's `RouteBaseApp.selectChild` policy.
+Application. It does not read the match: the host passes the child what it needs as
+start options, then activates the match with an explicit, awaited call.
 
 ```js
 initialize() { this.content = new RouteOutlet({ owner: this }); },
 
-showPage(match) {
-  return this.content.show('workflow', {
-    key: { patientId: match.params.patientId },   // identity; omitted = always the same
-    match,
+async showRoute(match) {
+  const { patientId } = match.params;
+  const patientApp = await this.content.show('patient', {
+    key: { patientId },                           // identity; omitted = always the same
     restart: false,                               // true = always stop + start
-    options: { region: this.getView().getRegion('content') },
+    options: { patientId, region: this.getView().getRegion('content') },
   });
+
+  if (!patientApp) return;                        // superseded
+
+  return patientApp.showRoute(match);
 },
 ```
 
-`show(appName, { key, match, restart, options })` → `Promise<Application | undefined>`:
+`show(appName, { key, restart, options })` → `Promise<Application | undefined>`:
 
 - The child must be registered with the owner (`childApps` / `addChildApp`).
-- **Reuse**: same `appName`, `isEqual(key)`, `restart` false → `routeState.set(match)`; start the child if it stopped independently.
-- **Replace**: stop the current child, create a new `RouteState` seeded with `match`,
-  and start the child with `{ ...options, route }`. Marionette 5.0.0 `stop()` is
-  synchronous and returns `true`, so replacement never waits for the old child; only
-  starting is asynchronous.
+- **Reuse**: same `appName`, `isEqual(key)`, `restart` false → keep the running child;
+  start it with `options` if it stopped independently.
+- **Replace**: stop the current child and start it with `options`. Marionette 5.0.0
+  `stop()` is synchronous and returns `true`, so replacement never waits for the old
+  child; only starting is asynchronous.
 - Newest call wins; superseded calls resolve `undefined`, including a call made
   obsolete re-entrantly while the old child stops.
 - A `stop()` that throws (for example an `onBeforeStop` hook) keeps the selection and
@@ -414,6 +394,14 @@ Known gaps of event-based invalidation:
 - Starting a stopped owner emits the same `before:start` as restarting it, so only a
   restart of a running owner invalidates; a `show` begun from the owner's own
   `onBeforeStart` is not canceled.
+
+Activation is the host's explicit call. `show` resolves with the running child once its
+shell is ready (a patient, a program); the host then calls a method on it with the match
+(`child.showRoute(match)`) and returns that promise. The router handler awaits it, so
+`finished` settles when the detail is ready. Supersession of the detail is the child's
+own outlet or lifecycle (starting a newer detail, or stopping the child), so an obsolete
+detail never commits DOM or focus. A page with no per-match detail needs no method:
+`show` resolving means it is ready.
 
 Child Applications use no base class. Error, loading, and refresh policy stay in each
 Application.

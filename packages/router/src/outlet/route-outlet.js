@@ -1,5 +1,4 @@
 import { MnObject } from 'marionette';
-import { RouteState } from './route-state.js';
 import { isEqual } from './is-equal.js';
 
 /**
@@ -24,10 +23,10 @@ export class RouteOutlet extends MnObject {
 
   /**
    * @param {string} appName Registered child Application of the owner.
-   * @param {{ key?: object, match: import('../router.js').Match, restart?: boolean, options?: object }} selection
+   * @param {{ key?: object, restart?: boolean, options?: object }} [selection]
    * @returns {Promise<object | undefined>} The running child, or undefined when superseded or canceled.
    */
-  async show(appName, selection) {
+  async show(appName, selection = {}) {
     const app = this.#owner.getChildApp(appName);
     if (!app) throw new Error(`Child application "${ appName }" is not registered`);
 
@@ -89,17 +88,15 @@ export class RouteOutlet extends MnObject {
     this.#intent = null;
   }
 
-  async #select(intent, app, appName, { key, match, restart = false, options }) {
+  async #select(intent, app, appName, { key, restart = false, options }) {
     if (!restart && this.#canReuse(appName, key)) {
-      const current = this.#selection;
-      current.route.set(match);
-      return this.#activate(intent, current, options);
+      return this.#activate(intent, this.#selection, options);
     }
 
     this.#stopSelection();
     if (this.#intent !== intent) return;
 
-    const selected = { app, appName, key, route: new RouteState(match) };
+    const selected = { app, appName, key };
     this.#selection = selected;
     return this.#activate(intent, selected, options);
   }
@@ -110,10 +107,10 @@ export class RouteOutlet extends MnObject {
   }
 
   async #activate(intent, selection, options) {
-    const { app, route } = selection;
+    const { app } = selection;
 
     try {
-      const started = await app.start({ ...options, route });
+      const started = await app.start(options);
       if (this.#intent !== intent) return;
       if (started) return app;
 
@@ -146,8 +143,6 @@ export class RouteOutlet extends MnObject {
   }
 
   #clearSelection() {
-    const selection = this.#selection;
     this.#selection = null;
-    selection?.route.destroy();
   }
 }

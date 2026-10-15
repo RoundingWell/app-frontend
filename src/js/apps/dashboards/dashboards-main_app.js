@@ -24,7 +24,6 @@ export default App.extend({
   },
   showRoute(match) {
     return this.pages.show(PAGES[match.name], {
-      match,
       restart: true,
       options: { region: this.getRegion(), dashboardId: match.params.dashboardId },
     }).catch(error => {

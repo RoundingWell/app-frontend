@@ -32,23 +32,17 @@ export default App.extend({
   prepareStart(options, { signal }) {
     return Radio.request('entities', 'fetch:clinicians:collection', { signal });
   },
-  onStart(app, { route }, clinicians) {
-    this.route = route;
+  onStart(app, options, clinicians) {
     this.clinicians = clinicians;
-    this.listenTo(route, 'change', this.showRoute);
 
     this.getView().showChildView('list', new ListView({
       collection: this.clinicians,
       state: this.getState(),
     }));
-
-    this.showRoute();
   },
-  onStop() {
-    this.stopListening(this.route);
-  },
-  showRoute() {
-    if (this.route.getName() === 'clinician') return this.showClinicianSidebar(this.route.getParams().clinicianId);
+  // The returned promise settles when the clinician sidebar is ready
+  showRoute({ name, params }) {
+    if (name === 'clinician') return this.showClinicianSidebar(params.clinicianId);
 
     return this.hideCliniciansSidebar();
   },
