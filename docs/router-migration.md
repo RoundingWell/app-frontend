@@ -9,7 +9,7 @@ When reality contradicts it, update this file in the same commit.
 
 | # | Decision |
 | --- | --- |
-| D1 | `Radio.trigger('event-router', name, ...args)` stays the primary fire-and-forget navigation API, as a navigation request only. A `router` request channel is added for results: `navigate` (returns the navigation promise) and `back` in Phase 2; `url` arrives with its first caller (Phase 3d) and `current` with its first caller (Phase 3b), since every line needs an E2E-reachable caller. |
+| D1 | `Radio.trigger('event-router', name, ...args)` stays the primary fire-and-forget navigation API, as a navigation request only. A `router` request channel is added for results: `navigate` (returns the navigation promise) and `back` in Phase 2; `url` arrives with its first caller (Phase 3d); `current` was cut in Phase 3b because no converted caller needed it, and every line needs an E2E-reachable caller. |
 | D2 | Aliases are a first-class, reusable router feature with an `until` date. The three patient aliases stay until 2027-09-02, default policy `canonicalize` (URL is replaced with the canonical URL). A spec fails once any alias is past `until`. Legacy flow URLs use async `redirect`. |
 | D3 | `notFound` and `unknownError` render at the current URL. No `/404` or `/unknown-error` pushes. |
 | D4 | The intercept handler awaits activation, so `navigation.transition.finished` / `router.navigate().finished` mean the page is ready. |
@@ -147,8 +147,7 @@ Deleted by the end: `event-router.js`, `routerapp.js`, `subrouterapp.js`,
   `workspace` route takes the slug: `Radio.trigger('event-router', 'workspace', slug)`.
 - `Radio.request('router', 'back', fallback)` → `router.back()`, or `fallback()` when the
   router owns no previous entry.
-- Phase 3d adds `Radio.request('router', 'url', name, params, { query })` → string;
-  Phase 3b adds `Radio.request('router', 'current')` → match.
+- Phase 3d adds `Radio.request('router', 'url', name, params, { query })` → string.
 - Callers needing query params (D5) or replace use the request form.
 - Area RouterApps are never dispatched from a trigger. The router handler (AppFrame →
   WorkspaceApp, awaited, D4) calls `RouterApp.showRoute(match)`. The bridge
@@ -457,6 +456,60 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   inaccessible areas render not-found), `default-route` (not-found on back/forward,
   `finished` means ready, content focus, latest navigation wins while an area loads),
   `routerapp` and `latest-list` component specs rewritten.
-- Phase 3b: not started
-- Phase 3c: not started
+- Phase 3b: done, awaiting review gate (not pushed to CI yet; see Not verified).
+  Step 1 (shell fixes from the 3a review): `WorkspaceApp` imports only the routed area
+  on first use (restoring the lazy `import()`; the programs controls rules are now
+  compound selectors, `.work-card__controls.workflows__flow-controls` and friends, so
+  they no longer depend on stylesheet order) and returns without showing a page whose
+  navigation was superseded while the area loaded; Latest list stores the route name,
+  params without `workspace`, query and info and goes back by name, so a page reached by
+  history from another workspace keeps the current one; `isAppUrl` builds the slug set
+  once; the dead `routerAppName` is gone. Deviation: the `undefined`-from-`show` check
+  after `areas.show` was not added, because areas have no async start, so `show` cannot
+  resolve `undefined` without the navigation signal aborting (no UI path reaches it).
+  Step 2: every area is a plain App with a `RouteOutlet`, an explicit route-name → child
+  map and its error policy in `.catch` at the `show` call (Clinicians, Dashboards,
+  Programs, Patients). Pages that follow the route (Clinicians all, Program, Program
+  flow, Patient) read `options.route`, listen to its `change` and `stopListening` in
+  `onStop`; lists use `restart: true`; resource pages use `key`. `RouterApp`,
+  `SubRouterApp`, `RouteBaseApp` and their component specs are deleted, with
+  `routeScope`, `startCurrentRoute`, `routeActions` and `currentAppOptions`. D5: the
+  worklist reads `clinicianId` from `match.query`, the clinician sidebar navigates with
+  `Radio.request('router', 'navigate', 'worklist', { worklistId: 'owned-by' }, { query: { clinicianId } })`,
+  and Latest list keeps the query, so "Back to List" keeps the filter. The `current`
+  request was cut (no caller). The `entryTarget` still arrives as `info.args[0]` from the
+  five `Radio.trigger` callers (not changed to `info.entryTarget`: that would touch the
+  list, flow, schedule and shared action views). The patient interactions feed is started
+  by `PatientApp` directly instead of through the outlet: the feed restarts itself during
+  its first start, and the outlet stops a child whose first start is superseded (noted in
+  DESIGN.md). `/one/worklist/owned-by?clinicianId=` loses its query on any direct load,
+  reload included, because `AuthProvider.handleAuthedPath` replaces the URL with the
+  pathname only; I10 survival of a reload therefore needs a one-line change in
+  `packages/care-ops-auth/AuthProvider.js`, which is outside this phase's scope and was
+  not made (see the review-gate question).
+  Not provable in E2E (kept or cut): AppFrame's `signal.throwIfAborted()` after the
+  workspace outlet (removing it left `default-route` and `app-nav` green, including a new
+  overlapping-navigation step), `onStop` → `stopListening(this.route)` in the route-reading
+  pages, and `this.content.stop()` before starting the interactions feed. Cut as
+  unreachable: the Patients area and PatientApp `reportError` fallbacks (the fetch layer
+  already shows every non-410 failure; failures reach the pages only as `undefined`
+  because `unknownError` stops the area).
+  Verified (Node 24.15, private preview on 8097, 8098, 8099): `npm run eslint` and
+  `stylelint` (editorconfig-checker binary unavailable), package tests 252/252, router-driver
+  component spec 34/34 and latest-list component spec 3/3 (Electron), and all 36 E2E
+  specs one at a time. Guards were removed one at a time and the targeted spec failed
+  each time: post-import abort check, programs CSS, Latest list workspace omission and
+  query, Clinicians/Dashboards/Programs `.catch` branches and keys, the worklist
+  `clinicianId` read, unknown worklist not-found, patient 410 not-found, patient `key`,
+  list `restart`, page `restart`, interactions reuse and stop, `entryTarget`, the patient
+  route `change` listener and the interactions flag reset. Specs added: `default-route`
+  (superseded while its area loads), `app-nav` (back to list stays in the workspace;
+  cross-area navigations overlap during a workspace load), `dashboards-all` and
+  `programs-all` (nav reload), `program` and `program-flow` (switching, returning,
+  failing workflows load), `clinician-sidebar` (query URL and Back to List keeps it),
+  `interactions` (another patient's feed). Not verified: CI full suite, Safari, Edge,
+  Firefox E2E, Datadog RUM, `editorconfig-checker`.
+- Phase 3c: partly done in 3b (adapters, base classes and component specs deleted,
+  `routing.md` rewritten, `AGENTS.md` pointers updated); remaining: confirm nothing
+  references removed modules after review.
 - Phase 4: not started

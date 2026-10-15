@@ -352,6 +352,10 @@ showPage(match) {
 replaces its methods. Owner restart invalidates pending selection but leaves the
 selected child running. Key equality is structural (primitives, arrays, plain objects).
 
+A child whose first start is superseded by that child's own `restart()` (a feed that
+reloads itself while its initial load is pending) resolves `false` while it is not yet
+running, so the outlet stops it. Such a child is started by its host without an outlet.
+
 Known gaps of event-based invalidation:
 
 - Stopping an already-stopped owner emits nothing. Marionette still stops its children,

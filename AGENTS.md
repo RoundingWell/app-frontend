@@ -10,7 +10,7 @@ Load a scoped overlay only when the task touches:
 - test authoring, test review, or coverage validation -> `test/README.md`
 - `scripts/**` -> `scripts/AGENTS.md`
 - `packages/care-ops-five9/**` -> `packages/care-ops-five9/AGENTS.md`
-- routing infrastructure (`src/js/routes.js`, `src/js/router.js`, `src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`) or application route definitions -> `src/js/base/routing.md`
+- routing infrastructure (`src/js/routes.js`, `src/js/router.js`) or application route definitions -> `src/js/base/routing.md`
 - data access, entities, or `src/js/entities-service/**` -> `src/js/entities-service/README.md`
 
 ## Instruction Priority
@@ -69,8 +69,8 @@ belong to this application.
 - Events/routing: use `Radio` from `marionette`. The `@mnjs/router` Router in
   `src/js/router.js` owns URL/history handling over the Navigation API;
   `src/js/services/router-radio.js` bridges the `event-router` Radio channel to it.
-  AppFrame and the local RouterApp/SubRouterApp classes own feature selection and
-  loading; see `src/js/base/routing.md` for app policy.
+  AppFrame, WorkspaceApp and each area App select their pages with `RouteOutlet`
+  (`@mnjs/router/outlet`); see `src/js/base/routing.md` for app policy.
 - Ownership entrypoint: `src/js/app.js` owns the `#root` Region, RootView, and
   bootstrap/dialer/app-frame child Applications. It configures shared popup Regions
   and owns its document/window listeners. Follow each feature's existing owner.
@@ -195,7 +195,7 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - Keep related Cypress scenarios consolidated when their setup can be reset explicitly. Do not recommend splitting solely because an earlier assertion failure skips later steps; that is normal test behavior. Flag actual leaked intercepts, clocks, or exception handlers instead.
 - During review, flag newly added visual assertions that would fail for an equally valid design implementation without changing state or behavior. Use design review or manual visual inspection for ordinary visual fidelity.
 - Iterate with single specs; they are much faster than the full suites:
-  - Component: `npx cypress run --component --spec src/js/base/routerapp.component.cy.js`
+  - Component: `npx cypress run --component --spec src/js/services/latest-list.component.cy.js`
   - E2E: build and serve the test app once (`npm run build -- --mode test`, then `npx vite preview -m test` in the background to serve on port 8090), then `npx cypress run --spec src/js/apps/<domain>/<app>/<spec>.e2e.cy.js`
   - Do not pass `--spec` through `npm run coverage:e2e`; npm appends it after the script's `exit`, so the full suite still runs unfiltered and the script then exits 1 (`exit: too many arguments`).
 - Before claiming UI behavior is validated, run the full suite relevant to the change:
