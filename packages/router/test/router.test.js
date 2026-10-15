@@ -449,6 +449,79 @@ describe('Router dispatch and events', () => {
   });
 });
 
+describe('Router reentrancy', () => {
+  it('lets a navigation started from the previous match abort listener win', async() => {
+    const context = await started();
+    await context.router.navigate('worklist', { worklistId: 'a' }).finished;
+    context.log.length = 0;
+
+    lastRoute(context).signal.addEventListener('abort', () => {
+      context.router.navigate('worklist', { worklistId: 'c' });
+    }, { once: true });
+
+    const second = context.router.navigate('worklist', { worklistId: 'b' });
+
+    assert.equal(await second.finished, false);
+    await tick();
+
+    assert.deepEqual(context.log, ['route:worklist', 'handler:worklist', 'ready:worklist']);
+    assert.equal(context.router.getCurrent().params.worklistId, 'c');
+    assert.equal(context.driver.currentEntry.url, 'http://localhost/w1/worklist/c');
+  });
+
+  it('lets a navigation started from a route listener win', async() => {
+    const context = await started();
+    const handled = [];
+    context.handler = match => {
+      handled.push(match.params.worklistId);
+    };
+    context.router.on('route', match => {
+      if (match.params.worklistId === 'b') context.router.navigate('worklist', { worklistId: 'c' });
+    });
+
+    const second = context.router.navigate('worklist', { worklistId: 'b' });
+
+    assert.equal(await second.finished, false);
+    await tick();
+
+    assert.deepEqual(handled, ['c']);
+    assert.equal(context.router.getCurrent().params.worklistId, 'c');
+    assert.equal(context.log.filter(entry => entry.startsWith('ready')).length, 1);
+  });
+
+  it('runs no handler when stop() is called from a route listener', async() => {
+    const context = await started();
+    const stopped = () => context.router.stop();
+    context.router.once('route', stopped);
+
+    const result = context.router.navigate('worklist', { worklistId: 'b' });
+
+    assert.equal(await result.finished, false);
+    await tick();
+
+    assert.deepEqual(context.log, ['route:worklist']);
+  });
+
+  it('runs no handler for a navigation superseded while its redirect was called', async() => {
+    const context = await started();
+    context.router.mount([{
+      name: 'guarded',
+      path: '/:workspace/guarded',
+      redirect: () => {
+        context.router.navigate('worklist', { worklistId: 'c' });
+      },
+    }]);
+
+    const guarded = context.router.navigate('/w1/guarded');
+
+    assert.equal(await guarded.finished, false);
+    await tick();
+
+    assert.deepEqual(context.log, ['route:worklist', 'handler:worklist', 'ready:worklist']);
+    assert.equal(context.router.getCurrent().params.worklistId, 'c');
+  });
+});
+
 describe('Router.navigate', () => {
   it('builds the URL from a route name, copying persistParams from the current match', async() => {
     const context = await started();

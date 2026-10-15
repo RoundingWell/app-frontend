@@ -226,6 +226,13 @@ Events (`Events` from `@mnjs/utils`, so `listenTo(router, …)` works):
 
 Superseded navigations emit nothing after their `route`.
 
+A match is installed as current, and its controller as the current controller, before the
+previous controller is aborted. A navigation or `stop()` started from an abort listener of
+the previous match or from a `route` listener therefore supersedes the navigation being
+committed: the router rechecks that it is still current after the abort and after the
+`route` event, skips the handler and `route:ready`, and settles `finished` as `false`
+(an `AbortError` thrown from the intercept handler).
+
 ### Intercept rules
 
 The router intercepts a `navigate` event only when all of the following hold:

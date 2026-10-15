@@ -456,6 +456,7 @@ export class Router {
 
   async #run(plan, nav) {
     const match = this.#commit(plan.base, nav);
+    if (!match) throw new DOMException('Navigation superseded', 'AbortError');
     try {
       if (plan.pending && await this.#redirected(nav, plan.pending)) return;
       await this.#options.handler?.(match, { signal: match.signal });
@@ -476,15 +477,20 @@ export class Router {
     return true;
   }
 
+  // Installs the match before anything it triggers can run, so a navigation or
+  // stop() started from an abort or route listener supersedes this one. Returns
+  // null when that happened and the handler must not run.
   #commit(base, nav) {
     const entry = this.#driver.currentEntry;
-    this.#abortCurrent();
-    this.#currentController = nav.controller;
+    const previous = this.#currentController;
     const match = toMatch(base, nav, entry.key, this.#mark(entry));
     nav.match = match;
     this.#current = match;
+    this.#currentController = nav.controller;
+    previous?.abort();
+    if (!this.#isCurrent(nav)) return null;
     this.trigger('route', match);
-    return match;
+    return this.#isCurrent(nav) ? match : null;
   }
 
   #mark(entry) {
