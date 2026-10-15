@@ -509,6 +509,39 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   failing workflows load), `clinician-sidebar` (query URL and Back to List keeps it),
   `interactions` (another patient's feed). Not verified: CI full suite, Safari, Edge,
   Firefox E2E, Datadog RUM, `editorconfig-checker`.
+- Phase 3b follow-up: done, awaiting review gate (pushed after the full per-spec E2E run,
+  see Not verified). (1) `AuthProvider.auth` passes `pathname + search + hash` to
+  `handleAuthedPath` (which compares the pathname part), and `beginReauth` defaults its
+  return path the same way, so `?clinicianId=` survives a direct load and a reload (I10;
+  the clinician-sidebar spec clears the saved worklist state and reloads). An
+  unauthenticated deep link still returns without its query (`auth()` calls
+  `loginPrompt(location.pathname)`); not changed, since it was not asked for. (2)
+  Completion contract (D4): `PatientApp`, `ProgramApp` and `ProgramFlowApp` no longer
+  show the route from `onStart` or listen to `change`; the area resolves the shell with
+  `pages.show`, returns when it is `undefined` (superseded), then returns
+  `app.showRoute(match)`, so `finished` and the content focus wait for the detail.
+  `ProgramApp.editList` and the interactions feed's start and reuse are part of the
+  returned chain. E2E: `patient` (detail held: `finished` and focus pending until the
+  action renders; selecting another detail or leaving the patient mid-load leaves no stale
+  render or focus), `program`, `program-flow` and `interactions` (finished means ready),
+  `workflow` and `program-flow` (a 410 shell still finishes). Removing the area `await`,
+  the `!app` returns and the returned detail promises each failed a spec, except the
+  interactions reuse `return` (no observable difference: the feed is already loaded). (3)
+  Router reentrancy: `#commit` installs `#current` and the controller before aborting the
+  previous one and rechecks after the abort and after the `route` event; a superseded
+  commit throws an `AbortError` so `finished` is `false`. The planned recheck after the
+  redirect call was cut: removing it failed no test, because the commit rechecks cover
+  it. (4) Entry state: omitted `state` on a replace or repeat keeps the entry's
+  plain-object state. (5) Round-trip tests (aliases, optional segments, nesting,
+  ranking, encoding, wildcards) found no mismatch; `url()` now rejects `.` and `..` and
+  values failing a param's regex. (6) `peerDependenciesMeta` marks marionette optional
+  and DESIGN.md documents navigate, repeat, refresh and the unbuilt reflect.
+  Verified: package tests 279/279, `npm run eslint` and `stylelint`, router-driver,
+  auth and latest-list component specs in Electron, Chrome and Firefox, and all E2E
+  specs one at a time. Not verified: CI, Safari, Edge, Firefox E2E, the new reentrancy
+  and entry-state tests on the real Navigation API (they run on the memory driver only),
+  `editorconfig-checker`, `packages/care-ops-auth` lint (the package is outside the
+  lint scope and already fails `eslint`).
 - Phase 3c: partly done in 3b (adapters, base classes and component specs deleted,
   `routing.md` rewritten, `AGENTS.md` pointers updated); remaining: confirm nothing
   references removed modules after review.
