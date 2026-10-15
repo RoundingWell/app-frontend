@@ -26,5 +26,10 @@
   },
   "peerDependencies": {
     "marionette": "5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "marionette": {
+      "optional": true
+    }
   }
 }

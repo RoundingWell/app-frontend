@@ -39,7 +39,7 @@ migration plan lives in [`docs/router-migration.md`](../../docs/router-migration
 packages/router/
   package.json        name "@mnjs/router", type module, private until extraction
   index.js            core: Router, memoryDriver, navigationDriver
-  outlet.js           Marionette layer: RouteOutlet, RouteState (peer dep: marionette)
+  outlet.js           Marionette layer: RouteOutlet, RouteState (optional peer dep: marionette)
   src/**              implementation
   test/**             node:test suites (run with `node --test`)
   DESIGN.md
@@ -48,7 +48,8 @@ packages/router/
 - `exports`: `"."` → `index.js`, `"./outlet"` → `outlet.js`.
 - Core dependencies: `@mnjs/utils` only (`Events`, `extend`). No `backbone`,
   `underscore`, `marionette`, `js/*`, or app imports. The outlet layer may import
-  `marionette` (peer dependency) and `@mnjs/utils`.
+  `marionette` and `@mnjs/utils`. `marionette` is a peer dependency, declared optional
+  in `peerDependenciesMeta` because only `@mnjs/router/outlet` needs it.
 - An ESLint `no-restricted-imports` block for `packages/router/**` enforces this.
 - Package tests do not count toward app coverage (`.nycrc.json` includes only
   `src/js/**`). They are the package's own contract tests and move with it.
@@ -232,6 +233,23 @@ the previous match or from a `route` listener therefore supersedes the navigatio
 committed: the router rechecks that it is still current after the abort and after the
 `route` event, skips the handler and `route:ready`, and settles `finished` as `false`
 (an `AbortError` thrown from the intercept handler).
+
+### Navigate, repeat, refresh and reflect
+
+Four ways to reach a URL, all dispatching through the handler unless noted:
+
+- **navigate**: `navigate(name | url, ...)` builds the target and asks the driver for a
+  `push` (default `auto`). The handler runs and `finished` settles when the page is ready.
+- **repeat**: navigating to the URL that is already current (`auto`) replaces the entry
+  and dispatches again with `navigationType: 'replace'`. The application decides whether
+  that reloads (nav re-selection reloads lists) or no-ops. The entry's state is kept.
+- **refresh**: `refresh()` replaces the current entry with its own URL and state and
+  dispatches again; use it after the route table changes.
+- **reflect** (not built): a URL change that updates the address bar and entry without
+  re-dispatching, for state the page already shows (a filter the page itself changed).
+  It would be a `navigate` option that commits the driver entry and emits no `route`.
+  It is added when an application caller needs it; until then pages navigate (repeat) or
+  keep the state out of the URL.
 
 ### Entry state
 
