@@ -1,0 +1,24 @@
+src/js/base/cache/idb.cy.js
+  s_a6bce4f2558323::t_a9770f58525dc8 114,120-121
+  s_a6bce4f2558323::t_43b6a97a947999 3-65,124-238
+src/js/base/cache/idb.js
+  s_a6bce4f2558323::t_43b6a97a947999 7-10,14-38,42,44,52-63,66-77
+  s_a6bce4f2558323::t_b67684d6aa0cda 46-47
+  s_a6bce4f2558323::t_fa05aa1f76976f 48-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "017b5472b948c3c6dc8ce831100693233f64abe6",
+  "prompts": {},
+  "sessions": {
+    "s_a6bce4f2558323": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0083b0b7-8501-4a97-958c-1d3ac97170cf",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,23 @@
+scripts/deploy.js
+  s_5533e7f8ce871a::t_1eacf36a0179a2 352-356,358,361-376
+scripts/deploy.test.js
+  s_5533e7f8ce871a::t_05abe34563cab8 94-144
+.circleci/deploy.yml
+  s_5533e7f8ce871a::t_95234406ad2778 149
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.0",
+  "base_commit_sha": "3c4a44a73f0f1282927eb83efb40a7ac0ba30c97",
+  "prompts": {},
+  "sessions": {
+    "s_5533e7f8ce871a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4f82-8ca6-78c2-89df-9c37188f86b5",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

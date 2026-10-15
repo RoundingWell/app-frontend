@@ -1,0 +1,98 @@
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 20-23,25,27,34
+src/js/entities-service/events.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12-13
+src/js/apps/patients/patient/form/widgets/widgets_header_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 8-9,11,13,15
+src/js/entities-service/widget-values.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,21
+src/js/base/app.js
+  s_85aebd1623278c::t_1a87aeacd61a0d 2-5
+src/js/entities-service/files.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,13,15
+src/js/apps/patients/shared/components/due_view.js
+  s_85aebd1623278c::t_a4e2406ff1b832 30-34
+src/js/apps/patients/shared/widgets/widgets.js
+  s_85aebd1623278c::t_f8fcfa2604d51a 138
+  s_85aebd1623278c::t_899ae093931bf4 134,137,139-140
+src/js/apps/patients/shared/components/dialer_view.js
+  s_85aebd1623278c::t_a4e2406ff1b832 19-23
+src/js/apps/patients/patient/form/form_app.js
+  s_85aebd1623278c::t_1856319b205127 225
+  s_85aebd1623278c::t_c70588449d5486 68-71,73,75,276-277,370
+  s_85aebd1623278c::t_e3ef32db9d5350 2,6,14,33-35,39,49,59,83-84,91,106,130,149,163,188,203,212,221,237,251,264,266,272,295,303,305,308,311,314,316,325,327,331,335,340,343,347,378,382,391,402
+  s_85aebd1623278c::t_447647e7a1a406 45,85
+  s_85aebd1623278c::t_3944b39741556e 89
+  s_85aebd1623278c::t_899ae093931bf4 42,55,62,66,226,255,259,348-350,353,357,360
+  s_85aebd1623278c::t_7d7b134b9e8c97 88,364-369
+  s_85aebd1623278c::t_d41a3037f3216c 72,74
+  s_85aebd1623278c::t_f8fcfa2604d51a 52
+  s_85aebd1623278c::t_d132db48676a59 87,256-258,262
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 53
+  s_85aebd1623278c::t_1a87aeacd61a0d 5,56,58,63-65
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11-12,14,37
+  s_85aebd1623278c::t_cbe0f12c0f6867 17,23,38
+src/js/entities-service/form-responses.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 18-20,22,25
+src/js/entities-service/flows.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 19-22
+src/js/apps/patients/patient/action/action_views.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 109-111
+  s_85aebd1623278c::t_447647e7a1a406 22
+src/js/entities-service/entities/widgets.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11-12
+src/js/entities-service/workspace-patients.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,15
+package.json
+  s_85aebd1623278c::t_565599ef398efa 142
+src/js/entities-service/forms.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 42-43
+src/js/apps/patients/patient/action/action_app.js
+  s_85aebd1623278c::t_26b38907fd0a7b 146
+  s_85aebd1623278c::t_35479938c99de5 121
+  s_85aebd1623278c::t_a3fcf71e266ab6 2,6,23-28,33,58,87,97,132,147-148,160,193,195,242,244,247,270,293-296,299,304-307,310,315
+  s_85aebd1623278c::t_f320c5997ab973 73
+  s_85aebd1623278c::t_05aea19bc12483 255
+  s_85aebd1623278c::t_c70588449d5486 60,62,65,68,71,253,256-260
+  s_85aebd1623278c::t_d41a3037f3216c 77
+  s_85aebd1623278c::t_1a87aeacd61a0d 5,61,67
+  s_85aebd1623278c::t_d132db48676a59 144,243,245-246,254
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 104,111
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_f522eeba27c6c0 114-115,548-555
+  s_85aebd1623278c::t_565599ef398efa 5-16,116-118,556-562
+  s_85aebd1623278c::t_5993d3362bd802 24,107
+package-lock.json
+  s_85aebd1623278c::t_85d97b29a9d422 40,12306-12307
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 11,13-17,19,27,31,42,59,76
+src/js/entities-service/comments.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,14
+src/js/apps/patients/patient/patient_app.js
+  s_85aebd1623278c::t_1a87aeacd61a0d 130-131
+  s_85aebd1623278c::t_d132db48676a59 128
+  s_85aebd1623278c::t_c70588449d5486 134-141
+  s_85aebd1623278c::t_189f3a69eb6357 142
+src/js/apps/patients/patient/action/action-details_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 125,130
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_85aebd1623278c::t_0fe91cd4de930c 26,32,38,44,50,60,70,80,86,96,102,108,114,120,301
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "750f9599dfa45f37d5e577f1595fa521e7f6b92b",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,23 @@
+packages/care-ops-five9/five9_app.js
+  s_7d9748a0496f68::t_adf33e8ba7846d 30-31,41,44,96
+packages/care-ops-ringcentral/ringcentral_app.js
+  s_7d9748a0496f68::t_99c136fa8f985c 34-35,43,49,59
+src/js/app.js
+  s_7d9748a0496f68::t_df9fc43dd09bfc 91-92,95,99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2b08aea84ea977f28d22c0f19be033ba0107abe3",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

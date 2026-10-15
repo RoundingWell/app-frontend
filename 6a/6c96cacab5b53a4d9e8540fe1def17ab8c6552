@@ -1,0 +1,28 @@
+src/js/behaviors/form-frame-proto.js
+  s_97851b2b544b0c::t_e8a0fd6e6a0995 266,270,276-287,308-310
+  s_97851b2b544b0c::t_a8fc816d8e12f7 10,202
+  s_97851b2b544b0c::t_63aef7c758c055 8-9,11-12,25-27,35-36,38-39,48-49,53,74-75,147,155,162,182,184-185,193,197-201,203,243-265,267-269,271-275,288-307,311-345
+src/js/apps/patients/patient/action/action_app.js
+  s_97851b2b544b0c::t_63aef7c758c055 17
+src/js/apps/patients/patient/action/action.scss
+  s_97851b2b544b0c::t_63aef7c758c055 255-274
+src/js/apps/patients/patient/action/action-forms_views.js
+  s_97851b2b544b0c::t_63aef7c758c055 92,109-111,113,115-117
+  s_97851b2b544b0c::t_e8a0fd6e6a0995 114,121
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "6a6c96cacab5b53a4d9e8540fe1def17ab8c6552",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

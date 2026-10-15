@@ -1,0 +1,26 @@
+src/js/components/dateselect/index.js
+  s_85aebd1623278c::t_96e6d20e38adae 1,69,74
+  s_85aebd1623278c::t_4fbe449668a5ae 5,13,48-50,67-68,70-73,75-101,107-115,119,127-130,132-135,139-140,144-174,178,186,194,200-201,204-205
+src/js/services/patient-modal/patient-modal_views.js
+  s_85aebd1623278c::t_4fbe449668a5ae 114,118
+src/js/components/dateselect/date-select.component.cy.js
+  s_85aebd1623278c::t_4fbe449668a5ae 164
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_5d2cdeaaa27d0d 15,50-55,60-61,114-116,135-138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a45736e125a64a815288eb4112665a0d47c61f7f",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

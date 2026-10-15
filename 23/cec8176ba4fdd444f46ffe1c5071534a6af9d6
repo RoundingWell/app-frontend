@@ -1,0 +1,15 @@
+src/js/components/tooltip/tooltip.component.cy.js
+  h_0f06c286dda36f 220,223-225,227,229-239,241,243-261,263-265
+  h_0f06c286dda36f 262
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "23cec8176ba4fdd444f46ffe1c5071534a6af9d6",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+src/js/base/app.js
+  s_7d9748a0496f68::t_c17ae1dbf74b8e 1
+src/js/utils/handle-errors.component.cy.js
+  s_7d9748a0496f68::t_f4edfba874170d 20-31
+src/js/utils/handle-errors.js
+  s_7d9748a0496f68::t_60cc093dd5b309 8
+src/js/base/route-base-app.component.cy.js
+  s_7d9748a0496f68::t_468e9fa3bdb210 1-253
+src/js/base/route-base-app.js
+  s_7d9748a0496f68::t_c8163bfbf2d900 1-129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d2e8577b03560b2e40d0b5061af5b8f310ba3a2f",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

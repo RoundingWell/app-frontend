@@ -1,0 +1,19 @@
+README.md
+  s_df8c9999af5729::t_9b9bf1fa9e6ed4 26,28,150-151,153-157,160,345-347
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5ab7c8feb457cef28dd7d00fa1397a7d6178eab9",
+  "prompts": {},
+  "sessions": {
+    "s_df8c9999af5729": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9c551bc-efbe-41d6-822c-640524eec537",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

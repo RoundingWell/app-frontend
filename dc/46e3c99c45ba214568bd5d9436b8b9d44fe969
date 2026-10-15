@@ -1,0 +1,16 @@
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 1319-1336
+src/js/apps/patients/shared/widgets/recent-interactions_views.js
+  h_0f06c286dda36f 1,48-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dc46e3c99c45ba214568bd5d9436b8b9d44fe969",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+src/js/apps/globals/nav/whats-new/design-update.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1
+src/js/i18n/en-US/globals.yml
+  s_2d91c07b8aa12c::t_43943d114fe92a 47
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 40,43
+  s_2d91c07b8aa12c::t_00d4bc018cc3c2 44
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 27,38-39,41-42,45-46
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_2d91c07b8aa12c::t_8c44ac1f805509 15,235-242,245-248,250-291,454-455,457,659-660
+  s_2d91c07b8aa12c::t_d90ce5bd4f2684 292-330
+  s_2d91c07b8aa12c::t_43943d114fe92a 249
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 243-244
+  s_2d91c07b8aa12c::t_683fafe8a87b46 456,661
+  s_2d91c07b8aa12c::t_aa3c21efbcec73 662
+src/js/apps/globals/nav/nav_app.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 12,28-34,330-334,414-417,422,464,470-475,477-488
+  s_2d91c07b8aa12c::t_0f3107432a6b1a 476
+src/js/apps/globals/nav/whats-new/whats-new.scss
+  s_2d91c07b8aa12c::t_235c8a0aa6cd67 41
+  s_2d91c07b8aa12c::t_15dff461a70e14 40
+  s_2d91c07b8aa12c::t_d65a30918c79f6 26,29-30,37,56,67
+  s_2d91c07b8aa12c::t_702c72f63ef34c 5
+  s_2d91c07b8aa12c::t_c0031a0532ed70 9
+  s_2d91c07b8aa12c::t_aad49ff32dbc14 3-4
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 13,34,36,73
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-2,6-8,10-12,14-16,18-25,27-28,31-33,35,38-39,42-55,57-62,64-65,68-72,74-98
+  s_2d91c07b8aa12c::t_6ce6fb0fac10fe 63,66
+  s_2d91c07b8aa12c::t_01143bc504e1f7 17
+src/js/apps/globals/nav/whats-new/whats-new_views.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-53
+packages/care-ops-fontawesome/manifest.json
+  s_2d91c07b8aa12c::t_d65b96c787b0bf 45
+src/js/apps/globals/nav/app-nav/bottom-nav.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_2d91c07b8aa12c::t_0e63a2c7eb29ec 96-102,108
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 104-107,152-155
+src/js/apps/globals/nav/app-nav/workspace-menu.hbs
+  s_2d91c07b8aa12c::t_0e63a2c7eb29ec 6-13
+src/js/apps/globals/nav/whats-new/whats-new.component.cy.js
+  s_2d91c07b8aa12c::t_c44608f1c351b6 29-30,32-33,35-38
+  s_2d91c07b8aa12c::t_43943d114fe92a 58
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 24,28,31,34
+  s_2d91c07b8aa12c::t_8c44ac1f805509 1-23,25-27,39-57,59-60
+src/js/apps/globals/nav/whats-new/announcement.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-3,5,7
+  s_2d91c07b8aa12c::t_72ef5ca6bc3ede 6
+  s_2d91c07b8aa12c::t_15dff461a70e14 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "6e07e4775e59d00434ae3be32f4991e452b686cc",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_2d91c07b8aa12c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a046dd-e987-7010-815b-e2ec94d7f5d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

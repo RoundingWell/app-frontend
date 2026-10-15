@@ -1,0 +1,150 @@
+src/js/entities-service/forms.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 42-43
+package.json
+  s_85aebd1623278c::t_565599ef398efa 142
+src/js/base/app.js
+  s_85aebd1623278c::t_1a87aeacd61a0d 2-5
+src/js/apps/patients/patient/action/action_views.js
+  s_85aebd1623278c::t_447647e7a1a406 22
+  s_85aebd1623278c::t_a3fcf71e266ab6 109-111
+src/js/entities-service/comments.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,14
+src/js/services/ws.js
+  s_85aebd1623278c::t_723854be9dffb3 168,188-189,192-197,203-207,209-211,213-219,222,228,231
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_85aebd1623278c::t_0fe91cd4de930c 26,32,38,44,50,60,70,80,86,96,102,108,114,120,301
+src/js/apps/patients/patient/form/form_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 104,111
+src/js/apps/patients/patient/form/widgets/widgets_header_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 8-9,11,13,15
+src/js/apps/patients/shared/components/due_view.js
+  s_85aebd1623278c::t_a4e2406ff1b832 30-34
+src/js/base/routerapp.component.cy.js
+  s_85aebd1623278c::t_3e4077e8b45675 76,92,155,157
+  s_85aebd1623278c::t_888444b4b018d5 49,51-59,119,129,139,147,165,169,179,183,202,207,217,226-249
+  s_85aebd1623278c::t_d2db81cc3819e5 250
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_e57d2f7819e035 568-573
+  s_85aebd1623278c::t_5993d3362bd802 24,107
+  s_85aebd1623278c::t_85f0b9b7bcd8f4 574-578
+  s_85aebd1623278c::t_f7bc2639cf07b2 549-552,556-562
+  s_85aebd1623278c::t_fe0d9782d2ca4c 579-588
+  s_85aebd1623278c::t_f522eeba27c6c0 114-115,548,553-555,563-565
+  s_85aebd1623278c::t_565599ef398efa 5-16,116-118,566-567
+src/js/apps/patients/shared/widgets/widgets.js
+  s_85aebd1623278c::t_f8fcfa2604d51a 138
+  s_85aebd1623278c::t_899ae093931bf4 134,137,139-140
+src/js/entities-service/entities/widgets.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11-12
+src/js/apps/patients/patient/action/action-details_views.js
+  s_85aebd1623278c::t_fb8bfbe4d23f4e 125,130
+src/js/entities-service/workspace-patients.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,15
+src/js/entities-service/form-responses.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 18-20,22,25
+src/js/services/forms.js
+  s_85aebd1623278c::t_85f0b9b7bcd8f4 41,46-51
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 20-23,25,27,34
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_85aebd1623278c::t_86d991dbdd9c2f 38
+  s_85aebd1623278c::t_cbe0f12c0f6867 17,23,37
+  s_85aebd1623278c::t_e57d2f7819e035 33
+  s_85aebd1623278c::t_a3fcf71e266ab6 11-12,14
+src/js/apps/patients/shared/components/dialer_view.js
+  s_85aebd1623278c::t_a4e2406ff1b832 19-23
+src/js/base/routerapp.js
+  s_85aebd1623278c::t_723854be9dffb3 95,105-107,109,111-124,129,131,171-174
+  s_85aebd1623278c::t_825551f0d7148f 5-6
+src/js/entities-service/files.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 11,13,15
+package-lock.json
+  s_85aebd1623278c::t_85d97b29a9d422 40,12306-12307
+src/js/base/subrouterapp.js
+  s_85aebd1623278c::t_723854be9dffb3 11,14,38-40,43-48
+src/js/entities-service/widget-values.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12,21
+src/js/base/subrouterapp.component.cy.js
+  s_85aebd1623278c::t_888444b4b018d5 110,122,126,164-188
+  s_85aebd1623278c::t_c18300bbb316a5 189
+src/js/entities-service/events.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 12-13
+src/js/apps/patients/patient/patient_app.js
+  s_85aebd1623278c::t_ac78695587d778 128,131
+  s_85aebd1623278c::t_e57d2f7819e035 45
+  s_85aebd1623278c::t_c70588449d5486 134-140
+  s_85aebd1623278c::t_189f3a69eb6357 141-142
+  s_85aebd1623278c::t_1a87aeacd61a0d 130
+src/js/apps/patients/patient/form/form_app.js
+  s_85aebd1623278c::t_7d7b134b9e8c97 86,366-370
+  s_85aebd1623278c::t_1c4f68ad76b24a 372
+  s_85aebd1623278c::t_e57d2f7819e035 51-53,85
+  s_85aebd1623278c::t_f112c6afa1cd00 61
+  s_85aebd1623278c::t_d132db48676a59 257-259
+  s_85aebd1623278c::t_85f0b9b7bcd8f4 93,152-153
+  s_85aebd1623278c::t_e3ef32db9d5350 2,6,14,33-35,39,48
+  s_85aebd1623278c::t_447647e7a1a406 45
+  s_85aebd1623278c::t_c70588449d5486 72-75,77,278,371
+  s_85aebd1623278c::t_3944b39741556e 87
+  s_85aebd1623278c::t_1a87aeacd61a0d 5,60,67-68
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 57
+  s_85aebd1623278c::t_e7573f2e0fddb8 88
+  s_85aebd1623278c::t_d41a3037f3216c 76
+  s_85aebd1623278c::t_50280d0eaea0ca 106,130,149,165,190,205,214,223,239,253,264,266,274,297,305,307,310,313,316,318,327,329,333,337,342,345,355,359,362,380,384,393,404
+  s_85aebd1623278c::t_899ae093931bf4 42,66,70,227,260,349-351
+  s_85aebd1623278c::t_c2352f26ea4594 54
+  s_85aebd1623278c::t_50316d18b2eab8 55,90,268
+  s_85aebd1623278c::t_d76cb1cb027a1a 228
+  s_85aebd1623278c::t_f98e03321e1935 261
+  s_85aebd1623278c::t_4e0e830e606725 352
+  s_85aebd1623278c::t_ca63beeae895a1 58
+  s_85aebd1623278c::t_f59e401b674ca9 64-65
+  s_85aebd1623278c::t_6c8e23a9c17bab 279
+  s_85aebd1623278c::t_018613539084fa 71
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_85aebd1623278c::t_e57d2f7819e035 38
+  s_85aebd1623278c::t_bf29b25ad3ff4d 42,59,76
+  s_85aebd1623278c::t_a3fcf71e266ab6 11,13-17,19,27,31
+src/js/base/routing.md
+  s_85aebd1623278c::t_888444b4b018d5 131-134
+src/js/apps/patients/patient/action/action_app.js
+  s_85aebd1623278c::t_a3fcf71e266ab6 2,6,23-28,33,58,87,97,132,144,146-147,243,246,293-296,299,304-306
+  s_85aebd1623278c::t_ecc601c8738d61 160,193,195,270,310,315
+  s_85aebd1623278c::t_1a87aeacd61a0d 5,61,67
+  s_85aebd1623278c::t_fd7518b8d71c1a 260
+  s_85aebd1623278c::t_1107d3b7cee610 148
+  s_85aebd1623278c::t_3990f9b88a2821 247
+  s_85aebd1623278c::t_c70588449d5486 60,62,65,68,71,255-259
+  s_85aebd1623278c::t_d41a3037f3216c 77
+  s_85aebd1623278c::t_35479938c99de5 121
+  s_85aebd1623278c::t_05aea19bc12483 254
+  s_85aebd1623278c::t_d132db48676a59 242,244-245,253
+  s_85aebd1623278c::t_733132d34d6c4b 307
+  s_85aebd1623278c::t_e57d2f7819e035 143
+  s_85aebd1623278c::t_f320c5997ab973 73
+src/js/services/ws.component.cy.js
+  s_85aebd1623278c::t_b8c51fa3519c19 16-25,222-230,232-243,245-246,248-250,252,254-256,258-259,262,267-272,274,277,281-282,285-286,288,291-296,299-300
+  s_85aebd1623278c::t_825551f0d7148f 302-317,321-322,325-329,337-342,345
+  s_85aebd1623278c::t_2e23b3e7166104 380-381
+  s_85aebd1623278c::t_4ff143152e04fa 297-298
+  s_85aebd1623278c::t_f153846c3ce927 330-336
+  s_85aebd1623278c::t_0a37434461ca43 301
+src/js/entities-service/flows.js
+  s_85aebd1623278c::t_b6b3ccb0cecb7e 19-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "96c3d73784c8440d0c52fe7510febc258b330063",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

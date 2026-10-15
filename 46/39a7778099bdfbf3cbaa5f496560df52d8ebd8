@@ -1,0 +1,20 @@
+.circleci/README.md
+  s_bc07e84f071b6d::t_fc20ae3049040c 3-4,6,17-19
+  s_bc07e84f071b6d::t_6f7c3178e6a8ca 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4639a7778099bdfbf3cbaa5f496560df52d8ebd8",
+  "prompts": {},
+  "sessions": {
+    "s_bc07e84f071b6d": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0e886-ed87-78c2-bcce-8c5a9637e6a6",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+src/js/services/ws.e2e.cy.js
+  s_267e7a791356aa::t_259547b7dbfef4 3-144
+  s_267e7a791356aa::t_b9f73cc50dd85f 1-2,145-146
+test/support/websockets.js
+  s_267e7a791356aa::t_eddd0ca4267b3c 55-65
+src/js/auth.e2e.cy.js
+  s_267e7a791356aa::t_588288463d02c0 1-43
+  s_267e7a791356aa::t_e40ebac47faa9a 44-45
+test/support/commands.js
+  s_267e7a791356aa::t_2a87ea655998ac 112
+src/js/formservice.e2e.cy.js
+  s_267e7a791356aa::t_d310df6b825910 20-29,31-68,71-86,88-129,132-141,143-189,191-231
+src/js/services/dialer.e2e.cy.js
+  s_267e7a791356aa::t_e04fc7ea2759a4 1,81,150-167,355-369,372,629-686
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5afbcf2b9e606eb65b4c969acd7a0f65cc8ba295",
+  "prompts": {},
+  "sessions": {
+    "s_267e7a791356aa": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08689-8981-7cf3-a3c5-0ee0a88b599c",
+        "model": "gpt-6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

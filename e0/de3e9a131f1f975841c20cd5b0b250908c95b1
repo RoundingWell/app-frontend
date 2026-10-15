@@ -1,0 +1,49 @@
+index.html
+  s_534c2b6810f4ee::t_1c8b3084854959 8,22
+public/site.webmanifest
+  s_534c2b6810f4ee::t_de663b6285a77e 33
+src/js/apps/globals/error/error.e2e.cy.js
+  s_534c2b6810f4ee::t_cf0746c875dee8 10,15-17,19-35,90,97-98,101-104
+src/js/apps/globals/error/error.hbs
+  s_534c2b6810f4ee::t_7ec61cf2d51965 1-3,5-13,15-16
+src/js/apps/globals/error/error.scss
+  s_534c2b6810f4ee::t_6a276a6cb9dd74 2-8,10-17,19,23-27,29,32-36,41-52,55-75,77-79
+src/js/apps/globals/error/error_views.js
+  s_534c2b6810f4ee::t_8d896086fb4260 12-16,24-26
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_534c2b6810f4ee::t_0771a61f4ecf51 384-395,406,409-413,622-626,688,726-728,733-740,746-747,758,803-929,951,1488
+src/js/apps/globals/nav/app-nav/app-nav.scss
+  s_534c2b6810f4ee::t_5869b8dbf0f707 39-52,298,369-506
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_534c2b6810f4ee::t_f97bc88c530b98 1,7-8,35,43-47,61-71,74,230-235,240,244-247,259-262,264,267,276-277,284-314,363-367
+src/js/apps/globals/nav/app-nav/layout.hbs
+  s_534c2b6810f4ee::t_fc8af2d0a5ee08 1-3,5-8
+src/js/apps/globals/nav/nav_app.js
+  s_534c2b6810f4ee::t_f2c1eaf716e9e3 6,143-147,151,169,173-178,181,186,216,225-226,232,318-319,330-332,342-355,358,362-392,422-431
+src/js/apps/globals/nav/nav_state.js
+  s_534c2b6810f4ee::t_09d1efc3c2e757 8,18-23,49
+src/js/services/alert.component.cy.js
+  s_534c2b6810f4ee::t_c939510e6a2d4f 124-145
+src/js/services/alert/alert-box.scss
+  s_534c2b6810f4ee::t_dacb3581e0a4a5 3-4,7-9,14-18,45-47,49-50,53,55-56,58,60,65-94
+src/js/services/alert/alert-box_views.js
+  s_534c2b6810f4ee::t_e8da8f077fd441 28-30
+src/js/utils/responsive.js
+  s_534c2b6810f4ee::t_509f71869b161f 1-5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "e0de3e9a131f1f975841c20cd5b0b250908c95b1",
+  "prompts": {},
+  "sessions": {
+    "s_534c2b6810f4ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a23-001e-7b23-9454-44a54672d14d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

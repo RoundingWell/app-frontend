@@ -1,0 +1,22 @@
+src/js/behaviors/form-frame-proto.js
+  s_97851b2b544b0c::t_daef2fd1e7d4b2 293-294
+  s_97851b2b544b0c::t_2d6719be428be5 24,78,172,295-298,348-351
+  s_97851b2b544b0c::t_7f9844d4fcb4cc 352
+  s_97851b2b544b0c::t_9ba055a809797a 151,169-171
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "0fd5999620e9d811d79a374731674a0218de79ee",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

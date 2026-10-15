@@ -1,0 +1,32 @@
+src/js/apps/patients/patient/action/action-activity_app.js
+  h_0f06c286dda36f 7-8,15,19,22,24,27,58
+src/js/apps/patients/patient/action/action-activity_views.js
+  h_0f06c286dda36f 19-20,302,305-307,321
+src/js/apps/patients/patient/action/action_app.js
+  h_0f06c286dda36f 277,289
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  h_0f06c286dda36f 7-10,119-128
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  h_0f06c286dda36f 1,6-7,14-18,20,22,24
+src/js/apps/patients/patient/flow/flow_app.js
+  h_0f06c286dda36f 186
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  h_0f06c286dda36f 23,194-198,210,233-241
+src/js/apps/patients/shared/widgets/README.md
+  h_0f06c286dda36f 118,123-124
+src/js/apps/patients/shared/widgets/interactions_view.js
+  h_0f06c286dda36f 1-22
+src/js/apps/patients/shared/widgets/widgets.js
+  h_0f06c286dda36f 11-12,86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5672853b350658e775f904986176d3e956683946",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

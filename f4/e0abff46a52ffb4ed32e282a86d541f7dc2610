@@ -1,0 +1,39 @@
+src/js/entities-service/settings.js
+  s_4f8dcbf2626875::t_9efbffa6efdfff 6
+src/js/entities-service/clinicians.js
+  s_37fb08e15398c6::t_fa1de16f5f24e1 18
+src/js/entities-service/workspaces.js
+  s_4f8dcbf2626875::t_9efbffa6efdfff 6
+src/js/entities-service/widgets.js
+  s_4f8dcbf2626875::t_9efbffa6efdfff 6
+src/js/entities-service/roles.js
+  s_4f8dcbf2626875::t_9efbffa6efdfff 6
+src/js/base/cache/response-cache.cy.js
+  s_4f8dcbf2626875::t_89958a0519936f 83-93
+src/js/entities-service/teams.js
+  s_4f8dcbf2626875::t_9efbffa6efdfff 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "f4e0abff46a52ffb4ed32e282a86d541f7dc2610",
+  "prompts": {},
+  "sessions": {
+    "s_37fb08e15398c6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e6a5d-2bb9-71c1-a146-58f423510918",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

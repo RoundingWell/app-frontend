@@ -1,0 +1,23 @@
+.circleci/detect-cypress-defer.sh
+  s_377efbce3348c3::t_774812c2e12ff4 27-28,30,40,45-46,48-49,57,63-66
+  s_377efbce3348c3::t_57eaa973129702 60
+  s_377efbce3348c3::t_ddbbc6f692a265 7-8
+  s_377efbce3348c3::t_f4011f1c6cbab2 47
+  s_377efbce3348c3::t_ca1c155b1fcfd5 20-26,29,31-39,50-56,58-59,61-62,67-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "0454005f2de9c9899e077469cb17c9effdfab1fe",
+  "prompts": {},
+  "sessions": {
+    "s_377efbce3348c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5a54-58b9-7b33-90df-8957eb006d4e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

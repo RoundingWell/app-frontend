@@ -1,0 +1,22 @@
+test/support/defaults.js
+  s_6d0dd6537d3367::t_2697b92c6f0ca9 43-48
+src/js/services/ws.js
+  s_6d0dd6537d3367::t_ee059faf9d17cb 49-51
+  s_6d0dd6537d3367::t_59062e9ed72194 48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "130bbe36564a0eafba75a0ae88c9b7d54ddb46d1",
+  "prompts": {},
+  "sessions": {
+    "s_6d0dd6537d3367": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e88d2-72c6-71c1-b061-e5c5e2252ff3",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

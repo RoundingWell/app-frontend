@@ -1,0 +1,46 @@
+AGENTS.md
+  s_d0fa04c7b6bebf::t_0c8418da60580d 13
+  s_d0fa04c7b6bebf::t_437b28650c7498 107
+  s_d0fa04c7b6bebf::t_bbc29aeb2b9476 143
+  s_d0fa04c7b6bebf::t_eb055342dd8ec9 108-109
+  s_d0fa04c7b6bebf::t_7e7c3414112a39 105-106,110-112
+  s_d0fa04c7b6bebf::t_fe972284636aa1 42-60
+src/js/README.md
+  s_bfe1ca05168524::t_4b3019f7a3b445 25
+src/js/entities-service/README.md
+  s_d0fa04c7b6bebf::t_b11e7b941d8ca0 84-85
+  s_d0fa04c7b6bebf::t_15315efc7e3f61 89-94
+  s_d0fa04c7b6bebf::t_80607dddbd8bbc 1,3-5,7-83,86-88,95-104
+test/README.md
+  s_d0fa04c7b6bebf::t_b03c2e4d88eeb9 98
+.github/copilot.yaml
+  s_bfe1ca05168524::t_4b3019f7a3b445 12,36
+  s_d0fa04c7b6bebf::t_57407e9b18fe8e 23
+.github/copilot-instructions.md
+  s_d0fa04c7b6bebf::t_fe3f0f4101fd4e 31
+  s_bfe1ca05168524::t_4b3019f7a3b445 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "d9e63830ce9366c9bf7c69701c5d9efb72fcd07c",
+  "prompts": {},
+  "sessions": {
+    "s_bfe1ca05168524": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ebbfe-6bc5-7d32-b999-c2c94a4b9f72",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    },
+    "s_d0fa04c7b6bebf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f0cf2d24-0418-420b-a551-332ae9dc0192",
+        "model": "claude-fable-5"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,31 @@
+src/js/base/route-base-app.component.cy.js
+  s_95c744f3bea79b::t_9bcceca4b98a8f 184-221
+src/js/base/route-base-app.js
+  s_95c744f3bea79b::t_ab1c16f5516e77 56,66,71-80
+src/js/base/routerapp.component.cy.js
+  s_95c744f3bea79b::t_c18a221fa3ae4f 197-223
+src/js/base/routerapp.js
+  s_95c744f3bea79b::t_6dd6a09ec83d09 47-49,51-54,133-136
+src/js/base/routing.md
+  s_95c744f3bea79b::t_0f466169436a3a 174-176,200
+src/js/base/subrouterapp.component.cy.js
+  s_95c744f3bea79b::t_340c7b837b40e2 153-216
+src/js/base/subrouterapp.js
+  s_95c744f3bea79b::t_8d0211f1fccd7b 68,72,82-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3fc8fa9eaff4dc498b3da2e77e61fab75d0d3187",
+  "prompts": {},
+  "sessions": {
+    "s_95c744f3bea79b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c3e7-5dfa-75c1-9015-cadfef4ae9ce",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

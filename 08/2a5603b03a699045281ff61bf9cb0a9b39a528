@@ -1,0 +1,23 @@
+src/js/apps/patients/worklist/worklist-list.scss
+  s_d04385ebae28ca::t_3d62dd06e7aa4a 107,128-129,132-133
+src/js/apps/patients/worklist/flow-item.hbs
+  s_d04385ebae28ca::t_27bc5f46de4d02 10
+src/scss/domain/flow-card.scss
+  s_d04385ebae28ca::t_27bc5f46de4d02 16-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "082a5603b03a699045281ff61bf9cb0a9b39a528",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

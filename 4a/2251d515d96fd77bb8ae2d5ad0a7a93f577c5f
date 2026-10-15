@@ -1,0 +1,19 @@
+src/js/components/picklist/picklist.component.cy.js
+  s_7d9748a0496f68::t_23c19cdcc9b873 47-53,254,259-261,281-295
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "4a2251d515d96fd77bb8ae2d5ad0a7a93f577c5f",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

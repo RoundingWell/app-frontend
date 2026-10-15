@@ -1,0 +1,56 @@
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  s_534c2b6810f4ee::t_b6299f51e77c1f 9-45,75-76,100-101
+  s_534c2b6810f4ee::t_dbb25d23c1f2ac 77
+  s_534c2b6810f4ee::t_02b0a8f1ac0f62 69-71,584,591
+  s_534c2b6810f4ee::t_561de7a5590cd3 72-74
+  s_534c2b6810f4ee::t_6460d63d602ed6 254
+  s_534c2b6810f4ee::t_08720b0416e02c 249-253,255-258
+  s_534c2b6810f4ee::t_11e6efa11c2fa8 78-81
+  s_534c2b6810f4ee::t_982e0dcad27351 87-88
+  s_534c2b6810f4ee::t_2421302d0a63cd 8,82-86,89-99
+  s_534c2b6810f4ee::t_4147a58e7e1bd4 46-68,305,466-467,530-555
+  s_534c2b6810f4ee::t_bf1c4bd10c46f0 232-235
+src/js/apps/globals/search/tip.hbs
+  s_534c2b6810f4ee::t_ff263b877dc008 6,11,17
+src/js/apps/globals/search/patient-search_views.js
+  s_534c2b6810f4ee::t_d7560466da6dc3 134,212-217,232-236
+  s_534c2b6810f4ee::t_4147a58e7e1bd4 54,72
+  s_534c2b6810f4ee::t_1bbd0db8539dae 133,142
+  s_534c2b6810f4ee::t_5c66cab9ae03ba 13,60,120,135-136,141,153,159-169,210,219
+src/js/apps/globals/search/dialog.hbs
+  s_534c2b6810f4ee::t_1a284acb71ecf0 4
+  s_534c2b6810f4ee::t_8842dc5673e5ef 2
+  s_534c2b6810f4ee::t_5c66cab9ae03ba 5
+src/js/apps/globals/search/patient-search.scss
+  s_534c2b6810f4ee::t_9240ad6ce52aa0 122
+  s_534c2b6810f4ee::t_a079b745595f16 125-127,129,131,134-135,145-146
+  s_534c2b6810f4ee::t_7de0f3ab6d021c 277
+  s_534c2b6810f4ee::t_eaab01d89e430c 338
+  s_534c2b6810f4ee::t_d7560466da6dc3 12-15,18-19,191-194,268,272-276,278-281,283,289-290,299-300,305-309,311-317,333-336,339,346-348,351,354-355,361-362,366,382-390,397-398,400-401,411-413,415-417
+  s_534c2b6810f4ee::t_4147a58e7e1bd4 136-138
+  s_534c2b6810f4ee::t_19beb4aba0576e 414
+  s_534c2b6810f4ee::t_eb1b8e1f28272d 27-41,50,56-59,66,107-110,113-114,117,119,121,123,139-143,171-174,177-179,182,185-186,195-198,282,284-288,291-298,301-304,310,318-332,337,340-345,349-350,352-353,356-360,363-365,367-368,373-381,391-396,399,402-410,418
+  s_534c2b6810f4ee::t_ff263b877dc008 252-254,419-431
+  s_534c2b6810f4ee::t_1bbd0db8539dae 369-372
+  s_534c2b6810f4ee::t_bdd2ec5d2021ae 255
+src/js/apps/globals/search/result-item.hbs
+  s_534c2b6810f4ee::t_5c66cab9ae03ba 2-14,16-20,22-29,31-32
+  s_534c2b6810f4ee::t_4147a58e7e1bd4 1
+  s_534c2b6810f4ee::t_d7560466da6dc3 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "3cfb92a471e8bf0e781b1c1e33f3d0408e2ed0db",
+  "prompts": {},
+  "sessions": {
+    "s_534c2b6810f4ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a23-001e-7b23-9454-44a54672d14d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
