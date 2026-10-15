@@ -1,6 +1,7 @@
 import { Radio } from 'marionette';
 
 import { AuthProvider } from '@roundingwell/care-ops-auth/AuthProvider.js';
+import { WorkosAuthProvider } from '@roundingwell/care-ops-auth/workos.js';
 import { fetchConfig } from '@roundingwell/care-ops-config';
 
 import { auth } from 'js/auth'; // registers the 'auth' channel replies
@@ -30,6 +31,34 @@ context('auth', function() {
         .then(() => {
           expect(Radio.request('auth', 'getUserId'), 'updated synchronous identity').to.equal('user_B');
         });
+    });
+  });
+
+  context('return path', function() {
+    afterEach(function() {
+      window.history.pushState({}, '', '/');
+    });
+
+    specify('reauthentication returns to the current path, query and hash', function() {
+      const provider = new WorkosAuthProvider();
+      const loginPrompt = cy.stub(provider, 'loginPrompt');
+
+      window.history.pushState({}, '', '/one/worklist/owned-by?clinicianId=c1#top');
+      provider.beginReauth('auth_required');
+
+      expect(loginPrompt).to.have.been.calledOnceWith('/one/worklist/owned-by?clinicianId=c1#top', 'auth_required');
+    });
+
+    specify('an authenticated load keeps its query and hash, and leaves the login path', function() {
+      const provider = new AuthProvider();
+      const replaceState = cy.stub(provider, 'replaceState');
+
+      provider.handleAuthedPath('/one/worklist/owned-by?clinicianId=c1#top');
+      provider.handleAuthedPath('/login?next=1');
+
+      expect(replaceState).to.have.been.calledTwice;
+      expect(replaceState.firstCall).to.have.been.calledWith('/one/worklist/owned-by?clinicianId=c1#top');
+      expect(replaceState.secondCall).to.have.been.calledWith(AuthProvider.PATH_ROOT);
     });
   });
 

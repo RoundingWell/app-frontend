@@ -18,7 +18,7 @@ export class AuthProvider {
       return;
     }
 
-    this.handleAuthedPath(location.pathname);
+    this.handleAuthedPath(location.pathname + location.search + location.hash);
 
     success();
   }
@@ -30,12 +30,14 @@ export class AuthProvider {
   }
 
   handleAuthedPath(path) {
-    if (path === AuthProvider.PATH_LOGIN) {
+    const { pathname } = new URL(path || AuthProvider.PATH_ROOT, location.origin);
+
+    if (pathname === AuthProvider.PATH_LOGIN) {
       this.replaceState(AuthProvider.PATH_ROOT);
       return;
     }
 
-    if (path === AuthProvider.PATH_RWELL) {
+    if (pathname === AuthProvider.PATH_RWELL) {
       this.replaceState(AuthProvider.PATH_ROOT);
       localStorage.setItem(AuthProvider.PATH_RWELL, 1);
       return;

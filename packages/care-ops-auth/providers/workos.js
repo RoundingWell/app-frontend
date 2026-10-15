@@ -104,7 +104,7 @@ export class WorkosAuthProvider extends AuthProvider {
     this.client.signIn({ state: path });
   }
 
-  beginReauth(reason, path = location.pathname) {
+  beginReauth(reason, path = location.pathname + location.search + location.hash) {
     if (this.reauthPending) return;
 
     this.loginPrompt(path, reason);

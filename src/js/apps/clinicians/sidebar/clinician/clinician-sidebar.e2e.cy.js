@@ -266,6 +266,11 @@ context('clinician sidebar', function() {
         return fx;
       })
       .routesForPatientWorkflow()
+      .routeWorkspaceClinicians(fx => {
+        fx.data.push(testClinician);
+
+        return fx;
+      })
       .routeActions()
       .visit(`/clinicians/${ testClinician.id }`)
       .wait('@routeClinicians');
@@ -327,6 +332,29 @@ context('clinician sidebar', function() {
     cy
       .location('search')
       .should('equal', `?clinicianId=${ testClinician.id }`);
+
+    // The saved worklist state must not stand in for the URL
+    cy
+      .window()
+      .then(win => {
+        Object.keys(win.localStorage)
+          .filter(key => key.startsWith('owned-by_'))
+          .forEach(key => win.localStorage.removeItem(key));
+      });
+
+    cy
+      .get('@routeActions.all')
+      .its('length')
+      .then(requestCount => {
+        cy.reload();
+
+        cy
+          .get('@routeActions.all')
+          .should(interceptions => {
+            expect(interceptions).to.have.length.above(requestCount);
+            expect(interceptions[requestCount].request.url).to.contain(`filter[clinicians]=${ testClinician.id }`);
+          });
+      });
   });
 
   specify('admin clinician', function() {
