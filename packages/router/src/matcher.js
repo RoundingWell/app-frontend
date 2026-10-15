@@ -259,13 +259,20 @@ function isRepeated(token) {
   return token.wildcard || token.modifier === '*' || token.modifier === '+';
 }
 
+// URLPattern compiles regex groups in Unicode mode, so the build-time check does too.
+// Route compilation has already rejected invalid regexes.
+function paramPattern(token) {
+  token.pattern ??= new RegExp(`^(?:${ token.regex })$`, 'u');
+  return token.pattern;
+}
+
 // A dot segment would be resolved away by URL parsing and name another route.
 function encodeSegment(token, route, segment) {
   if (segment === '.' || segment === '..') {
     throw new Error(`Route "${ route.name }" param "${ token.name }" cannot contain the dot segment "${ segment }"`);
   }
   const encoded = encodeURIComponent(segment);
-  if (token.regex !== undefined && !new RegExp(`^(?:${ token.regex })$`).test(encoded)) {
+  if (token.regex !== undefined && !paramPattern(token).test(encoded)) {
     throw new Error(`Route "${ route.name }" param "${ token.name }" must match (${ token.regex }): "${ segment }"`);
   }
   return encoded;

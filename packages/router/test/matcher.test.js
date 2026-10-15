@@ -509,6 +509,14 @@ describe('Matcher: url() rejects values that would not round trip', () => {
     assert.equal(matcher.url('optionalItem', { workspace: 'w', id: '5' }), '/w/optional/5');
     assert.equal(matcher.url('optionalItem', { workspace: 'w' }), '/w/optional');
   });
+
+  it('checks param regexes in Unicode mode, as URLPattern matches them', () => {
+    const matcher = new Matcher([{ name: 'upper', path: '/upper/:code(\\p{Lu}+)' }]);
+
+    assert.equal(matcher.url('upper', { code: 'ABC' }), '/upper/ABC');
+    assert.deepEqual(matcher.match('/upper/ABC').params, { code: 'ABC' });
+    assert.throws(() => matcher.url('upper', { code: 'abc' }), /param "code"/);
+  });
 });
 
 describe('Matcher: getParamNames, has', () => {
