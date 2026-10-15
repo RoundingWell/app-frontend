@@ -3,7 +3,7 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { dispatchAppTestsEvent } from './lib/github-e2e-app.js';
+import { dispatchAppTestsEvent } from './lib/github-app/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const EVENT_TYPE = 'qa2_deploy_succeeded';

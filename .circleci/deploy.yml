@@ -8,18 +8,6 @@ aliases:
   .node-image: &node-image cimg/node:24.15
 
 commands:
-  setup-fa-auth:
-    steps:
-      - run:
-          name: Configure npm registry auth
-          command: |
-            cat > ~/.npmrc \<< EOF
-            # Pro Font Awesome registry
-            @fortawesome:registry=https://npm.fontawesome.com/
-            //npm.fontawesome.com/:_authToken=${FONTAWESOME}
-            EOF
-            echo "Created ~/.npmrc"
-
   restore-npm-cache:
     steps:
       - restore_cache:
@@ -47,10 +35,9 @@ commands:
               echo "Node version mismatch: .nvmrc=${expected_major_minor}, image=${image_version}"
               exit 1
             fi
-      - setup-fa-auth
       - run:
           name: Install dependencies
-          command: npm ci --prefer-offline --no-audit
+          command: node scripts/install-icons-ci.mjs
 
   setup-aws-oidc:
     steps:

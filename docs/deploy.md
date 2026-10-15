@@ -11,10 +11,14 @@ This document covers:
 ```bash
 nvm use
 ```
-2. Install dependencies:
+2. Install dependencies using existing Git read access to the private
+`RoundingWell/pkg-icons` repository:
 ```bash
 npm ci
 ```
+CI uses `node scripts/install-icons-ci.mjs` with its configured GitHub App.
+Local SSH-only setups use the checkout-local rewrite in [installation prerequisites](../README.md#icons-).
+
 3. Build `dist`:
 ```bash
 npm run build
