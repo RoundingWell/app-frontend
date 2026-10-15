@@ -1,27 +1,30 @@
 import { Radio } from 'marionette';
+import { RouteOutlet } from '@mnjs/router/outlet';
 
-import RouterApp from 'js/base/routerapp';
+import { addError } from 'js/datadog';
+
+import App from 'js/base/app';
 
 import CliniciansAllApp from 'js/apps/clinicians/clinicians-all/clinicians-all_app';
 
-export default RouterApp.extend({
+const PAGES = {
+  'clinicians:all': 'cliniciansAll',
+  'clinician': 'cliniciansAll',
+};
+
+export default App.extend({
   childApps: {
     cliniciansAll: CliniciansAllApp,
   },
-
-  eventRoutes: {
-    'clinicians:all': {
-      action: 'showCliniciansAll',
-    },
-    'clinician': {
-      action: 'showCliniciansAll',
-    },
+  initialize() {
+    this.pages = new RouteOutlet({ owner: this, onCleanupError: addError });
   },
-
-  showCliniciansAll() {
-    return this.startRoute('cliniciansAll');
-  },
-  onRouteError(error) {
-    Radio.trigger('event-router', 'unknownError', error?.response?.status);
+  showRoute(match) {
+    return this.pages.show(PAGES[match.name], {
+      match,
+      options: { region: this.getRegion() },
+    }).catch(error => {
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    });
   },
 });

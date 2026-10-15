@@ -1,7 +1,8 @@
 import { values } from 'underscore';
+import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
-import SubRouterApp from 'js/base/subrouterapp';
+import App from 'js/base/app';
 
 import ClinicianSidebarApp from 'js/apps/clinicians/sidebar/clinician/clinician-sidebar_app';
 import SearchView from 'js/components/list-search';
@@ -9,14 +10,12 @@ import SearchView from 'js/components/list-search';
 import { ListView, LayoutView, notFound } from 'js/apps/clinicians/clinicians-all/clinicians-all_views';
 import { getClinicianModal } from 'js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views';
 
-export default SubRouterApp.extend({
-  routeScope: [],
+export default App.extend({
   childApps: {
     sidebar: ClinicianSidebarApp,
   },
-  routeActions: {
-    'clinician': 'showClinicianSidebar',
-    'clinicians:all': 'hideCliniciansSidebar',
+  createState() {
+    return new Backbone.Model();
   },
   viewEvents: {
     'click:addClinician': 'showAddModal',
@@ -33,15 +32,25 @@ export default SubRouterApp.extend({
   prepareStart(options, { signal }) {
     return Radio.request('entities', 'fetch:clinicians:collection', { signal });
   },
-  onStart(app, options, clinicians) {
+  onStart(app, { route }, clinicians) {
+    this.route = route;
     this.clinicians = clinicians;
+    this.listenTo(route, 'change', this.showRoute);
 
     this.getView().showChildView('list', new ListView({
       collection: this.clinicians,
       state: this.getState(),
     }));
 
-    this.startCurrentRoute();
+    this.showRoute();
+  },
+  onStop() {
+    this.stopListening(this.route);
+  },
+  showRoute() {
+    if (this.route.getName() === 'clinician') return this.showClinicianSidebar(this.route.getParams().clinicianId);
+
+    return this.hideCliniciansSidebar();
   },
   showSearchView() {
     const searchView = this.getView().showChildView('search', new SearchView({
