@@ -19,10 +19,10 @@ export default App.extend({
     this.listenTo(router, 'route', this.onRoute);
   },
 
-  onRoute({ name, params, info, meta }) {
+  onRoute({ name, params, query, info, meta }) {
     if (!meta.isList) return;
 
-    this._latestList = { name, params: omit(params, 'workspace'), info };
+    this._latestList = { name, params: omit(params, 'workspace'), query, info };
   },
 
   hasLatestList() {
@@ -30,8 +30,8 @@ export default App.extend({
   },
 
   goLatestList() {
-    const { name, params, info } = this._latestList;
+    const { name, params, query, info } = this._latestList;
 
-    Radio.request('router', 'navigate', name, params, { info }).catch(addError);
+    Radio.request('router', 'navigate', name, params, { query, info }).catch(addError);
   },
 });

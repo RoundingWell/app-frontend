@@ -957,6 +957,48 @@ context('patient interactions', function() {
       .should('be.visible');
   });
 
+  specify('loads the feed again when routing to another patient', function() {
+    const patient = getPatient();
+    const otherPatient = getPatient();
+    const history = map(range(3), index => getInteraction({
+      attributes: {
+        metadata: { message: `Message ${ index }` },
+        occurred_at: new Date(2026, 4, 9, 10, index).toISOString(),
+      },
+    }));
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = history;
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .get('@routePatientInteractions.all')
+      .its('length')
+      .then(requestCount => {
+        cy.navigate(`/patient/${ otherPatient.id }/interactions`);
+
+        cy
+          .get('@routePatientInteractions.all')
+          .should('have.length.above', requestCount);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Message 0')
+      .should('be.visible');
+  });
+
   specify('starts plain arrival at Today and preserves the viewed range through filtering and empty results', function() {
     const patient = getPatient();
     const history = map(range(25), index => getInteraction({

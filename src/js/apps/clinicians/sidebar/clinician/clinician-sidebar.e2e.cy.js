@@ -265,6 +265,7 @@ context('clinician sidebar', function() {
 
         return fx;
       })
+      .routesForPatientWorkflow()
       .routeActions()
       .visit(`/clinicians/${ testClinician.id }`)
       .wait('@routeClinicians');
@@ -302,6 +303,30 @@ context('clinician sidebar', function() {
     cy
       .get('[data-owner-filter-region]')
       .should('contain', 'Test Clinician');
+
+    cy
+      .location('search')
+      .should('equal', `?clinicianId=${ testClinician.id }`);
+
+    cy
+      .get('.js-patient')
+      .first()
+      .click()
+      .wait('@routePatient');
+
+    cy
+      .get('.patient-sidebar__name')
+      .click()
+      .wait('@routePatient');
+
+    cy
+      .get('.patient__context-trail')
+      .contains('Back to List')
+      .click();
+
+    cy
+      .location('search')
+      .should('equal', `?clinicianId=${ testClinician.id }`);
   });
 
   specify('admin clinician', function() {

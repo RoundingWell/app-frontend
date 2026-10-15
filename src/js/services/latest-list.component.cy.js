@@ -4,8 +4,8 @@ import router from 'js/router';
 
 import LatestListService from './latest-list';
 
-function route(name, params, meta, info) {
-  router.trigger('route', { name, params, info, meta });
+function route(name, params, meta, { query = new URLSearchParams(), info } = {}) {
+  router.trigger('route', { name, params, query, info, meta });
 }
 
 context('LatestListService', function() {
@@ -37,18 +37,19 @@ context('LatestListService', function() {
 
     Radio.request('history', 'go:latestList');
 
-    expect(navigate).to.have.been.calledOnceWith('worklist', { worklistId: 'owned-by' }, { info: undefined });
+    expect(navigate).to.have.been.calledOnceWith('worklist', { worklistId: 'owned-by' }, { query: new URLSearchParams(), info: undefined });
   });
 
-  specify('routes back to the latest list by name with its info', function() {
+  specify('routes back to the latest list by name with its query and info', function() {
     const navigate = cy.stub().resolves(true);
-    const info = { args: [{ clinicianId: 'c1' }] };
+    const info = { args: ['target'] };
+    const query = new URLSearchParams({ clinicianId: 'c1' });
     Radio.reply('router', 'navigate', navigate);
 
-    route('worklist', { workspace: 'one', worklistId: 'owned-by' }, { isList: true }, info);
+    route('worklist', { workspace: 'one', worklistId: 'owned-by' }, { isList: true }, { query, info });
 
     Radio.request('history', 'go:latestList');
 
-    expect(navigate).to.have.been.calledOnceWith('worklist', { worklistId: 'owned-by' }, { info });
+    expect(navigate).to.have.been.calledOnceWith('worklist', { worklistId: 'owned-by' }, { query, info });
   });
 });

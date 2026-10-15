@@ -6,6 +6,7 @@ import 'scss/modules/forms.scss';
 import 'scss/modules/sidebar.scss';
 
 import intl from 'js/i18n';
+import { addError } from 'js/datadog';
 
 import { WorkspacesComponent, TeamComponent, RoleComponent, StateComponent } from 'js/apps/clinicians/shared/clinicians_views';
 
@@ -114,7 +115,7 @@ const WorklistView = View.extend({
     'click .js-button': 'click:button',
   },
   onClickButton() {
-    Radio.trigger('event-router', 'worklist', 'owned-by', { clinicianId: this.clinician.id });
+    Radio.request('router', 'navigate', 'worklist', { worklistId: 'owned-by' }, { query: { clinicianId: this.clinician.id } }).catch(addError);
   },
 });
 
