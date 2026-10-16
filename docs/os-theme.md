@@ -33,7 +33,8 @@ continue to import their own styles. No theme selectors or mixin copies are adde
 - `npm run build` and `npm run coverage` for production build and both test suites.
 - `os-theme.e2e.cy.js` exercises early HTML, OS changes in both directions, app
   startup, desktop/mobile dialogs and preservation of entered text and focus.
-  The focused test uses Chromium's media emulation through CDP.
+  The focused test uses Chromium's media emulation through CDP; its browser
+  configuration keeps Firefox nightly runs from invoking unsupported CDP calls.
 - Review synthetic-data captures at 1440×960 and 390×844 in both schemes. Inspect
   worklists, schedule, patient workflow/interactions/sidebar, programs, clinician
   dialogs and menus, empty/error states, prelogin and the initial preloader.
