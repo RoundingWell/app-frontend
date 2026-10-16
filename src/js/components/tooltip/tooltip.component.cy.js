@@ -162,9 +162,14 @@ context('Tooltip', function() {
       .should('not.exist');
   });
 
-  specify('Retains anchor listeners when tooltips replace each other', function() {
+  specify('Retains anchor listeners across replacement and scrolling', function() {
     const SwapTestView = View.extend({
-      template: hbs`<button class="first">First</button><button class="second">Second</button>`,
+      template: hbs`
+        <div class="scroll-container" style="height: 100px; overflow: auto;">
+          <button class="first">First</button><button class="second">Second</button>
+          <p style="margin-top: 300px;">End of scrollable content</p>
+        </div>
+      `,
       ui: {
         first: '.first',
         second: '.second',
@@ -197,6 +202,52 @@ context('Tooltip', function() {
 
     cy.get('.first').trigger('pointerover');
     cy.get('.tooltip').contains('First tooltip');
+
+    cy
+      .get('.scroll-container')
+      .scrollTo('bottom')
+      .should($container => {
+        expect($container[0].scrollTop, 'anchor container scrolled').to.be.greaterThan(0);
+      });
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
+
+    const scrolledToAnchor = cy.stub();
+    cy
+      .get('.scroll-container')
+      .then($container => {
+        $container[0].addEventListener('scroll', scrolledToAnchor, { once: true });
+      })
+      .scrollTo('top')
+      .should(() => {
+        expect(scrolledToAnchor).to.have.been.calledOnce;
+      });
+
+    cy
+      .get('.first')
+      .focus();
+
+    cy
+      .get('.tooltip')
+      .contains('First tooltip');
+
+    cy
+      .get('.first')
+      .blur();
+
+    cy
+      .get('.tooltip')
+      .should('not.exist');
+
+    cy
+      .get('.first')
+      .trigger('pointerover');
+
+    cy
+      .get('.tooltip')
+      .contains('First tooltip');
   });
 
   specify('Retains the delay across pointer transitions within a raw anchor', function() {
