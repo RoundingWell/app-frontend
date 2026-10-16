@@ -2034,7 +2034,8 @@ context('patient interactions', function() {
         return fx;
       })
       .intercept('GET', '/api/patients/*/interactions*', req => {
-        if (new URL(req.url).searchParams.get('page[limit]') === '3' || dateFilter.started) return;
+        const query = new URL(req.url).searchParams;
+        if (query.get('page[limit]') === '3' || query.has('page[before]') || query.has('page[after]') || dateFilter.started) return;
         return dateFilter.reply(req, { data: [] });
       });
 
@@ -2098,7 +2099,8 @@ context('patient interactions', function() {
         return fx;
       })
       .intercept('GET', '/api/patients/*/interactions*', req => {
-        if (new URL(req.url).searchParams.get('page[limit]') === '3' || dateIntent.started) return;
+        const query = new URL(req.url).searchParams;
+        if (query.get('page[limit]') === '3' || query.has('page[before]') || query.has('page[after]') || dateIntent.started) return;
         return dateIntent.reply(req, { data: [] });
       });
 

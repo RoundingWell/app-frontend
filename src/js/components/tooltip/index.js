@@ -1,4 +1,4 @@
-import { bind, delay as _delay, extend, result } from 'underscore';
+import { bind, delay as _delay, extend, isEqual, result } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
 import { animate } from 'animejs';
 import { View } from 'marionette';
@@ -107,11 +107,17 @@ export default View.extend({
     });
   },
   onAttach() {
-    this._onScroll = bind(this.hideTooltip, this);
+    this._anchorPosition = result(this, 'position');
+    this._onScroll = bind(this.onScroll, this);
     this.el.ownerDocument.addEventListener('scroll', this._onScroll, true);
     animate(this.el, {
       opacity: { to: 1, duration: 500 },
     });
+  },
+  onScroll() {
+    if (isEqual(this._anchorPosition, result(this, 'position'))) return;
+
+    this.hideTooltip();
   },
   onBeforeDetach() {
     this.el.ownerDocument.removeEventListener('scroll', this._onScroll, true);

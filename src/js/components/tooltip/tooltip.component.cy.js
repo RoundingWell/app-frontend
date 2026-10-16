@@ -169,6 +169,9 @@ context('Tooltip', function() {
           <button class="first">First</button><button class="second">Second</button>
           <p style="margin-top: 300px;">End of scrollable content</p>
         </div>
+        <div class="other-scroll-container" style="height: 100px; overflow: auto;">
+          <p style="margin-top: 300px;">Unrelated scrollable content</p>
+        </div>
       `,
       ui: {
         first: '.first',
@@ -202,6 +205,21 @@ context('Tooltip', function() {
 
     cy.get('.first').trigger('pointerover');
     cy.get('.tooltip').contains('First tooltip');
+
+    const unrelatedScroll = cy.stub();
+    cy
+      .get('.other-scroll-container')
+      .then($container => {
+        $container[0].addEventListener('scroll', unrelatedScroll, { once: true });
+      })
+      .scrollTo('bottom')
+      .should(() => {
+        expect(unrelatedScroll).to.have.been.calledOnce;
+      });
+
+    cy
+      .get('.tooltip')
+      .contains('First tooltip');
 
     cy
       .get('.scroll-container')
