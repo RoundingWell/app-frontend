@@ -66,6 +66,18 @@
   position: relative;
 }
 
+// Use a quiet underline for the borderless search field, keeping keyboard focus visible.
+:where([data-theme='dark']) .patient-search__input:focus-visible {
+  box-shadow: inset 0 -2px 0 var(--color-focus-ring);
+  outline-color: transparent;
+}
+
+@media (forced-colors: active) {
+  :where([data-theme='dark']) .patient-search__input:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
 .patient-search__picklist-header {
   align-items: center;
   color: var(--color-text-subtle);

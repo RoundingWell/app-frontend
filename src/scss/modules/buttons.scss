@@ -241,7 +241,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--color-interactive);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
   }
 }
@@ -271,7 +271,7 @@
   width: 32px;
 
   &:focus-visible {
-    outline: 2px solid var(--color-interactive);
+    outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
   }
 

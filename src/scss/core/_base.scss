@@ -15,6 +15,23 @@ body {
 
 // The reset removes native outlines; restore keyboard focus without raising specificity.
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-interactive);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+:where([data-theme='dark']) {
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+}
+
+// Chrome 112 needs the scrollbar pseudo-elements; keep native widths.
+@supports not (scrollbar-color: auto) {
+  @media (forced-colors: none) {
+    :where([data-theme='dark'], [data-theme='dark'] *)::-webkit-scrollbar {
+      background-color: var(--color-scrollbar-track);
+    }
+
+    :where([data-theme='dark'], [data-theme='dark'] *)::-webkit-scrollbar-thumb {
+      background-color: var(--color-scrollbar-thumb);
+    }
+  }
 }

@@ -9,15 +9,15 @@ function setOsTheme(value) {
   }));
 }
 
-function assertTheme(isDark) {
+function assertTheme(isOsDark) {
   cy
     .document()
     .should(doc => {
       const style = doc.defaultView.getComputedStyle(doc.documentElement);
       const background = style.backgroundColor.match(/\d+/g).map(Number);
-      expect(background[0] < 128, 'canvas follows the OS theme').to.equal(isDark);
-      expect(doc.defaultView.matchMedia('(prefers-color-scheme: dark)').matches).to.equal(isDark);
-      expect(style.colorScheme, 'native controls support both themes').to.equal('light dark');
+      expect(background[0] < 128, 'canvas stays dark regardless of the OS theme').to.equal(true);
+      expect(doc.defaultView.matchMedia('(prefers-color-scheme: dark)').matches).to.equal(isOsDark);
+      expect(style.colorScheme, 'native controls stay dark').to.equal('dark');
     });
 }
 
@@ -72,13 +72,13 @@ function checkDialerThemes(dialer) {
 }
 
 // Cypress exposes OS media emulation through CDP only in Chromium browsers.
-context('OS color scheme', { browser: { family: 'chromium' } }, function() {
+context('Forced dark color scheme', { browser: { family: 'chromium' } }, function() {
   afterEach(function() {
     setOsTheme('light');
   });
 
-  specify('paints before configuration and follows live OS changes without reloading', function() {
-    setOsTheme('dark');
+  specify('paints dark before configuration and stays dark through live OS changes', function() {
+    setOsTheme('light');
 
     // This test-only route returns before config/auth; the startup shell is real HTML.
     cy.visit('/logout', { isRoot: true, noWait: true });
@@ -87,8 +87,6 @@ context('OS color scheme', { browser: { family: 'chromium' } }, function() {
       .get('.startup-shell__logo')
       .should('be.visible');
 
-    assertTheme(true);
-    setOsTheme('light');
     assertTheme(false);
     setOsTheme('dark');
     assertTheme(true);
