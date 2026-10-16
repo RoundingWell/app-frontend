@@ -1,0 +1,24 @@
+src/js/apps/patients/shared/bulk-edit/flows-inline.hbs
+  s_2d91c07b8aa12c::t_14cb73aa582065 4
+package.json
+  s_2d91c07b8aa12c::t_36057f287abec9 63-64
+src/js/apps/clinicians/clinicians-all/item.hbs
+  s_2d91c07b8aa12c::t_9ec2ec505e6983 11-13
+  s_2d91c07b8aa12c::t_f44317b98aa518 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "2d5479a11d28dc15c7f4cd851e30777a497ecfde",
+  "prompts": {},
+  "sessions": {
+    "s_2d91c07b8aa12c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a046dd-e987-7010-815b-e2ec94d7f5d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

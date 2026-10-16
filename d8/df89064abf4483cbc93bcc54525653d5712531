@@ -1,0 +1,71 @@
+src/js/entities-service/settings.js
+  s_4f8dcbf2626875::t_ab4181f7ede98e 8
+src/js/services/workspace.js
+  s_4f8dcbf2626875::t_92b9796276beff 1,56,58,63-64,66,79-80
+src/js/base/cache/entity-cache.js
+  s_4f8dcbf2626875::t_0113605cf68178 1-10,13,19,23,32-35,38,42-58
+src/js/auth.cy.js
+  s_4f8dcbf2626875::t_f71753eca7ee1e 7-9,12-15,18-20
+src/js/base/entity-service.js
+  s_4f8dcbf2626875::t_29ed36165cc02e 17-22,47,49,54-67,74-91,112-146
+src/js/entities-service/workspaces.js
+  s_4f8dcbf2626875::t_ac8f5d49c81501 9
+src/js/entities-service/widgets.js
+  s_4f8dcbf2626875::t_dc8956695a4752 13
+src/js/auth.js
+  s_4f8dcbf2626875::t_0fa8540c47532b 129
+  s_4f8dcbf2626875::t_4c80596edf8ee2 13,20-23,86,105-107,119-121,127,130-138
+src/js/entities-service/programs.js
+  s_4f8dcbf2626875::t_053e1460347c2d 19
+src/js/base/cache/response-cache.cy.js
+  s_4f8dcbf2626875::t_1e950e272fabd4 8
+  s_4f8dcbf2626875::t_3590ec201cac7d 58
+  s_4f8dcbf2626875::t_8fb429692ca4d8 69,113
+src/js/entities-service/clinicians.js
+  s_4f8dcbf2626875::t_b4697c46fc621c 16,22
+src/js/entities-service/teams.js
+  s_4f8dcbf2626875::t_25b5f0ca486494 9
+src/js/entities-service/states.js
+  s_4f8dcbf2626875::t_c2492a8f75eb43 9
+src/js/services/bootstrap.js
+  s_4f8dcbf2626875::t_da77507f47edaa 1,68,79-81,109
+  s_37fb08e15398c6::t_129688ee3ff1c4 98-99
+src/js/entities-service/forms.js
+  s_4f8dcbf2626875::t_3b879ed0a320aa 13
+src/js/base/collection.js
+  s_4f8dcbf2626875::t_65b2765437d362 5
+  s_4f8dcbf2626875::t_f9e4f154d61704 21,25-27
+src/js/base/cache/idb.js
+  s_4f8dcbf2626875::t_43ab7dbf63fbc4 78-87,93
+src/js/base/model.js
+  s_4f8dcbf2626875::t_858f00bdc934c4 70,74-76
+  s_4f8dcbf2626875::t_2759ced97d28f7 8
+src/js/base/app.js
+  s_4f8dcbf2626875::t_bbb5892f1e6189 20
+src/js/base/cache/entity-cache.cy.js
+  s_4f8dcbf2626875::t_bbeffa40da7e02 4-21,25,28-33,36-39,42-51,54-63,66-73,77-78,81,88-97,101-125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "d8df89064abf4483cbc93bcc54525653d5712531",
+  "prompts": {},
+  "sessions": {
+    "s_37fb08e15398c6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e6a5d-2bb9-71c1-a146-58f423510918",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

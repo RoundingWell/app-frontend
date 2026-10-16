@@ -1,0 +1,31 @@
+test/support/commands.js
+  s_1602d26affa37a::t_42d3de1416e53c 82-96,98,116-117
+docs/router-migration.md
+  s_1602d26affa37a::t_4e9d2fd08f655d 12,145-149,151-157,215-225,349-381
+src/js/apps/globals/error/error.e2e.cy.js
+  s_1602d26affa37a::t_062c14eb058b57 17-20,40-43
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_1602d26affa37a::t_d0cd79e7e112af 130-133,143-146,155-158
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_1602d26affa37a::t_bb3fc6d1316ba3 2255-2262,2269,2275-2293
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_1602d26affa37a::t_e20be1a06c234f 2840,2842-2850,2855-2873
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_1602d26affa37a::t_cff07eb759a33d 310-317,326,333-351
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8c2d385ae4b6acfc86b9b180709babb405a17b10",
+  "prompts": {},
+  "sessions": {
+    "s_1602d26affa37a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d06ea408-0196-44da-8b76-b93623aa34af",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

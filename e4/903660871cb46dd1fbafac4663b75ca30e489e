@@ -1,0 +1,40 @@
+packages/router/src/router.js
+  s_20ea81ecafd6a6::t_b21885ec4a4ced 236-243
+packages/router/test/router.test.js
+  s_20ea81ecafd6a6::t_d06fb74af56c50 117-128
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_20ea81ecafd6a6::t_f0e7ba441d8cfa 248-294
+docs/router-migration.md
+  s_20ea81ecafd6a6::t_2aa838fc147e7d 261-270
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_20ea81ecafd6a6::t_9d19eba31762a3 575-584
+src/js/services/router-radio.js
+  s_20ea81ecafd6a6::t_fb575468086c09 34
+  s_20ea81ecafd6a6::t_79bdca47413c2e 61-63
+  s_20ea81ecafd6a6::t_1fe38f43aac13a 6
+  s_20ea81ecafd6a6::t_53ba6cc9961d26 7
+src/js/services/history.js
+  s_20ea81ecafd6a6::t_6ddb9b24994479 13-14,17-19,21
+  s_20ea81ecafd6a6::t_1e1a867b480956 5
+  s_20ea81ecafd6a6::t_d8267b73276b55 6
+packages/router/DESIGN.md
+  s_20ea81ecafd6a6::t_f6997aa0b08290 210
+src/js/base/routerapp.js
+  s_20ea81ecafd6a6::t_07ac5b56c80a01 38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e4903660871cb46dd1fbafac4663b75ca30e489e",
+  "prompts": {},
+  "sessions": {
+    "s_20ea81ecafd6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1e41361-2f04-4998-b24a-b7e91b2868ac",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

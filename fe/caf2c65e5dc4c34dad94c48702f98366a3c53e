@@ -1,0 +1,22 @@
+icons.json
+  h_0f06c286dda36f 70,89
+src/js/apps/globals/error/error.e2e.cy.js
+  h_0f06c286dda36f 14-15,33-34
+src/js/apps/globals/error/error.hbs
+  h_0f06c286dda36f 2-7,10-11,21
+src/js/apps/globals/error/error.scss
+  h_0f06c286dda36f 32-40,42-43,45-46,48-51,58-60,62,64-65,73,126-134
+src/js/i18n/en-US/globals.yml
+  h_0f06c286dda36f 53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fecaf2c65e5dc4c34dad94c48702f98366a3c53e",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+src/js/services/ws.cy.js
+  s_6d0dd6537d3367::t_6d4faae2d390c3 332-358
+src/js/services/ws.js
+  s_6d0dd6537d3367::t_762f9b2684f6a3 1,81,112-115,117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "325bc1767f3d10a59245fb536736a7d45dbb8053",
+  "prompts": {},
+  "sessions": {
+    "s_6d0dd6537d3367": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e88d2-72c6-71c1-b061-e5c5e2252ff3",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

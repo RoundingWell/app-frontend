@@ -1,0 +1,23 @@
+src/js/apps/patients/schedule/schedule-results_app.js
+  s_7d9748a0496f68::t_af684b78401e66 1-102
+src/js/apps/patients/schedule/schedule_app.js
+  s_7d9748a0496f68::t_559989e5a5effc 4,8,10,12-14,39,55,67
+src/js/apps/patients/schedule/schedule_views.js
+  s_7d9748a0496f68::t_fc64d1edd6445d 357-359,400,402-406
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bdfe342085fe79e59e997c8564ba4d22bdee4744",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

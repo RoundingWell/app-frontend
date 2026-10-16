@@ -1,0 +1,35 @@
+src/js/behaviors/iframe-form.component.cy.js
+  s_7d9748a0496f68::t_d41b22493813f7 3,52-56,58-59,68-72,74-75,97-100
+src/js/behaviors/iframe-form.js
+  s_7d9748a0496f68::t_79bf1ac86083eb 12,16,22-24,26,29,35,38-39
+src/js/behaviors/input-watcher.component.cy.js
+  s_7d9748a0496f68::t_e7e6786179c07d 1-37
+src/js/behaviors/input-watcher.js
+  s_7d9748a0496f68::t_45075589010a69 24,37
+src/js/behaviors/picklist-transport.js
+  s_7d9748a0496f68::t_ce3302ee35ab9b 16,30-31,38-39,43-46,52-53,55,57,63-64,66,68,72,75-76,79-81,86-87,90-91,94,97,100,105-106,109-110,113,115-116,119,126-127,129-130,133-134,136,138-141,150,154,162,165
+src/js/behaviors/sortable-list.js
+  s_7d9748a0496f68::t_fb2612e4a27eab 24,47,57
+src/js/behaviors/top-region.js
+  s_7d9748a0496f68::t_1052deebba580b 25,29,40
+src/js/utils/stop-event-propagation.component.cy.js
+  s_7d9748a0496f68::t_a4510f128dcd3f 5,9
+src/js/utils/stop-event-propagation.js
+  s_7d9748a0496f68::t_3a9fc49ae1abe1 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ecf88ebdf1ae4116ed6ce987a316dafda55728b4",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

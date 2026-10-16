@@ -1,0 +1,33 @@
+package.json
+  ffc0931798fef4c5 45
+.circleci/config.yml
+  ffc0931798fef4c5 109-111,176-179,183-184,240-244,263-273,393,396,405,407,418,422-423,432,438-439,481,485,491,498-499
+vite.config.js
+  ffc0931798fef4c5 120
+test/unit/save-cypress-coverage.mjs
+  ffc0931798fef4c5 4,21-22,25
+test/unit/vitest-babel-coverage/provider.js
+  ffc0931798fef4c5 7,39,41
+test/unit/normalize-coverage-map.mjs
+  ffc0931798fef4c5 3,5-6,8,10,12,15-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.0",
+  "base_commit_sha": "de95579e9e0201b23fcc3ee616a8f9ff725be461",
+  "prompts": {
+    "ffc0931798fef4c5": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d887c-a471-7792-b22f-876b2e5dd6f7",
+        "model": "gpt-5.4"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 273,
+      "total_deletions": 18,
+      "accepted_lines": 259,
+      "overriden_lines": 0
+    }
+  }
+}

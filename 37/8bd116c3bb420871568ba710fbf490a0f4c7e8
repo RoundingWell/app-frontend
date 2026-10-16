@@ -1,0 +1,54 @@
+src/js/apps/patients/patient/form/form_app.js
+  s_75d71698654ae6::t_ac49546d09dcef 76,98-99
+  s_75d71698654ae6::t_6d8c7a9356f45c 35,39,43,45,50,224,229-237
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_5cb787676df08f::t_240b04fcc5e585 1965-1972,1979-2048
+src/js/apps/patients/patient/action/action_app.js
+  s_5cb787676df08f::t_fe9c9cb5b38ab3 95,104,125-126,203,208,210-251
+src/js/apps/patients/patient/action/action_views.js
+  s_5cb787676df08f::t_fddfda02f2b7db 54-57
+src/js/apps/patients/patient/form/form_views.js
+  s_5cb787676df08f::t_91b5d860243726 22,27,40,48,51-52,54
+src/js/apps/patients/patient/patient.scss
+  s_5cb787676df08f::t_77fb138797a6fa 21-26
+src/js/apps/patients/patient/patient_app.js
+  s_5cb787676df08f::t_12f618c0aa4451 25,28,79,96-99,108-111,117,123,125-127,131-147
+src/js/apps/patients/patient/patient_views.js
+  s_bf038f572e8bda::t_ff62d477da6569 102-104
+src/js/apps/patients/patients-main_app.js
+  s_5cb787676df08f::t_394fc65d2188ad 59-62,71-74,129
+src/js/apps/patients/patient/action/action.scss
+  s_5cb787676df08f::t_2ddf5634adf3e7 50-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.13",
+  "base_commit_sha": "378bd116c3bb420871568ba710fbf490a0f4c7e8",
+  "prompts": {},
+  "sessions": {
+    "s_5cb787676df08f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f380a-6030-7862-907a-777090f3c585",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_75d71698654ae6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5c2a-b3c8-7691-8399-34693be77aa7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_bf038f572e8bda": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f235b-3bd8-7db3-a6cf-2a9360e7463e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

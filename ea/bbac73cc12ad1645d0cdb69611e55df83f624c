@@ -1,0 +1,47 @@
+packages/care-ops-fontawesome/non-template-manifest.json
+  s_44c886cd8fd84f::t_67a8c3f39d1208 2,23,46
+config/vite-plugin-fontawesome-icons.js
+  s_44c886cd8fd84f::t_0cfa374c3f54d9 1-167
+test/unit/fontawesome-icons-plugin.test.js
+  s_44c886cd8fd84f::t_f7704cac8deee0 1-17,19-21,23-38
+  s_44c886cd8fd84f::t_ed8c394e0d27ae 18,22
+src/scss/README.md
+  s_44c886cd8fd84f::t_e12beb80f70957 165,167
+  s_44c886cd8fd84f::t_ce65ecdc85f644 169-171
+package.json
+  s_44c886cd8fd84f::t_6eba92e52bfb19 97,111
+test/unit/fontawesome-package.test.js
+  s_44c886cd8fd84f::t_e12beb80f70957 10-20,22,27-34,39-53,60-76
+  s_44c886cd8fd84f::t_f7704cac8deee0 21,23-26,35-38,54-59
+vite.config.js
+  s_44c886cd8fd84f::t_22271fe6c53412 21,134
+packages/care-ops-fontawesome/package.json
+  s_44c886cd8fd84f::t_67a8c3f39d1208 15,20
+  s_44c886cd8fd84f::t_237b1471856844 19,21-22,24-25
+src/js/base/fontawesome.js
+  s_44c886cd8fd84f::t_d42ab105467841 6
+packages/care-ops-fontawesome/index.js
+  s_44c886cd8fd84f::t_237b1471856844 45-57
+  s_44c886cd8fd84f::t_a918375dc8618f 11,64-123
+  s_44c886cd8fd84f::t_67a8c3f39d1208 2,4-5,12-22,25-31,36,38-41,58
+packages/care-ops-fontawesome/styles.css
+  s_44c886cd8fd84f::t_67a8c3f39d1208 1
+src/js/base/fontawesome.test.js
+  s_44c886cd8fd84f::t_f7704cac8deee0 9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "eabbac73cc12ad1645d0cdb69611e55df83f624c",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

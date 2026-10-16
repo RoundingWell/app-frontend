@@ -1,0 +1,19 @@
+src/scss/modules/list-pages.scss
+  s_5cb787676df08f::t_c494385289f9f2 278-281
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "abb664778e76839691f39084cce157586a09561a",
+  "prompts": {},
+  "sessions": {
+    "s_5cb787676df08f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f380a-6030-7862-907a-777090f3c585",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

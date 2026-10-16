@@ -1,0 +1,26 @@
+README.md
+  h_0f06c286dda36f 26,28,151-152,337-360
+docs/deploy.md
+  h_0f06c286dda36f 14-15,19-22
+package-lock.json
+  h_0f06c286dda36f 31,5731-5733,16928
+package.json
+  h_0f06c286dda36f 143
+packages/care-ops-fontawesome/package.json
+  h_0f06c286dda36f 11
+scripts/with-icons-auth.sh
+  h_0f06c286dda36f 4-6,8-21,40,42
+scripts/with-icons-auth.test.js
+  h_0f06c286dda36f 36-60,115,120-124,126,130,135,149-150,155
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5c2319e1c5d5515d36d4883fdf384a7d9eb354fb",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

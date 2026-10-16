@@ -1,0 +1,32 @@
+src/js/apps/patients/worklist/worklist_app.js
+  s_e0e7fbf19a3b71::t_85bc5a409bebd9 449-450,455-457
+src/js/utils/handle-errors.component.cy.js
+  s_e0e7fbf19a3b71::t_85bc5a409bebd9 20-31
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_e0e7fbf19a3b71::t_77e4b855796ab0 1367
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_e0e7fbf19a3b71::t_77e4b855796ab0 619
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_e0e7fbf19a3b71::t_77e4b855796ab0 328-329,473
+  s_e0e7fbf19a3b71::t_0ef37c245d55b4 400-401,474
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_e0e7fbf19a3b71::t_20f47515160a48 242-249
+src/js/auth/workos.component.cy.js
+  s_e0e7fbf19a3b71::t_77e4b855796ab0 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3472727a301c7d24bb97d4dc88188903bf070180",
+  "prompts": {},
+  "sessions": {
+    "s_e0e7fbf19a3b71": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c800-da6b-7301-8f2d-7eb6aea7f772",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

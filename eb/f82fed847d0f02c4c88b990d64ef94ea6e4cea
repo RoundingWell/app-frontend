@@ -1,0 +1,78 @@
+.circleci/deploy.yml
+  h_0f06c286dda36f 40
+.circleci/workflows.yml
+  h_0f06c286dda36f 62,166
+  s_377efbce3348c3::t_66dd2ad1060b1a 104
+  s_377efbce3348c3::t_665876234d42e1 105-106
+scripts/with-icons-auth.sh
+  h_0f06c286dda36f 1-3,5-53
+  h_0f06c286dda36f 4
+packages/care-ops-fontawesome/index.js
+  s_6c4e953149fe47::t_da96961c43a3e4 1
+src/js/index.js
+  s_6c4e953149fe47::t_990757487ee65c 1
+test/support/component.js
+  h_0f06c286dda36f 1
+package.json
+  h_0f06c286dda36f 143
+  s_6c4e953149fe47::t_bc6f4809a4e1db 142
+package-lock.json
+  s_6c4e953149fe47::t_a5780d34cf5c34 5730,5734-5735
+  h_0f06c286dda36f 31,5731-5733,16928
+scripts/with-icons-auth.test.js
+  h_0f06c286dda36f 1-13,17-188
+  h_0f06c286dda36f 14-16
+docs/deploy.md
+  h_0f06c286dda36f 14-15,20-21
+  h_0f06c286dda36f 19
+packages/care-ops-fontawesome/package.json
+  h_0f06c286dda36f 11
+  s_6c4e953149fe47::t_5b7bb9518687b3 5,13-16
+scripts/pkg-icons-askpass.sh
+  h_0f06c286dda36f 1-10
+README.md
+  h_0f06c286dda36f 26,28,151-152,317-338,348,356-358,365-374
+  s_df8c9999af5729::t_9b9bf1fa9e6ed4 150,154,157
+  h_0f06c286dda36f 339-347,349-355,359-364
+scripts/install-icons-ci.mjs
+  h_0f06c286dda36f 1-138
+scripts/install-icons-ci.test.mjs
+  h_0f06c286dda36f 1-205
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ebf82fed847d0f02c4c88b990d64ef94ea6e4cea",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_377efbce3348c3": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f5a54-58b9-7b33-90df-8957eb006d4e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_6c4e953149fe47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b04c05b6-cf79-475d-8e52-577944d6db4d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_df8c9999af5729": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e9c551bc-efbe-41d6-822c-640524eec537",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

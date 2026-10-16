@@ -1,0 +1,23 @@
+src/js/base/routerapp.js
+  s_95c744f3bea79b::t_1e8578fc0eafe7 7,10,27
+src/js/base/routing.md
+  s_95c744f3bea79b::t_b2a53080fd944f 162
+src/js/base/subrouterapp.js
+  s_95c744f3bea79b::t_24fb422458bbd0 6,8,16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3c74598711063ee8fc64c43bb7de488737b208b0",
+  "prompts": {},
+  "sessions": {
+    "s_95c744f3bea79b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c3e7-5dfa-75c1-9015-cadfef4ae9ce",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_85aebd1623278c::t_856260f8d74d48 1,142
+  s_85aebd1623278c::t_849ea03c803091 35,49-54,87,96,141,144-147
+  s_85aebd1623278c::t_cc166885d224cc 148
+src/js/services/patient-modal.js
+  s_85aebd1623278c::t_849ea03c803091 53
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_849ea03c803091 15,26-29
+  s_85aebd1623278c::t_7d858fc9fc6041 44-45
+  s_85aebd1623278c::t_a296e4b3bf3af4 39-41
+  s_85aebd1623278c::t_cadfd9055fb143 42-43,57-59
+src/js/services/patient-modal/patient-modal_views.js
+  s_85aebd1623278c::t_856260f8d74d48 1,224
+  s_85aebd1623278c::t_849ea03c803091 42,57-62,171,181,223,226-229
+  s_85aebd1623278c::t_943ca4174e0089 230
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_85aebd1623278c::t_849ea03c803091 110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7341fd48ccacd91196c1cba99dfd5f2a68b9b677",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

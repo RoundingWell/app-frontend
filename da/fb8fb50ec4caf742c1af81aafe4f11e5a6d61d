@@ -1,0 +1,70 @@
+icons.json
+  h_0f06c286dda36f 7
+src/js/app.js
+  h_0f06c286dda36f 62,139,148,150-153,162,164-165
+src/js/apps/globals/app-frame/close-request.component.cy.js
+  h_0f06c286dda36f 1-82
+src/js/apps/globals/app-frame/close-request.js
+  h_0f06c286dda36f 1-79
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  h_0f06c286dda36f 154-177
+src/js/apps/globals/app-frame/root_views.js
+  h_0f06c286dda36f 13-14,79,90,94,100,139,142,153,156,298,307-308,311,333-335
+src/js/apps/globals/app-frame/startup.hbs
+  h_0f06c286dda36f 1-22
+src/js/apps/globals/app-frame/startup.scss
+  h_0f06c286dda36f 1-268
+src/js/apps/globals/app-frame/startup_views.component.cy.js
+  h_0f06c286dda36f 1-123
+src/js/apps/globals/app-frame/startup_views.js
+  h_0f06c286dda36f 1-89
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  h_0f06c286dda36f 476-479,492-497
+src/js/apps/globals/nav/nav_app.js
+  h_0f06c286dda36f 155-156,216,327-336
+src/js/apps/globals/search/dialog.hbs
+  h_0f06c286dda36f 2,4-5
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  h_0f06c286dda36f 8-59,218-221,228-237,284,536,543
+src/js/apps/globals/search/patient-search.scss
+  h_0f06c286dda36f 12-15,18-19,27-41,50,56-59,66,107-110,113-114,117,119,121-123,125-127,129,131,134-143,145-146,171-174,177-179,182,185-186,191-198,252-255,268,273-432
+src/js/apps/globals/search/patient-search_views.js
+  h_0f06c286dda36f 11,52,58,70,119,132-135,140-141,152,161-173,191,193-198,200,213-217
+src/js/apps/globals/search/result-item.hbs
+  h_0f06c286dda36f 1-20,22-29,31-32
+src/js/apps/globals/search/tip.hbs
+  h_0f06c286dda36f 6,11,17
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  h_0f06c286dda36f 233-259
+src/js/apps/patients/patient/form/form-viewport.js
+  h_0f06c286dda36f 20,26-28,36-38,49-50
+src/js/behaviors/dialog-focus.js
+  h_0f06c286dda36f 1-45
+src/js/i18n/en-US/globals.yml
+  h_0f06c286dda36f 59,97-98,120-125
+src/js/services/modal/modal.hbs
+  h_0f06c286dda36f 5
+src/js/services/modal/modal_views.component.cy.js
+  h_0f06c286dda36f 2-5,15,27,58-141
+src/js/services/modal/modal_views.js
+  h_0f06c286dda36f 12,21,23-30,36,103,106
+src/js/utils/accessibility/focus-trap.js
+  h_0f06c286dda36f 1-56
+src/scss/app-root.scss
+  h_0f06c286dda36f 3-6
+src/scss/modules/buttons.scss
+  h_0f06c286dda36f 21,46-51
+src/scss/modules/modals.scss
+  h_0f06c286dda36f 7-9,42,71,73,89,139-140,143-183
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "dafb8fb50ec4caf742c1af81aafe4f11e5a6d61d",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

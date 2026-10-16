@@ -1,0 +1,25 @@
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_d5818e75dd3580::t_b5a50ff03e340d 633-634,1287-1288,1552-1553,1564-1565,1626-1627,2051-2052
+src/js/apps/patients/patient/form/form.e2e.cy.js
+  s_d5818e75dd3580::t_f8599df1f345a6 418-419
+src/js/apps/patients/patient/form/patient.e2e.cy.js
+  s_d5818e75dd3580::t_66182989c25556 76-77,892-893
+src/js/entities-service/entities/forms.js
+  s_d5818e75dd3580::t_3afe2f52fad24c 31-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "00502ea28363162aceb266542c1c24d767d2439a",
+  "prompts": {},
+  "sessions": {
+    "s_d5818e75dd3580": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0a0b1-cbde-7821-bbf0-6eb80df9e723",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

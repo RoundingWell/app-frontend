@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_2d91c07b8aa12c::t_11475ecd4713b1 116
+  s_2d91c07b8aa12c::t_21a1d6f45ce545 104
+  s_2d91c07b8aa12c::t_66efeeda525d94 115,2186-2190
+  s_2d91c07b8aa12c::t_bf7323e343e72b 108
+  s_2d91c07b8aa12c::t_b9ebaebd751eca 117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "f54b601c4f823b42a327ae5db5eb887cbdbeed59",
+  "prompts": {},
+  "sessions": {
+    "s_2d91c07b8aa12c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a046dd-e987-7010-815b-e2ec94d7f5d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

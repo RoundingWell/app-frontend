@@ -1,0 +1,21 @@
+packages/router/src/drivers/navigation.js
+  s_d64fc49a719823::t_a93aa6891d36bd 32-33,44
+src/js/base/router-driver.component.cy.js
+  s_d64fc49a719823::t_7204b5e57c833b 1-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e72f23be348917276b94c949bd0febb628cb3f52",
+  "prompts": {},
+  "sessions": {
+    "s_d64fc49a719823": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4b00d38-320d-4c42-8d3b-e943c3a379ee",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

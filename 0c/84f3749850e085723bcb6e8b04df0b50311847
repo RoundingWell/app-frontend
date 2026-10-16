@@ -1,0 +1,23 @@
+package-lock.json
+  s_e5d334995a458a::t_62ca39743e2a80 6546-6548,16984
+packages/care-ops-superset/index.js
+  s_e5d334995a458a::t_4a1252462b8439 19,24
+packages/care-ops-superset/package.json
+  s_e5d334995a458a::t_08bf2d9105f2f1 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "0c84f3749850e085723bcb6e8b04df0b50311847",
+  "prompts": {},
+  "sessions": {
+    "s_e5d334995a458a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9f26313a-d63e-404c-83ad-d38d321c7d0d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_09e8292bb4bcb3::t_420bbaedaaa868 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "11e2cdcc9d6e40df65a413f684bda60758500f37",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
