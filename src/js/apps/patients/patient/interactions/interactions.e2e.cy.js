@@ -224,6 +224,185 @@ context('patient interactions', function() {
     }
   });
 
+  specify('expands overflowing call notes until the timeline list is replaced', function() {
+    const patient = getPatient();
+    const longNote = 'Call summary <review> & next steps\nSecond line\nThird line\nFourth line\nFifth line\nFinal line';
+    const fourLines = 'Four-line call summary\nSecond line\nThird line\nFinal line';
+    const responsiveNote = `Responsive call summary. ${ 'The team reviewed the next steps and confirmed the plan. '.repeat(8) }`;
+    const history = map(range(50), index => getInteraction({
+      attributes: {
+        channel: 'voice',
+        occurred_at: new Date(Date.UTC(2026, 8, index + 1)).toISOString(),
+        metadata: { note: `Call record ${ index }` },
+      },
+    }));
+    history[25].attributes.metadata.note = longNote;
+    history[26].attributes.metadata.note = fourLines;
+    history[27].attributes.metadata.note = responsiveNote;
+
+    cy
+      .viewport(1920, 900)
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = history;
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/interactions/${ history[25].id }`);
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item')
+      .should('have.length', 25);
+
+    cy
+      .contains('.patient-interactions__item', 'Call record 24')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Four-line call summary')
+      .find('.js-note-text')
+      .should('have.text', fourLines)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Four-line call summary')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .viewport(700, 900);
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-show-more')
+      .should('be.visible')
+      .focus();
+
+    cy
+      .viewport(1920, 900);
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-note-text')
+      .should('be.focused');
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-note-text')
+      .should('have.text', longNote)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.greaterThan($text[0].clientHeight);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('be.visible')
+      .and('have.attr', 'aria-expanded', 'false')
+      .focus();
+
+    cy
+      .press(Cypress.Keyboard.Keys.ENTER);
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-note-text')
+      .should('be.focused')
+      .and('have.text', longNote)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('not.exist');
+
+    // A paging response can refresh an already loaded resource as well as add rows.
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (!query.has('page[before]')) return;
+        const updated = getInteraction({
+          ...history[25],
+          attributes: { ...history[25].attributes, metadata: { note: longNote, clinician_name: 'Updated call author' } },
+        });
+        req.alias = 'refreshCallNote';
+        req.reply({ body: { data: [...getPage(history, query, history), updated] } });
+      });
+
+    cy
+      .get('.patient-interactions')
+      .scrollTo('top');
+
+    cy
+      .wait('@refreshCallNote');
+
+    cy
+      .contains('.patient-interactions__item', 'Updated call author')
+      .find('.js-note-text')
+      .should('have.text', longNote)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Updated call author')
+      .find('.js-show-more')
+      .should('not.exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .scrollIntoView();
+
+    cy
+      .get('.patient-interactions__filters [data-filter="appointments"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('be.visible')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-note-text')
+      .should('be.focused');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('be.visible');
+  });
+
   specify('checks both history boundaries for a short linked feed', function() {
     const patient = getPatient();
     const interaction = getInteraction({ attributes: { metadata: { message: 'Only recorded interaction' } } });
@@ -1839,7 +2018,7 @@ context('patient interactions', function() {
       },
     });
     const videoCall = getInteraction({
-      attributes: { channel: 'video', direction: 'outbound', metadata: { note: 'Video consultation completed.' } },
+      attributes: { channel: 'video', direction: 'outbound', metadata: { note: 'Video consultation completed.\nSecond line\nThird line\nFourth line\nFifth line\nFinal line' } },
       relationships: { action: getRelationship(action) },
     });
     const email = getInteraction({
@@ -1879,7 +2058,16 @@ context('patient interactions', function() {
 
     cy
       .contains('.patient-action__activity .patient-interactions__item', 'Video consultation completed.')
-      .should('contain', 'Outbound Video call');
+      .should('contain', 'Outbound Video call')
+      .find('.patient-interactions__summary')
+      .should($summary => {
+        expect($summary[0].scrollHeight).to.be.at.most($summary[0].clientHeight + 1);
+      });
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'Video consultation completed.')
+      .find('.js-show-more')
+      .should('not.exist');
 
     cy
       .contains('.patient-action__activity .patient-interactions__item', 'Follow-up email instructions.')

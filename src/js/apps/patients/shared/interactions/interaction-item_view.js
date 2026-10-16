@@ -26,12 +26,47 @@ const InteractionItemView = View.extend({
     return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
   },
   template: InteractionItemTemplate,
-  ui: { action: '.js-action', interaction: '.js-interaction' },
+  ui: { action: '.js-action', interaction: '.js-interaction', note: '.js-note', noteText: '.js-note-text', showMore: '.js-show-more' },
   triggers: {
     'click @ui.action': 'click:action',
     'click @ui.interaction': 'click:interaction',
+    'click @ui.showMore': 'click:show:more',
   },
   modelEvents: { change: 'render' },
+  onClickShowMore() {
+    const shouldFocus = document.activeElement === this.getUI('showMore')[0];
+    this.noteExpanded = true;
+    this.render();
+    if (shouldFocus) this.getUI('noteText')[0].focus({ preventScroll: true });
+  },
+  onDomRefresh() {
+    const note = this.getUI('noteText')[0];
+    if (!note || this.noteExpanded) return;
+    this.noteObserver = new ResizeObserver(() => this.updateNoteOverflow());
+    this.noteObserver.observe(note);
+    this.updateNoteOverflow();
+  },
+  onDomRemove() {
+    this.disconnectNoteObserver();
+  },
+  onBeforeDestroy() {
+    this.disconnectNoteObserver();
+  },
+  disconnectNoteObserver() {
+    this.noteObserver?.disconnect();
+    this.noteObserver = null;
+  },
+  updateNoteOverflow() {
+    const note = this.getUI('note')[0];
+    const text = this.getUI('noteText')[0];
+    // Measure without the control's reserved space so four-line notes stay whole.
+    note.classList.remove('patient-interactions__note--overflowing');
+    const overflowing = text.scrollHeight > text.clientHeight + 1;
+    note.classList.toggle('patient-interactions__note--overflowing', overflowing);
+    const button = this.getUI('showMore')[0];
+    if (!overflowing && document.activeElement === button) text.focus({ preventScroll: true });
+    button.hidden = !overflowing;
+  },
   setGrouping(continuation, continues) {
     this.el.classList.toggle('patient-interactions__item--continuation', continuation);
     this.el.classList.toggle('patient-interactions__item--continues', continues);
@@ -53,6 +88,9 @@ const InteractionItemView = View.extend({
       return;
     }
     Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
+  },
+  hasCollapsibleNote() {
+    return this.model.getChannelGroup() === 'calls' && !this.getOption('activity');
   },
   templateContext() {
     const metadata = this.model.get('metadata') || {};
@@ -81,6 +119,9 @@ const InteractionItemView = View.extend({
       stayDays,
       hasStay: stayDays >= 0,
       activity: this.getOption('activity'),
+      collapsibleNote: this.hasCollapsibleNote(),
+      noteExpanded: this.noteExpanded,
+      noteId: `interaction-note-${ this.cid }`,
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',
       workName: this.getWorkLink(),
     };
