@@ -1,27 +1,39 @@
 {
   "private": true,
   "name": "@mnjs/router",
-  "version": "0.1.0",
   "description": "Named, nested routes over the Navigation API and URLPattern",
-  "license": "MIT",
+  "version": "0.1.0",
   "type": "module",
   "exports": {
     ".": "./index.js",
-    "./outlet": "./outlet.js"
+    "./outlet": "./outlet.js",
+    "./package.json": "./package.json"
   },
   "files": [
     "index.js",
     "outlet.js",
-    "src/"
+    "src/",
+    "readme.md"
   ],
   "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
-    "node": ">=24"
+    "node": ">=24.15.0"
   },
   "scripts": {
     "test": "node --test \"test/*.test.js\"",
     "test:browser": "playwright test"
   },
+  "keywords": [
+    "marionette",
+    "router",
+    "routing",
+    "navigation-api",
+    "urlpattern"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@mnjs/utils": "5.0.0"
   },
