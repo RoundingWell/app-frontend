@@ -40,11 +40,14 @@ packages/router/
   index.js            core: Router, memoryDriver, navigationDriver
   outlet.js           Marionette layer: RouteOutlet (optional peer dep: marionette)
   src/**              implementation
-  test/**             node:test suites (run with `node --test`)
+  test/**             node:test suites (`npm test`); test/browser: Playwright conformance page
+  playwright.config.js  `npm run test:browser` (Chromium, Firefox, WebKit)
+  readme.md           published overview
   DESIGN.md
+  UPSTREAM.md         extraction plan for the Marionette monorepo
 ```
 
-- `exports`: `"."` → `index.js`, `"./outlet"` → `outlet.js`.
+- `exports`: `"."` → `index.js`, `"./outlet"` → `outlet.js`, `"./package.json"`.
 - Core dependencies: `@mnjs/utils` only (`Events`, `extend`). No `backbone`,
   `underscore`, `marionette`, `js/*`, or app imports. The outlet layer may import
   `marionette` and `@mnjs/utils`. `marionette` is a peer dependency, declared optional
@@ -326,8 +329,9 @@ driver = {
   deterministic tests, including supersession (a new `navigate` aborts the previous
   event's `signal`) and traversal.
 - One shared conformance suite runs against every driver. The navigation driver's
-  conformance run happens in browsers (Cypress component spec in the app during
-  incubation; Playwright Chromium/Firefox/WebKit after extraction).
+  conformance run happens in browsers: the package's Playwright run on Chromium,
+  Firefox and WebKit (`npm run test:browser`), and the app's Cypress component spec
+  until extraction.
 
 ## Marionette layer: `@mnjs/router/outlet`
 
@@ -430,8 +434,10 @@ Fragment handling is not implemented.
 
 ## Testing strategy
 
-- Unit: `node --test packages/router/test` with `memoryDriver`.
-- Driver conformance: shared suite, run against `memoryDriver` in Node and
-  `navigationDriver` in real browsers.
+- Unit: `npm test -w packages/router` (`node --test "test/*.test.js"`) with `memoryDriver`.
+  The public-surface suites import `@mnjs/router` and `@mnjs/router/outlet`, so they also
+  run against a packed install.
+- Driver and router conformance: shared suites, run against `memoryDriver` in Node and
+  `navigationDriver` in real browsers (Playwright and the app's Cypress spec).
 - Outlet: `node --test` with Marionette Applications that have no Region (no DOM shim).
 - Application behavior: app E2E (the app's invariants, not the package's).
