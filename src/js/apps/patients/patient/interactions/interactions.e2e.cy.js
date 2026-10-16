@@ -267,7 +267,7 @@ context('patient interactions', function() {
       .and('have.class', 'is-selected');
   });
 
-  specify('shows an ongoing admission length of stay through today', function() {
+  specify('shows an ongoing admission without length of stay', function() {
     const patient = getPatient();
     const admission = getInteraction({
       attributes: {
@@ -301,7 +301,7 @@ context('patient interactions', function() {
       .find('.patient-interactions__card')
       .should('contain', `Admitted ${ formatDate(admission.attributes.metadata.admitted_at, 'SHORT') }`)
       .and('contain', 'No discharge received')
-      .and('contain', 'LOS 2 days');
+      .and('not.contain', 'LOS');
   });
 
   specify('navigates linked interactions, grouped paging, and date destinations', function() {
@@ -412,7 +412,8 @@ context('patient interactions', function() {
           .should('have.attr', 'href', '#far-fa-hospital');
 
         cy
-          .contains('LOS 1 day');
+          .get('.patient-interactions__card')
+          .should('not.contain', 'LOS');
 
         cy
           .contains('Example Medical Center')
