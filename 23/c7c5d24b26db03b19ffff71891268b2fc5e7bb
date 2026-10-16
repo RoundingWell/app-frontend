@@ -1,0 +1,23 @@
+packages/router/test/matcher.test.js
+  s_6c4e953149fe47::t_d5eab7bfa61a1a 403-513
+packages/router/src/matcher.js
+  s_6c4e953149fe47::t_be54e9ce6af1c6 97-102,104-105,258-276,284
+packages/router/DESIGN.md
+  s_6c4e953149fe47::t_b3b8b9c5a72efc 203
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "23c7c5d24b26db03b19ffff71891268b2fc5e7bb",
+  "prompts": {},
+  "sessions": {
+    "s_6c4e953149fe47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b04c05b6-cf79-475d-8e52-577944d6db4d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
