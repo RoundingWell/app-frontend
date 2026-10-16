@@ -1,0 +1,72 @@
+icons.json
+  h_0f06c286dda36f 7
+src/js/app.js
+  h_0f06c286dda36f 141,150,152,153-154,163,165-166
+src/js/apps/globals/app-frame/close-request.component.cy.js
+  h_0f06c286dda36f 1-22,24-45,47-82,103
+src/js/apps/globals/app-frame/close-request.js
+  h_0f06c286dda36f 12-13,16-17,19-26,28-29,31-34,36-39,41-45,48-51,53-59,61-73,75,78-80
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  h_0f06c286dda36f 164,187,207-220,227-230,252,263,268
+src/js/apps/globals/app-frame/root_views.js
+  h_0f06c286dda36f 13-14,79,298,332-333,335
+src/js/apps/globals/app-frame/startup.hbs
+  h_0f06c286dda36f 1-22
+src/js/apps/globals/app-frame/startup.scss
+  h_0f06c286dda36f 3-60,63-269
+src/js/apps/globals/app-frame/startup_views.js
+  h_0f06c286dda36f 1-9,11-28,29-33,35-41,48-51,53-79,81-91
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  h_0f06c286dda36f 476-479,492-497
+src/js/apps/globals/nav/nav_app.js
+  h_0f06c286dda36f 155-156,216,327-336
+src/js/apps/globals/search/dialog.hbs
+  h_0f06c286dda36f 2,4-5
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  h_0f06c286dda36f 8-50,58-64,75-76,235-238,245-254,301,553,560
+src/js/apps/globals/search/patient-search.scss
+  h_0f06c286dda36f 12-15,18-19,27-41,50,56-59,66,107-110,113-114,117,119,121-123,125-127,129,131,134-143,145-146,171-174,177-179,182,185-186,191-198,252-255,268,273-432
+src/js/apps/globals/search/patient-search_views.js
+  h_0f06c286dda36f 11,52,58,70,119,133-135,140-141,152,161-173,191,193-198,200,213-217
+src/js/apps/globals/search/result-item.hbs
+  h_0f06c286dda36f 1-20,22-29,31-32
+src/js/apps/globals/search/tip.hbs
+  h_0f06c286dda36f 6,11,17
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  h_0f06c286dda36f 233-259
+src/js/apps/patients/patient/form/form-viewport.js
+  h_0f06c286dda36f 20,26-28,36-38,49-50
+src/js/behaviors/dialog-focus.js
+  h_0f06c286dda36f 2-25,30-34,35-47
+src/js/i18n/en-US/globals.yml
+  h_0f06c286dda36f 59,97-98,120-125
+src/js/services/modal/modal.hbs
+  h_0f06c286dda36f 5
+src/js/services/modal/modal_views.component.cy.js
+  h_0f06c286dda36f 2-5,15,27,58-141
+src/js/services/modal/modal_views.js
+  h_0f06c286dda36f 12,21,23-30,36,103,106
+src/js/utils/accessibility/focus-trap.js
+  h_0f06c286dda36f 1-41,42-43,44-46
+src/scss/app-root.scss
+  h_0f06c286dda36f 3-6
+src/scss/modules/buttons.scss
+  h_0f06c286dda36f 21,46-51
+src/scss/modules/modals.scss
+  h_0f06c286dda36f 7-9,42,71,73,89,139-140,143-183
+src/js/apps/globals/error/error.scss
+  h_0f06c286dda36f 14-17,25,28,41,44,47,55-57,61,63,68,70,71,82-83,84,85,93,97-99,100-103,109,110-111,113-120,121-123
+src/js/apps/globals/error/error.hbs
+  h_0f06c286dda36f 19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "85949ddbc38ef5d6e4fb90c54b2d61de301587e2",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
