@@ -2,7 +2,7 @@ import formatDate from 'helpers/format-date';
 
 import { getErrors } from 'helpers/json-api';
 import { testTs } from 'helpers/test-timestamp';
-import stateColors from 'helpers/state-colors';
+import themeColor from 'helpers/theme-color';
 
 import { getProgram } from 'support/api/programs';
 
@@ -108,7 +108,7 @@ context('program sidebar', function() {
       .find('[data-name-region]')
       .should('contain', 'name error')
       .find('.js-input')
-      .should('have.css', 'border-top-color', stateColors.error);
+      .should(themeColor('border-top-color', '--color-danger'));
 
     cy
       .get('.sidebar')

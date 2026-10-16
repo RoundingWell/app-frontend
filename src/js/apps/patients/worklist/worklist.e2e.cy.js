@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { v7 as uuid, NIL as NIL_UUID } from 'uuid';
 
 import formatDate from 'helpers/format-date';
+import themeColor from 'helpers/theme-color';
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
 import { getRelationship } from 'helpers/json-api';
@@ -808,7 +809,7 @@ context('worklist page', function() {
       .first()
       .contains('Test Patient')
       .should('have.class', 'patient-list__patient--selected')
-      .and('have.css', 'color', 'rgb(51, 51, 51)');
+      .and(themeColor('color', '--color-text'));
 
     cy.viewport(640, 720);
 

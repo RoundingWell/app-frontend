@@ -1,6 +1,6 @@
 import { getErrors, getRelationship } from 'helpers/json-api';
 
-import stateColors from 'helpers/state-colors';
+import themeColor from 'helpers/theme-color';
 
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { roleAdmin, roleEmployee, roleManager } from 'support/api/roles';
@@ -500,14 +500,14 @@ context('clinician sidebar', function() {
       .find('[data-name-region]')
       .should('contain', 'name error')
       .find('.js-input')
-      .should('have.css', 'border-top-color', stateColors.error);
+      .should(themeColor('border-top-color', '--color-danger'));
 
     cy
       .get('.sidebar')
       .find('[data-email-region]')
       .should('contain', 'email error')
       .find('.js-input')
-      .should('have.css', 'border-top-color', stateColors.error);
+      .should(themeColor('border-top-color', '--color-danger'));
   });
 
   specify('clinician does not exist', function() {

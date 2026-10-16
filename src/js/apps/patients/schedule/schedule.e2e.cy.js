@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { v7 as uuidv7, v5 as uuidv5 } from 'uuid';
 
 import formatDate from 'helpers/format-date';
+import themeColor from 'helpers/theme-color';
 import { testDate, testDateAdd, testDateSubtract } from 'helpers/test-date';
 import { getRelationship, mergeJsonApi } from 'helpers/json-api';
 
@@ -318,7 +319,7 @@ context('schedule page', function() {
       .next()
       .should('contain', formatDate(testDate(), 'MMM, ddd'))
       .and('have.class', 'is-today')
-      .and('have.css', 'color', 'rgb(5, 130, 218)');
+      .and(themeColor('color', '--color-interactive'));
 
     cy
       .get('@scheduleList')

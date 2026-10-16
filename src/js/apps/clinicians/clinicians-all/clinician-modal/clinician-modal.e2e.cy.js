@@ -1,5 +1,5 @@
 import { getErrors } from 'helpers/json-api';
-import stateColors from 'helpers/state-colors';
+import themeColor from 'helpers/theme-color';
 
 import { workspaceOne } from 'support/api/workspaces';
 import { roleManager } from 'support/api/roles';
@@ -275,12 +275,12 @@ context('clinicians modal', function() {
     cy
       .get('@modal')
       .find('[data-name-region] .js-input')
-      .should('have.css', 'border-top-color', stateColors.error);
+      .should(themeColor('border-top-color', '--color-danger'));
 
     cy
       .get('@modal')
       .find('[data-email-region] .js-input')
-      .should('have.css', 'border-top-color', stateColors.error);
+      .should(themeColor('border-top-color', '--color-danger'));
 
     cy
       .get('.alert-box')
