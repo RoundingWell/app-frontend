@@ -1,0 +1,51 @@
+src/js/entities-service/entities/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 7,12,18
+src/js/entities-service/panels.js
+  s_d04385ebae28ca::t_e18abee404e025 3,9-11
+src/js/services/sidebars.js
+  s_d04385ebae28ca::t_e18abee404e025 11-12,15,21
+  s_d04385ebae28ca::t_52a79645dd9cb9 1,19
+  s_d04385ebae28ca::t_79f098f9fa95c5 16-18
+src/js/services/widgets.js
+  s_d04385ebae28ca::t_e18abee404e025 1
+test/fixtures/test/settings.json
+  s_d04385ebae28ca::t_52a79645dd9cb9 3-4
+src/js/services/bootstrap.js
+  s_d04385ebae28ca::t_e18abee404e025 74,78,86
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_d04385ebae28ca::t_deca7e39976c67 59-62,88,90,93-94,96-97
+  s_d04385ebae28ca::t_c555cfbc2f5c47 89,388
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_d04385ebae28ca::t_deca7e39976c67 894
+  s_d04385ebae28ca::t_c555cfbc2f5c47 64
+  s_d04385ebae28ca::t_1fd903115f3586 18,21-23,26-27,33-34,49-52,54-58,65-66,69-70,76-77,234,283-284,771,786-787,897
+test/support/api/panels.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 4,6,8-9,12,15,19
+src/js/entities-service/index.js
+  s_d04385ebae28ca::t_e18abee404e025 25-26
+test/support/defaults.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 59
+test/support/e2e.js
+  s_d04385ebae28ca::t_52a79645dd9cb9 42
+src/js/services/sidebars.component.cy.js
+  s_d04385ebae28ca::t_4d0f544d8dedbb 6,12,18-37,46-67,69
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_d04385ebae28ca::t_deca7e39976c67 55,58-59,61,68-69,71
+  s_d04385ebae28ca::t_c555cfbc2f5c47 53-54,62,72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "e257ed91a46fbc58e04e50ebda435e04b9a0782a",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

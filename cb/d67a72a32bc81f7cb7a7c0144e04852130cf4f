@@ -1,0 +1,19 @@
+src/js/services/dialer.e2e.cy.js
+  s_09e8292bb4bcb3::t_a8ee2a3f4a4fb6 232,265,492,525
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "cbd67a72a32bc81f7cb7a7c0144e04852130cf4f",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

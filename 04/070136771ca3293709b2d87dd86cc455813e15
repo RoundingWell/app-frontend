@@ -1,0 +1,34 @@
+packages/router/src/router.js
+  s_20ea81ecafd6a6::t_6146d6d71ee552 359-364
+docs/router-migration.md
+  s_20ea81ecafd6a6::t_323dbb5bc38ea5 320-332
+  s_20ea81ecafd6a6::t_f2b0699a92fabf 192-194
+packages/router/test/conformance/router.js
+  s_20ea81ecafd6a6::t_c593781d2a272b 1-264
+packages/router/test/router-conformance.test.js
+  s_20ea81ecafd6a6::t_cffc308cef876d 1-13
+src/js/index.js
+  s_20ea81ecafd6a6::t_0f120026cdbceb 18
+.circleci/workflows.yml
+  s_20ea81ecafd6a6::t_a16811f81000b4 123-125
+package.json
+  s_20ea81ecafd6a6::t_6e4daf012d7eb6 51
+src/js/base/router-driver.component.cy.js
+  s_20ea81ecafd6a6::t_5e4aa273c3f1f9 4,11-15,18-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "04070136771ca3293709b2d87dd86cc455813e15",
+  "prompts": {},
+  "sessions": {
+    "s_20ea81ecafd6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1e41361-2f04-4998-b24a-b7e91b2868ac",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+packages/router/test/conformance/router.js
+  s_1602d26affa37a::t_00a57ad59e1621 291
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9ed58acef5aa023181efcf7ca2d37d99d51c8a4e",
+  "prompts": {},
+  "sessions": {
+    "s_1602d26affa37a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d06ea408-0196-44da-8b76-b93623aa34af",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

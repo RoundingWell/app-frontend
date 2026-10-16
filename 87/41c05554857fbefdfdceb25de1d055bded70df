@@ -1,0 +1,37 @@
+package-lock.json
+  s_e5d334995a458a::t_21973fffb50613 18-19,30,5738-5741,6545-6560,11700-11708,16978-16985
+package.json
+  s_e5d334995a458a::t_9e73130042dcad 18-19,131
+packages/care-ops-superset/index.js
+  s_e5d334995a458a::t_b935a93eeeaa1e 1-43
+packages/care-ops-superset/package.json
+  s_e5d334995a458a::t_37c02e4a472c03 1-15
+src/js/apps/dashboards/dashboard/dashboard.e2e.cy.js
+  s_e5d334995a458a::t_c6326be9095d54 5,65-138
+src/js/apps/dashboards/dashboard/dashboard_app.js
+  s_e5d334995a458a::t_6413d913846777 6,26
+src/js/apps/dashboards/dashboard/dashboard_views.js
+  s_e5d334995a458a::t_1766e02a8a50c0 6-7,29,33,42-84,108
+src/js/entities-service/dashboards.js
+  s_e5d334995a458a::t_837c04cbb162e2 2,12-19
+test/fixtures/config/dashboards.js
+  s_e5d334995a458a::t_56abd6c254c754 10
+test/support/api/dashboards.js
+  s_e5d334995a458a::t_7a7c9005397cf6 9,17,22-52,76-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "8741c05554857fbefdfdceb25de1d055bded70df",
+  "prompts": {},
+  "sessions": {
+    "s_e5d334995a458a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9f26313a-d63e-404c-83ad-d38d321c7d0d",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

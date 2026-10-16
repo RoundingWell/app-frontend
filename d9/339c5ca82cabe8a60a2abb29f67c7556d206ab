@@ -1,0 +1,34 @@
+packages/router/src/outlet/route-outlet.js
+  s_d1cca99368c386::t_3537ebb015a456 22,45,48-49,61-71,73-77,79-80,83-85,99-100,109,122,127,132,134
+  s_d1cca99368c386::t_7f6421835370e6 142,144-145
+packages/router/DESIGN.md
+  s_d1cca99368c386::t_c3f82b28496ee1 331
+  s_d1cca99368c386::t_caa1d584bc598c 281-283,332-339,343-345,351-363
+packages/router/test/conformance/index.js
+  s_d1cca99368c386::t_5b6173e24035fb 97,386-406
+  s_d1cca99368c386::t_b8a2bf85eaac30 407-408
+packages/router/test/outlet.test.js
+  s_d1cca99368c386::t_caa1d584bc598c 321-326
+  s_d1cca99368c386::t_792387776aec9c 306,310,315-320,327-333,336-354,471-501
+  s_d1cca99368c386::t_0931f39f0d34e9 502
+packages/router/src/drivers/memory.js
+  s_d1cca99368c386::t_5b6173e24035fb 4-5,335
+packages/router/test/drivers.test.js
+  s_d1cca99368c386::t_5b6173e24035fb 160,164,169,175-179
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d9339c5ca82cabe8a60a2abb29f67c7556d206ab",
+  "prompts": {},
+  "sessions": {
+    "s_d1cca99368c386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "875840b0-7975-43b6-957e-a4b0a76b029b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

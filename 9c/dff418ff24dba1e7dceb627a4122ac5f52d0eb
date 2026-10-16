@@ -1,0 +1,23 @@
+src/js/auth.cy.js
+  s_4f8dcbf2626875::t_44781775313c36 1-17,21-41
+  s_4f8dcbf2626875::t_79d747cf72475f 18-20
+src/js/auth.js
+  s_4f8dcbf2626875::t_bb6152ba22654d 13-15
+  s_4f8dcbf2626875::t_8bbfebb9093d6c 78,82-108,114
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "9cdff418ff24dba1e7dceb627a4122ac5f52d0eb",
+  "prompts": {},
+  "sessions": {
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

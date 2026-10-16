@@ -1,0 +1,33 @@
+src/js/services/alert.component.cy.js
+  s_7d9748a0496f68::t_bcdb542be716ee 1-2,16-18,23,25,36,44,90-91,107,111,113-114,118
+src/js/services/alert.js
+  s_7d9748a0496f68::t_a5ab6a27a032c6 1
+src/js/services/alert/alert-box.hbs
+  s_7d9748a0496f68::t_a2b5cadd4a7940 5
+src/js/services/alert/alert-box_views.js
+  s_7d9748a0496f68::t_7163b25dcec959 9
+src/js/services/modal.js
+  s_7d9748a0496f68::t_4dd3449cfb1d5d 17-25,93,101,107,110,112,118
+src/js/services/modal/modal_views.js
+  s_7d9748a0496f68::t_c19d9c8458d404 1,65,76
+src/js/services/ws.component.cy.js
+  s_7d9748a0496f68::t_fe09cdf7e6ceb4 5-6,16-25,52-53,86,144-154,156,220-347,378-379,421,430,439,527-529,531-535,537,558,671,689-692,694-697,798-820
+src/js/services/ws.js
+  s_7d9748a0496f68::t_19c12d7853ac05 1,6-7,28,30,34-35,37-40,50-51,54,58,90-94,96,101,118,121-123,168,182-190,192-198,201-202,204-205,207-229,257,259,263-264,269
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a05ee47640c4d4a1299ffcb1b4c0a243979d2f97",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  h_0f06c286dda36f 13-16,178-179,304-338,342-346,348-351,353-355
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  h_0f06c286dda36f 6-9,58-59,155-185,189-203
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  h_0f06c286dda36f 26-27,108-131,268-269,331-332,422-449,451-457,984-990,1501-1503,1505-1507,1509-1512,1514-1516,1518-1520,1522-1526
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f45a76ecf058e5ddb12cdb05aee2ad75fb220349",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

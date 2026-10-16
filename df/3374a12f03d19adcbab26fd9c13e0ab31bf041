@@ -1,0 +1,19 @@
+src/js/apps/globals/app-frame/root_views.js
+  s_7d9748a0496f68::t_abba034c740d8b 3,41,48,66,90,106-109,114-115,140,142,147,152-153,157,176,179,181,184-185,191,199,312-313,320,328-331,333
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "df3374a12f03d19adcbab26fd9c13e0ab31bf041",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

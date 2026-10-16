@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/interactions/date-control_view.js
+  s_20ea81ecafd6a6::t_a9b33218aca9ed 8-10
+  s_20ea81ecafd6a6::t_fcf40bba7f9c84 148,153-154
+src/js/apps/globals/app-frame/root_views.js
+  s_20ea81ecafd6a6::t_6ca4500a8ee505 44-47,52-54,56-58,62-64
+  s_20ea81ecafd6a6::t_01cc21c71f7922 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "10d6fdcde48dab0dabf78dd39788fd26306b973e",
+  "prompts": {},
+  "sessions": {
+    "s_20ea81ecafd6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1e41361-2f04-4998-b24a-b7e91b2868ac",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+docs/patient-workspace-architecture-spec.md
+  s_5a146704f00d9c::t_957d3281130c85 365-385
+  s_5a146704f00d9c::t_56f4114fc5a949 65,347-357,398-400,505-508,888-889,1250,1289-1292,1294,1296,1298-1299,1301-1302,1304,1306-1308,1326
+  s_5a146704f00d9c::t_9afd6620f58ca9 1-64,66-346,358-364,386-397,401-504,509-887,890-1249,1251-1288,1293,1295,1297,1300,1303,1305,1309-1325,1327-1354
+src/js/base/routerapp.js
+  s_bb10a2a6aa7141::t_2c3d3005d3a9c3 56
+  s_bb10a2a6aa7141::t_cb6ec095891506 49-55,57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "a647fb1ef0708919640573de3eef5408917a6f51",
+  "prompts": {},
+  "sessions": {
+    "s_5a146704f00d9c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b99-b4a2-7582-bd31-5b23242fc748",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_bb10a2a6aa7141": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ea2d2-de4c-7980-b0f9-8d238289a939",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
