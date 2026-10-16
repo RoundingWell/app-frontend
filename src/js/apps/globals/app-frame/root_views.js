@@ -227,7 +227,7 @@ const TooltipRegionView = TopRegionView.extend({
   onRegionShow(region, view, options) {
     this.listenTo(userActivityCh, 'window:resize', this.empty);
     this.listenTo(userActivityCh, 'document:scroll', this.onDocumentScroll);
-    this.anchorPosition = view.regionOptions();
+    this.anchorPosition = view.uiView.getBounds(view.anchor);
 
     this.ignoreEl = options.ignoreEl;
     view.el.classList.remove(
@@ -243,7 +243,8 @@ const TooltipRegionView = TopRegionView.extend({
     this.stopListening(userActivityCh);
   },
   onDocumentScroll() {
-    if (isEqual(this.anchorPosition, this.region.currentView.regionOptions())) return;
+    const view = this.region.currentView;
+    if (isEqual(this.anchorPosition, view.uiView.getBounds(view.anchor))) return;
 
     this.empty();
   },
