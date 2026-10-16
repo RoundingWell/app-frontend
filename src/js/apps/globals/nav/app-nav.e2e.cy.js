@@ -474,10 +474,13 @@ context('App Nav', function() {
       .type('{esc}');
 
     cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
       .get('[data-nav-content-region]')
       .find('.js-search')
       .contains('.app-nav__label', 'Search')
-      .should('not.be.visible')
       .parents('.js-search')
       .click();
 
@@ -485,6 +488,12 @@ context('App Nav', function() {
       .get('.patient-search__modal')
       .find('.js-close')
       .click();
+
+    cy
+      .get('[data-nav-content-region]')
+      .find('.js-search')
+      .should('be.focused')
+      .blur();
 
     cy
       .get('[data-nav-content-region]')
