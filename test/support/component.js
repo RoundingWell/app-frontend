@@ -9,6 +9,7 @@ import '@cypress/code-coverage/support';
 import './api-guard';
 import './websockets';
 
+import 'scss/core/_tokens.scss';
 import 'scss/provider-core.scss';
 import 'scss/app-root.scss';
 

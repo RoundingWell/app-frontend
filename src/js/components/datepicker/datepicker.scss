@@ -38,7 +38,7 @@
 }
 
 .datepicker__month {
-  color: color(blue);
+  color: var(--color-interactive);
   cursor: pointer;
   padding: 4px 8px;
 }
@@ -79,7 +79,7 @@
 .datepicker__days li.is-next-month,
 .datepicker__days a.is-prev-month,
 .datepicker__days a.is-next-month {
-  color: #{$black-80};
+  color: var(--color-text-disabled);
 }
 
 // NOTE: Currently hiding other month days
@@ -89,28 +89,28 @@
 
 .datepicker__days a {
   border-radius: 50%;
-  color: color(blue);
+  color: var(--color-interactive);
   cursor: pointer;
   font-weight: 700;
 }
 
 .datepicker__days a.is-today {
-  color: color(green);
+  color: var(--color-success);
 }
 
 .datepicker__days a:hover,
 .datepicker__days a:active {
-  color: #{$white};
+  color: var(--color-on-solid);
 }
 
 .datepicker__days a:hover {
-  background-color: color(blue);
+  background-color: var(--color-primary-background);
 }
 
 .datepicker__days a:active,
 .datepicker__days a.is-selected {
-  background-color: color(blue, dark);
-  color: #{$white};
+  background-color: var(--color-primary-background-active);
+  color: var(--color-on-solid);
 }
 
 .datepicker__button {

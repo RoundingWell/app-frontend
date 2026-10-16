@@ -9,8 +9,8 @@ $nav-row-padding: 6px 12.5px;
 $nav-row-width: calc(100% - 16px);
 
 .app-nav {
-  background-color: $bkg-color;
-  color: rgb(255 255 255 / 60%);
+  background-color: var(--color-brand-surface);
+  color: var(--color-nav-text);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -42,7 +42,7 @@ $nav-row-width: calc(100% - 16px);
 }
 
 .app-nav__picklist-heading {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 14px;
   line-height: 16px;
   margin-bottom: 4px;
@@ -51,8 +51,8 @@ $nav-row-width: calc(100% - 16px);
 }
 
 .app-nav__picklist-workspace-name {
-  border-bottom: 1px solid #{$black-90};
-  color: #{$black-20};
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
@@ -60,33 +60,33 @@ $nav-row-width: calc(100% - 16px);
 
   &.is-highlighted:not(.is-disabled),
   &:hover:not(.is-disabled) {
-    background-color: #{$white};
-    color: #{$black-20};
+    background-color: var(--color-surface);
+    color: var(--color-text);
   }
 }
 
 .app-nav__picklist-item {
-  color: #{$black-20};
+  color: var(--color-text);
   font-weight: 600;
   padding: 8px 16px;
 
   .icon {
-    color: #{$black-20};
+    color: var(--color-text);
   }
 
   &.is-highlighted:not(.is-disabled),
   &:hover:not(.is-disabled),
   &.is-selected {
-    background-color: color(grey);
-    color: #{$black-20};
+    background-color: var(--color-surface-selected);
+    color: var(--color-text);
     position: relative;
 
     .icon {
-      color: color(blue);
+      color: var(--color-interactive);
     }
 
     &::before {
-      background-color: color(light_blue);
+      background-color: var(--color-primary-background);
       bottom: 0;
       content: '';
       left: 0;
@@ -112,7 +112,7 @@ $nav-row-width: calc(100% - 16px);
 
   &:hover, &.is-active {
     background-color: var(--color-nav-hover);
-    color: #{$white};
+    color: var(--color-on-solid);
   }
 }
 
@@ -139,7 +139,7 @@ $nav-row-width: calc(100% - 16px);
 }
 
 .app-nav__header-title {
-  color: #{$white};
+  color: var(--color-on-solid);
   display: inline-block;
   font-size: 16px;
   font-weight: 700;
@@ -178,14 +178,14 @@ $nav-row-width: calc(100% - 16px);
   grid-template-columns: $nav-icon-width minmax(0, 1fr);
   height: $nav-row-height;
   margin: $nav-row-margin;
-  opacity: 0.64;
+  opacity: var(--opacity-nav-item);
   padding: $nav-row-padding;
   text-align: left;
   width: $nav-row-width;
 
   &:hover, &.is-active, &.is-selected {
     background-color: var(--color-nav-hover);
-    color: #{$white};
+    color: var(--color-on-solid);
     opacity: 1;
   }
 }
@@ -272,7 +272,7 @@ $nav-row-width: calc(100% - 16px);
 }
 
 .app-nav__bottom {
-  background-color: $bkg-color;
+  background-color: var(--color-brand-surface);
   bottom: 0;
   margin-top: auto;
   padding-bottom: 16px;

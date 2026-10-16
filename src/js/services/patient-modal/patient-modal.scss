@@ -5,7 +5,7 @@
 
 .patient-modal__field-label {
   align-items: center;
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   display: flex;
   font-size: 14px;
   font-weight: 600;
@@ -22,7 +22,7 @@
 }
 
 .patient-modal__locked-icon {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   line-height: 24px;
   position: absolute;
   right: 16px;

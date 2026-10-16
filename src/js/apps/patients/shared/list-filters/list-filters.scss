@@ -29,7 +29,7 @@
 
 .list-filters__clear-filters {
   align-items: center;
-  color: color(blue);
+  color: var(--color-interactive);
   display: inline-flex;
   font-size: 14px;
   font-weight: 600;
@@ -40,7 +40,7 @@
 }
 
 .list-filters__body {
-  color: #{$black-20};
+  color: var(--color-text);
   padding-top: 16px;
 }
 
@@ -122,7 +122,7 @@
 }
 
 .list-filters__section-heading .icon {
-  color: #{$black-40};
+  color: var(--color-text-medium);
 }
 
 .list-filters__custom-filters-list {
@@ -226,7 +226,7 @@
 }
 
 .list-filters__section-button .icon {
-  color: #{$black-40};
+  color: var(--color-text-medium);
   transition: transform 0.15s linear;
 }
 

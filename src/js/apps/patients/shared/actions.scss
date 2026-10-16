@@ -16,7 +16,7 @@
 
 .action-form-button {
   align-items: center;
-  color: color(blue);
+  color: var(--color-interactive);
   display: inline-flex;
   height: 24px;
   justify-content: center;
@@ -25,7 +25,7 @@
 
   &:focus,
   &:hover {
-    color: color(blue, dark);
+    color: var(--color-interactive-hover);
   }
 
   .icon {
@@ -39,7 +39,7 @@
 }
 
 .action-tooltip__flow-icon {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   line-height: 16px;
   padding-right: 8px;
   vertical-align: text-bottom;
@@ -51,7 +51,7 @@
 }
 
 .action-tooltip__action-icon {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   display: table-cell;
   padding-right: 8px;
   text-align: center;

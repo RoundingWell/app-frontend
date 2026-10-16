@@ -1,4 +1,10 @@
 :root {
+  color-scheme: light dark;
+
+  // Paint the canvas before auth and application styles load.
+  background: var(--color-surface);
+  color: var(--color-text);
+
   /* Surfaces */
   --color-page-bg: #FBFBFC;
   --color-surface: #FFF;
@@ -6,24 +12,60 @@
   --color-surface-muted: #F3F3F4;
   --color-surface-hover: #F2F9FD;
   --color-surface-selected: #EDF0F2;
+  --color-surface-neutral: #F2F2F2;
   --color-selection-background: #EFF6FF;
   --color-chip-background: #FCFCFD;
   --color-control-background: #EEEEF0;
-  --color-nav-hover: #375467;
+  --color-highlight-background: #FFFDDE;
 
   /* Borders */
   --color-border: #E6E6E6;
   --color-border-subtle: #E5E5E6;
   --color-border-strong: #D8D8D8;
+  --color-border-muted: #CCC;
   --color-chip-border: #D6D6D7;
+  --color-control-border: #999;
+  --color-field-border: #E6E6E6;
   --color-divider: #E3E3E3;
 
-  /* Text */
+  /* Text and semantic state indicators */
   --color-text: #333;
+  --color-text-strong: #000;
   --color-text-medium: #666;
   --color-text-secondary: #767676;
   --color-text-subtle: #999;
+  --color-text-disabled: #CCC;
   --color-interactive: #0582DA;
+  --color-interactive-hover: #0270BF;
+  --color-integration-link: #237BA9;
+  --color-danger: #E65140;
+  --color-success: #00BF68;
+  --color-warning: #FF8000;
+  --color-accent: #9013FE;
+
+  /* Solid actions: paired with on-solid rather than semantic text colors */
+  --color-primary-background: #0582DA;
+  --color-primary-background-hover: #2490D8;
+  --color-primary-background-active: #0270BF;
+  --color-danger-background: #E65140;
+  --color-danger-background-hover: #FF5A47;
+  --color-danger-background-active: #CC4839;
+  --color-positive-background: #00BF68;
+  --color-positive-background-hover: #24DE7F;
+  --color-positive-background-active: #138F51;
+  --color-warning-background: #FF8000;
+  --color-on-solid: #FFF;
+  --color-inverse-surface: #333;
+  --color-inverse-hover: #666;
+  --color-on-inverse: #FFF;
+
+  /* Intentionally dark branded surfaces in both modes */
+  --color-brand-surface: #1F2B33;
+  --color-brand-text-secondary: #999;
+  --color-brand-link: #0582DA;
+  --color-nav-hover: #375467;
+  --color-nav-text: rgb(255 255 255 / 60%);
+  --opacity-nav-item: 0.64;
 
   /* Elevation */
   --shadow-card: 0 1px 0 rgb(77 77 77 / 20%);
@@ -42,4 +84,60 @@
   --content-detail-width: min(1200px, calc(100% - var(--content-detail-gutter)));
   --content-expanded-width: min(1440px, 100%);
   --content-list-width: min(1200px, 100%);
+}
+
+// Keep the OS preference live in CSS; Chrome 112 is still a supported target.
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-page-bg: #131B23;
+    --color-surface: #1D2832;
+    --color-surface-muted: #26333F;
+    --color-surface-hover: #203D52;
+    --color-surface-selected: #324250;
+    --color-surface-neutral: #2C3A46;
+    --color-selection-background: #203E58;
+    --color-chip-background: #24323E;
+    --color-control-background: #354653;
+    --color-border: #3B4B58;
+    --color-border-subtle: #354551;
+    --color-border-strong: #627582;
+    --color-border-muted: #647784;
+    --color-chip-border: #6E8190;
+    --color-control-border: #8093A2;
+    --color-field-border: #71818E;
+    --color-divider: #3B4B58;
+    --color-text: #E2EAF0;
+    --color-text-strong: #FFF;
+    --color-text-medium: #B4C2CD;
+    --color-text-secondary: #ADBDCA;
+    --color-text-subtle: #A4B5C2;
+    --color-text-disabled: #728593;
+    --color-interactive: #73C3FF;
+    --color-interactive-hover: #A3D8FF;
+    --color-integration-link: #73C3FF;
+    --color-danger: #FF9A8F;
+    --color-success: #69DFA6;
+    --color-warning: #FFB36B;
+    --color-accent: #C5A0FF;
+    --color-highlight-background: #443D22;
+    --color-primary-background: #096BAE;
+    --color-primary-background-hover: #0873BA;
+    --color-primary-background-active: #085E99;
+    --color-brand-text-secondary: #A4B5C2;
+    --color-brand-link: #73C3FF;
+    --color-warning-background: #99500B;
+    --color-danger-background: #AD3C32;
+    --color-danger-background-hover: #BA4337;
+    --color-danger-background-active: #99332B;
+    --color-positive-background: #167347;
+    --color-positive-background-hover: #197E4F;
+    --color-positive-background-active: #12633D;
+    --color-inverse-surface: #CAD8E2;
+    --color-inverse-hover: #E2EAF0;
+    --color-on-inverse: #1D2832;
+    --color-brand-surface: #15212B;
+    --color-nav-text: #ADBDCA;
+    --opacity-nav-item: 1;
+    --shadow-card: 0 1px 0 rgb(0 0 0 / 45%);
+  }
 }

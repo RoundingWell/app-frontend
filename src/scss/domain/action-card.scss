@@ -55,7 +55,7 @@ button.action-card__count {
 
 button.action-card__count:hover,
 button.action-card__count:focus {
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 @container (width <= #{work-card.$stack}) {

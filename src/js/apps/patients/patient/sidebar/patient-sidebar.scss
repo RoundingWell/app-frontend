@@ -54,7 +54,7 @@
 }
 
 .patient-sidebar__name:hover {
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 .patient-sidebar__close {
@@ -102,7 +102,7 @@
 }
 
 .patient-sidebar__card {
-  background: #{$white};
+  background: var(--color-surface);
   border: 0.5px solid var(--color-chip-border);
   border-radius: 8px;
   box-shadow: var(--shadow-card);
@@ -134,7 +134,7 @@
   width: 100%;
 
   &:focus-visible {
-    outline: 2px solid color(blue);
+    outline: 2px solid var(--color-interactive);
     outline-offset: 4px;
   }
 }

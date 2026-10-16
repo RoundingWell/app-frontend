@@ -1,5 +1,5 @@
 .worklist-list-page {
-  --date-filter-nav-background: #{$white};
+  --date-filter-nav-background: var(--color-surface);
   --date-filter-nav-border-color: var(--color-border-subtle);
   --date-filter-nav-border-width: 0.5px;
   --date-filter-nav-box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
@@ -100,7 +100,7 @@
 
   &:hover,
   &:focus-visible {
-    color: color(blue);
+    color: var(--color-interactive);
   }
 
   .icon {
@@ -149,20 +149,20 @@
 }
 
 .worklist-list__sidebar-button:hover:enabled {
-  background-color: #{$black-95};
-  border-color: #{$black-80};
+  background-color: var(--color-surface-neutral);
+  border-color: var(--color-border-muted);
 }
 
 .worklist-list__sidebar-button:active:enabled,
 .worklist-list__sidebar-button:focus {
-  background-color: #{$black-90};
-  border-color: #{$black-90};
+  background-color: var(--color-border);
+  border-color: var(--color-border);
 }
 
 .worklist-list__sidebar-button[aria-pressed='true'] {
   background: var(--color-control-background);
   border-color: transparent;
-  color: #{$black-20};
+  color: var(--color-text);
 }
 
 .worklist-list__filter-sort {
@@ -171,22 +171,22 @@
 }
 
 .worklist-list__owner-toggle-button {
-  color: color(blue);
+  color: var(--color-interactive);
   font-size: 12px;
   line-height: 16px;
 }
 
 .worklist-list__owner-toggle-button:hover:enabled {
-  background-color: color(light_blue, light);
-  border-color: color(light_blue);
-  color: color(light_blue);
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-interactive);
+  color: var(--color-interactive);
 }
 
 .worklist-list__owner-toggle-button:active:enabled,
 .worklist-list__owner-toggle-button:focus {
-  background-color: color(light_blue);
-  border-color: color(light_blue);
-  color: #{$white};
+  background-color: var(--color-primary-background);
+  border-color: var(--color-interactive);
+  color: var(--color-on-solid);
 }
 
 .worklist-list__owner-toggle-icon {

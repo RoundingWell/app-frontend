@@ -1,16 +1,16 @@
 .widgets__value:empty::before {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
 
   // &ndash;
   content: '–';
 }
 
 .widgets__status-inactive {
-  color: #{$error-color};
+  color: var(--color-danger);
 }
 
 .widgets__status-archived {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
 }
 
 .widgets__form-widget {
@@ -38,7 +38,7 @@
 }
 
 .widgets__divider {
-  border-top: 1px solid #{$black-90};
+  border-top: 1px solid var(--color-border);
   content: '';
   display: block;
   height: 0;

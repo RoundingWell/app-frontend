@@ -1,6 +1,6 @@
 .patient-list__title-filter-button {
   align-items: center;
-  color: color(blue);
+  color: var(--color-interactive);
   display: flex;
   font-weight: inherit;
   margin-left: var(--space-1);
@@ -8,7 +8,7 @@
 }
 
 .patient-list__title-filter-icon {
-  color: color(blue);
+  color: var(--color-interactive);
   font-size: 12px;
   margin-left: 8px;
   vertical-align: -0.0825em;

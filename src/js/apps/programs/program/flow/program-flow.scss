@@ -4,11 +4,11 @@
   padding: 8px 0 16px;
 
   &:hover:not(.is-selected) {
-    background-color: color(light_blue, light);
+    background-color: var(--color-surface-hover);
   }
 
   &.is-selected {
-    background-color: #{$greyed};
+    background-color: var(--color-surface-selected);
   }
 }
 
@@ -17,7 +17,7 @@
   margin-bottom: 16px;
 
   .icon {
-    color: #{$black-60};
+    color: var(--color-text-subtle);
     font-size: 20px;
     margin-right: 8px;
     vertical-align: bottom;
@@ -25,7 +25,7 @@
 }
 
 .program-flow__details {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   display: inline-block;
   font-size: 14px;
   margin-right: 16px;
@@ -40,7 +40,7 @@
 }
 
 .program-flow__actions {
-  border-top: #{$black-90} 1px solid;
+  border-top: var(--color-border) 1px solid;
   margin: 0 24px;
   padding: 16px 0;
 }

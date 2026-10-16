@@ -51,7 +51,7 @@
   }
 
   .icon.fa-check {
-    color: color(blue);
+    color: var(--color-interactive);
     font-size: 12px;
     margin-left: 16px;
     margin-right: 0;
@@ -80,7 +80,7 @@
 }
 
 .picklist__message {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 14px;
   font-style: italic;
   padding: 4px 8px;
@@ -99,7 +99,7 @@
 .picklist__message-loading {
   align-items: center;
   animation: picklist-pulse 400ms ease-in-out infinite alternate;
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   display: flex;
   font-size: 12px;
   justify-content: center;
@@ -130,8 +130,8 @@
   width: 100%;
 
   &:focus {
-    background: #{$white};
-    border-color: color(blue);
+    background: var(--color-surface);
+    border-color: var(--color-interactive);
   }
 
   &::placeholder {
@@ -154,8 +154,8 @@
 }
 
 .picklist__info {
-  background: #{$highlighted};
-  color: #{$black-20};
+  background: var(--color-highlight-background);
+  color: var(--color-text);
   font-size: 12px;
   line-height: 1.4;
   margin: 8px 8px 0;
@@ -163,7 +163,7 @@
   position: relative;
 
   .icon {
-    color: #{$black-60};
+    color: var(--color-text-subtle);
     left: 8px;
     position: absolute;
     top: 8px;

@@ -5,7 +5,7 @@
 
   &.is-applied {
     .icon {
-      color: #{$white};
+      color: var(--color-on-solid);
     }
   }
 }
@@ -18,7 +18,7 @@
 }
 
 .list-search__clear-icon {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   cursor: pointer;
   line-height: 24px;
   position: absolute;
@@ -40,12 +40,12 @@
   padding: 4px 32px 4px 36px;
 
   .is-applied & {
-    background-color: color(blue);
-    border: 1px solid color(blue);
-    color: #{$white};
+    background-color: var(--color-primary-background);
+    border: 1px solid var(--color-interactive);
+    color: var(--color-on-solid);
   }
 
   &::placeholder {
-    color: #{$black-20};
+    color: var(--color-text);
   }
 }

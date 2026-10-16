@@ -1,5 +1,5 @@
 .dialer-component__phone-icon {
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 .dialer-component__phone-number {
@@ -7,7 +7,7 @@
 }
 
 .dialer-component__phone-label {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 12px;
   margin-left: auto;
   text-transform: capitalize;

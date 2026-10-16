@@ -1,5 +1,5 @@
 .comment__item {
-  color: #{$black-20};
+  color: var(--color-text);
   font-size: 14px;
   padding-left: 40px;
   position: relative;
@@ -12,9 +12,9 @@
 }
 
 .comment__author-label {
-  background: #{$black-90};
+  background: var(--color-border);
   border-radius: 16px;
-  color: #{$black-20};
+  color: var(--color-text);
   display: inline-block;
   font-size: 12px;
   font-weight: 600;
@@ -35,18 +35,18 @@
 }
 
 .comment__author-name {
-  color: #{$black-20};
+  color: var(--color-text);
   font-weight: 600;
 }
 
 .comment__timestamp {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 12px;
   margin-left: 4px;
 }
 
 .comment__edit {
-  color: color(blue);
+  color: var(--color-interactive);
   cursor: pointer;
   float: right;
   font-size: 12px;
@@ -67,7 +67,7 @@
 }
 
 .comment__edited {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 12px;
 }
 
@@ -82,14 +82,14 @@
 }
 
 .comment__delete {
-  color: #{$error-color};
+  color: var(--color-danger);
   font-size: 12px;
   margin-left: 40px;
   margin-right: auto;
   padding: 0;
 
   &:hover {
-    color: #{$error-color};
+    color: var(--color-danger);
     opacity: 0.5;
   }
 

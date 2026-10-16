@@ -1,7 +1,7 @@
 .workflows__add-action-icon {
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 .workflows__add-flow-icon {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
 }

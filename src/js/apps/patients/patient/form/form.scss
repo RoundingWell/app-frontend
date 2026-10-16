@@ -9,7 +9,7 @@
 }
 
 .form__frame {
-  background: #{$black-95};
+  background: var(--color-surface-neutral);
   display: flex;
   flex: 1;
   height: 100%;
@@ -107,11 +107,11 @@
 
   .form__frame--embedded:not(.form__frame--expanded) .form__title {
     border-radius: 8px 8px 0 0;
-    border-right: 1px solid #{$black-90};
+    border-right: 1px solid var(--color-border);
   }
 
   .form__frame--embedded:not(.form__frame--expanded) .form__controls {
-    border-left: 1px solid #{$black-90};
+    border-left: 1px solid var(--color-border);
     border-radius: 0;
     border-top: 0;
   }
@@ -198,7 +198,7 @@
 
 .form__title {
   align-items: center;
-  border: 1px solid #{$black-90};
+  border: 1px solid var(--color-border);
   border-bottom: 0;
   border-radius: 8px 0 0;
   border-right: 0;
@@ -224,8 +224,8 @@
 }
 
 .form__content {
-  background-color: #{$white};
-  border: 1px solid #{$black-90};
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 0 0 8px 8px;
   box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
   height: 100%;
@@ -240,7 +240,7 @@
 
 .form__controls {
   align-items: center;
-  border: 1px solid #{$black-90};
+  border: 1px solid var(--color-border);
   border-bottom: 0;
   border-left: 0;
   border-radius: 0 8px 0 0;
@@ -259,7 +259,7 @@
 
 .form__actions-icon {
   align-items: center;
-  background: #{$white};
+  background: var(--color-surface);
   border: 1px solid var(--color-chip-border);
   border-radius: 16px;
   cursor: pointer;
@@ -270,7 +270,7 @@
   width: 40px;
 
   .icon {
-    color: #{$black-60};
+    color: var(--color-text-subtle);
     font-size: 16px;
     vertical-align: middle;
   }
@@ -279,7 +279,7 @@
   &.is-active,
   &.is-selected {
     .icon {
-      color: color(blue);
+      color: var(--color-interactive);
     }
   }
 
@@ -293,7 +293,7 @@
     opacity: 0.5;
 
     .icon {
-      color: #{$black-80};
+      color: var(--color-text-disabled);
     }
   }
 }
@@ -304,10 +304,10 @@
 
 .form__submission-status {
   align-items: center;
-  background: #{$white};
+  background: var(--color-surface);
   border: 1px solid var(--color-chip-border);
   border-radius: 16px;
-  color: #{$black-20};
+  color: var(--color-text);
   display: inline-flex;
   font-size: 14px;
   height: 32px;
@@ -325,19 +325,19 @@
 }
 
 .form__submission-status:hover:enabled {
-  background-color: #{$black-95};
-  border-color: #{$black-80};
+  background-color: var(--color-surface-neutral);
+  border-color: var(--color-border-muted);
 }
 
 .form__submission-status:active:enabled,
 .form__submission-status:focus {
-  background-color: #{$black-90};
-  border-color: #{$black-90};
+  background-color: var(--color-border);
+  border-color: var(--color-border);
 }
 
 .form__submit-status {
   align-items: center;
-  border-left: 1px solid #{$black-80};
+  border-left: 1px solid var(--color-border-muted);
   display: flex;
   margin-left: 20px;
   padding-left: 20px;
@@ -348,7 +348,7 @@
   margin-right: 12px;
 
   .icon {
-    color: #{$black-60};
+    color: var(--color-text-subtle);
     font-size: 20px;
     vertical-align: -0.125em;
   }
@@ -360,8 +360,8 @@
 }
 
 .form__draft-menu {
-  background: #{$white};
-  border: 1px solid #{$black-90};
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
   font-size: 12px;
@@ -370,7 +370,7 @@
 }
 
 .form__draft-menu-info {
-  color: #{$black-40};
+  color: var(--color-text-medium);
   padding: 0 16px;
 }
 
@@ -381,7 +381,7 @@
 }
 
 .form__draft-menu-discard-button {
-  color: color(red);
+  color: var(--color-danger);
   cursor: pointer;
   display: block;
   font-size: 14px;
@@ -391,8 +391,8 @@
   width: 100%;
 
   &:hover {
-    background-color: color(blue);
-    color: #{$white};
+    background-color: var(--color-primary-background);
+    color: var(--color-on-solid);
   }
 }
 

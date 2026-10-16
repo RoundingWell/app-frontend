@@ -31,7 +31,7 @@
 }
 
 .patient-pages__tab:hover {
-  background: var(--patient-pages-tab-hover-background, #{$black-95});
+  background: var(--patient-pages-tab-hover-background, var(--color-surface-neutral));
   color: var(--color-text);
 }
 
@@ -50,6 +50,6 @@
 }
 
 .patient-pages__tab:focus-visible {
-  outline: 2px solid #{color(blue)};
+  outline: 2px solid var(--color-interactive);
   outline-offset: 2px;
 }

@@ -1,17 +1,19 @@
 .form-input {
-  border: 1px solid #{$black-90};
+  background: var(--color-surface);
+  border: 1px solid var(--color-field-border);
   border-radius: 4px;
+  color: var(--color-text);
 
   &::placeholder {
-    color: #{$black-60};
+    color: var(--color-text-subtle);
   }
 
   &:hover:enabled {
-    border-color: #{$black-60};
+    border-color: var(--color-control-border);
   }
 
   &:focus {
-    border-color: color(blue);
+    border-color: var(--color-interactive);
     box-shadow: 0 0 8px rgb(color(blue, 'dark'), 0.3);
   }
 
@@ -22,7 +24,7 @@
   }
 
   &.has-error {
-    border-color: #{$error-color};
+    border-color: var(--color-danger);
   }
 }
 
@@ -43,6 +45,6 @@
 }
 
 .form-error {
-  color: #{$error-color};
+  color: var(--color-danger);
   font-size: 12px;
 }

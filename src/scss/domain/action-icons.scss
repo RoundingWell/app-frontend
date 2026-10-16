@@ -3,25 +3,25 @@
 }
 
 .action-icon--black {
-  color: #{$black-20};
+  color: var(--color-text);
 }
 
 .action-icon--grey {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
 }
 
 .action-icon--red {
-  color: color(red);
+  color: var(--color-danger);
 }
 
 .action-icon--green {
-  color: color(green);
+  color: var(--color-success);
 }
 
 .action-icon--orange {
-  color: color(orange);
+  color: var(--color-warning);
 }
 
 .action-icon--purple {
-  color: color(purple);
+  color: var(--color-accent);
 }

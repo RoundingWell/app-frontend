@@ -9,10 +9,10 @@
 }
 
 .workflows__tab--selected {
-  color: color(blue);
+  color: var(--color-interactive);
 
   &::before {
-    background: color(blue);
+    background: var(--color-primary-background);
     border-radius: 2px 2px 0 0;
     bottom: 0;
     content: ' ';
@@ -25,7 +25,7 @@
 }
 
 .workflows__actions {
-  border-top: 1px solid #{$black-90};
+  border-top: 1px solid var(--color-border);
   margin: 0 24px;
   padding: 16px 0;
 }
@@ -60,5 +60,5 @@
 
 .workflows__flow-state--published,
 .workflows__flow-state--automated {
-  color: color(green);
+  color: var(--color-success);
 }

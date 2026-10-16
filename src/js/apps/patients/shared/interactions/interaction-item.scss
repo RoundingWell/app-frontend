@@ -1,5 +1,5 @@
 .patient-interactions__item {
-  --interaction-color: #{color(blue)};
+  --interaction-color: var(--color-interactive);
 
   color: var(--color-text);
   display: flex;
@@ -11,15 +11,15 @@
 .patient-interactions__item--voice,
 .patient-interactions__item--voicemail,
 .patient-interactions__item--video {
-  --interaction-color: #{color(purple)};
+  --interaction-color: var(--color-accent);
 }
 
 .patient-interactions__item--appointment {
-  --interaction-color: #{color(green)};
+  --interaction-color: var(--color-success);
 }
 
 .patient-interactions__item--visit {
-  --interaction-color: #{color(orange)};
+  --interaction-color: var(--color-warning);
 }
 
 .patient-interactions__marker {
@@ -105,7 +105,7 @@
 }
 
 .patient-interactions__item.is-selected .patient-interactions__card {
-  border-color: color(blue);
+  border-color: var(--color-interactive);
 }
 
 .patient-interactions__item-heading {
@@ -190,10 +190,10 @@
 }
 
 .patient-interactions__cancellation {
-  color: color(red);
+  color: var(--color-danger);
 }
 
 .patient-interactions__action:focus-visible {
-  outline: 2px solid #{color(blue)};
+  outline: 2px solid var(--color-interactive);
   outline-offset: 2px;
 }

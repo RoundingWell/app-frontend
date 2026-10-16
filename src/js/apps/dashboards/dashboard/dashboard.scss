@@ -14,13 +14,13 @@
 
 
 .dashboard__context-trail {
-  color: #{$black-20};
+  color: var(--color-text);
   line-height: 1;
   padding: 16px 0;
   z-index: var(--z-positioned);
 
   .icon {
-    color: #{$black-60};
+    color: var(--color-text-subtle);
     font-size: 12px;
     margin-right: 8px;
     vertical-align: -0.0825em;
@@ -30,7 +30,7 @@
 .dashboard__context-link {
   background: transparent;
   border: 0;
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   cursor: pointer;
   font: inherit;
   font-weight: 600;
@@ -38,7 +38,7 @@
   padding: 0;
 
   &:hover {
-    color: color(blue);
+    color: var(--color-interactive);
   }
 }
 

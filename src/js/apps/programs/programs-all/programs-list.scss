@@ -1,10 +1,10 @@
 
 .programs-list__published {
-  color: #{$black};
+  color: var(--color-text-strong);
   font-weight: 600;
 
   &.is-published {
-    color: color(green);
+    color: var(--color-success);
   }
 
   .icon {

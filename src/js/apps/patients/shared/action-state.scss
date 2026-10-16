@@ -5,25 +5,25 @@
 }
 
 .action-state--red {
-  color: color(red);
+  color: var(--color-danger);
 }
 
 .action-state--black {
-  color: #{$black-20};
+  color: var(--color-text);
 }
 
 .action-state--green {
-  color: color(green);
+  color: var(--color-success);
 }
 
 .action-state--orange {
-  color: color(orange);
+  color: var(--color-warning);
 }
 
 .action-state--purple {
-  color: color(purple);
+  color: var(--color-accent);
 }
 
 .action-state--grey {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
 }

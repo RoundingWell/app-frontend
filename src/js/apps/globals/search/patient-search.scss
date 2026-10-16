@@ -60,7 +60,7 @@
 }
 
 .patient-search__header {
-  border-bottom: 1px solid #{$black-90};
+  border-bottom: 1px solid var(--color-border);
   margin: 0 8px;
   padding-left: 16px;
   position: relative;
@@ -68,7 +68,7 @@
 
 .patient-search__picklist-header {
   align-items: center;
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   display: flex;
   font-size: 12px;
   justify-content: space-between;
@@ -112,7 +112,7 @@
   align-items: center;
   background: transparent;
   border: 0;
-  color: #{$black-20};
+  color: var(--color-text);
   cursor: pointer;
   display: grid;
   font-size: 14px;
@@ -123,18 +123,18 @@
   width: 100%;
 
   &.is-highlighted {
-    background-color: color(blue);
-    color: #{$white};
+    background-color: var(--color-primary-background);
+    color: var(--color-on-solid);
 
     .patient-search__picklist-item-meta,
     .patient-search__picklist-item-result-label {
-      color: #{$white};
+      color: var(--color-on-solid);
     }
   }
 }
 
 .patient-search__picklist-item.is-inactive {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-style: italic;
 
   .patient-search__picklist-item-result-label {
@@ -144,12 +144,12 @@
 
 @media (hover: hover) and (pointer: fine) {
   .patient-search__picklist-item:hover {
-    background-color: color(blue);
-    color: #{$white};
+    background-color: var(--color-primary-background);
+    color: var(--color-on-solid);
 
     .patient-search__picklist-item-meta,
     .patient-search__picklist-item-result-label {
-      color: #{$white};
+      color: var(--color-on-solid);
     }
   }
 }
@@ -187,7 +187,7 @@
 }
 
 .patient-search__picklist-item-result-label {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
 }
 
 .patient-search__picklist-item-result {
@@ -199,7 +199,7 @@
 }
 
 .patient-search__no-results {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 14px;
   font-style: normal;
   margin: 0 8px;
@@ -210,19 +210,19 @@
 .patient-search__add {
   background: transparent;
   border: 0;
-  color: color(blue);
+  color: var(--color-interactive);
   cursor: pointer;
   font: inherit;
   padding: 0;
 
   &:hover,
   &:focus {
-    color: color(blue, dark);
+    color: var(--color-interactive-hover);
   }
 }
 
 .patient-search__tip {
-  border-bottom: 1px solid #{$black-90};
+  border-bottom: 1px solid var(--color-border);
   padding-bottom: 16px;
   padding-left: 60px;
   text-align: left;
@@ -240,9 +240,9 @@
 }
 
 .patient-search__search-by-label {
-  background-color: color(light_blue, light);
+  background-color: var(--color-surface-hover);
   border-radius: 4px;
-  color: #{$black-20};
+  color: var(--color-text);
   display: inline-block;
   font-weight: 600;
   margin-right: 8px;
