@@ -1,6 +1,6 @@
 # Experimental OS theme
 
-Based on PR1847 at `cc9b22fa9b0bad5ee209b3c5afcca50350dabe01`.
+Based on PR1847 at `3d69acab8d91784909e2cf3054f4041e655fb9f6`.
 
 The browser owns the theme. `index.html` loads `core/_tokens.scss` as a blocking
 stylesheet before configuration, authentication, and application JavaScript.
@@ -16,6 +16,8 @@ fallback architecture. Browser targets and dependencies are unchanged.
 Owned styles consume semantic surface, text, border, interaction and state tokens.
 Solid actions use separate backgrounds paired with `--color-on-solid`; semantic
 state text becomes lighter in dark mode without making filled buttons too bright.
+Telephony wrappers pair a branded header background with its own foreground role; dark call states reuse the
+contrasting solid-action fills.
 The existing dark navigation, preloader, error artwork and vendor brand colors
 remain intentional. Dark navigation avoids compounded text opacity. Existing
 light token values, selectors, layout measurements and button sizes are preserved.
