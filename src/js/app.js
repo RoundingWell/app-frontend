@@ -33,7 +33,7 @@ import DialerService from 'js/services/dialer';
 import ErrorApp from 'js/apps/globals/error/error_app';
 
 import { RootView } from 'js/apps/globals/app-frame/root_views';
-import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
+import NotSetupView from 'js/auth/prelogin/not-setup_views';
 
 const Application = App.extend({
   channelName: 'app',
@@ -145,7 +145,7 @@ const Application = App.extend({
     addError(get(error, 'responseData', error));
 
     if (isNotSetup) {
-      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new NotSetupView());
       this.showView();
       return;
     }
@@ -159,7 +159,7 @@ const Application = App.extend({
     this.startDialer().catch(addError);
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
-      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new NotSetupView());
       return;
     }
 

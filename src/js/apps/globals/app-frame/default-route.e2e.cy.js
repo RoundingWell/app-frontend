@@ -100,8 +100,8 @@ context('default routes', function() {
       .visit({ noWait: true });
 
     cy
-      .get('.prelogin__message')
-      .contains('Hold up, your account is not set up yet. Please notify your manager or administrator to correct this issue.');
+      .get('.account-setup')
+      .contains('Hold up, Your account is not set up yet. Please notify your manager or administrator to correct this issue.');
   });
 
   specify('current clinician has no team', function() {
@@ -118,8 +118,8 @@ context('default routes', function() {
       .visit({ noWait: true });
 
     cy
-      .get('.prelogin__message')
-      .contains('Hold up, your account is not set up yet. Please notify your manager or administrator to correct this issue.');
+      .get('.account-setup')
+      .contains('Hold up, Your account is not set up yet. Please notify your manager or administrator to correct this issue.');
   });
 
   // Server should return 403, but for good measure
@@ -137,15 +137,15 @@ context('default routes', function() {
       .visit({ noWait: true });
 
     cy
-      .get('.prelogin__message')
-      .contains('Hold up, your account is not set up yet. Please notify your manager or administrator to correct this issue.');
+      .get('.account-setup')
+      .contains('Hold up, Your account is not set up yet. Please notify your manager or administrator to correct this issue.');
 
     cy
-      .get('.prelogin')
+      .get('.account-setup')
       .click('right');
 
     cy
-      .get('.prelogin__message');
+      .get('.account-setup');
   });
 
   specify('current clinician has been disabled', function() {
@@ -165,8 +165,8 @@ context('default routes', function() {
       .wait('@routeClinicianDisabled');
 
     cy
-      .get('.prelogin__message')
-      .contains('Hold up, your account is not set up yet. Please notify your manager or administrator to correct this issue.');
+      .get('.account-setup')
+      .contains('Hold up, Your account is not set up yet. Please notify your manager or administrator to correct this issue.');
   });
 
   specify('keeps the loader visible until bootstrap completes', function() {

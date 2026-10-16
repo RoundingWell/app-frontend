@@ -105,20 +105,3 @@ body {
     text-decoration: none;
   }
 }
-
-.prelogin__message-header {
-  color: color(orange);
-  margin-bottom: 32px;
-
-  .icon {
-    font-size: 32px;
-  }
-}
-
-.prelogin__message {
-  color: #{$black-20};
-  font-size: 28px;
-  line-height: 40px;
-  padding: 16px 80px;
-  text-align: center;
-}

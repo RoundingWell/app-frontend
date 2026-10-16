@@ -50,8 +50,8 @@ careOptsFrontend:
         errorHeader: Uh-oh.
         errorInfo: "Error code: { status }."
         errorMessage: Something went wrong.
+        notFoundHelp: Please check the URL.
         notFoundInfo: This page doesn't exist.
-        notFoundMessage: Something went wrong.
     modal:
       modalViews:
         modalView:
