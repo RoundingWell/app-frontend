@@ -33,7 +33,7 @@ import DialerService from 'js/services/dialer';
 import ErrorApp from 'js/apps/globals/error/error_app';
 
 import { RootView } from 'js/apps/globals/app-frame/root_views';
-import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
+import NotSetupView from 'js/auth/prelogin/not-setup_views';
 
 const Application = App.extend({
   channelName: 'app',
@@ -58,8 +58,6 @@ const Application = App.extend({
     this.configComponents();
     this.startServices();
     this.setListeners();
-    // Ensure Error is the first app initialized
-    new ErrorApp({ region: this.getView().getRegion('error') });
   },
 
   configComponents() {
@@ -104,6 +102,10 @@ const Application = App.extend({
 
     signal.throwIfAborted();
 
+    // Bootstrap failures belong to the startup screen. Register the error router
+    // before the app-frame routers, once bootstrap has completed successfully.
+    this.addChildApp('error', new ErrorApp({ region: this.getView().getRegion('error') }));
+
     return this.startAppFrame(bootstrapService, AppFrameApp);
   },
 
@@ -111,8 +113,6 @@ const Application = App.extend({
     const currentUser = bootstrapService.getCurrentUser();
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) return { currentUser };
-
-    this.getView().getRegion('preloader').empty();
 
     const appFrameApp = this.addChildApp('appFrame', new AppFrameApp());
     this.listenToOnce(appFrameApp, 'before:start', this.startHistory);
@@ -138,15 +138,20 @@ const Application = App.extend({
     const isNotSetup = error === 'No workspaces found' || get(error, ['response', 'status']) === 403;
 
     if (!isNotSetup && this.getChildApp('bootstrap').isRunning()) {
+      this.getView().getRegion('preloader').currentView.dismiss();
       return handleErrors(error).catch(reportedError => window.reportError(reportedError));
     }
 
     addError(get(error, 'responseData', error));
 
     if (isNotSetup) {
-      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new NotSetupView());
       this.showView();
+      return;
     }
+
+    this.getView().getRegion('preloader').currentView.showError();
+    this.showView();
   },
 
   onStart(app, options, { currentUser }) {
@@ -154,8 +159,11 @@ const Application = App.extend({
     this.startDialer().catch(addError);
 
     if (!currentUser.hasTeam() || !currentUser.isEnabled()) {
-      this.getView().getRegion('preloader').show(new PreloaderView({ notSetup: true }));
+      this.getView().getRegion('preloader').show(new NotSetupView());
+      return;
     }
+
+    this.getView().getRegion('preloader').currentView.dismiss();
   },
 
   startHistory() {

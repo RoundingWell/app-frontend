@@ -1,0 +1,113 @@
+@use '../../../../scss/modules/ambient-glow';
+
+@keyframes startup-core-breathe {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  25%,
+  75% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes startup-ring-release {
+  0% {
+    opacity: 0;
+    transform: scale(0.56);
+  }
+
+  12% {
+    opacity: 0.42;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+.startup__ambient {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.startup__visual {
+  align-items: center;
+  display: flex;
+  flex: none;
+  height: 88px;
+  justify-content: center;
+  position: relative;
+  width: 88px;
+}
+
+.startup__motion {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+}
+
+.startup__core {
+  animation: startup-core-breathe 3.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  background: radial-gradient(circle at 50% 50%, rgb(5 130 218 / 52%) 0, rgb(5 130 218 / 26%) 38%, rgb(5 130 218 / 0%) 72%);
+  border-radius: 50%;
+  height: 64px;
+  position: absolute;
+  width: 64px;
+  will-change: transform, opacity;
+}
+
+.startup__ring {
+  animation: startup-ring-release 3.6s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+  border: 1px solid rgb(174 216 250 / 100%);
+  border-radius: 50%;
+  box-sizing: border-box;
+  height: 88px;
+  opacity: 0;
+  position: absolute;
+  transform: scale(0.56);
+  width: 88px;
+  will-change: transform, opacity;
+}
+
+.startup__ring--offset {
+  animation-delay: 1.8s;
+}
+
+.startup__logo {
+  display: block;
+  height: 36px;
+  position: relative;
+  width: 36px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup__core,
+  .startup__ring {
+    animation: none;
+    will-change: auto;
+  }
+
+  .startup__core {
+    opacity: 0.8;
+    transform: none;
+  }
+
+  .startup__ring {
+    opacity: 0.22;
+    transform: none;
+  }
+
+  .startup__ring--offset {
+    opacity: 0.12;
+    transform: scale(0.76);
+  }
+}

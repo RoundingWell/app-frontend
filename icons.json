@@ -4,6 +4,7 @@
   ],
   "fat": [],
   "fas": [
+    "arrow-left",
     "calendar",
     "caret-down",
     "caret-left",
@@ -67,6 +68,7 @@
     "lock",
     "lock-keyhole",
     "magnifying-glass",
+    "octagon-exclamation",
     "paper-plane-top",
     "paperclip",
     "pen",
@@ -85,6 +87,7 @@
     "tag",
     "toggle-off",
     "trash-can",
+    "triangle-exclamation",
     "user",
     "users",
     "users-gear",
