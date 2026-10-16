@@ -17,7 +17,8 @@ function assertTheme(isDark) {
     });
 }
 
-context('OS color scheme', function() {
+// Cypress exposes OS media emulation through CDP only in Chromium browsers.
+context('OS color scheme', { browser: { family: 'chromium' } }, function() {
   afterEach(function() {
     setOsTheme('light');
   });
