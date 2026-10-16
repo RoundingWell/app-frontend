@@ -114,3 +114,9 @@ careOptsFrontend:
         picklistItemView:
           labelDob: Birth Date
           labelName: Name
+    startup:
+      errorMessage: Check your connection, then try again.
+      errorTitle: We couldn't load your workspace
+      loading: Loading RoundingWell
+      retry: Retry
+      retrying: Retrying...

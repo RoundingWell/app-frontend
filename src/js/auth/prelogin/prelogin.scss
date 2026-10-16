@@ -11,19 +11,8 @@ body {
   box-sizing: border-box;
 }
 
-@keyframes reveal-preloader {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
 .prelogin {
   align-items: center;
-  animation: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) 0.5s reveal-preloader forwards;
   box-sizing: border-box;
   color: #{$black-20};
   display: flex;
@@ -36,7 +25,6 @@ body {
   justify-content: top;
   line-height: 20px;
   margin: 0;
-  opacity: 0;
   vertical-align: baseline;
   width: 100%;
 }
