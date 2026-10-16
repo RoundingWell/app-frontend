@@ -1,0 +1,31 @@
+src/js/components/droplist/droplist.component.cy.js
+  s_7d9748a0496f68::t_e761856245beef 25,37,60
+src/js/components/droplist/index.js
+  s_7d9748a0496f68::t_eff0a3fd87371f 23,45-49,51-60,62-63,72-74,78-79,84-86,89-91,99,102,107,112-113,116-124,128,133-134,137,141,156,158-160
+src/js/components/optionlist/index.js
+  s_7d9748a0496f68::t_7cf1229cd51262 9,27-28,32-33,36,40,48,51,55-58
+src/js/components/optionlist/optionlist.component.cy.js
+  s_7d9748a0496f68::t_3a8d37b9219fbd 20
+src/js/components/picklist/index.js
+  s_7d9748a0496f68::t_dc4d4f2f242021 2,98,115,149-159,195-196,222,237-238,242-245,266
+src/js/components/picklist/picklist.component.cy.js
+  s_7d9748a0496f68::t_75f5924e0a14d5 43-47,130-135
+src/js/components/team/index.js
+  s_7d9748a0496f68::t_d73e5ecbc2197d 28,40-45,51-53,58-60,63,66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "1719893191e0c4403ec8a91eb5f876613dc33273",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

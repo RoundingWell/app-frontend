@@ -1,0 +1,46 @@
+src/js/router.js
+  s_d1cca99368c386::t_ce3fc721f9241e 3,5,7-10,12-21,24-25,28-29,31,40-42,44-46
+  s_d1cca99368c386::t_f9231607201d64 1,32-39,43
+src/js/services/router-radio.js
+  s_d1cca99368c386::t_f9231607201d64 1,8,42
+  s_d1cca99368c386::t_6082df387942a0 4,32-33,36,44
+  s_d1cca99368c386::t_fbcf957c2736bb 6
+src/js/base/routerapp.component.cy.js
+  s_d1cca99368c386::t_5b8c5a025d83e5 32-35,47-48,67-70,72,74,77-78,80,82-86,90-99,101-108,111-121,123-126,128,134-135,139,148-149,153,160,171-172,177,186-187,198-199,204,210,212,216
+src/js/apps/patients/patients-main_app.js
+  s_d1cca99368c386::t_9b3e28953563ed 24-27,30-34
+  s_20ea81ecafd6a6::t_5f55fd3d8a76d4 28-29
+src/js/routes.js
+  s_d1cca99368c386::t_91989f13d7999f 1-71,82-95,97-131,133-136,138-141,143-151,153-156,158-176,178-181
+  s_d1cca99368c386::t_3605152e037770 96,132,137,142,152,157,177
+  s_20ea81ecafd6a6::t_957f4429d785d5 73-81
+  s_20ea81ecafd6a6::t_ca924717de9733 72
+src/js/base/routerapp.js
+  s_d1cca99368c386::t_c28bc313508dec 42-43
+  s_d1cca99368c386::t_66045aeb19f2e7 23,30
+  s_d1cca99368c386::t_a64efe4f85ba16 1,5-6,9-10,12-13,21-22,24-25,28,32,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9bb47047896e247410c6c13a6b0a809db8891fef",
+  "prompts": {},
+  "sessions": {
+    "s_20ea81ecafd6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1e41361-2f04-4998-b24a-b7e91b2868ac",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_d1cca99368c386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "875840b0-7975-43b6-957e-a4b0a76b029b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

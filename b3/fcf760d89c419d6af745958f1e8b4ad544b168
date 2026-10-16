@@ -1,0 +1,25 @@
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_20ea81ecafd6a6::t_2a49cc60dfbd0a 273-274
+  s_20ea81ecafd6a6::t_d3b5ebc5375943 286-296,303-308
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_20ea81ecafd6a6::t_3c8012dd98660e 602-623,628-634
+  s_20ea81ecafd6a6::t_0029e6e42d8450 635
+docs/router-migration.md
+  s_20ea81ecafd6a6::t_3b9d0afc6ec5aa 211-216
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b3fcf760d89c419d6af745958f1e8b4ad544b168",
+  "prompts": {},
+  "sessions": {
+    "s_20ea81ecafd6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1e41361-2f04-4998-b24a-b7e91b2868ac",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+src/js/apps/patients/patient/action/action_app.js
+  s_9d69b09c9c3d76::t_c60c3e91508d19 13,17-18,20,85,195-196,198-199,206-207
+  s_9d69b09c9c3d76::t_9c54ccceb2dc14 9,32,197,203,208
+  s_9d69b09c9c3d76::t_90d8c8d1db4e9e 14,19,69,78,86,201-202,204-205
+src/js/apps/patients/patient/action/action-attachments_app.js
+  s_9d69b09c9c3d76::t_90d8c8d1db4e9e 1-94
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_9d69b09c9c3d76::t_c60c3e91508d19 1-8,10-23,25-30,32-56,58-73,75-97
+  s_9d69b09c9c3d76::t_9c54ccceb2dc14 9,24,31,57,74
+src/js/apps/patients/patient/action/action_views.js
+  s_9d69b09c9c3d76::t_9c54ccceb2dc14 47-48,50-53,61-62,81
+  s_9d69b09c9c3d76::t_90d8c8d1db4e9e 73-76
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_9d69b09c9c3d76::t_ca1120235d44fe 272,276
+  s_9d69b09c9c3d76::t_9c54ccceb2dc14 269,271,274-275,281
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_9d69b09c9c3d76::t_ca1120235d44fe 1645,1761
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.11",
+  "base_commit_sha": "466bf2b7b0bd2a2b0a017863cb9c8acdcf6dfca1",
+  "prompts": {},
+  "sessions": {
+    "s_9d69b09c9c3d76": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ee325-2abd-7ac3-8e19-2658889cb04b",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

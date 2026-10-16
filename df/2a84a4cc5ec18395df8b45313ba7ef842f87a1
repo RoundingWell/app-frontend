@@ -1,0 +1,63 @@
+src/js/apps/clinicians/clinicians-main_app.js
+  s_ce43237aac8d7b::t_729044eb2cf798 32
+  s_ce43237aac8d7b::t_84caeccad6ba46 22-24,29-31
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_ce43237aac8d7b::t_ca4743b72fc8e9 259-274
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_ce43237aac8d7b::t_84caeccad6ba46 35,43-45
+src/js/base/routing.md
+  s_ce43237aac8d7b::t_3661cfa4852f7f 165
+  s_ce43237aac8d7b::t_4ad7e24a56e65a 146
+  s_ce43237aac8d7b::t_0e0c2b04622865 46-52
+  s_ce43237aac8d7b::t_4d23066becfe4b 58-59,63,69-70,85-86,139,154-156,167,218-219
+  s_ce43237aac8d7b::t_29b7c9a9bd2a72 22-25,42-43,99-106
+packages/router/test/outlet.test.js
+  s_ce43237aac8d7b::t_cfba2b50362d82 4,44-45,49,51,53,58,89-91,93,95-96,101,105,113,115-117,119,122,128,130,134,136,139,143,146,152,204,230
+src/js/apps/patients/patients-main_app.js
+  s_ce43237aac8d7b::t_ba96650b50d67c 56
+src/js/apps/patients/patient/patient_app.js
+  s_ce43237aac8d7b::t_549be1ce0b01e1 101-102,105-106,116,126,132,142,145
+  s_ce43237aac8d7b::t_6f618959d376c2 122,138
+src/js/apps/programs/program/program_app.js
+  s_ce43237aac8d7b::t_549be1ce0b01e1 57-58,60,62,66,78,85,89,93,102,117
+src/js/apps/programs/programs-main_app.js
+  s_ce43237aac8d7b::t_ba96650b50d67c 53-54,56
+packages/router/src/outlet/route-outlet.js
+  s_ce43237aac8d7b::t_e1ebddf711c5eb 26,29
+  s_ce43237aac8d7b::t_fba7d96ebf3058 91,93,99,110,113
+packages/router/DESIGN.md
+  s_ce43237aac8d7b::t_4e656a11987e3b 14,41,337-338,343-346,348,350-353,357,360-364,398-404
+  s_ce43237aac8d7b::t_7219a9c2cef4b1 405
+src/js/apps/patients/patient/flow/flow_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 13,231-235
+src/js/services/router-radio.js
+  s_ce43237aac8d7b::t_6f618959d376c2 42
+docs/router-migration.md
+  s_ce43237aac8d7b::t_29b7c9a9bd2a72 141-142
+src/js/apps/patients/worklist/action_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 8,83-87,91-94
+src/js/services/latest-list.component.cy.js
+  s_ce43237aac8d7b::t_92affd75ea671d 7-8,40,43,48,52
+src/js/apps/patients/schedule/schedule_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 12,252-256,260-263
+src/js/services/latest-list.js
+  s_ce43237aac8d7b::t_6f618959d376c2 22,25,33,35
+src/js/apps/patients/shared/actions_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 7,49-53,57-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "df2a84a4cc5ec18395df8b45313ba7ef842f87a1",
+  "prompts": {},
+  "sessions": {
+    "s_ce43237aac8d7b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff25645-35d6-4301-b300-b8e3ad235205",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+package-lock.json
+  h_0f06c286dda36f 3216-3224,16992-16994
+packages/care-ops-datadog/README.md
+  h_0f06c286dda36f 1-28
+vite.shared.config.js
+  h_0f06c286dda36f 22-23,43
+packages/care-ops-datadog/package.json
+  h_0f06c286dda36f 11-13
+packages/care-ops-datadog/index.js
+  h_0f06c286dda36f 3,54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a4557dd09ebe0d979ac5520565631bbd907c15e4",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+src/js/behaviors/sortable-list.js
+  s_85aebd1623278c::t_2341d555cd04f6 24,47,57
+src/js/apps/programs/program/flow/flow_views.js
+  s_85aebd1623278c::t_2f655091563cf2 67,157
+  s_85aebd1623278c::t_ceb72ad5fb9e65 145,147-149
+src/js/services/sidebar.js
+  s_85aebd1623278c::t_646c5319ac15bc 35,38,42,55,58,64,68-71,86
+  s_85aebd1623278c::t_8fc8e673bf0a06 44-46
+  s_85aebd1623278c::t_20a69416a5c2d8 43
+src/js/services/sidebar.component.cy.js
+  s_85aebd1623278c::t_03daa844f0e443 8,20,26-27
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_5706a0d0c38a57 16,87,241-246
+src/js/apps/programs/shared/flows_views.js
+  s_85aebd1623278c::t_a465ab40dbe993 9,27
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_85aebd1623278c::t_ceb72ad5fb9e65 68,70-72,138,140-142
+  s_85aebd1623278c::t_2f655091563cf2 45,48
+src/js/apps/programs/program/program_app.js
+  s_85aebd1623278c::t_492be217b5d6e3 116-117,128-130
+src/js/apps/programs/shared/actions_views.js
+  s_85aebd1623278c::t_a465ab40dbe993 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a3b2f4883c99a362ad99c62f694948de24d49975",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

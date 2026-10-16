@@ -1,0 +1,57 @@
+src/js/apps/patients/worklist/worklist_app.js
+  s_85aebd1623278c::t_a8b8c9ef9c36cd 283,463-465,473,477-496,498-504
+  s_85aebd1623278c::t_dcae79e7cd27ce 457
+src/js/entities-service/events.js
+  s_85aebd1623278c::t_19fdb9461a6ee7 15-16
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  s_85aebd1623278c::t_19fdb9461a6ee7 9,11-12,14
+src/js/apps/patients/shared/bulk-edit/inline_app.js
+  s_85aebd1623278c::t_c136b970ab300f 27
+  s_85aebd1623278c::t_dcae79e7cd27ce 7
+  s_85aebd1623278c::t_a8b8c9ef9c36cd 8-9,22-24
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  s_85aebd1623278c::t_a1155ed742ddbd 10,16,22,28,34,40,100
+src/js/apps/patients/schedule/schedule_app.js
+  s_85aebd1623278c::t_a8b8c9ef9c36cd 354,362,364,367,371-381,384-399,401-407
+  s_85aebd1623278c::t_77bbe20f2f9ae4 209-210
+src/js/apps/patients/patient/flow/flow_app.js
+  s_85aebd1623278c::t_a8b8c9ef9c36cd 224,229,231-235
+  s_85aebd1623278c::t_19fdb9461a6ee7 6,36,38,40-44,46,56,58,68,93-97,117,119,145-146,150,157,175-176,178,203,217,223,225,238,240,276,291,323
+  s_85aebd1623278c::t_8b3535cf5e1ffe 47-49,98-100,111,114-115,118,227,260-263,265
+  s_85aebd1623278c::t_1be6e95a89c5b6 25-27
+  s_85aebd1623278c::t_c136b970ab300f 116,236-237,270
+  s_85aebd1623278c::t_ce58540eb43aba 264
+src/js/apps/patients/patient/flow/flow_views.js
+  s_85aebd1623278c::t_3680efbea58f5d 221
+  s_85aebd1623278c::t_a1155ed742ddbd 260
+src/js/components/tooltip/index.js
+  s_85aebd1623278c::t_ce58540eb43aba 61,72-75
+  s_85aebd1623278c::t_64b94c1339dd2b 76
+src/js/apps/patients/shared/bulk-edit/bulk-edit-actions_app.js
+  s_85aebd1623278c::t_d5be6e8196e779 20
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_e5bf0a4bbd61b1 150
+  s_85aebd1623278c::t_956436b7d09a02 618-623
+  s_85aebd1623278c::t_55aa9e33de8f1f 123
+  s_85aebd1623278c::t_de8c6202a3a83a 24,114,118-122,124-125,131-135
+  s_85aebd1623278c::t_72839b44eca8b8 136-149
+  s_85aebd1623278c::t_3b394dc0774c03 126-127
+src/js/entities-service/actions.js
+  s_85aebd1623278c::t_19fdb9461a6ee7 45-46,49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "292d3ef6c319e0e7f698ae4237db5d6b1fa2fd82",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

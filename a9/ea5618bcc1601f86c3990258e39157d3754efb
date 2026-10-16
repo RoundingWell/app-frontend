@@ -1,0 +1,25 @@
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_4071d1618c057a::t_b6f2d1218582e0 19-20,23,25-28,31,33-34,36,39,47-48,54,77
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_4071d1618c057a::t_550627c4267a18 32,166
+src/js/apps/clinicians/clinicians-main_app.js
+  s_4071d1618c057a::t_4d12b034811930 8-11,27
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_app.js
+  s_4071d1618c057a::t_1606ac3dae74b7 8,12,23,30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "a9ea5618bcc1601f86c3990258e39157d3754efb",
+  "prompts": {},
+  "sessions": {
+    "s_4071d1618c057a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7fb702ed-238b-4f50-afad-3364d3d7e0c2",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

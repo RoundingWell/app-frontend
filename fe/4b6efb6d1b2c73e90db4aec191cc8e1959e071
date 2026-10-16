@@ -1,0 +1,27 @@
+.circleci/config.yml
+  5309671f167a585c 73-85,290-301,456-458
+docs/deploy.md
+  5309671f167a585c 143-148,176-180
+.circleci/deploy.yml
+  5309671f167a585c 61-73,221-250,311,323
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "fe4b6efb6d1b2c73e90db4aec191cc8e1959e071",
+  "prompts": {
+    "5309671f167a585c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f9e571ad-213c-4847-9c79-2d9682aa76b9",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Paul Falgout",
+      "messages": [],
+      "total_additions": 144,
+      "total_deletions": 38,
+      "accepted_lines": 84,
+      "overriden_lines": 0
+    }
+  }
+}

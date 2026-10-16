@@ -1,0 +1,21 @@
+src/js/components/list-search/list-search_views.js
+  s_85aebd1623278c::t_76ef9040b433ae 11-13,44-45,52,58-59
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_76ef9040b433ae 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7c8612ef0d5844a5776ab3ccf8a914b7c5c89808",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

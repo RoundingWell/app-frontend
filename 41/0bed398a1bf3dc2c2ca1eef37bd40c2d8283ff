@@ -1,0 +1,21 @@
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_7d9748a0496f68::t_3cece2f22a2ece 3
+src/js/apps/patients/patient/form/form_views.js
+  s_7d9748a0496f68::t_39aa36de4a21e8 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "410bed398a1bf3dc2c2ca1eef37bd40c2d8283ff",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
