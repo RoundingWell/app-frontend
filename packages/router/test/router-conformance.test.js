@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { memoryDriver } from '../src/drivers/memory.js';
+import { memoryDriver } from '@mnjs/router';
 import { routerConformance } from './conformance/router.js';
 
 routerConformance({

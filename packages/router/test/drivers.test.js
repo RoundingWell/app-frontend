@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { memoryDriver } from '../src/drivers/memory.js';
-import { navigationDriver } from '../src/drivers/navigation.js';
+import { memoryDriver, navigationDriver } from '@mnjs/router';
+
 import { driverConformance } from './conformance/index.js';
 
 driverConformance({

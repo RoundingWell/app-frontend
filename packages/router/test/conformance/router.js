@@ -1,4 +1,4 @@
-import { Router } from '../../src/router.js';
+import { Router } from '@mnjs/router';
 
 /**
  * Router behavior that depends on the driver's navigation semantics: event

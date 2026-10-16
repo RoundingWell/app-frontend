@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { Application } from 'marionette';
-import { RouteOutlet } from '../outlet.js';
+import { RouteOutlet } from '@mnjs/router/outlet';
 
 function deferred() {
   const result = {};

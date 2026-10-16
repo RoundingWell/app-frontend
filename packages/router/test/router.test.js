@@ -3,8 +3,7 @@ import assert from 'node:assert/strict';
 
 import { Events } from '@mnjs/utils';
 
-import { Router } from '../src/router.js';
-import { memoryDriver } from '../src/drivers/memory.js';
+import { Router, memoryDriver } from '@mnjs/router';
 
 const MARKER = '@mnjs/router';
 
