@@ -19,7 +19,8 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test \"test/*.test.js\"",
+    "test:browser": "playwright test"
   },
   "dependencies": {
     "@mnjs/utils": "5.0.0"
@@ -31,5 +32,8 @@
     "marionette": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
   }
 }
