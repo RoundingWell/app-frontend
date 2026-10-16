@@ -595,10 +595,11 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Grouped message 10')
       .should('be.visible');
 
+    // The sticky filter is already visible; keep its position while clicking.
     cy
       .get('.patient-interactions__filters [data-filter="calls"]')
       .should('have.attr', 'aria-pressed', 'false')
-      .click();
+      .click({ scrollBehavior: false });
 
     cy
       .contains('.patient-interactions__item', 'Grouped message 2')

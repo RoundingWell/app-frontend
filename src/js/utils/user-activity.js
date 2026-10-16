@@ -16,9 +16,6 @@ export default function listenToUserActivity() {
   window.addEventListener('resize', () => {
     Radio.trigger('user-activity', 'window:resize');
   }, { signal });
-  document.addEventListener('scroll', evt => {
-    Radio.trigger('user-activity', 'document:scroll', evt);
-  }, { capture: true, signal });
   document.addEventListener('keydown', evt => {
     Radio.trigger('user-activity', 'document:keydown', evt);
 

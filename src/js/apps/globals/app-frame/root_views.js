@@ -1,4 +1,4 @@
-import { extend, isEqual, partial } from 'underscore';
+import { extend, partial } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView, Region } from 'marionette';
 
@@ -226,8 +226,6 @@ const TooltipRegionView = TopRegionView.extend({
   },
   onRegionShow(region, view, options) {
     this.listenTo(userActivityCh, 'window:resize', this.empty);
-    this.listenTo(userActivityCh, 'document:scroll', this.onDocumentScroll);
-    this.anchorPosition = view.uiView.getBounds(view.anchor);
 
     this.ignoreEl = options.ignoreEl;
     view.el.classList.remove(
@@ -241,12 +239,6 @@ const TooltipRegionView = TopRegionView.extend({
   },
   onRegionEmpty() {
     this.stopListening(userActivityCh);
-  },
-  onDocumentScroll() {
-    const view = this.region.currentView;
-    if (isEqual(this.anchorPosition, view.uiView.getBounds(view.anchor))) return;
-
-    this.empty();
   },
   empty() {
     this.region.detachView();
