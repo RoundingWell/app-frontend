@@ -13,7 +13,6 @@
     "packages/care-ops-config",
     "packages/care-ops-datadog",
     "packages/care-ops-five9",
-    "packages/care-ops-fontawesome",
     "packages/care-ops-quicksight",
     "packages/care-ops-ringcentral",
     "packages/care-ops-superset"
@@ -80,7 +79,6 @@
     "@octokit/core": "^7.0.6",
     "@rollup/plugin-babel": "^7.0.0",
     "@rollup/plugin-node-resolve": "^16.0.0",
-    "@roundingwell/care-ops-fontawesome": "workspace:*",
     "@stylistic/eslint-plugin": "^5.3.1",
     "babel-plugin-istanbul": "^8.0.0",
     "browserslist-to-esbuild": "^2.1.1",
@@ -120,7 +118,6 @@
   },
   "dependencies": {
     "@formatjs/intl": "^4.1.8",
-    "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@mnjs/adapters": "5.0.0",
     "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
@@ -140,7 +137,8 @@
     "morphdom": "2.7.8",
     "sortablejs": "^1.14.0",
     "underscore": "^1.13.1",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.0",
+    "@roundingwell/icons": "git+https://github.com/RoundingWell/pkg-icons.git#86589b767454105b86568781dc1be7f55f83b91c"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.50.0"

@@ -159,4 +159,4 @@ It contains the legacy color maps and color variables. New V6 theme values are C
 
 Care Ops renders SVG icons with hidden `<symbol>` definitions and same-document `<use>` references from the `{{fa}}`, `{{fas}}`, `{{far}}`, `{{fal}}`, and `{{fat}}` helpers.
 
-App icons are listed in `packages/care-ops-fontawesome/manifest.json` and inlined into `index.html`. Customer/shared icon bundles served from `/icons/icons.js` are owned by `customer-assets`.
+App icons are listed in `icons.json` and inlined into `index.html`.

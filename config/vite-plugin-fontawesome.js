@@ -1,9 +1,9 @@
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
 
-import getIconSymbols from '@roundingwell/care-ops-fontawesome';
+import getIconSymbols from '@roundingwell/icons';
 
-const ICON_MANIFEST_PATH = 'packages/care-ops-fontawesome/manifest.json';
+const ICON_MANIFEST_PATH = 'icons.json';
 const SHARED_ICON_SCRIPT_PATH = '/icons/icons.js';
 
 function readManifest(rootDir, manifestPath) {

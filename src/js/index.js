@@ -1,4 +1,4 @@
-import '@fortawesome/fontawesome-svg-core/styles.css';
+import '@roundingwell/icons/styles.css';
 
 import { Workbox } from 'workbox-window';
 

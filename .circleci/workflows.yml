@@ -40,18 +40,6 @@ commands:
               exit 1
             fi
 
-  setup-fa-auth:
-    steps:
-      - run:
-          name: Configure npm registry auth
-          command: |
-            cat > ~/.npmrc \<< EOF
-            # Pro Font Awesome registry
-            @fortawesome:registry=https://npm.fontawesome.com/
-            //npm.fontawesome.com/:_authToken=${FONTAWESOME}
-            EOF
-            echo "📦 Created ~/.npmrc"
-
   restore-npm-cache:
     steps:
       - restore_cache:
@@ -69,10 +57,9 @@ commands:
   install-dependencies:
     steps:
       - verify-node-version
-      - setup-fa-auth
       - run:
           name: Install dependencies
-          command: npm ci --prefer-offline --no-audit
+          command: node scripts/install-icons-ci.mjs
 
   setup-aws-oidc:
     steps:
@@ -170,11 +157,10 @@ jobs:
             done
       - restore-npm-cache
       - verify-node-version
-      - setup-fa-auth
       - cypress/install:
           skip-checkout: true
           install-browsers: false
-          install-command: npm ci --prefer-offline --no-audit
+          install-command: node scripts/install-icons-ci.mjs
 
       # Build app
       - when:

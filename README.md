@@ -23,9 +23,9 @@ $ nvm use
 
 ## Installing Project Dependencies
 
-Then you will need to run
+With existing Git read access to `RoundingWell/pkg-icons`, install with:
 ```shell
-$ npm i
+$ npm ci
 ```
 
 ## Releasing
@@ -145,27 +145,51 @@ nonUnique.get('foo') === 'bar'; // false
 - [Store.js](https://github.com/marcuswestin/store.js#readme)
   A library for accessing localstorage across browsers
 
-## Font Awesome
+## Icons 🧰
 
-This project uses [Font Awesome Pro](https://fontawesome.com/how-to-use/on-the-web/setup/using-package-managers#installing-pro)
-and should be setup globally to work with npm for devs. [Logging into the doc page](https://fontawesome.com/how-to-use/on-the-web/setup/using-package-managers#installing-pro) will provide the license needed.
-
-Icons are loaded with subsetting. To use an icon with Font Awesome it needs to be set in `package.json`
+Add app icons to root `icons.json`, then build normally:
 
 ```json
-"fontawesome": {
-  "far": ["check"],
-  "fas": ["check"],
-  "fal": ["acorn"]
-},
+{ "far": ["check"], "fas": ["check"], "fal": ["acorn"], "fat": [] }
 ```
 
-The above example would make available solid and regular check and light acorn. To access the icon, use the following template helper:
 ```hbs
-{{fas "check"}}
-{{fal "acorn"}}
 {{far "check"}}
+{{fal "acorn"}}
 ```
+
+```mermaid
+flowchart LR
+  A["pkg-icons 🔒"] --> B["App icons.json → inline SVG"]
+```
+
+`npm ci` uses your existing Git read access to the private
+[pkg-icons toolbox](https://github.com/RoundingWell/pkg-icons). No App setup is
+needed locally. For SSH-only Git auth, configure this checkout once:
+
+```sh
+git config --local url."git@github.com:RoundingWell/pkg-icons.git".insteadOf \
+  https://github.com/RoundingWell/pkg-icons.git
+npm ci
+```
+
+CI uses HTTPS with `node scripts/install-icons-ci.mjs`. A small, scripts-disabled
+public bootstrap loads Octokit for GitHub App authentication.
+CircleCI supplies `PKG_ICONS_APP_CLIENT_ID`, `PKG_ICONS_APP_INSTALLATION_ID` and
+`PKG_ICONS_APP_PRIVATE_KEY_BASE64`. Encode the downloaded RSA PEM on macOS:
+
+```sh
+base64 < /path/to/app-private-key.pem | tr -d '\r\n' | pbcopy
+```
+
+Save the clipboard as `PKG_ICONS_APP_PRIVATE_KEY_BASE64` in CircleCI. The bootstrap
+decodes it in memory and mints a short-lived pkg-icons-only Contents: read token.
+Invalid credentials fail before installation; keys never reach install hooks.
+
+This app pins an immutable `@roundingwell/icons` revision in `package-lock.json`.
+That revision currently contains Font Awesome 7.2.0 (`7.2.0-rw.0`). Only selected
+manifest icons enter the browser bundle; ordinary installs make no FontAwesome
+requests. Catalog, provenance and update instructions live in the toolbox README.
 
 ## Templating and Styles
 
