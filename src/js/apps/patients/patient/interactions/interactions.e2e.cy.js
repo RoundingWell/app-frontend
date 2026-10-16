@@ -23,14 +23,15 @@ function assertFeedEnd($item) {
 function createResponseGate(pendingResponses) {
   const drains = [];
   let release;
-  const response = new Cypress.Promise(resolve => {
+  // Teardown must still release gates when Cypress cancels a timed-out waiter.
+  const response = new Promise(resolve => {
     release = resolve;
   });
   const gate = {
     started: false,
     release,
     get drain() {
-      return Cypress.Promise.all(drains);
+      return Promise.all(drains);
     },
     reply(request, body) {
       this.started = true;
@@ -51,12 +52,19 @@ function trackInteractionRequests(win, completions, restores) {
   win.fetch = (...args) => {
     if (!String(args[0]).includes('/interactions')) return originalFetch.apply(win, args);
     let complete;
-    completions.push(new Cypress.Promise(resolve => {
+    // Native promises survive cancellation of a Cypress wait and remain drainable.
+    completions.push(new Promise(resolve => {
       complete = resolve;
     }));
     // Use the runner's task queue (unaffected by AUT clocks or later visits).
     // After JSON decoding, application Promise continuations drain before this task.
-    const settled = () => setTimeout(complete, 0);
+    const signal = args[1]?.signal;
+    const settled = () => {
+      signal?.removeEventListener('abort', settled);
+      setTimeout(complete, 0);
+    };
+    // An aborted response may never reach clone()/json(), even after headers arrive.
+    signal?.addEventListener('abort', settled, { once: true });
     const trackResponse = response => {
       const originalClone = response.clone.bind(response);
       const originalJson = response.json.bind(response);
@@ -78,7 +86,7 @@ function trackInteractionRequests(win, completions, restores) {
 
 function drainInteractionRequests(completions) {
   const count = completions.length;
-  return Cypress.Promise.all(completions).then(() => {
+  return Promise.all(completions).then(() => {
     if (completions.length !== count) return drainInteractionRequests(completions);
   });
 }
@@ -587,10 +595,11 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Grouped message 10')
       .should('be.visible');
 
+    // The sticky filter is already visible; keep its position while clicking.
     cy
       .get('.patient-interactions__filters [data-filter="calls"]')
       .should('have.attr', 'aria-pressed', 'false')
-      .click();
+      .click({ scrollBehavior: false });
 
     cy
       .contains('.patient-interactions__item', 'Grouped message 2')
@@ -2096,7 +2105,8 @@ context('patient interactions', function() {
         return fx;
       })
       .intercept('GET', '/api/patients/*/interactions*', req => {
-        if (new URL(req.url).searchParams.get('page[limit]') === '3' || dateFilter.started) return;
+        const query = new URL(req.url).searchParams;
+        if (query.get('page[limit]') === '3' || query.has('page[before]') || query.has('page[after]') || dateFilter.started) return;
         return dateFilter.reply(req, { data: [] });
       });
 
@@ -2160,7 +2170,8 @@ context('patient interactions', function() {
         return fx;
       })
       .intercept('GET', '/api/patients/*/interactions*', req => {
-        if (new URL(req.url).searchParams.get('page[limit]') === '3' || dateIntent.started) return;
+        const query = new URL(req.url).searchParams;
+        if (query.get('page[limit]') === '3' || query.has('page[before]') || query.has('page[after]') || dateIntent.started) return;
         return dateIntent.reply(req, { data: [] });
       });
 
