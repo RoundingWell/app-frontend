@@ -596,4 +596,31 @@ Setup in a fresh worktree: `nvm use` (Node 24.15) and `npm ci`.
   Remaining: the CI full-suite and coverage run; manual Safari 26.2 smoke (I1, I4, I7,
   I18); Edge; Datadog RUM view changes (dev-build check or manual `startView` from
   `route`); optional Phase 3d real links; Phase 4.
-- Phase 4: not started
+- Phase 4: done, awaiting review gate (pushed; full suite run in cloud sessions, see
+  the report for that commit). (1) Standalone: `npm pack -w packages/router` installed
+  into a scratch project with `@mnjs/utils@5.0.0` and `marionette@5.0.0` on Node 24.15;
+  `test/` copied into the installed package runs 276/276, and copied beside
+  `node_modules` the public-surface suites run 188/188 (`matcher.test.js` is white-box
+  and runs only in the package tree). Fixed: the driver, router, conformance and outlet
+  suites import `@mnjs/router`/`@mnjs/router/outlet` instead of `../src`; the router
+  conformance suite no longer reaches into `src/`. `@mnjs/router` imports without
+  `marionette` installed; only `/outlet` needs it. The test script is now
+  `node --test "test/*.test.js"` (276 tests; the previous 278 counted the two conformance
+  modules as empty test files). (2) `@playwright/test` 1.63.0 (the version Marionette's
+  release profile pins) is a devDependency of `packages/router`; `npm run test:browser`
+  serves a minimal page from `test/browser` and runs both conformance suites: Chromium
+  153 37/37, Firefox 155 37/37, WebKit 26.6 36/37. The WebKit failure is an engine bug
+  reproduced without router code: `destination.getState()` is `undefined` on a
+  traversal, so `match.state` on a traversal is `{}` there (the app reads no entry
+  state). The driver workaround is in UPSTREAM.md and was not made. (3) package.json:
+  `./package.json` export, `readme.md` in `files`, `publishConfig`, keywords, Node
+  `>=24.15.0`; dist, CJS, types and `repository` are upstream build steps. (4)
+  `UPSTREAM.md` covers placement, build, lockstep versioning, the browser floor, the
+  routing guide changes (upstream's guide is `docs/guides/routing.md`, a `hashchange`
+  example, not `docs/routing.md`) and proposals a–c (keep host-driven activation; keep
+  the `/outlet` subpath; adopt a History API driver, `refresh({ info })` and the
+  prototype's tooling bar; `reflect` as a separate method emitting `route:reflect`).
+  Verified: `npm test -w packages/router` 276/276, `npm run eslint`, `stylelint`,
+  router-driver component spec 37/37 (Electron). Not verified: Safari 26.2 itself,
+  `editorconfig-checker` (binary download blocked). Open: the package license holder
+  (the host repo is CC BY-NC 4.0, the package declares MIT).
