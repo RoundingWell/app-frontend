@@ -36,8 +36,8 @@
   width: 40px;
 
   &.is-today {
-    background: color(blue);
-    color: #{$white};
+    background: var(--color-primary-background);
+    color: var(--color-on-solid);
     height: 40px;
     line-height: 40px;
   }
@@ -48,7 +48,7 @@
   padding: 0 24px 0 4px;
 
   &.is-today {
-    color: color(blue);
+    color: var(--color-interactive);
   }
 }
 
@@ -148,7 +148,7 @@
 
   &:hover,
   &:focus-visible {
-    color: color(blue);
+    color: var(--color-interactive);
   }
 }
 
@@ -181,7 +181,7 @@
 
   &:hover,
   &:focus-visible {
-    color: color(blue);
+    color: var(--color-interactive);
   }
 
   .icon {
@@ -219,7 +219,7 @@
   white-space: nowrap;
 
   &.is-overdue {
-    color: color(red);
+    color: var(--color-danger);
   }
 }
 

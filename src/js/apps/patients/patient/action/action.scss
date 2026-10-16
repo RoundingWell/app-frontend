@@ -107,7 +107,7 @@
 }
 
 .patient-action__title-icon {
-  color: color(blue);
+  color: var(--color-interactive);
   font-size: 24px;
   left: 0;
   position: absolute;
@@ -119,7 +119,7 @@
 }
 
 .patient-action__details-copy {
-  color: #{$black-20};
+  color: var(--color-text);
   font-size: 14px;
   line-height: 20px;
   margin-top: 8px;
@@ -221,7 +221,7 @@
 
 .patient-action__count:hover,
 .patient-action__count:focus {
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 .patient-action__due {
@@ -253,7 +253,7 @@
 .patient-action__activity-items {
   --loader-margin-top: 60px;
 
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 12px;
   margin-top: 8px;
 }
@@ -330,7 +330,7 @@
   border: 0.5px solid var(--color-chip-border);
   border-radius: 16px;
   box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
-  color: #{$black-20};
+  color: var(--color-text);
   display: flex;
   height: 32px;
   justify-content: center;
@@ -354,7 +354,7 @@
 .patient-action__attachment-control:hover,
 .patient-action__attachment-control:focus {
   border-color: var(--color-border-strong);
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 .patient-action__attachment-files {
@@ -378,7 +378,7 @@
 }
 
 .patient-action__attachment-filename {
-  color: color(blue);
+  color: var(--color-interactive);
   flex: 0 1 auto;
   font-size: 14px;
   font-weight: 600;
@@ -394,7 +394,7 @@
   align-items: center;
   background: transparent;
   border: 0;
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   cursor: pointer;
   display: flex;
   flex: 0 0 24px;
@@ -406,7 +406,7 @@
 
 .patient-action__attachment-action:hover,
 .patient-action__attachment-action:focus {
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 .patient-action__attachment-action .icon {
@@ -415,7 +415,7 @@
 }
 
 .patient-action__attachment-progress {
-  background: #{$black-90};
+  background: var(--color-border);
   border-radius: 8px;
   flex: 0 0 96px;
   height: 8px;
@@ -424,7 +424,7 @@
 }
 
 .patient-action__attachment-progress-value {
-  background: #{$black-60};
+  background: var(--color-control-border);
   border-radius: 8px;
   height: 8px;
   min-width: 16px;
@@ -463,7 +463,7 @@
 }
 
 .patient-action__comment-composer {
-  background: #{$white};
+  background: var(--color-surface);
   border: 0.5px solid var(--color-border-subtle);
   border-radius: 8px;
   box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
@@ -504,9 +504,9 @@
 }
 
 .patient-action__comment-post:disabled {
-  background: #{$white};
-  border-color: #{$black-90};
-  color: #{$black-60};
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-text-subtle);
 }
 
 .patient-action__activity-date {

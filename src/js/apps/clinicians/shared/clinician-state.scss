@@ -1,14 +1,14 @@
 .clinician-state--disabled {
-  color: color(red);
+  color: var(--color-danger);
   font-weight: bold;
 }
 
 .clinician-state--pending {
-  color: color(orange);
+  color: var(--color-warning);
   font-weight: bold;
 }
 
 .clinician-state--active {
-  color: color(green);
+  color: var(--color-success);
   font-weight: bold;
 }

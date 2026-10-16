@@ -69,10 +69,10 @@
 }
 
 .patient-detail-page__notice {
-  background-color: #{$highlighted};
-  border: 1px solid #{$highlighted};
+  background-color: var(--color-highlight-background);
+  border: 1px solid var(--color-highlight-background);
   border-radius: 4px;
-  color: #{$black-20};
+  color: var(--color-text);
   font-size: 12px;
   line-height: 16px;
   padding: 8px 16px;
@@ -157,7 +157,7 @@
 .patient__context-trail {
   align-items: center;
   background: var(--color-page-bg);
-  color: #{$black-20};
+  color: var(--color-text);
   display: flex;
   flex: none;
   flex-wrap: wrap;
@@ -234,12 +234,12 @@
   text-align: left;
 
   &:hover {
-    color: color(blue);
+    color: var(--color-interactive);
   }
 }
 
 .patient__context-current {
-  color: #{$black-20};
+  color: var(--color-text);
   font-weight: 500;
   line-height: 20px;
 }

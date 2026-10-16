@@ -4,11 +4,11 @@
   border-left: var(--button-border-width, 1px) solid var(--color-chip-border);
 
   &:hover {
-    border-left-color: #{$black-90};
+    border-left-color: var(--color-border);
   }
 
   &.is-overdue {
-    color: color(red);
+    color: var(--color-danger);
   }
 }
 

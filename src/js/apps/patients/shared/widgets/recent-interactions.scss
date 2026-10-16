@@ -3,7 +3,7 @@
 .patient-interactions-preview__link {
   background: none;
   border: 0;
-  color: color(blue);
+  color: var(--color-interactive);
   cursor: pointer;
   padding: 0;
 }
@@ -16,7 +16,7 @@
 
 .patient-interactions-preview__all:focus-visible,
 .patient-interactions-preview__link:focus-visible {
-  outline: 2px solid color(blue);
+  outline: 2px solid var(--color-interactive);
   outline-offset: 2px;
 }
 
@@ -26,7 +26,7 @@
 
 .patient-interactions-preview__link {
   align-items: flex-start;
-  color: var(--interaction-color, #{color(blue)});
+  color: var(--interaction-color, var(--color-interactive));
   display: flex;
   gap: 8px;
   text-align: left;
@@ -76,13 +76,13 @@
 .patient-interactions-preview__item--voice,
 .patient-interactions-preview__item--voicemail,
 .patient-interactions-preview__item--video {
-  --interaction-color: #{color(purple)};
+  --interaction-color: var(--color-accent);
 }
 
 .patient-interactions-preview__item--appointment {
-  --interaction-color: #{color(green)};
+  --interaction-color: var(--color-success);
 }
 
 .patient-interactions-preview__item--visit {
-  --interaction-color: #{color(orange)};
+  --interaction-color: var(--color-warning);
 }

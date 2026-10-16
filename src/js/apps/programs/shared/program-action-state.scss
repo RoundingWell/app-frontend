@@ -1,11 +1,11 @@
 .program-action-state--automated,
 .program-action-state--standard,
 .program-action-state--conditional {
-  color: color(green);
+  color: var(--color-success);
   font-weight: bold;
 }
 
 .program-action-state--disabled.program-action-state--automated,
 .program-action-state--disabled.program-action-state--standard {
-  color: #{$black-80};
+  color: var(--color-text-disabled);
 }

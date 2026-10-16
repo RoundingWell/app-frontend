@@ -22,7 +22,7 @@
   border: 0.5px solid var(--color-border-subtle);
   border-radius: 16px;
   box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
-  color: #{$black-20};
+  color: var(--color-text);
   display: inline-flex;
   font-size: 0;
   height: 32px;
@@ -34,12 +34,12 @@
 
 .patient-list-page__all-filters-button:where([aria-expanded='true']) {
   background: var(--color-control-background);
-  color: #{$black-20};
+  color: var(--color-text);
 }
 
 .patient-list-page__all-filters-button:where([aria-expanded='false']:has(.patient-list-page__active-filter-dot)) {
   background: var(--color-surface);
-  color: #{$black-20};
+  color: var(--color-text);
 }
 
 .patient-list-page__all-filters-icon {
@@ -55,7 +55,7 @@
 }
 
 .patient-list-page__active-filter-dot {
-  background: color(blue);
+  background: var(--color-primary-background);
   border-radius: 50%;
   height: 8px;
   position: absolute;

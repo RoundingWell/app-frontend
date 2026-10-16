@@ -10,6 +10,6 @@ html, body {
 }
 
 .app-root {
-  background-color: #{$bkg-color};
+  background-color: var(--color-brand-surface);
   -webkit-overflow-scrolling: touch;
 }

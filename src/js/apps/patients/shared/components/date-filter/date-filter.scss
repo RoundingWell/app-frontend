@@ -1,5 +1,5 @@
 .date-filter {
-  background-color: #{$white};
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgb(0 0 0 / 18%);
@@ -10,7 +10,7 @@
 }
 
 .date-filter__label {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 12px;
   line-height: 16px;
   padding: 10px 12px 8px;
@@ -18,7 +18,7 @@
 }
 
 .date-filter__toggle {
-  border-bottom: 1px solid #{$black-90};
+  border-bottom: 1px solid var(--color-border);
   padding: 0 8px 8px;
 }
 
@@ -32,7 +32,7 @@
   background: var(--color-chip-background);
   border-color: var(--color-chip-border);
   border-radius: 16px;
-  color: #{$black-20};
+  color: var(--color-text);
   display: inline-flex;
   font-size: 14px;
   justify-content: center;
@@ -43,14 +43,14 @@
 }
 
 .date-filter__type:not([aria-pressed='true']):hover:enabled {
-  background-color: #{$black-95};
-  border-color: #{$black-80};
+  background-color: var(--color-surface-neutral);
+  border-color: var(--color-border-muted);
 }
 
 .date-filter__type:not([aria-pressed='true']):active:enabled,
 .date-filter__type:not([aria-pressed='true']):focus {
-  background-color: #{$black-90};
-  border-color: #{$black-90};
+  background-color: var(--color-border);
+  border-color: var(--color-border);
 }
 
 .date-filter__type[aria-pressed='true'] {
@@ -60,7 +60,7 @@
 }
 
 .date-filter__type:focus-visible {
-  outline: 2px solid color(blue);
+  outline: 2px solid var(--color-interactive);
   outline-offset: 2px;
 }
 
@@ -111,21 +111,21 @@
 }
 
 .date-filter__date-button {
-  background: #{$white};
+  background: var(--color-surface);
   border: 0.5px solid var(--color-border-subtle);
   border-radius: 16px;
   box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
-  color: #{$black-20};
+  color: var(--color-text);
   height: 32px;
   margin: 0;
   padding: 6px 12px;
 }
 
 .date-filter__date-button:hover:enabled {
-  background-color: #{$black-95};
+  background-color: var(--color-surface-neutral);
 }
 
 .date-filter__date-button:active:enabled,
 .date-filter__date-button:focus {
-  background-color: #{$black-90};
+  background-color: var(--color-border);
 }

@@ -7,7 +7,7 @@
   border-radius: 8px;
   box-shadow: 0 10px 24px rgb(0 0 0 / 18%);
   box-sizing: border-box;
-  color: #{$white};
+  color: var(--color-on-solid);
   margin: 16px 8px 12px;
   min-height: 184px;
   padding: 16px 12px 18px;
@@ -19,9 +19,9 @@
 }
 
 .whats-new-announcement__badge {
-  border: 1px solid color(orange);
+  border: 1px solid var(--color-warning);
   border-radius: 12px;
-  color: color(orange);
+  color: var(--color-warning);
   display: inline-block;
   font-size: 10px;
   font-weight: 700;
@@ -70,7 +70,7 @@
 
 .whats-new-announcement__dismiss {
   align-items: center;
-  color: #{$white};
+  color: var(--color-on-solid);
   display: flex;
   height: 32px;
   justify-content: center;
@@ -83,7 +83,7 @@
 
 .whats-new-announcement__action:hover,
 .whats-new-announcement__dismiss:hover {
-  color: #{$white};
+  color: var(--color-on-solid);
 }
 
 .whats-new-update {

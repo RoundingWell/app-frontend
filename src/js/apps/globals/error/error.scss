@@ -1,5 +1,5 @@
 .error-page {
-  background-color: $bkg-color;
+  background-color: var(--color-brand-surface);
   box-sizing: border-box;
   color: #{$white};
   display: flex;
@@ -101,7 +101,7 @@
     0 3px 2px rgb(0 0 0 / 25%),
     0 8px 18px rgb(0 0 0 / 20%),
     0 0 24px rgb(0 0 0 / 17.5%);
-  color: $bkg-color;
+  color: var(--color-brand-surface);
   max-width: 100%;
   white-space: normal;
 

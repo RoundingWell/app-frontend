@@ -1,5 +1,5 @@
 .clinician-sidebar__info {
-  background: color(yellow, light);
+  background: var(--color-highlight-background);
   border-radius: 4px;
   display: flex;
   font-size: 12px;
@@ -9,7 +9,7 @@
 }
 
 .clinician-sidebar__info .icon {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   margin-right: 8px;
 }
 
@@ -24,7 +24,7 @@
 }
 
 .clinician-sidebar__locked-icon {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   line-height: 24px;
   position: absolute;
   right: 16px;
@@ -32,12 +32,12 @@
 }
 
 .clinician-sidebar__worklist {
-  border-top: 1px solid #{$black-90};
+  border-top: 1px solid var(--color-border);
   padding-top: 16px;
 }
 
 .clinician-sidebar__worklist-info {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-size: 14px;
   margin-top: 12px;
 }

@@ -71,19 +71,19 @@
 }
 
 .patient-interactions__filter--messages {
-  --interaction-color: #{color(blue)};
+  --interaction-color: var(--color-interactive);
 }
 
 .patient-interactions__filter--calls {
-  --interaction-color: #{color(purple)};
+  --interaction-color: var(--color-accent);
 }
 
 .patient-interactions__filter--appointments {
-  --interaction-color: #{color(green)};
+  --interaction-color: var(--color-success);
 }
 
 .patient-interactions__filter--visits {
-  --interaction-color: #{color(orange)};
+  --interaction-color: var(--color-warning);
 }
 
 .patient-interactions__list {
@@ -173,8 +173,8 @@
 }
 
 .patient-interactions__date-control.is-today .patient-interactions__date-button {
-  border-color: color(blue);
-  color: color(blue);
+  border-color: var(--color-interactive);
+  color: var(--color-interactive);
 }
 
 .patient-interactions__date-control.is-today .icon {
@@ -183,7 +183,7 @@
 
 .patient-interactions__date-divider:has(.is-today)::before,
 .patient-interactions__date-divider:has(.is-today)::after {
-  background: color(blue);
+  background: var(--color-primary-background);
 }
 
 .patient-interactions__today-position {
@@ -200,10 +200,10 @@
 .patient-interactions__today {
   align-items: center;
   background: var(--color-surface);
-  border: 1px solid #{color(blue)};
+  border: 1px solid var(--color-interactive);
   border-radius: 18px;
   box-shadow: var(--shadow-card);
-  color: color(blue);
+  color: var(--color-interactive);
   cursor: pointer;
   display: flex;
   font-size: 11px;
@@ -222,6 +222,6 @@
 .patient-interactions__today:focus-visible,
 .patient-interactions__date-button:focus-visible,
 .patient-interactions__calendar-close:focus-visible {
-  outline: 2px solid #{color(blue)};
+  outline: 2px solid var(--color-interactive);
   outline-offset: 2px;
 }

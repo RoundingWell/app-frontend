@@ -1,7 +1,7 @@
 .modal {
   --loader-min-height: 120px;
 
-  background-color: #{$white};
+  background-color: var(--color-surface);
   border-radius: 8px;
   box-shadow: 0 4px 8px 0 rgb(0 0 0 / 50%);
   display: flex;
@@ -37,7 +37,7 @@
 
 .modal__header {
   align-items: center;
-  color: #{$black-20};
+  color: var(--color-text);
   display: flex;
   flex: none;
   font-size: 24px;
@@ -76,7 +76,7 @@
 }
 
 .modal__content {
-  border-top: 1px solid $black-90;
+  border-top: 1px solid var(--color-border);
   padding: 16px 24px 0;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .modal__error {
-  color: #{$error-color};
+  color: var(--color-danger);
 }
 
 .modal__form-iframe {
@@ -120,7 +120,7 @@
 
 .modal__form-label {
   align-items: center;
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   display: flex;
   font-size: 14px;
   font-weight: 600;

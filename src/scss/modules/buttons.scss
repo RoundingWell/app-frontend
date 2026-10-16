@@ -3,7 +3,7 @@
 .button {
   align-items: var(--button-align-items, normal);
   background: var(--button-background, none);
-  border: var(--button-border-width, 1px) solid var(--button-border-color, #{$black-90});
+  border: var(--button-border-width, 1px) solid var(--button-border-color, var(--color-field-border));
   border-radius: var(--button-border-radius, 4px);
   box-shadow: var(--button-box-shadow, none);
   cursor: pointer;
@@ -31,7 +31,7 @@
   }
 
   &.has-error {
-    border-color: #{$error-color};
+    border-color: var(--color-danger);
   }
 
   .icon:first-child:not(:last-child) {
@@ -50,37 +50,37 @@
 .button--outline {
   background: var(--button-background, var(--color-surface));
   border-color: var(--button-border-color, var(--color-chip-border));
-  color: color(blue);
+  color: var(--color-interactive);
   text-align: left;
 
   &:hover:enabled {
-    background-color: color(light_blue, light);
-    border-color: color(light_blue);
-    color: color(light_blue);
+    background-color: var(--color-surface-hover);
+    border-color: var(--color-primary-background);
+    color: var(--color-interactive);
   }
 
   &:active:enabled,
   &:focus {
-    background-color: color(light_blue);
-    border-color: color(light_blue);
-    color: #{$white};
+    background-color: var(--color-primary-background);
+    border-color: var(--color-primary-background);
+    color: var(--color-on-solid);
   }
 }
 
 .button--secondary {
-  color: #{$black-20};
+  color: var(--color-text);
   line-height: var(--button-line-height, 16px);
   text-align: left;
 
   &:hover:enabled {
-    background-color: #{$white};
-    border-color: #{$black-60};
+    background-color: var(--color-surface);
+    border-color: var(--color-control-border);
   }
 
   &:active:enabled,
   &:focus {
-    background-color: #{$black-90};
-    border-color: #{$black-60};
+    background-color: var(--color-border);
+    border-color: var(--color-control-border);
   }
 }
 
@@ -89,7 +89,7 @@
   background: var(--button-background, var(--color-chip-background));
   border-color: var(--button-border-color, var(--color-chip-border));
   border-radius: var(--button-border-radius, 16px);
-  color: #{$black-20};
+  color: var(--color-text);
   display: var(--button-display, inline-flex);
   font-size: var(--button-font-size, 12px);
   font-weight: var(--button-font-weight, 500);
@@ -100,14 +100,14 @@
   text-align: left;
 
   &:hover:enabled {
-    background-color: #{$white};
-    border-color: #{$black-60};
+    background-color: var(--color-surface);
+    border-color: var(--color-control-border);
   }
 
   &:active:enabled,
   &:focus {
-    background-color: #{$black-90};
-    border-color: #{$black-60};
+    background-color: var(--color-border);
+    border-color: var(--color-control-border);
   }
 
   .icon:first-child:not(:last-child) {
@@ -139,109 +139,109 @@
 }
 
 .button--primary {
-  background: var(--button-background, #{color(blue)});
-  border-color: var(--button-border-color, #{color(blue)});
-  color: #{$white};
+  background: var(--button-background, var(--color-primary-background));
+  border-color: var(--button-border-color, var(--color-primary-background));
+  color: var(--color-on-solid);
   font-weight: 700;
 
   &:hover:enabled {
-    background-color: color(blue, light);
-    color: #{$white};
+    background-color: var(--color-primary-background-hover);
+    color: var(--color-on-solid);
   }
 
   &:active:enabled,
   &:focus {
-    background-color: color(blue, dark);
-    color: #{$white};
+    background-color: var(--color-primary-background-active);
+    color: var(--color-on-solid);
   }
 }
 
 .button--danger {
-  background: var(--button-background, #{color(red)});
-  border-color: var(--button-border-color, #{color(red)});
-  color: #{$white};
+  background: var(--button-background, var(--color-danger-background));
+  border-color: var(--button-border-color, var(--color-danger-background));
+  color: var(--color-on-solid);
   font-weight: 700;
 
   &:hover:enabled {
-    background-color: color(red, light);
+    background-color: var(--color-danger-background-hover);
   }
 
   &:active:enabled,
   &:focus {
-    background-color: color(red, dark);
+    background-color: var(--color-danger-background-active);
   }
 }
 
 .button--positive {
-  background: var(--button-background, #{color(green)});
-  border-color: var(--button-border-color, #{color(green)});
-  color: #{$white};
+  background: var(--button-background, var(--color-positive-background));
+  border-color: var(--button-border-color, var(--color-positive-background));
+  color: var(--color-on-solid);
   font-weight: 700;
 
   &:hover:enabled {
-    background-color: color(green, light);
+    background-color: var(--color-positive-background-hover);
   }
 
   &:active:enabled,
   &:focus {
-    background-color: color(green, dark);
+    background-color: var(--color-positive-background-active);
   }
 }
 
 .button--muted {
-  background: var(--button-background, #{$black-20});
-  border-color: var(--button-border-color, #{$black-20});
-  color: #{$white};
+  background: var(--button-background, var(--color-inverse-surface));
+  border-color: var(--button-border-color, var(--color-inverse-surface));
+  color: var(--color-on-inverse);
   font-weight: 700;
 
   &:hover:enabled,
   &:active:enabled,
   &:focus {
-    background-color: #{$black-40};
+    background-color: var(--color-inverse-hover);
   }
 }
 
 .button--text {
   border-color: var(--button-border-color, transparent);
-  color: #{$black-60};
+  color: var(--color-text-subtle);
 
   &:hover,
   &:focus {
-    color: #{$black-20};
+    color: var(--color-text);
   }
 }
 
 .button--link {
   border-color: var(--button-border-color, transparent);
-  color: color(blue);
+  color: var(--color-interactive);
   font-size: var(--button-font-size, 12px);
   padding: var(--button-padding, 2px 0);
 
   &:hover,
   &:focus {
-    color: color(blue, dark);
+    color: var(--color-interactive-hover);
   }
 
   &.is-disabled,
   &[disabled] {
-    color: #{$black-60};
+    color: var(--color-text-subtle);
   }
 }
 
 .button--icon {
   border-width: var(--button-border-width, 0);
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   padding: var(--button-padding, 0);
   transition: color 0.15s linear;
 
   &:hover,
   &:focus,
   &.is-active {
-    color: #{$black-20};
+    color: var(--color-text);
   }
 
   &:focus-visible {
-    outline: 2px solid color(blue);
+    outline: 2px solid var(--color-interactive);
     outline-offset: 2px;
   }
 }
@@ -271,7 +271,7 @@
   width: 32px;
 
   &:focus-visible {
-    outline: 2px solid color(blue);
+    outline: 2px solid var(--color-interactive);
     outline-offset: 2px;
   }
 
@@ -291,14 +291,14 @@
   }
 
   &:hover:not(:disabled) .button__checkbox-icon {
-    color: $black-20;
+    color: var(--color-text);
   }
 }
 
 .button__checkbox-icon--empty {
   border: 1.5px solid currentcolor;
   border-radius: 2px;
-  color: #{$black-80};
+  color: var(--color-text-disabled);
 
   use {
     display: none;
@@ -307,7 +307,7 @@
 
 .button__checkbox-icon--selected,
 .button__checkbox-icon--mixed {
-  color: color(blue);
+  color: var(--color-interactive);
 }
 
 .button__value {
@@ -317,7 +317,7 @@
 }
 
 .button__value--indeterminate {
-  color: #{$black-60};
+  color: var(--color-text-subtle);
   font-style: italic;
   font-weight: bold;
 }

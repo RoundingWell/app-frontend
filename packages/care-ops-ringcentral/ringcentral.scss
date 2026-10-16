@@ -22,7 +22,7 @@ body:has(.ringcentral-wrapper.is-open) {
 }
 
 .ringcentral-panel {
-  background: white;
+  background: var(--color-surface);
   border-radius: 8px 8px 0 0;
   box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
   display: flex;
@@ -39,7 +39,7 @@ body:has(.ringcentral-wrapper.is-open) {
 
 .ringcentral-panel__header {
   align-items: center;
-  background-color: $ringcentral-color;
+  background-color: var(--color-integration-link);
   border: 0;
   border-radius: 8px 8px 0 0;
   color: white;
@@ -80,10 +80,10 @@ body:has(.ringcentral-wrapper.is-open) {
 
 .ringcentral-panel__patient-btn {
   align-items: center;
-  background-color: white;
+  background-color: var(--color-surface);
   border: 1px solid $ringcentral-color;
   border-radius: 8px;
-  color: $ringcentral-color;
+  color: var(--color-integration-link);
   cursor: pointer;
   display: flex;
   font-size: 14px;
@@ -98,7 +98,7 @@ body:has(.ringcentral-wrapper.is-open) {
   width: 100%;
 
   &:hover {
-    background-color: color(light_blue, light);
+    background-color: var(--color-surface-hover);
   }
 
   svg {

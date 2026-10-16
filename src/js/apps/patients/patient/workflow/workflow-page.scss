@@ -33,7 +33,7 @@
 }
 
 .workflow-page__tab:hover {
-  background: #{$black-95};
+  background: var(--color-surface-neutral);
   color: var(--color-text);
 }
 

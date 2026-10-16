@@ -2,7 +2,7 @@
 
 .startup {
   align-items: center;
-  background-color: $bkg-color;
+  background-color: var(--color-brand-surface);
   box-sizing: border-box;
   color: #{$white};
   display: flex;
@@ -99,7 +99,7 @@
   --button-font-size: 15px;
   --button-padding: 11px 24px;
 
-  color: $bkg-color;
+  color: var(--color-brand-surface);
   min-width: 112px;
 }
 
