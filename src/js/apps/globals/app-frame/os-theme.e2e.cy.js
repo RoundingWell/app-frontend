@@ -1,3 +1,7 @@
+import { map } from 'underscore';
+
+import { getCurrentClinician } from 'support/api/clinicians';
+
 function setOsTheme(value) {
   return cy.then(() => Cypress.automation('remote:debugger:protocol', {
     command: 'Emulation.setEmulatedMedia',
@@ -15,6 +19,56 @@ function assertTheme(isDark) {
       expect(doc.defaultView.matchMedia('(prefers-color-scheme: dark)').matches).to.equal(isDark);
       expect(style.colorScheme, 'native controls support both themes').to.equal('light dark');
     });
+}
+
+function luminance(color) {
+  const [red, green, blue] = map(color.match(/\d+/g), channel => {
+    const value = Number(channel) / 255;
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+  });
+
+  return red * 0.2126 + green * 0.7152 + blue * 0.0722;
+}
+
+function assertHeaderContrast(selector) {
+  cy
+    .get(selector)
+    .then($header => {
+      const header = $header[0];
+      // Flush the OS change and wait for the header's color transition to settle.
+      header.ownerDocument.defaultView.getComputedStyle(header).getPropertyValue('background-color');
+      return Cypress.Promise.all(map(header.getAnimations(), animation => animation.finished));
+    });
+
+  cy
+    .get(selector)
+    .should($header => {
+      const win = $header[0].ownerDocument.defaultView;
+      const background = luminance(win.getComputedStyle($header[0]).backgroundColor);
+
+      for (const element of [$header[0], ...$header.find('.icon')]) {
+        const foreground = luminance(win.getComputedStyle(element).color);
+        const ratio = (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
+        expect(ratio, `${ selector } text/icon contrast`).to.be.at.least(4.5);
+      }
+    });
+}
+
+function checkDialerThemes(dialer) {
+  cy
+    .routesForDefault()
+    .routeCurrentClinician(fx => {
+      fx.data = getCurrentClinician({ attributes: { settings: { dialer } } });
+      return fx;
+    })
+    .visit();
+
+  setOsTheme('light');
+  assertTheme(false);
+  assertHeaderContrast(`.${ dialer }-panel__header`);
+  setOsTheme('dark');
+  assertTheme(true);
+  assertHeaderContrast(`.${ dialer }-panel__header`);
 }
 
 // Cypress exposes OS media emulation through CDP only in Chromium browsers.
@@ -101,5 +155,13 @@ context('OS color scheme', { browser: { family: 'chromium' } }, function() {
         .should('have.value', 'Morgan Example')
         .and('be.focused');
     }
+  });
+
+  specify('five9 header text and icons stay readable in both OS themes', function() {
+    checkDialerThemes('five9');
+  });
+
+  specify('ringcentral header text and icons stay readable in both OS themes', function() {
+    checkDialerThemes('ringcentral');
   });
 });
