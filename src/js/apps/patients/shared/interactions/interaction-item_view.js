@@ -59,7 +59,6 @@ const InteractionItemView = View.extend({
     const timestamp = this.model.getTimestamp();
     const group = this.model.getChannelGroup();
     const appointmentDate = group === 'appointments' ? this.getAppointmentDate(timestamp, metadata.timezone) : undefined;
-    const stayDays = this.model.getLengthOfStay();
     const viaLabel = getInteractionViaLabel(this.model);
     return {
       timestamp,
@@ -78,8 +77,6 @@ const InteractionItemView = View.extend({
       hasDuration: this.model.hasDuration(),
       patientClass: VISIT_CLASSES[metadata.patient_class] || metadata.patient_class,
       hasVisitHeading: metadata.patient_class || metadata.facility,
-      stayDays,
-      hasStay: stayDays >= 0,
       activity: this.getOption('activity'),
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',
       workName: this.getWorkLink(),

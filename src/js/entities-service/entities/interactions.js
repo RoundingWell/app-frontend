@@ -1,5 +1,4 @@
 import Store from 'backbone.store';
-import dayjs from 'dayjs';
 import { contains, findKey } from 'underscore';
 
 import BaseCollection from 'js/base/collection';
@@ -32,12 +31,6 @@ const _Model = BaseModel.extend({
   },
   getChannelGroup() {
     return findKey(CHANNEL_GROUPS, channels => contains(channels, this.get('channel')));
-  },
-  getLengthOfStay() {
-    const metadata = this.get('metadata');
-    if (!metadata?.admitted_at) return;
-    const end = metadata.discharged_at ? dayjs(metadata.discharged_at) : dayjs();
-    return end.startOf('day').diff(dayjs(metadata.admitted_at).startOf('day'), 'day');
   },
   getAction() {
     return this.getRelationship('_action');
