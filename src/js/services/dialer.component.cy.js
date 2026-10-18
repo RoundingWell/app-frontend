@@ -1,5 +1,6 @@
 import { v5 as uuid } from 'uuid';
 import { Application, Radio, View } from 'marionette';
+import { EIGHTBYEIGHT_CTI_URL } from '@roundingwell/care-ops-8x8/eightbyeight_constants.js';
 import { RWELL_NS } from 'js/static';
 import DialerService from './dialer';
 
@@ -112,6 +113,65 @@ context('Dialer Service', function() {
           },
         },
       });
+  });
+
+  specify('eightByEightCall', function() {
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy
+      .get('@root')
+      .then(() => {
+        Radio.request('dialer', 'eightByEightCall', {
+          callData: {
+            eventId: 'abc1234',
+            searchContext: '+15555550100',
+            callRecording: 'https://cloud8.8x8.com/recording/abc1234',
+          },
+          actionId: 'action-1',
+        });
+      });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body')
+      .should('deep.equal', {
+        data: {
+          type: 'artifacts',
+          id: uuid('8x8-call-log:abc1234', RWELL_NS),
+          attributes: {
+            artifact: '8x8-call-log',
+            identifier: 'abc1234',
+            values: {
+              callData: {
+                eventId: 'abc1234',
+                searchContext: '+15555550100',
+              },
+              actionId: 'action-1',
+            },
+          },
+        },
+      });
+  });
+
+  specify('loads the 8x8 provider', function() {
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy.then(async() => {
+      await service.start();
+
+      const wrapper = document.querySelector('.eightbyeight-wrapper');
+      const iframe = wrapper && wrapper.querySelector('iframe');
+
+      expect(service.isRunning()).to.equal(true);
+      expect(service.hasChildApp('provider')).to.equal(true);
+      expect(wrapper).to.exist;
+      expect(iframe.getAttribute('src')).to.equal(EIGHTBYEIGHT_CTI_URL);
+    });
   });
 
   specify('ringcentralCall', function() {
