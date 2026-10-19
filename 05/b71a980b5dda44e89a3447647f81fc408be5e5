@@ -1,0 +1,59 @@
+src/js/apps/patients/patient/interactions/interactions_app.js
+  h_0f06c286dda36f 3,10-11,31,37,50-52,54-55,82,99-100,105-116,122-129,132-133,135-156,236
+  h_0f06c286dda36f 12-13,44-45,53,56,65,80,95,117-121,130-131,134,158,221
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 121-128,133-143,147-172,176-179,214-355,357-372,380-403,409-431,439-520,529-532,551-556
+  h_0f06c286dda36f 129-132,144-146,173-175,180-213,356,373-379,404-408,432-438,521-528,533-550
+src/js/apps/patients/shared/widgets/recent-interactions_views.js
+  h_0f06c286dda36f 18
+src/js/apps/patients/patient/interactions/scroll-edges_behavior.js
+  h_0f06c286dda36f 32,35
+src/js/entities-service/entities/interactions.js
+  h_0f06c286dda36f 29,49-52
+  h_0f06c286dda36f 3,10-19,30-48
+src/js/apps/patients/shared/interactions/live-updates.js
+  h_0f06c286dda36f 1-7
+src/js/entities-service/interactions.js
+  h_0f06c286dda36f 41,51-55
+  h_0f06c286dda36f 7,46,58-76,78-81
+src/js/apps/patients/shared/widgets/recent-interactions_app.js
+  h_0f06c286dda36f 7-8,16,32,35-41
+  h_0f06c286dda36f 17,20,28-31,42,44,49
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 2,116-119,130-132,134-145,296,298-300,303-305
+src/js/apps/patients/patient/patient_app.js
+  s_707028172dd2fb::t_2dc7e197704d13 64,76
+src/js/apps/patients/schedule/schedule-results_app.js
+  s_707028172dd2fb::t_5d68d96cf2cbea 76,121,123
+src/js/apps/patients/worklist/worklist-results_app.js
+  s_707028172dd2fb::t_1e40a0e6286cb8 75,131,133,284-285
+src/js/apps/patients/patient/action/action_app.js
+  h_0f06c286dda36f 261,270
+src/js/apps/patients/patient/flow/flow_app.js
+  h_0f06c286dda36f 123,126
+src/js/apps/patients/patient/workflow/workflow_app.js
+  h_0f06c286dda36f 86
+test/support/api/interactions.js
+  h_0f06c286dda36f 26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "05b71a980b5dda44e89a3447647f81fc408be5e5",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_707028172dd2fb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b453764a-cbb1-48dc-bfe2-bea1f29fa0e5",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
