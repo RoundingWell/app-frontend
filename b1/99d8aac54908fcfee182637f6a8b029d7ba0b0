@@ -1,0 +1,23 @@
+src/js/utils/local-store.cy.js
+  s_470ea101676b4a::t_cd4efc59eaf4e2 54,59,64
+  s_470ea101676b4a::t_5e800a04021669 106
+  s_470ea101676b4a::t_680a455f453379 3-13,17-22
+  s_470ea101676b4a::t_d57456aca396e2 75
+  s_470ea101676b4a::t_bb59eed4436250 14-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "b199d8aac54908fcfee182637f6a8b029d7ba0b0",
+  "prompts": {},
+  "sessions": {
+    "s_470ea101676b4a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "118a9120-1d88-41b7-8c32-1423d853a6e2",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

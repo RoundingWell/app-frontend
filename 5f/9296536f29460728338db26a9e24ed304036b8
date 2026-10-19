@@ -1,0 +1,31 @@
+src/js/apps/programs/program/flow/flow_views.js
+  s_09e8292bb4bcb3::t_56b7117c72a045 122
+  s_09e8292bb4bcb3::t_f55410593e98d3 14
+  s_09e8292bb4bcb3::t_87f48abbe0ba59 112
+  s_09e8292bb4bcb3::t_7f2ab3645a3539 206
+  s_09e8292bb4bcb3::t_33e483bd288fc0 224-225
+src/js/apps/programs/program/flow/action-item.hbs
+  s_09e8292bb4bcb3::t_60a5c5946f5953 1-18,20-24
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_09e8292bb4bcb3::t_61b14d16ea1d77 398
+  s_09e8292bb4bcb3::t_ced66672346840 482
+  s_09e8292bb4bcb3::t_6a24291d7c7bbb 634,640
+  s_09e8292bb4bcb3::t_d49428858b691c 664,666
+  s_09e8292bb4bcb3::t_28c9eaae8df8d7 405,410,416,418
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "5f9296536f29460728338db26a9e24ed304036b8",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

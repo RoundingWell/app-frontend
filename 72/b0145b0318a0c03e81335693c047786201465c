@@ -1,0 +1,21 @@
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_7d9748a0496f68::t_66f3b1142f8972 3
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_7d9748a0496f68::t_a6064e41c7b73e 2
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "72b0145b0318a0c03e81335693c047786201465c",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

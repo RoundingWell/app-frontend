@@ -1,0 +1,19 @@
+package.json
+  s_49c211c5eb89ae::t_81e5d528889af8 63-67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "c82cdbd33d13f53c7b6de4436c62eeacda7fc581",
+  "prompts": {},
+  "sessions": {
+    "s_49c211c5eb89ae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fac4d-88ab-7a20-ba89-1042953ff388",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

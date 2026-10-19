@@ -1,0 +1,48 @@
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_6c4e953149fe47::t_2ea6cee2331af9 787-857
+  s_6c4e953149fe47::t_67d47bd8a0c862 366-370
+src/js/apps/patients/patient/patient.e2e.cy.js
+  s_6c4e953149fe47::t_6f8951d5d3365e 406-446
+  s_6c4e953149fe47::t_d51c77fda3af4e 6,298-309,311-405
+  s_6c4e953149fe47::t_4c728ddbeb820a 310
+  s_6c4e953149fe47::t_b3ef8c0dc4b630 447-448
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  s_6c4e953149fe47::t_914b8f7b4a06f1 990-997,1007-1016
+src/js/apps/programs/program/program.e2e.cy.js
+  s_6c4e953149fe47::t_2ea6cee2331af9 378-452
+  s_6c4e953149fe47::t_67d47bd8a0c862 453-523
+src/js/apps/patients/patient/patient_app.js
+  s_6c4e953149fe47::t_030566d7341f9b 69,95-98,101-102,105-106,109-111,113,116,119-122,125-126,129-132,135-138,141-142,145,169,184
+src/js/apps/programs/program/flow/flow_app.js
+  s_6c4e953149fe47::t_016969f360c30e 29,53-56,61
+src/js/apps/programs/program/program_app.js
+  s_6c4e953149fe47::t_016969f360c30e 39,49-52,57-58,60,62,66,68,79,86,90,94-96,103,118
+src/js/apps/programs/programs-main_app.js
+  s_6c4e953149fe47::t_38449a8a8bde88 32-33,36,44-47
+packages/router/DESIGN.md
+  s_6c4e953149fe47::t_a4e8fa66c6a971 310-317
+  s_6c4e953149fe47::t_780513db885a6a 318
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_6c4e953149fe47::t_b9a3a5123a1df7 2269-2273
+src/js/base/routing.md
+  s_6c4e953149fe47::t_b8a58da7d87c56 133,135-162,214-215,228-229
+src/js/apps/patients/patients-main_app.js
+  s_6c4e953149fe47::t_016969f360c30e 45
+  s_6c4e953149fe47::t_030566d7341f9b 46-47,50,52,54,56,58-61,63-68,70-72,76-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3b476ed60128b807391eb095eca64e2e0efa5385",
+  "prompts": {},
+  "sessions": {
+    "s_6c4e953149fe47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b04c05b6-cf79-475d-8e52-577944d6db4d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

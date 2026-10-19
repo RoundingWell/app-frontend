@@ -1,0 +1,30 @@
+src/js/apps/patients/patient/interactions/date-control_view.js
+  h_0f06c286dda36f 1-130
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 45,50,149-151,154,161-163
+src/js/apps/patients/patient/interactions/interactions.scss
+  h_0f06c286dda36f 16-17,36,41-43,45-49,52-54,57-59,128-131
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 13,18,35-48,53,65-66,76,79-82,90,124-130,139,243,254,270-278,307,309-319,350,355,369,373,377
+src/js/apps/patients/patient/interactions/layout.hbs
+  h_0f06c286dda36f 7,9-12
+src/js/apps/patients/shared/interactions/appointment-presentation.js
+  h_0f06c286dda36f 52-53
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  h_0f06c286dda36f 9-11
+src/js/apps/patients/shared/interactions/interaction-item.scss
+  h_0f06c286dda36f 6-7,36-37,51,87
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  h_0f06c286dda36f 27-28,31,58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3c0a81a26dad6a7a81f969926c6b69bb2c602148",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

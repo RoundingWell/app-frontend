@@ -1,0 +1,114 @@
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 1-741,743,755-767,769-770,772-775,778-779,781-798,804,806-809,811-815,823,825-834,838-844,846-848,850-855,895-2350
+  h_0f06c286dda36f 742,744-754,768,771,776-777,780,799-803,805,810,816-822,824,835-837,845,849,856-894
+src/js/apps/patients/patient/interactions/interactions.scss
+  h_0f06c286dda36f 1-236
+src/js/apps/patients/patient/context-trail.hbs
+  h_0f06c286dda36f 24-29
+src/js/apps/patients/patient/form/form-errors.e2e.cy.js
+  h_0f06c286dda36f 14
+src/js/apps/patients/patient/workflow/closed-layout.hbs
+  h_0f06c286dda36f 2-15
+test/support/commands.js
+  h_0f06c286dda36f 43
+src/js/entities-service/index.js
+  h_0f06c286dda36f 25-26
+packages/care-ops-fontawesome/manifest.json
+  h_0f06c286dda36f 43,54,64,70,75-77
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  h_0f06c286dda36f 1-32
+src/js/apps/patients/shared/widgets/interactions_view.js
+  h_0f06c286dda36f 1-22
+src/js/apps/patients/patient/form/form-interaction.e2e.cy.js
+  h_0f06c286dda36f 17
+test/fixtures/config/interactions.js
+  h_0f06c286dda36f 1-14
+src/js/components/datepicker/datepicker.component.cy.js
+  h_0f06c286dda36f 50,191-234
+src/js/apps/patients/shared/interactions/interactions-status.scss
+  h_0f06c286dda36f 1-38
+src/js/apps/patients/patient/interactions/date-control_view.js
+  h_0f06c286dda36f 1-151
+src/js/apps/patients/shared/interactions/interaction-item.scss
+  h_0f06c286dda36f 1-195
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 1-198,202-204,206,208-303
+  h_0f06c286dda36f 199-201,205,207
+src/js/apps/patients/patient/form/form.e2e.cy.js
+  h_0f06c286dda36f 30
+src/js/apps/patients/patient/workflow/layout.hbs
+  h_0f06c286dda36f 2-21
+src/js/apps/patients/patient/interactions/scroll-edges_behavior.js
+  h_0f06c286dda36f 1-67
+src/js/apps/patients/patient/patient_app.js
+  h_0f06c286dda36f 11,24,41-42,108-124,156,159-168
+src/js/entities-service/interactions.js
+  h_0f06c286dda36f 1-107
+src/js/components/datepicker/index.js
+  h_0f06c286dda36f 102
+src/js/apps/patients/shared/patient-pages.scss
+  h_0f06c286dda36f 1-55
+test/support/e2e.js
+  h_0f06c286dda36f 29
+src/js/apps/patients/shared/widgets/widgets.js
+  h_0f06c286dda36f 11-12,86
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  h_0f06c286dda36f 23,194-227,239-246,251,270-346
+src/js/apps/patients/patients-main_app.js
+  h_0f06c286dda36f 53-60
+src/js/apps/patients/patient/workflow/workflow_views.js
+  h_0f06c286dda36f 29-30,368,372-374
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  h_0f06c286dda36f 7-10,74,119-128
+src/js/apps/patients/patient/action/action-activity_app.js
+  h_0f06c286dda36f 5-7,16,20-24,27,29,32,42-46,68
+src/js/apps/patients/patient/patient_views.js
+  h_0f06c286dda36f 50,54-55
+test/support/api/interactions.js
+  h_0f06c286dda36f 1-27,29-34,36-64
+  h_0f06c286dda36f 28,35
+src/js/entities-service/entities/interactions.js
+  h_0f06c286dda36f 1-53
+src/js/apps/patients/shared/widgets/recent-interactions_app.js
+  h_0f06c286dda36f 1-33
+src/js/apps/patients/shared/widgets/recent-interactions.scss
+  h_0f06c286dda36f 1-88
+src/js/apps/patients/shared/interactions/loading.hbs
+  h_0f06c286dda36f 1-12
+src/js/apps/patients/patient/flow/flow_app.js
+  h_0f06c286dda36f 186
+src/js/apps/patients/shared/widgets/README.md
+  h_0f06c286dda36f 118,123-124
+src/js/apps/patients/patient/action/action-activity_views.js
+  h_0f06c286dda36f 19-20,243,302,305-307,321
+src/js/apps/patients/patient/action/action_app.js
+  h_0f06c286dda36f 277
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  h_0f06c286dda36f 1-137
+src/js/apps/patients/shared/widgets/recent-interactions_views.js
+  h_0f06c286dda36f 1-105
+src/js/apps/patients/patient/interactions/interactions_app.js
+  h_0f06c286dda36f 1-42,44-54,56-81,83-117,122-170
+  h_0f06c286dda36f 43,55,82,118-121
+src/js/apps/patients/shared/interactions/interactions-status_views.js
+  h_0f06c286dda36f 1-35
+src/js/i18n/en-US/patients.yml
+  h_0f06c286dda36f 5-27,237-296
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  h_0f06c286dda36f 33
+src/js/apps/patients/patient/interactions/layout.hbs
+  h_0f06c286dda36f 1-26
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  h_0f06c286dda36f 1,4-6,15-23,25,27,29,31-35
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "aae027234b75681a79eb37943e606d1efb32fbb2",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

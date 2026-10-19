@@ -1,0 +1,47 @@
+src/js/apps/dashboards/dashboard/dashboard_app.js
+  s_85aebd1623278c::t_6ba5d3dd834bc6 10-13
+  s_85aebd1623278c::t_f23b9b156cf0ec 16-18,20,22
+  s_85aebd1623278c::t_a6622340a4562a 14,23,27
+src/js/base/routing.md
+  s_85aebd1623278c::t_b17fd4371b8155 111-112,158-166,198-200
+src/js/apps/dashboards/dashboards-all/dashboards-all_app.js
+  s_85aebd1623278c::t_a6622340a4562a 20,26,32
+  s_85aebd1623278c::t_55dc3b4d0e4101 2,10-11,22-23,25,33,39
+  s_85aebd1623278c::t_6ba5d3dd834bc6 14,16-17
+src/js/base/routerapp.component.cy.js
+  s_85aebd1623278c::t_e49ac6bb41a48d 28-29,40-42,55-56,153,156,160,167,170,174,179,181,183,190,193,196-198,200-202,205,208,211,213-214
+src/js/apps/dashboards/dashboards-all/dashboards-all_views.js
+  s_85aebd1623278c::t_713b9f1e8a2fa1 62
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_b17fd4371b8155 16,68-77,82-83,203-209
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_85aebd1623278c::t_16d4f6be88ab92 81
+src/js/base/routerapp.js
+  s_85aebd1623278c::t_b43b2b251ff774 148,154-158
+  s_85aebd1623278c::t_413387409136ba 20,118-123,137,139,153,188
+src/js/apps/dashboards/dashboards-main_app.js
+  s_85aebd1623278c::t_b43b2b251ff774 40
+  s_85aebd1623278c::t_0061da09bbf63f 1-2,13-17,33,35-39,41-45
+  s_85aebd1623278c::t_ddc29c01ed6c4d 3-4
+src/js/behaviors/input-watcher.js
+  s_85aebd1623278c::t_85df404d7cd010 37
+  s_85aebd1623278c::t_fa6f4b3704239d 24
+src/js/components/list-search/list-search_views.js
+  s_85aebd1623278c::t_fa6f4b3704239d 49-50,55-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ac2df446b1226c48abe64a6a0035e446369c851b",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

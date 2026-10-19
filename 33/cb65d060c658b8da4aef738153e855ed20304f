@@ -1,0 +1,26 @@
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_5cb787676df08f::t_629ff4d06bbb63 238-239,253-263,271,302
+  s_5cb787676df08f::t_e46b64d3f4a682 264
+  s_5cb787676df08f::t_6d995f06e9d546 303-306,309-317
+  s_5cb787676df08f::t_3e4296413547f6 193,272-278,307-308
+src/scss/modules/list-pages.scss
+  s_5cb787676df08f::t_6d995f06e9d546 219,224-225,283
+  s_5cb787676df08f::t_3e4296413547f6 221
+  s_5cb787676df08f::t_2e53fb457fdee9 222-223
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "33cb65d060c658b8da4aef738153e855ed20304f",
+  "prompts": {},
+  "sessions": {
+    "s_5cb787676df08f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f380a-6030-7862-907a-777090f3c585",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

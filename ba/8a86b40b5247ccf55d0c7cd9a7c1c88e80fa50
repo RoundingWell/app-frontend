@@ -1,0 +1,19 @@
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_14c2c438fbdb53::t_048dfceff04494 1352,1394-1405
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "ba8a86b40b5247ccf55d0c7cd9a7c1c88e80fa50",
+  "prompts": {},
+  "sessions": {
+    "s_14c2c438fbdb53": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d01f19f1-e3ef-4c93-b082-3b62545bd947",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

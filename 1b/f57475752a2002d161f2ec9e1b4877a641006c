@@ -1,0 +1,16 @@
+README.md
+  h_0f06c286dda36f 1
+docs/images/roundingwell-logo.svg
+  h_0f06c286dda36f 1-54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1bf57475752a2002d161f2ec9e1b4877a641006c",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

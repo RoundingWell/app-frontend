@@ -1,0 +1,27 @@
+package-lock.json
+  s_6c4e953149fe47::t_a5780d34cf5c34 31,5730-5735,16928
+package.json
+  s_6c4e953149fe47::t_bc6f4809a4e1db 142-143
+packages/care-ops-fontawesome/index.js
+  s_6c4e953149fe47::t_da96961c43a3e4 1
+packages/care-ops-fontawesome/package.json
+  s_6c4e953149fe47::t_5b7bb9518687b3 5,11,13-16
+src/js/index.js
+  s_6c4e953149fe47::t_990757487ee65c 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4f1542dc3ad3a46a6b3f734e22b87f4ae4f0801a",
+  "prompts": {},
+  "sessions": {
+    "s_6c4e953149fe47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b04c05b6-cf79-475d-8e52-577944d6db4d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

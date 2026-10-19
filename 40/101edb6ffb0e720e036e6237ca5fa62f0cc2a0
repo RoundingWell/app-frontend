@@ -1,0 +1,26 @@
+src/js/apps/patients/schedule/schedule_app.js
+  s_85aebd1623278c::t_a4b7466bd6df6d 93
+  s_85aebd1623278c::t_e179ce716f606b 244-246
+src/js/apps/patients/worklist/worklist_app.js
+  s_85aebd1623278c::t_a4b7466bd6df6d 113
+  s_85aebd1623278c::t_e179ce716f606b 342-344
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_c291dcb499fb5f 144
+  s_85aebd1623278c::t_a4b7466bd6df6d 24,141,143,145-146
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "40101edb6ffb0e720e036e6237ca5fa62f0cc2a0",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

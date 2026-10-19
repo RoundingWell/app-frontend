@@ -1,0 +1,53 @@
+.github/copilot-instructions.md
+  s_85aebd1623278c::t_8c365acc92e3e7 11,20,35
+  s_85aebd1623278c::t_f5b3c7188d28d6 10
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_3b6ee44d974c5f 24,144,146-154,158,162-163
+  s_85aebd1623278c::t_6b8711b7632c63 701-703
+  s_85aebd1623278c::t_f5b3c7188d28d6 704-707
+src/js/utils/README.md
+  s_85aebd1623278c::t_9c6df06feabb15 46
+  s_85aebd1623278c::t_65ceef6afa54a6 48-53,55
+  s_85aebd1623278c::t_23e1ca30ee1c5d 58
+  s_85aebd1623278c::t_f5b3c7188d28d6 56-57
+AGENTS.md
+  s_85aebd1623278c::t_8c365acc92e3e7 35,45-46,48-54,58-72,76,85
+  s_85aebd1623278c::t_65ceef6afa54a6 164-169
+  s_85aebd1623278c::t_23e1ca30ee1c5d 55-57
+  s_85aebd1623278c::t_f5b3c7188d28d6 47,73-75
+src/js/base/routing.md
+  s_85aebd1623278c::t_9858f0999420ef 232-235
+src/js/README.md
+  s_85aebd1623278c::t_9c6df06feabb15 135
+  s_85aebd1623278c::t_8c365acc92e3e7 73-74,77-80
+  s_85aebd1623278c::t_9858f0999420ef 9
+  s_85aebd1623278c::t_d256546d9c5c71 134
+  s_85aebd1623278c::t_f5b3c7188d28d6 75-76
+README.md
+  s_85aebd1623278c::t_f5b3c7188d28d6 126-127
+  s_85aebd1623278c::t_71523de4a9f694 257
+  s_85aebd1623278c::t_8c365acc92e3e7 123-125
+  s_85aebd1623278c::t_863720f1cca879 119-120
+  s_85aebd1623278c::t_e04bb14467c6d1 122
+.github/copilot.yaml
+  s_85aebd1623278c::t_8c365acc92e3e7 10,18,25,36,44,61
+  s_85aebd1623278c::t_f5b3c7188d28d6 9,35,58
+jsconfig.json
+  s_85aebd1623278c::t_9c6df06feabb15 6
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cb3fd36ac5c9f6c91359fac9012236f1a9ca68b0",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

@@ -1,0 +1,24 @@
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  h_0f06c286dda36f 17-18,20,29,40,49,56,60,111
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  h_0f06c286dda36f 4,64-65,76,90-91,169,249-250,300,312,322,332
+src/js/apps/programs/sidebar/flow/flow-sidebar_app.js
+  h_0f06c286dda36f 14,22-23,25,36,39,46,50
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  h_0f06c286dda36f 5,68-69,80,94-95,142,213-214,262,273
+src/js/apps/programs/sidebar/program/program-sidebar_app.js
+  h_0f06c286dda36f 8,22,32,42,46
+src/js/apps/programs/sidebar/program/programs-sidebar_views.js
+  h_0f06c286dda36f 60-61,73,87-88,159-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f78c77c01889029863b4bb03e8fee1b7cebe82f3",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

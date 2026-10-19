@@ -1,0 +1,21 @@
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_ac479aa708f14b::t_d478af86997394 500-641
+src/js/apps/patients/patient/form/form_app.js
+  s_ac479aa708f14b::t_9b4bf5e68cce82 160-162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "c5646ed2260eb950c1f63fd46836708852a5f069",
+  "prompts": {},
+  "sessions": {
+    "s_ac479aa708f14b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "488d9df5-515f-4c50-8d84-1543e4653720",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
