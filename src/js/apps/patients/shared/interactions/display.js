@@ -64,5 +64,6 @@ export function getInteractionDescription(model) {
   }
   if (group === 'visits') return { name: intl.visit, text: intl.added };
   if (group === 'messages') return getMessageDescription(model, metadata);
-  return { name: getSenderName(model, metadata), text: model.get('channel') === 'voicemail' ? intl.leftVoicemail : intl.loggedCall };
+  const isOutboundVoicemail = model.get('channel') === 'voicemail' && model.get('direction') === 'outbound';
+  return { name: getSenderName(model, metadata), text: isOutboundVoicemail ? intl.leftVoicemail : intl.loggedCall };
 }

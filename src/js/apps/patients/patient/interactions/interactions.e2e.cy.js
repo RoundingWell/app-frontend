@@ -144,6 +144,8 @@ context('patient interactions', function() {
       { channel: 'sms', direction: 'inbound', metadata: { from: '+16155550101' }, name: '+16155550101' },
       { channel: 'sms', direction: 'inbound', metadata: {}, name: null },
       { channel: 'voice', direction: 'inbound', metadata: {}, name: null },
+      { channel: 'voicemail', direction: 'inbound', metadata: { clinician_name: 'Mark Ott' }, name: 'Mark Ott' },
+      { channel: 'voicemail', direction: 'inbound', metadata: {}, name: null },
     );
 
     cy
@@ -172,7 +174,7 @@ context('patient interactions', function() {
         .contains('.patient-interactions__item', `Sender scenario ${ index }.`)
         .scrollIntoView()
         .find('.patient-interactions__activity-description')
-        .should('contain', scenario.channel === 'sms' ? 'via SMS' : scenario.channel === 'voicemail' ? 'left a voicemail.' : 'logged a call.')
+        .should('contain', scenario.channel === 'sms' ? 'via SMS' : scenario.channel === 'voicemail' && scenario.direction === 'outbound' ? 'left a voicemail.' : 'logged a call.')
         .within(() => {
           if (scenario.name) {
             cy
