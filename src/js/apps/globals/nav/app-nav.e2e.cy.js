@@ -251,7 +251,7 @@ context('App Nav', function() {
       .get('.whats-new-modal')
       .should('contain', 'What\'s New')
       .find('iframe')
-      .should('have.attr', 'src', 'https://www.roundingwell.com/rw-design-update');
+      .should('have.attr', 'src', 'https://www.roundingwell.com/whats-new');
 
     cy
       .get('.whats-new-modal')
@@ -289,7 +289,7 @@ context('App Nav', function() {
     cy
       .get('.whats-new-modal')
       .find('iframe')
-      .should('have.attr', 'src', 'https://www.roundingwell.com/rw-design-update');
+      .should('have.attr', 'src', 'https://www.roundingwell.com/whats-new');
   });
 
   specify('keeps the interactions announcement clear of menu controls', function() {
