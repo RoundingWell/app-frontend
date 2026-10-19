@@ -1838,8 +1838,20 @@ context('patient interactions', function() {
         action: getRelationship(action),
       },
     });
+    const activityNote = [
+      'Video consultation completed.',
+      'Reviewed the follow-up plan with the patient and confirmed the date, location, and purpose of the next appointment.',
+      'Discussed the written instructions from the care team and answered questions about preparing for the visit.',
+      'The patient described the steps already completed and identified the remaining items to discuss with the clinician.',
+      'Confirmed that the patient has the clinic contact information and knows how to request help with scheduling.',
+      'Reviewed transportation arrangements and discussed contacting the care team if those arrangements change.',
+      'The patient repeated the agreed next steps and confirmed that the written summary would be helpful for reference.',
+      'Discussed sending a follow-up message with the appointment details and the questions raised during this call.',
+      'Confirmed the preferred callback number and a suitable time for the care team to follow up after the appointment.',
+      'The patient had no further questions and agreed to contact the clinic if additional support is needed.',
+    ].join('\n');
     const videoCall = getInteraction({
-      attributes: { channel: 'video', direction: 'outbound', metadata: { note: 'Video consultation completed.\nSecond line\nThird line\nFourth line\nFifth line\nFinal line' } },
+      attributes: { channel: 'video', direction: 'outbound', metadata: { note: activityNote } },
       relationships: { action: getRelationship(action) },
     });
     const email = getInteraction({
@@ -1882,6 +1894,8 @@ context('patient interactions', function() {
       .should('contain', 'Outbound Video call')
       .find('.patient-interactions__summary')
       .should($summary => {
+        expect(activityNote.length).to.be.greaterThan(900);
+        expect($summary).to.have.text(activityNote);
         expect($summary[0].scrollHeight).to.be.at.most($summary[0].clientHeight + 1);
       });
 
