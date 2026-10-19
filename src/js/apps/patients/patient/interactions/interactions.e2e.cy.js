@@ -2493,7 +2493,7 @@ context('patient interactions', function() {
         expect(teardownFocus).to.have.length(0);
       });
 
-    const noteAtLimit = `Full summary <review> & next steps\n${ 'The team reviewed the next steps.\n'.repeat(18) }`.slice(0, 600);
+    const noteAtLimit = `Full summary <review> & next steps\n${ 'The team reviewed the next steps.\n'.repeat(30) }`.slice(0, 900);
     const longNote = `${ noteAtLimit.replace('Full summary', 'Call summary') }!`;
     const noteHistory = map(range(50), index => getInteraction({
       attributes: {

@@ -61,7 +61,7 @@ const InteractionItemView = View.extend({
     Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
   },
   hasCollapsibleNote(summary) {
-    return this.model.getChannelGroup() === 'calls' && !this.getOption('activity') && summary?.length > 600;
+    return this.model.getChannelGroup() === 'calls' && !this.getOption('activity') && summary?.length > 900;
   },
   templateContext() {
     const metadata = this.model.get('metadata') || {};
