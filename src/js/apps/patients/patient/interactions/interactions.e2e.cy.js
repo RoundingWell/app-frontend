@@ -401,7 +401,7 @@ context('patient interactions', function() {
       .should('have.attr', 'href', '#far-fa-paper-plane-top');
 
     cy
-      .contains('.patient-interactions__activity-description', 'Outbound Message')
+      .contains('.patient-interactions__activity-description', 'Cypress Clinic')
       .scrollIntoView()
       .should('be.visible')
       .closest('.patient-interactions__item')
@@ -924,6 +924,58 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__date-divider .patient-interactions__date-button', 'May 30')
       .should('be.visible');
+
+    const clinicianCall = getInteraction({
+      attributes: { channel: 'voice', direction: 'outbound', metadata: { clinician_name: 'Mark Ott', note: 'Call completed by clinician.' } },
+    });
+    const organizationCall = getInteraction({
+      attributes: { channel: 'voice', direction: 'outbound', metadata: { note: 'Call completed by organization.' } },
+    });
+    const organizationVoicemail = getInteraction({
+      attributes: { channel: 'voicemail', direction: 'outbound', metadata: { clinician_name: null, note: 'Voicemail left by organization.' } },
+    });
+    const inboundMessage = getInteraction({
+      attributes: { channel: 'sms', direction: 'inbound', metadata: { from: '+16155550101', clinician_name: 'Ignored Clinician', note: 'Inbound message with sender.' } },
+    });
+    const clinicianInboundVoicemail = getInteraction({
+      attributes: { channel: 'voicemail', direction: 'inbound', metadata: { clinician_name: 'Mark Ott', note: 'Inbound voicemail with clinician.' } },
+    });
+    const unnamedInboundVoicemail = getInteraction({
+      attributes: { channel: 'voicemail', direction: 'inbound', metadata: { note: 'Inbound voicemail without clinician.' } },
+    });
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [clinicianCall, organizationCall, organizationVoicemail, inboundMessage, clinicianInboundVoicemail, unnamedInboundVoicemail];
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    for (const [interaction, name, text] of [
+      [clinicianCall, 'Mark Ott', 'logged a call.'],
+      [organizationCall, 'Cypress Clinic', 'logged a call.'],
+      [organizationVoicemail, 'Cypress Clinic', 'left a voicemail.'],
+      [inboundMessage, '+16155550101', 'via SMS'],
+      [clinicianInboundVoicemail, 'Mark Ott', 'logged a call.'],
+      [unnamedInboundVoicemail, null, 'logged a call.'],
+    ]) {
+      cy
+        .contains('.patient-interactions__item', interaction.attributes.metadata.note)
+        .scrollIntoView()
+        .find('.patient-interactions__activity-description')
+        .should('contain', text)
+        .within(() => {
+          if (name) {
+            cy
+              .get('strong')
+              .should('have.text', name);
+          } else {
+            cy
+              .get('strong')
+              .should('not.exist');
+          }
+        });
+    }
   });
 
   specify('starts at Today, labels year boundaries, and preserves the viewed range through filtering and empty results', function() {
@@ -1342,7 +1394,7 @@ context('patient interactions', function() {
       .should('not.exist');
 
     const sparsePreview = [
-      getInteraction({ attributes: { channel: 'voice', direction: 'inbound', metadata: { note: 'Inbound callback' } } }),
+      getInteraction({ attributes: { channel: 'voice', direction: 'inbound', metadata: { from: '+16155550101', clinician_name: 'Ignored Clinician', note: 'Inbound callback' } } }),
       getInteraction({ attributes: { metadata: null } }),
       getInteraction({ attributes: { channel: 'appointment', occurred_at: null, metadata: { appointment_type: 'Consultation' } } }),
     ];
@@ -1363,6 +1415,14 @@ context('patient interactions', function() {
       .and($titles => {
         expect($titles.toArray().map(title => title.textContent)).to.include('Appointment');
       });
+
+    cy
+      .get('.patient-interactions-preview__item--sms .patient-interactions-preview__sender')
+      .should('have.text', 'Cypress Clinic');
+
+    cy
+      .get('.patient-interactions-preview__item--voice .patient-interactions-preview__sender')
+      .should('have.text', '+16155550101');
 
     cy
       .get('.patient-interactions-preview__item--appointment')
@@ -1893,9 +1953,9 @@ context('patient interactions', function() {
 
     cy
       .get('.patient-action__activity .patient-interactions__item--sms')
-      .should('contain', 'Outbound Message')
+      .should('contain', 'Cypress Clinic')
       .find('.patient-interactions__activity-description strong')
-      .should('not.exist');
+      .should('have.text', 'Cypress Clinic');
 
     cy
       .routePatientInteractions(fx => {

@@ -1,4 +1,5 @@
 import { has, some } from 'underscore';
+import { Radio } from 'marionette';
 
 import i18n from 'js/i18n';
 
@@ -44,10 +45,15 @@ export function hasInteractionCardContent(model) {
     metadata.admit_reason, metadata.discharged_at], Boolean);
 }
 
+export function getSenderName(model, metadata) {
+  if (metadata.clinician_name || model.get('direction') !== 'outbound') return metadata.clinician_name;
+  return Radio.request('bootstrap', 'organization').get('name');
+}
+
 function getMessageDescription(model, metadata) {
   const inbound = model.get('direction') === 'inbound';
-  const name = inbound ? metadata.from : metadata.clinician_name;
-  return { name, text: name ? undefined : `${ inbound ? intl.inbound : intl.outbound } ${ intl.message }` };
+  const name = inbound ? metadata.from : getSenderName(model, metadata);
+  return { name, text: name ? undefined : `${ intl.inbound } ${ intl.message }` };
 }
 
 export function getInteractionDescription(model) {
@@ -58,5 +64,6 @@ export function getInteractionDescription(model) {
   }
   if (group === 'visits') return { name: intl.visit, text: intl.added };
   if (group === 'messages') return getMessageDescription(model, metadata);
-  return { name: metadata.clinician_name, text: intl.loggedCall };
+  const isOutboundVoicemail = model.get('channel') === 'voicemail' && model.get('direction') === 'outbound';
+  return { name: getSenderName(model, metadata), text: isOutboundVoicemail ? intl.leftVoicemail : intl.loggedCall };
 }

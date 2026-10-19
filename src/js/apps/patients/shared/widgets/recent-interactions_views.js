@@ -3,7 +3,7 @@ import { Radio, View, CollectionView } from 'marionette';
 
 import i18n from 'js/i18n';
 
-import { getInteractionChannelLabel, getInteractionIcon, getAppointmentStatusLabel } from 'js/apps/patients/shared/interactions/display';
+import { getInteractionChannelLabel, getInteractionIcon, getAppointmentStatusLabel, getSenderName } from 'js/apps/patients/shared/interactions/display';
 import { InteractionsLoadingView, InteractionsErrorView } from 'js/apps/patients/shared/interactions/interactions-status_views';
 
 import './recent-interactions.scss';
@@ -24,7 +24,7 @@ const RecentInteractionsItemView = View.extend({
       <span class="patient-interactions-preview__symbol" aria-hidden="true">{{far icon}}</span>
       <span class="patient-interactions-preview__details">
         <strong class="patient-interactions-preview__title">{{ title }}</strong>
-        <span class="patient-interactions-preview__sender">{{#if (isValue direction "inbound")}}{{ metadata.from }}{{else}}{{ metadata.clinician_name }}{{/if}}</span>
+        <span class="patient-interactions-preview__sender">{{ sender }}</span>
         {{#if timestamp}}<time class="patient-interactions-preview__time" datetime="{{ timestamp }}">{{formatDateTime timestamp "AT_TIME"}}</time>{{/if}}
       </span>
     </button>
@@ -50,10 +50,12 @@ const RecentInteractionsItemView = View.extend({
     return appendDetail(title, metadata.facility);
   },
   templateContext() {
+    const metadata = this.model.get('metadata') || {};
     return {
       title: this.getTitle(),
       icon: getInteractionIcon(this.model),
       timestamp: this.model.getTimestamp(),
+      sender: this.model.get('direction') === 'inbound' ? metadata.from : getSenderName(this.model, metadata),
     };
   },
 });
