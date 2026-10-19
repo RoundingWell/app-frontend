@@ -1,0 +1,28 @@
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_7d9748a0496f68::t_763ca922e13ebe 365-378,394-398,413
+  s_7d9748a0496f68::t_e35e823a66a996 399-412
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_7d9748a0496f68::t_3736ea23a3a7d8 987-1019
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_7d9748a0496f68::t_d1c32e9a675bcc 733-735,746,751,757,767-787,794,796,798
+src/js/apps/programs/program/program.e2e.cy.js
+  s_7d9748a0496f68::t_b3c2feb386c89f 200-204,213,255-275
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_7d9748a0496f68::t_2a4942ab2e13e3 374-410,479-496
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e6c6ae1d12e15ad8f7c0c0f275d668ce3b06f90d",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

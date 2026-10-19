@@ -1,0 +1,85 @@
+src/js/base/subrouterapp.component.cy.js
+  s_85aebd1623278c::t_23bd28ffb22990 1,58-63,165-168,170-191,193,201-202
+  s_85aebd1623278c::t_d7463e4e8d2bab 192,194-200
+  s_85aebd1623278c::t_95c3a35ee3d60c 259
+  s_85aebd1623278c::t_725653cc161b36 169
+  s_85aebd1623278c::t_709718c851b562 203-205,207-208,210-218,221,223-258
+  s_85aebd1623278c::t_0ad97a3b43da26 206,209,219-220,222
+src/js/base/subrouterapp.js
+  s_85aebd1623278c::t_f5a2190ee3e4de 84
+  s_85aebd1623278c::t_06020376953b96 12,72-73,78,82-83,88-90,97,99-101,119-121,130-133
+  s_85aebd1623278c::t_f65a05246df02e 81,92,96,98,104-110
+  s_85aebd1623278c::t_709718c851b562 9-10,74-75,77,79,91,93-94,117,123-129,134
+  s_85aebd1623278c::t_09506945416b48 80,95,111
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_85aebd1623278c::t_fcba3268410046 13,15-20,22-26,28,30,57
+src/js/services/sidebar.js
+  s_85aebd1623278c::t_23b53bdbdcde2e 48,50,61-62,70-72,77-82
+  s_85aebd1623278c::t_646c5319ac15bc 35,38,42,55,58,73-76,91
+  s_85aebd1623278c::t_8fc8e673bf0a06 44-46
+  s_85aebd1623278c::t_20a69416a5c2d8 43
+  s_85aebd1623278c::t_cca889c96a9065 64-69
+src/js/apps/programs/sidebar/flow/flow-sidebar_app.js
+  s_85aebd1623278c::t_99a0622e802ddb 14,22-23,25,36,39,46,50
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_85aebd1623278c::t_c107f0a36faee7 10-13,16-22,24-25,27,29
+src/js/apps/programs/program/flow/flow_app.js
+  s_85aebd1623278c::t_cd8fe324ff1001 114,116-118,120-122
+  s_85aebd1623278c::t_8983858db9fd6a 15-22,30,32-39,41,48,59,63-65,68-70,81,93,97,109
+src/js/apps/programs/sidebar/program/program-sidebar_app.js
+  s_85aebd1623278c::t_fc41219f9e5283 8,22,32,42,46
+src/js/apps/programs/program/action/action_app.js
+  s_85aebd1623278c::t_921e3d7cacc8f4 12-15,17,30-35,37
+  s_85aebd1623278c::t_df6f8129c35c1c 38-39
+src/js/apps/programs/program/program_app.js
+  s_85aebd1623278c::t_37beb9df98c6e6 18-25,28-32,37,45-48,51,54-60,69-77,79-84,87,89-91,93-97,99,104,106,108,113,142
+  s_85aebd1623278c::t_d519758f97bed7 78,98,107
+  s_85aebd1623278c::t_492be217b5d6e3 116-117,128-130
+src/js/apps/programs/programs-main_app.js
+  s_85aebd1623278c::t_6b323438304f08 1-2,12-17,56-65,67-76,78-87
+src/js/entities-service/program-actions.js
+  s_85aebd1623278c::t_265c7bfaa8e753 16,19
+src/js/entities-service/programs.js
+  s_85aebd1623278c::t_265c7bfaa8e753 14-15
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_e93cf7e8ddc11c 79,85-86,88-91,96-97
+  s_85aebd1623278c::t_5706a0d0c38a57 16,87,241,243-246
+  s_85aebd1623278c::t_0e1d6b83d5b683 242
+src/js/entities-service/program-flows.js
+  s_85aebd1623278c::t_265c7bfaa8e753 15,18
+src/js/entities-service/tags.js
+  s_85aebd1623278c::t_265c7bfaa8e753 13,16
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_85aebd1623278c::t_c92334d514b29c 18-19,21,30,41,51,58,62
+src/js/behaviors/sortable-list.js
+  s_85aebd1623278c::t_2341d555cd04f6 24,47,57
+src/js/apps/programs/program/flow/flow_views.js
+  s_85aebd1623278c::t_2f655091563cf2 67,157
+  s_85aebd1623278c::t_ceb72ad5fb9e65 145,147-149
+src/js/services/sidebar.component.cy.js
+  s_85aebd1623278c::t_03daa844f0e443 8,20,26-27
+  s_85aebd1623278c::t_cca889c96a9065 57
+src/js/apps/programs/shared/flows_views.js
+  s_85aebd1623278c::t_a465ab40dbe993 9,27
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_85aebd1623278c::t_ceb72ad5fb9e65 68,70-72,138,140-142
+  s_85aebd1623278c::t_2f655091563cf2 45,48
+src/js/apps/programs/shared/actions_views.js
+  s_85aebd1623278c::t_a465ab40dbe993 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d9d8a8039e4a0b752533f62a4c38feac4dc7f31f",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

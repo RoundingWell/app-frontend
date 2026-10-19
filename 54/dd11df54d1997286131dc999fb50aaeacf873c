@@ -1,0 +1,68 @@
+src/js/entities-service/README.md
+  s_ccd396716f1975::t_e4b0652dc75215 61-64,83-84
+src/js/entities-service/entities/patient-fields.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 9-11
+  s_ccd396716f1975::t_70201fcd6be15a 14
+src/js/entities-service/entities/workspace-patients.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 6-8
+  s_ccd396716f1975::t_70201fcd6be15a 11
+src/js/entities-service/entities/comments.js
+  s_ccd396716f1975::t_70201fcd6be15a 14
+  s_ccd396716f1975::t_6e360c40ba9dc0 9-11
+src/js/entities-service/entities/patients.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 12-18
+  s_ccd396716f1975::t_70201fcd6be15a 21
+src/js/base/model.component.cy.js
+  s_ccd396716f1975::t_be31de9ea0e686 5,9-10
+  s_ccd396716f1975::t_03909b312aa4f7 3,6-8,11-15,54-56,59,61,70-73,75-80
+  s_ccd396716f1975::t_477e79e4543ed6 34
+  s_ccd396716f1975::t_72c0eb4a7165df 74
+  s_ccd396716f1975::t_799b16b2dabb28 81-82
+  s_ccd396716f1975::t_e4b0652dc75215 4,57-58,60,62-69
+src/js/entities-service/entities/actions.js
+  s_ccd396716f1975::t_70201fcd6be15a 23
+  s_ccd396716f1975::t_6e360c40ba9dc0 14-20
+src/js/entities-service/entities/program-flows.js
+  s_ccd396716f1975::t_70201fcd6be15a 25
+  s_ccd396716f1975::t_6e360c40ba9dc0 13-22
+src/js/entities-service/entities/files.js
+  s_ccd396716f1975::t_70201fcd6be15a 19
+  s_ccd396716f1975::t_6e360c40ba9dc0 8-10
+src/js/entities-service/entities/program-actions.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 13-28
+  s_ccd396716f1975::t_70201fcd6be15a 31
+src/js/entities-service/entities/artifacts.js
+  s_ccd396716f1975::t_e4b0652dc75215 5-9,12
+src/js/base/model.js
+  s_ccd396716f1975::t_830b6f8afa06c0 1
+src/js/entities-service/entities/form-responses.js
+  s_ccd396716f1975::t_70201fcd6be15a 17
+  s_ccd396716f1975::t_6e360c40ba9dc0 11-14
+src/js/base/jsonapi-mixin.js
+  s_ccd396716f1975::t_830b6f8afa06c0 54-72
+src/js/entities-service/entities/flows.js
+  s_ccd396716f1975::t_70201fcd6be15a 14
+  s_ccd396716f1975::t_6e360c40ba9dc0 8-11
+src/js/entities-service/entities/programs.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 10-15
+  s_ccd396716f1975::t_70201fcd6be15a 18
+src/js/entities-service/entities/clinicians.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 12-18
+  s_ccd396716f1975::t_70201fcd6be15a 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "54dd11df54d1997286131dc999fb50aaeacf873c",
+  "prompts": {},
+  "sessions": {
+    "s_ccd396716f1975": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04384-a61d-71c1-bf25-82b3d002659e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

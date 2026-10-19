@@ -1,0 +1,40 @@
+src/js/apps/programs/programs-main_app.js
+  s_6c4e953149fe47::t_ca6cba0630f463 2,4-6,12-23,29-30,32-33,35,40,42,44-47
+  s_6c4e953149fe47::t_15d46087dea600 49
+  s_6c4e953149fe47::t_27790b7f45f2f1 51
+  s_6c4e953149fe47::t_b3c93b593f5212 41
+  s_6c4e953149fe47::t_2fab7b802575cb 36-39
+  s_6c4e953149fe47::t_e05444d21b5043 48
+src/js/apps/programs/program/program_app.js
+  s_6c4e953149fe47::t_d02758f7a4684e 2,4,8-9,19,27-28,39-40,42,48,53-72,74-80,91
+  s_6c4e953149fe47::t_088c093eaff1b5 123
+src/js/apps/programs/program/flow/flow_app.js
+  s_6c4e953149fe47::t_d02758f7a4684e 3,13,29-30,47-48,53,57,59-64,66-70,126
+  s_6c4e953149fe47::t_95ff94fb2fb06d 58,65
+src/js/apps/programs/program/program.e2e.cy.js
+  s_6c4e953149fe47::t_d33a97d24e8d48 109-135
+  s_6c4e953149fe47::t_c0c546c1b6279c 325-407
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_6c4e953149fe47::t_f1c89863e5c1b8 94-107,114-121
+  s_6c4e953149fe47::t_94cc4cfa0b4bec 108-113
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_6c4e953149fe47::t_d5b3dc2c7860b2 815-816,819,847-850
+  s_6c4e953149fe47::t_d33a97d24e8d48 302-341
+  s_6c4e953149fe47::t_5c61077cf6a8bc 851
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ca32aa1f344136b94ce4756a180314b926cfd348",
+  "prompts": {},
+  "sessions": {
+    "s_6c4e953149fe47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b04c05b6-cf79-475d-8e52-577944d6db4d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

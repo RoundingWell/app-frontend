@@ -1,0 +1,45 @@
+src/js/i18n/en-US/patients.yml
+  s_68eb4121d9a9bc::t_da08a01004ba62 185,336
+src/js/apps/patients/patient/action/action-activity_app.js
+  s_68eb4121d9a9bc::t_22f139597f753e 8
+src/js/apps/patients/patient/action/action-details_views.js
+  s_68eb4121d9a9bc::t_0d337f19a88268 11,21-39,41-58,61,95-97,99-102,112,166-168,174-176,342-347
+src/js/apps/patients/patient/action/action-forms_views.js
+  s_68eb4121d9a9bc::t_4acd8edbcfdddd 87
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_68eb4121d9a9bc::t_d33150f5998f53 334-341,359-385,399-424,734-735,819-820,823-827,836,927-933,1610-1627,2071-2075,2126-2142,2161-2164,2247,2290,2395,2538-2541,2609,2633,2821-2822,2836-2837
+src/js/apps/patients/patient/action/action.scss
+  s_68eb4121d9a9bc::t_b460a9bb767511 11-13,17-18,21-22,30,62-69,104-106,113,120-122,126-145,190-191,414,416-417,421,425,427,500
+src/js/apps/patients/patient/action/action_app.js
+  s_68eb4121d9a9bc::t_9474b89f70b0b6 9,106,118-124,174-175,177,181,183
+src/js/apps/patients/patient/action/action_views.js
+  s_68eb4121d9a9bc::t_754e629ee81683 18,32,34,48,50-51,53,56,59-62
+src/js/apps/patients/patient/patient.scss
+  s_68eb4121d9a9bc::t_f74a237b95de15 40-119,219,242-245,247-248,251-252,259-262,265-266,269-270
+src/js/apps/patients/patient/patient_views.js
+  s_68eb4121d9a9bc::t_57af2b2a998a4f 16,18-20,23,25,29-33,38-42,48-52,58,94-96,99-102,113,118,147
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_68eb4121d9a9bc::t_d1155ef27eb88d 30,35,38,40-41,44-47,52-61
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_68eb4121d9a9bc::t_8432c908d11793 46-55,130,162
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_68eb4121d9a9bc::t_2a28dcd33e4498 29-32
+src/js/apps/patients/shared/components/duration_component.js
+  s_68eb4121d9a9bc::t_a49e75d84a10d8 20,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7a2aaaedde01eba5313cf094d41286e5f69f0d27",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

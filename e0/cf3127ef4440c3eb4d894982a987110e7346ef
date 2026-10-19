@@ -1,0 +1,21 @@
+src/js/base/subrouterapp.component.cy.js
+  s_7d9748a0496f68::t_301e7da58c5499 1,46,58-63,67-68,88,90,95,98,105,107,110,116,119,122,126-213,218,221,230,233-234,236,239,242-243,249-399
+src/js/base/subrouterapp.js
+  s_7d9748a0496f68::t_fa7a757fb882a3 1-2,4,6,8-11,13-14,16,19-20,23,26-27,31-32,36,39-42,44,46-51,63-64,68-75,78-79,82-86,90-97,105-107,110-111
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e0cf3127ef4440c3eb4d894982a987110e7346ef",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

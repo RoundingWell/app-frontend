@@ -1,0 +1,16 @@
+src/js/apps/globals/error/error.hbs
+  h_0f06c286dda36f 14
+src/js/apps/globals/error/error.scss
+  h_0f06c286dda36f 32,35,41-42,51-54,58,62-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c0ed467b79c8d382489aa067aa5006f7b55c97f1",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

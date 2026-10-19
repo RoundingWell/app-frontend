@@ -1,0 +1,55 @@
+src/js/app.js
+  s_7d9748a0496f68::t_3748a9f86d9dfb 12,15,40-43,56,61,65-67,74,79,81,84-85,92-93,97-98,100-103,105-107,110-113,115-123,125-126,129-132,135-141,144-146,150-153,155,159,170-177
+src/js/services/bootstrap.js
+  s_7d9748a0496f68::t_f94194e30655d7 66-75,77,89-90
+src/js/services/widgets.component.cy.js
+  s_7d9748a0496f68::t_09dcee102c50a6 18-19
+src/js/services/workspace.js
+  s_7d9748a0496f68::t_38b20222940dc8 56-67,71-76,79-81,84,86
+src/js/utils/user-activity.js
+  s_7d9748a0496f68::t_d1f4633d6353a4 1-38
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_7d9748a0496f68::t_d97adad25694c1 11-12,14-15,20-22,27,29,31-32
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_7d9748a0496f68::t_f05750bb268811 1,51,58-71,98,116-119,121,202,224-225,237,240-241,245-246,290,323
+src/js/apps/globals/nav/nav_app.js
+  s_7d9748a0496f68::t_13a1b70300b333 143,156-157,168,174-175,177-179,181-183,185,187-188,191-194,198,213-220,273,277,296,299,304,309,312,314,317,320,323,326,339,350-351,360,362,365,367,373,376,385-386,394,422,428,452,472,512,521,523-524,526
+src/js/apps/globals/nav/nav_state.js
+  s_7d9748a0496f68::t_7396f5fe7c8638 59,61-62
+src/js/apps/globals/search/patient-search_views.js
+  s_7d9748a0496f68::t_54d59c244cd742 2,102-103,107,117,135,155-157,193-196,198,200,203,208,212
+src/js/apps/globals/search/search_app.js
+  s_7d9748a0496f68::t_1342402752d303 8
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_7d9748a0496f68::t_4cc0a37e2f42b3 1,2,34,48-53,56,61,86,95,103,140-141,143-147
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_7d9748a0496f68::t_faf27ef567b655 7,18-20,23,25-28,31,33-34,36,39,47-48,51,53-54,101
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_7d9748a0496f68::t_7dbd019a95484f 32,93,106,166
+src/js/apps/clinicians/clinicians-main_app.js
+  s_7d9748a0496f68::t_e3a00208aaf8b6 1-2,26-29
+src/js/apps/clinicians/shared/clinicians_views.js
+  s_7d9748a0496f68::t_f4cc4d928b5344 81,89,91-95,99
+src/js/apps/clinicians/shared/components/role_component.js
+  s_7d9748a0496f68::t_bb75cd0ae1f44b 21,27,30-38,42
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_app.js
+  s_7d9748a0496f68::t_ea70e1891e9276 8,12,23,30
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_7d9748a0496f68::t_fd2f1a98169102 1,190,200,239-240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6dc2ed892b7cf0adcba656cf5d89dffc617a2c32",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

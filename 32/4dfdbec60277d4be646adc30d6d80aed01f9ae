@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_d04385ebae28ca::t_5422fd73ceb35b 35,49
+src/js/apps/patients/patient/form/form_views.js
+  s_d04385ebae28ca::t_24f0f768f4af9a 99
+src/js/apps/patients/patient/form/layout.hbs
+  s_d04385ebae28ca::t_24f0f768f4af9a 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "324dfdbec60277d4be646adc30d6d80aed01f9ae",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

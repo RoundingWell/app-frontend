@@ -1,0 +1,14 @@
+src/js/apps/globals/error/error.scss
+  h_0f06c286dda36f 22,24,28,32-40,50,53,56,61-63,67,69,74,77,84-85,87,98-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c4b18fc2a37f96e61781954b6288aac6bb1b7e0e",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

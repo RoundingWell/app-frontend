@@ -1,0 +1,23 @@
+packages/router/DESIGN.md
+  s_20ea81ecafd6a6::t_b78a32198d638e 120-121
+  s_20ea81ecafd6a6::t_229be372413087 1-119,122-174,176-178,183-337
+  s_20ea81ecafd6a6::t_8811b0c07cce25 175,179-182
+docs/router-migration.md
+  s_20ea81ecafd6a6::t_cd7454b3fb617e 1-307
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4e9ce7d5fe1bcf2477e5d7aa55d208d433c4a0fc",
+  "prompts": {},
+  "sessions": {
+    "s_20ea81ecafd6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1e41361-2f04-4998-b24a-b7e91b2868ac",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

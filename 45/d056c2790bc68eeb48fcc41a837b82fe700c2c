@@ -1,0 +1,52 @@
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_68eb4121d9a9bc::t_c7d3d1fa17ab93 183-186
+  s_68eb4121d9a9bc::t_ecc256e1d54827 33-39,41,72,144
+  s_68eb4121d9a9bc::t_c7a6520dc19a8d 29
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 2,152-160,187
+  s_ed28f1881feec6::t_7d45b30a09808e 161,188
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_68eb4121d9a9bc::t_210e479f39215f 26-27,393,396,403-414
+  s_68eb4121d9a9bc::t_ecc256e1d54827 120,258
+  s_68eb4121d9a9bc::t_4045c770fcb045 395
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_68eb4121d9a9bc::t_92a8fed8d949dd 375-376
+  s_68eb4121d9a9bc::t_26d72045318739 71,446-447
+src/js/apps/patients/patient/flow/flow_views.js
+  s_68eb4121d9a9bc::t_69c310a22e2a95 64,73
+  s_68eb4121d9a9bc::t_ecc256e1d54827 72,157
+src/js/apps/patients/patient/workflow/workflow-page.scss
+  s_68eb4121d9a9bc::t_ecc256e1d54827 76
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 3
+  s_68eb4121d9a9bc::t_6f5a770f1b5cb2 11,91,104-105,108-110,112,147,160,181-182,187-188
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_68eb4121d9a9bc::t_bdc8686c180975 820
+  s_68eb4121d9a9bc::t_c96e0d4f9369fa 657-658,680-681
+  s_68eb4121d9a9bc::t_3b1420af756b05 752-754,765-767,784-786,797-799
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_68eb4121d9a9bc::t_9dc7aea9c868b8 10
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 5
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "45d056c2790bc68eeb48fcc41a837b82fe700c2c",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_ed28f1881feec6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ff9b5-1a5a-7631-b4b5-09a79caa529b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

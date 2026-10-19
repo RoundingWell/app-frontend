@@ -1,0 +1,16 @@
+src/js/apps/patients/patient/action/action-activity_app.js
+  h_0f06c286dda36f 6,44
+src/js/apps/patients/patient/flow/flow-activity_app.js
+  h_0f06c286dda36f 5,34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7ba3aceaca7a28920847c57e06e7a2d55630f1a6",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

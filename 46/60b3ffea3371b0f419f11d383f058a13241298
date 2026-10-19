@@ -1,0 +1,162 @@
+src/js/apps/globals/nav/nav_state.js
+  s_09e8292bb4bcb3::t_af2e8bf2018c83 1-46,48
+  s_09e8292bb4bcb3::t_18590cceaef1af 47
+  s_09e8292bb4bcb3::t_5a57b1aa61d0df 49-51
+  s_09e8292bb4bcb3::t_476873960ce2b7 52-60
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_bf038f572e8bda::t_91a293ea328f14 1007
+  s_bf038f572e8bda::t_e770701742fac4 381-382
+  s_bf038f572e8bda::t_2c80bd6766f3ac 752-754,756,786-792,795-801
+  s_bf038f572e8bda::t_66732190fcdd6d 23-29,604-655,686-689,707-751,757-785,793-794,802-804
+  s_bf038f572e8bda::t_cfbcab95659e91 755,806-834
+  s_1bf45839d4ebf2::t_4f664d33f5eeb0 364
+  s_bf038f572e8bda::t_3130a6404e40e7 16-22,387-389,410-411,417-418,423-427,479-480,485-486,546-603,656-685,690-706,805,835-861
+  s_1bf45839d4ebf2::t_60b53444818a51 363
+  s_bf038f572e8bda::t_32d8d9006ec0e6 862
+src/js/apps/globals/nav/nav_app.js
+  s_1bf45839d4ebf2::t_83b9ccad459915 364-369,371
+  s_1bf45839d4ebf2::t_63bf5fa40f2935 51-52,60,69-70
+  s_09e8292bb4bcb3::t_63b52f09acf004 244-246
+  s_bf038f572e8bda::t_a17cedfab5775c 13-14,34,43,123-200,269,274,279,282,284-289,296,307-311,314-318,321,323-327,329-335,355,360-362,370,372-373,396-400,402-442
+  s_1bf45839d4ebf2::t_2f380a28a42e3a 265,267-268,270,272-273,275-278,281,295,298-300
+  s_9bbdacebb067ff::t_b967fb5d22fa18 263,280
+  s_1bf45839d4ebf2::t_bfb13d613b579f 266,271
+  s_1bf45839d4ebf2::t_be666c8e89dfca 283
+  s_09e8292bb4bcb3::t_bb39c01dfbf056 264
+  s_09e8292bb4bcb3::t_dad1aee2394ea4 301
+  s_09e8292bb4bcb3::t_e4ef6390d033b8 313,319
+  s_09e8292bb4bcb3::t_f3d7560cb45585 10
+  s_bf038f572e8bda::t_338a439f3674c6 312
+src/js/i18n/en-US/globals.yml
+  s_1bf45839d4ebf2::t_155fe5e89cc801 18-19,27
+  s_1bf45839d4ebf2::t_32996563745cb9 17
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_1bf45839d4ebf2::t_4f37a19001ae1a 15-16,18,20-21
+  s_1bf45839d4ebf2::t_8aa8593fd4b97d 46,50,118,123,126,146,165-166,170-174,176,201,206,217-222,228,230-231,233,237,241,244,247,256,269,277,281-283,285-295,301,312-315,343-344,362,365,376-377
+  s_09e8292bb4bcb3::t_227b4ac957d8e4 189,193-194,196-199
+  s_1bf45839d4ebf2::t_923cb1bba19e85 232
+  s_1bf45839d4ebf2::t_78c52b459ac669 234-235
+  s_1bf45839d4ebf2::t_c2fedc6c097a2f 26-32,47,124
+  s_1bf45839d4ebf2::t_78c72f7b1a9f41 226,311
+  s_1bf45839d4ebf2::t_f6c7594f4d41c6 184-188,190-192,195,200,239
+  s_1bf45839d4ebf2::t_362a43bc85bd5e 44,51-53,55-57,121
+  s_1bf45839d4ebf2::t_d1cca32786eeee 272
+  s_1bf45839d4ebf2::t_09a1c56d21a0e4 13-14,17,19,22-25,205,238
+  s_1bf45839d4ebf2::t_be666c8e89dfca 45,122
+  s_1bf45839d4ebf2::t_2528bbe1383f04 175
+  s_1bf45839d4ebf2::t_0972e8ad171a3e 202-204
+  s_1bf45839d4ebf2::t_07d91c10917150 207-209,214-216
+  s_1bf45839d4ebf2::t_694c6830cf01d2 223-225
+  s_1bf45839d4ebf2::t_f20f4ed6ffe065 227
+  s_1bf45839d4ebf2::t_780725945048c4 229
+  s_1bf45839d4ebf2::t_4a782cead92f5f 236
+  s_1bf45839d4ebf2::t_537ad6f0869b4e 240
+  s_1bf45839d4ebf2::t_e632b26f263f3c 242-243
+  s_1bf45839d4ebf2::t_33b6da8c354d3d 245-246
+  s_1bf45839d4ebf2::t_2f69665eabffda 248-250
+  s_1bf45839d4ebf2::t_7d6eacb8176bb2 270-271
+  s_1bf45839d4ebf2::t_836543b9c0a27d 273
+  s_1bf45839d4ebf2::t_c4cd105402eff7 296-300
+  s_1bf45839d4ebf2::t_f0535b5436d627 302-303
+  s_1bf45839d4ebf2::t_43462a5e81b124 310
+  s_1bf45839d4ebf2::t_b3039caea18cd7 316
+  s_1bf45839d4ebf2::t_7924fd916885d3 341-342
+  s_1bf45839d4ebf2::t_89ee34ab2af379 345-346
+  s_1bf45839d4ebf2::t_3c1b1a5479d52f 364
+  s_1bf45839d4ebf2::t_b5ee155fc52e9e 375
+  s_09e8292bb4bcb3::t_0c6a3732b2d7e8 111,210-213,251,323,328-330,386-391
+src/js/apps/globals/nav/app-nav/app-nav.scss
+  s_1bf45839d4ebf2::t_c039260f27e83d 2
+  s_09e8292bb4bcb3::t_8ed92cf261dacf 218-219,221-222,225-237,351
+  s_1bf45839d4ebf2::t_bda9027e7ce8ae 206,257
+  s_1bf45839d4ebf2::t_c6dcac0b924227 179-181,183,203-204,207-208,217,238-240,249,308
+  s_1bf45839d4ebf2::t_5373dc0b4e6393 117-118,125,300-302
+  s_1bf45839d4ebf2::t_33e02052b8931d 13,22-27,30-32,34,143,211,297,311-314,316-321,326-327
+  s_1bf45839d4ebf2::t_3594805042aa3e 174,184,188
+  s_1bf45839d4ebf2::t_fa31c1f877d847 119,307
+  s_1bf45839d4ebf2::t_e0380cb821b604 7,122,175,190
+  s_1bf45839d4ebf2::t_735ec184c4d666 15-16,19,142,210,260,293-296
+  s_1bf45839d4ebf2::t_4cb238d82b36d8 241
+  s_1bf45839d4ebf2::t_d1cca32786eeee 182
+  s_1bf45839d4ebf2::t_50f4965eaf1e59 3-6,8,10,123-124,191,193-194,205,209,242,247-248,306,309,343,347
+  s_1bf45839d4ebf2::t_923cb1bba19e85 28-29,35-36
+  s_1bf45839d4ebf2::t_0af28631e7d645 17
+  s_5bc9cc1ce7547e::t_01fd517a9b9910 14
+  s_1bf45839d4ebf2::t_687d3f44394b6d 139
+  s_1bf45839d4ebf2::t_dde3de9f26c7fb 189
+  s_1bf45839d4ebf2::t_0bc77b0efab76a 192
+  s_1bf45839d4ebf2::t_ae3f30bf07fe56 9
+  s_1bf45839d4ebf2::t_1f98328b4e198e 20,292
+  s_1bf45839d4ebf2::t_2fc57fc2f51086 195
+  s_1bf45839d4ebf2::t_ccdb990c11ab4e 173,315
+  s_09e8292bb4bcb3::t_d20bfb72046003 144-145,214,283,310,322-325,328-330,333-339,344,348,352-353
+  s_1bf45839d4ebf2::t_a83ab9ba5ae2a2 116
+  s_1bf45839d4ebf2::t_1bacdc60a5a69d 261-262
+  s_1bf45839d4ebf2::t_3245bf46602792 115
+  s_1bf45839d4ebf2::t_03724268ea874a 121
+  s_1bf45839d4ebf2::t_43d14213477248 140-141
+  s_09e8292bb4bcb3::t_2e231774e6d724 146-148
+  s_1bf45839d4ebf2::t_cf155ba6ecddd3 172
+  s_1bf45839d4ebf2::t_97967494f6af48 178
+  s_1bf45839d4ebf2::t_5bf91a33720db2 202
+  s_1bf45839d4ebf2::t_024d506daf24cb 216
+  s_1bf45839d4ebf2::t_e3fc9a0b20fb5b 256
+  s_1bf45839d4ebf2::t_daca03ed213b6d 259
+  s_1bf45839d4ebf2::t_24b923dfd4a057 291
+  s_1bf45839d4ebf2::t_dae8c2198efd89 299
+  s_1bf45839d4ebf2::t_2ed07ecc99b68c 305
+  s_09e8292bb4bcb3::t_cea902d632ef57 349-350
+  s_09e8292bb4bcb3::t_ddc6ccef1b03b5 354-356
+  s_09e8292bb4bcb3::t_2d4f007801a28e 149-150,160,186,252,267,272,277,285,287,340-342,345-346,357-359
+src/js/apps/globals/app-frame/app-frame.scss
+  s_1bf45839d4ebf2::t_147e47c3c25ada 2,4,13,16,18,23-28
+  s_1bf45839d4ebf2::t_d1cca32786eeee 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "4660b3ffea3371b0f419f11d383f058a13241298",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
+    },
+    "s_1bf45839d4ebf2": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f18e0-4c13-78a0-80de-dcff52a401d4",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_5bc9cc1ce7547e": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ed59c-909a-7bf3-8869-883000e2afbb",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_9bbdacebb067ff": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f179d-c3b2-7ad0-b571-02aa3cd725b8",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_bf038f572e8bda": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f235b-3bd8-7db3-a6cf-2a9360e7463e",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

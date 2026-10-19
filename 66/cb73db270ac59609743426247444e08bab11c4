@@ -1,0 +1,38 @@
+src/js/apps/patients/worklist/worklist_app.js
+  s_85aebd1623278c::t_0701238ef2d516 16,470,472,475,479
+src/js/apps/patients/shared/components/date-filter/date-filter_state.component.cy.js
+  s_85aebd1623278c::t_0701238ef2d516 56
+  s_85aebd1623278c::t_84d1aff1fc8910 81-85
+  s_85aebd1623278c::t_3930479e2f11c0 5,76-80,86
+  s_85aebd1623278c::t_f40f4e8a0a9706 67-75,87
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_427795c16e3056 15,54-56,63-64
+  s_85aebd1623278c::t_6367e392419a9a 57-58,61-62,122-133,185-188
+src/js/apps/patients/schedule/schedule_app.js
+  s_85aebd1623278c::t_0701238ef2d516 15,336,338,341,345
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  s_85aebd1623278c::t_1cf77e67fae1ad 16,19,27,36,40,51,53,55-58,61-66,69-70,73-74,76,83-85,94,97,105-112,118,131-132
+src/js/apps/patients/shared/components/date-filter/index.js
+  s_85aebd1623278c::t_f40f4e8a0a9706 240
+  s_85aebd1623278c::t_02fd6b585154a6 4-8,12,14,19-20,25-31,56-57,60-91,93,95-105,107-108,111-119,121-185,188-189,191-198,212,227-231,233-238,245-269
+src/js/base/helpers.component.cy.js
+  s_85aebd1623278c::t_0701238ef2d516 105
+src/js/i18n/en-US/patients.yml
+  s_85aebd1623278c::t_0701238ef2d516 313,315,319,321
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "66cb73db270ac59609743426247444e08bab11c4",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

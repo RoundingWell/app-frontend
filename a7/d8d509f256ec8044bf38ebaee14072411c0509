@@ -1,0 +1,23 @@
+src/js/apps/globals/app-frame_app.cy.js
+  s_5a146704f00d9c::t_3d1acecb29babd 65-94
+src/js/base/routerapp.cy.js
+  s_5a146704f00d9c::t_3d1acecb29babd 87-103
+src/js/services/latest-list.cy.js
+  s_5a146704f00d9c::t_3d1acecb29babd 58-69
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.7",
+  "base_commit_sha": "a7d8d509f256ec8044bf38ebaee14072411c0509",
+  "prompts": {},
+  "sessions": {
+    "s_5a146704f00d9c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e9b99-b4a2-7582-bd31-5b23242fc748",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

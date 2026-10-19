@@ -1,0 +1,27 @@
+packages/care-ops-auth/AuthProvider.js
+  s_6c4e953149fe47::t_df35cd223570de 21,33-35,40
+packages/care-ops-auth/providers/workos.js
+  s_6c4e953149fe47::t_df35cd223570de 107
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_6c4e953149fe47::t_df35cd223570de 269-273,335-357
+src/js/auth.component.cy.js
+  s_6c4e953149fe47::t_6b6370e46eaa0d 37-62
+  s_6c4e953149fe47::t_51f1350eea0da1 4
+  s_6c4e953149fe47::t_78a437d3da8524 63-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3bce9f7b4c0cf13966377d683de3e1d6ebecc0ba",
+  "prompts": {},
+  "sessions": {
+    "s_6c4e953149fe47": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b04c05b6-cf79-475d-8e52-577944d6db4d",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

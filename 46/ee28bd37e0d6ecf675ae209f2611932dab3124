@@ -1,0 +1,19 @@
+src/js/apps/patients/shared/components/dialer_view.js
+  s_7d9748a0496f68::t_0cb57f0a90b7ca 8,45-49,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "46ee28bd37e0d6ecf675ae209f2611932dab3124",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
