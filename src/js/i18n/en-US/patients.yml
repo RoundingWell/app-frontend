@@ -270,6 +270,7 @@ careOptsFrontend:
           viaFax: via fax
           viaPortal: via portal
           loggedCall: logged a call.
+          leftVoicemail: left a voicemail.
           added: added
         interactionsStatusViews:
           retry: Retry

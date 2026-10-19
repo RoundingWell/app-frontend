@@ -132,6 +132,66 @@ context('patient interactions', function() {
     expect(getPage(data.slice(0, 4), query, data)).to.deep.equal([]);
   });
 
+  specify('names outbound senders and preserves inbound sender fallbacks', function() {
+    const patient = getPatient();
+    const scenarios = [];
+    for (const channel of ['voice', 'voicemail', 'sms']) {
+      for (const clinicianName of ['Mark Ott', undefined, null, '']) {
+        scenarios.push({ channel, direction: 'outbound', metadata: { clinician_name: clinicianName }, name: clinicianName || 'Upperline Health' });
+      }
+    }
+    scenarios.push(
+      { channel: 'sms', direction: 'inbound', metadata: { from: '+16155550101' }, name: '+16155550101' },
+      { channel: 'sms', direction: 'inbound', metadata: {}, name: null },
+      { channel: 'voice', direction: 'inbound', metadata: {}, name: null },
+    );
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .intercept('GET', '/appconfig.json*', {
+        body: { app: { stage: 'dev', name: 'Upperline Health', version: 'dev' } },
+      })
+      .routePatientInteractions(fx => {
+        fx.data = map(scenarios, (scenario, index) => getInteraction({
+          attributes: {
+            channel: scenario.channel,
+            direction: scenario.direction,
+            metadata: { ...scenario.metadata, note: `Sender scenario ${ index }.` },
+          },
+        }));
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    for (const [index, scenario] of scenarios.entries()) {
+      cy
+        .contains('.patient-interactions__item', `Sender scenario ${ index }.`)
+        .scrollIntoView()
+        .find('.patient-interactions__activity-description')
+        .should('contain', scenario.channel === 'sms' ? 'via SMS' : scenario.channel === 'voicemail' ? 'left a voicemail.' : 'logged a call.')
+        .within(() => {
+          if (scenario.name) {
+            cy
+              .get('strong')
+              .should('have.text', scenario.name);
+          } else {
+            cy
+              .get('strong')
+              .should('not.exist');
+          }
+        });
+    }
+
+    cy
+      .contains('.patient-interactions__item', 'Sender scenario 13.')
+      .find('.patient-interactions__activity-description')
+      .should('contain', 'Inbound Message');
+  });
+
   specify('renders appointment statuses, cancellation reasons, and valid durations', function() {
     const patient = getPatient();
     const durations = [20, '15', 20, 0, null, '0', -1, '20', undefined, '', ' ', 'invalid', '-1'];
@@ -441,7 +501,7 @@ context('patient interactions', function() {
       .should('have.attr', 'href', '#far-fa-paper-plane-top');
 
     cy
-      .contains('.patient-interactions__activity-description', 'Outbound Message')
+      .contains('.patient-interactions__activity-description', 'Cypress Clinic')
       .scrollIntoView()
       .should('be.visible')
       .closest('.patient-interactions__item')
@@ -1888,9 +1948,9 @@ context('patient interactions', function() {
 
     cy
       .get('.patient-action__activity .patient-interactions__item--sms')
-      .should('contain', 'Outbound Message')
+      .should('contain', 'Cypress Clinic')
       .find('.patient-interactions__activity-description strong')
-      .should('not.exist');
+      .should('have.text', 'Cypress Clinic');
 
     cy
       .routePatientInteractions(fx => {
