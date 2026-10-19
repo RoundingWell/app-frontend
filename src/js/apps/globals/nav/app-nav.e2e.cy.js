@@ -12,7 +12,7 @@ import { teamCoordinator } from 'support/api/teams';
 import { testForm } from 'support/api/forms';
 
 const navMinimizedKey = `isNavMenuMinimized_${ fxCurrentClinician.id }`;
-const whatsNewDismissedKey = `whatsNewDismissed_v6-design-update_${ fxCurrentClinician.id }`;
+const whatsNewDismissedKey = `whatsNewDismissed_interactions_${ fxCurrentClinician.id }`;
 
 function expectNavMenuLabel(label, assertion = 'be.visible') {
   cy
@@ -232,7 +232,9 @@ context('App Nav', function() {
       .should('not.have.class', 'is-selected');
   });
 
-  specify('shows and remembers the design update announcement', function() {
+  specify('shows the interactions announcement after a previous update was dismissed and remembers dismissal', function() {
+    localStorage.setItem(`whatsNewDismissed_v6-design-update_${ fxCurrentClinician.id }`, true);
+
     cy
       .routePrograms()
       .visit();
@@ -240,7 +242,8 @@ context('App Nav', function() {
     cy
       .get('.app-nav__announcement')
       .should('be.visible')
-      .should('contain', 'RW Design Update')
+      .should('contain', 'Interactions')
+      .should('contain', 'See every touchpoint with a patient')
       .contains('button', 'See what\'s new')
       .click();
 
@@ -257,7 +260,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav__announcement')
-      .find('[aria-label="Dismiss design update announcement"]')
+      .find('[aria-label="Dismiss interactions announcement"]')
       .click()
       .then(() => {
         expect(JSON.parse(localStorage.getItem(whatsNewDismissedKey))).to.be.true;
@@ -289,7 +292,7 @@ context('App Nav', function() {
       .should('have.attr', 'src', 'https://www.roundingwell.com/rw-design-update');
   });
 
-  specify('keeps the design update announcement clear of menu controls', function() {
+  specify('keeps the interactions announcement clear of menu controls', function() {
     cy
       .routePrograms()
       .visit();

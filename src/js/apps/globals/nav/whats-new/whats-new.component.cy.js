@@ -21,7 +21,11 @@ context('What\'s New views', function() {
     });
 
     cy
-      .contains('RW Design Update')
+      .contains('Interactions')
+      .should('be.visible');
+
+    cy
+      .contains('See every touchpoint with a patient')
       .should('be.visible');
 
     cy
@@ -42,7 +46,7 @@ context('What\'s New views', function() {
       });
 
     cy
-      .get('[aria-label="Dismiss design update announcement"]')
+      .get('[aria-label="Dismiss interactions announcement"]')
       .click()
       .then(() => {
         expect(dismiss).to.be.calledOnce;
