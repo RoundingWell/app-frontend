@@ -45,7 +45,7 @@ export function hasInteractionCardContent(model) {
     metadata.admit_reason, metadata.discharged_at], Boolean);
 }
 
-function getSenderName(model, metadata) {
+export function getSenderName(model, metadata) {
   if (metadata.clinician_name || model.get('direction') !== 'outbound') return metadata.clinician_name;
   return Radio.request('bootstrap', 'organization').get('name');
 }
@@ -53,7 +53,7 @@ function getSenderName(model, metadata) {
 function getMessageDescription(model, metadata) {
   const inbound = model.get('direction') === 'inbound';
   const name = inbound ? metadata.from : getSenderName(model, metadata);
-  return { name, text: name ? undefined : `${ inbound ? intl.inbound : intl.outbound } ${ intl.message }` };
+  return { name, text: name ? undefined : `${ intl.inbound } ${ intl.message }` };
 }
 
 export function getInteractionDescription(model) {
