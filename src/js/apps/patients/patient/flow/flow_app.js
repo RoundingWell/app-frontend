@@ -120,10 +120,10 @@ export default App.extend({
     Radio.request('ws', 'manage:add', this, this.actions, 'patient-actions', { include: ACTION_INCLUDE });
   },
   getSubscriptionResources() {
-    return [this.flow, ...(this.actions?.models || [])].filter(Boolean);
+    return [this.patient, this.flow, ...(this.actions?.models || [])].filter(Boolean);
   },
   unsubscribe() {
-    Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());
+    Radio.request('ws', 'unsubscribe', this.getSubscriptionResources().filter(resource => resource !== this.patient));
   },
   _setFlowProgress() {
     const complete = this.actions.filter(action => action.isDone()).length;

@@ -258,6 +258,7 @@ export default App.extend({
   },
   getSubscriptionResources() {
     return [
+      this.patient,
       this.action,
       this.currentFlow,
     ].filter(Boolean);
@@ -266,7 +267,7 @@ export default App.extend({
     Radio.request('ws', 'subscribe', this.getSubscriptionResources());
   },
   unsubscribe() {
-    Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());
+    Radio.request('ws', 'unsubscribe', this.getSubscriptionResources().filter(resource => resource !== this.patient));
   },
   startActivity(initialSection) {
     const activityApp = this.getChildApp('activity');

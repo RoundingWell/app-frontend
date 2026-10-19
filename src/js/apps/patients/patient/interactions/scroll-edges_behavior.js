@@ -29,10 +29,10 @@ export default Behavior.extend({
   onBeforeCommit() {
     this.position = { top: this.el.scrollTop, height: this.el.scrollHeight };
   },
-  onAfterCommit({ prepend }) {
+  onAfterCommit({ prepend, offset }) {
     const { top, height } = this.position;
     this.position = null;
-    this.el.scrollTop = top + (prepend ? this.el.scrollHeight - height : 0);
+    this.el.scrollTop = offset === undefined ? top + (prepend ? this.el.scrollHeight - height : 0) : this.el.scrollTop + offset;
     this.view.triggerMethod('scroll:position');
   },
   onPagingChange() {

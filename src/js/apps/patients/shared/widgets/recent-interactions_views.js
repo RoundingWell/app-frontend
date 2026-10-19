@@ -15,6 +15,7 @@ function appendDetail(title, detail, separator = ' • ') {
 }
 
 const RecentInteractionsItemView = View.extend({
+  modelEvents: { change: 'render' },
   tagName: 'li',
   className() {
     return `patient-interactions-preview__item patient-interactions-preview__item--${ this.model.get('channel') }`;

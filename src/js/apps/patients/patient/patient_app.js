@@ -61,6 +61,7 @@ export default SubRouterApp.extend({
   },
 
   onStop() {
+    Radio.request('ws', 'unsubscribe', this.patient);
     if (this.layoutState) this.stopListening(this.layoutState);
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
     Radio.request('nav', 'setMinimized', false);
@@ -72,6 +73,7 @@ export default SubRouterApp.extend({
 
   onStart(app, options, patient) {
     this.patient = patient;
+    Radio.request('ws', 'add', patient);
     this.contextTrail = new Backbone.Model();
     this.currentUser = Radio.request('bootstrap', 'currentUser');
     this.sidebarPreferenceHidden = !!localStore.get(this.getSidebarPreferenceKey());

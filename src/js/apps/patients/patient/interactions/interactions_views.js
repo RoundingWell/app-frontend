@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import { contains, groupBy, map } from 'underscore';
+import { contains, every, groupBy, map } from 'underscore';
 import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
@@ -113,9 +113,10 @@ const InteractionsListView = CollectionView.extend({
     'select:date': 'select:date',
   },
   initialize() {
-    this.listenTo(this.getOption('interactions'), 'update reset', () => {
-      this.collection.set(groupInteractions(this.getOption('interactions')));
-    });
+    this.listenTo(this.getOption('interactions'), 'update reset', this.updateInteractions);
+  },
+  updateInteractions() {
+    this.collection.set(groupInteractions(this.getOption('interactions')));
   },
   getCurrentDate(top) {
     let date = this.collection.first()?.id;
@@ -126,9 +127,22 @@ const InteractionsListView = CollectionView.extend({
   },
   focusInteraction(model) {
     if (!model) return;
+    this.getInteractionView(model)?.focusInteraction();
+  },
+  getInteractionView(model) {
     const day = this.collection.get(getDate(model));
-    const item = this.children.findByModel(day)?.getChildView('content')?.children.findByModel(model);
-    item?.focusInteraction();
+    return this.children.findByModel(day)?.getChildView('content')?.children.findByModel(model);
+  },
+  getScrollAnchor(top) {
+    const model = this.getOption('interactions').find(interaction => {
+      return this.getInteractionView(interaction)?.el.getBoundingClientRect().bottom > top;
+    });
+    if (!model) return;
+    return { model, top: this.getInteractionView(model).el.getBoundingClientRect().top };
+  },
+  getScrollOffset(anchor) {
+    const view = this.getInteractionView(anchor.model);
+    return view ? view.el.getBoundingClientRect().top - anchor.top : undefined;
   },
   scrollToDate(date, shouldFocus) {
     const day = this.collection.find(model => model.id >= date) || this.collection.last();
@@ -279,11 +293,16 @@ const InteractionsPageView = View.extend({
     this.getState().set('contentStatus', 'ready');
     this.updateCurrentDate();
   },
-  updateInteractions(collection, models) {
+  updateInteractions(collection, models, { live = false } = {}) {
     const prepend = models[0] !== collection.first();
+    const sameModels = live && models.length === collection.length && every(models, model => collection.get(model) === model);
+    const list = this.getChildView('content');
+    const anchor = live && list.getScrollAnchor(this.getUI('controls')[0].getBoundingClientRect().bottom);
     this.triggerMethod('before:commit');
     collection.set(models);
-    this.triggerMethod('after:commit', { prepend });
+    // Store hydration and reordering can keep the same members, so no update fires.
+    if (sameModels) list.updateInteractions();
+    this.triggerMethod('after:commit', { prepend, offset: anchor ? list.getScrollOffset(anchor) : undefined });
   },
   focusInteraction(model) {
     this.getChildView('content')?.focusInteraction(model);

@@ -1,11 +1,15 @@
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
-import { contains, flatten, keys, map, without } from 'underscore';
+import { contains, flatten, has, keys, map, without } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
+
+import { compareInteractions, compareToBound } from 'js/entities-service/entities/interactions';
+
+import { isPatientInteractionMessage } from 'js/apps/patients/shared/interactions/live-updates';
 
 import { InteractionsPageView } from './interactions_views';
 
@@ -24,23 +28,32 @@ export default App.extend({
   },
   onBeforeStart(app, { patient, interactionId, kind = 'replace', date }) {
     if (!this.getView()) this.showPage({ patient, interactionId });
+    if (this.getState().get('request')?.kind === 'update') this.refreshPending = true;
     this.getState().set({ request: { kind, date }, retry: null, ...(kind === 'replace' && { hasOlder: false, hasNewer: false }) });
     if (kind === 'replace') this.getView().showLoading();
   },
   showPage({ patient, interactionId }) {
     this.patient = patient;
+    this.refreshPending = false;
     this.channelGroups = Radio.request('entities', 'interactions:channelGroups');
     this.getState().set({ interactionId, selectedGroups: keys(this.channelGroups), contentStatus: 'loading' });
     this.showView(new InteractionsPageView({
       model: patient,
       state: this.getState(),
     }));
+    this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
+    Radio.request('ws', 'subscribe', patient);
   },
   async prepareStart({ kind = 'replace', date, at }, { signal }) {
     const input = this.getRequest(kind, date, at);
     if (at) input.filterAnchor = true;
-    if (kind === 'replace' && !this.collection && !input.at && !date) input.date = dayjs().format('YYYY-MM-DD');
-    const result = await this.loadWindow(input, { signal });
+    let result = await this.loadWindow(input, { signal });
+    // Collection hydration does not use the model message queue.
+    while (this.refreshPending) {
+      this.refreshPending = false;
+      input.live = true;
+      result = await Radio.request('entities', 'fetch:interactions:window:refresh', input, result || this.getWindow(), { signal });
+    }
     return { result, input };
   },
   async loadWindow(input, { signal }) {
@@ -49,6 +62,7 @@ export default App.extend({
     if (input.channels && !input.channels.length) {
       return { models: [], hasOlder: false, hasNewer: false };
     }
+    if (kind === 'update') return this.loadInteraction(input, { signal });
     if (kind === 'replace') {
       return this.loadInitialWindow(input, { signal });
     }
@@ -63,7 +77,9 @@ export default App.extend({
     return Radio.request('entities', 'fetch:interactions:window:toDate', input, window, input.date, options);
   },
   onStart(app, options, { result, input }) {
+    if (!result) return this.getState().set({ request: null, retry: null });
     this.showInteractions(result, input);
+    this.refillEmptyWindow();
   },
   handleStartFailure(options, error) {
     const { kind = 'replace', date, at } = options;
@@ -76,14 +92,70 @@ export default App.extend({
     return false;
   },
   onBeforeDestroyView() {
+    this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.stop();
   },
   onStop() {
+    this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
+    this.refreshPending = false;
     this.collection = null;
     this.filterPosition = null;
     this.getState().set({ request: null, retry: null, hasOlder: false, hasNewer: false });
   },
+  onInteractionMessage(message, model) {
+    if (!isPatientInteractionMessage(message, this.patient)) return;
+    if (this.getState().get('request')) {
+      this.refreshPending = true;
+      return;
+    }
+    if (!this.collection) return;
+    if (message.category === 'ResourceDeleted') return this.refillEmptyWindow();
+    const attributes = message.payload.attributes;
+    if (!this.collection.get(model) || has(attributes, 'action_id') || has(attributes, 'flow_id')) {
+      return this.requestInteractions('update', undefined, model.id);
+    }
+    this.reconcileInteraction(message, model);
+  },
+  reconcileInteraction({ category }, model) {
+    if (category === 'ResourceCreated') return;
+    const previous = model.previous('occurred_at') || model.previous('expected_at');
+    const first = this.collection.first();
+    const last = this.collection.last();
+    const lower = { id: first.id, timestamp: first === model ? previous : first.getTimestamp() };
+    const upper = { id: last.id, timestamp: last === model ? previous : last.getTimestamp() };
+    const models = this.collection.filter(item => item !== model);
+    if (this.isInWindow(model, lower, upper)) models.push(model);
+    this.getView().updateInteractions(this.collection, models.sort(compareInteractions), { live: true });
+    this.refillEmptyWindow();
+  },
+  async loadInteraction(input, { signal }) {
+    const window = this.getWindow();
+    const first = window.models[0];
+    const last = window.models[window.models.length - 1];
+    const lower = first && { id: first.id, timestamp: first.getTimestamp() };
+    const upper = last && { id: last.id, timestamp: last.getTimestamp() };
+    const wasLoaded = !!this.collection.get(input.at);
+    const model = await Radio.request('entities', 'fetch:interactions:model:byPatient', input, { signal });
+    const inWindow = this.isInWindow(model, lower, upper);
+    if (!wasLoaded && !inWindow) return null;
+    const models = window.models.filter(item => item.id !== input.at);
+    if (inWindow) models.push(model);
+    return { ...window, models: models.sort(compareInteractions) };
+  },
+  isInWindow(model, lower, upper) {
+    if (!model?.getTimestamp()) return false;
+    const { hasOlder, hasNewer } = this.getState().attributes;
+    return (!hasOlder || !lower || compareToBound(model, lower) >= 0)
+      && (!hasNewer || !upper || compareToBound(model, upper) <= 0);
+  },
+  refillEmptyWindow() {
+    const { request, hasOlder, hasNewer } = this.getState().attributes;
+    if (!this.collection || this.collection.length || request || (!hasOlder && !hasNewer)) return;
+    this.getState().set('interactionId', undefined);
+    this.requestInteractions('replace', this.getView().getCurrentDate());
+  },
   getRequest(kind, date, at = this.getState().get('interactionId')) {
+    if (kind === 'replace' && !this.collection && !at && !date) date = dayjs().format('YYYY-MM-DD');
     const selectedGroups = this.getState().get('selectedGroups');
     const channels = flatten(map(selectedGroups, group => this.channelGroups[group]));
     return {
@@ -146,12 +218,10 @@ export default App.extend({
   },
   showInteractions({ models, hasOlder, hasNewer }, input) {
     const view = this.getView();
+    this.commitInteractions(models, input);
     if (input.kind === 'focus') {
       view.focusInteraction(this.collection.get(this.getState().get('interactionId')));
-      this.getState().set({ request: null, retry: null });
-      return;
     }
-    this.commitInteractions(models, input);
     if (input.date) view.scrollToDate(input.date);
     this.getState().set({ hasOlder, hasNewer, request: null, retry: null });
   },
@@ -163,6 +233,6 @@ export default App.extend({
       if (!input.at) view.scrollToLatest();
       return;
     }
-    view.updateInteractions(this.collection, models);
+    view.updateInteractions(this.collection, models, { live: input.kind === 'update' || input.live });
   },
 });

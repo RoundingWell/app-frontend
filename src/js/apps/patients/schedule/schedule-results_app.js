@@ -73,7 +73,7 @@ export default App.extend({
     this.triggerMethod('click:patient', patient);
   },
   onStop() {
-    this.patientSidebarPatientId = null;
+    this.setPatientSelected(null);
   },
   releaseRun() {
     this.run = null;
@@ -118,7 +118,9 @@ export default App.extend({
     if (triggerView && !triggerView.isDestroyed()) triggerView.focusPatient();
   },
   setPatientSelected(patientId) {
+    if (this.patientSidebarPatientId) Radio.request('ws', 'unsubscribe', { type: 'patients', id: this.patientSidebarPatientId });
     this.patientSidebarPatientId = patientId;
+    if (patientId) Radio.request('ws', 'add', { type: 'patients', id: patientId });
     this.getView()?.getChildView('list')?.setPatientSelected?.(patientId);
   },
   onClickBulkCancel() {

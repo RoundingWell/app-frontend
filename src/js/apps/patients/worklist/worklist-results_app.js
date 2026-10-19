@@ -72,7 +72,7 @@ export default App.extend({
   },
   onStop() {
     this.collection = null;
-    this.patientSidebarPatientId = null;
+    this.setPatientSelected(null);
   },
   releaseRun() {
     this.run = null;
@@ -128,7 +128,9 @@ export default App.extend({
     if (triggerView && !triggerView.isDestroyed()) triggerView.focusPatient();
   },
   setPatientSelected(patientId) {
+    if (this.patientSidebarPatientId) Radio.request('ws', 'unsubscribe', { type: 'patients', id: this.patientSidebarPatientId });
     this.patientSidebarPatientId = patientId;
+    if (patientId) Radio.request('ws', 'add', { type: 'patients', id: patientId });
     this.getView()?.getChildView('list')?.setPatientSelected?.(patientId);
   },
   onClickBulkCancel() {
@@ -279,7 +281,8 @@ export default App.extend({
     const filterType = isFlowType ? 'flows' : 'actions';
 
     this.releaseManagedAdds?.();
-    Radio.request('ws', 'subscribe', this.collection.models, { filters: { [filterType]: this.filters } });
+    const patient = this.patientSidebarPatientId ? [{ type: 'patients', id: this.patientSidebarPatientId }] : [];
+    Radio.request('ws', 'subscribe', [...this.collection.models, ...patient], { filters: { [filterType]: this.filters } });
     this.releaseManagedAdds = Radio.request('ws', 'manage:add', this, this.collection, entityType, this.query);
   },
   getSortOption(sortId) {

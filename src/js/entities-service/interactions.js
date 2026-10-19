@@ -4,7 +4,7 @@ import { contains, flatten, isEmpty, uniq, values } from 'underscore';
 import { getUrl } from 'js/base/fetch';
 import BaseEntity from 'js/base/entity-service';
 
-import { _Model, Model, Collection, CHANNEL_GROUPS } from './entities/interactions';
+import { _Model, Model, Collection, CHANNEL_GROUPS, compareToBound } from './entities/interactions';
 
 function getFilter(actionId, flowId, channels) {
   const filter = {};
@@ -38,20 +38,47 @@ const Entity = BaseEntity.extend({
     'interactions:channelGroups': 'getChannelGroups',
     'interactions:collection': 'getCollection',
     'fetch:interactions:collection:byPatient': 'fetchByPatient',
+    'fetch:interactions:model:byPatient': 'fetchModelByPatient',
     'fetch:interactions:models:forActivity': 'fetchForActivity',
     'fetch:interactions:window:initial': 'fetchInitialWindow',
     'fetch:interactions:window:adjacent': 'fetchAdjacentWindow',
     'fetch:interactions:window:toDate': 'fetchWindowToDate',
+    'fetch:interactions:window:refresh': 'fetchRefreshWindow',
   },
   getChannelGroups() {
     return CHANNEL_GROUPS;
   },
+  async fetchModelByPatient(query, options) {
+    const collection = await this.fetchByPatient({ ...query, limit: 1 }, options);
+    // A filtered-out cursor can return its next matching neighbor.
+    return collection.get(query.at);
+  },
   async fetchInitialWindow(query, { signal }) {
     const collection = await this.fetchByPatient(query, { signal });
+    const models = collection.filter(model => model.getTimestamp());
     return {
-      models: query.at ? [...collection.models] : [...collection.models].reverse(),
-      hasOlder: query.at ? !!collection.length : collection.length === query.limit,
-      hasNewer: !!query.at && !!collection.length,
+      models: query.at ? models : models.reverse(),
+      hasOlder: query.at ? !!models.length : models.length === query.limit,
+      hasNewer: !!query.at && !!models.length,
+    };
+  },
+  async fetchRefreshWindow(query, window, options) {
+    if (query.channels && !query.channels.length) return { models: [], hasOlder: false, hasNewer: false };
+    const first = window.models[0];
+    const last = window.models[window.models.length - 1];
+    if (!first) return this.fetchInitialWindow({ ...query, at: undefined }, options);
+    const lower = { id: first.id, timestamp: first.getTimestamp() };
+    const upper = { id: last.id, timestamp: last.getTimestamp() };
+    let refreshed = await this.fetchInitialWindow({ ...query, at: undefined }, options);
+    while (refreshed.hasOlder && compareToBound(refreshed.models[0], lower) > 0) {
+      options.signal.throwIfAborted();
+      refreshed = await this.fetchAdjacentWindow(query, refreshed, 'older', options);
+    }
+    return {
+      models: refreshed.models.filter(model => (!window.hasOlder || compareToBound(model, lower) >= 0)
+        && (!window.hasNewer || compareToBound(model, upper) <= 0)),
+      hasOlder: window.hasOlder || refreshed.hasOlder,
+      hasNewer: window.hasNewer,
     };
   },
   async fetchAdjacentWindow(query, window, direction, { signal }) {

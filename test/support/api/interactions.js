@@ -23,7 +23,7 @@ function comparePosition(left, right) {
 }
 
 export function getPage(data, query, allData) {
-  data = sortBy(sortBy(data, 'id'), interaction => Date.parse(getTimestamp(interaction)));
+  data = sortBy(sortBy(data, 'id'), interaction => getTimestamp(interaction) ? Date.parse(getTimestamp(interaction)) : -Infinity);
   const before = query.get('page[before]');
   const after = query.get('page[after]');
   const at = query.get('page[at]');
