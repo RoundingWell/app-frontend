@@ -105,8 +105,25 @@
 }
 
 .patient-interactions__item.is-selected .patient-interactions__card {
-  outline: 1px solid var(--color-interactive);
-  outline-offset: -1px;
+  border-color: transparent;
+  position: relative;
+
+  &::after {
+    border: 1px solid var(--color-interactive);
+    border-radius: inherit;
+    content: '';
+    inset: -0.5px;
+    pointer-events: none;
+    position: absolute;
+  }
+}
+
+.patient-interactions__item--continuation.is-selected .patient-interactions__card::after {
+  border-top: 0;
+}
+
+.patient-interactions__item--continues.is-selected .patient-interactions__card::after {
+  border-bottom: 0;
 }
 
 .patient-interactions__item-heading {
