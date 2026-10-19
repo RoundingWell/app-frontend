@@ -236,6 +236,7 @@ careOptsFrontend:
     shared:
       interactions:
         interactionItemView:
+          showMore: Show more
           viewOnInteractions: View on Interactions
           message: Message
           call: Call

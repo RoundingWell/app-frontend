@@ -105,7 +105,25 @@
 }
 
 .patient-interactions__item.is-selected .patient-interactions__card {
-  border-color: color(blue);
+  border-color: transparent;
+  position: relative;
+
+  &::after {
+    border: 1px solid var(--color-interactive);
+    border-radius: inherit;
+    content: '';
+    inset: -0.5px;
+    pointer-events: none;
+    position: absolute;
+  }
+}
+
+.patient-interactions__item--continuation.is-selected .patient-interactions__card::after {
+  border-top: 0;
+}
+
+.patient-interactions__item--continues.is-selected .patient-interactions__card::after {
+  border-bottom: 0;
 }
 
 .patient-interactions__item-heading {
@@ -128,8 +146,28 @@
 }
 
 .patient-interactions__item-heading + .patient-interactions__summary,
+.patient-interactions__item-heading + .patient-interactions__note,
 .patient-interactions__item-heading + .patient-interactions__detail {
   margin-top: 8px;
+}
+
+.patient-interactions__summary--collapsed {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+.patient-interactions__show-more {
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.45;
+  margin-top: 4px;
+  padding: 0;
 }
 
 .patient-interactions__detail {
@@ -193,7 +231,9 @@
   color: color(red);
 }
 
-.patient-interactions__action:focus-visible {
+.patient-interactions__action:focus-visible,
+.patient-interactions__show-more:focus-visible,
+.patient-interactions__summary--collapsible:focus-visible {
   outline: 2px solid #{color(blue)};
   outline-offset: 2px;
 }

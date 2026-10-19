@@ -26,12 +26,18 @@ const InteractionItemView = View.extend({
     return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
   },
   template: InteractionItemTemplate,
-  ui: { action: '.js-action', interaction: '.js-interaction' },
+  ui: { action: '.js-action', interaction: '.js-interaction', noteText: '.js-note-text', showMore: '.js-show-more' },
   triggers: {
     'click @ui.action': 'click:action',
     'click @ui.interaction': 'click:interaction',
+    'click @ui.showMore': 'click:show:more',
   },
   modelEvents: { change: 'render' },
+  onClickShowMore() {
+    this.noteExpanded = true;
+    this.render();
+    this.getUI('noteText')[0].focus({ preventScroll: true });
+  },
   setGrouping(continuation, continues) {
     this.el.classList.toggle('patient-interactions__item--continuation', continuation);
     this.el.classList.toggle('patient-interactions__item--continues', continues);
@@ -54,19 +60,23 @@ const InteractionItemView = View.extend({
     }
     Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
   },
+  hasCollapsibleNote(summary) {
+    return this.model.getChannelGroup() === 'calls' && !this.getOption('activity') && summary?.length > 900;
+  },
   templateContext() {
     const metadata = this.model.get('metadata') || {};
     const timestamp = this.model.getTimestamp();
     const group = this.model.getChannelGroup();
     const appointmentDate = group === 'appointments' ? this.getAppointmentDate(timestamp, metadata.timezone) : undefined;
     const viaLabel = getInteractionViaLabel(this.model);
+    const summary = getInteractionSummary(this.model);
     return {
       timestamp,
       group,
       icon: getInteractionIcon(this.model),
       channelLabel: getInteractionChannelLabel(this.model),
       description: getInteractionDescription(this.model),
-      summary: getInteractionSummary(this.model),
+      summary,
       hasCardContent: hasInteractionCardContent(this.model),
       viaLabel,
       timeSeparator: viaLabel || group === 'appointments',
@@ -78,6 +88,9 @@ const InteractionItemView = View.extend({
       patientClass: VISIT_CLASSES[metadata.patient_class] || metadata.patient_class,
       hasVisitHeading: metadata.patient_class || metadata.facility,
       activity: this.getOption('activity'),
+      collapsibleNote: this.hasCollapsibleNote(summary),
+      noteExpanded: this.noteExpanded,
+      noteId: `interaction-note-${ this.cid }`,
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',
       workName: this.getWorkLink(),
     };
