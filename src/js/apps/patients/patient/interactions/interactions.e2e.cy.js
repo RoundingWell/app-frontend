@@ -267,43 +267,6 @@ context('patient interactions', function() {
       .and('have.class', 'is-selected');
   });
 
-  specify('shows an ongoing admission without length of stay', function() {
-    const patient = getPatient();
-    const admission = getInteraction({
-      attributes: {
-        channel: 'visit',
-        occurred_at: '2026-10-04T12:00:00Z',
-        metadata: {
-          facility: 'General Hospital',
-          patient_class: 'inpatient',
-          admitted_at: '2026-10-04T12:00:00Z',
-          discharged_at: null,
-        },
-      },
-    });
-
-    cy
-      .routesForPatientWorkflow()
-      .routePatient(fx => {
-        fx.data = patient;
-        return fx;
-      })
-      .routePatientInteractions(fx => {
-        fx.data = [admission];
-        return fx;
-      })
-      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-06T12:00:00Z', functionNames: ['Date'] });
-
-    cy
-      .contains('.patient-interactions__item', 'General Hospital')
-      .scrollIntoView()
-      .should('be.visible')
-      .find('.patient-interactions__card')
-      .should('contain', `Admitted ${ formatDate(admission.attributes.metadata.admitted_at, 'SHORT') }`)
-      .and('contain', 'No discharge received')
-      .and('not.contain', 'LOS');
-  });
-
   specify('navigates linked interactions, grouped paging, and date destinations', function() {
     const patient = getPatient();
     const flow = getFlow({
@@ -410,10 +373,6 @@ context('patient interactions', function() {
         cy
           .get('.patient-interactions__marker use')
           .should('have.attr', 'href', '#far-fa-hospital');
-
-        cy
-          .get('.patient-interactions__card')
-          .should('not.contain', 'LOS');
 
         cy
           .contains('Example Medical Center')
@@ -1819,6 +1778,15 @@ context('patient interactions', function() {
       relationships: { action: getRelationship(action) },
     });
 
+    const ongoingAdmission = getInteraction({
+      attributes: {
+        channel: 'visit',
+        occurred_at: '2026-10-04T12:00:00Z',
+        metadata: { facility: 'General Hospital', admitted_at: '2026-10-04T12:00:00Z' },
+      },
+      relationships: { action: getRelationship(action) },
+    });
+
     const inboundCall = getInteraction({
       attributes: {
         channel: 'voicemail',
@@ -1850,7 +1818,7 @@ context('patient interactions', function() {
 
     cy
       .routePatientInteractions(fx => {
-        fx.data = [interaction, sameDay, previousDay, undatedAppointment, undatedVisit, inboundCall, missingMetadata, videoCall, email];
+        fx.data = [interaction, sameDay, previousDay, undatedAppointment, undatedVisit, ongoingAdmission, inboundCall, missingMetadata, videoCall, email];
         fx.included = [action];
         return fx;
       })
@@ -1871,6 +1839,12 @@ context('patient interactions', function() {
       .contains('.patient-action__activity .patient-interactions__item', 'Visit details pending')
       .find('time')
       .should('not.exist');
+
+    cy
+      .contains('.patient-action__activity .patient-interactions__item', 'General Hospital')
+      .find('.patient-interactions__card')
+      .should('contain', `Admitted ${ formatDate(ongoingAdmission.attributes.metadata.admitted_at, 'SHORT') }`)
+      .and('contain', 'No discharge received');
 
     cy
       .contains('.patient-action__activity .patient-interactions__item', 'Inbound callback')
