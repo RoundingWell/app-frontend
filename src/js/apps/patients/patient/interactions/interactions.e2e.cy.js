@@ -1539,7 +1539,7 @@ context('patient interactions', function() {
       .should('contain', 'Left a message asking the patient to call back.');
 
     cy
-      .get('.patient-interactions-preview__all')
+      .get('.patient-interactions-preview .js-all')
       .click();
 
     cy

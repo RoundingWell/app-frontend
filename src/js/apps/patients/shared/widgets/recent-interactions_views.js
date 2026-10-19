@@ -1,11 +1,14 @@
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
 
+import 'scss/modules/buttons.scss';
+
 import i18n from 'js/i18n';
 
 import { getInteractionChannelLabel, getInteractionIcon, getAppointmentStatusLabel, getSenderName } from 'js/apps/patients/shared/interactions/display';
 import { InteractionsLoadingView, InteractionsErrorView } from 'js/apps/patients/shared/interactions/interactions-status_views';
 
+import './widgets.scss';
 import './recent-interactions.scss';
 
 const intl = i18n.patients.shared.widgets.recentInteractionsViews;
@@ -82,7 +85,7 @@ const RecentInteractionsView = View.extend({
   className: 'patient-interactions-preview',
   template: hbs`
     <div data-content-region></div>
-    <button class="patient-interactions-preview__all js-all" type="button">{{far "right-left-large"}} {{ @intl.patients.shared.widgets.recentInteractionsViews.interactionsTab }}</button>
+    <button class="button button--outline widgets__form-widget js-all" type="button">{{far "right-left-large"}}<span>{{ @intl.patients.shared.widgets.recentInteractionsViews.interactionsTab }}</span></button>
   `,
   regions: { content: '[data-content-region]' },
   ui: { all: '.js-all' },

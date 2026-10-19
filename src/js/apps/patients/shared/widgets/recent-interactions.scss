@@ -1,5 +1,4 @@
-// The 14px item gap, 2px text separation, 18px pill radius and 6px padding/icon gap are approved optical exceptions.
-.patient-interactions-preview__all,
+// The 14px item gap and 2px text separation are approved optical exceptions.
 .patient-interactions-preview__link {
   background: none;
   border: 0;
@@ -14,7 +13,6 @@
   padding: 0;
 }
 
-.patient-interactions-preview__all:focus-visible,
 .patient-interactions-preview__link:focus-visible {
   outline: 2px solid color(blue);
   outline-offset: 2px;
@@ -58,19 +56,6 @@
   color: var(--color-text-secondary);
   font-size: 12px;
   margin-top: 2px;
-}
-
-.patient-interactions-preview__all {
-  border: 1px solid var(--color-border-subtle);
-  border-radius: 18px;
-  margin-top: 20px;
-  padding: 6px 12px;
-  text-align: left;
-  width: 100%;
-}
-
-.patient-interactions-preview__all .icon {
-  margin-right: 6px;
 }
 
 .patient-interactions-preview__item--voice,
