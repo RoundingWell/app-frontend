@@ -2560,10 +2560,11 @@ context('patient interactions', function() {
       .find('.js-show-more')
       .should('be.visible')
       .and('have.attr', 'aria-expanded', 'false')
-      .focus();
+      .focus()
+      .should('be.focused');
 
     cy
-      .press(Cypress.Keyboard.Keys.ENTER);
+      .press(Cypress.Keyboard.Keys.SPACE);
 
     cy
       .contains('.patient-interactions__item', 'Call summary <review> & next steps')
@@ -2644,6 +2645,7 @@ context('patient interactions', function() {
       .get('.patient-interactions[aria-busy="false"]')
       .contains('.patient-interactions__item', 'Call summary <review> & next steps')
       .find('.js-show-more')
+      .scrollIntoView()
       .should('be.visible');
   });
 });
