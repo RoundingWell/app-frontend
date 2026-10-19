@@ -24,11 +24,9 @@ const formats = {
   // Jan 15, 2019 10:45 PM
   AT_TIME: 'lll',
   DATE(date) {
-    /* istanbul ignore else */
     if (date.isSame(dayjs(), 'year')) {
       return date.format(formats.SHORT);
     }
-    /* istanbul ignore next */
     return date.format(formats.LONG);
   },
   TIME_OR_DAY(date) {

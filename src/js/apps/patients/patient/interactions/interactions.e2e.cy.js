@@ -966,19 +966,19 @@ context('patient interactions', function() {
       .should('be.visible');
   });
 
-  specify('starts plain arrival at Today and preserves the viewed range through filtering and empty results', function() {
+  specify('starts at Today, labels year boundaries, and preserves the viewed range through filtering and empty results', function() {
     const patient = getPatient();
     const history = map(range(25), index => getInteraction({
       attributes: index < 11 ?
         {
           metadata: { message: `${ index < 10 ? 'Before today' : 'Today' } message ${ index }` },
-          occurred_at: new Date(2026, 4, index < 10 ? 9 : 10, 10, index).toISOString(),
+          occurred_at: (index < 10 ? new Date(2025, 11, 31, 10, index) : new Date(2026, 0, 1, 10, index)).toISOString(),
         } :
         {
           channel: 'appointment',
           metadata: { status: 'scheduled' },
           occurred_at: null,
-          expected_at: new Date(2026, 4, 11, 10, index).toISOString(),
+          expected_at: new Date(2027, 0, 1, 10, index).toISOString(),
         },
     }));
 
@@ -992,7 +992,7 @@ context('patient interactions', function() {
         fx.data = history;
         return fx;
       })
-      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: new Date(2026, 4, 10, 12).toISOString(), functionNames: ['Date'] });
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: new Date(2026, 0, 1, 12).toISOString(), functionNames: ['Date'] });
 
     cy
       .get('.patient-interactions[aria-busy="false"]')
@@ -1001,11 +1001,37 @@ context('patient interactions', function() {
     cy
       .get('.patient-interactions__toolbar-date')
       .should('contain', 'Today')
-      .and('contain', 'May 10');
+      .and('contain', 'Jan 1');
 
     cy
       .contains('.patient-interactions__item', 'Today message 10')
       .should('be.visible');
+
+    let dateButton;
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-button')
+      .then($button => {
+        dateButton = $button[0];
+      });
+
+    for (const label of ['Wednesday, Dec 31, 2025', 'Today, Jan 1']) {
+      cy
+        .contains('.patient-interactions__date-divider .js-date-button', label)
+        .scrollIntoView()
+        .should('have.attr', 'aria-label', `Jump to date ${ label }`)
+        .find('.js-date-label')
+        .should('have.text', label);
+
+      cy
+        .get('.patient-interactions__toolbar-date .js-date-button')
+        .should('have.attr', 'aria-label', `Jump to date ${ label }`)
+        .and($button => {
+          expect($button[0], 'date control retained through updates').to.equal(dateButton);
+        })
+        .find('.js-date-label')
+        .should('have.text', label);
+    }
 
     const refresh = createResponseGate(pendingResponses);
     let position;
@@ -1057,7 +1083,7 @@ context('patient interactions', function() {
     cy
       .get('.patient-interactions__toolbar-date')
       .should('contain', 'Today')
-      .and('contain', 'May 10');
+      .and('contain', 'Jan 1');
 
     cy
       .contains('.patient-interactions__item', 'Today message 10')
@@ -1067,9 +1093,13 @@ context('patient interactions', function() {
       .get('.patient-interactions__filters [data-filter="messages"]')
       .click({ scrollBehavior: false });
 
-    cy
-      .get('.patient-interactions__toolbar-date')
-      .should('contain', 'May 11');
+    for (const selector of ['.patient-interactions__toolbar-date', '.patient-interactions__date-divider']) {
+      cy
+        .contains(`${ selector } .js-date-button`, 'Friday, Jan 1, 2027')
+        .should('have.attr', 'aria-label', 'Jump to date Friday, Jan 1, 2027')
+        .find('.js-date-label')
+        .should('have.text', 'Friday, Jan 1, 2027');
+    }
 
     cy
       .get('.patient-interactions__filters [data-filter="visits"]')

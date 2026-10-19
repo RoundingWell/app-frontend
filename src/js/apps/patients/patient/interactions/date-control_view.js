@@ -60,49 +60,41 @@ const InteractionDateModalView = View.extend({
 });
 
 const InteractionDateControlView = View.extend({
-  className: 'patient-interactions__date-control',
+  tagName: 'button',
+  className: 'patient-interactions__date-control patient-interactions__date-button js-date-button',
+  attributes: { 'type': 'button', 'aria-expanded': 'false' },
   createState({ stateOptions }) {
     return new Backbone.Model({ isVisible: true, ...stateOptions });
   },
   stateEvents: { 'change:isVisible': 'updateVisibility' },
   template: hbs`
-    <button class="patient-interactions__date-button js-date-button" type="button" aria-label="{{ @intl.patients.patient.interactions.dateControlView.jumpToDate }} {{ dateLabel }}" aria-expanded="false">
-      <span class="js-date-label">{{ dateLabel }}</span> {{far "angle-down"}}
-    </button>
+    <span class="js-date-label">{{#if isToday}}{{ @intl.patients.patient.interactions.dateControlView.today }}{{else}}{{formatDateTime date "dddd" nowrap=false}}{{/if}}, {{formatDateTime date "DATE" nowrap=false}}</span> {{far "angle-down"}}
   `,
-  ui: { dateButton: '.js-date-button', dateLabel: '.js-date-label' },
-  triggers: { 'click @ui.dateButton': 'date:button:click' },
-  modelEvents: { 'change:id': 'updateDate' },
+  ui: { dateLabel: '.js-date-label' },
+  triggers: { click: 'date:button:click' },
+  modelEvents: { 'change:id': 'render' },
   templateContext() {
-    return { dateLabel: this.getDateLabel() };
-  },
-  getDateLabel() {
     const date = dayjs(this.model.id);
-    const day = date.isSame(dayjs(), 'day') ? intl.today : date.format('dddd');
-    return `${ day }, ${ date.format('MMM D') }`;
+    this.isToday = date.isSame(dayjs(), 'day');
+    return { date, isToday: this.isToday };
   },
   onRender() {
-    this.updateDate();
+    this.el.classList.toggle('is-today', this.isToday);
+    this.el.setAttribute('aria-label', `${ intl.jumpToDate } ${ this.getUI('dateLabel')[0].textContent }`);
     this.updateVisibility();
   },
   updateVisibility() {
     this.el.hidden = !this.getState().get('isVisible');
   },
-  updateDate() {
-    this.el.classList.toggle('is-today', dayjs(this.model.id).isSame(dayjs(), 'day'));
-    const label = this.getDateLabel();
-    this.getUI('dateLabel')[0].textContent = label;
-    this.getUI('dateButton')[0].setAttribute('aria-label', `${ intl.jumpToDate } ${ label }`);
-  },
   focusDate() {
-    this.getUI('dateButton')[0].focus({ preventScroll: true });
+    this.el.focus({ preventScroll: true });
   },
   onDateButtonClick() {
     if (this.dateMenu) {
       this.dateMenu.destroy();
       return;
     }
-    const anchor = this.getUI('dateButton')[0];
+    const anchor = this.el;
     const menu = new Optionlist({
       anchor,
       uiView: this,

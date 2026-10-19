@@ -25,7 +25,6 @@ const helpers = {
 
     date = formatDate(date, format);
 
-    /* istanbul ignore if */
     if (hash.nowrap === false) return date;
 
     return new Handlebars.SafeString(`<span class="u-text--nowrap">${ date }</span>`);
