@@ -13,10 +13,6 @@ dayjs.extend(timezonePlugin);
 
 const intl = i18n.patients.shared.interactions.interactionItemView;
 const VISIT_CLASSES = { E: intl.emergency, I: intl.inpatient, O: intl.outpatient, V: intl.observation, Obs: intl.observation, OBS: intl.observation };
-const noteViews = new WeakMap();
-const noteObserver = new ResizeObserver(entries => {
-  for (const { target } of entries) noteViews.get(target)?.updateNoteOverflow();
-});
 
 function getWorkName(model) {
   const action = model.getAction();
@@ -42,26 +38,6 @@ const InteractionItemView = View.extend({
     this.render();
     this.getUI('noteText')[0].focus({ preventScroll: true });
   },
-  onDomRefresh() {
-    const note = this.getUI('noteText')[0];
-    if (!note || this.noteExpanded) return;
-    noteViews.set(note, this);
-    noteObserver.observe(note);
-    this.updateNoteOverflow();
-  },
-  onDomRemove() {
-    const note = this.getUI('noteText')[0];
-    if (!note) return;
-    noteObserver.unobserve(note);
-    noteViews.delete(note);
-  },
-  updateNoteOverflow() {
-    const text = this.getUI('noteText')[0];
-    const overflowing = text.scrollHeight > text.clientHeight + 1;
-    const button = this.getUI('showMore')[0];
-    if (!overflowing && document.activeElement === button) text.focus({ preventScroll: true });
-    button.hidden = !overflowing;
-  },
   setGrouping(continuation, continues) {
     this.el.classList.toggle('patient-interactions__item--continuation', continuation);
     this.el.classList.toggle('patient-interactions__item--continues', continues);
@@ -84,8 +60,8 @@ const InteractionItemView = View.extend({
     }
     Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
   },
-  hasCollapsibleNote() {
-    return this.model.getChannelGroup() === 'calls' && !this.getOption('activity');
+  hasCollapsibleNote(summary) {
+    return this.model.getChannelGroup() === 'calls' && !this.getOption('activity') && summary?.length > 600;
   },
   templateContext() {
     const metadata = this.model.get('metadata') || {};
@@ -94,13 +70,14 @@ const InteractionItemView = View.extend({
     const appointmentDate = group === 'appointments' ? this.getAppointmentDate(timestamp, metadata.timezone) : undefined;
     const stayDays = this.model.getLengthOfStay();
     const viaLabel = getInteractionViaLabel(this.model);
+    const summary = getInteractionSummary(this.model);
     return {
       timestamp,
       group,
       icon: getInteractionIcon(this.model),
       channelLabel: getInteractionChannelLabel(this.model),
       description: getInteractionDescription(this.model),
-      summary: getInteractionSummary(this.model),
+      summary,
       hasCardContent: hasInteractionCardContent(this.model),
       viaLabel,
       timeSeparator: viaLabel || group === 'appointments',
@@ -114,7 +91,7 @@ const InteractionItemView = View.extend({
       stayDays,
       hasStay: stayDays >= 0,
       activity: this.getOption('activity'),
-      collapsibleNote: this.hasCollapsibleNote(),
+      collapsibleNote: this.hasCollapsibleNote(summary),
       noteExpanded: this.noteExpanded,
       noteId: `interaction-note-${ this.cid }`,
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',

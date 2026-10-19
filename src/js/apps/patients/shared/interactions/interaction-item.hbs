@@ -41,7 +41,7 @@
     {{#if summary}}{{#if collapsibleNote}}
       <div class="patient-interactions__note">
         <p class="patient-interactions__summary patient-interactions__summary--collapsible{{#unless noteExpanded}} patient-interactions__summary--collapsed{{/unless}} js-note-text" id="{{ noteId }}" tabindex="-1">{{ summary }}</p>
-        {{#unless noteExpanded}}<button class="patient-interactions__show-more js-show-more" type="button" aria-controls="{{ noteId }}" aria-expanded="false" hidden>{{ @intl.patients.shared.interactions.interactionItemView.showMore }}</button>{{/unless}}
+        {{#unless noteExpanded}}<button class="patient-interactions__show-more js-show-more" type="button" aria-controls="{{ noteId }}" aria-expanded="false">{{ @intl.patients.shared.interactions.interactionItemView.showMore }}</button>{{/unless}}
       </div>
     {{else}}<p class="patient-interactions__summary">{{ summary }}</p>{{/if}}{{/if}}
   </div>{{/if}}

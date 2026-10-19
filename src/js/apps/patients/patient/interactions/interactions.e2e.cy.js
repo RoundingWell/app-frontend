@@ -20,11 +20,6 @@ function assertFeedEnd($item) {
   expect(container.getBoundingClientRect().bottom - $item[0].getBoundingClientRect().bottom, 'only normal bottom spacing').to.be.at.most(padding + 1);
 }
 
-function assertShowMoreBelowNote($button) {
-  const text = $button.siblings('.js-note-text')[0];
-  expect($button[0].getBoundingClientRect().top, 'Show more below the clamped note').to.be.at.least(text.getBoundingClientRect().bottom);
-}
-
 function createResponseGate(pendingResponses) {
   const drains = [];
   let release;
@@ -2498,9 +2493,8 @@ context('patient interactions', function() {
         expect(teardownFocus).to.have.length(0);
       });
 
-    const longNote = 'Call summary <review> & next steps\nSecond line\nThird line\nFourth line\nFifth line\nFinal line';
-    const fourLines = 'Four-line call summary\nSecond line\nThird line\nFinal line';
-    const responsiveNote = `Responsive call summary. ${ 'The team reviewed the next steps and confirmed the plan. '.repeat(8) }`;
+    const noteAtLimit = `Full summary <review> & next steps\n${ 'The team reviewed the next steps.\n'.repeat(18) }`.slice(0, 600);
+    const longNote = `${ noteAtLimit.replace('Full summary', 'Call summary') }!`;
     const noteHistory = map(range(50), index => getInteraction({
       attributes: {
         channel: 'voice',
@@ -2509,8 +2503,7 @@ context('patient interactions', function() {
       },
     }));
     noteHistory[25].attributes.metadata.note = longNote;
-    noteHistory[26].attributes.metadata.note = fourLines;
-    noteHistory[27].attributes.metadata.note = responsiveNote;
+    noteHistory[26].attributes.metadata.note = noteAtLimit;
 
     cy
       .viewport(1920, 900)
@@ -2528,48 +2521,31 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Call record 24')
       .find('.js-show-more')
-      .should('not.be.visible');
+      .should('not.exist');
 
     cy
-      .contains('.patient-interactions__item', 'Four-line call summary')
-      .find('.js-note-text')
-      .should('have.text', fourLines)
+      .contains('.patient-interactions__item', 'Full summary <review> & next steps')
+      .as('noteAtLimit')
+      .find('.patient-interactions__summary')
+      .should('have.text', noteAtLimit)
       .and($text => {
         expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
       });
 
     cy
-      .contains('.patient-interactions__item', 'Four-line call summary')
+      .get('@noteAtLimit')
       .find('.js-show-more')
-      .should('not.be.visible');
-
-    cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-show-more')
-      .should('not.be.visible');
+      .should('not.exist');
 
     cy
       .viewport(700, 900);
 
     cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-show-more')
-      .should('be.visible')
-      .and(assertShowMoreBelowNote)
-      .focus();
-
-    cy
-      .viewport(1920, 900);
-
-    cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-show-more')
-      .should('not.be.visible');
-
-    cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-note-text')
-      .should('be.focused');
+      .get('@noteAtLimit')
+      .find('.patient-interactions__summary')
+      .should($text => {
+        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
+      });
 
     cy
       .contains('.patient-interactions__item', 'Call summary <review> & next steps')
@@ -2584,7 +2560,6 @@ context('patient interactions', function() {
       .find('.js-show-more')
       .should('be.visible')
       .and('have.attr', 'aria-expanded', 'false')
-      .and(assertShowMoreBelowNote)
       .focus();
 
     cy
