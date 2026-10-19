@@ -31,9 +31,9 @@
         <p class="patient-interactions__detail">{{ metadata.admit_reason }}</p>
       {{/if}}
       {{#if metadata.discharged_at}}
-        <p class="patient-interactions__detail">{{ @intl.patients.shared.interactions.interactionItemView.discharged }} {{formatDateTime metadata.discharged_at "DATE"}} {{ @intl.patients.shared.interactions.interactionItemView.appointmentAt }} {{formatDateTime metadata.discharged_at "TIME"}}{{#if hasStay}} • {{formatMessage @intl.patients.shared.interactions.interactionItemView.lengthOfStay days=stayDays}}{{/if}}{{#if metadata.discharge_disposition}} • {{ metadata.discharge_disposition }}{{/if}}</p>
+        <p class="patient-interactions__detail">{{ @intl.patients.shared.interactions.interactionItemView.discharged }} {{formatDateTime metadata.discharged_at "DATE"}} {{ @intl.patients.shared.interactions.interactionItemView.appointmentAt }} {{formatDateTime metadata.discharged_at "TIME"}}{{#if metadata.discharge_disposition}} • {{ metadata.discharge_disposition }}{{/if}}</p>
       {{else if metadata.admitted_at}}
-        <p class="patient-interactions__detail"><em>{{ @intl.patients.shared.interactions.interactionItemView.noDischarge }}</em>{{#if hasStay}} • {{formatMessage @intl.patients.shared.interactions.interactionItemView.lengthOfStay days=stayDays}}{{/if}}</p>
+        <p class="patient-interactions__detail"><em>{{ @intl.patients.shared.interactions.interactionItemView.noDischarge }}</em></p>
       {{/if}}
     {{else if (isValue group "calls")}}
       <div class="patient-interactions__item-heading"><span class="patient-interactions__channel">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.interactions.interactionItemView.inbound }}{{else}}{{ @intl.patients.shared.interactions.interactionItemView.outbound }}{{/if}} {{ channelLabel }}</span>{{#if metadata.disposition}}<span class="patient-interactions__separator">•</span><span>{{ metadata.disposition }}</span>{{/if}}</div>
