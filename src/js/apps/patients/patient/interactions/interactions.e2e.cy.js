@@ -20,6 +20,11 @@ function assertFeedEnd($item) {
   expect(container.getBoundingClientRect().bottom - $item[0].getBoundingClientRect().bottom, 'only normal bottom spacing').to.be.at.most(padding + 1);
 }
 
+function assertShowMoreBelowNote($button) {
+  const text = $button.siblings('.js-note-text')[0];
+  expect($button[0].getBoundingClientRect().top, 'Show more below the clamped note').to.be.at.least(text.getBoundingClientRect().bottom);
+}
+
 function createResponseGate(pendingResponses) {
   const drains = [];
   let release;
@@ -222,185 +227,6 @@ context('patient interactions', function() {
             .should('not.exist');
         });
     }
-  });
-
-  specify('expands overflowing call notes until the timeline list is replaced', function() {
-    const patient = getPatient();
-    const longNote = 'Call summary <review> & next steps\nSecond line\nThird line\nFourth line\nFifth line\nFinal line';
-    const fourLines = 'Four-line call summary\nSecond line\nThird line\nFinal line';
-    const responsiveNote = `Responsive call summary. ${ 'The team reviewed the next steps and confirmed the plan. '.repeat(8) }`;
-    const history = map(range(50), index => getInteraction({
-      attributes: {
-        channel: 'voice',
-        occurred_at: new Date(Date.UTC(2026, 8, index + 1)).toISOString(),
-        metadata: { note: `Call record ${ index }` },
-      },
-    }));
-    history[25].attributes.metadata.note = longNote;
-    history[26].attributes.metadata.note = fourLines;
-    history[27].attributes.metadata.note = responsiveNote;
-
-    cy
-      .viewport(1920, 900)
-      .routesForPatientWorkflow()
-      .routePatient(fx => {
-        fx.data = patient;
-        return fx;
-      })
-      .routePatientInteractions(fx => {
-        fx.data = history;
-        return fx;
-      })
-      .visit(`/patient/${ patient.id }/interactions/${ history[25].id }`);
-
-    cy
-      .get('.patient-interactions[aria-busy="false"]')
-      .find('.patient-interactions__item')
-      .should('have.length', 25);
-
-    cy
-      .contains('.patient-interactions__item', 'Call record 24')
-      .find('.js-show-more')
-      .should('not.be.visible');
-
-    cy
-      .contains('.patient-interactions__item', 'Four-line call summary')
-      .find('.js-note-text')
-      .should('have.text', fourLines)
-      .and($text => {
-        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
-      });
-
-    cy
-      .contains('.patient-interactions__item', 'Four-line call summary')
-      .find('.js-show-more')
-      .should('not.be.visible');
-
-    cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-show-more')
-      .should('not.be.visible');
-
-    cy
-      .viewport(700, 900);
-
-    cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-show-more')
-      .should('be.visible')
-      .focus();
-
-    cy
-      .viewport(1920, 900);
-
-    cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-show-more')
-      .should('not.be.visible');
-
-    cy
-      .contains('.patient-interactions__item', 'Responsive call summary.')
-      .find('.js-note-text')
-      .should('be.focused');
-
-    cy
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .find('.js-note-text')
-      .should('have.text', longNote)
-      .and($text => {
-        expect($text[0].scrollHeight).to.be.greaterThan($text[0].clientHeight);
-      });
-
-    cy
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .find('.js-show-more')
-      .should('be.visible')
-      .and('have.attr', 'aria-expanded', 'false')
-      .focus();
-
-    cy
-      .press(Cypress.Keyboard.Keys.ENTER);
-
-    cy
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .find('.js-note-text')
-      .should('be.focused')
-      .and('have.text', longNote)
-      .and($text => {
-        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
-      });
-
-    cy
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .find('.js-show-more')
-      .should('not.exist');
-
-    // A paging response can refresh an already loaded resource as well as add rows.
-    cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
-        const query = new URL(req.url).searchParams;
-        if (!query.has('page[before]')) return;
-        const updated = getInteraction({
-          ...history[25],
-          attributes: { ...history[25].attributes, metadata: { note: longNote, clinician_name: 'Updated call author' } },
-        });
-        req.alias = 'refreshCallNote';
-        req.reply({ body: { data: [...getPage(history, query, history), updated] } });
-      });
-
-    cy
-      .get('.patient-interactions')
-      .scrollTo('top');
-
-    cy
-      .wait('@refreshCallNote');
-
-    cy
-      .contains('.patient-interactions__item', 'Updated call author')
-      .find('.js-note-text')
-      .should('have.text', longNote)
-      .and($text => {
-        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
-      });
-
-    cy
-      .contains('.patient-interactions__item', 'Updated call author')
-      .find('.js-show-more')
-      .should('not.exist');
-
-    cy
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .scrollIntoView();
-
-    cy
-      .get('.patient-interactions__filters [data-filter="appointments"]')
-      .click({ scrollBehavior: false });
-
-    cy
-      .get('.patient-interactions[aria-busy="false"]')
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .find('.js-show-more')
-      .should('be.visible')
-      .click();
-
-    cy
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .find('.js-note-text')
-      .should('be.focused');
-
-    cy
-      .get('.patient-pages .js-workflow')
-      .click();
-
-    cy
-      .get('.patient-pages .js-interactions')
-      .click();
-
-    cy
-      .get('.patient-interactions[aria-busy="false"]')
-      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
-      .find('.js-show-more')
-      .should('be.visible');
   });
 
   specify('checks both history boundaries for a short linked feed', function() {
@@ -1366,7 +1192,7 @@ context('patient interactions', function() {
       .and('be.visible');
   });
 
-  specify('opens from workflow and a configured sidebar, then links through an action', function() {
+  specify('opens from workflow and a configured sidebar, links through an action, and expands call notes', function() {
     const patient = getPatient();
     const action = getAction({
       attributes: { name: 'Call patient' },
@@ -2671,5 +2497,178 @@ context('patient interactions', function() {
         win.document.removeEventListener('focusin', onTeardownFocus);
         expect(teardownFocus).to.have.length(0);
       });
+
+    const longNote = 'Call summary <review> & next steps\nSecond line\nThird line\nFourth line\nFifth line\nFinal line';
+    const fourLines = 'Four-line call summary\nSecond line\nThird line\nFinal line';
+    const responsiveNote = `Responsive call summary. ${ 'The team reviewed the next steps and confirmed the plan. '.repeat(8) }`;
+    const noteHistory = map(range(50), index => getInteraction({
+      attributes: {
+        channel: 'voice',
+        occurred_at: new Date(Date.UTC(2026, 8, index + 1)).toISOString(),
+        metadata: { note: `Call record ${ index }` },
+      },
+    }));
+    noteHistory[25].attributes.metadata.note = longNote;
+    noteHistory[26].attributes.metadata.note = fourLines;
+    noteHistory[27].attributes.metadata.note = responsiveNote;
+
+    cy
+      .viewport(1920, 900)
+      .routePatientInteractions(fx => {
+        fx.data = noteHistory;
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/interactions/${ noteHistory[25].id }`);
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item')
+      .should('have.length', 25);
+
+    cy
+      .contains('.patient-interactions__item', 'Call record 24')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Four-line call summary')
+      .find('.js-note-text')
+      .should('have.text', fourLines)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Four-line call summary')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .viewport(700, 900);
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-show-more')
+      .should('be.visible')
+      .and(assertShowMoreBelowNote)
+      .focus();
+
+    cy
+      .viewport(1920, 900);
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-show-more')
+      .should('not.be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Responsive call summary.')
+      .find('.js-note-text')
+      .should('be.focused');
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-note-text')
+      .should('have.text', longNote)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.greaterThan($text[0].clientHeight);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('be.visible')
+      .and('have.attr', 'aria-expanded', 'false')
+      .and(assertShowMoreBelowNote)
+      .focus();
+
+    cy
+      .press(Cypress.Keyboard.Keys.ENTER);
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-note-text')
+      .should('be.focused')
+      .and('have.text', longNote)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('not.exist');
+
+    // A paging response can refresh an already loaded resource as well as add rows.
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (!query.has('page[before]')) return;
+        const updated = getInteraction({
+          ...noteHistory[25],
+          attributes: { ...noteHistory[25].attributes, metadata: { note: longNote, clinician_name: 'Updated call author' } },
+        });
+        req.alias = 'refreshCallNote';
+        req.reply({ body: { data: [...getPage(noteHistory, query, noteHistory), updated] } });
+      });
+
+    cy
+      .get('.patient-interactions')
+      .scrollTo('top');
+
+    cy
+      .wait('@refreshCallNote');
+
+    cy
+      .contains('.patient-interactions__item', 'Updated call author')
+      .find('.js-note-text')
+      .should('have.text', longNote)
+      .and($text => {
+        expect($text[0].scrollHeight).to.be.at.most($text[0].clientHeight + 1);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Updated call author')
+      .find('.js-show-more')
+      .should('not.exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .scrollIntoView();
+
+    cy
+      .get('.patient-interactions__filters [data-filter="appointments"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('be.visible')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-note-text')
+      .should('be.focused');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .contains('.patient-interactions__item', 'Call summary <review> & next steps')
+      .find('.js-show-more')
+      .should('be.visible');
   });
 });

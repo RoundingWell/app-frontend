@@ -133,37 +133,23 @@
   margin-top: 8px;
 }
 
-.patient-interactions__note {
-  position: relative;
-}
-
-.patient-interactions__note--collapsed .patient-interactions__summary {
-  max-height: 4lh;
+.patient-interactions__summary--collapsed {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
   overflow: hidden;
-}
-
-// Reserve the control's space on the fourth line without covering any text.
-.patient-interactions__note--overflowing .patient-interactions__summary::before {
-  content: '';
-  float: right;
-  height: 4lh;
-  shape-outside: inset(3lh 0 0);
-  width: 6em;
 }
 
 .patient-interactions__show-more {
   background: none;
   border: 0;
-  bottom: 0;
   color: color(blue);
   cursor: pointer;
   font: inherit;
   line-height: 1.45;
+  margin-top: 4px;
   padding: 0;
-  position: absolute;
-  right: 0;
-  text-align: right;
-  width: 6em;
 }
 
 .patient-interactions__detail {
@@ -229,7 +215,7 @@
 
 .patient-interactions__action:focus-visible,
 .patient-interactions__show-more:focus-visible,
-.patient-interactions__note .patient-interactions__summary:focus-visible {
+.patient-interactions__summary--collapsible:focus-visible {
   outline: 2px solid #{color(blue)};
   outline-offset: 2px;
 }

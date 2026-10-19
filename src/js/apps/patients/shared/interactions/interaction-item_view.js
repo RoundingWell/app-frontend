@@ -13,6 +13,10 @@ dayjs.extend(timezonePlugin);
 
 const intl = i18n.patients.shared.interactions.interactionItemView;
 const VISIT_CLASSES = { E: intl.emergency, I: intl.inpatient, O: intl.outpatient, V: intl.observation, Obs: intl.observation, OBS: intl.observation };
+const noteViews = new WeakMap();
+const noteObserver = new ResizeObserver(entries => {
+  for (const { target } of entries) noteViews.get(target)?.updateNoteOverflow();
+});
 
 function getWorkName(model) {
   const action = model.getAction();
@@ -26,7 +30,7 @@ const InteractionItemView = View.extend({
     return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
   },
   template: InteractionItemTemplate,
-  ui: { action: '.js-action', interaction: '.js-interaction', note: '.js-note', noteText: '.js-note-text', showMore: '.js-show-more' },
+  ui: { action: '.js-action', interaction: '.js-interaction', noteText: '.js-note-text', showMore: '.js-show-more' },
   triggers: {
     'click @ui.action': 'click:action',
     'click @ui.interaction': 'click:interaction',
@@ -34,35 +38,26 @@ const InteractionItemView = View.extend({
   },
   modelEvents: { change: 'render' },
   onClickShowMore() {
-    const shouldFocus = document.activeElement === this.getUI('showMore')[0];
     this.noteExpanded = true;
     this.render();
-    if (shouldFocus) this.getUI('noteText')[0].focus({ preventScroll: true });
+    this.getUI('noteText')[0].focus({ preventScroll: true });
   },
   onDomRefresh() {
     const note = this.getUI('noteText')[0];
     if (!note || this.noteExpanded) return;
-    this.noteObserver = new ResizeObserver(() => this.updateNoteOverflow());
-    this.noteObserver.observe(note);
+    noteViews.set(note, this);
+    noteObserver.observe(note);
     this.updateNoteOverflow();
   },
   onDomRemove() {
-    this.disconnectNoteObserver();
-  },
-  onBeforeDestroy() {
-    this.disconnectNoteObserver();
-  },
-  disconnectNoteObserver() {
-    this.noteObserver?.disconnect();
-    this.noteObserver = null;
+    const note = this.getUI('noteText')[0];
+    if (!note) return;
+    noteObserver.unobserve(note);
+    noteViews.delete(note);
   },
   updateNoteOverflow() {
-    const note = this.getUI('note')[0];
     const text = this.getUI('noteText')[0];
-    // Measure without the control's reserved space so four-line notes stay whole.
-    note.classList.remove('patient-interactions__note--overflowing');
     const overflowing = text.scrollHeight > text.clientHeight + 1;
-    note.classList.toggle('patient-interactions__note--overflowing', overflowing);
     const button = this.getUI('showMore')[0];
     if (!overflowing && document.activeElement === button) text.focus({ preventScroll: true });
     button.hidden = !overflowing;
