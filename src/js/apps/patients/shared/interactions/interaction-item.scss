@@ -105,7 +105,8 @@
 }
 
 .patient-interactions__item.is-selected .patient-interactions__card {
-  border-color: color(blue);
+  outline: 1px solid var(--color-interactive);
+  outline-offset: -1px;
 }
 
 .patient-interactions__item-heading {
