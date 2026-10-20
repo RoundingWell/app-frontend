@@ -7,6 +7,8 @@ import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
+import { compareInteractions } from 'js/entities-service/entities/interactions';
+
 import { InteractionsPageView } from './interactions_views';
 
 const PAGE_SIZE = 25;
@@ -68,6 +70,7 @@ export default App.extend({
   handleStartFailure(options, error) {
     const { kind = 'replace', date, at } = options;
     if (kind === 'replace') {
+      if (this.collection) this.stopListening(this.collection);
       this.collection = null;
       this.getView().showError();
     }
@@ -79,6 +82,7 @@ export default App.extend({
     this.stop();
   },
   onStop() {
+    if (this.collection) this.stopListening(this.collection);
     this.collection = null;
     this.filterPosition = null;
     this.getState().set({ request: null, retry: null, hasOlder: false, hasNewer: false });
@@ -158,7 +162,9 @@ export default App.extend({
   commitInteractions(models, input) {
     const view = this.getView();
     if (input.kind === 'replace') {
-      this.collection = Radio.request('entities', 'interactions:collection', models);
+      if (this.collection) this.stopListening(this.collection);
+      this.collection = Radio.request('entities', 'interactions:collection', models, { comparator: compareInteractions });
+      this.listenTo(this.collection, 'change:occurred_at change:expected_at', () => this.collection.sort());
       view.showInteractions(this.collection);
       if (!input.at) view.scrollToLatest();
       return;
