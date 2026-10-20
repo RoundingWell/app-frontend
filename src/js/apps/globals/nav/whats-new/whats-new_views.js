@@ -7,8 +7,8 @@ import DesignUpdateTemplate from './design-update.hbs';
 
 import './whats-new.scss';
 
-const WHATS_NEW_VERSION = 'v6-design-update';
-const WHATS_NEW_URL = 'https://www.roundingwell.com/rw-design-update';
+const WHATS_NEW_VERSION = 'interactions';
+const WHATS_NEW_URL = 'https://www.roundingwell.com/whats-new';
 
 const AnnouncementView = View.extend({
   className: 'app-nav__announcement',

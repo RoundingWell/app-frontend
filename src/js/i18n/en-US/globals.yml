@@ -38,9 +38,9 @@ careOptsFrontend:
           announcement:
             action: See what's new
             badge: NEW
-            dismiss: Dismiss design update announcement
-            heading: RW Design Update
-            message: Explore the refreshed RoundingWell experience.
+            dismiss: Dismiss interactions announcement
+            heading: Interactions
+            message: See every touchpoint with a patient
           modal:
             done: Done
             heading: What's New
