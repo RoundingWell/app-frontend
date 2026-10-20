@@ -1,0 +1,29 @@
+src/js/services/patient-modal.js
+  s_85aebd1623278c::t_849ea03c803091 53
+src/js/services/patient-modal/patient-modal_views.js
+  s_85aebd1623278c::t_849ea03c803091 42,57-62,171,181,223-227
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_7d858fc9fc6041 43-44
+  s_85aebd1623278c::t_a296e4b3bf3af4 39-42
+  s_85aebd1623278c::t_849ea03c803091 15,26-29
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_85aebd1623278c::t_849ea03c803091 35,49-54,87,96,141-145
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_85aebd1623278c::t_849ea03c803091 110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b2a17effe19276061404b24a89231db15f5a906e",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_09e8292bb4bcb3::t_9e73a290be036f 13
+  s_09e8292bb4bcb3::t_273bbd9cf5682f 34,39
+  s_09e8292bb4bcb3::t_789afe24a2e5f5 47
+  s_09e8292bb4bcb3::t_636a369e161044 160
+  s_09e8292bb4bcb3::t_16271c79bda7ea 58-71
+  s_09e8292bb4bcb3::t_cfaafb58a9ddad 139
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_09e8292bb4bcb3::t_5fc5df6f502e9d 114-115
+  s_09e8292bb4bcb3::t_0bf68a120503a2 225
+  s_09e8292bb4bcb3::t_ef95a0d9906e3b 63-64,68,70
+  s_09e8292bb4bcb3::t_b6d7b6a24aa079 94-95
+  s_09e8292bb4bcb3::t_91d348781a2b90 255,267,279
+  s_09e8292bb4bcb3::t_48bcc982b15292 41-42,47-48,52,54
+  s_09e8292bb4bcb3::t_f772c5730ff850 178
+  s_09e8292bb4bcb3::t_b26108bcfe8465 241
+  s_09e8292bb4bcb3::t_b24c779707672b 163
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_09e8292bb4bcb3::t_d4d6032c8c07e8 249-250
+  s_09e8292bb4bcb3::t_a6c2194c899b44 199-200,202
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "5c138b71632cd2a1e136b87ec929ad24073f1b36",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

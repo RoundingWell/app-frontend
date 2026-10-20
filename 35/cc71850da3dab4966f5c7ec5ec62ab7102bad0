@@ -1,0 +1,53 @@
+src/js/apps/programs/program/action/action_app.js
+  s_7d9748a0496f68::t_191285d0fd027b 15,28,30,33-35
+src/js/apps/programs/program/flow/action-item.hbs
+  s_7d9748a0496f68::t_69cac4dc6fc47d 2,16,23-24
+src/js/apps/programs/program/flow/flow_app.js
+  s_7d9748a0496f68::t_20a91d9e97e711 26,28-33,35,42,53-57,61-63,66-68,79,91,95,107,112,114-120,122-124
+src/js/apps/programs/program/flow/flow_views.js
+  s_7d9748a0496f68::t_0c2e885237383c 2,67,144,154,163,176,188
+src/js/apps/programs/program/program_app.js
+  s_7d9748a0496f68::t_07f27c9341d423 14,20,25-31,34,39,42-43,46,49-51,60-72,75,77-79,81-82,87,89-91,96,99-100,111-113,125
+src/js/apps/programs/program/program_views.js
+  s_7d9748a0496f68::t_433dc88ca7d167 2
+src/js/apps/programs/program/sidebar/sidebar-views.js
+  s_7d9748a0496f68::t_4a76df70f5cccb 46
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_7d9748a0496f68::t_c0718db6a12cd6 13,15-20,22-26,28,30,57
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_7d9748a0496f68::t_77c24c560bc3dc 1,46,49,93,105,115,157,203-204
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_7d9748a0496f68::t_cebb0c3324397e 14-20,22-23,25,27,32,34
+src/js/apps/programs/programs-all/programs-all_views.js
+  s_7d9748a0496f68::t_663832a9993839 2
+src/js/apps/programs/programs-main_app.js
+  s_7d9748a0496f68::t_ec025f99b102c1 1-2,54,57,60-68
+src/js/apps/programs/sidebar/action/action-sidebar_app.js
+  s_7d9748a0496f68::t_cc610a388961f2 17-18,20,29,40,49,56,60,111
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  s_7d9748a0496f68::t_1c576e5a1ad1c9 4,64-65,76,90-91,169,249-250,300,312,322,332
+src/js/apps/programs/sidebar/flow/flow-sidebar_app.js
+  s_7d9748a0496f68::t_d118409971951e 14,22-23,25,36,39,46,50
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  s_7d9748a0496f68::t_69fc5547905d01 5,68-69,80,94-95,142,213-214,262,273
+src/js/apps/programs/sidebar/program/program-sidebar_app.js
+  s_7d9748a0496f68::t_6e2a85835d1e12 8,22,32,42,46
+src/js/apps/programs/sidebar/program/programs-sidebar_views.js
+  s_7d9748a0496f68::t_da90eb07d6d019 60-61,73,87-88,159-160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "35cc71850da3dab4966f5c7ec5ec62ab7102bad0",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+src/js/formservice.js
+  s_7d9748a0496f68::t_5e8156e2ba255a 17-23,25,27-36,53-59,61
+src/js/services/forms.js
+  s_7d9748a0496f68::t_b5c36d1c2d18b2 41,46-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fc9ab0fa35d130efecc327fb3cea33031142cba3",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

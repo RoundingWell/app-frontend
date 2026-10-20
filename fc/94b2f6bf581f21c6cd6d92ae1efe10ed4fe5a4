@@ -1,0 +1,19 @@
+src/js/services/ws.e2e.cy.js
+  s_7d9748a0496f68::t_2edd9be9c7a939 46,53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fc94b2f6bf581f21c6cd6d92ae1efe10ed4fe5a4",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

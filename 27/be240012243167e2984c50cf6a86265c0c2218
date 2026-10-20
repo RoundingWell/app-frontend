@@ -1,0 +1,81 @@
+src/js/app.js
+  s_534c2b6810f4ee::t_b29e9a1d0b2da1 36,60,127-128,143-144,146-148,153,157
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.hbs
+  s_534c2b6810f4ee::t_1353b2de809300 1-5
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.scss
+  s_534c2b6810f4ee::t_1c2873360f0401 1-25
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_534c2b6810f4ee::t_a862fe80a14216 18-19
+src/js/apps/globals/app-frame/app-frame.scss
+  s_534c2b6810f4ee::t_b8ceb9491e9f07 71-96
+src/js/apps/globals/app-frame/close-request.component.cy.js
+  s_534c2b6810f4ee::t_d0c701cf47a767 1-91
+src/js/apps/globals/app-frame/close-request.js
+  s_534c2b6810f4ee::t_0546ff700cf92c 1-62
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  s_534c2b6810f4ee::t_710b96fed8e204 125-148
+src/js/apps/globals/app-frame/root_views.js
+  s_534c2b6810f4ee::t_bc388210e3e3c4 9,14-15,82,93,97,103,139,144-145,147-150,153,158,163,166-168,176-180,190-206,224-232,366,375-376,379,401-403
+src/js/apps/globals/app-frame/startup.hbs
+  s_534c2b6810f4ee::t_0134cd7c1a8aa9 1-21
+src/js/apps/globals/app-frame/startup.scss
+  s_534c2b6810f4ee::t_51e19fca6355fa 1-237
+src/js/apps/globals/app-frame/startup_views.component.cy.js
+  s_534c2b6810f4ee::t_8ed091439606d0 1-123
+src/js/apps/globals/app-frame/startup_views.js
+  s_534c2b6810f4ee::t_0c103556442891 1-91
+src/js/auth/prelogin/prelogin_views.js
+  s_534c2b6810f4ee::t_bc27a87af851e9 46,56,62
+src/js/behaviors/dialog-focus.js
+  s_534c2b6810f4ee::t_4ee6e998359ff9 1-49
+src/js/behaviors/picklist-transport.js
+  s_534c2b6810f4ee::t_f2dbf9a982961e 2,18,68-81
+src/js/components/droplist/droplist.component.cy.js
+  s_534c2b6810f4ee::t_68d4e76cbe4634 2-3,54,108-111,119,154-169,172-174,181,192,195-234,245-319,321-396
+src/js/components/droplist/index.js
+  s_534c2b6810f4ee::t_2e29ac7898308f 1,9,19,25,136-137,141,143,151,156,164-172,180-183,185-198
+src/js/components/optionlist/index.js
+  s_534c2b6810f4ee::t_df6bc5a368438a 1-3,13,29,50,53-61,71-86
+src/js/components/optionlist/optionlist.component.cy.js
+  s_534c2b6810f4ee::t_7680f25d201fb1 10-13,15,67-70,113-122
+src/js/components/picklist/index.js
+  s_534c2b6810f4ee::t_8a836a99a7afc0 49,90-99,128-130,135,174-181,183,189,194-199,279
+src/js/components/picklist/picklist.scss
+  s_534c2b6810f4ee::t_55afd8d10e6cfd 12-15,25,66-72,184-250
+src/js/i18n/en-US/globals.yml
+  s_534c2b6810f4ee::t_cc4e5b28fe8c3a 21-22,51,91-92,112-117
+src/js/i18n/en-US/shared.yml
+  s_534c2b6810f4ee::t_cc8c8d05027b46 17-18,21
+src/js/services/modal/modal.hbs
+  s_534c2b6810f4ee::t_9c4dbd2e43873d 5
+src/js/services/modal/modal_views.component.cy.js
+  s_534c2b6810f4ee::t_6c483844e3b7e8 2-5,41,53,63-146
+src/js/services/modal/modal_views.js
+  s_534c2b6810f4ee::t_349039fc782a5e 13,53,55-62,68,144,147
+src/js/utils/accessibility/focus-trap.js
+  s_534c2b6810f4ee::t_aa90adf3563783 1-56
+src/scss/app-root.scss
+  s_534c2b6810f4ee::t_afd3af8dd1b42c 3-6
+src/scss/modules/buttons.scss
+  s_534c2b6810f4ee::t_7ac8a48888edb5 20
+src/scss/modules/forms.scss
+  s_534c2b6810f4ee::t_c3c9bbc0fe0161 45-50
+src/scss/modules/modals.scss
+  s_534c2b6810f4ee::t_149f57a8b96366 7-9,30,59,61,77,135-141,144-182
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "27be240012243167e2984c50cf6a86265c0c2218",
+  "prompts": {},
+  "sessions": {
+    "s_534c2b6810f4ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a23-001e-7b23-9454-44a54672d14d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

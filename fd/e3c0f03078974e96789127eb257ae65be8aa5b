@@ -1,0 +1,27 @@
+src/js/apps/patients/worklist/worklist_state.js
+  s_dca241af71b506::t_081acd3ffed36a 3,73-79
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_dca241af71b506::t_081acd3ffed36a 118
+src/js/apps/patients/patients-main_app.js
+  s_dca241af71b506::t_081acd3ffed36a 92,108
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_dca241af71b506::t_081acd3ffed36a 127-180
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_dca241af71b506::t_081acd3ffed36a 290-293
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "fde3c0f03078974e96789127eb257ae65be8aa5b",
+  "prompts": {},
+  "sessions": {
+    "s_dca241af71b506": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08157-2c68-7783-9b67-388304772f92",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

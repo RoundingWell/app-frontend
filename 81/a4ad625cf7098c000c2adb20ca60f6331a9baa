@@ -1,0 +1,21 @@
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_d04385ebae28ca::t_c9629bd9b09983 1351,1382,1390,1400
+src/js/apps/patients/shared/bulk-edit/bulk-edit.scss
+  s_d04385ebae28ca::t_396f33b1dc9b99 57,60,64,68-70,72,76,84,95-97,99,107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "81a4ad625cf7098c000c2adb20ca60f6331a9baa",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

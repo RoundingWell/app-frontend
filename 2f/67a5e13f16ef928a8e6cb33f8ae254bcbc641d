@@ -1,0 +1,55 @@
+src/js/apps/programs/program/flow/action-item.hbs
+  s_e9c4ebfa58429b::t_a12bac464093af 1-26
+src/js/apps/programs/program/flow/flow_views.js
+  s_e9c4ebfa58429b::t_6024925f8b42fa 14,112,122,206,224-225
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_e9c4ebfa58429b::t_cb485e6b7e466f 398,405,410,416,418,482,634,640,664,666
+src/js/apps/programs/program/flow/program-flow.scss
+  s_e9c4ebfa58429b::t_a7d4ee7014c3ce 22
+src/js/apps/programs/program/program.e2e.cy.js
+  s_e9c4ebfa58429b::t_b9ac4422982979 38,198,211
+src/js/apps/programs/program/program.scss
+  s_e9c4ebfa58429b::t_f2d2a993630795 22
+src/js/apps/programs/program/program_app.js
+  s_e9c4ebfa58429b::t_cfc38b6fbc7f59 43
+src/js/apps/programs/program/workflows/action-item.hbs
+  s_e9c4ebfa58429b::t_451c7235d65c96 1-25
+src/js/apps/programs/program/workflows/flow-item.hbs
+  s_e9c4ebfa58429b::t_85dd2e12bbc0bc 1-25
+src/js/apps/programs/program/workflows/layout.hbs
+  s_e9c4ebfa58429b::t_7ff6ebd1331313 7
+src/js/apps/programs/program/workflows/workflows.e2e.cy.js
+  s_e9c4ebfa58429b::t_d8a7a8d971781b 97-98,103-104,109-110,113,117-118,123,128,146,164-165,172,190,201,208,213,219,226,269-270,386,505
+src/js/apps/programs/program/workflows/workflows_app.js
+  s_e9c4ebfa58429b::t_abb2a40616f215 19
+src/js/apps/programs/program/workflows/workflows_views.js
+  s_e9c4ebfa58429b::t_49616085337d52 9,30,51,121,160
+src/js/apps/programs/programs-all/programs-all.e2e.cy.js
+  s_e9c4ebfa58429b::t_0f223f3493b035 56,60,68,76
+src/js/apps/programs/programs-all/programs-all_app.js
+  s_e9c4ebfa58429b::t_736b33b64cf21a 18
+src/js/apps/programs/programs-all/programs-all_views.js
+  s_e9c4ebfa58429b::t_4060aedda77340 10,14,19,21-31,58,73
+src/js/apps/programs/shared/components/tags-manager_component.js
+  s_e9c4ebfa58429b::t_7dd75380f5348d 19
+src/js/apps/programs/sidebar/action/action-sidebar.e2e.cy.js
+  s_e9c4ebfa58429b::t_17b19457473185 210-211,269-270,297-298
+src/js/apps/programs/sidebar/program/program-sidebar.e2e.cy.js
+  s_e9c4ebfa58429b::t_475e900f5d2358 161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "2f67a5e13f16ef928a8e6cb33f8ae254bcbc641d",
+  "prompts": {},
+  "sessions": {
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

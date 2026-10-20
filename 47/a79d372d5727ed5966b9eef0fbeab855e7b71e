@@ -1,0 +1,20 @@
+README.md
+  h_0f06c286dda36f 26,337,349
+docs/deploy.md
+  h_0f06c286dda36f 14,19
+scripts/with-icons-auth.sh
+  h_0f06c286dda36f 17-25
+scripts/with-icons-auth.test.js
+  h_0f06c286dda36f 40-42,45,48-50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "47a79d372d5727ed5966b9eef0fbeab855e7b71e",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

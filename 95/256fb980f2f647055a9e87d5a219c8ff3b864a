@@ -1,0 +1,19 @@
+src/js/i18n/en-US/patients.yml
+  s_98141a3add0497::t_f1d7a31894c989 209-211,226,228-229,234-235,247-252,360-364,409,418,420,481-482
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "95256fb980f2f647055a9e87d5a219c8ff3b864a",
+  "prompts": {},
+  "sessions": {
+    "s_98141a3add0497": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa3d5-b074-7972-8c1c-0ef07df7968e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

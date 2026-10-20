@@ -1,0 +1,22 @@
+src/js/apps/patients/shared/filters_state.js
+  s_68eb4121d9a9bc::t_93ff59516598b3 25-30
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_68eb4121d9a9bc::t_6ca16fddaf5768 171-173,175-176,179,262,276,284-285,295-298,301,305,309-310,312,317-319,322-324
+  s_68eb4121d9a9bc::t_2ddc4b82ab4344 267,314,320-321,325-326
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "b0410576866e45ba549c63a9c66544714692ca8e",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}
