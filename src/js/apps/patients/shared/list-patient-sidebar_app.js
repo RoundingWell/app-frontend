@@ -27,7 +27,11 @@ export default PatientSidebarApp.extend({
   },
   onStart(app, options, loadedPatient) {
     this.patient = loadedPatient;
+    Radio.request('ws', 'add', loadedPatient);
     this.getView().showSidebars(this.sidebars);
+  },
+  onStop() {
+    if (this.patient) Radio.request('ws', 'unsubscribe', this.patient);
   },
   focusClose() {
     this.getView()?.focusClose();

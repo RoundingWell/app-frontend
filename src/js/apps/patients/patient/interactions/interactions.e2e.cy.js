@@ -184,6 +184,93 @@ context('patient interactions', function() {
       .should('not.exist');
   });
 
+  specify('refetches the latest three while collapsed', function() {
+    const patient = getPatient();
+    const rows = map(range(4), index => getInteraction({
+      attributes: {
+        direction: 'inbound',
+        occurred_at: `2026-10-08T0${ index }:00:00Z`,
+        metadata: { message: `Live row ${ index }`, from: `Sender ${ index }` },
+      },
+    }));
+    const added = getInteraction({
+      attributes: { direction: 'inbound', occurred_at: '2026-10-08T04:00:00Z', metadata: { message: 'New live row', from: 'New sender' } },
+    });
+    const send = (category, row, attributes = {}) => cy.sendWs({
+      category,
+      resource: { type: 'interactions', id: row.id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes },
+    });
+
+    cy
+      .viewport(1280, 900)
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .visitOnClock(`/patient/${ patient.id }/workflow`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should('have.length', 3);
+
+    cy
+      .get('.patient__frame .js-sidebar-button')
+      .then($button => {
+        if ($button.attr('aria-expanded') === 'true') cy.wrap($button).click();
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        expect(stub.lastCall.args[0].data.resources).to.deep.include({ type: 'patients', id: patient.id });
+      });
+
+    cy.then(() => rows.push(added));
+    send('ResourceCreated', added, { channel: 'sms', direction: 'inbound', metadata: added.attributes.metadata });
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should($senders => {
+        expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 2', 'Sender 3', 'New sender']);
+      });
+
+    cy.then(() => {
+      added.attributes.occurred_at = '2026-10-07T04:00:00Z';
+    });
+    send('InteractionCompleted', added, { occurred_at: '2026-10-07T04:00:00Z' });
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should($senders => {
+        expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 1', 'Sender 2', 'Sender 3']);
+      });
+
+    const removed = rows[3];
+    cy.then(() => rows.splice(3, 1));
+    send('ResourceDeleted', removed);
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should($senders => {
+        expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 0', 'Sender 1', 'Sender 2']);
+      });
+  });
+
   specify('renders appointment statuses, cancellation reasons, and valid durations', function() {
     const patient = getPatient();
     const durations = [20, '15', 20, 0, null, '0', -1, '20', undefined, '', ' ', 'invalid', '-1'];
