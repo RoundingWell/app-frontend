@@ -83,7 +83,7 @@ export default App.extend({
       patient: this.patient.id,
     };
 
-    Radio.request('ws', 'subscribe', this.collection.models, {
+    Radio.request('ws', 'subscribe', [this.patient, ...this.collection.models], {
       filters: { actions: { ...filters, flow: NIL_UUID }, flows: filters },
     });
     Radio.request('ws', 'manage:add', this, this.collection, 'flows', { include: FLOW_INCLUDE });

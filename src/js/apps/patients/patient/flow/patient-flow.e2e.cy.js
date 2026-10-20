@@ -3498,6 +3498,7 @@ context('patient flow page', function() {
   });
 
   specify('socket notifications', function() {
+    const testPatient = getPatient();
     const testSocketFileId = uuid();
     const testComment = getComment();
 
@@ -3550,7 +3551,14 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .routePatientByFlow()
+      .routePatientByFlow(fx => {
+        fx.data = testPatient;
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+        return fx;
+      })
       .routeFlowActions(fx => {
         fx.data = [
           testSocketAction,
@@ -3566,15 +3574,16 @@ context('patient flow page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce')
+      .should('have.been.calledTwice')
       .then(stub => {
-        const { filters, resources } = stub.getCall(0).args[0].data;
+        const { filters, resources } = stub.getCall(1).args[0].data;
 
         expect(filters).to.deep.equal({
           actions: { flow: testSocketFlow.id },
         });
 
         expect(resources).to.deep.equal([
+          getRelationship(testPatient).data,
           getRelationship(testSocketFlow).data,
           getRelationship(testSocketAction).data,
         ]);
@@ -3913,9 +3922,9 @@ context('patient flow page', function() {
     // verify the new flow is added to the ws subscription resources
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledTwice')
+      .should('have.been.calledThrice')
       .then(stub => {
-        const secondCallData = stub.getCall(1).args[0].data;
+        const secondCallData = stub.getCall(2).args[0].data;
         const { resources } = secondCallData;
 
         expect(resources).to.deep.include({

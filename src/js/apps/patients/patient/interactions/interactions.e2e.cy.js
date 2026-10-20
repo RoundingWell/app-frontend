@@ -132,6 +132,58 @@ context('patient interactions', function() {
     expect(getPage(data.slice(0, 4), query, data)).to.deep.equal([]);
   });
 
+  specify('applies update messages and removes deleted interactions', function() {
+    const patient = getPatient();
+    const call = getInteraction({ attributes: { channel: 'voice', occurred_at: '2026-10-08T03:00:00Z', metadata: { note: 'Known note' } } });
+    const appointment = getInteraction({ attributes: { channel: 'appointment', occurred_at: null, expected_at: '2026-10-08T04:00:00Z', metadata: { status: 'scheduled', appointment_type: 'Known appointment' } } });
+    const send = (category, row, attributes = {}) => cy.sendWs({
+      category,
+      resource: { type: 'interactions', id: row.id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes },
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [call, appointment];
+        return fx;
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Known note')
+      .should('exist');
+
+    send('MetadataUpdated', call, { metadata: { note: 'Updated note' } });
+
+    cy
+      .contains('.patient-interactions__item', 'Updated note')
+      .should('exist');
+
+    send('InteractionCompleted', call, { occurred_at: '2026-10-09T03:00:00Z' });
+
+    cy
+      .get('.patient-interactions__day')
+      .last()
+      .should('contain', 'Updated note');
+
+    send('InteractionCancelled', appointment, { cancelled_at: '2026-10-08T05:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .should('contain', 'cancelled');
+
+    send('ResourceDeleted', call);
+
+    cy
+      .contains('.patient-interactions__item', 'Updated note')
+      .should('not.exist');
+  });
+
   specify('renders appointment statuses, cancellation reasons, and valid durations', function() {
     const patient = getPatient();
     const durations = [20, '15', 20, 0, null, '0', -1, '20', undefined, '', ' ', 'invalid', '-1'];

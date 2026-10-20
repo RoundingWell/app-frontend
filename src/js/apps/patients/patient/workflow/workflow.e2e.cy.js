@@ -1357,12 +1357,12 @@ context('patient workflow page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce')
+      .should('have.been.calledTwice')
       .then(stub => {
         const states = [stateTodo.id, stateInProgress.id].join();
         const patient = testPatient.id;
 
-        const { filters, resources } = stub.getCall(0).args[0].data;
+        const { filters, resources } = stub.getCall(1).args[0].data;
 
         expect(filters).to.deep.equal({
           actions: { states, patient, flow: NIL_UUID },
@@ -1370,6 +1370,7 @@ context('patient workflow page', function() {
         });
 
         expect(resources).to.deep.equal([
+          getRelationship(testPatient).data,
           getRelationship(testSocketFlow).data,
         ]);
       });
@@ -1486,9 +1487,9 @@ context('patient workflow page', function() {
     // verify the new flow is added to the ws subscription resources
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledTwice')
+      .should('have.been.calledThrice')
       .then(stub => {
-        const secondCallData = stub.getCall(1).args[0].data;
+        const secondCallData = stub.getCall(2).args[0].data;
         const { resources } = secondCallData;
 
         expect(resources).to.deep.include({
@@ -1653,12 +1654,12 @@ context('patient workflow page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledOnce')
+      .should('have.been.calledTwice')
       .then(stub => {
         const states = [stateTodo.id, stateInProgress.id].join();
         const patient = testPatient.id;
 
-        const { filters, resources } = stub.getCall(0).args[0].data;
+        const { filters, resources } = stub.getCall(1).args[0].data;
 
         expect(filters).to.deep.equal({
           actions: { states, patient, flow: NIL_UUID },
@@ -1666,6 +1667,7 @@ context('patient workflow page', function() {
         });
 
         expect(resources).to.deep.equal([
+          getRelationship(testPatient).data,
           getRelationship(testSocketAction).data,
         ]);
       });
@@ -1857,9 +1859,9 @@ context('patient workflow page', function() {
     // verify the new action is added to the ws subscription resources
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledTwice')
+      .should('have.been.calledThrice')
       .then(stub => {
-        const secondCallData = stub.getCall(1).args[0].data;
+        const secondCallData = stub.getCall(2).args[0].data;
         const { resources } = secondCallData;
 
         expect(resources).to.deep.include({
