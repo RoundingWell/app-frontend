@@ -50,8 +50,11 @@ careOptsFrontend:
         errorHeader: Uh-oh.
         errorInfo: "Error code: { status }."
         errorMessage: Something went wrong.
+        notFoundHelp: Please check the URL.
         notFoundInfo: This page doesn't exist.
-        notFoundMessage: Something went wrong.
+        notSetupHeading: Hold up,
+        notSetupHelp: Please notify your manager or administrator to correct this issue.
+        notSetupMessage: Your account is not set up yet.
     modal:
       modalViews:
         modalView:
@@ -114,3 +117,9 @@ careOptsFrontend:
         picklistItemView:
           labelDob: Birth Date
           labelName: Name
+    startup:
+      errorMessage: Check your connection, then try again.
+      errorTitle: We couldn't load your workspace
+      loading: Loading RoundingWell
+      retry: Retry
+      retrying: Retrying...

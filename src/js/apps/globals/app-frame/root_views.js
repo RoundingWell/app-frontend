@@ -9,8 +9,6 @@ import px from 'js/utils/formatting/px';
 import PreloadRegion from 'js/regions/preload_region';
 import TopRegionBehavior from 'js/behaviors/top-region';
 
-import { PreloaderView } from 'js/auth/prelogin/prelogin_views';
-
 import LayoutTemplate from './layout.hbs';
 
 import './app-frame.scss';
@@ -75,9 +73,6 @@ const OverlayRegionView = TopRegionView.extend({
 const PreloaderRegionView = TopRegionView.extend({
   // NOTE: ensures preload can't close on user click
   contains: preventRegionClose,
-  onRender() {
-    this.showChildView('region', new PreloaderView());
-  },
 });
 
 const ModalRegionView = TopRegionView.extend({
