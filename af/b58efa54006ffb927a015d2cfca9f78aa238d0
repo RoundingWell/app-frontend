@@ -1,0 +1,221 @@
+src/js/i18n/en-US/patients.yml
+  s_68eb4121d9a9bc::t_6956473702a245 113
+  s_68eb4121d9a9bc::t_c4015dec0adc20 113
+src/js/apps/patients/patient/flow/flow_views.js
+  s_68eb4121d9a9bc::t_d6d2c95172a4e9 18,110,119,150-152,158-160,181-182,201-203,207-210,342-345,376,379-380,382,391
+  s_68eb4121d9a9bc::t_c99fe1f0504b38 18,110,119,150-152,158-160,181-182,201-203,207-210,342-345,376,379-380,382,391
+  s_68eb4121d9a9bc::t_69c310a22e2a95 64,73
+  s_68eb4121d9a9bc::t_ecc256e1d54827 72,157
+src/js/apps/patients/patient/flow/header.hbs
+  s_68eb4121d9a9bc::t_34cec97fb6e22d 1-2,9
+  s_68eb4121d9a9bc::t_05ccbefff43ee0 1-2,9
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_68eb4121d9a9bc::t_d0bd5e6aeef391 176-186,212-229,581-607,637-656,659-661,669-679,682-684,686-687,689,693-694,701-702,713-714,720,755,768,787,801-802,879,903,2256,2268,2275-2277,2287-2289,2291-2293,2870,2884-2885,2892,2899
+  s_68eb4121d9a9bc::t_3a171846110168 176-186,212-229,581-607,637-656,659-661,669-679,682-684,686-687,689,693-694,701-702,713-714,720,755,768,787,801-802,879,903,2256,2268,2275-2277,2287-2289,2291-2293,2870,2884-2885,2892,2899
+  s_68eb4121d9a9bc::t_bdc8686c180975 820
+  s_68eb4121d9a9bc::t_c96e0d4f9369fa 657-658,680-681
+  s_68eb4121d9a9bc::t_3b1420af756b05 752-754,765-767,784-786,797-799
+  s_ed28f1881feec6::t_7860e591a48f98 685
+src/js/apps/patients/patient/flow/patient-flow.scss
+  s_68eb4121d9a9bc::t_a2e1c30ec65577 40,46,55,61,64,114,145,147,162-180,192,201,203,208,217
+  s_68eb4121d9a9bc::t_a5dbbe6ae3bd77 40,46,55,61,64,114,145,147,162-180,192,201,203,208,217
+  s_68eb4121d9a9bc::t_c7d3d1fa17ab93 183-186
+  s_68eb4121d9a9bc::t_ecc256e1d54827 33-39,41,72,144
+  s_68eb4121d9a9bc::t_c7a6520dc19a8d 29
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 2,152-160,187
+  s_ed28f1881feec6::t_7d45b30a09808e 161,188
+src/js/apps/patients/patient/workflow/done-layout.hbs
+  s_68eb4121d9a9bc::t_771d89884ddc58 3-4,7,9
+  s_68eb4121d9a9bc::t_b342a244c01f13 3-4,7,9
+src/js/apps/patients/patient/workflow/flow-item.hbs
+  s_68eb4121d9a9bc::t_57e8042c3c3451 4,7-9,11-20
+  s_68eb4121d9a9bc::t_e55816a2f99266 4,7-9,11-20
+  s_68eb4121d9a9bc::t_9dc7aea9c868b8 10
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 5
+src/js/apps/patients/patient/workflow/layout.hbs
+  s_68eb4121d9a9bc::t_a7e188cf9b28bb 3-4,6-7
+  s_68eb4121d9a9bc::t_d02b9669a8f6ae 3-4,6-7
+src/js/apps/patients/patient/workflow/workflow-page.scss
+  s_68eb4121d9a9bc::t_8d6253df5f6932 61,64,70,74-75,77-79,86-90,92-93,99-103,106-107,111,126-133,135-137,152-156,170,172-173,176-177,180,183-186,190,192-196
+  s_68eb4121d9a9bc::t_7d9558e51df76f 61,64,70,74-75,77-79,86-90,92-93,99-103,106-107,111,126-133,135-137,152-156,170,172-173,176-177,180,183-186,190,192-196
+  s_68eb4121d9a9bc::t_ecc256e1d54827 76
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 3
+  s_68eb4121d9a9bc::t_6f5a770f1b5cb2 11,91,104-105,108-110,112,147,160,181-182,187-188
+src/js/apps/patients/patient/workflow/workflow.e2e.cy.js
+  s_68eb4121d9a9bc::t_bd8b0a443c9fa4 10,181-182,192,273-274,283-284,289-290,292-293,297-308,338-347,354-356,362-374,377,379,387,402-409,417,423-428,434-445,448-451,479,582,631-632,685-687,2164,2176-2178
+  s_68eb4121d9a9bc::t_476b2611580848 10,181-182,192,273-274,283-284,289-290,292-293,297-308,338-347,354-356,362-374,377,379,387,402-409,417,423-428,434-445,448-451,479,582,631-632,685-687,2164,2176-2178
+  s_68eb4121d9a9bc::t_92a8fed8d949dd 375-376
+  s_68eb4121d9a9bc::t_26d72045318739 71,446-447
+src/js/apps/patients/patient/workflow/workflow_views.js
+  s_68eb4121d9a9bc::t_91cc72515d2acc 17,30-32,38-40,55-59,61-69,121-123,144-146,150-153,259-261,272-274,278-281,332-334
+  s_68eb4121d9a9bc::t_b5cd2933beb065 17,30-32,38-40,55-59,61-69,121-123,144-146,150-153,259-261,272-274,278-281,332-334
+  s_68eb4121d9a9bc::t_210e479f39215f 26-27,393,396,403-414
+  s_68eb4121d9a9bc::t_ecc256e1d54827 120,258
+  s_68eb4121d9a9bc::t_4045c770fcb045 395
+src/js/apps/patients/shared/detail-action-item.hbs
+  s_68eb4121d9a9bc::t_cd37a9a831c9b1 1,4-6,9,11,13-14,17-25
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_ed28f1881feec6::t_0fc43eb06f2837 1586-1587
+  s_68eb4121d9a9bc::t_59c2ba2cc77513 162-163
+  s_68eb4121d9a9bc::t_ba6918a671adce 1474-1475
+  s_68eb4121d9a9bc::t_549d0ff1ae372b 511-512,1468-1469
+  s_68eb4121d9a9bc::t_63a45c62582f99 1943
+  s_68eb4121d9a9bc::t_4bc2901897adba 144
+  s_68eb4121d9a9bc::t_a6f17feaf93249 140
+  s_68eb4121d9a9bc::t_45936cc2ad0f78 1459-1460,1483
+src/js/components/team/team-component.component.cy.js
+  s_68eb4121d9a9bc::t_23a223d56e3c11 57-66
+src/scss/core/_tokens.scss
+  s_68eb4121d9a9bc::t_23a223d56e3c11 6,16,28-29
+  s_ed28f1881feec6::t_0b63bfb04f02bd 30
+src/js/apps/patients/shared/patient-readonly.scss
+  s_68eb4121d9a9bc::t_ecc256e1d54827 24-25,27-30
+src/scss/modules/buttons.scss
+  s_68eb4121d9a9bc::t_23a223d56e3c11 107
+  s_68eb4121d9a9bc::t_ecc256e1d54827 98-100,102
+  s_68eb4121d9a9bc::t_6f5a770f1b5cb2 106,108-109
+src/js/components/picklist/picklist.scss
+  s_68eb4121d9a9bc::t_72a339c6523c61 103,105-106
+src/js/components/dateselect/date-select.component.cy.js
+  s_68eb4121d9a9bc::t_23a223d56e3c11 163-172
+src/js/apps/patients/patient/form/form_views.js
+  s_68eb4121d9a9bc::t_45347928b49f45 74-76,79,123
+src/js/behaviors/form-viewport.js
+  s_68eb4121d9a9bc::t_45347928b49f45 7-15,26-29,32,71,104-105,143-156
+  s_68eb4121d9a9bc::t_6bd1cf21f2033e 139
+src/js/apps/patients/patient/action/action_views.js
+  s_68eb4121d9a9bc::t_45347928b49f45 49-51
+src/js/behaviors/form-viewport.component.cy.js
+  s_68eb4121d9a9bc::t_11472562bcbac0 1-55
+src/js/apps/patients/patient/patient_app.js
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 106,119
+src/scss/README.md
+  s_68eb4121d9a9bc::t_c6723950c4bec3 70-71,73
+  s_68eb4121d9a9bc::t_cdb6401950eb15 72
+src/scss/modules/list-pages.scss
+  s_68eb4121d9a9bc::t_b7b91c283394d7 6-8,40,236-237
+  s_68eb4121d9a9bc::t_c00ded9cc288f6 42,161,299
+  s_68eb4121d9a9bc::t_a387657ec80970 14,210
+  s_68eb4121d9a9bc::t_bfe39abaf9e2b5 4,155
+  s_68eb4121d9a9bc::t_c6723950c4bec3 2-3,5,31,64,144,187
+src/scss/modules/card-list.scss
+  s_68eb4121d9a9bc::t_f399239211b403 366
+  s_68eb4121d9a9bc::t_23a223d56e3c11 66-67,69,71
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 78,148-159
+  s_68eb4121d9a9bc::t_c6723950c4bec3 527,545
+  s_68eb4121d9a9bc::t_c00ded9cc288f6 39-41,173,505-506,508,512,619-620
+  s_68eb4121d9a9bc::t_ecc256e1d54827 25-27,30-32,34,65,68,70,72-77,234,237-238,355,412,415-416,536,538,544
+  s_68eb4121d9a9bc::t_6f5a770f1b5cb2 440
+  s_68eb4121d9a9bc::t_a387657ec80970 20,305
+  s_68eb4121d9a9bc::t_550d7d4ca76992 539
+  s_68eb4121d9a9bc::t_9dc7aea9c868b8 254,519,525,532,537,540-542,554-555,559,564-565
+  s_ed28f1881feec6::t_04569d68ae464a 79,160
+src/js/apps/patients/worklist/flow_views.js
+  s_68eb4121d9a9bc::t_ecc256e1d54827 29
+src/js/apps/patients/worklist/flow-item.hbs
+  s_68eb4121d9a9bc::t_9dc7aea9c868b8 21
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 10
+src/js/apps/patients/worklist/worklist-list.scss
+  s_68eb4121d9a9bc::t_bfe39abaf9e2b5 360
+  s_68eb4121d9a9bc::t_a387657ec80970 183,208,229,247,271,284,335,338,355-356
+  s_68eb4121d9a9bc::t_d67aebf268b440 127
+  s_68eb4121d9a9bc::t_c6723950c4bec3 364
+  s_68eb4121d9a9bc::t_72a339c6523c61 32,35,39-52,105,128-129,133-137,139-143,149-153,180
+  s_68eb4121d9a9bc::t_b7b91c283394d7 361-363
+  s_68eb4121d9a9bc::t_f399239211b403 58
+  s_ed28f1881feec6::t_a81e993ea027ed 359
+  s_ed28f1881feec6::t_d59f99a79e81fc 138
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_68eb4121d9a9bc::t_72a339c6523c61 166
+  s_ed28f1881feec6::t_52dc0bb7e86c22 162
+src/js/apps/patients/worklist/worklist_views.js
+  s_68eb4121d9a9bc::t_23a223d56e3c11 61
+  s_ed28f1881feec6::t_d59f99a79e81fc 246
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_68eb4121d9a9bc::t_45347928b49f45 192-194
+src/js/apps/patients/worklist/action_views.js
+  s_68eb4121d9a9bc::t_ecc256e1d54827 27
+src/js/apps/patients/shared/responsive-list-page.js
+  s_68eb4121d9a9bc::t_aa5f33ce1a1786 26
+  s_68eb4121d9a9bc::t_23a223d56e3c11 4,21,24
+  s_68eb4121d9a9bc::t_45347928b49f45 18,40,49,174-175
+  s_68eb4121d9a9bc::t_6bd1cf21f2033e 10-13,22-23,25
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_68eb4121d9a9bc::t_7f29608291b586 50,52
+  s_68eb4121d9a9bc::t_6bd1cf21f2033e 51
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_68eb4121d9a9bc::t_9d97485c2cd20d 918,1189-1190,1192-1193
+  s_68eb4121d9a9bc::t_eaa095f5418269 1081
+  s_68eb4121d9a9bc::t_c00ded9cc288f6 1154-1158
+  s_68eb4121d9a9bc::t_32ee82fe5e47f7 1319,1321
+  s_68eb4121d9a9bc::t_549d0ff1ae372b 1320,1322
+  s_ed28f1881feec6::t_e12daf2dcebd62 1182,1191
+src/js/apps/patients/schedule/day-item.hbs
+  s_68eb4121d9a9bc::t_29e5c70266f234 15
+src/js/apps/patients/schedule/schedule-list.scss
+  s_68eb4121d9a9bc::t_29e5c70266f234 90-109,162,242,244,248
+  s_68eb4121d9a9bc::t_a387657ec80970 9,294,319
+  s_68eb4121d9a9bc::t_9d97485c2cd20d 1-4
+  s_68eb4121d9a9bc::t_c6723950c4bec3 70
+  s_68eb4121d9a9bc::t_c00ded9cc288f6 41-42,46
+src/js/apps/patients/schedule/layout.hbs
+  s_68eb4121d9a9bc::t_29e5c70266f234 8
+src/js/apps/patients/shared/components/state_component.js
+  s_68eb4121d9a9bc::t_69c310a22e2a95 16,76
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_68eb4121d9a9bc::t_084f578baafb4f 573
+  s_68eb4121d9a9bc::t_63a45c62582f99 420-421,423
+  s_68eb4121d9a9bc::t_69c310a22e2a95 930-932,934,2141
+src/js/apps/patients/shared/read-only_views.js
+  s_68eb4121d9a9bc::t_69c310a22e2a95 14,20
+  s_68eb4121d9a9bc::t_ecc256e1d54827 65,68,74,82-85
+src/js/apps/patients/patient/action/action.scss
+  s_68eb4121d9a9bc::t_a387657ec80970 22,30,70,298,384
+  s_68eb4121d9a9bc::t_ecc256e1d54827 107-112,124,134-135,140-141,148-151
+  s_68eb4121d9a9bc::t_e46caa1362fe6c 31,33-34,42,44-57,121,123,125,127-133,136-137,139,142,144-147,152-153,155-156,449,451-458,460-462,464-468,470-472,474-480,482-496,498-502,504-506
+  s_68eb4121d9a9bc::t_d67189fdc8ac68 497,503
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 169,233,236
+src/js/apps/patients/patient/patient.scss
+  s_68eb4121d9a9bc::t_a1581dfccae7ea 37
+src/js/apps/patients/patient/action/action-details_views.js
+  s_68eb4121d9a9bc::t_69c310a22e2a95 135,287
+  s_68eb4121d9a9bc::t_ecc256e1d54827 139,301
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_ed28f1881feec6::t_05e24eed820357 1717,1719,1722,1732,1734,1741-1752,1760-1766,1768
+src/js/apps/patients/shared/filters_state.js
+  s_ed28f1881feec6::t_eb2227555072c1 25-30
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_ed28f1881feec6::t_eb2227555072c1 171-173,175-176,179,262,267,276,284-285,295-298,301,305,309-310,312,314,317-326
+src/js/apps/patients/shared/components/time-component.scss
+  s_ed28f1881feec6::t_eb2227555072c1 5-7
+src/js/apps/patients/shared/components/owner-component.scss
+  s_ed28f1881feec6::t_eb2227555072c1 10-11,13
+src/js/apps/patients/shared/components/due-component.scss
+  s_ed28f1881feec6::t_eb2227555072c1 14-16
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_ed28f1881feec6::t_81cd523bcbb350 160
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "afb58efa54006ffb927a015d2cfca9f78aa238d0",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_ed28f1881feec6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ff9b5-1a5a-7631-b4b5-09a79caa529b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

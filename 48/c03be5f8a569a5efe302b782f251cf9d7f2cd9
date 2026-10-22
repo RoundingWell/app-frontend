@@ -1,0 +1,21 @@
+src/js/apps/patients/patient/workflow/action-item.hbs
+  s_c7f14869965768::t_0c68f76d223bc1 16
+src/js/apps/patients/patient/flow/action-item.hbs
+  s_c7f14869965768::t_0c68f76d223bc1 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "48c03be5f8a569a5efe302b782f251cf9d7f2cd9",
+  "prompts": {},
+  "sessions": {
+    "s_c7f14869965768": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a53-c578-7091-b7b7-2fef102ad653",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

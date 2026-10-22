@@ -1,0 +1,29 @@
+packages/care-ops-fontawesome/index.js
+  s_44c886cd8fd84f::t_09ae0cdf51818f 19
+src/scss/README.md
+  s_44c886cd8fd84f::t_469f5de7f98913 169
+src/js/base/fontawesome.js
+  s_44c886cd8fd84f::t_971613a0f3f047 10
+vite.config.js
+  s_44c886cd8fd84f::t_a3579269ce5901 21,134
+packages/care-ops-fontawesome/package.json
+  s_44c886cd8fd84f::t_e7f55c4f1705e3 18
+config/vite-plugin-fontawesome.js
+  s_44c886cd8fd84f::t_a3579269ce5901 1-41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "b69a822d9a3c7bc21790b7c1de03a031fa58e662",
+  "prompts": {},
+  "sessions": {
+    "s_44c886cd8fd84f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d9639-cd69-7782-b17c-9ea2fc7ab534",
+        "model": "gpt-5.5"
+      },
+      "human_author": null
+    }
+  }
+}

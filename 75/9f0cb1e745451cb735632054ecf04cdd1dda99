@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  s_98141a3add0497::t_4e69bd4d8e382b 79,82-84,87,94
+  s_98141a3add0497::t_0fe826461c801f 7,21-25,45-48,50,52-55,59-65,72-78,80-81,85-86,88-93,95-96
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_98141a3add0497::t_0fe826461c801f 110-141
+  s_98141a3add0497::t_36158ead10cc8a 142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "759f0cb1e745451cb735632054ecf04cdd1dda99",
+  "prompts": {},
+  "sessions": {
+    "s_98141a3add0497": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fa3d5-b074-7972-8c1c-0ef07df7968e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

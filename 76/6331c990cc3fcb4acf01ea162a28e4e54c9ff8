@@ -1,0 +1,38 @@
+packages/care-ops-fontawesome/manifest.json
+  h_0f06c286dda36f 43,54,64,70-71,76-78
+src/js/apps/patients/shared/interactions/interaction-item.hbs
+  h_0f06c286dda36f 1-20
+src/js/apps/patients/shared/interactions/interaction-item.scss
+  h_0f06c286dda36f 1-191
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  h_0f06c286dda36f 1-84
+src/js/apps/patients/shared/interactions/interaction-presentation.js
+  h_0f06c286dda36f 1-148
+src/js/apps/patients/shared/interactions/load-activity-interactions.js
+  h_0f06c286dda36f 1-21
+src/js/entities-service/entities/interactions.js
+  h_0f06c286dda36f 1-21
+src/js/entities-service/index.js
+  h_0f06c286dda36f 25-26
+src/js/entities-service/interactions.js
+  h_0f06c286dda36f 1-50
+src/js/i18n/en-US/patients.yml
+  h_0f06c286dda36f 5-61
+test/support/api/interactions.js
+  h_0f06c286dda36f 1-38
+test/support/commands.js
+  h_0f06c286dda36f 43
+test/support/e2e.js
+  h_0f06c286dda36f 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "766331c990cc3fcb4acf01ea162a28e4e54c9ff8",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

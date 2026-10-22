@@ -1,0 +1,36 @@
+src/js/services/sidebar.js
+  s_d1cca99368c386::t_a3703872157597 5-6,15-19,22
+  s_d1cca99368c386::t_8d784a46c2f3b5 20-21
+  s_d1cca99368c386::t_81713a46d26d79 23
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_d1cca99368c386::t_035de378bb4e07 54-68
+  s_d1cca99368c386::t_e9d2c36101ca5d 597
+src/js/apps/globals/nav/nav_app.js
+  s_d1cca99368c386::t_d597731b5ca9ac 1,7-9,39,48,142,171-172,226-227,229-232,238,244,362-363
+  s_d1cca99368c386::t_2065a2c20de518 178,182
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_d1cca99368c386::t_d597731b5ca9ac 110
+src/js/services/latest-list.js
+  s_d1cca99368c386::t_8a65d8df6e4457 3-4,34
+  s_d1cca99368c386::t_a3703872157597 7-8,17-18,21-24,32-33
+src/js/services/workspace.js
+  s_d1cca99368c386::t_245504a91c830c 8-9,26-27,37,53-58
+src/js/services/latest-list.component.cy.js
+  s_d1cca99368c386::t_589b9543aec92a 3-4,7-10,24-28,32-40,43-46,48,52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5bc03095b6e69c8f5b7c72d09ff4cc55593bd135",
+  "prompts": {},
+  "sessions": {
+    "s_d1cca99368c386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "875840b0-7975-43b6-957e-a4b0a76b029b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

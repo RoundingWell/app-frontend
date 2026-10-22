@@ -1,0 +1,23 @@
+src/js/apps/patients/patient/action/action.scss
+  s_09e8292bb4bcb3::t_ccdc5bab330fd9 44-56
+src/js/apps/patients/patient/action/action-details_views.js
+  s_09e8292bb4bcb3::t_84289e0d4fd7db 53-57,59-62,64-71
+  s_09e8292bb4bcb3::t_b45f55dd0fc631 115-123,125
+  s_09e8292bb4bcb3::t_03c0cfab64af19 124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.13",
+  "base_commit_sha": "7b4a8a4006268cbcadfb2c59f6fe642bef0f50fc",
+  "prompts": {},
+  "sessions": {
+    "s_09e8292bb4bcb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "203cd645-ff86-4d1a-b816-014dc50b930f",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

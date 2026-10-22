@@ -1,0 +1,28 @@
+docs/os-theme.md
+  h_0f06c286dda36f 5-15,26-30,34,41,55
+index.html
+  h_0f06c286dda36f 2,6
+src/js/apps/globals/app-frame/os-theme.e2e.cy.js
+  h_0f06c286dda36f 12,18-20,75,80-81
+src/js/apps/globals/search/patient-search.scss
+  h_0f06c286dda36f 69-80
+src/scss/core/_base.scss
+  h_0f06c286dda36f 18,21-37
+src/scss/core/_tokens.scss
+  h_0f06c286dda36f 2,40,77-80,97-155
+src/scss/modules/buttons.scss
+  h_0f06c286dda36f 244,274
+src/scss/modules/skeleton.scss
+  h_0f06c286dda36f 16,41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "14e8f66504259f28cc8c57facfbc8872da5fd349",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

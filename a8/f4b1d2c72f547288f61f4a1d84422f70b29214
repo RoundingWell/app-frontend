@@ -1,0 +1,42 @@
+src/js/auth/prelogin/prelogin_views.js
+  s_534c2b6810f4ee::t_7e1c3711669875 46,56,62
+src/js/apps/globals/app-frame/startup.scss
+  s_534c2b6810f4ee::t_7e1c3711669875 1-35,37-76,82-229,231-237
+  s_534c2b6810f4ee::t_b570e1ba5e7075 36
+  s_534c2b6810f4ee::t_b68d3f42dc2b19 77-81
+  s_534c2b6810f4ee::t_b782ec039499a6 230
+src/js/apps/globals/app-frame/startup_views.js
+  s_534c2b6810f4ee::t_05ad2b553251b0 29
+  s_534c2b6810f4ee::t_7e1c3711669875 1-28,30-91
+src/js/apps/globals/app-frame/startup_views.component.cy.js
+  s_534c2b6810f4ee::t_3d2bfc8f695c90 116-119
+  s_534c2b6810f4ee::t_6dd45cf3787b92 1-108,110-115,120-123
+  s_534c2b6810f4ee::t_c41ed46c7d6e49 109
+src/js/apps/globals/app-frame/startup.hbs
+  s_534c2b6810f4ee::t_7e1c3711669875 1-21
+src/js/apps/globals/app-frame/root_views.js
+  s_534c2b6810f4ee::t_7e1c3711669875 13,80
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  s_534c2b6810f4ee::t_353e8a83de0ad3 125-148
+src/js/app.js
+  s_534c2b6810f4ee::t_7e1c3711669875 36,143-144,146,148,153,157
+  s_534c2b6810f4ee::t_004533e8012366 60,147
+src/js/i18n/en-US/globals.yml
+  s_534c2b6810f4ee::t_7e1c3711669875 107-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "a8f4b1d2c72f547288f61f4a1d84422f70b29214",
+  "prompts": {},
+  "sessions": {
+    "s_534c2b6810f4ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a23-001e-7b23-9454-44a54672d14d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

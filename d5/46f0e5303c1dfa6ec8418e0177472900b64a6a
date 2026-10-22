@@ -1,0 +1,20 @@
+src/js/behaviors/form-auto-height.js
+  s_97851b2b544b0c::t_04f187c8b4e057 22-25,89
+  s_97851b2b544b0c::t_677312b9709708 11-14,28-32,34-35,38,53-54,65,70,72-74,80-81,84,92-93,95,97-99,106,108-110,113,121,126-133,136-137,140,143,167-197,203-206,248-249,251-258,260-261,263,267-268
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d546f0e5303c1dfa6ec8418e0177472900b64a6a",
+  "prompts": {},
+  "sessions": {
+    "s_97851b2b544b0c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f9306-e63f-7033-885e-962a81018ca4",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

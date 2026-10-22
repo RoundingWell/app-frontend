@@ -1,0 +1,65 @@
+src/js/apps/patients/patient/flow/flow_views.js
+  s_33bb8cd239820b::t_596db8006437b5 222-228,402,403,404-407
+  s_33bb8cd239820b::t_c851a347435763 177
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_33bb8cd239820b::t_333fa23d6d00da 551-608,612-629,635-636,638-646,649-692,1448-1454,1459-1463,1470,1472-1476,1478-1480,1482-1485,1487-1490,1492-1498,1500-1510
+  s_33bb8cd239820b::t_9e00030c85bce8 609-611,630-634,647-648
+  s_33bb8cd239820b::t_ccd0ac08c2a838 637
+src/js/apps/patients/patient/patient_app.js
+  s_33bb8cd239820b::t_65db82d013e9e4 35,111-112,113-114
+src/js/apps/patients/patients-main_app.js
+  s_33bb8cd239820b::t_3c82a909cb5c66 64-67
+src/js/apps/patients/schedule/day-item.hbs
+  s_33bb8cd239820b::t_00bf707abd3ad3 19
+  s_33bb8cd239820b::t_65a4b99ff80537 18
+src/js/apps/patients/schedule/schedule-list.scss
+  s_33bb8cd239820b::t_0f5f43c6625e6b 58,155-178,179-180,253,266-270
+  s_33bb8cd239820b::t_c851a347435763 259
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_33bb8cd239820b::t_79fb6bce4ddea1 7,518-540,1049-1052,1100,1165-1169,1353-1357
+  s_33bb8cd239820b::t_f7b9b6d4aa9c02 231
+src/js/apps/patients/schedule/schedule_views.js
+  s_33bb8cd239820b::t_fed78114ee5c11 153,162,235-238
+  s_33bb8cd239820b::t_62a9c38bce3107 247-248
+  s_33bb8cd239820b::t_65a4b99ff80537 237
+  s_33bb8cd239820b::t_bc1a70453fcdda 173
+src/js/apps/patients/worklist/action_views.js
+  s_33bb8cd239820b::t_f6f63e376866da 97
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_33bb8cd239820b::t_e670a649289979 1584-1593,1621-1622
+  s_33bb8cd239820b::t_65a4b99ff80537 1619-1620
+src/js/base/routing.md
+  s_33bb8cd239820b::t_1d3a898cf2804b 70-73,74,75-79
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_33bb8cd239820b::t_7bcbe9758336a6 2796-2799
+test/support/defaults.js
+  s_33bb8cd239820b::t_754b405e926fe3 11
+  s_33bb8cd239820b::t_bbd8a0cd0eef18 12-15
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_33bb8cd239820b::t_fd09135fe4c9b3 2088-2089
+  s_33bb8cd239820b::t_f9e5f9acc06fdf 104,149,1956-1957
+  s_33bb8cd239820b::t_9dff6c81a2e376 1958-1960
+  s_33bb8cd239820b::t_65a4b99ff80537 147-148
+  s_33bb8cd239820b::t_60677a501b8255 66,90
+  s_33bb8cd239820b::t_bd84e63452ce2a 57,67-71,88-89
+src/js/apps/patients/patient/flow/flow_app.js
+  s_33bb8cd239820b::t_16c694ca5735e7 58,77,311,313
+src/scss/domain/work-card.scss
+  s_33bb8cd239820b::t_c851a347435763 115-123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "197ed6314b0c9b34afd95c01bf153de5f2838995",
+  "prompts": {},
+  "sessions": {
+    "s_33bb8cd239820b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f0cd-bbc3-7263-bd22-4fdeb98ce196",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

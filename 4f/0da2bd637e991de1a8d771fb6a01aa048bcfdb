@@ -1,0 +1,20 @@
+README.md
+  h_0f06c286dda36f 356-359
+package-lock.json
+  h_0f06c286dda36f 31,5732,16928
+package.json
+  h_0f06c286dda36f 143
+packages/care-ops-fontawesome/package.json
+  h_0f06c286dda36f 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4f0da2bd637e991de1a8d771fb6a01aa048bcfdb",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

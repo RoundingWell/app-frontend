@@ -1,0 +1,37 @@
+.github/copilot-instructions.md
+  s_7d9748a0496f68::t_1498aa27f9f701 10-12,21,36
+.github/copilot.yaml
+  s_7d9748a0496f68::t_abd855367ce9ff 9-11,19,26,36-38,46,60-61,64
+.gitignore
+  s_7d9748a0496f68::t_347989fe69e220 45
+AGENTS.md
+  s_7d9748a0496f68::t_73444f104e010d 35-37,43-44,48-78,85-87,127-132,177
+README.md
+  s_7d9748a0496f68::t_4934c890f9c656 119-120,122-127,257
+docs/marionette-v5-migration.md
+  s_7d9748a0496f68::t_f224e26451b8df 1-82
+src/js/README.md
+  s_7d9748a0496f68::t_5a8ba785f0ba41 9,73-80,134-135
+src/js/base/routing.md
+  s_7d9748a0496f68::t_3ca086caa91113 11,14-15,44,55-58,97-104,116,120-121,137-138,140-144,153,170-199,203-211,224,233-235,240-243
+src/js/entities-service/README.md
+  s_7d9748a0496f68::t_5df569b13980fc 38,40-43
+src/js/utils/README.md
+  s_7d9748a0496f68::t_5181c896d71392 46,48-53,55-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6c2abd0897f7f57856d19ead0cc7eaa3650aafa2",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+AGENTS.md
+  s_d1cca99368c386::t_499144a9267a05 13
+src/js/base/routing.md
+  s_d1cca99368c386::t_facbf71e122086 1,4-5,9-10,12-32,37-46,55,59-60,63-65,69-76,78-79,93,97,100,106,110-111,113-114,122-124
+  s_d1cca99368c386::t_3605152e037770 11,94-96,245
+  s_d1cca99368c386::t_7e05a66144c323 33-36
+  s_d1cca99368c386::t_5b4877d9ab465a 91
+  s_d1cca99368c386::t_30b8fe44772beb 191-195,223-225,228,237-241,246
+  s_d1cca99368c386::t_585f6b1b05d172 92
+packages/router/DESIGN.md
+  s_d1cca99368c386::t_5b4877d9ab465a 380-381,383
+  s_d1cca99368c386::t_8a6a2f13f218f0 377-379,382
+  s_d1cca99368c386::t_3605152e037770 384-388
+docs/router-migration.md
+  s_d1cca99368c386::t_7d7899551f4245 440-454
+  s_d1cca99368c386::t_7e05a66144c323 409-417,430-431,455
+  s_d1cca99368c386::t_7d24aa5cd1182b 145-147,153-154,156-157,394-404,406-408,418-424,427-429,432-439,456-459
+  s_d1cca99368c386::t_1392b298dda4ec 125,256
+  s_d1cca99368c386::t_8dd0b4bd637a4d 121,425-426
+  s_d1cca99368c386::t_3605152e037770 405
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "df524fce4d12a1daef0a3865ec595f3cd49eddbc",
+  "prompts": {},
+  "sessions": {
+    "s_d1cca99368c386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "875840b0-7975-43b6-957e-a4b0a76b029b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,33 @@
+src/js/base/routing.md
+  s_2f5d775ddb4a37::t_2151fdb75088f5 1-173
+src/js/base/routerapp.js
+  s_2f5d775ddb4a37::t_3c8c3d9a127c06 186,189
+  s_2f5d775ddb4a37::t_f512041b780b7a 1,39-40,42-45,51-59,86,91-96,99-105,112,115-119,123,132-139,141-142,144-145,148,150-151,153-154,158-163,165,173,175,182-185,187-188,190-194,198-206,209
+  s_2f5d775ddb4a37::t_98c66dfaa0f530 146
+src/js/base/subrouterapp.cy.js
+  s_2f5d775ddb4a37::t_2151fdb75088f5 1-158
+AGENTS.md
+  s_2f5d775ddb4a37::t_2151fdb75088f5 12
+src/js/base/subrouterapp.js
+  s_2f5d775ddb4a37::t_2151fdb75088f5 1,9,14,19-22,24-39,42-57,61,70-75
+src/js/base/README.md
+  s_2f5d775ddb4a37::t_2151fdb75088f5 7-12
+src/js/base/routerapp.cy.js
+  s_2f5d775ddb4a37::t_2151fdb75088f5 1-202
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "3553108e349b210ed6e4dd10f27ee565866b0780",
+  "prompts": {},
+  "sessions": {
+    "s_2f5d775ddb4a37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "97d5b7b3-3d60-4064-90fb-56ac3e4bc258",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

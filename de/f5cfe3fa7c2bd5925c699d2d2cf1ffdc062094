@@ -1,0 +1,39 @@
+src/js/apps/patients/worklist/action-item.hbs
+  s_68eb4121d9a9bc::t_e5336ee30a40c0 2,5-25,27-30,32-42
+src/js/apps/patients/worklist/action_views.js
+  s_68eb4121d9a9bc::t_82bfe4d907b9b3 20-22,27-30,74,88-91,116-119
+src/js/apps/patients/worklist/bulk-edit.e2e.cy.js
+  s_68eb4121d9a9bc::t_88d62bf8b1f104 254-256,261
+src/js/apps/patients/worklist/flow-item.hbs
+  s_68eb4121d9a9bc::t_20a56bad0c8441 2,5-15,18-30
+src/js/apps/patients/worklist/flow_views.js
+  s_68eb4121d9a9bc::t_5ae597d181bdb6 22-24,29-32,55,73-76,96-99
+src/js/apps/patients/worklist/layout.hbs
+  s_68eb4121d9a9bc::t_30c7f12ba7d8cd 8
+src/js/apps/patients/worklist/worklist-list.scss
+  s_68eb4121d9a9bc::t_4c48a79d49fb8d 1-14,31-36,39-41,43-46,50-54,56-61,65-129,135,137-139,152,178,196-199,210,228,231-233,236-237,240-253,257-258,260-266,280-290,298,305,334-373,375
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_68eb4121d9a9bc::t_45589f74461244 14,52-53,56,60,103,106-120,148,150-183,185-208
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_68eb4121d9a9bc::t_9d024acaf37a34 31,44-49,51-52,54-83,126-127,134,137-171,182-195,229,271,482,484,494-516,595-629,654-655,671-688,725-730,752-755,1309-1310,1313,1350-1351,1357,1396,1430,1432-1498,1506,1513-1556,1587-1588,1653-1671,1688,1714,1744-1760,1762-1763,1910-1958,2014,2018-2028,3085-3088,4829
+src/js/apps/patients/worklist/worklist_app.js
+  s_68eb4121d9a9bc::t_2aafffe871f22c 332-333
+src/js/apps/patients/worklist/worklist_views.js
+  s_68eb4121d9a9bc::t_f44fb54350a125 236,246,250-264,266-274,286,313,327,329
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "def5cfe3fa7c2bd5925c699d2d2cf1ffdc062094",
+  "prompts": {},
+  "sessions": {
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+src/js/behaviors/dialog-focus.js
+  h_0f06c286dda36f 36
+src/js/apps/globals/app-frame/close-request.js
+  h_0f06c286dda36f 71
+src/js/services/modal/modal.e2e.cy.js
+  h_0f06c286dda36f 188-197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a5143f35bb0e0f8dea857cb10f6d2aa41e776619",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

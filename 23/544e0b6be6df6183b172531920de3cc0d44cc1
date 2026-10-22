@@ -1,0 +1,23 @@
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_8300066960e1ec::t_16b33f8c7d640a 12-13,46-50
+  s_8300066960e1ec::t_52a31fcc777ecc 51
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  s_8300066960e1ec::t_16b33f8c7d640a 5-6,36-40
+  s_8300066960e1ec::t_c2ddeddbc338f8 41
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "23544e0b6be6df6183b172531920de3cc0d44cc1",
+  "prompts": {},
+  "sessions": {
+    "s_8300066960e1ec": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01569-89c2-7c60-b8b5-827eeffa78fe",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

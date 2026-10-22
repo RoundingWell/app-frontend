@@ -1,0 +1,35 @@
+src/js/base/cache/entity-cache.cy.js
+  s_4f8dcbf2626875::t_8a4c0fd0bb8a1f 54,57
+src/js/auth.js
+  s_4f8dcbf2626875::t_fac07b9697bf13 102-107
+src/js/base/cache/response-cache.cy.js
+  s_4f8dcbf2626875::t_decca100877588 55-63
+  s_4f8dcbf2626875::t_eead8dca783cf5 124,127,135,138
+  s_4f8dcbf2626875::t_3aeeadfce5e942 132
+  s_4f8dcbf2626875::t_51e636e3bc4f64 123,131
+  s_4f8dcbf2626875::t_368a0df1dbadae 90
+  s_4f8dcbf2626875::t_4788011c432284 54
+src/js/base/cache/idb.js
+  s_4f8dcbf2626875::t_68d5092acf55f8 25
+  s_4f8dcbf2626875::t_b790f54485022c 22,26-28
+src/js/base/cache/entity-cache.js
+  s_4f8dcbf2626875::t_b1fb058cae5ab3 11
+src/js/auth.cy.js
+  s_4f8dcbf2626875::t_33a841988456de 10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.2",
+  "base_commit_sha": "42a69ae8212a2f8316a427f9650cc877805e558d",
+  "prompts": {},
+  "sessions": {
+    "s_4f8dcbf2626875": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2243c85e-a4b4-4dbd-83cb-dcd5881efc56",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": null
+    }
+  }
+}

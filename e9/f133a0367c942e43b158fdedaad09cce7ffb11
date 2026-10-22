@@ -1,0 +1,104 @@
+src/js/entities-service/entities/program-flows.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 13-22
+  s_ccd396716f1975::t_70201fcd6be15a 25
+src/js/entities-service/entities/flows.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 8-11
+  s_ccd396716f1975::t_70201fcd6be15a 14
+src/js/entities-service/entities/patient-fields.js
+  s_ccd396716f1975::t_70201fcd6be15a 14
+  s_ccd396716f1975::t_6e360c40ba9dc0 9-11
+src/js/entities-service/entities/patients.js
+  s_ccd396716f1975::t_70201fcd6be15a 21
+  s_ccd396716f1975::t_6e360c40ba9dc0 12-18
+src/js/entities-service/entities/program-actions.js
+  s_ccd396716f1975::t_70201fcd6be15a 31
+  s_ccd396716f1975::t_6e360c40ba9dc0 13-28
+src/js/entities-service/entities/workspace-patients.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 6-8
+  s_ccd396716f1975::t_70201fcd6be15a 11
+src/js/base/model.js
+  s_ccd396716f1975::t_830b6f8afa06c0 1
+src/js/services/sidebars.component.cy.js
+  s_d04385ebae28ca::t_225064f38cbfee 69-80
+src/js/entities-service/entities/artifacts.js
+  s_ccd396716f1975::t_e4b0652dc75215 5-9,12
+src/js/entities-service/entities/clinicians.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 12-18
+  s_ccd396716f1975::t_70201fcd6be15a 21
+src/js/entities-service/entities/form-responses.js
+  s_ccd396716f1975::t_70201fcd6be15a 17
+  s_ccd396716f1975::t_6e360c40ba9dc0 11-14
+src/js/entities-service/entities/actions.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 14-20
+  s_ccd396716f1975::t_70201fcd6be15a 23
+src/js/base/jsonapi-mixin.js
+  s_ccd396716f1975::t_830b6f8afa06c0 54-72
+src/js/entities-service/entities/programs.js
+  s_ccd396716f1975::t_70201fcd6be15a 18
+  s_ccd396716f1975::t_6e360c40ba9dc0 10-15
+src/js/services/sidebars.js
+  s_d04385ebae28ca::t_fa519557cfa309 1,4-5,15,20-21
+  s_e9c4ebfa58429b::t_48005e1445e541 38
+  s_d6429951fb9231::t_ab750c60fff2a4 22-23,27-37
+src/js/entities-service/entities/comments.js
+  s_ccd396716f1975::t_6e360c40ba9dc0 9-11
+  s_ccd396716f1975::t_70201fcd6be15a 14
+src/js/entities-service/entities/files.js
+  s_ccd396716f1975::t_70201fcd6be15a 19
+  s_ccd396716f1975::t_6e360c40ba9dc0 8-10
+src/js/entities-service/README.md
+  s_ccd396716f1975::t_e4b0652dc75215 61-64,83-84
+src/js/base/model.component.cy.js
+  s_ccd396716f1975::t_477e79e4543ed6 34
+  s_ccd396716f1975::t_799b16b2dabb28 81-82
+  s_ccd396716f1975::t_03909b312aa4f7 3,6-8,11-15,54-56,59,61,70-73,75-80
+  s_ccd396716f1975::t_72c0eb4a7165df 74
+  s_ccd396716f1975::t_be31de9ea0e686 5,9-10
+  s_ccd396716f1975::t_e4b0652dc75215 4,57-58,60,62-69
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_d6429951fb9231::t_1ee92ec5acc40e 59-71
+src/js/apps/patients/shared/list-patient-sidebar_app.component.cy.js
+  s_d6429951fb9231::t_5dd2340bde66e7 1-40
+src/js/apps/patients/shared/list-patient-sidebar_app.js
+  s_d6429951fb9231::t_b117283af9ccf8 3-4,64-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e9f133a0367c942e43b158fdedaad09cce7ffb11",
+  "prompts": {},
+  "sessions": {
+    "s_ccd396716f1975": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04384-a61d-71c1-bf25-82b3d002659e",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    },
+    "s_d6429951fb9231": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a03eb3-6aa8-7fe0-91bd-98039115289c",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_e9c4ebfa58429b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f97da-8239-7f50-9170-48d8bbace4d7",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

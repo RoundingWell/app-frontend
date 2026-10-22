@@ -1,0 +1,33 @@
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_7d9748a0496f68::t_c78d441cb13aab 1,3,34,48-53,56,61,86,95,103,140-141,143-147
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_7d9748a0496f68::t_01b33d0b249386 7,18-20,23,25-28,31,33-34,36,39,47-48,51,53-54,77,101
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_7d9748a0496f68::t_4e1afef210f3a3 32,93,106,166
+src/js/apps/clinicians/clinicians-main_app.js
+  s_7d9748a0496f68::t_0f14e73864d4fa 1-2,26-29
+src/js/apps/clinicians/shared/clinicians_views.js
+  s_7d9748a0496f68::t_d8fbea085d6ded 81,89,91-95,99
+src/js/apps/clinicians/shared/components/role_component.js
+  s_7d9748a0496f68::t_9048db76db8c54 21,27,30-38,42
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_app.js
+  s_7d9748a0496f68::t_9c845c2f39c150 8,12,23,30
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_7d9748a0496f68::t_d09d8335e88962 2,190,200,239-240
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "280f4ca1a69b42a1a40720a0460c91696e21b737",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+packages/router/src/outlet/route-state.js
+  s_d64fc49a719823::t_43bb084e5f03ad 9-10,13-14,18,22,26,30,34,38,43,48-52
+packages/router/src/outlet/route-outlet.js
+  s_d64fc49a719823::t_121e78e803e58c 2-7,14-19,24-27,35-43,45-47,52-53,58-98,101-111,117-128,131-133,135-138,140-141,143-172
+  s_d64fc49a719823::t_c22bf7e2af3269 44,130,142
+  s_d64fc49a719823::t_b314774a606f6c 99-100,112-116,129,134,139
+packages/router/test/outlet.test.js
+  s_d64fc49a719823::t_5046af51d3a909 487-492,592
+  s_d64fc49a719823::t_b426cf8fd82054 1-486,493-591,593-595
+packages/router/src/outlet/is-equal.js
+  s_d64fc49a719823::t_bd12fa00702f06 1-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d64c65d2737dddbf1e6d806c29c1669d6ad50d38",
+  "prompts": {},
+  "sessions": {
+    "s_d64fc49a719823": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4b00d38-320d-4c42-8d3b-e943c3a379ee",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

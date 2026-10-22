@@ -1,0 +1,38 @@
+src/js/apps/patients/patient/flow/flow_views.js
+  s_85aebd1623278c::t_bca8a3d94d702e 17,272,275,278,285
+src/js/apps/patients/shared/flows_views.js
+  s_85aebd1623278c::t_b58bf896d1070e 7,62
+src/js/apps/patients/shared/components/check_view.js
+  s_85aebd1623278c::t_b58bf896d1070e 2,6-16,18,20-21,23-24,26-27,29-30,32-33,36-38
+docs/marionette-v5-migration.md
+  s_85aebd1623278c::t_4aa89ba413f133 15,20-23,33-34
+  s_85aebd1623278c::t_473d6b48b1ec3b 35-36
+src/js/apps/patients/worklist/action_views.js
+  s_85aebd1623278c::t_bca8a3d94d702e 11,148,151,154,161
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_85aebd1623278c::t_bca8a3d94d702e 11,258,267,270,277
+src/js/apps/patients/shared/components/check_view.component.cy.js
+  s_85aebd1623278c::t_b58bf896d1070e 1,3,5-6,16,19,22,27
+src/js/apps/patients/shared/actions_views.js
+  s_85aebd1623278c::t_b58bf896d1070e 15,120
+src/js/apps/patients/worklist/flow_views.js
+  s_85aebd1623278c::t_bca8a3d94d702e 12,114,117,120,127
+src/js/apps/patients/schedule/schedule_views.js
+  s_85aebd1623278c::t_bca8a3d94d702e 19,198,201,204,211
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "343e725ec40462f00f29a8f3cb0f89788405da6a",
+  "prompts": {},
+  "sessions": {
+    "s_85aebd1623278c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09566-a835-71d3-9051-74118051e3a8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

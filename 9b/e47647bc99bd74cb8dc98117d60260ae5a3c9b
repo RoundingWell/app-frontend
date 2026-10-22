@@ -1,0 +1,23 @@
+packages/router/test/matcher.test.js
+  s_20ea81ecafd6a6::t_f0f990b04fb0be 512-519
+packages/router/src/matcher.js
+  s_20ea81ecafd6a6::t_fecd2faebb5d2f 262-264,266-268
+  s_20ea81ecafd6a6::t_e57d6eb8f68158 265
+  s_20ea81ecafd6a6::t_c7744662c43b0f 275
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9be47647bc99bd74cb8dc98117d60260ae5a3c9b",
+  "prompts": {},
+  "sessions": {
+    "s_20ea81ecafd6a6": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a1e41361-2f04-4998-b24a-b7e91b2868ac",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

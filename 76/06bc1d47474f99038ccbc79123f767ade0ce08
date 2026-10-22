@@ -1,0 +1,19 @@
+.github/workflows/codeql.yml
+  s_66bf9c2899aa28::t_199ee9aebccb17 30,39,42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "7606bc1d47474f99038ccbc79123f767ade0ce08",
+  "prompts": {},
+  "sessions": {
+    "s_66bf9c2899aa28": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb25b-f825-7273-84dd-6bb238d0b303",
+        "model": "gpt-5.5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

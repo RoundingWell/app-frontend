@@ -1,0 +1,25 @@
+src/js/base/fetch.js
+  s_40e12f2c95ab47::t_18c675b6bd988b 8-9,11,18,20,25,27,29-30,48-56,66-86,88-90,92-94,96-99,101
+  s_40e12f2c95ab47::t_431d02ece5f907 19,57,59-63,100,103-111,117,211
+  s_40e12f2c95ab47::t_fd5ef24b3acca2 58
+src/js/base/fetch.component.cy.js
+  s_40e12f2c95ab47::t_e271645b2b9847 81-115
+  s_40e12f2c95ab47::t_63a10c566738fc 118-145
+  s_40e12f2c95ab47::t_4ea58f70036b70 116-117,146-225
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e5eea646a6d70ff98607d58fb88ce6c4196baf6a",
+  "prompts": {},
+  "sessions": {
+    "s_40e12f2c95ab47": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04bf7-d783-7cb2-8d20-5e20d8587b42",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+src/js/router.js
+  s_d1cca99368c386::t_ce3fc721f9241e 3,5,7-10,12-21,24-25,28-29,31,40-42,44-46
+  s_d1cca99368c386::t_f9231607201d64 1,32-39,43
+src/js/services/router-radio.js
+  s_d1cca99368c386::t_f9231607201d64 1,8,42
+  s_d1cca99368c386::t_6082df387942a0 4,32-33,36,44
+  s_d1cca99368c386::t_fbcf957c2736bb 6
+src/js/base/routerapp.component.cy.js
+  s_d1cca99368c386::t_5b8c5a025d83e5 32-35,47-48,67-70,72,74,77-78,80,82-86,90-99,101-108,111-121,123-126,128,134-135,139,148-149,153,160,171-172,177,186-187,198-199,204,210,212,216
+src/js/apps/patients/patients-main_app.js
+  s_d1cca99368c386::t_9b3e28953563ed 24-32
+src/js/routes.js
+  s_d1cca99368c386::t_91989f13d7999f 1-85,87-121,123-126,128-131,133-141,143-146,148-166,168-171
+  s_d1cca99368c386::t_3605152e037770 86,122,127,132,142,147,167
+src/js/base/routerapp.js
+  s_d1cca99368c386::t_c28bc313508dec 42-43
+  s_d1cca99368c386::t_66045aeb19f2e7 23,30
+  s_d1cca99368c386::t_a64efe4f85ba16 1,5-6,9-10,12-13,21-22,24-25,28,32,37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6e72e1d2cf914fd843084872c5a2928a5ac5ee9d",
+  "prompts": {},
+  "sessions": {
+    "s_d1cca99368c386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "875840b0-7975-43b6-957e-a4b0a76b029b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
