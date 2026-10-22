@@ -2,8 +2,11 @@
 
 ## Import Order
 
-When importing dependencies we loosely follow some general rules and strictly follow others.
-The canonical ordering list lives in [`/AGENTS.md`](../../AGENTS.md); this is the worked example.
+This section is the canonical import-order reference linked from `AGENTS.md`.
+Use this order: third-party libraries, shared SCSS, utilities/i18n,
+base classes, entities/services, apps/controllers, behaviors/regions/components,
+Views, templates, then app-shared/domain/view-local SCSS. The example shows the
+boundaries; keep shared SCSS ahead of JavaScript dependencies that import styles.
 ```js
 // 3rd party dependencies generally in order or "lowest-level" dependency
 import { extend } from 'underscore';
@@ -71,13 +74,12 @@ import { FooView } from 'js/apps/foo/foo_views';
 ## Marionette
 
 See [AGENTS.md](../../AGENTS.md#marionette-application-context) for this app's
-installed contract, integrations, ownership entrypoint, and packaged documentation
-helper. Use the `marionette` skill supplied by Marionette's upstream plugin to
-select the matching framework API guide for the task.
+integrations and ownership entrypoint. Follow the [agent setup](../../README.md#agent-skills)
+before using the version-matched upstream skill for framework API contracts.
 
 This repo requires template element selectors in the View's `ui` hash and access
 through `getUI`, keeping selector queries out of View methods. The packaged
-`docs/dom.interactions.md` explains the native DOM values and event APIs.
+`docs/api/shared/view-bindings.md` explains the UI binding and DOM event APIs.
 
 ### Trigger and Event Names
 

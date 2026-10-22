@@ -6,7 +6,7 @@ pull_request_review:
         `/AGENTS.md` is the canonical source for repo-wide AI guidance. Review the diff with these checkpoints:
 
         - JavaScript only. Do not introduce TypeScript.
-        - Use the Marionette application context in `/AGENTS.md` and Marionette's version-matched upstream docs.
+        - Follow `/AGENTS.md#marionette-application-context` for skill setup and app integration; use the installed skill for framework contracts. When dependencies are unavailable during review, retain the tracked CollectionView UI and async cancellation guardrails in `/AGENTS.md#core-guardrails`.
         - Define template selectors in `ui`, access them through `getUI`, and keep DOM mutation with its owning View.
         - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
         - Route data access through `src/js/entities-service/**`.
@@ -33,7 +33,7 @@ code_generation:
       prompt: >
         `/AGENTS.md` is the canonical source for repo-wide AI guidance. When generating code:
         - Stay in JavaScript.
-        - Use the Marionette application context in `/AGENTS.md` and Marionette's version-matched upstream docs.
+        - Follow `/AGENTS.md#marionette-application-context` for skill setup and app integration; use the installed skill for framework contracts.
         - Define template selectors in `ui`, access them through `getUI`, and keep DOM mutation with its owning View.
         - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
         - Put data fetching in `src/js/entities-service/**`.
@@ -57,7 +57,7 @@ chat:
         `/AGENTS.md` is the canonical source for repo-wide AI guidance.
         Key facts:
         - This is a Marionette.js and Backbone.js frontend built with Vite.
-        - Use the Marionette application context in `/AGENTS.md` and Marionette's version-matched upstream docs.
+        - Follow `/AGENTS.md#marionette-application-context` for skill setup and app integration; use the installed skill for framework contracts.
         - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
         - Component specs live beside their owners as `src/**/*.component.cy.js`.
         - E2E specs live beside their owners as `src/**/*.e2e.cy.js`.

@@ -18,6 +18,7 @@
     "packages/care-ops-superset"
   ],
   "scripts": {
+    "setup:agents": "node scripts/setup-agent-skills.js",
     "analyze": "npx vite-bundle-visualizer",
     "prebuild:shared-runtime": "rimraf public/shared",
     "build:shared:config": "vite build --config vite.shared.config.js --mode shared-config",
