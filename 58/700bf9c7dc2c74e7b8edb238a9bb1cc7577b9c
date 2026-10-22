@@ -1,0 +1,32 @@
+.github/copilot-instructions.md
+  h_0f06c286dda36f 8,13
+package.json
+  h_0f06c286dda36f 21
+REVIEW.md
+  h_0f06c286dda36f 1-5
+AGENTS.md
+  h_0f06c286dda36f 6-18,41,54,60-63,118,134-136,143
+scripts/setup-agent-skills.js
+  h_0f06c286dda36f 1-37
+.gitignore
+  h_0f06c286dda36f 55-57
+src/js/base/routing.md
+  h_0f06c286dda36f 213-214
+README.md
+  h_0f06c286dda36f 31-78
+src/js/README.md
+  h_0f06c286dda36f 5-8,76-77,81
+.github/copilot.yaml
+  h_0f06c286dda36f 9,36,60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "58700bf9c7dc2c74e7b8edb238a9bb1cc7577b9c",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
