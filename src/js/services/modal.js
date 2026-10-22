@@ -57,7 +57,7 @@ export default App.extend({
   },
   showForm(patient, formName, form, size) {
     const modalSize = size === 'small' ? 'small' : 'large';
-    const className = `modal modal--form modal--form-${ modalSize }`;
+    const className = `modal modal--dialog modal--form-${ modalSize }`;
 
     // Destroy any showing modal before building the replacement service.
     // Both services reply on the same `form<id>` channel, and the outgoing

@@ -19,7 +19,7 @@ export default function listenToUserActivity() {
   document.addEventListener('keydown', evt => {
     Radio.trigger('user-activity', 'document:keydown', evt);
 
-    if (isTextInput(evt.target) || hasHotkeyModifier(evt)) return;
+    if (evt.defaultPrevented || isTextInput(evt.target) || hasHotkeyModifier(evt)) return;
     if (evt.key === '/') Radio.trigger('hotkey', 'search', evt);
     if (evt.key === 'Escape') Radio.trigger('hotkey', 'close', evt);
   }, { signal });
@@ -36,3 +36,5 @@ export default function listenToUserActivity() {
 
   return controller;
 }
+
+export { isTextInput, hasHotkeyModifier };
