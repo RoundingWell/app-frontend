@@ -2224,8 +2224,8 @@ context('patient workflow page', function() {
 
     cy
       .get('.error-page')
-      .should('contain', 'Something went wrong.')
-      .and('contain', ' This page doesn\'t exist.');
+      .should('contain', 'This page doesn\'t exist.')
+      .and('contain', 'Please check the URL.');
 
     cy
       .url()

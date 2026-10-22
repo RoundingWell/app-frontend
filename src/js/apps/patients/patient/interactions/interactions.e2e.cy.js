@@ -1647,6 +1647,8 @@ context('patient interactions', function() {
       .get('.patient-interactions__controls')
       .should('be.visible');
 
+    cy.viewport(390, 844);
+
     cy
       .get('.patient-interactions__date-button')
       .first()
@@ -1684,6 +1686,11 @@ context('patient interactions', function() {
     cy
       .get('.patient-interactions__calendar-modal')
       .should('be.visible')
+      .should($modal => {
+        const bounds = $modal[0].getBoundingClientRect();
+        expect(bounds.width).to.be.lessThan(390);
+        expect(bounds.height).to.be.lessThan(844);
+      })
       .and('be.focused')
       .trigger('keydown', { eventConstructor: 'KeyboardEvent', key: 'Tab', shiftKey: true });
 

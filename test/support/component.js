@@ -72,7 +72,7 @@ const AppView = View.extend({
 });
 
 function mount(getView = () => new View({ template: false })) {
-  return cy.then(async() => {
+  return cy.readFile('index.html', { log: false }).then(async applicationEntryHtml => {
     await destroyApp();
 
     app = new TestApplication({
@@ -80,6 +80,13 @@ function mount(getView = () => new View({ template: false })) {
         el: getContainerEl(),
       },
     });
+
+    // Recreate the entrypoint's startup shell for each fresh application mount.
+    const container = getContainerEl();
+    const componentDocument = container.ownerDocument;
+    const entry = new componentDocument.defaultView.DOMParser().parseFromString(applicationEntryHtml, 'text/html');
+
+    container.replaceChildren(componentDocument.importNode(entry.getElementById('root'), true));
 
     const TestRootView = RootView.extend({ AppView });
     const rootView = new TestRootView();

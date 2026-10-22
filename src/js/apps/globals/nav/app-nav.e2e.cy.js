@@ -292,6 +292,89 @@ context('App Nav', function() {
       .should('have.attr', 'src', 'https://www.roundingwell.com/whats-new');
   });
 
+  specify('ignores Escape when no layer is open', function() {
+    const errors = [];
+
+    cy.on('uncaught:exception', error => {
+      errors.push(error);
+      return false;
+    });
+
+    cy.visit();
+
+    cy.get('body').type('{esc}');
+
+    cy.get('.app-nav').should('be.visible');
+
+    cy.url().should('contain', '/one/worklist/owned-by');
+
+    cy.then(() => {
+      expect(errors, 'Escape without a layer does not crash the app').to.be.empty;
+    });
+  });
+
+  specify('closes only the top layer when native and Escape requests arrive together', function() {
+    const watchers = [];
+
+    cy
+      .routeSettings('patient_creation_form', null)
+      .visit({
+        onBeforeLoad(win) {
+          const CloseWatcher = win.CloseWatcher;
+
+          cy.stub(win, 'CloseWatcher').callsFake(options => {
+            const watcher = new CloseWatcher(options);
+
+            watchers.push(watcher);
+            return watcher;
+          });
+        },
+      });
+
+    cy
+      .get('.app-nav')
+      .find('.js-add-patient')
+      .click();
+
+    cy
+      .get('.modal')
+      .should('contain', 'Add Patient')
+      .find('[data-sex-region] button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('be.visible')
+      .then($picklist => {
+        const win = $picklist[0].ownerDocument.defaultView;
+        const modal = win.document.querySelector('.modal');
+
+        watchers.at(-1).requestClose();
+        expect($picklist[0].isConnected, 'native close removes the dropdown before Escape handling').to.equal(false);
+        modal.dispatchEvent(new win.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      });
+
+    cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
+      .get('.modal')
+      .should('be.visible')
+      .and('contain', 'Add Patient')
+      .find('.modal__footer .js-close')
+      .click();
+
+    cy
+      .get('.modal')
+      .should('not.exist');
+
+    cy
+      .get('.app-nav')
+      .find('.js-add-patient')
+      .should('be.focused');
+  });
+
   specify('keeps the interactions announcement clear of menu controls', function() {
     cy
       .routePrograms()
@@ -477,10 +560,13 @@ context('App Nav', function() {
       .type('{esc}');
 
     cy
+      .get('.picklist')
+      .should('not.exist');
+
+    cy
       .get('[data-nav-content-region]')
       .find('.js-search')
       .contains('.app-nav__label', 'Search')
-      .should('not.be.visible')
       .parents('.js-search')
       .click();
 
@@ -488,6 +574,12 @@ context('App Nav', function() {
       .get('.patient-search__modal')
       .find('.js-close')
       .click();
+
+    cy
+      .get('[data-nav-content-region]')
+      .find('.js-search')
+      .should('be.focused')
+      .blur();
 
     cy
       .get('[data-nav-content-region]')
@@ -644,6 +736,13 @@ context('App Nav', function() {
     cy
       .routePrograms()
       .visit();
+
+    // Initial route selection dismisses transient overlays; finish it before focusing.
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .should('have.class', 'is-selected');
 
     cy
       .get('.app-nav')

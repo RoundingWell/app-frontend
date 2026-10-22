@@ -8,9 +8,11 @@ import 'scss/modules/modals.scss';
 
 import intl from 'js/i18n';
 
+import DialogFocusBehavior from 'js/behaviors/dialog-focus';
 import InputFocusBehavior from 'js/behaviors/input-focus';
 import InputWatcherBehavior from 'js/behaviors/input-watcher';
 import PicklistBehavior from 'js/behaviors/picklist-transport';
+import { hasHotkeyModifier } from 'js/utils/user-activity';
 
 import DialogTemplate from './dialog.hbs';
 import ResultHeaderTemplate from './result-header.hbs';
@@ -48,19 +50,13 @@ const EmptyView = View.extend({
 
 const PicklistItem = View.extend({
   tagName: 'li',
-  className() {
-    const className = 'js-picklist-item patient-search__picklist-item';
-
-    if (this.model.get('status') !== 'active') return `${ className } is-inactive`;
-
-    return className;
-  },
+  className: 'patient-search__result',
   initialize({ state }) {
     this.state = state;
     this.listenTo(this.state, 'change:search', this.render);
   },
   triggers: {
-    'click': 'select',
+    'click .js-picklist-item': 'select',
   },
   onSelect() {
     this.state.set({ selected: this.model });
@@ -72,6 +68,7 @@ const PicklistItem = View.extend({
       search: this.state.get('search'),
       shouldShowMatch: this.shouldShowMatch(),
       isDobMatch: this.isDobMatch(),
+      isInactive: this.model.get('status') !== 'active',
     };
   },
   shouldShowMatch() {
@@ -120,7 +117,7 @@ const PatientSearchPicklist = View.extend({
     'search': 'onSearchComplete',
   },
   modelEvents: {
-    'change:search': 'showHeader',
+    'change:search': 'onSearchChange',
   },
   behaviors: [
     {
@@ -133,10 +130,16 @@ const PatientSearchPicklist = View.extend({
   triggers: {
     'focus @ui.input': 'focus',
     'click @ui.add': 'click:addPatient',
+    'click @ui.close': 'click:back',
+  },
+  events: {
+    'click @ui.clear': 'onClear',
   },
   ui: {
     input: '.js-input',
     add: '.js-add',
+    clear: '.js-clear',
+    close: '.js-search-back',
   },
   regionClass: Region.extend({ replaceElement: true }),
   regions: {
@@ -147,13 +150,33 @@ const PatientSearchPicklist = View.extend({
   onRender() {
     this.showHeader();
     this.showList();
+    this.updateClearButton();
   },
   onSearchComplete() {
     this.showHeader();
     this.showList();
   },
+  onWatchKeydown(event) {
+    if (event.key !== 'Escape' || hasHotkeyModifier(event)) return;
+
+    event.preventDefault();
+    this.triggerMethod('click:back');
+  },
   onWatchChange(search) {
     this.model.set('search', search);
+  },
+  onSearchChange() {
+    this.showHeader();
+    this.updateClearButton();
+  },
+  onClear() {
+    const input = this.getUI('input')[0];
+    input.value = '';
+    input.focus();
+    this.triggerMethod('watch:input');
+  },
+  updateClearButton() {
+    this.getUI('clear')[0].hidden = !this.model.get('search');
   },
   showHeader() {
     if (!this.collection.length) {
@@ -172,9 +195,16 @@ const PatientSearchPicklist = View.extend({
 });
 
 const PatientSearchModal = View.extend({
-  className: 'modal patient-search__modal',
+  behaviors: [DialogFocusBehavior],
+  className: 'modal modal--dialog patient-search__modal',
+  attributes: {
+    'aria-label': intl.globals.search.patientSearchViews.dialogView.placeholderText,
+    'aria-modal': 'true',
+    'role': 'dialog',
+    'tabindex': '-1',
+  },
   template: hbs`
-    <button class="button button--icon patient-search__close js-close" type="button" aria-label="{{ @intl.globals.search.patientSearchViews.patientSearchModal.close }}">{{far "xmark"}}</button>
+    <button class="button button--icon patient-search__close patient-search__close--desktop js-close" type="button" aria-label="{{ @intl.globals.search.patientSearchViews.patientSearchModal.close }}">{{far "xmark"}}</button>
     <div data-picklist-region></div>
   `,
   triggers: {
@@ -213,7 +243,7 @@ const PatientSearchModal = View.extend({
       'click:addPatient': () => {
         this.triggerMethod('click:addPatient');
       },
-      'close': this.destroy,
+      'click:back': this.destroy,
     });
   },
   onChangeSearch(state, search) {

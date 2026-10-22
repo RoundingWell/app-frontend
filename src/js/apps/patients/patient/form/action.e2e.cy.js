@@ -2099,7 +2099,7 @@ context('Patient Action Form', function() {
 
         return fx;
       })
-      .visitOnClock(`/patient/${ routePatientId }/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .visit(`/patient/${ routePatientId }/flow/${ testFlow.id }/action/${ testAction.id }`)
       .wait('@routeAction')
       .wait('@routeFlow')
       .wait('@routeFormByAction')

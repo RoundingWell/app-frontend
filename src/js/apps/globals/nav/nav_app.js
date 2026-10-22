@@ -152,6 +152,8 @@ export default RouterApp.extend({
   },
   stateEvents: {
     'change:currentApp': 'onChangeCurrentApp',
+    'change:isFullNavVisible': 'syncCloseRequest',
+    'change:isMinimized': 'syncCloseRequest',
   },
   viewEvents: {
     'focus:in': 'onFocusIn',
@@ -175,7 +177,6 @@ export default RouterApp.extend({
     };
 
     this.listenTo(Radio.channel('user-activity'), 'body:down', this.onBodyDown);
-    this.listenTo(Radio.channel('hotkey'), 'close', () => this.getState().closeOverlay());
 
     // Drop admin items the current user can't access — permissions are stable.
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -212,6 +213,7 @@ export default RouterApp.extend({
   },
   onStop() {
     this._narrowQuery.removeEventListener('change', this._onNarrowQueryChange);
+    Radio.request('close-request', 'unregister', this);
   },
   onStart() {
     this.setView(new AppNavView({ model: this.getState() }));
@@ -321,6 +323,16 @@ export default RouterApp.extend({
   },
   closeTouchDrawer() {
     this.getState().set('isTouchDrawerOpen', false);
+  },
+  syncCloseRequest() {
+    const isOverlayVisible = this.getState().get('isMinimized') && this.getState().get('isFullNavVisible');
+
+    if (isOverlayVisible) {
+      Radio.request('close-request', 'register', this, () => this.getState().closeOverlay());
+      return;
+    }
+
+    Radio.request('close-request', 'unregister', this);
   },
   getNavMenuMinimizedKey() {
     const currentUser = Radio.request('bootstrap', 'currentUser');
