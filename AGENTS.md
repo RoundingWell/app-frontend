@@ -3,15 +3,19 @@
 - Applies to: all AI agents operating in this repository
 - Canonical reference: `/AGENTS.md`
 
-Start here. Load additional docs only when referenced below.
+Start here. Read the target, direct callers, and recent changes before editing;
+use the nearest current implementation as the pattern. Load references by task:
 
-Load a scoped overlay only when the task touches:
-
-- test authoring, test review, or coverage validation -> `test/README.md`
-- `scripts/**` -> `scripts/AGENTS.md`
-- `packages/care-ops-five9/**` -> `packages/care-ops-five9/AGENTS.md`
-- routing infrastructure (`src/js/base/routerapp.js`, `src/js/base/subrouterapp.js`) or application route definitions -> `src/js/base/routing.md`
-- data access, entities, or `src/js/entities-service/**` -> `src/js/entities-service/README.md`
+| Task or changed path | Read |
+| --- | --- |
+| App, View, template, or style work | [JavaScript conventions](src/js/README.md) and the owning feature |
+| Marionette framework contracts | [Skill setup and app integrations](#marionette-application-context) |
+| Test authoring, review, or coverage | [Validation](#validation), [test evidence](test/README.md) |
+| `scripts/**` | [Script rules](scripts/AGENTS.md) |
+| `packages/care-ops-five9/**` | [SDK rules](packages/care-ops-five9/AGENTS.md) |
+| Routing infrastructure or route definitions | [Local routing contract](src/js/base/routing.md) |
+| Data access, entities, or entity services | [Entity service contract](src/js/entities-service/README.md) |
+| Release, artifact, or environment setup | [Development setup](README.md), [deployment contract](docs/deploy.md) |
 
 ## Instruction Priority
 
@@ -34,11 +38,12 @@ Load a scoped overlay only when the task touches:
 
 - Stay in JavaScript. Do not introduce TypeScript or a new framework.
 - Underscore is the default data-manipulation API, including where native equivalents exist. Do not replace it mechanically or flag its use as outdated.
-- Define parent-owned template element selectors in the View's `ui` hash and access them through `getUI`; do not scatter selector queries through View methods. Do not bind a CollectionView's `ui` to dynamic child View DOM: cached elements become stale as children render or filter. Keep DOM mutation with its owning View.
+- Define parent-owned template element selectors in the View's `ui` hash and access them through `getUI`; do not scatter selector queries through View methods. Do not bind a CollectionView's `ui` to dynamic child View DOM: bound queries are snapshots. Keep child selectors and DOM mutation with their owning View. For UI binding behavior, see `node_modules/marionette/docs/api/shared/view-bindings.md#ui-bindings`.
 - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
 - Prefer composition when sharing application behavior: owned child apps for independent UI lifetimes, focused objects for stateful coordination, and functions for stateless work. Keep each domain's startup, refresh, and error policy explicit. Avoid application base classes that orchestrate subclass hooks or mixins that implicitly depend on the consuming app's fields. Modest duplication is preferable to a configurable lifecycle engine. Inheritance remains appropriate for a genuine specialization with a small, stable contract, such as a shared layout View.
 - Choose app boundaries around independently managed UI or asynchronous workflows, not the existing directory or ownership tree. Let a visual app own a complete View in one Region; compose its internal controls as Views and focused objects rather than borrowing several regions from its parent. Give child apps explicit regions, data sources, and events rather than the parent layout View or callbacks that navigate its view tree. The page coordinates siblings and handles host destruction; Views own DOM, responsive layout, and focus within their own elements. Treat host lifetime, Application lifetime, and request lifetime separately: losing a host must invalidate its effects even when Application teardown is still pending.
 - Keep `preinitialize` and `initialize` available as safe extension points on generic components. Put mandatory internal setup in the constructor when it must run even if a subclass defines either hook.
+- In async `prepareStart`, pass the signal to requests and call `signal.throwIfAborted()` after awaits before manually starting children or performing additional side effects. Superseded startup resolves `false`; it does not undo manual work.
 - Colocate app-specific views, templates, SCSS, state, and Cypress specs under `src/js/apps/<domain>/<app>/**`.
 - Keep domain-shared UI under `src/js/apps/<domain>/shared/**` and cross-domain reusable UI under `src/js/components/**`.
 - Route data access through `src/js/entities-service/**` instead of introducing ad hoc fetch logic elsewhere.
@@ -47,11 +52,16 @@ Load a scoped overlay only when the task touches:
 - Never use `silent: true` to suppress model/state notifications. Seed initial values before observers attach, or compute a complete update and apply it with a normal `set`; use lifecycle ownership for cleanup.
 - Avoid prototype-method `.call()`/`.apply()` chains outside constructor delegation. Prefer lifecycle hooks, supported extension points, or shared helpers; retain a parent-method call only when its behavior is required and no suitable hook exists.
 - Reuse existing utilities and workspace packages before adding dependencies.
+- Internal fetch helpers require the options passed by their current callers. Do not restore hypothetical no-options consumers or removed configuration variants without finding an active caller.
 - Use i18n keys that match the repo's existing formatjs-style naming.
 
 ## Marionette Application Context
 
 Use the upstream Marionette plugin's `marionette` skill for framework work.
+After `npm ci`, run `npm run setup:agents` to expose the installed skill through
+project-local links. Repeating setup is safe; it checks source presence and
+preserves existing work. It does not verify package versions or documentation.
+See [setup and client verification](README.md#agent-skills) for discovery limits.
 If the plugin is unavailable, read the installed skill at
 `node_modules/marionette/skills/marionette/SKILL.md`. It routes to documentation
 matching this application's installed package and explains how to verify the
@@ -81,10 +91,6 @@ belong to this application.
 - Verification: run this repo's commands from the root using the boundaries in
   **Validation** below; generic units use component specs, app flows use E2E.
 
-The upstream plugin supplies the consumer skill and hosted documentation MCP.
-Follow that workflow for retrieval and verification. Keep framework API
-instructions upstream; keep this section limited to application decisions.
-
 ## Intentional Choices — Do Not Propose Changing or Flag in Review
 
 These are deliberate, settled decisions. Do not suggest "modernizing" them in
@@ -110,17 +116,7 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 
 ## Template, Style, and Import Conventions
 
-- Prefer this import order when adding or reorganizing imports (canonical list; the worked example is in `src/js/README.md`):
-  1. polyfills and third-party libraries
-  2. shared SCSS modules
-  3. shared utilities and i18n
-  4. base classes
-  5. entities and service modules
-  6. apps and controllers
-  7. behaviors, regions, and components
-  8. views
-  9. templates
-  10. app-shared SCSS, shared domain SCSS, then view-local SCSS last
+- The [import order and worked example](src/js/README.md#import-order) is canonical for import ordering; load it when changing or reviewing imports.
 - Within third-party imports, place `hbs` from `handlebars-inline-precompile` before imports from `marionette`.
 - Keep shared SCSS modules before every JavaScript dependency that may transitively import styles. Keep explicit domain SCSS after those JavaScript dependencies so domain rules win without added specificity.
 - Handlebars spacing should stay tight and consistent: `{{ value }}` and `{{#if}}{{else}}{{/if}}`.
@@ -134,23 +130,18 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - `scripts/**` drives release, artifact, and deploy flows. Preserve CLI flags, output shape, and release semantics when editing.
 - Workspace packages under `packages/**` are shared entry points for the app. Treat public APIs as stable unless the task explicitly changes them.
 
-## Lifecycle Review
-
-- Verify cancellation claims against the installed Marionette version and actual callers. Superseded startup operations resolve false, but code inside an async `prepareStart` still needs `signal.throwIfAborted()` before manually starting children after awaits.
-- Use the upstream skill for restart, teardown, and event ownership contracts.
-- Internal fetch helpers require the options passed by their current callers. Do not restore hypothetical no-options consumers or removed configuration variants without finding an active caller.
-
 ## Reviewing Changes
 
-- Put findings first.
+- Review the requested diff at its current head and inspect relevant callers. Read-only review permits authorized non-mutating checks and reproduction; source edits and publication require separate authorization.
+- Put findings first, ordered by severity, with file/line evidence, triggering conditions, and impact. Report open questions and meaningful verification limits rather than unsupported defects.
+- Use the installed package's `node_modules/marionette/docs/api/application.md` for preparation, cancellation, restart, and teardown contracts, and `node_modules/marionette/docs/api/shared/events.md` for event ownership. Check the actual application callers against those contracts; the app-level reminders above also apply to reviewers without installed dependencies.
 - Put repo-specific risks first:
   - `scripts/**` release and deploy behavior
   - `packages/care-ops-five9/sdk/**` and the SDK wrapper flow
   - `src/js/entities-service/**` data-access boundaries
   - Marionette view patterns such as `ui`, `triggers`, and scoped DOM behavior
   - template and SCSS coupling
-- Keep review output concise and operational.
-- Explain only when severity, tradeoffs, failures, uncertainty, or evidence require it.
+- Keep review output concise and operational; use existing checks tied to the current head and authorized non-mutating reproduction to resolve evidence gaps.
 - Review is most useful for non-trivial diffs, risky refactors, shared package changes, release or deploy changes, and behavior changes that may not be caught by lint.
 - Review is less useful for tiny mechanical edits, pure copy changes, or changes where tests and lint already provide the meaningful signal.
 
@@ -217,7 +208,7 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 
 ## AI Docs Maintenance
 
-- `AGENTS.md` is the canonical source for repo-wide AI guidance.
+- `AGENTS.md` is the canonical source for repo-wide AI guidance and delegates scoped details to named references, including [import ordering](src/js/README.md#import-order).
 - Companion docs should summarize or scope rules, not restate them with conflicting details.
 - Copilot prompt surfaces intentionally inline a small subset of rules that they must see locally, such as import order and review-output constraints.
 - Prefer deleting stale AI docs over maintaining low-signal indexes or checklists.

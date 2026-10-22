@@ -5,12 +5,12 @@
 For test authoring, review, or coverage validation, read `/AGENTS.md#validation` and
 `test/README.md` for behavior proof and complete coverage evidence.
 
-Load a scoped overlay only when your change touches `scripts/**` or `packages/care-ops-five9/**`.
+Use the task table in `/AGENTS.md` for scoped overlays and source-linked patterns.
 
 ## Key Rules
 
 - JavaScript only. Do not generate TypeScript.
-- Use the Marionette application context in `/AGENTS.md` and Marionette's version-matched upstream docs.
+- Follow `/AGENTS.md#marionette-application-context` for skill setup and app integration; use the installed skill for framework contracts.
 - Define template selectors in `ui`, access them through `getUI`, and keep DOM mutation with its owning View.
 - Prefer View `triggers` over `events`, and `triggerMethod` over `trigger`.
 - Route data access through `src/js/entities-service/**`.

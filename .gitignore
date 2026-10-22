@@ -52,6 +52,9 @@ typings/
 # claude code
 .claude/
 
+# Generated link to the skill shipped by the pinned Marionette dependency
+/.agents/skills/marionette
+
 # Users Environment Variables
 .lock-wscript
 .DS_Store

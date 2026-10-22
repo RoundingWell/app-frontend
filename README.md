@@ -28,6 +28,54 @@ With existing Git read access to `RoundingWell/pkg-icons`, install with:
 $ npm ci
 ```
 
+### Agent skills
+
+After installing dependencies, explicitly expose the installed Marionette skill:
+
+```shell
+$ npm run setup:agents
+```
+
+This offline step checks that the installed `SKILL.md` exists, then creates
+ignored, relative directory symlinks at
+`.agents/skills/marionette` and `.claude/skills/marionette`, pointing directly to
+`node_modules/marionette/skills/marionette`. Repeating setup preserves those
+links. Conflicting files, directories, or links fail without replacing them;
+move the conflicting entry aside before retrying. Symlink creation must be
+supported by your OS and checkout permissions.
+
+Setup is optional for ordinary app development and never runs during `npm ci`
+or app startup. It checks source presence and link safety, leaving version and
+documentation verification to the installed upstream skill. Framework guidance
+stays upstream and follows the installed dependency.
+The upstream plugin's version is independent of the framework pin in
+`package.json`; this setup does not install/update plugins or configure MCP.
+
+Creating links does **not** prove a client discovered or used the skill:
+
+- In [Codex](https://learn.chatgpt.com/docs/build-skills), open this checkout,
+  find the project skill in `/skills`, and invoke `$marionette`. Restart the
+  session if it is missing. The project `.agents/skills` location supports
+  symlinked skill folders.
+- In [Claude Code](https://code.claude.com/docs/en/skills), open this checkout,
+  find `/marionette` in the skill menu, and invoke it. Its project
+  `.claude/skills` location supports symlinked folders.
+- [Cursor](https://cursor.com/docs/skills) and supported
+  [Copilot surfaces](https://docs.github.com/en/copilot/concepts/customizations/agent-skills)
+  also recognize these project locations. Verify their skill selector and
+  symlink support for the client version you use.
+- Other clients must support these project locations and directory symlinks.
+  Verify their skill selector/invocation independently; otherwise read the
+  installed `SKILL.md` directly as described in `AGENTS.md`.
+
+For an actual local lookup, run
+`node .agents/skills/marionette/scripts/docs.mjs --page docs/tooling.md` from the
+repo root and confirm the reported package version/revision. If a plugin and the
+project skill both appear, choose the project entry to verify this bootstrap.
+Client trust, disabled skills, remote sessions without dependencies, and plugin
+permission prompts can still prevent loading. Handle those in the client;
+setup never changes authentication, permissions, or global settings.
+
 ## Releasing
 
 Releases are tag-based. CircleCI publishes a release artifact from version tags, and deploys consume that artifact.

@@ -210,9 +210,8 @@ this boundary allows future extraction without adding a second routing backend.
 
 ## Async ownership
 
-Async loading belongs in `prepareStart(options, { signal })`. Return the prepared
-value for `onStart(app, options, result)`, and pass the lifecycle signal through to
-cancelable requests. Route dispatch stays synchronous — do not add another async
+For preparation, startup results, and cancellation signals, use the installed
+package's `node_modules/marionette/docs/api/application.md`. Route dispatch stays synchronous — do not add another async
 layer. Route handlers should return their activation promise. Route completion
 notifications still fire synchronously after invoking the handler; they do not
 mean that async content is ready. Synchronous throws and returned async failures are observed through
