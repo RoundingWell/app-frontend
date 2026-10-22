@@ -87,6 +87,7 @@ const InteractionItemView = View.extend({
       hasDuration: this.model.hasDuration(),
       patientClass: VISIT_CLASSES[metadata.patient_class] || metadata.patient_class,
       hasVisitHeading: metadata.patient_class || metadata.facility,
+      dateOnlyDischarge: /^\d{4}-\d{2}-\d{2}$/.test(metadata.discharged_at),
       activity: this.getOption('activity'),
       collapsibleNote: this.hasCollapsibleNote(summary),
       noteExpanded: this.noteExpanded,

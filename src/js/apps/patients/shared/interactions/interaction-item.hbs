@@ -4,7 +4,7 @@
     <span class="patient-interactions__activity-description">
       {{#if description.name}}<strong>{{ description.name }}</strong>{{/if}}{{#if description.text}} {{ description.text }}{{/if}}
       <span class="patient-interactions__time{{#if (isValue group "appointments")}} patient-interactions__time--appointment{{/if}}">
-        {{#if viaLabel}}{{ viaLabel }}{{/if}}{{#if timestamp}}{{#if timeSeparator}} • {{/if}}<time datetime="{{ timestamp }}">{{formatDateTime timeDate timeFormat}}{{#if appointmentTimezone}} {{ appointmentTimezone }}{{/if}}</time>{{/if}}
+        {{#if viaLabel}}{{ viaLabel }}{{/if}}{{#unless dateOnlyDischarge}}{{#if timestamp}}{{#if timeSeparator}} • {{/if}}<time datetime="{{ timestamp }}">{{formatDateTime timeDate timeFormat}}{{#if appointmentTimezone}} {{ appointmentTimezone }}{{/if}}</time>{{/if}}{{/unless}}
       </span>
     </span>
     {{#if activity}}<button class="patient-interactions__action js-interaction" type="button">{{ @intl.patients.shared.interactions.interactionItemView.viewOnInteractions }} {{far "angle-right"}}</button>{{else if workName}}<button class="patient-interactions__action js-action" type="button">{{ workName }} {{far "angle-right"}}</button>{{/if}}
@@ -31,7 +31,7 @@
         <p class="patient-interactions__detail">{{ metadata.admit_reason }}</p>
       {{/if}}
       {{#if metadata.discharged_at}}
-        <p class="patient-interactions__detail">{{ @intl.patients.shared.interactions.interactionItemView.discharged }} {{formatDateTime metadata.discharged_at "DATE"}} {{ @intl.patients.shared.interactions.interactionItemView.appointmentAt }} {{formatDateTime metadata.discharged_at "TIME"}}{{#if metadata.discharge_disposition}} • {{ metadata.discharge_disposition }}{{/if}}</p>
+        <p class="patient-interactions__detail">{{ @intl.patients.shared.interactions.interactionItemView.discharged }} {{formatDateTime metadata.discharged_at "DATE"}}{{#unless dateOnlyDischarge}} {{ @intl.patients.shared.interactions.interactionItemView.appointmentAt }} {{formatDateTime metadata.discharged_at "TIME"}}{{/unless}}{{#if metadata.discharge_disposition}} • {{ metadata.discharge_disposition }}{{/if}}</p>
       {{else if metadata.admitted_at}}
         <p class="patient-interactions__detail"><em>{{ @intl.patients.shared.interactions.interactionItemView.noDischarge }}</em></p>
       {{/if}}

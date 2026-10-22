@@ -315,6 +315,19 @@ context('patient interactions', function() {
       },
     });
 
+    const dischargeVisits = map([
+      { manual: true, source: 'Call Prep', discharged_at: '2026-09-24', discharge_disposition: 'Home' },
+      { manual: false, source: 'Collective', discharged_at: '2026-09-24' },
+      { discharged_at: new Date(2026, 8, 24).toISOString() },
+      { manual: true, discharged_at: formatDate(new Date(2026, 8, 24, 16, 30), 'YYYY-MM-DDTHH:mm:ssZ') },
+    ], (metadata, index) => getInteraction({
+      attributes: {
+        channel: 'visit',
+        occurred_at: metadata.discharged_at.includes('T') ? metadata.discharged_at : '2026-09-24T00:00:00-05:00',
+        metadata: { ...metadata, facility: `Discharge facility ${ index }` },
+      },
+    }));
+
     const emptyMessage = getInteraction({
       attributes: { channel: 'sms', occurred_at: '2026-09-24T10:59:00Z', metadata: { note: null, disposition: 'Text Sent' } },
       relationships: { action: getRelationship(action) },
@@ -349,16 +362,21 @@ context('patient interactions', function() {
       })
       .routeFlowActivity()
       .routePatientInteractions(fx => {
-        fx.data = [actionInteraction, flowInteraction, emptyMessage, emptyVisit];
+        fx.data = [actionInteraction, flowInteraction, emptyMessage, emptyVisit, ...dischargeVisits];
         fx.included = [action, flow, dischargeFlow];
         return fx;
       })
       .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-06T12:00:00Z', functionNames: ['Date'] });
 
     cy
-      .get('.patient-interactions__item')
-      .first()
+      .contains('.patient-interactions__item', 'Example Medical Center')
+      .scrollIntoView()
       .within(() => {
+        cy
+          .get('.patient-interactions__activity-description')
+          .should('contain', 'Visit added')
+          .and('not.contain', 'manually');
+
         cy
           .contains('Discharged')
           .should('be.visible');
@@ -394,6 +412,80 @@ context('patient interactions', function() {
       });
 
     cy
+      .contains('.patient-interactions__item', 'Discharge facility 0')
+      .scrollIntoView()
+      .within(() => {
+        cy
+          .get('.patient-interactions__activity-description')
+          .should('contain', 'Visit added manually')
+          .and('not.contain', 'via');
+
+        cy
+          .get('.patient-interactions__activity-description time')
+          .should('not.exist');
+
+        cy
+          .get('.patient-interactions__detail')
+          .should('have.text', 'Discharged Sep 24 • Home');
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Discharge facility 1')
+      .scrollIntoView()
+      .within(() => {
+        cy
+          .get('.patient-interactions__activity-description')
+          .should('contain', 'Visit added')
+          .and('not.contain', 'manually')
+          .and('contain', 'via Collective');
+
+        cy
+          .get('.patient-interactions__activity-description time')
+          .should('not.exist');
+
+        cy
+          .get('.patient-interactions__detail')
+          .should('have.text', 'Discharged Sep 24');
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Discharge facility 2')
+      .scrollIntoView()
+      .within(() => {
+        cy
+          .get('.patient-interactions__activity-description')
+          .should('contain', 'Visit added')
+          .and('not.contain', 'manually')
+          .and('not.contain', 'via');
+
+        cy
+          .get('.patient-interactions__activity-description time')
+          .should('have.text', '12:00 AM');
+
+        cy
+          .get('.patient-interactions__detail')
+          .should('have.text', 'Discharged Sep 24 at 12:00 AM');
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Discharge facility 3')
+      .scrollIntoView()
+      .within(() => {
+        cy
+          .get('.patient-interactions__activity-description')
+          .should('contain', 'Visit added manually')
+          .and('not.contain', 'via');
+
+        cy
+          .get('.patient-interactions__activity-description time')
+          .should('have.text', '4:30 PM');
+
+        cy
+          .get('.patient-interactions__detail')
+          .should('have.text', 'Discharged Sep 24 at 4:30 PM');
+      });
+
+    cy
       .contains('.patient-interactions__item', 'Please call us to schedule your follow-up.')
       .should('contain', 'Alex Morgan')
       .and('not.contain', 'Outbound message fallback')
@@ -423,7 +515,10 @@ context('patient interactions', function() {
         cy
           .get('.patient-interactions__activity-description')
           .should('be.visible')
-          .and('contain', 'Visit added');
+          .and('contain', 'Visit added')
+          .and('not.contain', 'manually')
+          .and('not.contain', 'via')
+          .and('not.contain', 'Invalid Date');
 
         cy
           .contains('.js-action', 'TCM - ER Discharge')
