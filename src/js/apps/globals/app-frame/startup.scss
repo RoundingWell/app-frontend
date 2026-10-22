@@ -1,0 +1,132 @@
+.startup {
+  align-items: center;
+  background-color: $bkg-color;
+  box-sizing: border-box;
+  color: #{$white};
+  display: flex;
+  font-family: Figtree, 'Droid Sans', 'helvetica neue', arial, sans-serif;
+  height: 100%;
+  justify-content: center;
+  min-height: 100%;
+  overflow: hidden;
+  padding:
+    max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right))
+    max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
+  pointer-events: all;
+  width: 100%;
+}
+
+.startup.is-exiting {
+  pointer-events: none;
+}
+
+.startup__loading {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.startup__loading[hidden],
+.startup__error[hidden] {
+  display: none;
+}
+
+.startup__status-text {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.startup__error {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 420px;
+  opacity: 0;
+  position: relative;
+  text-align: center;
+  transform: translateY(8px);
+  transition:
+    opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  z-index: 1;
+}
+
+.startup.is-error .startup__error {
+  opacity: 1;
+  transform: translateY(0);
+
+  @starting-style {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.startup__error-mark {
+  height: 40px;
+  margin-bottom: 32px;
+  opacity: 0.92;
+  width: 40px;
+}
+
+.startup__error-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 32px;
+  margin: 0;
+}
+
+.startup__error-message {
+  color: rgb(255 255 255 / 68%);
+  font-size: 15px;
+  line-height: 22px;
+  margin: 10px 0 28px;
+  max-width: 340px;
+}
+
+.startup__retry {
+  --button-background: #{$white};
+  --button-border-color: #{$white};
+  --button-border-radius: 8px;
+  --button-font-size: 15px;
+  --button-padding: 11px 24px;
+
+  color: $bkg-color;
+  min-width: 112px;
+}
+
+.startup__retrying-label,
+.startup.is-retrying .startup__retry-label {
+  display: none;
+}
+
+.startup.is-retrying .startup__retrying-label {
+  display: inline;
+}
+
+@media (width <= 480px) {
+  .startup__error-title {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
+  .startup__error-message {
+    font-size: 14px;
+    line-height: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup__error {
+    transition-duration: 1ms;
+  }
+}

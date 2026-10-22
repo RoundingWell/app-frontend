@@ -19,6 +19,7 @@ import yaml from './config/vite-plugin-yaml.js';
 import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
 import fontawesome from './config/vite-plugin-fontawesome.js';
+import startupLogo from './config/vite-plugin-startup-logo.js';
 
 dayjs.extend(utcPlugin);
 
@@ -177,6 +178,7 @@ export default defineConfig(({ mode }) => {
         '/packages/care-ops-auth/providers/workos.js',
       ]),
       fontawesome(),
+      startupLogo(),
       isTest && babelPlugin,
       inlineHbsCompile(),
       handlebars(),
