@@ -1,0 +1,28 @@
+src/js/utils/session-store.js
+  s_a28ebcefd3c8ca::t_ae99f70bc77dbc 1-5
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_a28ebcefd3c8ca::t_3bd9d7ad9a9151 2113-2209
+src/js/apps/patients/patient/patient_app.js
+  s_a28ebcefd3c8ca::t_9dd1822f052a73 7,80,159,162,166,180-187,189-194,212
+  s_a28ebcefd3c8ca::t_9abffc244197ea 163-165
+src/js/utils/web-store.js
+  s_a28ebcefd3c8ca::t_ae99f70bc77dbc 1-43
+src/js/utils/local-store.js
+  s_a28ebcefd3c8ca::t_ae99f70bc77dbc 1,3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b25d5c3ede6591363d9288f4d2678ea983ca90df",
+  "prompts": {},
+  "sessions": {
+    "s_a28ebcefd3c8ca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d9fc63c5-afe5-4b26-aa32-9550e35c526a",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

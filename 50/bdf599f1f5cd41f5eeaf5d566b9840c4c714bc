@@ -1,0 +1,33 @@
+src/js/apps/patients/patient/form/action.e2e.cy.js
+  s_5cb787676df08f::t_0b96eaa877202e 1818
+  s_5cb787676df08f::t_743c72f2776d7b 1608-1611,1613,1615,1648,1650,1662,1670-1717,1753,1755-1760,1809-1817
+  s_5cb787676df08f::t_7ec98f24224747 1656-1657,1750-1752
+src/js/apps/patients/patient/form/form_app.js
+  s_5cb787676df08f::t_c9ede921be9a1b 7,34-36,41,47-49,143-145,197,200-206,350,359,368-369
+  s_5cb787676df08f::t_7ab68eee692a8d 370
+src/js/apps/patients/patient/form/form.scss
+  s_5cb787676df08f::t_c9ede921be9a1b 286-303
+src/js/apps/patients/patient/form/patient.e2e.cy.js
+  s_5cb787676df08f::t_743c72f2776d7b 658-660
+  s_5cb787676df08f::t_1fecb640058382 656-657
+src/js/apps/patients/patient/form/form_views.js
+  s_5cb787676df08f::t_12a2a5d6beb6fd 299,303
+  s_5cb787676df08f::t_8a3de85d8e0bda 305-307
+  s_5cb787676df08f::t_c9ede921be9a1b 1,257-286,289-297,300-301,311-312,314,319-334
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "50bdf599f1f5cd41f5eeaf5d566b9840c4c714bc",
+  "prompts": {},
+  "sessions": {
+    "s_5cb787676df08f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f380a-6030-7862-907a-777090f3c585",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

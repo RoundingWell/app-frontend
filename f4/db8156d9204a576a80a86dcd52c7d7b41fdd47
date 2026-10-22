@@ -1,0 +1,37 @@
+src/js/apps/patients/patient/patient_app.js
+  s_ce43237aac8d7b::t_6f618959d376c2 122,138
+src/js/apps/patients/patient/flow/flow_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 13,231-235
+src/js/services/router-radio.js
+  s_ce43237aac8d7b::t_6f618959d376c2 42
+docs/router-migration.md
+  s_ce43237aac8d7b::t_29b7c9a9bd2a72 141-142
+src/js/apps/patients/worklist/action_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 8,83-87,91-94
+src/js/services/latest-list.component.cy.js
+  s_ce43237aac8d7b::t_92affd75ea671d 7-8,40,43,48,52
+src/js/base/routing.md
+  s_ce43237aac8d7b::t_29b7c9a9bd2a72 22-25,42-43,99-106
+src/js/apps/patients/schedule/schedule_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 12,252-256,260-263
+src/js/services/latest-list.js
+  s_ce43237aac8d7b::t_6f618959d376c2 22,25,33,35
+src/js/apps/patients/shared/actions_views.js
+  s_ce43237aac8d7b::t_6f618959d376c2 7,49-53,57-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f4db8156d9204a576a80a86dcd52c7d7b41fdd47",
+  "prompts": {},
+  "sessions": {
+    "s_ce43237aac8d7b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7ff25645-35d6-4301-b300-b8e3ad235205",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

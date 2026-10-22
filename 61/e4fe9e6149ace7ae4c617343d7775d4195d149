@@ -1,0 +1,47 @@
+src/js/apps/globals/error/error_app.js
+  s_d1cca99368c386::t_245504a91c830c 1,3,5-7,9,14-20,22-36,38-42
+src/js/apps/globals/error/error.e2e.cy.js
+  s_d1cca99368c386::t_ab6e84dce34956 33,132
+src/js/app.js
+  s_d1cca99368c386::t_c4010b241746f3 117-118
+src/js/apps/globals/app-frame/workspace_app.js
+  s_d1cca99368c386::t_691735caad0035 71
+  s_d1cca99368c386::t_1f1bc887497c01 2,4,6,10-27,33-39,66-68,72-77,81,84-86,89
+  s_d1cca99368c386::t_f48a70050d5633 46-50,52-53,55,60,62,69-70,79
+  s_d1cca99368c386::t_88c3ee3e2bf16c 61
+  s_d1cca99368c386::t_d7d55a5b1eb460 64
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  s_d1cca99368c386::t_e1cea61f9e792d 121-124,154-155,157-158,160-162,187-188,191-192
+  s_d1cca99368c386::t_0e9a686981f11e 172-173,216-219
+  s_d1cca99368c386::t_65b0c2a0ea0748 104-109,114-120,127-142,195-205,207-215,220-234
+  s_d1cca99368c386::t_f01d562ac6f753 143-153
+  s_d1cca99368c386::t_be7c6b40a6bd01 125-126,206
+  s_d1cca99368c386::t_61d4b149d148e3 189
+  s_d1cca99368c386::t_9bfe9e5f91b9b9 110-113
+  s_d1cca99368c386::t_b6d3b2cc55afaa 156,167-171,174-175,179
+  s_d1cca99368c386::t_9784e8ed1582f6 159,163-166,176-178,180-186,190,193-194
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_d1cca99368c386::t_fa68f591e3a8e7 60
+  s_d1cca99368c386::t_97ebd8d9c0806e 2,8-10,15,23-24,31-32,44-46,48-55
+  s_d1cca99368c386::t_ceb18f51d2f72a 6,43
+  s_d1cca99368c386::t_1cb1c1d1f20d52 41-42
+  s_d1cca99368c386::t_cfa21cd7575a06 7,58-59
+src/js/apps/patients/patient/flow/patient-flow.e2e.cy.js
+  s_d1cca99368c386::t_8a967ac42f25cb 1678-1679,1685,1726
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "61e4fe9e6149ace7ae4c617343d7775d4195d149",
+  "prompts": {},
+  "sessions": {
+    "s_d1cca99368c386": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "875840b0-7975-43b6-957e-a4b0a76b029b",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

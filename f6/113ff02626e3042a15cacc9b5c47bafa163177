@@ -1,0 +1,67 @@
+src/js/apps/clinicians/shared/components/role_component.js
+  s_2326781df73def::t_72120f2947cb8b 31
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  s_2326781df73def::t_72120f2947cb8b 22,46,70-71,81,85,97
+src/js/apps/dashboards/dashboards-all/item.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-7
+src/js/apps/dashboards/dashboards-all/layout.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-15
+src/js/apps/dashboards/dashboard/dashboard.scss
+  s_2326781df73def::t_72120f2947cb8b 31-32,35,38
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.scss
+  s_2326781df73def::t_72120f2947cb8b 1-15
+src/js/apps/dashboards/dashboards-all/dashboards-all_views.js
+  s_2326781df73def::t_72120f2947cb8b 6-8,13-15,17-18,31,38,43,82-83
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.e2e.cy.js
+  s_2326781df73def::t_72120f2947cb8b 184-186
+  s_2326781df73def::t_3984761aad1d91 88,103,121,141,155-160,183,242
+src/js/apps/clinicians/shared/clinicians_views.js
+  s_2326781df73def::t_72120f2947cb8b 5-6,33,72,74,92
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  s_2326781df73def::t_72120f2947cb8b 202,249-250,363
+  s_2326781df73def::t_67acc3c3b123f4 199-200
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  s_2326781df73def::t_72120f2947cb8b 7,33
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  s_2326781df73def::t_72120f2947cb8b 6-9,13,18-19,38,43,51,61-64,119-120
+  s_2326781df73def::t_3887102dc07b4c 140
+src/js/apps/clinicians/clinicians-all/clinicians.scss
+  s_2326781df73def::t_72120f2947cb8b 2
+src/js/apps/clinicians/clinicians-all/clinicians-all.e2e.cy.js
+  s_2326781df73def::t_72120f2947cb8b 42,45-46,51-52,56,58,67-68,72,74
+  s_2326781df73def::t_22a5666cc27fcb 41,98-99,118-119,167,182,229,245,259,271,283
+src/js/apps/dashboards/dashboard/dashboard_views.js
+  s_2326781df73def::t_72120f2947cb8b 15,17
+src/js/apps/clinicians/clinicians-all/layout.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-16
+src/js/apps/clinicians/clinicians-all/item.hbs
+  s_2326781df73def::t_72120f2947cb8b 1-17
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_2326781df73def::t_7abcff342f4775 33
+src/js/apps/dashboards/dashboard/dashboard.e2e.cy.js
+  s_2326781df73def::t_170f723950ea51 52-53
+src/js/apps/dashboards/dashboard/dashboard_app.js
+  s_2326781df73def::t_34d97009a93425 13
+src/js/apps/dashboards/dashboards-all/dashboards-all.e2e.cy.js
+  s_2326781df73def::t_7226569826f47c 35-36,63,106,108,124,138,155
+src/js/apps/dashboards/dashboards-all/dashboards-all_app.js
+  s_2326781df73def::t_9efbe3fc538700 17
+test/support/api/clinicians.js
+  s_2326781df73def::t_a09a4dddda7335 15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "f6113ff02626e3042a15cacc9b5c47bafa163177",
+  "prompts": {},
+  "sessions": {
+    "s_2326781df73def": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffef4-6532-7662-9084-64d1a2c60264",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

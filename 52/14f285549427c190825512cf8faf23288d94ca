@@ -1,0 +1,19 @@
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_ed28f1881feec6::t_0fc43eb06f2837 1581-1582
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "5214f285549427c190825512cf8faf23288d94ca",
+  "prompts": {},
+  "sessions": {
+    "s_ed28f1881feec6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ff9b5-1a5a-7631-b4b5-09a79caa529b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

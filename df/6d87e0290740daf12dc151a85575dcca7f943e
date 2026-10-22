@@ -1,0 +1,39 @@
+AGENTS.md
+  s_2326781df73def::t_72120f2947cb8b 81-83,135
+.github/copilot-instructions.md
+  s_2326781df73def::t_72120f2947cb8b 14
+src/scss/README.md
+  s_2326781df73def::t_72120f2947cb8b 147,149,151-152
+  s_68eb4121d9a9bc::t_c6723950c4bec3 70
+  s_68eb4121d9a9bc::t_cdb6401950eb15 72
+  s_2326781df73def::t_314d6e05088912 3,21,33,35-36,42,71,73-74,85,87-89,91-92,114-115,153,155-156
+.github/copilot.yaml
+  s_2326781df73def::t_72120f2947cb8b 12,36
+src/js/README.md
+  s_2326781df73def::t_72120f2947cb8b 40,43-46,51-57
+  s_2326781df73def::t_4c40ed5e2a577d 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "df6d87e0290740daf12dc151a85575dcca7f943e",
+  "prompts": {},
+  "sessions": {
+    "s_2326781df73def": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019ffef4-6532-7662-9084-64d1a2c60264",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    },
+    "s_68eb4121d9a9bc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fd80e-8b14-75e1-8319-c6d81cf37aeb",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

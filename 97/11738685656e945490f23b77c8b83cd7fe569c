@@ -1,0 +1,23 @@
+src/js/apps/patients/shared/bulk-edit/bulk-edit.scss
+  s_d04385ebae28ca::t_19ee55799659b8 57,60,64,68-70,72,76,84,95-97,99,107
+src/js/apps/patients/worklist/worklist-list.scss
+  s_d04385ebae28ca::t_fbad2480d3c36f 107,128-129,132-133
+src/js/i18n/en-US/patients.yml
+  s_d04385ebae28ca::t_d3f3c88f1643be 399
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "9711738685656e945490f23b77c8b83cd7fe569c",
+  "prompts": {},
+  "sessions": {
+    "s_d04385ebae28ca": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01637-4e2d-7c20-a256-73e520e63518",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

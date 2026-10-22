@@ -1,0 +1,23 @@
+packages/care-ops-five9/five9_app.js
+  s_7d9748a0496f68::t_96658407ee4b7f 2,4,20-22,30-32,37-44,59,64-68,70-79,81,83,85-122,124-126,129-130,133,135,141-143,145,147,151,153-154,164,166
+packages/care-ops-five9/five9_views.js
+  s_7d9748a0496f68::t_4644f2329d3d72 133,141-143,155
+packages/care-ops-five9/index.js
+  s_7d9748a0496f68::t_b9f3f7961c33b0 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "b117cda5a32797e40028c321af242db535fb85c0",
+  "prompts": {},
+  "sessions": {
+    "s_7d9748a0496f68": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0cc99-8ef9-71e1-9a3a-459f637e5741",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

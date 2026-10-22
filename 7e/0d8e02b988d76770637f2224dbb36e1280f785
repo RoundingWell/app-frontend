@@ -1,0 +1,34 @@
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_c5b8a5726ffd55::t_e792a4ef13f0ac 199
+  s_c5b8a5726ffd55::t_dd94b4ed22da6e 198,202
+src/js/apps/globals/nav/nav_state.js
+  s_c5b8a5726ffd55::t_29b8447ef8256c 17-18,21-23,27
+  s_c5b8a5726ffd55::t_094d698dac5344 19-20,24-26
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 1,64,66-68
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 22-23,75-76
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_c5b8a5726ffd55::t_e792a4ef13f0ac 838-839
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 840-857
+src/js/apps/globals/nav/nav_app.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 173,175,181-182,217-219,351-354
+  s_c5b8a5726ffd55::t_b8fb99cb4eb23d 355
+src/js/apps/globals/nav/nav_state.component.cy.js
+  s_c5b8a5726ffd55::t_51ef3cc32f0e96 1-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "7e0d8e02b988d76770637f2224dbb36e1280f785",
+  "prompts": {},
+  "sessions": {
+    "s_c5b8a5726ffd55": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0111f-1ea8-7582-8386-8677a05f56ed",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

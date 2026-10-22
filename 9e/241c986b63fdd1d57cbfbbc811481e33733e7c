@@ -1,0 +1,24 @@
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.e2e.cy.js
+  h_0f06c286dda36f 2,278,283
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  h_0f06c286dda36f 3,503,510
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  h_0f06c286dda36f 6,322
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  h_0f06c286dda36f 6,812
+src/js/apps/programs/sidebar/program/program-sidebar.e2e.cy.js
+  h_0f06c286dda36f 5,111
+test/helpers/theme-color.js
+  h_0f06c286dda36f 1-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9e241c986b63fdd1d57cbfbbc811481e33733e7c",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

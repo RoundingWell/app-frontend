@@ -1,0 +1,23 @@
+src/scss/domain/work-card.scss
+  s_33bb8cd239820b::t_c851a347435763 115-123
+src/js/apps/patients/patient/flow/flow_views.js
+  s_33bb8cd239820b::t_c851a347435763 177
+src/js/apps/patients/schedule/schedule-list.scss
+  s_33bb8cd239820b::t_c851a347435763 259
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "04be5917a235336ed15129e7149270705d91bdcc",
+  "prompts": {},
+  "sessions": {
+    "s_33bb8cd239820b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0f0cd-bbc3-7263-bd22-4fdeb98ce196",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

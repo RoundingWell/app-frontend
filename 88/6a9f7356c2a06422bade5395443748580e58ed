@@ -1,0 +1,83 @@
+package.json
+  s_e409610ec8685a::t_c2dde493c158b2 50-51
+src/js/services/ws.component.cy.js
+  s_e409610ec8685a::t_1e195f666d6b7b 146-157,236-244,285-287,344-346,386-388,441-443,567-569,671-673,891,894
+AGENTS.md
+  s_e409610ec8685a::t_3c30e167834616 184
+  s_e409610ec8685a::t_07984d2a4c8a18 180-183,185-187,189-204,207
+  s_e409610ec8685a::t_ab93ab082eef97 188
+src/js/components/droplist/droplist.component.cy.js
+  s_e409610ec8685a::t_49694fdec38244 248-253,255-257
+src/js/apps/patients/shared/components/date-filter/date-filter_state.component.cy.js
+  s_e409610ec8685a::t_01c73ae4fd927b 60-62,65-67,74-83
+src/js/utils/local-store.component.cy.js
+  s_e409610ec8685a::t_f49ceae2d9fb04 21-23
+src/js/services/sidebar.component.cy.js
+  s_e409610ec8685a::t_752fe8fb6a6bb0 10-13,15,17-18,20,22-24,26-31,33,35,37-39,43-46,48,50-52,54,56-59,61-65,67-70,74-77,79,81-83,85,87-88,90-93,95-98,102-138,143-181,186-216
+src/js/regions/preload_region.component.cy.js
+  s_e409610ec8685a::t_36c81eef5988d1 70-72
+test/eslint/cypress-style.test.js
+  s_e409610ec8685a::t_619c8d85c9694e 1-59
+src/js/behaviors/iframe-form.component.cy.js
+  s_e409610ec8685a::t_bd47a27045b0b7 49-83,96-108
+src/js/utils/latest-request.component.cy.js
+  s_e409610ec8685a::t_e4f48dae9c7ce0 6
+src/js/behaviors/input-watcher.component.cy.js
+  s_e409610ec8685a::t_fbdd891fb4c86a 24-25
+src/js/auth.component.cy.js
+  s_e409610ec8685a::t_8451b6456ff4bf 37-42,56-61
+src/js/base/cache/idb.component.cy.js
+  s_e409610ec8685a::t_0c0d6e6770f894 24,127-129,137-141,146-148,156-169,176-178,186-190,218-229,247-256
+eslint-rules/cypress-command-layout.js
+  s_e409610ec8685a::t_e4143185d05492 1-39
+src/js/base/fetch.component.cy.js
+  s_e409610ec8685a::t_9756f0149b52d3 20-34,36-41,46-55,57-61,66-76,78-85,89-95,97-110,113,115-116,118-123,128-137,139-140,142,144-154,158-166,168-169,171,173-182,186-201,206-229,231-235,237,239,241-243,245-249,251-258
+src/js/services/modal/modal_views.component.cy.js
+  s_e409610ec8685a::t_96bc8f9c6c1fe7 17-22,26-27,42-48,55-61
+src/js/auth/prelogin/prelogin.component.cy.js
+  s_e409610ec8685a::t_9876c374bd0aba 12-27
+src/js/services/dialer.component.cy.js
+  s_e409610ec8685a::t_f9176071125ae1 122-131,133-138,140-141
+eslint.config.mjs
+  s_e409610ec8685a::t_f986221ea6b36b 8-9,130-143
+  s_e409610ec8685a::t_e93c6f5a68b44a 144
+src/js/base/cache/response-cache.component.cy.js
+  s_e409610ec8685a::t_32391ed9ef2c1c 59,82-84,123-125,128-132,139-147
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_e409610ec8685a::t_3db25e7cf77866 109-131,138-176,186-198,207-219
+src/js/services/form-drafts.component.cy.js
+  s_e409610ec8685a::t_b1c09a2177e896 91-93
+src/js/auth/workos.component.cy.js
+  s_e409610ec8685a::t_57d004c6e8443f 119,245,357-380,383-385,390-392
+src/js/components/tooltip/tooltip.component.cy.js
+  s_e409610ec8685a::t_21f0a4a35acce1 192-197,199-204,206-211,234-247,249-251,253-263,292-305,314-316,318-319
+src/js/apps/patients/shared/components/due_view.component.cy.js
+  s_e409610ec8685a::t_9e4b274cc76a0a 9-10
+src/js/services/forms.component.cy.js
+  s_e409610ec8685a::t_444ad76f124697 35-37,44-46
+src/js/apps/patients/worklist/worklist-loading.e2e.cy.js
+  s_e409610ec8685a::t_b7776eaf5168d4 682-683
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_e409610ec8685a::t_dca65937ecb2f4 76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "886a9f7356c2a06422bade5395443748580e58ed",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_e409610ec8685a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0eeb9-ce2f-7691-8403-ba571c2bdced",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

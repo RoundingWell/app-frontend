@@ -1,0 +1,55 @@
+src/js/apps/globals/nav/app-nav/bottom-nav.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1
+src/js/apps/globals/nav/app-nav/app-nav.scss
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 101-103
+src/js/apps/globals/nav/whats-new/design-update.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1
+packages/care-ops-fontawesome/manifest.json
+  s_2d91c07b8aa12c::t_6ce6fb0fac10fe 39
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  s_2d91c07b8aa12c::t_d90ce5bd4f2684 294-332
+  s_2d91c07b8aa12c::t_683fafe8a87b46 458,663
+  s_2d91c07b8aa12c::t_8c44ac1f805509 15,237-293,456-457,459,661-662
+  s_2d91c07b8aa12c::t_aa3c21efbcec73 664
+src/js/apps/globals/nav/whats-new/whats-new.scss
+  s_2d91c07b8aa12c::t_6ce6fb0fac10fe 63,67
+  s_2d91c07b8aa12c::t_c0031a0532ed70 9
+  s_2d91c07b8aa12c::t_01143bc504e1f7 17
+  s_2d91c07b8aa12c::t_73ce40259360f8 5
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-4,6-8,10-16,18-62,64-66,68-98
+src/js/apps/globals/nav/nav_app.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 12,28-34,330-334,414-417,422,464,470-475,477-488
+  s_2d91c07b8aa12c::t_0f3107432a6b1a 476
+src/js/i18n/en-US/globals.yml
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 27,38-47
+src/js/apps/globals/nav/whats-new/whats-new.component.cy.js
+  s_2d91c07b8aa12c::t_c44608f1c351b6 29-38
+  s_2d91c07b8aa12c::t_8c44ac1f805509 1-28,39-60
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 99-104,146-149
+src/js/apps/globals/nav/whats-new/whats-new_views.js
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-53
+src/js/apps/globals/nav/whats-new/announcement.hbs
+  s_2d91c07b8aa12c::t_89e130e9bb6c9f 1-7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "3a0e3f33cc1b29271ad842e67bff781eb500fdd7",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  },
+  "sessions": {
+    "s_2d91c07b8aa12c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a046dd-e987-7010-815b-e2ec94d7f5d8",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

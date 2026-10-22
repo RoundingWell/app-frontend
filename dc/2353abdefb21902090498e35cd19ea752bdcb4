@@ -1,0 +1,30 @@
+src/js/apps/patients/schedule/schedule.e2e.cy.js
+  s_07635a0b98c102::t_53c89e7ffb7da8 63-98
+src/js/apps/patients/worklist/worklist_app.js
+  s_07635a0b98c102::t_2914e05474c324 312
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  s_07635a0b98c102::t_2914e05474c324 385,397
+src/js/apps/patients/schedule/schedule_app.js
+  s_07635a0b98c102::t_2914e05474c324 209
+src/js/apps/patients/shared/list-filters/list-filters_app.js
+  s_07635a0b98c102::t_2914e05474c324 148
+src/js/apps/patients/worklist/worklist.e2e.cy.js
+  s_07635a0b98c102::t_66b384f4b17362 127
+  s_07635a0b98c102::t_639cd3a136dee9 128-162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "dc2353abdefb21902090498e35cd19ea752bdcb4",
+  "prompts": {},
+  "sessions": {
+    "s_07635a0b98c102": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a058a4-30ce-7791-8c8f-9a299443b654",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": null
+    }
+  }
+}

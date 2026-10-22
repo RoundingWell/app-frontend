@@ -1,0 +1,14 @@
+package.json
+  h_0f06c286dda36f 47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "35eb6e1c60ce5f5f997abbb7eaaf8f1fbbf52488",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

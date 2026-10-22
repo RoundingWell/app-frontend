@@ -1,0 +1,61 @@
+src/js/apps/patients/patient/action/action-activity_views.js
+  s_534c2b6810f4ee::t_308a81045ef429 202
+src/js/apps/patients/patient/action/action-details_views.js
+  s_534c2b6810f4ee::t_158cb66f342c91 99
+src/js/apps/patients/patient/action/action.e2e.cy.js
+  s_534c2b6810f4ee::t_ca1a8508748112 357-364,2156-2185
+src/js/apps/patients/patient/action/action.scss
+  s_534c2b6810f4ee::t_59499d39748db6 535-537,542-587
+src/js/apps/patients/patient/action/action_views.js
+  s_534c2b6810f4ee::t_6abb9c59870906 91-97,99,101
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  s_534c2b6810f4ee::t_fc8f540473ba9a 253-279
+src/js/apps/patients/patient/form/form-viewport.js
+  s_534c2b6810f4ee::t_19d619d37a297a 21,27-29,37-39
+src/js/apps/patients/patient/form/form.scss
+  s_534c2b6810f4ee::t_b125f7f0821817 435-512
+src/js/apps/patients/patient/form/form_views.js
+  s_534c2b6810f4ee::t_cc6e20d6ce52a1 123,126
+src/js/apps/patients/patient/patient.scss
+  s_534c2b6810f4ee::t_b597541eb115ab 160-172,287-300
+src/js/apps/patients/patient/sidebar/patient-sidebar.scss
+  s_534c2b6810f4ee::t_3c9483555f1df7 199-228
+src/js/apps/patients/patient/sidebar/sidebar.e2e.cy.js
+  s_534c2b6810f4ee::t_533e88c0f245ee 121-126,133-140
+src/js/apps/patients/patient/workflow/workflow-page.scss
+  s_534c2b6810f4ee::t_5dccb44170eb73 35-39,47-58
+src/js/apps/patients/shared/actions.scss
+  s_534c2b6810f4ee::t_eceb9f0c33a96e 69-82
+src/js/apps/patients/shared/comments.scss
+  s_534c2b6810f4ee::t_c543edcfeda232 49-50,54,57,59-60,71-83
+src/js/apps/patients/shared/components/date-filter/date-filter.scss
+  s_534c2b6810f4ee::t_2bdd83aeb00126 127-139
+src/js/apps/patients/shared/list-filters/list-filters.scss
+  s_534c2b6810f4ee::t_881bb30db2ad4b 260-283
+src/js/apps/patients/shared/widgets/widgets.scss
+  s_534c2b6810f4ee::t_de9110dfa75399 64-69
+src/js/components/tooltip/index.js
+  s_534c2b6810f4ee::t_013eb357640e5f 23,47,50,73-74,76,79,83-88,98-99,101
+src/js/components/tooltip/tooltip.component.cy.js
+  s_534c2b6810f4ee::t_2c1c139266807f 121-198
+src/scss/domain/action-card.scss
+  s_534c2b6810f4ee::t_046a3ba3a3f5ba 48-51
+src/scss/modules/card-list.scss
+  s_534c2b6810f4ee::t_f6043d81056c93 16-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "eb99f4349a4e64f61033b912fc222699a8ffa512",
+  "prompts": {},
+  "sessions": {
+    "s_534c2b6810f4ee": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a01a23-001e-7b23-9454-44a54672d14d",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
