@@ -19,6 +19,33 @@ context('Modal Service', function() {
       });
   };
 
+  specify('preserves form input on Escape and ignores modified Escape', function() {
+    cy.routeActions().visit().wait('@routeActions');
+
+    cy.getRadio(Radio => {
+      Radio.request('modal', 'show', {
+        headingText: 'Edit name',
+        bodyHTML: '<input class="name-input" aria-label="Name">',
+      });
+    });
+
+    cy.get('.name-input').type('Unsubmitted name');
+
+    cy.press(Cypress.Keyboard.Keys.ESC);
+
+    cy.get('.name-input').should('have.value', 'Unsubmitted name');
+
+    cy.get('.modal__close')
+      .focus()
+      .trigger('keydown', { key: 'Escape', shiftKey: true });
+
+    cy.get('.name-input').should('have.value', 'Unsubmitted name');
+
+    cy.press(Cypress.Keyboard.Keys.ESC);
+
+    cy.get('.modal').should('not.exist');
+  });
+
   specify('Displaying', function() {
     const buttonStub = cy.stub();
     cy
@@ -67,7 +94,7 @@ context('Modal Service', function() {
           headingText: 'Close On Save',
           bodyText: 'Default onSave behavior. Also a cool custom class!',
           buttonClass: 'save-button',
-          className: 'modal modal--small custom-class',
+          className: 'modal modal--dialog modal--small custom-class',
         });
       });
 
@@ -184,6 +211,16 @@ context('Modal Service', function() {
     cy
       .get('.modal')
       .contains('Custom Footer');
+
+    cy
+      .get('.modal')
+      .should('be.focused');
+
+    cy.press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .get('.modal')
+      .should('be.focused');
 
     cy
       .get('.fill-window.fill-window--dark.is-shown')

@@ -5,6 +5,111 @@ import { getRelationship, getResource } from 'helpers/json-api';
 import { getPatient } from 'support/api/patients';
 
 context('Patient Quick Search', function() {
+  specify('fills a mobile viewport and exposes touch-friendly search controls', function() {
+    cy.viewport(390, 844);
+
+    cy
+      .routesForPatientWorkflow()
+      .routeSettings('manual_patient_creation', false)
+      .routeActions()
+      .visit()
+      .wait('@routeActions');
+
+    cy.get('body').type('/');
+
+    cy
+      .get('.patient-search__modal')
+      .should('have.attr', 'role', 'dialog')
+      .and('have.attr', 'aria-modal', 'true')
+      .then($modal => {
+        const bounds = $modal[0].getBoundingClientRect();
+
+        expect(bounds.left).to.equal(0);
+        expect(bounds.top).to.equal(0);
+        expect(bounds.width).to.equal(390);
+        expect(bounds.height).to.equal(844);
+      });
+
+    cy
+      .get('.patient-search__input')
+      .should('have.attr', 'type', 'search')
+      .and('have.attr', 'enterkeyhint', 'search')
+      .and('be.focused')
+      .type('Te');
+
+    cy
+      .get('.patient-search__clear')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Clear search')
+      .click();
+
+    cy
+      .get('.patient-search__input')
+      .should('have.value', '')
+      .and('be.focused');
+
+    cy.press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .focused()
+      .should('have.class', 'patient-search__close--mobile');
+
+    cy.press(Cypress.Keyboard.Keys.TAB);
+
+    cy
+      .get('.patient-search__input')
+      .should('be.focused');
+
+    cy
+      .get('.patient-search__close--mobile')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Back')
+      .click();
+
+    cy.get('.patient-search__modal').should('not.exist');
+
+    cy.get('body').type('/');
+
+    cy
+      .get('.patient-search__input')
+      .should('be.focused');
+
+    cy.press(Cypress.Keyboard.Keys.ESC);
+
+    cy.get('.patient-search__modal').should('not.exist');
+  });
+
+  specify('searches an identical pasted query after clearing it', function() {
+    cy.viewport(390, 844);
+
+    cy.intercept('GET', '/api/patients?filter*', { data: [] }).as('patientSearch');
+
+    cy.routesForPatientWorkflow().routeActions().visit().wait('@routeActions');
+
+    cy.get('.app-frame__nav .js-search').click();
+
+    cy.get('.patient-search__input').type('Test');
+
+    cy.wait('@patientSearch');
+
+    cy.get('.patient-search__no-results').should('contain', 'No results match your query.');
+
+    cy.get('.patient-search__clear').click();
+
+    cy.get('.patient-search__input').should('have.value', '').and('be.focused');
+
+    cy.get('.patient-search__no-results').should('contain', 'Search by');
+
+    cy.then(() => Cypress.automation('remote:debugger:protocol', {
+      command: 'Input.insertText',
+      params: { text: 'Test' },
+    }));
+
+    cy.get('.patient-search__no-results').should('contain', 'No results match your query.');
+
+    cy.wait('@patientSearch');
+  });
+
   specify('Modal & default searching functionality', function() {
     const replies = {};
     const patients = _.times(10, index => {
@@ -163,21 +268,30 @@ context('Patient Quick Search', function() {
     cy
       .get('@searchModal')
       .find('.js-picklist-item')
-      .first()
-      .should('not.have.class', 'is-inactive')
-      .next()
-      .should('have.class', 'is-inactive');
+      .then($results => {
+        expect($results.eq(0)).not.to.have.class('is-inactive');
+        expect($results.eq(1)).to.have.class('is-inactive');
+      });
 
     cy
       .get('@searchModal')
       .find('.js-picklist-item strong')
       .contains('2')
       .parents('.js-picklist-item')
-      .find('.patient-search__picklist-item-meta')
-      .should('contain', 'active')
-      .should('not.contain', 'Patient')
-      .should('not.contain', 'Name')
-      .click();
+      .as('matchedPatient')
+      .find('.patient-search__status-value')
+      .should('have.text', 'active');
+
+    cy
+      .get('@matchedPatient')
+      .find('.patient-search__picklist-item-result')
+      .should('not.exist');
+
+    cy
+      .get('@matchedPatient')
+      .focus();
+
+    cy.get('@matchedPatient').type('{enter}');
 
     cy
       .url()
@@ -223,7 +337,7 @@ context('Patient Quick Search', function() {
 
     cy
       .get('@searchModal')
-      .find('.js-close')
+      .find('.patient-search__close--desktop')
       .click();
 
     cy
@@ -475,18 +589,14 @@ context('Patient Quick Search', function() {
       .find('.js-picklist-item')
       .first()
       .find('.patient-search__picklist-item-result-value')
-      .should($el => {
-        expect($el.text().trim()).to.be.empty;
-      });
+      .should('not.exist');
 
     cy
       .get('.patient-search__modal')
       .find('.js-picklist-item')
       .first()
       .find('.patient-search__picklist-item-result-label')
-      .should($el => {
-        expect($el.text().trim()).to.be.empty;
-      });
+      .should('not.exist');
   });
 
   specify('No Results with Patient Add', function() {
@@ -526,5 +636,9 @@ context('Patient Quick Search', function() {
     cy
       .get('.modal')
       .should('contain', 'Add Patient');
+
+    cy.get('.modal__close').click();
+
+    cy.get('@search').should('be.focused');
   });
 });

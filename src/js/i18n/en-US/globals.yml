@@ -59,6 +59,8 @@ careOptsFrontend:
       modalViews:
         modalView:
           cancelText: Cancel
+          closeText: Close
+          defaultHeading: Details
           submitText: Save
         viewOnlyForm:
           doneText: Done
@@ -96,6 +98,8 @@ careOptsFrontend:
     search:
       patientSearchViews:
         dialogView:
+          backText: Back
+          clearText: Clear search
           placeholderText: Search for patients
         emptyView:
           addPatient: Add Patient

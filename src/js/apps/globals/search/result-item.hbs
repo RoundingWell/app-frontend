@@ -1,28 +1,32 @@
-<div class="patient-search__picklist-item-name-icon">
-  {{far "address-card"}}
-</div>
-<div class="patient-search__picklist-item-name-text">
-  <span class="u-text--overflow">{{matchText name search includeSubstrings=true}}{{~ remove_whitespace ~}}</span>
-</div>
-<div class="patient-search__picklist-item-meta">
-  <div class="patient-search__picklist-item-dob u-text--overflow">
-    {{#if isDobMatch}}
-      <strong>{{formatDateTime birth_date "MM/DD/YYYY"}}</strong>
-    {{else}}
-      {{formatDateTime birth_date "MM/DD/YYYY"}}
-    {{/if}}
-  </div>
-  <div class="patient-search__picklist-item-status u-text--overflow">
-    {{status}}
-  </div>
-  <div class="patient-search__picklist-item-result-value u-text--overflow">
+<button class="js-picklist-item patient-search__picklist-item{{#if isInactive}} is-inactive{{/if}}" type="button">
+  <span class="patient-search__picklist-item-name-icon">
+    {{far "address-card"}}
+  </span>
+  <span class="patient-search__picklist-item-meta">
+    <span class="patient-search__picklist-item-name-text">
+      <span class="u-text--overflow-two-lines">{{matchText name search includeSubstrings=true}}{{~ remove_whitespace ~}}</span>
+    </span>
+    <span class="patient-search__picklist-item-dob">
+      <span class="patient-search__mobile-label">{{ @intl.globals.search.patientSearchViews.headerView.dob }}</span>
+      {{#if isDobMatch}}
+        <strong>{{formatDateTime birth_date "MM/DD/YYYY"}}</strong>
+      {{else}}
+        {{formatDateTime birth_date "MM/DD/YYYY"}}
+      {{/if}}
+    </span>
+    <span class="patient-search__picklist-item-status">
+      <span class="patient-search__mobile-label">{{ @intl.globals.search.patientSearchViews.headerView.workspaceStatus }}</span>
+      <span class="patient-search__status-value">{{status}}</span>
+    </span>
     {{#if shouldShowMatch}}
-      {{matchText match.value search includeSubstrings=true}}
+      <span class="patient-search__picklist-item-result">
+        <span class="patient-search__picklist-item-result-value u-text--overflow-two-lines">
+          {{matchText match.value search includeSubstrings=true}}
+        </span>
+        <span class="patient-search__picklist-item-result-label u-text--overflow">
+          {{match.label}}
+        </span>
+      </span>
     {{/if}}
-  </div>
-  <div class="patient-search__picklist-item-result-label u-text--overflow">
-    {{#if shouldShowMatch}}
-      {{match.label}}
-    {{/if}}
-  </div>
-</div>
+  </span>
+</button>

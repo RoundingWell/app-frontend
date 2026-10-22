@@ -84,6 +84,35 @@ context('default routes', function() {
       .should('contain', 'one/worklist/owned-by');
   });
 
+  specify('closes the patient sidebar before routing to another list', function() {
+    cy
+      .routesForDefault()
+      .routesForPatientWorkflow()
+      .visit();
+
+    cy
+      .get('.js-patient')
+      .first()
+      .click();
+
+    cy
+      .get('.patient-sidebar')
+      .should('be.visible');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Shared By"]')
+      .click();
+
+    cy
+      .url()
+      .should('contain', 'one/worklist/shared-by');
+
+    cy
+      .get('.patient-sidebar')
+      .should('not.exist');
+  });
+
   specify('current clinician has no workspaces', function() {
     cy
       .routeCurrentClinician(fx => {

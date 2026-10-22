@@ -34,8 +34,10 @@
   }
 }
 
+// Keep page layers below shell navigation without relying on an animation.
 .app-frame__content {
   background-color: var(--color-page-bg);
+  isolation: isolate;
   opacity: 0;
   overflow: hidden auto;
 

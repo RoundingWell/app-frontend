@@ -10,6 +10,7 @@ import PreloadRegion from 'js/regions/preload_region';
 import TopRegionBehavior from 'js/behaviors/top-region';
 
 import LayoutTemplate from './layout.hbs';
+import CloseRequestManager from './close-request';
 import { StartupView } from './startup_views';
 
 import './app-frame.scss';
@@ -88,17 +89,36 @@ const ModalRegionView = TopRegionView.extend({
   initialize(options) {
     this.mergeOptions(options, ['body', 'setLocation', 'contains']);
     this.region = this.getRegion('region');
+    this.listenTo(this.region, 'before:show', this.captureFocusReturn);
+  },
+  captureFocusReturn() {
+    if (this.region.hasView()) return;
+    if (document.activeElement === document.body && this.focusReturn?.isConnected) return;
 
-    const hotkeyCh = Radio.channel('hotkey');
-    this.listenTo(hotkeyCh, 'close', this.empty);
+    this.focusReturn = document.activeElement;
   },
   onRegionShow() {
+    Radio.request('close-request', 'register', this, () => this.empty());
     this.listenTo(historyCh, 'change:route', this.empty);
     this.listenTo(userActivityCh, 'window:resize', this.setLocation);
     this.setLocation();
   },
   onRegionEmpty() {
+    Radio.request('close-request', 'unregister', this);
+    this.stopListening(historyCh);
     this.stopListening(userActivityCh);
+
+    if (this.region.isSwappingView()) return;
+
+    const focusReturn = this.focusReturn;
+    window.requestAnimationFrame(() => {
+      if (this.region.hasView()) return;
+
+      this.focusReturn = null;
+      if (document.activeElement !== document.body || !focusReturn?.isConnected) return;
+
+      focusReturn.focus();
+    });
   },
   setLocation() {
     const view = this.region.currentView;
@@ -139,8 +159,6 @@ const PopRegionView = TopRegionView.extend({
   initialize({ body }) {
     this.region = this.getRegion('region');
     this.body = body;
-    const hotkeyCh = Radio.channel('hotkey');
-    this.listenTo(hotkeyCh, 'close', this.empty);
   },
   onRegionShow(region, view, options) {
     view.el.classList.add('app-frame__pop-region');
@@ -151,8 +169,10 @@ const PopRegionView = TopRegionView.extend({
     this.listenTo(view, 'render', partial(this.setLocation, popOptions));
     this.listenTo(view, 'render:children', partial(this.setLocation, popOptions));
     this.setLocation(popOptions);
+    Radio.request('close-request', 'register', this, () => this.empty());
   },
   onRegionEmpty(region, view) {
+    Radio.request('close-request', 'unregister', this);
     view.el.classList.remove('app-frame__pop-region');
     this.stopListening(userActivityCh);
     this.stopListening(historyCh);
@@ -294,6 +314,7 @@ const RootView = CollectionView.extend({
     this.render();
     this.regions = [];
     const body = this.el;
+    this.closeRequestManager = new CloseRequestManager();
 
     Radio.reply('top-region', 'contains', this.contains, this);
 
@@ -304,7 +325,6 @@ const RootView = CollectionView.extend({
     this.addRegionView('tooltip', new TooltipRegionView({ body }));
     this.addRegionView('modal', new ModalRegionView({ body }));
     this.addRegionView('modalSmall', new ModalRegionView({ body }));
-    this.addRegionView('modalLoading', new ModalRegionView({ body, contains: preventRegionClose }));
     this.addRegionView('alert', new TopRegionView());
     this.addRegionView('pop', new PopRegionView({ body }));
     this.addRegionView('overlay', new OverlayRegionView());
@@ -327,6 +347,10 @@ const RootView = CollectionView.extend({
       const view = this.children.findByIndex(i);
       if (view.contains(target, testView)) return true;
     }
+  },
+  onBeforeDestroy() {
+    this.closeRequestManager.destroy();
+    Radio.channel('top-region').stopReplying(null, null, this);
   },
 });
 
