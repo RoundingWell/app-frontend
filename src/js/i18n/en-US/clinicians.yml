@@ -29,6 +29,11 @@ careOptsFrontend:
         title: Clinicians
         workspacesHeader: Workspaces
       notFound: The Clinician you requested does not exist.
+      statusFilterView:
+        active: Active
+        disabled: Disabled
+        enabled: Enabled
+        headingText: Filter by Status
     shared:
       clinicianViews:
         stateComponent:

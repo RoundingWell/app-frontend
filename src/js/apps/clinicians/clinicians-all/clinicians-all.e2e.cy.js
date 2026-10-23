@@ -44,6 +44,17 @@ context('clinicians list', function() {
       .should('be.visible');
 
     cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Enabled')
+      .click();
+
+    cy
       .get('.card-list')
       .find('.card-list__item')
       .last()
@@ -319,5 +330,238 @@ context('clinicians list', function() {
     cy
       .get('@listSearch')
       .should('have.attr', 'value', 'Employee');
+  });
+
+  specify('filter clinicians by status', function() {
+    const clinicians = [
+      getClinician({
+        attributes: {
+          name: 'Quinn Active',
+          enabled: true,
+          last_active_at: testTs(),
+        },
+        relationships: {
+          role: getRelationship(roleEmployee),
+          team: getRelationship(teamCoordinator),
+          workspaces: getRelationship([workspaceOne]),
+        },
+      }),
+      getClinician({
+        attributes: {
+          name: 'Sam Active',
+          enabled: true,
+          last_active_at: testTs(),
+        },
+        relationships: {
+          role: getRelationship(roleEmployee),
+          team: getRelationship(teamCoordinator),
+          workspaces: getRelationship([workspaceOne]),
+        },
+      }),
+      getClinician({
+        attributes: {
+          name: 'Sam Pending',
+          enabled: true,
+          last_active_at: null,
+        },
+        relationships: {
+          role: getRelationship(roleEmployee),
+          team: getRelationship(teamCoordinator),
+          workspaces: getRelationship([workspaceOne]),
+        },
+      }),
+      getClinician({
+        attributes: {
+          name: 'Sam Disabled',
+          enabled: false,
+          last_active_at: testTs(),
+        },
+        relationships: {
+          role: getRelationship(roleEmployee),
+          team: getRelationship(teamCoordinator),
+          workspaces: getRelationship([workspaceOne]),
+        },
+      }),
+    ];
+
+    cy
+      .routeClinicians(fx => {
+        fx.data = clinicians;
+
+        return fx;
+      })
+      .visit('/clinicians')
+      .wait('@routeClinicians');
+
+    cy
+      .get('.list-page__topbar')
+      .find('[data-search-region] + [data-status-filter-region] button')
+      .as('statusFilter')
+      .should('contain', 'Active');
+
+    cy
+      .get('.list-page__list')
+      .as('cliniciansList')
+      .should('contain', 'Quinn Active')
+      .should('contain', 'Sam Active')
+      .should('not.contain', 'Sam Pending')
+      .should('not.contain', 'Sam Disabled');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 2);
+
+    cy
+      .get('@statusFilter')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('contain', 'Filter by Status')
+      .find('.js-picklist-item')
+      .should('have.length', 3)
+      .first()
+      .should('contain', 'Active')
+      .should('have.class', 'is-selected');
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .eq(1)
+      .should('contain', 'Enabled');
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .eq(2)
+      .should('contain', 'Disabled')
+      .click();
+
+    cy
+      .get('@statusFilter')
+      .should('contain', 'Disabled');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Sam Disabled');
+
+    cy
+      .get('@statusFilter')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Enabled')
+      .click();
+
+    cy
+      .get('@statusFilter')
+      .should('contain', 'Enabled');
+
+    cy
+      .get('@cliniciansList')
+      .should('contain', 'Quinn Active')
+      .should('contain', 'Sam Active')
+      .should('contain', 'Sam Pending')
+      .should('not.contain', 'Sam Disabled');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 3);
+
+    cy
+      .get('.list-page__header')
+      .find('[data-search-region] .js-input')
+      .as('listSearch')
+      .type('Sam');
+
+    cy
+      .get('@cliniciansList')
+      .should('contain', 'Sam Active')
+      .should('contain', 'Sam Pending')
+      .should('not.contain', 'Quinn Active')
+      .should('not.contain', 'Sam Disabled');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 2);
+
+    cy
+      .get('@statusFilter')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Active')
+      .click();
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Sam Active');
+
+    cy
+      .get('@listSearch')
+      .next()
+      .click();
+
+    cy
+      .get('@statusFilter')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Disabled')
+      .click();
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Sam Disabled');
+
+    cy
+      .routeActions()
+      .visit('/worklist/owned-by')
+      .wait('@routeActions');
+
+    cy
+      .go('back')
+      .wait('@routeClinicians');
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .should('contain', 'Disabled');
+
+    cy
+      .get('.list-page__list')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Sam Disabled');
+
+    cy
+      .visit('/clinicians')
+      .wait('@routeClinicians');
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .should('contain', 'Disabled');
+
+    cy
+      .get('.list-page__list')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Sam Disabled');
   });
 });

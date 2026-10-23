@@ -1,4 +1,5 @@
 import { every, map, sortBy } from 'underscore';
+import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView, Behavior } from 'marionette';
 
@@ -12,6 +13,7 @@ import buildMatchersArray from 'js/utils/formatting/build-matchers-array';
 import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import PreloadRegion from 'js/regions/preload_region';
+import Droplist from 'js/components/droplist';
 import { RoleComponent, TeamComponent, StateComponent } from 'js/apps/clinicians/shared/clinicians_views';
 
 import ItemTemplate from './item.hbs';
@@ -20,6 +22,15 @@ import LayoutTemplate from './layout.hbs';
 import './clinicians.scss';
 
 const notFound = intl.clinicians.cliniciansAllViews.notFound;
+const statusFilterI18n = intl.clinicians.cliniciansAllViews.statusFilterView;
+
+function matchesStatusFilter(clinician, statusFilter) {
+  if (statusFilter === 'disabled') return !clinician.isEnabled();
+  if (statusFilter === 'enabled') return clinician.isEnabled();
+
+  return clinician.isEnabled() && clinician.isActive();
+}
+
 const RowBehavior = Behavior.extend({
   modelEvents: {
     'editing': 'onEditing',
@@ -129,6 +140,7 @@ const LayoutView = View.extend({
       replaceElement: true,
     },
     search: '[data-search-region]',
+    statusFilter: '[data-status-filter-region]',
   },
   triggers: {
     'click .js-add-clinician': 'click:addClinician',
@@ -157,10 +169,10 @@ const ListView = CollectionView.extend({
   initialize({ state }) {
     this.state = state;
 
-    this.listenTo(state, 'change:searchQuery', this.searchList);
+    this.listenTo(state, 'change:searchQuery change:statusFilter', this.filterList);
   },
   onAttach() {
-    this.searchList(null, this.state.get('searchQuery'));
+    this.filterList();
   },
   onListItemRender(view) {
     view.searchString = view.el.textContent;
@@ -168,24 +180,55 @@ const ListView = CollectionView.extend({
   onRenderChildren() {
     this.triggerMethod('filtered', this.children.pluck('model'));
   },
-  searchList(state, searchQuery) {
-    if (!searchQuery) {
-      this.removeFilter();
-      return;
-    }
+  filterList() {
+    const searchQuery = this.state.get('searchQuery');
+    const statusFilter = this.state.get('statusFilter');
+    const matchers = searchQuery ? buildMatchersArray(searchQuery) : null;
 
-    const matchers = buildMatchersArray(searchQuery);
+    this.setFilter(function(view) {
+      if (!matchesStatusFilter(view.model, statusFilter)) return false;
+      if (!matchers) return true;
 
-    this.setFilter(function({ searchString }) {
       return every(matchers, function(matcher) {
-        return matcher.test(searchString);
+        return matcher.test(view.searchString);
       });
     });
+  },
+});
+
+const StatusFilterView = Droplist.extend({
+  align: 'right',
+  className: 'button button--secondary button--pill',
+  popWidth: 192,
+  picklistOptions: {
+    headingText: statusFilterI18n.headingText,
+  },
+  initialize({ statusFilter }) {
+    this.collection = new Backbone.Collection([
+      {
+        id: 'active',
+        text: statusFilterI18n.active,
+      },
+      {
+        id: 'enabled',
+        text: statusFilterI18n.enabled,
+      },
+      {
+        id: 'disabled',
+        text: statusFilterI18n.disabled,
+      },
+    ]);
+
+    this.getState().set('selected', this.collection.get(statusFilter));
+  },
+  onChangeSelected(selected) {
+    this.triggerMethod('change:statusFilter', selected.id);
   },
 });
 
 export {
   LayoutView,
   ListView,
+  StatusFilterView,
   notFound,
 };
