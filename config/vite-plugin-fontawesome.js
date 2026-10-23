@@ -5,9 +5,9 @@ import getIconSymbols from '@roundingwell/icons';
 
 const ICON_MANIFEST_PATH = 'icons.json';
 const SHARED_ICON_SCRIPT_PATH = '/icons/icons.js';
-// Standard workflow states, clinician states, and success alerts for local dev.
+// Status icons not already supplied by the app manifest, for local dev.
 const LOCAL_STATUS_ICONS = {
-  fas: ['arrow-right-arrow-left', 'circle-check', 'circle-dot', 'circle-exclamation', 'circle-half-stroke'],
+  fas: ['arrow-right-arrow-left', 'circle-check', 'circle-exclamation', 'circle-half-stroke'],
   far: ['circle-check', 'circle-minus', 'octagon-minus'],
 };
 
