@@ -47,6 +47,7 @@ careOptsFrontend:
           headingText: Update Role
     sidebar:
       clinicianSidebarTemplate:
+        npi: NPI
         workspaces: Workspaces
         role: Role
         state: State
@@ -61,6 +62,8 @@ careOptsFrontend:
           workspaceTeamInfo: Team & Workspaces must be assigned in order for this clinician to have access to members.
         nameView:
           placeholder: New Clinician
+        npiView:
+          error: NPI must be exactly 10 digits
         saveView:
           cancelBtn: Cancel
           saveBtn: Save

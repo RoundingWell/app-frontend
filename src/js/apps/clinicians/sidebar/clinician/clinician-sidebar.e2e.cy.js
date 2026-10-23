@@ -413,6 +413,7 @@ context('clinician sidebar', function() {
       .clear()
       .type('edited.email@roundingwell.com')
       .press(Cypress.Keyboard.Keys.TAB)
+      .press(Cypress.Keyboard.Keys.TAB)
       .press(Cypress.Keyboard.Keys.TAB);
 
     cy
@@ -445,6 +446,7 @@ context('clinician sidebar', function() {
       .should('have.value', 'test.clinician@roundingwell.com')
       .clear()
       .type('edited.email@roundingwell.com')
+      .press(Cypress.Keyboard.Keys.TAB)
       .press(Cypress.Keyboard.Keys.TAB);
 
     cy
@@ -483,6 +485,7 @@ context('clinician sidebar', function() {
       .find('[data-email-region] .js-input')
       .clear()
       .type('edited.email@roundingwell.com')
+      .press(Cypress.Keyboard.Keys.TAB)
       .press(Cypress.Keyboard.Keys.TAB);
 
     cy
@@ -508,6 +511,164 @@ context('clinician sidebar', function() {
       .should('contain', 'email error')
       .find('.js-input')
       .should('have.css', 'border-top-color', stateColors.error);
+  });
+
+  specify('edit clinician npi', function() {
+    const clinicianWithoutNpi = getClinician({
+      attributes: {
+        name: 'No Npi Clinician',
+        email: 'no.npi@roundingwell.com',
+        npi: null,
+      },
+      relationships: {
+        team: getRelationship(teamCoordinator),
+        role: getRelationship(roleEmployee),
+      },
+    });
+
+    cy
+      .routeClinicians(fx => {
+        fx.data = [clinicianWithoutNpi];
+
+        return fx;
+      })
+      .visit(`/clinicians/${ clinicianWithoutNpi.id }`)
+      .wait('@routeClinicians');
+
+    cy
+      .get('.sidebar')
+      .as('clinicianSidebar')
+      .find('.sidebar__label')
+      .contains('NPI');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region]')
+      .should('not.contain', 'NPI must be exactly 10 digits')
+      .find('.js-input')
+      .should('have.value', '')
+      .should('not.be.disabled');
+
+    const clinicianWithNpi = getClinician({
+      attributes: {
+        name: 'Test Clinician',
+        email: 'test.clinician@roundingwell.com',
+        npi: '1234567893',
+      },
+      relationships: {
+        team: getRelationship(teamCoordinator),
+        role: getRelationship(roleEmployee),
+      },
+    });
+
+    cy
+      .routeClinicians(fx => {
+        fx.data = [clinicianWithNpi];
+
+        return fx;
+      })
+      .visit(`/clinicians/${ clinicianWithNpi.id }`)
+      .wait('@routeClinicians');
+
+    cy
+      .get('.sidebar')
+      .as('clinicianSidebar');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-name-region] .js-input')
+      .should('be.disabled');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region] .js-input')
+      .should('have.value', '1234567893')
+      .should('not.be.disabled');
+
+    cy
+      .intercept('PATCH', `/api/clinicians/${ clinicianWithNpi.id }`, {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchClinicianNpi');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region] .js-input')
+      .clear()
+      .type('12345');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region]')
+      .should('contain', 'NPI must be exactly 10 digits')
+      .find('.js-input')
+      .should('have.class', 'has-error');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region] .js-input')
+      .clear()
+      .type('123456789A');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region]')
+      .should('contain', 'NPI must be exactly 10 digits')
+      .find('.js-input')
+      .should('have.class', 'has-error');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-save-region] button')
+      .should('be.disabled');
+
+    cy
+      .get('@routePatchClinicianNpi.all')
+      .should('have.length', 0);
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region] .js-input')
+      .clear()
+      .type('1098765432');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('[data-npi-region]')
+      .should('not.contain', 'NPI must be exactly 10 digits')
+      .find('.js-input')
+      .should('not.have.class', 'has-error');
+
+    cy
+      .get('@clinicianSidebar')
+      .find('.js-save')
+      .click();
+
+    cy
+      .wait('@routePatchClinicianNpi')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data.attributes).to.deep.equal({ npi: '1098765432' });
+      });
+
+    cy
+      .get('.sidebar')
+      .find('[data-npi-region] .js-input')
+      .should('have.value', '1098765432')
+      .clear();
+
+    cy
+      .get('.sidebar')
+      .find('.js-save')
+      .click();
+
+    cy
+      .wait('@routePatchClinicianNpi')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data.attributes).to.deep.equal({ npi: null });
+      });
   });
 
   specify('clinician does not exist', function() {

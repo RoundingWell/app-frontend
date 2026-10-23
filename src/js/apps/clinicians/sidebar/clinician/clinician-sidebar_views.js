@@ -5,6 +5,8 @@ import 'scss/modules/buttons.scss';
 import 'scss/modules/forms.scss';
 import 'scss/modules/sidebar.scss';
 
+import trim from 'js/utils/formatting/trim';
+
 import intl from 'js/i18n';
 
 import { WorkspacesComponent, TeamComponent, RoleComponent, StateComponent } from 'js/apps/clinicians/shared/clinicians_views';
@@ -14,6 +16,7 @@ import ClinicianSidebarTemplate from './clinician-sidebar.hbs';
 import './clinician-sidebar.scss';
 
 const headingText = intl.clinicians.sidebar.clinicianSidebarViews.headingText;
+const npiErrorText = intl.clinicians.sidebar.clinicianSidebarViews.npiView.error;
 
 const NameView = View.extend({
   className: 'pos--relative',
@@ -60,6 +63,37 @@ const EmailView = View.extend({
   },
   onInput(evt) {
     this.model.set('email', evt.target.value);
+  },
+});
+
+const NpiView = View.extend({
+  className: 'pos--relative',
+  template: hbs`
+    <input class="form-input form-input--primary w-100 js-input" value="{{ npi }}" />
+    <div class="form-error u-margin--b-4 js-error" hidden></div>
+  `,
+  ui: {
+    input: '.js-input',
+    error: '.js-error',
+  },
+  events: {
+    'input @ui.input': 'onInput',
+  },
+  onInput(evt) {
+    const value = trim(evt.target.value);
+
+    this.model.set('npi', value || null);
+  },
+  onRender() {
+    this.showError(this.getOption('error'));
+  },
+  showError(error) {
+    const input = this.getUI('input')[0];
+    const errorEl = this.getUI('error')[0];
+
+    input.classList.toggle('has-error', !!error);
+    errorEl.hidden = !error;
+    errorEl.textContent = error || '';
   },
 });
 
@@ -127,6 +161,7 @@ const SidebarView = View.extend({
   regions: {
     name: '[data-name-region]',
     email: '[data-email-region]',
+    npi: '[data-npi-region]',
     save: '[data-save-region]',
     team: '[data-team-region]',
     workspaces: '[data-workspaces-region]',
@@ -172,6 +207,17 @@ const SidebarView = View.extend({
       model: this.clonedClinician,
       error,
     }));
+  },
+  showNpi(error) {
+    this.showChildView('npi', new NpiView({
+      model: this.clonedClinician,
+      error,
+    }));
+  },
+  getNpiError() {
+    if (this.clonedClinician.isValidNpi()) return;
+
+    return npiErrorText;
   },
   showState() {
     const isActive = this.model.isActive();
@@ -224,7 +270,11 @@ const SidebarView = View.extend({
     });
   },
   showSave() {
-    if (!this.clonedClinician.isValid()) {
+    const error = this.getNpiError();
+
+    this.getChildView('npi').showError(error);
+
+    if (!this.clonedClinician.isValid() || error) {
       this.showDisabledSave();
       return;
     }
@@ -238,11 +288,13 @@ const SidebarView = View.extend({
     this.cloneClinician();
     this.listenTo(this.clonedClinician, 'change:name', this.showSave);
     this.listenTo(this.clonedClinician, 'change:email', this.showSave);
+    this.listenTo(this.clonedClinician, 'change:npi', this.showSave);
 
     this.getRegion('save').empty();
 
     this.showName();
     this.showEmail();
+    this.showNpi();
   },
   showInfo() {
     if (!this.model.hasTeam() || this.model.getWorkspaces().length === 0) {
@@ -260,9 +312,10 @@ const SidebarView = View.extend({
       workspace: currentWorkspace,
     }));
   },
-  showErrors({ name, email }) {
+  showErrors({ name, email, npi }) {
     this.showName(name);
     this.showEmail(email);
+    this.showNpi(npi);
     this.showDisabledSave();
   },
   onSave() {
