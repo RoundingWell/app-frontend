@@ -2,7 +2,7 @@ import formatDate from 'helpers/format-date';
 import { testTs } from 'helpers/test-timestamp';
 import { getRelationship } from 'helpers/json-api';
 
-import { getClinician } from 'support/api/clinicians';
+import { fxCurrentClinician, getClinician } from 'support/api/clinicians';
 import { roleAdmin, roleEmployee, roleManager } from 'support/api/roles';
 import { teamCoordinator, teamNurse } from 'support/api/teams';
 import { workspaceOne, workspaceTwo } from 'support/api/workspaces';
@@ -485,8 +485,12 @@ context('clinicians list', function() {
     cy
       .get('.picklist')
       .should('contain', 'Filter by Status')
+      .and('contain', 'Pending');
+
+    cy
+      .get('.picklist')
       .find('.js-picklist-item')
-      .should('have.length', 3)
+      .should('have.length', 4)
       .first()
       .should('contain', 'Active')
       .should('have.class', 'is-selected');
@@ -495,12 +499,18 @@ context('clinicians list', function() {
       .get('.picklist')
       .find('.js-picklist-item')
       .eq(1)
-      .should('contain', 'Enabled');
+      .should('contain', 'Pending');
 
     cy
       .get('.picklist')
       .find('.js-picklist-item')
       .eq(2)
+      .should('contain', 'Enabled');
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .eq(3)
       .should('contain', 'Disabled')
       .click();
 
@@ -629,5 +639,121 @@ context('clinicians list', function() {
       .find('.card-list__item')
       .should('have.length', 1)
       .should('contain', 'Sam Disabled');
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Pending')
+      .click();
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .should('contain', 'Pending');
+
+    cy
+      .get('.list-page__list')
+      .should('contain', 'Sam Pending')
+      .should('not.contain', 'Quinn Active')
+      .should('not.contain', 'Sam Active')
+      .should('not.contain', 'Sam Disabled');
+
+    cy
+      .get('.list-page__list')
+      .find('.card-list__item')
+      .should('have.length', 1);
+
+    cy
+      .get('.list-page__header')
+      .find('[data-search-region] .js-input')
+      .type('Sam');
+
+    cy
+      .get('.list-page__list')
+      .should('contain', 'Sam Pending')
+      .should('not.contain', 'Sam Active')
+      .should('not.contain', 'Sam Disabled')
+      .should('not.contain', 'Quinn Active');
+
+    cy
+      .get('.list-page__list')
+      .find('.card-list__item')
+      .should('have.length', 1);
+
+    cy
+      .visit('/clinicians')
+      .wait('@routeClinicians');
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .should('contain', 'Pending');
+
+    cy
+      .get('.list-page__list')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Sam Pending');
+
+    cy
+      .intercept('PATCH', '/api/clinicians/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchClinician');
+
+    cy
+      .get('.list-page__list')
+      .find('.card-list__item')
+      .find('[data-state-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Disabled')
+      .click();
+
+    cy
+      .wait('@routePatchClinician')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data.attributes.enabled).to.be.false;
+      });
+
+    cy
+      .get('.list-page__list')
+      .should('not.contain', 'Sam Pending');
+
+    cy
+      .get('.list-page__list')
+      .find('.card-list__item')
+      .should('have.length', 0);
+
+    cy.window().then(win => {
+      win.localStorage.setItem(`cliniciansStatusFilter_${ fxCurrentClinician.id }`, JSON.stringify('nope'));
+    });
+
+    cy
+      .visit('/clinicians')
+      .wait('@routeClinicians');
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .should('contain', 'Active');
+
+    cy
+      .get('.list-page__list')
+      .should('contain', 'Quinn Active')
+      .should('contain', 'Sam Active')
+      .should('not.contain', 'Sam Pending')
+      .should('not.contain', 'Sam Disabled');
   });
 });

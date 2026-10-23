@@ -34,6 +34,7 @@ careOptsFrontend:
         disabled: Disabled
         enabled: Enabled
         headingText: Filter by Status
+        pending: Pending
     shared:
       clinicianViews:
         stateComponent:

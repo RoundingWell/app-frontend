@@ -1,4 +1,4 @@
-import { every, map, sortBy } from 'underscore';
+import { contains, every, map, sortBy } from 'underscore';
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView, Behavior } from 'marionette';
@@ -24,11 +24,37 @@ import './clinicians.scss';
 const notFound = intl.clinicians.cliniciansAllViews.notFound;
 const statusFilterI18n = intl.clinicians.cliniciansAllViews.statusFilterView;
 
+const statusFilterOptions = [
+  {
+    id: 'active',
+    text: statusFilterI18n.active,
+  },
+  {
+    id: 'pending',
+    text: statusFilterI18n.pending,
+  },
+  {
+    id: 'enabled',
+    text: statusFilterI18n.enabled,
+  },
+  {
+    id: 'disabled',
+    text: statusFilterI18n.disabled,
+  },
+];
+
 function matchesStatusFilter(clinician, statusFilter) {
   if (statusFilter === 'disabled') return !clinician.isEnabled();
   if (statusFilter === 'enabled') return clinician.isEnabled();
+  if (statusFilter === 'pending') return clinician.isEnabled() && !clinician.isActive();
 
   return clinician.isEnabled() && clinician.isActive();
+}
+
+function getStatusFilter(statusFilter) {
+  if (contains(map(statusFilterOptions, 'id'), statusFilter)) return statusFilter;
+
+  return 'active';
 }
 
 const RowBehavior = Behavior.extend({
@@ -205,22 +231,9 @@ const StatusFilterView = Droplist.extend({
     headingText: statusFilterI18n.headingText,
   },
   initialize({ statusFilter }) {
-    this.collection = new Backbone.Collection([
-      {
-        id: 'active',
-        text: statusFilterI18n.active,
-      },
-      {
-        id: 'enabled',
-        text: statusFilterI18n.enabled,
-      },
-      {
-        id: 'disabled',
-        text: statusFilterI18n.disabled,
-      },
-    ]);
+    this.collection = new Backbone.Collection(statusFilterOptions);
 
-    this.getState().set('selected', this.collection.get(statusFilter));
+    this.getState().set('selected', this.collection.get(getStatusFilter(statusFilter)));
   },
   onChangeSelected(selected) {
     this.triggerMethod('change:statusFilter', selected.id);
@@ -231,5 +244,6 @@ export {
   LayoutView,
   ListView,
   StatusFilterView,
+  getStatusFilter,
   notFound,
 };

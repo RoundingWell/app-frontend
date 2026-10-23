@@ -9,7 +9,7 @@ import SubRouterApp from 'js/base/subrouterapp';
 import ClinicianSidebarApp from 'js/apps/clinicians/sidebar/clinician/clinician-sidebar_app';
 import SearchView from 'js/components/list-search';
 
-import { ListView, LayoutView, StatusFilterView, notFound } from 'js/apps/clinicians/clinicians-all/clinicians-all_views';
+import { ListView, LayoutView, StatusFilterView, getStatusFilter, notFound } from 'js/apps/clinicians/clinicians-all/clinicians-all_views';
 import { getClinicianModal } from 'js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views';
 
 export default SubRouterApp.extend({
@@ -87,7 +87,7 @@ export default SubRouterApp.extend({
     return `cliniciansStatusFilter_${ currentUser.id }`;
   },
   getStoredStatusFilter() {
-    return localStore.get(this.getStatusFilterKey()) || 'active';
+    return getStatusFilter(localStore.get(this.getStatusFilterKey()));
   },
   onChangeStatusFilter(state, statusFilter) {
     localStore.set(this.getStatusFilterKey(), statusFilter);
