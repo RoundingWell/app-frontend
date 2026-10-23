@@ -35,7 +35,10 @@ export default App.extend({
     this.triggerMethod('close', this);
   },
   onSave({ model }) {
-    this.clinician.save(model.attributes).then(() => {
+    // Name and email updates are rejected once a clinician has been active.
+    const attrs = model.isEditable() ? model.attributes : { npi: model.get('npi') };
+
+    this.clinician.save(attrs).then(() => {
       Radio.trigger('event-router', 'clinician', this.clinician.id);
     }, ({ responseData }) => {
       const errors = this.clinician.parseErrors(responseData);

@@ -56,7 +56,7 @@ context('Base model JSON:API serialization', function() {
     const resources = [
       { Model: Action, writable: { name: 'Test Action' }, readOnly: { created_at: '2026-08-27T00:00:00Z' } },
       { Model: Artifact, writable: { artifact: 'test', identifier: 'test-id', values: {} } },
-      { Model: WritableClinician, writable: { name: 'Test Clinician' }, readOnly: { disabled_at: null } },
+      { Model: WritableClinician, writable: { name: 'Test Clinician', npi: '1234567893' }, readOnly: { disabled_at: null } },
       { Model: Comment, writable: { message: 'Test comment' }, readOnly: { edited_at: '2026-08-27T00:00:00Z' } },
       { Model: File, writable: { path: 'test/file.pdf' }, readOnly: { alias: 'file.pdf' } },
       { Model: Flow, writable: { name: 'Test Flow' }, readOnly: { updated_at: '2026-08-27T00:00:00Z' } },
@@ -79,5 +79,16 @@ context('Base model JSON:API serialization', function() {
 
       expect(model.toJSONApi().attributes).to.deep.equal(writable);
     });
+  });
+
+  specify('sends null when a clinician npi is cleared', function() {
+    const clinician = new WritableClinician({
+      id: 'clinician-id',
+      name: 'Test Clinician',
+      email: 'test.clinician@roundingwell.com',
+      npi: null,
+    });
+
+    expect(clinician.toJSONApi().attributes.npi).to.equal(null);
   });
 });
