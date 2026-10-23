@@ -133,11 +133,25 @@ To develop against a remote AWS dev organization:
 
 #### Frontend Setup
 
-Create a `.env` file in the project root with your dev organization URL:
+On an interactive `npm run dev`, a missing `.env` is created from prompts. The setup
+asks for your lowercase dev organization slug, whether to use a `local` or `remote`
+backend, and defaults `DEPLOY_AWS_PROFILE` and `DEPLOY_STAGE` to `dev` (press Enter
+to accept, or type another value):
 ```env
+DEPLOY_AWS_PROFILE=dev
+DEPLOY_STAGE=dev
+DEPLOY_ORGANIZATION=john
 VITE_DEV_API_URL=https://john.roundingwell.dev
 ```
 _Note: Replace `john` with **your** organization slug._
+
+Choose `remote` for the dev organization URL shown above. Choose `local` to omit
+`VITE_DEV_API_URL`, which makes the Vite dev server use `http://localhost:8080` and
+serve local status icons.
+
+An existing `.env` is never overwritten, and non-interactive runs (CI, piped commands)
+skip creation with a notice and start Vite with its defaults. To set up `.env` without
+starting the server, run `node scripts/create-env.js`.
 
 ### Deploying the Frontend to a Dev Organization
 
