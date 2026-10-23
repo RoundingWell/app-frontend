@@ -128,10 +128,23 @@ context('clinicians list', function() {
       });
 
     cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Active')
+      .click();
+
+    cy
       .get('.card-list')
       .find('.card-list__item')
+      .should('have.length', 1)
       .first()
-      .as('firstItem');
+      .as('firstItem')
+      .should('contain', 'Aaron Aaronson');
 
     cy
       .get('@firstItem')
@@ -152,6 +165,28 @@ context('clinicians list', function() {
       });
 
     cy
+      .get('.card-list')
+      .should('not.contain', 'Aaron Aaronson');
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Disabled')
+      .click();
+
+    cy
+      .get('.card-list')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .first()
+      .as('firstItem');
+
+    cy
       .get('@firstItem')
       .contains('NUR')
       .should('be.disabled');
@@ -168,7 +203,38 @@ context('clinicians list', function() {
       .click();
 
     cy
-      .get('@firstItem')
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Active')
+      .click();
+
+    cy
+      .wait('@routePatchClinician')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data.attributes.enabled).to.be.true;
+      });
+
+    cy
+      .get('.card-list')
+      .should('not.contain', 'Aaron Aaronson');
+
+    cy
+      .get('[data-status-filter-region]')
+      .find('button')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Active')
+      .click();
+
+    cy
+      .get('.card-list')
+      .find('.card-list__item')
+      .first()
+      .as('firstItem')
       .click();
 
     cy

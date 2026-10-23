@@ -159,6 +159,7 @@ const ListView = CollectionView.extend({
   },
   collectionEvents: {
     'change:name': 'sort',
+    'change:enabled change:_team change:_workspaces change:last_active_at': 'filterList',
   },
   childViewTriggers: {
     'render': 'listItem:render',
