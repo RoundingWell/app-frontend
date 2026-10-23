@@ -18,8 +18,11 @@ export function getInteractionChannelLabel(model) {
 }
 
 export function getInteractionViaLabel(model) {
-  const source = model.get('metadata')?.source;
-  if (model.getChannelGroup() === 'visits' && source) return `${ intl.via } ${ source }`;
+  const metadata = model.get('metadata') || {};
+  if (model.getChannelGroup() === 'visits') {
+    if (metadata.manual) return;
+    if (metadata.source) return `${ intl.via } ${ metadata.source }`;
+  }
   return CHANNEL_VIA[model.get('channel')];
 }
 
@@ -62,7 +65,7 @@ export function getInteractionDescription(model) {
   if (group === 'appointments') {
     return { name: intl.appointment, text: getAppointmentStatusLabel(model) };
   }
-  if (group === 'visits') return { name: intl.visit, text: intl.added };
+  if (group === 'visits') return { name: intl.visit, text: metadata.manual ? intl.addedManually : intl.added };
   if (group === 'messages') return getMessageDescription(model, metadata);
   const isOutboundVoicemail = model.get('channel') === 'voicemail' && model.get('direction') === 'outbound';
   return { name: getSenderName(model, metadata), text: isOutboundVoicemail ? intl.leftVoicemail : intl.loggedCall };

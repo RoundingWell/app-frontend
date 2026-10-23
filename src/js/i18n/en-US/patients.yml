@@ -272,6 +272,7 @@ careOptsFrontend:
           loggedCall: logged a call.
           leftVoicemail: left a voicemail.
           added: added
+          addedManually: added manually
         interactionsStatusViews:
           retry: Retry
           loading: Loading interactions…
