@@ -8,49 +8,77 @@ import { fileURLToPath } from 'node:url';
 export const ENV_PATH = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.env');
 export const DEFAULT_AWS_PROFILE = 'dev';
 export const DEFAULT_STAGE = 'dev';
+export const DEFAULT_BACKEND = 'remote';
 
 const ORGANIZATION_PATTERN = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+const PROFILE_PATTERN = /^[A-Za-z0-9._-]+$/;
 
 export function organizationError(value) {
   if (!value) return 'Organization name is required.';
   if (!ORGANIZATION_PATTERN.test(value)) {
-    return `"${ value }" is not a valid organization name. Use lowercase letters, numbers, and hyphens (e.g. "john").`;
+    return `"${ value }" is not a valid organization name. Use lowercase letters, numbers, and hyphens (e.g. "woody").`;
   }
   return undefined;
 }
 
 export function profileError(value) {
-  if (!ORGANIZATION_PATTERN.test(value)) {
-    return `"${ value }" is not a valid profile or stage. Use lowercase letters, numbers, and hyphens.`;
+  if (!PROFILE_PATTERN.test(value)) {
+    return `"${ value }" is not a valid profile or stage. Use letters, numbers, dots, underscores, and hyphens.`;
   }
   return undefined;
 }
 
-export function buildEnvFile({ organization, awsProfile = DEFAULT_AWS_PROFILE, stage = DEFAULT_STAGE }) {
-  return [
+export function backendError(value) {
+  if (value !== 'local' && value !== 'remote') {
+    return `"${ value }" is not a valid backend. Use "local" or "remote".`;
+  }
+  return undefined;
+}
+
+export function buildEnvFile({
+  organization,
+  backend = DEFAULT_BACKEND,
+  awsProfile = DEFAULT_AWS_PROFILE,
+  stage = DEFAULT_STAGE,
+}) {
+  const lines = [
     `DEPLOY_AWS_PROFILE=${ awsProfile }`,
     `DEPLOY_STAGE=${ stage }`,
     `DEPLOY_ORGANIZATION=${ organization }`,
-    `VITE_DEV_API_URL=https://${ organization }.roundingwell.dev`,
-    '',
-  ].join('\n');
+  ];
+
+  if (backend === 'remote') {
+    lines.push(`VITE_DEV_API_URL=https://${ organization }.roundingwell.dev`);
+  }
+
+  return `${ lines.join('\n') }\n`;
 }
 
-async function ask(rl, label, { defaultValue, validate } = {}) {
+export function writeEnvFile(filePath, contents) {
+  try {
+    fs.writeFileSync(filePath, contents, { flag: 'wx' });
+    return true;
+  } catch(error) {
+    if (error.code === 'EEXIST') return false;
+    throw error;
+  }
+}
+
+async function ask(rl, output, label, { defaultValue, validate } = {}) {
   for (;;) {
     const suffix = defaultValue ? ` (${ defaultValue })` : '';
-    const answer = (await rl.question(`${ label }${ suffix }: `)).trim().toLowerCase();
+    const answer = (await rl.question(`${ label }${ suffix }: `)).trim();
 
     if (!answer) {
       if (defaultValue) return defaultValue;
-      process.stdout.write('  A value is required.\n');
+      output.write('  A value is required.\n');
       continue;
     }
 
     const error = validate?.(answer);
 
     if (error) {
-      process.stdout.write(`  ${ error }\n`);
+      output.write(`  ${ error }\n`);
       continue;
     }
 
@@ -58,37 +86,43 @@ async function ask(rl, label, { defaultValue, validate } = {}) {
   }
 }
 
-async function main() {
-  if (fs.existsSync(ENV_PATH)) return;
+export async function runSetup({ envPath = ENV_PATH, input = process.stdin, output = process.stdout } = {}) {
+  if (fs.existsSync(envPath)) return 'exists';
 
-  if (!process.stdin.isTTY) {
-    process.stdout.write('No .env found; skipping interactive .env setup because stdin is not a TTY.\n');
-    return;
+  if (!input.isTTY) {
+    output.write('No .env found; skipping interactive .env setup because stdin is not a TTY.\n');
+    return 'skipped';
   }
 
-  process.stdout.write('No .env found. Let\'s create one for local development.\n\n');
+  output.write('No .env found. Let\'s create one for local development.\n\n');
 
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  let organization;
-  let awsProfile;
-  let stage;
+  const rl = createInterface({ input, output });
+  let options;
 
   try {
-    organization = await ask(rl, 'Developer organization name (e.g. john)', { validate: organizationError });
-    awsProfile = await ask(rl, 'DEPLOY_AWS_PROFILE', { defaultValue: DEFAULT_AWS_PROFILE, validate: profileError });
-    stage = await ask(rl, 'DEPLOY_STAGE', { defaultValue: DEFAULT_STAGE, validate: profileError });
+    options = {
+      organization: await ask(rl, output, 'Developer organization name (e.g. woody)', { validate: organizationError }),
+      backend: await ask(rl, output, 'Backend [local/remote]', { defaultValue: DEFAULT_BACKEND, validate: backendError }),
+      awsProfile: await ask(rl, output, 'DEPLOY_AWS_PROFILE', { defaultValue: DEFAULT_AWS_PROFILE, validate: profileError }),
+      stage: await ask(rl, output, 'DEPLOY_STAGE', { defaultValue: DEFAULT_STAGE, validate: profileError }),
+    };
   } finally {
     rl.close();
   }
 
-  fs.writeFileSync(ENV_PATH, buildEnvFile({ organization, awsProfile, stage }));
+  const contents = buildEnvFile(options);
 
-  process.stdout.write(`\nWrote ${ ENV_PATH }:\n`);
-  process.stdout.write(buildEnvFile({ organization, awsProfile, stage }));
+  if (!writeEnvFile(envPath, contents)) {
+    output.write(`\n${ envPath } already exists; leaving it unchanged.\n`);
+    return 'exists';
+  }
+
+  output.write(`\nWrote ${ envPath }:\n${ contents }`);
+  return 'created';
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  main().catch(error => {
+  runSetup().catch(error => {
     process.stderr.write(`Failed to create .env: ${ error.message }\n`);
     process.exitCode = 1;
   });
