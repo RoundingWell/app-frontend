@@ -9,6 +9,7 @@
   "homepage": "https://RoundingWell.com",
   "type": "module",
   "workspaces": [
+    "packages/care-ops-8x8",
     "packages/care-ops-auth",
     "packages/care-ops-config",
     "packages/care-ops-datadog",
@@ -118,6 +119,7 @@
   "dependencies": {
     "@formatjs/intl": "^4.1.8",
     "@mnjs/adapters": "5.0.0",
+    "@roundingwell/care-ops-8x8": "workspace:*",
     "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
     "@roundingwell/care-ops-datadog": "workspace:*",

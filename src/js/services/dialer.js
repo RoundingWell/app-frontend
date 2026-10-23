@@ -1,6 +1,9 @@
+import { omit } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import parsePhoneNumber from 'libphonenumber-js/min';
+
+import { EIGHTBYEIGHT_CALL_ID_FIELD } from '@roundingwell/care-ops-8x8/eightbyeight_constants.js';
 
 import App from 'js/base/app';
 
@@ -13,6 +16,7 @@ export default App.extend({
     'showPatientLinks': 'showPatientLinks',
     'five9Call': 'five9Call',
     'ringcentralCall': 'ringcentralCall',
+    'eightByEightCall': 'eightByEightCall',
   },
   radioEvents: {
     'change:currentPatientId': 'updateCurrentPatientId',
@@ -50,6 +54,12 @@ export default App.extend({
 
     if (dialerSetting === 'ringcentral') {
       const { default: DialerApp } = await import('@roundingwell/care-ops-ringcentral');
+
+      return { DialerApp, options: { patients } };
+    }
+
+    if (dialerSetting === '8x8') {
+      const { default: DialerApp } = await import('@roundingwell/care-ops-8x8');
 
       return { DialerApp, options: { patients } };
     }
@@ -117,6 +127,18 @@ export default App.extend({
       artifact: 'ringcentral-call-log',
       identifier: callData.callId,
       values,
+    });
+  },
+  eightByEightCall(values) {
+    const callData = omit(values.callData, 'callRecording');
+
+    Radio.request('entities', 'save:artifacts:model', {
+      artifact: '8x8-call-log',
+      identifier: callData[EIGHTBYEIGHT_CALL_ID_FIELD],
+      values: {
+        ...values,
+        callData,
+      },
     });
   },
   _addPatient(patient) {

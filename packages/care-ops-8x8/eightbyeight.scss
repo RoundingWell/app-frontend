@@ -1,0 +1,121 @@
+$eightbyeight-color: color(red);
+$eightbyeight-color-hover: color(red, dark);
+$eightbyeight-call-active: color(green);
+$eightbyeight-call-active-hover: color(green, dark);
+$eightbyeight-call-ended: color(red);
+$eightbyeight-call-ended-hover: color(red, dark);
+
+// TODO(8x8-demo): assumption 4. Panel size matches RingCentral
+// (300px wide, 80vh open, max 760px). Widen if the Work UI clips.
+body:has(.eightbyeight-wrapper) {
+  --dialer-clearance: calc(36px + var(--space-6));
+}
+
+body:has(.eightbyeight-wrapper.is-open) {
+  --dialer-clearance: calc(min(80vh, 760px) + var(--space-6));
+}
+
+.eightbyeight-wrapper {
+  border-radius: 8px 8px 0 0;
+  bottom: 0;
+  position: fixed;
+  right: 40px;
+  width: 300px;
+}
+
+.eightbyeight-panel {
+  background: white;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
+  display: flex;
+  flex-direction: column;
+  height: 36px;
+  max-height: 760px;
+  overflow: hidden;
+  transition: height 0.2s ease;
+
+  .eightbyeight-wrapper.is-open & {
+    height: 80vh;
+  }
+}
+
+.eightbyeight-panel__header {
+  align-items: center;
+  background-color: $eightbyeight-color;
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  font-weight: bold;
+  justify-content: space-between;
+  padding: 8px 16px;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+
+  .icon.fa-window-minimize {
+    transform: translateY(-4px);
+  }
+
+  &:hover {
+    background-color: $eightbyeight-color-hover;
+  }
+
+  &.is-call-active {
+    background-color: $eightbyeight-call-active;
+
+    &:hover {
+      background-color: $eightbyeight-call-active-hover;
+    }
+  }
+
+  &.is-call-ended {
+    background-color: $eightbyeight-call-ended;
+
+    &:hover {
+      background-color: $eightbyeight-call-ended-hover;
+    }
+  }
+}
+
+.eightbyeight-panel__patient-btn {
+  align-items: center;
+  background-color: white;
+  border: 1px solid $eightbyeight-color;
+  border-radius: 8px;
+  color: $eightbyeight-color;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  text-overflow: ellipsis;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+  white-space: nowrap;
+  width: 100%;
+
+  &:hover {
+    background-color: color(light_blue, light);
+  }
+
+  svg {
+    flex-shrink: 0;
+    margin: 0 6px;
+  }
+}
+
+.eightbyeight-panel__iframe {
+  min-height: 0;
+  pointer-events: none;
+  visibility: hidden;
+
+  .eightbyeight-wrapper.is-open & {
+    flex: 1 1 auto;
+    pointer-events: auto;
+    visibility: visible;
+  }
+}

@@ -593,4 +593,268 @@ context('Dialer Service', function() {
       .next()
       .should('contain', 'Other Patient');
   });
+
+  specify('8x8 - patient dashboard buttons', function() {
+    const currentClinician = getCurrentClinician({
+      attributes: {
+        settings: { dialer: '8x8' },
+      },
+    });
+
+    localStorage.setItem(`owned-by_${ currentClinician.id }_${ workspaceOne.id }-${ STATE_VERSION }`, JSON.stringify({
+      id: 'owned-by',
+      listType: 'flows',
+      flowsSortId: 'sortCreatedDesc',
+      clinicianId: currentClinician.id,
+      states: [stateTodo.id],
+      customFilters: {},
+    }));
+
+    cy
+      .routesForPatientAction()
+      .routeFlowActivity()
+      .routeCurrentClinician(fx => {
+        fx.data = currentClinician;
+
+        return fx;
+      })
+      .routeFlows(fx => {
+        fx.data = [testFlow];
+
+        fx.included.push(testPatient);
+
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = testFlow;
+
+        return fx;
+      }, { delay: 200 })
+      .routeFlowActions(fx => {
+        fx.data = [testAction];
+
+        fx.included.push(testFlow);
+
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = testAction;
+
+        return fx;
+      })
+      .routePatient(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientByFlow(fx => {
+        fx.data = testPatient;
+
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [testFlow];
+
+        return fx;
+      })
+      .routePatientActions(fx => {
+        fx.data = [testAction];
+
+        return fx;
+      })
+      .routeDashboards()
+      .visit(`/flow/${ testFlow.id }/action/${ testAction.id }`)
+      .wait('@routeFlow')
+      .wait('@routeActionActivity')
+      .wait('@routeActionComments')
+      .wait('@routeActionFiles');
+
+    cy
+      .get('[data-nav-content-region]')
+      .find('[data-worklists-region]')
+      .find('.app-nav__link')
+      .contains('Owned By')
+      .as('navOwnedByLink')
+      .click()
+      .wait('@routeFlows');
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .find('iframe')
+      .should('have.attr', 'src', 'https://cloud8.8x8.com/mashell/public/index.html?env=embeddable&nextgen=true');
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .find('[data-patient-buttons-region] button')
+      .should('have.length', 0);
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('dialer', 'showPatientLinks', {
+          actionId: testAction.id,
+          number: null,
+        });
+      });
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .find('[data-patient-buttons-region] button')
+      .as('patientButtons')
+      .should('have.length', 1)
+      .should('contain', 'Test Patient')
+      .click()
+      .wait('@routePatient')
+      .wait('@routePatientFlows')
+      .wait('@routePatientActions');
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('dialer', 'showPatientLinks', {
+          actionId: testAction.id,
+          number: null,
+        });
+      });
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy
+      .get('.workflow-page__tabs')
+      .find('.js-workflow-closed')
+      .click()
+      .wait('@routePatientFlows')
+      .wait('@routePatientActions');
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy
+      .get('.workflow-page__tabs')
+      .find('.js-workflow-open')
+      .click()
+      .wait('@routePatientFlows')
+      .wait('@routePatientActions');
+
+    cy
+      .get('@navOwnedByLink')
+      .click()
+      .wait('@routeFlows');
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 1);
+
+    cy
+      .get('.flow-card')
+      .contains('Test Flow')
+      .click()
+      .wait('@routeFlow');
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('dialer', 'showPatientLinks', {
+          actionId: testAction.id,
+          number: null,
+        });
+      });
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy
+      .get('.patient__context-trail .js-patient')
+      .click()
+      .wait('@routePatient')
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows');
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy
+      .get('.flow-card')
+      .contains('Test Flow')
+      .click();
+
+    cy
+      .get('@patientButtons', { timeout: 0 })
+      .should('have.length', 0);
+
+    cy
+      .wait('@routeFlow');
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy
+      .get('.app-nav')
+      .find('.app-nav__bottom')
+      .contains('Dashboards')
+      .click()
+      .wait('@routeDashboards');
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 1);
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('dialer', 'showPatientLinks', {
+          actionId: null,
+          number: null,
+        });
+      });
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 1);
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('dialer', 'showPatientLinks', null);
+      });
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 0);
+
+    cy.intercept({
+      method: 'GET',
+      url: '/api/patients?filter*',
+    }, {
+      body: {
+        data: searchResults,
+        included: [getResource(testPatient, 'patients')],
+      },
+    }).as('routePatientSearch');
+
+    cy
+      .getRadio(Radio => {
+        Radio.request('dialer', 'showPatientLinks', {
+          actionId: null,
+          number: '+16513216543',
+        });
+      });
+
+    cy
+      .get('@patientButtons')
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'Test Patient')
+      .next()
+      .should('contain', 'Other Patient');
+  });
 });
