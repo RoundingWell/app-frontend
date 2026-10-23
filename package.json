@@ -43,6 +43,7 @@
     "coverage:clear": "rimraf .nyc_output coverage",
     "coverage:report": "nyc report --reporter=html --reporter=text --reporter=lcovonly",
     "coverage:report:ci": "nyc report --reporter=lcovonly",
+    "predev": "node scripts/create-env.js",
     "dev": "vite -d",
     "test": "vite -m test & cypress open",
     "lint": "npm run eslint && npm run stylelint",

@@ -133,11 +133,19 @@ To develop against a remote AWS dev organization:
 
 #### Frontend Setup
 
-Create a `.env` file in the project root with your dev organization URL:
+`npm run dev` creates the `.env` file for you. It asks for your dev organization
+slug and defaults `DEPLOY_AWS_PROFILE` and `DEPLOY_STAGE` to `dev` (press Enter
+to accept, or type another value):
 ```env
+DEPLOY_AWS_PROFILE=dev
+DEPLOY_STAGE=dev
+DEPLOY_ORGANIZATION=john
 VITE_DEV_API_URL=https://john.roundingwell.dev
 ```
 _Note: Replace `john` with **your** organization slug._
+
+To set up `.env` without starting the server, run `node scripts/create-env.js`.
+An existing `.env` is never overwritten.
 
 ### Deploying the Frontend to a Dev Organization
 
