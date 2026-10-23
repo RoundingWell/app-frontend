@@ -69,7 +69,7 @@ const EmailView = View.extend({
 const NpiView = View.extend({
   className: 'pos--relative',
   template: hbs`
-    <input class="form-input form-input--primary w-100 js-input" value="{{ npi }}" />
+    <input class="form-input form-input--primary w-100 js-input" id="clinician-sidebar-npi" value="{{ npi }}" />
     <div class="form-error u-margin--b-4 js-error" hidden></div>
   `,
   ui: {
@@ -270,7 +270,7 @@ const SidebarView = View.extend({
     });
   },
   showSave() {
-    const error = this.getNpiError();
+    const error = this.serverNpiError || this.getNpiError();
 
     this.getChildView('npi').showError(error);
 
@@ -284,11 +284,16 @@ const SidebarView = View.extend({
   showDisabledSave() {
     this.showChildView('save', new DisabledSaveView());
   },
+  onChangeNpi() {
+    this.serverNpiError = null;
+    this.showSave();
+  },
   showForm() {
+    this.serverNpiError = null;
     this.cloneClinician();
     this.listenTo(this.clonedClinician, 'change:name', this.showSave);
     this.listenTo(this.clonedClinician, 'change:email', this.showSave);
-    this.listenTo(this.clonedClinician, 'change:npi', this.showSave);
+    this.listenTo(this.clonedClinician, 'change:npi', this.onChangeNpi);
 
     this.getRegion('save').empty();
 
@@ -313,6 +318,7 @@ const SidebarView = View.extend({
     }));
   },
   showErrors({ name, email, npi }) {
+    this.serverNpiError = npi || null;
     this.showName(name);
     this.showEmail(email);
     this.showNpi(npi);
