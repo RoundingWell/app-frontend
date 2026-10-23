@@ -79,6 +79,7 @@ $nav-row-width: calc(100% - 16px);
   &.is-selected {
     background-color: color(grey);
     color: #{$black-20};
+    font-weight: 600;
     position: relative;
 
     .icon {
