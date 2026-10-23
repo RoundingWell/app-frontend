@@ -176,7 +176,9 @@ export default defineConfig(({ mode }) => {
         '/packages/care-ops-auth/AuthProvider.js',
         '/packages/care-ops-auth/providers/workos.js',
       ]),
-      fontawesome(),
+      fontawesome({
+        localStatusIcons: !isProduction && !isTest && !env.VITE_DEV_API_URL,
+      }),
       isTest && babelPlugin,
       inlineHbsCompile(),
       handlebars(),

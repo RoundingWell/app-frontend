@@ -79,7 +79,7 @@ setup never changes authentication, permissions, or global settings.
 ## Releasing
 
 Releases are tag-based. CircleCI publishes a release artifact from version tags, and deploys consume that artifact.
-Deployment steps for local and CircleCI runs are documented in `docs/deploy.md`.
+Deployment steps for local and CircleCI runs are documented in the [deployment runbook](docs/deploy.md).
 
 Allowed release sources:
 - local branch `develop`
@@ -138,6 +138,16 @@ Create a `.env` file in the project root with your dev organization URL:
 VITE_DEV_API_URL=https://john.roundingwell.dev
 ```
 _Note: Replace `john` with **your** organization slug._
+
+### Deploying the Frontend to a Dev Organization
+
+With the repo `.env` file present and AWS SSO credentials available, replace `<your-org>` with your organization slug:
+
+```shell
+npm run deploy:dev -- --stage=dev --organization=<your-org>
+```
+
+See the [deployment runbook](docs/deploy.md) for AWS profile setup, `.env` defaults, and CircleCI deployment steps.
 
 ### Running the Development Server
 
