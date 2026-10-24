@@ -263,7 +263,7 @@ export default App.extend({
     ].filter(Boolean);
   },
   subscribe() {
-    Radio.request('ws', 'subscribe', this.getSubscriptionResources());
+    Radio.request('ws', 'subscribe', [this.patient, ...this.getSubscriptionResources()]);
   },
   unsubscribe() {
     Radio.request('ws', 'unsubscribe', this.getSubscriptionResources());

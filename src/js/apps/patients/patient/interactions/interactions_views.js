@@ -113,7 +113,7 @@ const InteractionsListView = CollectionView.extend({
     'select:date': 'select:date',
   },
   initialize() {
-    this.listenTo(this.getOption('interactions'), 'update reset', () => {
+    this.listenTo(this.getOption('interactions'), 'update reset sort change:occurred_at change:expected_at', () => {
       this.collection.set(groupInteractions(this.getOption('interactions')));
     });
   },
