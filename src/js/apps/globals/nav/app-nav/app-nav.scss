@@ -11,17 +11,14 @@ $nav-row-width: calc(100% - 16px);
 .app-nav {
   background-color: $bkg-color;
   color: rgb(255 255 255 / 60%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
   height: 100%;
   min-height: 0;
-  overflow: hidden auto;
+  overflow: hidden;
   position: relative;
   width: var(--app-nav-width);
 
   // A minimized nav is a floating rail: the container reserves the rail width
-  // and this element is absolute, so expand/collapse is a pure width swap.
+  // and this element is absolute, so reveal never resizes the content.
   &--minimized {
     left: 0;
     position: absolute;
@@ -34,6 +31,19 @@ $nav-row-width: calc(100% - 16px);
     box-shadow: 4px 0 16px rgb(0 0 0 / 18%);
     width: var(--app-nav-width);
   }
+}
+
+.app-nav__surface {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  overflow: hidden auto;
+  width: var(--app-nav-width);
+}
+
+.app-nav--rail:where(:not(.is-hover-motion)) .app-nav__surface {
+  width: var(--app-nav-rail-width);
 }
 
 .app-nav__picklist {
@@ -205,7 +215,7 @@ $nav-row-width: calc(100% - 16px);
   position: relative;
 }
 
-.app-nav--rail {
+.app-nav--rail:where(:not(.is-hover-motion)) {
   .app-nav__header {
     justify-items: center;
     padding: 12px;
@@ -221,10 +231,6 @@ $nav-row-width: calc(100% - 16px);
 
   .app-nav__label {
     display: none;
-  }
-
-  .app-nav__minimize-icon--expand {
-    display: inline;
   }
 
   .app-nav__search,
@@ -307,31 +313,28 @@ $nav-row-width: calc(100% - 16px);
   display: none;
 }
 
-// The collapse affordance shows whenever the nav is visually open — either the
-// full nav or a minimized nav expanded by an overlay.
+// The pin affordance follows the saved layout action, not hover visibility.
 .app-nav--expanded .app-nav__minimize-icon--collapse {
   display: inline;
 }
 
-.app-nav--overlay-expanded {
-  .app-nav__minimize-icon--collapse {
-    display: inline;
-  }
+.app-nav--minimized .app-nav__minimize-icon--expand {
+  display: inline;
+}
 
-  .app-nav__label--keep-open {
-    display: inline;
-  }
+.app-nav--minimized .app-nav__label--minimize {
+  display: none;
+}
 
-  .app-nav__label--minimize {
-    display: none;
-  }
+.app-nav--minimized:where(.is-full-nav-visible, .is-hover-motion) .app-nav__label--keep-open {
+  display: inline;
 }
 
 // On a narrow viewport the nav is minimized by the breakpoint, so "keep open"
 // can't pin it open — clicking the expanded drawer's button just closes it.
 // Swap the collapse caret + "keep open" for a close affordance.
-.app-nav--narrow-overlay-expanded {
-  .app-nav__minimize-icon--collapse {
+.app-nav--minimized:where(.is-narrow):where(.is-full-nav-visible, .is-hover-motion) {
+  .app-nav__minimize-icon--expand {
     display: none;
   }
 

@@ -948,7 +948,8 @@ context('App Nav', function() {
       .get('@minimizeMenuButton')
       .should('have.attr', 'aria-label', 'Close Menu')
       .should('contain', 'Close Menu')
-      .find('.fa-xmark');
+      .find('.fa-xmark')
+      .should('be.visible');
 
     cy
       .get('@minimizeMenuButton')
@@ -1011,6 +1012,12 @@ context('App Nav', function() {
     cy
       .routePrograms()
       .visit();
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .should('have.class', 'is-selected');
 
     cy
       .get('.app-nav')
