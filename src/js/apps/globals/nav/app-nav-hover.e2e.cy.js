@@ -63,7 +63,7 @@ context('Collapsed navigation hover', function() {
     expectOverlay(false);
 
     pointer('pointerover');
-    cy.tick(149);
+    cy.tick(119);
     expectOverlay(false);
 
     cy
@@ -147,7 +147,7 @@ context('Collapsed navigation hover', function() {
     // Navigation suppresses reopening until the pointer leaves and reenters.
     pointer('pointerout', 250);
     pointer('pointerover');
-    cy.tick(150);
+    cy.tick(120);
     expectOverlay(true);
   });
 
@@ -250,7 +250,7 @@ context('Collapsed navigation hover', function() {
     expectOverlay(false);
     pointer('pointerout', 250);
     pointer('pointerover');
-    cy.tick(150);
+    cy.tick(120);
     expectOverlay(true);
     expectSettled();
 
@@ -306,7 +306,7 @@ context('Collapsed navigation hover', function() {
 
     cy.clock(Date.now(), ['Date', 'setTimeout', 'clearTimeout']);
     pointer('pointerover');
-    cy.tick(150);
+    cy.tick(120);
 
     cy
       .get('.js-minimize-menu')
@@ -322,7 +322,7 @@ context('Collapsed navigation hover', function() {
       });
 
     pointer('pointerover');
-    cy.tick(150);
+    cy.tick(120);
 
     cy
       .get('.js-minimize-menu')
@@ -376,7 +376,7 @@ context('Collapsed navigation hover', function() {
     pointer('pointerdown', 25, { pointerType: 'touch' });
     pointer('pointerout', 250, { pointerType: 'touch' });
     pointer('pointerover');
-    cy.tick(150);
+    cy.tick(120);
 
     cy
       .get('.app-nav')

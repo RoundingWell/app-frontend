@@ -19,7 +19,7 @@ const i18n = intl.globals.appNav.appNavViews;
 // a single CSS cubic-bezier. Normalize each segment for Anime.js.
 // https://chromium.googlesource.com/chromium/src/+/refs/tags/156.0.8078.49/ui/gfx/animation/tween.cc#48
 const HOVER_OPEN_DURATION = 180;
-const HOVER_CLOSE_DURATION = 144;
+const HOVER_CLOSE_DURATION = 120;
 const splitX = 0.166666;
 const splitY = 0.4;
 const first = cubicBezier(0.05 / splitX, 0, 0.133333 / splitX, 0.06 / splitY);

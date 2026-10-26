@@ -13,7 +13,7 @@ import { AnnouncementView, WHATS_NEW_VERSION, showWhatsNew } from 'js/apps/globa
 
 // Viewport width at/below which the nav auto-collapses to the rail.
 const NAV_COLLAPSE_QUERY = '(max-width: 900px)';
-const HOVER_OPEN_DELAY = 150;
+const HOVER_OPEN_DELAY = 120;
 
 const dashboardsNav = new Backbone.Model({
   text: i18n.dashboardsNav.dashboards,
