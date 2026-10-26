@@ -317,7 +317,7 @@ context('worklist page', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized');
+      .should('have.class', 'app-nav--minimized');
 
     cy
       .get('.list-page__topbar')

@@ -2209,7 +2209,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .get('.app-nav')
-      .should('not.have.class', 'is-minimized')
+      .should('not.have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
   });
 

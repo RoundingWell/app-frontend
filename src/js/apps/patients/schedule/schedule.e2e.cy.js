@@ -1322,7 +1322,7 @@ context('schedule page', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized');
+      .should('have.class', 'app-nav--minimized');
 
     cy
       .get('.schedule-list__day-list')
@@ -1442,7 +1442,7 @@ context('schedule page', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized');
+      .should('have.class', 'app-nav--minimized');
 
     cy
       .get('.list-page__topbar')

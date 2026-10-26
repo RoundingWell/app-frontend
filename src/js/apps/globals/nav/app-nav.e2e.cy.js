@@ -746,7 +746,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
 
     cy
@@ -755,7 +755,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
 
     cy
@@ -775,7 +775,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('not.have.class', 'is-minimized')
+      .should('not.have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
 
     cy
@@ -789,7 +789,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
 
     cy
@@ -802,11 +802,11 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
   });
 
-  specify('minimized nav closes after selecting a destination', function() {
+  specify('minimized nav closes after keyboard selection', function() {
     localStorage.setItem(navMinimizedKey, true);
 
     cy
@@ -816,23 +816,45 @@ context('App Nav', function() {
     cy
       .get('[data-worklists-region]')
       .find('.app-nav__link')
-      .eq(1)
-      .focus();
-
-    cy
-      .get('.app-nav')
-      .should('have.class', 'is-overlay-expanded')
-      .should('have.class', 'is-full-nav-visible');
+      .first()
+      .should('have.class', 'is-selected');
 
     cy
       .get('[data-worklists-region]')
       .find('.app-nav__link')
       .eq(1)
-      .click();
+      .focus();
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
+      .should('have.class', 'is-full-nav-visible');
+
+    cy
+      .get('.app-nav')
+      .trigger('pointerover', { eventConstructor: 'PointerEvent', pointerType: 'mouse' });
+
+    cy
+      .window()
+      .then(win => win.focus());
+
+    cy
+      .focused()
+      .should('have.attr', 'aria-label', 'Schedule');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .eq(1)
+      .type('{enter}');
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/schedule');
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
   });
 
@@ -890,7 +912,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
   });
 
@@ -910,7 +932,7 @@ context('App Nav', function() {
     cy
       .get('.app-nav')
       .should('have.class', 'is-narrow')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
 
     cy
@@ -922,7 +944,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
 
     cy
@@ -932,7 +954,7 @@ context('App Nav', function() {
     cy
       .get('.app-nav')
       .should('have.class', 'is-narrow')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
 
     cy
@@ -941,14 +963,15 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-overlay-expanded')
+      .should('have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
 
     cy
       .get('@minimizeMenuButton')
       .should('have.attr', 'aria-label', 'Close Menu')
       .should('contain', 'Close Menu')
-      .find('.fa-xmark');
+      .find('.fa-xmark')
+      .should('be.visible');
 
     cy
       .get('@minimizeMenuButton')
@@ -962,7 +985,7 @@ context('App Nav', function() {
     cy
       .get('.app-nav')
       .should('have.class', 'is-narrow')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
   });
 
@@ -1013,8 +1036,14 @@ context('App Nav', function() {
       .visit();
 
     cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .should('have.class', 'is-selected');
+
+    cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible')
       .then($nav => {
         const PointerEvent = $nav[0].ownerDocument.defaultView.PointerEvent;
@@ -1111,7 +1140,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('have.class', 'is-minimized')
+      .should('have.class', 'app-nav--minimized')
       .should('not.have.class', 'is-full-nav-visible');
 
     cy
@@ -1121,7 +1150,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('not.have.class', 'is-minimized')
+      .should('not.have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
 
     cy
@@ -1140,7 +1169,7 @@ context('App Nav', function() {
 
     cy
       .get('.app-nav')
-      .should('not.have.class', 'is-minimized')
+      .should('not.have.class', 'app-nav--minimized')
       .should('have.class', 'is-full-nav-visible');
   });
 

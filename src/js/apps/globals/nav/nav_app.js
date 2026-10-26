@@ -13,6 +13,7 @@ import { AnnouncementView, WHATS_NEW_VERSION, showWhatsNew } from 'js/apps/globa
 
 // Viewport width at/below which the nav auto-collapses to the rail.
 const NAV_COLLAPSE_QUERY = '(max-width: 900px)';
+const HOVER_OPEN_DELAY = 120;
 
 const dashboardsNav = new Backbone.Model({
   text: i18n.dashboardsNav.dashboards,
@@ -160,6 +161,7 @@ export default RouterApp.extend({
     'focus:out': 'onFocusOut',
     'pointer:enter': 'onPointerEnter',
     'pointer:leave': 'onPointerLeave',
+    'pointer:down': 'onPointerDown',
   },
   createState() {
     return new StateModel();
@@ -173,10 +175,12 @@ export default RouterApp.extend({
 
     this._narrowQuery = window.matchMedia(NAV_COLLAPSE_QUERY);
     this._onNarrowQueryChange = () => {
+      this.cancelHoverTimer();
       this.getState().set('isNarrow', this._narrowQuery.matches);
     };
 
     this.listenTo(Radio.channel('user-activity'), 'body:down', this.onBodyDown);
+    this.listenTo(Radio.channel('user-activity'), 'document:keydown', this.onDocumentKeyDown);
 
     // Drop admin items the current user can't access — permissions are stable.
     const currentUser = Radio.request('bootstrap', 'currentUser');
@@ -202,6 +206,7 @@ export default RouterApp.extend({
     this.resetNavigationState();
   },
   resetNavigationState() {
+    this.cancelHoverTimer();
     this.getState().set({
       isFocusWithin: false,
       isHovering: false,
@@ -212,6 +217,7 @@ export default RouterApp.extend({
     });
   },
   onStop() {
+    this.cancelHoverTimer();
     this._narrowQuery.removeEventListener('change', this._onNarrowQueryChange);
     Radio.request('close-request', 'unregister', this);
   },
@@ -275,9 +281,14 @@ export default RouterApp.extend({
 
     this.getState().set('selectedNav', selectedNav);
 
-    // Navigating dismisses any transient expansion without changing the
-    // persisted minimized preference.
-    this.getState().closeOverlay();
+    // Navigation dismisses focus and drawers; a mouse preview stays until exit.
+    this.cancelHoverTimer();
+    this.getState().set({
+      isFocusWithin: false,
+      isNavDroplistOpen: false,
+      isTouchDrawerOpen: false,
+    });
+    this.getView()?.finishHoverMotion();
   },
   findNavItem(event, eventArgs) {
     if (event === 'dashboards:all') return dashboardsNav;
@@ -295,22 +306,68 @@ export default RouterApp.extend({
     this.adminNavDroplist.getState().set('selected', adminNavMenu.get(appName));
   },
   setTemporarilyMinimized(isMinimized) {
+    this.cancelHoverTimer();
     this.getState().set('temporaryMinimized', isMinimized);
   },
   onPointerEnter(evt) {
     if (!this.canHoverExpand(evt)) return;
 
-    this.getState().set('isHovering', true);
+    const state = this.getState();
+    if (!state.get('isMinimized')) return;
+
+    if (state.get('isFullNavVisible')) {
+      this.cancelHoverTimer();
+      this.getView().setHovering(true);
+      return;
+    }
+
+    if (this._hoverTimer) return;
+
+    this._hoverTimer = setTimeout(() => {
+      this._hoverTimer = null;
+      this.getView().setHovering(true);
+    }, HOVER_OPEN_DELAY);
+  },
+  cancelHoverTimer() {
+    clearTimeout(this._hoverTimer);
+    this._hoverTimer = null;
   },
   onPointerLeave(evt) {
     if (!this.canHoverExpand(evt)) return;
 
-    this.getState().set('isHovering', false);
+    this.cancelHoverTimer();
+    this.getView().setHovering(false);
+  },
+  onPointerDown(evt) {
+    this.cancelHoverTimer();
+    this.getView().preparePointerInteraction();
+
+    if (!this.canHoverExpand(evt) && this.getState().get('isHovering')) {
+      // A touch/pen taking over a mouse preview owns a drawer until selection.
+      this.getState().set({ isHovering: false, isTouchDrawerOpen: true });
+    }
+  },
+  onDocumentKeyDown(evt) {
+    if (evt.key !== 'Enter' && evt.key !== ' ') return;
+
+    const isFocusWithin = !!this.getView()?.el.contains(evt.target);
+    if (!isFocusWithin && !this.hasActiveNavDroplist()) return;
+
+    this.cancelHoverTimer();
+    this.getState().set({ isHovering: false, isFocusWithin });
+    this.getView()?.finishHoverMotion();
+  },
+  closeOverlay() {
+    this.cancelHoverTimer();
+    this.getState().closeOverlay();
+    this.getView()?.finishHoverMotion();
   },
   onFocusIn() {
     if (!this.getState().get('isMinimized')) return;
 
+    this.cancelHoverTimer();
     this.getState().set('isFocusWithin', true);
+    this.getView().finishHoverMotion();
   },
   onFocusOut() {
     this.getState().set('isFocusWithin', false);
@@ -318,7 +375,7 @@ export default RouterApp.extend({
   toggleTouchDrawer() {
     const shouldOpen = !this.getState().get('isTouchDrawerOpen');
 
-    this.getState().closeOverlay();
+    this.closeOverlay();
     this.getState().set('isTouchDrawerOpen', shouldOpen);
   },
   closeTouchDrawer() {
@@ -328,7 +385,7 @@ export default RouterApp.extend({
     const isOverlayVisible = this.getState().get('isMinimized') && this.getState().get('isFullNavVisible');
 
     if (isOverlayVisible) {
-      Radio.request('close-request', 'register', this, () => this.getState().closeOverlay());
+      Radio.request('close-request', 'register', this, () => this.closeOverlay());
       return;
     }
 
@@ -345,6 +402,10 @@ export default RouterApp.extend({
     return `whatsNewDismissed_${ WHATS_NEW_VERSION }_${ currentUser.id }`;
   },
   onBodyDown(evt) {
+    if (!this.canHoverExpand(evt)) {
+      this.cancelHoverTimer();
+      this.getState().set('isHovering', false);
+    }
     if (!this.getState().get('isTouchDrawerOpen')) return;
 
     const view = this.getView();
@@ -368,7 +429,7 @@ export default RouterApp.extend({
     // Otherwise the click toggles the persisted minimized preference.
     const isPinningOpen = state.get('isMinimized') && state.get('isFullNavVisible');
 
-    state.closeOverlay();
+    this.closeOverlay();
 
     if (!isPinningOpen) {
       state.set('userMinimized', !state.get('userMinimized'));
