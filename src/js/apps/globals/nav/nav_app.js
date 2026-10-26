@@ -160,6 +160,8 @@ export default RouterApp.extend({
     'focus:out': 'onFocusOut',
     'pointer:enter': 'onPointerEnter',
     'pointer:leave': 'onPointerLeave',
+    'pointer:move': 'onPointerMove',
+    'pointer:down': 'onPointerDown',
   },
   createState() {
     return new StateModel();
@@ -173,6 +175,7 @@ export default RouterApp.extend({
 
     this._narrowQuery = window.matchMedia(NAV_COLLAPSE_QUERY);
     this._onNarrowQueryChange = () => {
+      this.cancelHoverIntent();
       this.getState().set('isNarrow', this._narrowQuery.matches);
     };
 
@@ -202,6 +205,9 @@ export default RouterApp.extend({
     this.resetNavigationState();
   },
   resetNavigationState() {
+    this.cancelHoverIntent();
+    this._hoverBlocked = false;
+    this._pointerWithin = false;
     this.getState().set({
       isFocusWithin: false,
       isHovering: false,
@@ -212,6 +218,7 @@ export default RouterApp.extend({
     });
   },
   onStop() {
+    this.cancelHoverIntent();
     this._narrowQuery.removeEventListener('change', this._onNarrowQueryChange);
     Radio.request('close-request', 'unregister', this);
   },
@@ -277,7 +284,7 @@ export default RouterApp.extend({
 
     // Navigating dismisses any transient expansion without changing the
     // persisted minimized preference.
-    this.getState().closeOverlay();
+    this.closeOverlay();
   },
   findNavItem(event, eventArgs) {
     if (event === 'dashboards:all') return dashboardsNav;
@@ -295,22 +302,89 @@ export default RouterApp.extend({
     this.adminNavDroplist.getState().set('selected', adminNavMenu.get(appName));
   },
   setTemporarilyMinimized(isMinimized) {
+    this.cancelHoverIntent();
     this.getState().set('temporaryMinimized', isMinimized);
   },
   onPointerEnter(evt) {
     if (!this.canHoverExpand(evt)) return;
 
-    this.getState().set('isHovering', true);
+    this._pointerWithin = true;
+    this.startHoverIntent(evt);
+  },
+  onPointerMove(evt) {
+    if (this._hoverBlocked || this.getState().get('isFullNavVisible')) return;
+    if (!this.canHoverExpand(evt)) return;
+
+    this._pointerWithin = true;
+    this._hoverX = evt.clientX;
+    // A closing surface can still be visible outside the rail. Reentry only
+    // counts once the pointer reaches the stable rail boundary.
+    this.startHoverIntent(evt);
+  },
+  startHoverIntent(evt) {
+    const state = this.getState();
+    if (this._hoverBlocked || this._hoverTimer || !state.get('isMinimized') || state.get('isFullNavVisible')) return;
+
+    const rail = this.getView().getRailBounds();
+    if (evt.clientX < rail.left || evt.clientX > rail.right) return;
+
+    this._hoverX = evt.clientX;
+    this._hoverRailRight = rail.right;
+    this._hoverStarted = Date.now();
+    this._hoverEntryX = evt.clientX;
+    this._hoverSampleCount = 0;
+    this.sampleHoverIntent();
+  },
+  sampleHoverIntent() {
+    const now = Date.now();
+    this._hoverSampleCount++;
+    const elapsed = now - this._hoverStarted;
+    const nearEdge = this._hoverX >= this._hoverRailRight - 12;
+    // Chrome 156 defaults: 10ms samples, >50ms observation, 3 samples,
+    // <0.25 horizontal px/ms; the outermost 12px requires >200ms.
+    // https://chromium.googlesource.com/chromium/src/+/refs/tags/156.0.8078.49/chrome/browser/ui/views/frame/vertical_tab_strip_region_view.cc#1034
+    const isIntentional = elapsed > 50 && this._hoverSampleCount >= 3
+      && Math.abs(this._hoverX - this._hoverEntryX) / elapsed < 0.25
+      && (!nearEdge || elapsed > 200);
+
+    if (isIntentional) {
+      this.cancelHoverIntent();
+      this.getView().setHovering(true);
+      return;
+    }
+
+    this._hoverTimer = setTimeout(() => this.sampleHoverIntent(), 10);
+  },
+  cancelHoverIntent() {
+    clearTimeout(this._hoverTimer);
+    this._hoverTimer = null;
   },
   onPointerLeave(evt) {
     if (!this.canHoverExpand(evt)) return;
 
-    this.getState().set('isHovering', false);
+    this.cancelHoverIntent();
+    this._hoverBlocked = false;
+    this._pointerWithin = false;
+    this.getView().setHovering(false);
+  },
+  onPointerDown(evt) {
+    this._pointerWithin = this.canHoverExpand(evt);
+    this.cancelHoverIntent();
+    this._hoverBlocked = this._pointerWithin;
+    this.getView().preparePointerInteraction();
+  },
+  closeOverlay() {
+    this.cancelHoverIntent();
+    this._hoverBlocked = this._pointerWithin;
+    this.getState().closeOverlay();
+    this.getView()?.finishHoverMotion();
   },
   onFocusIn() {
     if (!this.getState().get('isMinimized')) return;
 
+    this.cancelHoverIntent();
     this.getState().set('isFocusWithin', true);
+    this.getView().finishHoverMotion();
   },
   onFocusOut() {
     this.getState().set('isFocusWithin', false);
@@ -318,7 +392,7 @@ export default RouterApp.extend({
   toggleTouchDrawer() {
     const shouldOpen = !this.getState().get('isTouchDrawerOpen');
 
-    this.getState().closeOverlay();
+    this.closeOverlay();
     this.getState().set('isTouchDrawerOpen', shouldOpen);
   },
   closeTouchDrawer() {
@@ -328,7 +402,7 @@ export default RouterApp.extend({
     const isOverlayVisible = this.getState().get('isMinimized') && this.getState().get('isFullNavVisible');
 
     if (isOverlayVisible) {
-      Radio.request('close-request', 'register', this, () => this.getState().closeOverlay());
+      Radio.request('close-request', 'register', this, () => this.closeOverlay());
       return;
     }
 
@@ -368,7 +442,7 @@ export default RouterApp.extend({
     // Otherwise the click toggles the persisted minimized preference.
     const isPinningOpen = state.get('isMinimized') && state.get('isFullNavVisible');
 
-    state.closeOverlay();
+    this.closeOverlay();
 
     if (!isPinningOpen) {
       state.set('userMinimized', !state.get('userMinimized'));

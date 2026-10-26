@@ -1,3 +1,4 @@
+import { animate, cubicBezier } from 'animejs';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
 
@@ -13,6 +14,19 @@ import WorkspaceMenuTemplate from './workspace-menu.hbs';
 import './app-nav.scss';
 
 const i18n = intl.globals.appNav.appNavViews;
+
+// Chrome 156 EASE_IN_OUT_EMPHASIZED is two joined cubic Beziers, not
+// a single CSS cubic-bezier. Normalize each segment for Anime.js.
+// https://chromium.googlesource.com/chromium/src/+/refs/tags/156.0.8078.49/ui/gfx/animation/tween.cc#48
+const HOVER_OPEN_DURATION = 200;
+const HOVER_CLOSE_DURATION = 160;
+const splitX = 0.166666;
+const splitY = 0.4;
+const first = cubicBezier(0.05 / splitX, 0, 0.133333 / splitX, 0.06 / splitY);
+const second = cubicBezier((0.208333 - splitX) / (1 - splitX), (0.82 - splitY) / (1 - splitY), (0.25 - splitX) / (1 - splitX), 1);
+const hoverEase = t => t < splitX ?
+  splitY * first(t / splitX) :
+  splitY + (1 - splitY) * second((t - splitX) / (1 - splitX));
 
 function getAppNavModeClassNames(isMinimized, isFullNavVisible) {
   if (!isMinimized) return ['app-nav--expanded', 'is-full-nav-visible'];
@@ -219,10 +233,12 @@ const AppNavView = View.extend({
     },
   },
   events: {
-    'focusin': 'onFocusIn',
-    'focusout': 'onFocusOut',
-    'pointerover': 'onPointerEnter',
-    'pointerout': 'onPointerLeave',
+    'focusin': 'onDomFocusIn',
+    'focusout': 'onDomFocusOut',
+    'pointerover': 'onDomPointerEnter',
+    'pointerout': 'onDomPointerLeave',
+    'pointermove': 'onDomPointerMove',
+    'pointerdown': 'onDomPointerDown',
   },
   template: LayoutTemplate,
   modelEvents: {
@@ -234,25 +250,77 @@ const AppNavView = View.extend({
     this.updateDisplayState();
   },
   updateDisplayState() {
+    const width = this.el.getBoundingClientRect().width;
+    this.finishHoverMotion();
+    if (!this._animateHover || !this.model.get('isMinimized') || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const opening = this.model.get('isFullNavVisible');
+    const style = getComputedStyle(this.el);
+    const targetWidth = parseFloat(style.getPropertyValue(opening ? '--app-nav-width' : '--app-nav-rail-width'));
+    this.el.classList.add('is-hover-motion');
+    this.el.style.width = `${ width }px`;
+    this._hoverAnimation = animate(this.el, {
+      width: targetWidth,
+      duration: opening ? HOVER_OPEN_DURATION : HOVER_CLOSE_DURATION,
+      ease: hoverEase,
+      onComplete: () => this.finishHoverMotion(),
+    });
+  },
+  setHovering(isHovering) {
+    this._animateHover = true;
+    this.model.set('isHovering', isHovering);
+    this._animateHover = false;
+  },
+  preparePointerInteraction() {
+    // Keep a closing button under the pointer through native mouseup/click.
+    if (this._hoverAnimation && !this.model.get('isFullNavVisible')) {
+      this.model.set('isHovering', true);
+    }
+    this.finishHoverMotion();
+  },
+  finishHoverMotion() {
+    this._hoverAnimation?.cancel();
+    this._hoverAnimation = null;
+    this.el.style.removeProperty('width');
     this.el.className = getAppNavClassName(this.model);
   },
-  onPointerEnter(evt) {
+  getRailBounds() {
+    const left = this.el.getBoundingClientRect().left;
+    const width = parseFloat(getComputedStyle(this.el).getPropertyValue('--app-nav-rail-width'));
+    return { left, right: left + width };
+  },
+  onBeforeDestroy() {
+    this.finishHoverMotion();
+  },
+  onDomPointerMove(evt) {
+    this.triggerMethod('pointer:move', evt);
+  },
+  onDomPointerDown(evt) {
+    this._pointerFocusTarget = evt.target;
+    this.triggerMethod('pointer:down', evt);
+  },
+  onDomPointerEnter(evt) {
     if (this.el.contains(evt.relatedTarget)) return;
 
-    this.trigger('pointer:enter', evt);
+    this.triggerMethod('pointer:enter', evt);
   },
-  onPointerLeave(evt) {
+  onDomPointerLeave(evt) {
     if (this.el.contains(evt.relatedTarget)) return;
 
-    this.trigger('pointer:leave', evt);
+    this.triggerMethod('pointer:leave', evt);
   },
-  onFocusIn(evt) {
-    this.trigger('focus:in', evt);
+  onDomFocusIn(evt) {
+    const isPointerFocus = evt.target.contains(this._pointerFocusTarget);
+    this._pointerFocusTarget = null;
+    if (isPointerFocus) return;
+
+    this.triggerMethod('focus:in', evt);
   },
-  onFocusOut(evt) {
+  onDomFocusOut(evt) {
+    if (!evt.relatedTarget?.contains(this._pointerFocusTarget)) this._pointerFocusTarget = null;
     if (this.el.contains(evt.relatedTarget)) return;
 
-    this.trigger('focus:out', evt);
+    this.triggerMethod('focus:out', evt);
   },
 });
 

@@ -1013,6 +1013,12 @@ context('App Nav', function() {
       .visit();
 
     cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link')
+      .first()
+      .should('have.class', 'is-selected');
+
+    cy
       .get('.app-nav')
       .should('have.class', 'is-minimized')
       .should('not.have.class', 'is-full-nav-visible')
