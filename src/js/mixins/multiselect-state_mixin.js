@@ -15,7 +15,7 @@ export default {
     return clone(this.get(`${ this.getType() }Selected`));
   },
   isSelected(model) {
-    const selectedList = this.getSelectedList();
+    const selectedList = this.get(`${ this.getType() }Selected`);
 
     return !!selectedList[model.id];
   },
