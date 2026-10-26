@@ -11,8 +11,8 @@ context('Global Error Page', function() {
 
     cy
       .get('.error-page')
-      .should('contain', 'Something went wrong.')
-      .and('contain', ' This page doesn\'t exist.');
+      .should('contain', 'This page doesn\'t exist.')
+      .and('contain', 'Please check the URL.');
 
     cy
       .get('.error-page')
@@ -30,8 +30,8 @@ context('Global Error Page', function() {
 
     cy
       .get('.error-page')
-      .should('contain', 'Something went wrong.')
-      .and('contain', ' This page doesn\'t exist.');
+      .should('contain', 'This page doesn\'t exist.')
+      .and('contain', 'Please check the URL.');
 
     cy
       .get('.error-page')
@@ -67,18 +67,23 @@ context('Global Error Page', function() {
       .should('contain', '/one/');
   });
 
-  specify('non-json error', function() {
+  specify('non-json bootstrap error shows startup recovery', function() {
     cy
       .intercept('GET', '/api/clinicians/me', {
         statusCode: 403,
         body: '<html><body>403 Forbidden</body></html>',
       })
       .as('routeCurrentClinician')
-      .visit({ noWait: true });
+      .visit({ noWait: true })
+      .wait('@routeCurrentClinician');
 
     cy
-      .get('.error-page')
-      .should('contain', 'Error code: 403.');
+      .get('.startup__error')
+      .should('be.visible')
+      .and('contain', 'We couldn\'t load your workspace')
+      .find('.js-retry')
+      .should('be.visible')
+      .and('not.be.disabled');
   });
 
   specify('workspace error', function() {

@@ -1,20 +1,20 @@
 <div class="patient-search__tip">{{ @intl.globals.search.patientSearchViews.emptyView.searchTip }}</div>
 <div class="patient-search__search-by">
   <div class="patient-search__search-by-title">{{ @intl.globals.search.patientSearchViews.emptyView.searchBy }}</div>
-  <div class="u-margin--t-8 qa-search-option">
+  <div class="patient-search__search-option u-margin--t-8 qa-search-option">
     <span class="patient-search__search-by-label">{{ @intl.globals.search.patientSearchViews.emptyView.exampleDobLabel }}</span>
-    {{ @intl.globals.search.patientSearchViews.emptyView.exampleDob }}
+    <span class="patient-search__search-by-example">{{ @intl.globals.search.patientSearchViews.emptyView.exampleDob }}</span>
   </div>
   {{#each settings.identifiers}}
-    <div class="u-margin--t-8 qa-search-option">
+    <div class="patient-search__search-option u-margin--t-8 qa-search-option">
       <span class="patient-search__search-by-label">{{this.label}}</span>
-      {{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}
+      <span class="patient-search__search-by-example">{{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}</span>
     </div>
   {{/each}}
   {{#each settings.queries}}
-    <div class="u-margin--t-8 qa-search-option">
+    <div class="patient-search__search-option u-margin--t-8 qa-search-option">
       <span class="patient-search__search-by-label">{{this.label}}</span>
-      {{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}
+      <span class="patient-search__search-by-example">{{ @intl.globals.search.patientSearchViews.emptyView.exampleId }} {{this.example}}</span>
     </div>
   {{/each}}
 </div>

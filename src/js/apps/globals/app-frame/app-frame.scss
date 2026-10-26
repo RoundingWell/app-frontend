@@ -24,24 +24,11 @@
   }
 }
 
-@keyframes reveal-content {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
+// Keep page layers below shell navigation without relying on an animation.
 .app-frame__content {
   background-color: var(--color-page-bg);
-  opacity: 0;
+  isolation: isolate;
   overflow: hidden auto;
-
-  &:not(:empty) {
-    animation: 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) 0s reveal-content forwards;
-  }
 }
 
 .app-frame__sidebar {

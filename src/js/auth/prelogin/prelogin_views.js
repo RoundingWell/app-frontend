@@ -6,7 +6,6 @@ import PreloadRegion from 'js/regions/preload_region';
 
 import PreloginTemplate from './prelogin.hbs';
 import LoginPromptTemplate from './login-prompt.hbs';
-import NotSetupTemplate from './not-setup.hbs';
 
 import './prelogin.scss';
 
@@ -39,31 +38,6 @@ const LoginPromptView = View.extend({
   },
 });
 
-const NotSetupView = View.extend({
-  className: 'prelogin__message',
-  template: NotSetupTemplate,
-});
-
-const PreloaderView = View.extend({
-  className: 'fill-window',
-  regions: {
-    content: {
-      el: '[data-content-region]',
-      regionClass: PreloadRegion,
-    },
-  },
-  template: PreloginTemplate,
-  onRender() {
-    if (this.getOption('notSetup')) {
-      this.showChildView('content', new NotSetupView());
-      return;
-    }
-
-    this.getRegion('content').startPreloader({ variant: 'generic' });
-  },
-});
-
 export {
-  PreloaderView,
   LoginPromptView,
 };

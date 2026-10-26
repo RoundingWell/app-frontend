@@ -9,6 +9,7 @@ import intl from 'js/i18n';
 
 import PreloadRegion from 'js/regions/preload_region';
 
+import DialogFocusBehavior from 'js/behaviors/dialog-focus';
 import IframeFormBehavior from 'js/behaviors/iframe-form';
 import ModalTemplate from './modal.hbs';
 
@@ -17,12 +18,23 @@ const i18n = intl.globals.modal.modalViews;
 const ReplaceElRegion = Region.extend({ replaceElement: true, timeout: 0 });
 
 const ModalView = View.extend({
-  className: 'modal',
+  behaviors: [DialogFocusBehavior],
+  className: 'modal modal--dialog',
+  attributes() {
+    return {
+      'aria-label': this.headingText,
+      'aria-modal': 'true',
+      'role': 'dialog',
+      'tabindex': '-1',
+    };
+  },
+  headingText: i18n.modalView.defaultHeading,
   buttonClass: 'button button--positive',
   bodyClass: 'modal__content',
   headerClass: 'modal__header',
   headerIconType: 'far',
   cancelText: i18n.modalView.cancelText,
+  closeText: i18n.modalView.closeText,
   submitText: i18n.modalView.submitText,
   regionClass: ReplaceElRegion,
   regions: {
@@ -81,7 +93,7 @@ const ModalView = View.extend({
 });
 
 const SmallModalView = ModalView.extend({
-  className: 'modal modal--small',
+  className: 'modal modal--dialog modal--small',
   bodyClass: 'modal__content modal__content--small',
   headerClass: 'modal__header modal__header--small',
 });
@@ -89,9 +101,10 @@ const SmallModalView = ModalView.extend({
 const IframeFormView = View.extend({
   behaviors: [IframeFormBehavior],
   className: 'modal__form-iframe',
-  template: hbs`<iframe src="{{ url }}"></iframe>`,
+  template: hbs`<iframe src="{{ url }}" title="{{ title }}"></iframe>`,
   templateContext() {
     return {
+      title: this.model.get('name'),
       url: this.model.getFormUrl({ modal: 1 }),
     };
   },

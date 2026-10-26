@@ -36,7 +36,7 @@ function showWhatsNew() {
   return Radio.request('modal', 'show', {
     bodyView: new DesignUpdateView(),
     cancelText: false,
-    className: 'modal modal--form modal--form-large whats-new-modal',
+    className: 'modal modal--dialog modal--form-large whats-new-modal',
     headingText: intl.globals.appNav.appNavViews.whatsNew.modal.heading,
     headerIcon: 'circle-info',
     submitText: intl.globals.appNav.appNavViews.whatsNew.modal.done,

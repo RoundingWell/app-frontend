@@ -29,6 +29,7 @@ export default Behavior.extend({
 
     // mouseover is delegated; ignore movement within the same item below.
     evts[`mouseover ${ this.getOption('items') }`] = this.onHoverItem;
+    evts[`focusin ${ this.getOption('items') }`] = this.onFocusItem;
 
     return evts;
   },
@@ -37,6 +38,10 @@ export default Behavior.extend({
   onAttach() {
     const items = this.getItems();
     this.scrollTo(items, items.filter(item => item.classList.contains('is-selected')), 'middle');
+  },
+
+  onFocusItem(evt) {
+    this.updateTransport(this.getItems(), [evt.delegateTarget]);
   },
 
   onHoverItem(evt) {

@@ -87,8 +87,6 @@ function mount(getView = () => new View({ template: false })) {
     app.setView(rootView);
     app.showView();
 
-    rootView.getRegion('preloader').empty();
-
     const view = getView(rootView);
 
     rootView.appView.showChildView('region', view);

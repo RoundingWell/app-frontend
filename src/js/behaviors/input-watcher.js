@@ -56,6 +56,10 @@ export default Behavior.extend({
     this.triggerWatchChange();
   }, 1),
 
+  onWatchInput() {
+    this.triggerWatchChange();
+  },
+
   triggerWatchChange() {
     const watchText = this.getWatchText();
 
