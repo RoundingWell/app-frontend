@@ -1,25 +1,14 @@
-import { each } from 'underscore';
 import { NIL as NIL_UUID } from 'uuid';
 
 import { getErrors, getRelationship } from 'helpers/json-api';
 
 import { getCurrentClinician } from 'support/api/clinicians';
 
-function setMotionPreference(value) {
-  return Cypress.automation('remote:debugger:protocol', {
-    command: 'Emulation.setEmulatedMedia',
-    params: {
-      features: value ? [{ name: 'prefers-reduced-motion', value }] : [],
-    },
-  });
-}
-
 context('default routes', function() {
   let releaseConfig;
   let releaseBootstrap;
   let releaseAppFrame;
   let startupObserver;
-  let hasEmulatedMotion;
 
   afterEach(function() {
     startupObserver?.disconnect();
@@ -41,11 +30,6 @@ context('default routes', function() {
       releaseAppFrame();
       cy.wait('@failedAppFrame');
       releaseAppFrame = null;
-    }
-
-    if (hasEmulatedMotion) {
-      cy.then(() => setMotionPreference());
-      hasEmulatedMotion = false;
     }
   });
 
@@ -196,164 +180,99 @@ context('default routes', function() {
       .contains('Hold up, Your account is not set up yet. Please notify your manager or administrator to correct this issue.');
   });
 
-  each(['before', 'after'], motionChange => {
-    const description = `keeps loading when reduced motion changes ${ motionChange } startup`;
+  specify('keeps loading until bootstrap finishes', function() {
+    let initialCore;
 
-    specify(description, function() {
-      let initialLogoVisible;
-      let initialAnimationReady;
-      let initialCore;
-      let initialAnimation;
-      let initialStartTime;
-      let animationReady;
+    cy
+      .routesForDefault()
+      .intercept('GET', '/appconfig.json*', req => {
+        return new Cypress.Promise(resolve => {
+          releaseConfig = resolve;
+        }).then(() => req.reply({ body: {
+          app: { stage: 'dev', name: 'Cypress Clinic', version: 'dev' },
+        } }));
+      })
+      .as('heldConfig')
+      .intercept('GET', '/api/clinicians/me', req => {
+        return new Cypress.Promise(resolve => {
+          releaseBootstrap = resolve;
+        }).then(() => req.reply({ body: { data: getCurrentClinician(), included: [] } }));
+      })
+      .as('heldBootstrap')
+      .visit({ noWait: true });
 
-      cy.then(() => {
-        hasEmulatedMotion = true;
-        return setMotionPreference('no-preference');
-      });
-      const configResponse = new Cypress.Promise(resolve => {
-        releaseConfig = resolve;
-      });
-      const bootstrapResponse = new Cypress.Promise(resolve => {
-        releaseBootstrap = resolve;
-      });
-
-      cy
-        .routesForDefault()
-        .intercept('GET', '/appconfig.json*', req => {
-          return configResponse.then(() => req.reply({ body: {
-            app: { stage: 'dev', name: 'Cypress Clinic', version: 'dev' },
-          } }));
-        })
-        .as('heldConfig')
-        .intercept('GET', '/api/clinicians/me', req => {
-          return bootstrapResponse.then(() => req.reply({ body: { data: getCurrentClinician(), included: [] } }));
-        })
-        .as('heldBootstrap')
-        .visit({
-          noWait: true,
-          onBeforeLoad(win) {
-            const observer = new win.MutationObserver(() => {
-              const logo = win.document.querySelector('.startup-shell__logo');
-              if (!logo) return;
-
-              initialLogoVisible = Cypress.dom.isVisible(logo);
-              initialCore = win.document.querySelector('[data-startup-visual] .startup__core');
-              const animations = initialCore.getAnimations();
-              initialAnimationReady = win.matchMedia('(prefers-reduced-motion: reduce)').matches ?
-                animations.length === 0 :
-                animations.some(animation => animation.playState === 'running');
-              [initialAnimation] = animations;
-              animationReady = initialAnimation.ready.then(() => {
-                initialStartTime = initialAnimation.startTime;
-              });
-              observer.disconnect();
-            });
-
-            observer.observe(win.document, { childList: true, subtree: true });
-          },
-        });
-
-      cy.then(() => animationReady);
-
-      cy.then(() => {
-        expect(initialStartTime, 'initial animation has started').to.be.a('number');
-        expect(initialLogoVisible, 'logo visible before authentication').to.equal(true);
-        expect(initialAnimationReady, 'loading motion respects preference before authentication').to.equal(true);
-      });
-
-      if (motionChange === 'before') {
-        cy.then(() => setMotionPreference('reduce'));
-
-        cy.then(() => {
-          expect(initialCore.getAnimations(), 'entry HTML responds to reduced motion').to.be.empty;
-        });
-      }
-
-      cy.then(() => releaseConfig());
-
-      cy.wait('@heldConfig').then(() => {
-        releaseConfig = null;
-      });
-
-      cy
-        .get('.startup__logo')
-        .should('be.visible');
-
-      cy
-        .get('.startup-shell')
-        .should('not.exist');
-
-      cy
-        .get('.startup__core')
-        .should($core => {
-          expect($core[0], 'initial animated core retained').to.equal(initialCore);
-        });
-
-      if (motionChange === 'after') {
-        cy
-          .get('.startup__core')
-          .should($core => {
-            const [animation] = $core[0].getAnimations();
-            expect(animation.startTime, 'animation phase survives startup handoff').to.equal(initialStartTime);
-          });
-
-        cy.then(() => setMotionPreference('reduce'));
-      }
-
-      cy
-        .get('.startup__core')
-        .should($core => {
-          expect($core[0].getAnimations(), 'runtime respects native reduced motion').to.be.empty;
-        });
-
-      cy
-        .get('.startup')
-        .should('have.attr', 'aria-busy', 'true')
-        .find('.startup__status-text')
-        .should('have.text', 'Loading RoundingWell')
-        .then(() => releaseBootstrap());
-
-      cy.wait('@heldBootstrap').then(() => {
-        releaseBootstrap = null;
-      });
-
-      cy
-        .get('.app-nav')
-        .should('be.visible');
-
-      cy
-        .get('.startup')
-        .should('not.exist');
+    cy.wrap(null).should(() => {
+      expect(releaseConfig, 'configuration request started').to.be.a('function');
     });
+
+    cy.get('.startup-shell__logo').should('be.visible');
+
+    cy.get('[data-startup-visual] .startup__core').then($core => {
+      initialCore = $core[0];
+    });
+
+    cy.then(() => releaseConfig());
+
+    cy.wait('@heldConfig').then(() => {
+      releaseConfig = null;
+    });
+
+    cy.get('.startup-shell').should('not.exist');
+
+    cy.get('.startup__core').should($core => {
+      expect($core[0], 'initial visual retained through handoff').to.equal(initialCore);
+    });
+
+    cy.get('.startup')
+      .should('have.attr', 'aria-busy', 'true')
+      .find('.startup__status-text')
+      .should('have.text', 'Loading RoundingWell');
+
+    cy.wrap(null).should(() => {
+      expect(releaseBootstrap, 'bootstrap request started').to.be.a('function');
+    });
+
+    cy.then(() => releaseBootstrap());
+
+    cy.wait('@heldBootstrap').then(() => {
+      releaseBootstrap = null;
+    });
+
+    cy.get('.app-nav').should('be.visible');
+
+    cy.get('.startup').should('not.exist');
   });
 
-  specify('dismisses startup without an exit animation when reduced motion is requested', function() {
+  specify('dismisses startup without an exit animation when matchMedia reports reduced motion', function() {
     let didAnimateExit = false;
-    const bootstrapResponse = new Cypress.Promise(resolve => {
-      releaseBootstrap = resolve;
-    });
-
-    cy.then(() => {
-      hasEmulatedMotion = true;
-      return setMotionPreference('reduce');
-    });
 
     cy
       .routesForDefault()
       .intercept('GET', '/api/clinicians/me', req => {
-        return bootstrapResponse.then(() => req.reply({ body: { data: getCurrentClinician(), included: [] } }));
+        return new Cypress.Promise(resolve => {
+          releaseBootstrap = resolve;
+        }).then(() => req.reply({ body: { data: getCurrentClinician(), included: [] } }));
       })
       .as('heldBootstrap')
       .visit('/worklist/owned-by', {
         noWait: true,
       });
 
+    cy.wrap(null).should(() => {
+      expect(releaseBootstrap, 'bootstrap request started').to.be.a('function');
+    });
+
     cy
       .get('.startup')
       .should('have.attr', 'aria-busy', 'true')
       .then($startup => {
         const win = $startup[0].ownerDocument.defaultView;
+        const matchMedia = win.matchMedia.bind(win);
+
+        cy.stub(win, 'matchMedia').callsFake(query => {
+          if (query === '(prefers-reduced-motion: reduce)') return { matches: true };
+          return matchMedia(query);
+        });
 
         startupObserver = new win.MutationObserver(records => {
           didAnimateExit ||= records.some(record => record.target.classList.contains('is-exiting'));

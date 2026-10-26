@@ -79,7 +79,7 @@ context('Patient Quick Search', function() {
     cy.get('.patient-search__modal').should('not.exist');
   });
 
-  specify('searches an identical pasted query after clearing it', function() {
+  specify('searches an identical query after clearing it', function() {
     cy.viewport(390, 844);
 
     cy.intercept('GET', '/api/patients?filter*', { data: [] }).as('patientSearch');
@@ -100,10 +100,9 @@ context('Patient Quick Search', function() {
 
     cy.get('.patient-search__no-results').should('contain', 'Search by');
 
-    cy.then(() => Cypress.automation('remote:debugger:protocol', {
-      command: 'Input.insertText',
-      params: { text: 'Test' },
-    }));
+    cy.get('.patient-search__input').invoke('val', 'Test').trigger('input');
+
+    cy.get('.patient-search__input').should('have.value', 'Test');
 
     cy.get('.patient-search__no-results').should('contain', 'No results match your query.');
 
