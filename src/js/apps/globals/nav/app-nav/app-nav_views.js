@@ -299,6 +299,11 @@ const AppNavView = View.extend({
     this.triggerMethod('focus:in', evt);
   },
   onDomFocusOut(evt) {
+    if (!evt.relatedTarget && evt.target === this.el.ownerDocument.activeElement) {
+      if (!this.model.get('isFocusWithin')) this._pointerFocusTarget = evt.target;
+      return;
+    }
+
     if (!evt.relatedTarget?.contains(this._pointerFocusTarget)) this._pointerFocusTarget = null;
     if (this.el.contains(evt.relatedTarget)) return;
 
