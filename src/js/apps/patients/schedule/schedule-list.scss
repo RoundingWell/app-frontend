@@ -307,6 +307,12 @@
   }
 }
 
+@media (width > 720px) {
+  .schedule-list-page {
+    --list-page-header-border-bottom: 0;
+  }
+}
+
 @media (width <= 560px) {
   .schedule-list__list-row {
     padding-inline: var(--space-4);
