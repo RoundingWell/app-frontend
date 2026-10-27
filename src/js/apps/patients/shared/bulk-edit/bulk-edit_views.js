@@ -28,7 +28,9 @@ function hasDerivedValueChanged(model, field) {
 function getIsOverdue(date, time) {
   if (!date) return false;
 
-  const dueDateTime = dayjs(time ? `${ date } ${ time }` : date);
+  if (!time) return dayjs(date).isBefore(dayjs(), 'day');
+
+  const dueDateTime = dayjs(`${ date } ${ time }`);
 
   return dueDateTime.isBefore(dayjs(), 'day') || dueDateTime.isBefore(dayjs(), 'minute');
 }
@@ -254,7 +256,7 @@ const BulkEditActionsBodyView = View.extend({
       });
     }
 
-    const isOverdue = getIsOverdue(this.model.get('date'));
+    const isOverdue = getIsOverdue(this.model.get('date'), this.model.get('time'));
 
     return new DueView({
       date: this.model.get('date'),
@@ -322,11 +324,11 @@ const BulkEditActionsBodyView = View.extend({
     this.showChildView('owner', ownerComponent);
   },
   showChangedDueDateTime() {
-    if (this.model.hasChanged('dateMulti') || this.model.hasChanged('date')) {
-      this.showDueDateTime();
-    } else if (hasDerivedValueChanged(this.model, 'time')) {
-      this.showDueTime();
-    }
+    const hasDueChanged = some(['dateMulti', 'date', 'timeMulti', 'time'], field => this.model.hasChanged(field));
+
+    if (!hasDueChanged) return;
+
+    this.showDueDateTime();
   },
   showDueDateTime() {
     this.showDueDate();
