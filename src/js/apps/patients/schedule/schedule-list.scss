@@ -1,10 +1,14 @@
 .schedule-list-page {
   --list-page-title-icon-margin-right: var(--space-2);
   --list-page-topbar-columns: minmax(0, 1fr) auto;
+  --patient-list-page-expanded-filters-padding: var(--space-3) var(--space-4);
+  --patient-list-page-default-filters-padding: var(--space-3) var(--space-1);
+  --patient-list-page-header-secondary-height: 48px;
+  --patient-list-page-responsive-filters-padding: var(--space-3) var(--space-1);
 }
 
-.schedule-list-page .patient-list-page__selection {
-  --button-checkbox-justify-content: center;
+.schedule-list__list {
+  padding-top: var(--space-3);
 }
 
 .schedule-list__list-row {
@@ -32,7 +36,7 @@
   line-height: 36px;
   margin-right: 4px;
   text-align: center;
-  transform: translateX(-4px);
+  transform: translateX(-12px);
   width: 40px;
 
   &.is-today {
@@ -232,6 +236,8 @@
 }
 
 .schedule-list__check {
+  --button-checkbox-justify-content: flex-start;
+
   align-items: center;
   display: flex;
   height: 100%;
@@ -310,6 +316,12 @@
 @media (width > 720px) {
   .schedule-list-page {
     --list-page-header-border-bottom: 0;
+  }
+}
+
+@media (width <= 1024px) {
+  .schedule-list-page .patient-list-page__filters:has(.patient-list-page__bulk-edit:not(:empty)) {
+    --patient-list-page-responsive-filters-padding: var(--patient-list-page-expanded-filters-padding);
   }
 }
 
