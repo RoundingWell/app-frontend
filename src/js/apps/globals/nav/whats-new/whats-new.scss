@@ -10,11 +10,12 @@
   color: #{$white};
   margin: 16px 8px 12px;
   min-height: 184px;
+  opacity: var(--app-nav-announcement-opacity, 1);
   padding: 16px 12px 18px;
   position: relative;
 }
 
-.app-nav--rail .app-nav__announcement {
+.app-nav:where(:not(.is-full-nav-visible, .is-hover-motion)) .app-nav__announcement {
   display: none;
 }
 
