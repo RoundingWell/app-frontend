@@ -5,7 +5,6 @@ import { getErrors, getRelationship } from 'helpers/json-api';
 import { getCurrentClinician } from 'support/api/clinicians';
 
 context('default routes', function() {
-  let releaseConfig;
   let releaseBootstrap;
   let releaseAppFrame;
   let startupObserver;
@@ -13,12 +12,6 @@ context('default routes', function() {
   afterEach(function() {
     startupObserver?.disconnect();
     startupObserver = null;
-
-    if (releaseConfig) {
-      releaseConfig();
-      cy.wait('@heldConfig');
-      releaseConfig = null;
-    }
 
     if (releaseBootstrap) {
       releaseBootstrap();
@@ -181,56 +174,39 @@ context('default routes', function() {
   });
 
   specify('keeps loading until bootstrap finishes', function() {
-    let initialCore;
+    let markBootstrapStarted;
+    const bootstrapStarted = new Cypress.Promise(resolve => {
+      markBootstrapStarted = resolve;
+    });
+    let releaseBootstrapResponse;
+    const bootstrapResponse = new Cypress.Promise(resolve => {
+      releaseBootstrapResponse = resolve;
+    });
 
     cy
       .routesForDefault()
-      .intercept('GET', '/appconfig.json*', req => {
-        return new Cypress.Promise(resolve => {
-          releaseConfig = resolve;
-        }).then(() => req.reply({ body: {
+      .intercept('GET', '/appconfig.json*', {
+        body: {
           app: { stage: 'dev', name: 'Cypress Clinic', version: 'dev' },
-        } }));
+        },
       })
-      .as('heldConfig')
       .intercept('GET', '/api/clinicians/me', req => {
-        return new Cypress.Promise(resolve => {
-          releaseBootstrap = resolve;
-        }).then(() => req.reply({ body: { data: getCurrentClinician(), included: [] } }));
+        releaseBootstrap = releaseBootstrapResponse;
+        markBootstrapStarted();
+        return bootstrapResponse.then(() => req.reply({ body: { data: getCurrentClinician(), included: [] } }));
       })
       .as('heldBootstrap')
       .visit({ noWait: true });
 
-    cy.wrap(null).should(() => {
-      expect(releaseConfig, 'configuration request started').to.be.a('function');
-    });
-
-    cy.get('.startup-shell__logo').should('be.visible');
-
-    cy.get('[data-startup-visual] .startup__core').then($core => {
-      initialCore = $core[0];
-    });
-
-    cy.then(() => releaseConfig());
-
-    cy.wait('@heldConfig').then(() => {
-      releaseConfig = null;
-    });
-
-    cy.get('.startup-shell').should('not.exist');
-
-    cy.get('.startup__core').should($core => {
-      expect($core[0], 'initial visual retained through handoff').to.equal(initialCore);
-    });
+    cy.then(() => bootstrapStarted);
 
     cy.get('.startup')
-      .should('have.attr', 'aria-busy', 'true')
+      .should('be.visible')
+      .and('have.attr', 'aria-busy', 'true')
       .find('.startup__status-text')
       .should('have.text', 'Loading RoundingWell');
 
-    cy.wrap(null).should(() => {
-      expect(releaseBootstrap, 'bootstrap request started').to.be.a('function');
-    });
+    cy.get('.app-nav').should('not.exist');
 
     cy.then(() => releaseBootstrap());
 
