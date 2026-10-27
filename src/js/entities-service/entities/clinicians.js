@@ -12,6 +12,7 @@ const TYPE = 'clinicians';
 const WRITABLE_ATTRIBUTES = [
   'name',
   'email',
+  'npi',
   'credentials',
   'settings',
   'enabled',
@@ -132,6 +133,13 @@ const _Model = BaseModel.extend({
   },
   isEnabled() {
     return this.get('enabled');
+  },
+  isValidNpi() {
+    const npi = this.get('npi');
+
+    if (npi == null) return true;
+
+    return /^\d{10}$/.test(trim(npi));
   },
 });
 
