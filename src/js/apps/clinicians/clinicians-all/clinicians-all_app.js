@@ -1,12 +1,15 @@
 import { values } from 'underscore';
+import Backbone from 'backbone';
 import { Radio } from 'marionette';
+
+import localStore from 'js/utils/local-store';
 
 import SubRouterApp from 'js/base/subrouterapp';
 
 import ClinicianSidebarApp from 'js/apps/clinicians/sidebar/clinician/clinician-sidebar_app';
 import SearchView from 'js/components/list-search';
 
-import { ListView, LayoutView, notFound } from 'js/apps/clinicians/clinicians-all/clinicians-all_views';
+import { ListView, LayoutView, StatusFilterView, getStatusFilter, notFound } from 'js/apps/clinicians/clinicians-all/clinicians-all_views';
 import { getClinicianModal } from 'js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views';
 
 export default SubRouterApp.extend({
@@ -19,16 +22,28 @@ export default SubRouterApp.extend({
     'clinician': 'showClinicianSidebar',
     'clinicians:all': 'hideCliniciansSidebar',
   },
+  stateEvents: {
+    'change:statusFilter': 'onChangeStatusFilter',
+  },
   viewEvents: {
     'click:addClinician': 'showAddModal',
   },
+  createState() {
+    return new Backbone.Model({
+      currentRoute: null,
+      statusFilter: 'active',
+    });
+  },
   onBeforeStart() {
+    this.getState().set('statusFilter', this.getStoredStatusFilter());
+
     const view = this.setView(new LayoutView());
 
     view.render();
     view.getRegion('list').startPreloader({ variant: 'generic' });
 
     this.showSearchView();
+    this.showStatusFilter();
     this.showView();
   },
   prepareStart(options, { signal }) {
@@ -55,6 +70,27 @@ export default SubRouterApp.extend({
     this.getState().set({
       searchQuery: searchQuery.length > 2 ? searchQuery : '',
     });
+  },
+  showStatusFilter() {
+    const statusFilterView = this.getView().showChildView('statusFilter', new StatusFilterView({
+      statusFilter: this.getState().get('statusFilter'),
+    }));
+
+    this.listenTo(statusFilterView, 'change:statusFilter', this.setStatusFilter);
+  },
+  setStatusFilter(statusFilter) {
+    this.getState().set({ statusFilter });
+  },
+  getStatusFilterKey() {
+    const currentUser = Radio.request('bootstrap', 'currentUser');
+
+    return `cliniciansStatusFilter_${ currentUser.id }`;
+  },
+  getStoredStatusFilter() {
+    return getStatusFilter(localStore.get(this.getStatusFilterKey()));
+  },
+  onChangeStatusFilter(state, statusFilter) {
+    localStore.set(this.getStatusFilterKey(), statusFilter);
   },
   showClinicianSidebar(clinicianId) {
     const clinician = this.clinicians.get(clinicianId);
