@@ -1,6 +1,8 @@
+import dayjs from 'dayjs';
+
 import formatDate from 'helpers/format-date';
 import { testTs, testTsSubtract } from 'helpers/test-timestamp';
-import { testDateAdd } from 'helpers/test-date';
+import { testDate, testDateAdd } from 'helpers/test-date';
 import { getRelationship } from 'helpers/json-api';
 
 import { getAction } from 'support/api/actions';
@@ -918,6 +920,94 @@ context('Worklist bulk editing', function() {
       .get('@bulkEditToolbar')
       .find('[data-due-time-region]')
       .find('.is-overdue');
+
+    cy
+      .clock(dayjs(testDate()).hour(12).valueOf(), ['Date']);
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .click();
+
+    cy
+      .get('.datepicker')
+      .find('.js-today')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .find('.is-overdue');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region]')
+      .find('.is-overdue');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('1:00 PM')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .find('.is-overdue')
+      .should('not.exist');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region]')
+      .find('.is-overdue')
+      .should('not.exist');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Clear Time')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .find('.is-overdue')
+      .should('not.exist');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region]')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('10:00 AM')
+      .click();
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-date-region]')
+      .find('.is-overdue');
+
+    cy
+      .get('@bulkEditToolbar')
+      .find('[data-due-time-region]')
+      .find('.is-overdue');
+
+    cy
+      .clock()
+      .invoke('restore');
 
     cy
       .get('@bulkEditToolbar')
