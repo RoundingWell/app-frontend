@@ -1,6 +1,7 @@
 import { View } from 'marionette';
 
 import 'scss/modules/fill-window.scss';
+import 'scss/modules/ambient-glow.scss';
 
 import PreloadRegion from 'js/regions/preload_region';
 
