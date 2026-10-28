@@ -428,4 +428,194 @@ context('default routes', function() {
         return cy.task('combineCoverage', JSON.stringify(outgoingCoverage), { log: false });
       });
   });
+
+  function getAuthResponse() {
+    const now = Date.now() / 1000;
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({ sid: 'startup-session', iat: now, exp: now + 3600 }));
+
+    return {
+      statusCode: 200,
+      body: {
+        user: {
+          object: 'user',
+          id: 'startup-user',
+          email: 'startup@example.test',
+          email_verified: true,
+          first_name: 'Startup',
+          last_name: 'Test',
+          created_at: '2026-01-01T00:00:00Z',
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+        access_token: `${ header }.${ payload }.signature`,
+        refresh_token: 'startup-refresh-token',
+        authentication_method: 'password',
+      },
+    };
+  }
+
+  context('startup authentication readiness', function() {
+    let authResponse;
+    let appConfig;
+    let releaseAuth;
+    let authStartupObserver;
+    let recoveryFrames;
+    let unhandledRejections;
+
+    function finishAuth() {
+      cy.then(() => releaseAuth());
+
+      cy.wait('@startupAuth').then(() => {
+        releaseAuth = null;
+      });
+    }
+
+    beforeEach(function() {
+      authResponse = getAuthResponse();
+      releaseAuth = null;
+      recoveryFrames = 0;
+      unhandledRejections = [];
+      const origin = new URL(Cypress.config('baseUrl'));
+      appConfig = {
+        app: { stage: 'dev', name: 'Cypress Clinic', version: 'dev' },
+        auth: {
+          provider: 'workos',
+          disableLoginPrompt: false,
+          config: {
+            clientId: 'startup-client',
+            createClientOptions: {
+              apiHostname: origin.hostname,
+              port: Number(origin.port),
+              https: false,
+              devMode: true,
+            },
+          },
+        },
+      };
+
+      cy.intercept('GET', '/appconfig.json*', req => req.reply(appConfig));
+
+      cy.intercept('POST', '/user_management/authenticate', req => {
+        return new Cypress.Promise(resolve => {
+          releaseAuth = () => {
+            req.reply(authResponse);
+            resolve();
+          };
+        });
+      }).as('startupAuth');
+
+      cy.intercept('GET', '/user_management/authorize*', {
+        headers: { 'content-type': 'text/html' },
+        body: '<!DOCTYPE html><html><body><h1>Mock WorkOS sign-in</h1></body></html>',
+      }).as('startupLogin');
+    });
+
+    function visitStartup() {
+      let failedImportFrame;
+
+      cy.readFile('dist/.vite/manifest.json').then(manifest => {
+        cy.intercept('GET', `/${ manifest['src/js/app.js'].file }`, { statusCode: 503 }).as('failedStartupApp');
+      });
+
+      cy.visit('/', {
+        isRoot: true,
+        noWait: true,
+        onBeforeLoad(win) {
+          win.localStorage.setItem('workos:refresh-token:startup-client', 'startup-refresh-token');
+          win.addEventListener('unhandledrejection', event => unhandledRejections.push(event.reason));
+          failedImportFrame = new Cypress.Promise(resolve => {
+            win.addEventListener('vite:preloadError', () => {
+              win.requestAnimationFrame(resolve);
+            }, { once: true });
+          });
+          authStartupObserver = new win.MutationObserver(() => {
+            if (win.document.querySelector('.startup.is-error')) recoveryFrames += 1;
+          });
+          authStartupObserver.observe(win.document, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        },
+      });
+
+      cy.wrap(null).should(() => {
+        expect(releaseAuth, 'auth request is pending').to.be.a('function');
+      });
+
+      cy.wait('@failedStartupApp');
+
+      // The failed import and a rendered frame precede either auth outcome.
+      cy.then(() => failedImportFrame);
+    }
+
+    afterEach(function() {
+      authStartupObserver?.disconnect();
+      if (!releaseAuth) return;
+
+      finishAuth();
+    });
+
+    specify('does not show recovery before a logged-out redirect', function() {
+      authResponse = {
+        statusCode: 400,
+        body: { error: 'invalid_grant', error_description: 'Session has already ended.' },
+      };
+
+      visitStartup();
+
+      cy.get('#root')
+        .then($root => {
+          const $status = $root.find('[role="status"]');
+          expect($status).to.have.length(1);
+          expect($status).to.be.visible.and.have.attr('aria-busy', 'true');
+        });
+
+      finishAuth();
+
+      cy.contains('h1', 'Sign in to your organization').should('be.visible');
+      cy.contains('button', 'Continue to sign in').click();
+      cy.wait('@startupLogin');
+
+      cy.contains('h1', 'Mock WorkOS sign-in')
+        .should('be.visible')
+        .then(() => {
+          expect(recoveryFrames, 'no recovery before login navigation').to.equal(0);
+          expect(unhandledRejections, 'speculative rejection is handled').to.deep.equal([]);
+        });
+    });
+
+    specify('shows recovery for a failed import after authentication succeeds', function() {
+      visitStartup();
+      finishAuth();
+
+      cy.get('.startup__error')
+        .should('be.visible')
+        .and('contain', 'We couldn\'t load your workspace');
+
+      cy.get('.startup__retry')
+        .should('be.enabled')
+        .then(() => {
+          expect(unhandledRejections, 'authenticated failure reaches recovery').to.deep.equal([]);
+        });
+    });
+
+    specify('shows recovery when the authentication provider rejects', function() {
+      appConfig.auth.config.clientId = '';
+
+      cy.visit('/', {
+        isRoot: true,
+        noWait: true,
+        onBeforeLoad(win) {
+          win.addEventListener('unhandledrejection', event => unhandledRejections.push(event.reason));
+        },
+      });
+
+      cy.get('.startup__error')
+        .should('be.visible')
+        .and('contain', 'We couldn\'t load your workspace');
+
+      cy.get('.startup__retry')
+        .should('be.enabled')
+        .then(() => {
+          expect(unhandledRejections, 'provider rejection reaches recovery').to.deep.equal([]);
+        });
+    });
+  });
 });

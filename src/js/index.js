@@ -84,8 +84,12 @@ async function initialize() {
 
   const authPromise = startAuth();
   const appPromise = loadApp();
+  // Observe speculative failures while auth is pending; report them after readiness.
+  appPromise.catch(() => {});
 
-  const [, appModule] = await Promise.all([authPromise, appPromise]);
+  await authPromise;
+
+  const appModule = await appPromise;
 
   await start(appModule);
 }

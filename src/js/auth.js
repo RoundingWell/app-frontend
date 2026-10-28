@@ -98,7 +98,7 @@ async function auth() {
 
   const agent = await getAuthAgent();
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     agent.auth(async() => {
       try {
         cachedUserId = await agent.getUserId();
@@ -110,7 +110,7 @@ async function auth() {
         // swallow — boot without cache rather than crash auth.
       }
       resolve();
-    });
+    }).catch(reject);
   });
 }
 

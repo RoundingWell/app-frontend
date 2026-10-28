@@ -254,6 +254,7 @@ export default defineConfig(({ mode }) => {
       port: isTest ? 8090 : 8081,
     },
     build: {
+      manifest: isTest,
       sourcemap: 'hidden',
       target: browserslistToEsbuild(),
       rollupOptions: {
