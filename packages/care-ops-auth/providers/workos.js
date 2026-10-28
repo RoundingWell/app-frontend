@@ -162,6 +162,7 @@ export class WorkosAuthProvider extends AuthProvider {
         const path = state;
         if (path === AuthProvider.PATH_LOGOUT) {
           this.signOut({ returnTo: location.origin });
+          this.dispose();
           return;
         }
 
@@ -220,6 +221,7 @@ export class WorkosAuthProvider extends AuthProvider {
       if (user) {
         try {
           await this.client.signOut({ returnTo: location.origin });
+          this.client.dispose();
           return;
         } catch (e) {
           this.authEvent('AUTH_LOGOUT', {
@@ -263,6 +265,7 @@ export class WorkosAuthProvider extends AuthProvider {
 
     try {
       await this.client.signOut({ returnTo: location.origin });
+      this.client.dispose();
     } catch {
       this.replaceRoot();
     }

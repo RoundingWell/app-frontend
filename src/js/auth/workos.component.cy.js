@@ -404,6 +404,7 @@ context('WorkosAuthProvider', function() {
       getUser: cy.stub().returns({ id: 'user' }),
       signIn: cy.stub(),
       signOut: cy.stub(),
+      dispose: cy.stub(),
     };
     const success = cy.stub();
 
@@ -413,6 +414,8 @@ context('WorkosAuthProvider', function() {
     return provider.auth(success).then(() => {
       expect(client.getUser).to.have.been.calledOnce;
       expect(client.signOut).to.have.been.calledWith({ returnTo: location.origin });
+      expect(client.dispose).to.have.been.calledOnce;
+      expect(client.signOut).to.have.been.calledBefore(client.dispose);
       expect(client.signIn).not.to.have.been.called;
       expect(success).not.to.have.been.called;
     });
@@ -512,6 +515,7 @@ context('WorkosAuthProvider', function() {
     provider.token = 'Bearer token';
     provider.client = {
       signOut: cy.stub(),
+      dispose: cy.stub(),
     };
 
     return provider.logout().then(() => {
@@ -522,6 +526,8 @@ context('WorkosAuthProvider', function() {
         online: true,
       });
       expect(provider.client.signOut).to.have.been.calledWith({ returnTo: location.origin });
+      expect(provider.client.dispose).to.have.been.calledOnce;
+      expect(provider.client.signOut).to.have.been.calledBefore(provider.client.dispose);
     });
   });
 });
