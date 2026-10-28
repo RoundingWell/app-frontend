@@ -6,102 +6,120 @@ body {
   margin: 0;
 }
 
+.prelogin,
 .prelogin * {
-  border: 0;
   box-sizing: border-box;
 }
 
 .prelogin {
-  align-items: center;
-  box-sizing: border-box;
-  color: #{$black-20};
+  background-color: $bkg-color;
+  color: rgb(255 255 255 / 92%);
   display: flex;
-  flex-direction: column;
   font-family: Figtree, 'Droid Sans', 'helvetica neue', arial, sans-serif;
   font-size: 14px;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   height: 100vh;
-  justify-content: top;
+  height: 100dvh;
   line-height: 20px;
-  margin: 0;
-  vertical-align: baseline;
+  overflow: auto;
+  padding:
+    max(32px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right))
+    max(32px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
   width: 100%;
 }
 
-.prelogin__roundingwell-logo {
-  margin: 56px 0;
+.prelogin__content {
+  margin: auto;
+  max-width: 440px;
+  text-align: center;
+  width: 100%;
 }
 
-.prelogin__content {
-  background-color: #{$white};
-  border-radius: 4px;
-  color: #{$black-20};
-  line-height: 2.6em;
-  min-height: 380px;
-  padding: 48px 0;
-  text-align: center;
-  width: 620px;
+.prelogin__mark {
+  display: block;
+  margin: 0 auto 12px;
 }
 
 .prelogin__header {
-  font-size: 28px;
-  font-weight: 400;
-  margin: 16px 0;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 32px;
+  margin: 0 0 24px;
+}
+
+.prelogin__card {
+  background-color: rgb(46 56 61);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 8px;
+  padding: 32px 24px;
 }
 
 .prelogin__host {
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 400;
-  margin-top: 40px;
+  line-height: 24px;
+  margin: 0 0 24px;
+  overflow-wrap: anywhere;
 }
 
 .prelogin__continue-button {
-  background-color: color(green);
-  border: 1px solid color(green);
+  background-color: color(blue, dark);
+  border: 1px solid transparent;
   border-radius: 4px;
   color: #{$white};
   cursor: pointer;
-  display: inline-block;
-  font-family: Figtree, 'Droid Sans', 'helvetica neue', arial, sans-serif;
+  display: block;
+  font: inherit;
   font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  margin-top: 48px;
-  overflow: hidden;
-  padding: 8px 48px;
-  position: relative;
-  text-decoration: none;
-  text-overflow: ellipsis;
-  transition: background-color 0.15s;
-  transition-timing-function: linear;
-  vertical-align: middle;
-  white-space: nowrap;
+  font-weight: 600;
+  line-height: 24px;
+  min-height: 44px;
+  padding: 9px 16px;
+  width: 100%;
 
   &:hover:enabled {
-    background-color: color(green, light);
+    background-color: rgb(0 95 163);
   }
 
-  &:active:enabled,
-  &:focus {
-    background-color: color(green, dark);
+  &:active:enabled {
+    background-color: rgb(0 78 138);
   }
 
-  .fa-right-to-bracket {
-    display: inline-block;
-    font-size: 20px;
-    height: 1em;
-    margin-left: 4px;
-    vertical-align: -4px;
+  &:focus-visible {
+    outline: 2px solid #{$white};
+    outline-offset: 4px;
   }
 }
 
 .prelogin__contact-info {
-  color: #{$black-60};
-  margin-top: 40px;
+  color: rgb(255 255 255 / 68%);
+  margin: 24px 0 0;
 
   a {
-    color: color(blue);
-    text-decoration: none;
+    color: rgb(113 194 255);
+    display: inline-block;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+
+    &:hover {
+      color: #{$white};
+    }
+
+    &:focus-visible {
+      border-radius: 2px;
+      outline: 2px solid #{$white};
+      outline-offset: 4px;
+    }
+  }
+}
+
+@media (width <= 480px) {
+  .prelogin__header {
+    font-size: 22px;
+    line-height: 30px;
   }
 }
