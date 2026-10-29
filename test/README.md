@@ -91,6 +91,27 @@ Fixtures, Cypress support, plugins, and reports remain under `test/`.
 
 ## Writing Tests
 
+For tests that own several Marionette resources, import `createTestScope` from
+`@mnjs/test`, create a fresh scope in `beforeEach`, and return `scope.cleanup()`
+from `afterEach`. Register disposal as soon as each resource is acquired. Cleanup
+awaits disposers in reverse order and continues after a disposer throws. Release
+and await any test-held background work before destroying its dependencies.
+Remove only the Radio replies/listeners the test owns; a channel-wide `reset()`
+can hide leaked bindings and remove another owner's subscriptions.
+
+`mountApplication` from the same core entry owns a fixture host, Region and
+Application. Use `scope.own(...)`, and await `mounted.ready` when it starts the
+Application. Use `start: false` when the scenario controls startup. Borrowed apps,
+channels and destination elements still need their own cleanup. The sidebar
+service specs demonstrate this without changing the shared `cy.mount` shell.
+
+The runner-independent `@mnjs/test@0.1.0` helpers work with Cypress 16 without
+dependency overrides. The shared `cy.mount` retains this app's shell contract:
+it passes a `RootView` with popup regions to the factory, owns user-activity
+listeners, and yields the jQuery `#root` subject. The optional Cypress adapter
+yields a mount handle and does not supply that shell. Keep explicit awaited
+teardown hooks; `setupHooks` from mount-utils does not await its optional callback.
+
 Tests should be organized as follows:
 ```js
 context('Feature Name / App Section', function() {

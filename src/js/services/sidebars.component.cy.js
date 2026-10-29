@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 
 import SidebarsService from './sidebars';
 import WidgetsService from './widgets';
@@ -10,11 +11,12 @@ import { fxTestWidgets } from 'support/api/widgets';
 
 context('Sidebars Service', function() {
   let panels;
-  let sidebarsService;
-  let widgetsService;
+  let scope;
 
   beforeEach(function() {
-    widgetsService = new WidgetsService({ widgets: new Widgets(fxTestWidgets) });
+    scope = createTestScope();
+    const widgetsService = new WidgetsService({ widgets: new Widgets(fxTestWidgets) });
+    scope.defer(() => widgetsService.destroy());
     panels = new Panels([
       {
         id: 'demographics-panel',
@@ -34,15 +36,15 @@ context('Sidebars Service', function() {
     ]);
   });
 
-  afterEach(async function() {
-    Radio.reset('settings');
-    await sidebarsService?.destroy();
-    await widgetsService.destroy();
+  afterEach(function() {
+    return scope.cleanup();
   });
 
   function startService(sidebar) {
-    Radio.reply('settings', 'get', () => sidebar);
-    sidebarsService = new SidebarsService({ panels });
+    Radio.reply('settings', 'get', () => sidebar, scope);
+    scope.defer(() => Radio.channel('settings').stopReplying('get', null, scope));
+    const sidebarsService = new SidebarsService({ panels });
+    scope.defer(() => sidebarsService.destroy());
 
     return Radio.request('sidebars', 'patient');
   }

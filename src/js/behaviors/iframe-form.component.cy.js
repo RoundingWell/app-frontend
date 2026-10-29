@@ -1,6 +1,7 @@
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 
 import IframeFormBehavior from './iframe-form';
 
@@ -29,17 +30,23 @@ const ParentView = View.extend({
 });
 
 context('Iframe Form Behavior', function() {
+  let scope;
+
+  beforeEach(function() {
+    scope = createTestScope();
+  });
+
   afterEach(function() {
-    Radio.channel('form1').reset();
-    Radio.channel('form2').reset();
-    Radio.channel('user-activity').reset();
+    return scope.cleanup();
   });
 
   specify('routes postMessage events only to the matching iframe channel', function() {
     const requests = [];
 
-    Radio.reply('form1', 'fetch:form:data', (...args) => requests.push(['form1', ...args]));
-    Radio.reply('form2', 'fetch:form:data', (...args) => requests.push(['form2', ...args]));
+    Radio.reply('form1', 'fetch:form:data', (...args) => requests.push(['form1', ...args]), scope);
+    scope.defer(() => Radio.channel('form1').stopReplying('fetch:form:data', null, scope));
+    Radio.reply('form2', 'fetch:form:data', (...args) => requests.push(['form2', ...args]), scope);
+    scope.defer(() => Radio.channel('form2').stopReplying('fetch:form:data', null, scope));
 
     cy
       .mount(() => new ParentView())
@@ -100,7 +107,9 @@ context('Iframe Form Behavior', function() {
   specify('reports iframe interactions as user activity', function() {
     const focusedIframes = [];
 
-    Radio.channel('user-activity').on('iframe:focus', iframe => focusedIframes.push(iframe));
+    const onFocus = iframe => focusedIframes.push(iframe);
+    Radio.channel('user-activity').on('iframe:focus', onFocus);
+    scope.defer(() => Radio.channel('user-activity').off('iframe:focus', onFocus));
 
     cy
       .mount(() => new ParentView())
