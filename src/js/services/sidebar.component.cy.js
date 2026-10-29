@@ -261,10 +261,9 @@ context('Sidebar Service', function() {
       });
   });
 
-  specify('disposes the displayed sidebar and its replies while preserving other channel owners', function() {
+  specify('stops the displayed sidebar and releases its replies when destroyed', function() {
     cy.document().then(async document => {
-      const mounted = mountService(document);
-      const service = mounted.app;
+      const { app: service } = mountService(document);
       const sidebarApp = ownApp(new SidebarApp());
       const channel = service.getChannel();
       const otherOwner = {};
@@ -276,14 +275,11 @@ context('Sidebar Service', function() {
       expect(await channel.request('start', sidebarApp, {})).to.equal(sidebarApp);
       const view = sidebarApp.getView();
 
-      await mounted.cleanup();
+      await service.destroy();
 
-      expect(service.isDestroyed()).to.be.true;
       expect(sidebarApp.isRunning()).to.be.false;
       expect(sidebarApp.isDestroyed(), 'the sidebar app is borrowed for reuse').to.be.false;
       expect(view.isDestroyed()).to.be.true;
-      expect(mounted.region.isDestroyed()).to.be.true;
-      expect(mounted.container.isConnected).to.be.false;
       expect(channel.request('start', sidebarApp, {})).to.equal(undefined);
       expect(channel.request('stop')).to.equal(undefined);
       expect(channel.request('other:owner')).to.equal('still available');

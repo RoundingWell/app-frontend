@@ -115,6 +115,9 @@ cleanup. Use the core `createTestScope` for resources outside that mount, such a
 test-owned Radio replies and mock servers. Cypress already owns its spies,
 intercepts and clocks; do not duplicate their cleanup.
 
+Keep specs focused on application behavior and lifecycle. Generic helper and
+test tooling contracts belong in the library's own tests.
+
 Tests should be organized as follows:
 ```js
 context('Feature Name / App Section', function() {
