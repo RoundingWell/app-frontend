@@ -96,6 +96,8 @@ jobs:
   lint:
     docker:
       - image: *node-image
+    environment:
+      CYPRESS_INSTALL_BINARY: '0'
     steps:
       - checkout
       - restore-npm-cache
