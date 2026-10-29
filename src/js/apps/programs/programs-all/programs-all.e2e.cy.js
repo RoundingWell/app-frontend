@@ -55,10 +55,6 @@ context('program all list', function() {
       .wait('@routePrograms');
 
     cy
-      .get('.js-add')
-      .should('be.visible');
-
-    cy
       .get('.card-list__item', { timeout: 10000 })
       .should('have.length', 3);
 

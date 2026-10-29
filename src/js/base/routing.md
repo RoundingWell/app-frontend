@@ -24,7 +24,7 @@ definitions.
   route to a local handler without owning any URLs. It carries declarative scope
   identity, retains the latest route while loading, and re-dispatches after its
   async startup completes.
-- **page App** — a plain `js/base/app` (e.g. worklist, schedule, dashboard, form).
+- **page App** — a plain `js/base/app` (e.g. worklist, schedule, dashboard, form, program).
   It renders a view and has no route dispatch or scope. RouterApp starts these via
   `startCurrent` and never asks them for a route or scope.
 
@@ -122,8 +122,6 @@ Every `SubRouterApp` reached through `RouterApp.startRoute()` declares a `routeS
 
 ```js
 routeScope: ['patientId']   // PatientApp
-routeScope: ['flowId']      // PatientFlowApp, ProgramFlowApp
-routeScope: ['programId']   // ProgramApp
 routeScope: []              // CliniciansAllApp — always "the same" instance
 ```
 

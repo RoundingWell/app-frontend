@@ -10,6 +10,21 @@
   width: 100%;
 }
 
+.program-page__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-8);
+  min-height: 0;
+  overflow: hidden auto;
+  padding: var(--space-2) var(--space-6) var(--space-6);
+}
+
+.program-page__section-title {
+  font-size: 18px;
+  margin-bottom: var(--space-3);
+}
+
 .program-page__sidebar {
   display: flex;
   flex: initial;
