@@ -33,9 +33,7 @@ export default defineConfig({
     indexHtmlFile: 'test/support/component.html',
     supportFile: 'test/support/component.js',
     setupNodeEvents,
-    devServer(config) {
-      return devServer(config);
-    },
+    devServer,
   },
 
   e2e: {
@@ -45,10 +43,6 @@ export default defineConfig({
     supportFile: 'test/support/e2e.js',
     setupNodeEvents,
     experimentalRunAllSpecs: true,
-  },
-
-  expose: {
-    featureFlags: {},
   },
 
   numTestsKeptInMemory: 5,
