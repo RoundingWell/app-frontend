@@ -1220,12 +1220,20 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         });
       }).as('routePutFile');
 
+    let finishUpload;
+    const uploadResponse = new Cypress.Promise(resolve => {
+      finishUpload = resolve;
+    });
+
+    cy.on('fail', error => {
+      finishUpload();
+      throw error;
+    });
+
     cy
       .intercept('PUT', '/upload-test', req => {
-        req.reply({
-          statusCode: 200,
-          throttleKbps: 10,
-        });
+        // Send the bytes to the local test server so native XHR upload progress fires.
+        req.continue(res => uploadResponse.then(() => res.send({ statusCode: 200, body: '' })));
       }).as('routeUploadFile');
 
     cy
@@ -1254,6 +1262,15 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         contents: Cypress.Buffer.from('test'),
         fileName: 'test.pdf',
       }, { force: true });
+
+    cy
+      .get('.patient-action')
+      .find('.js-progress')
+      .should('have.prop', 'style')
+      // Fail before the held response callback times out, then release it below.
+      .its('width', { timeout: 3000 })
+      .should('equal', '100%')
+      .then(() => finishUpload());
 
     cy
       .wait('@routeGetFile')

@@ -354,6 +354,27 @@ context('Collapsed navigation hover', function() {
       .click()
       .then($button => inspect($button[0], true));
 
+    pointer('pointerout', 250);
+    pointer('pointerover');
+    cy.tick(120);
+    expectOverlay(true);
+    expectSettled();
+
+    cy
+      .get('.js-minimize-menu')
+      .then($button => inspect($button[0], true));
+
+    cy.viewport(900, 768);
+
+    cy
+      .get('.app-nav')
+      .should('have.class', 'is-narrow')
+      .should('have.class', 'app-nav--minimized')
+      .should('not.have.class', 'is-full-nav-visible');
+
+    cy.viewport(1280, 768);
+    expectOverlay(true);
+
     cy
       .get('.js-minimize-menu')
       .click()
