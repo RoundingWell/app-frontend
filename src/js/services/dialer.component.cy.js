@@ -1,38 +1,34 @@
 import { v5 as uuid } from 'uuid';
 import { Application, Radio, View } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 import { RWELL_NS } from 'js/static';
 import DialerService from './dialer';
 
 context('Dialer Service', function() {
   let service;
+  let scope;
 
   beforeEach(function() {
+    scope = createTestScope();
+    scope.defer(() => Radio.channel('settings').stopReplying('get', null, scope));
     cy
       .clock()
       .mount(rootView => {
         const region = rootView.getRegion('overlay');
         service = new DialerService({ region });
+        scope.defer(() => service.destroy());
 
         return new View({ template: false });
       })
       .as('root');
   });
 
-  afterEach(async function() {
-    Radio.stopReplying('settings', 'get');
-
-    if (Radio.request.restore) {
-      Radio.request.restore();
-    }
-
-    if (service) {
-      await service.destroy();
-      service = null;
-    }
+  afterEach(function() {
+    return scope.cleanup();
   });
 
   specify('does not create a provider for an unknown dialer setting', function() {
-    Radio.reply('settings', 'get', () => 'unknown');
+    Radio.reply('settings', 'get', () => 'unknown', scope);
 
     cy.then(async() => {
       await service.start();
@@ -47,7 +43,7 @@ context('Dialer Service', function() {
     const action = { id: 'action-1' };
     const DialerApp = Application.extend({ call });
 
-    Radio.reply('settings', 'get', () => 'ringcentral');
+    Radio.reply('settings', 'get', () => 'ringcentral', scope);
     cy.stub(service, 'loadProvider').resolves({ DialerApp });
 
     cy.then(async() => {

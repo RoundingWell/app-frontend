@@ -105,12 +105,15 @@ Application. Use `start: false` when the scenario controls startup. Borrowed app
 channels and destination elements still need their own cleanup. The sidebar
 service specs demonstrate this without changing the shared `cy.mount` shell.
 
-The runner-independent `@mnjs/test@0.1.0` helpers work with Cypress 16 without
-dependency overrides. The shared `cy.mount` retains this app's shell contract:
-it passes a `RootView` with popup regions to the factory, owns user-activity
-listeners, and yields the jQuery `#root` subject. The optional Cypress adapter
-yields a mount handle and does not supply that shell. Keep explicit awaited
-teardown hooks; `setupHooks` from mount-utils does not await its optional callback.
+The shared `cy.mount` delegates mounting and cleanup to `@mnjs/test/cypress`.
+`setupCypress()` owns replacement and awaited test teardown. The app wrapper
+supplies `TestApplication`, `RootView`, popup regions and user-activity listeners,
+passes the root View to the callback, and yields the jQuery `#root` subject.
+It constructs the shell after `mountApplication(..., { start: false })` returns
+an owned handle, so callback failures still leave the Application registered for
+cleanup. Use the core `createTestScope` for resources outside that mount, such as
+test-owned Radio replies and mock servers. Cypress already owns its spies,
+intercepts and clocks; do not duplicate their cleanup.
 
 Tests should be organized as follows:
 ```js

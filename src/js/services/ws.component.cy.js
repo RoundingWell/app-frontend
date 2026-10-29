@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 import { version } from 'uuid';
 
 import App from 'js/base/app';
@@ -55,10 +56,16 @@ Cypress.Commands.add('startService', () => {
 });
 
 context('WS Service', function() {
+  let scope;
+
   beforeEach(function() {
-    Radio.reply('bootstrap', 'currentUser', { clientKey });
-    Radio.reply('workspace', 'current', { id: workspace });
-    Radio.reply('auth', 'getToken', () => 'Bearer token');
+    scope = createTestScope();
+    Radio.reply('bootstrap', 'currentUser', { clientKey }, scope);
+    scope.defer(() => Radio.channel('bootstrap').stopReplying('currentUser', null, scope));
+    Radio.reply('workspace', 'current', { id: workspace }, scope);
+    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
+    Radio.reply('auth', 'getToken', () => 'Bearer token', scope);
+    scope.defer(() => Radio.channel('auth').stopReplying('getToken', null, scope));
 
     let tokenId = 0;
 
@@ -71,13 +78,11 @@ context('WS Service', function() {
 
     cy.mockWs(endpoint);
     service = new WSService();
+    scope.defer(() => service.destroy());
   });
 
   afterEach(function() {
-    service.destroy();
-    Radio.stopReplying('auth', 'getToken');
-    Radio.stopReplying('bootstrap', 'currentUser');
-    Radio.stopReplying('workspace', 'current');
+    return scope.cleanup();
   });
 
   specify('Constructing the websocket', function() {
@@ -309,7 +314,9 @@ context('WS Service', function() {
     cy.then(async() => {
       const channel = Radio.channel('ws');
       const app = new App();
+      scope.defer(() => app.destroy());
       const otherApp = new App();
+      scope.defer(() => otherApp.destroy());
       const actions = new Backbone.Collection();
       const flows = new Backbone.Collection();
       const otherActions = new Backbone.Collection();
@@ -358,9 +365,6 @@ context('WS Service', function() {
       channel.trigger('message:patient-actions', { category: 'ResourceCreated' }, action);
       await Cypress.Promise.resolve();
       expect(replacement.get(action)).to.equal(action);
-
-      await app.destroy();
-      await otherApp.destroy();
     });
   });
 
@@ -371,6 +375,7 @@ context('WS Service', function() {
       const model = new Backbone.Model({ id: 'flow-id' });
       const fetch = deferred();
       const app = new App();
+      scope.defer(() => app.destroy());
 
       model.type = 'flows';
       cy.stub(model, 'fetch').returns(fetch.promise);
@@ -391,8 +396,6 @@ context('WS Service', function() {
       await Cypress.Promise.resolve();
 
       expect(collection.get(model)).to.be.undefined;
-
-      await app.destroy();
     });
   });
 
@@ -809,10 +812,16 @@ context('WS Service', function() {
 
 /* eslint-disable-next-line */
 context('WS Service - Disabled', function() {
+  let scope;
+
   beforeEach(function() {
-    Radio.reply('bootstrap', 'currentUser', { clientKey });
-    Radio.reply('workspace', 'current', { id: workspace });
-    Radio.reply('auth', 'getToken', () => 'Bearer token');
+    scope = createTestScope();
+    Radio.reply('bootstrap', 'currentUser', { clientKey }, scope);
+    scope.defer(() => Radio.channel('bootstrap').stopReplying('currentUser', null, scope));
+    Radio.reply('workspace', 'current', { id: workspace }, scope);
+    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
+    Radio.reply('auth', 'getToken', () => 'Bearer token', scope);
+    scope.defer(() => Radio.channel('auth').stopReplying('getToken', null, scope));
 
     cy
       .intercept('GET', '/api/websockets', getWsResponse('disabled-token', { is_enabled: false }))
@@ -822,9 +831,7 @@ context('WS Service - Disabled', function() {
   });
 
   afterEach(function() {
-    Radio.stopReplying('auth', 'getToken');
-    Radio.stopReplying('bootstrap', 'currentUser');
-    Radio.stopReplying('workspace', 'current');
+    return scope.cleanup();
   });
 
   specify('settles disabled startup without constructing a socket', function() {
@@ -859,6 +866,7 @@ context('WS Service - Disabled', function() {
   specify('allows another managed addition after a fetch fails', function() {
     cy.then(async() => {
       const app = new App();
+      scope.defer(() => app.destroy());
       const collection = new Backbone.Collection();
       const model = new Backbone.Model({ id: 'retry-flow' });
       model.type = 'flows';
@@ -867,6 +875,7 @@ context('WS Service - Disabled', function() {
       fetch.onSecondCall().resolves(model);
       await app.start();
       const retryService = new WSService();
+      scope.defer(() => retryService.destroy());
       retryService.manageAdd(app, collection, 'flows');
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -874,8 +883,6 @@ context('WS Service - Disabled', function() {
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(collection.get(model)).to.equal(model);
-      await app.destroy();
-      await retryService.destroy();
     });
   });
 });

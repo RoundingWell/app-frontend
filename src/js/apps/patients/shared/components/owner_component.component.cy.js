@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 
 import 'js/entities-service/index';
 import { Collection as Roles } from 'js/entities-service/entities/roles';
@@ -24,23 +25,33 @@ const clinicians = new Clinicians({ data: [currentClinician, ...getClinicians()]
 const workspaces = new Workspaces({ data: getWorkspaces() }, { parse: true });
 
 context('Owner Component', function() {
+  let scope;
+
   beforeEach(function() {
+    scope = createTestScope();
+    scope.defer(() => Radio.channel('bootstrap').stopReplying('currentUser', null, scope));
+    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
     Radio.reply('bootstrap', 'currentUser', () => {
       return clinicians.get(currentClinician.id);
-    });
+    }, scope);
 
     // Clear the cache
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaceTwo.id });
-    });
+    }, scope);
 
-    new OwnerComponent({
+    const cacheReset = new OwnerComponent({
       owner: clinicians.get(currentClinician.id),
     });
+    scope.defer(() => cacheReset.destroy());
 
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaceOne.id, name: 'Current Workspace' });
-    });
+    }, scope);
+  });
+
+  afterEach(function() {
+    return scope.cleanup();
   });
 
   specify('displaying', function() {
@@ -51,9 +62,10 @@ context('Owner Component', function() {
         OwnerComponent.setPopRegion(rootView.getRegion('pop'));
 
         // Cache the elements
-        new OwnerComponent({
+        const cachedComponent = new OwnerComponent({
           owner: clinicians.get(currentClinician.id),
         });
+        scope.defer(() => cachedComponent.destroy());
 
         const component = new OwnerComponent({
           owner: clinicians.get(currentClinician.id),
@@ -152,7 +164,7 @@ context('Owner Component', function() {
 
     Radio.reply('bootstrap', 'currentUser', () => {
       return owner;
-    });
+    }, scope);
 
     cy
       .mount(rootView => {
@@ -269,7 +281,7 @@ context('Owner Component', function() {
 
     Radio.reply('bootstrap', 'currentUser', () => {
       return owner;
-    });
+    }, scope);
 
     cy
       .mount(rootView => {

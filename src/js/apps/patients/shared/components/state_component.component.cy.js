@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 
 import { Collection as States } from 'js/entities-service/entities/states';
 import { Collection as Workspaces, Model as Workspace } from 'js/entities-service/entities/workspaces';
@@ -14,12 +15,23 @@ const workspaces = new Workspaces({ data: getWorkspaces() }, { parse: true });
 workspaces.at(1).set('_states', [{ id: stateInProgress.id, type: 'states' }]);
 
 context('State Component', function() {
+  let scope;
+
+  beforeEach(function() {
+    scope = createTestScope();
+    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
+  });
+
+  afterEach(function() {
+    return scope.cleanup();
+  });
+
   specify('Display', function() {
     const onChange = cy.stub();
 
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(0).id });
-    });
+    }, scope);
 
     cy
       .mount(rootView => {
@@ -66,7 +78,7 @@ context('State Component', function() {
   specify('uses the selected workspace states', function() {
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(1).id });
-    });
+    }, scope);
 
     cy
       .mount(rootView => {
@@ -91,7 +103,7 @@ context('State Component', function() {
   specify('compact state with label', function() {
     Radio.reply('workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(1).id });
-    });
+    }, scope);
 
     cy
       .mount(rootView => {

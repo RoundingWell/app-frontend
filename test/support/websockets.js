@@ -1,25 +1,16 @@
 import { Server, WebSocket as MockedWebSocket } from 'mock-socket';
+import { createTestScope } from '@mnjs/test';
 
-let socketReady;
 let mockServer;
+let scope = createTestScope();
 
-const getServer = (url, messageHandler) => {
-  return new Cypress.Promise(resolve => {
-    if (mockServer) {
-      mockServer.close();
-    }
+/* eslint-disable-next-line mocha/no-top-level-hooks */
+beforeEach(() => {
+  scope = createTestScope();
+});
 
-    mockServer = new Server(url, { mock: true });
-
-    mockServer.on('connection', socket => {
-      socket.on('message', message => {
-        messageHandler(JSON.parse(message));
-      });
-    });
-
-    resolve();
-  });
-};
+/* eslint-disable-next-line mocha/no-top-level-hooks */
+afterEach(() => scope.cleanup());
 
 Cypress.Commands.add('mockWs', url => {
   cy.log('ws: Mocking WebSocket');
@@ -30,16 +21,24 @@ Cypress.Commands.add('mockWs', url => {
 
   const messageHandler = cy.stub().as('wsHandleMessage');
 
-  socketReady = getServer(url, messageHandler);
+  return cy.then(async() => {
+    await scope.cleanup();
+    scope = createTestScope();
+    const server = new Server(url, { mock: true });
+    scope.defer(() => server.stop());
+    scope.defer(() => server.close());
+    mockServer = server;
 
-  cy.on('test:after:run', () => {
-    cy.log('ws: Stopping Mock Server');
-    mockServer.close();
+    server.on('connection', socket => {
+      socket.on('message', message => {
+        messageHandler(JSON.parse(message));
+      });
+    });
   });
 });
 
 Cypress.Commands.add('sendWs', message => {
-  cy.wrap(socketReady).then(() => {
+  cy.then(() => {
     message = JSON.stringify(message);
     cy.log('ws: Sending message', message);
     mockServer.emit('message', message);
@@ -47,7 +46,7 @@ Cypress.Commands.add('sendWs', message => {
 });
 
 Cypress.Commands.add('errorWs', () => {
-  cy.wrap(socketReady).then(() => {
+  cy.then(() => {
     cy.log('ws: Sending error');
     mockServer.simulate('error');
   });

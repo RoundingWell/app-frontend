@@ -82,7 +82,7 @@ Cypress.Commands.overwrite('visit', (originalFn, url = '/', options = {}) => {
   // pageLoadTimeout for visit is 60000ms
   return cy
     .mockWs('ws://cypress-websocket/ws')
-    .wrap(originalFn(url, options), { timeout: 60000 })
+    .then({ timeout: 60000 }, () => originalFn(url, options))
     .wait(waits);
 });
 

@@ -1,17 +1,20 @@
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 
 import AlertService from './alert';
 
 context('Alert Service', function() {
-  let alertService;
+  let scope;
 
   beforeEach(function() {
+    scope = createTestScope();
     cy
       .clock()
       .mount(rootView => {
         const region = rootView.getRegion('alert');
-        alertService = new AlertService({ region });
+        const alertService = new AlertService({ region });
+        scope.defer(() => alertService.destroy());
 
         return new View({
           template: hbs`<style>.alert-box{ opacity:1!important; }</style>`,
@@ -20,13 +23,8 @@ context('Alert Service', function() {
       .as('root');
   });
 
-  afterEach(async function() {
-    if (alertService) {
-      await alertService.destroy();
-      alertService = null;
-    }
-
-    Radio.channel('alert').reset();
+  afterEach(function() {
+    return scope.cleanup();
   });
 
   specify('Displaying', function() {

@@ -11,7 +11,6 @@ context('LatestListService', function() {
 
   afterEach(function() {
     service.destroy();
-    Radio.reset();
   });
 
   specify('records list routes from route metadata', function() {

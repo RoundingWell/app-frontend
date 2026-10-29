@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { createTestScope } from '@mnjs/test';
 
 import fetcher from './fetch';
 
@@ -12,8 +13,15 @@ function response(status) {
 }
 
 context('base fetch auth recovery', function() {
+  let scope;
+
+  beforeEach(function() {
+    scope = createTestScope();
+    scope.defer(() => Radio.channel('auth').stopReplying(null, null, scope));
+  });
+
   afterEach(function() {
-    Radio.reset();
+    return scope.cleanup();
   });
 
   specify('delegates 401 handling to auth and uses the retry response', function() {
@@ -29,7 +37,7 @@ context('base fetch auth recovery', function() {
       Radio.reply('auth', {
         getToken,
         handleUnauthorized,
-      });
+      }, scope);
 
       return fetcher('/api/test').then(result => {
         expect(result.status).to.equal(200);
@@ -48,7 +56,7 @@ context('base fetch auth recovery', function() {
       Radio.reply('auth', {
         getToken: cy.stub().resolves('Bearer token'),
         handleUnauthorized,
-      });
+      }, scope);
 
       return fetcher('/api/test').then(result => {
         expect(result.status).to.equal(401);
@@ -68,7 +76,7 @@ context('base fetch auth recovery', function() {
       Radio.reply('auth', {
         getToken: cy.stub().resolves('Bearer token'),
         handleUnauthorized: cy.stub().callsFake(retry => retry()),
-      });
+      }, scope);
 
       return fetcher('/api/test', { abort: false })
         .then(() => fetcher('/api/test', { abort: false }))
@@ -102,7 +110,7 @@ context('base fetch auth recovery', function() {
         });
       });
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'));
+      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
 
       const request = fetcher('/api/test', { signal: controller.signal });
       controller.abort();
@@ -129,7 +137,7 @@ context('base fetch auth recovery', function() {
         return Cypress.Promise.resolve(response(200));
       });
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'));
+      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
 
       const firstRequest = fetcher('/api/test', { signal: controller.signal });
       const secondRequest = fetcher('/api/test');
@@ -156,7 +164,7 @@ context('base fetch auth recovery', function() {
         return Cypress.Promise.resolve(response(200));
       });
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'));
+      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
 
       const writeRequest = fetcher('/api/test', { method: 'POST' });
       const readRequest = fetcher('/api/test');
@@ -174,7 +182,7 @@ context('base fetch auth recovery', function() {
     cy.window().then(win => {
       const fetchMock = cy.stub(win, 'fetch').resolves(response(200));
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'));
+      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
 
       return fetcher('/api/test', {
         method: 'get',
@@ -218,7 +226,7 @@ context('base fetch auth recovery', function() {
         })
         .onThirdCall().resolves(response(200));
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'));
+      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
 
       const firstRequest = fetcher('/api/test');
 

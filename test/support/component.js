@@ -1,9 +1,6 @@
 import '@roundingwell/icons/styles.css';
 
-import {
-  setupHooks,
-  getContainerEl,
-} from '@cypress/mount-utils';
+import { mountApplication, setupCypress } from '@mnjs/test/cypress';
 
 import '@cypress/code-coverage/support';
 import './api-guard';
@@ -23,8 +20,6 @@ import listenToUserActivity from 'js/utils/user-activity';
 
 import { RootView } from 'js/apps/globals/app-frame/root_views';
 
-let app;
-
 const TestApplication = Application.extend({
   channelName: 'app',
   radioRequests: {
@@ -41,28 +36,6 @@ const TestApplication = Application.extend({
   },
 });
 
-async function destroyApp() {
-  const currentApp = app;
-  app = undefined;
-
-  await currentApp?.destroy();
-}
-
-Cypress.on('run:start', () => {
-  // Consider doing a check to ensure your adapter only runs in Component Testing mode.
-  if (Cypress.testingType !== 'component') {
-    return;
-  }
-
-  Cypress.on('test:before:run:async', async() => {
-    await destroyApp();
-    getContainerEl().innerHTML = '';
-  });
-});
-
-/* eslint-disable-next-line mocha/no-top-level-hooks */
-afterEach(() => destroyApp());
-
 const AppView = View.extend({
   regions: {
     region: '[data-region]',
@@ -72,15 +45,7 @@ const AppView = View.extend({
 });
 
 function mount(getView = () => new View({ template: false })) {
-  return cy.then(async() => {
-    await destroyApp();
-
-    app = new TestApplication({
-      region: {
-        el: getContainerEl(),
-      },
-    });
-
+  return mountApplication(region => new TestApplication({ region }), { start: false }).then(({ app }) => {
     const TestRootView = RootView.extend({ AppView });
     const rootView = new TestRootView();
 
@@ -90,16 +55,8 @@ function mount(getView = () => new View({ template: false })) {
     const view = getView(rootView);
 
     rootView.appView.showChildView('region', view);
-
-    // Log a messsage in the Command Log.
-    Cypress.log({
-      name: 'mount',
-      message: [`Mount View: ${ view.cid }`],
-    });
   }).get('#root');
 }
 
+setupCypress();
 Cypress.Commands.add('mount', mount);
-
-// Setup Cypress lifecycle hooks.
-setupHooks();
