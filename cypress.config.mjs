@@ -45,7 +45,6 @@ export default defineConfig({
     supportFile: 'test/support/e2e.js',
     setupNodeEvents,
     experimentalRunAllSpecs: true,
-    experimentalStudio: true,
   },
 
   expose: {
