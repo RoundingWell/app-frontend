@@ -51,6 +51,12 @@ const EmptyView = View.extend({
 const ActionItemView = View.extend({
   className: 'program-items__action',
   template: ActionItemTemplate,
+  initialize() {
+    const form = this.model.getForm();
+    if (!form) return;
+
+    this.listenTo(form, 'change:name', this.render);
+  },
   templateContext() {
     return {
       ...getItemContext(this.model),

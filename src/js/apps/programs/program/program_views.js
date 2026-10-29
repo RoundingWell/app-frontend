@@ -39,7 +39,11 @@ const ContextTrailView = View.extend({
 });
 
 const FlowItemView = View.extend({
+  tagName: 'button',
   className: 'card-list__item',
+  attributes: {
+    type: 'button',
+  },
   template: FlowItemTemplate,
   templateContext() {
     return {

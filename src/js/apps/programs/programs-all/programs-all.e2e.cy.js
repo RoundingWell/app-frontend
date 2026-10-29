@@ -84,7 +84,7 @@ context('program all list', function() {
 
     cy
       .location('pathname')
-      .should('contain', `/program/${ firstProgram.id }`);
+      .should('equal', `/one/program/${ firstProgram.id }`);
   });
 
   specify('shows an error when programs cannot load', function() {

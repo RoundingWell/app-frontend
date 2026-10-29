@@ -199,8 +199,8 @@ context('program flow page', function() {
       .wait('@routeProgram');
 
     cy
-      .url()
-      .should('contain', `program/${ testProgram.id }`);
+      .location('pathname')
+      .should('equal', `/one/program/${ testProgram.id }`);
 
     cy
       .go('back')
@@ -212,8 +212,8 @@ context('program flow page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', 'programs');
+      .location('pathname')
+      .should('equal', '/one/programs');
 
     cy
       .get('.card-list__item')

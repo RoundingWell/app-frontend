@@ -228,13 +228,29 @@ context('program page', function() {
 
     cy
       .get('[data-testid="program-flows"]')
+      .contains('Draft Flow')
+      .closest('.card-list__item')
+      .focus()
+      .type('{enter}')
+      .wait('@routeProgramFlow');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/program-flow/${ draftFlow.id }`);
+
+    cy
+      .go('back')
+      .wait('@routeProgram');
+
+    cy
+      .get('[data-testid="program-flows"]')
       .contains('Automated Flow')
       .click()
       .wait('@routeProgramFlow');
 
     cy
-      .url()
-      .should('contain', `program-flow/${ automatedFlow.id }`);
+      .location('pathname')
+      .should('equal', `/one/program-flow/${ automatedFlow.id }`);
 
     cy
       .get('.program-flow__header')
@@ -250,8 +266,8 @@ context('program page', function() {
       .click();
 
     cy
-      .url()
-      .should('contain', 'programs');
+      .location('pathname')
+      .should('equal', '/one/programs');
 
     cy
       .get('.card-list__item')
