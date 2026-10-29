@@ -3,6 +3,20 @@
 Read [the agent validation policy](../AGENTS.md#validation) when authoring or
 reviewing tests. This document describes how to collect evidence for that policy.
 
+## Browsers
+
+Cypress 16 uses Chrome by default through `defaultBrowser` in
+[`cypress.config.mjs`](../cypress.config.mjs). This applies to interactive runs,
+coverage scripts, focused specs, and the component shard runner. Install Chrome
+locally and use `npx cypress info` to check that Cypress detects it. A Chromium
+installation is a separate browser; select it explicitly with
+`npx cypress run --browser chromium` if that is what your machine provides.
+
+Use `--browser firefox` or `--browser edge` for another installed browser.
+CircleCI's primary runs select Chrome explicitly; nightly runs retain Chrome,
+Firefox, and Edge for both component and E2E suites. Keep assertions independent
+of Chrome-only APIs and timing. See [the runner image requirements](../.circleci/README.md#cypress-workers-and-coverage).
+
 ## Coverage
 
 Use `npm run coverage` for both suites, `npm run coverage:component` for components,
@@ -222,8 +236,9 @@ When checking for states like errors, rather than checking for the existence of 
 The available state colors are defined in [`./helpers/state-colors.js`](./helpers/state-colors.js).
 
 ```js
+import stateColors from 'helpers/state-colors';
+
 context('Clinician Profile', function() {
-  const stateColors = Cypress.env('stateColors');
   //...
   cy
     .get('@phoneInput')

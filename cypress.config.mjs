@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress';
+import { devServer } from '@cypress/vite-dev-server';
 import vitePreprocessor from 'cypress-vite';
 import { cypressConfig } from './vite.config.js';
 
@@ -25,14 +26,15 @@ function setupNodeEvents(on, config) {
 }
 
 export default defineConfig({
+  defaultBrowser: 'chrome',
+
   component: {
     specPattern: 'src/**/*.component.cy.js',
     indexHtmlFile: 'test/support/component.html',
     supportFile: 'test/support/component.js',
     setupNodeEvents,
-    devServer: {
-      framework: 'marionette',
-      bundler: 'vite',
+    devServer(config) {
+      return devServer(config);
     },
   },
 
@@ -46,11 +48,10 @@ export default defineConfig({
     experimentalStudio: true,
   },
 
-  env: {
+  expose: {
     featureFlags: {},
   },
 
-  experimentalMemoryManagement: true,
   numTestsKeptInMemory: 5,
 
   retries: {
