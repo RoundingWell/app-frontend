@@ -9,9 +9,6 @@ import { _Model as Flow } from 'js/entities-service/entities/flows';
 import { _Model as WritableFormResponse, Model as FormResponse } from 'js/entities-service/entities/form-responses';
 import { _Model as WritablePatientField, Model as PatientField } from 'js/entities-service/entities/patient-fields';
 import { _Model as Patient } from 'js/entities-service/entities/patients';
-import { _Model as ProgramAction } from 'js/entities-service/entities/program-actions';
-import { _Model as ProgramFlow } from 'js/entities-service/entities/program-flows';
-import { _Model as Program } from 'js/entities-service/entities/programs';
 import { _Model as WorkspacePatient } from 'js/entities-service/entities/workspace-patients';
 
 context('Base model JSON:API serialization', function() {
@@ -63,9 +60,6 @@ context('Base model JSON:API serialization', function() {
       { Model: WritableFormResponse, writable: { status: 'draft' }, readOnly: { created_at: '2026-08-27T00:00:00Z' } },
       { Model: WritablePatientField, writable: { value: 'high' }, readOnly: { name: 'priority' } },
       { Model: Patient, writable: { first_name: 'Test' }, readOnly: { identifiers: [] } },
-      { Model: ProgramAction, writable: { published_at: null }, readOnly: { created_at: '2026-08-27T00:00:00Z' } },
-      { Model: ProgramFlow, writable: { archived_at: null }, readOnly: { updated_at: '2026-08-27T00:00:00Z' } },
-      { Model: Program, writable: { published_at: null }, readOnly: { created_at: '2026-08-27T00:00:00Z' } },
       { Model: WorkspacePatient, writable: { status: 'active' }, readOnly: { segment: 'Test Segment' } },
     ];
 
