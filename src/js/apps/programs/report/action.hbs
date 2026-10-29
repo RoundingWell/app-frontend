@@ -1,0 +1,22 @@
+<div class="work-card__surface program-report__action-surface">
+  <div class="work-card__main program-report__action-main">
+    <div class="work-card__heading">
+      {{#if options.icon}}<span class="work-card__state action-icon action-icon--{{ options.color }}">{{fa options.iconType options.icon}}</span>{{/if}}
+      <h3 class="program-report__action-title"><a class="work-card__title js-action-link" href="{{ actionUrl }}">{{ name }}</a></h3>
+    </div>
+    {{#if details}}<p class="program-report__description">{{ details }}</p>{{/if}}
+    {{#if tags}}<ul class="program-report__tags" aria-label="{{ @intl.programs.report.tagsLabel }}">{{#each tags}}<li>{{ this }}</li>{{/each}}</ul>{{/if}}
+    {{#if teamNames}}<p class="program-report__configuration">{{ @intl.programs.report.visibleTeamsLabel }} {{ teamNames }}</p>{{/if}}
+    {{#if roleNames}}<p class="program-report__configuration">{{ @intl.programs.report.visibleRolesLabel }} {{ roleNames }}</p>{{/if}}
+    {{#if uploadTypes}}<p class="program-report__configuration">{{far "paperclip"}} {{ @intl.programs.report.uploadsLabel }} {{ uploadTypes }}</p>{{/if}}
+  </div>
+  <div class="work-card__aside program-report__action-aside">
+    <dl class="program-report__facts">
+      <div><dt>{{ @intl.programs.report.ownerLabel }}</dt><dd>{{ ownerName }}{{#if inheritedOwner}}<span class="program-report__inherited">{{ inheritedOwner }}</span>{{/if}}</dd></div>
+      <div><dt>{{ @intl.programs.report.behaviorLabel }}</dt><dd>{{far behaviorIcon}}{{ behaviorLabel }}</dd></div>
+      <div><dt>{{ @intl.programs.report.dueLabel }}</dt><dd>{{#if hasDueDay}}{{formatMessage (intlGet "programs.report.dueDaysText") day=days_until_due}}{{#if weekdays_only}}<span class="program-report__inherited">{{ @intl.programs.report.weekdaysOnlyText }}</span>{{/if}}{{else}}{{ @intl.programs.report.noDueDateText }}{{/if}}</dd></div>
+      {{#if hasForm}}<div><dt>{{ @intl.programs.report.formLabel }}</dt><dd>{{far "square-poll-horizontal"}}{{ formName }}</dd></div>{{/if}}
+    </dl>
+    <div class="work-card__meta program-report__action-meta"><span>{{ status }}</span>{{#if updated_at}}<span>{{ @intl.programs.report.updatedLabel }} {{formatDateTime updated_at "MMM D, YYYY"}}</span>{{/if}}</div>
+  </div>
+</div>

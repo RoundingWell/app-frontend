@@ -1,12 +1,11 @@
-<div class="card-list__item-surface">
+<a class="card-list__item-surface js-program-link" href="{{ url }}">
   <div class="card-list__item-main">
-    <span class="card-list__item-title" data-testid="program-list-name">{{ name }}</span>
-    <span class="card-list__item-meta">
-      <span class="programs-list__published{{#if published}} is-published{{/if}}">
-        {{#if published}}{{fas "toggle-on"}}{{else}}{{far "toggle-off"}}{{/if}}
-        {{formatMessage (intlGet "programs.programsAllViews.itemView.published") published=published}}
-      </span>
-      <span>{{formatDateTime updated_at "TIME_OR_DAY"}}</span>
-    </span>
+    <h2 class="card-list__item-title" data-testid="program-list-name">{{ name }}</h2>
+    {{far "chevron-right"}}
   </div>
-</div>
+  {{#if details}}<p class="programs-list__details">{{ details }}</p>{{/if}}
+  <div class="card-list__item-meta">
+    <span class="programs-list__published">{{ @intl.programs.report.publishedText }}</span>
+    {{#if updated_at}}<span>{{ @intl.programs.report.updatedLabel }} {{formatDateTime updated_at "MMM D, YYYY"}}</span>{{/if}}
+  </div>
+</a>

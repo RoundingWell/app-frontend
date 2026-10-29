@@ -1,97 +1,68 @@
-import { testTs, testTsSubtract } from 'helpers/test-timestamp';
+import { testTs } from 'helpers/test-timestamp';
 
 import { getProgram } from 'support/api/programs';
 
-context('program all list', function() {
-  specify('display programs list', function() {
-    cy.viewport(2200, 900);
-
-    const firstProgram = getProgram({
-      attributes: {
-        name: 'First in List',
-        published_at: testTs(),
-        archived_at: null,
-        updated_at: testTs(),
-      },
+context('program reports list', function() {
+  specify('lists published, non-archived programs and opens their documentation', function() {
+    const program = getProgram({
+      attributes: { name: 'Care transitions', details: 'Support patients after discharge.', published_at: testTs(), archived_at: null },
     });
-
-    const lastProgram = getProgram({
-      attributes: {
-        name: 'Last in List',
-        published_at: testTs(),
-        archived_at: null,
-        updated_at: testTsSubtract(2),
-      },
-    });
-
-    const secondProgram = getProgram({
-      attributes: {
-        name: 'Second in List, Not Published',
-        published_at: null,
-        archived_at: null,
-        updated_at: testTsSubtract(1),
-      },
-    });
+    const unpublished = getProgram({ attributes: { name: 'Unpublished program', published_at: null, archived_at: null } });
+    const archived = getProgram({ attributes: { name: 'Archived program', published_at: testTs(), archived_at: testTs() } });
 
     cy
-      .routeWorkspacePrograms(fx => {
-        fx.data = [firstProgram, lastProgram, secondProgram];
-
-        return fx;
-      })
       .routePrograms(fx => {
-        fx.data = [firstProgram, lastProgram, secondProgram];
-
+        fx.data = [archived, program, unpublished];
         return fx;
       })
       .routeProgram(fx => {
-        fx.data = firstProgram;
-
+        fx.data = program;
         return fx;
       })
-      .routeProgramActions()
-      .routeProgramFlows()
+      .routeProgramFlows(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .routeProgramActions(fx => {
+        fx.data = [];
+        return fx;
+      })
       .visit('/programs')
       .wait('@routePrograms');
 
     cy
-      .get('.js-add')
-      .should('be.visible');
-
-    cy
-      .get('.card-list__item', { timeout: 10000 })
-      .should('have.length', 3);
-
-    cy
-      .get('.card-list__item')
-      .first()
-      .within(() => {
-        cy.get('[data-testid="program-list-name"]').should('contain', 'First in List');
-        cy.contains('On');
-      });
-
-    cy
-      .get('.card-list__item')
-      .eq(1)
-      .within(() => {
-        cy.get('[data-testid="program-list-name"]').should('contain', 'Second in List, Not Published');
-        cy.contains('Off');
-      });
-
-    cy
-      .get('.card-list__item')
-      .first()
-      .click()
-      .wait('@routeProgram')
-      .wait('@routeProgramActions')
-      .wait('@routeProgramFlows');
+      .get('.programs-list .card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Support patients after discharge.')
+      .should('contain', 'Published')
+      .find('a')
+      .should('have.attr', 'href', `/one/program/${ program.id }`)
+      .click();
 
     cy
       .location('pathname')
-      .should('contain', `/program/${ firstProgram.id }`);
+      .should('equal', `/one/program/${ program.id }`);
+
+    cy
+      .get('.program-report')
+      .should('contain', 'Care transitions')
+      .should('contain', 'This program has no flows.')
+      .should('contain', 'No actions are configured here.');
   });
 
-  specify('shows an error when programs cannot load', function() {
+  specify('shows an empty list and an error when programs cannot load', function() {
+    cy
+      .routePrograms(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .visit('/programs')
+      .wait('@routePrograms');
+
+    cy
+      .get('.programs-list')
+      .should('contain', 'No published programs');
+
     cy
       .intercept('GET', '/api/programs', { statusCode: 400, body: { errors: [] } })
       .as('routeProgramsError')

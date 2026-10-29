@@ -1,0 +1,14 @@
+<div class="program-report__flow-heading">
+  {{far "folder-open"}}
+  <h1 class="program-report__title">{{ name }}</h1>
+  <span class="program-report__status">{{ status }}</span>
+</div>
+{{#if details}}<p class="program-report__description">{{ details }}</p>{{/if}}
+<dl class="program-report__flow-facts">
+  <div><dt>{{ @intl.programs.report.ownerLabel }}</dt><dd>{{far "circle-user"}}{{ ownerName }}</dd></div>
+  <div><dt>{{ @intl.programs.report.behaviorLabel }}</dt><dd>{{far behaviorIcon}}{{ behaviorLabel }}</dd></div>
+  {{#if updated_at}}<div><dt>{{ @intl.programs.report.updatedLabel }}</dt><dd>{{formatDateTime updated_at "MMM D, YYYY"}}</dd></div>{{/if}}
+</dl>
+{{#if tags}}<ul class="program-report__tags" aria-label="{{ @intl.programs.report.tagsLabel }}">{{#each tags}}<li>{{ this }}</li>{{/each}}</ul>{{/if}}
+{{#if teamNames}}<p class="program-report__configuration">{{ @intl.programs.report.visibleTeamsLabel }} {{ teamNames }}</p>{{/if}}
+{{#if roleNames}}<p class="program-report__configuration">{{ @intl.programs.report.visibleRolesLabel }} {{ roleNames }}</p>{{/if}}

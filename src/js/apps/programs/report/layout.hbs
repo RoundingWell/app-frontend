@@ -1,0 +1,39 @@
+<div class="program-report__document">
+  <nav class="program-report__breadcrumb" aria-label="{{ @intl.programs.report.breadcrumbLabel }}">
+    <a class="js-report-link" href="{{ programsUrl }}">{{fas "chevron-left"}}{{ @intl.programs.programsAllViews.layoutView.title }}</a>
+    {{#if hasFlow}}<span aria-hidden="true">{{far "chevron-right"}}</span><a class="js-report-link" href="{{ overviewUrl }}">{{ name }}</a>{{/if}}
+  </nav>
+  {{#unless hasFlow}}
+  <header class="program-report__header">
+    <p class="program-report__eyebrow">{{ @intl.programs.report.workflowDocumentationText }}</p>
+    <h1 class="program-report__title">{{ name }}</h1>
+    {{#if details}}<p class="program-report__description">{{ details }}</p>{{/if}}
+    <div class="program-report__metadata">
+      <span class="program-report__status">{{far "circle-check"}}{{ status }}</span>
+      {{#if workspaces}}<span>{{far "hospital"}}{{ workspaces }}</span>{{/if}}
+      {{#if updated_at}}<span>{{ @intl.programs.report.updatedLabel }} <time datetime="{{ updated_at }}">{{formatDateTime updated_at "MMM D, YYYY"}}</time></span>{{/if}}
+      {{#if published_at}}<span>{{ @intl.programs.report.publishedLabel }} <time datetime="{{ published_at }}">{{formatDateTime published_at "MMM D, YYYY"}}</time></span>{{/if}}
+    </div>
+  </header>
+  {{/unless}}
+  <nav class="program-report__navigation" aria-label="{{ @intl.programs.report.workflowNavigationLabel }}">
+    <a class="program-report__nav-link js-report-link" href="{{ overviewUrl }}"{{#unless hasFlow}} aria-current="page"{{/unless}}>{{ @intl.programs.report.overviewLabel }}</a>
+    {{#each flows}}
+      <a class="program-report__nav-link js-report-link" href="{{ url }}"{{#if isCurrent}} aria-current="page"{{/if}}>{{far "folder"}}<span>{{ name }}</span>{{#if inactiveStatus}}<span class="program-report__nav-status">{{ inactiveStatus }}</span>{{/if}}</a>
+    {{/each}}
+  </nav>
+  {{#if hasFlow}}
+    <div data-flow-region></div>
+  {{else}}
+    <section class="program-report__introduction">
+      <h2 class="program-report__section-title js-report-heading" tabindex="-1">{{ @intl.programs.report.overviewLabel }}</h2>
+      <p>{{#if flows}}{{ @intl.programs.report.flowNavigationHelp }}{{else}}{{ @intl.programs.report.emptyFlowsText }}{{/if}}</p>
+    </section>
+  {{/if}}
+  <section class="program-report__action-section">
+    <h2 class="program-report__section-title{{#if hasFlow}} js-report-heading{{/if}}"{{#if hasFlow}} tabindex="-1"{{/if}}>{{#if hasFlow}}{{ @intl.programs.report.flowActionsLabel }}{{else}}{{ @intl.programs.report.standaloneActionsLabel }}{{/if}}</h2>
+    <p class="program-report__section-help">{{#if hasFlow}}{{ @intl.programs.report.sequenceHelp }}{{else}}{{ @intl.programs.report.standaloneActionsHelp }}{{/if}}</p>
+    <p class="program-report__notice js-missing-action" role="status" tabindex="-1" hidden>{{ @intl.programs.report.missingActionText }}</p>
+    <div data-actions-region></div>
+  </section>
+</div>

@@ -1,13 +1,49 @@
+.programs-list__header {
+  padding: var(--space-6);
+
+  h1 {
+    align-items: center;
+    display: flex;
+    font-size: 24px;
+    gap: var(--space-3);
+    line-height: 32px;
+  }
+
+  p {
+    color: var(--color-text-secondary);
+    margin-top: var(--space-2);
+  }
+}
+
+.programs-list .card-list {
+  list-style: none;
+  margin: 0;
+  max-width: 1120px;
+}
+
+.programs-list .card-list__item-surface {
+  color: inherit;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 1px solid var(--color-interactive);
+    outline-offset: -1px;
+  }
+}
+
+.programs-list .card-list__item-title {
+  font-size: 16px;
+  line-height: 24px;
+  white-space: normal;
+}
+
+.programs-list__details {
+  color: var(--color-text-secondary);
+  line-height: 20px;
+  max-width: 80ch;
+  overflow-wrap: anywhere;
+}
 
 .programs-list__published {
-  color: #{$black};
-  font-weight: 600;
-
-  &.is-published {
-    color: color(green);
-  }
-
-  .icon {
-    margin-right: 4px;
-  }
+  color: var(--color-text);
 }

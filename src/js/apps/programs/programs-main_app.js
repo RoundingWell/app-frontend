@@ -3,17 +3,14 @@ import { Radio } from 'marionette';
 import RouterApp from 'js/base/routerapp';
 
 import ProgramsAllApp from 'js/apps/programs/programs-all/programs-all_app';
-import ProgramApp from 'js/apps/programs/program/program_app';
-import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
+import ReportApp from 'js/apps/programs/report/report_app';
 
 export default RouterApp.extend({
   routerAppName: 'ProgramsApp',
   childApps: {
     programsAll: ProgramsAllApp,
-    program: ProgramApp,
-    programflow: ProgramFlowApp,
+    report: ReportApp,
   },
-
   eventRoutes: {
     'programs:all': {
       action: 'showProgramsAll',
@@ -22,45 +19,32 @@ export default RouterApp.extend({
     },
     'program:details': {
       action: 'showProgram',
-      route: 'program/:id',
+      route: 'program/:programId',
     },
     'program:action': {
       action: 'showProgram',
-      route: 'program/:id/action/:id',
-    },
-    'program:action:new': {
-      action: 'showProgram',
-      route: 'program/:id/action',
-    },
-    'programFlow:new': {
-      action: 'showProgram',
-      route: 'program/:id/flow',
+      route: 'program/:programId/action/:actionId',
     },
     'programFlow': {
       action: 'showProgramFlow',
-      route: 'program-flow/:id',
+      route: 'program-flow/:flowId',
     },
     'programFlow:action': {
       action: 'showProgramFlow',
-      route: 'program-flow/:id/action/:id',
-    },
-    'programFlow:action:new': {
-      action: 'showProgramFlow',
-      route: 'program-flow/:id/action',
+      route: 'program-flow/:flowId/action/:actionId',
     },
   },
-
   showProgramsAll() {
     return this.startCurrent('programsAll');
   },
   showProgram(programId) {
-    return this.startRoute('program', { programId });
+    return this.startRoute('report', { programId });
   },
   showProgramFlow(flowId) {
-    return this.startRoute('programflow', { flowId });
+    return this.startRoute('report', { flowId });
   },
-  onRouteError(error, { definition }) {
-    if (definition.action === 'showProgramFlow') {
+  onRouteError(error) {
+    if (error?.response?.status === 404) {
       Radio.trigger('event-router', 'notFound');
       return;
     }
