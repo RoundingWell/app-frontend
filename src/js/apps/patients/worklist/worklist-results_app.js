@@ -279,7 +279,9 @@ export default App.extend({
     const filterType = isFlowType ? 'flows' : 'actions';
 
     this.releaseManagedAdds?.();
-    Radio.request('ws', 'subscribe', this.collection.models, { filters: { [filterType]: this.filters } });
+    const resources = [...this.collection.models];
+    if (this.patientSidebarPatientId) resources.push({ type: 'patients', id: this.patientSidebarPatientId });
+    Radio.request('ws', 'subscribe', resources, { filters: { [filterType]: this.filters } });
     this.releaseManagedAdds = Radio.request('ws', 'manage:add', this, this.collection, entityType, this.query);
   },
   getSortOption(sortId) {
