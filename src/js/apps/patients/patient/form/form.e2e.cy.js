@@ -318,10 +318,11 @@ context('Noncontext Form', function() {
 
     cy
       .wait('@routePatientFieldfooHistory')
-      .its('request.query')
-      .then(data => {
-        expect(data.page.limit).to.equal('10');
-        expect(data.sort).to.equal('newest');
+      .its('request.url')
+      .should(url => {
+        const { searchParams } = new URL(url);
+        expect(searchParams.get('page[limit]')).to.equal('10');
+        expect(searchParams.get('sort')).to.equal('newest');
       });
 
     cy
@@ -334,10 +335,11 @@ context('Noncontext Form', function() {
 
     cy
       .wait('@routePatientFieldbarHistory')
-      .its('request.query')
-      .then(data => {
-        expect(data.page.limit).to.equal('2');
-        expect(data.sort).to.equal('oldest');
+      .its('request.url')
+      .should(url => {
+        const { searchParams } = new URL(url);
+        expect(searchParams.get('page[limit]')).to.equal('2');
+        expect(searchParams.get('sort')).to.equal('oldest');
       });
 
     cy

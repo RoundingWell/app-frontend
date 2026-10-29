@@ -131,6 +131,9 @@ const babelPlugin = babel({
   configFile: false,
 });
 
+// Keep component and E2E coverage mapped to the same original source locations.
+babelPlugin.enforce = 'pre';
+
 export const cypressConfig = defineConfig({
   mode: 'test',
   plugins: [

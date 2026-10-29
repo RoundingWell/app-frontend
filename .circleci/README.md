@@ -29,6 +29,19 @@ new pipeline has produced a successful nightly run.
 
 ## Cypress workers and coverage
 
+Primary component and E2E jobs explicitly run Chrome. The nightly matrix keeps
+Chrome, Firefox, and Edge for both suites. All use the pinned `cypress/browsers`
+image in `workflows.yml`, which includes the browser executables and Firefox's
+geckodriver; a plain Node image cannot satisfy these browser selections.
+
+The current image provides Node 24.22.1, Chrome 156, Firefox 159, and Edge 156 on
+Linux amd64. Keep its Node minor aligned with `.nvmrc` and the `cimg/node` pins in
+both `workflows.yml` and `deploy.yml`: dependency installation checks that match.
+When updating the image, check the actual browser versions and Cypress's
+[supported browser range](https://docs.cypress.io/app/references/launching-browsers#browser-versions-supported),
+then validate both component and E2E runs across the nightly browser matrix.
+Image availability and version checks alone do not establish passing suites.
+
 Component jobs use four workers without Cypress Cloud recording. The
 `scripts/run-component-shard.js` runner assigns each spec to exactly one worker,
 balancing total file size as a simple runtime proxy. Local component runs remain

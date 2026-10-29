@@ -8,7 +8,7 @@ const PLUGIN_NAME = 'vite-plugin-hbs-inline-compile';
 
 const JS_FILE_REGEX = /\.[cm]?[jt]sx?$/;
 const HBS_TAG_REGEX = /hbs`([^`]*)`/gs;
-const HBS_IMPORT_REGEX = /import hbs from 'handlebars-inline-precompile';?\s*\n?/g;
+const HBS_IMPORT_REGEX = /import hbs from (['"])handlebars-inline-precompile\1;?\s*\n?/g;
 
 export default function viteHbsInlineCompile() {
   return {
