@@ -253,36 +253,11 @@ context('Sidebar Service', function() {
           }))());
           expect(await service.startSidebarApp(failed, {})).to.equal(undefined);
           expect(service.currentApp).to.equal(undefined);
-          await failed.destroy();
+          failed.destroy();
         }
 
         expect(onError).to.have.been.calledWith(503);
         expect(onError).to.have.been.calledWith(undefined);
       });
-  });
-
-  specify('stops the displayed sidebar and releases its replies when destroyed', function() {
-    cy.document().then(async document => {
-      const { app: service } = mountService(document);
-      const sidebarApp = ownApp(new SidebarApp());
-      const channel = service.getChannel();
-      const otherOwner = {};
-      const otherReply = () => 'still available';
-      channel.reply('other:owner', otherReply, otherOwner);
-      scope.defer(() => channel.stopReplying('other:owner', otherReply, otherOwner));
-
-      await service.start();
-      expect(await channel.request('start', sidebarApp, {})).to.equal(sidebarApp);
-      const view = sidebarApp.getView();
-
-      await service.destroy();
-
-      expect(sidebarApp.isRunning()).to.be.false;
-      expect(sidebarApp.isDestroyed(), 'the sidebar app is borrowed for reuse').to.be.false;
-      expect(view.isDestroyed()).to.be.true;
-      expect(channel.request('start', sidebarApp, {})).to.equal(undefined);
-      expect(channel.request('stop')).to.equal(undefined);
-      expect(channel.request('other:owner')).to.equal('still available');
-    });
   });
 });

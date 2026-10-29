@@ -27,7 +27,7 @@ context('Forms Service', function() {
     expect(formService.channelName()).to.equal('form1');
   });
 
-  specify('releases its replies while preserving other channel owners', async function() {
+  specify('releases its replies while preserving other channel owners', function() {
     const formService = new FormsService({
       form: new Backbone.Model({ id: '1' }),
       patient: new Backbone.Model({ id: 'patient-1' }),
@@ -41,7 +41,7 @@ context('Forms Service', function() {
     channel.reply('form:interact', interact, viewport);
     scope.defer(() => channel.stopReplying('form:interact', interact, viewport));
 
-    await formService.destroy();
+    formService.destroy();
 
     expect(channel.request('form:interact')).to.equal('interacted');
     channel.request('ready:form');

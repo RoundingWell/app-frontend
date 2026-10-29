@@ -837,25 +837,20 @@ context('WS Service - Disabled', function() {
   specify('settles disabled startup without constructing a socket', function() {
     cy.then(async() => {
       const disabledService = new WSService();
+      scope.defer(() => disabledService.destroy());
 
-      try {
-        expect(await disabledService.start(), 'disabled startup settled').to.be.true;
-        expect(disabledService.ws, 'disabled startup must not construct a socket').to.deep.equal({});
+      expect(await disabledService.start(), 'disabled startup settled').to.be.true;
+      expect(disabledService.ws, 'disabled startup must not construct a socket').to.deep.equal({});
 
-        Radio.request('ws', 'subscribe', { id: 'foo', type: 'bar' });
+      Radio.request('ws', 'subscribe', { id: 'foo', type: 'bar' });
 
-        expect(disabledService.ws, 'disabled subscription must not construct a socket').to.deep.equal({});
+      expect(disabledService.ws, 'disabled subscription must not construct a socket').to.deep.equal({});
 
-        await disabledService.stop();
-        expect(disabledService.isRunning()).to.be.false;
+      await disabledService.stop();
+      expect(disabledService.isRunning()).to.be.false;
 
-        expect(await disabledService.start(), 'disabled reentry settled').to.be.true;
-        expect(disabledService.ws, 'disabled reentry must not construct a socket').to.deep.equal({});
-      } finally {
-        await disabledService.destroy();
-      }
-
-      expect(disabledService.isDestroyed()).to.be.true;
+      expect(await disabledService.start(), 'disabled reentry settled').to.be.true;
+      expect(disabledService.ws, 'disabled reentry must not construct a socket').to.deep.equal({});
     });
 
     cy

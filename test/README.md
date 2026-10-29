@@ -91,29 +91,21 @@ Fixtures, Cypress support, plugins, and reports remain under `test/`.
 
 ## Writing Tests
 
-For tests that own several Marionette resources, import `createTestScope` from
-`@mnjs/test`, create a fresh scope in `beforeEach`, and return `scope.cleanup()`
-from `afterEach`. Register disposal as soon as each resource is acquired. Cleanup
-awaits disposers in reverse order and continues after a disposer throws. Release
-and await any test-held background work before destroying its dependencies.
-Remove only the Radio replies/listeners the test owns; a channel-wide `reset()`
-can hide leaked bindings and remove another owner's subscriptions.
+Use the shared `cy.mount(callback)` for Views. Its [app shell](support/component.js)
+supplies popup regions and user-activity listeners, passes the root View to the
+callback, and yields the jQuery `#root` subject. `@mnjs/test/cypress` owns mounting
+and cleanup.
 
-`mountApplication` from the same core entry owns a fixture host, Region and
-Application. Use `scope.own(...)`, and await `mounted.ready` when it starts the
-Application. Use `start: false` when the scenario controls startup. Borrowed apps,
-channels and destination elements still need their own cleanup. The sidebar
-service specs demonstrate this without changing the shared `cy.mount` shell.
+For additional resources, use `createTestScope` from `@mnjs/test`: create it in
+`beforeEach`, register disposal when acquiring each resource, and return
+`scope.cleanup()` from `afterEach`. Release and await held work before disposing
+its dependencies. Remove only the Radio bindings the test owns. Cypress already
+cleans up its spies, intercepts and clocks.
 
-The shared `cy.mount` delegates mounting and cleanup to `@mnjs/test/cypress`.
-`setupCypress()` owns replacement and awaited test teardown. The app wrapper
-supplies `TestApplication`, `RootView`, popup regions and user-activity listeners,
-passes the root View to the callback, and yields the jQuery `#root` subject.
-It constructs the shell after `mountApplication(..., { start: false })` returns
-an owned handle, so callback failures still leave the Application registered for
-cleanup. Use the core `createTestScope` for resources outside that mount, such as
-test-owned Radio replies and mock servers. Cypress already owns its spies,
-intercepts and clocks; do not duplicate their cleanup.
+Service fixtures can use `scope.own(mountApplication(...))`; use `start: false`
+when the scenario controls startup, otherwise await `mounted.ready`. See the
+[sidebar examples](../src/js/services/sidebar.component.cy.js) and
+[@mnjs/test documentation](https://www.npmjs.com/package/@mnjs/test/v/0.1.0).
 
 Keep specs focused on application behavior and lifecycle. Generic helper and
 test tooling contracts belong in the library's own tests.
