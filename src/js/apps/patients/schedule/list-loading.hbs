@@ -1,0 +1,24 @@
+<div class="schedule-list__skeleton-row" aria-hidden="true">
+  <div class="schedule-list__skeleton-day-heading">
+    <span class="skeleton-loading__shape schedule-list__skeleton-date"></span>
+    <span class="skeleton-loading__shape schedule-list__skeleton-month-day"></span>
+  </div>
+  <div class="schedule-list__skeleton-day-list-container">
+    <div class="schedule-list__skeleton-day-list">
+      {{#each items}}
+        <div class="schedule-list__skeleton-item">
+          <div class="schedule-list__skeleton-check-column">
+            <span class="skeleton-loading__shape schedule-list__skeleton-check"></span>
+          </div>
+          <div class="schedule-list__skeleton-card">
+            <span class="skeleton-loading__shape schedule-list__skeleton-time"></span>
+            <span class="skeleton-loading__shape schedule-list__skeleton-patient"></span>
+            <span class="skeleton-loading__shape schedule-list__skeleton-state"></span>
+            <span class="skeleton-loading__shape schedule-list__skeleton-action"></span>
+            <span class="skeleton-loading__shape schedule-list__skeleton-context"></span>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  </div>
+</div>

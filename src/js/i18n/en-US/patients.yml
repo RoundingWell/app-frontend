@@ -208,6 +208,7 @@ careOptsFrontend:
         errorView:
           message: The schedule could not be loaded. Please try again.
           retry: Retry
+          updateError: The schedule could not be updated.
         allFiltersButtonView:
           allFiltersButton: All Filters
         dayItemView:
@@ -223,6 +224,9 @@ careOptsFrontend:
           noScheduledActions: No Scheduled Actions
         layoutView:
           closeSidebar: Close sidebar
+        loadingView:
+          loadingActions: Loading actions
+          updating: Updating schedule
         scheduleTitleView:
           tooltip: Schedule Worklist displays all Actions with a due date for you (or someone else on your team).
         tableHeaderView:
