@@ -254,13 +254,7 @@ const ListUpdatingView = View.extend({
     'aria-live': 'polite',
     'role': 'status',
   },
-  template: hbs`{{ loadingText }}`,
-  templateContext() {
-    const loadingViewI18n = i18n.loadingView;
-    const loadingText = this.getOption('isFlowList') ? loadingViewI18n.updatingFlows : loadingViewI18n.updatingActions;
-
-    return { loadingText };
-  },
+  template: hbs`{{ @intl.patients.worklist.worklistViews.loadingView.updating }}`,
 });
 
 const ListErrorView = View.extend({

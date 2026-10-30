@@ -539,8 +539,7 @@ careOptsFrontend:
           loadingFlows: Loading flows
           retry: Retry
           updateError: The worklist could not be updated.
-          updatingActions: Updating actions
-          updatingFlows: Updating flows
+          updating: Updating worklist
         listTitleLabelView:
           listLabels: |
             {title, select,

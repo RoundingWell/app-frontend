@@ -407,27 +407,32 @@
 .worklist-list__list.is-loading {
   opacity: 0.6;
   pointer-events: none;
-  position: relative;
   user-select: none;
 }
 
-.worklist-list__list.is-loading::before {
-  animation: skeleton-loading-wave 1.4s ease-in-out infinite;
-  background: linear-gradient(90deg, var(--color-control-background) 25%, var(--color-page-bg) 50%, var(--color-control-background) 75%);
+.worklist-list__updating {
+  animation: worklist-list-shimmer 1.2s linear infinite;
+  background: linear-gradient(
+    120deg,
+    var(--color-text-secondary) 24%,
+    color-mix(in srgb, var(--color-text-secondary) 25%, var(--color-page-bg)) 50%,
+    var(--color-text-secondary) 76%
+  );
+  background-clip: text;
   background-size: 200% 100%;
-  content: '';
-  height: var(--space-1);
-  left: var(--space-6);
-  position: absolute;
-  right: var(--space-6);
-  top: 0;
-  z-index: 1;
+  color: transparent;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
-.worklist-list__updating {
-  color: var(--color-text-subtle);
-  font-size: 12px;
-  white-space: nowrap;
+@keyframes worklist-list-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -50% 0;
+  }
 }
 
 .worklist-list__error {
@@ -453,7 +458,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .worklist-list__list.is-loading::before {
+  .worklist-list__updating {
     animation: none;
+    color: var(--color-text-secondary);
   }
 }
