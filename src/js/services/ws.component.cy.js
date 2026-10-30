@@ -281,7 +281,7 @@ context('WS Service', function() {
       cy.stub(stoppedModel, 'fetch').resolves(stoppedModel);
 
       service.manageAdd(app, firstCollection, 'flows');
-      service.manageAdd(app, collection, 'flows');
+      scope.defer(service.manageAdd(app, collection, 'flows'));
       channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
       await Cypress.Promise.resolve();
 
@@ -314,6 +314,13 @@ context('WS Service', function() {
       const flow = new Backbone.Model({ id: 'retained-flow' });
       const actionFetch = deferred();
       const otherActionFetch = deferred();
+      scope.defer(() => {
+        app.stop();
+        otherApp.stop();
+        actionFetch.resolve(action);
+        otherActionFetch.resolve(action);
+        return Promise.all([actionFetch.promise, otherActionFetch.promise]);
+      });
       action.type = 'patient-actions';
       flow.type = 'flows';
       const fetchAction = cy.stub(action, 'fetch');
@@ -365,6 +372,11 @@ context('WS Service', function() {
       const model = new Backbone.Model({ id: 'flow-id' });
       const fetch = deferred();
       const app = scope.own(new App());
+      scope.defer(() => {
+        app.stop();
+        fetch.resolve(model);
+        return Promise.allSettled([fetch.promise]);
+      });
 
       model.type = 'flows';
       cy.stub(model, 'fetch').returns(fetch.promise);
@@ -418,8 +430,8 @@ context('WS Service', function() {
       })
       .get('@sendData')
       .should('be.calledOnce')
-      .then(async() => {
-        await service.stop();
+      .then(() => {
+        service.stop();
         service.sendData.resetHistory();
       });
 
@@ -827,7 +839,7 @@ context('WS Service - Disabled', function() {
 
       expect(disabledService.ws, 'disabled subscription must not construct a socket').to.deep.equal({});
 
-      await disabledService.stop();
+      disabledService.stop();
       expect(disabledService.isRunning()).to.be.false;
 
       expect(await disabledService.start(), 'disabled reentry settled').to.be.true;

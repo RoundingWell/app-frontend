@@ -6,7 +6,6 @@ import { mountApplication } from '@mnjs/test/cypress';
 
 import '@cypress/code-coverage/support';
 import './api-guard';
-import './websockets';
 
 import 'scss/provider-core.scss';
 import 'scss/app-root.scss';

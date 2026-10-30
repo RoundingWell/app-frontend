@@ -49,8 +49,6 @@ context('Sidebar Service', function() {
       await service.stopSidebarApp();
 
       expect(sidebarApp.isRunning()).to.be.false;
-
-      await service.stop();
     });
   });
 
@@ -72,9 +70,6 @@ context('Sidebar Service', function() {
       expect(superseded.getView()).to.not.exist;
       expect(element.children).to.have.length(1);
       expect(element.contains(latest.getView().el)).to.be.true;
-
-      await service.stopSidebarApp();
-      await service.stop();
     });
   });
 
@@ -93,9 +88,6 @@ context('Sidebar Service', function() {
       expect(incoming.isRunning()).to.be.true;
       expect(incoming.getView()).to.exist;
       expect(element.contains(incoming.getView().el)).to.be.true;
-
-      await service.stopSidebarApp();
-      await service.stop();
     });
   });
 
@@ -201,7 +193,7 @@ context('Sidebar Service', function() {
       await service.start({ region: firstRegion });
       await service.startSidebarApp(sidebarApp, {});
       sidebarApp.getState().set('draft', 'preserved');
-      await service.stop();
+      service.stop();
 
       await service.start({ region: nextRegion });
       await service.startSidebarApp(sidebarApp, {});
@@ -209,8 +201,6 @@ context('Sidebar Service', function() {
       expect(firstElement.children).to.have.length(0);
       expect(nextElement.contains(sidebarApp.getView().el)).to.be.true;
       expect(sidebarApp.getState().get('draft')).to.equal('preserved');
-
-      await service.stop();
     });
   });
 
@@ -233,7 +223,6 @@ context('Sidebar Service', function() {
           }))());
           expect(await service.startSidebarApp(failed, {})).to.equal(undefined);
           expect(service.currentApp).to.equal(undefined);
-          failed.destroy();
         }
 
         expect(onError).to.have.been.calledWith(503);

@@ -20,9 +20,11 @@ function deferred() {
 
   context(title, function() {
     let owner;
+    let scope;
 
     beforeEach(async function() {
-      owner = testScope().own(new Router({ workspaceSlug: 'test-ws' }));
+      scope = testScope();
+      owner = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await owner.start();
     });
 
@@ -46,6 +48,11 @@ function deferred() {
         return ready.promise;
       } }))());
       const replacing = owner.startCurrent('next');
+      scope.defer(() => {
+        owner.stop();
+        ready.resolve();
+        return replacing;
+      });
       expect(owner.stop()).to.equal(true);
       ready.resolve();
       expect(await replacing).to.equal(undefined);
@@ -54,11 +61,11 @@ function deferred() {
     });
 
     specify('invalidates pending selection even when its owner is already stopped', async function() {
-      await owner.stop();
+      owner.stop();
       const child = owner.addChildApp('child', new App());
       const started = cy.spy(child, 'start');
       const selecting = owner.startCurrent('child');
-      await owner.stop();
+      owner.stop();
 
       expect(await selecting).to.equal(undefined);
       expect(started).to.have.been.calledOnce;
@@ -66,12 +73,12 @@ function deferred() {
     });
 
     specify('clears a live child selected beneath an already-stopped owner', async function() {
-      await owner.stop();
+      owner.stop();
       const child = owner.addChildApp('child', new App());
       await owner.startCurrent('child');
       expect(child.isRunning()).to.be.true;
 
-      await owner.stop();
+      owner.stop();
       expect(child.isRunning()).to.be.false;
       expect(owner.getCurrent()).to.equal(null);
     });
@@ -86,11 +93,15 @@ function deferred() {
         },
       }))());
       const selecting = owner.startCurrent('child');
+      scope.defer(() => {
+        owner.stop();
+        readiness.resolve();
+        return selecting;
+      });
       await preparing.promise;
-      const destroying = owner.destroy();
+      owner.destroy();
       readiness.resolve();
 
-      await destroying;
       expect(await selecting).to.equal(undefined);
       expect(child.isDestroyed()).to.be.true;
       expect(owner.getCurrent()).to.equal(null);
@@ -122,6 +133,10 @@ function deferred() {
         async prepareStart() {
           const nested = this.getChildApp('nested');
           await nested.start();
+          const onBeforeStop = nested.onBeforeStop;
+          scope.defer(() => {
+            nested.onBeforeStop = onBeforeStop;
+          });
           nested.onBeforeStop = () => {
             throw cleanupFailure;
           };
@@ -130,7 +145,6 @@ function deferred() {
       }))());
 
       const result = await owner.startCurrent('child').catch(error => error);
-      child.getChildApp('nested').onBeforeStop = () => {};
       expect(result).to.equal(failure);
       expect(reported).to.have.been.calledOnceWith(cleanupFailure, child);
       expect(owner.getCurrent()).to.equal(child);
@@ -142,12 +156,15 @@ function deferred() {
       const child = owner.addChildApp('child', new App({ childApps: { nested: App } }));
       const nested = child.getChildApp('nested');
       await nested.start();
+      const onBeforeStop = nested.onBeforeStop;
+      scope.defer(() => {
+        nested.onBeforeStop = onBeforeStop;
+      });
       nested.onBeforeStop = () => {
         throw cleanupFailure;
       };
 
       const result = await owner.selectChild('child', { start: () => false });
-      nested.onBeforeStop = () => {};
       expect(result).to.equal(undefined);
       expect(reported).to.have.been.calledOnceWith(cleanupFailure, child);
       expect(owner.getCurrent()).to.equal(child);
@@ -164,8 +181,14 @@ function deferred() {
       }))());
       const next = owner.addChildApp('next', new App());
       const selecting = owner.startCurrent('child');
+      let replacing = null;
+      scope.defer(() => {
+        owner.stop();
+        readiness.resolve();
+        return Promise.all([selecting, replacing]);
+      });
       await preparing.promise;
-      const replacing = owner.startCurrent('next');
+      replacing = owner.startCurrent('next');
       readiness.reject(new Error('obsolete page failed'));
 
       expect(await selecting).to.equal(undefined);

@@ -2,7 +2,8 @@ import { Server, WebSocket as MockedWebSocket } from 'mock-socket';
 
 let mockServer;
 
-function stopMockServer() {
+/* eslint-disable-next-line mocha/no-exports */
+export function stopMockServer() {
   const server = mockServer;
   mockServer = undefined;
 
@@ -15,8 +16,10 @@ function stopMockServer() {
   }
 }
 
-/* eslint-disable-next-line mocha/no-top-level-hooks */
-afterEach(stopMockServer);
+if (Cypress.testingType === 'e2e') {
+  /* eslint-disable-next-line mocha/no-top-level-hooks */
+  afterEach(stopMockServer);
+}
 
 Cypress.Commands.add('mockWs', url => {
   cy.log('ws: Mocking WebSocket');
