@@ -1,5 +1,5 @@
 import { Radio } from 'marionette';
-import { createTestScope } from '@mnjs/test';
+import { testScope } from '@mnjs/test/cypress';
 
 import SettingsService from './settings';
 
@@ -8,19 +8,15 @@ import { Model as Workspace } from 'js/entities-service/entities/workspaces';
 import { Collection as Settings } from 'js/entities-service/entities/settings';
 
 context('Settings Service', function() {
-  let scope;
-
   beforeEach(function() {
-    scope = createTestScope();
-    scope.defer(() => Radio.channel('bootstrap').stopReplying('currentUser', null, scope));
-    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
+    const scope = testScope();
     const currentUser = new Clinician({ settings: { baz: 'clinician' } });
 
-    Radio.reply('bootstrap', 'currentUser', () => currentUser, scope);
+    scope.reply(Radio, 'bootstrap', 'currentUser', () => currentUser);
 
     const currentWorkspace = new Workspace({ settings: { bar: 1, baz: 'workspace' } });
 
-    Radio.reply('workspace', 'current', () => currentWorkspace, scope);
+    scope.reply(Radio, 'workspace', 'current', () => currentWorkspace);
 
     const settings = new Settings([
       { id: 'foo', value: 'value' },
@@ -28,12 +24,7 @@ context('Settings Service', function() {
       { id: 'baz', value: 'organization' },
     ]);
 
-    const service = new SettingsService({ settings });
-    scope.defer(() => service.destroy());
-  });
-
-  afterEach(function() {
-    return scope.cleanup();
+    scope.own(new SettingsService({ settings }));
   });
 
   specify('Get Org Setting', function() {

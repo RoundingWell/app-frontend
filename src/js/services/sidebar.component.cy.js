@@ -1,6 +1,7 @@
-import { Radio, Region, View } from 'marionette';
+import { Radio, View } from 'marionette';
 import Backbone from 'backbone';
-import { createTestScope, mountApplication } from '@mnjs/test';
+import { mountApplication, mountRegion } from '@mnjs/test';
+import { testScope } from '@mnjs/test/cypress';
 
 import App from 'js/base/app';
 
@@ -16,11 +17,7 @@ context('Sidebar Service', function() {
   let scope;
 
   beforeEach(function() {
-    scope = createTestScope();
-  });
-
-  afterEach(function() {
-    return scope.cleanup();
+    scope = testScope();
   });
 
   function mountService(document) {
@@ -31,15 +28,10 @@ context('Sidebar Service', function() {
     }));
   }
 
-  function ownApp(app) {
-    scope.defer(() => app.destroy());
-    return app;
-  }
-
   specify('reconstructs the current sidebar app when asked to start it again', function() {
     cy.document().then(async document => {
       const { app: service } = mountService(document);
-      const sidebarApp = ownApp(new SidebarApp());
+      const sidebarApp = scope.own(new SidebarApp());
 
       await service.start();
 
@@ -65,8 +57,8 @@ context('Sidebar Service', function() {
   specify('interleaved starts display only the latest app', function() {
     cy.document().then(async document => {
       const { app: service, container: element } = mountService(document);
-      const superseded = ownApp(new SidebarApp());
-      const latest = ownApp(new SidebarApp());
+      const superseded = scope.own(new SidebarApp());
+      const latest = scope.own(new SidebarApp());
 
       await service.start();
 
@@ -89,8 +81,8 @@ context('Sidebar Service', function() {
   specify('a stopping app leaves its replacement displayed', function() {
     cy.document().then(async document => {
       const { app: service, container: element } = mountService(document);
-      const outgoing = ownApp(new SidebarApp());
-      const incoming = ownApp(new SidebarApp());
+      const outgoing = scope.own(new SidebarApp());
+      const incoming = scope.own(new SidebarApp());
 
       await service.start();
 
@@ -110,10 +102,10 @@ context('Sidebar Service', function() {
   specify('yields to a sidebar started while stopping the outgoing app', function() {
     cy.document().then(async document => {
       const { app: service, container: element } = mountService(document);
-      const other = ownApp(new SidebarApp());
-      const incoming = ownApp(new SidebarApp());
+      const other = scope.own(new SidebarApp());
+      const incoming = scope.own(new SidebarApp());
       let replacing;
-      const outgoing = ownApp(new (SidebarApp.extend({
+      const outgoing = scope.own(new (SidebarApp.extend({
         onStop() {
           replacing ||= service.startSidebarApp(other, {});
         },
@@ -134,14 +126,10 @@ context('Sidebar Service', function() {
   specify('yields to a sidebar started while stopping the incoming app', function() {
     cy.document().then(async document => {
       const { app: service, container: element } = mountService(document);
-      const outsideElement = document.createElement('div');
-      document.body.append(outsideElement);
-      scope.defer(() => outsideElement.remove());
-      const outsideRegion = new Region({ el: outsideElement });
-      scope.defer(() => outsideRegion.destroy());
-      const other = ownApp(new SidebarApp());
+      const { region: outsideRegion } = scope.own(mountRegion({ document }));
+      const other = scope.own(new SidebarApp());
       let replacing;
-      const incoming = ownApp(new (SidebarApp.extend({
+      const incoming = scope.own(new (SidebarApp.extend({
         onStop() {
           replacing ||= service.startSidebarApp(other, {});
         },
@@ -162,7 +150,7 @@ context('Sidebar Service', function() {
   specify('stops the active sidebar synchronously during service shutdown', function() {
     cy.document().then(async document => {
       const { app: service } = mountService(document);
-      const sidebarApp = ownApp(new SidebarApp());
+      const sidebarApp = scope.own(new SidebarApp());
       await service.start();
       await service.startSidebarApp(sidebarApp, {});
       expect(service.stop()).to.equal(true);
@@ -173,12 +161,12 @@ context('Sidebar Service', function() {
   specify('cancels a pending sidebar replacement during service shutdown', function() {
     cy.document().then(async document => {
       const { app: service } = mountService(document);
-      const outgoing = ownApp(new SidebarApp());
+      const outgoing = scope.own(new SidebarApp());
       let resolveStart;
       const ready = new Promise(resolve => {
         resolveStart = resolve;
       });
-      const incoming = ownApp(new (SidebarApp.extend({ prepareStart() {
+      const incoming = scope.own(new (SidebarApp.extend({ prepareStart() {
         return ready;
       } }))());
       await service.start();
@@ -199,24 +187,16 @@ context('Sidebar Service', function() {
 
   specify('rebinds a reusable app to a recreated shell without losing state', function() {
     cy.document().then(async document => {
-      const firstElement = document.createElement('div');
-      const nextElement = document.createElement('div');
+      const { region: firstRegion, slot: firstElement } = scope.own(mountRegion({ document }));
+      const { region: nextRegion, slot: nextElement } = scope.own(mountRegion({ document }));
 
-      document.body.append(firstElement, nextElement);
-      scope.defer(() => firstElement.remove());
-      scope.defer(() => nextElement.remove());
-      const firstRegion = new Region({ el: firstElement });
-      const nextRegion = new Region({ el: nextElement });
-      scope.defer(() => firstRegion.destroy());
-      scope.defer(() => nextRegion.destroy());
-
-      const service = ownApp(new SidebarService());
+      const service = scope.own(new SidebarService());
       const StatefulApp = SidebarApp.extend({
         createState() {
           return new Backbone.Model();
         },
       });
-      const sidebarApp = ownApp(new StatefulApp());
+      const sidebarApp = scope.own(new StatefulApp());
 
       await service.start({ region: firstRegion });
       await service.startSidebarApp(sidebarApp, {});
@@ -246,7 +226,7 @@ context('Sidebar Service', function() {
         await service.start();
 
         for (const error of [{ response: { status: 503 } }, new Error('Failed preparation')]) {
-          const failed = ownApp(new (App.extend({
+          const failed = scope.own(new (App.extend({
             prepareStart() {
               throw error;
             },

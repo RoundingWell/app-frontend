@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import WidgetsService from './widgets';
 
@@ -7,16 +8,10 @@ import { Collection as Widgets } from 'js/entities-service/entities/widgets';
 import { fxTestWidgets } from 'support/api/widgets';
 
 context('Widgets Service', function() {
-  let service;
-
   beforeEach(function() {
     const widgets = new Widgets(fxTestWidgets);
 
-    service = new WidgetsService({ widgets });
-  });
-
-  afterEach(async function() {
-    await service?.destroy();
+    testScope().own(new WidgetsService({ widgets }));
   });
 
   specify('build', function() {

@@ -93,19 +93,25 @@ Fixtures, Cypress support, plugins, and reports remain under `test/`.
 
 Use the shared `cy.mount(callback)` for Views. Its [app shell](support/component.js)
 supplies popup regions and user-activity listeners, passes the root View to the
-callback, and yields the jQuery `#root` subject. `@mnjs/test/cypress` owns mounting
-and cleanup.
+callback, and yields the jQuery `#root` subject. The callback's second argument is
+the mount scope: register shell-bound services with `scope.own(service)` so they
+are released before that shell is replaced or destroyed.
 
-For additional resources, use `createTestScope` from `@mnjs/test`: create it in
-`beforeEach`, register disposal when acquiring each resource, and return
-`scope.cleanup()` from `afterEach`. Release and await held work before disposing
-its dependencies. Remove only the Radio bindings the test owns. Cypress already
-cleans up its spies, intercepts and clocks.
+Call `testScope()` from `@mnjs/test/cypress` synchronously inside `beforeEach` or
+the test for fixtures that survive remounts. Register Radio replies with
+`scope.reply(Radio, channelName, requestName, handler)` and other cleanup with
+`scope.own(resource)` or `scope.defer(dispose)`. The adapter releases these fixtures
+after the final mount.
+Release and await held work before disposing its dependencies. Cypress already
+cleans up its spies, intercepts and clocks. Import [component hooks](support/component-hooks.js)
+before other support modules so owned services finish before websocket and
+coverage teardown. ESM imports run before the importing module's body.
 
-Service fixtures can use `scope.own(mountApplication(...))`; use `start: false`
-when the scenario controls startup, otherwise await `mounted.ready`. See the
+Service fixtures can own `mountRegion(...)` or `mountApplication(...)` handles;
+use `start: false` when the scenario controls startup, otherwise await
+`mounted.ready`. See the
 [sidebar examples](../src/js/services/sidebar.component.cy.js) and
-[@mnjs/test documentation](https://www.npmjs.com/package/@mnjs/test/v/0.1.0).
+[@mnjs/test documentation](https://www.npmjs.com/package/@mnjs/test).
 
 Keep specs focused on application behavior and lifecycle. Generic helper and
 test tooling contracts belong in the library's own tests.

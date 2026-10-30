@@ -1,3 +1,5 @@
+import { testScope } from '@mnjs/test/cypress';
+
 import App from './app';
 import RouterApp from './routerapp';
 import SubRouterApp from './subrouterapp';
@@ -20,12 +22,8 @@ function deferred() {
     let owner;
 
     beforeEach(async function() {
-      owner = new Router({ workspaceSlug: 'test-ws' });
+      owner = testScope().own(new Router({ workspaceSlug: 'test-ws' }));
       await owner.start();
-    });
-
-    afterEach(async function() {
-      await owner.destroy();
     });
 
     specify('stops the old child synchronously and completes only the latest replacement', async function() {

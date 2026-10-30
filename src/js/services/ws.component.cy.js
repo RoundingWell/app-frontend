@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
-import { createTestScope } from '@mnjs/test';
+import { testScope } from '@mnjs/test/cypress';
 import { version } from 'uuid';
 
 import App from 'js/base/app';
@@ -59,13 +59,10 @@ context('WS Service', function() {
   let scope;
 
   beforeEach(function() {
-    scope = createTestScope();
-    Radio.reply('bootstrap', 'currentUser', { clientKey }, scope);
-    scope.defer(() => Radio.channel('bootstrap').stopReplying('currentUser', null, scope));
-    Radio.reply('workspace', 'current', { id: workspace }, scope);
-    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
-    Radio.reply('auth', 'getToken', () => 'Bearer token', scope);
-    scope.defer(() => Radio.channel('auth').stopReplying('getToken', null, scope));
+    scope = testScope();
+    scope.reply(Radio, 'bootstrap', 'currentUser', { clientKey });
+    scope.reply(Radio, 'workspace', 'current', { id: workspace });
+    scope.reply(Radio, 'auth', 'getToken', () => 'Bearer token');
 
     let tokenId = 0;
 
@@ -77,12 +74,7 @@ context('WS Service', function() {
       .as('websocketsApi');
 
     cy.mockWs(endpoint);
-    service = new WSService();
-    scope.defer(() => service.destroy());
-  });
-
-  afterEach(function() {
-    return scope.cleanup();
+    service = scope.own(new WSService());
   });
 
   specify('Constructing the websocket', function() {
@@ -313,10 +305,8 @@ context('WS Service', function() {
   specify('Releases one managed result without canceling other owners or resource types', function() {
     cy.then(async() => {
       const channel = Radio.channel('ws');
-      const app = new App();
-      scope.defer(() => app.destroy());
-      const otherApp = new App();
-      scope.defer(() => otherApp.destroy());
+      const app = scope.own(new App());
+      const otherApp = scope.own(new App());
       const actions = new Backbone.Collection();
       const flows = new Backbone.Collection();
       const otherActions = new Backbone.Collection();
@@ -374,8 +364,7 @@ context('WS Service', function() {
       const collection = new Backbone.Collection();
       const model = new Backbone.Model({ id: 'flow-id' });
       const fetch = deferred();
-      const app = new App();
-      scope.defer(() => app.destroy());
+      const app = scope.own(new App());
 
       model.type = 'flows';
       cy.stub(model, 'fetch').returns(fetch.promise);
@@ -815,13 +804,10 @@ context('WS Service - Disabled', function() {
   let scope;
 
   beforeEach(function() {
-    scope = createTestScope();
-    Radio.reply('bootstrap', 'currentUser', { clientKey }, scope);
-    scope.defer(() => Radio.channel('bootstrap').stopReplying('currentUser', null, scope));
-    Radio.reply('workspace', 'current', { id: workspace }, scope);
-    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
-    Radio.reply('auth', 'getToken', () => 'Bearer token', scope);
-    scope.defer(() => Radio.channel('auth').stopReplying('getToken', null, scope));
+    scope = testScope();
+    scope.reply(Radio, 'bootstrap', 'currentUser', { clientKey });
+    scope.reply(Radio, 'workspace', 'current', { id: workspace });
+    scope.reply(Radio, 'auth', 'getToken', () => 'Bearer token');
 
     cy
       .intercept('GET', '/api/websockets', getWsResponse('disabled-token', { is_enabled: false }))
@@ -830,14 +816,9 @@ context('WS Service - Disabled', function() {
     cy.mockWs(endpoint);
   });
 
-  afterEach(function() {
-    return scope.cleanup();
-  });
-
   specify('settles disabled startup without constructing a socket', function() {
     cy.then(async() => {
-      const disabledService = new WSService();
-      scope.defer(() => disabledService.destroy());
+      const disabledService = scope.own(new WSService());
 
       expect(await disabledService.start(), 'disabled startup settled').to.be.true;
       expect(disabledService.ws, 'disabled startup must not construct a socket').to.deep.equal({});
@@ -860,8 +841,7 @@ context('WS Service - Disabled', function() {
 
   specify('allows another managed addition after a fetch fails', function() {
     cy.then(async() => {
-      const app = new App();
-      scope.defer(() => app.destroy());
+      const app = scope.own(new App());
       const collection = new Backbone.Collection();
       const model = new Backbone.Model({ id: 'retry-flow' });
       model.type = 'flows';
@@ -869,8 +849,7 @@ context('WS Service - Disabled', function() {
       fetch.onFirstCall().rejects(new Error('Network unavailable'));
       fetch.onSecondCall().resolves(model);
       await app.start();
-      const retryService = new WSService();
-      scope.defer(() => retryService.destroy());
+      const retryService = scope.own(new WSService());
       retryService.manageAdd(app, collection, 'flows');
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
       await new Promise(resolve => setTimeout(resolve, 0));

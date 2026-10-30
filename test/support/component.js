@@ -1,6 +1,8 @@
+import './component-hooks';
+
 import '@roundingwell/icons/styles.css';
 
-import { mountApplication, setupCypress } from '@mnjs/test/cypress';
+import { mountApplication } from '@mnjs/test/cypress';
 
 import '@cypress/code-coverage/support';
 import './api-guard';
@@ -45,18 +47,17 @@ const AppView = View.extend({
 });
 
 function mount(getView = () => new View({ template: false })) {
-  return mountApplication(region => new TestApplication({ region }), { start: false }).then(({ app }) => {
+  return mountApplication(region => new TestApplication({ region }), { start: false }).then(({ app, scope }) => {
     const TestRootView = RootView.extend({ AppView });
     const rootView = new TestRootView();
 
     app.setView(rootView);
     app.showView();
 
-    const view = getView(rootView);
+    const view = getView(rootView, scope);
 
     rootView.appView.showChildView('region', view);
   }).get('#root');
 }
 
-setupCypress();
 Cypress.Commands.add('mount', mount);

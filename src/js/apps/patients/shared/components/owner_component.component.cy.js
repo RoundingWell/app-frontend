@@ -1,5 +1,5 @@
 import { Radio } from 'marionette';
-import { createTestScope } from '@mnjs/test';
+import { testScope } from '@mnjs/test/cypress';
 
 import 'js/entities-service/index';
 import { Collection as Roles } from 'js/entities-service/entities/roles';
@@ -28,44 +28,36 @@ context('Owner Component', function() {
   let scope;
 
   beforeEach(function() {
-    scope = createTestScope();
-    scope.defer(() => Radio.channel('bootstrap').stopReplying('currentUser', null, scope));
-    scope.defer(() => Radio.channel('workspace').stopReplying('current', null, scope));
-    Radio.reply('bootstrap', 'currentUser', () => {
+    scope = testScope();
+    scope.reply(Radio, 'bootstrap', 'currentUser', () => {
       return clinicians.get(currentClinician.id);
-    }, scope);
+    });
 
     // Clear the cache
-    Radio.reply('workspace', 'current', () => {
+    scope.reply(Radio, 'workspace', 'current', () => {
       return new Workspace({ id: workspaceTwo.id });
-    }, scope);
-
-    const cacheReset = new OwnerComponent({
-      owner: clinicians.get(currentClinician.id),
     });
-    scope.defer(() => cacheReset.destroy());
 
-    Radio.reply('workspace', 'current', () => {
+    scope.own(new OwnerComponent({
+      owner: clinicians.get(currentClinician.id),
+    }));
+
+    scope.reply(Radio, 'workspace', 'current', () => {
       return new Workspace({ id: workspaceOne.id, name: 'Current Workspace' });
-    }, scope);
-  });
-
-  afterEach(function() {
-    return scope.cleanup();
+    });
   });
 
   specify('displaying', function() {
     const onChange = cy.stub();
 
     cy
-      .mount(rootView => {
+      .mount((rootView, mountScope) => {
         OwnerComponent.setPopRegion(rootView.getRegion('pop'));
 
         // Cache the elements
-        const cachedComponent = new OwnerComponent({
+        mountScope.own(new OwnerComponent({
           owner: clinicians.get(currentClinician.id),
-        });
-        scope.defer(() => cachedComponent.destroy());
+        }));
 
         const component = new OwnerComponent({
           owner: clinicians.get(currentClinician.id),
@@ -162,9 +154,9 @@ context('Owner Component', function() {
     const notInWorkspace = getClinician({ attributes: { name: 'Not in Workspace' } });
     const owner = new Clinician({ data: notInWorkspace }, { parse: true });
 
-    Radio.reply('bootstrap', 'currentUser', () => {
+    scope.reply(Radio, 'bootstrap', 'currentUser', () => {
       return owner;
-    }, scope);
+    });
 
     cy
       .mount(rootView => {
@@ -279,9 +271,9 @@ context('Owner Component', function() {
     });
     const owner = new Clinician({ data: employee }, { parse: true });
 
-    Radio.reply('bootstrap', 'currentUser', () => {
+    scope.reply(Radio, 'bootstrap', 'currentUser', () => {
       return owner;
-    }, scope);
+    });
 
     cy
       .mount(rootView => {

@@ -1,5 +1,5 @@
 import { Radio } from 'marionette';
-import { createTestScope } from '@mnjs/test';
+import { testScope } from '@mnjs/test/cypress';
 
 import 'js/entities-service';
 import { Collection as Teams } from 'js/entities-service/entities/teams';
@@ -10,18 +10,13 @@ context('Team Component', function() {
   let scope;
 
   beforeEach(function() {
-    scope = createTestScope();
-    scope.defer(() => Radio.channel('bootstrap').stopReplying('teams', null, scope));
-  });
-
-  afterEach(function() {
-    return scope.cleanup();
+    scope = testScope();
   });
 
   specify('No Default', function() {
-    Radio.reply('bootstrap', 'teams', () => {
+    scope.reply(Radio, 'bootstrap', 'teams', () => {
       return new Teams();
-    }, scope);
+    });
 
     cy
       .mount(rootView => {
@@ -47,9 +42,9 @@ context('Team Component', function() {
   });
 
   specify('isCompact', function() {
-    Radio.reply('bootstrap', 'teams', () => {
+    scope.reply(Radio, 'bootstrap', 'teams', () => {
       return new Teams({ data: getTeams() }, { parse: true });
-    }, scope);
+    });
 
     cy
       .mount(rootView => {
@@ -80,9 +75,9 @@ context('Team Component', function() {
     const changeTeamStub = cy.stub().as('changeTeam');
     const teams = new Teams({ data: getTeams() }, { parse: true });
 
-    Radio.reply('bootstrap', 'teams', () => {
+    scope.reply(Radio, 'bootstrap', 'teams', () => {
       return teams;
-    }, scope);
+    });
 
     cy
       .mount(rootView => {

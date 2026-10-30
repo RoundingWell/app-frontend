@@ -1,5 +1,5 @@
 import { Radio } from 'marionette';
-import { createTestScope } from '@mnjs/test';
+import { testScope } from '@mnjs/test/cypress';
 
 import fetcher from './fetch';
 
@@ -16,12 +16,7 @@ context('base fetch auth recovery', function() {
   let scope;
 
   beforeEach(function() {
-    scope = createTestScope();
-    scope.defer(() => Radio.channel('auth').stopReplying(null, null, scope));
-  });
-
-  afterEach(function() {
-    return scope.cleanup();
+    scope = testScope();
   });
 
   specify('delegates 401 handling to auth and uses the retry response', function() {
@@ -34,10 +29,8 @@ context('base fetch auth recovery', function() {
         .onSecondCall().resolves('Bearer new-token');
       const handleUnauthorized = cy.stub().callsFake(retry => retry());
 
-      Radio.reply('auth', {
-        getToken,
-        handleUnauthorized,
-      }, scope);
+      scope.reply(Radio, 'auth', 'getToken', getToken);
+      scope.reply(Radio, 'auth', 'handleUnauthorized', handleUnauthorized);
 
       return fetcher('/api/test').then(result => {
         expect(result.status).to.equal(200);
@@ -53,10 +46,8 @@ context('base fetch auth recovery', function() {
       const fetchMock = cy.stub(win, 'fetch').resolves(response(401));
       const handleUnauthorized = cy.stub();
 
-      Radio.reply('auth', {
-        getToken: cy.stub().resolves('Bearer token'),
-        handleUnauthorized,
-      }, scope);
+      scope.reply(Radio, 'auth', 'getToken', cy.stub().resolves('Bearer token'));
+      scope.reply(Radio, 'auth', 'handleUnauthorized', handleUnauthorized);
 
       return fetcher('/api/test').then(result => {
         expect(result.status).to.equal(401);
@@ -73,10 +64,8 @@ context('base fetch auth recovery', function() {
         .onSecondCall().resolves(response(200))
         .onThirdCall().resolves(response(200));
 
-      Radio.reply('auth', {
-        getToken: cy.stub().resolves('Bearer token'),
-        handleUnauthorized: cy.stub().callsFake(retry => retry()),
-      }, scope);
+      scope.reply(Radio, 'auth', 'getToken', cy.stub().resolves('Bearer token'));
+      scope.reply(Radio, 'auth', 'handleUnauthorized', cy.stub().callsFake(retry => retry()));
 
       return fetcher('/api/test', { abort: false })
         .then(() => fetcher('/api/test', { abort: false }))
@@ -110,7 +99,7 @@ context('base fetch auth recovery', function() {
         });
       });
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
+      scope.reply(Radio, 'auth', 'getToken', cy.stub().resolves('Bearer token'));
 
       const request = fetcher('/api/test', { signal: controller.signal });
       controller.abort();
@@ -137,7 +126,7 @@ context('base fetch auth recovery', function() {
         return Cypress.Promise.resolve(response(200));
       });
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
+      scope.reply(Radio, 'auth', 'getToken', cy.stub().resolves('Bearer token'));
 
       const firstRequest = fetcher('/api/test', { signal: controller.signal });
       const secondRequest = fetcher('/api/test');
@@ -164,7 +153,7 @@ context('base fetch auth recovery', function() {
         return Cypress.Promise.resolve(response(200));
       });
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
+      scope.reply(Radio, 'auth', 'getToken', cy.stub().resolves('Bearer token'));
 
       const writeRequest = fetcher('/api/test', { method: 'POST' });
       const readRequest = fetcher('/api/test');
@@ -182,7 +171,7 @@ context('base fetch auth recovery', function() {
     cy.window().then(win => {
       const fetchMock = cy.stub(win, 'fetch').resolves(response(200));
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
+      scope.reply(Radio, 'auth', 'getToken', cy.stub().resolves('Bearer token'));
 
       return fetcher('/api/test', {
         method: 'get',
@@ -226,7 +215,7 @@ context('base fetch auth recovery', function() {
         })
         .onThirdCall().resolves(response(200));
 
-      Radio.reply('auth', 'getToken', cy.stub().resolves('Bearer token'), scope);
+      scope.reply(Radio, 'auth', 'getToken', cy.stub().resolves('Bearer token'));
 
       const firstRequest = fetcher('/api/test');
 

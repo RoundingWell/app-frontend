@@ -1,7 +1,7 @@
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View } from 'marionette';
-import { createTestScope } from '@mnjs/test';
+import { testScope } from '@mnjs/test/cypress';
 
 import IframeFormBehavior from './iframe-form';
 
@@ -33,20 +33,14 @@ context('Iframe Form Behavior', function() {
   let scope;
 
   beforeEach(function() {
-    scope = createTestScope();
-  });
-
-  afterEach(function() {
-    return scope.cleanup();
+    scope = testScope();
   });
 
   specify('routes postMessage events only to the matching iframe channel', function() {
     const requests = [];
 
-    Radio.reply('form1', 'fetch:form:data', (...args) => requests.push(['form1', ...args]), scope);
-    scope.defer(() => Radio.channel('form1').stopReplying('fetch:form:data', null, scope));
-    Radio.reply('form2', 'fetch:form:data', (...args) => requests.push(['form2', ...args]), scope);
-    scope.defer(() => Radio.channel('form2').stopReplying('fetch:form:data', null, scope));
+    scope.reply(Radio, 'form1', 'fetch:form:data', (...args) => requests.push(['form1', ...args]));
+    scope.reply(Radio, 'form2', 'fetch:form:data', (...args) => requests.push(['form2', ...args]));
 
     cy
       .mount(() => new ParentView())
