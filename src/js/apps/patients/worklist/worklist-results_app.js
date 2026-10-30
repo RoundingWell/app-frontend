@@ -260,7 +260,7 @@ export default App.extend({
     this.isRefreshingList = true;
     listView.setLoading(true);
     this.getView().getRegion('status').empty();
-    this.getView().getRegion('count').show(new ListUpdatingView({ isFlowList: this.getState().isFlowType() }));
+    this.getView().getRegion('count').show(new ListUpdatingView());
   },
   showListError(isRefresh) {
     const errorView = new ListErrorView({ isRefresh });

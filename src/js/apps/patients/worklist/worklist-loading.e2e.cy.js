@@ -141,9 +141,8 @@ context('worklist loading states', function() {
     cy
       .get('.worklist-list__updating')
       .should('be.visible')
-      .should('contain', 'Updating actions')
+      .should('contain', 'Updating worklist')
       .parents('.patient-list-page__count')
-      .should('contain', 'Updating actions')
       .should('not.contain', '1 Action');
 
     cy
