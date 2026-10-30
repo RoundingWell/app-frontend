@@ -49,17 +49,32 @@ const ListLoadingView = View.extend({
   },
 });
 
+const ListUpdatingView = View.extend({
+  className: 'schedule-list__updating',
+  attributes: {
+    'aria-live': 'polite',
+    'role': 'status',
+  },
+  template: hbs`{{ @intl.patients.schedule.scheduleViews.loadingView.updating }}`,
+});
+
 const ListErrorView = View.extend({
   className: 'schedule-list__error',
   attributes: {
     role: 'alert',
   },
   template: hbs`
-    <span>{{ @intl.patients.schedule.scheduleViews.errorView.message }}</span>
+    <span>{{ message }}</span>
     <button class="button button--text js-retry" type="button">{{ @intl.patients.schedule.scheduleViews.errorView.retry }}</button>
   `,
   triggers: {
     'click .js-retry': 'retry',
+  },
+  templateContext() {
+    const errorViewI18n = intl.patients.schedule.scheduleViews.errorView;
+    const message = this.getOption('isRefresh') ? errorViewI18n.updateError : errorViewI18n.message;
+
+    return { message };
   },
 });
 
@@ -377,7 +392,8 @@ const EmptyFindInListView = View.extend({
 const ScheduleListView = CollectionView.extend({
   className: 'list-page__list schedule-list__list',
   attributes: {
-    role: 'list',
+    'role': 'list',
+    'aria-busy': 'false',
   },
   childView: DayListView,
   childViewOptions(model) {
@@ -440,6 +456,10 @@ const ScheduleListView = CollectionView.extend({
     this.selectedPatientId = patientId;
     this.children.each(view => view.setPatientSelected(patientId));
   },
+  setLoading(isLoading) {
+    this.el.setAttribute('aria-busy', String(isLoading));
+    this.el.classList.toggle('is-loading', isLoading);
+  },
   onChildFilter() {
     this.filter();
   },
@@ -463,6 +483,7 @@ export {
   LayoutView,
   ListErrorView,
   ListLoadingView,
+  ListUpdatingView,
   ScheduleTitleView,
   AllFiltersButtonView,
   ScheduleListView,

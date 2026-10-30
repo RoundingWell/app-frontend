@@ -155,31 +155,112 @@ context('schedule page', function() {
       .should('not.exist');
 
     cy
-      .intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } })
+      .intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] }, delay: 1000 })
       .as('routeActionsError');
 
     cy
       .get('[data-date-filter-region]')
       .find('.js-next')
-      .click()
-      .wait('@routeActionsError');
+      .click();
 
     cy
-      .get('.schedule-list__error')
-      .should('be.visible');
+      .get('.patient-list-page__count')
+      .should('contain', 'Updating schedule');
+
+    cy
+      .wait('@routeActionsError')
+      .get('.schedule-list__list')
+      .should('contain', 'Test Patient')
+      .should('not.have.class', 'is-loading')
+      .should('have.attr', 'aria-busy', 'false');
+
+    cy
+      .get('.list-page__status')
+      .find('.schedule-list__error')
+      .should('contain', 'The schedule could not be updated.');
+
+    cy
+      .get('.patient-list-page__count')
+      .should('be.empty');
 
     cy
       .routeActions();
 
     cy
-      .get('[data-date-filter-region]')
-      .find('.js-next')
+      .get('.list-page__status')
+      .find('.js-retry')
       .click()
       .wait('@routeActions');
 
     cy
       .get('.schedule-list__list')
       .should('be.visible');
+
+    cy
+      .get('.schedule-list__error')
+      .should('not.exist');
+  });
+
+  specify('retains the current cards while the schedule refreshes', function() {
+    let requestCount = 0;
+    const action = getAction({
+      attributes: {
+        name: 'Loading State Action',
+        due_date: testDate(),
+      },
+      relationships: {
+        patient: getRelationship(testPatient1),
+      },
+    });
+
+    cy
+      .intercept('GET', '/api/actions?*', req => {
+        requestCount += 1;
+        req.reply({
+          delay: requestCount > 1 ? 1000 : 0,
+          body: {
+            data: [action],
+            included: [testPatient1],
+            meta: {
+              actions: { total: 1 },
+              worklist: uuidv7(),
+            },
+          },
+        });
+      })
+      .as('routeActions')
+      .visit('/schedule')
+      .wait('@routeActions');
+
+    cy
+      .get('[data-date-filter-region]')
+      .find('.js-next')
+      .click();
+
+    cy
+      .get('.schedule-list__list')
+      .should('be.visible')
+      .should('contain', 'Loading State Action')
+      .should('have.class', 'is-loading')
+      .should('have.attr', 'aria-busy', 'true');
+
+    cy
+      .get('.schedule-list__updating')
+      .should('be.visible')
+      .should('contain', 'Updating schedule')
+      .parents('.patient-list-page__count')
+      .should('not.contain', '1 Action');
+
+    cy
+      .wait('@routeActions')
+      .get('.schedule-list__list')
+      .should('not.have.class', 'is-loading')
+      .should('have.attr', 'aria-busy', 'false')
+      .should('contain', 'Loading State Action');
+
+    cy
+      .get('.patient-list-page__count')
+      .should('contain', '1 Action');
   });
 
   specify('display schedule', function() {

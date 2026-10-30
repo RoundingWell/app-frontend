@@ -353,6 +353,37 @@
   width: min(140px, 100%);
 }
 
+.schedule-list__list.is-loading {
+  opacity: 0.6;
+  pointer-events: none;
+  user-select: none;
+}
+
+.schedule-list__updating {
+  animation: schedule-list-shimmer 1.2s linear infinite;
+  background: linear-gradient(
+    120deg,
+    var(--color-text-secondary) 24%,
+    color-mix(in srgb, var(--color-text-secondary) 25%, var(--color-page-bg)) 50%,
+    var(--color-text-secondary) 76%
+  );
+  background-clip: text;
+  background-size: 200% 100%;
+  color: transparent;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+@keyframes schedule-list-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+
+  to {
+    background-position: -50% 0;
+  }
+}
+
 @container schedule-day-list (width <= 800px) {
   .schedule-list__day-list,
   .schedule-list__skeleton-day-list {
@@ -440,4 +471,11 @@
   justify-content: center;
   margin: 0 var(--space-6) var(--space-3);
   padding: var(--space-2) var(--space-4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .schedule-list__updating {
+    animation: none;
+    color: var(--color-text-secondary);
+  }
 }
