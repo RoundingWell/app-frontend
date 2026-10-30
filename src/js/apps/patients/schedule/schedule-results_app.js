@@ -11,8 +11,7 @@ import BulkEditActionsApp from 'js/apps/patients/shared/bulk-edit/bulk-edit-acti
 
 import ResultsView from 'js/apps/patients/shared/list-results_views';
 
-import { SelectAllView, ScheduleListView, ListErrorView } from './schedule_views';
-import { LoadingView } from 'js/regions/preload_region';
+import { CountLoadingView, ListErrorView, ListLoadingView, ScheduleListView, SelectAllView } from './schedule_views';
 import { BulkEditActionsSuccessTemplate } from 'js/apps/patients/shared/bulk-edit/bulk-edit_views';
 
 export default App.extend({
@@ -30,7 +29,6 @@ export default App.extend({
     this.stopBulkEdit();
     this.selection.releaseCollections();
     this.getView().showSelectAll(this.selection.getControlState());
-    this.getView().getRegion('count').empty();
     this.showListLoading();
   },
   prepareStart(options, { signal }) {
@@ -139,10 +137,12 @@ export default App.extend({
     this.getChildApp('bulkEditActions')?.stop();
   },
   showListLoading() {
-    this.getView().showChildView('list', new LoadingView({ variant: 'generic' }));
+    this.getView().getRegion('count').show(new CountLoadingView());
+    this.getView().showChildView('list', new ListLoadingView());
   },
   handleRefreshError(error) {
     const view = new ListErrorView();
+    this.getView().getRegion('count').empty();
     this.getView().showChildView('list', view);
     addError(error);
   },

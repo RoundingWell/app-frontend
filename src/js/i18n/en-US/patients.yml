@@ -223,6 +223,8 @@ careOptsFrontend:
           noScheduledActions: No Scheduled Actions
         layoutView:
           closeSidebar: Close sidebar
+        loadingView:
+          loadingActions: Loading actions
         scheduleTitleView:
           tooltip: Schedule Worklist displays all Actions with a due date for you (or someone else on your team).
         tableHeaderView:

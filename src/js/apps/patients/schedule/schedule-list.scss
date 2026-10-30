@@ -7,11 +7,13 @@
   --patient-list-page-responsive-filters-padding: var(--space-3) var(--space-1);
 }
 
-.schedule-list__list {
+.schedule-list__list,
+.schedule-list__skeleton {
   padding-top: var(--space-3);
 }
 
-.schedule-list__list-row {
+.schedule-list__list-row,
+.schedule-list__skeleton-row {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -22,7 +24,8 @@
   padding: 0;
 }
 
-.schedule-list__day-heading {
+.schedule-list__day-heading,
+.schedule-list__skeleton-day-heading {
   align-items: center;
   display: flex;
   min-height: 40px;
@@ -56,19 +59,22 @@
   }
 }
 
-.schedule-list__day-list {
+.schedule-list__day-list,
+.schedule-list__skeleton-day-list {
   display: grid;
   gap: var(--space-2);
   grid-template-columns: 100px 160px 20px minmax(160px, 1fr) minmax(0, 240px);
   padding-left: 40px;
 }
 
-.schedule-list__day-list-container {
+.schedule-list__day-list-container,
+.schedule-list__skeleton-day-list-container {
   container-name: schedule-day-list;
   container-type: inline-size;
 }
 
-.schedule-list__day-list-row {
+.schedule-list__day-list-row,
+.schedule-list__skeleton-item {
   --schedule-list-day-card-background: var(--color-surface);
 
   display: grid;
@@ -85,7 +91,8 @@
   --schedule-list-day-card-background: var(--color-selection-background);
 }
 
-.schedule-list__day-card {
+.schedule-list__day-card,
+.schedule-list__skeleton-card {
   align-items: center;
   background: var(--schedule-list-day-card-background);
   border: 0.5px solid var(--color-border-subtle);
@@ -93,12 +100,15 @@
   box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
   box-sizing: border-box;
   column-gap: var(--space-2);
-  cursor: pointer;
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
   min-height: 44px;
   padding: var(--space-1) var(--space-4);
+}
+
+.schedule-list__day-card {
+  cursor: pointer;
 }
 
 .schedule-list__patient {
@@ -235,7 +245,8 @@
   white-space: nowrap;
 }
 
-.schedule-list__check {
+.schedule-list__check,
+.schedule-list__skeleton-check-column {
   --button-checkbox-justify-content: flex-start;
 
   align-items: center;
@@ -268,12 +279,88 @@
   text-align: center;
 }
 
+.schedule-list__count-skeleton {
+  width: 64px;
+}
+
+.schedule-list__count-skeleton-shape {
+  height: 16px;
+  width: 100%;
+}
+
+.schedule-list__skeleton {
+  pointer-events: none;
+}
+
+.schedule-list__skeleton-date {
+  border-radius: 50%;
+  height: 32px;
+  margin-right: var(--space-2);
+  width: 32px;
+}
+
+.schedule-list__skeleton-month-day {
+  height: 12px;
+  width: 80px;
+}
+
+.schedule-list__skeleton-item:nth-child(2) {
+  opacity: 0.72;
+}
+
+.schedule-list__skeleton-item:nth-child(3) {
+  opacity: 0.42;
+}
+
+.schedule-list__skeleton-check {
+  border-radius: var(--space-1);
+  height: 16px;
+  width: 16px;
+}
+
+.schedule-list__skeleton-time,
+.schedule-list__skeleton-patient,
+.schedule-list__skeleton-action,
+.schedule-list__skeleton-context {
+  height: 12px;
+}
+
+.schedule-list__skeleton-time {
+  grid-column: 1;
+  width: 64px;
+}
+
+.schedule-list__skeleton-patient {
+  grid-column: 2;
+  width: 120px;
+}
+
+.schedule-list__skeleton-state {
+  border-radius: 50%;
+  grid-column: 3;
+  height: 16px;
+  width: 16px;
+}
+
+.schedule-list__skeleton-action {
+  grid-column: 4;
+  width: min(320px, 80%);
+}
+
+.schedule-list__skeleton-context {
+  grid-column: 5;
+  justify-self: end;
+  width: min(140px, 100%);
+}
+
 @container schedule-day-list (width <= 800px) {
-  .schedule-list__day-list {
+  .schedule-list__day-list,
+  .schedule-list__skeleton-day-list {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .schedule-list__day-card {
+  .schedule-list__day-card,
+  .schedule-list__skeleton-card {
     grid-auto-rows: 32px;
     grid-template-columns: 20px 44px minmax(0, 1fr);
     grid-template-rows: repeat(2, 32px);
@@ -292,24 +379,32 @@
     order: -1;
   }
 
-  .schedule-list__patient {
+  .schedule-list__patient,
+  .schedule-list__skeleton-patient {
     grid-column: 3;
     grid-row: 1;
   }
 
-  .schedule-list__due-time {
+  .schedule-list__due-time,
+  .schedule-list__skeleton-time {
     grid-column: 1 / 3;
     grid-row: 1;
   }
 
-  .schedule-list__action-state {
+  .schedule-list__action-state,
+  .schedule-list__skeleton-state {
     grid-column: 1;
     grid-row: 2;
   }
 
-  .schedule-list__action {
+  .schedule-list__action,
+  .schedule-list__skeleton-action {
     grid-column: 2 / -1;
     grid-row: 2;
+  }
+
+  .schedule-list__skeleton-context {
+    display: none;
   }
 }
 
@@ -326,14 +421,15 @@
 }
 
 @media (width <= 560px) {
-  .schedule-list__list-row {
+  .schedule-list__list-row,
+  .schedule-list__skeleton-row {
     padding-inline: var(--space-4);
   }
 
-  .schedule-list__day-list {
+  .schedule-list__day-list,
+  .schedule-list__skeleton-day-list {
     padding-left: 40px;
   }
-
 }
 
 .schedule-list__error {

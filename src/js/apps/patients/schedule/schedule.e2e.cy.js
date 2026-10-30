@@ -98,17 +98,45 @@ context('schedule page', function() {
 
   specify('retries failed schedule requests', function() {
     cy
-      .intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } })
+      .intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] }, delay: 1000 })
       .as('routeActionsError')
-      .visit('/schedule')
-      .wait('@routeActionsError');
+      .visit('/schedule');
 
     cy
+      .get('.patient-list-page__count')
+      .find('.schedule-list__count-skeleton')
+      .should('be.visible');
+
+    cy
+      .get('.schedule-list__skeleton')
+      .should('be.visible')
+      .should('have.attr', 'aria-busy', 'true')
+      .should('have.attr', 'role', 'status')
+      .should('have.attr', 'aria-label', 'Loading actions');
+
+    cy
+      .wait('@routeActionsError')
       .get('.schedule-list__error')
       .should('be.visible');
 
     cy
-      .routeActions();
+      .get('.patient-list-page__count')
+      .should('be.empty');
+
+    cy
+      .get('.schedule-list__skeleton')
+      .should('not.exist');
+
+    cy
+      .routeActions(fx => {
+        fx.data = [getAction({
+          attributes: { due_date: testDate() },
+          relationships: { patient: getRelationship(testPatient1) },
+        })];
+        fx.included = [testPatient1];
+
+        return fx;
+      });
 
     cy
       .get('.schedule-list__error')
@@ -119,6 +147,12 @@ context('schedule page', function() {
     cy
       .get('.schedule-list__list')
       .should('be.visible');
+
+    cy
+      .get('.patient-list-page__count')
+      .should('contain', '1 Action')
+      .find('.schedule-list__count-skeleton')
+      .should('not.exist');
 
     cy
       .intercept('GET', '/api/actions?*', { statusCode: 422, body: { errors: [] } })

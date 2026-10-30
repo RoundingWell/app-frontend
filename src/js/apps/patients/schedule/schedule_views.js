@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
+import 'scss/modules/skeleton.scss';
 
 import { alphaSort } from 'js/utils/sorting';
 import intl from 'js/i18n';
@@ -19,10 +20,34 @@ import SelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import DayItemTemplate from './day-item.hbs';
 import DayListTemplate from './day-list.hbs';
 import LayoutTemplate from './layout.hbs';
+import ListLoadingTemplate from './list-loading.hbs';
 
 import 'scss/domain/action-icons.scss';
 import 'scss/domain/patient-list.scss';
 import './schedule-list.scss';
+
+const CountLoadingView = View.extend({
+  className: 'schedule-list__count-skeleton skeleton-loading skeleton-loading--immediate',
+  attributes: {
+    'aria-hidden': 'true',
+  },
+  template: hbs`<span class="skeleton-loading__shape schedule-list__count-skeleton-shape"></span>`,
+});
+
+const ListLoadingView = View.extend({
+  className: 'list-page__list schedule-list__skeleton skeleton-loading skeleton-loading--immediate',
+  attributes: {
+    'aria-busy': 'true',
+    'aria-label': intl.patients.schedule.scheduleViews.loadingView.loadingActions,
+    'role': 'status',
+  },
+  template: ListLoadingTemplate,
+  templateContext() {
+    return {
+      items: new Array(3).fill(null),
+    };
+  },
+});
 
 const ListErrorView = View.extend({
   className: 'schedule-list__error',
@@ -434,8 +459,10 @@ const ScheduleListView = CollectionView.extend({
 });
 
 export {
+  CountLoadingView,
   LayoutView,
   ListErrorView,
+  ListLoadingView,
   ScheduleTitleView,
   AllFiltersButtonView,
   ScheduleListView,
