@@ -484,11 +484,12 @@ context('WS Service', function() {
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[2]]))
 
-      .then(() => {
+      .then(messages => {
+        messages.resetHistory();
         channel.request('unsubscribe', notifications[1]);
       })
       .get('@wsHandleMessage')
-      .should('be.calledWith', testData([notifications[2]]))
+      .should('have.been.calledOnceWithExactly', testData([notifications[2]]))
 
       .then(() => {
         channel.request('subscribe', [notifications[3]]);
@@ -502,11 +503,12 @@ context('WS Service', function() {
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[3], notifications[0], notifications[1]]))
 
-      .then(() => {
+      .then(messages => {
+        messages.resetHistory();
         channel.request('unsubscribe', [notifications[3]]);
       })
       .get('@wsHandleMessage')
-      .should('be.calledWith', testData([notifications[0], notifications[1]]));
+      .should('have.been.calledOnceWithExactly', testData([notifications[0], notifications[1]]));
   });
 
   specify('Subscribing with filters and no resources', function() {
@@ -672,6 +674,8 @@ context('WS Service', function() {
     cy
       .startService()
       .then(() => {
+        service.RECONNECT_BASE_DELAY = 1000;
+        cy.stub(Math, 'random').returns(0);
         channel.request('subscribe', [], { filters: {} });
       })
       .get('@wsHandleMessage')
@@ -683,14 +687,28 @@ context('WS Service', function() {
           resources: [],
           subscriptionVersion: Cypress.sinon.match.string,
         },
-      })
-      .then(() => {
-        service.ws.close();
       });
 
+    cy.clock();
+    cy.then(() => {
+      cy.spy(service, 'restart').as('restartService');
+      service.ws.addEventListener('close', cy.stub().as('socketClosed'), { once: true });
+      service.ws.close();
+    });
+
+    // Observe the actual close before advancing through a full reconnect delay.
     cy
+      .tick(1000)
+      .get('@socketClosed')
+      .should('have.been.calledOnce')
+      .tick(1000)
+      .get('@restartService')
+      .should('not.have.been.called')
       .get('@startService')
-      .should('be.calledOnce');
+      .should('be.calledOnce')
+      .then(() => {
+        expect(service.reconnect).to.be.null;
+      });
   });
 
   specify('Clearing filters before reconnecting resource subscriptions', function() {
