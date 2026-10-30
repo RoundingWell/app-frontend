@@ -1,7 +1,6 @@
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
 
-import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
 import 'scss/modules/card-list.scss';
 
@@ -44,9 +43,6 @@ const LayoutView = View.extend({
       regionClass: PreloadRegion,
       replaceElement: true,
     },
-  },
-  triggers: {
-    'click .js-add': 'click:add',
   },
 });
 

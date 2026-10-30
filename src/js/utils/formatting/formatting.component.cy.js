@@ -5,7 +5,6 @@ import collectionOf from './collection-of';
 import hasAllText from './has-all-text';
 import matchText from './match-text';
 import px from './px';
-import removeNewline from './remove-newline';
 import searchSanitize from './search-sanitize';
 import startsWith from './starts-with';
 import trim from './trim';
@@ -69,12 +68,6 @@ context('formatting', function() {
 
   specify('px', function() {
     expect(px(25.25)).to.equal('25.25px');
-  });
-
-  specify('removeNewline', function() {
-    const str = 'text\rmore\ntext';
-
-    expect(removeNewline(str)).to.eql('text more text');
   });
 
   specify('searchSanitize', function() {

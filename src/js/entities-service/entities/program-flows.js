@@ -1,56 +1,16 @@
-import { extend, first, size } from 'underscore';
+import { first, size } from 'underscore';
 import { Radio } from 'marionette';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
-import trim from 'js/utils/formatting/trim';
-import collectionOf from 'js/utils/formatting/collection-of';
-
 import { STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-flows';
-const WRITABLE_ATTRIBUTES = [
-  'name',
-  'details',
-  'tags',
-  'sync',
-  'behavior',
-  'complexity',
-  'published_at',
-  'archived_at',
-];
 
 const _Model = BaseModel.extend({
-  writableAttributes: WRITABLE_ATTRIBUTES,
-  urlRoot() {
-    if (this.isNew()) {
-      const program = this.getProgram();
-      return `/api/programs/${ program.id }/relationships/flows`;
-    }
-
-    return '/api/program-flows';
-  },
+  urlRoot: '/api/program-flows',
   type: TYPE,
-  validate({ name }) {
-    if (!trim(name)) return 'Flow name required';
-  },
-  getProgram() {
-    return this.getRelationship('_program');
-  },
-  getTags() {
-    return Radio.request('entities', 'tags:collection', collectionOf(this.get('tags'), 'text'));
-  },
-  addTag(tag) {
-    const tags = this.getTags();
-    tags.add(tag);
-    return this.save({ tags: tags.map('text') });
-  },
-  removeTag(tag) {
-    const tags = this.getTags();
-    tags.remove(tag);
-    return this.save({ tags: tags.map('text') });
-  },
   getOwner() {
     return this.getRelationship('_owner');
   },
@@ -67,25 +27,6 @@ const _Model = BaseModel.extend({
     });
 
     return flow;
-  },
-  saveOwner(owner) {
-    return this.save({ _owner: owner ? owner.getResource() : null }, {
-      relationships: {
-        owner: this.toRelation(owner),
-      },
-    });
-  },
-  saveAll(attrs) {
-    attrs = extend({}, this.attributes, attrs);
-
-    const relationships = {
-      owner: this.toRelation(attrs._owner),
-    };
-
-    return this.save(attrs, { relationships }, { wait: true });
-  },
-  setActions(actions) {
-    this.set('_program_actions', actions.getResources());
   },
   getActions() {
     return Radio.request('entities', 'programActions:collection', this.get('_program_actions'), { flowId: this.id });

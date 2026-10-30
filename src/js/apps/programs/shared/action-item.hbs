@@ -1,0 +1,12 @@
+<div class="card-list__item-surface program-items__surface program-items__surface--{{ behavior.modifier }}">
+  <div class="card-list__item-main">
+    <span class="card-list__item-title" data-testid="program-action-name">{{ name }}</span>
+    <span class="program-behavior program-behavior--{{ behavior.modifier }}">{{far behavior.icon}}{{ behavior.label }}</span>
+  </div>
+  {{#if details}}<p class="program-items__details">{{ details }}</p>{{/if}}
+  <div class="card-list__item-meta program-items__meta">
+    {{#if ownerName}}<span class="program-items__owner">{{far "users"}}{{ ownerName }}</span>{{/if}}
+    {{#if hasDue}}<span class="program-items__due">{{far "clock"}}{{formatMessage (intlGet "programs.shared.programViews.daysUntilDue") days=days_until_due}}</span>{{/if}}
+    {{#if formName}}<span class="program-items__form">{{far "square-poll-horizontal"}}{{ formName }}</span>{{/if}}
+  </div>
+</div>
