@@ -41,10 +41,16 @@
 }
 
 .list-manager__droplist {
-  border-color: transparent;
   width: 100%;
 
-  &:hover:enabled {
-    border-color: #{$black-90};
+  &,
+  &:hover:enabled,
+  &:active:enabled,
+  &:focus {
+    border-color: transparent;
   }
+}
+
+.list-manager__wrapper:has(.list-manager__droplist:is(:hover:enabled, :focus)) {
+  border-color: #{$black-60};
 }
