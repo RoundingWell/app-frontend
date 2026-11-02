@@ -3,8 +3,6 @@ import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import parsePhoneNumber from 'libphonenumber-js/min';
 
-import { EIGHTBYEIGHT_CALL_ID_FIELD } from '@roundingwell/care-ops-8x8/eightbyeight_constants.js';
-
 import App from 'js/base/app';
 
 const patients = new Backbone.Collection([]);
@@ -134,7 +132,7 @@ export default App.extend({
 
     Radio.request('entities', 'save:artifacts:model', {
       artifact: '8x8-call-log',
-      identifier: callData[EIGHTBYEIGHT_CALL_ID_FIELD],
+      identifier: callData.eventId,
       values: {
         ...values,
         callData,

@@ -15,8 +15,6 @@ export const EIGHTBYEIGHT_ORIGIN = 'https://cloud8.8x8.com';
 
 export const EIGHTBYEIGHT_CTI_URL = `${ EIGHTBYEIGHT_ORIGIN }/mashell/public/index.html?env=embeddable&nextgen=true`;
 
-export const EIGHTBYEIGHT_CALL_ID_FIELD = 'eventId';
-
 export const UC_EVENT = {
   offered: 'mashell-voice-phone-offered-uc-event-v1',
   accepted: 'mashell-voice-phone-accepted-uc-event-v1',
