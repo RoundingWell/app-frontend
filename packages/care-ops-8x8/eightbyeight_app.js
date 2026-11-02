@@ -7,10 +7,7 @@ import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
-import {
-  EIGHTBYEIGHT_ORIGIN,
-  UC_EVENT,
-} from './eightbyeight_constants';
+import { EIGHTBYEIGHT_ORIGIN } from './eightbyeight_constants';
 import { LayoutView } from './eightbyeight_views';
 
 function toDialableNumber(number) {
@@ -27,9 +24,9 @@ function callDataForArtifact(data) {
 
 export default App.extend({
   dialerEvents: {
-    [UC_EVENT.offered]: 'onOffered',
-    [UC_EVENT.accepted]: 'onAccepted',
-    [UC_EVENT.terminated]: 'onTerminated',
+    'mashell-voice-phone-offered-uc-event-v1': 'onOffered',
+    'mashell-voice-phone-accepted-uc-event-v1': 'onAccepted',
+    'mashell-voice-phone-terminated-uc-event-v1': 'onTerminated',
   },
   stateEvents: {
     'change:isDialerReady': 'onDialerReady',
