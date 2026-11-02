@@ -79,7 +79,7 @@ export default App.extend({
     if (!data || typeof data !== 'object') return;
 
     if (data.status === 'failed') {
-      addError(new Error('8x8 dialer event rejected'));
+      addError(new Error(`8x8 dialer event failed:${ data.eventType } ${ data.data?.error }`));
       return;
     }
 
