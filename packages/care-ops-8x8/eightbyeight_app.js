@@ -1,4 +1,3 @@
-import { omit } from 'underscore';
 import Backbone from 'backbone';
 import parsePhoneNumber from 'libphonenumber-js/min';
 import { Radio } from 'marionette';
@@ -16,10 +15,6 @@ function toDialableNumber(number) {
   if (phone && phone.isValid()) return phone.number;
 
   return number;
-}
-
-function callDataForArtifact(data) {
-  return omit(data, 'callRecording');
 }
 
 export default App.extend({
@@ -118,7 +113,7 @@ export default App.extend({
     const state = this.getState();
 
     Radio.request('dialer', 'eightByEightCall', {
-      callData: callDataForArtifact(data),
+      callData: data,
       actionId: state.get('actionId'),
     });
 
