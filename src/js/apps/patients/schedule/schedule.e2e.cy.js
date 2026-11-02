@@ -1144,6 +1144,18 @@ context('schedule page', function() {
     cy
       .get('[data-date-filter-region]')
       .should('contain', formatDate(testDateAdd(1, 'month'), 'MMM YYYY'))
+      .find('.js-next')
+      .click();
+
+    cy
+      .wait('@routeActions')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[due_date]=${ formatDate(dayjs(testDateAdd(2, 'month')).startOf('month'), 'YYYY-MM-DD') },${ formatDate(dayjs(testDateAdd(2, 'month')).endOf('month'), 'YYYY-MM-DD') }`);
+
+    cy
+      .get('[data-date-filter-region]')
+      .should('contain', formatDate(testDateAdd(2, 'month'), 'MMM YYYY'))
       .click();
 
     cy
