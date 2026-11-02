@@ -95,9 +95,9 @@ export default App.extend({
 
     if (data.status !== 'success') return;
 
-    const handler = this.dialerEvents[data.eventType];
-    if (!handler) return;
+    if (!Object.hasOwn(this.dialerEvents, data.eventType)) return;
 
+    const handler = this.dialerEvents[data.eventType];
     this[handler](data.data || {});
   },
   onOffered(data) {
