@@ -68,7 +68,6 @@ export default App.extend({
   onBeforeDestroy() {
     this._abortController?.abort();
   },
-  // TODO(8x8-demo): assumption 2. iframe load stands in for ready and logged-in.
   onIframeLoad() {
     this.getState().set('isDialerReady', true);
   },

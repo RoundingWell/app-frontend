@@ -124,7 +124,6 @@ const LayoutView = View.extend({
       collection: this.collection,
     }));
   },
-  // TODO(8x8-demo): assumption 1. postMessage to EIGHTBYEIGHT_ORIGIN.
   call(number) {
     const [iframe] = this.getUI('iframe');
     if (!iframe) return false;

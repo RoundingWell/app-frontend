@@ -5,8 +5,6 @@ $eightbyeight-call-active-hover: color(green, dark);
 $eightbyeight-call-ended: color(red);
 $eightbyeight-call-ended-hover: color(red, dark);
 
-// TODO(8x8-demo): assumption 4. Panel size matches RingCentral
-// (300px wide, 80vh open, max 760px). Widen if the Work UI clips.
 body:has(.eightbyeight-wrapper) {
   --dialer-clearance: calc(36px + var(--space-6));
 }
