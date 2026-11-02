@@ -39,15 +39,10 @@ export default App.extend({
     this._abortController?.abort();
     this._abortController = new AbortController();
 
-    const currentView = this.getView();
-    if (currentView) this.stopListening(currentView);
-
     this.showView(new LayoutView({
       model: this.getState(),
       collection: this.patients,
     }));
-
-    this.listenTo(this.getView(), 'load:iframe', this.onIframeLoad);
 
     window.addEventListener('message', this.onMessage, {
       signal: this._abortController.signal,
@@ -66,9 +61,6 @@ export default App.extend({
   },
   onBeforeDestroy() {
     this._abortController?.abort();
-  },
-  onIframeLoad() {
-    this.getState().set('isDialerReady', true);
   },
   onMessage({ data, origin }) {
     if (origin !== 'https://cloud8.8x8.com') return;

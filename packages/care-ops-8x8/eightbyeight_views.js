@@ -100,7 +100,6 @@ const LayoutView = View.extend({
   },
   triggers: {
     'click @ui.header': 'click:header',
-    'load @ui.iframe': 'load:iframe',
   },
   onClickHeader() {
     this.model.set('isOpen', !this.model.get('isOpen'));
@@ -110,6 +109,8 @@ const LayoutView = View.extend({
     this.showPanelStatus();
   },
   onRender() {
+    this.getUI('iframe')[0].addEventListener('load', () => this.model.set('isDialerReady', true));
+
     this.showPatientButtons();
     this.showCallState();
     this.showPanelStatus();
