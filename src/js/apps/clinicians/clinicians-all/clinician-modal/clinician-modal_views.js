@@ -123,7 +123,7 @@ const ClinicianModal = View.extend({
   },
   showWorkspacesComponent() {
     const workspacesManager = this.showChildView('workspaces', new WorkspacesComponent({
-      className: 'modal__form-component',
+      className: 'list-manager__wrapper modal__form-component',
       workspaces: Radio.request('bootstrap', 'workspaces'),
       member: this.model,
     }));

@@ -5,14 +5,16 @@
 }
 
 .list-manager__item {
+  align-items: center;
   border: 1px solid transparent;
   border-bottom-color: #{$black-90};
   display: flex;
   font-size: 14px;
   font-weight: 600;
   line-height: 16px;
+  min-height: var(--button-min-height, 34px);
   overflow: hidden;
-  padding: 8px 16px;
+  padding: 0 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 
@@ -41,10 +43,16 @@
 }
 
 .list-manager__droplist {
-  border-color: transparent;
   width: 100%;
 
-  &:hover:enabled {
-    border-color: #{$black-90};
+  &,
+  &:hover:enabled,
+  &:active:enabled,
+  &:focus {
+    border-color: transparent;
   }
+}
+
+.list-manager__wrapper:has(.list-manager__droplist:is(:hover:enabled, :focus)) {
+  border-color: #{$black-60};
 }
