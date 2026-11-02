@@ -4,8 +4,6 @@ import dayjs from 'dayjs';
 import hbs from 'handlebars-inline-precompile';
 import { Radio, View, CollectionView } from 'marionette';
 
-import { buildStartCallMessage, EIGHTBYEIGHT_CTI_URL, EIGHTBYEIGHT_ORIGIN } from './eightbyeight_constants';
-
 import './eightbyeight.scss';
 
 function timeSince(startTime) {
@@ -78,7 +76,7 @@ const LayoutView = View.extend({
       </div>
       <iframe
         class="eightbyeight-panel__iframe js-iframe"
-        src="{{ ctiUrl }}"
+        src="https://cloud8.8x8.com/mashell/public/index.html?env=embeddable&nextgen=true"
         title="8x8 Dialer"
         loading="lazy"
         referrerpolicy="no-referrer"
@@ -87,9 +85,6 @@ const LayoutView = View.extend({
       </iframe>
     </div>
   `,
-  templateContext() {
-    return { ctiUrl: EIGHTBYEIGHT_CTI_URL };
-  },
   regions: {
     patientButtons: '[data-patient-buttons-region]',
     heading: '[data-heading-region]',
@@ -128,7 +123,16 @@ const LayoutView = View.extend({
     const [iframe] = this.getUI('iframe');
     if (!iframe) return false;
 
-    iframe.contentWindow.postMessage(buildStartCallMessage(number), EIGHTBYEIGHT_ORIGIN);
+    iframe.contentWindow.postMessage({
+      eventName: 'maEvent',
+      family: 'external',
+      content: {
+        eventName: 'startCall',
+        method: 'mapDirective',
+        phoneNumber: number,
+      },
+      schemaVersion: '1.0.0',
+    }, 'https://cloud8.8x8.com');
 
     return true;
   },

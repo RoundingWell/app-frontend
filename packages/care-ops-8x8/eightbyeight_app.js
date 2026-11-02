@@ -6,7 +6,6 @@ import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
-import { EIGHTBYEIGHT_ORIGIN } from './eightbyeight_constants';
 import { LayoutView } from './eightbyeight_views';
 
 function toDialableNumber(number) {
@@ -72,7 +71,7 @@ export default App.extend({
     this.getState().set('isDialerReady', true);
   },
   onMessage({ data, origin }) {
-    if (origin !== EIGHTBYEIGHT_ORIGIN) return;
+    if (origin !== 'https://cloud8.8x8.com') return;
 
     this.handleDialerEvent(data);
   },
