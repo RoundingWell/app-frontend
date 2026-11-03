@@ -32,4 +32,8 @@ careOptsFrontend:
       workspacesManager:
         workspacesDroplist:
           addWorkspace: Add Workspace...
+  dialer:
+    eightByEightApp:
+      numberCopiedNotice: Number copied — paste it into the 8x8 panel and press Call.
+      numberCopyFailedNotice: 'Couldn''t copy the number. Type {number} into the 8x8 panel and press Call.'
 locales: en-US

@@ -1,12 +1,36 @@
 import Backbone from 'backbone';
+import hbs from 'handlebars-inline-precompile';
 import parsePhoneNumber from 'libphonenumber-js/min';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
+import { renderTemplate } from 'js/i18n';
 
 import App from 'js/base/app';
 
 import { LayoutView } from './eightbyeight_views';
+
+// Mashell ignores startCall until the embedding domain is on
+// https://cloud8.8x8.com/maestro/public/v2.0/whitelisteddomains/
+// (https://developer.8x8.com/tech-partner/docs/partner-sdk-maestro-sdk-overview/).
+// Set enabled to false, or delete offerManualDial, once roundingwell.com is listed.
+export const COPY_NUMBER_UNTIL_WHITELISTED = {
+  enabled: true,
+};
+
+const numberCopiedNotice = hbs`{{ @intl.dialer.eightByEightApp.numberCopiedNotice }}`;
+const numberCopyFailedNotice = hbs`{{formatHTMLMessage (intlGet "dialer.eightByEightApp.numberCopyFailedNotice") number=number}}`;
+
+function copyDialNumber(number) {
+  try {
+    const writeText = navigator.clipboard?.writeText?.bind(navigator.clipboard);
+    if (!writeText) return Promise.resolve(false);
+
+    return Promise.resolve(writeText(number)).then(() => true, () => false);
+  } catch {
+    return Promise.resolve(false);
+  }
+}
 
 function toDialableNumber(number) {
   const phone = parsePhoneNumber(String(number), 'US');
@@ -112,16 +136,29 @@ export default App.extend({
   },
   call(number, action) {
     const state = this.getState();
+    const dialableNumber = toDialableNumber(number);
     state.set('isOpen', true);
+    this.offerManualDial(dialableNumber);
 
     if (state.get('callState') === 'active') return;
 
     state.set({
-      pendingCall: toDialableNumber(number),
+      pendingCall: dialableNumber,
       actionId: action.id,
     });
 
     this._call();
+  },
+  offerManualDial(number) {
+    if (!COPY_NUMBER_UNTIL_WHITELISTED.enabled || !number) return;
+
+    copyDialNumber(number).then(copied => {
+      const text = copied ?
+        renderTemplate(numberCopiedNotice) :
+        renderTemplate(numberCopyFailedNotice, { number });
+
+      Radio.request('alert', 'show', { text, alertType: 'info' });
+    });
   },
   _call() {
     const state = this.getState();
