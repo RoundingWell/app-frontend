@@ -4,29 +4,18 @@ import { Radio, View } from 'marionette';
 import AlertService from './alert';
 
 context('Alert Service', function() {
-  let alertService;
-
   beforeEach(function() {
     cy
       .clock()
-      .mount(rootView => {
+      .mount((rootView, scope) => {
         const region = rootView.getRegion('alert');
-        alertService = new AlertService({ region });
+        scope.own(new AlertService({ region }));
 
         return new View({
           template: hbs`<style>.alert-box{ opacity:1!important; }</style>`,
         });
       })
       .as('root');
-  });
-
-  afterEach(async function() {
-    if (alertService) {
-      await alertService.destroy();
-      alertService = null;
-    }
-
-    Radio.channel('alert').reset();
   });
 
   specify('Displaying', function() {

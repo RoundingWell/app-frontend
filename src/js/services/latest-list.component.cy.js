@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import LatestListService from './latest-list';
 
@@ -6,12 +7,7 @@ context('LatestListService', function() {
   let service;
 
   beforeEach(function() {
-    service = new LatestListService();
-  });
-
-  afterEach(function() {
-    service.destroy();
-    Radio.reset();
+    service = testScope().own(new LatestListService());
   });
 
   specify('records list routes from route metadata', function() {

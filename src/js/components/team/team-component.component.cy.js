@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import 'js/entities-service';
 import { Collection as Teams } from 'js/entities-service/entities/teams';
@@ -6,12 +7,14 @@ import { teamCoordinator, getTeams } from 'support/api/teams';
 import TeamComponent from './index';
 
 context('Team Component', function() {
-  afterEach(function() {
-    Radio.channel('bootstrap').reset();
+  let scope;
+
+  beforeEach(function() {
+    scope = testScope();
   });
 
   specify('No Default', function() {
-    Radio.reply('bootstrap', 'teams', () => {
+    scope.reply(Radio, 'bootstrap', 'teams', () => {
       return new Teams();
     });
 
@@ -39,7 +42,7 @@ context('Team Component', function() {
   });
 
   specify('isCompact', function() {
-    Radio.reply('bootstrap', 'teams', () => {
+    scope.reply(Radio, 'bootstrap', 'teams', () => {
       return new Teams({ data: getTeams() }, { parse: true });
     });
 
@@ -72,7 +75,7 @@ context('Team Component', function() {
     const changeTeamStub = cy.stub().as('changeTeam');
     const teams = new Teams({ data: getTeams() }, { parse: true });
 
-    Radio.reply('bootstrap', 'teams', () => {
+    scope.reply(Radio, 'bootstrap', 'teams', () => {
       return teams;
     });
 
