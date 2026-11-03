@@ -8,6 +8,7 @@ import { renderTemplate } from 'js/i18n';
 
 import App from 'js/base/app';
 
+import { buildCallLogValues, rememberCallEvent } from './eightbyeight_call_log';
 import { LayoutView } from './eightbyeight_views';
 
 // Mashell ignores startCall until the embedding domain is on
@@ -30,6 +31,18 @@ function copyDialNumber(number) {
   } catch {
     return Promise.resolve(false);
   }
+}
+
+function patientIdForAction(actionId) {
+  if (!actionId) return null;
+
+  const action = Radio.request('entities', 'actions:model', actionId);
+  if (!action) return null;
+
+  const patient = action.getPatient();
+  if (!patient) return null;
+
+  return patient.id;
 }
 
 function toDialableNumber(number) {
@@ -107,6 +120,8 @@ export default App.extend({
     this[handler](data.data || {});
   },
   onOffered(data) {
+    this._callSession = rememberCallEvent(this._callSession, data);
+
     if (data.direction !== 'inbound') return;
 
     const state = this.getState();
@@ -115,6 +130,8 @@ export default App.extend({
     state.set('callState', 'ringing');
   },
   onAccepted(data) {
+    this._callSession = rememberCallEvent(this._callSession, data);
+
     const state = this.getState();
     state.set('callState', 'active');
 
@@ -125,11 +142,14 @@ export default App.extend({
   },
   onTerminated(data) {
     const state = this.getState();
+    const actionId = state.get('actionId');
 
-    Radio.request('dialer', 'eightByEightCall', {
-      callData: data,
-      actionId: state.get('actionId'),
-    });
+    this._callSession = rememberCallEvent(this._callSession, data);
+    Radio.request('dialer', 'eightByEightCall', buildCallLogValues(this._callSession, {
+      actionId,
+      patientId: patientIdForAction(actionId),
+    }));
+    this._callSession = null;
 
     state.set({ callState: null, actionId: null });
     Radio.request('dialer', 'showPatientLinks', null);

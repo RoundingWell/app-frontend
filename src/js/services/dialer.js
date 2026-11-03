@@ -1,4 +1,3 @@
-import { omit } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 import parsePhoneNumber from 'libphonenumber-js/min';
@@ -128,15 +127,10 @@ export default App.extend({
     });
   },
   eightByEightCall(values) {
-    const callData = omit(values.callData, 'callRecording');
-
     Radio.request('entities', 'save:artifacts:model', {
       artifact: '8x8-call-log',
-      identifier: callData.eventId,
-      values: {
-        ...values,
-        callData,
-      },
+      identifier: values.callData.eventId,
+      values,
     });
   },
   _addPatient(patient) {

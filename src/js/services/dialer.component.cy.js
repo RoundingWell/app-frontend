@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { v5 as uuid } from 'uuid';
 import { Application, Radio, View } from 'marionette';
 import { COPY_NUMBER_UNTIL_WHITELISTED } from '@roundingwell/care-ops-8x8/eightbyeight_app.js';
@@ -231,7 +232,32 @@ context('Dialer Service', function() {
       .should('have.length', 1);
   });
 
-  specify('eightByEightCall', function() {
+  specify('saves one 8x8 call log when the call ends', function() {
+    const startTime = '1793723417987';
+    const answeredTime = '1793723420000';
+    const endTime = '1793723427938';
+    const recording = 'https://cloud8.8x8.com/recording/abc1234';
+    const request = Radio.request;
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'actions:model') {
+        return {
+          getPatient() {
+            return {
+              id: 'patient-1',
+              get(key) {
+                return { first_name: 'Test', last_name: 'Patient' }[key];
+              },
+            };
+          },
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    Radio.reply('settings', 'get', () => '8x8');
+
     cy
       .intercept('PATCH', '/api/artifacts/**', {
         statusCode: 201,
@@ -239,38 +265,176 @@ context('Dialer Service', function() {
       })
       .as('patchArtifact');
 
-    cy
-      .get('@root')
-      .then(() => {
-        Radio.request('dialer', 'eightByEightCall', {
-          callData: {
-            eventId: 'abc1234',
-            searchContext: '+15555550100',
-            callRecording: 'https://cloud8.8x8.com/recording/abc1234',
-          },
-          actionId: 'action-1',
-        });
-      });
+    cy.then(async() => {
+      await service.start();
+      service.getChildApp('provider').getState().set('actionId', 'action-1');
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'offered-1',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+15555550100',
+      startTime,
+      schemaVersion: '1.0.0',
+    });
+
+    postEightByEightEvent('mashell-voice-phone-accepted-uc-event-v1', {
+      eventName: 'accepted',
+      eventId: 'accepted-1',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+15555550100',
+      startTime: answeredTime,
+      schemaVersion: '1.0.0',
+    });
+
+    postEightByEightEvent('mashell-voice-phone-terminated-uc-event-v1', {
+      eventName: 'terminated',
+      eventId: 'abc1234',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+15555550100',
+      startTime,
+      endTime,
+      callDuration: '00:00:10',
+      callRecording: recording,
+      hasRecording: true,
+      schemaVersion: '1.0.0',
+    });
 
     cy
       .wait('@patchArtifact')
       .its('request.body')
-      .should('deep.equal', {
-        data: {
-          type: 'artifacts',
-          id: uuid('8x8-call-log:abc1234', RWELL_NS),
-          attributes: {
-            artifact: '8x8-call-log',
-            identifier: 'abc1234',
-            values: {
-              callData: {
-                eventId: 'abc1234',
-                searchContext: '+15555550100',
+      .should(body => {
+        const startIso = dayjs(Number(startTime)).toISOString();
+        const answeredIso = dayjs(Number(answeredTime)).toISOString();
+        const endIso = dayjs(Number(endTime)).toISOString();
+
+        expect(body).to.deep.equal({
+          data: {
+            type: 'artifacts',
+            id: uuid('8x8-call-log:abc1234', RWELL_NS),
+            attributes: {
+              artifact: '8x8-call-log',
+              identifier: 'abc1234',
+              values: {
+                callData: {
+                  eventName: 'terminated',
+                  eventId: 'abc1234',
+                  method: 'mapEvent',
+                  direction: 'outbound',
+                  media: 'phone',
+                  searchContext: '+15555550100',
+                  startTime: startIso,
+                  endTime: endIso,
+                  callDuration: '00:00:10',
+                  callRecording: recording,
+                  hasRecording: true,
+                  schemaVersion: '1.0.0',
+                  answeredTime: answeredIso,
+                  ringDuration: '00:00:02',
+                  talkDuration: '00:00:08',
+                },
+                report: {
+                  Call_ID: 'abc1234',
+                  Direction: 'Outgoing',
+                  Talk_Time: '00:00:10',
+                  Start_Time: startIso,
+                  Stop_Time: endIso,
+                  Answered: 'Answered',
+                  Last_Leg_Disposition: 'Connected',
+                  Callee: '+15555550100',
+                  Answered_Time: answeredIso,
+                },
+                events: {
+                  offered: {
+                    eventName: 'offered',
+                    eventId: 'offered-1',
+                    method: 'mapEvent',
+                    direction: 'outbound',
+                    media: 'phone',
+                    searchContext: '+15555550100',
+                    startTime,
+                    schemaVersion: '1.0.0',
+                  },
+                  accepted: {
+                    eventName: 'accepted',
+                    eventId: 'accepted-1',
+                    method: 'mapEvent',
+                    direction: 'outbound',
+                    media: 'phone',
+                    searchContext: '+15555550100',
+                    startTime: answeredTime,
+                    schemaVersion: '1.0.0',
+                  },
+                  terminated: {
+                    eventName: 'terminated',
+                    eventId: 'abc1234',
+                    method: 'mapEvent',
+                    direction: 'outbound',
+                    media: 'phone',
+                    searchContext: '+15555550100',
+                    startTime,
+                    endTime,
+                    callDuration: '00:00:10',
+                    callRecording: recording,
+                    hasRecording: true,
+                    schemaVersion: '1.0.0',
+                  },
+                },
+                action_id: 'action-1',
+                patient_id: 'patient-1',
               },
-              actionId: 'action-1',
             },
           },
-        },
+        });
+      });
+  });
+
+  specify('records an 8x8 call that was never accepted', function() {
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postEightByEightEvent('mashell-voice-phone-terminated-uc-event-v1', {
+      eventName: 'terminated',
+      eventId: 'missed-1',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+15555550100',
+      startTime: '1793723417987',
+      endTime: '1793723419000',
+      callDuration: '00:00:01',
+      hasRecording: false,
+      schemaVersion: '1.0.0',
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.report.Last_Leg_Disposition).to.equal('Not-Connected');
+        expect(values.report.Answered).to.equal(null);
+        expect(values.callData.answeredTime).to.equal(undefined);
+        expect(values.callData.callRecording).to.equal(undefined);
+        expect(values.action_id).to.equal(null);
+        expect(values.patient_id).to.equal(null);
+        expect(values.events.offered).to.equal(null);
       });
   });
 
@@ -346,6 +510,19 @@ context('Dialer Service', function() {
       .get('@fetchSearch')
       .should('not.have.been.called');
   });
+
+  function postEightByEightEvent(eventType, data) {
+    cy.window().then(win => {
+      win.dispatchEvent(new win.MessageEvent('message', {
+        origin: 'https://cloud8.8x8.com',
+        data: {
+          eventType,
+          status: 'success',
+          data,
+        },
+      }));
+    });
+  }
 
   function startEightByEightDialer() {
     Radio.reply('settings', 'get', () => '8x8');
