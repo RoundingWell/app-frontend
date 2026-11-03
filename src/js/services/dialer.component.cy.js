@@ -114,6 +114,22 @@ context('Dialer Service', function() {
       });
   });
 
+  specify('loads the 8x8 provider with softphone permissions', function() {
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy.then(async() => {
+      await service.start();
+
+      expect(service.isRunning()).to.equal(true);
+      expect(service.hasChildApp('provider')).to.equal(true);
+    });
+
+    cy
+      .get('.eightbyeight-wrapper iframe')
+      .should('have.attr', 'allow', 'microphone *; camera *; speaker-selection *; hid *; local-network-access *; autoplay *')
+      .and('not.have.attr', 'sandbox');
+  });
+
   specify('eightByEightCall', function() {
     cy
       .intercept('PATCH', '/api/artifacts/**', {

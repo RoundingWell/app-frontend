@@ -681,7 +681,9 @@ context('Dialer Service', function() {
     cy
       .get('.eightbyeight-wrapper')
       .find('iframe')
-      .should('have.attr', 'src', 'https://cloud8.8x8.com/mashell/public/index.html?env=embeddable&nextgen=true');
+      .should('have.attr', 'src', 'https://cloud8.8x8.com/mashell/public/index.html?env=embeddable&nextgen=true')
+      .and('have.attr', 'allow', 'microphone *; camera *; speaker-selection *; hid *; local-network-access *; autoplay *')
+      .and('not.have.attr', 'sandbox');
 
     cy
       .get('.eightbyeight-wrapper')

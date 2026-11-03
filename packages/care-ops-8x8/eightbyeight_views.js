@@ -64,6 +64,12 @@ const StatusView = View.extend({
   },
 });
 
+// No sandbox: Mashell nests the softphone in a child iframe, and sandbox
+// flags are inherited, so the child cannot run the way it does in a
+// top-level tab. The allow list is microphone and speaker-selection from
+// the Maestro embed docs, plus camera, hid, and local-network-access
+// (the child iframe requests those) and autoplay (a cross-origin frame
+// does not get it by default).
 const LayoutView = View.extend({
   className: 'eightbyeight-wrapper',
   template: hbs`
@@ -80,8 +86,7 @@ const LayoutView = View.extend({
         title="8x8 Dialer"
         loading="lazy"
         referrerpolicy="no-referrer"
-        allow="microphone *; speaker-selection *"
-        sandbox="allow-scripts allow-forms allow-same-origin allow-popups">
+        allow="microphone *; camera *; speaker-selection *; hid *; local-network-access *; autoplay *">
       </iframe>
     </div>
   `,
