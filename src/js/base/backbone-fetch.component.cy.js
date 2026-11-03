@@ -218,4 +218,53 @@ context('Backbone fetch cancellation', function() {
       });
     });
   });
+
+  specify('keeps the Store current when a signal-less collection request is internally cancelled', function() {
+    const resource = name => ({ data: [{ type: TYPE, id: 'row', attributes: { name } }] });
+    let started;
+    const firstStarted = new Cypress.Promise(resolve => {
+      started = resolve;
+    });
+    const heldResponse = new Cypress.Promise(resolve => {
+      releaseBody = resolve;
+    });
+    let reads = 0;
+
+    cy
+      .intercept('GET', '/api/internal-collection-cancellation', req => {
+        if (++reads === 1) {
+          const reply = heldResponse.then(() => req.reply({ body: resource('Stale value') }));
+          requests.push(reply);
+          started();
+          return reply;
+        }
+        req.reply({ body: resource('Current value') });
+      });
+
+    cy.window().then(win => {
+      const nativeFetch = cy.spy(win, 'fetch');
+      const Model = Store(BaseModel.extend({ type: TYPE }), TYPE);
+      const Collection = BaseCollection.extend({ model: Model });
+      const model = new Model({ id: 'row', name: 'Initial value' });
+      const oldWindow = new Collection([model]);
+      const currentWindow = new Collection([model]);
+      Radio.reply('auth', 'getToken', () => undefined);
+      const oldRequest = oldWindow.fetch({ url: '/api/internal-collection-cancellation' });
+      requests.push(oldRequest);
+
+      return firstStarted.then(() => {
+        const currentRequest = currentWindow.fetch({ url: '/api/internal-collection-cancellation' });
+        requests.push(currentRequest);
+        expect(nativeFetch.firstCall.args[1].signal.aborted, 'superseded native request cancelled').to.equal(true);
+        releaseBody();
+        return currentRequest;
+      }).then(() => {
+        expect(model.get('name')).to.equal('Current value');
+        return oldRequest;
+      }).then(() => {
+        expect(Store.find(TYPE, model.id)).to.equal(model);
+        expect(model.get('name')).to.equal('Current value');
+      });
+    });
+  });
 });
