@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 
 import 'scss/modules/buttons.scss';
 import 'scss/modules/list-pages.scss';
+import 'scss/modules/skeleton.scss';
 
 import { alphaSort } from 'js/utils/sorting';
 import intl from 'js/i18n';
@@ -19,10 +20,43 @@ import SelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import DayItemTemplate from './day-item.hbs';
 import DayListTemplate from './day-list.hbs';
 import LayoutTemplate from './layout.hbs';
+import ListLoadingTemplate from './list-loading.hbs';
 
 import 'scss/domain/action-icons.scss';
 import 'scss/domain/patient-list.scss';
 import './schedule-list.scss';
+
+const CountLoadingView = View.extend({
+  className: 'schedule-list__count-skeleton skeleton-loading skeleton-loading--immediate',
+  attributes: {
+    'aria-hidden': 'true',
+  },
+  template: hbs`<span class="skeleton-loading__shape schedule-list__count-skeleton-shape"></span>`,
+});
+
+const ListLoadingView = View.extend({
+  className: 'list-page__list schedule-list__skeleton skeleton-loading skeleton-loading--immediate',
+  attributes: {
+    'aria-busy': 'true',
+    'aria-label': intl.patients.schedule.scheduleViews.loadingView.loadingActions,
+    'role': 'status',
+  },
+  template: ListLoadingTemplate,
+  templateContext() {
+    return {
+      items: new Array(3).fill(null),
+    };
+  },
+});
+
+const ListUpdatingView = View.extend({
+  className: 'schedule-list__updating',
+  attributes: {
+    'aria-live': 'polite',
+    'role': 'status',
+  },
+  template: hbs`{{ @intl.patients.schedule.scheduleViews.loadingView.updating }}`,
+});
 
 const ListErrorView = View.extend({
   className: 'schedule-list__error',
@@ -30,11 +64,17 @@ const ListErrorView = View.extend({
     role: 'alert',
   },
   template: hbs`
-    <span>{{ @intl.patients.schedule.scheduleViews.errorView.message }}</span>
+    <span>{{ message }}</span>
     <button class="button button--text js-retry" type="button">{{ @intl.patients.schedule.scheduleViews.errorView.retry }}</button>
   `,
   triggers: {
     'click .js-retry': 'retry',
+  },
+  templateContext() {
+    const errorViewI18n = intl.patients.schedule.scheduleViews.errorView;
+    const message = this.getOption('isRefresh') ? errorViewI18n.updateError : errorViewI18n.message;
+
+    return { message };
   },
 });
 
@@ -352,7 +392,8 @@ const EmptyFindInListView = View.extend({
 const ScheduleListView = CollectionView.extend({
   className: 'list-page__list schedule-list__list',
   attributes: {
-    role: 'list',
+    'role': 'list',
+    'aria-busy': 'false',
   },
   childView: DayListView,
   childViewOptions(model) {
@@ -415,6 +456,10 @@ const ScheduleListView = CollectionView.extend({
     this.selectedPatientId = patientId;
     this.children.each(view => view.setPatientSelected(patientId));
   },
+  setLoading(isLoading) {
+    this.el.setAttribute('aria-busy', String(isLoading));
+    this.el.classList.toggle('is-loading', isLoading);
+  },
   onChildFilter() {
     this.filter();
   },
@@ -434,8 +479,11 @@ const ScheduleListView = CollectionView.extend({
 });
 
 export {
+  CountLoadingView,
   LayoutView,
   ListErrorView,
+  ListLoadingView,
+  ListUpdatingView,
   ScheduleTitleView,
   AllFiltersButtonView,
   ScheduleListView,
