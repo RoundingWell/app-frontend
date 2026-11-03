@@ -1,25 +1,25 @@
 import { Server, WebSocket as MockedWebSocket } from 'mock-socket';
 
-let socketReady;
 let mockServer;
 
-const getServer = (url, messageHandler) => {
-  return new Cypress.Promise(resolve => {
-    if (mockServer) {
-      mockServer.close();
-    }
+/* eslint-disable-next-line mocha/no-exports */
+export function stopMockServer() {
+  const server = mockServer;
+  mockServer = undefined;
 
-    mockServer = new Server(url, { mock: true });
+  if (!server) return;
 
-    mockServer.on('connection', socket => {
-      socket.on('message', message => {
-        messageHandler(JSON.parse(message));
-      });
-    });
+  try {
+    server.close();
+  } finally {
+    server.stop();
+  }
+}
 
-    resolve();
-  });
-};
+if (Cypress.testingType === 'e2e') {
+  /* eslint-disable-next-line mocha/no-top-level-hooks */
+  afterEach(stopMockServer);
+}
 
 Cypress.Commands.add('mockWs', url => {
   cy.log('ws: Mocking WebSocket');
@@ -30,16 +30,20 @@ Cypress.Commands.add('mockWs', url => {
 
   const messageHandler = cy.stub().as('wsHandleMessage');
 
-  socketReady = getServer(url, messageHandler);
+  return cy.then(() => {
+    stopMockServer();
+    mockServer = new Server(url, { mock: true });
 
-  cy.on('test:after:run', () => {
-    cy.log('ws: Stopping Mock Server');
-    mockServer.close();
+    mockServer.on('connection', socket => {
+      socket.on('message', message => {
+        messageHandler(JSON.parse(message));
+      });
+    });
   });
 });
 
 Cypress.Commands.add('sendWs', message => {
-  cy.wrap(socketReady).then(() => {
+  cy.then(() => {
     message = JSON.stringify(message);
     cy.log('ws: Sending message', message);
     mockServer.emit('message', message);
@@ -47,7 +51,7 @@ Cypress.Commands.add('sendWs', message => {
 });
 
 Cypress.Commands.add('errorWs', () => {
-  cy.wrap(socketReady).then(() => {
+  cy.then(() => {
     cy.log('ws: Sending error');
     mockServer.simulate('error');
   });
