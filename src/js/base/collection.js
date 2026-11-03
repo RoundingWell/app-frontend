@@ -9,7 +9,7 @@ export default Backbone.Collection.extend(extend({
     return this.invoke('getResource');
   },
   fetch(options = {}) {
-    const fetcher = Backbone.Collection.prototype.fetch.call(this, options);
+    const fetcher = Backbone.Collection.prototype.fetch.call(this, extend({}, options, { _discardAbortedResponse: true }));
 
     // Resolve with entity if successful
     return fetcher.then(response => {

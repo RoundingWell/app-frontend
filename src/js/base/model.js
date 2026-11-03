@@ -35,7 +35,6 @@ export default Backbone.Model.extend(extend({
     return Backbone.Model.prototype.destroy.call(this, options);
   },
   fetch(options) {
-    const generation = this._fetchGeneration = (this._fetchGeneration || 0) + 1;
     // Model fetches default to aborting.
     const fetcher = Backbone.Model.prototype.fetch.call(this, extend({ abort: true }, options));
 
@@ -44,19 +43,23 @@ export default Backbone.Model.extend(extend({
     // Resolve with entity if successful
     return fetcher
       .then(response => {
-        if (generation !== this._fetchGeneration) return this;
         this._isFetching = false;
 
-        // Cancellation discards the response, but queued live updates still apply.
+        // NOTE: If the response fails, a retry will include notifications results.
+        if (!response) {
+          this._notifications = null;
+          return this;
+        }
+
         each(this._notifications, this._handleMessage, this);
         this._notifications = null;
 
-        if (!response || response.ok) return this;
+        if (response.ok) return this;
 
         return response;
       })
       .catch(error => {
-        if (generation === this._fetchGeneration) this._isFetching = false;
+        this._isFetching = false;
 
         throw error;
       });

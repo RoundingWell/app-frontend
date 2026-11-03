@@ -81,7 +81,7 @@ context('Backbone fetch cancellation', function() {
     });
   });
 
-  specify('replays queued websocket updates when a model response is cancelled after headers', function() {
+  specify('preserves queued websocket updates when a model request is aborted after headers', function() {
     cy.window().then(win => {
       const Model = Store(BaseModel.extend({
         type: TYPE,
@@ -142,23 +142,22 @@ context('Backbone fetch cancellation', function() {
     });
   });
 
-  specify('keeps queued updates with the current model fetch when an older cancelled fetch settles', function() {
+  specify('dispatches queued deletion after an older model fetch succeeds and the newer fetch fails', function() {
     cy.window().then(win => {
       const Model = Store(BaseModel.extend({
         type: TYPE,
         messages: {
-          MetadataUpdated({ attributes }) {
-            this.set(attributes);
+          ResourceDeleted() {
+            this.destroy({ isDeleted: true });
           },
         },
       }), TYPE);
       const model = new Model({ id: 'row', name: 'Initial value' });
-      const controller = new AbortController();
       const releases = [];
       releaseBody = () => {
         for (const release of releases) release();
       };
-      const pendingResponse = name => {
+      const pendingResponse = (name, status = 200) => {
         let started;
         const bodyStarted = new Cypress.Promise(resolve => {
           started = resolve;
@@ -169,13 +168,12 @@ context('Backbone fetch cancellation', function() {
             releases.push(() => {
               if (released) return;
               released = true;
-              body.enqueue(new TextEncoder().encode(JSON.stringify({ data: {
-                type: TYPE, id: model.id, attributes: { name },
-              } })));
+              const data = { data: { type: TYPE, id: model.id, attributes: { name } } };
+              body.enqueue(new TextEncoder().encode(JSON.stringify(data)));
               body.close();
             });
           },
-        }), { headers: { 'Content-Type': 'application/vnd.api+json' } });
+        }), { status, headers: { 'Content-Type': 'application/vnd.api+json' } });
         const clone = response.clone.bind(response);
         cy.stub(response, 'clone').callsFake(() => {
           started();
@@ -183,36 +181,39 @@ context('Backbone fetch cancellation', function() {
         });
         return { response, bodyStarted };
       };
-      const oldResponse = pendingResponse('Old server value');
-      const currentResponse = pendingResponse('Current server value');
+      const oldResponse = pendingResponse('Older response');
+      const newerResponse = pendingResponse('Failed response', 422);
       const trigger = cy.spy();
+      const destroyed = cy.spy();
+      model.on('destroy', destroyed);
       Radio.reply('ws', 'trigger', trigger);
       Radio.reply('auth', 'getToken', () => undefined);
       cy.stub(win, 'fetch')
         .onFirstCall().resolves(oldResponse.response)
-        .onSecondCall().resolves(currentResponse.response);
-      const oldRequest = model.fetch({ url: '/api/fetch-generation-test', signal: controller.signal });
+        .onSecondCall().resolves(newerResponse.response);
+      const oldRequest = model.fetch({ url: '/api/overlapping-model-test', abort: false });
       requests.push(oldRequest);
-      let currentRequest;
+      let newerRequest;
 
       return oldResponse.bodyStarted.then(() => {
-        currentRequest = model.fetch({ url: '/api/fetch-generation-test' });
-        requests.push(currentRequest);
-        return currentResponse.bodyStarted;
+        newerRequest = model.fetch({ url: '/api/overlapping-model-test', abort: false }).catch(error => {
+          expect(error.response.status).to.equal(422);
+        });
+        requests.push(newerRequest);
+        return newerResponse.bodyStarted;
       }).then(() => {
-        model.handleMessage({ category: 'MetadataUpdated', resource: model.getResource(), payload: { attributes: { name: 'Websocket value' } } });
-        controller.abort();
+        model.handleMessage({ category: 'ResourceDeleted', resource: model.getResource() });
+        releases[1]();
+        return newerRequest;
+      }).then(() => {
+        expect(destroyed).not.to.have.been.called;
+        expect(trigger).not.to.have.been.called;
         releases[0]();
         return oldRequest;
       }).then(() => {
-        expect(model.isFetching(), 'newer fetch still owns notification queue').to.equal(true);
-        expect(model.get('name')).to.equal('Initial value');
-        expect(trigger).not.to.have.been.called;
-        releases[1]();
-        return currentRequest;
-      }).then(() => {
-        expect(model.get('name')).to.equal('Websocket value');
+        expect(destroyed, 'queued deletion applied after the older success').to.have.been.calledOnce;
         expect(trigger).to.have.been.calledOnce;
+        expect(trigger.lastCall.args[0].category).to.equal('ResourceDeleted');
         expect(model.isFetching()).to.equal(false);
       });
     });
