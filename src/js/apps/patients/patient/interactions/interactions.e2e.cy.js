@@ -1,4 +1,4 @@
-import { contains, filter, map, range } from 'underscore';
+import { contains, filter, map, range, some } from 'underscore';
 
 import { getRelationship } from 'helpers/json-api';
 import formatDate from 'helpers/format-date';
@@ -10,6 +10,8 @@ import { getPatient } from 'support/api/patients';
 import { getActivity } from 'support/api/events';
 import { getComment } from 'support/api/comments';
 import { getCurrentClinician } from 'support/api/clinicians';
+import { stateTodo } from 'support/api/states';
+import { teamCoordinator } from 'support/api/teams';
 
 function assertFeedEnd($item) {
   const container = $item.closest('.patient-interactions')[0];
@@ -218,12 +220,21 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Updated note')
       .should('exist');
 
-    send('InteractionCompleted', call, { occurred_at: '2026-10-09T03:00:00Z' });
+    send('InteractionCompleted', call, { occurred_at: '2026-10-09T02:00:00Z' });
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'Known appointment')
+      .and('not.contain', 'Updated note');
 
     cy
       .get('.patient-interactions__day')
       .last()
-      .should('contain', 'Updated note');
+      .should('contain', 'Updated note')
+      .find('.js-date-label')
+      .should('contain', formatDate('2026-10-09T02:00:00Z', 'DATE'));
 
     send('InteractionCancelled', appointment, { cancelled_at: '2026-10-08T05:00:00Z' });
 
@@ -236,6 +247,12 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Updated note')
       .should('not.exist');
+
+    send('ResourceDeleted', appointment);
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible');
   });
 
   specify('refetches the latest three while collapsed', function() {
@@ -285,13 +302,21 @@ context('patient interactions', function() {
     cy
       .get('.patient__frame .js-sidebar-button')
       .then($button => {
-        if ($button.attr('aria-expanded') === 'true') cy.wrap($button).click();
+        if ($button.attr('aria-expanded') !== 'true') cy.wrap($button).click();
       });
+
+    cy
+      .get('.patient__frame .js-sidebar-button')
+      .should('have.attr', 'aria-expanded', 'true')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false');
 
     cy
       .get('@wsHandleMessage')
       .should(stub => {
-        expect(stub.lastCall.args[0].data.resources).to.deep.include({ type: 'patients', id: patient.id });
+        const subscription = stub.lastCall.args[0];
+        expect(subscription.name).to.equal('Subscribe');
+        expect(subscription.data.resources).to.deep.include({ type: 'patients', id: patient.id });
       });
 
     cy.then(() => rows.push(added));
@@ -322,6 +347,274 @@ context('patient interactions', function() {
       .get('.patient-interactions-preview__sender')
       .should($senders => {
         expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 0', 'Sender 1', 'Sender 2']);
+      });
+  });
+
+  specify('does not restore a deleted row when an older window finishes', function() {
+    const patient = getPatient();
+    const rows = map(range(50), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1)).toISOString(), metadata: { note: `Pending row ${ index }` },
+    } }));
+    const deleted = rows[25];
+    const older = createResponseGate(pendingResponses);
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (!query.has('page[before]')) return;
+        return older.reply(req, { data: getPage(rows, query, rows) });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ deleted.id }`, { now: '2026-11-01T12:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Pending row 25')
+      .should('be.focused');
+
+    cy
+      .get('.patient-interactions')
+      .scrollTo('top');
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(older.started).to.equal(true);
+      });
+
+    cy.then(() => rows.splice(rows.indexOf(deleted), 1));
+    cy.sendWs({
+      category: 'ResourceDeleted', resource: { type: 'interactions', id: deleted.id },
+      payload: { patient: { type: 'patients', id: patient.id } },
+    });
+
+    cy.then(() => older.release());
+    cy.then(() => Cypress.Promise.all([older.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item')
+      .should('have.length', 37);
+
+    cy
+      .contains('.patient-interactions__item', 'Pending row 0')
+      .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Pending row 25')
+      .should('not.exist');
+  });
+
+  specify('reconciles older and newer paging boundaries after loaded rows move', function() {
+    const patient = getPatient();
+    for (const [index, timestamp] of [[13, '2026-08-01T00:00:00Z'], [37, '2026-12-01T00:00:00Z']]) {
+      const rows = map(range(50), row => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, row + 1)).toISOString(), metadata: { note: `Boundary row ${ row }` },
+      } }));
+      const moved = rows[index];
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (query.get('page[limit]') === '25' && !query.has('page[at]') && !query.has('page[before]') && !query.has('page[after]')) req.alias = 'reconciledWindow';
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z' });
+
+      cy
+        .get('.patient-interactions__item')
+        .should('have.length', 25);
+
+      cy.then(() => {
+        moved.attributes.occurred_at = timestamp;
+      });
+      cy.sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: moved.id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+      });
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .scrollTo('bottom')
+        .scrollTo('top');
+
+      cy
+        .get('.patient-interactions__item')
+        .should('have.length', 50);
+
+      cy
+        .wait('@reconciledWindow');
+
+      cy
+        .contains('.patient-interactions__item', 'Boundary row 0')
+        .should('exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Boundary row 49')
+        .should('exist');
+    }
+  });
+
+  specify('hydrates new work links outside the newest-three widget', function() {
+    const patient = getPatient();
+    const rows = map(range(4), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: `2026-10-08T0${ index }:00:00Z`, metadata: { note: `Linked row ${ index }` },
+    } }));
+    const actionFlow = getFlow({ attributes: { name: 'Hydrated action flow' }, relationships: { patient: getRelationship(patient) } });
+    const action = getAction({ attributes: { name: 'Hydrated action' }, relationships: { patient: getRelationship(patient), flow: getRelationship(actionFlow) } });
+    const flow = getFlow({ attributes: { name: 'Hydrated standalone flow' }, relationships: { patient: getRelationship(patient) } });
+    const send = attributes => cy.sendWs({
+      category: 'MetadataUpdated', resource: { type: 'interactions', id: rows[0].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes },
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = action;
+        fx.included = [actionFlow];
+        return fx;
+      })
+      .routeFlow(fx => {
+        fx.data = flow;
+        return fx;
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .should('exist');
+
+    send({ action_id: action.id });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .should('contain', 'Hydrated action flow: Hydrated action');
+
+    cy
+      .wait('@routeAction');
+
+    send({ action_id: null, flow_id: flow.id });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .should('contain', 'Hydrated standalone flow');
+
+    cy
+      .wait('@routeFlow');
+
+    send({ flow_id: null });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .should('not.exist');
+  });
+
+  specify('owns the patient subscription before workflow readiness and clears child state on navigation', function() {
+    const patient = getPatient();
+    const flow = getFlow({ attributes: { name: 'Owned workflow flow' }, relationships: { patient: getRelationship(patient), state: getRelationship(stateTodo), owner: getRelationship(teamCoordinator) } });
+    const loading = createResponseGate(pendingResponses);
+
+    cy
+      .routesForPatientWorkflow()
+      .routesForDefault()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/flows*', req => loading.reply(req, { data: [flow] }))
+      .visitOnClock(`/patient/${ patient.id }/workflow`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        expect(loading.started).to.equal(true);
+        expect(stub).to.have.been.called;
+        const subscription = stub.lastCall.args[0];
+        expect(subscription.name).to.equal('Subscribe');
+        expect(subscription.data.resources).to.deep.equal([{ type: 'patients', id: patient.id }]);
+        expect(subscription.data.filters).to.equal(undefined);
+      });
+
+    cy.then(() => loading.release());
+
+    cy
+      .contains('.flow-card', 'Owned workflow flow')
+      .should('be.visible');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        expect(stub.lastCall.args[0].data.resources).to.deep.include({ type: 'flows', id: flow.id });
+      })
+      .invoke('resetHistory');
+
+    cy
+      .get('.app-nav')
+      .contains('Owned By')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        expect(some(stub.getCalls(), call => {
+          const subscription = call.args[0];
+          return subscription.name === 'Subscribe' && !subscription.data.resources.length && !subscription.data.filters;
+        })).to.equal(true);
+      });
+
+    cy
+      .go('back');
+
+    cy
+      .contains('.flow-card', 'Owned workflow flow')
+      .should('be.visible');
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        const subscription = stub.lastCall.args[0];
+        expect(subscription.name).to.equal('Subscribe');
+        expect(subscription.data.resources).to.deep.equal([{ type: 'patients', id: patient.id }]);
+        expect(subscription.data.filters).to.equal(undefined);
       });
   });
 

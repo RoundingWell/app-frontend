@@ -1,6 +1,9 @@
 import Store from 'backbone.store';
 import dayjs from 'dayjs';
 import { contains, findKey, has, omit } from 'underscore';
+import { Radio } from 'marionette';
+
+import { addError } from 'js/datadog';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
@@ -26,6 +29,13 @@ const _Model = BaseModel.extend({
       if (has(attributes, 'action_id')) relationships._action = attributes.action_id ? { id: attributes.action_id, type: 'patient-actions' } : null;
       if (has(attributes, 'flow_id')) relationships._flow = attributes.flow_id ? { id: attributes.flow_id, type: 'flows' } : null;
       this.set({ ...omit(attributes, 'action_id', 'flow_id'), ...relationships });
+      const requests = [];
+      if (attributes.action_id) requests.push(Radio.request('entities', 'fetch:actions:model', attributes.action_id, { abort: false }));
+      if (attributes.flow_id) requests.push(Radio.request('entities', 'fetch:flows:model', attributes.flow_id, { abort: false }));
+      if (requests.length) {
+        // Responses enrich the Store; they never replace the current link IDs.
+        Promise.all(requests).then(() => this.trigger('change', this)).catch(addError);
+      }
     },
     InteractionScheduled({ attributes }) {
       this.set(attributes);

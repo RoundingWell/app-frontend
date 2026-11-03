@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
-import { contains, flatten, keys, map, without } from 'underscore';
+import { contains, filter, flatten, has, keys, map, without } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -31,6 +31,8 @@ export default App.extend({
   },
   showPage({ patient, interactionId }) {
     this.patient = patient;
+    this.deletedIds = new Set();
+    this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.channelGroups = Radio.request('entities', 'interactions:channelGroups');
     this.getState().set({ interactionId, selectedGroups: keys(this.channelGroups), contentStatus: 'loading' });
     this.showView(new InteractionsPageView({
@@ -82,10 +84,31 @@ export default App.extend({
     this.stop();
   },
   onStop() {
+    this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     if (this.collection) this.stopListening(this.collection);
     this.collection = null;
     this.filterPosition = null;
     this.getState().set({ request: null, retry: null, hasOlder: false, hasNewer: false });
+  },
+  onInteractionMessage({ category, resource, payload }) {
+    if (payload.patient?.id !== this.patient.id) return;
+    if (category === 'ResourceDeleted') {
+      this.deletedIds.add(resource.id);
+      if (!this.collection?.length) this.reconcileWindow();
+      return;
+    }
+    if (has(payload.attributes, 'occurred_at') || has(payload.attributes, 'expected_at')) this.reconcileMovedInteraction(resource.id);
+  },
+  reconcileMovedInteraction(id) {
+    if (this.collection?.get(id)) this.reconcileWindow();
+  },
+  reconcileWindow() {
+    const { hasOlder, hasNewer, request } = this.getState().attributes;
+    // A moved cursor no longer bounds the loaded server window. Reconcile through
+    // the existing date loader instead of paging from a newly sorted endpoint.
+    if (hasOlder || hasNewer || request) {
+      this.requestInteractions('replace', this.getView().getCurrentDate(), null);
+    }
   },
   getRequest(kind, date, at = this.getState().get('interactionId')) {
     const selectedGroups = this.getState().get('selectedGroups');
@@ -160,6 +183,7 @@ export default App.extend({
     this.getState().set({ hasOlder, hasNewer, request: null, retry: null });
   },
   commitInteractions(models, input) {
+    models = filter(models, model => !this.deletedIds.has(model.id));
     const view = this.getView();
     if (input.kind === 'replace') {
       if (this.collection) this.stopListening(this.collection);

@@ -197,6 +197,12 @@ the test green, that shows the test did not detect its removal; it does not prov
 the guard redundant. Trace supported callers and lifecycle ordering before
 removing a path or requesting an ignore.
 
+WebSocket `Subscribe` requests replace earlier pending subscriptions before the
+socket opens. Assert the active subscription's resources and filters rather
+than an exact startup message count. To verify parent ownership independently
+of a child, hold child readiness and assert the patient subscription before
+releasing the response.
+
 Use realistic fixtures, actual controls, and sufficient content to reach the
 state under test. For scrolling, overflow, and responsive behavior, use real
 browser layout and a viewport appropriate to the scenario. Do not override

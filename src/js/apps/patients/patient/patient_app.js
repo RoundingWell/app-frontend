@@ -61,7 +61,7 @@ export default SubRouterApp.extend({
   },
 
   onStop() {
-    if (this.patient) Radio.request('ws', 'unsubscribe', this.patient);
+    if (this.patient) Radio.request('ws', 'subscribe', []);
     if (this.layoutState) this.stopListening(this.layoutState);
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
     Radio.request('nav', 'setMinimized', false);
@@ -161,6 +161,9 @@ export default SubRouterApp.extend({
     });
     return this.selectChild(appName, {
       start: app => {
+        // The outgoing child has stopped. Restore the patient-owned baseline
+        // before the incoming child installs its resources and filters.
+        Radio.request('ws', 'subscribe', this.patient);
         const started = app.start(startOptions);
         if (appName !== 'interactions') return started;
         // The feed owns its loading/error shell; host selection must retain it
