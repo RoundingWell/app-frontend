@@ -132,6 +132,13 @@ export default App.extend({
 
     this.subscribe();
     this.showView();
+    this.publishCurrentAction();
+  },
+  publishCurrentAction() {
+    Radio.trigger('dialer', 'change:currentAction', {
+      id: this.action.id,
+      patientId: this.patient && this.patient.id,
+    });
   },
   updateContext() {
     this.triggerMethod('context:change', {
@@ -143,6 +150,10 @@ export default App.extend({
     });
   },
   onStop() {
+    const current = Radio.request('dialer', 'currentAction');
+    if (!current || current.id === this.action?.id) {
+      Radio.trigger('dialer', 'change:currentAction', null);
+    }
     this.unsubscribe();
     if (this.currentFlow) this.stopListening(this.currentFlow);
     if (this.action) this.stopListening(this.action);

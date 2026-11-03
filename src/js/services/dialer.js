@@ -14,9 +14,17 @@ export default App.extend({
     'five9Call': 'five9Call',
     'ringcentralCall': 'ringcentralCall',
     'eightByEightCall': 'eightByEightCall',
+    'currentAction': 'getCurrentAction',
   },
   radioEvents: {
     'change:currentPatientId': 'updateCurrentPatientId',
+    'change:currentAction': 'updateCurrentAction',
+  },
+  updateCurrentAction(action) {
+    this._currentAction = action;
+  },
+  getCurrentAction() {
+    return this._currentAction;
   },
   updateCurrentPatientId(patientId) {
     patients.currentPatientId = patientId;

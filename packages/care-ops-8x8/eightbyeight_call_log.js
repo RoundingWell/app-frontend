@@ -76,11 +76,11 @@ function toIso(value) {
   return parsed.isValid() ? parsed.toISOString() : null;
 }
 
-function e164(number) {
+export function toE164(number) {
   if (!number) return null;
 
   const phone = parsePhoneNumber(String(number), 'US');
-  if (phone && phone.isValid()) return phone.number;
+  if (phone?.number) return phone.number;
 
   return String(number);
 }
@@ -140,7 +140,7 @@ export function attachmentForCall(pending, session) {
   const withinWindow = Number.isFinite(start) && Math.abs(start - pending.clickedAt) <= CALL_ATTACH_WINDOW_MS;
 
   if (!withinWindow) return { actionId: null, clear: true };
-  if (e164(identity.searchContext) !== pending.number) return { actionId: null, clear: false };
+  if (toE164(identity.searchContext) !== pending.number) return { actionId: null, clear: false };
 
   return { actionId: pending.actionId, clear: true };
 }
@@ -155,7 +155,7 @@ function baseCallData(identity) {
     method: 'mapEvent',
     schemaVersion: '1.0.0',
     direction,
-    searchContext: e164(identity.searchContext),
+    searchContext: toE164(identity.searchContext),
     callDuration: talkTime(terminated.callDuration),
     startTime: toIso(firstValue(offered?.startTime, terminated.startTime)),
     endTime: toIso(terminated.endTime),
@@ -177,6 +177,15 @@ function callReport(callData, callOutcome) {
   if (callData.direction === 'outbound') report.Callee = callData.searchContext;
 
   return report;
+}
+
+export function contextMatchesCall(numbers, session) {
+  if (!numbers?.length) return false;
+
+  const number = toE164(callIdentity(session || {}).searchContext);
+  if (!number) return false;
+
+  return numbers.includes(number);
 }
 
 export function buildCallLogValues(session = {}, { actionId, patientId } = {}) {

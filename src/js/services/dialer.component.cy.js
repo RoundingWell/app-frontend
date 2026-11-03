@@ -27,6 +27,7 @@ context('Dialer Service', function() {
 
   afterEach(async function() {
     COPY_NUMBER_UNTIL_WHITELISTED.enabled = true;
+    Radio.trigger('dialer', 'change:currentAction', null);
     Radio.stopReplying('settings', 'get');
 
     if (Radio.request.restore) {
@@ -628,6 +629,167 @@ context('Dialer Service', function() {
       .should('equal', dayjs(Number(endedStart)).toISOString());
   });
 
+  specify('attaches a manual 8x8 call when the number is on the open action', function() {
+    const startTime = '1793723417987';
+
+    stubPatientPhones([{ number: '(555) 555-0100' }]);
+    Radio.trigger('dialer', 'change:currentAction', { id: 'action-1', patientId: 'patient-1' });
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postManualCall({
+      eventId: 'manual-match',
+      searchContext: '+15555550100',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal('action-1');
+        expect(values.patient_id).to.equal('patient-1');
+      });
+  });
+
+  specify('does not attach a manual 8x8 call for a different patient number', function() {
+    const startTime = '1793723417987';
+
+    stubPatientPhones([{ number: '+15555550999' }]);
+    Radio.trigger('dialer', 'change:currentAction', { id: 'action-1', patientId: 'patient-1' });
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postManualCall({
+      eventId: 'manual-miss',
+      searchContext: '+15555550100',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal(null);
+        expect(values.patient_id).to.equal(null);
+      });
+  });
+
+  specify('does not attach a manual 8x8 call when no action is open', function() {
+    const startTime = '1793723417987';
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postManualCall({
+      eventId: 'manual-none',
+      searchContext: '+15555550100',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal(null);
+        expect(values.patient_id).to.equal(null);
+      });
+  });
+
+  specify('prefers a pending Call Number click over the open action', function() {
+    const startTime = '1793723417987';
+    const request = Radio.request;
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'patientFields:model') {
+        return {
+          value: [{ number: '+15555550100' }],
+          get(key) {
+            return this[key];
+          },
+          fetch() {
+            return Promise.resolve();
+          },
+        };
+      }
+
+      if (channelName === 'entities' && requestName === 'actions:model') {
+        return {
+          getPatient() {
+            return {
+              id: 'patient-click',
+              get() {
+                return 'Test';
+              },
+            };
+          },
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    Radio.trigger('dialer', 'change:currentAction', { id: 'action-open', patientId: 'patient-open' });
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    clickToCall('+15555550100', 'action-click', Number(startTime));
+
+    postManualCall({
+      eventId: 'clicked-call',
+      searchContext: '+15555550100',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal('action-click');
+        expect(values.patient_id).to.equal('patient-click');
+      });
+  });
+
   specify('records an 8x8 call that was never accepted', function() {
     Radio.reply('settings', 'get', () => '8x8');
 
@@ -742,6 +904,42 @@ context('Dialer Service', function() {
       .get('@fetchSearch')
       .should('not.have.been.called');
   });
+
+  function postManualCall({ eventId, searchContext, startTime }) {
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: `${ eventId }-offered`,
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext,
+      startTime,
+      schemaVersion: '1.0.0',
+    });
+
+    postTerminatedCall({ eventId, searchContext, startTime });
+  }
+
+  function stubPatientPhones(phones) {
+    const request = Radio.request;
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'patientFields:model') {
+        return {
+          value: null,
+          get(key) {
+            return this[key];
+          },
+          fetch() {
+            this.value = phones;
+            return Promise.resolve();
+          },
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+  }
 
   function clickToCall(number, actionId, at) {
     cy.tick(at);

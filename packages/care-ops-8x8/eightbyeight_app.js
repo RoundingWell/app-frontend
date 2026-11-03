@@ -1,6 +1,5 @@
 import Backbone from 'backbone';
 import hbs from 'handlebars-inline-precompile';
-import parsePhoneNumber from 'libphonenumber-js/min';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -8,7 +7,7 @@ import { renderTemplate } from 'js/i18n';
 
 import App from 'js/base/app';
 
-import { attachmentForCall, buildCallLogValues, rememberCallEvent, takeTerminated } from './eightbyeight_call_log';
+import { attachmentForCall, buildCallLogValues, contextMatchesCall, rememberCallEvent, takeTerminated, toE164 } from './eightbyeight_call_log';
 import { LayoutView } from './eightbyeight_views';
 
 // Mashell ignores startCall until the embedding domain is on
@@ -33,6 +32,31 @@ function copyDialNumber(number) {
   }
 }
 
+function phoneNumbersFrom(value) {
+  if (!Array.isArray(value)) return [];
+
+  return value.reduce((numbers, item) => {
+    const number = toE164(item?.number);
+    if (number) numbers.push(number);
+    return numbers;
+  }, []);
+}
+
+function patientPhoneNumbers(patientId) {
+  const field = Radio.request('entities', 'patientFields:model', {
+    name: 'phones',
+    _patient: { id: patientId, type: 'patients' },
+  });
+  if (!field?.get) return Promise.resolve([]);
+
+  const value = field.get('value');
+  if (value != null) return Promise.resolve(phoneNumbersFrom(value));
+
+  return field.fetch()
+    .then(() => phoneNumbersFrom(field.get('value')))
+    .catch(() => []);
+}
+
 function patientIdForAction(actionId) {
   if (!actionId) return null;
 
@@ -46,11 +70,7 @@ function patientIdForAction(actionId) {
 }
 
 function toDialableNumber(number) {
-  const phone = parsePhoneNumber(String(number), 'US');
-
-  if (phone && phone.isValid()) return phone.number;
-
-  return number;
+  return toE164(number) || number;
 }
 
 export default App.extend({
@@ -91,6 +111,8 @@ export default App.extend({
     this._abortController?.abort();
     this._pendingAction = null;
     this._callSession = null;
+    this._contextAction = null;
+    this._contextNumbers = null;
     this.getState().set({
       isDialerReady: false,
       callState: null,
@@ -125,7 +147,10 @@ export default App.extend({
     this[handler](data.data || {});
   },
   onOffered(data) {
+    const previous = this._callSession;
     this._callSession = rememberCallEvent(this._callSession, data);
+    if (previous?.terminated) this.clearOpenAction();
+    if (!this._contextAction && this._callSession?.offered === data) this.captureOpenAction();
 
     if (data.direction !== 'inbound') return;
 
@@ -136,6 +161,7 @@ export default App.extend({
   },
   onAccepted(data) {
     this._callSession = rememberCallEvent(this._callSession, data);
+    if (!this._contextAction && this._callSession?.accepted === data) this.captureOpenAction();
 
     const state = this.getState();
     state.set('callState', 'active');
@@ -145,23 +171,71 @@ export default App.extend({
       number: data.searchContext,
     });
   },
-  onTerminated(data) {
+  async onTerminated(data) {
     const state = this.getState();
     const taken = takeTerminated(this._callSession, data);
 
     this._callSession = taken.session;
-    const attachment = attachmentForCall(this._pendingAction, taken.saving);
-    if (attachment.clear) this._pendingAction = null;
+    const linked = await this.linkedAction(taken);
 
-    Radio.request('dialer', 'eightByEightCall', buildCallLogValues(taken.saving, {
-      actionId: attachment.actionId,
-      patientId: patientIdForAction(attachment.actionId),
-    }));
+    Radio.request('dialer', 'eightByEightCall', buildCallLogValues(taken.saving, linked));
 
     if (taken.session) return;
 
+    this.finishCall(state);
+  },
+  async linkedAction(taken) {
+    const attachment = attachmentForCall(this._pendingAction, taken.saving);
+    if (attachment.clear) this._pendingAction = null;
+
+    const fromContext = await this.contextFor(taken, attachment);
+
+    return {
+      actionId: attachment.actionId || fromContext?.actionId || null,
+      patientId: this.patientFor(attachment, fromContext),
+    };
+  },
+  patientFor(attachment, fromContext) {
+    if (attachment.actionId) return patientIdForAction(attachment.actionId);
+    if (!fromContext) return null;
+
+    return fromContext.patientId;
+  },
+  finishCall(state) {
+    this.clearOpenAction();
     state.set({ callState: null, actionId: null });
     Radio.request('dialer', 'showPatientLinks', null);
+  },
+  captureOpenAction() {
+    const current = Radio.request('dialer', 'currentAction');
+    if (!current?.id || !current.patientId) {
+      this._contextAction = { actionId: null };
+      return;
+    }
+
+    this._contextAction = {
+      actionId: current.id,
+      patientId: current.patientId,
+    };
+    this._contextNumbers = patientPhoneNumbers(current.patientId).then(numbers => {
+      if (this._contextAction?.actionId === current.id) this._contextAction.numbers = numbers;
+      return numbers;
+    });
+  },
+  async contextFor(taken, attachment) {
+    if (attachment.actionId || this._pendingAction || taken.session) return null;
+
+    const context = this._contextAction;
+    if (!context?.actionId) return null;
+
+    const numbers = context.numbers || await this._contextNumbers;
+    if (!contextMatchesCall(numbers, taken.saving)) return null;
+
+    return context;
+  },
+  clearOpenAction() {
+    this._contextAction = null;
+    this._contextNumbers = null;
   },
   call(number, action) {
     const state = this.getState();
