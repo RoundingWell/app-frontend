@@ -8,7 +8,7 @@ import { renderTemplate } from 'js/i18n';
 
 import App from 'js/base/app';
 
-import { buildCallLogValues, rememberCallEvent } from './eightbyeight_call_log';
+import { attachmentForCall, buildCallLogValues, rememberCallEvent } from './eightbyeight_call_log';
 import { LayoutView } from './eightbyeight_views';
 
 // Mashell ignores startCall until the embedding domain is on
@@ -89,6 +89,7 @@ export default App.extend({
   },
   onStop() {
     this._abortController?.abort();
+    this._pendingAction = null;
     this.getState().set({
       isDialerReady: false,
       callState: null,
@@ -142,12 +143,14 @@ export default App.extend({
   },
   onTerminated(data) {
     const state = this.getState();
-    const actionId = state.get('actionId');
 
     this._callSession = rememberCallEvent(this._callSession, data);
+    const attachment = attachmentForCall(this._pendingAction, this._callSession);
+    if (attachment.clear) this._pendingAction = null;
+
     Radio.request('dialer', 'eightByEightCall', buildCallLogValues(this._callSession, {
-      actionId,
-      patientId: patientIdForAction(actionId),
+      actionId: attachment.actionId,
+      patientId: patientIdForAction(attachment.actionId),
     }));
     this._callSession = null;
 
@@ -162,6 +165,11 @@ export default App.extend({
 
     if (state.get('callState') === 'active') return;
 
+    this._pendingAction = {
+      number: dialableNumber,
+      actionId: action.id,
+      clickedAt: Date.now(),
+    };
     state.set({
       pendingCall: dialableNumber,
       actionId: action.id,

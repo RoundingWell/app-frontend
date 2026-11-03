@@ -1,6 +1,10 @@
 import dayjs from 'dayjs';
 import parsePhoneNumber from 'libphonenumber-js/min';
 
+// A click's action is attached only when the call number matches and the
+// call starts within this long of the click.
+export const CALL_ATTACH_WINDOW_MS = 2 * 60 * 1000;
+
 // UC embed events are offered, accepted, and terminated. eventId is unique
 // per event, so a call is matched on direction plus searchContext.
 // https://developer.8x8.com/tech-partner/docs/partner-sdk-maestro-sdk-events/
@@ -110,6 +114,19 @@ function callIdentity(session) {
     direction: firstValue(terminated.direction, offered?.direction, accepted?.direction),
     searchContext: firstValue(terminated.searchContext, offered?.searchContext, accepted?.searchContext),
   };
+}
+
+export function attachmentForCall(pending, session) {
+  if (!pending) return { actionId: null, clear: false };
+
+  const identity = callIdentity(session || {});
+  const start = Number(firstValue(identity.offered?.startTime, identity.terminated.startTime));
+  const withinWindow = Number.isFinite(start) && Math.abs(start - pending.clickedAt) <= CALL_ATTACH_WINDOW_MS;
+
+  if (!withinWindow) return { actionId: null, clear: true };
+  if (e164(identity.searchContext) !== pending.number) return { actionId: null, clear: false };
+
+  return { actionId: pending.actionId, clear: true };
 }
 
 function baseCallData(identity) {

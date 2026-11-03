@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { v5 as uuid } from 'uuid';
 import { Application, Radio, View } from 'marionette';
 import { COPY_NUMBER_UNTIL_WHITELISTED } from '@roundingwell/care-ops-8x8/eightbyeight_app.js';
+import { CALL_ATTACH_WINDOW_MS } from '@roundingwell/care-ops-8x8/eightbyeight_call_log.js';
 import { RWELL_NS } from 'js/static';
 import AlertService from 'js/services/alert';
 import DialerService from './dialer';
@@ -266,7 +267,7 @@ context('Dialer Service', function() {
 
     cy.then(async() => {
       await service.start();
-      service.getChildApp('provider').getState().set('actionId', 'action-1');
+      armClickedAction('+15555550100', 'action-1', Number(startTime));
     });
 
     postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
@@ -349,6 +350,115 @@ context('Dialer Service', function() {
             },
           },
         });
+      });
+  });
+
+  specify('does not attach an 8x8 call for a different number', function() {
+    const startTime = '1793723417987';
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+      armClickedAction('+15555550100', 'action-1', Number(startTime));
+    });
+
+    postTerminatedCall({
+      eventId: 'other-number',
+      searchContext: '+15555550999',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal(null);
+        expect(values.patient_id).to.equal(null);
+        expect(values.callData.searchContext).to.equal('+15555550999');
+      });
+  });
+
+  specify('does not attach an 8x8 call that starts outside the click window', function() {
+    const startTime = '1793723417987';
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+      armClickedAction('+15555550100', 'action-1', Number(startTime) - CALL_ATTACH_WINDOW_MS - 1);
+    });
+
+    postTerminatedCall({
+      eventId: 'late-call',
+      searchContext: '+15555550100',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal(null);
+        expect(values.patient_id).to.equal(null);
+      });
+  });
+
+  specify('does not reuse an 8x8 action after it is attached', function() {
+    const startTime = '1793723417987';
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+      armClickedAction('+15555550100', 'action-1', Number(startTime));
+    });
+
+    postTerminatedCall({
+      eventId: 'first-call',
+      searchContext: '+15555550100',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values.action_id')
+      .should('equal', 'action-1');
+
+    postTerminatedCall({
+      eventId: 'second-call',
+      searchContext: '+15555550100',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.callData.eventId).to.equal('second-call');
+        expect(values.action_id).to.equal(null);
+        expect(values.patient_id).to.equal(null);
       });
   });
 
@@ -466,6 +576,29 @@ context('Dialer Service', function() {
       .get('@fetchSearch')
       .should('not.have.been.called');
   });
+
+  function armClickedAction(number, actionId, clickedAt) {
+    const provider = service.getChildApp('provider');
+
+    provider._pendingAction = { number, actionId, clickedAt };
+    provider.getState().set('actionId', actionId);
+  }
+
+  function postTerminatedCall({ eventId, searchContext, startTime }) {
+    postEightByEightEvent('mashell-voice-phone-terminated-uc-event-v1', {
+      eventName: 'terminated',
+      eventId,
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext,
+      startTime,
+      endTime: String(Number(startTime) + 10000),
+      callDuration: '00:00:10',
+      hasRecording: false,
+      schemaVersion: '1.0.0',
+    });
+  }
 
   function postEightByEightEvent(eventType, data) {
     cy.window().then(win => {
