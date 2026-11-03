@@ -45,16 +45,11 @@ export default Backbone.Model.extend(extend({
       .then(response => {
         this._isFetching = false;
 
-        // NOTE: If the response fails, a retry will include notifications results.
-        if (!response) {
-          this._notifications = null;
-          return this;
-        }
-
+        // Cancellation discards the response, but queued live updates still apply.
         each(this._notifications, this._handleMessage, this);
         this._notifications = null;
 
-        if (response.ok) return this;
+        if (!response || response.ok) return this;
 
         return response;
       })

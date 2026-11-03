@@ -80,4 +80,65 @@ context('Backbone fetch cancellation', function() {
       });
     });
   });
+
+  specify('replays queued websocket updates when a model response is cancelled after headers', function() {
+    cy.window().then(win => {
+      const Model = Store(BaseModel.extend({
+        type: TYPE,
+        messages: {
+          MetadataUpdated({ attributes }) {
+            this.set(attributes);
+          },
+        },
+      }), TYPE);
+      const model = new Model({ id: 'row', name: 'Initial value' });
+      const controller = new AbortController();
+      const notification = {
+        category: 'MetadataUpdated', resource: model.getResource(), author: { type: 'clinicians', id: 'sender' }, payload: { attributes: { name: 'Websocket value' } },
+      };
+      const trigger = cy.spy();
+      Radio.reply('ws', 'trigger', trigger);
+      Radio.reply('auth', 'getToken', () => undefined);
+      let started;
+      const bodyStarted = new Cypress.Promise(resolve => {
+        started = resolve;
+      });
+      const response = new Response(new ReadableStream({
+        start(body) {
+          let released = false;
+          releaseBody = () => {
+            if (released) return;
+            released = true;
+            body.enqueue(new TextEncoder().encode(JSON.stringify({ data: {
+              type: TYPE, id: model.id, attributes: { name: 'Stale value' },
+            } })));
+            body.close();
+          };
+        },
+      }), { headers: { 'Content-Type': 'application/vnd.api+json' } });
+      const clone = response.clone.bind(response);
+      cy.stub(response, 'clone').callsFake(() => {
+        started();
+        return clone();
+      });
+      cy.stub(win, 'fetch').resolves(response);
+      const request = model.fetch({ url: '/api/cancelled-body-model-test', signal: controller.signal });
+      requests.push(request);
+
+      return bodyStarted.then(() => {
+        model.handleMessage(notification);
+        expect(model.get('name')).to.equal('Initial value');
+        expect(trigger).not.to.have.been.called;
+        controller.abort();
+        releaseBody();
+        return request;
+      }).then(() => {
+        expect(model.get('name')).to.equal('Websocket value');
+        expect(trigger).to.have.been.calledOnce;
+        expect(trigger.lastCall.args[0]).to.deep.equal(notification);
+        expect(trigger.lastCall.args[1]).to.equal(model);
+        expect(model.isFetching()).to.equal(false);
+      });
+    });
+  });
 });
