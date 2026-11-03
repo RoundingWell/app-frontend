@@ -107,7 +107,10 @@ export default App.extend({
     if (request || !this.collection?.length) this.reconcileWindow();
   },
   reconcileTimestampUpdate(id) {
-    if (this.getState().get('request') || this.collection?.get(id)) this.reconcileWindow();
+    const request = this.getState().get('request');
+    // Filter refreshes retain their date when the anchoring row moves away.
+    if (request?.date && request.at === id) this.getState().set('request', { ...request, at: null });
+    if (request || this.collection?.get(id)) this.reconcileWindow();
   },
   reconcileWindow() {
     const { hasOlder, hasNewer, request } = this.getState().attributes;

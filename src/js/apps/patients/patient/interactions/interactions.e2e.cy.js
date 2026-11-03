@@ -1,4 +1,4 @@
-import { contains, filter, map, range, some } from 'underscore';
+import { contains, filter, find, map, range, some } from 'underscore';
 
 import { getRelationship } from 'helpers/json-api';
 import formatDate from 'helpers/format-date';
@@ -501,6 +501,81 @@ context('patient interactions', function() {
           .should('not.exist');
       }
     }
+  });
+
+  specify('keeps the viewed date when a filter anchor moves during replacement', function() {
+    const patient = getPatient();
+    const rows = map(range(120), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 0, Math.floor(index / 2) + 1, 12)).toISOString(), metadata: { note: `Filter row ${ index }` },
+    } }));
+    const refresh = createResponseGate(pendingResponses);
+    const timestamp = '2025-01-01T12:00:00Z';
+    let anchor;
+    let dateLabel;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (refresh.started || !query.has('filter[channel]') || !query.has('page[at]')) return;
+        anchor = find(rows, row => row.id === query.get('page[at]'));
+        return refresh.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[80].id }`, { now: '2026-03-20T12:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Filter row 80')
+      .should('be.focused');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-label')
+      .then($label => {
+        dateLabel = $label.text();
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(refresh.started).to.equal(true);
+        expect(anchor).to.exist;
+      });
+
+    cy.then(() => {
+      anchor.attributes.occurred_at = timestamp;
+      return cy.sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: anchor.id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+      });
+    });
+
+    cy.then(() => refresh.release());
+    cy.then(() => Cypress.Promise.all([refresh.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-label')
+      .should($label => {
+        expect($label.text(), 'viewed date retained after filter reconciliation').to.equal(dateLabel);
+      });
   });
 
   specify('reconciles older and newer paging boundaries after loaded rows move', function() {
