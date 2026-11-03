@@ -16,6 +16,12 @@ import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
 
+function patientName(patient) {
+  if (!patient?.get) return null;
+
+  return [patient.get('first_name'), patient.get('last_name')].filter(Boolean).join(' ');
+}
+
 export default App.extend({
   childApps: {
     activity: ActivityApp,
@@ -135,9 +141,12 @@ export default App.extend({
     this.publishCurrentAction();
   },
   publishCurrentAction() {
+    const patient = this.patient;
+
     Radio.trigger('dialer', 'change:currentAction', {
       id: this.action.id,
-      patientId: this.patient && this.patient.id,
+      patientId: patient && patient.id,
+      patientName: patientName(patient),
     });
   },
   updateContext() {

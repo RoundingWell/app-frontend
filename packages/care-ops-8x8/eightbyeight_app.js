@@ -73,6 +73,22 @@ function toDialableNumber(number) {
   return toE164(number) || number;
 }
 
+function normalizeAction(action) {
+  if (!action?.id || !action.patientId) return null;
+
+  return {
+    actionId: action.id,
+    patientId: action.patientId,
+    patientName: action.patientName || '',
+  };
+}
+
+function callKey(event) {
+  if (!event) return null;
+
+  return `${ event.direction }:${ event.searchContext }`;
+}
+
 export default App.extend({
   dialerEvents: {
     'mashell-voice-phone-offered-uc-event-v1': 'onOffered',
@@ -100,6 +116,8 @@ export default App.extend({
       model: this.getState(),
       collection: this.patients,
     }));
+    this.listenTo(this.getView(), 'link:call', this.onLinkCall);
+    this.listenTo(Radio.channel('dialer'), 'change:currentAction', this.onCurrentAction);
 
     window.addEventListener('message', this.onMessage, {
       signal: this._abortController.signal,
@@ -108,16 +126,22 @@ export default App.extend({
     this._call();
   },
   onStop() {
+    this.stopListening();
     this._abortController?.abort();
     this._pendingAction = null;
     this._callSession = null;
-    this._contextAction = null;
-    this._contextNumbers = null;
+    this._explicitLink = null;
+    this._openAction = null;
+    this._watchKey = null;
+    this.dropActionTrail();
     this.getState().set({
       isDialerReady: false,
       callState: null,
+      callLive: false,
       actionId: null,
       pendingCall: null,
+      openAction: null,
+      linkedAction: null,
     });
   },
   onBeforeDestroy() {
@@ -147,10 +171,8 @@ export default App.extend({
     this[handler](data.data || {});
   },
   onOffered(data) {
-    const previous = this._callSession;
     this._callSession = rememberCallEvent(this._callSession, data);
-    if (previous?.terminated) this.clearOpenAction();
-    if (!this._contextAction && this._callSession?.offered === data) this.captureOpenAction();
+    this.noteCallStarted(data);
 
     if (data.direction !== 'inbound') return;
 
@@ -165,7 +187,7 @@ export default App.extend({
   },
   onAccepted(data) {
     this._callSession = rememberCallEvent(this._callSession, data);
-    if (!this._contextAction && this._callSession?.accepted === data) this.captureOpenAction();
+    this.noteCallStarted(data);
 
     const state = this.getState();
     state.set('callState', 'active');
@@ -189,57 +211,143 @@ export default App.extend({
     this.finishCall(state);
   },
   async linkedAction(taken) {
-    const attachment = attachmentForCall(this._pendingAction, taken.saving);
-    if (attachment.clear) this._pendingAction = null;
+    const clicked = this.clickedAttachment(taken);
+    if (clicked || taken.session) return clicked || { actionId: null, patientId: null };
 
-    const fromContext = await this.contextFor(taken, attachment);
-
-    return {
-      actionId: attachment.actionId || fromContext?.actionId || null,
-      patientId: this.patientFor(attachment, fromContext),
-    };
+    return this.liveAttachment(taken.saving);
   },
-  patientFor(attachment, fromContext) {
-    if (attachment.actionId) return patientIdForAction(attachment.actionId);
-    if (!fromContext) return null;
-
-    return fromContext.patientId;
-  },
-  finishCall(state) {
-    this.clearOpenAction();
-    state.set({ callState: null, actionId: null });
-    Radio.request('dialer', 'showPatientLinks', null);
-  },
-  captureOpenAction() {
-    const current = Radio.request('dialer', 'currentAction');
-    if (!current?.id || !current.patientId) {
-      this._contextAction = { actionId: null };
-      return;
+  async liveAttachment(session) {
+    if (this._explicitLink) {
+      return {
+        actionId: this._explicitLink.actionId,
+        patientId: this._explicitLink.patientId,
+      };
     }
 
-    this._contextAction = {
-      actionId: current.id,
-      patientId: current.patientId,
+    this.rememberOpenAction(this._openAction);
+    await this.settleTrail();
+
+    const match = this.latestPhoneMatch(session);
+
+    return {
+      actionId: match?.actionId || null,
+      patientId: match?.patientId || null,
     };
-    this._contextNumbers = patientPhoneNumbers(current.patientId).then(numbers => {
-      if (this._contextAction?.actionId === current.id) this._contextAction.numbers = numbers;
-      return numbers;
+  },
+  clickedAttachment(taken) {
+    const attachment = attachmentForCall(this._pendingAction, taken.saving);
+    if (attachment.clear) this._pendingAction = null;
+    if (!attachment.actionId) return null;
+
+    return {
+      actionId: attachment.actionId,
+      patientId: patientIdForAction(attachment.actionId),
+    };
+  },
+  finishCall(state) {
+    this._explicitLink = null;
+    this._watchKey = null;
+    this.dropActionTrail();
+    state.set({
+      callState: null,
+      callLive: false,
+      actionId: null,
+      linkedAction: null,
     });
+    Radio.request('dialer', 'showPatientLinks', null);
   },
-  async contextFor(taken, attachment) {
-    if (attachment.actionId || this._pendingAction || taken.session) return null;
+  noteCallStarted(data) {
+    const session = this._callSession;
+    const ownsEvent = session?.offered === data || session?.accepted === data;
+    if (!ownsEvent) return;
 
-    const context = this._contextAction;
-    if (!context?.actionId) return null;
+    const key = callKey(data);
+    if (this._watchKey === key) return;
 
-    const numbers = context.numbers || await this._contextNumbers;
-    if (!contextMatchesCall(numbers, taken.saving)) return null;
-
-    return context;
+    this._watchKey = key;
+    this.beginCallWatch();
   },
-  clearOpenAction() {
-    this._contextAction = null;
-    this._contextNumbers = null;
+  beginCallWatch() {
+    this.dropActionTrail();
+    this._openAction = this._openAction || normalizeAction(Radio.request('dialer', 'currentAction'));
+    this.getState().set({
+      callLive: true,
+      openAction: this._openAction,
+    });
+    this.rememberOpenAction(this._openAction);
+  },
+  onCurrentAction(action) {
+    const open = normalizeAction(action);
+    const linked = this._explicitLink;
+
+    if (!open || (linked && linked.actionId !== open.actionId)) {
+      this._explicitLink = null;
+    }
+
+    this._openAction = open;
+    this.getState().set({
+      openAction: open,
+      linkedAction: this._explicitLink,
+    });
+
+    if (this.getState().get('callLive')) this.rememberOpenAction(open);
+  },
+  onLinkCall() {
+    const open = this._openAction;
+    if (!open || !this.getState().get('callLive')) return;
+
+    this._explicitLink = open;
+    this.getState().set('linkedAction', open);
+  },
+  rememberOpenAction(action) {
+    const entry = this.trailEntry(action);
+    if (!entry) return;
+
+    this.trackPhones(entry);
+  },
+  trailEntry(action) {
+    if (!action?.actionId || !action.patientId) return null;
+
+    const trail = this._actionTrail || (this._actionTrail = []);
+    const last = trail[trail.length - 1];
+    if (last?.actionId === action.actionId && last.numbers) return null;
+
+    const entry = { actionId: action.actionId, patientId: action.patientId, numbers: null };
+    trail.push(entry);
+
+    return entry;
+  },
+  trackPhones(entry) {
+    const watch = this._trailWatch;
+    const pending = patientPhoneNumbers(entry.patientId)
+      .then(numbers => this.keepNumbers(entry, watch, numbers))
+      .catch(() => this.keepNumbers(entry, watch, []));
+
+    this._trailPromises = this._trailPromises || [];
+    this._trailPromises.push(pending);
+  },
+  keepNumbers(entry, watch, numbers) {
+    if (watch !== this._trailWatch) return;
+
+    entry.numbers = numbers;
+  },
+  async settleTrail() {
+    const pending = (this._trailPromises || []).splice(0);
+    await Promise.all(pending);
+  },
+  latestPhoneMatch(session) {
+    const trail = this._actionTrail || [];
+
+    for (let index = trail.length - 1; index >= 0; index--) {
+      if (contextMatchesCall(trail[index].numbers, session)) return trail[index];
+    }
+
+    return null;
+  },
+  dropActionTrail() {
+    this._trailWatch = (this._trailWatch || 0) + 1;
+    this._actionTrail = [];
+    this._trailPromises = [];
   },
   call(number, action) {
     const state = this.getState();

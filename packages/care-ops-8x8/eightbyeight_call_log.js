@@ -80,7 +80,7 @@ export function toE164(number) {
   if (!number) return null;
 
   const phone = parsePhoneNumber(String(number), 'US');
-  if (phone?.number) return phone.number;
+  if (phone?.isValid()) return phone.number;
 
   return String(number);
 }

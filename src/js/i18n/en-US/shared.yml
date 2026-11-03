@@ -36,4 +36,6 @@ careOptsFrontend:
     eightByEightApp:
       numberCopiedNotice: Number copied — paste it into the 8x8 panel and press Call.
       numberCopyFailedNotice: 'Couldn''t copy the number. Type {number} into the 8x8 panel and press Call.'
+      linkCall: Link this call
+      linkedCall: Linked to {name}
 locales: en-US

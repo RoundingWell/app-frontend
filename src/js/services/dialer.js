@@ -90,31 +90,40 @@ export default App.extend({
     provider.call(number, action);
   },
   showPatientLinks(callData) {
+    const generation = this._patientLinkGeneration = (this._patientLinkGeneration || 0) + 1;
+
     if (!callData) {
       patients.reset();
       return;
     }
 
-    const { actionId, number } = callData;
+    if (this._linkActionPatient(callData.actionId)) return;
 
-    const action = Radio.request('entities', 'actions:model', actionId);
-    const patient = action.getPatient();
+    this._searchCaller(callData.number, generation);
+  },
+  _linkActionPatient(actionId) {
+    const action = actionId && Radio.request('entities', 'actions:model', actionId);
+    const patient = action && action.getPatient();
+    if (!patient) return false;
 
-    if (patient) {
-      this._addPatient(patient);
-      return;
-    }
+    this._addPatient(patient);
 
+    return true;
+  },
+  _searchCaller(number, generation) {
     if (!number) return;
 
     const phone = parsePhoneNumber(number, 'US');
+    if (!(phone && phone.isValid())) return;
 
-    if (phone && phone.isValid()) {
-      const searchCollection = Radio.request('entities', 'searchPatients:collection');
+    const searchCollection = Radio.request('entities', 'searchPatients:collection');
 
-      searchCollection.fetch({ data: { 'filter[search]': number } })
-        .then(() => searchCollection.each(this._addPatient, this));
-    }
+    searchCollection.fetch({ data: { 'filter[search]': number } })
+      .then(() => {
+        if (generation !== this._patientLinkGeneration) return;
+
+        searchCollection.each(this._addPatient, this);
+      });
   },
   five9Call(values) {
     const { callData } = values;

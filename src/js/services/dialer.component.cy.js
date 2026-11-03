@@ -215,6 +215,7 @@ context('Dialer Service', function() {
 
   specify('keeps the 8x8 panel closed on an inbound call and links the patient', function() {
     const matches = [];
+    const searches = [];
     const request = Radio.request;
 
     startEightByEightDialer();
@@ -222,7 +223,8 @@ context('Dialer Service', function() {
     cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
       if (channelName === 'entities' && requestName === 'searchPatients:collection') {
         return {
-          fetch() {
+          fetch(options) {
+            searches.push(options?.data?.['filter[search]']);
             return Promise.resolve();
           },
           each(iterator, context) {
@@ -267,6 +269,326 @@ context('Dialer Service', function() {
       .find('[data-patient-buttons-region] button')
       .should('have.length', 1)
       .and('contain', 'Ada Lovelace');
+
+    cy.then(() => {
+      expect(searches).to.deep.equal(['+12025550123', '+12025550123']);
+    });
+  });
+
+  specify('attaches an 8x8 call to an action opened while the call is live', function() {
+    const startTime = '1793723417987';
+    const request = Radio.request;
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'patientFields:model') {
+        const patientId = args[0]._patient.id;
+        const phones = patientId === 'patient-late' ?
+          [{ number: '(202) 555-0123' }] :
+          [{ number: '+12025550999' }];
+
+        return {
+          value: null,
+          get(key) {
+            return this[key];
+          },
+          fetch() {
+            this.value = phones;
+            return Promise.resolve();
+          },
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'late-offered',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+12025550123',
+      startTime,
+      schemaVersion: '1.0.0',
+    });
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', {
+        id: 'action-late',
+        patientId: 'patient-late',
+        patientName: 'Ada Lovelace',
+      });
+    });
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', {
+        id: 'action-other',
+        patientId: 'patient-other',
+        patientName: 'Grace Hopper',
+      });
+    });
+
+    postTerminatedCall({
+      eventId: 'late-end',
+      searchContext: '+12025550123',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal('action-late');
+        expect(values.patient_id).to.equal('patient-late');
+      });
+  });
+
+  specify('links the live 8x8 call to the open action', function() {
+    const startTime = '1793723417987';
+
+    stubPatientPhones([]);
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'link-offered',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+12025550123',
+      startTime,
+      schemaVersion: '1.0.0',
+    });
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', {
+        id: 'action-link',
+        patientId: 'patient-link',
+        patientName: 'Ada Lovelace',
+      });
+    });
+
+    cy
+      .get('.js-link-call')
+      .should('contain', 'Link this call')
+      .then($button => {
+        $button[0].click();
+      });
+
+    cy
+      .get('.js-link-call')
+      .should('contain', 'Linked to Ada Lovelace');
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .should('not.have.class', 'is-open');
+
+    postTerminatedCall({
+      eventId: 'link-end',
+      searchContext: '+12025550123',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal('action-link');
+        expect(values.patient_id).to.equal('patient-link');
+      });
+
+    cy
+      .get('.js-link-call')
+      .should('not.exist');
+  });
+
+  specify('clears an 8x8 call link when the action changes', function() {
+    const startTime = '1793723417987';
+
+    stubPatientPhones([]);
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'relink-offered',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+12025550123',
+      startTime,
+      schemaVersion: '1.0.0',
+    });
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', {
+        id: 'action-first',
+        patientId: 'patient-first',
+        patientName: 'Ada Lovelace',
+      });
+    });
+
+    cy
+      .get('.js-link-call')
+      .then($button => {
+        $button[0].click();
+      });
+
+    cy
+      .get('.js-link-call')
+      .should('contain', 'Linked to Ada Lovelace');
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', {
+        id: 'action-second',
+        patientId: 'patient-second',
+        patientName: 'Grace Hopper',
+      });
+    });
+
+    cy
+      .get('.js-link-call')
+      .should('contain', 'Link this call')
+      .and('not.contain', 'Ada Lovelace')
+      .then($button => {
+        $button[0].click();
+      });
+
+    cy
+      .get('.js-link-call')
+      .should('contain', 'Linked to Grace Hopper');
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', null);
+    });
+
+    cy
+      .get('.js-link-call')
+      .should('not.exist');
+
+    postTerminatedCall({
+      eventId: 'relink-end',
+      searchContext: '+12025550123',
+      startTime,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.action_id).to.equal(null);
+        expect(values.patient_id).to.equal(null);
+      });
+  });
+
+  specify('ignores an inbound patient search that finishes after the call ends', function() {
+    const startTime = '1793723417987';
+    const searches = [];
+    let releaseSearch;
+    const searchGate = new Cypress.Promise(resolve => {
+      releaseSearch = resolve;
+    });
+    const request = Radio.request;
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'searchPatients:collection') {
+        return {
+          fetch(options) {
+            searches.push(options?.data?.['filter[search]']);
+            return searchGate;
+          },
+          each(iterator, context) {
+            iterator.call(context, {
+              id: 'patient-stale',
+              get(attr) {
+                return { first_name: 'Ada', last_name: 'Lovelace' }[attr];
+              },
+            });
+          },
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    postInboundOffer();
+
+    cy
+      .get('.eightbyeight-panel__header')
+      .should('contain', 'Incoming Call');
+
+    postEightByEightEvent('mashell-voice-phone-terminated-uc-event-v1', {
+      eventName: 'terminated',
+      eventId: 'stale-end',
+      method: 'mapEvent',
+      direction: 'inbound',
+      media: 'phone',
+      searchContext: '+12025550123',
+      startTime,
+      endTime: String(Number(startTime) + 10000),
+      callDuration: '00:00:10',
+      hasRecording: false,
+      schemaVersion: '1.0.0',
+    });
+
+    cy.wait('@patchArtifact');
+
+    cy.then(() => {
+      releaseSearch();
+      expect(searches).to.deep.equal(['+12025550123']);
+    });
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .find('[data-patient-buttons-region] button')
+      .should('have.length', 0);
   });
 
   specify('copies a clicked 8x8 number and still sends startCall', function() {
@@ -757,7 +1079,7 @@ context('Dialer Service', function() {
   specify('attaches a manual 8x8 call when the number is on the open action', function() {
     const startTime = '1793723417987';
 
-    stubPatientPhones([{ number: '(555) 555-0100' }]);
+    stubPatientPhones([{ number: '(202) 555-0123' }]);
     Radio.trigger('dialer', 'change:currentAction', { id: 'action-1', patientId: 'patient-1' });
     Radio.reply('settings', 'get', () => '8x8');
 
@@ -774,7 +1096,7 @@ context('Dialer Service', function() {
 
     postManualCall({
       eventId: 'manual-match',
-      searchContext: '+15555550100',
+      searchContext: '+12025550123',
       startTime,
     });
 
