@@ -575,6 +575,78 @@ context('patient interactions', function() {
     }
   });
 
+  specify('retains newer later-page values and hydrates previously unloaded links', function() {
+    const patient = getPatient();
+    const rows = map(range(50), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(), metadata: { note: `Later page row ${ index }` },
+    } }));
+    const initial = createResponseGate(pendingResponses);
+    const action = getAction({ attributes: { name: 'Previously unloaded work' }, relationships: { patient: getRelationship(patient) } });
+    rows[47].attributes.metadata = { note: 'Updated since creation' };
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = action;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (initial.started || query.get('page[limit]') !== '25' || query.has('page[before]')) return;
+        return initial.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-09-01T12:00:00Z' });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(initial.started).to.equal(true);
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy.sendWs({
+      category: 'MetadataUpdated', resource: { type: 'interactions', id: rows[0].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes: { metadata: { note: 'Earlier event note' }, action_id: action.id } },
+    });
+    cy.sendWs({
+      category: 'ResourceCreated', resource: { type: 'interactions', id: rows[47].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes: { channel: 'voice', direction: 'inbound', metadata: { note: 'Creation-time note' } } },
+    });
+    cy.wait('@routeAction');
+    cy.then(() => {
+      // The older page starts after these events and returns the current server state.
+      rows[0].attributes.metadata = { note: 'Newer server note' };
+      rows[0].relationships.action = getRelationship(action);
+      initial.release();
+    });
+    cy.then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Newer server note')
+      .should('be.visible')
+      .find('.js-action')
+      .should('contain', 'Previously unloaded work');
+
+    cy
+      .contains('.patient-interactions__item', 'Updated since creation')
+      .should('exist');
+  });
+
   specify('runs the queued reconciliation after a superseded snapshot fails', function() {
     const patient = getPatient();
     const rows = map(range(3), index => getInteraction({ attributes: {

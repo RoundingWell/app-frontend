@@ -100,7 +100,9 @@ const Entity = BaseEntity.extend({
     const collection = this.getCollection();
     if (read) {
       const parse = collection.parse.bind(collection);
-      collection.parse = (response, parseOptions) => read.apply(parse(response, parseOptions));
+      // Events preceding this request must not replace newer values in its response.
+      const sequence = read.sequence;
+      collection.parse = (response, parseOptions) => read.apply(parse(response, parseOptions), sequence);
     }
     return collection.fetch({
       ...options,
