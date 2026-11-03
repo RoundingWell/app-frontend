@@ -35,9 +35,9 @@ function createResponseGate(pendingResponses) {
     get drain() {
       return Promise.all(drains);
     },
-    reply(request, body) {
+    reply(request, body, statusCode = 200) {
       this.started = true;
-      const drain = response.then(() => request.reply({ body }));
+      const drain = response.then(() => request.reply({ body, statusCode }));
       drains.push(drain);
       return drain;
     },
@@ -55,12 +55,15 @@ function trackInteractionRequests(win, completions, restores) {
     if (!String(args[0]).includes('/interactions')) return originalFetch.apply(win, args);
     let complete;
     // Native promises survive cancellation of a Cypress wait and remain drainable.
-    completions.push(new Promise(resolve => {
+    const completion = new Promise(resolve => {
       complete = resolve;
-    }));
+    });
+    completion.requestUrl = String(args[0]);
+    completions.push(completion);
     // Use the runner's task queue (unaffected by AUT clocks or later visits).
     // After JSON decoding, application Promise continuations drain before this task.
     const signal = args[1]?.signal;
+    completion.requestSignal = signal;
     const settled = () => {
       signal?.removeEventListener('abort', settled);
       setTimeout(complete, 0);
@@ -348,6 +351,280 @@ context('patient interactions', function() {
       .should($senders => {
         expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 0', 'Sender 1', 'Sender 2']);
       });
+  });
+
+  specify('makes progress through update bursts and retains newer navigation and filtering', function() {
+    for (const destination of ['refresh', 'interaction', 'filtered-date']) {
+      const patient = getPatient();
+      const rows = map(range(50), index => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(),
+        metadata: { note: `Burst row ${ index }`, clinician_name: `Burst clinician ${ index }` },
+      } }));
+      const target = rows[37];
+      const linked = rows[49];
+      const deleted = rows[36];
+      const deletedNext = rows[48];
+      const initial = createResponseGate(pendingResponses);
+      const followup = createResponseGate(pendingResponses);
+      const action = getAction({ attributes: { name: 'Live burst action' }, relationships: { patient: getRelationship(patient) } });
+      const send = (category, row, attributes = {}) => cy.sendWs({
+        category, resource: { type: 'interactions', id: row.id }, payload: { patient: { type: 'patients', id: patient.id }, attributes },
+      });
+      const firstTimestamp = '2026-12-01T12:00:00Z';
+      const latestTimestamp = '2026-12-02T12:00:00Z';
+      let followupRead;
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routeSettings('sidebar', ['interactions'])
+        .routePanels(fx => {
+          fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+          return fx;
+        })
+        .routeWidgets(fx => {
+          fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+          return fx;
+        })
+        .routeAction(fx => {
+          fx.data = action;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (query.get('page[limit]') !== '25' || query.get('page[at]') !== target.id || query.has('filter[channel]')) return;
+          const body = { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) };
+          if (!initial.started) return initial.reply(req, body);
+          if (!followup.started) return followup.reply(req, body);
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z' });
+
+      cy
+        .get('.patient-interactions[aria-busy="true"]')
+        .should(() => {
+          expect(initial.started).to.equal(true);
+        });
+
+      cy
+        .get('@wsHandleMessage')
+        .should('have.been.called');
+
+      cy.then(() => {
+        target.attributes.occurred_at = firstTimestamp;
+        linked.attributes.metadata = { note: 'Live burst note', clinician_name: 'Burst clinician 49' };
+        linked.relationships.action = getRelationship(action);
+      });
+      send('InteractionCompleted', target, { occurred_at: firstTimestamp });
+      send('MetadataUpdated', linked, { metadata: { note: 'Live burst note', clinician_name: 'Burst clinician 49' }, action_id: action.id });
+      cy.wait('@routeAction');
+      cy.then(() => initial.release());
+      cy.then(() => {
+        const firstRead = find(requestCompletions, completion => {
+          const query = new URL(completion.requestUrl, 'http://localhost').searchParams;
+          return query.get('page[at]') === target.id && query.get('page[limit]') === '25';
+        });
+        expect(firstRead, 'initial native read is tracked').to.exist;
+        return Cypress.Promise.all([initial.drain, firstRead]);
+      });
+
+      cy
+        .get('.patient-interactions[aria-busy="true"]')
+        .should(() => {
+          expect(followup.started, 'a follow-up is pending after the first snapshot commits').to.equal(true);
+        });
+
+      cy
+        .get('.patient-interactions')
+        .then($feed => {
+          const $selected = $feed.find('.patient-interactions__item.is-selected');
+          const $linked = $feed.find('.patient-interactions__item').filter((index, item) => item.textContent.includes('Live burst note'));
+          const snapshot = {
+            selected: $selected.text().includes('Burst row 37'),
+            focused: $selected[0] === $feed[0].ownerDocument.activeElement,
+            timestamp: $selected.find('time').attr('datetime'),
+            action: $linked.find('.js-action').text(),
+          };
+          const assertProgress = () => {
+            expect(snapshot.selected, 'first window commits while its follow-up is held').to.equal(true);
+            expect(snapshot.focused, 'selection survives the first commit').to.equal(true);
+            expect(snapshot.timestamp, 'pending response retains the live timestamp').to.equal(firstTimestamp);
+            expect(snapshot.action, 'pending response retains the new work link').to.contain('Live burst action');
+          };
+          if (snapshot.selected && snapshot.focused && snapshot.timestamp === firstTimestamp && snapshot.action.includes('Live burst action')) return assertProgress();
+          // Drain held responses before reporting a controlled regression failure.
+          followup.release();
+          return Cypress.Promise.all([followup.drain, drainInteractionRequests(requestCompletions)]).then(assertProgress);
+        });
+
+      cy.then(() => {
+        target.attributes.occurred_at = latestTimestamp;
+        linked.attributes.metadata = { note: 'Latest burst note', clinician_name: 'Burst clinician 49' };
+        linked.relationships.action = getRelationship();
+        rows.splice(rows.indexOf(deleted), 1);
+        rows.splice(rows.indexOf(deletedNext), 1);
+      });
+      send('InteractionCompleted', target, { occurred_at: latestTimestamp });
+      send('MetadataUpdated', linked, { metadata: { note: 'Latest burst note', clinician_name: 'Burst clinician 49' }, action_id: null });
+      send('ResourceDeleted', deleted);
+      send('ResourceDeleted', deletedNext);
+
+      cy
+        .contains('.patient-interactions__item', 'Latest burst note')
+        .find('.js-action')
+        .should('not.exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Burst row 36')
+        .should('not.exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Burst row 48')
+        .should('not.exist');
+
+      cy.then(() => {
+        const reads = filter(requestCompletions, completion => {
+          const query = new URL(completion.requestUrl, 'http://localhost').searchParams;
+          return query.get('page[at]') === target.id && query.get('page[limit]') === '25';
+        });
+        followupRead = reads[1];
+        expect(followupRead, 'follow-up native read is tracked').to.exist;
+        expect(followupRead.requestSignal.aborted, 'update burst leaves the pending read running').to.equal(false);
+      });
+
+      if (destination === 'interaction') {
+        cy
+          .contains('.patient-interactions-preview__link', 'Burst clinician 49')
+          .click({ scrollBehavior: false });
+
+        cy
+          .get('.patient-interactions__item.is-selected')
+          .should('contain', 'Latest burst note')
+          .and('be.focused');
+
+        cy.then(() => {
+          expect(followupRead.requestSignal.aborted, 'new interaction navigation cancels the older read').to.equal(true);
+        });
+      }
+      if (destination === 'filtered-date') {
+        cy
+          .get('.patient-interactions__filters [data-filter="messages"]')
+          .should('have.attr', 'aria-pressed', 'true')
+          .click({ scrollBehavior: false })
+          .should('have.attr', 'aria-pressed', 'false');
+
+        cy
+          .get('.patient-interactions[aria-busy="false"]')
+          .should('be.visible');
+
+        cy.then(() => {
+          expect(followupRead.requestSignal.aborted, 'new filtering cancels the older read').to.equal(true);
+        });
+
+        cy
+          .get('.patient-interactions__toolbar-date .js-date-button')
+          .click({ scrollBehavior: false });
+
+        cy
+          .contains('.js-picklist-item', 'The very beginning')
+          .click();
+
+        cy
+          .contains('.patient-interactions__item', 'Burst row 0')
+          .should('be.visible');
+      }
+
+      cy.then(() => followup.release());
+      cy.then(() => Cypress.Promise.all([initial.drain, followup.drain, drainInteractionRequests(requestCompletions)]));
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      if (destination === 'filtered-date') {
+        cy
+          .contains('.patient-interactions__item', 'Burst row 0')
+          .should('be.visible');
+
+        cy
+          .get('.patient-interactions__filters [data-filter="messages"]')
+          .should('have.attr', 'aria-pressed', 'false');
+      } else {
+        cy
+          .get('.patient-interactions__item.is-selected')
+          .should('contain', destination === 'interaction' ? 'Latest burst note' : 'Burst row 37')
+          .and('be.focused')
+          .find('time')
+          .should('have.attr', 'datetime', destination === 'interaction' ? linked.attributes.occurred_at : latestTimestamp);
+      }
+
+      cy
+        .contains('.patient-interactions__item', 'Latest burst note')
+        .find('.js-action')
+        .should('not.exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Burst row 48')
+        .should('not.exist');
+    }
+  });
+
+  specify('runs the queued reconciliation after a superseded snapshot fails', function() {
+    const patient = getPatient();
+    const rows = map(range(3), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: `2026-10-0${ index + 1 }T12:00:00Z`, metadata: { note: `Retry row ${ index }` },
+    } }));
+    const initial = createResponseGate(pendingResponses);
+    const timestamp = '2026-10-05T12:00:00Z';
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (initial.started || query.get('page[at]') !== rows[1].id) return;
+        return initial.reply(req, { errors: [{ title: 'Snapshot unavailable' }] }, 422);
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[1].id }`, { now: '2026-11-01T12:00:00Z' });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(initial.started).to.equal(true);
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy.then(() => {
+      rows[1].attributes.occurred_at = timestamp;
+    });
+    cy.sendWs({
+      category: 'InteractionCompleted', resource: { type: 'interactions', id: rows[1].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+    });
+    cy.then(() => initial.release());
+    cy.then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .contains('.patient-interactions__item.is-selected', 'Retry row 1')
+      .should('be.focused')
+      .find('time')
+      .should('have.attr', 'datetime', timestamp);
   });
 
   specify('reconciles late windows after deletion and timestamp updates', function() {

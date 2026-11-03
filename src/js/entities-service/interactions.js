@@ -46,15 +46,15 @@ const Entity = BaseEntity.extend({
   getChannelGroups() {
     return CHANNEL_GROUPS;
   },
-  async fetchInitialWindow(query, { signal }) {
-    const collection = await this.fetchByPatient(query, { signal });
+  async fetchInitialWindow(query, options) {
+    const collection = await this.fetchByPatient(query, options);
     return {
       models: query.at ? [...collection.models] : [...collection.models].reverse(),
       hasOlder: query.at ? !!collection.length : collection.length === query.limit,
       hasNewer: !!query.at && !!collection.length,
     };
   },
-  async fetchAdjacentWindow(query, window, direction, { signal }) {
+  async fetchAdjacentWindow(query, window, direction, options) {
     const { models } = window;
     const newer = direction === 'newer';
     const availability = newer ? 'hasNewer' : 'hasOlder';
@@ -64,7 +64,7 @@ const Entity = BaseEntity.extend({
       channels: query.channels,
       limit: query.limit,
       [newer ? 'after' : 'before']: cursor.id,
-    }, { signal });
+    }, options);
     const adjacent = collection.filter(model => !contains(models, model));
     return {
       ...window,
@@ -72,7 +72,8 @@ const Entity = BaseEntity.extend({
       [availability]: !!adjacent.length && collection.length === query.limit,
     };
   },
-  async fetchWindowToDate(query, window, date, { signal }) {
+  async fetchWindowToDate(query, window, date, options) {
+    const { signal } = options;
     const direction = getDateDirection(window, date);
     const newer = direction === 'newer';
     const availability = newer ? 'hasNewer' : 'hasOlder';
@@ -82,7 +83,7 @@ const Entity = BaseEntity.extend({
       const edgeDate = dayjs(edge.getTimestamp()).format('YYYY-MM-DD');
       // Older pages must cross the day to include its first entries.
       if (newer ? edgeDate >= date : edgeDate < date) break;
-      window = await this.fetchAdjacentWindow(query, window, direction, { signal });
+      window = await this.fetchAdjacentWindow(query, window, direction, options);
     }
     return window;
   },
@@ -91,12 +92,17 @@ const Entity = BaseEntity.extend({
     const collection = await this.fetchByPatient({ patientId, actionId, flowId, channels, limit: 100 }, { signal });
     return collection.models;
   },
-  fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit }, options) {
+  fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit }, { read, ...options } = {}) {
     const data = { include: 'action.flow,flow' };
     addParams(data, 'filter', getFilter(actionId, flowId, channels));
     addParams(data, 'page', getPage(at, before, after, limit));
 
-    return this.fetchCollection({
+    const collection = this.getCollection();
+    if (read) {
+      const parse = collection.parse.bind(collection);
+      collection.parse = (response, parseOptions) => read.apply(parse(response, parseOptions));
+    }
+    return collection.fetch({
       ...options,
       // Page and preview requests share an endpoint but have independent results.
       url: getUrl(`/api/patients/${ patientId }/interactions`, data),

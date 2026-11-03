@@ -8,6 +8,7 @@ import { addError } from 'js/datadog';
 import App from 'js/base/app';
 
 import { compareInteractions } from 'js/entities-service/entities/interactions';
+import InteractionWindowRead from 'js/entities-service/interaction-window-read';
 
 import { InteractionsPageView } from './interactions_views';
 
@@ -44,32 +45,41 @@ export default App.extend({
     const input = this.getRequest(kind, date, at);
     if (at) input.filterAnchor = true;
     if (kind === 'replace' && !this.collection && !input.at && !date) input.date = dayjs().format('YYYY-MM-DD');
-    const result = await this.loadWindow(input, { signal });
-    return { result, input };
+    const read = this.pendingRead = new InteractionWindowRead(input.date);
+    const result = await this.loadWindow(input, { signal, read });
+    return { result, input, read };
   },
-  async loadWindow(input, { signal }) {
+  async loadWindow(input, options) {
     const { kind, date } = input;
     if (kind === 'focus') return this.getWindow();
     if (input.channels && !input.channels.length) {
       return { models: [], hasOlder: false, hasNewer: false };
     }
     if (kind === 'replace') {
-      return this.loadInitialWindow(input, { signal });
+      return this.loadInitialWindow(input, options);
     }
     if (kind === 'older' || kind === 'newer') {
-      return Radio.request('entities', 'fetch:interactions:window:adjacent', input, this.getWindow(), kind, { signal });
+      return Radio.request('entities', 'fetch:interactions:window:adjacent', input, this.getWindow(), kind, options);
     }
-    return Radio.request('entities', 'fetch:interactions:window:toDate', input, this.getWindow(), date, { signal });
+    return Radio.request('entities', 'fetch:interactions:window:toDate', input, this.getWindow(), date, options);
   },
   async loadInitialWindow(input, options) {
     const window = await Radio.request('entities', 'fetch:interactions:window:initial', input, options);
     if (!input.date || input.filterAnchor) return window;
     return Radio.request('entities', 'fetch:interactions:window:toDate', input, window, input.date, options);
   },
-  onStart(app, options, { result, input }) {
-    this.showInteractions(result, input);
+  onStart(app, options, { result, input, read }) {
+    this.pendingRead = null;
+    this.showInteractions({ ...result, models: read.filterModels(result.models) }, input);
+    if (read.refresh) this.requestInteractions('replace', read.refresh.date, read.refresh.at);
   },
   handleStartFailure(options, error) {
+    const refresh = this.pendingRead?.refresh;
+    this.pendingRead = null;
+    if (refresh) {
+      this.requestInteractions('replace', refresh.date, refresh.at);
+      return false;
+    }
     const { kind = 'replace', date, at } = options;
     if (kind === 'replace') {
       if (this.collection) this.stopListening(this.collection);
@@ -89,10 +99,13 @@ export default App.extend({
     if (this.collection) this.stopListening(this.collection);
     this.collection = null;
     this.filterPosition = null;
+    this.pendingRead = null;
     this.getState().set({ request: null, retry: null, hasOlder: false, hasNewer: false });
   },
-  onInteractionMessage({ category, resource, payload }) {
+  onInteractionMessage(data) {
+    const { category, resource, payload } = data;
     if (payload.patient?.id !== this.patient.id) return;
+    this.pendingRead?.record(data);
     if (category === 'ResourceDeleted') {
       this.reconcileDeletion(resource.id);
       return;
@@ -119,10 +132,18 @@ export default App.extend({
     // A changed or deleted cursor no longer bounds the server window. Reconcile through
     // the existing date loader instead of paging from a newly sorted endpoint.
     if (pending.kind === 'replace' || pending.kind === 'focus') {
-      this.requestInteractions('replace', pending.date, pending.at);
+      this.queueReconciliation(pending.date, pending.at);
       return;
     }
-    this.requestInteractions('replace', pending.date || this.getView().getCurrentDate(), null);
+    this.queueReconciliation(pending.date || this.getView().getCurrentDate(), null);
+  },
+  queueReconciliation(date, at) {
+    const read = this.pendingRead;
+    if (read) {
+      read.refresh = { date: date || read.refresh?.date || read.date, at };
+      return;
+    }
+    this.requestInteractions('replace', date, at);
   },
   getRequest(kind, date, at = this.getState().get('interactionId')) {
     const selectedGroups = this.getState().get('selectedGroups');

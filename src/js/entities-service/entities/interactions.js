@@ -14,6 +14,13 @@ export function compareInteractions(left, right) {
   return dayjs(left.getTimestamp()).diff(right.getTimestamp());
 }
 
+export function getInteractionAttributes(attributes) {
+  const relationships = {};
+  if (has(attributes, 'action_id')) relationships._action = attributes.action_id ? { id: attributes.action_id, type: 'patient-actions' } : null;
+  if (has(attributes, 'flow_id')) relationships._flow = attributes.flow_id ? { id: attributes.flow_id, type: 'flows' } : null;
+  return { ...omit(attributes, 'action_id', 'flow_id'), ...relationships };
+}
+
 export const CHANNEL_GROUPS = {
   messages: ['sms', 'email', 'mail', 'fax', 'portal'],
   calls: ['voice', 'voicemail', 'video'],
@@ -25,10 +32,7 @@ const _Model = BaseModel.extend({
   type: TYPE,
   messages: {
     MetadataUpdated({ attributes }) {
-      const relationships = {};
-      if (has(attributes, 'action_id')) relationships._action = attributes.action_id ? { id: attributes.action_id, type: 'patient-actions' } : null;
-      if (has(attributes, 'flow_id')) relationships._flow = attributes.flow_id ? { id: attributes.flow_id, type: 'flows' } : null;
-      this.set({ ...omit(attributes, 'action_id', 'flow_id'), ...relationships });
+      this.set(getInteractionAttributes(attributes));
       const requests = [];
       if (attributes.action_id) requests.push(Radio.request('entities', 'fetch:actions:model', attributes.action_id, { abort: false }));
       if (attributes.flow_id) requests.push(Radio.request('entities', 'fetch:flows:model', attributes.flow_id, { abort: false }));
