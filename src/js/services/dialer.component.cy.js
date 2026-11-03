@@ -201,6 +201,86 @@ context('Dialer Service', function() {
     cy.viewport(1280, 768);
   });
 
+  function postInboundOffer() {
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'offered-in',
+      method: 'mapEvent',
+      direction: 'inbound',
+      media: 'phone',
+      schemaVersion: '1.0.0',
+    });
+  }
+
+  specify('opens the 8x8 panel for an inbound call without reloading it', function() {
+    startEightByEightDialer();
+    cy.viewport(1280, 500);
+
+    cy
+      .get('.eightbyeight-panel__iframe')
+      .then($iframe => {
+        cy.wrap($iframe[0]).as('dialerFrame');
+      });
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .should('not.have.class', 'is-open');
+
+    postInboundOffer();
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .should('have.class', 'is-open');
+
+    cy
+      .get('@dialerFrame')
+      .should($frame => {
+        const frame = $frame[0];
+
+        expect(frame.isConnected).to.equal(true);
+        expect(document.querySelector('.eightbyeight-panel__iframe')).to.equal(frame);
+        expect(frame.src).to.contain('mashell/public/index.html');
+        expect(frame.hasAttribute('sandbox')).to.equal(false);
+        expect(getComputedStyle(frame).pointerEvents).to.equal('auto');
+        expect(getComputedStyle(frame).visibility).to.equal('visible');
+      });
+
+    cy
+      .get('.eightbyeight-panel__header')
+      .then($header => {
+        cy
+          .get('.eightbyeight-panel__iframe')
+          .should($iframe => {
+            const headerBox = $header[0].getBoundingClientRect();
+            const frameBox = $iframe[0].getBoundingClientRect();
+
+            expect(frameBox.top).to.be.at.least(headerBox.bottom - 1);
+          });
+      });
+
+    cy
+      .get('.eightbyeight-panel')
+      .then($panel => {
+        $panel[0].scrollTop = 200;
+      });
+
+    cy
+      .get('.eightbyeight-panel')
+      .should($panel => {
+        expect($panel[0].scrollTop).to.equal(200);
+      });
+
+    postInboundOffer();
+
+    cy
+      .get('.eightbyeight-panel')
+      .should($panel => {
+        expect($panel[0].scrollTop).to.equal(0);
+      });
+
+    cy.viewport(1280, 768);
+  });
+
   specify('copies a clicked 8x8 number and still sends startCall', function() {
     const writeText = cy.stub().resolves();
 
