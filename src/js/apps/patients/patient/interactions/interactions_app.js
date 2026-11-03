@@ -13,6 +13,7 @@ import InteractionWindowRead from 'js/entities-service/interaction-window-read';
 import { InteractionsPageView } from './interactions_views';
 
 const PAGE_SIZE = 25;
+const RECONCILIATION_DELAY = 500;
 
 export default App.extend({
   createState() {
@@ -41,13 +42,23 @@ export default App.extend({
       state: this.getState(),
     }));
   },
-  async prepareStart({ kind = 'replace', date, at }, { signal }) {
+  async prepareStart({ kind = 'replace', date, at, reconcile }, { signal }) {
     const input = this.getRequest(kind, date, at);
     if (at) input.filterAnchor = true;
     if (kind === 'replace' && !this.collection && !input.at && !date) input.date = dayjs().format('YYYY-MM-DD');
     const read = this.pendingRead = new InteractionWindowRead(input.date);
-    const result = await this.loadWindow(input, { signal, read });
-    return { result, input, read };
+    const options = { signal, read };
+    const prepared = reconcile ? await this.repairAndPage(input, reconcile, options) : { result: await this.loadWindow(input, options) };
+    return { ...prepared, input, read };
+  },
+  async repairAndPage(input, reconcile, options) {
+    const replacement = { ...input, ...reconcile, kind: 'replace', filterAnchor: !!reconcile.at };
+    const window = this.getLiveWindow(await this.loadInitialWindow(replacement, options), options.read);
+    options.signal.throwIfAborted();
+    const result = window[input.kind === 'newer' ? 'hasNewer' : 'hasOlder'] ?
+      await Radio.request('entities', 'fetch:interactions:window:adjacent', input, window, input.kind, options) :
+      window;
+    return { result, repaired: { window, input: replacement } };
   },
   async loadWindow(input, options) {
     const { kind, date } = input;
@@ -68,16 +79,23 @@ export default App.extend({
     if (!input.date || input.filterAnchor) return window;
     return Radio.request('entities', 'fetch:interactions:window:toDate', input, window, input.date, options);
   },
-  onStart(app, options, { result, input, read }) {
+  onStart(app, options, { result, input, read, repaired }) {
     this.pendingRead = null;
-    this.showInteractions({ ...result, models: read.filterModels(result.models) }, input);
-    if (read.refresh) this.requestInteractions('replace', read.refresh.date, read.refresh.at);
+    // Restore the repaired viewport before prepending/appending its adjacent page.
+    if (repaired) this.showInteractions(this.getLiveWindow(repaired.window, read), repaired.input);
+    this.showInteractions(this.getLiveWindow(result, read), input);
+    if (read.refresh) this.scheduleReconciliation(read.refresh);
+  },
+  getLiveWindow(window, read) {
+    const models = read.filterModels(window.models);
+    return { ...window, models, hasOlder: !!models.length && window.hasOlder, hasNewer: !!models.length && window.hasNewer };
   },
   handleStartFailure(options, error) {
     const refresh = this.pendingRead?.refresh;
     this.pendingRead = null;
     if (refresh) {
-      this.requestInteractions('replace', refresh.date, refresh.at);
+      this.getState().set('request', null);
+      this.scheduleReconciliation(refresh);
       return false;
     }
     const { kind = 'replace', date, at } = options;
@@ -86,7 +104,7 @@ export default App.extend({
       this.collection = null;
       this.getView().showError();
     }
-    this.getState().set({ request: null, retry: { kind, date, at } });
+    this.getState().set({ request: null, retry: { kind, date, at, reconcile: options.reconcile } });
     addError(error);
     return false;
   },
@@ -95,6 +113,7 @@ export default App.extend({
     this.stop();
   },
   onStop() {
+    this.cancelReconciliation();
     this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     if (this.collection) this.stopListening(this.collection);
     this.collection = null;
@@ -113,17 +132,23 @@ export default App.extend({
     if (has(payload.attributes, 'occurred_at') || has(payload.attributes, 'expected_at')) this.reconcileTimestampUpdate(resource.id);
   },
   reconcileDeletion(id) {
+    this.invalidateAnchor(id, true);
     const request = this.getState().get('request');
-    if (request?.at === id) {
-      this.getState().set('request', { ...request, at: null, date: request.date || this.getView().getCurrentDate() });
-    }
     if (request || !this.collection?.length) this.reconcileWindow();
   },
   reconcileTimestampUpdate(id) {
+    this.invalidateAnchor(id, false);
     const request = this.getState().get('request');
-    // Filter refreshes retain their date when the anchoring row moves away.
-    if (request?.date && request.at === id) this.getState().set('request', { ...request, at: null });
     if (request || this.collection?.get(id)) this.reconcileWindow();
+  },
+  invalidateAnchor(id, deleted) {
+    const pending = this.reconciliation || this.getState().get('request');
+    if (pending?.at !== id) return;
+    // Explicit ID navigation follows a moved row; date navigation retains its day.
+    if (!deleted && !pending.date) return;
+    const next = { ...pending, at: null, date: pending.date || this.getView().getCurrentDate() };
+    if (this.reconciliation) this.reconciliation = next;
+    else this.getState().set('request', next);
   },
   reconcileWindow() {
     const { hasOlder, hasNewer, request } = this.getState().attributes;
@@ -143,7 +168,24 @@ export default App.extend({
       read.refresh = { date: date || read.refresh?.date || read.date, at };
       return;
     }
-    this.requestInteractions('replace', date, at);
+    this.scheduleReconciliation(this.reconciliation || { date, at });
+  },
+  scheduleReconciliation(refresh) {
+    this.reconciliation = refresh;
+    // Events never extend the deadline. Each completed read gets a quiet interval
+    // in which navigation and automatic edge paging can take precedence.
+    if (this.reconciliationTimer) return;
+    this.reconciliationTimer = setTimeout(() => {
+      const latest = this.cancelReconciliation();
+      this.requestInteractions('replace', latest.date, latest.at);
+    }, RECONCILIATION_DELAY);
+  },
+  cancelReconciliation() {
+    clearTimeout(this.reconciliationTimer);
+    this.reconciliationTimer = null;
+    const refresh = this.reconciliation;
+    this.reconciliation = null;
+    return refresh;
   },
   getRequest(kind, date, at = this.getState().get('interactionId')) {
     const selectedGroups = this.getState().get('selectedGroups');
@@ -166,11 +208,14 @@ export default App.extend({
     this.getState().set('selectedGroups', [...selectedGroups, group]);
     return true;
   },
+  hasPendingReplacement() {
+    return this.getState().get('request')?.kind === 'replace' || !!this.reconciliation;
+  },
   navigateToInteraction(interactionId) {
     const changedGroups = this.enableInteractionGroup(interactionId);
     this.getState().set({ interactionId });
     const request = this.getState().get('request');
-    const pendingFilter = request?.kind === 'replace';
+    const pendingFilter = this.hasPendingReplacement();
     const loaded = this.collection && (!interactionId || this.collection.get(interactionId));
     if (!loaded || pendingFilter || changedGroups) return this.requestInteractions('replace');
     if (request) return this.requestInteractions('focus');
@@ -189,17 +234,20 @@ export default App.extend({
     });
     this.requestInteractions('replace', date, at);
   },
-  requestInteractions(kind, date, at) {
-    const options = { kind, date, at };
+  requestInteractions(kind, date, at, retryReconciliation) {
+    const queued = this.cancelReconciliation() || retryReconciliation;
+    // A delayed refresh may have invalidated the current paging cursor.
+    const reconcile = (kind === 'older' || kind === 'newer') && queued;
+    const options = { kind, date, at, ...(reconcile && { reconcile }) };
     return this.restart(options).catch(error => this.handleStartFailure(options, error));
   },
   retryRequest() {
-    const { kind, date, at } = this.getState().get('retry');
-    this.requestInteractions(kind, date, at);
+    const { kind, date, at, reconcile } = this.getState().get('retry');
+    this.requestInteractions(kind, date, at, reconcile);
   },
   jumpToDate(date) {
     // A navigation intent supersedes paging, including a pending filter refresh.
-    const kind = !this.collection || this.getState().get('request')?.kind === 'replace' ? 'replace' : 'date';
+    const kind = !this.collection || this.hasPendingReplacement() ? 'replace' : 'date';
     this.requestInteractions(kind, date);
   },
   getWindow() {

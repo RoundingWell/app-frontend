@@ -404,7 +404,7 @@ context('patient interactions', function() {
           if (!initial.started) return initial.reply(req, body);
           if (!followup.started) return followup.reply(req, body);
         })
-        .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z' });
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
 
       cy
         .get('.patient-interactions[aria-busy="true"]')
@@ -575,6 +575,403 @@ context('patient interactions', function() {
     }
   });
 
+  specify('settles sustained updates, repairs paging, and yields to newer navigation and filters', function() {
+    const patient = getPatient();
+    const rows = map(range(100), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(),
+      metadata: { note: `Settling row ${ index }`, clinician_name: `Settling clinician ${ index }` },
+    } }));
+    const target = rows[50];
+    const initial = createResponseGate(pendingResponses);
+    const followup = createResponseGate(pendingResponses);
+    const repair = createResponseGate(pendingResponses);
+    const edge = createResponseGate(pendingResponses);
+    let anchoredReads = 0;
+    let paging = false;
+    const pagingGate = query => {
+      if (!paging) return;
+      if (!repair.started && !query.has('page[before]') && !query.has('page[after]')) return repair;
+      if (!edge.started && query.get('page[before]') === rows[25].id) return edge;
+    };
+    const update = minute => {
+      const timestamp = `2026-10-21T12:${ String(minute).padStart(2, '0') }:00.000Z`;
+
+      cy
+        .then(() => {
+          target.attributes.occurred_at = timestamp;
+        });
+
+      cy
+        .sendWs({
+          category: 'InteractionCompleted', resource: { type: 'interactions', id: target.id },
+          payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+        });
+      if (minute > 1) {
+        cy
+          .contains('.patient-interactions__item', 'Settling row 50')
+          .find('time')
+          .should('have.attr', 'datetime', timestamp);
+      }
+    };
+    const mainReads = () => filter(requestCompletions, completion => new URL(completion.requestUrl, 'http://localhost').searchParams.get('page[limit]') === '25').length;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (query.get('page[limit]') !== '25') return;
+        const body = { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) };
+        if (query.get('page[at]') === target.id) {
+          anchoredReads++;
+          if (anchoredReads === 1) return initial.reply(req, body);
+          if (anchoredReads === 2) return followup.reply(req, body);
+        }
+        return pagingGate(query)?.reply(req, body);
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date', 'setTimeout', 'clearTimeout'] });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(initial.started).to.equal(true);
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+    update(1);
+
+    cy
+      .then(() => initial.release());
+
+    cy
+      .then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    for (const minute of [2, 3, 4]) {
+      cy
+        .tick(100);
+      update(minute);
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .then(() => expect(anchoredReads, 'events retain the settling interval').to.equal(1));
+    }
+
+    cy
+      .tick(199);
+
+    cy
+      .then(() => expect(anchoredReads, 'refresh remains bounded by its original deadline').to.equal(1));
+
+    cy
+      .tick(1);
+
+    cy
+      .get('.patient-interactions')
+      .should($feed => {
+        expect(followup.started, 'sustained events do not postpone the original 500 ms deadline').to.equal(true);
+        expect($feed.attr('aria-busy'), 'the bounded follow-up is running').to.equal('true');
+      });
+    update(5);
+
+    cy
+      .then(() => followup.release());
+
+    cy
+      .then(() => Cypress.Promise.all([followup.drain, drainInteractionRequests(requestCompletions)]));
+
+    for (const minute of [6, 7, 8]) {
+      cy
+        .tick(100);
+      update(minute);
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .then(() => expect(anchoredReads, 'each completed read gets a settling interval').to.equal(2));
+    }
+
+    cy
+      .tick(200);
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should(() => {
+        expect(anchoredReads, 'one final refresh converges after the stream stops').to.equal(3);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 50')
+      .find('time')
+      .should('have.attr', 'datetime', '2026-10-21T12:08:00.000Z');
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .then(() => expect(anchoredReads, 'idle convergence leaves no refresh loop').to.equal(3));
+
+    update(9);
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 50')
+      .find('time')
+      .should('have.attr', 'datetime', '2026-10-21T12:09:00.000Z');
+
+    cy
+      .window()
+      .then(win => new Cypress.Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve))));
+
+    cy
+      .then(() => {
+        paging = true;
+      });
+
+    cy
+      .get('.patient-interactions')
+      .scrollTo('top')
+      .should('have.prop', 'scrollTop', 0);
+
+    cy
+      .get('.patient-interactions')
+      .should(() => {
+        expect(repair.started, 'edge paging repairs its invalidated cursor first').to.equal(true);
+      });
+    update(10);
+
+    cy
+      .then(() => repair.release());
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(edge.started, 'automatic paging advances despite another update during repair').to.equal(true);
+      });
+    update(11);
+
+    cy
+      .then(() => edge.release());
+
+    cy
+      .then(() => Cypress.Promise.all([repair.drain, edge.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 0')
+      .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 50')
+      .find('time')
+      .should('have.attr', 'datetime', '2026-10-21T12:11:00.000Z');
+
+    cy
+      .contains('.patient-interactions-preview__link', 'Settling clinician 99')
+      .click({ scrollBehavior: false });
+
+    cy
+      .contains('.patient-interactions__item.is-selected', 'Settling row 99')
+      .should('be.focused');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .contains('.patient-interactions__item.is-selected', 'Settling row 99')
+      .should('be.focused');
+
+    cy
+      .then(() => {
+        rows[99].attributes.occurred_at = '2026-12-09T12:01:00.000Z';
+      });
+
+    cy
+      .sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: rows[99].id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: '2026-12-09T12:01:00.000Z' } },
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click({ scrollBehavior: false })
+      .should('have.attr', 'aria-pressed', 'false');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+    let filteredReads;
+
+    cy
+      .then(() => {
+        filteredReads = mainReads();
+      });
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .then(() => expect(mainReads(), 'new filters cancel the older refresh deadline').to.equal(filteredReads));
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .should('have.attr', 'aria-pressed', 'false');
+  });
+
+  specify('retries dirty paging repairs and settles an exhausted repair', function() {
+    for (const scenario of ['retry', 'empty']) {
+      const patient = getPatient();
+      const rows = map(range(50), index => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(), metadata: { note: `Repair row ${ index }` },
+      } }));
+      const moved = rows[13];
+      const timestamp = '2026-11-02T12:00:00.000Z';
+      let repairs = 0;
+      let edges = 0;
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (query.get('page[limit]') !== '25' || query.has('page[at]')) return;
+          if (!query.has('page[before]') && !query.has('page[after]')) repairs++;
+          if (query.get('page[before]') !== rows[0]?.id) return;
+          edges++;
+          if (edges === 1) req.reply({ statusCode: 422, body: { errors: [{ title: 'Adjacent page unavailable' }] } });
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date', 'setTimeout', 'clearTimeout'] });
+
+      cy
+        .contains('.patient-interactions__item.is-selected', 'Repair row 25')
+        .should('be.focused');
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .then(() => {
+          moved.attributes.occurred_at = timestamp;
+        });
+
+      cy
+        .sendWs({
+          category: 'InteractionCompleted', resource: { type: 'interactions', id: moved.id },
+          payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+        });
+
+      cy
+        .contains('.patient-interactions__item', 'Repair row 13')
+        .find('time')
+        .should('have.attr', 'datetime', timestamp);
+
+      cy
+        .window()
+        .then(win => new Cypress.Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve))));
+
+      if (scenario === 'empty') {
+        cy
+          .then(() => rows.splice(0));
+      }
+
+      cy
+        .get('.patient-interactions')
+        .scrollTo('top');
+
+      if (scenario === 'retry') {
+        cy
+          .get('.js-paging-error')
+          .should('be.visible')
+          .find('.js-retry')
+          .click();
+
+        cy
+          .contains('.patient-interactions__item', 'Repair row 0')
+          .should('exist');
+
+        cy
+          .contains('.patient-interactions__item', 'Repair row 49')
+          .should('exist');
+      } else {
+        cy
+          .get('.patient-interactions')
+          .should($feed => {
+            const $empty = $feed.find('.patient-interactions__empty');
+            expect($empty.length, 'an exhausted repair settles as an empty feed').to.equal(1);
+            expect($empty).to.be.visible;
+          });
+      }
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .tick(1000);
+
+      cy
+        .then(() => drainInteractionRequests(requestCompletions));
+
+      cy
+        .then(() => {
+          expect(repairs, 'retry retains the cursor repair; an empty repair settles once').to.equal(scenario === 'retry' ? 2 : 1);
+          expect(edges, 'an empty repaired window never requests an undefined cursor').to.equal(scenario === 'retry' ? 2 : 0);
+        });
+
+      cy
+        .get('.js-paging-error')
+        .should('not.be.visible');
+    }
+  });
+
   specify('retains newer later-page values and hydrates previously unloaded links', function() {
     const patient = getPatient();
     const rows = map(range(50), index => getInteraction({ attributes: {
@@ -670,7 +1067,7 @@ context('patient interactions', function() {
         if (initial.started || query.get('page[at]') !== rows[1].id) return;
         return initial.reply(req, { errors: [{ title: 'Snapshot unavailable' }] }, 422);
       })
-      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[1].id }`, { now: '2026-11-01T12:00:00Z' });
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[1].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
 
     cy
       .get('.patient-interactions[aria-busy="true"]')
@@ -730,7 +1127,7 @@ context('patient interactions', function() {
             },
           });
         })
-        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z' });
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
 
       cy
         .contains('.patient-interactions__item', 'Pending row 25')
@@ -807,7 +1204,7 @@ context('patient interactions', function() {
           if (query.get('page[at]') !== target.id || initial.started) return;
           return initial.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
         })
-        .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z' });
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
 
       cy
         .get('.patient-interactions[aria-busy="true"]')
@@ -842,8 +1239,8 @@ context('patient interactions', function() {
           .should('have.attr', 'datetime', timestamp);
       } else {
         cy
-          .get('.patient-interactions__item')
-          .should('have.length', 25);
+          .contains('.patient-interactions__item', 'Initial row 49')
+          .should('be.visible');
 
         cy
           .contains('.patient-interactions__item', 'Initial row 25')
@@ -878,7 +1275,7 @@ context('patient interactions', function() {
         anchor = find(rows, row => row.id === query.get('page[at]'));
         return refresh.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
       })
-      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[80].id }`, { now: '2026-03-20T12:00:00Z' });
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[80].id }`, { now: '2026-03-20T12:00:00Z', functionNames: ['Date'] });
 
     cy
       .contains('.patient-interactions__item', 'Filter row 80')
@@ -949,7 +1346,7 @@ context('patient interactions', function() {
           const query = new URL(req.url).searchParams;
           if (query.get('page[limit]') === '25' && !query.has('page[at]') && !query.has('page[before]') && !query.has('page[after]')) req.alias = 'reconciledWindow';
         })
-        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z' });
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
 
       cy
         .get('.patient-interactions__item')
@@ -3851,6 +4248,7 @@ context('patient interactions', function() {
       .get('.patient-interactions[aria-busy="false"]')
       .contains('.patient-interactions__item', 'Call summary <review> & next steps')
       .find('.js-show-more')
+      .scrollIntoView()
       .should('be.visible')
       .click();
 
