@@ -144,6 +144,63 @@ context('Dialer Service', function() {
       .and('not.have.attr', 'sandbox');
   });
 
+  // Layout-viewport heights after typical browser chrome. Scaled sizes are
+  // the CSS pixels of 1366x768 and 1280x720 at 125% and 150% display scaling.
+  const shortViewports = [
+    [1366, 648],
+    [1280, 600],
+    [1092, 494],
+    [910, 392],
+    [1024, 456],
+    [852, 360],
+  ];
+
+  specify('keeps the open 8x8 panel inside a short viewport', function() {
+    startEightByEightDialer();
+
+    cy.viewport(1280, 500);
+
+    // The collapsed bar is fixed to the viewport edge. Dispatch the click on
+    // the header the clinician uses; Cypress's actionability check treats
+    // that edge as covered in the component runner.
+    cy
+      .get('.eightbyeight-panel__header')
+      .then($header => {
+        $header[0].click();
+      });
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .should('have.class', 'is-open');
+
+    shortViewports.forEach(([width, height]) => {
+      cy.viewport(width, height);
+
+      cy
+        .get('.eightbyeight-wrapper')
+        .should($wrapper => {
+          const rect = $wrapper[0].getBoundingClientRect();
+
+          expect(rect.top, `top at ${ width }x${ height }`).to.be.at.least(0);
+          expect(rect.left, `left at ${ width }x${ height }`).to.be.at.least(0);
+          expect(rect.bottom, `bottom at ${ width }x${ height }`).to.be.at.most(window.innerHeight + 1);
+          expect(rect.right, `right at ${ width }x${ height }`).to.be.at.most(window.innerWidth + 1);
+        });
+
+      cy
+        .get('.eightbyeight-panel')
+        .should($panel => {
+          const panel = $panel[0];
+          const iframe = panel.querySelector('iframe');
+
+          expect(iframe.offsetHeight, `iframe at ${ width }x${ height }`).to.be.at.least(720);
+          expect(panel.scrollHeight, `scroll at ${ width }x${ height }`).to.be.greaterThan(panel.clientHeight);
+        });
+    });
+
+    cy.viewport(1280, 768);
+  });
+
   specify('copies a clicked 8x8 number and still sends startCall', function() {
     const writeText = cy.stub().resolves();
 
