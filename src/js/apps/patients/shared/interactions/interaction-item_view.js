@@ -17,7 +17,9 @@ const VISIT_CLASSES = { E: intl.emergency, I: intl.inpatient, O: intl.outpatient
 function getWorkName(model) {
   const action = model.getAction();
   const flow = action?.getFlow() || model.getFlow();
-  return action && flow ? `${ flow.get('name') }: ${ action.get('name') }` : action?.get('name') || flow?.get('name');
+  const actionName = action?.get('name');
+  const flowName = flow?.get('name');
+  return actionName && flowName ? `${ flowName }: ${ actionName }` : actionName || flowName;
 }
 
 const InteractionItemView = View.extend({

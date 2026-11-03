@@ -1,6 +1,6 @@
 import Store from 'backbone.store';
 import dayjs from 'dayjs';
-import { contains, findKey, has, omit } from 'underscore';
+import { contains, findKey, has, map, omit } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -34,7 +34,8 @@ const _Model = BaseModel.extend({
       if (attributes.flow_id) requests.push(Radio.request('entities', 'fetch:flows:model', attributes.flow_id, { abort: false }));
       if (requests.length) {
         // Responses enrich the Store; they never replace the current link IDs.
-        Promise.all(requests).then(() => this.trigger('change', this)).catch(addError);
+        Promise.all(map(requests, request => request.catch(addError)))
+          .then(() => this.trigger('change', this)).catch(addError);
       }
     },
     InteractionScheduled({ attributes }) {

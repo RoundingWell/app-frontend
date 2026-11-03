@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
-import { contains, filter, flatten, has, keys, map, without } from 'underscore';
+import { contains, flatten, has, keys, map, without } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -24,14 +24,14 @@ export default App.extend({
     'retry:paging': 'retryRequest',
     'select:date': 'jumpToDate',
   },
-  onBeforeStart(app, { patient, interactionId, kind = 'replace', date }) {
+  onBeforeStart(app, { patient, interactionId, kind = 'replace', date, at }) {
     if (!this.getView()) this.showPage({ patient, interactionId });
-    this.getState().set({ request: { kind, date }, retry: null, ...(kind === 'replace' && { hasOlder: false, hasNewer: false }) });
+    const anchor = at === undefined ? this.getState().get('interactionId') : at;
+    this.getState().set({ request: { kind, date, at: anchor }, retry: null, ...(kind === 'replace' && { hasOlder: false, hasNewer: false }) });
     if (kind === 'replace') this.getView().showLoading();
   },
   showPage({ patient, interactionId }) {
     this.patient = patient;
-    this.deletedIds = new Set();
     this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.channelGroups = Radio.request('entities', 'interactions:channelGroups');
     this.getState().set({ interactionId, selectedGroups: keys(this.channelGroups), contentStatus: 'loading' });
@@ -81,6 +81,7 @@ export default App.extend({
     return false;
   },
   onBeforeDestroyView() {
+    this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.stop();
   },
   onStop() {
@@ -93,22 +94,32 @@ export default App.extend({
   onInteractionMessage({ category, resource, payload }) {
     if (payload.patient?.id !== this.patient.id) return;
     if (category === 'ResourceDeleted') {
-      this.deletedIds.add(resource.id);
-      if (!this.collection?.length) this.reconcileWindow();
+      this.reconcileDeletion(resource.id);
       return;
     }
-    if (has(payload.attributes, 'occurred_at') || has(payload.attributes, 'expected_at')) this.reconcileMovedInteraction(resource.id);
+    if (has(payload.attributes, 'occurred_at') || has(payload.attributes, 'expected_at')) this.reconcileTimestampUpdate(resource.id);
   },
-  reconcileMovedInteraction(id) {
-    if (this.collection?.get(id)) this.reconcileWindow();
+  reconcileDeletion(id) {
+    const request = this.getState().get('request');
+    if (request?.at === id) {
+      this.getState().set('request', { ...request, at: null, date: request.date || this.getView().getCurrentDate() });
+    }
+    if (request || !this.collection?.length) this.reconcileWindow();
+  },
+  reconcileTimestampUpdate(id) {
+    if (this.getState().get('request') || this.collection?.get(id)) this.reconcileWindow();
   },
   reconcileWindow() {
     const { hasOlder, hasNewer, request } = this.getState().attributes;
-    // A moved cursor no longer bounds the loaded server window. Reconcile through
+    const pending = request || {};
+    if (!hasOlder && !hasNewer && !request) return;
+    // A changed or deleted cursor no longer bounds the server window. Reconcile through
     // the existing date loader instead of paging from a newly sorted endpoint.
-    if (hasOlder || hasNewer || request) {
-      this.requestInteractions('replace', this.getView().getCurrentDate(), null);
+    if (pending.kind === 'replace' || pending.kind === 'focus') {
+      this.requestInteractions('replace', pending.date, pending.at);
+      return;
     }
+    this.requestInteractions('replace', pending.date || this.getView().getCurrentDate(), null);
   },
   getRequest(kind, date, at = this.getState().get('interactionId')) {
     const selectedGroups = this.getState().get('selectedGroups');
@@ -183,7 +194,6 @@ export default App.extend({
     this.getState().set({ hasOlder, hasNewer, request: null, retry: null });
   },
   commitInteractions(models, input) {
-    models = filter(models, model => !this.deletedIds.has(model.id));
     const view = this.getView();
     if (input.kind === 'replace') {
       if (this.collection) this.stopListening(this.collection);
