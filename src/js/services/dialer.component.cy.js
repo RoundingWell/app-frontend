@@ -267,8 +267,9 @@ context('Dialer Service', function() {
 
     cy.then(async() => {
       await service.start();
-      armClickedAction('+15555550100', 'action-1', Number(startTime));
     });
+
+    clickToCall('+15555550100', 'action-1', Number(startTime));
 
     postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
       eventName: 'offered',
@@ -367,8 +368,9 @@ context('Dialer Service', function() {
 
     cy.then(async() => {
       await service.start();
-      armClickedAction('+15555550100', 'action-1', Number(startTime));
     });
+
+    clickToCall('+15555550100', 'action-1', Number(startTime));
 
     postTerminatedCall({
       eventId: 'other-number',
@@ -400,8 +402,9 @@ context('Dialer Service', function() {
 
     cy.then(async() => {
       await service.start();
-      armClickedAction('+15555550100', 'action-1', Number(startTime) - CALL_ATTACH_WINDOW_MS - 1);
     });
+
+    clickToCall('+15555550100', 'action-1', Number(startTime) - CALL_ATTACH_WINDOW_MS - 1);
 
     postTerminatedCall({
       eventId: 'late-call',
@@ -432,8 +435,9 @@ context('Dialer Service', function() {
 
     cy.then(async() => {
       await service.start();
-      armClickedAction('+15555550100', 'action-1', Number(startTime));
     });
+
+    clickToCall('+15555550100', 'action-1', Number(startTime));
 
     postTerminatedCall({
       eventId: 'first-call',
@@ -460,6 +464,168 @@ context('Dialer Service', function() {
         expect(values.action_id).to.equal(null);
         expect(values.patient_id).to.equal(null);
       });
+  });
+
+  specify('does not copy a number during an active 8x8 call', function() {
+    const writeText = cy.stub().resolves();
+    const request = Radio.request;
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'actions:model') {
+        return {
+          getPatient() {
+            return {
+              id: 'patient-1',
+              get() {
+                return 'Test';
+              },
+            };
+          },
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy.then(async() => {
+      await service.start();
+      alertService = new AlertService({ region: rootView.getRegion('alert') });
+    });
+
+    stubClipboard(writeText);
+
+    postEightByEightEvent('mashell-voice-phone-accepted-uc-event-v1', {
+      eventName: 'accepted',
+      eventId: 'accepted-1',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+15555550100',
+      startTime: '1793723420000',
+      schemaVersion: '1.0.0',
+    });
+
+    cy.then(() => {
+      Radio.request('dialer', 'call', '+15555550999', { id: 'action-2' });
+    });
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .should('have.class', 'is-open');
+
+    cy
+      .get('.alert-box')
+      .should('not.exist');
+
+    cy.then(() => {
+      expect(writeText).not.to.be.called;
+    });
+  });
+
+  specify('keeps an in-progress 8x8 call when another number hangs up', function() {
+    const firstStart = '1793723417987';
+    const otherStart = '1793723500000';
+    const firstEnd = '1793723600000';
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'offered-a',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+15555550100',
+      startTime: firstStart,
+      schemaVersion: '1.0.0',
+    });
+
+    postTerminatedCall({
+      eventId: 'other-hangup',
+      searchContext: '+15555550999',
+      startTime: otherStart,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values.callData')
+      .should(callData => {
+        expect(callData.eventId).to.equal('other-hangup');
+        expect(callData.startTime).to.equal(dayjs(Number(otherStart)).toISOString());
+        expect(callData.searchContext).to.equal('+15555550999');
+      });
+
+    postTerminatedCall({
+      eventId: 'first-hangup',
+      searchContext: '+15555550100',
+      startTime: firstEnd,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values.callData')
+      .should(callData => {
+        expect(callData.eventId).to.equal('first-hangup');
+        expect(callData.startTime).to.equal(dayjs(Number(firstStart)).toISOString());
+      });
+  });
+
+  specify('drops an in-progress 8x8 call when the provider stops', function() {
+    const offeredStart = '1793723417987';
+    const endedStart = '1793723500000';
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'offered-stale',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+15555550100',
+      startTime: offeredStart,
+      schemaVersion: '1.0.0',
+    });
+
+    cy.then(async() => {
+      await service.stop();
+      await service.start();
+    });
+
+    postTerminatedCall({
+      eventId: 'after-stop',
+      searchContext: '+15555550100',
+      startTime: endedStart,
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values.callData.startTime')
+      .should('equal', dayjs(Number(endedStart)).toISOString());
   });
 
   specify('records an 8x8 call that was never accepted', function() {
@@ -577,11 +743,12 @@ context('Dialer Service', function() {
       .should('not.have.been.called');
   });
 
-  function armClickedAction(number, actionId, clickedAt) {
-    const provider = service.getChildApp('provider');
+  function clickToCall(number, actionId, at) {
+    cy.tick(at);
 
-    provider._pendingAction = { number, actionId, clickedAt };
-    provider.getState().set('actionId', actionId);
+    cy.then(() => {
+      Radio.request('dialer', 'call', number, { id: actionId });
+    });
   }
 
   function postTerminatedCall({ eventId, searchContext, startTime }) {

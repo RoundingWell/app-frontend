@@ -8,7 +8,7 @@ import { renderTemplate } from 'js/i18n';
 
 import App from 'js/base/app';
 
-import { attachmentForCall, buildCallLogValues, rememberCallEvent } from './eightbyeight_call_log';
+import { attachmentForCall, buildCallLogValues, rememberCallEvent, takeTerminated } from './eightbyeight_call_log';
 import { LayoutView } from './eightbyeight_views';
 
 // Mashell ignores startCall until the embedding domain is on
@@ -90,6 +90,7 @@ export default App.extend({
   onStop() {
     this._abortController?.abort();
     this._pendingAction = null;
+    this._callSession = null;
     this.getState().set({
       isDialerReady: false,
       callState: null,
@@ -109,7 +110,10 @@ export default App.extend({
     if (!data || typeof data !== 'object') return;
 
     if (data.status === 'failed') {
-      addError(new Error(`8x8 dialer event failed:${ data.eventType } ${ data.data?.error }`));
+      addError(new Error('8x8 dialer event failed'), {
+        eventType: data.eventType,
+        error: data.data?.error,
+      });
       return;
     }
 
@@ -143,16 +147,18 @@ export default App.extend({
   },
   onTerminated(data) {
     const state = this.getState();
+    const taken = takeTerminated(this._callSession, data);
 
-    this._callSession = rememberCallEvent(this._callSession, data);
-    const attachment = attachmentForCall(this._pendingAction, this._callSession);
+    this._callSession = taken.session;
+    const attachment = attachmentForCall(this._pendingAction, taken.saving);
     if (attachment.clear) this._pendingAction = null;
 
-    Radio.request('dialer', 'eightByEightCall', buildCallLogValues(this._callSession, {
+    Radio.request('dialer', 'eightByEightCall', buildCallLogValues(taken.saving, {
       actionId: attachment.actionId,
       patientId: patientIdForAction(attachment.actionId),
     }));
-    this._callSession = null;
+
+    if (taken.session) return;
 
     state.set({ callState: null, actionId: null });
     Radio.request('dialer', 'showPatientLinks', null);
@@ -161,10 +167,10 @@ export default App.extend({
     const state = this.getState();
     const dialableNumber = toDialableNumber(number);
     state.set('isOpen', true);
-    this.offerManualDial(dialableNumber);
 
     if (state.get('callState') === 'active') return;
 
+    this.offerManualDial(dialableNumber);
     this._pendingAction = {
       number: dialableNumber,
       actionId: action.id,

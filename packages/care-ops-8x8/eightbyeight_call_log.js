@@ -42,13 +42,29 @@ function rememberAccepted(session, event) {
   return { ...session, accepted: event };
 }
 
-function rememberTerminated(session, event) {
-  const offeredMismatch = session.offered && !sameCall(session.offered, event);
-  const acceptedMismatch = session.accepted && !sameCall(session.accepted, event);
+function eventMismatches(current, event) {
+  return Boolean(current) && !sameCall(current, event);
+}
 
-  if (offeredMismatch && acceptedMismatch) return { terminated: event };
+function rememberTerminated(session, event) {
+  if (eventMismatches(session.offered, event) || eventMismatches(session.accepted, event)) {
+    return { terminated: event };
+  }
 
   return { ...session, terminated: event };
+}
+
+export function takeTerminated(session, event) {
+  const mismatched = session && (
+    eventMismatches(session.offered, event) || eventMismatches(session.accepted, event)
+  );
+
+  if (mismatched) return { saving: { terminated: event }, session };
+
+  return {
+    saving: rememberTerminated(session || {}, event),
+    session: null,
+  };
 }
 
 function toIso(value) {
