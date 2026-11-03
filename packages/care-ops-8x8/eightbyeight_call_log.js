@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import parsePhoneNumber from 'libphonenumber-js/min';
 
 // UC embed events are offered, accepted, and terminated. eventId is unique
 // per event, so a call is matched on direction plus searchContext.
@@ -55,24 +56,23 @@ function toIso(value) {
   return parsed.isValid() ? parsed.toISOString() : null;
 }
 
-function clock(ms) {
-  if (!Number.isFinite(ms) || ms <= 0) return null;
+function e164(number) {
+  if (!number) return null;
 
-  const total = Math.round(ms / 1000);
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const seconds = total % 60;
+  const phone = parsePhoneNumber(String(number), 'US');
+  if (phone && phone.isValid()) return phone.number;
 
-  return [hours, minutes, seconds].map(part => String(part).padStart(2, '0')).join(':');
+  return String(number);
 }
 
-function elapsed(from, to) {
-  const start = Number(from);
-  const end = Number(to);
+// The Call Detail export stores talk time as H:MM:SS, for example 0:00:07.
+function talkTime(value) {
+  if (!value) return null;
 
-  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+  const match = String(value).match(/^(\d+):(\d{2}):(\d{2})$/);
+  if (!match) return String(value);
 
-  return clock(end - start);
+  return `${ Number(match[1]) }:${ match[2] }:${ match[3] }`;
 }
 
 function outcome(session) {
@@ -112,51 +112,27 @@ function callIdentity(session) {
   };
 }
 
-function answeredRawTime(offered, accepted) {
-  if (!accepted) return null;
-  if (accepted.startTime === offered?.startTime) return null;
-
-  return accepted.startTime;
-}
-
 function baseCallData(identity) {
-  const { terminated, offered, direction, searchContext } = identity;
-  const callData = {
-    ...terminated,
+  const { terminated, offered, direction } = identity;
+
+  return {
+    eventId: terminated.eventId || null,
     eventName: 'terminated',
-    media: terminated.media || 'phone',
+    media: 'phone',
     method: 'mapEvent',
-    schemaVersion: terminated.schemaVersion || '1.0.0',
+    schemaVersion: '1.0.0',
     direction,
-    searchContext,
+    searchContext: e164(identity.searchContext),
+    callDuration: talkTime(terminated.callDuration),
     startTime: toIso(firstValue(offered?.startTime, terminated.startTime)),
     endTime: toIso(terminated.endTime),
-    callDuration: terminated.callDuration || null,
     hasRecording: Boolean(terminated.hasRecording),
   };
-
-  if (!callData.callRecording) delete callData.callRecording;
-
-  return callData;
-}
-
-function withDurations(callData, identity) {
-  const answeredRaw = answeredRawTime(identity.offered, identity.accepted);
-  const answeredTime = toIso(answeredRaw);
-  const ringDuration = elapsed(identity.offered?.startTime, answeredRaw);
-  const talkFrom = answeredRaw || identity.accepted?.startTime;
-  const talkDuration = identity.accepted ? elapsed(talkFrom, identity.terminated.endTime) : null;
-
-  if (answeredTime) callData.answeredTime = answeredTime;
-  if (ringDuration) callData.ringDuration = ringDuration;
-  if (talkDuration) callData.talkDuration = talkDuration;
-
-  return callData;
 }
 
 function callReport(callData, callOutcome) {
   const report = {
-    Call_ID: callData.eventId || null,
+    Call_ID: callData.eventId,
     Direction: reportDirection(callData.direction),
     Talk_Time: callData.callDuration,
     Start_Time: callData.startTime,
@@ -166,24 +142,17 @@ function callReport(callData, callOutcome) {
   };
 
   if (callData.direction === 'outbound') report.Callee = callData.searchContext;
-  if (callData.direction === 'inbound') report.Caller = callData.searchContext;
-  if (callData.answeredTime) report.Answered_Time = callData.answeredTime;
 
   return report;
 }
 
 export function buildCallLogValues(session = {}, { actionId, patientId } = {}) {
   const identity = callIdentity(session);
-  const callData = withDurations(baseCallData(identity), identity);
+  const callData = baseCallData(identity);
 
   return {
     callData,
     report: callReport(callData, outcome(session)),
-    events: {
-      offered: identity.offered || null,
-      accepted: identity.accepted || null,
-      terminated: session.terminated || null,
-    },
     action_id: actionId || null,
     patient_id: patientId || null,
   };

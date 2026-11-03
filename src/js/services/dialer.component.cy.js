@@ -236,7 +236,6 @@ context('Dialer Service', function() {
     const startTime = '1793723417987';
     const answeredTime = '1793723420000';
     const endTime = '1793723427938';
-    const recording = 'https://cloud8.8x8.com/recording/abc1234';
     const request = Radio.request;
 
     cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
@@ -302,7 +301,6 @@ context('Dialer Service', function() {
       startTime,
       endTime,
       callDuration: '00:00:10',
-      callRecording: recording,
       hasRecording: true,
       schemaVersion: '1.0.0',
     });
@@ -312,7 +310,6 @@ context('Dialer Service', function() {
       .its('request.body')
       .should(body => {
         const startIso = dayjs(Number(startTime)).toISOString();
-        const answeredIso = dayjs(Number(answeredTime)).toISOString();
         const endIso = dayjs(Number(endTime)).toISOString();
 
         expect(body).to.deep.equal({
@@ -324,68 +321,27 @@ context('Dialer Service', function() {
               identifier: 'abc1234',
               values: {
                 callData: {
-                  eventName: 'terminated',
                   eventId: 'abc1234',
-                  method: 'mapEvent',
-                  direction: 'outbound',
+                  eventName: 'terminated',
                   media: 'phone',
+                  method: 'mapEvent',
+                  schemaVersion: '1.0.0',
+                  direction: 'outbound',
                   searchContext: '+15555550100',
+                  callDuration: '0:00:10',
                   startTime: startIso,
                   endTime: endIso,
-                  callDuration: '00:00:10',
-                  callRecording: recording,
                   hasRecording: true,
-                  schemaVersion: '1.0.0',
-                  answeredTime: answeredIso,
-                  ringDuration: '00:00:02',
-                  talkDuration: '00:00:08',
                 },
                 report: {
                   Call_ID: 'abc1234',
                   Direction: 'Outgoing',
-                  Talk_Time: '00:00:10',
+                  Talk_Time: '0:00:10',
                   Start_Time: startIso,
                   Stop_Time: endIso,
                   Answered: 'Answered',
                   Last_Leg_Disposition: 'Connected',
                   Callee: '+15555550100',
-                  Answered_Time: answeredIso,
-                },
-                events: {
-                  offered: {
-                    eventName: 'offered',
-                    eventId: 'offered-1',
-                    method: 'mapEvent',
-                    direction: 'outbound',
-                    media: 'phone',
-                    searchContext: '+15555550100',
-                    startTime,
-                    schemaVersion: '1.0.0',
-                  },
-                  accepted: {
-                    eventName: 'accepted',
-                    eventId: 'accepted-1',
-                    method: 'mapEvent',
-                    direction: 'outbound',
-                    media: 'phone',
-                    searchContext: '+15555550100',
-                    startTime: answeredTime,
-                    schemaVersion: '1.0.0',
-                  },
-                  terminated: {
-                    eventName: 'terminated',
-                    eventId: 'abc1234',
-                    method: 'mapEvent',
-                    direction: 'outbound',
-                    media: 'phone',
-                    searchContext: '+15555550100',
-                    startTime,
-                    endTime,
-                    callDuration: '00:00:10',
-                    callRecording: recording,
-                    hasRecording: true,
-                    schemaVersion: '1.0.0',
-                  },
                 },
                 action_id: 'action-1',
                 patient_id: 'patient-1',
@@ -430,11 +386,11 @@ context('Dialer Service', function() {
       .should(values => {
         expect(values.report.Last_Leg_Disposition).to.equal('Not-Connected');
         expect(values.report.Answered).to.equal(null);
-        expect(values.callData.answeredTime).to.equal(undefined);
-        expect(values.callData.callRecording).to.equal(undefined);
+        expect(values.callData.callDuration).to.equal('0:00:01');
+        expect(values.callData.hasRecording).to.equal(false);
         expect(values.action_id).to.equal(null);
         expect(values.patient_id).to.equal(null);
-        expect(values.events.offered).to.equal(null);
+        expect(values.events).to.equal(undefined);
       });
   });
 
