@@ -158,6 +158,60 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Known note')
       .should('exist');
 
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .find('time')
+      .should('have.attr', 'datetime', appointment.attributes.expected_at)
+      .and('contain', formatDate(appointment.attributes.expected_at, 'TIME'));
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 1);
+
+    const nextDay = '2026-10-09T02:00:00Z';
+    send('InteractionScheduled', appointment, { expected_at: nextDay });
+
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .find('time')
+      .should('have.attr', 'datetime', nextDay)
+      .and('contain', formatDate(nextDay, 'TIME'));
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 2)
+      .last()
+      .should('contain', 'Known appointment')
+      .find('.js-date-label')
+      .should('contain', formatDate(nextDay, 'DATE'));
+
+    cy
+      .get('.patient-interactions__list time')
+      .should($times => {
+        expect(map($times.toArray(), time => time.getAttribute('datetime'))).to.deep.equal([call.attributes.occurred_at, nextDay]);
+      });
+
+    const beforeCall = '2026-10-08T02:00:00Z';
+    send('InteractionScheduled', appointment, { expected_at: beforeCall });
+
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .find('time')
+      .should('have.attr', 'datetime', beforeCall)
+      .and('contain', formatDate(beforeCall, 'TIME'));
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 1)
+      .find('.js-date-label')
+      .should('contain', formatDate(beforeCall, 'DATE'));
+
+    cy
+      .get('.patient-interactions__list time')
+      .should($times => {
+        expect(map($times.toArray(), time => time.getAttribute('datetime'))).to.deep.equal([beforeCall, call.attributes.occurred_at]);
+      });
+
     send('MetadataUpdated', call, { metadata: { note: 'Updated note' } });
 
     cy
