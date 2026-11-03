@@ -35,6 +35,7 @@ export default Backbone.Model.extend(extend({
     return Backbone.Model.prototype.destroy.call(this, options);
   },
   fetch(options) {
+    const generation = this._fetchGeneration = (this._fetchGeneration || 0) + 1;
     // Model fetches default to aborting.
     const fetcher = Backbone.Model.prototype.fetch.call(this, extend({ abort: true }, options));
 
@@ -43,6 +44,7 @@ export default Backbone.Model.extend(extend({
     // Resolve with entity if successful
     return fetcher
       .then(response => {
+        if (generation !== this._fetchGeneration) return this;
         this._isFetching = false;
 
         // Cancellation discards the response, but queued live updates still apply.
@@ -54,7 +56,7 @@ export default Backbone.Model.extend(extend({
         return response;
       })
       .catch(error => {
-        this._isFetching = false;
+        if (generation === this._fetchGeneration) this._isFetching = false;
 
         throw error;
       });

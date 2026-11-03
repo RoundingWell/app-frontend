@@ -141,4 +141,80 @@ context('Backbone fetch cancellation', function() {
       });
     });
   });
+
+  specify('keeps queued updates with the current model fetch when an older cancelled fetch settles', function() {
+    cy.window().then(win => {
+      const Model = Store(BaseModel.extend({
+        type: TYPE,
+        messages: {
+          MetadataUpdated({ attributes }) {
+            this.set(attributes);
+          },
+        },
+      }), TYPE);
+      const model = new Model({ id: 'row', name: 'Initial value' });
+      const controller = new AbortController();
+      const releases = [];
+      releaseBody = () => {
+        for (const release of releases) release();
+      };
+      const pendingResponse = name => {
+        let started;
+        const bodyStarted = new Cypress.Promise(resolve => {
+          started = resolve;
+        });
+        const response = new Response(new ReadableStream({
+          start(body) {
+            let released = false;
+            releases.push(() => {
+              if (released) return;
+              released = true;
+              body.enqueue(new TextEncoder().encode(JSON.stringify({ data: {
+                type: TYPE, id: model.id, attributes: { name },
+              } })));
+              body.close();
+            });
+          },
+        }), { headers: { 'Content-Type': 'application/vnd.api+json' } });
+        const clone = response.clone.bind(response);
+        cy.stub(response, 'clone').callsFake(() => {
+          started();
+          return clone();
+        });
+        return { response, bodyStarted };
+      };
+      const oldResponse = pendingResponse('Old server value');
+      const currentResponse = pendingResponse('Current server value');
+      const trigger = cy.spy();
+      Radio.reply('ws', 'trigger', trigger);
+      Radio.reply('auth', 'getToken', () => undefined);
+      cy.stub(win, 'fetch')
+        .onFirstCall().resolves(oldResponse.response)
+        .onSecondCall().resolves(currentResponse.response);
+      const oldRequest = model.fetch({ url: '/api/fetch-generation-test', signal: controller.signal });
+      requests.push(oldRequest);
+      let currentRequest;
+
+      return oldResponse.bodyStarted.then(() => {
+        currentRequest = model.fetch({ url: '/api/fetch-generation-test' });
+        requests.push(currentRequest);
+        return currentResponse.bodyStarted;
+      }).then(() => {
+        model.handleMessage({ category: 'MetadataUpdated', resource: model.getResource(), payload: { attributes: { name: 'Websocket value' } } });
+        controller.abort();
+        releases[0]();
+        return oldRequest;
+      }).then(() => {
+        expect(model.isFetching(), 'newer fetch still owns notification queue').to.equal(true);
+        expect(model.get('name')).to.equal('Initial value');
+        expect(trigger).not.to.have.been.called;
+        releases[1]();
+        return currentRequest;
+      }).then(() => {
+        expect(model.get('name')).to.equal('Websocket value');
+        expect(trigger).to.have.been.calledOnce;
+        expect(model.isFetching()).to.equal(false);
+      });
+    });
+  });
 });
