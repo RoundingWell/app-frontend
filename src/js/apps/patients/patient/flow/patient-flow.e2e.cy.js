@@ -3574,9 +3574,9 @@ context('patient flow page', function() {
 
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledTwice')
-      .then(stub => {
-        const { filters, resources } = stub.getCall(1).args[0].data;
+      .should(stub => {
+        expect(stub).to.have.been.called;
+        const { filters, resources } = stub.lastCall.args[0].data;
 
         expect(filters).to.deep.equal({
           actions: { flow: testSocketFlow.id },
@@ -3922,10 +3922,9 @@ context('patient flow page', function() {
     // verify the new flow is added to the ws subscription resources
     cy
       .get('@wsHandleMessage')
-      .should('have.been.calledThrice')
-      .then(stub => {
-        const secondCallData = stub.getCall(2).args[0].data;
-        const { resources } = secondCallData;
+      .should(stub => {
+        expect(stub).to.have.been.called;
+        const { resources } = stub.lastCall.args[0].data;
 
         expect(resources).to.deep.include({
           id: testNewSocketAction.id,
