@@ -157,13 +157,11 @@ export default App.extend({
     const state = this.getState();
     if (state.get('callState') === 'active') return;
 
-    // The collapsed iframe does not take clicks. Open it so 8x8's answer
-    // banner is on screen. The iframe element is left in place.
-    state.set({
-      callState: 'ringing',
-      isOpen: true,
+    state.set('callState', 'ringing');
+    Radio.request('dialer', 'showPatientLinks', {
+      actionId: state.get('actionId'),
+      number: data.searchContext,
     });
-    this.getView().revealIncomingCall();
   },
   onAccepted(data) {
     this._callSession = rememberCallEvent(this._callSession, data);

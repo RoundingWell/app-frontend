@@ -74,7 +74,7 @@ const LayoutView = View.extend({
   className: 'eightbyeight-wrapper',
   template: hbs`
     <div data-patient-buttons-region></div>
-    <div class="eightbyeight-panel js-panel">
+    <div class="eightbyeight-panel">
       <div class="eightbyeight-panel__header js-header">
         {{fas "phone"}}
         <span data-heading-region>8x8</span>
@@ -102,7 +102,6 @@ const LayoutView = View.extend({
   ui: {
     header: '.js-header',
     iframe: '.js-iframe',
-    panel: '.js-panel',
   },
   triggers: {
     'click @ui.header': 'click:header',
@@ -145,11 +144,6 @@ const LayoutView = View.extend({
   },
   togglePanel() {
     this.el.classList.toggle('is-open', this.model.get('isOpen'));
-  },
-  // Work for Web answers from the in-app banner at the top of the softphone.
-  // A short panel scrolls, so bring that banner back into view.
-  revealIncomingCall() {
-    this.getUI('panel')[0].scrollTop = 0;
   },
   showCallState() {
     const callState = this.model.get('callState');

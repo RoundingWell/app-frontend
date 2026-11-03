@@ -208,77 +208,65 @@ context('Dialer Service', function() {
       method: 'mapEvent',
       direction: 'inbound',
       media: 'phone',
+      searchContext: '+12025550123',
       schemaVersion: '1.0.0',
     });
   }
 
-  specify('opens the 8x8 panel for an inbound call without reloading it', function() {
-    startEightByEightDialer();
-    cy.viewport(1280, 500);
+  specify('keeps the 8x8 panel closed on an inbound call and links the patient', function() {
+    const matches = [];
+    const request = Radio.request;
 
-    cy
-      .get('.eightbyeight-panel__iframe')
-      .then($iframe => {
-        cy.wrap($iframe[0]).as('dialerFrame');
-      });
+    startEightByEightDialer();
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'searchPatients:collection') {
+        return {
+          fetch() {
+            return Promise.resolve();
+          },
+          each(iterator, context) {
+            matches.forEach(patient => iterator.call(context, patient));
+          },
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    postInboundOffer();
 
     cy
       .get('.eightbyeight-wrapper')
       .should('not.have.class', 'is-open');
 
+    cy
+      .get('.eightbyeight-panel__header')
+      .should('have.class', 'is-call-active')
+      .and('contain', 'Incoming Call');
+
+    cy
+      .get('.eightbyeight-wrapper')
+      .find('[data-patient-buttons-region] button')
+      .should('have.length', 0);
+
+    cy.then(() => {
+      matches.push({
+        id: 'patient-1',
+        get(attr) {
+          return { first_name: 'Ada', last_name: 'Lovelace' }[attr];
+        },
+      });
+    });
+
     postInboundOffer();
 
     cy
       .get('.eightbyeight-wrapper')
-      .should('have.class', 'is-open');
-
-    cy
-      .get('@dialerFrame')
-      .should($frame => {
-        const frame = $frame[0];
-
-        expect(frame.isConnected).to.equal(true);
-        expect(document.querySelector('.eightbyeight-panel__iframe')).to.equal(frame);
-        expect(frame.src).to.contain('mashell/public/index.html');
-        expect(frame.hasAttribute('sandbox')).to.equal(false);
-        expect(getComputedStyle(frame).pointerEvents).to.equal('auto');
-        expect(getComputedStyle(frame).visibility).to.equal('visible');
-      });
-
-    cy
-      .get('.eightbyeight-panel__header')
-      .then($header => {
-        cy
-          .get('.eightbyeight-panel__iframe')
-          .should($iframe => {
-            const headerBox = $header[0].getBoundingClientRect();
-            const frameBox = $iframe[0].getBoundingClientRect();
-
-            expect(frameBox.top).to.be.at.least(headerBox.bottom - 1);
-          });
-      });
-
-    cy
-      .get('.eightbyeight-panel')
-      .then($panel => {
-        $panel[0].scrollTop = 200;
-      });
-
-    cy
-      .get('.eightbyeight-panel')
-      .should($panel => {
-        expect($panel[0].scrollTop).to.equal(200);
-      });
-
-    postInboundOffer();
-
-    cy
-      .get('.eightbyeight-panel')
-      .should($panel => {
-        expect($panel[0].scrollTop).to.equal(0);
-      });
-
-    cy.viewport(1280, 768);
+      .should('not.have.class', 'is-open')
+      .find('[data-patient-buttons-region] button')
+      .should('have.length', 1)
+      .and('contain', 'Ada Lovelace');
   });
 
   specify('copies a clicked 8x8 number and still sends startCall', function() {
