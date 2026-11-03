@@ -568,15 +568,15 @@ context('patient interactions', function() {
     } }));
     const actionFlow = getFlow({ attributes: { name: 'Hydrated action flow' }, relationships: { patient: getRelationship(patient) } });
     const action = getAction({ attributes: { name: 'Hydrated action' }, relationships: { patient: getRelationship(patient), flow: getRelationship(actionFlow) } });
-    const flow = getFlow({ attributes: { name: 'Hydrated standalone flow' }, relationships: { patient: getRelationship(patient) } });
-    const missingAction = getAction();
+    const flow = getFlow({ attributes: { name: 'Hydrated standalone flow' }, relationships: { patient: getRelationship(patient), state: getRelationship(stateTodo), owner: getRelationship(teamCoordinator) } });
+    const missingAction = getAction({ attributes: { name: 'Unavailable linked action' }, relationships: { patient: getRelationship(patient), flow: getRelationship(flow), state: getRelationship(stateTodo), owner: getRelationship(teamCoordinator) } });
     const send = attributes => cy.sendWs({
       category: 'MetadataUpdated', resource: { type: 'interactions', id: rows[0].id },
       payload: { patient: { type: 'patients', id: patient.id }, attributes },
     });
 
     cy
-      .routesForPatientWorkflow()
+      .routesForPatientAction()
       .routePatient(fx => {
         fx.data = patient;
         return fx;
@@ -591,12 +591,20 @@ context('patient interactions', function() {
         return fx;
       })
       .routeFlow(fx => {
+        flow.relationships['program-flow'] = fx.data.relationships['program-flow'];
+        flow.relationships.program = fx.data.relationships.program;
         fx.data = flow;
         return fx;
       })
+      .routeFlowActions(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .routeFlowActivity()
       .intercept('GET', `/api/flows/${ actionFlow.id }*`, { statusCode: 422, body: { errors: [{ title: 'Flow unavailable' }] } })
       .as('failedLinkedFlow')
-      .intercept('GET', `/api/actions/${ missingAction.id }*`, { statusCode: 422, body: { errors: [{ title: 'Action unavailable' }] } })
+      .intercept('GET', `/api/actions/${ missingAction.id }*`, { body: { data: missingAction, included: [flow] } })
+      .intercept({ method: 'GET', url: `/api/actions/${ missingAction.id }*`, times: 1 }, { statusCode: 422, body: { errors: [{ title: 'Action unavailable' }] } })
       .as('failedLinkedAction')
       .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-08T12:00:00Z' });
 
@@ -615,6 +623,13 @@ context('patient interactions', function() {
       .wait('@routeAction')
       .wait('@failedLinkedFlow');
 
+    send({ action_id: null, flow_id: null });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .should('not.exist');
+
     send({ action_id: missingAction.id, flow_id: flow.id });
 
     cy
@@ -627,12 +642,18 @@ context('patient interactions', function() {
       .wait('@routeFlow')
       .wait('@failedLinkedAction');
 
-    send({ action_id: null, flow_id: null });
-
     cy
       .contains('.patient-interactions__item', 'Linked row 0')
       .find('.js-action')
-      .should('not.exist');
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/flow/${ flow.id }`);
+
+    cy
+      .get('.patient-flow__name')
+      .should('contain', 'Hydrated standalone flow');
   });
 
   specify('owns the patient subscription before workflow readiness and clears child state on navigation', function() {

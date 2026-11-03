@@ -52,15 +52,15 @@ const InteractionItemView = View.extend({
     const flow = action?.getFlow() || this.model.getFlow();
     const patientId = this.getOption('patientId');
 
+    if (!action?.get('name')) {
+      Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
+      return;
+    }
     if (!flow) {
       Radio.trigger('event-router', 'patient:action', patientId, action.id);
       return;
     }
-    if (action) {
-      Radio.trigger('event-router', 'patient:flow:action', patientId, flow.id, action.id);
-      return;
-    }
-    Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
+    Radio.trigger('event-router', 'patient:flow:action', patientId, flow.id, action.id);
   },
   hasCollapsibleNote(summary) {
     return this.model.getChannelGroup() === 'calls' && !this.getOption('activity') && summary?.length > 900;

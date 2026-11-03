@@ -13,6 +13,9 @@ Backbone.ajax = options => {
 
       const responseData = await getData(response, options.dataType);
 
+      // Headers can arrive before cancellation while the body is still pending.
+      if (options.signal?.aborted) return;
+
       if (!response.ok) {
         if (options.error) options.error(responseData);
 
