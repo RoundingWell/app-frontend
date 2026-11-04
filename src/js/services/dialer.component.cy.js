@@ -356,6 +356,152 @@ context('Dialer Service', function() {
       });
   });
 
+  specify('keeps a newer 8x8 call when hang-up is still resolving phones', function() {
+    const startTime = '1793723417987';
+    const request = Radio.request;
+    let releasePhones;
+    let fetches = 0;
+    const phonesReady = new Cypress.Promise(resolve => {
+      releasePhones = resolve;
+    });
+
+    cy.stub(Radio, 'request').callsFake((channelName, requestName, ...args) => {
+      if (channelName === 'entities' && requestName === 'patientFields:model') {
+        const patientId = args[0]._patient.id;
+        const phones = patientId === 'patient-hang' ?
+          [{ number: '+12025550123' }, { number: '+12125551212' }] :
+          [{ number: '+18005551212' }];
+
+        return {
+          value: null,
+          get(key) {
+            return this[key];
+          },
+          fetch() {
+            const gate = fetches === 0 ? phonesReady : Cypress.Promise.resolve();
+            fetches += 1;
+
+            return gate.then(() => {
+              this.value = phones;
+            });
+          },
+        };
+      }
+
+      if (channelName === 'entities' && requestName === 'searchPatients:collection') {
+        return {
+          fetch() {
+            return Cypress.Promise.resolve();
+          },
+          each() {},
+        };
+      }
+
+      return request.call(Radio, channelName, requestName, ...args);
+    });
+
+    Radio.reply('settings', 'get', () => '8x8');
+
+    cy
+      .intercept('PATCH', '/api/artifacts/**', {
+        statusCode: 201,
+        body: { data: {} },
+      })
+      .as('patchArtifact');
+
+    cy.then(async() => {
+      await service.start();
+    });
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', {
+        id: 'action-hang',
+        patientId: 'patient-hang',
+        patientName: 'Ada Lovelace',
+      });
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'hang-offered',
+      method: 'mapEvent',
+      direction: 'outbound',
+      media: 'phone',
+      searchContext: '+12025550123',
+      startTime,
+      schemaVersion: '1.0.0',
+    });
+
+    postTerminatedCall({
+      eventId: 'hang-end',
+      searchContext: '+12025550123',
+      startTime,
+    });
+
+    postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
+      eventName: 'offered',
+      eventId: 'hang-in-offered',
+      method: 'mapEvent',
+      direction: 'inbound',
+      media: 'phone',
+      searchContext: '+12125551212',
+      schemaVersion: '1.0.0',
+    });
+
+    cy.then(() => {
+      releasePhones();
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.callData.eventId).to.equal('hang-end');
+        expect(values.action_id).to.equal('action-hang');
+        expect(values.patient_id).to.equal('patient-hang');
+      });
+
+    cy
+      .get('.eightbyeight-panel__header')
+      .should('have.class', 'is-call-active')
+      .and('contain', 'Incoming Call');
+
+    cy
+      .get('.js-link-call')
+      .should('contain', 'Link this call');
+
+    cy.then(() => {
+      Radio.trigger('dialer', 'change:currentAction', {
+        id: 'action-other',
+        patientId: 'patient-other',
+        patientName: 'Grace Hopper',
+      });
+    });
+
+    postEightByEightEvent('mashell-voice-phone-terminated-uc-event-v1', {
+      eventName: 'terminated',
+      eventId: 'hang-in-end',
+      method: 'mapEvent',
+      direction: 'inbound',
+      media: 'phone',
+      searchContext: '+12125551212',
+      startTime,
+      endTime: String(Number(startTime) + 10000),
+      callDuration: '00:00:10',
+      hasRecording: false,
+      schemaVersion: '1.0.0',
+    });
+
+    cy
+      .wait('@patchArtifact')
+      .its('request.body.data.attributes.values')
+      .should(values => {
+        expect(values.callData.eventId).to.equal('hang-in-end');
+        expect(values.action_id).to.equal('action-hang');
+        expect(values.patient_id).to.equal('patient-hang');
+      });
+  });
+
   specify('links the live 8x8 call to the open action', function() {
     const startTime = '1793723417987';
 

@@ -199,14 +199,15 @@ export default App.extend({
   },
   async onTerminated(data) {
     const state = this.getState();
-    const taken = takeTerminated(this._callSession, data);
+    const endingSession = this._callSession;
+    const taken = takeTerminated(endingSession, data);
 
     this._callSession = taken.session;
     const linked = await this.linkedAction(taken);
 
     Radio.request('dialer', 'eightByEightCall', buildCallLogValues(taken.saving, linked));
 
-    if (taken.session) return;
+    if (taken.session || this._callSession !== taken.session) return;
 
     this.finishCall(state);
   },
@@ -225,9 +226,10 @@ export default App.extend({
     }
 
     this.rememberOpenAction(this._openAction);
+    const trail = (this._actionTrail || []).slice();
     await this.settleTrail();
 
-    const match = this.latestPhoneMatch(session);
+    const match = this.latestPhoneMatch(session, trail);
 
     return {
       actionId: match?.actionId || null,
@@ -318,26 +320,21 @@ export default App.extend({
     return entry;
   },
   trackPhones(entry) {
-    const watch = this._trailWatch;
     const pending = patientPhoneNumbers(entry.patientId)
-      .then(numbers => this.keepNumbers(entry, watch, numbers))
-      .catch(() => this.keepNumbers(entry, watch, []));
+      .then(numbers => this.keepNumbers(entry, numbers))
+      .catch(() => this.keepNumbers(entry, []));
 
     this._trailPromises = this._trailPromises || [];
     this._trailPromises.push(pending);
   },
-  keepNumbers(entry, watch, numbers) {
-    if (watch !== this._trailWatch) return;
-
+  keepNumbers(entry, numbers) {
     entry.numbers = numbers;
   },
   async settleTrail() {
     const pending = (this._trailPromises || []).splice(0);
     await Promise.all(pending);
   },
-  latestPhoneMatch(session) {
-    const trail = this._actionTrail || [];
-
+  latestPhoneMatch(session, trail = this._actionTrail || []) {
     for (let index = trail.length - 1; index >= 0; index--) {
       if (contextMatchesCall(trail[index].numbers, session)) return trail[index];
     }
@@ -345,7 +342,6 @@ export default App.extend({
     return null;
   },
   dropActionTrail() {
-    this._trailWatch = (this._trailWatch || 0) + 1;
     this._actionTrail = [];
     this._trailPromises = [];
   },
