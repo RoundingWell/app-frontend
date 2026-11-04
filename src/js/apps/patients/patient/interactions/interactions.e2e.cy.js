@@ -382,7 +382,7 @@ context('patient interactions', function() {
 
     cy
       .location('pathname')
-      .should('contain', '/workflow');
+      .should('equal', `/one/patient/${ patient.id }/workflow`);
 
     cy
       .then(() => initial.release());
