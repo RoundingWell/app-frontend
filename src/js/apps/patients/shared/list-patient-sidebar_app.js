@@ -31,7 +31,7 @@ export default PatientSidebarApp.extend({
     this.getView().showSidebars(this.sidebars);
   },
   onStop() {
-    if (this.patient) Radio.request('ws', 'unsubscribe', this.patient);
+    Radio.request('ws', 'unsubscribe', this.patient);
   },
   focusClose() {
     this.getView()?.focusClose();
