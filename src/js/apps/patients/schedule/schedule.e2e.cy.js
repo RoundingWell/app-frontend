@@ -180,6 +180,11 @@ context('schedule page', function() {
       .should('contain', 'The schedule could not be updated.');
 
     cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.enabled');
+
+    cy
       .get('.patient-list-page__count')
       .should('be.empty');
 
@@ -233,6 +238,11 @@ context('schedule page', function() {
       .wait('@routeActions');
 
     cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.enabled');
+
+    cy
       .get('[data-date-filter-region]')
       .find('.js-next')
       .click();
@@ -243,6 +253,11 @@ context('schedule page', function() {
       .should('contain', 'Loading State Action')
       .should('have.class', 'is-loading')
       .should('have.attr', 'aria-busy', 'true');
+
+    cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.disabled');
 
     cy
       .get('.schedule-list__updating')
@@ -261,6 +276,11 @@ context('schedule page', function() {
     cy
       .get('.patient-list-page__count')
       .should('contain', '1 Action');
+
+    cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.enabled');
   });
 
   specify('display schedule', function() {
