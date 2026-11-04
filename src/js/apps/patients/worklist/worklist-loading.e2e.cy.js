@@ -129,6 +129,11 @@ context('worklist loading states', function() {
       .visit('/worklist/owned-by')
       .wait('@routeActions');
 
+    cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.enabled');
+
     chooseLastWeek();
 
     cy
@@ -137,6 +142,11 @@ context('worklist loading states', function() {
       .should('contain', 'Loading State Action')
       .should('have.class', 'is-loading')
       .should('have.attr', 'aria-busy', 'true');
+
+    cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.disabled');
 
     cy
       .get('.worklist-list__updating')
@@ -151,6 +161,11 @@ context('worklist loading states', function() {
       .should('not.have.class', 'is-loading')
       .should('have.attr', 'aria-busy', 'false')
       .should('contain', 'Loading State Action');
+
+    cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.enabled');
   });
 
   specify('keeps the patient sidebar loader mounted while data loads', function() {
@@ -323,6 +338,11 @@ context('worklist loading states', function() {
       .get('.list-page__list')
       .should('contain', 'Loading State Action')
       .should('have.attr', 'aria-busy', 'false');
+
+    cy
+      .get('[data-select-all-region]')
+      .find('button')
+      .should('be.enabled');
 
     cy
       .get('.worklist-list__error')

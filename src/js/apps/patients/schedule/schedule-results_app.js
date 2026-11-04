@@ -44,12 +44,17 @@ export default App.extend({
       view.showCount({ collection, filteredCollection, isFlowList: this.getState().getType() === 'flows' });
     });
     this.listenTo(this.selection, 'change', selected => {
-      view.showSelectAll(this.selection.getControlState());
+      this.showSelectAll();
       if (selected.length) this.showBulkEdit();
       else this.stopBulkEdit();
     });
-    view.showSelectAll(this.selection.getControlState());
+    this.showSelectAll();
     this.showView();
+  },
+  showSelectAll() {
+    const controlState = this.selection.getControlState();
+    if (this.isRefreshingList) controlState.isDisabled = true;
+    this.getView().showSelectAll(controlState);
   },
   onBeforeDestroyView() {
     this.releaseRun();
@@ -97,6 +102,7 @@ export default App.extend({
     });
   },
   showCollection(collection) {
+    this.isRefreshingList = false;
     this.getState().setWorklist(collection.getMeta('worklist'));
     this.filtersState.set('worklist', collection.getMeta('worklist'));
     this.selection.setCollection(collection);
@@ -143,10 +149,13 @@ export default App.extend({
     const listView = this.getView().getChildView('list');
 
     if (!listView?.setLoading) {
+      this.isRefreshingList = false;
       this.showListLoading();
       return;
     }
 
+    this.isRefreshingList = true;
+    this.showSelectAll();
     listView.setLoading(true);
     this.getView().getRegion('status').empty();
     this.getView().getRegion('count').show(new ListUpdatingView());
@@ -154,6 +163,8 @@ export default App.extend({
   handleRefreshError(error) {
     const listView = this.getView().getChildView('list');
 
+    this.isRefreshingList = false;
+    this.showSelectAll();
     this.getView().getRegion('count').empty();
     addError(error);
 

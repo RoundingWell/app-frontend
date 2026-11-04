@@ -46,12 +46,17 @@ export default App.extend({
       view.showCount({ collection, filteredCollection, isFlowList: this.getState().getType() === 'flows' });
     });
     this.listenTo(this.selection, 'change', selected => {
-      view.showSelectAll(this.selection.getControlState());
+      this.showSelectAll();
       if (selected.length) this.showBulkEdit();
       else this.stopBulkEdit();
     });
-    view.showSelectAll(this.selection.getControlState());
+    this.showSelectAll();
     this.showView();
+  },
+  showSelectAll() {
+    const controlState = this.selection.getControlState();
+    if (this.isRefreshingList) controlState.isDisabled = true;
+    this.getView().showSelectAll(controlState);
   },
   onBeforeDestroyView() {
     this.releaseRun();
@@ -162,6 +167,7 @@ export default App.extend({
 
     this.showListError(this.isRefreshingList);
     this.isRefreshingList = false;
+    this.showSelectAll();
   },
   showBulkEdit() {
     const appName = this.getState().isFlowType() ? 'bulkEditFlows' : 'bulkEditActions';
@@ -258,6 +264,7 @@ export default App.extend({
     }
 
     this.isRefreshingList = true;
+    this.showSelectAll();
     listView.setLoading(true);
     this.getView().getRegion('status').empty();
     this.getView().getRegion('count').show(new ListUpdatingView());
