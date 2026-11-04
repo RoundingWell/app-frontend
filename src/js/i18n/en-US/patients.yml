@@ -403,6 +403,8 @@ careOptsFrontend:
           callLabel: Call
           defaultText: Call Number
           headingText: Phone Numbers
+          linkCallText: Link this call
+          linkedText: Linked
         dueView:
           defaultText: Select Date...
         durationComponent:

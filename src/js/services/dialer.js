@@ -13,9 +13,26 @@ export default App.extend({
     'showPatientLinks': 'showPatientLinks',
     'five9Call': 'five9Call',
     'ringcentralCall': 'ringcentralCall',
+    'eightByEightCall': 'eightByEightCall',
+    'currentAction': 'getCurrentAction',
+    'callLink': 'getCallLink',
   },
   radioEvents: {
     'change:currentPatientId': 'updateCurrentPatientId',
+    'change:currentAction': 'updateCurrentAction',
+    'change:callLink': 'updateCallLink',
+  },
+  getCallLink() {
+    return this._callLink || { callLive: false, linkedAction: null };
+  },
+  updateCallLink(callLink) {
+    this._callLink = callLink;
+  },
+  updateCurrentAction(action) {
+    this._currentAction = action;
+  },
+  getCurrentAction() {
+    return this._currentAction;
   },
   updateCurrentPatientId(patientId) {
     patients.currentPatientId = patientId;
@@ -53,6 +70,12 @@ export default App.extend({
 
       return { DialerApp, options: { patients } };
     }
+
+    if (dialerSetting === '8x8') {
+      const { default: DialerApp } = await import('@roundingwell/care-ops-8x8');
+
+      return { DialerApp, options: { patients } };
+    }
   },
   onStart() {
     if (!this._pendingCall) return;
@@ -63,6 +86,7 @@ export default App.extend({
   },
   onStop() {
     this._pendingCall = null;
+    this._callLink = null;
   },
   call(number, action) {
     const provider = this.getChildApp('provider');
@@ -75,31 +99,40 @@ export default App.extend({
     provider.call(number, action);
   },
   showPatientLinks(callData) {
+    const generation = this._patientLinkGeneration = (this._patientLinkGeneration || 0) + 1;
+
     if (!callData) {
       patients.reset();
       return;
     }
 
-    const { actionId, number } = callData;
+    if (this._linkActionPatient(callData.actionId)) return;
 
-    const action = Radio.request('entities', 'actions:model', actionId);
-    const patient = action.getPatient();
+    this._searchCaller(callData.number, generation);
+  },
+  _linkActionPatient(actionId) {
+    const action = actionId && Radio.request('entities', 'actions:model', actionId);
+    const patient = action && action.getPatient();
+    if (!patient) return false;
 
-    if (patient) {
-      this._addPatient(patient);
-      return;
-    }
+    this._addPatient(patient);
 
+    return true;
+  },
+  _searchCaller(number, generation) {
     if (!number) return;
 
     const phone = parsePhoneNumber(number, 'US');
+    if (!(phone && phone.isValid())) return;
 
-    if (phone && phone.isValid()) {
-      const searchCollection = Radio.request('entities', 'searchPatients:collection');
+    const searchCollection = Radio.request('entities', 'searchPatients:collection');
 
-      searchCollection.fetch({ data: { 'filter[search]': number } })
-        .then(() => searchCollection.each(this._addPatient, this));
-    }
+    searchCollection.fetch({ data: { 'filter[search]': number } })
+      .then(() => {
+        if (generation !== this._patientLinkGeneration) return;
+
+        searchCollection.each(this._addPatient, this);
+      });
   },
   five9Call(values) {
     const { callData } = values;
@@ -116,6 +149,13 @@ export default App.extend({
     Radio.request('entities', 'save:artifacts:model', {
       artifact: 'ringcentral-call-log',
       identifier: callData.callId,
+      values,
+    });
+  },
+  eightByEightCall(values) {
+    Radio.request('entities', 'save:artifacts:model', {
+      artifact: '8x8-call-log',
+      identifier: values.callData.eventId,
       values,
     });
   },

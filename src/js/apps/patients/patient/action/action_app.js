@@ -16,6 +16,12 @@ import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
 
+function patientName(patient) {
+  if (!patient?.get) return null;
+
+  return [patient.get('first_name'), patient.get('last_name')].filter(Boolean).join(' ');
+}
+
 export default App.extend({
   childApps: {
     activity: ActivityApp,
@@ -132,6 +138,16 @@ export default App.extend({
 
     this.subscribe();
     this.showView();
+    this.publishCurrentAction();
+  },
+  publishCurrentAction() {
+    const patient = this.patient;
+
+    Radio.trigger('dialer', 'change:currentAction', {
+      id: this.action.id,
+      patientId: patient && patient.id,
+      patientName: patientName(patient),
+    });
   },
   updateContext() {
     this.triggerMethod('context:change', {
@@ -143,6 +159,10 @@ export default App.extend({
     });
   },
   onStop() {
+    const current = Radio.request('dialer', 'currentAction');
+    if (!current || current.id === this.action?.id) {
+      Radio.trigger('dialer', 'change:currentAction', null);
+    }
     this.unsubscribe();
     if (this.currentFlow) this.stopListening(this.currentFlow);
     if (this.action) this.stopListening(this.action);
