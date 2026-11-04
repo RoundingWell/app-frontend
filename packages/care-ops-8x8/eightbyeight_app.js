@@ -116,8 +116,10 @@ export default App.extend({
       model: this.getState(),
       collection: this.patients,
     }));
-    this.listenTo(this.getView(), 'link:call', this.onLinkCall);
-    this.listenTo(Radio.channel('dialer'), 'change:currentAction', this.onCurrentAction);
+    this.listenTo(Radio.channel('dialer'), {
+      'change:currentAction': this.onCurrentAction,
+      'link:call': this.onLinkCall,
+    });
 
     window.addEventListener('message', this.onMessage, {
       signal: this._abortController.signal,
@@ -143,6 +145,7 @@ export default App.extend({
       openAction: null,
       linkedAction: null,
     });
+    this.publishCallLink();
   },
   onBeforeDestroy() {
     this._abortController?.abort();
@@ -256,6 +259,7 @@ export default App.extend({
       actionId: null,
       linkedAction: null,
     });
+    this.publishCallLink();
     Radio.request('dialer', 'showPatientLinks', null);
   },
   noteCallStarted(data) {
@@ -276,6 +280,7 @@ export default App.extend({
       callLive: true,
       openAction: this._openAction,
     });
+    this.publishCallLink();
     this.rememberOpenAction(this._openAction);
   },
   onCurrentAction(action) {
@@ -291,15 +296,25 @@ export default App.extend({
       openAction: open,
       linkedAction: this._explicitLink,
     });
+    this.publishCallLink();
 
     if (this.getState().get('callLive')) this.rememberOpenAction(open);
   },
-  onLinkCall() {
-    const open = this._openAction;
+  onLinkCall(action) {
+    const open = normalizeAction(action);
     if (!open || !this.getState().get('callLive')) return;
 
     this._explicitLink = open;
     this.getState().set('linkedAction', open);
+    this.publishCallLink();
+  },
+  publishCallLink() {
+    const state = this.getState();
+
+    Radio.trigger('dialer', 'change:callLink', {
+      callLive: Boolean(state.get('callLive')),
+      linkedAction: state.get('linkedAction') || null,
+    });
   },
   rememberOpenAction(action) {
     const entry = this.trailEntry(action);

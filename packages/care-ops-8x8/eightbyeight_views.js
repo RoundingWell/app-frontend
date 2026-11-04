@@ -57,33 +57,6 @@ const PatientButtonsView = CollectionView.extend({
   },
 });
 
-const LinkCallView = View.extend({
-  tagName: 'button',
-  className: 'eightbyeight-panel__patient-btn js-link-call',
-  attributes: { type: 'button' },
-  template: hbs`{{#if linked}}{{formatMessage (intlGet "dialer.eightByEightApp.linkedCall") name=name}}{{else}}{{ @intl.dialer.eightByEightApp.linkCall }}{{/if}}`,
-  templateContext() {
-    const linked = this.model.get('linkedAction');
-    const open = this.model.get('openAction');
-    const isLinked = Boolean(linked && open && linked.actionId === open.actionId);
-
-    return {
-      linked: isLinked,
-      name: isLinked ? linked.patientName : '',
-    };
-  },
-  modelEvents: {
-    'change:linkedAction': 'render',
-    'change:openAction': 'render',
-  },
-  triggers: {
-    'click': 'link',
-  },
-  onLink() {
-    this.trigger('link:call');
-  },
-});
-
 const StatusView = View.extend({
   getTemplate() {
     if (!this.model.get('isOpen')) return hbs`{{far "window-maximize"}}`;
@@ -101,7 +74,6 @@ const LayoutView = View.extend({
   className: 'eightbyeight-wrapper',
   template: hbs`
     <div data-patient-buttons-region></div>
-    <div data-link-call-region></div>
     <div class="eightbyeight-panel">
       <div class="eightbyeight-panel__header js-header">
         {{fas "phone"}}
@@ -120,15 +92,12 @@ const LayoutView = View.extend({
   `,
   regions: {
     patientButtons: '[data-patient-buttons-region]',
-    linkCall: '[data-link-call-region]',
     heading: '[data-heading-region]',
     status: '[data-status-region]',
   },
   modelEvents: {
     'change:isOpen': 'onChangeIsOpen',
     'change:callState': 'showCallState',
-    'change:callLive': 'showLinkCall',
-    'change:openAction': 'showLinkCall',
   },
   ui: {
     header: '.js-header',
@@ -150,27 +119,11 @@ const LayoutView = View.extend({
     this.showPatientButtons();
     this.showCallState();
     this.showPanelStatus();
-    this.showLinkCall();
   },
   showPatientButtons() {
     this.showChildView('patientButtons', new PatientButtonsView({
       collection: this.collection,
     }));
-  },
-  showLinkCall() {
-    const region = this.getRegion('linkCall');
-    const show = this.model.get('callLive') && this.model.get('openAction');
-
-    if (!show) {
-      region.empty();
-      return;
-    }
-
-    if (region.hasView()) return;
-
-    const linkCall = new LinkCallView({ model: this.model });
-    this.listenTo(linkCall, 'link:call', () => this.triggerMethod('link:call'));
-    region.show(linkCall);
   },
   call(number) {
     const [iframe] = this.getUI('iframe');

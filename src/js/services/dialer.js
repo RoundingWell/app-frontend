@@ -15,10 +15,18 @@ export default App.extend({
     'ringcentralCall': 'ringcentralCall',
     'eightByEightCall': 'eightByEightCall',
     'currentAction': 'getCurrentAction',
+    'callLink': 'getCallLink',
   },
   radioEvents: {
     'change:currentPatientId': 'updateCurrentPatientId',
     'change:currentAction': 'updateCurrentAction',
+    'change:callLink': 'updateCallLink',
+  },
+  getCallLink() {
+    return this._callLink || { callLive: false, linkedAction: null };
+  },
+  updateCallLink(callLink) {
+    this._callLink = callLink;
   },
   updateCurrentAction(action) {
     this._currentAction = action;
@@ -78,6 +86,7 @@ export default App.extend({
   },
   onStop() {
     this._pendingCall = null;
+    this._callLink = null;
   },
   call(number, action) {
     const provider = this.getChildApp('provider');

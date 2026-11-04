@@ -1,3 +1,4 @@
+import Backbone from 'backbone';
 import dayjs from 'dayjs';
 import { v5 as uuid } from 'uuid';
 import { Application, Radio, View } from 'marionette';
@@ -5,6 +6,7 @@ import { COPY_NUMBER_UNTIL_WHITELISTED } from '@roundingwell/care-ops-8x8/eightb
 import { CALL_ATTACH_WINDOW_MS } from '@roundingwell/care-ops-8x8/eightbyeight_call_log.js';
 import { RWELL_NS } from 'js/static';
 import AlertService from 'js/services/alert';
+import DialerButtonView from 'js/apps/patients/shared/components/dialer_view.js';
 import DialerService from './dialer';
 
 context('Dialer Service', function() {
@@ -419,6 +421,11 @@ context('Dialer Service', function() {
         patientId: 'patient-hang',
         patientName: 'Ada Lovelace',
       });
+      showCallNumberButton({
+        id: 'action-hang',
+        patientId: 'patient-hang',
+        patientName: 'Ada Lovelace',
+      });
     });
 
     postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
@@ -502,7 +509,7 @@ context('Dialer Service', function() {
       });
   });
 
-  specify('links the live 8x8 call to the open action', function() {
+  specify('replaces Call Number with Link this call during a live 8x8 call', function() {
     const startTime = '1793723417987';
 
     stubPatientPhones([]);
@@ -518,6 +525,19 @@ context('Dialer Service', function() {
     cy.then(async() => {
       await service.start();
     });
+
+    cy.then(() => {
+      showCallNumberButton({
+        id: 'action-link',
+        patientId: 'patient-link',
+        patientName: 'Ada Lovelace',
+      });
+    });
+
+    cy
+      .get('.dialer-component__button')
+      .should('contain', 'Call Number')
+      .and('not.be.disabled');
 
     postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
       eventName: 'offered',
@@ -539,19 +559,22 @@ context('Dialer Service', function() {
     });
 
     cy
-      .get('.js-link-call')
+      .get('.dialer-component__button')
       .should('contain', 'Link this call')
+      .and('not.be.disabled')
       .then($button => {
         $button[0].click();
       });
 
     cy
-      .get('.js-link-call')
-      .should('contain', 'Linked to Ada Lovelace');
+      .get('.dialer-component__button')
+      .should('contain', 'Linked')
+      .and('be.disabled');
 
     cy
       .get('.eightbyeight-wrapper')
-      .should('not.have.class', 'is-open');
+      .should('not.have.class', 'is-open')
+      .and('not.contain', 'Link this call');
 
     postTerminatedCall({
       eventId: 'link-end',
@@ -568,8 +591,10 @@ context('Dialer Service', function() {
       });
 
     cy
-      .get('.js-link-call')
-      .should('not.exist');
+      .get('.dialer-component__button')
+      .should('contain', 'Call Number')
+      .and('not.contain', 'Linked')
+      .and('not.be.disabled');
   });
 
   specify('clears an 8x8 call link when the action changes', function() {
@@ -606,17 +631,24 @@ context('Dialer Service', function() {
         patientId: 'patient-first',
         patientName: 'Ada Lovelace',
       });
+      showCallNumberButton({
+        id: 'action-first',
+        patientId: 'patient-first',
+        patientName: 'Ada Lovelace',
+      });
     });
 
     cy
-      .get('.js-link-call')
+      .get('.dialer-component__button')
+      .should('contain', 'Link this call')
       .then($button => {
         $button[0].click();
       });
 
     cy
-      .get('.js-link-call')
-      .should('contain', 'Linked to Ada Lovelace');
+      .get('.dialer-component__button')
+      .should('contain', 'Linked')
+      .and('be.disabled');
 
     cy.then(() => {
       Radio.trigger('dialer', 'change:currentAction', {
@@ -624,26 +656,33 @@ context('Dialer Service', function() {
         patientId: 'patient-second',
         patientName: 'Grace Hopper',
       });
+      showCallNumberButton({
+        id: 'action-second',
+        patientId: 'patient-second',
+        patientName: 'Grace Hopper',
+      });
     });
 
     cy
-      .get('.js-link-call')
+      .get('.dialer-component__button')
       .should('contain', 'Link this call')
-      .and('not.contain', 'Ada Lovelace')
+      .and('not.be.disabled')
       .then($button => {
         $button[0].click();
       });
 
     cy
-      .get('.js-link-call')
-      .should('contain', 'Linked to Grace Hopper');
+      .get('.dialer-component__button')
+      .should('contain', 'Linked')
+      .and('be.disabled');
 
     cy.then(() => {
       Radio.trigger('dialer', 'change:currentAction', null);
+      rootView.appView.getRegion('region').empty();
     });
 
     cy
-      .get('.js-link-call')
+      .get('.dialer-component__button')
       .should('not.exist');
 
     postTerminatedCall({
@@ -1497,6 +1536,24 @@ context('Dialer Service', function() {
       .get('@fetchSearch')
       .should('not.have.been.called');
   });
+
+  function showCallNumberButton({ id, patientId, patientName }) {
+    const [firstName, ...rest] = String(patientName || '').split(' ');
+    const patient = new Backbone.Model({
+      id: patientId,
+      first_name: firstName,
+      last_name: rest.join(' '),
+    });
+    patient.getResource = () => ({ id: patientId, type: 'patients' });
+
+    const action = new Backbone.Model({ id });
+    action.getPatient = () => patient;
+
+    rootView.appView.getRegion('region').show(new DialerButtonView({
+      action,
+      isDisabled: false,
+    }));
+  }
 
   function postManualCall({ eventId, searchContext, startTime }) {
     postEightByEightEvent('mashell-voice-phone-offered-uc-event-v1', {
