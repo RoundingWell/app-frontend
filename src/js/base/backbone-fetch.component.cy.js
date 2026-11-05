@@ -1,5 +1,6 @@
 import Store from 'backbone.store';
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import BaseCollection from './collection';
 import BaseModel from './model';
@@ -8,20 +9,20 @@ import './backbone-fetch';
 const TYPE = 'cancelled-body-test-models';
 
 context('Backbone fetch cancellation', function() {
+  let scope;
   let requests;
   let releaseBody;
 
   beforeEach(function() {
+    scope = testScope();
+    scope.defer(() => Store.remove(TYPE));
     requests = [];
     releaseBody = undefined;
   });
 
   afterEach(function() {
     if (releaseBody) releaseBody();
-    return Cypress.Promise.all(requests).finally(() => {
-      Store.remove(TYPE);
-      Radio.reset();
-    });
+    return Cypress.Promise.all(requests);
   });
 
   specify('does not overwrite the Store when a cancelled response body finishes late', function() {
@@ -59,7 +60,7 @@ context('Backbone fetch cancellation', function() {
         .onSecondCall().resolves(new Response(JSON.stringify(resource('Current value')), {
           headers: { 'Content-Type': 'application/vnd.api+json' },
         }));
-      Radio.reply('auth', 'getToken', () => undefined);
+      scope.reply(Radio, 'auth', 'getToken', () => undefined);
 
       const oldRequest = oldWindow.fetch({ url: '/api/cancelled-body-test', signal: controller.signal });
       requests.push(oldRequest);
@@ -97,8 +98,8 @@ context('Backbone fetch cancellation', function() {
         category: 'MetadataUpdated', resource: model.getResource(), author: { type: 'clinicians', id: 'sender' }, payload: { attributes: { name: 'Websocket value' } },
       };
       const trigger = cy.spy();
-      Radio.reply('ws', 'trigger', trigger);
-      Radio.reply('auth', 'getToken', () => undefined);
+      scope.reply(Radio, 'ws', 'trigger', trigger);
+      scope.reply(Radio, 'auth', 'getToken', () => undefined);
       let started;
       const bodyStarted = new Cypress.Promise(resolve => {
         started = resolve;
@@ -186,8 +187,8 @@ context('Backbone fetch cancellation', function() {
       const trigger = cy.spy();
       const destroyed = cy.spy();
       model.on('destroy', destroyed);
-      Radio.reply('ws', 'trigger', trigger);
-      Radio.reply('auth', 'getToken', () => undefined);
+      scope.reply(Radio, 'ws', 'trigger', trigger);
+      scope.reply(Radio, 'auth', 'getToken', () => undefined);
       cy.stub(win, 'fetch')
         .onFirstCall().resolves(oldResponse.response)
         .onSecondCall().resolves(newerResponse.response);
@@ -248,7 +249,7 @@ context('Backbone fetch cancellation', function() {
       const model = new Model({ id: 'row', name: 'Initial value' });
       const oldWindow = new Collection([model]);
       const currentWindow = new Collection([model]);
-      Radio.reply('auth', 'getToken', () => undefined);
+      scope.reply(Radio, 'auth', 'getToken', () => undefined);
       const oldRequest = oldWindow.fetch({ url: '/api/internal-collection-cancellation' });
       requests.push(oldRequest);
 

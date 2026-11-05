@@ -1,4 +1,5 @@
 import { contains, filter, find, map, range, some } from 'underscore';
+import { createTestScope } from '@mnjs/test/scope';
 
 import { getRelationship } from 'helpers/json-api';
 import formatDate from 'helpers/format-date';
@@ -22,7 +23,7 @@ function assertFeedEnd($item) {
   expect(container.getBoundingClientRect().bottom - $item[0].getBoundingClientRect().bottom, 'only normal bottom spacing').to.be.at.most(padding + 1);
 }
 
-function createResponseGate(pendingResponses) {
+function createResponseGate(scope) {
   const drains = [];
   let release;
   // Teardown must still release gates when Cypress cancels a timed-out waiter.
@@ -42,13 +43,16 @@ function createResponseGate(pendingResponses) {
       return drain;
     },
   };
-  pendingResponses.push(gate);
+  scope.defer(() => {
+    gate.release();
+    return gate.drain;
+  });
   return gate;
 }
 
-function trackInteractionRequests(win, completions, restores) {
+function trackInteractionRequests(win, completions, scope) {
   const originalFetch = win.fetch;
-  restores.push(() => {
+  scope.defer(() => {
     win.fetch = originalFetch;
   });
   win.fetch = (...args) => {
@@ -96,7 +100,7 @@ function drainInteractionRequests(completions) {
   });
 }
 
-function observeInteractionMessage(win, id) {
+function observeInteractionMessage(win, id, scope) {
   return new Promise(resolve => {
     const channel = win.Radio.channel('ws');
     const received = message => {
@@ -106,19 +110,20 @@ function observeInteractionMessage(win, id) {
       setTimeout(resolve, 0);
     };
     channel.on('message:interactions', received);
+    scope.defer(() => channel.off('message:interactions', received));
   });
 }
 
 context('patient interactions', function() {
-  let pendingResponses;
+  let responses;
   let requestCompletions;
-  let restoreFetches;
+  let fixtures;
 
   beforeEach(function() {
-    pendingResponses = [];
+    responses = createTestScope();
     requestCompletions = [];
-    restoreFetches = [];
-    cy.on('window:before:load', win => trackInteractionRequests(win, requestCompletions, restoreFetches));
+    fixtures = createTestScope();
+    cy.on('window:before:load', win => trackInteractionRequests(win, requestCompletions, fixtures));
 
     cy
       .intercept({ method: 'GET', url: '/api/patients/*/interactions*', middleware: true }, req => {
@@ -130,10 +135,9 @@ context('patient interactions', function() {
   });
 
   afterEach(function() {
-    for (const response of pendingResponses) response.release();
-    return Cypress.Promise.all([drainInteractionRequests(requestCompletions), ...pendingResponses.map(response => response.drain)]).finally(() => {
-      for (const restore of restoreFetches) restore();
-    });
+    return responses.cleanup()
+      .finally(() => drainInteractionRequests(requestCompletions))
+      .finally(() => fixtures.cleanup());
   });
 
   specify('limits anchored one-item pages with included and filtered-out pivots', function() {
@@ -158,7 +162,7 @@ context('patient interactions', function() {
       channel: 'voice', direction: 'outbound', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(),
       metadata: { note: `Guard row ${ index }`, clinician_name: `Guard sender ${ index }` },
     } }));
-    const initial = createResponseGate(pendingResponses);
+    const initial = createResponseGate(responses);
     const countReads = limit => filter(requestCompletions, completion => new URL(completion.requestUrl, 'http://localhost').searchParams.get('page[limit]') === String(limit)).length;
     let previewReads;
     let foreignDelivered;
@@ -204,7 +208,7 @@ context('patient interactions', function() {
     cy
       .window()
       .then(win => {
-        foreignDelivered = observeInteractionMessage(win, foreign.id);
+        foreignDelivered = observeInteractionMessage(win, foreign.id, fixtures);
         previewReads = countReads(3);
         rows[25].attributes.metadata.note = 'Newer server note';
         rows[49].attributes.metadata.clinician_name = 'Newer server sender';
@@ -354,7 +358,7 @@ context('patient interactions', function() {
   specify('cancels an initial timeline on navigation and loads it again on reentry', function() {
     const patient = getPatient();
     const row = getInteraction({ attributes: { channel: 'voice', metadata: { note: 'Reentered interaction' } } });
-    const initial = createResponseGate(pendingResponses);
+    const initial = createResponseGate(responses);
 
     cy
       .routesForPatientWorkflow()
@@ -630,8 +634,8 @@ context('patient interactions', function() {
       const linked = rows[49];
       const deleted = rows[36];
       const deletedNext = rows[48];
-      const initial = createResponseGate(pendingResponses);
-      const followup = createResponseGate(pendingResponses);
+      const initial = createResponseGate(responses);
+      const followup = createResponseGate(responses);
       const action = getAction({ attributes: { name: 'Live burst action' }, relationships: { patient: getRelationship(patient) } });
       const send = (category, row, attributes = {}) => cy.sendWs({
         category, resource: { type: 'interactions', id: row.id }, payload: { patient: { type: 'patients', id: patient.id }, attributes },
@@ -848,10 +852,10 @@ context('patient interactions', function() {
       metadata: { note: `Settling row ${ index }`, clinician_name: `Settling clinician ${ index }` },
     } }));
     const target = rows[50];
-    const initial = createResponseGate(pendingResponses);
-    const followup = createResponseGate(pendingResponses);
-    const repair = createResponseGate(pendingResponses);
-    const edge = createResponseGate(pendingResponses);
+    const initial = createResponseGate(responses);
+    const followup = createResponseGate(responses);
+    const repair = createResponseGate(responses);
+    const edge = createResponseGate(responses);
     let anchoredReads = 0;
     let paging = false;
     const pagingGate = query => {
@@ -1243,7 +1247,7 @@ context('patient interactions', function() {
     const rows = map(range(50), index => getInteraction({ attributes: {
       channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(), metadata: { note: `Later page row ${ index }` },
     } }));
-    const initial = createResponseGate(pendingResponses);
+    const initial = createResponseGate(responses);
     const action = getAction({ attributes: { name: 'Previously unloaded work' }, relationships: { patient: getRelationship(patient) } });
     rows[47].attributes.metadata = { note: 'Updated since creation' };
 
@@ -1315,7 +1319,7 @@ context('patient interactions', function() {
     const rows = map(range(3), index => getInteraction({ attributes: {
       channel: 'voice', occurred_at: `2026-10-0${ index + 1 }T12:00:00Z`, metadata: { note: `Retry row ${ index }` },
     } }));
-    const initial = createResponseGate(pendingResponses);
+    const initial = createResponseGate(responses);
     const timestamp = '2026-10-05T12:00:00Z';
 
     cy
@@ -1370,7 +1374,7 @@ context('patient interactions', function() {
         channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, row + 1)).toISOString(), metadata: { note: `Pending row ${ row }` },
       } }));
       const changed = rows[index];
-      const older = createResponseGate(pendingResponses);
+      const older = createResponseGate(responses);
 
       cy
         .routesForPatientWorkflow()
@@ -1453,7 +1457,7 @@ context('patient interactions', function() {
         channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1)).toISOString(), metadata: { note: `Initial row ${ index }` },
       } }));
       const target = rows[25];
-      const initial = createResponseGate(pendingResponses);
+      const initial = createResponseGate(responses);
 
       cy
         .routesForPatientWorkflow()
@@ -1520,7 +1524,7 @@ context('patient interactions', function() {
     const rows = map(range(120), index => getInteraction({ attributes: {
       channel: 'voice', occurred_at: new Date(Date.UTC(2026, 0, Math.floor(index / 2) + 1, 12)).toISOString(), metadata: { note: `Queued row ${ index }` },
     } }));
-    const refresh = createResponseGate(pendingResponses);
+    const refresh = createResponseGate(responses);
     const otherTimestamp = new Date(Date.parse(rows[90].attributes.occurred_at) + 60000).toISOString();
     let anchor;
     let dateLabel;
@@ -1569,7 +1573,7 @@ context('patient interactions', function() {
     cy
       .window()
       .then(win => {
-        delivered = observeInteractionMessage(win, rows[90].id);
+        delivered = observeInteractionMessage(win, rows[90].id, fixtures);
         rows[90].attributes.occurred_at = otherTimestamp;
       });
 
@@ -1595,7 +1599,7 @@ context('patient interactions', function() {
     cy
       .window()
       .then(win => {
-        delivered = observeInteractionMessage(win, anchor.id);
+        delivered = observeInteractionMessage(win, anchor.id, fixtures);
         anchor.attributes.occurred_at = '2025-01-01T12:00:00Z';
       });
 
@@ -1632,7 +1636,7 @@ context('patient interactions', function() {
     const rows = map(range(120), index => getInteraction({ attributes: {
       channel: 'voice', occurred_at: new Date(Date.UTC(2026, 0, Math.floor(index / 2) + 1, 12)).toISOString(), metadata: { note: `Filter row ${ index }` },
     } }));
-    const refresh = createResponseGate(pendingResponses);
+    const refresh = createResponseGate(responses);
     const timestamp = '2025-01-01T12:00:00Z';
     let anchor;
     let dateLabel;
@@ -1858,7 +1862,7 @@ context('patient interactions', function() {
   specify('owns the patient subscription before workflow readiness and clears child state on navigation', function() {
     const patient = getPatient();
     const flow = getFlow({ attributes: { name: 'Owned workflow flow' }, relationships: { patient: getRelationship(patient), state: getRelationship(stateTodo), owner: getRelationship(teamCoordinator) } });
-    const loading = createResponseGate(pendingResponses);
+    const loading = createResponseGate(responses);
 
     cy
       .routesForPatientWorkflow()
@@ -2410,7 +2414,7 @@ context('patient interactions', function() {
       return interaction;
     });
 
-    const initial = createResponseGate(pendingResponses);
+    const initial = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -2960,7 +2964,7 @@ context('patient interactions', function() {
         .should('have.text', label);
     }
 
-    const refresh = createResponseGate(pendingResponses);
+    const refresh = createResponseGate(responses);
     let position;
 
     cy
@@ -3063,7 +3067,7 @@ context('patient interactions', function() {
 
       return interaction;
     });
-    const older = createResponseGate(pendingResponses);
+    const older = createResponseGate(responses);
 
     cy
       .routesForPatientWorkflow()
@@ -3487,7 +3491,7 @@ context('patient interactions', function() {
       .should('contain', 'Left a message asking the patient to call back.')
       .and('be.focused');
 
-    const targetFilter = createResponseGate(pendingResponses);
+    const targetFilter = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -4045,7 +4049,7 @@ context('patient interactions', function() {
       },
     });
 
-    const filtered = createResponseGate(pendingResponses);
+    const filtered = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -4107,7 +4111,7 @@ context('patient interactions', function() {
       .get('.patient-interactions [role="alert"]')
       .should('not.be.visible');
 
-    const dateFilter = createResponseGate(pendingResponses);
+    const dateFilter = createResponseGate(responses);
 
     cy
       .routePatientInteractions(fx => {
@@ -4172,7 +4176,7 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
       .should('be.visible');
 
-    const dateIntent = createResponseGate(pendingResponses);
+    const dateIntent = createResponseGate(responses);
 
     cy
       .routePatientInteractions(fx => {
@@ -4236,7 +4240,7 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
       .should('be.visible');
 
-    const leaving = createResponseGate(pendingResponses);
+    const leaving = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -4389,7 +4393,7 @@ context('patient interactions', function() {
     cy
       .viewport(1280, 900);
 
-    const preview = createResponseGate(pendingResponses);
+    const preview = createResponseGate(responses);
 
     cy
       .routesForDefault()
