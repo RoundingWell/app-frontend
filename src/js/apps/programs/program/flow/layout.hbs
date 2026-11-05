@@ -1,7 +1,11 @@
 <div class="program-page__layout">
   <div data-context-trail-region></div>
-  <div data-header-region></div>
-  <div data-add-action-region></div>
-  <div data-action-list-region></div>
+  <div class="program-page__content">
+    <div data-header-region></div>
+    <section>
+      <h2 class="program-page__section-title">{{ @intl.programs.program.flow.layoutTemplate.actionsHeading }}</h2>
+      <div data-action-list-region></div>
+    </section>
+  </div>
 </div>
 <div class="program-page__sidebar" data-sidebar-region></div>

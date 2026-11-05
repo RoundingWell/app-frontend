@@ -1,12 +1,7 @@
-<h1 class="program-flow__name">{{far "folder-open"}} {{ name }}</h1>
-<div>
-  <p class="program-flow__details">
-  {{#if details}}
-    {{ details }}
-  {{ else }}
-    <button class="program-flow__meta button button--secondary" type="button">{{far "pen-to-square"}} {{ @intl.programs.program.flow.flowViews.addDetailsBtn }}</button>
-  {{/if}}
-  </p>{{~ remove_whitespace ~}}
-  <span class="program-flow__meta" data-behavior-region></span>{{~ remove_whitespace ~}}
-  <span class="program-flow__meta" data-owner-region></span>
+<h1 class="program-flow__name">{{far "folder-open"}}{{ name }}</h1>
+{{#if details}}<p class="program-flow__details">{{ details }}</p>{{/if}}
+<div class="program-flow__meta">
+  <span class="program-behavior program-behavior--{{ behavior.modifier }}">{{far behavior.icon}}{{ behavior.label }}</span>
+  <span class="program-items__state{{#if published}} is-published{{/if}}">{{formatMessage (intlGet "programs.shared.programViews.published") published=published}}</span>
+  {{#if ownerName}}<span class="program-items__owner">{{far "users"}}{{ ownerName }}</span>{{/if}}
 </div>

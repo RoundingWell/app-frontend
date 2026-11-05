@@ -1,54 +1,15 @@
-import { extend, first, size } from 'underscore';
+import { first, size } from 'underscore';
 import { Radio } from 'marionette';
 import Store from 'backbone.store';
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
-import trim from 'js/utils/formatting/trim';
-import collectionOf from 'js/utils/formatting/collection-of';
-
 import { STATE_STATUS, PROGRAM_BEHAVIORS } from 'js/static';
 
 const TYPE = 'program-actions';
-const WRITABLE_ATTRIBUTES = [
-  'name',
-  'details',
-  'days_until_due',
-  'weekdays_only',
-  'sequence',
-  'tags',
-  'sync',
-  'allowed_uploads',
-  'options',
-  'behavior',
-  'complexity',
-  'published_at',
-  'archived_at',
-];
 
 const _Model = BaseModel.extend({
-  writableAttributes: WRITABLE_ATTRIBUTES,
-  urlRoot: '/api/program-actions',
   type: TYPE,
-  validate({ name }) {
-    if (!trim(name)) return 'Action name required';
-  },
-  getTags() {
-    return Radio.request('entities', 'tags:collection', collectionOf(this.get('tags'), 'text'));
-  },
-  addTag(tag) {
-    const tags = this.getTags();
-    tags.add(tag);
-    return this.save({ tags: tags.map('text') });
-  },
-  removeTag(tag) {
-    const tags = this.getTags();
-    tags.remove(tag);
-    return this.save({ tags: tags.map('text') });
-  },
-  getProgramFlow() {
-    return this.getRelationship('_program_flow');
-  },
   getProgram() {
     return this.getRelationship('_program');
   },
@@ -70,21 +31,8 @@ const _Model = BaseModel.extend({
 
     return Radio.request('entities', 'actions:model', attrs);
   },
-  enableAttachmentUploads() {
-    this.save({ allowed_uploads: ['pdf'] });
-  },
-  disableAttachmentUploads() {
-    this.save({ allowed_uploads: [] });
-  },
   getOwner() {
     return this.getRelationship('_owner');
-  },
-  saveOwner(owner) {
-    return this.save({ _owner: owner ? owner.getResource() : null }, {
-      relationships: {
-        owner: this.toRelation(owner),
-      },
-    });
   },
   getForm() {
     return this.getRelationship('_form');
@@ -106,26 +54,6 @@ const _Model = BaseModel.extend({
 
     return true;
   },
-  saveForm(form) {
-    form = this.toRelation(form);
-    const saveData = { _form: form.data };
-
-    return this.save(saveData, {
-      relationships: { form },
-    });
-  },
-  saveAll(attrs) {
-    attrs = extend({}, this.attributes, attrs);
-
-    const relationships = {
-      'owner': this.toRelation(attrs._owner),
-      'form': this.toRelation(attrs._form),
-      'program-flow': this.toRelation(attrs._program_flow),
-      'program': this.toRelation(attrs._program),
-    };
-
-    return this.save(attrs, { relationships }, { wait: true });
-  },
 });
 
 const Model = Store(_Model, TYPE);
@@ -139,17 +67,6 @@ const Collection = BaseCollection.extend({
     return '/api/program-actions';
   },
   model: Model,
-  updateSequences() {
-    const data = this.map((flowAction, sequence) => {
-      flowAction.set({ sequence });
-      return flowAction.toJSONApi({ sequence });
-    });
-
-    return this.sync('patch', this, {
-      url: this.url(),
-      data: JSON.stringify({ data }),
-    });
-  },
   filterAddable() {
     const clone = this.clone();
 

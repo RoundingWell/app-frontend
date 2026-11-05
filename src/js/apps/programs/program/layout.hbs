@@ -1,5 +1,18 @@
 <div class="program-page__layout">
   <div data-context-trail-region></div>
-  <div data-content-region></div>
+  <div class="program-page__content">
+    <section data-testid="program-flows">
+      <h2 class="program-page__section-title">{{ @intl.programs.program.layoutTemplate.flowsHeading }}</h2>
+      <div data-flows-region></div>
+    </section>
+    <section data-testid="program-standard-actions">
+      <h2 class="program-page__section-title">{{ @intl.programs.program.layoutTemplate.standardActionsHeading }}</h2>
+      <div data-standard-actions-region></div>
+    </section>
+    <section data-testid="program-automated-actions">
+      <h2 class="program-page__section-title">{{ @intl.programs.program.layoutTemplate.automatedActionsHeading }}</h2>
+      <div data-automated-actions-region></div>
+    </section>
+  </div>
 </div>
 <div class="program-page__sidebar" data-sidebar-region></div>

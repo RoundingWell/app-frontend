@@ -1,0 +1,11 @@
+<div class="card-list__item-surface program-items__surface program-items__surface--{{ behavior.modifier }}">
+  <div class="card-list__item-main">
+    <span class="card-list__item-heading">{{far "folder"}}<span class="card-list__item-title" data-testid="program-flow-name">{{ name }}</span></span>
+    <span class="card-list__item-controls">
+      <span class="program-behavior program-behavior--{{ behavior.modifier }}">{{far behavior.icon}}{{ behavior.label }}</span>
+      <span class="program-items__state{{#if published}} is-published{{/if}}">{{formatMessage (intlGet "programs.shared.programViews.published") published=published}}</span>
+    </span>
+  </div>
+  {{#if details}}<p class="program-items__details">{{ details }}</p>{{/if}}
+  {{#if ownerName}}<div class="card-list__item-meta program-items__meta"><span class="program-items__owner">{{far "users"}}{{ ownerName }}</span></div>{{/if}}
+</div>

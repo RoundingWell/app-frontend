@@ -43,7 +43,6 @@ import './api/roles';
 import './api/settings';
 import './api/panels';
 import './api/states';
-import './api/tags';
 import './api/teams';
 import './api/widgets';
 import './api/workspace-patients';

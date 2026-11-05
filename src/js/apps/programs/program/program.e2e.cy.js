@@ -3,23 +3,93 @@ import { testTs } from 'helpers/test-timestamp';
 import { getRelationship } from 'helpers/json-api';
 
 import { getProgram } from 'support/api/programs';
-import { getProgramAction } from 'support/api//program-actions';
+import { getProgramAction } from 'support/api/program-actions';
+import { getProgramFlow } from 'support/api/program-flows';
+import { testForm } from 'support/api/forms';
+import { teamCoordinator, teamNurse } from 'support/api/teams';
 
 context('program page', function() {
-  specify('context trail', function() {
+  specify('program details, flows, and actions', function() {
     const testProgram = getProgram({
       attributes: {
         name: 'Test Program',
-        updated_at: testTs(),
+        details: 'Program details',
+        published_at: testTs(),
+        archived_at: null,
+      },
+    });
+
+    const automatedFlow = getProgramFlow({
+      attributes: {
+        name: 'Automated Flow',
+        details: 'Flow details',
+        behavior: 'automated',
+        published_at: testTs(),
+        archived_at: null,
+      },
+      relationships: {
+        'owner': getRelationship(teamNurse),
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    const draftFlow = getProgramFlow({
+      attributes: {
+        name: 'Draft Flow',
+        details: null,
+        behavior: 'standard',
+        published_at: null,
+        archived_at: null,
+      },
+      relationships: {
+        'owner': getRelationship(),
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    const formAction = getProgramAction({
+      attributes: {
+        name: 'Standard With Form',
+        details: 'Action details',
+        behavior: 'standard',
+        days_until_due: 3,
+      },
+      relationships: {
+        'owner': getRelationship(teamCoordinator),
+        'form': getRelationship(testForm),
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    const plainAction = getProgramAction({
+      attributes: {
+        name: 'Standard Without Form',
+        details: null,
+        behavior: 'standard',
+        days_until_due: null,
+      },
+      relationships: {
+        'owner': getRelationship(),
+        'form': getRelationship(),
+        'program': getRelationship(testProgram),
+      },
+    });
+
+    const automatedAction = getProgramAction({
+      attributes: {
+        name: 'Automated Action',
+        details: null,
+        behavior: 'automated',
+        days_until_due: 0,
+      },
+      relationships: {
+        'owner': getRelationship(),
+        'form': getRelationship(),
+        'program': getRelationship(testProgram),
       },
     });
 
     cy
-      .routeWorkspacePrograms(fx => {
-        fx.data = [testProgram];
-
-        return fx;
-      })
       .routePrograms(fx => {
         fx.data = [testProgram];
 
@@ -30,198 +100,186 @@ context('program page', function() {
 
         return fx;
       })
-      .routeProgramActions()
-      .routeProgramFlows()
-      .visit('/programs');
+      .routeProgramFlows(fx => {
+        fx.data = [draftFlow, automatedFlow];
 
-    cy
-      .get('.card-list__item')
-      .contains('Test Program')
-      .click();
-
-    cy
-      .url()
-      .should('contain', `program/${ testProgram.id }`);
-
-    cy
-      .intercept('GET', '/api/program-actions/*', {
-        delay: 2000,
-        body: { data: getProgramAction(), included: [] },
+        return fx;
       })
-      .as('pendingAction');
+      .routeProgramActions(fx => {
+        fx.data = [plainAction, automatedAction, formAction];
 
-    cy
-      .get('.action-card')
-      .first()
-      .click('bottom');
+        return fx;
+      })
+      .routeProgramFlow(fx => {
+        fx.data = automatedFlow;
 
-    cy
-      .get('@pendingAction.all')
-      .should('have.length', 1);
-
-    cy
-      .get('.program-page__context-trail')
-      .should('contain', 'Test Program')
-      .contains('Back to List')
-      .click();
-
-    cy
-      .url()
-      .should('contain', 'programs');
-
-    cy
-      .intercept('GET', '/api/tags', { delay: 2000, body: { data: [] } })
-      .as('pendingTags');
-
-    cy
-      .get('.card-list__item')
-      .contains('Test Program')
-      .click();
-
-    cy
-      .get('[data-add-region]')
-      .contains('Add')
-      .click();
-
-    cy
-      .get('.picklist')
-      .contains('New Flow')
-      .click();
-
-    cy
-      .get('@pendingTags.all')
-      .should('have.length', 1);
-
-    cy
-      .get('.program-page__context-trail')
-      .contains('Back to List')
-      .click();
-
-    cy
-      .get('.card-list__item')
-      .should('contain', 'Test Program');
-
-    cy
-      .get('.sidebar')
-      .should('not.exist');
-  });
-
-  specify('read only sidebar', function() {
-    const testProgram = getProgram({
-      attributes: {
-        name: 'Test Program',
-        details: null,
-        published_at: testTs(),
-        created_at: testTs(),
-        archived_at: null,
-        updated_at: testTs(),
-      },
-    });
-
-    cy
-      .routeProgram(fx => {
+        return fx;
+      })
+      .routeProgramByProgramFlow(fx => {
         fx.data = testProgram;
 
         return fx;
       })
-      .routeProgramFlows()
-      .routeProgramActions()
-      .visit(`/program/${ testProgram.id }`);
+      .routeProgramFlowActions(fx => {
+        fx.data = [];
+
+        return fx;
+      })
+      .visit('/programs')
+      .wait('@routePrograms');
 
     cy
-      .intercept('PATCH', `/api/programs/${ testProgram.id }`, {
-        statusCode: 204,
-        body: {},
-      })
-      .as('routePatchProgram');
+      .get('.card-list__item')
+      .contains('Test Program')
+      .click()
+      .wait('@routeProgram')
+      .wait('@routeProgramFlows')
+      .wait('@routeProgramActions');
+
+    cy
+      .get('.program-page__context-trail')
+      .should('contain', 'Test Program');
 
     cy
       .get('.program-sidebar')
       .should('contain', 'Test Program')
-      .should('contain', 'No details given')
-      .should('contain', 'On');
+      .should('contain', 'Program details')
+      .should('contain', 'Published');
 
     cy
-      .get('.js-menu')
-      .click();
+      .get('[data-testid="program-flows"]')
+      .find('.card-list__item')
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'Automated Flow')
+      .should('contain', 'Flow details')
+      .should('contain', 'Published')
+      .should('contain', 'Nurse')
+      .find('.program-behavior')
+      .should('have.class', 'program-behavior--automated')
+      .should('contain', 'Automated');
 
     cy
-      .get('.picklist')
-      .should('contain', 'Update Program')
-      .should('contain', 'Edit')
-      .click();
+      .get('[data-testid="program-flows"]')
+      .find('.card-list__item')
+      .last()
+      .should('contain', 'Draft Flow')
+      .should('contain', 'Draft')
+      .find('.program-behavior')
+      .should('have.class', 'program-behavior--standard')
+      .should('contain', 'Standard');
 
     cy
-      .get('.sidebar')
-      .find('[data-name-region]')
-      .contains('Test Program')
-      .clear()
-      .type('Testing');
+      .get('[data-testid="program-flows"]')
+      .find('.card-list__item')
+      .last()
+      .find('.program-items__owner')
+      .should('not.exist');
 
     cy
-      .get('[data-save-region]')
-      .contains('Save')
+      .get('[data-testid="program-standard-actions"]')
+      .find('.program-items__action')
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'Standard With Form')
+      .should('contain', 'Action details')
+      .should('contain', 'Coordinator')
+      .should('contain', 'Due in 3 days')
+      .find('.program-items__form')
+      .should('contain', 'Test Form');
+
+    cy
+      .get('[data-testid="program-standard-actions"]')
+      .find('.program-items__action')
+      .first()
+      .find('.program-behavior')
+      .should('have.class', 'program-behavior--standard')
+      .should('contain', 'Standard');
+
+    cy
+      .get('[data-testid="program-standard-actions"]')
+      .find('.program-items__action')
+      .last()
+      .should('contain', 'Standard Without Form')
+      .within(() => {
+        cy
+          .get('.program-items__form')
+          .should('not.exist');
+
+        cy
+          .get('.program-items__owner')
+          .should('not.exist');
+
+        cy
+          .get('.program-items__due')
+          .should('not.exist');
+      });
+
+    cy
+      .get('[data-testid="program-automated-actions"]')
+      .find('.program-items__action')
+      .should('have.length', 1)
+      .first()
+      .should('contain', 'Automated Action')
+      .should('contain', 'Due same day')
+      .find('.program-behavior')
+      .should('have.class', 'program-behavior--automated')
+      .should('contain', 'Automated');
+
+    cy
+      .get('[data-testid="program-flows"]')
+      .contains('Draft Flow')
+      .closest('.card-list__item')
+      .focus()
+      .type('{enter}')
+      .wait('@routeProgramFlow');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/program-flow/${ draftFlow.id }`);
+
+    cy
+      .go('back')
+      .wait('@routeProgram');
+
+    cy
+      .get('[data-testid="program-flows"]')
+      .contains('Automated Flow')
       .click()
-      .wait('@routePatchProgram');
+      .wait('@routeProgramFlow');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/program-flow/${ automatedFlow.id }`);
+
+    cy
+      .get('.program-flow__header')
+      .should('contain', 'Automated Flow');
+
+    cy
+      .go('back')
+      .wait('@routeProgram');
 
     cy
       .get('.program-page__context-trail')
-      .should('contain', 'Testing');
-  });
-
-  specify('new flow sidebar', function() {
-    const testProgram = getProgram();
-
-    cy
-      .routeTags()
-      .routeProgram(fx => {
-        fx.data = testProgram;
-
-        return fx;
-      })
-      .routeProgramActions(fx => [])
-      .routeProgramFlows(fx => [])
-      .visit(`/program/${ testProgram.id }`)
-      .wait('@routeProgram')
-      .wait('@routeProgramActions')
-      .wait('@routeProgramFlows');
-
-    cy
-      .get('[data-add-region]')
-      .contains('Add')
+      .contains('Back to List')
       .click();
 
     cy
-      .get('.picklist')
-      .contains('New Flow')
-      .click();
+      .location('pathname')
+      .should('equal', '/one/programs');
 
     cy
-      .get('.sidebar');
+      .get('.card-list__item')
+      .should('contain', 'Test Program');
   });
 
-  specify('action not from a flow', function() {
+  specify('empty program', function() {
     const testProgram = getProgram({
       attributes: {
-        name: 'Test Program',
-        published_at: testTs(),
-      },
-    });
-
-    const testProgramAction = getProgramAction({
-      attributes: {
-        name: 'Test Action',
-        details: 'Details',
+        name: 'Empty Program',
+        details: null,
         published_at: null,
-        archived_at: null,
-        behavior: 'standard',
-        allowed_uploads: [],
-        days_until_due: 5,
-        created_at: testTs(),
-        updated_at: testTs(),
-      },
-      relationships: {
-        'program': getRelationship(testProgram),
       },
     });
 
@@ -231,49 +289,38 @@ context('program page', function() {
 
         return fx;
       })
-      .routeProgramFlows()
+      .routeProgramFlows(fx => {
+        fx.data = [];
+
+        return fx;
+      })
       .routeProgramActions(fx => {
-        fx.data = [testProgramAction];
+        fx.data = [];
 
         return fx;
       })
-      .routeProgramAction(fx => {
-        fx.data = testProgramAction;
-
-        return fx;
-      })
-      .routeTags()
-      .visit(`/program/${ testProgram.id }`);
+      .visit(`/program/${ testProgram.id }`)
+      .wait('@routeProgram')
+      .wait('@routeProgramFlows')
+      .wait('@routeProgramActions');
 
     cy
-      .get('.action-card')
-      .first()
-      .find('[data-behavior-region] button')
-      .click();
+      .get('.program-sidebar')
+      .should('contain', 'Empty Program')
+      .should('contain', 'No details given')
+      .should('contain', 'Draft');
 
     cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .should('have.length', 2)
-      .contains('Conditional')
-      .should('not.exist');
+      .get('[data-testid="program-flows"]')
+      .should('contain', 'No program flows');
 
     cy
-      .get('.action-card')
-      .contains('Test Action')
-      .click();
+      .get('[data-testid="program-standard-actions"]')
+      .should('contain', 'No standard actions');
 
     cy
-      .get('.sidebar')
-      .find('[data-behavior-region]')
-      .click();
-
-    cy
-      .get('.picklist')
-      .find('.js-picklist-item')
-      .should('have.length', 2)
-      .contains('Conditional')
-      .should('not.exist');
+      .get('[data-testid="program-automated-actions"]')
+      .should('contain', 'No automated actions');
   });
 
   specify('shows an error when program workflows cannot load', function() {

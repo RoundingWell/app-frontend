@@ -11,9 +11,6 @@ const _Model = BaseModel.extend({
   getStates() {
     return Radio.request('entities', 'states:collection', this.get('_states'));
   },
-  getForms() {
-    return Radio.request('entities', 'forms:collection', this.get('_forms'));
-  },
   getClinicians() {
     return Radio.request('entities', 'clinicians:collection', this.get('_clinicians'));
   },

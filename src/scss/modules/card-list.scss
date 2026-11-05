@@ -13,6 +13,17 @@
   cursor: pointer;
 }
 
+button.card-list__item {
+  display: block;
+  text-align: left;
+  width: 100%;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-interactive);
+    outline-offset: 2px;
+  }
+}
+
 .card-list__item:hover:not(.is-selected) {
   --card-list-item-background: var(--color-surface-hover);
 }
