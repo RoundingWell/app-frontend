@@ -1,5 +1,5 @@
 import { Application } from "marionette";
-import { isEqual } from "./is-equal.js";
+import { equalKeys, snapshotKey } from "./selection-key.js";
 const states = /* @__PURE__ */ new WeakMap();
 const stateFor = (switcher) => states.get(switcher);
 function currentSelection(switcher) {
@@ -55,7 +55,7 @@ async function activate(switcher, intent, selection, options) {
 async function select(switcher, intent, app, appName, { key, reconstruct = false, options }) {
   const state = stateFor(switcher);
   const current = currentSelection(switcher);
-  if (!reconstruct && current?.app === app && isEqual(current.key, key)) {
+  if (!reconstruct && current?.app === app && equalKeys(current.key, key)) {
     return activate(switcher, intent, current, options);
   }
   stopSelection(switcher);
@@ -98,10 +98,11 @@ const ChildAppSwitcher = Application.extend({
     if (!app) {
       throw new Error(`Child application "${appName}" is not registered`);
     }
+    const key = snapshotKey(selection.key);
     const intent = {};
     state.intent = intent;
     try {
-      const selected = await select(this, intent, app, appName, selection);
+      const selected = await select(this, intent, app, appName, { ...selection, key });
       if (state.intent !== intent || !canSelect(this) || selection.signal?.aborted || currentSelection(this)?.app !== selected || this.getChildApp(appName) !== selected || !selected?.isRunning()) {
         return;
       }

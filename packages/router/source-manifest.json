@@ -1,11 +1,11 @@
 {
-  "revision": "a613f8de3a7c5a9a4d9aebe42a5f04b64b3ac6d0",
+  "revision": "c4a7134d8d37322c31e1595ecad037ba64ce2356",
   "esbuild": "0.28.1",
   "files": {
     "child-app-switcher.ts": {
-      "source": "c39de7d898320cd02a590fcc549580f1425f2ddce672d311b23ab7fe1f0339a8",
+      "source": "5d1a25989f7fd5f77a7e354e1a8e5d189f20cda1fa6b51b0601c0e2ef10bd5ba",
       "output": "child-app-switcher.js",
-      "javascript": "60ae5d8b09f4975cadf84ea3063808aaa16d9fa483659bbd0266ba63921b2e42"
+      "javascript": "84b14e47afec75d4f258d67363eee407d4fb7190f79873dc8eccca8a38e8d291"
     },
     "drivers/memory.ts": {
       "source": "aab8e1099fd3826b31ce9c0e854ae0eaca2f27b2905a82a8dcba2cd1ca996ed7",
@@ -21,11 +21,6 @@
       "source": "02c3569be2ed087f55178cc71745215cb64cfd7b3a4d53f186cc400bd2207270",
       "output": "index.js",
       "javascript": "2fafa9958396bc9a42fd9ffbad8dd6dea2f2a7d718c83bd737d40dae65fb7f66"
-    },
-    "is-equal.ts": {
-      "source": "6410bd647916bcd4651215e3d6453c8f182639639cd465d8f84795abd89cbdde",
-      "output": "is-equal.js",
-      "javascript": "5d4d7141fb992501b2cdd5b4930dac8d2e82f445ef34635913f5417e5895f02f"
     },
     "matcher.ts": {
       "source": "cfa5aef817fa1fb07206461f81b0e50c19bd35484f8d57b085e36cd210b3dd0b",
@@ -57,10 +52,23 @@
       "output": "router.js",
       "javascript": "87f1af58ac17f78be11c1e2252be44e1b29b2f4216042c127d13720c0300a7fd"
     },
+    "selection-key.ts": {
+      "source": "1b425678728f4713605ac91aaedad14c4f114034534200b2808960ee6f972853",
+      "output": "selection-key.js",
+      "javascript": "0923dc6550e6d5145b6c975630ea7adef5b016732cfc270ca2e3e5dcfb21996f"
+    },
     "types.ts": {
       "source": "c3570ac8a601fb65368d37f1e9ecf97b68b92a493a96c03859b38bb8c659a58f",
       "output": "types.js",
       "javascript": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
+  },
+  "documents": {
+    "readme.md": "77840bc903cc0a060d8eea717a6786a5f973e68afe37f692430dd17a71b662c2",
+    "DESIGN.md": "54426069a989dfbac896edc01422d5507fc2e203605752544716d33cea550209",
+    "PROVENANCE.md": "6ab36fc4d2da12f4f41e7a32686f53974a170935311e2c0ba12769702604c433",
+    "examples/desk/README.md": "538f339be6e6e228b6b361d2eeda2d9c1a23e1a10d8bcac0325dfc30d1fe6d62",
+    "examples/desk/bootstrap.mjs": "e78dc7c3393286b5c6c5762f9e35f0015c888a6b1d989de9d0da59fde037cc1d",
+    "examples/desk/desk.mjs": "1601cad100e5f3ed07c8f7796fd22fd58c708ba898eeefd648eda49089e018cd"
   }
 }
