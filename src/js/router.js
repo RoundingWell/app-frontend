@@ -35,8 +35,6 @@ const router = new Router({
   handler: (match, context) => handler(match, context),
 });
 
-router.on('route:error', error => window.reportError(error));
-
 // Match the other runtime exports exposed for console navigation/debugging.
 window.router = router;
 

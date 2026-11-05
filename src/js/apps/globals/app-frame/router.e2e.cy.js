@@ -192,7 +192,6 @@ context('named application routing', function() {
       .should('have.value', '');
   });
 
-
   specify('rejects a restricted area entered directly in the address bar', function() {
     cy
       .routeCurrentClinician(fx => {
@@ -212,8 +211,13 @@ context('named application routing', function() {
       .should('equal', '/404');
   });
 
+  specify('preserves startup recovery for workspace permission and client failures', function() {
+    const reportedErrors = [];
+    cy.on('uncaught:exception', error => {
+      reportedErrors.push(error);
+      return false;
+    });
 
-  specify('preserves startup recovery for a workspace permission failure', function() {
     cy
       .routeActions()
       .intercept('GET', '/api/states', {
@@ -228,6 +232,27 @@ context('named application routing', function() {
       .get('.account-setup')
       .should('be.visible')
       .and('contain', 'Your account is not set up yet.');
-  });
 
+    cy
+      .intercept('GET', '/api/states', {
+        statusCode: 404,
+        body: { errors: getErrors({ status: '404', title: 'Not Found' }) },
+      })
+      .as('missingWorkspaceResource')
+      .visit({ noWait: true })
+      .wait('@missingWorkspaceResource');
+
+    cy
+      .get('.startup__error')
+      .should('be.visible')
+      .and('contain', 'We couldn\'t load your workspace');
+
+    cy
+      .get('.error-page')
+      .should('not.exist');
+
+    cy.then(() => {
+      expect(reportedErrors, 'startup owns these failures without duplicate route reports').to.deep.equal([]);
+    });
+  });
 });

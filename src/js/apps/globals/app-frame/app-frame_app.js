@@ -20,6 +20,7 @@ export default App.extend({
     this.addChildApp('router', router);
     const navState = this.getChildApp('nav').getState();
     this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
+    this.listenTo(router, 'route:error', this.onRouteError);
   },
   onBeforeStart(app, options) {
     this.shellOptions = options;
@@ -30,7 +31,14 @@ export default App.extend({
   onChangeNavMinimized(state, isMinimized) {
     this.shellOptions.setNavMinimized(isMinimized);
   },
+  onRouteError(error) {
+    // The entrypoint owns initial workspace failures, including permission/setup
+    // recovery. Only that exact shared failure is already being handled there.
+    if (this.workspaceStartupFailure && this.workspaceStartupFailure.error === error) return;
+    window.reportError(error);
+  },
   async prepareStart(options, { signal }) {
+    this.workspaceStartupFailure = null;
     await this.getChildApp('nav').start({ region: options.navRegion });
     signal.throwIfAborted();
     const workspaces = this.getChildApp('workspaces');
@@ -47,7 +55,10 @@ export default App.extend({
     // Selection authority may move to the router's same-key request. Required
     // workspace readiness still belongs to startup and must propagate failures.
     initialWorkspace.catch(() => {});
-    const workspaceReady = workspaces.getChildApp('workspace').start();
+    const workspaceReady = workspaces.getChildApp('workspace').start().catch(error => {
+      this.workspaceStartupFailure = { error };
+      throw error;
+    });
     await router.start();
     signal.throwIfAborted();
     await workspaceReady;
@@ -56,19 +67,9 @@ export default App.extend({
     signal.throwIfAborted();
   },
   onStart() {
-    this.showInitialUnmatched().catch(addError);
-  },
-  async showInitialUnmatched() {
-    const url = window.location.href;
-    if (isAppUrl(new URL(url))) return;
-
-    const workspace = Radio.request('workspace', 'current');
-    const workspaceApp = await this.getChildApp('workspaces').switchTo('workspace', {
-      key: { workspace: workspace.id },
-      options: { ...this.shellOptions, workspace },
-    });
-    if (!workspaceApp || window.location.href !== url) return;
-    Radio.request('error', 'show:notFound');
+    // Workspace prerequisites are ready even when the engine leaves an initial
+    // server-owned or unknown-root URL unmatched.
+    if (!isAppUrl(new URL(window.location.href))) Radio.request('error', 'show:notFound');
   },
   async showRoute(match, { signal }) {
     // Error UI is owned by ErrorApp and must remain usable when workspace
