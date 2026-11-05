@@ -1544,11 +1544,15 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       },
     });
 
+    const testProgramAction = getProgramAction({
+      attributes: { allowed_uploads: ['pdf'] },
+    });
+
     const testAction = getAction({
       relationships: {
         'owner': getRelationship(getCurrentClinician()),
         'patient': getRelationship(testPatient),
-        'program-action': getRelationship(),
+        'program-action': getRelationship(testProgramAction),
         'state': getRelationship(stateTodo),
         'form': getRelationship(testForm),
       },
@@ -1578,8 +1582,10 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
 
     cy
       .routesForPatientAction()
+      .routeSettings('upload_attachments', true)
       .routeAction(fx => {
         fx.data = testAction;
+        fx.included.push(testProgramAction);
         return fx;
       })
       .routePatientByAction(fx => {
@@ -1749,6 +1755,23 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', 'Renamed Open Flow');
 
     cy
+      .get('[data-attachments-region] .js-add')
+      .should('exist');
+
+    cy.sendWs({
+      category: 'StateChanged',
+      resource: { type: testFlow.type, id: testFlow.id },
+      payload: {
+        state: { type: stateDone.type, id: stateDone.id },
+        attributes: {},
+      },
+    });
+
+    cy
+      .get('[data-attachments-region] .js-add')
+      .should('not.exist');
+
+    cy
       .routeAction(fx => {
         fx.data = {
           ...testAction,
@@ -1757,7 +1780,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
             flow: getRelationship(testFlow),
           },
         };
-        fx.included.push(testFlow);
+        fx.included.push(testProgramAction, testFlow);
         return fx;
       })
       .reload()
