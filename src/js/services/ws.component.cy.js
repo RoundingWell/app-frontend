@@ -1,5 +1,6 @@
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 import { version } from 'uuid';
 
 import App from 'js/base/app';
@@ -55,10 +56,13 @@ Cypress.Commands.add('startService', () => {
 });
 
 context('WS Service', function() {
+  let scope;
+
   beforeEach(function() {
-    Radio.reply('bootstrap', 'currentUser', { clientKey });
-    Radio.reply('workspace', 'current', { id: workspace });
-    Radio.reply('auth', 'getToken', () => 'Bearer token');
+    scope = testScope();
+    scope.reply(Radio, 'bootstrap', 'currentUser', { clientKey });
+    scope.reply(Radio, 'workspace', 'current', { id: workspace });
+    scope.reply(Radio, 'auth', 'getToken', () => 'Bearer token');
 
     let tokenId = 0;
 
@@ -70,14 +74,7 @@ context('WS Service', function() {
       .as('websocketsApi');
 
     cy.mockWs(endpoint);
-    service = new WSService();
-  });
-
-  afterEach(function() {
-    service.destroy();
-    Radio.stopReplying('auth', 'getToken');
-    Radio.stopReplying('bootstrap', 'currentUser');
-    Radio.stopReplying('workspace', 'current');
+    service = scope.own(new WSService());
   });
 
   specify('Constructing the websocket', function() {
@@ -284,7 +281,7 @@ context('WS Service', function() {
       cy.stub(stoppedModel, 'fetch').resolves(stoppedModel);
 
       service.manageAdd(app, firstCollection, 'flows');
-      service.manageAdd(app, collection, 'flows');
+      scope.defer(service.manageAdd(app, collection, 'flows'));
       channel.trigger('message:flows', { category: 'ResourceCreated' }, model);
       await Cypress.Promise.resolve();
 
@@ -308,8 +305,8 @@ context('WS Service', function() {
   specify('Releases one managed result without canceling other owners or resource types', function() {
     cy.then(async() => {
       const channel = Radio.channel('ws');
-      const app = new App();
-      const otherApp = new App();
+      const app = scope.own(new App());
+      const otherApp = scope.own(new App());
       const actions = new Backbone.Collection();
       const flows = new Backbone.Collection();
       const otherActions = new Backbone.Collection();
@@ -317,6 +314,13 @@ context('WS Service', function() {
       const flow = new Backbone.Model({ id: 'retained-flow' });
       const actionFetch = deferred();
       const otherActionFetch = deferred();
+      scope.defer(() => {
+        app.stop();
+        otherApp.stop();
+        actionFetch.resolve(action);
+        otherActionFetch.resolve(action);
+        return Promise.all([actionFetch.promise, otherActionFetch.promise]);
+      });
       action.type = 'patient-actions';
       flow.type = 'flows';
       const fetchAction = cy.stub(action, 'fetch');
@@ -358,9 +362,6 @@ context('WS Service', function() {
       channel.trigger('message:patient-actions', { category: 'ResourceCreated' }, action);
       await Cypress.Promise.resolve();
       expect(replacement.get(action)).to.equal(action);
-
-      await app.destroy();
-      await otherApp.destroy();
     });
   });
 
@@ -370,7 +371,12 @@ context('WS Service', function() {
       const collection = new Backbone.Collection();
       const model = new Backbone.Model({ id: 'flow-id' });
       const fetch = deferred();
-      const app = new App();
+      const app = scope.own(new App());
+      scope.defer(() => {
+        app.stop();
+        fetch.resolve(model);
+        return Promise.allSettled([fetch.promise]);
+      });
 
       model.type = 'flows';
       cy.stub(model, 'fetch').returns(fetch.promise);
@@ -391,8 +397,6 @@ context('WS Service', function() {
       await Cypress.Promise.resolve();
 
       expect(collection.get(model)).to.be.undefined;
-
-      await app.destroy();
     });
   });
 
@@ -426,8 +430,8 @@ context('WS Service', function() {
       })
       .get('@sendData')
       .should('be.calledOnce')
-      .then(async() => {
-        await service.stop();
+      .then(() => {
+        service.stop();
         service.sendData.resetHistory();
       });
 
@@ -480,11 +484,12 @@ context('WS Service', function() {
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[2]]))
 
-      .then(() => {
-        channel.request('unsubscribe', notifications[1]);
+      .then(messages => {
+        messages.resetHistory();
+        channel.request('unsubscribe', notifications[2]);
       })
       .get('@wsHandleMessage')
-      .should('be.calledWith', testData([notifications[2]]))
+      .should('have.been.calledOnceWithExactly', testData([]))
 
       .then(() => {
         channel.request('subscribe', [notifications[3]]);
@@ -498,11 +503,12 @@ context('WS Service', function() {
       .get('@wsHandleMessage')
       .should('be.calledWith', testData([notifications[3], notifications[0], notifications[1]]))
 
-      .then(() => {
+      .then(messages => {
+        messages.resetHistory();
         channel.request('unsubscribe', [notifications[3]]);
       })
       .get('@wsHandleMessage')
-      .should('be.calledWith', testData([notifications[0], notifications[1]]));
+      .should('have.been.calledOnceWithExactly', testData([notifications[0], notifications[1]]));
   });
 
   specify('Subscribing with filters and no resources', function() {
@@ -668,6 +674,8 @@ context('WS Service', function() {
     cy
       .startService()
       .then(() => {
+        service.RECONNECT_BASE_DELAY = 1000;
+        cy.stub(Math, 'random').returns(0);
         channel.request('subscribe', [], { filters: {} });
       })
       .get('@wsHandleMessage')
@@ -679,14 +687,28 @@ context('WS Service', function() {
           resources: [],
           subscriptionVersion: Cypress.sinon.match.string,
         },
-      })
-      .then(() => {
-        service.ws.close();
       });
 
+    cy.clock();
+    cy.then(() => {
+      cy.spy(service, 'restart').as('restartService');
+      service.ws.addEventListener('close', cy.stub().as('socketClosed'), { once: true });
+      service.ws.close();
+    });
+
+    // Observe the actual close before advancing through a full reconnect delay.
     cy
+      .tick(1000)
+      .get('@socketClosed')
+      .should('have.been.calledOnce')
+      .tick(1000)
+      .get('@restartService')
+      .should('not.have.been.called')
       .get('@startService')
-      .should('be.calledOnce');
+      .should('be.calledOnce')
+      .then(() => {
+        expect(service.reconnect).to.be.null;
+      });
   });
 
   specify('Clearing filters before reconnecting resource subscriptions', function() {
@@ -809,10 +831,13 @@ context('WS Service', function() {
 
 /* eslint-disable-next-line */
 context('WS Service - Disabled', function() {
+  let scope;
+
   beforeEach(function() {
-    Radio.reply('bootstrap', 'currentUser', { clientKey });
-    Radio.reply('workspace', 'current', { id: workspace });
-    Radio.reply('auth', 'getToken', () => 'Bearer token');
+    scope = testScope();
+    scope.reply(Radio, 'bootstrap', 'currentUser', { clientKey });
+    scope.reply(Radio, 'workspace', 'current', { id: workspace });
+    scope.reply(Radio, 'auth', 'getToken', () => 'Bearer token');
 
     cy
       .intercept('GET', '/api/websockets', getWsResponse('disabled-token', { is_enabled: false }))
@@ -821,34 +846,22 @@ context('WS Service - Disabled', function() {
     cy.mockWs(endpoint);
   });
 
-  afterEach(function() {
-    Radio.stopReplying('auth', 'getToken');
-    Radio.stopReplying('bootstrap', 'currentUser');
-    Radio.stopReplying('workspace', 'current');
-  });
-
   specify('settles disabled startup without constructing a socket', function() {
     cy.then(async() => {
-      const disabledService = new WSService();
+      const disabledService = scope.own(new WSService());
 
-      try {
-        expect(await disabledService.start(), 'disabled startup settled').to.be.true;
-        expect(disabledService.ws, 'disabled startup must not construct a socket').to.deep.equal({});
+      expect(await disabledService.start(), 'disabled startup settled').to.be.true;
+      expect(disabledService.ws, 'disabled startup must not construct a socket').to.deep.equal({});
 
-        Radio.request('ws', 'subscribe', { id: 'foo', type: 'bar' });
+      Radio.request('ws', 'subscribe', { id: 'foo', type: 'bar' });
 
-        expect(disabledService.ws, 'disabled subscription must not construct a socket').to.deep.equal({});
+      expect(disabledService.ws, 'disabled subscription must not construct a socket').to.deep.equal({});
 
-        await disabledService.stop();
-        expect(disabledService.isRunning()).to.be.false;
+      disabledService.stop();
+      expect(disabledService.isRunning()).to.be.false;
 
-        expect(await disabledService.start(), 'disabled reentry settled').to.be.true;
-        expect(disabledService.ws, 'disabled reentry must not construct a socket').to.deep.equal({});
-      } finally {
-        await disabledService.destroy();
-      }
-
-      expect(disabledService.isDestroyed()).to.be.true;
+      expect(await disabledService.start(), 'disabled reentry settled').to.be.true;
+      expect(disabledService.ws, 'disabled reentry must not construct a socket').to.deep.equal({});
     });
 
     cy
@@ -858,7 +871,7 @@ context('WS Service - Disabled', function() {
 
   specify('allows another managed addition after a fetch fails', function() {
     cy.then(async() => {
-      const app = new App();
+      const app = scope.own(new App());
       const collection = new Backbone.Collection();
       const model = new Backbone.Model({ id: 'retry-flow' });
       model.type = 'flows';
@@ -866,7 +879,7 @@ context('WS Service - Disabled', function() {
       fetch.onFirstCall().rejects(new Error('Network unavailable'));
       fetch.onSecondCall().resolves(model);
       await app.start();
-      const retryService = new WSService();
+      const retryService = scope.own(new WSService());
       retryService.manageAdd(app, collection, 'flows');
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
       await new Promise(resolve => setTimeout(resolve, 0));
@@ -874,8 +887,6 @@ context('WS Service - Disabled', function() {
       Radio.trigger('ws', 'message:flows', { category: 'ResourceCreated' }, model);
       await new Promise(resolve => setTimeout(resolve, 0));
       expect(collection.get(model)).to.equal(model);
-      await app.destroy();
-      await retryService.destroy();
     });
   });
 });

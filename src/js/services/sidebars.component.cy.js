@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import SidebarsService from './sidebars';
 import WidgetsService from './widgets';
@@ -10,11 +11,11 @@ import { fxTestWidgets } from 'support/api/widgets';
 
 context('Sidebars Service', function() {
   let panels;
-  let sidebarsService;
-  let widgetsService;
+  let scope;
 
   beforeEach(function() {
-    widgetsService = new WidgetsService({ widgets: new Widgets(fxTestWidgets) });
+    scope = testScope();
+    scope.own(new WidgetsService({ widgets: new Widgets(fxTestWidgets) }));
     panels = new Panels([
       {
         id: 'demographics-panel',
@@ -34,15 +35,9 @@ context('Sidebars Service', function() {
     ]);
   });
 
-  afterEach(async function() {
-    Radio.reset('settings');
-    await sidebarsService?.destroy();
-    await widgetsService.destroy();
-  });
-
   function startService(sidebar) {
-    Radio.reply('settings', 'get', () => sidebar);
-    sidebarsService = new SidebarsService({ panels });
+    scope.reply(Radio, 'settings', 'get', () => sidebar);
+    scope.own(new SidebarsService({ panels }));
 
     return Radio.request('sidebars', 'patient');
   }

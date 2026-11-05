@@ -1,6 +1,7 @@
 import { isEqual } from 'underscore';
 import { Radio } from 'marionette';
 import Store from 'backbone.store';
+import { testScope } from '@mnjs/test/cypress';
 
 import 'js/base/setup'; // wires Backbone.ajax -> js/base/fetch
 import 'js/entities-service'; // registers store models + entities channel replies
@@ -65,16 +66,18 @@ function waitForCache(key, attempts = 20, expectedResponse) {
 }
 
 context('cache/response-cache — replay equivalence', function() {
+  let scope;
   let releaseRefresh;
   let fetches;
   let cacheWrites;
 
   beforeEach(function() {
+    scope = testScope();
     releaseRefresh = null;
     fetches = cy.spy(Collection.prototype, 'fetch');
     cacheWrites = cy.spy(idb, 'put');
     idb.__reset();
-    Radio.reply('auth', 'getToken', () => Promise.resolve(null));
+    scope.reply(Radio, 'auth', 'getToken', () => Promise.resolve(null));
     return clearCache();
   });
 
@@ -87,8 +90,6 @@ context('cache/response-cache — replay equivalence', function() {
     } finally {
       Store.resetAll();
       idb.__reset();
-      Radio.stopReplying('auth', 'getUserId');
-      Radio.stopReplying('auth', 'getToken');
     }
   });
 
@@ -104,7 +105,7 @@ context('cache/response-cache — replay equivalence', function() {
     let liveClinicianAttrs;
     let replayCollection;
 
-    Radio.reply('auth', 'getUserId', () => 'user_test');
+    scope.reply(Radio, 'auth', 'getUserId', () => 'user_test');
 
     cy
       .intercept('GET', '/api/roles*', { body: ROLES_RESPONSE })
@@ -179,7 +180,7 @@ context('cache/response-cache — replay equivalence', function() {
   });
 
   specify('cache miss falls through to live fetch', function() {
-    Radio.reply('auth', 'getUserId', () => 'user_test'); // sync
+    scope.reply(Radio, 'auth', 'getUserId', () => 'user_test'); // sync
 
     cy
       .intercept('GET', '/api/roles*', { body: ROLES_RESPONSE })
@@ -196,7 +197,7 @@ context('cache/response-cache — replay equivalence', function() {
 
   specify('no userId — falls through to live fetch, no cache read', function() {
     // Sync undefined: the cache branch checks userId synchronously.
-    Radio.reply('auth', 'getUserId', () => undefined);
+    scope.reply(Radio, 'auth', 'getUserId', () => undefined);
 
     cy
       .intercept('GET', '/api/roles*', { body: ROLES_RESPONSE })

@@ -99,10 +99,6 @@ const ViewportView = View.extend({
 });
 
 context('Form Viewport Behavior', function() {
-  afterEach(function() {
-    Radio.channel('form1').reset();
-  });
-
   specify('uses smooth scrolling when matchMedia has no result', function() {
     cy.mount(() => new ViewportView());
 

@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import 'js/entities-service/index';
 import { Collection as Roles } from 'js/entities-service/entities/roles';
@@ -24,21 +25,24 @@ const clinicians = new Clinicians({ data: [currentClinician, ...getClinicians()]
 const workspaces = new Workspaces({ data: getWorkspaces() }, { parse: true });
 
 context('Owner Component', function() {
+  let scope;
+
   beforeEach(function() {
-    Radio.reply('bootstrap', 'currentUser', () => {
+    scope = testScope();
+    scope.reply(Radio, 'bootstrap', 'currentUser', () => {
       return clinicians.get(currentClinician.id);
     });
 
     // Clear the cache
-    Radio.reply('workspace', 'current', () => {
+    scope.reply(Radio, 'workspace', 'current', () => {
       return new Workspace({ id: workspaceTwo.id });
     });
 
-    new OwnerComponent({
+    scope.own(new OwnerComponent({
       owner: clinicians.get(currentClinician.id),
-    });
+    }));
 
-    Radio.reply('workspace', 'current', () => {
+    scope.reply(Radio, 'workspace', 'current', () => {
       return new Workspace({ id: workspaceOne.id, name: 'Current Workspace' });
     });
   });
@@ -47,13 +51,13 @@ context('Owner Component', function() {
     const onChange = cy.stub();
 
     cy
-      .mount(rootView => {
+      .mount((rootView, mountScope) => {
         OwnerComponent.setPopRegion(rootView.getRegion('pop'));
 
         // Cache the elements
-        new OwnerComponent({
+        mountScope.own(new OwnerComponent({
           owner: clinicians.get(currentClinician.id),
-        });
+        }));
 
         const component = new OwnerComponent({
           owner: clinicians.get(currentClinician.id),
@@ -150,7 +154,7 @@ context('Owner Component', function() {
     const notInWorkspace = getClinician({ attributes: { name: 'Not in Workspace' } });
     const owner = new Clinician({ data: notInWorkspace }, { parse: true });
 
-    Radio.reply('bootstrap', 'currentUser', () => {
+    scope.reply(Radio, 'bootstrap', 'currentUser', () => {
       return owner;
     });
 
@@ -267,7 +271,7 @@ context('Owner Component', function() {
     });
     const owner = new Clinician({ data: employee }, { parse: true });
 
-    Radio.reply('bootstrap', 'currentUser', () => {
+    scope.reply(Radio, 'bootstrap', 'currentUser', () => {
       return owner;
     });
 

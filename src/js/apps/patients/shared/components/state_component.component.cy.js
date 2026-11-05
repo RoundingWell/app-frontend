@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import { Collection as States } from 'js/entities-service/entities/states';
 import { Collection as Workspaces, Model as Workspace } from 'js/entities-service/entities/workspaces';
@@ -14,10 +15,16 @@ const workspaces = new Workspaces({ data: getWorkspaces() }, { parse: true });
 workspaces.at(1).set('_states', [{ id: stateInProgress.id, type: 'states' }]);
 
 context('State Component', function() {
+  let scope;
+
+  beforeEach(function() {
+    scope = testScope();
+  });
+
   specify('Display', function() {
     const onChange = cy.stub();
 
-    Radio.reply('workspace', 'current', () => {
+    scope.reply(Radio, 'workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(0).id });
     });
 
@@ -64,7 +71,7 @@ context('State Component', function() {
   });
 
   specify('uses the selected workspace states', function() {
-    Radio.reply('workspace', 'current', () => {
+    scope.reply(Radio, 'workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(1).id });
     });
 
@@ -89,7 +96,7 @@ context('State Component', function() {
   });
 
   specify('compact state with label', function() {
-    Radio.reply('workspace', 'current', () => {
+    scope.reply(Radio, 'workspace', 'current', () => {
       return new Workspace({ id: workspaces.at(1).id });
     });
 

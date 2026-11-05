@@ -1,4 +1,5 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import CloseRequestManager from './close-request';
 
@@ -23,12 +24,8 @@ context('Close Request Manager', function() {
     cy.clock();
   });
 
-  afterEach(function() {
-    manager?.destroy();
-  });
-
   specify('closes only the highest active layer for platform close requests', function() {
-    manager = new CloseRequestManager({ CloseWatcher: TestCloseWatcher });
+    manager = testScope().own(new CloseRequestManager({ CloseWatcher: TestCloseWatcher }));
     const navLayer = {};
     const lowerLayer = {};
     const upperLayer = {};
@@ -79,7 +76,7 @@ context('Close Request Manager', function() {
     const closeLower = cy.stub().callsFake(() => manager.unregister(lowerLayer));
     const closeUpper = cy.stub().callsFake(() => manager.unregister(upperLayer));
 
-    manager = new CloseRequestManager({ CloseWatcher: TestCloseWatcher });
+    manager = testScope().own(new CloseRequestManager({ CloseWatcher: TestCloseWatcher }));
     manager.register(lowerLayer, closeLower);
     manager.register(upperLayer, closeUpper);
     watchers.at(-1).requestClose();
@@ -97,7 +94,7 @@ context('Close Request Manager', function() {
     const closeLower = cy.stub().callsFake(() => manager.unregister(lowerLayer));
     const closeUpper = cy.stub().callsFake(() => manager.unregister(upperLayer));
 
-    manager = new CloseRequestManager({ CloseWatcher: null });
+    manager = testScope().own(new CloseRequestManager({ CloseWatcher: null }));
     manager.register(upperLayer, closeUpper, 2);
     manager.register(lowerLayer, closeLower, 1);
     Radio.trigger('hotkey', 'close', event);
@@ -118,7 +115,7 @@ context('Close Request Manager', function() {
     const upper = {};
     const closeLower = cy.stub();
 
-    manager = new CloseRequestManager({ CloseWatcher: TestCloseWatcher });
+    manager = testScope().own(new CloseRequestManager({ CloseWatcher: TestCloseWatcher }));
     manager.register(lower, closeLower);
     manager.register(upper, cy.stub());
 
@@ -139,7 +136,7 @@ context('Close Request Manager', function() {
   specify('releases its watcher, pending close and Radio bindings on destruction', function() {
     const close = cy.stub();
 
-    manager = new CloseRequestManager({ CloseWatcher: TestCloseWatcher });
+    manager = testScope().own(new CloseRequestManager({ CloseWatcher: TestCloseWatcher }));
     Radio.request('close-request', 'register', {}, close);
     const watcher = watchers.at(-1);
 

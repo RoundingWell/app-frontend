@@ -1,3 +1,5 @@
+import { testScope } from '@mnjs/test/cypress';
+
 import App from './app';
 import SubRouterApp from './subrouterapp';
 
@@ -62,38 +64,37 @@ const SelectedApp = SubRouterApp.extend({
 });
 
 context('SubRouterApp', function() {
-  let app;
+  let scope;
 
-  afterEach(async function() {
-    if (app) await app.destroy();
-    app = null;
+  beforeEach(function() {
+    scope = testScope();
   });
 
   describe('getRouteScope', function() {
     specify('returns only the configured scope keys', function() {
-      app = new BaseApp();
+      const app = scope.own(new BaseApp());
       expect(app.getRouteScope({ patientId: 'p1', clinicianId: 'c9' })).to.deep.equal({ patientId: 'p1' });
     });
 
     specify('returns {} when options are omitted', function() {
-      app = new BaseApp();
+      const app = scope.own(new BaseApp());
       expect(app.getRouteScope()).to.deep.equal({});
     });
 
     specify('returns {} for an empty scope', function() {
-      app = new (BaseApp.extend({ routeScope: [] }))();
+      const app = scope.own(new (BaseApp.extend({ routeScope: [] }))());
       expect(app.getRouteScope({ patientId: 'p1' })).to.deep.equal({});
     });
 
     specify('requires an explicit scope declaration', function() {
-      app = new (BaseApp.extend({ routeScope: undefined }))();
+      const app = scope.own(new (BaseApp.extend({ routeScope: undefined }))());
       expect(() => app.getRouteScope()).to.throw('SubRouterApp requires a routeScope array');
     });
   });
 
   describe('synchronous startup', function() {
     specify('dispatches the current route from onStart with positional args', async function() {
-      app = new SyncApp();
+      const app = scope.own(new SyncApp());
       app.setCurrentRoute(action);
       await app.start();
 
@@ -103,7 +104,7 @@ context('SubRouterApp', function() {
     });
 
     specify('dispatches immediately when a route arrives while running', async function() {
-      app = new SyncApp();
+      const app = scope.own(new SyncApp());
       await app.start();
       expect(app.calls).to.deep.equal([]);
 
@@ -114,12 +115,17 @@ context('SubRouterApp', function() {
 
   describe('loading startup', function() {
     specify('retains only the newest route while loading and dispatches it once ready', async function() {
-      app = new LoadingApp();
+      const app = scope.own(new LoadingApp());
       app.setCurrentRoute(workflow);
       const starting = app.start();
 
       // still loading: nothing dispatched
       const routing = app.startRoute(action);
+      scope.defer(async() => {
+        app.stop();
+        app.loaded.resolve();
+        await Promise.all([starting, routing]);
+      });
       expect(app.calls).to.deep.equal([]);
 
       app.loaded.resolve();
@@ -133,14 +139,14 @@ context('SubRouterApp', function() {
     specify('observes async action failure during initial and subsequent dispatch', async function() {
       const failure = new Error('content failed');
       const reported = [];
-      app = new (SyncApp.extend({
+      const app = scope.own(new (SyncApp.extend({
         showAction() {
           return Promise.reject(failure);
         },
         onRouteError(error) {
           reported.push(error);
         },
-      }))();
+      }))());
       app.setCurrentRoute(action);
       await app.start();
       await app.startRoute(action);
@@ -154,14 +160,14 @@ context('SubRouterApp', function() {
     specify('reports synchronous throws during initial and running dispatch', async function() {
       const failure = new Error('synchronous route failure');
       const reported = [];
-      app = new (SyncApp.extend({
+      const app = scope.own(new (SyncApp.extend({
         showAction() {
           throw failure;
         },
         onRouteError(error) {
           reported.push(error);
         },
-      }))();
+      }))());
       app.setCurrentRoute(action);
       expect(await app.start()).to.be.true;
       await app.startRoute(action);
@@ -174,7 +180,7 @@ context('SubRouterApp', function() {
     specify('reports a current route failure even after the action stops its owner', async function() {
       const failure = new Error('route stopped itself');
       const reported = [];
-      app = new (SyncApp.extend({
+      const app = scope.own(new (SyncApp.extend({
         async showAction() {
           await this.stop();
           throw failure;
@@ -182,7 +188,7 @@ context('SubRouterApp', function() {
         onRouteError(error) {
           reported.push(error);
         },
-      }))();
+      }))());
       await app.start();
       app.setCurrentRoute(action);
       await app.startCurrentRoute();
@@ -194,7 +200,7 @@ context('SubRouterApp', function() {
     specify('ignores an action failure once a newer route takes over', async function() {
       const readiness = deferred();
       const reported = [];
-      app = new (SyncApp.extend({
+      const app = scope.own(new (SyncApp.extend({
         showAction() {
           return readiness.promise.then(() => {
             throw new Error('stale failure');
@@ -203,10 +209,15 @@ context('SubRouterApp', function() {
         onRouteError(error) {
           reported.push(error);
         },
-      }))();
+      }))());
       await app.start();
       app.setCurrentRoute(action);
       const dispatching = app.startCurrentRoute();
+      scope.defer(async() => {
+        app.stop();
+        readiness.resolve();
+        await dispatching;
+      });
       await app.startRoute(workflow);
       readiness.resolve();
       await dispatching;
@@ -216,7 +227,7 @@ context('SubRouterApp', function() {
 
   describe('unmatched routes', function() {
     specify('is a safe no-op and does not fire startRoute', async function() {
-      app = new SyncApp();
+      const app = scope.own(new SyncApp());
       app.setCurrentRoute({ event: 'patient:missing', eventArgs: [], definition: {} });
       await app.start();
 
@@ -228,7 +239,7 @@ context('SubRouterApp', function() {
 
   describe('stop and restart', function() {
     specify('preserves route state while stopped', async function() {
-      app = new SyncApp();
+      const app = scope.own(new SyncApp());
       app.setCurrentRoute(workflow);
       await app.start();
       await app.stop();
@@ -237,7 +248,7 @@ context('SubRouterApp', function() {
     });
 
     specify('preserves the current route across restart', async function() {
-      app = new SyncApp();
+      const app = scope.own(new SyncApp());
       app.setCurrentRoute(workflow);
       await app.start();
       await app.restart();
@@ -248,7 +259,7 @@ context('SubRouterApp', function() {
     });
 
     specify('dispatches a route after synchronous stop', async function() {
-      app = new SyncApp();
+      const app = scope.own(new SyncApp());
       app.setCurrentRoute(workflow);
       await app.start();
       expect(app.stop()).to.equal(true);
@@ -258,7 +269,7 @@ context('SubRouterApp', function() {
     });
 
     specify('does not dispatch a route overtaken by a later stop', async function() {
-      app = new SyncApp();
+      const app = scope.own(new SyncApp());
       app.setCurrentRoute(workflow);
       await app.start();
 
@@ -274,7 +285,7 @@ context('SubRouterApp', function() {
 
   describe('selected child lifecycle', function() {
     specify('rejects an unregistered child without stopping the current child', async function() {
-      app = new SelectedApp();
+      const app = scope.own(new SelectedApp());
       const child = await app.startCurrent('child');
       let failure;
 
@@ -290,7 +301,7 @@ context('SubRouterApp', function() {
     });
 
     specify('starts a registered child and clears it when the owner stops', async function() {
-      app = new SelectedApp();
+      const app = scope.own(new SelectedApp());
       await app.start();
 
       const child = await app.startCurrent('child');
@@ -311,7 +322,7 @@ context('SubRouterApp', function() {
           throw new Error('failed to start');
         },
       });
-      app = new SubRouterApp();
+      const app = scope.own(new SubRouterApp());
       app.addChildApp('child', new BrokenApp());
 
       let failure;
@@ -336,10 +347,15 @@ context('SubRouterApp', function() {
         },
       }))();
 
-      app = new SubRouterApp();
+      const app = scope.own(new SubRouterApp());
       app.addChildApp('child', child);
 
       const starting = app.startCurrent('child');
+      scope.defer(async() => {
+        app.stop();
+        readiness.resolve();
+        await starting;
+      });
 
       await preparing.promise;
       const stopping = child.stop();
@@ -355,7 +371,7 @@ context('SubRouterApp', function() {
       const first = new App();
       const latest = new App();
 
-      app = new SubRouterApp();
+      const app = scope.own(new SubRouterApp());
       app.addChildApp('current', current);
       app.addChildApp('first', first);
       app.addChildApp('latest', latest);
