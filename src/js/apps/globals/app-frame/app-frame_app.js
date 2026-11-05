@@ -1,27 +1,31 @@
 import { Radio } from 'marionette';
+import { ChildAppSwitcher } from '@mnjs/router';
 
 import { addError } from 'js/datadog';
 
-import RouteBaseApp from 'js/base/route-base-app';
+import App from 'js/base/app';
+import router, { isAppUrl, setRouteHandler } from 'js/router';
 
 import NavApp from 'js/apps/globals/nav/nav_app';
 import WorkspaceApp from './workspace_app';
 
-export default RouteBaseApp.extend({
-  childApps: {
-    nav: NavApp,
-    workspace: WorkspaceApp,
-  },
-  initialize() {
-    const navState = this.getChildApp('nav').getState();
+const Workspaces = ChildAppSwitcher.extend({
+  childApps: { workspace: WorkspaceApp },
+  onCleanupError: addError,
+});
 
+export default App.extend({
+  childApps: { nav: NavApp, workspaces: Workspaces },
+  initialize() {
+    this.addChildApp('router', router);
+    const navState = this.getChildApp('nav').getState();
     this.listenTo(navState, 'change:isMinimized', this.onChangeNavMinimized);
-    this.listenTo(Radio.channel('workspace'), 'change:workspace', this.onChangeWorkspace);
   },
   onBeforeStart(app, options) {
     this.shellOptions = options;
     const navState = this.getChildApp('nav').getState();
     this.onChangeNavMinimized(navState, navState.get('isMinimized'));
+    setRouteHandler((match, context) => this.showRoute(match, context));
   },
   onChangeNavMinimized(state, isMinimized) {
     this.shellOptions.setNavMinimized(isMinimized);
@@ -29,21 +33,35 @@ export default RouteBaseApp.extend({
   async prepareStart(options, { signal }) {
     await this.getChildApp('nav').start({ region: options.navRegion });
     signal.throwIfAborted();
+    await this.getChildApp('workspaces').start();
+    signal.throwIfAborted();
+  },
+  onStart() {
+    router.start().then(() => this.showInitialUnmatched()).catch(addError);
+  },
+  async showInitialUnmatched() {
+    const url = window.location.href;
+    if (isAppUrl(new URL(url))) return;
 
-    return this.startWorkspace(Radio.request('workspace', 'current'));
-  },
-  /* istanbul ignore next: defensive reporting when workspace teardown itself throws */
-  onChildCleanupError(error) {
-    addError(error);
-  },
-  startWorkspace(workspace) {
-    return this.selectChild('workspace', {
-      start: app => app.start({ ...this.shellOptions, workspace }),
+    const workspace = Radio.request('workspace', 'current');
+    const workspaceApp = await this.getChildApp('workspaces').switchTo('workspace', {
+      key: { workspace: workspace.id },
+      options: { ...this.shellOptions, workspace },
     });
+    if (!workspaceApp || window.location.href !== url) return;
+    Radio.request('error', 'show:notFound');
   },
-  onChangeWorkspace(workspace) {
-    this.getChildApp('nav').refreshWorkspace();
+  async showRoute(match, { signal }) {
+    const previous = Radio.request('workspace', 'current');
+    const workspace = Radio.request('workspace', 'current', match.params.workspace);
+    if (previous !== workspace) this.getChildApp('nav').refreshWorkspace();
 
-    this.startWorkspace(workspace).catch(addError);
+    const workspaceApp = await this.getChildApp('workspaces').switchTo('workspace', {
+      key: { workspace: workspace.id },
+      options: { ...this.shellOptions, workspace },
+      signal,
+    });
+    if (!workspaceApp || signal.aborted) return;
+    return workspaceApp.showRoute(match);
   },
 });

@@ -1,6 +1,6 @@
 import { Radio } from 'marionette';
 
-import SubRouterApp from 'js/base/subrouterapp';
+import App from 'js/base/app';
 
 import ActionApp from 'js/apps/programs/program/action/action_app';
 
@@ -10,22 +10,12 @@ import FlowSidebarApp from 'js/apps/programs/sidebar/flow/flow-sidebar_app';
 import { LayoutView, ContextTrailView, HeaderView, AddActionView, ListView } from 'js/apps/programs/program/flow/flow_views';
 import { SidebarView } from 'js/apps/programs/program/sidebar/sidebar-views';
 
-export default SubRouterApp.extend({
-  routerAppName: 'ProgramFlowApp',
+export default App.extend({
   childApps: {
     action: ActionApp,
     programSidebar: ProgramSidebarApp,
     flowSidebar: FlowSidebarApp,
   },
-  routeScope: ['flowId'],
-  routeActions: {
-    'programFlow:action': 'showActionSidebar',
-    'programFlow:action:new': 'showActionSidebar',
-  },
-  onBeforeStartRoute() {
-    this.getChildApp('action').stop();
-  },
-
   onBeforeStart() {
     this.setView(new LayoutView());
   },
@@ -53,12 +43,28 @@ export default SubRouterApp.extend({
     this.showActionList();
     this.showProgramSidebar();
 
-    this.startCurrentRoute();
     this.showView();
   },
 
   onStop() {
     if (this.actions) this.stopListening(this.actions);
+  },
+
+  // Activates the detail of a match. The returned promise settles when the
+  // detail is ready. The shell above is prepared once per flow.
+  showRoute(match) {
+    this.routeSignal = match.signal;
+    const { flowId, actionId } = match.params;
+    const actionApp = this.getChildApp('action');
+
+    actionApp.stop();
+
+    if (match.name === 'programFlow') return;
+
+    return this.showActionSidebar(flowId, actionId).catch(error => {
+      actionApp.handleStartFailure();
+      if (!error?.response) window.reportError(error);
+    });
   },
 
   maintainFlowActions() {
@@ -113,19 +119,13 @@ export default SubRouterApp.extend({
 
   async showActionSidebar(flowId, actionId) {
     const actionApp = this.getChildApp('action');
-    const routeContext = this.getCurrentRoute();
-    actionApp.stop();
 
-    const started = await actionApp.start({ actionId, flowId });
+    const signal = this.routeSignal;
+    const started = await actionApp.showSidebar({ actionId, flowId }, { signal });
 
-    if (!started || this.getCurrentRoute() !== routeContext || !this.isRunning()) return;
+    if (!started || signal.aborted) return;
 
     this.editAction(actionApp.action);
-  },
-
-  onRouteError(error) {
-    this.getChildApp('action').handleStartFailure();
-    if (!error?.response) window.reportError(error);
   },
 
   editAction(action) {

@@ -32,8 +32,13 @@ export default App.extend({
   },
   onStart(app, options, action) {
     this.action = action;
+  },
+  async showSidebar(options, { signal }) {
+    const started = await this.start(options);
+    if (!started || signal.aborted) return;
 
-    const actionSidebar = this.getChildApp('actionSidebar');
-    Radio.request('sidebar', 'start', actionSidebar, { action });
+    const sidebar = await Radio.request('sidebar', 'start', this.getChildApp('actionSidebar'), { action: this.action });
+    if (!sidebar || signal.aborted || !this.isRunning()) return;
+    return this;
   },
 });

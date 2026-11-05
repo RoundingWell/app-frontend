@@ -7,6 +7,6 @@ The files here are the building blocks and configuration for building a complex 
 
 ## Routing
 
-`RouterApp` and `SubRouterApp` drive URL routing and app lifecycle. See
+`@mnjs/router` supplies the named Router and owned child switchers. See
 [routing.md](./routing.md) before changing routing infrastructure or application
 route definitions.

@@ -2,7 +2,6 @@ import 'js/base/setup';
 import 'js/i18n';
 
 import { get } from 'underscore';
-import Backbone from 'backbone';
 import { addError } from 'js/datadog';
 
 import 'scss/provider-core.scss';
@@ -24,6 +23,7 @@ import 'js/entities-service';
 import AlertService from 'js/services/alert';
 import BootstrapService from 'js/services/bootstrap';
 import HistoryService from 'js/services/history';
+import RouterRadioService from 'js/services/router-radio';
 import LastestListService from 'js/services/latest-list';
 import ModalService from 'js/services/modal';
 import PatientModalService from 'js/services/patient-modal';
@@ -106,8 +106,7 @@ const Application = App.extend({
 
     signal.throwIfAborted();
 
-    // Bootstrap failures belong to the startup screen. Register the error router
-    // before the app-frame routers, once bootstrap has completed successfully.
+    // Bootstrap failures belong to the startup screen; routing starts after bootstrap.
     this.addChildApp('error', new ErrorApp({ region: this.getView().getRegion('error') }));
 
     return this.startAppFrame(bootstrapService, AppFrameApp);
@@ -171,9 +170,8 @@ const Application = App.extend({
   },
 
   startHistory() {
-    Backbone.history.start({ pushState: true });
-
     new HistoryService();
+    new RouterRadioService();
   },
 });
 

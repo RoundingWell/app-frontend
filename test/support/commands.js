@@ -82,7 +82,13 @@ Cypress.Commands.overwrite('visit', (originalFn, url = '/', options = {}) => {
   // pageLoadTimeout for visit is 60000ms
   return cy
     .mockWs('ws://cypress-websocket/ws')
-    .then({ timeout: 60000 }, () => originalFn(url, options))
+    .window({ log: false })
+    .then({ timeout: 60000 }, win => {
+      // cy.visit promises a document load. Suspend interception in the outgoing
+      // document so an intentional visit cannot become a same-document route.
+      win.router?.stop();
+      return originalFn(url, options);
+    })
     .wait(waits);
 });
 
@@ -100,9 +106,7 @@ Cypress.Commands.add('visitOnClock', (url, options = {}) => {
 Cypress.Commands.add('navigate', (url, workspace = 'one') => {
   cy
     .window()
-    .its('Backbone')
-    .its('history')
-    .invoke('navigate', `${ workspace }${ url }`, { trigger: true });
+    .then(win => win.Radio.request('router', 'navigate', `/${ workspace }${ url }`));
 });
 
 Cypress.Commands.add('iframe', (getSelector = 'iframe') => {
