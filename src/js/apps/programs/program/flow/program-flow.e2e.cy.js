@@ -860,6 +860,7 @@ context('program flow page', function() {
 
     cy
       .get('.program-flow__header')
+      .find('.program-flow__name')
       .click();
 
     cy
