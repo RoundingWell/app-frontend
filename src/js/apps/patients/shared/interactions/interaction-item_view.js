@@ -17,7 +17,9 @@ const VISIT_CLASSES = { E: intl.emergency, I: intl.inpatient, O: intl.outpatient
 function getWorkName(model) {
   const action = model.getAction();
   const flow = action?.getFlow() || model.getFlow();
-  return action && flow ? `${ flow.get('name') }: ${ action.get('name') }` : action?.get('name') || flow?.get('name');
+  const actionName = action?.get('name');
+  const flowName = flow?.get('name');
+  return actionName && flowName ? `${ flowName }: ${ actionName }` : actionName || flowName;
 }
 
 const InteractionItemView = View.extend({
@@ -50,15 +52,15 @@ const InteractionItemView = View.extend({
     const flow = action?.getFlow() || this.model.getFlow();
     const patientId = this.getOption('patientId');
 
+    if (!action?.get('name')) {
+      Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
+      return;
+    }
     if (!flow) {
       Radio.trigger('event-router', 'patient:action', patientId, action.id);
       return;
     }
-    if (action) {
-      Radio.trigger('event-router', 'patient:flow:action', patientId, flow.id, action.id);
-      return;
-    }
-    Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
+    Radio.trigger('event-router', 'patient:flow:action', patientId, flow.id, action.id);
   },
   hasCollapsibleNote(summary) {
     return this.model.getChannelGroup() === 'calls' && !this.getOption('activity') && summary?.length > 900;

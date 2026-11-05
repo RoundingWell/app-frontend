@@ -116,7 +116,7 @@ export default App.extend({
   },
   subscribe() {
     const filters = { actions: { flow: this.flow.id } };
-    Radio.request('ws', 'subscribe', this.getSubscriptionResources(), { filters });
+    Radio.request('ws', 'subscribe', [this.patient, ...this.getSubscriptionResources()], { filters });
     Radio.request('ws', 'manage:add', this, this.actions, 'patient-actions', { include: ACTION_INCLUDE });
   },
   getSubscriptionResources() {

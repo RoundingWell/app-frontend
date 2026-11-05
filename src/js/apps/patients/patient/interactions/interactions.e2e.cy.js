@@ -1,4 +1,5 @@
-import { contains, filter, map, range } from 'underscore';
+import { contains, filter, find, map, range, some } from 'underscore';
+import { createTestScope } from '@mnjs/test/scope';
 
 import { getRelationship } from 'helpers/json-api';
 import formatDate from 'helpers/format-date';
@@ -10,6 +11,8 @@ import { getPatient } from 'support/api/patients';
 import { getActivity } from 'support/api/events';
 import { getComment } from 'support/api/comments';
 import { getCurrentClinician } from 'support/api/clinicians';
+import { stateTodo } from 'support/api/states';
+import { teamCoordinator } from 'support/api/teams';
 
 function assertFeedEnd($item) {
   const container = $item.closest('.patient-interactions')[0];
@@ -20,7 +23,7 @@ function assertFeedEnd($item) {
   expect(container.getBoundingClientRect().bottom - $item[0].getBoundingClientRect().bottom, 'only normal bottom spacing').to.be.at.most(padding + 1);
 }
 
-function createResponseGate(pendingResponses) {
+function createResponseGate(scope) {
   const drains = [];
   let release;
   // Teardown must still release gates when Cypress cancels a timed-out waiter.
@@ -33,32 +36,38 @@ function createResponseGate(pendingResponses) {
     get drain() {
       return Promise.all(drains);
     },
-    reply(request, body) {
+    reply(request, body, statusCode = 200) {
       this.started = true;
-      const drain = response.then(() => request.reply({ body }));
+      const drain = response.then(() => request.reply({ body, statusCode }));
       drains.push(drain);
       return drain;
     },
   };
-  pendingResponses.push(gate);
+  scope.defer(() => {
+    gate.release();
+    return gate.drain;
+  });
   return gate;
 }
 
-function trackInteractionRequests(win, completions, restores) {
+function trackInteractionRequests(win, completions, scope) {
   const originalFetch = win.fetch;
-  restores.push(() => {
+  scope.defer(() => {
     win.fetch = originalFetch;
   });
   win.fetch = (...args) => {
     if (!String(args[0]).includes('/interactions')) return originalFetch.apply(win, args);
     let complete;
     // Native promises survive cancellation of a Cypress wait and remain drainable.
-    completions.push(new Promise(resolve => {
+    const completion = new Promise(resolve => {
       complete = resolve;
-    }));
+    });
+    completion.requestUrl = String(args[0]);
+    completions.push(completion);
     // Use the runner's task queue (unaffected by AUT clocks or later visits).
     // After JSON decoding, application Promise continuations drain before this task.
     const signal = args[1]?.signal;
+    completion.requestSignal = signal;
     const settled = () => {
       signal?.removeEventListener('abort', settled);
       setTimeout(complete, 0);
@@ -91,16 +100,30 @@ function drainInteractionRequests(completions) {
   });
 }
 
+function observeInteractionMessage(win, id, scope) {
+  return new Promise(resolve => {
+    const channel = win.Radio.channel('ws');
+    const received = message => {
+      if (message.resource.id !== id) return;
+      channel.off('message:interactions', received);
+      // Observe delivery after the feature handlers and their fetch microtasks.
+      setTimeout(resolve, 0);
+    };
+    channel.on('message:interactions', received);
+    scope.defer(() => channel.off('message:interactions', received));
+  });
+}
+
 context('patient interactions', function() {
-  let pendingResponses;
+  let responses;
   let requestCompletions;
-  let restoreFetches;
+  let fixtures;
 
   beforeEach(function() {
-    pendingResponses = [];
+    responses = createTestScope();
     requestCompletions = [];
-    restoreFetches = [];
-    cy.on('window:before:load', win => trackInteractionRequests(win, requestCompletions, restoreFetches));
+    fixtures = createTestScope();
+    cy.on('window:before:load', win => trackInteractionRequests(win, requestCompletions, fixtures));
 
     cy
       .intercept({ method: 'GET', url: '/api/patients/*/interactions*', middleware: true }, req => {
@@ -112,10 +135,9 @@ context('patient interactions', function() {
   });
 
   afterEach(function() {
-    for (const response of pendingResponses) response.release();
-    return Cypress.Promise.all([drainInteractionRequests(requestCompletions), ...pendingResponses.map(response => response.drain)]).finally(() => {
-      for (const restore of restoreFetches) restore();
-    });
+    return responses.cleanup()
+      .finally(() => drainInteractionRequests(requestCompletions))
+      .finally(() => fixtures.cleanup());
   });
 
   specify('limits anchored one-item pages with included and filtered-out pivots', function() {
@@ -130,6 +152,1808 @@ context('patient interactions', function() {
 
     query.set('page[at]', 'row-4');
     expect(getPage(data.slice(0, 4), query, data)).to.deep.equal([]);
+  });
+
+  specify('ignores another patient during loading and leaves idle historical updates out of the window', function() {
+    const patient = getPatient();
+    const otherPatient = getPatient();
+    const foreign = getInteraction();
+    const rows = map(range(50), index => getInteraction({ attributes: {
+      channel: 'voice', direction: 'outbound', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(),
+      metadata: { note: `Guard row ${ index }`, clinician_name: `Guard sender ${ index }` },
+    } }));
+    const initial = createResponseGate(responses);
+    const countReads = limit => filter(requestCompletions, completion => new URL(completion.requestUrl, 'http://localhost').searchParams.get('page[limit]') === String(limit)).length;
+    let previewReads;
+    let foreignDelivered;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (initial.started || query.get('page[limit]') !== '25' || query.get('page[at]') !== rows[25].id) return;
+        return initial.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date', 'setTimeout', 'clearTimeout'] });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => expect(initial.started).to.equal(true));
+
+    cy
+      .contains('.patient-interactions-preview__sender', 'Guard sender 49')
+      .should('exist');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy
+      .window()
+      .then(win => {
+        foreignDelivered = observeInteractionMessage(win, foreign.id, fixtures);
+        previewReads = countReads(3);
+        rows[25].attributes.metadata.note = 'Newer server note';
+        rows[49].attributes.metadata.clinician_name = 'Newer server sender';
+      });
+
+    cy
+      .sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: foreign.id },
+        payload: { patient: { type: 'patients', id: otherPatient.id }, attributes: { occurred_at: '2026-12-01T12:00:00Z' } },
+      });
+
+    cy
+      .then(() => foreignDelivered);
+
+    cy
+      .then(() => Promise.all(filter(requestCompletions, completion => new URL(completion.requestUrl, 'http://localhost').searchParams.get('page[limit]') === '3')));
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .then($senders => {
+        const senders = $senders.text();
+        const reads = countReads(3);
+        const assertUnchanged = () => {
+          expect(senders, 'another patient cannot refresh this preview').to.contain('Guard sender 49');
+          expect(senders).not.to.contain('Newer server sender');
+          expect(reads, 'another patient does not refetch this preview').to.equal(previewReads);
+        };
+        if (senders.includes('Guard sender 49') && reads === previewReads) return assertUnchanged();
+        initial.release();
+        return Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]).then(assertUnchanged);
+      });
+
+    cy
+      .then(() => initial.release());
+
+    cy
+      .then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item.is-selected')
+      .should($item => expect($item.text(), 'another patient cannot replace the current timeline snapshot').to.contain('Guard row 25'))
+      .and('be.focused');
+
+    cy
+      .then(() => expect(countReads(25), 'another patient does not queue a timeline replacement').to.equal(1));
+
+    cy
+      .then(() => {
+        rows[0].attributes.occurred_at = '2026-09-01T12:01:00.000Z';
+      });
+
+    cy
+      .sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: rows[0].id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: '2026-09-01T12:01:00.000Z' } },
+      });
+
+    cy
+      .contains('.patient-interactions-preview__sender', 'Newer server sender')
+      .should('exist');
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item.is-selected')
+      .should($item => expect($item.text(), 'idle historical updates retain the current snapshot').to.contain('Guard row 25'))
+      .and('be.focused');
+
+    cy
+      .contains('.patient-interactions__item', 'Guard row 0')
+      .should('not.exist');
+
+    cy
+      .then(() => expect(countReads(25), 'an idle unloaded row leaves the current window intact').to.equal(1));
+  });
+
+  specify('retries a failed filter replacement after discarding the old feed', function() {
+    const patient = getPatient();
+    const row = getInteraction({ attributes: { channel: 'voice', occurred_at: '2026-10-08T12:00:00Z', metadata: { note: 'Before replacement' } } });
+    let failed = false;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [row];
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (failed || !new URL(req.url).searchParams.has('filter[channel]')) return;
+        failed = true;
+        req.reply({ statusCode: 422, body: { errors: [{ title: 'Replacement unavailable' }] } });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
+
+    cy
+      .contains('.patient-interactions__item', 'Before replacement')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="appointments"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions')
+      .should($feed => {
+        expect($feed.find('.patient-interactions__status[role="alert"]').length, 'a failed replacement shows its retryable error').to.equal(1);
+      });
+
+    cy
+      .get('.patient-interactions__item')
+      .should('not.exist');
+
+    cy
+      .then(() => {
+        row.attributes.metadata.note = 'Recovered replacement';
+      });
+
+    cy
+      .get('.patient-interactions__status .js-retry')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Recovered replacement')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__status[role="alert"]')
+      .should('not.exist');
+  });
+
+  specify('cancels an initial timeline on navigation and loads it again on reentry', function() {
+    const patient = getPatient();
+    const row = getInteraction({ attributes: { channel: 'voice', metadata: { note: 'Reentered interaction' } } });
+    const initial = createResponseGate(responses);
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [row];
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (initial.started || new URL(req.url).searchParams.get('page[limit]') !== '25') return;
+        return initial.reply(req, { data: [row] });
+      })
+      .visit(`/patient/${ patient.id }/interactions/${ row.id }`);
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => expect(initial.started).to.equal(true));
+
+    cy
+      .get('.patient-interactions .js-workflow')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/workflow`);
+
+    cy
+      .then(() => initial.release());
+
+    cy
+      .then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions')
+      .should('not.exist');
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .get('#root')
+      .should($root => expect($root.find('.patient-interactions__item').text(), 'the cancelled owner remains reusable').to.contain('Reentered interaction'));
+  });
+
+  specify('applies update messages and removes deleted interactions', function() {
+    const patient = getPatient();
+    const call = getInteraction({ attributes: { channel: 'voice', occurred_at: '2026-10-08T03:00:00Z', metadata: { note: 'Known note' } } });
+    const appointment = getInteraction({ attributes: { channel: 'appointment', occurred_at: null, expected_at: '2026-10-08T04:00:00Z', metadata: { status: 'scheduled', appointment_type: 'Known appointment' } } });
+    const send = (category, row, attributes = {}) => cy.sendWs({
+      category,
+      resource: { type: 'interactions', id: row.id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes },
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [call, appointment];
+        return fx;
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Known note')
+      .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .find('time')
+      .should('have.attr', 'datetime', appointment.attributes.expected_at)
+      .and('contain', formatDate(appointment.attributes.expected_at, 'TIME'));
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 1);
+
+    const nextDay = '2026-10-09T02:00:00Z';
+    send('InteractionScheduled', appointment, { expected_at: nextDay });
+
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .find('time')
+      .should('have.attr', 'datetime', nextDay)
+      .and('contain', formatDate(nextDay, 'TIME'));
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 2)
+      .last()
+      .should('contain', 'Known appointment')
+      .find('.js-date-label')
+      .should('contain', formatDate(nextDay, 'DATE'));
+
+    cy
+      .get('.patient-interactions__list time')
+      .should($times => {
+        expect(map($times.toArray(), time => time.getAttribute('datetime'))).to.deep.equal([call.attributes.occurred_at, nextDay]);
+      });
+
+    const beforeCall = '2026-10-08T02:00:00Z';
+    send('InteractionScheduled', appointment, { expected_at: beforeCall });
+
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .find('time')
+      .should('have.attr', 'datetime', beforeCall)
+      .and('contain', formatDate(beforeCall, 'TIME'));
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 1)
+      .find('.js-date-label')
+      .should('contain', formatDate(beforeCall, 'DATE'));
+
+    cy
+      .get('.patient-interactions__list time')
+      .should($times => {
+        expect(map($times.toArray(), time => time.getAttribute('datetime'))).to.deep.equal([beforeCall, call.attributes.occurred_at]);
+      });
+
+    send('MetadataUpdated', call, { metadata: { note: 'Updated note' } });
+
+    cy
+      .contains('.patient-interactions__item', 'Updated note')
+      .should('exist');
+
+    send('InteractionCompleted', call, { occurred_at: '2026-10-09T02:00:00Z' });
+
+    cy
+      .get('.patient-interactions__day')
+      .should('have.length', 2)
+      .first()
+      .should('contain', 'Known appointment')
+      .and('not.contain', 'Updated note');
+
+    cy
+      .get('.patient-interactions__day')
+      .last()
+      .should('contain', 'Updated note')
+      .find('.js-date-label')
+      .should('contain', formatDate('2026-10-09T02:00:00Z', 'DATE'));
+
+    send('InteractionCancelled', appointment, { cancelled_at: '2026-10-08T05:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Known appointment')
+      .should('contain', 'cancelled');
+
+    send('ResourceDeleted', call);
+
+    cy
+      .contains('.patient-interactions__item', 'Updated note')
+      .should('not.exist');
+
+    send('ResourceDeleted', appointment);
+
+    cy
+      .get('.patient-interactions__empty')
+      .should('be.visible');
+  });
+
+  specify('refetches the latest three while collapsed', function() {
+    const patient = getPatient();
+    const rows = map(range(4), index => getInteraction({
+      attributes: {
+        direction: 'inbound',
+        occurred_at: `2026-10-08T0${ index }:00:00Z`,
+        metadata: { message: `Live row ${ index }`, from: `Sender ${ index }` },
+      },
+    }));
+    const added = getInteraction({
+      attributes: { direction: 'inbound', occurred_at: '2026-10-08T04:00:00Z', metadata: { message: 'New live row', from: 'New sender' } },
+    });
+    const send = (category, row, attributes = {}) => cy.sendWs({
+      category,
+      resource: { type: 'interactions', id: row.id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes },
+    });
+
+    cy
+      .viewport(1280, 900)
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .visitOnClock(`/patient/${ patient.id }/workflow`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should('have.length', 3);
+
+    cy
+      .get('.patient__frame .js-sidebar-button')
+      .then($button => {
+        if ($button.attr('aria-expanded') !== 'true') cy.wrap($button).click();
+      });
+
+    cy
+      .get('.patient__frame .js-sidebar-button')
+      .should('have.attr', 'aria-expanded', 'true')
+      .click()
+      .should('have.attr', 'aria-expanded', 'false');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        const subscription = stub.lastCall.args[0];
+        expect(subscription.name).to.equal('Subscribe');
+        expect(subscription.data.resources).to.deep.include({ type: 'patients', id: patient.id });
+      });
+
+    cy.then(() => rows.push(added));
+    send('ResourceCreated', added, { channel: 'sms', direction: 'inbound', metadata: added.attributes.metadata });
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should($senders => {
+        expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 2', 'Sender 3', 'New sender']);
+      });
+
+    cy.then(() => {
+      added.attributes.occurred_at = '2026-10-07T04:00:00Z';
+    });
+    send('InteractionCompleted', added, { occurred_at: '2026-10-07T04:00:00Z' });
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should($senders => {
+        expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 1', 'Sender 2', 'Sender 3']);
+      });
+
+    const removed = rows[3];
+    cy.then(() => rows.splice(3, 1));
+    send('ResourceDeleted', removed);
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should($senders => {
+        expect($senders.toArray().map(sender => sender.textContent)).to.deep.equal(['Sender 0', 'Sender 1', 'Sender 2']);
+      });
+  });
+
+  specify('makes progress through update bursts and retains newer navigation and filtering', function() {
+    for (const destination of ['refresh', 'interaction', 'filtered-date']) {
+      const patient = getPatient();
+      const rows = map(range(50), index => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(),
+        metadata: { note: `Burst row ${ index }`, clinician_name: `Burst clinician ${ index }` },
+      } }));
+      const target = rows[37];
+      const linked = rows[49];
+      const deleted = rows[36];
+      const deletedNext = rows[48];
+      const initial = createResponseGate(responses);
+      const followup = createResponseGate(responses);
+      const action = getAction({ attributes: { name: 'Live burst action' }, relationships: { patient: getRelationship(patient) } });
+      const send = (category, row, attributes = {}) => cy.sendWs({
+        category, resource: { type: 'interactions', id: row.id }, payload: { patient: { type: 'patients', id: patient.id }, attributes },
+      });
+      const firstTimestamp = '2026-12-01T12:00:00Z';
+      const latestTimestamp = '2026-12-02T12:00:00Z';
+      let followupRead;
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routeSettings('sidebar', ['interactions'])
+        .routePanels(fx => {
+          fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+          return fx;
+        })
+        .routeWidgets(fx => {
+          fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+          return fx;
+        })
+        .routeAction(fx => {
+          fx.data = action;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (query.get('page[limit]') !== '25' || query.get('page[at]') !== target.id || query.has('filter[channel]')) return;
+          const body = { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) };
+          if (!initial.started) return initial.reply(req, body);
+          if (!followup.started) return followup.reply(req, body);
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
+
+      cy
+        .get('.patient-interactions[aria-busy="true"]')
+        .should(() => {
+          expect(initial.started).to.equal(true);
+        });
+
+      cy
+        .get('@wsHandleMessage')
+        .should('have.been.called');
+
+      cy.then(() => {
+        target.attributes.occurred_at = firstTimestamp;
+        linked.attributes.metadata = { note: 'Live burst note', clinician_name: 'Burst clinician 49' };
+        linked.relationships.action = getRelationship(action);
+      });
+      send('InteractionCompleted', target, { occurred_at: firstTimestamp });
+      send('MetadataUpdated', linked, { metadata: { note: 'Live burst note', clinician_name: 'Burst clinician 49' }, action_id: action.id });
+      cy.wait('@routeAction');
+      cy.then(() => initial.release());
+      cy.then(() => {
+        const firstRead = find(requestCompletions, completion => {
+          const query = new URL(completion.requestUrl, 'http://localhost').searchParams;
+          return query.get('page[at]') === target.id && query.get('page[limit]') === '25';
+        });
+        expect(firstRead, 'initial native read is tracked').to.exist;
+        return Cypress.Promise.all([initial.drain, firstRead]);
+      });
+
+      cy
+        .get('.patient-interactions[aria-busy="true"]')
+        .should(() => {
+          expect(followup.started, 'a follow-up is pending after the first snapshot commits').to.equal(true);
+        });
+
+      cy
+        .get('.patient-interactions')
+        .then($feed => {
+          const $selected = $feed.find('.patient-interactions__item.is-selected');
+          const $linked = $feed.find('.patient-interactions__item').filter((index, item) => item.textContent.includes('Live burst note'));
+          const snapshot = {
+            selected: $selected.text().includes('Burst row 37'),
+            focused: $selected[0] === $feed[0].ownerDocument.activeElement,
+            timestamp: $selected.find('time').attr('datetime'),
+            action: $linked.find('.js-action').text(),
+          };
+          const assertProgress = () => {
+            expect(snapshot.selected, 'first window commits while its follow-up is held').to.equal(true);
+            expect(snapshot.focused, 'selection survives the first commit').to.equal(true);
+            expect(snapshot.timestamp, 'pending response retains the live timestamp').to.equal(firstTimestamp);
+            expect(snapshot.action, 'pending response retains the new work link').to.contain('Live burst action');
+          };
+          if (snapshot.selected && snapshot.focused && snapshot.timestamp === firstTimestamp && snapshot.action.includes('Live burst action')) return assertProgress();
+          // Drain held responses before reporting a controlled regression failure.
+          followup.release();
+          return Cypress.Promise.all([followup.drain, drainInteractionRequests(requestCompletions)]).then(assertProgress);
+        });
+
+      cy.then(() => {
+        target.attributes.occurred_at = latestTimestamp;
+        linked.attributes.metadata = { note: 'Latest burst note', clinician_name: 'Burst clinician 49' };
+        linked.relationships.action = getRelationship();
+        rows.splice(rows.indexOf(deleted), 1);
+        rows.splice(rows.indexOf(deletedNext), 1);
+      });
+      send('InteractionCompleted', target, { occurred_at: latestTimestamp });
+      send('MetadataUpdated', linked, { metadata: { note: 'Latest burst note', clinician_name: 'Burst clinician 49' }, action_id: null });
+      send('ResourceDeleted', deleted);
+      send('ResourceDeleted', deletedNext);
+
+      cy
+        .contains('.patient-interactions__item', 'Latest burst note')
+        .find('.js-action')
+        .should('not.exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Burst row 36')
+        .should('not.exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Burst row 48')
+        .should('not.exist');
+
+      cy.then(() => {
+        const reads = filter(requestCompletions, completion => {
+          const query = new URL(completion.requestUrl, 'http://localhost').searchParams;
+          return query.get('page[at]') === target.id && query.get('page[limit]') === '25';
+        });
+        followupRead = reads[1];
+        expect(followupRead, 'follow-up native read is tracked').to.exist;
+        expect(followupRead.requestSignal.aborted, 'update burst leaves the pending read running').to.equal(false);
+      });
+
+      if (destination === 'interaction') {
+        cy
+          .contains('.patient-interactions-preview__link', 'Burst clinician 49')
+          .click({ scrollBehavior: false });
+
+        cy
+          .get('.patient-interactions__item.is-selected')
+          .should('contain', 'Latest burst note')
+          .and('be.focused');
+
+        cy.then(() => {
+          expect(followupRead.requestSignal.aborted, 'new interaction navigation cancels the older read').to.equal(true);
+        });
+      }
+      if (destination === 'filtered-date') {
+        cy
+          .get('.patient-interactions__filters [data-filter="messages"]')
+          .should('have.attr', 'aria-pressed', 'true')
+          .click({ scrollBehavior: false })
+          .should('have.attr', 'aria-pressed', 'false');
+
+        cy
+          .get('.patient-interactions[aria-busy="false"]')
+          .should('be.visible');
+
+        cy.then(() => {
+          expect(followupRead.requestSignal.aborted, 'new filtering cancels the older read').to.equal(true);
+        });
+
+        cy
+          .get('.patient-interactions__toolbar-date .js-date-button')
+          .click({ scrollBehavior: false });
+
+        cy
+          .contains('.js-picklist-item', 'The very beginning')
+          .click();
+
+        cy
+          .contains('.patient-interactions__item', 'Burst row 0')
+          .should('be.visible');
+      }
+
+      cy.then(() => followup.release());
+      cy.then(() => Cypress.Promise.all([initial.drain, followup.drain, drainInteractionRequests(requestCompletions)]));
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      if (destination === 'filtered-date') {
+        cy
+          .contains('.patient-interactions__item', 'Burst row 0')
+          .should('be.visible');
+
+        cy
+          .get('.patient-interactions__filters [data-filter="messages"]')
+          .should('have.attr', 'aria-pressed', 'false');
+      } else {
+        cy
+          .get('.patient-interactions__item.is-selected')
+          .should('contain', destination === 'interaction' ? 'Latest burst note' : 'Burst row 37')
+          .and('be.focused')
+          .find('time')
+          .should('have.attr', 'datetime', destination === 'interaction' ? linked.attributes.occurred_at : latestTimestamp);
+      }
+
+      cy
+        .contains('.patient-interactions__item', 'Latest burst note')
+        .find('.js-action')
+        .should('not.exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Burst row 48')
+        .should('not.exist');
+    }
+  });
+
+  specify('settles sustained updates, repairs paging, and yields to newer navigation and filters', function() {
+    const patient = getPatient();
+    const rows = map(range(100), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(),
+      metadata: { note: `Settling row ${ index }`, clinician_name: `Settling clinician ${ index }` },
+    } }));
+    const target = rows[50];
+    const initial = createResponseGate(responses);
+    const followup = createResponseGate(responses);
+    const repair = createResponseGate(responses);
+    const edge = createResponseGate(responses);
+    let anchoredReads = 0;
+    let paging = false;
+    const pagingGate = query => {
+      if (!paging) return;
+      if (!repair.started && !query.has('page[before]') && !query.has('page[after]')) return repair;
+      if (!edge.started && query.get('page[before]') === rows[25].id) return edge;
+    };
+    const update = minute => {
+      const timestamp = `2026-10-21T12:${ String(minute).padStart(2, '0') }:00.000Z`;
+
+      cy
+        .then(() => {
+          target.attributes.occurred_at = timestamp;
+        });
+
+      cy
+        .sendWs({
+          category: 'InteractionCompleted', resource: { type: 'interactions', id: target.id },
+          payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+        });
+      if (minute > 1) {
+        cy
+          .contains('.patient-interactions__item', 'Settling row 50')
+          .find('time')
+          .should('have.attr', 'datetime', timestamp);
+      }
+    };
+    const mainReads = () => filter(requestCompletions, completion => new URL(completion.requestUrl, 'http://localhost').searchParams.get('page[limit]') === '25').length;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (query.get('page[limit]') !== '25') return;
+        const body = { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) };
+        if (query.get('page[at]') === target.id) {
+          anchoredReads++;
+          if (anchoredReads === 1) return initial.reply(req, body);
+          if (anchoredReads === 2) return followup.reply(req, body);
+        }
+        return pagingGate(query)?.reply(req, body);
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date', 'setTimeout', 'clearTimeout'] });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(initial.started).to.equal(true);
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+    update(1);
+
+    cy
+      .then(() => initial.release());
+
+    cy
+      .then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    for (const minute of [2, 3, 4]) {
+      cy
+        .tick(100);
+      update(minute);
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .then(() => expect(anchoredReads, 'events retain the settling interval').to.equal(1));
+    }
+
+    cy
+      .tick(199);
+
+    cy
+      .then(() => expect(anchoredReads, 'refresh remains bounded by its original deadline').to.equal(1));
+
+    cy
+      .tick(1);
+
+    cy
+      .get('.patient-interactions')
+      .should($feed => {
+        expect(followup.started, 'sustained events do not postpone the original 500 ms deadline').to.equal(true);
+        expect($feed.attr('aria-busy'), 'the bounded follow-up is running').to.equal('true');
+      });
+    update(5);
+
+    cy
+      .then(() => followup.release());
+
+    cy
+      .then(() => Cypress.Promise.all([followup.drain, drainInteractionRequests(requestCompletions)]));
+
+    for (const minute of [6, 7, 8]) {
+      cy
+        .tick(100);
+      update(minute);
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .then(() => expect(anchoredReads, 'each completed read gets a settling interval').to.equal(2));
+    }
+
+    cy
+      .tick(200);
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should(() => {
+        expect(anchoredReads, 'one final refresh converges after the stream stops').to.equal(3);
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 50')
+      .find('time')
+      .should('have.attr', 'datetime', '2026-10-21T12:08:00.000Z');
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .then(() => expect(anchoredReads, 'idle convergence leaves no refresh loop').to.equal(3));
+
+    update(9);
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 50')
+      .find('time')
+      .should('have.attr', 'datetime', '2026-10-21T12:09:00.000Z');
+
+    cy
+      .window()
+      .then(win => new Cypress.Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve))));
+
+    cy
+      .then(() => {
+        paging = true;
+      });
+
+    cy
+      .get('.patient-interactions')
+      .scrollTo('top')
+      .should('have.prop', 'scrollTop', 0);
+
+    cy
+      .get('.patient-interactions')
+      .should(() => {
+        expect(repair.started, 'edge paging repairs its invalidated cursor first').to.equal(true);
+      });
+    update(10);
+
+    cy
+      .then(() => repair.release());
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(edge.started, 'automatic paging advances despite another update during repair').to.equal(true);
+      });
+    update(11);
+
+    cy
+      .then(() => edge.release());
+
+    cy
+      .then(() => Cypress.Promise.all([repair.drain, edge.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 0')
+      .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Settling row 50')
+      .find('time')
+      .should('have.attr', 'datetime', '2026-10-21T12:11:00.000Z');
+
+    cy
+      .contains('.patient-interactions-preview__link', 'Settling clinician 99')
+      .click({ scrollBehavior: false });
+
+    cy
+      .contains('.patient-interactions__item.is-selected', 'Settling row 99')
+      .should('be.focused');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .contains('.patient-interactions__item.is-selected', 'Settling row 99')
+      .should('be.focused');
+
+    cy
+      .then(() => {
+        rows[99].attributes.occurred_at = '2026-12-09T12:01:00.000Z';
+      });
+
+    cy
+      .sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: rows[99].id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: '2026-12-09T12:01:00.000Z' } },
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click({ scrollBehavior: false })
+      .should('have.attr', 'aria-pressed', 'false');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+    let filteredReads;
+
+    cy
+      .then(() => {
+        filteredReads = mainReads();
+      });
+
+    cy
+      .tick(1000);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .then(() => expect(mainReads(), 'new filters cancel the older refresh deadline').to.equal(filteredReads));
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .should('have.attr', 'aria-pressed', 'false');
+  });
+
+  specify('retries dirty paging repairs and settles an exhausted repair', function() {
+    for (const scenario of ['retry', 'empty']) {
+      const patient = getPatient();
+      const rows = map(range(50), index => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(), metadata: { note: `Repair row ${ index }` },
+      } }));
+      const moved = rows[13];
+      const timestamp = '2026-11-02T12:00:00.000Z';
+      let repairs = 0;
+      let edges = 0;
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (query.get('page[limit]') !== '25' || query.has('page[at]')) return;
+          if (!query.has('page[before]') && !query.has('page[after]')) repairs++;
+          if (query.get('page[before]') !== rows[0]?.id) return;
+          edges++;
+          if (edges === 1) req.reply({ statusCode: 422, body: { errors: [{ title: 'Adjacent page unavailable' }] } });
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date', 'setTimeout', 'clearTimeout'] });
+
+      cy
+        .contains('.patient-interactions__item.is-selected', 'Repair row 25')
+        .should('be.focused');
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .then(() => {
+          moved.attributes.occurred_at = timestamp;
+        });
+
+      cy
+        .sendWs({
+          category: 'InteractionCompleted', resource: { type: 'interactions', id: moved.id },
+          payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+        });
+
+      cy
+        .contains('.patient-interactions__item', 'Repair row 13')
+        .find('time')
+        .should('have.attr', 'datetime', timestamp);
+
+      cy
+        .window()
+        .then(win => new Cypress.Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve))));
+
+      if (scenario === 'empty') {
+        cy
+          .then(() => rows.splice(0));
+      }
+
+      cy
+        .get('.patient-interactions')
+        .scrollTo('top');
+
+      if (scenario === 'retry') {
+        cy
+          .get('.js-paging-error')
+          .should('be.visible')
+          .find('.js-retry')
+          .click();
+
+        cy
+          .contains('.patient-interactions__item', 'Repair row 0')
+          .should('exist');
+
+        cy
+          .contains('.patient-interactions__item', 'Repair row 49')
+          .should('exist');
+      } else {
+        cy
+          .get('.patient-interactions')
+          .should($feed => {
+            const $empty = $feed.find('.patient-interactions__empty');
+            expect($empty.length, 'an exhausted repair settles as an empty feed').to.equal(1);
+            expect($empty).to.be.visible;
+          });
+      }
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .should('be.visible');
+
+      cy
+        .tick(1000);
+
+      cy
+        .then(() => drainInteractionRequests(requestCompletions));
+
+      cy
+        .then(() => {
+          expect(repairs, 'retry retains the cursor repair; an empty repair settles once').to.equal(scenario === 'retry' ? 2 : 1);
+          expect(edges, 'an empty repaired window never requests an undefined cursor').to.equal(scenario === 'retry' ? 2 : 0);
+        });
+
+      cy
+        .get('.js-paging-error')
+        .should('not.be.visible');
+    }
+  });
+
+  specify('retains newer later-page values and hydrates previously unloaded links', function() {
+    const patient = getPatient();
+    const rows = map(range(50), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1, 12)).toISOString(), metadata: { note: `Later page row ${ index }` },
+    } }));
+    const initial = createResponseGate(responses);
+    const action = getAction({ attributes: { name: 'Previously unloaded work' }, relationships: { patient: getRelationship(patient) } });
+    rows[47].attributes.metadata = { note: 'Updated since creation' };
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = action;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (initial.started || query.get('page[limit]') !== '25' || query.has('page[before]')) return;
+        return initial.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-09-01T12:00:00Z' });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(initial.started).to.equal(true);
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy.sendWs({
+      category: 'MetadataUpdated', resource: { type: 'interactions', id: rows[0].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes: { metadata: { note: 'Earlier event note' }, action_id: action.id } },
+    });
+    cy.sendWs({
+      category: 'ResourceCreated', resource: { type: 'interactions', id: rows[47].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes: { channel: 'voice', direction: 'inbound', metadata: { note: 'Creation-time note' } } },
+    });
+    cy.wait('@routeAction');
+    cy.then(() => {
+      // The older page starts after these events and returns the current server state.
+      rows[0].attributes.metadata = { note: 'Newer server note' };
+      rows[0].relationships.action = getRelationship(action);
+      initial.release();
+    });
+    cy.then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .contains('.patient-interactions__item', 'Newer server note')
+      .should('be.visible')
+      .find('.js-action')
+      .should('contain', 'Previously unloaded work');
+
+    cy
+      .contains('.patient-interactions__item', 'Updated since creation')
+      .should('exist');
+  });
+
+  specify('runs the queued reconciliation after a superseded snapshot fails', function() {
+    const patient = getPatient();
+    const rows = map(range(3), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: `2026-10-0${ index + 1 }T12:00:00Z`, metadata: { note: `Retry row ${ index }` },
+    } }));
+    const initial = createResponseGate(responses);
+    const timestamp = '2026-10-05T12:00:00Z';
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (initial.started || query.get('page[at]') !== rows[1].id) return;
+        return initial.reply(req, { errors: [{ title: 'Snapshot unavailable' }] }, 422);
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[1].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(initial.started).to.equal(true);
+      });
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy.then(() => {
+      rows[1].attributes.occurred_at = timestamp;
+    });
+    cy.sendWs({
+      category: 'InteractionCompleted', resource: { type: 'interactions', id: rows[1].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+    });
+    cy.then(() => initial.release());
+    cy.then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .contains('.patient-interactions__item.is-selected', 'Retry row 1')
+      .should('be.focused')
+      .find('time')
+      .should('have.attr', 'datetime', timestamp);
+  });
+
+  specify('reconciles late windows after deletion and timestamp updates', function() {
+    const patient = getPatient();
+    const timestamp = '2026-10-31T12:00:00Z';
+    for (const [category, index] of [['ResourceDeleted', 25], ['ResourceDeleted', 13], ['InteractionCompleted', 0]]) {
+      const rows = map(range(50), row => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, row + 1)).toISOString(), metadata: { note: `Pending row ${ row }` },
+      } }));
+      const changed = rows[index];
+      const older = createResponseGate(responses);
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (!query.has('page[before]')) return;
+          // Cover a missing cursor and a response captured before the event.
+          const captured = JSON.parse(JSON.stringify(getPage(rows, query, rows)));
+          return older.reply(req, {
+            get data() {
+              return index === 13 ? getPage(rows, query, rows) : captured;
+            },
+          });
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
+
+      cy
+        .contains('.patient-interactions__item', 'Pending row 25')
+        .should('be.focused');
+
+      cy
+        .get('.patient-interactions')
+        .scrollTo('top');
+
+      cy
+        .get('.patient-interactions[aria-busy="true"]')
+        .should(() => {
+          expect(older.started).to.equal(true);
+        });
+
+      cy.then(() => {
+        if (category === 'ResourceDeleted') rows.splice(rows.indexOf(changed), 1);
+        else changed.attributes.occurred_at = timestamp;
+      });
+      cy.sendWs({
+        category, resource: { type: 'interactions', id: changed.id },
+        payload: {
+          patient: { type: 'patients', id: patient.id },
+          attributes: category === 'InteractionCompleted' ? { occurred_at: timestamp } : {},
+        },
+      });
+
+      cy.then(() => older.release());
+      cy.then(() => Cypress.Promise.all([older.drain, drainInteractionRequests(requestCompletions)]));
+
+      cy
+        .contains('.patient-interactions__item', 'Pending row 0')
+        .should('exist');
+
+      if (category === 'ResourceDeleted') {
+        cy
+          .contains('.patient-interactions__item', `Pending row ${ index }`)
+          .should('not.exist');
+      } else {
+        cy
+          .contains('.patient-interactions__item', 'Pending row 0')
+          .find('time')
+          .should('have.attr', 'datetime', timestamp);
+      }
+
+      cy
+        .get('.patient-interactions__item')
+        .should('have.length', category === 'ResourceDeleted' ? 49 : 50);
+    }
+  });
+
+  specify('preserves the initial destination when interaction events supersede loading', function() {
+    const patient = getPatient();
+    const timestamp = '2026-08-01T12:00:00Z';
+    for (const category of ['InteractionCompleted', 'ResourceDeleted']) {
+      const rows = map(range(50), index => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, index + 1)).toISOString(), metadata: { note: `Initial row ${ index }` },
+      } }));
+      const target = rows[25];
+      const initial = createResponseGate(responses);
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (query.get('page[at]') !== target.id || initial.started) return;
+          return initial.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ target.id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
+
+      cy
+        .get('.patient-interactions[aria-busy="true"]')
+        .should(() => {
+          expect(initial.started).to.equal(true);
+        });
+
+      cy
+        .get('@wsHandleMessage')
+        .should('have.been.called');
+
+      cy.then(() => {
+        if (category === 'ResourceDeleted') rows.splice(rows.indexOf(target), 1);
+        else target.attributes.occurred_at = timestamp;
+      });
+      cy.sendWs({
+        category, resource: { type: 'interactions', id: target.id },
+        payload: {
+          patient: { type: 'patients', id: patient.id },
+          attributes: category === 'InteractionCompleted' ? { occurred_at: timestamp } : {},
+        },
+      });
+
+      cy.then(() => initial.release());
+      cy.then(() => Cypress.Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+      if (category === 'InteractionCompleted') {
+        cy
+          .contains('.patient-interactions__item.is-selected', 'Initial row 25')
+          .should('be.focused')
+          .find('time')
+          .should('have.attr', 'datetime', timestamp);
+      } else {
+        cy
+          .contains('.patient-interactions__item', 'Initial row 49')
+          .should('be.visible');
+
+        cy
+          .contains('.patient-interactions__item', 'Initial row 25')
+          .should('not.exist');
+      }
+    }
+  });
+
+  specify('keeps the viewed date when a queued filter anchor moves before refresh', function() {
+    const patient = getPatient();
+    const rows = map(range(120), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 0, Math.floor(index / 2) + 1, 12)).toISOString(), metadata: { note: `Queued row ${ index }` },
+    } }));
+    const refresh = createResponseGate(responses);
+    const otherTimestamp = new Date(Date.parse(rows[90].attributes.occurred_at) + 60000).toISOString();
+    let anchor;
+    let dateLabel;
+    let delivered;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (refresh.started || !query.has('filter[channel]') || !query.has('page[at]')) return;
+        anchor = find(rows, row => row.id === query.get('page[at]'));
+        return refresh.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[80].id }`, { now: '2026-03-20T12:00:00Z', functionNames: ['Date', 'setTimeout', 'clearTimeout'] });
+
+    cy
+      .contains('.patient-interactions__item', 'Queued row 80')
+      .should('be.focused');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-label')
+      .then($label => {
+        dateLabel = $label.text();
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => expect(refresh.started).to.equal(true));
+
+    cy
+      .window()
+      .then(win => {
+        delivered = observeInteractionMessage(win, rows[90].id, fixtures);
+        rows[90].attributes.occurred_at = otherTimestamp;
+      });
+
+    cy
+      .sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: rows[90].id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: otherTimestamp } },
+      });
+
+    cy
+      .then(() => delivered);
+
+    cy
+      .then(() => refresh.release());
+
+    cy
+      .then(() => Cypress.Promise.all([refresh.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .window()
+      .then(win => {
+        delivered = observeInteractionMessage(win, anchor.id, fixtures);
+        anchor.attributes.occurred_at = '2025-01-01T12:00:00Z';
+      });
+
+    cy
+      .then(() => cy.sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: anchor.id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: '2025-01-01T12:00:00Z' } },
+      }));
+
+    cy
+      .then(() => delivered);
+
+    cy
+      .tick(500);
+
+    cy
+      .then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-label')
+      .should($label => expect($label.text(), 'queued reconciliation retains the requested day').to.equal(dateLabel));
+
+    cy
+      .get('.patient-interactions__item')
+      .should($items => expect($items.text()).not.to.contain(anchor.attributes.metadata.note));
+  });
+
+  specify('keeps the viewed date when a filter anchor moves during replacement', function() {
+    const patient = getPatient();
+    const rows = map(range(120), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: new Date(Date.UTC(2026, 0, Math.floor(index / 2) + 1, 12)).toISOString(), metadata: { note: `Filter row ${ index }` },
+    } }));
+    const refresh = createResponseGate(responses);
+    const timestamp = '2025-01-01T12:00:00Z';
+    let anchor;
+    let dateLabel;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (refresh.started || !query.has('filter[channel]') || !query.has('page[at]')) return;
+        anchor = find(rows, row => row.id === query.get('page[at]'));
+        return refresh.reply(req, { data: JSON.parse(JSON.stringify(getPage(rows, query, rows))) });
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[80].id }`, { now: '2026-03-20T12:00:00Z', functionNames: ['Date'] });
+
+    cy
+      .contains('.patient-interactions__item', 'Filter row 80')
+      .should('be.focused');
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-label')
+      .then($label => {
+        dateLabel = $label.text();
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => {
+        expect(refresh.started).to.equal(true);
+        expect(anchor).to.exist;
+      });
+
+    cy.then(() => {
+      anchor.attributes.occurred_at = timestamp;
+      return cy.sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: anchor.id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+      });
+    });
+
+    cy.then(() => refresh.release());
+    cy.then(() => Cypress.Promise.all([refresh.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__toolbar-date .js-date-label')
+      .should($label => {
+        expect($label.text(), 'viewed date retained after filter reconciliation').to.equal(dateLabel);
+      });
+  });
+
+  specify('reconciles older and newer paging boundaries after loaded rows move', function() {
+    const patient = getPatient();
+    for (const [index, timestamp] of [[13, '2026-08-01T00:00:00Z'], [37, '2026-12-01T00:00:00Z']]) {
+      const rows = map(range(50), row => getInteraction({ attributes: {
+        channel: 'voice', occurred_at: new Date(Date.UTC(2026, 8, row + 1)).toISOString(), metadata: { note: `Boundary row ${ row }` },
+      } }));
+      const moved = rows[index];
+
+      cy
+        .routesForPatientWorkflow()
+        .routePatient(fx => {
+          fx.data = patient;
+          return fx;
+        })
+        .routePatientInteractions(fx => {
+          fx.data = rows;
+          return fx;
+        })
+        .intercept('GET', '/api/patients/*/interactions*', req => {
+          const query = new URL(req.url).searchParams;
+          if (query.get('page[limit]') === '25' && !query.has('page[at]') && !query.has('page[before]') && !query.has('page[after]')) req.alias = 'reconciledWindow';
+        })
+        .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[25].id }`, { now: '2026-11-01T12:00:00Z', functionNames: ['Date'] });
+
+      cy
+        .get('.patient-interactions__item')
+        .should('have.length', 25);
+
+      cy.then(() => {
+        moved.attributes.occurred_at = timestamp;
+      });
+      cy.sendWs({
+        category: 'InteractionCompleted', resource: { type: 'interactions', id: moved.id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { occurred_at: timestamp } },
+      });
+
+      cy
+        .get('.patient-interactions[aria-busy="false"]')
+        .scrollTo('bottom')
+        .scrollTo('top');
+
+      cy
+        .get('.patient-interactions__item')
+        .should('have.length', 50);
+
+      cy
+        .wait('@reconciledWindow');
+
+      cy
+        .contains('.patient-interactions__item', 'Boundary row 0')
+        .should('exist');
+
+      cy
+        .contains('.patient-interactions__item', 'Boundary row 49')
+        .should('exist');
+    }
+  });
+
+  specify('hydrates new work links outside the newest-three widget', function() {
+    const patient = getPatient();
+    const rows = map(range(4), index => getInteraction({ attributes: {
+      channel: 'voice', occurred_at: `2026-10-08T0${ index }:00:00Z`, metadata: { note: `Linked row ${ index }` },
+    } }));
+    const actionFlow = getFlow({ attributes: { name: 'Hydrated action flow' }, relationships: { patient: getRelationship(patient) } });
+    const action = getAction({ attributes: { name: 'Hydrated action' }, relationships: { patient: getRelationship(patient), flow: getRelationship(actionFlow) } });
+    const flow = getFlow({ attributes: { name: 'Hydrated standalone flow' }, relationships: { patient: getRelationship(patient), state: getRelationship(stateTodo), owner: getRelationship(teamCoordinator) } });
+    const missingAction = getAction({ attributes: { name: 'Unavailable linked action' }, relationships: { patient: getRelationship(patient), flow: getRelationship(flow), state: getRelationship(stateTodo), owner: getRelationship(teamCoordinator) } });
+    const send = attributes => cy.sendWs({
+      category: 'MetadataUpdated', resource: { type: 'interactions', id: rows[0].id },
+      payload: { patient: { type: 'patients', id: patient.id }, attributes },
+    });
+
+    cy
+      .routesForPatientAction()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .routeAction(fx => {
+        fx.data = action;
+        fx.included = [actionFlow];
+        return fx;
+      })
+      .routeFlow(fx => {
+        flow.relationships['program-flow'] = fx.data.relationships['program-flow'];
+        flow.relationships.program = fx.data.relationships.program;
+        fx.data = flow;
+        return fx;
+      })
+      .routeFlowActions(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .routeFlowActivity()
+      .intercept('GET', `/api/flows/${ actionFlow.id }*`, { statusCode: 422, body: { errors: [{ title: 'Flow unavailable' }] } })
+      .as('failedLinkedFlow')
+      .intercept('GET', `/api/actions/${ missingAction.id }*`, { body: { data: missingAction, included: [flow] } })
+      .intercept({ method: 'GET', url: `/api/actions/${ missingAction.id }*`, times: 1 }, { statusCode: 422, body: { errors: [{ title: 'Action unavailable' }] } })
+      .as('failedLinkedAction')
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .should('exist');
+
+    send({ action_id: action.id, flow_id: actionFlow.id });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .should('contain', 'Hydrated action flow: Hydrated action');
+
+    cy
+      .wait('@routeAction')
+      .wait('@failedLinkedFlow');
+
+    send({ action_id: null, flow_id: null });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .should('not.exist');
+
+    send({ action_id: missingAction.id, flow_id: flow.id });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .should('contain', 'Hydrated standalone flow')
+      .and('not.contain', 'undefined');
+
+    cy
+      .wait('@routeFlow')
+      .wait('@failedLinkedAction');
+
+    cy
+      .contains('.patient-interactions__item', 'Linked row 0')
+      .find('.js-action')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/flow/${ flow.id }`);
+
+    cy
+      .get('.patient-flow__name')
+      .should('contain', 'Hydrated standalone flow');
+  });
+
+  specify('owns the patient subscription before workflow readiness and clears child state on navigation', function() {
+    const patient = getPatient();
+    const flow = getFlow({ attributes: { name: 'Owned workflow flow' }, relationships: { patient: getRelationship(patient), state: getRelationship(stateTodo), owner: getRelationship(teamCoordinator) } });
+    const loading = createResponseGate(responses);
+
+    cy
+      .routesForPatientWorkflow()
+      .routesForDefault()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/flows*', req => loading.reply(req, { data: [flow] }))
+      .visitOnClock(`/patient/${ patient.id }/workflow`, { now: '2026-10-08T12:00:00Z' });
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        expect(loading.started).to.equal(true);
+        expect(stub).to.have.been.called;
+        const subscription = stub.lastCall.args[0];
+        expect(subscription.name).to.equal('Subscribe');
+        expect(subscription.data.resources).to.deep.equal([{ type: 'patients', id: patient.id }]);
+        expect(subscription.data.filters).to.equal(undefined);
+      });
+
+    cy.then(() => loading.release());
+
+    cy
+      .contains('.flow-card', 'Owned workflow flow')
+      .should('be.visible');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        expect(stub.lastCall.args[0].data.resources).to.deep.include({ type: 'flows', id: flow.id });
+      })
+      .invoke('resetHistory');
+
+    cy
+      .get('.app-nav')
+      .contains('Owned By')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', '/one/worklist/owned-by');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        expect(some(stub.getCalls(), call => {
+          const subscription = call.args[0];
+          return subscription.name === 'Subscribe' && !subscription.data.resources.length && !subscription.data.filters;
+        })).to.equal(true);
+      });
+
+    cy
+      .get('.worklist-list__list[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        const subscription = stub.lastCall.args[0];
+        expect(subscription.name).to.equal('Subscribe');
+        expect(subscription.data.resources).not.to.deep.include({ type: 'patients', id: patient.id });
+        expect(subscription.data.resources).not.to.deep.include({ type: 'flows', id: flow.id });
+        expect(subscription.data.filters?.actions?.patient).not.to.equal(patient.id);
+        expect(subscription.data.filters?.flows?.patient).not.to.equal(patient.id);
+      });
+
+    cy
+      .go('back');
+
+    cy
+      .contains('.flow-card', 'Owned workflow flow')
+      .should('be.visible');
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('be.visible');
+
+    cy
+      .get('@wsHandleMessage')
+      .should(stub => {
+        const subscription = stub.lastCall.args[0];
+        expect(subscription.name).to.equal('Subscribe');
+        expect(subscription.data.resources).to.deep.equal([{ type: 'patients', id: patient.id }]);
+        expect(subscription.data.filters).to.equal(undefined);
+      });
   });
 
   specify('renders appointment statuses, cancellation reasons, and valid durations', function() {
@@ -590,7 +2414,7 @@ context('patient interactions', function() {
       return interaction;
     });
 
-    const initial = createResponseGate(pendingResponses);
+    const initial = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -1140,7 +2964,7 @@ context('patient interactions', function() {
         .should('have.text', label);
     }
 
-    const refresh = createResponseGate(pendingResponses);
+    const refresh = createResponseGate(responses);
     let position;
 
     cy
@@ -1243,7 +3067,7 @@ context('patient interactions', function() {
 
       return interaction;
     });
-    const older = createResponseGate(pendingResponses);
+    const older = createResponseGate(responses);
 
     cy
       .routesForPatientWorkflow()
@@ -1667,7 +3491,7 @@ context('patient interactions', function() {
       .should('contain', 'Left a message asking the patient to call back.')
       .and('be.focused');
 
-    const targetFilter = createResponseGate(pendingResponses);
+    const targetFilter = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -2225,7 +4049,7 @@ context('patient interactions', function() {
       },
     });
 
-    const filtered = createResponseGate(pendingResponses);
+    const filtered = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -2287,7 +4111,7 @@ context('patient interactions', function() {
       .get('.patient-interactions [role="alert"]')
       .should('not.be.visible');
 
-    const dateFilter = createResponseGate(pendingResponses);
+    const dateFilter = createResponseGate(responses);
 
     cy
       .routePatientInteractions(fx => {
@@ -2352,7 +4176,7 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
       .should('be.visible');
 
-    const dateIntent = createResponseGate(pendingResponses);
+    const dateIntent = createResponseGate(responses);
 
     cy
       .routePatientInteractions(fx => {
@@ -2416,7 +4240,7 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Your care plan is available in the patient portal.')
       .should('be.visible');
 
-    const leaving = createResponseGate(pendingResponses);
+    const leaving = createResponseGate(responses);
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -2569,7 +4393,7 @@ context('patient interactions', function() {
     cy
       .viewport(1280, 900);
 
-    const preview = createResponseGate(pendingResponses);
+    const preview = createResponseGate(responses);
 
     cy
       .routesForDefault()
@@ -2806,6 +4630,7 @@ context('patient interactions', function() {
       .get('.patient-interactions[aria-busy="false"]')
       .contains('.patient-interactions__item', 'Call summary <review> & next steps')
       .find('.js-show-more')
+      .scrollIntoView()
       .should('be.visible')
       .click();
 
