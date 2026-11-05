@@ -1,20 +1,15 @@
 import { Radio } from 'marionette';
+import { testScope } from '@mnjs/test/cypress';
 
 import router from 'js/router';
 
 import RouterRadioService from './router-radio';
 
 context('RouterRadioService', function() {
-  let service;
-
   beforeEach(function() {
-    Radio.reply('workspace', 'current', () => ({ get: () => 'two' }));
-    service = new RouterRadioService();
-  });
-
-  afterEach(function() {
-    service.destroy();
-    Radio.reset();
+    const scope = testScope();
+    scope.reply(Radio, 'workspace', 'current', () => ({ get: () => 'two' }));
+    scope.own(new RouterRadioService());
   });
 
   specify('keeps workspace navigation available after a root error route', function() {

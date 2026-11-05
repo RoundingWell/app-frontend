@@ -6,17 +6,15 @@ import router from 'js/router';
 import LatestListService from './latest-list';
 
 context('LatestListService', function() {
-  let service;
-
   beforeEach(function() {
-    service = testScope().own(new LatestListService());
+    testScope().own(new LatestListService());
   });
 
   specify('remembers the list and filter while keeping the destination workspace current', function() {
     const navigate = cy.stub().resolves(true);
     const query = new URLSearchParams({ ct: 'cache-token' });
     const info = { worklist: { clinicianId: 'clinician-id' } };
-    Radio.reply('router', 'navigate', navigate);
+    testScope().reply(Radio, 'router', 'navigate', navigate);
 
     expect(Radio.request('history', 'has:latestList')).to.equal(false);
 
