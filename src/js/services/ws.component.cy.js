@@ -486,10 +486,10 @@ context('WS Service', function() {
 
       .then(messages => {
         messages.resetHistory();
-        channel.request('unsubscribe', notifications[1]);
+        channel.request('unsubscribe', notifications[2]);
       })
       .get('@wsHandleMessage')
-      .should('have.been.calledOnceWithExactly', testData([notifications[2]]))
+      .should('have.been.calledOnceWithExactly', testData([]))
 
       .then(() => {
         channel.request('subscribe', [notifications[3]]);
