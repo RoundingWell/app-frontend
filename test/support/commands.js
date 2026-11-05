@@ -106,7 +106,11 @@ Cypress.Commands.add('visitOnClock', (url, options = {}) => {
 Cypress.Commands.add('navigate', (url, workspace = 'one') => {
   cy
     .window()
-    .then(win => win.Radio.request('router', 'navigate', `/${ workspace }${ url }`));
+    .then(win => {
+      // Preserve the helper's nonblocking intent so response gates can be
+      // released by later commands. The engine's route:error owns failures.
+      win.Radio.request('router', 'navigate', `/${ workspace }${ url }`).catch(() => {});
+    });
 });
 
 Cypress.Commands.add('iframe', (getSelector = 'iframe') => {

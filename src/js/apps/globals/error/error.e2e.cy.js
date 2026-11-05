@@ -126,7 +126,9 @@ context('Global Error Page', function() {
       .get('.error-page')
       .should('contain', 'Error code: 500.');
 
-    cy.routeStates();
+    cy
+      .routeStates()
+      .routeWorkspaceClinicians();
 
     cy
       .get('.error-page')
@@ -139,5 +141,9 @@ context('Global Error Page', function() {
       .then(() => {
         expect(errorStub).to.be.calledOnce;
       });
+
+    cy
+      .get('.worklist-list-page')
+      .should('be.visible');
   });
 });

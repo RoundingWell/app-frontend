@@ -29,5 +29,15 @@ context('RouterRadioService', function() {
 
     Radio.request('router', 'navigate', 'schedule', { workspace: 'one' });
     expect(navigate.secondCall.args[1]).to.deep.equal({ workspace: 'one' });
+
+    const worklist = { clinicianId: 'clinician-id' };
+    Radio.trigger('event-router', 'worklist', 'owned-by', worklist);
+    expect(navigate.thirdCall.args[2]).to.deep.equal({ focusReset: 'manual', scroll: 'manual', info: { worklist } });
+
+    Radio.trigger('event-router', 'workspace', 'one');
+    expect(navigate.lastCall.args[1]).to.deep.equal({ workspace: 'one' });
+
+    Radio.trigger('event-router', 'unrelated:event');
+    expect(navigate).to.have.callCount(4);
   });
 });

@@ -60,7 +60,7 @@ export default ChildAppSwitcher.extend({
     return this.switchTo(WORKLISTS[worklistId], {
       signal: match.signal,
       reconstruct: true,
-      options: { worklistId, clinicianId: match.query.get('clinicianId'), region },
+      options: { worklistId, clinicianId: match.info?.worklist?.clinicianId, region },
     });
   },
 

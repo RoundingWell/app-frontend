@@ -11,6 +11,19 @@ import { testForm } from 'support/api/forms';
 import { teamNurse, teamCoordinator } from 'support/api/teams';
 
 context('program flow page', function() {
+  let releasePendingSidebar;
+  let pendingSidebarReady;
+
+  afterEach(function() {
+    if (releasePendingSidebar) {
+      releasePendingSidebar();
+      const ready = pendingSidebarReady;
+      cy.then(() => ready);
+    }
+    releasePendingSidebar = null;
+    pendingSidebarReady = null;
+  });
+
   const testProgramFlowId = uuid();
   const testProgramId = uuid();
 
@@ -801,6 +814,71 @@ context('program flow page', function() {
 
     cy
       .get('.sidebar')
+      .should('not.exist');
+  });
+
+  specify('does not insert a new action after its loading sidebar is replaced', function() {
+    cy
+      .routeTags()
+      .routeProgramFlow(fx => {
+        fx.data = testProgramFlow;
+        return fx;
+      })
+      .routeProgramFlowActions(fx => {
+        fx.data = testProgramFlowActions;
+        return fx;
+      })
+      .routeProgramByProgramFlow()
+      .visit(`/program-flow/${ testProgramFlowId }`)
+      .wait('@routeProgramFlowActions');
+
+    cy.window().then(win => {
+      pendingSidebarReady = new Cypress.Promise(resolve => {
+        win.navigation.addEventListener('navigatesuccess', resolve, { once: true });
+      });
+    });
+
+    cy
+      .intercept({ method: 'GET', url: '/api/tags*', times: 1 }, req => {
+        return new Cypress.Promise(resolve => {
+          releasePendingSidebar = () => {
+            req.reply({ body: { data: [], included: [] } });
+            resolve();
+          };
+        });
+      })
+      .as('heldActionTags');
+
+    cy
+      .get('.js-add-action')
+      .click();
+
+    cy.wrap(null).should(() => {
+      expect(releasePendingSidebar, 'action sidebar preparation is held').to.be.a('function');
+    });
+
+    cy
+      .get('.program-flow__header')
+      .click();
+
+    cy
+      .get('.sidebar')
+      .should('be.visible');
+
+    cy.then(() => {
+      releasePendingSidebar();
+      releasePendingSidebar = null;
+      return pendingSidebarReady;
+    });
+
+    cy
+      .get('.program-flow__list')
+      .find('.action-card')
+      .should('have.length', testProgramFlowActions.length);
+
+    cy
+      .get('.program-flow__list')
+      .find('.is-selected')
       .should('not.exist');
   });
 

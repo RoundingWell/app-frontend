@@ -14,7 +14,8 @@ context('LatestListService', function() {
 
   specify('remembers the list and filter while keeping the destination workspace current', function() {
     const navigate = cy.stub().resolves(true);
-    const query = new URLSearchParams({ clinicianId: 'clinician-id' });
+    const query = new URLSearchParams({ ct: 'cache-token' });
+    const info = { worklist: { clinicianId: 'clinician-id' } };
     Radio.reply('router', 'navigate', navigate);
 
     expect(Radio.request('history', 'has:latestList')).to.equal(false);
@@ -23,6 +24,7 @@ context('LatestListService', function() {
       name: 'worklist',
       params: { workspace: 'one', worklistId: 'owned-by' },
       query,
+      info,
       meta: { isList: true },
     });
 
@@ -35,6 +37,6 @@ context('LatestListService', function() {
 
     expect(Radio.request('history', 'has:latestList')).to.equal(true);
     Radio.request('history', 'go:latestList');
-    expect(navigate).to.have.been.calledOnceWithExactly('worklist', { worklistId: 'owned-by' }, { query });
+    expect(navigate).to.have.been.calledOnceWithExactly('worklist', { worklistId: 'owned-by' }, { query, info });
   });
 });

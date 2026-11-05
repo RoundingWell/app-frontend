@@ -1,4 +1,4 @@
-import { map } from 'underscore';
+import { each, map } from 'underscore';
 import { Radio } from 'marionette';
 import { ChildAppSwitcher } from '@mnjs/router';
 
@@ -43,6 +43,11 @@ export default App.extend({
     this.shellOptions = options;
   },
   async prepareStart(options, { signal }) {
+    // Area state captures workspace-specific stores and filters at construction.
+    // Preserve that lifetime boundary while reusing the persistent nav shell.
+    const areas = this.getChildApp('areas');
+    each(areas.getChildApps(), (area, name) => areas.removeChildApp(name));
+
     // Preserve the existing shared/domain stylesheet load order while the app
     // proves route ownership independently of area code splitting.
     await Promise.all([

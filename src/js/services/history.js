@@ -12,7 +12,8 @@ export default App.extend({
   initialize() {
     this._href = window.location.href;
 
-    this.listenTo(router, 'route', this.onRoute);
+    this.listenTo(router, 'route:ready', this.onRoute);
+    this.listenTo(router, 'route:error', this.onRouteError);
   },
   // Refreshing the current URL is not a route change
   onRoute({ url }) {
@@ -20,6 +21,9 @@ export default App.extend({
 
     this._href = url.href;
     this.getChannel().trigger('change:route', url.pathname);
+  },
+  onRouteError(error, match) {
+    if (match) this.onRoute(match);
   },
   goBack(handleEmptyHistory) {
     Radio.request('router', 'back', handleEmptyHistory);

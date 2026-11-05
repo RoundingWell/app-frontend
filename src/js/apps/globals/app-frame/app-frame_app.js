@@ -33,11 +33,30 @@ export default App.extend({
   async prepareStart(options, { signal }) {
     await this.getChildApp('nav').start({ region: options.navRegion });
     signal.throwIfAborted();
-    await this.getChildApp('workspaces').start();
+    const workspaces = this.getChildApp('workspaces');
+    await workspaces.start();
+    signal.throwIfAborted();
+
+    // Workspace prerequisites must load even while an initial legacy redirect
+    // waits for its resource. Enable error routing before awaiting those loads.
+    const workspace = Radio.request('workspace', 'current');
+    const initialWorkspace = workspaces.switchTo('workspace', {
+      key: { workspace: workspace.id },
+      options: { ...this.shellOptions, workspace },
+    });
+    // Selection authority may move to the router's same-key request. Required
+    // workspace readiness still belongs to startup and must propagate failures.
+    initialWorkspace.catch(() => {});
+    const workspaceReady = workspaces.getChildApp('workspace').start();
+    await router.start();
+    signal.throwIfAborted();
+    await workspaceReady;
+    signal.throwIfAborted();
+    await initialWorkspace;
     signal.throwIfAborted();
   },
   onStart() {
-    router.start().then(() => this.showInitialUnmatched()).catch(addError);
+    this.showInitialUnmatched().catch(addError);
   },
   async showInitialUnmatched() {
     const url = window.location.href;
@@ -52,6 +71,12 @@ export default App.extend({
     Radio.request('error', 'show:notFound');
   },
   async showRoute(match, { signal }) {
+    // Error UI is owned by ErrorApp and must remain usable when workspace
+    // prerequisites themselves failed. Avoid reloading those prerequisites here.
+    if (match.name === 'notFound' || match.name === 'unknownError') {
+      this.getChildApp('workspaces').getCurrent()?.stopArea();
+      return;
+    }
     const previous = Radio.request('workspace', 'current');
     const workspace = Radio.request('workspace', 'current', match.params.workspace);
     if (previous !== workspace) this.getChildApp('nav').refreshWorkspace();

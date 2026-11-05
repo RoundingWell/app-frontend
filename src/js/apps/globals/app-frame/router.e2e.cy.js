@@ -1,3 +1,7 @@
+import { getErrors, getRelationship } from 'helpers/json-api';
+
+import { getCurrentClinician } from 'support/api/clinicians';
+import { roleEmployee } from 'support/api/roles';
 import { getPatient } from 'support/api/patients';
 
 context('named application routing', function() {
@@ -135,4 +139,95 @@ context('named application routing', function() {
       .get('.worklist-list-page')
       .should('be.visible');
   });
+
+  specify('recreates workspace-owned page state when changing workspaces', function() {
+    cy
+      .routesForDefault()
+      .visit()
+      .wait('@routeActions');
+
+    cy
+      .get('.list-search__input')
+      .type('workspace search');
+
+    cy
+      .get('.list-search__container')
+      .should('have.class', 'is-applied');
+
+    cy
+      .get('.list-search__input')
+      .should('have.value', 'workspace search');
+
+    cy
+      .get('.app-nav__header')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.picklist__group')
+      .first()
+      .find('.picklist__item')
+      .eq(1)
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .url()
+      .should('contain', '/two/worklist/owned-by');
+
+    cy
+      .get('.list-search__input')
+      .should('have.value', '');
+
+    cy
+      .go('back')
+      .wait('@routeActions');
+
+    cy
+      .url()
+      .should('contain', '/one/worklist/owned-by');
+
+    cy
+      .get('.list-search__input')
+      .should('have.value', '');
+  });
+
+
+  specify('rejects a restricted area entered directly in the address bar', function() {
+    cy
+      .routeCurrentClinician(fx => {
+        fx.data = getCurrentClinician({ relationships: { role: getRelationship(roleEmployee) } });
+        return fx;
+      })
+      .routePrograms()
+      .visit('/programs');
+
+    cy
+      .get('.error-page')
+      .should('be.visible')
+      .and('contain', 'This page doesn\'t exist.');
+
+    cy
+      .location('pathname')
+      .should('equal', '/404');
+  });
+
+
+  specify('preserves startup recovery for a workspace permission failure', function() {
+    cy
+      .routeActions()
+      .intercept('GET', '/api/states', {
+        statusCode: 403,
+        body: { errors: getErrors({ status: '403', title: 'Forbidden' }) },
+      })
+      .as('restrictedWorkspace')
+      .visit({ noWait: true })
+      .wait('@restrictedWorkspace');
+
+    cy
+      .get('.account-setup')
+      .should('be.visible')
+      .and('contain', 'Your account is not set up yet.');
+  });
+
 });

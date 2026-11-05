@@ -48,7 +48,7 @@ export default App.extend({
 
     const names = getPositionalParamNames(name);
     const extra = args[names.length];
-    const options = name === 'worklist' ? { query: extra } : { info: { entryTarget: extra, status: name === 'unknownError' ? args[0] : undefined } };
+    const options = name === 'worklist' ? { info: { worklist: extra } } : { info: { entryTarget: extra, status: name === 'unknownError' ? args[0] : undefined } };
     this.navigate(name, object(names, args.slice(0, names.length)), options).catch(addError);
   },
 });
