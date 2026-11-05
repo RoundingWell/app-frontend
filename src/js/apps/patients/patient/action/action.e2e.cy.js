@@ -1550,7 +1550,13 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         'patient': getRelationship(testPatient),
         'program-action': getRelationship(),
         'state': getRelationship(stateTodo),
+        'form': getRelationship(testForm),
       },
+    });
+
+    let releaseFormAction;
+    const formActionGate = new Cypress.Promise(resolve => {
+      releaseFormAction = resolve;
     });
 
     let releaseActivity;
@@ -1564,6 +1570,7 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     });
 
     cy.on('fail', error => {
+      releaseFormAction();
       releaseActivity();
       replyAddFlowFailure();
       throw error;
@@ -1579,6 +1586,19 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
         fx.data = testPatient;
         return fx;
       })
+      .routeFormByAction()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeLatestFormResponse()
+      .intercept({
+        method: 'GET',
+        pathname: `/api/actions/${ testAction.id }`,
+        query: { include: '*form-responses*' },
+        times: 1,
+      }, () => {
+        return formActionGate.then(() => ({ body: { data: testAction, included: [] } }));
+      })
+      .as('routeFormAction')
       .routePatientFlows(fx => {
         fx.data = [];
         return fx;
@@ -1589,6 +1609,18 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .intercept('GET', '/api/actions/**/activity*', () => flowsResponded)
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
       .wait('@routeAction')
+      // Attachments load after Add to flow starts, so an early flows request is already recorded.
+      .wait('@routeActionFiles');
+
+    // The held form request times out at 4000ms; fail on an early flows request before that.
+    cy
+      .get('@routePatientFlows.all', { timeout: 3000 })
+      .should('have.length', 0);
+
+    cy.then(() => releaseFormAction());
+
+    cy
+      .wait('@routeFormAction')
       .wait('@routePatientFlows')
       .wait('@routeActionActivity');
 

@@ -122,6 +122,7 @@ export default App.extend({
     this.setView(new LayoutView());
     this.renderFormExpandedState();
 
+    this.isFormLoading = this.action.hasForm();
     this.showContent();
     this.showAddFlow();
     this.showMenu();
@@ -214,6 +215,10 @@ export default App.extend({
       return;
     }
 
+    // The embedded form fetches the action too; a response sent before the flow
+    // was added would reset it. Wait until that fetch settles.
+    if (this.isFormLoading) return;
+
     addFlowApp.start({
       region: this.getView().getRegion('addFlow'),
       patient: this.patient,
@@ -275,6 +280,11 @@ export default App.extend({
       } catch(unhandledError) {
         addError(unhandledError);
       }
+    }).then(() => {
+      if (!this.hasLayoutRegion('addFlow')) return;
+
+      this.isFormLoading = false;
+      this.showAddFlow();
     });
   },
   onToggleFormExpanded() {
