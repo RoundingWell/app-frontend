@@ -76,6 +76,10 @@ const LayoutView = View.extend({
   },
   template: LayoutTemplate,
   regions: {
+    addFlow: {
+      el: '[data-add-flow-region]',
+      replaceElement: true,
+    },
     menu: {
       el: '[data-menu-region]',
       replaceElement: true,

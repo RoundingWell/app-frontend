@@ -29,6 +29,12 @@ careOptsFrontend:
         actionApp:
           notFound: The Action you requested does not exist.
           uploadError: File failed to upload
+        addFlowViews:
+          addFlowOptlist:
+            headingText: Open Flows
+            placeholderText: Find...
+          addFlowView:
+            label: Add to flow
         detailsTemplate:
           placeholder: Add Details
         detailsViews:

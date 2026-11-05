@@ -12,12 +12,14 @@ import App from 'js/base/app';
 import { ActionLoadingView, LayoutView, MenuView } from 'js/apps/patients/patient/action/action_views';
 import { ActionView, ReadOnlyActionView } from 'js/apps/patients/patient/action/action-details_views';
 import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_views';
+import AddFlowApp from 'js/apps/patients/patient/action/action-add-flow_app';
 import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
 
 export default App.extend({
   childApps: {
+    addFlow: AddFlowApp,
     activity: ActivityApp,
     attachments: AttachmentsApp,
     form: FormApp,
@@ -42,6 +44,7 @@ export default App.extend({
     if (!this.hasLayoutRegion('action')) return;
 
     this.showAction();
+    this.showAddFlow();
   },
   onStateChangeCanDelete() {
     if (!this.hasLayoutRegion('menu')) return;
@@ -106,14 +109,10 @@ export default App.extend({
 
     this.setAccess();
     this.currentFlow = this.flow || this.action.getFlow();
-    if (this.currentFlow) {
-      this.listenTo(this.currentFlow, {
-        'change:_state': this.setAccess,
-        'change:name': this.updateContext,
-      });
-    }
+    if (this.currentFlow) this.listenToFlow(this.currentFlow);
 
     this.listenTo(action, {
+      'change:_flow': this.onChangeFlow,
       'change:_owner': this.onChangeOwner,
       'change:name': this.updateContext,
       'destroy': this.onActionDestroy,
@@ -124,6 +123,7 @@ export default App.extend({
     this.renderFormExpandedState();
 
     this.showContent();
+    this.showAddFlow();
     this.showMenu();
     this.activityApp = this.startActivity(entryTarget?.section);
     this.attachmentsApp = this.startAttachments(entryTarget?.section);
@@ -147,6 +147,22 @@ export default App.extend({
     if (this.currentFlow) this.stopListening(this.currentFlow);
     if (this.action) this.stopListening(this.action);
     if (this.layoutState) this.stopListening(this.layoutState);
+  },
+  listenToFlow(flow) {
+    this.listenTo(flow, {
+      'change:_state': this.setAccess,
+      'change:name': this.updateContext,
+    });
+  },
+  onChangeFlow() {
+    // Only an action without a flow can be added to one.
+    this.flow = this.action.getFlow();
+    this.currentFlow = this.flow;
+    this.listenToFlow(this.currentFlow);
+    Radio.request('ws', 'add', this.currentFlow);
+
+    this.updateContext();
+    this.showAddFlow();
   },
   onChangeOwner() {
     this.setAccess();
@@ -189,6 +205,20 @@ export default App.extend({
       'click:attachments': () => this.attachmentsApp.focus(),
       'click:comments': () => this.activityApp.focus(),
     });
+  },
+  showAddFlow() {
+    const addFlowApp = this.getChildApp('addFlow');
+
+    if (this.currentFlow || !this.getState().get('canEdit')) {
+      addFlowApp.stop();
+      return;
+    }
+
+    addFlowApp.start({
+      region: this.getView().getRegion('addFlow'),
+      patient: this.patient,
+      action: this.action,
+    }).catch(addError);
   },
   showMenu() {
     const menuRegion = this.getView().getRegion('menu');

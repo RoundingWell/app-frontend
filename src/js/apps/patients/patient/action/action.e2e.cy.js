@@ -1525,6 +1525,227 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('contain', 'New Action Name');
   });
 
+  specify('add an action without a flow to an open flow', function() {
+    const testPatient = getPatient();
+
+    const testFlow = getFlow({
+      attributes: { name: 'Open Test Flow' },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateTodo),
+      },
+    });
+
+    const testOtherFlow = getFlow({
+      attributes: { name: 'Other Open Flow' },
+      relationships: {
+        patient: getRelationship(testPatient),
+        state: getRelationship(stateInProgress),
+      },
+    });
+
+    const testAction = getAction({
+      relationships: {
+        'owner': getRelationship(getCurrentClinician()),
+        'patient': getRelationship(testPatient),
+        'program-action': getRelationship(),
+        'state': getRelationship(stateTodo),
+      },
+    });
+
+    let releaseActivity;
+    const flowsResponded = new Cypress.Promise(resolve => {
+      releaseActivity = resolve;
+    });
+
+    let replyAddFlowFailure;
+    const addFlowFailureGate = new Cypress.Promise(resolve => {
+      replyAddFlowFailure = resolve;
+    });
+
+    cy.on('fail', error => {
+      releaseActivity();
+      replyAddFlowFailure();
+      throw error;
+    });
+
+    cy
+      .routesForPatientAction()
+      .routeAction(fx => {
+        fx.data = testAction;
+        return fx;
+      })
+      .routePatientByAction(fx => {
+        fx.data = testPatient;
+        return fx;
+      })
+      .routePatientFlows(fx => {
+        fx.data = [];
+        return fx;
+      })
+      .intercept('GET', '/api/patients/**/flows*', req => {
+        req.on('response', () => releaseActivity());
+      })
+      .intercept('GET', '/api/actions/**/activity*', () => flowsResponded)
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction')
+      .wait('@routePatientFlows')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('[data-activity-region]')
+      .find('.patient-action__activity-list')
+      .should('exist');
+
+    cy
+      .get('.patient-action__add-flow')
+      .should('not.exist');
+
+    cy
+      .routePatientFlows(fx => {
+        fx.data = [testFlow, testOtherFlow];
+        return fx;
+      });
+
+    cy
+      .intercept('POST', `/api/actions/${ testAction.id }/relationships/flow`, req => addFlowFailureGate.then(() => {
+        req.reply({
+          statusCode: 403,
+          body: {
+            errors: getErrors({
+              status: '403',
+              title: 'Forbidden',
+              detail: 'Unable to add action to flow',
+            }),
+          },
+        });
+      }))
+      .as('routeAddFlowFailure')
+      .reload()
+      .wait('@routeAction');
+
+    cy
+      .wait('@routePatientFlows')
+      .itsUrl()
+      .its('search')
+      .should('contain', `filter[states]=${ stateTodo.id },${ stateInProgress.id }`);
+
+    cy
+      .get('.patient-action__header')
+      .contains('Add to flow')
+      .click();
+
+    cy
+      .get('.picklist')
+      .should('contain', 'Open Flows')
+      .should('contain', 'Other Open Flow')
+      .contains('Open Test Flow')
+      .click();
+
+    cy
+      .get('.patient-action__add-flow', { timeout: 3000 })
+      .should('be.disabled');
+
+    cy.then(() => replyAddFlowFailure());
+
+    cy
+      .wait('@routeAddFlowFailure');
+
+    cy
+      .get('.alert-box__body')
+      .should('contain', 'Unable to add action to flow');
+
+    cy
+      .get('.patient__context-trail')
+      .should('not.contain', 'Open Test Flow');
+
+    cy
+      .get('.patient-action__header')
+      .contains('Add to flow')
+      .click();
+
+    cy
+      .intercept('POST', `/api/actions/${ testAction.id }/relationships/flow`, {
+        statusCode: 204,
+      })
+      .as('routeAddFlow');
+
+    cy
+      .get('.picklist')
+      .contains('Open Test Flow')
+      .click();
+
+    cy
+      .wait('@routeAddFlow')
+      .its('request.body')
+      .should(({ data }) => {
+        expect(data).to.deep.equal({ id: testFlow.id, type: testFlow.type });
+      });
+
+    cy
+      .get('.patient__context-trail')
+      .should('contain', 'Open Test Flow')
+      .should('contain', testAction.attributes.name);
+
+    cy
+      .get('.patient-action__header')
+      .should('not.contain', 'Add to flow');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/action/${ testAction.id }`);
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.calledWithMatch', {
+        name: 'Subscribe',
+        data: {
+          resources: Cypress.sinon.match.some(Cypress.sinon.match({ id: testFlow.id, type: testFlow.type })),
+        },
+      });
+
+    cy.sendWs({
+      category: 'NameChanged',
+      resource: { type: testFlow.type, id: testFlow.id },
+      payload: {
+        attributes: { name: 'Renamed Open Flow' },
+      },
+    });
+
+    cy
+      .get('.patient__context-trail')
+      .should('contain', 'Renamed Open Flow');
+
+    cy
+      .routeAction(fx => {
+        fx.data = {
+          ...testAction,
+          relationships: {
+            ...testAction.relationships,
+            flow: getRelationship(testFlow),
+          },
+        };
+        fx.included.push(testFlow);
+        return fx;
+      })
+      .reload()
+      .wait('@routeAction')
+      .wait('@routeActionActivity');
+
+    cy
+      .get('[data-activity-region]')
+      .find('.patient-action__activity-list')
+      .should('exist');
+
+    cy
+      .get('@routePatientFlows.all')
+      .should('have.length', 2);
+
+    cy
+      .get('.patient-action__add-flow')
+      .should('not.exist');
+  });
+
   specify('action attachments - uploads not allowed without edit permission', function() {
     const testFile = getFile();
     const testProgramAction = getProgramAction({
@@ -2644,6 +2865,10 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
       .should('exist');
 
     cy
+      .get('.patient-action__header')
+      .should('contain', 'Add to flow');
+
+    cy
       .get('[data-action-region]')
       .find('.js-input');
 
@@ -2666,6 +2891,10 @@ context('patient action page', { scrollBehavior: 'center' }, function() {
     cy
       .get('.patient-action__menu')
       .should('not.exist');
+
+    cy
+      .get('.patient-action__header')
+      .should('not.contain', 'Add to flow');
 
     cy
       .get('[data-action-region]')

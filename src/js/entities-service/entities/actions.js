@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
+import fetcher, { handleJSON } from 'js/base/fetch';
 
 import { addError } from 'js/datadog';
 
@@ -230,6 +231,16 @@ const _Model = BaseModel.extend({
       relationships: {
         owner: this.toRelation(owner),
       },
+    });
+  },
+  saveFlow(flow) {
+    const url = `${ this.url() }/relationships/flow`;
+
+    return fetcher(url, {
+      method: 'POST',
+      data: JSON.stringify({ data: flow.getResource() }),
+    }).then(handleJSON).then(() => {
+      this.set({ _flow: flow.getResource() });
     });
   },
   saveAll(attrs) {
