@@ -20,6 +20,7 @@ context('Embedded form interaction', function() {
       .routeActionActivity()
       .routeActionComments()
       .routeActionFiles()
+      .routePatientFlows()
       .routeAction(fx => ({ ...fx, data: action }))
       .routePatient()
       .routeFormByAction(fx => ({ ...fx, data: testForm }))

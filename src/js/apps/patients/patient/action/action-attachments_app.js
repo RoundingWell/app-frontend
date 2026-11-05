@@ -21,6 +21,7 @@ export default App.extend({
     this.flow = action.getFlow();
 
     this.listenTo(action, {
+      'change:_flow': this.onChangeFlow,
       'change:_owner': this.showAttachments,
       'ws:add:attachment': this.onWsAddAttachment,
     });
@@ -40,6 +41,11 @@ export default App.extend({
     Radio.request('ws', 'unsubscribe', this.attachments.models);
     this.stopListening(this.action);
     if (this.flow) this.stopListening(this.flow);
+  },
+  onChangeFlow() {
+    // Only an action without a flow can be added to one.
+    this.flow = this.action.getFlow();
+    this.listenTo(this.flow, 'change:_state', this.showAttachments);
   },
   onWsAddAttachment(model) {
     this.attachments.add(model);

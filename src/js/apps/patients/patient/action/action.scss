@@ -526,3 +526,17 @@
   }
 
 }
+
+.patient-action__add-flow {
+  --button-align-items: center;
+  --button-border-width: 0.5px;
+  --button-display: inline-flex;
+
+  flex: none;
+  margin-right: 40px;
+  margin-top: 22px;
+}
+
+.patient-action__add-flow-icon {
+  color: color(blue);
+}
