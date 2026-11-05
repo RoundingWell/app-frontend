@@ -364,6 +364,7 @@ context('program flow page', function() {
             attributes: {
               sequence: 0,
               name: 'First In List',
+              days_until_due: 2,
               updated_at: testTs(),
             },
             relationships: {
