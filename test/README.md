@@ -103,11 +103,9 @@ the test for fixtures that survive remounts. Register Radio replies with
 `scope.own(resource)` or `scope.defer(dispose)`. The adapter releases these fixtures
 after the final mount.
 Release and await held work before disposing its dependencies. Cypress already
-cleans up its spies, intercepts and clocks. Import [component hooks](support/component-hooks.js)
-before other support modules. They register mock-server cleanup first in the fixture
-scope, so it runs after services even if a disposer fails. E2E keeps its own server
-teardown hook. Coverage follows the component cleanup hook; a rejecting hook can
-skip later root hooks. ESM imports run before the importing module's body.
+cleans up its spies, intercepts and clocks. Import
+[component hooks](support/component-hooks.js) before other support modules.
+Within each scope, cleanup runs in reverse registration order.
 
 Service fixtures can own `mountRegion(...)` or `mountApplication(...)` handles;
 use `start: false` when the scenario controls startup, otherwise await

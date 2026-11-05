@@ -1,3 +1,5 @@
+import { testScope } from '@mnjs/test/cypress';
+
 import RouterApp from './routerapp';
 import SubRouterApp from './subrouterapp';
 
@@ -60,16 +62,15 @@ function deferred() {
 }
 
 context('RouterApp', function() {
-  let app;
+  let scope;
 
-  afterEach(async function() {
-    if (app) await app.destroy();
-    app = null;
+  beforeEach(function() {
+    scope = testScope();
   });
 
   describe('route triggers and aliases', function() {
     specify('prefixes the workspace slug onto non-root routes', function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       expect(app.router.getDefaultRoute('patient:workflow')).to.equal('test-ws/patient/:id/workflow');
     });
 
@@ -84,7 +85,7 @@ context('RouterApp', function() {
           };
         },
       });
-      app = new AliasRouter({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new AliasRouter({ workspaceSlug: 'test-ws' }));
 
       expect(app.router.getDefaultRoute('patient:workflow')).to.equal('test-ws/patient/:id/workflow');
       expect(app.translateEvent('patient:workflow', 'p1')).to.equal('test-ws/patient/p1/workflow');
@@ -109,7 +110,7 @@ context('RouterApp', function() {
         showRoot() {},
       });
 
-      app = new RootRouter();
+      const app = scope.own(new RootRouter());
 
       expect(app.router.getDefaultRoute('root')).to.equal('');
     });
@@ -124,7 +125,7 @@ context('RouterApp', function() {
           this.currentDuringHook = this.getCurrentRoute();
         },
       });
-      app = new CapturingRouter({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new CapturingRouter({ workspaceSlug: 'test-ws' }));
 
       await trigger(app, 'patient:workflow', 'p1');
 
@@ -137,7 +138,7 @@ context('RouterApp', function() {
     });
 
     specify('passes the router before route context to appRoute events', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       const beforeAppRoute = cy.stub();
       const appRoute = cy.stub();
 
@@ -153,7 +154,7 @@ context('RouterApp', function() {
     });
 
     specify('getCurrentRouteMeta returns the definition meta', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await trigger(app, 'worklist', 'w1');
       expect(app.getCurrentRouteMeta()).to.deep.equal({ isList: true });
     });
@@ -169,7 +170,7 @@ context('RouterApp', function() {
         const errorHandler = cy.stub();
         const dispatched = cy.stub();
         const dispatchedRoute = deferred();
-        app = new (Router.extend({
+        const app = scope.own(new (Router.extend({
           startOnRoute,
           showSchedule() {
             return readiness.promise.then(() => {
@@ -177,13 +178,18 @@ context('RouterApp', function() {
             });
           },
           onRouteError: errorHandler,
-        }))({ workspaceSlug: 'test-ws' });
+        }))({ workspaceSlug: 'test-ws' }));
         app.on('appRoute', () => {
           dispatched();
           dispatchedRoute.resolve();
         });
 
         const routing = app.routeAction('schedule', 'showSchedule');
+        scope.defer(async() => {
+          app.stop();
+          readiness.resolve();
+          await routing;
+        });
         await dispatchedRoute.promise;
         expect(dispatched).to.have.been.calledOnce;
         expect(errorHandler).not.to.have.been.called;
@@ -198,12 +204,12 @@ context('RouterApp', function() {
     specify('reports a throwing stop for the current departure', async function() {
       const failure = new Error('cannot stop');
       const reported = cy.stub();
-      app = new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new (Router.extend({ onRouteError: reported }))({ workspaceSlug: 'test-ws' }));
       await app.routeAction('schedule', 'showSchedule');
       const route = app.getCurrentRoute();
       const stop = cy.stub(app, 'stop').throws(failure);
+      scope.defer(() => stop.restore());
       await app.onNoMatch();
-      stop.restore();
       expect(reported).to.have.been.calledOnceWith(failure, route);
       expect(app.getCurrentRoute()).to.equal(null);
     });
@@ -211,7 +217,7 @@ context('RouterApp', function() {
 
   describe('scope identity', function() {
     specify('reuses the child and forwards the route for an equal scope', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await trigger(app, 'patient:workflow', 'p1');
       await app.routePromise;
       const child = app.getCurrent();
@@ -225,7 +231,7 @@ context('RouterApp', function() {
     });
 
     specify('restarts the child for a different scope', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await trigger(app, 'patient:workflow', 'p1');
       await app.routePromise;
       const child = app.getCurrent();
@@ -237,7 +243,7 @@ context('RouterApp', function() {
     });
 
     specify('startCurrent is unconditional even for an equal scope', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await app.startCurrent('patient', { patientId: 'p1' });
       const child = app.getCurrent();
       await app.startCurrent('patient', { patientId: 'p1' });
@@ -248,7 +254,7 @@ context('RouterApp', function() {
 
   describe('child stop cleanup', function() {
     specify('restarts a stopped child for the next route in the same scope', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await trigger(app, 'patient:workflow', 'p1');
       await app.routePromise;
       const child = app.getCurrent();
@@ -263,7 +269,7 @@ context('RouterApp', function() {
     });
 
     specify('clears the current child when its owner stops', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await trigger(app, 'patient:workflow', 'p1');
       await app.routePromise;
       const child = app.getCurrent();
@@ -275,7 +281,7 @@ context('RouterApp', function() {
     });
 
     specify('dispatches the newest route after synchronous stop', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
       await trigger(app, 'patient:workflow', 'p1');
       await app.routePromise;
       const child = app.getCurrent();
@@ -287,7 +293,7 @@ context('RouterApp', function() {
     });
 
     specify('does not dispatch a route overtaken by a later stop', async function() {
-      app = new Router({ workspaceSlug: 'test-ws' });
+      const app = scope.own(new Router({ workspaceSlug: 'test-ws' }));
 
       await trigger(app, 'patient:workflow', 'p1');
       await app.routePromise;
