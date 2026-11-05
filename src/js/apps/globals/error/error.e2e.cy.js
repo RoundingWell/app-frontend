@@ -1,4 +1,7 @@
-import { getErrors } from 'helpers/json-api';
+import { getErrors, getRelationship } from 'helpers/json-api';
+
+import { getAction } from 'support/api/actions';
+import { getPatient } from 'support/api/patients';
 
 context('Global Error Page', function() {
   beforeEach(function() {
@@ -105,16 +108,30 @@ context('Global Error Page', function() {
       .should('contain', 'Error code: 500.');
   });
 
-  specify('500 error', function() {
+  specify('recovers from a workspace error and still reports a later patient startup failure', function() {
     const errorStub = cy.stub();
+    const patient = getPatient();
+    const action = getAction({ relationships: { patient: getRelationship(patient) } });
 
-    cy.on('uncaught:exception', () => {
-      errorStub();
+    cy.on('uncaught:exception', error => {
+      errorStub(error);
 
       return false;
     });
 
     cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+
+        return fx;
+      })
+      .routeActions(fx => {
+        fx.data = [action];
+        fx.included = [patient];
+
+        return fx;
+      })
       .intercept('GET', '/api/workspaces/**/clinicians*', {
         statusCode: 500,
         body: {},
@@ -141,6 +158,44 @@ context('Global Error Page', function() {
       .then(() => {
         expect(errorStub).to.be.calledOnce;
       });
+
+    cy
+      .get('.worklist-list-page')
+      .should('be.visible');
+
+    cy
+      .get('.js-patient')
+      .first()
+      .click()
+      .wait('@routePatient');
+
+    cy
+      .intercept('GET', '/api/patients/*?*', {
+        statusCode: 422,
+        body: { errors: getErrors({ status: '422', title: 'Patient unavailable' }) },
+      })
+      .as('failedPatientStartup');
+
+    cy
+      .get('.patient-sidebar__name')
+      .click()
+      .wait('@failedPatientStartup');
+
+    cy.wrap(errorStub).should('have.callCount', 2);
+
+    cy.then(() => {
+      expect(errorStub.lastCall.args[0].message).to.contain('Error Status: 422');
+    });
+
+    cy
+      .get('.patient__context-trail')
+      .should('not.exist');
+
+    cy
+      .get('[data-worklists-region]')
+      .find('.app-nav__link[aria-label="Owned By"]')
+      .click()
+      .wait('@routeActions');
 
     cy
       .get('.worklist-list-page')
