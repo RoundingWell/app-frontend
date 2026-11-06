@@ -57,6 +57,20 @@ function getStatusFilter(statusFilter) {
   return 'active';
 }
 
+function getTeamSearchText(clinician) {
+  if (!clinician.hasTeam()) return '';
+
+  const team = clinician.getTeam();
+
+  return `${ team.get('name') } ${ team.get('abbr') }`;
+}
+
+function getClinicianSearchString(view) {
+  if (!view.model) return view.el.textContent;
+
+  return `${ view.el.textContent } ${ getTeamSearchText(view.model) }`;
+}
+
 const RowBehavior = Behavior.extend({
   modelEvents: {
     'editing': 'onEditing',
@@ -202,7 +216,7 @@ const ListView = CollectionView.extend({
     this.filterList();
   },
   onListItemRender(view) {
-    view.searchString = view.el.textContent;
+    view.searchString = getClinicianSearchString(view);
   },
   onRenderChildren() {
     this.triggerMethod('filtered', this.children.pluck('model'));
