@@ -57,6 +57,20 @@ function getStatusFilter(statusFilter) {
   return 'active';
 }
 
+function getTeamSearchText(clinician) {
+  if (!clinician.hasTeam()) return '';
+
+  const team = clinician.getTeam();
+
+  return `${ team.get('name') } ${ team.get('abbr') }`;
+}
+
+function getClinicianSearchString(view) {
+  if (!view.model) return view.el.textContent;
+
+  return `${ view.el.textContent } ${ getTeamSearchText(view.model) }`;
+}
+
 const RowBehavior = Behavior.extend({
   modelEvents: {
     'editing': 'onEditing',
@@ -202,24 +216,35 @@ const ListView = CollectionView.extend({
     this.filterList();
   },
   onListItemRender(view) {
-    view.searchString = view.el.textContent;
-  },
-  onRenderChildren() {
-    this.triggerMethod('filtered', this.children.pluck('model'));
+    view.searchString = getClinicianSearchString(view);
+
+    // A team change filters before this render replaces the previous team text.
+    if (!this.state.get('searchQuery') || this._isFiltering) return;
+
+    this.filterList();
   },
   filterList() {
     const searchQuery = this.state.get('searchQuery');
     const statusFilter = this.state.get('statusFilter');
     const matchers = searchQuery ? buildMatchersArray(searchQuery) : null;
 
-    this.setFilter(function(view) {
-      if (!matchesStatusFilter(view.model, statusFilter)) return false;
-      if (!matchers) return true;
+    this._isFiltering = true;
 
-      return every(matchers, function(matcher) {
-        return matcher.test(view.searchString);
+    try {
+      this.setFilter(function(view) {
+        if (!matchesStatusFilter(view.model, statusFilter)) return false;
+        if (!matchers) return true;
+
+        return every(matchers, function(matcher) {
+          return matcher.test(view.searchString);
+        });
       });
-    });
+    } finally {
+      this._isFiltering = false;
+    }
+  },
+  onRenderChildren() {
+    this.triggerMethod('filtered', this.children.pluck('model'));
   },
 });
 
