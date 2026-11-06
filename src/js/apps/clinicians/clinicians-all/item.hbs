@@ -1,8 +1,8 @@
 <div class="card-list__item-surface">
-  <div class="card-list__item-main">
-    <div class="card-list__item-heading">
-      <span class="card-list__item-title">{{#unless name}}{{ @intl.clinicians.cliniciansAllViews.itemView.newClinician }}{{/unless}}{{ name }}</span>
-      <span class="card-list__item-meta">
+  <div class="card-list__item-main clinicians__item-main">
+    <div class="card-list__item-heading clinicians__item-heading">
+      <span class="card-list__item-title clinicians__name">{{#unless name}}{{ @intl.clinicians.cliniciansAllViews.itemView.newClinician }}{{/unless}}{{ name }}</span>
+      <span class="card-list__item-meta clinicians__workspaces">
         {{#unless workspaces}}<span class="u-text--subtle">{{ @intl.clinicians.cliniciansAllViews.itemView.noWorkspaces }}</span>{{/unless}}
         {{#each workspaces}}{{#unless @first}}, {{/unless}}{{ this.name }}{{/each}}&#8203;
       </span>
