@@ -27,7 +27,7 @@ export default Droplist.extend({
   className() {
     const isCompact = this.getOption('isCompact');
 
-    return isCompact ? 'button button--secondary' : 'button button--secondary w-100';
+    return isCompact ? 'button button--compact' : 'button button--secondary w-100';
   },
   templateContext: {
     attr: 'label',
