@@ -286,6 +286,7 @@ context('clinicians list', function() {
             relationships: {
               workspaces: getRelationship([workspaceOne]),
               role: getRelationship(roleEmployee),
+              team: getRelationship(teamCoordinator),
             },
           }),
           getClinician({
@@ -295,6 +296,29 @@ context('clinicians list', function() {
             relationships: {
               workspaces: getRelationship([workspaceTwo]),
               role: getRelationship(roleAdmin),
+              team: getRelationship(teamNurse),
+            },
+          }),
+          getClinician({
+            attributes: {
+              name: 'Pat Pending',
+              last_active_at: null,
+            },
+            relationships: {
+              workspaces: getRelationship([workspaceTwo]),
+              role: getRelationship(roleEmployee),
+              team: getRelationship(teamCoordinator),
+            },
+          }),
+          getClinician({
+            attributes: {
+              name: 'Casey Caseless',
+              last_active_at: null,
+            },
+            relationships: {
+              workspaces: getRelationship([workspaceOne]),
+              role: getRelationship(roleManager),
+              team: getRelationship(),
             },
           }),
         ];
@@ -381,6 +405,38 @@ context('clinicians list', function() {
       .should('contain', 'Employee');
 
     cy
+      .get('@listSearch')
+      .clear()
+      .type('Coordinator');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Aaron Aaronson')
+      .should('not.contain', 'Pat Pending')
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'CO');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('NUR');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Baron Baronson')
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'NUR');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Employee');
+
+    cy
       .routeActions()
       .get('[data-nav-content-region]')
       .find('[data-worklists-region]')
@@ -395,7 +451,142 @@ context('clinicians list', function() {
 
     cy
       .get('@listSearch')
-      .should('have.attr', 'value', 'Employee');
+      .should('have.attr', 'value', 'Employee')
+      .clear();
+
+    cy
+      .get('.list-page__topbar')
+      .find('[data-search-region] + [data-status-filter-region] button')
+      .as('statusFilter')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Enabled')
+      .click();
+
+    cy
+      .get('.list-page__list')
+      .as('cliniciansList')
+      .should('contain', 'Pat Pending')
+      .should('contain', 'Casey Caseless');
+
+    cy
+      .get('@listSearch')
+      .type('Coordinator');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 2)
+      .should('contain', 'Aaron Aaronson')
+      .should('contain', 'Pat Pending')
+      .should('not.contain', 'Baron Baronson')
+      .should('not.contain', 'Casey Caseless');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .first()
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'CO');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .eq(1)
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'CO');
+
+    cy
+      .get('@statusFilter')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Active')
+      .click();
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Aaron Aaronson')
+      .should('not.contain', 'Pat Pending');
+
+    cy
+      .get('@statusFilter')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Pending')
+      .click();
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Pat Pending')
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'CO');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('NUR');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__empty')
+      .should('contain', 'No results match your Find in List search');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Casey');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Casey Caseless');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Manager');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Casey Caseless');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Workspace One');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Casey Caseless')
+      .should('contain', 'Workspace One');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('zzz');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__empty')
+      .should('contain', 'No results match your Find in List search');
   });
 
   specify('filter clinicians by status', function() {
