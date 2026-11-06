@@ -434,6 +434,50 @@ context('clinicians list', function() {
     cy
       .get('@listSearch')
       .clear()
+      .type('Coordinator');
+
+    cy
+      .intercept('PATCH', '/api/clinicians/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchClinicianTeam');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .find('[data-team-region]')
+      .contains('CO')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Nurse')
+      .click()
+      .wait('@routePatchClinicianTeam');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__empty')
+      .should('contain', 'No results match your Find in List search');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('NUR');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 2)
+      .should('contain', 'Aaron Aaronson')
+      .should('contain', 'Baron Baronson');
+
+    cy
+      .get('@listSearch')
+      .clear()
       .type('Employee');
 
     cy
