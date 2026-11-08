@@ -1,0 +1,430 @@
+src/js/apps/globals/nav/whats-new/announcement.template.js
+  h_0f06c286dda36f 1-7,9,11
+src/js/apps/clinicians/clinicians-all/clinicians-all_views.js
+  h_0f06c286dda36f 3,10,20-21,76,81
+src/js/apps/patients/patient/workflow/layout.template.js
+  h_0f06c286dda36f 1-4,6-8,11-13,17-18,25
+src/js/components/droplist/index.js
+  h_0f06c286dda36f 3,8,53-57
+src/js/apps/patients/shared/comments_views.js
+  h_0f06c286dda36f 1-2,9,19-27,63,65,67-68
+src/js/apps/patients/patient/action/action-dialer_views.js
+  h_0f06c286dda36f 1,11
+src/js/apps/patients/patient/interactions/date-control_view.js
+  h_0f06c286dda36f 4,7,19,21-22,71-72
+src/js/apps/globals/nav/app-nav/bottom-nav.template.js
+  h_0f06c286dda36f 1-4,6-8,10-18,20
+src/js/apps/globals/error/error_views.js
+  h_0f06c286dda36f 6
+src/js/regions/preload_region.component.cy.js
+  h_0f06c286dda36f 1,7,29
+src/js/apps/globals/app-frame/startup_views.js
+  h_0f06c286dda36f 8
+src/js/apps/patients/shared/widgets/interactions_view.js
+  h_0f06c286dda36f 1,7
+src/js/apps/patients/worklist/action_views.js
+  h_0f06c286dda36f 1,7,13,24
+src/js/apps/patients/worklist/list-loading.template.js
+  h_0f06c286dda36f 1-5,17,26-28,37
+src/js/apps/patients/shared/add-workflow/add-workflow_views.js
+  h_0f06c286dda36f 1,6,53
+src/js/apps/patients/shared/components/owner_component.js
+  h_0f06c286dda36f 2,7,16
+src/js/apps/patients/patient/sidebar/sidebar_views.js
+  h_0f06c286dda36f 1,10,12,18-19,27-28,34-36,51,53-55,58,90,203
+src/js/apps/patients/schedule/day-list.template.js
+  h_0f06c286dda36f 1-6,11
+src/js/apps/programs/programs-all/programs-all_views.js
+  h_0f06c286dda36f 1,8,13-14,20
+src/js/apps/programs/sidebar/action/action-sidebar.template.js
+  h_0f06c286dda36f 1-4,8,12,16,20,24,28,32-34,37-38
+src/js/apps/programs/sidebar/program/programs-sidebar_views.js
+  h_0f06c286dda36f 1,9,17-19,31,36-38,96-99,115-117
+src/js/services/patient-modal/patient-modal.template.js
+  h_0f06c286dda36f 1-11
+src/js/base/template-helpers.js
+  h_0f06c286dda36f 1-15
+src/js/behaviors/iframe-form.component.cy.js
+  h_0f06c286dda36f 2,10,14
+src/js/apps/patients/worklist/worklist-results_app.js
+  h_0f06c286dda36f 5,244,248
+src/js/apps/patients/patient/sidebar/loading.template.js
+  h_0f06c286dda36f 1-5,12,16,18
+src/js/apps/patients/schedule/schedule_views.js
+  h_0f06c286dda36f 2,11,21-24,35,59,67-69,115,117,132-133,374-375,384-385
+src/js/services/modal/modal.template.js
+  h_0f06c286dda36f 1-6,8,12,17-18,20,22
+src/js/apps/patients/patient/form/layout.template.js
+  h_0f06c286dda36f 1-4,8-9,14-17,25
+src/js/apps/patients/patient/workflow/loading.template.js
+  h_0f06c286dda36f 1-5,7,25-26
+src/js/apps/programs/sidebar/program/program-name.template.js
+  h_0f06c286dda36f 1-7,9-10
+src/js/apps/patients/shared/components/select-all_view.js
+  h_0f06c286dda36f 1,34,37,40
+src/js/apps/patients/shared/interactions/interaction-item_view.js
+  h_0f06c286dda36f 8,73,75-76,100
+src/js/apps/patients/shared/components/date-filter/index.js
+  h_0f06c286dda36f 3,9,60,62,64-66,68-69
+src/js/apps/patients/patient/action/read-only.template.js
+  h_0f06c286dda36f 1-4,6,16-17,19,22-23
+src/js/i18n/index.js
+  h_0f06c286dda36f 3-4,62-63,66,68
+src/js/apps/globals/search/dialog.template.js
+  h_0f06c286dda36f 1-9,15
+src/js/components/datepicker/layout.template.js
+  h_0f06c286dda36f 1-5,7,11
+src/js/apps/patients/patient/form/form_views.js
+  h_0f06c286dda36f 2,7,16,24-26,122,146-147,153,155,158,165-168,192,262,294-296,298,323-324,334-335,339-340,353-354
+src/js/regions/preload.template.js
+  h_0f06c286dda36f 1-7,12-14,20-21
+src/js/apps/patients/patient/action/loading.template.js
+  h_0f06c286dda36f 1-4,23
+src/js/apps/dashboards/dashboards-all/layout.template.js
+  h_0f06c286dda36f 1-4,9,19
+src/js/apps/programs/program/flow/action-item.template.js
+  h_0f06c286dda36f 1-7,10-12,14-16,24,27-28,32-33
+src/js/apps/globals/error/error.template.js
+  h_0f06c286dda36f 1-4,7,9,12-20,22,26
+src/js/apps/clinicians/shared/clinicians_views.js
+  h_0f06c286dda36f 1,7,12,28,73-74,76-83
+src/js/apps/globals/search/result-header.template.js
+  h_0f06c286dda36f 1-4,6,10,13,16,20
+src/js/apps/programs/program/sidebar/sidebar-views.js
+  h_0f06c286dda36f 2,8,13,50
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar_views.js
+  h_0f06c286dda36f 1-2,9,16,25-27,48-50,71-72,102-104,114,119-120,126,128,131,134
+packages/care-ops-five9/five9_views.js
+  h_0f06c286dda36f 4,7,29,39,47-48,55,57-58,81,85,147,163
+src/js/apps/patients/shared/bulk-edit/flows-inline.template.js
+  h_0f06c286dda36f 1-5,7-8,18
+src/js/apps/patients/worklist/flow-item.template.js
+  h_0f06c286dda36f 1-8,15,17,19-23,29-30,32-33,38-39,44-45
+AGENTS.md
+  h_0f06c286dda36f 30-31,76-85,128
+src/js/components/dateselect/index.js
+  h_0f06c286dda36f 3,9,14,42,182
+src/js/services/modal.js
+  h_0f06c286dda36f 2,19
+src/js/apps/patients/patient/workflow/action-item.template.js
+  h_0f06c286dda36f 1-4,9,17,21-22,24-33,37
+src/js/apps/patients/patient/flow/header.template.js
+  h_0f06c286dda36f 1-5,7-9,11,14-15
+src/js/base/helpers.component.cy.js
+  h_0f06c286dda36f 1,6,10,12,15-21,36-47,68-72,112-122,206-303,306,315-317,319,321-323,327-340,345,347,349-353,356,386-390,429,439
+src/js/apps/patients/patient/action/action-details_views.js
+  h_0f06c286dda36f 1,8,17-19,43-57,67-69,79-86
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.template.js
+  h_0f06c286dda36f 1-4,6,9-12,15
+src/js/apps/clinicians/shared/components/role_component.js
+  h_0f06c286dda36f 1,14
+src/js/apps/patients/patient/workflow/closed-layout.template.js
+  h_0f06c286dda36f 1-4,6-8,11-13,19
+src/js/apps/patients/patient/flow/layout.template.js
+  h_0f06c286dda36f 1-4,18,22
+src/js/apps/patients/shared/components/check_view.js
+  h_0f06c286dda36f 1,6-7
+src/js/apps/patients/patient/action/form-layout.template.js
+  h_0f06c286dda36f 1-4
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal_views.js
+  h_0f06c286dda36f 2-3,9,16,32-33
+src/js/apps/dashboards/dashboard/dashboard_views.js
+  h_0f06c286dda36f 1,8,15,17,19,87
+src/js/apps/patients/patient/flow/flow-activity-views.js
+  h_0f06c286dda36f 1,7,14-17,20-23,26-29,32-35,38-41,44-47,65-66,88
+src/js/apps/patients/worklist/flow_views.js
+  h_0f06c286dda36f 1,7,15,27
+src/js/apps/patients/shared/list-results_views.js
+  h_0f06c286dda36f 5
+src/js/apps/globals/nav/app-nav/workspace-menu.template.js
+  h_0f06c286dda36f 1-5,7,9-11,13-15,18
+src/js/apps/patients/shared/list-filters/list-filters_views.js
+  h_0f06c286dda36f 1-2,8-9,15,21,28,49-50,100,102,105,109,120,136,138-139,142-145,147-148,218-221,224-225,228-229,252-253,280,282-283,345-347,358-360,400
+src/js/apps/patients/shared/interactions/interactions-status_views.js
+  h_0f06c286dda36f 2,8-9,27-29
+src/js/apps/patients/shared/components/state_component.js
+  h_0f06c286dda36f 2,7,17-21
+src/js/components/tooltip/tooltip.component.cy.js
+  h_0f06c286dda36f 3,21,86,167,204,276
+src/js/apps/clinicians/clinicians-all/item.template.js
+  h_0f06c286dda36f 1-5,8,10-11,18,22
+src/js/apps/patients/schedule/list-loading.template.js
+  h_0f06c286dda36f 1-4,11,23,26
+src/js/apps/patients/shared/widgets/widgets_views.js
+  h_0f06c286dda36f 1,4,16-20
+src/js/apps/patients/patient/action/action-forms_views.js
+  h_0f06c286dda36f 3
+src/js/base/fontawesome.js
+  h_0f06c286dda36f 2,5-7,13,22-23
+src/js/apps/programs/sidebar/flow/flow-details.template.js
+  h_0f06c286dda36f 1-7
+src/js/apps/patients/patient/action/action-attachments_views.js
+  h_0f06c286dda36f 1,6,19-27,79-81,83,85-87
+src/js/apps/patients/patient/context-trail.template.js
+  h_0f06c286dda36f 1-19,21-22,24-28
+src/js/apps/patients/shared/list_views.js
+  h_0f06c286dda36f 2,5,10,12,14-18,21-22,25-26,37
+src/js/apps/programs/program/sidebar/sidebar-layout.template.js
+  h_0f06c286dda36f 1-6,9-14,17
+src/js/apps/patients/schedule/schedule-results_app.js
+  h_0f06c286dda36f 5,205
+src/js/apps/programs/program/flow/header.template.js
+  h_0f06c286dda36f 1-4,7-11,13
+src/js/components/picklist/index.js
+  h_0f06c286dda36f 3-4,9,53-56,58-60,62,70-77,123-124,126,173,175-177,180,273-274
+src/js/apps/patients/patient/form/widgets/widget_header_view.js
+  h_0f06c286dda36f 1,10
+src/js/apps/patients/patient/action/action-activity_views.js
+  h_0f06c286dda36f 3-4,14,25-28,31-34,37-40,43-46,49-55,58-64,67-73,76-79,82-85,88-91,94-97,100-103,128-130,140-142,144,150,152-153,167-168,175-180,182,198,201,206-225,296,298,332
+src/js/apps/programs/shared/components/dueday_component.js
+  h_0f06c286dda36f 3,7,18,20,22,24,26
+src/js/i18n/en-US/patients.yml
+  h_0f06c286dda36f 480
+src/js/apps/programs/sidebar/flow/flow-sidebar.template.js
+  h_0f06c286dda36f 1-4,8,12,16,20,23-25,28-30
+src/js/apps/patients/schedule/layout.template.js
+  h_0f06c286dda36f 1-4,22,25
+docs/migrations/mnjs-html-current-validation.json
+  h_0f06c286dda36f 1-762
+src/js/apps/globals/app-frame/root_views.js
+  h_0f06c286dda36f 2,12,54,306
+src/js/apps/patients/shared/list-page.js
+  h_0f06c286dda36f 3,9,171
+src/js/services/alert.component.cy.js
+  h_0f06c286dda36f 1,15
+src/js/apps/patients/shared/read-only_views.js
+  h_0f06c286dda36f 1,5,12-16,30,42-44,57,61-63,65-66,79-84
+src/js/components/datepicker/index.js
+  h_0f06c286dda36f 28
+src/js/apps/programs/program/workflows/flow-item.template.js
+  h_0f06c286dda36f 1-4,7,9,15-22,26,30
+src/js/apps/patients/shared/bulk-edit/bulk-edit_views.js
+  h_0f06c286dda36f 4,9-10,16-17,39-45,53,62,81,88,188,392,503,512,514
+src/js/apps/globals/search/result-item.template.js
+  h_0f06c286dda36f 1-7,9,13,16-21,23-24,26-27,29,32,35-36,38-39
+packages/care-ops-ringcentral/ringcentral_views.js
+  h_0f06c286dda36f 4,7,29,38,40-41,63-64,70,74,145,154
+src/js/apps/programs/sidebar/action/action-name.template.js
+  h_0f06c286dda36f 1-7
+src/js/apps/globals/app-frame/layout.template.js
+  h_0f06c286dda36f 1-3,6
+src/js/apps/programs/programs-all/layout.template.js
+  h_0f06c286dda36f 1-4,9,13,19
+README.md
+  h_0f06c286dda36f 228-232,270-272,275-276,278-280,284-286
+src/js/apps/programs/program/program_views.js
+  h_0f06c286dda36f 1,4,7,16-19,21-23
+src/js/services/alert/alert-box_views.js
+  h_0f06c286dda36f 5
+src/js/auth/prelogin/not-setup_views.js
+  h_0f06c286dda36f 7
+src/js/utils/trusted-html.js
+  h_0f06c286dda36f 1-7
+package-lock.json
+  h_0f06c286dda36f 23,4286-4297
+src/js/apps/globals/nav/app-nav/layout.template.js
+  h_0f06c286dda36f 1-3,8
+src/js/apps/globals/nav/app-nav/workspace-button.template.js
+  h_0f06c286dda36f 1-4,7-8,10,12
+src/js/apps/programs/sidebar/flow/flow-name.template.js
+  h_0f06c286dda36f 1-7
+src/js/apps/programs/programs-all/item.template.js
+  h_0f06c286dda36f 1-4,6,8-10,12,16
+src/js/services/alert/alert-box.template.js
+  h_0f06c286dda36f 1-5,8,10-11
+src/js/auth/prelogin/prelogin_views.js
+  h_0f06c286dda36f 8-9
+src/js/apps/patients/shared/interactions/interaction-item.template.js
+  h_0f06c286dda36f 1-124,126-128
+src/js/auth/prelogin/not-setup.template.js
+  h_0f06c286dda36f 1-4,7,9,12-13,17
+vendor/mnjs-html-artifact.json
+  h_0f06c286dda36f 1-57
+src/js/apps/patients/shared/components/duration_component.js
+  h_0f06c286dda36f 3,7,20-21,23,25
+src/js/apps/programs/sidebar/program/program-details.template.js
+  h_0f06c286dda36f 1-7
+src/js/apps/clinicians/clinicians-all/clinician-modal/clinician-modal.template.js
+  h_0f06c286dda36f 1-9
+src/js/apps/dashboards/dashboards-all/item.template.js
+  h_0f06c286dda36f 1-3,6,10
+src/js/components/team/index.js
+  h_0f06c286dda36f 2,7,16
+src/js/apps/programs/program/layout.template.js
+  h_0f06c286dda36f 1-3,8
+src/js/apps/patients/shared/components/time_component.js
+  h_0f06c286dda36f 4,8,25,27,29,58
+src/js/apps/globals/search/tip.template.js
+  h_0f06c286dda36f 1-8,10,12-13,15-17,19-21,23-26
+src/js/apps/patients/patient/flow/loading.template.js
+  h_0f06c286dda36f 1-5,24,42,44,51
+src/js/apps/patients/patient/workflow/workflow_views.js
+  h_0f06c286dda36f 2,11,18-22,40,48
+src/js/apps/programs/sidebar/action/action-sidebar_views.js
+  h_0f06c286dda36f 3,11,23-25,34,39-41,99-102,118-120,125,129-131,133,135,137-139,141,161,172
+src/js/apps/patients/worklist/sidebar-controls.template.js
+  h_0f06c286dda36f 1-3,6
+src/js/apps/patients/patient/interactions/layout.template.js
+  h_0f06c286dda36f 1-4,6-8,11-15,18,22-23,27,30
+src/js/apps/patients/patient/interactions/interactions_views.js
+  h_0f06c286dda36f 4,11,22,77,144
+src/js/apps/programs/program/flow/layout.template.js
+  h_0f06c286dda36f 1-3,10
+src/js/components/datepicker/datepicker_views.js
+  h_0f06c286dda36f 1,3,6-7,23,25-27,51,54
+src/js/components/dateselect/date-select.template.js
+  h_0f06c286dda36f 1-8
+src/js/apps/clinicians/clinicians-all/layout.template.js
+  h_0f06c286dda36f 1-4,9,15,21
+src/js/apps/programs/program/workflows/action-item.template.js
+  h_0f06c286dda36f 1-7,10-12,14-16,24,27,31-32
+src/js/services/modal/modal_views.js
+  h_0f06c286dda36f 2-3,15,79,105
+src/js/components/datepicker/datepicker.component.cy.js
+  h_0f06c286dda36f 2,5,14,16-22
+src/js/auth/prelogin/login-prompt.template.js
+  h_0f06c286dda36f 1-3,7,12
+src/js/apps/clinicians/sidebar/clinician/clinician-sidebar.e2e.cy.js
+  h_0f06c286dda36f 1-2,25-32,34,38,177,196,215,230,244,248
+src/js/apps/programs/shared/components/behavior_component.js
+  h_0f06c286dda36f 3,7,17,19
+src/js/apps/patients/schedule/day-item.template.js
+  h_0f06c286dda36f 1-18,20-26,29,31,33,35-36
+src/js/apps/patients/shared/widgets/recent-interactions_views.js
+  h_0f06c286dda36f 1,6,26,28,30-32,81,87,89
+src/js/i18n/intl.js
+  h_0f06c286dda36f 57,62-81,116-119
+src/js/apps/patients/patient/flow/action-item.template.js
+  h_0f06c286dda36f 1-4,10,18,22-23,25-34,38
+src/js/apps/globals/app-frame/startup.template.js
+  h_0f06c286dda36f 1-4,9,14-15,17-18,21
+src/js/apps/patients/shared/list-filters/panel.template.js
+  h_0f06c286dda36f 1-3,13
+src/js/apps/patients/shared/components/due_view.js
+  h_0f06c286dda36f 1,6,15-17,34
+test/support/component.js
+  h_0f06c286dda36f 16,44
+src/js/behaviors/input-watcher.component.cy.js
+  h_0f06c286dda36f 1,13,32
+src/js/apps/patients/patient/workflow/flow-item.template.js
+  h_0f06c286dda36f 1-7,11,18-19,24-25,30-31
+src/js/apps/patients/patient/layout.template.js
+  h_0f06c286dda36f 1-4,10
+src/js/apps/programs/shared/components/form_component.js
+  h_0f06c286dda36f 1,6,13-15,18-20
+src/js/apps/patients/shared/list-results.template.js
+  h_0f06c286dda36f 1-3,14
+src/js/apps/patients/shared/interactions/loading.template.js
+  h_0f06c286dda36f 1-5,7,14-15
+src/js/apps/patients/patient/flow/flow_app.js
+  h_0f06c286dda36f 5,281
+src/js/apps/patients/shared/components/date-filter/date-filter_views.js
+  h_0f06c286dda36f 1,6,17,46,48,50,52,54,83-84,95-96,117
+src/js/apps/patients/shared/widgets/widgets.js
+  h_0f06c286dda36f 1-2,7-8,21,27,62,72,85,89,102,108,117,143-146
+src/js/apps/patients/worklist/action-item.template.js
+  h_0f06c286dda36f 1-7,14,16,20-21,23,26-28,30,32-33,39-41,45-46,48-57,61-62
+src/js/apps/patients/shared/components/dialer_view.js
+  h_0f06c286dda36f 2,7,27,69-71,73,75
+src/js/base/template-formatters.js
+  h_0f06c286dda36f 1-77
+src/js/apps/programs/program/workflows/workflows_views.js
+  h_0f06c286dda36f 1,7,21-23,34,204
+src/js/services/sidebar/sidebar_views.js
+  h_0f06c286dda36f 7
+src/js/apps/patients/shared/bulk-edit/actions-inline.template.js
+  h_0f06c286dda36f 1-5,7-8,17,20
+src/js/base/template-icons.js
+  h_0f06c286dda36f 1-11
+src/js/components/droplist/droplist.component.cy.js
+  h_0f06c286dda36f 128-132
+src/js/apps/globals/nav/whats-new/whats-new_views.js
+  h_0f06c286dda36f 5-6
+src/js/apps/patients/worklist/worklist_views.js
+  h_0f06c286dda36f 1-2,10,24-26,73-74,105-107,136,138,154,156-157,217,225,255,263-265,368
+src/js/services/sidebar/sidebar.template.js
+  h_0f06c286dda36f 1-4,11,17
+src/js/i18n/README.md
+  h_0f06c286dda36f 3,5-9,32,35-36,38-41,43-46,48-49,52-58,60-65,69-71,73-77,79-82
+src/js/regions/preload_region.js
+  h_0f06c286dda36f 6
+src/js/apps/patients/patient/patient_views.js
+  h_0f06c286dda36f 9-10
+src/js/auth/prelogin/prelogin.template.js
+  h_0f06c286dda36f 1-3,6
+src/js/apps/patients/patient/sidebar/sidebar.template.js
+  h_0f06c286dda36f 1-4,6-7,10
+src/js/apps/programs/sidebar/program/program-sidebar.template.js
+  h_0f06c286dda36f 1-4,7-9,13,16-17
+src/js/apps/dashboards/dashboards-all/dashboards-all_views.js
+  h_0f06c286dda36f 2,8,13-14,28-29,35-36
+src/js/components/list-search/list-search_views.js
+  h_0f06c286dda36f 1-2,8,13-14,18-19,21
+src/js/apps/globals/search/patient-search_views.js
+  h_0f06c286dda36f 3,9,18-21,41,43-48,207-208
+src/js/services/patient-modal/patient-modal_views.js
+  h_0f06c286dda36f 3-4,11,20,38-40,98,102,130
+src/js/README.md
+  h_0f06c286dda36f 13,43-44,54,58,63-74
+src/js/apps/patients/patient/form/form-viewport.component.cy.js
+  h_0f06c286dda36f 2,15,32,64,73
+src/js/apps/globals/nav/whats-new/design-update.template.js
+  h_0f06c286dda36f 1-4
+src/js/apps/patients/shared/actions_views.js
+  h_0f06c286dda36f 1,6-7,40,80,85-88,95
+src/js/apps/patients/patient/action/action-details.template.js
+  h_0f06c286dda36f 1-7
+src/js/apps/patients/patient/action/action-edit.template.js
+  h_0f06c286dda36f 1-3,9,14
+src/js/components/tooltip/index.js
+  h_0f06c286dda36f 2,6,16,40,44
+src/js/apps/patients/patient/flow/flow_views.js
+  h_0f06c286dda36f 3,12,21-24,129-136,150,159,178
+src/js/apps/programs/sidebar/flow/flow-sidebar_views.js
+  h_0f06c286dda36f 4,12,24-26,38,43-45,103-106,122-124,135,146
+src/js/apps/globals/nav/app-nav/app-nav_views.js
+  h_0f06c286dda36f 1,3,6,11-14,29-31,126,134-140,328,330-331,362-364
+src/js/base/setup.js
+  h_0f06c286dda36f 10
+src/js/apps/patients/shared/widgets/widget-template.js
+  h_0f06c286dda36f 1-64
+src/js/apps/programs/shared/components/tags-manager_component.js
+  h_0f06c286dda36f 1,7,20,35,63,91
+src/js/apps/patients/patient/action/action_views.js
+  h_0f06c286dda36f 2,10,16-17,50,59
+src/js/apps/programs/sidebar/action/action-details.template.js
+  h_0f06c286dda36f 1-7
+src/js/components/workspaces-manager/index.js
+  h_0f06c286dda36f 1,7,17,52,72
+src/js/services/modal/modal_views.component.cy.js
+  h_0f06c286dda36f 2,105,136,149,171,195,254,278
+src/js/components/optionlist/optionlist.component.cy.js
+  h_0f06c286dda36f 2,9
+src/js/apps/programs/program/flow/flow_views.js
+  h_0f06c286dda36f 1,7,14-16,34-37,39-41,107,109,119
+package.json
+  h_0f06c286dda36f 141-142
+src/js/apps/patients/worklist/layout.template.js
+  h_0f06c286dda36f 1-4,22,25
+src/js/base/helpers.js
+  h_0f06c286dda36f 1,3,21,30,39-41
+src/js/apps/patients/patient/action/layout.template.js
+  h_0f06c286dda36f 1-3,10
+src/js/apps/programs/program/workflows/layout.template.js
+  h_0f06c286dda36f 1-5,9
+docs/migrations/mnjs-html-current.md
+  h_0f06c286dda36f 1-120
+src/js/base/template-values.js
+  h_0f06c286dda36f 1-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "94aecfa90917775c85cf96ec8963540d4c87b121",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
