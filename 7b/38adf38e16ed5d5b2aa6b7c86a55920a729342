@@ -1,0 +1,85 @@
+packages/router/src/route-application.js
+  s_d98469173ab5ce::t_13df47139428d5 4-12,33,38-40,43,52-53,63-65,69-70,76-79,81,90-93,107,112-113,115,117,120,122,127,132,141
+packages/router/examples/catalog/catalog.mjs
+  s_d98469173ab5ce::t_8a0720705d12ba 1-2,6,10-14,16-26,28-33,36-40
+packages/router/readme.md
+  s_d98469173ab5ce::t_2e8c0557ce4ebd 37,47,65,76-78,80,96-97,99-104,106-107,113-114,119-124,209-212
+  s_d98469173ab5ce::t_8a0720705d12ba 156,181
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_d98469173ab5ce::t_981f0df19200cb 4,36-38,45,48-55,64-66,70
+  s_d98469173ab5ce::t_47eae958022f43 57,95-102
+  s_d98469173ab5ce::t_3e9f6c97898484 58-59,61-63
+  s_d98469173ab5ce::t_7f24854743e802 56
+packages/router/test/selection-key.test.js
+  s_d98469173ab5ce::t_d01f318bdbed84 6-8,81,92-93,97-99,102
+packages/router/test/route-application.test.js
+  s_d98469173ab5ce::t_83f9ae876f1de2 5,8-11,18-19,26,38-39,48,52,58,61-62,65,68,74,77,79-85,87-89,95-120,125,134,146,160-259,266-267,279,281,284,289-290,296,298-303,305,307-308,310-324,327-336,340,342,367,370,374
+packages/router/test/refinements.test.js
+  s_d98469173ab5ce::t_fefb84b4364e39 3,8-9,11,17,21,25,34,40-41,44-45,65-66,72-73,99-108,110-111,115-120
+src/js/apps/patients/patients-main_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 22,40,60,68,80-82,86-88,92-94,105-107,132-133
+src/js/apps/globals/app-frame/area-routes.component.cy.js
+  s_d98469173ab5ce::t_89cd70bfbbb6be 45,47,51-54,56-61,63-65
+packages/router/src/selection-key.js
+  s_d98469173ab5ce::t_9deddcd14e4c3d 1-5,8-9,12-14,17,21,25,28-29
+packages/router/UPSTREAM.md
+  s_d98469173ab5ce::t_8a0720705d12ba 7-10,14
+src/js/base/routing.md
+  s_d98469173ab5ce::t_47eae958022f43 24,57
+  s_d98469173ab5ce::t_1559729f4e4c46 36,103
+  s_d98469173ab5ce::t_224c70a4031570 10-11,13-19,44-48
+src/js/apps/programs/program/flow/flow_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 20,24,66
+src/js/router.js
+  s_d98469173ab5ce::t_2f0d51c559a0a7 55-56
+packages/router/test/package.test.js
+  s_d98469173ab5ce::t_6e420c7abb2fe6 76-77
+src/js/apps/dashboards/dashboards-main_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 17,24
+packages/router/src/selection.js
+  s_d98469173ab5ce::t_9deddcd14e4c3d 103
+src/js/services/router-radio.js
+  s_d98469173ab5ce::t_ad3b08b9a0b295 1,6,21,42,44
+packages/router/test/authority.test.js
+  s_d98469173ab5ce::t_6e420c7abb2fe6 13-14,50-51,97-98,101-102,108-109
+packages/router/src/matcher.js
+  s_d98469173ab5ce::t_a38f7b2c65caea 37,39
+packages/router/examples/catalog/README.md
+  s_d98469173ab5ce::t_8a0720705d12ba 1,3,5-12,14-15
+src/js/apps/programs/program/program_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 27,31,35,39,63
+src/js/apps/patients/patient/patient_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 33,37,41,45,49,53,57,61,65,75,94
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 19,26
+packages/router/src/router.js
+  s_d98469173ab5ce::t_a38f7b2c65caea 165-167,170-171,225,228,345,355-356,359-362,370,381,399-402,404-407,410-412,499,511,520,568
+packages/router/DESIGN.md
+  s_d98469173ab5ce::t_bf78c6c9c8ba86 362,364-382,384-391,393-427,429,431-433
+  s_d98469173ab5ce::t_8a7375705640fa 510
+  s_d98469173ab5ce::t_0547b85a159510 45,50,175-176,239-242,249-250,256-259,322-341,346,518-519,521-525,635-637
+src/js/apps/globals/app-frame/workspace_app.js
+  s_d98469173ab5ce::t_981f0df19200cb 16-19,21
+src/js/apps/clinicians/clinicians-main_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 15-16
+src/js/apps/globals/app-frame/router.e2e.cy.js
+  s_d98469173ab5ce::t_c8f0dfbabb48fb 601-602,658-659,671-672,686
+src/js/apps/programs/programs-main_app.js
+  s_d98469173ab5ce::t_6f5273c5c155e7 21,36-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7b38adf38e16ed5d5b2aa6b7c86a55920a729342",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
