@@ -191,7 +191,7 @@ const ListView = CollectionView.extend({
   },
   collectionEvents: {
     'change:name': 'sort',
-    'change:enabled change:last_active_at': 'filterList',
+    'change:enabled change:_team change:_workspaces change:last_active_at': 'filterList',
   },
   childViewTriggers: {
     'render': 'listItem:render',
@@ -210,6 +210,7 @@ const ListView = CollectionView.extend({
   onListItemRender(view) {
     view.searchString = view.el.textContent;
 
+    // Team/workspace changes filter before this render refreshes search-helper text.
     if (!this.state.get('searchQuery') || this._isFiltering) return;
 
     this.filterList();
