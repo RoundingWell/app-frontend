@@ -1,3 +1,41 @@
 .clinicians__list-search {
   min-width: 0;
 }
+
+.clinicians__last-active {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02px;
+  line-height: 16px;
+  margin-left: var(--space-2);
+}
+
+.clinicians__item-heading {
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+}
+
+.clinicians__name,
+.clinicians__workspaces {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.clinicians__workspaces {
+  display: block;
+}
+
+@container (width <= 720px) {
+  .clinicians__item-main {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .clinicians__item-heading {
+    width: 100%;
+  }
+}
