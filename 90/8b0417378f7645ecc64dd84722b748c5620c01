@@ -1,0 +1,18 @@
+src/js/apps/globals/app-frame/default-route.e2e.cy.js
+  h_0f06c286dda36f 10,13-15,263-316,319-321,374-384,402-409
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  h_0f06c286dda36f 295-356
+src/js/apps/globals/search/patient-quick-search.e2e.cy.js
+  h_0f06c286dda36f 55-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "908b0417378f7645ecc64dd84722b748c5620c01",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

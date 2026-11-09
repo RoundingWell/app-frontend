@@ -1,0 +1,40 @@
+src/js/README.md
+  h_0f06c286dda36f 5-8,76-77,81
+.github/copilot-instructions.md
+  h_0f06c286dda36f 8,13
+AGENTS.md
+  h_0f06c286dda36f 6-18,41,54,60,62-63,118,134-136,143
+  h_0f06c286dda36f 61
+package.json
+  h_0f06c286dda36f 21-22
+.github/copilot.yaml
+  h_0f06c286dda36f 9,36,60
+REVIEW.md
+  h_0f06c286dda36f 1-5
+.gitignore
+  h_0f06c286dda36f 55-57
+scripts/setup-agent-skills.test.js
+  h_0f06c286dda36f 1-50,52,54-61,63-75,77-78,80-87,89
+  h_0f06c286dda36f 51,53,62,76,79,88
+README.md
+  h_0f06c286dda36f 31-33,39-78
+  h_0f06c286dda36f 34-38
+.circleci/workflows.yml
+  h_0f06c286dda36f 110-112
+src/js/base/routing.md
+  h_0f06c286dda36f 213-214
+scripts/setup-agent-skills.js
+  h_0f06c286dda36f 1-10,12-17,19-23,25,27,30-37
+  h_0f06c286dda36f 11,18,24,26,28-29
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3a2c455629d0870ba6594fa12e6b4510655c3164",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

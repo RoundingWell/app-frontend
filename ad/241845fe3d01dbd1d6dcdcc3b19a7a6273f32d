@@ -1,0 +1,19 @@
+test/support/component.js
+  s_fccc4383f2a863::t_b579c4368c0fb4 75,84-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ad241845fe3d01dbd1d6dcdcc3b19a7a6273f32d",
+  "prompts": {},
+  "sessions": {
+    "s_fccc4383f2a863": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef199086-d5a0-4eab-9f4f-bd9bd8b941a9",
+        "model": "unknown"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

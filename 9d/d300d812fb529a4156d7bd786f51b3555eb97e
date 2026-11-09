@@ -1,0 +1,18 @@
+src/js/apps/patients/shared/widgets/recent-interactions.scss
+  h_0f06c286dda36f 1
+src/js/apps/patients/shared/widgets/recent-interactions_views.js
+  h_0f06c286dda36f 4-5,11,88
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 1542
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9dd300d812fb529a4156d7bd786f51b3555eb97e",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

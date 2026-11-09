@@ -1,0 +1,17 @@
+src/js/apps/patients/patient/interactions/date-control_view.js
+  h_0f06c286dda36f 7,14,83
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  h_0f06c286dda36f 969,975,981,995,1004,1035,1086,1097-1098,1100-1101
+  h_0f06c286dda36f 1010-1034,1096,1099,1102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "40c5af5812e21c8bb4df88e9c79e12f635149312",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

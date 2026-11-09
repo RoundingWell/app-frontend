@@ -1,0 +1,14 @@
+src/js/entities-service/entities/interactions.js
+  h_0f06c286dda36f 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "27cb35b0b4e705504eb8fec383d1f3e8ebe88b45",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+src/js/apps/patients/patient/interactions/date-control_view.js
+  h_0f06c286dda36f 7,14,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "eda8339f7c1757c85cdc3d02eea8ae61cbe65cac",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}

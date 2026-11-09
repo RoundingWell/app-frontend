@@ -1,0 +1,20 @@
+src/js/apps/globals/nav/app-nav.e2e.cy.js
+  h_0f06c286dda36f 15,235-237,245-246,263,295
+src/js/apps/globals/nav/whats-new/whats-new.component.cy.js
+  h_0f06c286dda36f 24-28,49
+src/js/apps/globals/nav/whats-new/whats-new_views.js
+  h_0f06c286dda36f 10
+src/js/i18n/en-US/globals.yml
+  h_0f06c286dda36f 41-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "51b62f50ceb006828a04891745012bde32297508",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
