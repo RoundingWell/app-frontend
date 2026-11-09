@@ -1,3 +1,4 @@
+import Backbone from 'backbone';
 import { v5 as uuid } from 'uuid';
 import { Application, Radio, View } from 'marionette';
 import { testScope } from '@mnjs/test/cypress';
@@ -140,6 +141,43 @@ context('Dialer Service', function() {
           },
         },
       });
+  });
+
+  specify('ignores patient search responses released after hangup or service stop', function() {
+    const pending = [];
+    const patient = new Backbone.Model({ id: 'patient-late', first_name: 'Late', last_name: 'Patient' });
+    scope.reply(Radio, 'entities', 'searchPatients:collection', () => {
+      const collection = new Backbone.Collection([patient]);
+      collection.fetch = () => {
+        const response = new Cypress.Promise(resolve => pending.push(() => {
+          resolve(collection);
+          return response;
+        }));
+        return response;
+      };
+      return collection;
+    });
+    const add = cy.spy(service, '_addPatient');
+    scope.defer(() => pending.forEach(resolve => resolve()));
+
+    cy.then(async() => {
+      await service.start();
+      service.showPatientLinks({ number: '+16513216543' });
+      service.showPatientLinks(null);
+      await pending.shift()();
+      expect(add).not.to.have.been.called;
+
+      service.showPatientLinks({ number: '+16513216543' });
+      await service.stop();
+      await pending.shift()();
+      expect(add).not.to.have.been.called;
+
+      await service.start();
+      service.showPatientLinks({ number: '+16513216543' });
+      await pending.shift()();
+      expect(add).to.have.been.calledOnce;
+      expect(add.firstCall.args[0]).to.equal(patient);
+    });
   });
 
   specify('showPatientLinks ignores invalid phone numbers', function() {
