@@ -13,6 +13,9 @@ Backbone.ajax = options => {
 
       const responseData = await getData(response, options.dataType);
 
+      // Collection windows can finish reading their bodies after cancellation.
+      if (options._discardAbortedResponse && options.signal?.aborted) return;
+
       if (!response.ok) {
         if (options.error) options.error(responseData);
 

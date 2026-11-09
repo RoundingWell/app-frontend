@@ -11,6 +11,9 @@ export default App.extend({
     'before:destroy': 'onBeforeDestroyView',
   },
   onBeforeStart(app, { patient }) {
+    this.patient = patient;
+    if (this.getView()) return;
+    this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.showView(new RecentInteractionsView({ model: patient }));
     this.getView().showLoading();
   },
@@ -22,12 +25,20 @@ export default App.extend({
   onStart(app, options, collection) {
     this.getView().showInteractions(collection);
   },
+  onInteractionMessage(message) {
+    if (message.payload?.patient?.id !== this.patient.id) return;
+    this.restart({ patient: this.patient }).catch(error => this.handleStartFailure(error));
+  },
+  onStop() {
+    this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
+  },
   handleStartFailure(error) {
     this.getView().showError();
     addError(error);
     return false;
   },
   onBeforeDestroyView() {
+    this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.stop();
   },
 });

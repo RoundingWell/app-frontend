@@ -1,10 +1,25 @@
 import Store from 'backbone.store';
-import { contains, findKey } from 'underscore';
+import dayjs from 'dayjs';
+import { contains, findKey, has, map, omit } from 'underscore';
+import { Radio } from 'marionette';
+
+import { addError } from 'js/datadog';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
 const TYPE = 'interactions';
+
+export function compareInteractions(left, right) {
+  return dayjs(left.getTimestamp()).diff(right.getTimestamp());
+}
+
+export function getInteractionAttributes(attributes) {
+  const relationships = {};
+  if (has(attributes, 'action_id')) relationships._action = attributes.action_id ? { id: attributes.action_id, type: 'patient-actions' } : null;
+  if (has(attributes, 'flow_id')) relationships._flow = attributes.flow_id ? { id: attributes.flow_id, type: 'flows' } : null;
+  return { ...omit(attributes, 'action_id', 'flow_id'), ...relationships };
+}
 
 export const CHANNEL_GROUPS = {
   messages: ['sms', 'email', 'mail', 'fax', 'portal'],
@@ -15,6 +30,31 @@ export const CHANNEL_GROUPS = {
 
 const _Model = BaseModel.extend({
   type: TYPE,
+  messages: {
+    MetadataUpdated({ attributes }) {
+      this.set(getInteractionAttributes(attributes));
+      const requests = [];
+      if (attributes.action_id) requests.push(Radio.request('entities', 'fetch:actions:model', attributes.action_id, { abort: false }));
+      if (attributes.flow_id) requests.push(Radio.request('entities', 'fetch:flows:model', attributes.flow_id, { abort: false }));
+      if (requests.length) {
+        // Responses enrich the Store; they never replace the current link IDs.
+        Promise.all(map(requests, request => request.catch(addError)))
+          .then(() => this.trigger('change', this)).catch(addError);
+      }
+    },
+    InteractionScheduled({ attributes }) {
+      this.set(attributes);
+    },
+    InteractionCompleted({ attributes }) {
+      this.set(attributes);
+    },
+    InteractionCancelled({ attributes }) {
+      this.set(attributes);
+    },
+    ResourceDeleted() {
+      this.destroy({ isDeleted: true });
+    },
+  },
   getTimestamp() {
     return this.get('occurred_at') || this.get('expected_at');
   },
