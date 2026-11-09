@@ -1,0 +1,44 @@
+packages/router/src/selection.js
+  s_d98469173ab5ce::t_f04e3194b3459f 35-37,39,41-46,51,55,61-62,98-101,103-104,107,109
+packages/router/test/route-application.test.js
+  s_d98469173ab5ce::t_f3387e8fa9cf36 42,46,50
+  s_d98469173ab5ce::t_e5a0ab8c0467a0 379-423
+src/js/base/routing.md
+  s_d98469173ab5ce::t_608760588a4b04 36,115
+  s_d98469173ab5ce::t_3d75dddfeac784 3,14,26
+src/js/apps/globals/error/error.e2e.cy.js
+  s_d98469173ab5ce::t_b1d66a232798a6 1,108,111-112
+src/js/services/modal/modal.e2e.cy.js
+  s_d98469173ab5ce::t_b1d66a232798a6 99
+packages/router/UPSTREAM.md
+  s_d98469173ab5ce::t_d1d28c185af45a 10
+src/js/apps/globals/app-frame/areas.js
+  s_d98469173ab5ce::t_3d75dddfeac784 1-53
+packages/care-ops-auth/AuthProvider.js
+  s_d98469173ab5ce::t_b1d66a232798a6 21
+packages/router/src/route-application.js
+  s_d98469173ab5ce::t_f3387e8fa9cf36 2,15,20-21,23-25,101,114
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  s_d98469173ab5ce::t_b1d66a232798a6 36,38
+packages/router/DESIGN.md
+  s_d98469173ab5ce::t_d1d28c185af45a 506-510
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_d98469173ab5ce::t_d1ca0eba82ef0e 58,60
+  s_d98469173ab5ce::t_3d75dddfeac784 8,104,107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8ce6e2559396f79a0082e281d25f3463b86000e4",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
