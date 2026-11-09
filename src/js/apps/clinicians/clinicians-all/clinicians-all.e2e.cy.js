@@ -460,8 +460,11 @@ context('clinicians list', function() {
 
     cy
       .get('@cliniciansList')
-      .find('.card-list__empty')
-      .should('contain', 'No results match your Find in List search');
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Aaron Aaronson')
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'NUR');
 
     cy
       .get('@listSearch')
@@ -530,20 +533,6 @@ context('clinicians list', function() {
       .should('not.contain', 'Casey Caseless');
 
     cy
-      .get('@cliniciansList')
-      .find('.card-list__item')
-      .first()
-      .find('[data-team-region] .button__value')
-      .should('have.text', 'CO');
-
-    cy
-      .get('@cliniciansList')
-      .find('.card-list__item')
-      .eq(1)
-      .find('[data-team-region] .button__value')
-      .should('have.text', 'CO');
-
-    cy
       .get('@statusFilter')
       .click();
 
@@ -574,58 +563,12 @@ context('clinicians list', function() {
       .get('@cliniciansList')
       .find('.card-list__item')
       .should('have.length', 1)
-      .should('contain', 'Pat Pending')
-      .find('[data-team-region] .button__value')
-      .should('have.text', 'CO');
+      .should('contain', 'Pat Pending');
 
     cy
       .get('@listSearch')
       .clear()
       .type('NUR');
-
-    cy
-      .get('@cliniciansList')
-      .find('.card-list__empty')
-      .should('contain', 'No results match your Find in List search');
-
-    cy
-      .get('@listSearch')
-      .clear()
-      .type('Casey');
-
-    cy
-      .get('@cliniciansList')
-      .find('.card-list__item')
-      .should('have.length', 1)
-      .should('contain', 'Casey Caseless');
-
-    cy
-      .get('@listSearch')
-      .clear()
-      .type('Manager');
-
-    cy
-      .get('@cliniciansList')
-      .find('.card-list__item')
-      .should('have.length', 1)
-      .should('contain', 'Casey Caseless');
-
-    cy
-      .get('@listSearch')
-      .clear()
-      .type('Workspace One');
-
-    cy
-      .get('@cliniciansList')
-      .find('.card-list__item')
-      .should('have.length', 1)
-      .should('contain', 'Casey Caseless')
-      .should('contain', 'Workspace One');
-
-    cy
-      .get('@listSearch')
-      .clear()
-      .type('zzz');
 
     cy
       .get('@cliniciansList')

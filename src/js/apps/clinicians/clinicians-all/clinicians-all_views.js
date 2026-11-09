@@ -99,14 +99,9 @@ const ItemView = View.extend({
   },
   template: ItemTemplate,
   templateContext() {
-    const team = this.model.hasTeam() ? this.model.getTeam() : null;
-
     return {
       workspaces: sortBy(map(this.model.getWorkspaces().models, 'attributes'), 'name'),
-      team: team && {
-        name: team.get('name'),
-        abbr: team.get('abbr'),
-      },
+      team: this.model.hasTeam() && this.model.getTeam().get('name'),
     };
   },
   onRender() {
@@ -209,31 +204,20 @@ const ListView = CollectionView.extend({
   },
   onListItemRender(view) {
     view.searchString = view.el.textContent;
-
-    // Team/workspace changes filter before this render refreshes search-helper text.
-    if (!this.state.get('searchQuery') || this._isFiltering) return;
-
-    this.filterList();
   },
   filterList() {
     const searchQuery = this.state.get('searchQuery');
     const statusFilter = this.state.get('statusFilter');
     const matchers = searchQuery ? buildMatchersArray(searchQuery) : null;
 
-    this._isFiltering = true;
+    this.setFilter(function(view) {
+      if (!matchesStatusFilter(view.model, statusFilter)) return false;
+      if (!matchers) return true;
 
-    try {
-      this.setFilter(function(view) {
-        if (!matchesStatusFilter(view.model, statusFilter)) return false;
-        if (!matchers) return true;
-
-        return every(matchers, function(matcher) {
-          return matcher.test(view.searchString);
-        });
+      return every(matchers, function(matcher) {
+        return matcher.test(view.searchString);
       });
-    } finally {
-      this._isFiltering = false;
-    }
+    });
   },
   onRenderChildren() {
     this.triggerMethod('filtered', this.children.pluck('model'));
