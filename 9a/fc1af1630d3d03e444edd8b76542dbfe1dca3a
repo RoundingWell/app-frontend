@@ -1,0 +1,81 @@
+packages/router/DESIGN.md
+  s_d98469173ab5ce::t_7edded283b95da 1-681
+packages/router/PROVENANCE.md
+  s_d98469173ab5ce::t_1a447de38673fa 1-64
+packages/router/RELEASING.md
+  s_d98469173ab5ce::t_e5f6f5bffed1de 1-110
+packages/router/UPSTREAM.md
+  s_d98469173ab5ce::t_7cee5e9a2c0fc8 1-39
+packages/router/examples/bootstrap.mjs
+  s_d98469173ab5ce::t_e9847a8d085cbf 1-18
+packages/router/examples/catalog/README.md
+  s_d98469173ab5ce::t_ba24e39c4c8a5a 1-15
+packages/router/examples/catalog/catalog.mjs
+  s_d98469173ab5ce::t_bf1f28d2a686fe 1-40
+packages/router/license.txt
+  s_d98469173ab5ce::t_2d94e38a8ed033 1-21
+packages/router/package.json
+  s_d98469173ab5ce::t_f1afa0c6b9eadf 1-24
+.circleci/README.md
+  s_d98469173ab5ce::t_84b376ac87c70a 25-28
+.circleci/workflows.yml
+  s_d98469173ab5ce::t_0f4a4c0788d531 112-114
+package-lock.json
+  s_d98469173ab5ce::t_3353b3c5444fcf 18-19,23-24,40,4251-4253,4264,4289-4291,4294,4300-4303,4336-4338,5707,12156-12158,12165-12166,16896-16909
+package.json
+  s_d98469173ab5ce::t_54469bf7150641 18-19,123,138,143-144
+packages/router/readme.md
+  s_d98469173ab5ce::t_85fb71a8c68793 1-231
+packages/router/source-manifest.json
+  s_d98469173ab5ce::t_1a3f23cd3bbd48 1-78
+packages/router/src/drivers/memory.js
+  s_d98469173ab5ce::t_41e7f47556ab83 1-361
+packages/router/src/drivers/navigation.js
+  s_d98469173ab5ce::t_6dc8f30d75fadb 1-25
+packages/router/src/index.js
+  s_d98469173ab5ce::t_43e1188cd0a63d 1-13
+packages/router/src/matcher.js
+  s_d98469173ab5ce::t_528d3b028fdf28 1-230
+packages/router/src/pattern.js
+  s_d98469173ab5ce::t_2a7fa0ae1ed819 1-207
+packages/router/src/query.js
+  s_d98469173ab5ce::t_431d0a4f86378c 1-13
+packages/router/src/route-application.js
+  s_d98469173ab5ce::t_bc8c144bfb0c01 1-139
+packages/router/src/route-types.js
+  s_d98469173ab5ce::t_e1894f4ed42146 1-6
+packages/router/src/router.js
+  s_d98469173ab5ce::t_0fa1f06afd13cb 1-651
+packages/router/src/selection-key.js
+  s_d98469173ab5ce::t_38ba139d5bb560 1-34
+packages/router/src/selection.js
+  s_d98469173ab5ce::t_571a5fcf6e68a2 1-131
+packages/router/test/authority.test.js
+  s_d98469173ab5ce::t_af3d90e0d7cadc 1-177
+packages/router/test/package.test.js
+  s_d98469173ab5ce::t_d8b2dfd7936b1b 1-92
+packages/router/test/refinements.test.js
+  s_d98469173ab5ce::t_4dff0b3fffcac5 1-121
+packages/router/test/route-application.test.js
+  s_d98469173ab5ce::t_9378d16048b9c6 1-423
+packages/router/test/selection-key.test.js
+  s_d98469173ab5ce::t_fab076d86bdf8d 1-107
+packages/router/vendor.mjs
+  s_d98469173ab5ce::t_07fa2f5c911575 1-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9afc1af1630d3d03e444edd8b76542dbfe1dca3a",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
