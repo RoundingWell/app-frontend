@@ -1,0 +1,25 @@
+src/js/apps/globals/app-frame/router.e2e.cy.js
+  s_d98469173ab5ce::t_0dde365cc1bfcd 535
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_d98469173ab5ce::t_0dde365cc1bfcd 8
+src/js/apps/globals/app-frame/area-routes.component.cy.js
+  s_d98469173ab5ce::t_25c15287332373 5-10,49,51-56
+src/js/apps/globals/app-frame/features.js
+  s_d98469173ab5ce::t_0dde365cc1bfcd 1,32-33,35-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "99ffab1ce149aeae06f0b4726b629745360053f0",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
