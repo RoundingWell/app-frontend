@@ -1,0 +1,40 @@
+packages/router/PROVENANCE.md
+  s_d98469173ab5ce::t_2bc6793a1431eb 16
+packages/router/test/selection-key.test.js
+  s_d98469173ab5ce::t_b359e45721d30c 4,10,58,85
+packages/router/src/route-application.js
+  s_d98469173ab5ce::t_72451670dd5033 1-2,78-83,85-95
+packages/router/test/package.test.js
+  s_d98469173ab5ce::t_b359e45721d30c 4
+packages/router/UPSTREAM.md
+  s_d98469173ab5ce::t_2bc6793a1431eb 8-11,13
+packages/router/readme.md
+  s_d98469173ab5ce::t_2bc6793a1431eb 108-110,153,209
+src/js/base/routing.md
+  s_d98469173ab5ce::t_0dde365cc1bfcd 22,24
+  s_d98469173ab5ce::t_2bc6793a1431eb 16
+packages/router/examples/desk/README.md
+  s_d98469173ab5ce::t_2bc6793a1431eb 53
+packages/router/DESIGN.md
+  s_d98469173ab5ce::t_2bc6793a1431eb 5-6,18-19,36,345-348,376-377,385,395,397,457,466,616
+packages/router/src/selection.js
+  s_d98469173ab5ce::t_72451670dd5033 1-132
+packages/router/test/refinements.test.js
+  s_d98469173ab5ce::t_b359e45721d30c 4,107,109,156,187
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "52d5cbcb9c7ec41411746f2c5770c7101ed5b0ad",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
