@@ -1,0 +1,23 @@
+packages/care-ops-datadog/index.js
+  s_d98469173ab5ce::t_0cf64ad00b9fe5 40,48,56,94-98
+src/js/datadog.js
+  s_d98469173ab5ce::t_c5e2f75d819a7b 1,5-8,11,16-25
+src/js/utils/native-view-tracking.js
+  s_d98469173ab5ce::t_e75fb194895336 1-21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fd41daefb4dd57ee72d18626fe90f815f551e58b",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
