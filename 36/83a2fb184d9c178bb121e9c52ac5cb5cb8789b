@@ -1,0 +1,16 @@
+package-lock.json
+  h_0f06c286dda36f 4289
+vendor/mnjs-html-artifact.json
+  h_0f06c286dda36f 4-7,9-14,16-18,20-21,25-28,32,34,36,38,40,43-47
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "3683a2fb184d9c178bb121e9c52ac5cb5cb8789b",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
