@@ -1,0 +1,20 @@
+docs/migrations/mnjs-html-0.1.0-validation.json
+  h_0f06c286dda36f 1-150
+package-lock.json
+  h_0f06c286dda36f 23,4287-4289
+package.json
+  h_0f06c286dda36f 142
+vendor/mnjs-html-artifact.json
+  h_0f06c286dda36f 3,5,9,11-12,20,27,40,42-44,46-48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d19f160ade37b2bd02f88cde6f5233e893c69f48",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
