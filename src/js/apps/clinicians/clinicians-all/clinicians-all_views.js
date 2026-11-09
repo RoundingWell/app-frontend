@@ -57,20 +57,6 @@ function getStatusFilter(statusFilter) {
   return 'active';
 }
 
-function getTeamSearchText(clinician) {
-  if (!clinician.hasTeam()) return '';
-
-  const team = clinician.getTeam();
-
-  return `${ team.get('name') } ${ team.get('abbr') }`;
-}
-
-function getClinicianSearchString(view) {
-  if (!view.model) return view.el.textContent;
-
-  return `${ view.el.textContent } ${ getTeamSearchText(view.model) }`;
-}
-
 const RowBehavior = Behavior.extend({
   modelEvents: {
     'editing': 'onEditing',
@@ -113,8 +99,14 @@ const ItemView = View.extend({
   },
   template: ItemTemplate,
   templateContext() {
+    const team = this.model.hasTeam() ? this.model.getTeam() : null;
+
     return {
       workspaces: sortBy(map(this.model.getWorkspaces().models, 'attributes'), 'name'),
+      team: team && {
+        name: team.get('name'),
+        abbr: team.get('abbr'),
+      },
     };
   },
   onRender() {
@@ -199,7 +191,7 @@ const ListView = CollectionView.extend({
   },
   collectionEvents: {
     'change:name': 'sort',
-    'change:enabled change:_team change:_workspaces change:last_active_at': 'filterList',
+    'change:enabled change:last_active_at': 'filterList',
   },
   childViewTriggers: {
     'render': 'listItem:render',
@@ -216,9 +208,8 @@ const ListView = CollectionView.extend({
     this.filterList();
   },
   onListItemRender(view) {
-    view.searchString = getClinicianSearchString(view);
+    view.searchString = view.el.textContent;
 
-    // A team change filters before this render replaces the previous team text.
     if (!this.state.get('searchQuery') || this._isFiltering) return;
 
     this.filterList();
