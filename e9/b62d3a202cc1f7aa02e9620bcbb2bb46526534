@@ -1,0 +1,95 @@
+AGENTS.md
+  s_d98469173ab5ce::t_ac2da7aa07b646 79-84,190
+src/js/app.js
+  s_d98469173ab5ce::t_d63cd6e04d8acb 26,109,174
+src/js/apps/clinicians/clinicians-all/clinicians-all_app.js
+  s_d98469173ab5ce::t_6275e6804dec76 7,15-28,99
+src/js/apps/clinicians/clinicians-main_app.js
+  s_d98469173ab5ce::t_1802d865cff9d9 2,6,10-12,15-16
+src/js/apps/dashboards/dashboards-main_app.js
+  s_d98469173ab5ce::t_76d18c974d7899 4,9,14-20,22-24,27-30,32-35,38
+src/js/apps/globals/app-frame/app-frame_app.js
+  s_d98469173ab5ce::t_9d2fb36dddb172 2-4,8,10,14-20,22,25-26,36-39,41-45,48-63,65-75,78-110,112
+src/js/apps/globals/app-frame/area-routes.component.cy.js
+  s_d98469173ab5ce::t_98cb8a4903adea 1-88
+src/js/apps/globals/app-frame/browser-support.e2e.cy.js
+  s_d98469173ab5ce::t_411ddb511968e8 1-62,64
+src/js/apps/globals/app-frame/features.js
+  s_d98469173ab5ce::t_15468dc564e999 1,3-48,50-52
+src/js/apps/globals/app-frame/router.e2e.cy.js
+  s_d98469173ab5ce::t_6a6ce1b3f6b087 1-18,21-31,34-49,52-57,59-67,70-74,77-87,89-90,92-99,101-124,127-169,171-178,180-187,191-194,196-200,202-203,206-215,218-228,231-243,247-248,250-254,257-285,287-312,315,317-319,322-326,329-331,333,335-336,338-340,342-343,345-348,350-353,355-357,359-363,365-368,370,372-374,376-378,380-383,385,387-390,392-442,444-471,473,475-477,479-489,492-495,497-502,504-508,510-513,515-536,538-713
+src/js/apps/globals/app-frame/workspace_app.js
+  s_d98469173ab5ce::t_e38bf0e6e86c7a 1,4,8,16-19,21,23-25,27-31,33-34,36-37,39,41-46
+src/js/apps/globals/error/error.e2e.cy.js
+  s_d98469173ab5ce::t_513bbb49b7fb6a 1-4,111,113-118,120-121,127-138,150-152,165-211
+src/js/apps/globals/error/error_app.js
+  s_d98469173ab5ce::t_47a8ac5e6b1b09 1,3,7-13,17,20-25,27-32,34-38,40,42-48
+src/js/apps/globals/nav/nav_app.js
+  s_d98469173ab5ce::t_abeb4cd6960c1f 1,7,141
+src/js/apps/patients/patient/action/action-focus.e2e.cy.js
+  s_d98469173ab5ce::t_de8e4570924eec 1,3,5-9,11-13,15-16,19-21,25-32,34-51,54-61,63-67,69-83,85-90,93-105,107-108,111-146,148-165,167-178,181-185,187-201,204-206,208-212,214-217,219-220,222-233,235-236,238-240,244-255,257-266,269-277,279-284,286-288
+src/js/apps/patients/patient/action/action_views.js
+  s_d98469173ab5ce::t_d407326b683ed8 27,79-89,109-149
+src/js/apps/patients/patient/interactions/interactions.e2e.cy.js
+  s_d98469173ab5ce::t_05f2a47ecaccf1 36,38-41,124-363
+src/js/apps/patients/patient/interactions/interactions_app.js
+  s_d98469173ab5ce::t_acf0e616bf65a2 31,44-50,71-75,77-80,90,97-98,148
+src/js/apps/patients/patient/patient_app.js
+  s_d98469173ab5ce::t_3181b6cf072f53 8,20,30-68,80,87-89,94,119-122,125-128,131-135,137-142,144-145,148-154,157-160,163-169,172-179,182-185,188,199,201-211,215
+src/js/apps/patients/patients-main_app.js
+  s_d98469173ab5ce::t_1202ebc9bf0c1f 5,11-46,57-64,67-71,73-75,77-82,84-88,90-94,96-101,103-107,109-114,118-119,121-124,127-128,131-133
+src/js/apps/programs/program/action/action_app.js
+  s_d98469173ab5ce::t_a65a89b8da65a6 35-38,40-44
+src/js/apps/programs/program/flow/flow_app.js
+  s_d98469173ab5ce::t_ad16013a73b59d 3,13-26,66-75,126,129-134,136
+src/js/apps/programs/program/flow/program-flow.e2e.cy.js
+  s_d98469173ab5ce::t_0afd0756ad83d1 14-26,367,821-897
+src/js/apps/programs/program/program.e2e.cy.js
+  s_d98469173ab5ce::t_b648ef69f1b9d9 9-91
+src/js/apps/programs/program/program_app.js
+  s_d98469173ab5ce::t_4f620b3d31f686 5-6,16,24-40,48-50,63-70,74-84,87,90-95,97,99,103,107-108,110-112,119,132,134
+src/js/apps/programs/programs-main_app.js
+  s_d98469173ab5ce::t_b4fa5ad28c2dd2 2,8-12,18-24,26-27,29-30,33-34,36-38,42
+src/js/base/README.md
+  s_d98469173ab5ce::t_0b6a54498a0c0a 10
+src/js/base/route-app.js
+  s_d98469173ab5ce::t_dd2ad1a55ce755 1,5-15
+src/js/base/routing.md
+  s_d98469173ab5ce::t_ea8064f01d1118 1,3,5,7,9-19,21,23-28,30,32,34,36,38,40,42,44-48,50-53,55,57,59-64,66-73,75-78,80,82-87,89,91,93,95,97,99-105,108-110,113,116-119,122-149
+src/js/entities-service/flows.js
+  s_d98469173ab5ce::t_0afb06c69c8e8b 19
+src/js/i18n/en-US/globals.yml
+  s_d98469173ab5ce::t_fa1df1859c30ca 130-131
+src/js/index.js
+  s_d98469173ab5ce::t_7824948cd36987 39,46,50-64,76-84,97-102
+src/js/router.js
+  s_d98469173ab5ce::t_f3239187436085 1-79
+src/js/services/history.js
+  s_d98469173ab5ce::t_74b96115047522 1-3,7-8,15,17-18,20-22,24-25,27-28,31-32
+src/js/services/latest-list.component.cy.js
+  s_d98469173ab5ce::t_63ca735681983c 4-5,10,13-16,18-23,25,27-36,40-48,50,52-57
+src/js/services/latest-list.js
+  s_d98469173ab5ce::t_bb9b0761fb04c6 1,6-7,16-17,20-28,36-41
+src/js/services/modal/modal.e2e.cy.js
+  s_d98469173ab5ce::t_2191f325cdd33b 95-100,105-106
+src/js/services/router-radio.js
+  s_d98469173ab5ce::t_dd82f31e640920 1-2,4,6,8-9,11-14,17-18,21-27,29-33,36-37,39,42-44,47-52,54-59,61-78
+test/support/commands.js
+  s_d98469173ab5ce::t_10a0ee76c59c42 85-91,109-113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e9b62d3a202cc1f7aa02e9620bcbb2bb46526534",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
