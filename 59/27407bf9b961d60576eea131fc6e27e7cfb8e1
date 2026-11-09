@@ -1,0 +1,23 @@
+packages/care-ops-auth/AuthProvider.js
+  s_d98469173ab5ce::t_a613b54860e440 21-26
+src/js/auth/auth-provider.component.cy.js
+  s_d98469173ab5ce::t_c629307979311f 1-33
+src/js/auth/workos.component.cy.js
+  s_d98469173ab5ce::t_1f38bf0ab03823 49-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5927407bf9b961d60576eea131fc6e27e7cfb8e1",
+  "prompts": {},
+  "sessions": {
+    "s_d98469173ab5ce": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2f00b857-38a8-44f4-a5fe-6dec68c57e53",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
