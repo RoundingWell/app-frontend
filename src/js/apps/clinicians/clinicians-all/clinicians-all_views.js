@@ -205,6 +205,9 @@ const ListView = CollectionView.extend({
   onListItemRender(view) {
     view.searchString = view.el.textContent;
   },
+  onRenderChildren() {
+    this.triggerMethod('filtered', this.children.pluck('model'));
+  },
   filterList() {
     const searchQuery = this.state.get('searchQuery');
     const statusFilter = this.state.get('statusFilter');
@@ -218,9 +221,6 @@ const ListView = CollectionView.extend({
         return matcher.test(view.searchString);
       });
     });
-  },
-  onRenderChildren() {
-    this.triggerMethod('filtered', this.children.pluck('model'));
   },
 });
 
