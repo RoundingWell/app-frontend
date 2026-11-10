@@ -13,6 +13,7 @@ export default App.extend({
     'showPatientLinks': 'showPatientLinks',
     'five9Call': 'five9Call',
     'ringcentralCall': 'ringcentralCall',
+    'eightByEightCall': 'eightByEightCall',
   },
   radioEvents: {
     'change:currentPatientId': 'updateCurrentPatientId',
@@ -48,6 +49,12 @@ export default App.extend({
       };
     }
 
+    if (dialerSetting === '8x8') {
+      const { default: DialerApp } = await import('@roundingwell/care-ops-8x8');
+
+      return { DialerApp, options: { patients } };
+    }
+
     if (dialerSetting === 'ringcentral') {
       const { default: DialerApp } = await import('@roundingwell/care-ops-ringcentral');
 
@@ -63,6 +70,7 @@ export default App.extend({
   },
   onStop() {
     this._pendingCall = null;
+    this.showPatientLinks(null);
   },
   call(number, action) {
     const provider = this.getChildApp('provider');
@@ -75,6 +83,8 @@ export default App.extend({
     provider.call(number, action);
   },
   showPatientLinks(callData) {
+    const generation = this._patientLinkGeneration = (this._patientLinkGeneration || 0) + 1;
+
     if (!callData) {
       patients.reset();
       return;
@@ -98,7 +108,11 @@ export default App.extend({
       const searchCollection = Radio.request('entities', 'searchPatients:collection');
 
       searchCollection.fetch({ data: { 'filter[search]': number } })
-        .then(() => searchCollection.each(this._addPatient, this));
+        .then(() => {
+          if (generation !== this._patientLinkGeneration) return;
+
+          searchCollection.each(this._addPatient, this);
+        });
     }
   },
   five9Call(values) {
@@ -116,6 +130,13 @@ export default App.extend({
     Radio.request('entities', 'save:artifacts:model', {
       artifact: 'ringcentral-call-log',
       identifier: callData.callId,
+      values,
+    });
+  },
+  eightByEightCall(values) {
+    return Radio.request('entities', 'save:artifacts:model', {
+      artifact: '8x8-call-log',
+      identifier: values.callData.eventId,
       values,
     });
   },

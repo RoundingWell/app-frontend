@@ -1,0 +1,171 @@
+$eightbyeight-color: rgb(35 123 169);
+$eightbyeight-color-hover: rgb(30 103 140);
+$eightbyeight-call-active: color(green);
+$eightbyeight-call-active-hover: color(green, dark);
+$eightbyeight-call-ended: color(red);
+$eightbyeight-call-ended-hover: color(red, dark);
+
+// Mashell's nested softphone frame is height: 99.5vh and fills the iframe we
+// give it. The embed docs have no height, scale, or resize message, so a short
+// panel clips the Call button. Keep the frame at the height that fits inside
+// the 760px panel and scroll the panel when the viewport is shorter.
+$eightbyeight-panel-max: 760px;
+$eightbyeight-viewport-offset: 16px;
+$eightbyeight-iframe-min-height: 720px;
+$eightbyeight-open-height: min($eightbyeight-panel-max, calc(100vh - #{$eightbyeight-viewport-offset}));
+
+body:has(.eightbyeight-wrapper) {
+  --dialer-clearance: calc(36px + var(--space-6));
+}
+
+body:has(.eightbyeight-wrapper.is-open) {
+  --dialer-clearance: calc(#{$eightbyeight-open-height} + var(--space-6));
+}
+
+.eightbyeight-wrapper {
+  border-radius: 8px 8px 0 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - #{$eightbyeight-viewport-offset});
+  position: fixed;
+  right: 40px;
+  width: 300px;
+
+  &.is-open {
+    height: calc(100vh - #{$eightbyeight-viewport-offset});
+    max-height: $eightbyeight-panel-max;
+  }
+}
+
+.eightbyeight-patients {
+  flex: 0 1 auto;
+  max-height: min(30vh, 228px);
+  min-height: 0;
+  overflow: auto;
+}
+
+.eightbyeight-panel {
+  background: white;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 20%);
+  display: flex;
+  flex-direction: column;
+  height: 36px;
+  max-height: $eightbyeight-panel-max;
+  min-height: 36px;
+  overflow: hidden;
+  transition: height 0.2s ease;
+
+  .eightbyeight-wrapper.is-open & {
+    flex: 1 1 auto;
+    height: auto;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+  }
+}
+
+.eightbyeight-panel__header {
+  align-items: center;
+  background-color: $eightbyeight-color;
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex: 0 0 auto;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: bold;
+  justify-content: space-between;
+  line-height: inherit;
+  padding: 8px 16px;
+  position: sticky;
+  top: 0;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+  z-index: 1;
+
+  .icon.fa-window-minimize {
+    transform: translateY(-4px);
+  }
+
+  &:hover {
+    background-color: $eightbyeight-color-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentcolor;
+    outline-offset: -4px;
+  }
+
+  &.is-call-active {
+    background-color: $eightbyeight-call-active;
+
+    &:hover {
+      background-color: $eightbyeight-call-active-hover;
+    }
+  }
+
+  &.is-call-ended {
+    background-color: $eightbyeight-call-ended;
+
+    &:hover {
+      background-color: $eightbyeight-call-ended-hover;
+    }
+  }
+}
+
+.eightbyeight-panel__call-status {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.eightbyeight-panel__patient-btn {
+  align-items: center;
+  background-color: white;
+  border: 1px solid $eightbyeight-color;
+  border-radius: 8px;
+  color: $eightbyeight-color;
+  cursor: pointer;
+  display: flex;
+  font-size: 14px;
+  font-weight: 600;
+  justify-content: center;
+  margin-bottom: 8px;
+  padding: 8px 16px;
+  text-overflow: ellipsis;
+  transition: background-color 0.15s;
+  transition-timing-function: linear;
+  white-space: nowrap;
+  width: 100%;
+
+  &:hover {
+    background-color: color(light_blue, light);
+  }
+
+  svg {
+    flex-shrink: 0;
+    margin: 0 6px;
+  }
+}
+
+.eightbyeight-panel__iframe {
+  border: 0;
+  min-height: 0;
+  pointer-events: none;
+  visibility: hidden;
+  width: 100%;
+
+  .eightbyeight-wrapper.is-open & {
+    flex: 0 0 auto;
+    height: $eightbyeight-iframe-min-height;
+    min-height: $eightbyeight-iframe-min-height;
+    pointer-events: auto;
+    visibility: visible;
+  }
+}
