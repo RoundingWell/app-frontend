@@ -2,6 +2,10 @@
   min-width: 0;
 }
 
+.clinicians__search-helper {
+  display: none;
+}
+
 .clinicians__last-active {
   color: var(--color-text-secondary);
   font-size: 12px;

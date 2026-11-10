@@ -286,6 +286,7 @@ context('clinicians list', function() {
             relationships: {
               workspaces: getRelationship([workspaceOne]),
               role: getRelationship(roleEmployee),
+              team: getRelationship(teamCoordinator),
             },
           }),
           getClinician({
@@ -295,6 +296,7 @@ context('clinicians list', function() {
             relationships: {
               workspaces: getRelationship([workspaceTwo]),
               role: getRelationship(roleAdmin),
+              team: getRelationship(teamNurse),
             },
           }),
         ];
@@ -379,6 +381,85 @@ context('clinicians list', function() {
       .should('have.length', 1)
       .first()
       .should('contain', 'Employee');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Coordinator');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Aaron Aaronson')
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'CO');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('NUR');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Baron Baronson')
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'NUR');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Coordinator');
+
+    cy
+      .intercept('PATCH', '/api/clinicians/*', {
+        statusCode: 204,
+        body: {},
+      })
+      .as('routePatchClinicianTeam');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .find('[data-team-region]')
+      .contains('CO')
+      .click();
+
+    cy
+      .get('.picklist')
+      .find('.js-picklist-item')
+      .contains('Nurse')
+      .click()
+      .wait('@routePatchClinicianTeam');
+
+    // An edited row stays visible until the search changes
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 1)
+      .should('contain', 'Aaron Aaronson')
+      .find('[data-team-region] .button__value')
+      .should('have.text', 'NUR');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Nurse');
+
+    cy
+      .get('@cliniciansList')
+      .find('.card-list__item')
+      .should('have.length', 2)
+      .should('contain', 'Aaron Aaronson')
+      .should('contain', 'Baron Baronson');
+
+    cy
+      .get('@listSearch')
+      .clear()
+      .type('Employee');
 
     cy
       .routeActions()

@@ -101,6 +101,7 @@ const ItemView = View.extend({
   templateContext() {
     return {
       workspaces: sortBy(map(this.model.getWorkspaces().models, 'attributes'), 'name'),
+      team: this.model.hasTeam() && this.model.getTeam().get('name'),
     };
   },
   onRender() {
