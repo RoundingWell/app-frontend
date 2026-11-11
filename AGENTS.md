@@ -64,12 +64,13 @@ reuse existing contracts where they fit without hiding coupling in feature code
 or introducing a general framework just to accommodate one requirement.
 
 Before implementing a change that introduces or materially changes any of the
-following, write a short impact note in the task or PR:
+following, write a short impact note and carry it into the PR description's
+Impact section:
 
 - State or coordination between owners, including shared events and subscriptions.
-- Startup, cancellation, cleanup, or other lifecycle responsibilities.
+- Lifecycle responsibilities that cross owners: one owner announcing its startup or teardown for another, or taking over another's startup, cancellation, or cleanup.
 - Behavior or persisted decisions derived from the current page, navigation, or browsing history.
-- Effects on other consumers or while the feature is inactive, including global UI effects.
+- Effects on other consumers, on users for whom the feature is not enabled, or on global UI.
 - Feature-specific policy placed in shared code, such as attribution, permissions, timing, or fallback behavior.
 
 Name the behavior/state owner, affected producers and consumers, changed
@@ -80,9 +81,11 @@ preserve existing contracts need no architectural essay. These triggers call for
 inspection and explanation, not automatic rejection of shared changes.
 
 If implementation or review feedback expands the reach, update the note before
-continuing the expansion. Stop and surface unresolved material scope, product,
-or ownership decisions before implementing the affected change; continue
-independent work. Review feedback alone does not authorize broader behavior.
+continuing the expansion. For unresolved material scope, product, or ownership
+decisions, ask the requester when one is present; otherwise record the open
+decision in the PR's Impact section. Leave the affected change unimplemented
+until the decision is resolved, and continue independent work. Review feedback
+alone does not authorize broader behavior.
 
 ## Marionette Application Context
 

@@ -12,4 +12,4 @@ See AGENTS.md#change-reach. -->
 
 ## Verification
 
-<!-- Checks and outcomes, exact tested revision, limits, and unresolved decisions. -->
+<!-- Checks and outcomes, limits, and unresolved decisions. -->
