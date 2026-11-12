@@ -5,7 +5,7 @@ import i18n from 'js/i18n';
 
 const intl = i18n.patients.shared.interactions.interactionItemView;
 const ICONS = { messages: 'paper-plane-top', appointments: 'calendar-day', visits: 'hospital' };
-const CHANNEL_LABELS = { voice: intl.call, voicemail: intl.voicemail, video: intl.videoCall };
+const CHANNEL_LABELS = { voice: intl.call, voicemail: intl.voicemail, video: intl.videoCall, sms: intl.sms };
 const CHANNEL_VIA = { sms: intl.viaSms, email: intl.viaEmail, mail: intl.viaMail, fax: intl.viaFax, portal: intl.viaPortal };
 
 export function getInteractionIcon(model) {
@@ -15,6 +15,10 @@ export function getInteractionIcon(model) {
 
 export function getInteractionChannelLabel(model) {
   return CHANNEL_LABELS[model.get('channel')];
+}
+
+export function hasInteractionChannelHeading(model) {
+  return model.getChannelGroup() === 'calls' || (model.get('channel') === 'sms' && !!model.get('metadata')?.disposition);
 }
 
 export function getInteractionViaLabel(model) {
@@ -41,7 +45,7 @@ export function getInteractionSummary(model) {
 
 export function hasInteractionCardContent(model) {
   const group = model.getChannelGroup();
-  if (group === 'calls' || group === 'appointments' || getInteractionSummary(model)) return true;
+  if (hasInteractionChannelHeading(model) || group === 'appointments' || getInteractionSummary(model)) return true;
   if (group !== 'visits') return false;
   const metadata = model.get('metadata') || {};
   return some([metadata.patient_class, metadata.facility, metadata.admitted_at,

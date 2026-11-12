@@ -41,7 +41,10 @@ const RecentInteractionsItemView = View.extend({
     const group = this.model.getChannelGroup();
     const metadata = this.model.get('metadata') || {};
     const direction = this.model.get('direction') === 'inbound' ? intl.inbound : intl.outbound;
-    if (group === 'messages') return `${ direction } ${ intl.message }`;
+    if (group === 'messages') {
+      const title = `${ direction } ${ intl.message }`;
+      return appendDetail(title, this.model.get('channel') === 'sms' ? metadata.disposition : undefined);
+    }
     if (group === 'calls') {
       const title = `${ direction } ${ getInteractionChannelLabel(this.model) }`;
       return appendDetail(title, metadata.disposition);

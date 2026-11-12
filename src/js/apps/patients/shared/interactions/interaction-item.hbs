@@ -35,7 +35,7 @@
       {{else if metadata.admitted_at}}
         <p class="patient-interactions__detail"><em>{{ @intl.patients.shared.interactions.interactionItemView.noDischarge }}</em></p>
       {{/if}}
-    {{else if (isValue group "calls")}}
+    {{else if hasChannelHeading}}
       <div class="patient-interactions__item-heading"><span class="patient-interactions__channel">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.interactions.interactionItemView.inbound }}{{else}}{{ @intl.patients.shared.interactions.interactionItemView.outbound }}{{/if}} {{ channelLabel }}</span>{{#if metadata.disposition}}<span class="patient-interactions__separator">•</span><span>{{ metadata.disposition }}</span>{{/if}}</div>
     {{/if}}
     {{#if summary}}{{#if collapsibleNote}}
