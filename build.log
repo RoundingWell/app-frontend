@@ -1,0 +1,162 @@
+
+> app-frontend@1.0.0 prebuild
+> npm run build:shared-runtime
+
+
+> app-frontend@1.0.0 prebuild:shared-runtime
+> rimraf public/shared
+
+
+> app-frontend@1.0.0 build:shared-runtime
+> npm run build:shared:config && npm run build:shared:datadog && npm run build:shared:forms
+
+
+> app-frontend@1.0.0 build:shared:config
+> vite build --config vite.shared.config.js --mode shared-config
+
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+vite v8.3.5 building client environment for shared-config...
+transforming...
+✓ 2 modules transformed.
+rendering chunks...
+computing gzip size...
+public/shared/config.js  1.09 kB │ gzip: 0.41 kB │ map: 2.90 kB
+
+✓ built in 65ms
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> app-frontend@1.0.0 build:shared:datadog
+> vite build --config vite.shared.config.js --mode shared-datadog
+
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+vite v8.3.5 building client environment for shared-datadog...
+transforming...
+✓ 302 modules transformed.
+rendering chunks...
+computing gzip size...
+public/shared/assets/worker-BCq4O7Rm.js   23.54 kB
+public/shared/datadog.js                 287.69 kB │ gzip: 85.93 kB │ map: 1,176.65 kB
+
+✓ built in 249ms
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> app-frontend@1.0.0 build:shared:forms
+> vite build --config vite.shared.config.js --mode shared-forms
+
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+vite v8.3.5 building client environment for shared-forms...
+transforming...
+✓ 2 modules transformed.
+rendering chunks...
+computing gzip size...
+public/shared/forms.js  2.31 kB │ gzip: 0.89 kB │ map: 6.77 kB
+
+✓ built in 37ms
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
+
+> app-frontend@1.0.0 build
+> vite build --mode test
+
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+vite v8.3.5 building client environment for test...
+transforming...
+✓ 875 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/.vite/manifest.json                             10.90 kB │ gzip:   1.46 kB
+dist/index.html                                      64.65 kB │ gzip:  15.38 kB
+dist/assets/team-C1pCFEHN.css                         0.06 kB │ gzip:   0.08 kB
+dist/assets/routerapp-xzlBqMa_.css                    0.53 kB │ gzip:   0.27 kB
+dist/assets/dashboards-main_app-CPI23wIv.css          0.66 kB │ gzip:   0.34 kB
+dist/assets/build-matchers-array-CD1TFKk4.css         0.71 kB │ gzip:   0.34 kB
+dist/assets/stop-event-propagation-DT9TEnwF.css       0.72 kB │ gzip:   0.32 kB
+dist/assets/list-manager-DvDho1qR.css                 0.93 kB │ gzip:   0.40 kB
+dist/assets/clinicians-main_app-Dtyf8OAH.css          1.42 kB │ gzip:   0.58 kB
+dist/assets/care-ops-five9-DHrCCqWk.css               1.73 kB │ gzip:   0.65 kB
+dist/assets/care-ops-ringcentral-lfGXDSwa.css         1.84 kB │ gzip:   0.66 kB
+dist/assets/auth-B24uNjs6.css                         2.08 kB │ gzip:   0.78 kB
+dist/assets/animation-BMgS3SBe.css                    2.42 kB │ gzip:   0.86 kB
+dist/assets/care-ops-8x8-1ZGv4xXC.css                 2.52 kB │ gzip:   0.86 kB
+dist/assets/fill-window-4hoR2jy0.css                  3.06 kB │ gzip:   1.15 kB
+dist/assets/list-pages-h_UjKB3w.css                   3.53 kB │ gzip:   0.97 kB
+dist/assets/programs-main_app-D5klBqim.css            4.11 kB │ gzip:   1.15 kB
+dist/assets/textarea-flex-B-pLkGiI.css                6.36 kB │ gzip:   1.54 kB
+dist/assets/app-frame_app-D3iX7fOK.css               14.17 kB │ gzip:   2.91 kB
+dist/assets/index-eVLuuYFx.css                       19.15 kB │ gzip:   3.90 kB
+dist/assets/app-Bt9f1gcr.css                         23.42 kB │ gzip:   5.74 kB
+dist/assets/patients-main_app-BNuyi45h.css           73.64 kB │ gzip:  11.90 kB
+dist/20261112-stop-event-propagation-DxIZ35Ap.js      2.44 kB │ gzip:   1.14 kB │ map:     6.64 kB
+dist/20261112-fetch-uK1-q1kZ.js                       2.64 kB │ gzip:   1.27 kB │ map:    12.83 kB
+dist/20261112-search-sanitize-DpTlfN9Y.js             3.89 kB │ gzip:   1.12 kB │ map:     2.84 kB
+dist/20261112-entity-cache-BUg44u8L.js                4.72 kB │ gzip:   1.89 kB │ map:    26.18 kB
+dist/20261112-auth-Jhv931TV.js                        4.92 kB │ gzip:   2.19 kB │ map:    13.09 kB
+dist/20261112-build-matchers-array-0qyMj3RS.js        6.66 kB │ gzip:   2.16 kB │ map:     8.88 kB
+dist/20261112-formservice-CRfXO5ur.js                 6.87 kB │ gzip:   2.01 kB │ map:     8.22 kB
+dist/20261112-care-ops-ringcentral-D-JkCh5n.js        7.59 kB │ gzip:   2.41 kB │ map:    20.83 kB
+dist/20261112-team-ny6YxITz.js                        8.20 kB │ gzip:   2.47 kB │ map:    10.27 kB
+dist/20261112-fill-window-DWeWiTjx.js                 8.82 kB │ gzip:   2.49 kB │ map:    12.39 kB
+dist/20261112-routerapp-CGAuK-zc.js                  10.47 kB │ gzip:   3.35 kB │ map:    27.08 kB
+dist/20261112-care-ops-8x8-Dkpx5tHh.js               11.47 kB │ gzip:   3.65 kB │ map:    36.27 kB
+dist/20261112-workos-Cda6P_3A.js                     20.52 kB │ gzip:   6.97 kB │ map:    73.69 kB
+dist/20261112-backbone-CaVdrM6Q.js                   24.52 kB │ gzip:   8.19 kB │ map:   117.11 kB
+dist/20261112-care-ops-five9-CbBy0-7n.js             75.26 kB │ gzip:  21.01 kB │ map:   321.43 kB
+dist/20261112-animation-Bj4pbFKq.js                  81.74 kB │ gzip:  22.26 kB │ map:   250.96 kB
+dist/20261112-clinicians-main_app-DskRE6lM.js        93.76 kB │ gzip:  18.32 kB │ map:   122.18 kB
+dist/20261112-dashboards-main_app-BwOsxvHZ.js        99.49 kB │ gzip:  25.15 kB │ map:   223.13 kB
+dist/20261112-app-frame_app-C3GQ5-dP.js             140.70 kB │ gzip:  29.04 kB │ map:   160.71 kB
+dist/20261112-programs-main_app-D26UGCAf.js         280.93 kB │ gzip:  58.34 kB │ map:   527.63 kB
+dist/20261112-index-C_WiTxyG.js                     301.69 kB │ gzip:  88.70 kB │ map: 1,460.55 kB
+dist/20261112-app-C2SkDsZA.js                       375.04 kB │ gzip:  72.83 kB │ map:   341.32 kB
+dist/20261112-entities-service-rj9lsAA6.js          387.80 kB │ gzip:  83.94 kB │ map:   732.03 kB
+dist/20261112-patients-main_app-CaUqDtj4.js       1,254.75 kB │ gzip: 229.92 kB │ map: 1,555.82 kB
+
+[33m[PREFER_BUILTIN_FEATURE] [0mThe functionality provided by `@rollup/plugin-node-resolve` is already covered natively, maybe you could remove the plugin from your configuration.
+ [38;5;240m │[0m 
+ [38;5;240m │[0m [38;5;115mHelp[0m: This diagnostic may be false positive, you could turn it off via `checks.preferBuiltinFeature`
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.35s
+[33m[PLUGIN_TIMINGS] [0mJavaScript callbacks ran for 5.0s of this 5.3s build (93%).
+The slowest callbacks, timed inside each callback (the wait before a callback starts is excluded, the time it awaits is included):
+  - plugin babel transform (50%, 2.7s, 694 calls)
+Additional callback time came from the callbacks below and from callbacks under 1s.
+3 callbacks are listed without a time. Their calls overlapped, so the time inside one call includes work from other calls. To find their cost, profile the build with `node --cpu-prof`:
+  - plugin node-resolve resolveId (807 calls)
+  - plugin vite-plugin-handlebars-loader load (874 calls)
+  - plugin vite:css transform (87 calls)
+See https://rolldown.rs/reference/InputOptions.checks#bundlertimings for more details.
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

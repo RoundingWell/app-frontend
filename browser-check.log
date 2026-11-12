@@ -1,0 +1,1 @@
+PASS: Chromium production-view assertions: 5 screenshot examples, 14 payload/card cases, preview titles, escaped text, 390px overflow. No API requests or page errors.

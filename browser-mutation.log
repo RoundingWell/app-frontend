@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: disposition-only outbound SMS is shown
+    at /workspace/fe284-evidence/check-render.cjs:15:12 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'Example Clinic via SMS • 2:00 PM',
+  expected: /Outbound SMS\s*•\s*4th of July Text Blast/,
+  operator: 'match',
+  diff: 'simple'
+}
