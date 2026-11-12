@@ -140,6 +140,116 @@ context('patient interactions', function() {
       .finally(() => fixtures.cleanup());
   });
 
+  specify('shows SMS dispositions with their content and keeps genuinely empty cards hidden', function() {
+    const patient = getPatient();
+    const cases = [
+      ['outbound', { disposition: '4th of July Text Blast' }],
+      ['inbound', { disposition: 'Scheduling' }],
+      ['outbound', { disposition: 'Text Sent', message: 'Your appointment is confirmed.', note: 'Message fallback' }, 'Your appointment is confirmed.'],
+      ['inbound', { disposition: 'NP Visit Scheduled', body: 'Tuesday works for me.', message: 'Wrong direction', note: 'Reply fallback' }, 'Tuesday works for me.'],
+      ['outbound', { disposition: 'Scheduling', note: 'Sent the scheduling link.' }, 'Sent the scheduling link.'],
+      ['inbound', { disposition: 'Scheduling', note: 'Patient asked to reschedule.' }, 'Patient asked to reschedule.'],
+      ['outbound', { message: 'Ordinary outbound message.' }, 'Ordinary outbound message.'],
+      ['inbound', { body: 'Ordinary patient reply.' }, 'Ordinary patient reply.'],
+      ['outbound', {}],
+      ['inbound', null],
+      ['outbound', { note: null, disposition: '' }],
+    ];
+    const messages = map(cases, ([direction, metadata], index) => getInteraction({
+      attributes: { channel: 'sms', direction, metadata, occurred_at: `2026-09-24T10:${ String(index).padStart(2, '0') }:00Z` },
+    }));
+    const voicemail = getInteraction({
+      attributes: { channel: 'voicemail', direction: 'outbound', occurred_at: '2026-09-24T11:00:00Z', metadata: { disposition: 'Left VM', note: 'Requested a callback.' } },
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [...messages, voicemail];
+        return fx;
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions`, { now: '2026-10-06T12:00:00Z', functionNames: ['Date'] });
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item')
+      .should('have.length', messages.length + 1);
+
+    for (const [index, message] of messages.entries()) {
+      const [direction, metadata, summary] = cases[index];
+      cy
+        .get(`.patient-interactions__item time[datetime="${ message.attributes.occurred_at }"]`)
+        .closest('.patient-interactions__item')
+        .scrollIntoView()
+        .within(() => {
+          if (metadata?.disposition) {
+            cy
+              .get('.patient-interactions__item-heading')
+              .should('contain', `${ direction === 'inbound' ? 'Inbound' : 'Outbound' } SMS`)
+              .and('contain', metadata.disposition);
+          } else {
+            cy
+              .get('.patient-interactions__item-heading')
+              .should('not.exist');
+          }
+
+          if (summary) {
+            cy
+              .get('.patient-interactions__summary')
+              .should('have.text', summary);
+          } else {
+            cy
+              .get('.patient-interactions__summary')
+              .should('not.exist');
+          }
+
+          if (!metadata?.disposition && !summary) {
+            cy
+              .get('.patient-interactions__card')
+              .should('not.exist');
+          }
+        });
+    }
+
+    cy
+      .contains('.patient-interactions__item', 'Requested a callback.')
+      .scrollIntoView()
+      .find('.patient-interactions__item-heading')
+      .should('contain', 'Outbound Voicemail')
+      .and('contain', 'Left VM');
+
+    cy
+      .routeSettings('sidebar', ['interactions'])
+      .routePanels(fx => {
+        fx.data = [{ id: 'interactions', type: 'panels', attributes: { slug: 'interactions', name: 'Interactions', widgets: ['interactions'] } }];
+        return fx;
+      })
+      .routeWidgets(fx => {
+        fx.data = [{ id: 'interactions', type: 'widgets', attributes: { category: 'interactions', slug: 'interactions', definition: {} } }];
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = messages.slice(0, 3);
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/workflow`);
+
+    cy
+      .get('.patient-interactions-preview__title')
+      .should('have.length', 3)
+      .and($titles => {
+        expect($titles.toArray().map(title => title.textContent)).to.deep.equal([
+          'Outbound Message • 4th of July Text Blast',
+          'Inbound Message • Scheduling',
+          'Outbound Message • Text Sent',
+        ]);
+      });
+  });
+
   specify('limits anchored one-item pages with included and filtered-out pivots', function() {
     const data = map(range(5), index => ({
       id: `row-${ index }`,
@@ -2153,7 +2263,7 @@ context('patient interactions', function() {
     }));
 
     const emptyMessage = getInteraction({
-      attributes: { channel: 'sms', occurred_at: '2026-09-24T10:59:00Z', metadata: { note: null, disposition: 'Text Sent' } },
+      attributes: { channel: 'sms', occurred_at: '2026-09-24T10:59:00Z', metadata: { note: null } },
       relationships: { action: getRelationship(action) },
     });
     const emptyVisit = getInteraction({

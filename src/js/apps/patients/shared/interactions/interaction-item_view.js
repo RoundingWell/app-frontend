@@ -4,7 +4,7 @@ import { Radio, View } from 'marionette';
 
 import i18n from 'js/i18n';
 
-import { getInteractionIcon, getInteractionChannelLabel, getInteractionSummary, getInteractionDescription, getInteractionViaLabel, hasInteractionCardContent } from './display';
+import { getInteractionIcon, getInteractionChannelLabel, hasInteractionChannelHeading, getInteractionSummary, getInteractionDescription, getInteractionViaLabel, hasInteractionCardContent } from './display';
 import InteractionItemTemplate from './interaction-item.hbs';
 
 import './interaction-item.scss';
@@ -77,6 +77,7 @@ const InteractionItemView = View.extend({
       group,
       icon: getInteractionIcon(this.model),
       channelLabel: getInteractionChannelLabel(this.model),
+      hasChannelHeading: hasInteractionChannelHeading(this.model),
       description: getInteractionDescription(this.model),
       summary,
       hasCardContent: hasInteractionCardContent(this.model),

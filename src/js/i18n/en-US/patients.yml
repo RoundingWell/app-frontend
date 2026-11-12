@@ -246,6 +246,7 @@ careOptsFrontend:
           call: Call
           voicemail: Voicemail
           videoCall: Video call
+          sms: SMS
           appointment: Appointment
           appointmentStatuses:
             scheduled: scheduled
