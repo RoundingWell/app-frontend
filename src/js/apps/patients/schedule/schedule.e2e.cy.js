@@ -505,7 +505,8 @@ context('schedule page', function() {
       .get('.picklist')
       .find('.picklist__group')
       .first()
-      .click();
+      .click()
+      .wait('@routeActions');
 
     cy
       .get('[data-owner-filter-region]')
@@ -515,7 +516,12 @@ context('schedule page', function() {
       .get('.picklist')
       .find('.js-clear')
       .contains('Clinician McTester')
-      .click();
+      .click()
+      .wait('@routeActions');
+
+    cy
+      .get('.schedule-list__list')
+      .should('have.attr', 'aria-busy', 'false');
 
     cy
       .get('@actionList')
