@@ -31,6 +31,7 @@ const resolve = {
 };
 
 const SHARED_RUNTIME_PRECACHE_IGNORES = ['**/shared/**'];
+const HISTORY_DRIVER_CHUNK_NAME = 'router-history';
 
 function sharedRuntimeDevPlugin() {
   return {
@@ -205,6 +206,7 @@ export default defineConfig(({ mode }) => {
           globIgnores: [
             '**/*.map',
             '**/.DS_Store',
+            `**/*-${ HISTORY_DRIVER_CHUNK_NAME }-*.js`,
             ...SHARED_RUNTIME_PRECACHE_IGNORES,
           ],
         },
@@ -265,7 +267,13 @@ export default defineConfig(({ mode }) => {
         output: {
           paths: ROOT_SHARED_RUNTIME_MODULES,
           entryFileNames: `${ datePrefix }-[name]-[hash].js`,
-          chunkFileNames: `${ datePrefix }-[name]-[hash].js`,
+          chunkFileNames(chunk) {
+            // Give the actual optional module a stable precache exclusion.
+            if (chunk.moduleIds.some(id => id.endsWith('/@mnjs/router/dist/history.js'))) {
+              return `${ datePrefix }-${ HISTORY_DRIVER_CHUNK_NAME }-[hash].js`;
+            }
+            return `${ datePrefix }-[name]-[hash].js`;
+          },
         },
       },
     },

@@ -628,9 +628,12 @@ context('patient flow page', function() {
 
         return fx;
       })
-      .visit(`/flow/${ testFlow.id }`)
+      .visit(`/flow/${ testFlow.id }?old=1#old`)
       .wait('@routeFlow')
       .wait('@routeFlowActions');
+
+    cy.location('search').should('equal', '');
+    cy.location('hash').should('equal', '');
 
     cy
       .get('.patient-flow__action-item .js-action-surface')
@@ -2602,6 +2605,8 @@ context('patient flow page', function() {
       getAction({
         attributes: {
           name: 'First In List',
+          due_time: '09:00:00',
+          duration: 15,
           due_date: testDateSubtract(1),
           created_at: testTsSubtract(1),
           sequence: 1,
@@ -2617,6 +2622,8 @@ context('patient flow page', function() {
       getAction({
         attributes: {
           name: 'Third In List',
+          due_time: '10:00:00',
+          duration: 30,
           due_date: testDateAdd(1),
           created_at: testTsSubtract(3),
           sequence: 3,
@@ -2631,6 +2638,8 @@ context('patient flow page', function() {
       getAction({
         attributes: {
           name: 'Second In List',
+          due_time: '11:00:00',
+          duration: 45,
           due_date: testDateAdd(2),
           created_at: testTsSubtract(2),
           sequence: 3,

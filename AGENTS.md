@@ -76,10 +76,14 @@ belong to this application.
   delegation uses Marionette's native default.
 - Renderer: `src/js/i18n/index.js` registers the Handlebars renderer with `@intl`
   template data. `src/js/app.js` imports both setup modules before app consumers.
-- Events/routing: use `Radio` from `marionette`. The local
-  `src/js/base/event-router.js` extends `Backbone.Router`; `Backbone.history` owns
-  URL/history handling. AppFrame and the local RouterApp/SubRouterApp classes own
-  feature selection and loading; see `src/js/base/routing.md` for app policy.
+- Events/routing: use `Radio` from `marionette`. The published `@mnjs/router`
+  dependency supplies the Application-based native Router and RouteApplication.
+  Feature Applications declare their own route hashes and mounted child Applications.
+  AppFrame owns the session registration and workspace activation; WorkspaceApp
+  delegates its compiled branch to native RouteApplication composition. Leaf
+  handlers return required presentation readiness and retain domain error policy.
+  See `src/js/base/routing.md` and the installed `node_modules/@mnjs/router`
+  documentation for the application and package contracts.
 - Ownership entrypoint: `src/js/app.js` owns the `#root` Region, RootView, and
   bootstrap/dialer/app-frame child Applications. It configures shared popup Regions
   and owns its document/window listeners. Follow each feature's existing owner.
@@ -185,7 +189,7 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 - Keep related Cypress scenarios consolidated when their setup can be reset explicitly. Do not recommend splitting solely because an earlier assertion failure skips later steps; that is normal test behavior. Flag actual leaked intercepts, clocks, or exception handlers instead.
 - During review, flag newly added visual assertions that would fail for an equally valid design implementation without changing state or behavior. Use design review or manual visual inspection for ordinary visual fidelity.
 - Iterate with single specs; they are much faster than the full suites:
-  - Component: `npx cypress run --component --spec src/js/base/routerapp.component.cy.js`
+  - Component: `npx cypress run --component --spec src/js/services/router-radio.component.cy.js`
   - E2E: build and serve the test app once (`npm run build -- --mode test`, then `npx vite preview -m test` in the background to serve on port 8090), then `npx cypress run --spec src/js/apps/<domain>/<app>/<spec>.e2e.cy.js`
   - Do not pass `--spec` through `npm run coverage:e2e`; npm appends it after the script's `exit`, so the full suite still runs unfiltered and the script then exits 1 (`exit: too many arguments`).
 - Before claiming UI behavior is validated, run the full suite relevant to the change:

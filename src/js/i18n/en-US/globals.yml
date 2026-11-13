@@ -127,3 +127,5 @@ careOptsFrontend:
       loading: Loading RoundingWell
       retry: Retry
       retrying: Retrying...
+      unsupportedBrowserMessage: Your browser doesn't support the features RoundingWell needs. Update your browser or ask your administrator for a supported browser.
+      unsupportedBrowserTitle: Use a supported browser

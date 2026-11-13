@@ -1,70 +1,50 @@
 import { Radio } from 'marionette';
-
-import RouterApp from 'js/base/routerapp';
+import RouteApp from 'js/base/route-app';
 
 import ProgramsAllApp from 'js/apps/programs/programs-all/programs-all_app';
 import ProgramApp from 'js/apps/programs/program/program_app';
 import ProgramFlowApp from 'js/apps/programs/program/flow/flow_app';
 
-export default RouterApp.extend({
-  routerAppName: 'ProgramsApp',
+function unknownError(error) {
+  Radio.trigger('event-router', 'unknownError', error?.response?.status);
+}
+
+export default RouteApp.extend({
   childApps: {
     programsAll: ProgramsAllApp,
     program: ProgramApp,
     programflow: ProgramFlowApp,
   },
-
-  eventRoutes: {
-    'programs:all': {
-      action: 'showProgramsAll',
-      route: 'programs',
-      meta: { isList: true },
+  routes: {
+    'programs': {
+      name: 'programs:all',
+      handler: 'showAll',
+      meta: {
+        isList: true,
+      },
     },
-    'program:details': {
-      action: 'showProgram',
-      route: 'program/:id',
+    'program/:programId': {
+      mount: 'program',
     },
-    'program:action': {
-      action: 'showProgram',
-      route: 'program/:id/action/:id',
-    },
-    'program:action:new': {
-      action: 'showProgram',
-      route: 'program/:id/action',
-    },
-    'programFlow:new': {
-      action: 'showProgram',
-      route: 'program/:id/flow',
-    },
-    'programFlow': {
-      action: 'showProgramFlow',
-      route: 'program-flow/:id',
-    },
-    'programFlow:action': {
-      action: 'showProgramFlow',
-      route: 'program-flow/:id/action/:id',
-    },
-    'programFlow:action:new': {
-      action: 'showProgramFlow',
-      route: 'program-flow/:id/action',
+    'program-flow/:flowId': {
+      mount: 'programflow',
     },
   },
-
-  showProgramsAll() {
-    return this.startCurrent('programsAll');
+  showAll(match) {
+    return this.switchTo('programsAll', {
+      signal: match.signal,
+      restart: true,
+      options: {
+        region: this.getRegion(),
+      },
+    }).catch(unknownError);
   },
-  showProgram(programId) {
-    return this.startRoute('program', { programId });
-  },
-  showProgramFlow(flowId) {
-    return this.startRoute('programflow', { flowId });
-  },
-  onRouteError(error, { definition }) {
-    if (definition.action === 'showProgramFlow') {
+  handleRouteError(error, match, { mount, phase }) {
+    if (phase !== 'start') throw error;
+    if (mount === 'programflow') {
       Radio.trigger('event-router', 'notFound');
       return;
     }
-
-    Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    unknownError(error);
   },
 });

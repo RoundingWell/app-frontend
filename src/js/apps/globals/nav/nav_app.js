@@ -1,10 +1,10 @@
-import { compact, isEqual, noop, partial, defer } from 'underscore';
+import { compact, isEqual } from 'underscore';
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
 import localStore from 'js/utils/local-store';
 
-import RouterApp from 'js/base/routerapp';
+import App from 'js/base/app';
 
 import SearchApp from 'js/apps/globals/search/search_app';
 import StateModel from 'js/apps/globals/nav/nav_state';
@@ -138,10 +138,7 @@ const patientsAppWorkflowsNav = new Backbone.Collection([
   },
 ]);
 
-export default RouterApp.extend({
-  // NOTE: Don't stop this app on no match
-  onNoMatch: noop,
-  startOnRoute: false,
+export default App.extend({
   channelName: 'nav',
   childApps: {
     search: SearchApp,
@@ -167,12 +164,6 @@ export default RouterApp.extend({
     return new StateModel();
   },
   initialize() {
-    this.listenTo(Radio.channel('event-router'), 'default', () => {
-      defer(() => {
-        Backbone.history.navigate(this.getDefaultRoute(), { trigger: true });
-      });
-    });
-
     this._narrowQuery = window.matchMedia(NAV_COLLAPSE_QUERY);
     this._onNarrowQueryChange = () => {
       this.cancelHoverTimer();
@@ -236,43 +227,6 @@ export default RouterApp.extend({
     this.updateCanPatientCreate();
     this.showMainNavDroplist();
     this.showBottomNavView();
-  },
-  eventRoutes() {
-    const currentUser = Radio.request('bootstrap', 'currentUser');
-    const workspaces = currentUser.getWorkspaces();
-
-    const rootRoute = {
-      action: 'setWorkspace',
-      route: '',
-      root: true,
-    };
-
-    // Add a root route for each user workspace
-    return workspaces.reduce((routes, workspace) => {
-      const route = workspace.get('slug');
-      routes[`workspace:${ route }`] = {
-        action: partial(this.setWorkspace, route),
-        root: true,
-        route: [route, `${ route }/*route`],
-      };
-      return routes;
-    }, { 'root': rootRoute });
-  },
-  setWorkspace(slug, route) {
-    const workspace = Radio.request('workspace', 'current', slug);
-    const workspaceSlug = workspace && workspace.get('slug');
-
-    if (!workspaceSlug || route) return;
-
-    defer(() => {
-      this.replaceUrl(this.getDefaultRoute());
-    });
-  },
-  getDefaultRoute() {
-    const workspace = Radio.request('workspace', 'current');
-    const workspaceSlug = workspace.get('slug');
-
-    return `/${ workspaceSlug }/worklist/owned-by`;
   },
   selectNav(appName, event, eventArgs) {
     this.getState().set('currentApp', appName);

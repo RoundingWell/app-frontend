@@ -4,22 +4,6 @@ export function deferCoverageReport(on, config) {
   return (event, handlers) => {
     if (event !== 'task') return on(event, handlers);
 
-    if (config.testingType === 'component' && handlers.combineCoverage) {
-      const combineCoverage = handlers.combineCoverage;
-      handlers = {
-        ...handlers,
-        combineCoverage(sentCoverage) {
-          const coverage = JSON.parse(sentCoverage);
-          for (const path of Object.keys(coverage)) {
-            if (/(?:^|\/)src\/js\/(?:apps|entities-service)\//.test(path.replaceAll('\\', '/'))) {
-              delete coverage[path];
-            }
-          }
-          return combineCoverage(JSON.stringify(coverage));
-        },
-      };
-    }
-
     if (!config.isTextTerminal) return on(event, handlers);
 
     const report = handlers.coverageReport;

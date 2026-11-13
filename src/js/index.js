@@ -36,20 +36,32 @@ async function start({ startApp }) {
   return startApp();
 }
 
-function showStartupError(error) {
-  addError(error);
-
+function showStartupMessage(titleText, messageText) {
   const root = document.getElementById('root');
   const panel = document.createElement('div');
   panel.className = 'startup__error';
 
   const title = document.createElement('h1');
   title.className = 'startup__error-title';
-  title.textContent = intl.globals.startup.errorTitle;
+  title.textContent = titleText;
 
   const message = document.createElement('p');
   message.className = 'startup__error-message';
-  message.textContent = intl.globals.startup.errorMessage;
+  message.textContent = messageText;
+
+  panel.append(title, message);
+  root.className = 'startup-shell startup is-error';
+  root.setAttribute('aria-busy', 'false');
+  root.setAttribute('role', 'alert');
+  root.replaceChildren(panel);
+
+  return panel;
+}
+
+function showStartupError(error) {
+  addError(error);
+
+  const panel = showStartupMessage(intl.globals.startup.errorTitle, intl.globals.startup.errorMessage);
 
   const retry = document.createElement('button');
   retry.className = 'button startup__retry';
@@ -61,11 +73,14 @@ function showStartupError(error) {
     window.location.reload();
   });
 
-  panel.append(title, message, retry);
-  root.className = 'startup-shell startup is-error';
-  root.setAttribute('aria-busy', 'false');
-  root.setAttribute('role', 'alert');
-  root.replaceChildren(panel);
+  panel.append(retry);
+}
+
+function supportsAppRouting() {
+  return typeof window.URLPattern === 'function'
+    && typeof window.AbortSignal?.any === 'function'
+    && typeof Promise.withResolvers === 'function'
+    && typeof URL.canParse === 'function';
 }
 
 async function initialize() {
@@ -75,6 +90,12 @@ async function initialize() {
 
   if (rootRoute === 'formservice') {
     await startFormService();
+    return;
+  }
+
+  // Check before importing the app: its module graph constructs the router.
+  if (!supportsAppRouting()) {
+    showStartupMessage(intl.globals.startup.unsupportedBrowserTitle, intl.globals.startup.unsupportedBrowserMessage);
     return;
   }
 

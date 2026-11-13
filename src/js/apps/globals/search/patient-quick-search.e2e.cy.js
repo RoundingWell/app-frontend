@@ -392,9 +392,14 @@ context('Patient Quick Search', function() {
 
     cy
       .get('@searchModal')
+      .find('.js-picklist-item')
+      .should('have.length', 10);
+
+    // A short substring may retain results; Qs must clear them.
+    cy
+      .get('@searchModal')
       .find('.patient-search__input')
-      .type('{leftArrow}{backspace}{backspace}')
-      .wait(100); // wait for debounce
+      .type('{leftArrow}{backspace}{backspace}Q');
 
     cy
       .get('@searchModal')

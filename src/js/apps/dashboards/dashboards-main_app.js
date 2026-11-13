@@ -1,44 +1,51 @@
 import { Radio } from 'marionette';
-
 import intl from 'js/i18n';
 
-import RouterApp from 'js/base/routerapp';
+import RouteApp from 'js/base/route-app';
 
 import DashboardsAllApp from 'js/apps/dashboards/dashboards-all/dashboards-all_app';
 import DashboardApp from 'js/apps/dashboards/dashboard/dashboard_app';
 
-export default RouterApp.extend({
-  routerAppName: 'DashboardsApp',
+export default RouteApp.extend({
   childApps: {
     dashboardsAll: DashboardsAllApp,
     dashboard: DashboardApp,
   },
-
-  eventRoutes: {
-    'dashboards:all': {
-      action: 'showDashboardsAll',
-      route: 'dashboards',
-      meta: { isList: true },
+  routes: {
+    'dashboards': {
+      name: 'dashboards:all',
+      handler: 'showAll',
+      meta: {
+        isList: true,
+      },
     },
-    'dashboard': {
-      action: 'showDashboard',
-      route: 'dashboards/:id',
+    'dashboards/:dashboardId': {
+      name: 'dashboard',
+      handler: 'showDashboard',
     },
   },
-
-  showDashboardsAll() {
-    return this.startCurrent('dashboardsAll');
+  showAll(match) {
+    return this.switchTo('dashboardsAll', {
+      signal: match.signal,
+      restart: true,
+      options: {
+        region: this.getRegion(),
+      },
+    }).catch(error => {
+      Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    });
   },
-  showDashboard(dashboardId) {
-    return this.startCurrent('dashboard', { dashboardId });
-  },
-  onRouteError(error, { definition }) {
-    if (definition.action === 'showDashboard') {
+  showDashboard(match) {
+    return this.switchTo('dashboard', {
+      signal: match.signal,
+      restart: true,
+      options: {
+        region: this.getRegion(),
+        dashboardId: match.params.dashboardId,
+      },
+    }).catch(() => {
       Radio.request('alert', 'show:error', intl.dashboards.dashboardApp.notFound);
       Radio.trigger('event-router', 'dashboards:all');
-      return;
-    }
-
-    Radio.trigger('event-router', 'unknownError', error?.response?.status);
+    });
   },
 });

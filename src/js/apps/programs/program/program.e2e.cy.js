@@ -6,6 +6,89 @@ import { getProgram } from 'support/api/programs';
 import { getProgramAction } from 'support/api//program-actions';
 
 context('program page', function() {
+  let releaseFlows;
+  let obsoleteNavigation;
+
+  afterEach(function() {
+    releaseFlows?.();
+    releaseFlows = null;
+    const pending = obsoleteNavigation;
+    obsoleteNavigation = null;
+    if (pending) cy.then(() => pending);
+  });
+
+  specify('does not finish obsolete highlighting after leaving a pending workflow list', function() {
+    const program = getProgram({
+      attributes: {
+        name: 'Pending Program',
+      },
+    });
+    let readyCount = 0;
+
+    cy
+      .routeActions()
+      .routeTags()
+      .routeProgram(fx => {
+        fx.data = program;
+        return fx;
+      })
+      .routeProgramActions()
+      .routeProgramFlows()
+      .visit('/worklist/owned-by');
+
+    cy.intercept({
+      method: 'GET',
+      url: `/api/programs/${ program.id }/flows*`,
+      times: 1,
+    }, req => {
+      return new Cypress.Promise(resolve => {
+        releaseFlows = () => {
+          releaseFlows = null;
+          req.reply({
+            body: {
+              data: [],
+              included: [],
+            },
+          });
+          resolve();
+        };
+      });
+    }).as('heldHighlightingFlows');
+
+    cy.window().then(win => {
+      win.router.on('route:ready', match => {
+        if (match.name === 'program:action:new') readyCount++;
+      });
+      obsoleteNavigation = win.Radio.request('router', 'navigate', 'program:action:new', {
+        programId: program.id,
+      });
+    });
+
+    cy.wrap(null).should(() => expect(releaseFlows).to.be.a('function'));
+    cy.get('.sidebar').should('be.visible');
+    cy.get('.workflows__content').should('be.visible');
+    cy.then(() => expect(readyCount, 'the held workflow list is required presentation').to.equal(0));
+
+    cy.get('.program-page__context-trail').contains('Back to List').click();
+    cy.location('pathname').should('equal', '/one/worklist/owned-by');
+    cy.get('.worklist-list-page').should('be.visible');
+    cy.then(() => obsoleteNavigation).should('equal', false);
+
+    cy.then(() => releaseFlows());
+    cy.wait('@heldHighlightingFlows');
+    cy.get('.program-page__context-trail').should('not.exist');
+    cy.get('.sidebar').should('not.exist');
+    cy.get('.alert-box').should('not.exist');
+    cy.then(() => expect(readyCount, 'cancelled detail never reports ready').to.equal(0));
+
+    cy.window().then(win => win.Radio.request('router', 'navigate', 'program:action:new', {
+      programId: program.id,
+    }));
+    cy.get('.sidebar').should('be.visible');
+    cy.get('.alert-box').should('not.exist');
+    cy.then(() => expect(readyCount, 'a later ordinary selection still completes').to.equal(1));
+  });
+
   specify('context trail', function() {
     const testProgram = getProgram({
       attributes: {

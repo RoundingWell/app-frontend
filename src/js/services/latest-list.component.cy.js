@@ -1,52 +1,59 @@
 import { Radio } from 'marionette';
 import { testScope } from '@mnjs/test/cypress';
 
+import router from 'js/router';
+
 import LatestListService from './latest-list';
 
 context('LatestListService', function() {
-  let service;
-
   beforeEach(function() {
-    service = testScope().own(new LatestListService());
+    testScope().own(new LatestListService());
   });
 
-  specify('records list routes from route metadata', function() {
-    Radio.request('history', 'set:latestList', {
-      event: 'worklist',
-      eventArgs: ['owned-by'],
-      definition: {
-        meta: { isList: true },
+  specify('remembers the list and filter while keeping the destination workspace current', function() {
+    const navigate = cy.stub().resolves(true);
+    const query = new URLSearchParams({
+      ct: 'cache-token',
+    });
+    const info = {
+      worklist: {
+        clinicianId: 'clinician-id',
+      },
+    };
+    testScope().reply(Radio, 'router', 'navigate:event', navigate);
+
+    expect(Radio.request('history', 'has:latestList')).to.equal(false);
+
+    router.triggerMethod('route', {
+      name: 'worklist',
+      params: {
+        workspace: 'one',
+        worklistId: 'owned-by',
+      },
+      query,
+      info,
+      meta: {
+        isList: true,
       },
     });
 
-    expect(service._latestList).to.equal('worklist');
-    expect(service._latestListArgs).to.deep.equal(['owned-by']);
-  });
-
-  specify('leaves the latest list unchanged for plain routes', function() {
-    service._setLatestList('worklist', ['owned-by']);
-
-    Radio.request('history', 'set:latestList', {
-      event: 'patient:workflow',
-      eventArgs: ['patient-id'],
-      definition: {
-        meta: {},
+    router.triggerMethod('route', {
+      name: 'patient:workflow',
+      params: {
+        workspace: 'two',
+        patientId: 'patient-id',
       },
+      query: new URLSearchParams(),
+      meta: {},
     });
 
-    expect(service._latestList).to.equal('worklist');
-    expect(service._latestListArgs).to.deep.equal(['owned-by']);
-  });
-
-  specify('routes back to the latest list', function() {
-    const eventRouter = Radio.channel('event-router');
-    const worklist = cy.stub();
-
-    service.listenTo(eventRouter, 'worklist', worklist);
-    service._setLatestList('worklist', ['owned-by']);
-
+    expect(Radio.request('history', 'has:latestList')).to.equal(true);
     Radio.request('history', 'go:latestList');
-
-    expect(worklist).to.have.been.calledWith('owned-by');
+    expect(navigate).to.have.been.calledOnceWithExactly('worklist', {
+      worklistId: 'owned-by',
+    }, {
+      query,
+      info,
+    });
   });
 });

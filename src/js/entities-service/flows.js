@@ -16,7 +16,7 @@ const Entity = BaseEntity.extend({
     'fetch:flows:collection': 'fetchCollection',
     'fetch:flows:collection:byPatient': 'fetchFlowsByPatient',
   },
-  fetchFlow(id, options = {}) {
+  fetchFlow(id, options) {
     const data = { ...options.data, include: FLOW_INCLUDE };
 
     return this.fetchModel(id, { ...options, data });

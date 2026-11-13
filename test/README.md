@@ -34,12 +34,13 @@ Reports can be found in `coverage/`.
 
 The configured source scope comes from [`.nycrc.json`](../.nycrc.json), shared
 through [`config/coverage.cjs`](../config/coverage.cjs) with Vite instrumentation.
-Component collection additionally drops `src/js/apps/**` and
-`src/js/entities-service/**` in
-[`scripts/cypress-coverage-events.js`](../scripts/cypress-coverage-events.js).
-Component totals therefore describe a narrower scope. Full coverage combines
-E2E and component data; application and entity-service coverage must come from
-E2E. Neither an executed branch nor 100% coverage proves a meaningful assertion.
+Both suites contribute coverage from that same configured source scope. Component
+checks can cover public non-UI application policies as well as generic services;
+E2E specs verify user journeys and View/lifecycle integration. The collector
+forwards both payloads unchanged instead of discarding app/entity paths by their
+directory name. Full coverage combines both suites. Neither an executed branch
+nor 100% coverage proves a meaningful assertion; keep UI assertions in E2E and
+use lower-level checks only for behavior that can be verified without a UI.
 
 For full local verification, start with clean coverage output and run
 `npm run coverage`, which clears `.nyc_output` and `coverage`, runs both suites,

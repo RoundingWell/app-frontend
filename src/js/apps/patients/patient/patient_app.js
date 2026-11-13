@@ -5,7 +5,7 @@ import handleErrors from 'js/utils/handle-errors';
 import localStore from 'js/utils/local-store';
 import sessionStore from 'js/utils/session-store';
 
-import SubRouterApp from 'js/base/subrouterapp';
+import RouteApp from 'js/base/route-app';
 
 import WorkflowPageApp from 'js/apps/patients/patient/workflow/workflow_app';
 import InteractionsPageApp from 'js/apps/patients/patient/interactions/interactions_app';
@@ -17,14 +17,56 @@ import { LoadingView } from 'js/regions/preload_region';
 
 import { LayoutView } from 'js/apps/patients/patient/patient_views';
 
-export default SubRouterApp.extend({
-  routeScope: ['patientId'],
+export default RouteApp.extend({
+  routes: {
+    'workflow': {
+      name: 'workflow',
+      handler: 'showWorkflow',
+    },
+    'workflow/closed': {
+      name: 'workflow:closed',
+      handler: 'showClosedWorkflow',
+    },
+    'interactions': {
+      name: 'interactions',
+      handler: 'showInteraction',
+    },
+    'interactions/:interactionId': {
+      name: 'interaction',
+      handler: 'showInteraction',
+    },
+    'action/:actionId': {
+      name: 'action',
+      handler: 'showPatientAction',
+    },
+    'flow/:flowId': {
+      name: 'flow',
+      handler: 'showFlow',
+    },
+    'flow/:flowId/focus/:actionId': {
+      name: 'flow:focus',
+      handler: 'showFlowFocus',
+    },
+    'flow/:flowId/action/:actionId': {
+      name: 'flow:action',
+      handler: 'showFlowAction',
+    },
+    'form/:formId': {
+      name: 'form',
+      handler: 'showPatientForm',
+    },
+  },
+
   childApps: {
-    workflow: WorkflowPageApp,
+    content: RouteApp.extend({
+      childApps: {
+        workflow: WorkflowPageApp,
+        flow: FlowPageApp,
+        action: ActionApp,
+        form: FormApp,
+      },
+    }),
     interactions: InteractionsPageApp,
-    flow: FlowPageApp,
-    action: ActionApp,
-    form: FormApp,
     patientSidebar: PatientSidebarApp,
   },
 
@@ -34,41 +76,26 @@ export default SubRouterApp.extend({
     'close:sidebar-drawer': 'closePatientSidebarDrawer',
   },
 
-  routeActions() {
-    return {
-      'patient:workflow': this.showWorkflow,
-      'patient:workflow:closed': this.showClosedWorkflow,
-      'patient:interactions': this.showInteractions,
-      'patient:interaction': this.showInteraction,
-      'patient:action': this.showPatientAction,
-      'patient:flow': this.showFlow,
-      'patient:flow:focus': this.showFlowFocus,
-      'patient:flow:action': this.showFlowAction,
-      'patient:form': this.showPatientForm,
-    };
-  },
-
-  currentAppOptions() {
-    return {
-      layoutState: this.layoutState,
-      patient: this.patient,
-      patientId: this.patient.id,
-    };
-  },
-
   onBeforeStart() {
     this.showView(new LoadingView({ variant: 'generic' }));
   },
 
   onStop() {
     if (this.patient) Radio.request('ws', 'subscribe', []);
+    this.isInteractionsSelected = false;
     if (this.layoutState) this.stopListening(this.layoutState);
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
     Radio.request('nav', 'setMinimized', false);
   },
 
-  prepareStart({ patientId }, { signal }) {
-    return Radio.request('entities', 'fetch:patients:model', patientId, { signal });
+  async prepareStart({ patientId }, { signal }) {
+    const patient = await Radio.request('entities', 'fetch:patients:model', patientId, {
+      signal,
+    });
+    signal.throwIfAborted();
+    await this.getChildApp('content').start();
+    signal.throwIfAborted();
+    return patient;
   },
 
   onStart(app, options, patient) {
@@ -95,57 +122,79 @@ export default SubRouterApp.extend({
 
     this.renderFormExpandedState();
     this.showPatientSidebar();
-    this.startCurrentRoute();
     this.showView();
   },
 
-  showWorkflow() {
-    return this.startContent('workflow', { status: 'notDone' });
+  showWorkflow(match) {
+    return this.startContent('workflow', {
+      status: 'notDone',
+    }, match.signal);
   },
 
-  showClosedWorkflow() {
-    return this.startContent('workflow', { status: 'done' });
+  showClosedWorkflow(match) {
+    return this.startContent('workflow', {
+      status: 'done',
+    }, match.signal);
   },
 
-  showInteractions() {
-    return this.showInteraction();
-  },
+  showInteraction(match) {
+    const { interactionId } = match.params;
 
-  showInteraction(patientId, interactionId) {
-    if (this.getCurrentSelection()?.appName === 'interactions') {
-      return this.selectChild('interactions', {
-        reuse: true,
-        start: app => {
-          app.navigateToInteraction(interactionId);
-          return true;
-        },
-      });
+    if (this.isInteractionsSelected) {
+      const interactionsApp = this.getChildApp('interactions');
+      const navigating = interactionsApp.navigateToInteraction(interactionId);
+      const presentation = interactionsApp.initialPresentation();
+      return navigating.then(() => presentation);
     }
-    return this.startContent('interactions', { interactionId });
+
+    return this.startContent('interactions', {
+      interactionId,
+    }, match.signal);
   },
 
-  showPatientAction(patientId, actionId, entryTarget) {
-    return this.startContent('action', { actionId, entryTarget });
+  showPatientAction(match) {
+    const { actionId } = match.params;
+
+    return this.startContent('action', {
+      actionId,
+      entryTarget: match.info?.entryTarget,
+    }, match.signal);
   },
 
-  showFlow(patientId, flowId) {
-    return this.startContent('flow', { flowId });
+  showFlow(match) {
+    return this.startContent('flow', {
+      flowId: match.params.flowId,
+    }, match.signal);
   },
 
-  showFlowFocus(patientId, flowId, focusActionId) {
-    return this.startContent('flow', { flowId, focusActionId });
+  showFlowFocus(match) {
+    const { flowId, actionId } = match.params;
+
+    return this.startContent('flow', {
+      flowId,
+      focusActionId: actionId,
+    }, match.signal);
   },
 
-  showFlowAction(patientId, flowId, actionId, entryTarget) {
-    return this.startContent('action', { flowId, actionId, entryTarget });
+  showFlowAction(match) {
+    const { flowId, actionId } = match.params;
+
+    return this.startContent('action', {
+      flowId,
+      actionId,
+      entryTarget: match.info?.entryTarget,
+    }, match.signal);
   },
 
-  showPatientForm(patientId, formId) {
-    return this.startContent('form', { formId });
+  showPatientForm(match) {
+    return this.startContent('form', {
+      formId: match.params.formId,
+    }, match.signal);
   },
 
-  startContent(appName, options) {
-    const pageApp = this.getChildApp(appName);
+  startContent(appName, options, signal) {
+    const content = this.getChildApp('content');
+    const pageApp = appName === 'interactions' ? this.getChildApp(appName) : content.getChildApp(appName);
 
     this.stopListening(undefined, 'context:change', this.updateContextTrail);
 
@@ -155,26 +204,48 @@ export default SubRouterApp.extend({
 
     this.listenTo(pageApp, 'context:change', this.updateContextTrail);
 
-    const startOptions = this.mixinOptions({
+    const pageOptions = {
       ...options,
+      layoutState: this.layoutState,
+      patient: this.patient,
+      patientId: this.patient.id,
+    };
+    const startOptions = {
+      ...pageOptions,
       region: this.getView().getRegion('content'),
-    });
-    return this.selectChild(appName, {
-      start: app => {
-        // The outgoing child has stopped. Restore the patient-owned baseline
-        // before the incoming child installs its resources and filters.
-        Radio.request('ws', 'subscribe', this.patient);
-        const started = app.start(startOptions);
-        if (appName !== 'interactions') return started;
-        // The feed owns its loading/error shell; host selection must retain it
-        // through initial request supersession and recoverable failures.
-        started.catch(error => this.handleContentStartFailure(app, startOptions, error));
-        return true;
-      },
+    };
+
+    // Outgoing pages unsubscribe only their own resources, retaining this
+    // patient baseline while the incoming page prepares its subscriptions.
+    Radio.request('ws', 'subscribe', this.patient);
+
+    if (appName === 'interactions') return this.startInteractions(pageApp, startOptions);
+
+    this.stopInteractions();
+
+    return content.switchTo(appName, {
+      signal,
+      restart: true,
+      options: startOptions,
     }).catch(error => {
       // Failure handlers receive the same shared context as application startup.
-      return this.handleContentStartFailure(pageApp, this.mixinOptions(options), error);
+      return this.handleContentStartFailure(pageApp, pageOptions, error);
     });
+  },
+  // The feed owns its loading/error shell and restarts itself, so the host
+  // retains it through initial request supersession and recoverable failures
+  // instead of selecting it through the outlet.
+  startInteractions(interactionsApp, options) {
+    this.getChildApp('content').clear();
+    this.isInteractionsSelected = true;
+
+    const starting = interactionsApp.start(options).catch(error => this.handleContentStartFailure(interactionsApp, options, error));
+    const presentation = interactionsApp.initialPresentation();
+    return starting.then(() => presentation);
+  },
+  stopInteractions() {
+    this.isInteractionsSelected = false;
+    this.getChildApp('interactions').stop();
   },
   handleContentStartFailure(pageApp, options, error) {
     if (!pageApp.handleStartFailure) return handleErrors(error);

@@ -1,39 +1,50 @@
-import { bind } from 'underscore';
+import App from 'js/base/app';
 
-import RouterApp from 'js/base/routerapp';
+import router from 'js/router';
 
 import { ErrorView } from 'js/apps/globals/error/error_views';
 
-export default RouterApp.extend({
-  eventRoutes: {
-    'notFound': {
-      action: 'show404',
-      route: '404',
-      root: true,
-    },
-    'unknownError': {
-      action: 'showError',
-      route: 'unknown-error',
-      root: true,
-    },
+export default App.extend({
+  channelName: 'error',
+  radioRequests: {
+    'show:notFound': 'showNotFound',
   },
-
-  initialize() {
-    this.router.route('*unknown', '404', bind(this.handleUnknown, this));
-  },
-
   viewEvents: {
     'click:back': 'stop',
   },
 
-  handleUnknown() {
-    this.start();
-    this.show404();
+  initialize() {
+    this.listenTo(router, 'route', this.onRoute);
   },
-  show404() {
-    this.showView(new ErrorView({ is404: true }));
+
+  // The error renders at the current URL and goes away with the next route
+  onRoute({ name, info }) {
+    if (name === 'notFound') {
+      this.showNotFound();
+      return;
+    }
+
+    if (name === 'unknownError') {
+      this.showError(info?.status);
+      return;
+    }
+
+    this.stop();
   },
+
+  showNotFound() {
+    this.restart({
+      is404: true,
+    });
+  },
+
   showError(status) {
-    this.showView(new ErrorView({ status }));
+    this.restart({
+      status,
+    });
+  },
+
+  onStart(app, options) {
+    this.showView(new ErrorView(options));
   },
 });

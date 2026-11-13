@@ -92,11 +92,18 @@ context('Modal Service', function() {
       .get('.modal--small')
       .should('not.exist');
 
+    // Close requests coalesce until the deferred watcher handoff completes.
+    // Give that AUT task a turn before sending a second independent Escape.
+    cy.window().then(win => new Cypress.Promise(resolve => {
+      win.setTimeout(resolve, 0);
+    }));
+
     cy
       .get('.modal')
       .should('have.attr', 'aria-label', 'Lower dialog')
       .find('.modal__close')
-      .focus();
+      .focus()
+      .should('be.focused');
 
     cy.press(Cypress.Keyboard.Keys.ESC);
 

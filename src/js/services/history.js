@@ -1,6 +1,8 @@
-import Backbone from 'backbone';
+import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
+
+import router from 'js/router';
 
 export default App.extend({
   channelName: 'history',
@@ -8,57 +10,23 @@ export default App.extend({
     'go:back': 'goBack',
   },
   initialize() {
-    const navigate = Backbone.history.navigate;
-    this._prevHistory = [Backbone.history.getFragment()];
+    this._href = window.location.href;
 
-    // Patch Backbone history navigate to track history
-    Backbone.history.navigate = (route, options) => {
-      const navigated = navigate.call(Backbone.history, route, options);
-
-      /* istanbul ignore next: supports backbone.navigate api, but likely unused */
-      if (navigated === false) return false;
-
-      this.setPrevious(route, options);
-
-      this.triggerChange();
-
-      return navigated;
-    };
-
-    window.addEventListener('popstate', () => {
-      const fragment = Backbone.history.getFragment();
-
-      // If the current url will be at the top of the stack, assume back button
-      if (fragment === this._prevHistory.at(1)) {
-        this._prevHistory.shift();
-      } else {
-        this._prevHistory.unshift(fragment);
-      }
-
-      this.triggerChange();
-    });
+    this.listenTo(router, 'route:ready', this.onRoute);
+    this.listenTo(router, 'route:error', this.onRouteError);
   },
-  setPrevious(route, { replace }) {
-    if (replace) {
-      this._prevHistory[0] = route;
-      return;
-    }
+  // Refreshing the current URL is not a route change
+  onRoute({ url }) {
+    if (url.href === this._href) return;
 
-    this._prevHistory.unshift(route);
+    this._href = url.href;
+    this.getChannel().trigger('change:route', url.pathname);
   },
-  triggerChange() {
-    this.getChannel().trigger('change:route', this._prevHistory[0]);
+  onRouteError(error, match) {
+    if (match) this.onRoute(match);
   },
   goBack(handleEmptyHistory) {
-    if (this._prevHistory.length < 2) {
-      handleEmptyHistory();
-      return;
-    }
-
-    // Remove the current route from the stack
-    this._prevHistory.shift();
-
-    // Navigate to the previous route
-    Backbone.history.navigate(this._prevHistory.shift(), { trigger: true });
+    const finished = router.canGoBack() ? router.back() : handleEmptyHistory();
+    finished?.catch(addError);
   },
 });

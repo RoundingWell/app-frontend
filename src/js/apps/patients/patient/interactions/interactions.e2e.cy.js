@@ -38,7 +38,10 @@ function createResponseGate(scope) {
     },
     reply(request, body, statusCode = 200) {
       this.started = true;
-      const drain = response.then(() => request.reply({ body, statusCode }));
+      const drain = response.then(() => request.reply({
+        body,
+        statusCode,
+      }));
       drains.push(drain);
       return drain;
     },
@@ -248,6 +251,88 @@ context('patient interactions', function() {
           'Outbound Message • Text Sent',
         ]);
       });
+  });
+
+  specify('waits for first presentation when a filter replaces initial loading', function() {
+    const patient = getPatient();
+    const interaction = getInteraction({
+      attributes: {
+        channel: 'sms',
+        occurred_at: new Date().toISOString(),
+        metadata: {
+          message: 'Replacement presentation',
+        },
+      },
+    });
+    const body = {
+      data: [interaction],
+      included: [],
+    };
+    const initial = createResponseGate(responses);
+    const replacement = createResponseGate(responses);
+    let initialRequests;
+    let dispatch;
+    let presentation;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') === '3') {
+          req.reply({
+            body,
+          });
+          return;
+        }
+        if (!initial.started) {
+          return initial.reply(req, {
+            errors: [{
+              status: '422',
+              title: 'Unavailable',
+            }],
+          }, 422);
+        }
+        return replacement.reply(req, body);
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    cy
+      .get('.patient-interactions-loading')
+      .should('be.visible')
+      .should(() => expect(initial.started, 'initial feed request is held').to.equal(true));
+
+    cy.window().then(win => {
+      initialRequests = requestCompletions.slice();
+      dispatch = win.router.getInitialDispatch();
+      dispatch.then(result => {
+        presentation = {
+          status: result.status,
+          loading: !!win.document.querySelector('.patient-interactions-loading'),
+        };
+      });
+    });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click();
+
+    cy.wrap(null).should(() => expect(replacement.started, 'replacement request is held').to.equal(true));
+    cy.then(() => Promise.all(initialRequests));
+    cy.then(() => expect(presentation, 'route readiness waits for replacement content').to.equal(undefined));
+    cy.then(() => replacement.release());
+    cy.then(() => dispatch);
+    cy.then(() => expect(presentation).to.deep.equal({
+      status: 'matched',
+      loading: false,
+    }));
+    cy.then(() => initial.release());
+    cy.then(() => Promise.all([initial.drain, replacement.drain, drainInteractionRequests(requestCompletions)]));
+    cy
+      .contains('.patient-interactions__item', 'Replacement presentation')
+      .should('be.visible');
   });
 
   specify('limits anchored one-item pages with included and filtered-out pivots', function() {
@@ -1422,6 +1507,113 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Updated since creation')
       .should('exist');
+  });
+
+  specify('cancels an inactive feed reconciliation when its host is replaced', function() {
+    const patient = getPatient();
+    const rows = map(range(3), index => getInteraction({
+      attributes: {
+        channel: 'voice',
+        occurred_at: `2026-10-0${ index + 1 }T12:00:00Z`,
+        metadata: {
+          note: `Stopped retry row ${ index }`,
+        },
+      },
+    }));
+    const initial = createResponseGate(responses);
+    const timestamp = '2026-10-05T12:00:00Z';
+    let workflowReady;
+    let readsAfterStop;
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        const query = new URL(req.url).searchParams;
+        if (initial.started || query.get('page[at]') !== rows[1].id) return;
+        return initial.reply(req, {
+          errors: [{
+            title: 'Snapshot unavailable',
+          }],
+        }, 422);
+      })
+      .visitOnClock(`/patient/${ patient.id }/interactions/${ rows[1].id }`, {
+        now: '2026-11-01T12:00:00Z',
+        functionNames: ['Date', 'setTimeout', 'clearTimeout'],
+      });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should(() => expect(initial.started).to.equal(true));
+
+    cy
+      .get('@wsHandleMessage')
+      .should('have.been.called');
+
+    cy.then(() => {
+      rows[1].attributes.occurred_at = timestamp;
+    });
+    cy.sendWs({
+      category: 'InteractionCompleted',
+      resource: {
+        type: 'interactions',
+        id: rows[1].id,
+      },
+      payload: {
+        patient: {
+          type: 'patients',
+          id: patient.id,
+        },
+        attributes: {
+          occurred_at: timestamp,
+        },
+      },
+    });
+    cy.then(() => initial.release());
+    cy.then(() => Promise.all([initial.drain, drainInteractionRequests(requestCompletions)]));
+
+    cy
+      .get('.patient-interactions-loading')
+      .should('be.visible');
+
+    cy.window().then(win => {
+      workflowReady = new Cypress.Promise(resolve => win.router.once('route:ready', resolve));
+    });
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+    cy.then(() => workflowReady).its('name').should('equal', 'patient:workflow');
+
+    cy.then(() => {
+      readsAfterStop = requestCompletions.length;
+    });
+    // Advance beyond the queued retry only after the replacement route is ready.
+    cy.tick(500);
+    cy.then(() => drainInteractionRequests(requestCompletions));
+
+    cy
+      .get('.workflow-page')
+      .should('be.visible');
+    cy
+      .get('.patient-interactions')
+      .should('not.exist');
+    cy.then(() => {
+      expect(requestCompletions.length, 'no read restarts after the feed host is gone').to.equal(readsAfterStop);
+    });
+
+    cy
+      .get('.patient-pages .js-interactions')
+      .click();
+    cy
+      .contains('.patient-interactions__item', 'Stopped retry row 1')
+      .should('be.visible');
   });
 
   specify('runs the queued reconciliation after a superseded snapshot fails', function() {

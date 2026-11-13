@@ -33,6 +33,7 @@ export default App.extend({
     if (kind === 'replace') this.getView().showLoading();
   },
   showPage({ patient, interactionId }) {
+    this.presentation = Promise.withResolvers();
     this.patient = patient;
     this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.channelGroups = Radio.request('entities', 'interactions:channelGroups');
@@ -84,11 +85,15 @@ export default App.extend({
     // Restore the repaired viewport before prepending/appending its adjacent page.
     if (repaired) this.showInteractions(this.getLiveWindow(repaired.window, read), repaired.input);
     this.showInteractions(this.getLiveWindow(result, read), input);
+    this.presentation.resolve(true);
     if (read.refresh) this.scheduleReconciliation(read.refresh);
   },
   getLiveWindow(window, read) {
     const models = read.filterModels(window.models);
     return { ...window, models, hasOlder: !!models.length && window.hasOlder, hasNewer: !!models.length && window.hasNewer };
+  },
+  initialPresentation() {
+    return this.presentation.promise;
   },
   handleStartFailure(options, error) {
     const refresh = this.pendingRead?.refresh;
@@ -106,9 +111,13 @@ export default App.extend({
     }
     this.getState().set({ request: null, retry: { kind, date, at, reconcile: options.reconcile } });
     addError(error);
+    this.presentation.resolve(false);
     return false;
   },
   onBeforeDestroyView() {
+    // A failed initial start can retain the view while the app is inactive.
+    this.cancelReconciliation();
+    this.presentation.resolve(false);
     this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     this.stop();
   },
@@ -116,6 +125,8 @@ export default App.extend({
     this.cancelReconciliation();
     this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
     if (this.collection) this.stopListening(this.collection);
+    this.presentation?.resolve(false);
+    this.presentation = null;
     this.collection = null;
     this.filterPosition = null;
     this.pendingRead = null;
