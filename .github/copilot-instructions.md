@@ -35,6 +35,13 @@ Use the task table in `/AGENTS.md` for scoped overlays and source-linked pattern
 
 ## Reviews
 
+Read `/AGENTS.md#change-reach`. Compare the current-head diff with the declared
+impact, tracing relevant producers, consumers, and lifecycle owners. Surface
+material undeclared behavior or unresolved decisions with concrete evidence;
+keep defects, decisions, and verification gaps distinct. Shared edits or file
+counts alone are not findings. Preserve severity ordering and do not manufacture
+architectural concerns. Passing tests do not establish appropriate change reach.
+
 - Put findings first.
 - Do not flag intentional choices: the Backbone/Marionette stack, synchronous string-based Radio requests, and JavaScript over TypeScript (see the Intentional Choices section in `/AGENTS.md`).
 - Prioritize repo-specific risks first: `scripts/**`, `packages/care-ops-five9/sdk/**`, `src/js/entities-service/**`, Marionette view patterns, and template or SCSS coupling.
