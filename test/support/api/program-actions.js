@@ -32,16 +32,6 @@ export function getProgramActions({ attributes, relationships, meta } = {}, { sa
   return _.times(sample, () => getProgramAction({ attributes, relationships, meta }, { depth }));
 }
 
-Cypress.Commands.add('routeProgramAction', (mutator = _.identity) => {
-  const data = getProgramAction();
-
-  cy
-    .intercept('GET', '/api/program-actions/*', {
-      body: mutator({ data, included: [] }),
-    })
-    .as('routeProgramAction');
-});
-
 Cypress.Commands.add('routeProgramActions', (mutator = _.identity) => {
   const data = getProgramActions({
     relationships: {

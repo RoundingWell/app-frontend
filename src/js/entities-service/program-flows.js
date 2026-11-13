@@ -6,7 +6,6 @@ import { PROGRAM_BEHAVIORS } from 'js/static';
 const Entity = BaseEntity.extend({
   Entity: { _Model, Model, Collection },
   radioRequests: {
-    'programFlows:model': 'getModel',
     'programFlows:collection': 'getCollection',
     'fetch:programFlows:model': 'fetchModel',
     'fetch:programFlows:collection:byProgram': 'fetchProgramFlowsByProgram',

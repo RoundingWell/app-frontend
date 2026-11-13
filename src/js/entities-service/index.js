@@ -44,8 +44,6 @@ import './settings';
 
 import './states';
 
-import './tags';
-
 import './teams';
 
 import './widget-values';
