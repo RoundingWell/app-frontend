@@ -17,6 +17,6 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@workos-inc/authkit-js": "^0.20.0"
+    "@workos-inc/authkit-js": "^0.20.5"
   }
 }

@@ -10,6 +10,6 @@
   "exports": "./index.js",
   "sideEffects": false,
   "dependencies": {
-    "amazon-quicksight-embedding-sdk": "^2.10.0"
+    "amazon-quicksight-embedding-sdk": "^2.12.1"
   }
 }
