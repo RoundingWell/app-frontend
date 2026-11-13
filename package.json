@@ -120,7 +120,8 @@
   },
   "dependencies": {
     "@formatjs/intl": "^4.1.8",
-    "@mnjs/adapters": "5.0.0",
+    "@mnjs/adapters": "5.1.0",
+    "@mnjs/router": "0.2.0",
     "@roundingwell/care-ops-8x8": "workspace:*",
     "@roundingwell/care-ops-auth": "workspace:*",
     "@roundingwell/care-ops-config": "workspace:*",
@@ -129,6 +130,7 @@
     "@roundingwell/care-ops-quicksight": "workspace:*",
     "@roundingwell/care-ops-ringcentral": "workspace:*",
     "@roundingwell/care-ops-superset": "workspace:*",
+    "@roundingwell/icons": "git+https://github.com/RoundingWell/pkg-icons.git#86589b767454105b86568781dc1be7f55f83b91c",
     "animejs": "^4.5.0",
     "backbone": "^1.4.0",
     "backbone.store": "^2.0.0",
@@ -136,12 +138,11 @@
     "handlebars": "^4.7.10",
     "idb": "^7.1.1",
     "libphonenumber-js": "^1.13.16",
-    "marionette": "5.0.0",
+    "marionette": "5.1.0",
     "morphdom": "2.7.8",
     "sortablejs": "^1.14.0",
     "underscore": "^1.13.1",
-    "uuid": "^14.0.3",
-    "@roundingwell/icons": "git+https://github.com/RoundingWell/pkg-icons.git#86589b767454105b86568781dc1be7f55f83b91c"
+    "uuid": "^14.0.3"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.68.2"
