@@ -96,7 +96,7 @@
     "globals": "^17.14.0",
     "istanbul-lib-coverage": "^3.0.2",
     "js-yaml": "^4.3.2",
-    "magic-string": "^0.30.17",
+    "magic-string": "^1.4.5",
     "mock-socket": "^9.3.1",
     "nyc": "^18.0.0",
     "postcss": "^8.5.32",
