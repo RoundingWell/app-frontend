@@ -37,6 +37,7 @@ export function initLogs({ env, clientToken, service, version, organization }) {
  * @param {string} opts.applicationId
  * @param {string} opts.service
  * @param {string} opts.version
+ * @param {boolean} [opts.trackViewsManually=false]
  */
 export function initRum({
   env,
@@ -44,6 +45,7 @@ export function initRum({
   applicationId,
   service,
   version,
+  trackViewsManually = false,
 }) {
   datadogRum.init({
     env,
@@ -51,6 +53,7 @@ export function initRum({
     applicationId,
     service,
     version,
+    trackViewsManually,
     workerUrl,
     useSecureSessionCookie: true,
     usePartitionedCrossSiteSessionCookie: true,
@@ -86,6 +89,11 @@ export function setUser(attrs) {
 export function startRum() {
   if (!rumReady) return;
   datadogRum.startSessionReplayRecording();
+}
+
+export function startView() {
+  if (!rumReady) return;
+  datadogRum.startView();
 }
 
 export function addAction(name, context) {
