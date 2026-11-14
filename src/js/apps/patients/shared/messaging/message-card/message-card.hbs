@@ -1,0 +1,12 @@
+{{#unless message.hidden}}
+<span class="messaging-card__marker" aria-hidden="true">{{far "paper-plane-top"}}</span>
+<div class="messaging-card__content">
+  <div class="messaging-card__headline"><strong>{{ message.senderName }}</strong> <span>{{ message.viaLabel }}</span>{{#if message.statusLabel}} • <span class="messaging-card__status">{{ message.statusLabel }}</span>{{else if message.time}} •{{/if}}{{#if message.time}} <time datetime="{{ message.time.datetime }}">{{ message.time.label }}</time>{{/if}}</div>
+  {{#if message.hasContent}}<div class="messaging-card__bubble">
+    {{#if message.disposition}}<div class="messaging-card__heading">{{ message.directionLabel }} {{ labels.sms }} • {{ message.disposition }}</div>{{/if}}
+    {{#if message.body}}<p class="messaging-card__body{{#unless expanded}} messaging-card__body--collapsed{{/unless}} js-body" id="{{ bodyId }}" tabindex="-1">{{#each segments}}{{#if href}}<a href="{{ href }}" target="_blank" rel="noopener noreferrer">{{ text }}</a>{{else}}{{ text }}{{/if}}{{/each}}</p>{{#unless expanded}}<button class="messaging-card__show-more js-show-more" type="button" aria-controls="{{ bodyId }}" aria-expanded="false" hidden>{{ labels.showMore }}</button>{{/unless}}{{/if}}
+  </div>{{/if}}
+  {{#if message.reason}}<p class="messaging-card__reason">{{ message.reason }}{{#if message.destination}} · {{formatPhoneNumber message.destination}}{{/if}}</p>{{/if}}
+  {{#if message.action}}<button class="messaging-card__action js-action" type="button">{{ message.action.name }} ›</button>{{/if}}
+</div>
+{{/unless}}

@@ -1,6 +1,9 @@
 import { Radio } from 'marionette';
 
 import App from 'js/base/app';
+import { prototypeTarget } from 'js/entities-service/messaging-prototype';
+import { isPrototypeTarget } from 'js/entities-service/messaging-prototype/contract';
+import MessagePatientView from './message-patient_view';
 
 import { SidebarLoadingView, SidebarView } from 'js/apps/patients/patient/sidebar/sidebar_views';
 
@@ -39,6 +42,9 @@ export default App.extend({
 
     view.showChildView('sidebars', new SidebarLoadingView());
     this.showView();
+    if (isPrototypeTarget(prototypeTarget(patient.id))) {
+      view.showChildView('messaging', new MessagePatientView({ patient }));
+    }
   },
   prepareStart({ patient }, { signal }) {
     return Promise.all(getPatientSidebarRequests(patient, this.sidebars, { signal }));

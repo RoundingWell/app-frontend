@@ -17,6 +17,7 @@ import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeCom
 import SharedSelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
+import { showMessagingSummary } from 'js/apps/patients/shared/messaging/summary_view';
 import ActionItemTemplate from './action-item.hbs';
 import HeaderTemplate from './header.hbs';
 import LayoutTemplate from './layout.hbs';
@@ -204,6 +205,7 @@ const ActionItemView = View.extend({
     };
   },
   regions: {
+    messaging: '[data-message-summary-region]',
     check: '[data-check-region]',
     details: '[data-details-region]',
     state: '[data-state-region]',
@@ -245,6 +247,8 @@ const ActionItemView = View.extend({
     this.navigateToAction({ section: 'comments' });
   },
   onRender() {
+    const messaging = showMessagingSummary(this, 'messaging', { action: this.model, showPreview: true });
+    if (messaging) this.listenTo(messaging, 'click:messages', () => this.navigateToAction({ section: 'messages' }));
     const canEdit = this.canEdit;
     this.canEdit = !this.flow.isDone() && this.model.canEdit();
 

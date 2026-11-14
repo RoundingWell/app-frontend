@@ -15,12 +15,15 @@ import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_vie
 import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
+import MessagesApp from './messages/messages_app';
+import { canShowMessagingSummary } from 'js/apps/patients/shared/messaging/summary_view';
 
 export default App.extend({
   childApps: {
     activity: ActivityApp,
     attachments: AttachmentsApp,
     form: FormApp,
+    messages: MessagesApp,
   },
   initialize() {
     this.listenTo(this.getChildApp('form'), 'toggle:expanded', this.onToggleFormExpanded);
@@ -126,6 +129,7 @@ export default App.extend({
     this.showContent();
     this.showMenu();
     this.activityApp = this.startActivity(entryTarget?.section);
+    this.startMessages();
     this.attachmentsApp = this.startAttachments(entryTarget?.section);
 
     this.updateContext();
@@ -188,6 +192,7 @@ export default App.extend({
     this.listenTo(actionView, {
       'click:attachments': () => this.attachmentsApp.focus(),
       'click:comments': () => this.activityApp.focus(),
+      'click:messages': () => this.getChildApp('messages').focusLatest(),
     });
   },
   showMenu() {
@@ -276,9 +281,18 @@ export default App.extend({
       action: this.action,
       patient: this.patient,
       focusOnLoad: initialSection === 'comments',
+      excludeSms: canShowMessagingSummary(this.action),
     }).catch(addError);
 
     return activityApp;
+  },
+  startMessages() {
+    if (!canShowMessagingSummary(this.action)) return;
+    const app = this.getChildApp('messages');
+    app.start({
+      patient: this.patient, action: this.action, viewport: this.getView().getViewportElement(),
+      region: this.getView().getRegion('messages'),
+    }).catch(error => app.handleStartFailure({}, error));
   },
   startAttachments(initialSection) {
     const attachmentsApp = this.getChildApp('attachments');

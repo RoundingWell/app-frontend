@@ -19,8 +19,11 @@
     {{ @intl.patients.patient.interactions.interactionsViews.pagingError }}
     <button class="button button--link js-retry" type="button">{{ @intl.patients.patient.interactions.interactionsViews.retry }}</button>
   </div>
-  <div data-content-region></div>
+  <div class="patient-interactions__content" data-content-region></div>
+  <div class="patient-interactions__recorded-status" data-recorded-status-region></div>
   <div class="patient-interactions__today-position">
     <button class="patient-interactions__today js-today" type="button" aria-label="{{ @intl.patients.patient.interactions.interactionsViews.jumpToToday }}" hidden>{{ @intl.patients.patient.interactions.interactionsViews.today }} <span aria-hidden="true">↓</span></button>
   </div>
+  <div class="patient-interactions__composer" data-composer-region></div>
+  <div data-recovery-region></div>
 </div>

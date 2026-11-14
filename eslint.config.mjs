@@ -23,6 +23,7 @@ export default [
         _PRODUCTION_: 'readonly',
         _DEVELOP_: 'readonly',
         _TEST_: 'readonly',
+        _MESSAGING_BINDINGS_: 'readonly',
         _NOW_: 'readonly',
       },
     },

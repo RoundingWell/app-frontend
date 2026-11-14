@@ -13,6 +13,28 @@
   width: var(--content-detail-width);
 }
 
+.patient-interactions__composer:has(.message-composer:not([hidden])) {
+  bottom: 0;
+  padding-bottom: 16px;
+  position: sticky;
+  z-index: 2;
+}
+
+.patient-interactions__body:has(.message-composer:not([hidden])) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.patient-interactions__content {
+  flex: 1;
+}
+
+.patient-interactions:has(.message-composer:not([hidden])) .patient-interactions__today-position {
+  // Keep the date jump reachable above the composer.
+  bottom: calc(var(--patient-interactions-composer-height) + 24px);
+}
+
 .patient-interactions__controls {
   align-items: center;
   border-bottom: 1px solid var(--color-divider);
@@ -224,4 +246,25 @@
 .patient-interactions__calendar-close:focus-visible {
   outline: 2px solid #{color(blue)};
   outline-offset: 2px;
+}
+
+.patient-interactions:has(.message-composer:not([hidden])) {
+  scroll-padding-bottom: calc(var(--patient-interactions-composer-height, 0px) + 24px);
+}
+
+.patient-interactions:has(.message-composer:not([hidden])) .patient-interactions__toolbar-date .patient-interactions__date-control {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (width > 1000px) {
+  .patient-interactions:has(.message-composer:not([hidden])) .patient-interactions__controls {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .patient-interactions:has(.message-composer:not([hidden])) .patient-interactions__filters {
+    flex-wrap: nowrap;
+  }
 }

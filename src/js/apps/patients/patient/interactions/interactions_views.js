@@ -14,6 +14,7 @@ import Tooltip from 'js/components/tooltip';
 
 import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
 import { hasInteractionCardContent } from 'js/apps/patients/shared/interactions/display';
+import { useMessagingRow, TimelineRowView } from 'js/apps/patients/shared/messaging/timeline-row_view';
 
 import ScrollEdgesBehavior from './scroll-edges_behavior';
 
@@ -48,7 +49,9 @@ function canGroupInteractions(left, right) {
 const InteractionsDayListView = CollectionView.extend({
   tagName: 'ol',
   className: 'patient-interactions__day-list',
-  childView: InteractionItemView,
+  childView(model) {
+    return useMessagingRow(this.getOption('patientId'), model) ? TimelineRowView : InteractionItemView;
+  },
   collectionEvents: { change: 'updateGrouping' },
   childViewOptions() {
     return {
@@ -117,6 +120,26 @@ const InteractionsListView = CollectionView.extend({
       this.collection.set(groupInteractions(this.getOption('interactions')));
     });
   },
+  captureAnchor(top, bottom) {
+    let anchor;
+    let selected;
+    this.children.each(day => {
+      const items = day.getChildView('content').children;
+      const focused = items.find(view => view.model.id === this.getState().get('interactionId'));
+      const bounds = focused?.el.getBoundingClientRect();
+      if (bounds && bounds.bottom > top && bounds.top < bottom) selected = { model: focused.model, top: bounds.top };
+      if (anchor) return;
+      const item = items.find(view => view.el.getBoundingClientRect().bottom > top);
+      if (item) anchor = { model: item.model, top: item.el.getBoundingClientRect().top };
+    });
+    return selected || anchor;
+  },
+  restoreAnchor(anchor, viewport) {
+    if (!anchor) return;
+    const day = this.collection.get(getDate(anchor.model));
+    const item = this.children.findByModel(day)?.getChildView('content')?.children.findByModel(anchor.model);
+    if (item) viewport.scrollTop += item.el.getBoundingClientRect().top - anchor.top;
+  },
   getCurrentDate(top) {
     let date = this.collection.first()?.id;
     this.children.each(view => {
@@ -157,31 +180,51 @@ const InteractionsPageView = View.extend({
   childViewTriggers: {
     'retry': 'retry:paging',
     'select:date': 'select:date',
+    'message:confirmed': 'message:confirmed',
+    'message:submitting': 'message:submitting',
   },
   template: LayoutTemplate,
-  regions: { date: '[data-date-region]', content: '[data-content-region]' },
-  ui: { today: '.js-today', controls: '.js-controls', filters: '.js-filter', workflow: '.js-workflow', pagingError: '.js-paging-error', pagingLoading: '.js-paging-loading', retry: '.js-retry' },
+  regions: { date: '[data-date-region]', content: '[data-content-region]', composer: '[data-composer-region]', recorded: '[data-recorded-status-region]', recovery: '[data-recovery-region]' },
+  ui: { today: '.js-today', controls: '.js-controls', filters: '.js-filter', workflow: '.js-workflow', pagingError: '.js-paging-error', pagingLoading: '.js-paging-loading', retry: '.js-retry', composer: '[data-composer-region]' },
   triggers: {
     'click @ui.workflow': 'click:workflow',
     'click @ui.today': 'click:today',
     'click @ui.retry': 'retry:paging',
   },
-  events: { 'click @ui.filters': 'onFilterClick', 'scroll': 'onScroll' },
+  events: { 'click @ui.filters': 'onFilterClick', 'scroll': 'onScroll', 'wheel': 'onReadingInput', 'touchstart': 'onReadingInput', 'keydown': 'onReadingInput', 'pointerdown': 'onReadingInput' },
+  onReadingInput(event) {
+    this.cancelAnchorFrame();
+    if (!this.getUI('composer')[0].contains(event.target)) this.followingComposer = false;
+  },
+  followComposer() {
+    this.followingComposer = true;
+    this.scrollToLatest();
+  },
+  cancelAnchorFrame() {
+    cancelAnimationFrame(this.anchorFrame);
+    this.readingAnchor = null;
+  },
   onScroll() {
     this.updateCurrentDate();
   },
   onAttach() {
     this.controlsObserver = new ResizeObserver(() => this.updateControlsHeight());
     this.controlsObserver.observe(this.getUI('controls')[0]);
+    this.controlsObserver.observe(this.getUI('composer')[0]);
     this.updateControlsHeight();
   },
   onBeforeDetach() {
+    this.cancelAnchorFrame();
     this.controlsObserver.disconnect();
+    this.contentObserver?.disconnect();
   },
   updateControlsHeight() {
     const height = this.getUI('controls')[0].getBoundingClientRect().height;
     this.el.style.setProperty('--patient-interactions-controls-height', `${ height }px`);
+    const composerHeight = this.getUI('composer')[0].getBoundingClientRect().height;
+    this.el.style.setProperty('--patient-interactions-composer-height', `${ composerHeight }px`);
     this.updateCurrentDate();
+    this.scheduleReadingAnchor();
   },
   updateCurrentDate() {
     if (this.getState().get('contentStatus') !== 'ready') return;
@@ -269,6 +312,8 @@ const InteractionsPageView = View.extend({
     this.getUI('today')[0].hidden = true;
   },
   showInteractions(collection) {
+    this.cancelAnchorFrame();
+    this.contentObserver?.disconnect();
     const list = new InteractionsListView({
       collection: new Backbone.Collection(groupInteractions(collection)),
       interactions: collection,
@@ -276,14 +321,50 @@ const InteractionsPageView = View.extend({
       state: this.getState(),
     });
     this.showChildView('content', list);
+    this.contentObserver = new ResizeObserver(() => this.scheduleReadingAnchor());
+    this.contentObserver.observe(list.el);
     this.getState().set('contentStatus', 'ready');
     this.updateCurrentDate();
   },
-  updateInteractions(collection, models) {
+  updateInteractions(collection, models, { preserveAnchor = false } = {}) {
+    const list = this.getChildView('content');
+    const anchor = preserveAnchor && this.getReadingAnchor(list);
     const prepend = models[0] !== collection.first();
     this.triggerMethod('before:commit');
     collection.set(models);
     this.triggerMethod('after:commit', { prepend });
+    this.cancelAnchorFrame();
+    if (preserveAnchor) {
+      this.readingAnchor = { list, anchor };
+      this.restoreReadingAnchor();
+      this.anchorFrame = requestAnimationFrame(() => this.restoreReadingAnchor());
+    }
+  },
+  getReadingAnchor(list) {
+    if (this.readingAnchor?.list === list) return this.readingAnchor.anchor;
+    return list?.captureAnchor(this.getUI('controls')[0].getBoundingClientRect().bottom, this.el.getBoundingClientRect().bottom);
+  },
+  retainReadingPoint() {
+    if (this.readingAnchor || this.followingComposer) return;
+    const list = this.getChildView('content');
+    const anchor = list.captureAnchor(this.getUI('controls')[0].getBoundingClientRect().bottom, this.el.getBoundingClientRect().bottom);
+    this.readingAnchor = { list, anchor };
+    this.scheduleReadingAnchor();
+  },
+  scheduleReadingAnchor() {
+    if (!this.readingAnchor && !this.followingComposer) return;
+    cancelAnimationFrame(this.anchorFrame);
+    this.anchorFrame = requestAnimationFrame(() => {
+      if (!this.isAttached()) return;
+      if (this.followingComposer) this.scrollToLatest();
+      else this.restoreReadingAnchor();
+    });
+  },
+  restoreReadingAnchor() {
+    const saved = this.readingAnchor;
+    if (!saved || !this.isAttached() || this.getChildView('content') !== saved.list) return;
+    saved.list.restoreAnchor(saved.anchor, this.el);
+    this.triggerMethod('scroll:position');
   },
   focusInteraction(model) {
     this.getChildView('content')?.focusInteraction(model);

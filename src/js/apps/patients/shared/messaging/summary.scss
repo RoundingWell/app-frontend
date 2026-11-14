@@ -1,0 +1,37 @@
+.messaging-summary:empty {
+  display: none;
+}
+
+.messaging-summary__count {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.patient-action__title .messaging-summary:not(:empty) {
+  color: color(blue);
+  display: inline-flex;
+  font-size: 12px;
+  margin-left: 12px;
+  vertical-align: middle;
+}
+
+.messaging-summary .messaging-summary__count {
+  color: color(blue);
+}
+
+.messaging-summary {
+  flex: none;
+}
+
+.messaging-summary-slot:empty,
+.messaging-summary-slot:has(> .messaging-summary:empty) {
+  display: none;
+}
+
+.messaging-summary-tooltip {
+  max-height: min(400px, calc(100dvh - 96px));
+  max-width: min(440px, calc(100vw - 48px));
+  overflow-y: auto;
+  white-space: pre-wrap;
+}

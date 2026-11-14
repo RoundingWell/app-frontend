@@ -9,6 +9,7 @@ import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
+import { showMessagingSummary } from 'js/apps/patients/shared/messaging/summary_view';
 import ActionItemTemplate from './action-item.hbs';
 
 import 'scss/domain/work-card.scss';
@@ -30,6 +31,7 @@ const ActionItemView = View.extend({
   },
   template: ActionItemTemplate,
   regions: {
+    messaging: '[data-message-summary-region]',
     check: '[data-check-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
@@ -112,6 +114,8 @@ const ActionItemView = View.extend({
     this.navigateToAction({ section });
   },
   onRender() {
+    const messaging = showMessagingSummary(this, 'messaging', { action: this.model, showPreview: true });
+    if (messaging) this.listenTo(messaging, 'click:messages', () => this.navigateToAction({ section: 'messages' }));
     this.setPatientSelected(this.selectedPatientId);
     this.showForm();
     this.showDetailsTooltip();

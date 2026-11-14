@@ -135,6 +135,7 @@ const SidebarView = View.extend({
   template: SidebarTemplate,
   regions: {
     name: '[data-name-region]',
+    messaging: '[data-messaging-region]',
     sidebars: '[data-sidebars-region]',
   },
   onRender() {

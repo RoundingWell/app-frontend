@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { contains, flatten, isEmpty, uniq, values } from 'underscore';
+import { contains, flatten, isEmpty, uniq, values, without } from 'underscore';
 
 import { getUrl } from 'js/base/fetch';
 import BaseEntity from 'js/base/entity-service';
@@ -87,13 +87,14 @@ const Entity = BaseEntity.extend({
     }
     return window;
   },
-  async fetchForActivity({ patientId, actionId, flowId }, { signal }) {
-    const channels = uniq(flatten(values(this.getChannelGroups())));
+  async fetchForActivity({ patientId, actionId, flowId, excludeSms }, { signal }) {
+    const allChannels = uniq(flatten(values(this.getChannelGroups())));
+    const channels = excludeSms ? without(allChannels, 'sms') : allChannels;
     const collection = await this.fetchByPatient({ patientId, actionId, flowId, channels, limit: 100 }, { signal });
     return collection.models;
   },
-  fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit }, { read, ...options } = {}) {
-    const data = { include: 'action.flow,flow' };
+  fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit, include = 'action.flow,flow' }, { read, ...options } = {}) {
+    const data = { include };
     addParams(data, 'filter', getFilter(actionId, flowId, channels));
     addParams(data, 'page', getPage(at, before, after, limit));
 
