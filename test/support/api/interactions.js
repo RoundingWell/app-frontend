@@ -57,7 +57,7 @@ Cypress.Commands.add('routePatientInteractions', (mutator = identity) => {
           && (!actionId || interaction.relationships.action.data?.id === actionId)
           && (!flowId || interaction.relationships.flow.data?.id === flowId);
       });
-      request.reply({ body: { ...body, data: getPage(data, query, body.data) } });
+      request.reply({ body: { ...body, included: query.get('include') === '' ? [] : body.included, data: getPage(data, query, body.data) } });
     })
     .as('routePatientInteractions');
 });

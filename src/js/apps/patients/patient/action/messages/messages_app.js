@@ -138,11 +138,11 @@ export default App.extend({
     this.dirty = false;
     this.historyController?.abort();
     const controller = this.historyController = new AbortController();
-    const anchor = this.list.captureAnchor(this.viewport);
     this.getView().setBusy(true);
     try {
       const models = await this.readHistory(controller.signal);
       if (controller.signal.aborted) return;
+      const anchor = this.list.captureAnchor(this.viewport);
       this.setModels(models, { retainWindow: true });
       this.list.restoreAnchor(anchor, this.viewport);
     } catch(error) {

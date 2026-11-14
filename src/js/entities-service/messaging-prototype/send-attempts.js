@@ -18,6 +18,6 @@ export function retainAttempt(scope, id) {
   if (sessionStore.get(scope)?.id !== id) throw new Error('Unable to preserve the recording request. Nothing was submitted.');
 }
 
-export function clearAttempt(scope) {
-  sessionStore.remove(scope);
+export function clearAttempt(scope, id) {
+  if (sessionStore.get(scope)?.id === id) sessionStore.remove(scope);
 }

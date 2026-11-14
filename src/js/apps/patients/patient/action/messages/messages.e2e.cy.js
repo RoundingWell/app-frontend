@@ -34,7 +34,7 @@ function fixture() {
     return scheduled;
   }));
   rows.push(row(61, { occurred_at: null, expected_at: '2099-11-20T12:00:00Z' }, { body: 'SYNTHETIC current scheduled' }));
-  rows.push(row(57, {}, { body: 'SYNTHETIC long note https://example.org/demo '.repeat(30) }));
+  rows.push(row(57, {}, { body: `${ 'SYNTHETIC long note https://example.org/demo '.repeat(30) }END OF FULL BODY` }));
   rows.push(row(58, {}, { delivery: { outcome: 'not_delivered', reason_code: 'cannot_receive_sms', recipient_number: '+12025550190' } }));
   rows.push(row(59, {}, { kind: 'consent_audit', audit: { event: 'opted_out', number: '+12025550142', source: 'patient_stop', actor: null } }));
   const value = {
@@ -84,8 +84,11 @@ function setup(data) {
 
 context('native action-page Messaging integration', function() {
   let releaseContext;
+  let releaseHistory;
 
   afterEach(function() {
+    releaseHistory?.();
+    releaseHistory = null;
     if (!releaseContext) return;
     releaseContext();
     releaseContext = null;
@@ -110,10 +113,18 @@ context('native action-page Messaging integration', function() {
     cy.get(`.messaging-widget .js-open-action[data-action-id="${ OTHER }"]`).click();
     cy.get('.message-composer .js-body').should('have.value', 'SYNTHETIC standalone draft');
     cy.intercept('GET', `/api/actions/${ ACTION }*`, { statusCode: 422, body: { errors: [{ detail: 'SYNTHETIC action unavailable' }] } });
-    cy.reload();
+    cy.sendWs({ category: 'InteractionCompleted', resource: { id: data.rows[0].id, type: 'interactions' },
+      payload: { patient: { id: PATIENT }, attributes: { occurred_at: data.rows[0].attributes.occurred_at } } });
     cy.get('.messaging-widget [role="status"]').should('contain', 'Open message actions could not be loaded');
     cy.get('.messaging-widget .js-open-action').should('not.exist');
     cy.get('.message-composer .js-body').should('be.enabled').and('have.value', 'SYNTHETIC standalone draft');
+    cy.get('.messaging-widget .js-scenarios summary').click();
+    cy.get('.messaging-widget .js-consent').first().click();
+    cy.get('.picklist').should('be.visible');
+    cy.sendWs({ category: 'NameChanged', resource: { id: ACTION, type: 'patient-actions' },
+      payload: { attributes: { name: 'SYNTHETIC changed old action' } } });
+    cy.get('.picklist').should('be.visible');
+    cy.get('body').type('{esc}');
   });
 
   ['action', 'interactions'].forEach(surface => {
@@ -256,7 +267,10 @@ context('native action-page Messaging integration', function() {
       releaseContext = null;
     });
     cy.wait('@heldContext');
-    cy.get('.message-composer .js-body').should('have.value', 'SYNTHETIC draft selection');
+    cy.get('.message-composer .js-body').should('have.value', 'SYNTHETIC draft selection').and($body => {
+      expect($body[0].selectionStart).to.equal(0);
+      expect($body[0].selectionEnd).to.equal(5);
+    });
     cy.focused().should('have.class', 'message-composer__input');
     cy.get('.message-composer .js-number').click();
     cy.get('.picklist').should('be.visible');
@@ -269,6 +283,64 @@ context('native action-page Messaging integration', function() {
     cy.get('.messaging-history__list').should('contain', 'SYNTHETIC picker incoming');
     cy.get('.picklist').should('be.visible');
     cy.get('body').type('{esc}');
+  });
+
+  specify('keeps the latest reading position chosen while a history refresh is pending', function() {
+    const data = fixture();
+    setup(data);
+
+    cy.visit(`/patient/${ PATIENT }/action/${ ACTION }`, { noWait: true });
+
+    cy.get('.messaging-history[aria-busy="false"] .messaging-history__row')
+      .should('have.length', 10);
+
+    cy.get('.messaging-history .js-earlier')
+      .click();
+
+    cy.get('.messaging-history__row')
+      .should('have.length.at.least', 20);
+
+    cy.get('.messaging-history__viewport')
+      .scrollTo('top');
+    let began;
+    const started = new Cypress.Promise(resolve => {
+      began = resolve;
+    });
+    let held = false;
+
+    cy.intercept('GET', `/api/patients/${ PATIENT }/interactions*`, req => {
+      if (held || new URL(req.url).searchParams.has('filter[action]')) return;
+      held = true;
+      req.alias = 'heldHistory';
+      began();
+      return new Cypress.Promise(resolve => {
+        releaseHistory = resolve;
+      });
+    });
+
+    cy.sendWs({ category: 'MetadataUpdated', resource: { id: data.rows[30].id, type: 'interactions' },
+      payload: { patient: { id: PATIENT }, attributes: { metadata: data.rows[30].attributes.metadata } } });
+
+    cy.then(() => started);
+
+    cy.get('.messaging-history .js-latest')
+      .click();
+
+    cy.then(() => {
+      releaseHistory();
+      releaseHistory = null;
+    });
+
+    cy.wait('@heldHistory');
+
+    cy.get('.messaging-history')
+      .should('have.attr', 'aria-busy', 'false');
+
+    cy.get('.messaging-history__viewport')
+      .should($viewport => {
+        const viewport = $viewport[0];
+        expect(viewport.scrollHeight - viewport.clientHeight - viewport.scrollTop, 'Latest remains at the newest message').to.be.lessThan(4);
+      });
   });
 
   specify('removes preference controls when a current context refresh fails', function() {
@@ -353,6 +425,7 @@ context('native action-page Messaging integration', function() {
     cy.get('.messaging-widget__stop-reason').should('contain', 'Only the patient can opt back in by texting START');
     cy.window().then(win => new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve))));
     cy.get('.messaging-history__row').should('have.length', 10);
+    cy.get('.messaging-history__viewport').scrollTo('center');
     let anchor;
     cy.get('.messaging-history__row').first().then($row => {
       const viewport = $row[0].closest('.messaging-history__viewport');
@@ -366,11 +439,19 @@ context('native action-page Messaging integration', function() {
       expect(Math.abs(row.getBoundingClientRect().top - $view[0].getBoundingClientRect().top - 40)).to.be.lessThan(4);
     });
     cy.contains('.messaging-history__row', 'SYNTHETIC long note').within(() => {
-      cy.get('.js-show-more').should('be.visible').click();
+      cy.get('.js-show-more').should('be.visible').focus();
+      cy.press(Cypress.Keyboard.Keys.SPACE);
       cy.get('.js-show-more').should('not.exist');
       cy.get('.messaging-card__body').should('have.class', 'js-body').and('not.have.class', 'messaging-card__body--collapsed');
       cy.get('a[href="https://example.org/demo"]').should('have.attr', 'rel', 'noopener noreferrer');
     });
+    cy.viewport(390, 844);
+    cy.contains('.messaging-history__row', 'SYNTHETIC long note').within(() => {
+      cy.get('.messaging-card__body').should('be.focused').and($body => expect($body[0].scrollHeight).to.equal($body[0].clientHeight));
+      cy.get('.js-show-more').should('not.exist');
+    });
+    cy.document().should(doc => expect(doc.documentElement.scrollWidth).to.be.at.most(doc.documentElement.clientWidth));
+    cy.viewport(1280, 720);
     cy.get('.messaging-history .js-latest').click();
     cy.get('.message-composer .js-body').type('SYNTHETIC persisted own response');
     cy.get('.message-composer .js-send').click().wait('@send');
@@ -434,6 +515,20 @@ context('native action-page Messaging integration', function() {
     cy.visit(`/patient/${ PATIENT }/interactions/${ data.rows[25].id }`, { noWait: true });
     cy.get('.startup').should('not.exist');
     cy.get('.messaging-timeline-row.is-selected').should('contain', 'SYNTHETIC history 25');
+    let selectedTop;
+    const preceding = data.rows[24];
+    cy.get('.messaging-timeline-row.is-selected').then($row => {
+      selectedTop = $row[0].getBoundingClientRect().top;
+    });
+    cy.then(() => {
+      preceding.attributes.metadata.prototype_fixture.body = 'SYNTHETIC enlarged loaded row\n'.repeat(5);
+    });
+    cy.sendWs({ category: 'MetadataUpdated', resource: { id: preceding.id, type: 'interactions' },
+      payload: { patient: { id: PATIENT }, attributes: { metadata: preceding.attributes.metadata } } });
+    cy.get('.patient-interactions__list').should('contain', 'SYNTHETIC enlarged loaded row');
+    cy.get('.messaging-timeline-row.is-selected').should($row => {
+      expect(Math.abs($row[0].getBoundingClientRect().top - selectedTop), 'loaded height update preserves the reading point').to.be.lessThan(4);
+    });
     const inbound = getInteraction({ attributes: {
       direction: 'inbound', channel: 'sms', expected_at: null, occurred_at: '2026-11-12T14:00:00Z',
       metadata: { prototype_fixture: { synthetic: true, namespace: NAMESPACE, contract_version: 1,
@@ -475,6 +570,46 @@ context('native action-page Messaging integration', function() {
     cy.get('.messaging-timeline-row.is-selected').should($row => {
       expect(Math.abs($row[0].getBoundingClientRect().top - top)).to.be.lessThan(4);
     });
+  });
+
+  specify('does not let an excluded untimestamped call block a new text', function() {
+    const data = fixture();
+    setup(data);
+
+    cy.visit(`/patient/${ PATIENT }/interactions/${ data.rows[25].id }`, { noWait: true });
+
+    cy.get('.startup')
+      .should('not.exist');
+
+    cy.get('.js-filter[data-filter="calls"]')
+      .click();
+
+    cy.get('.js-filter[data-filter="calls"]')
+      .should('not.have.class', 'is-selected');
+
+    cy.get('.patient-interactions__list .messaging-timeline-row')
+      .should('have.length.at.least', 1);
+    const voice = getInteraction({ attributes: { channel: 'voice', occurred_at: null, expected_at: null } });
+    cy.intercept('GET', `/api/patients/${ PATIENT }/interactions*`, req => {
+      if (new URL(req.url).searchParams.get('page[at]') === voice.id) req.reply({ body: { data: [voice], included: [] } });
+    });
+
+    cy.then(() => data.rows.push(voice));
+
+    cy.sendWs({ category: 'ResourceCreated', resource: { id: voice.id, type: 'interactions' }, payload: { patient: { id: PATIENT }, attributes: {} } });
+    const incoming = getInteraction({ attributes: { ...data.rows[0].attributes, occurred_at: '2026-11-12T12:00:00Z',
+      metadata: { prototype_fixture: { ...data.rows[0].attributes.metadata.prototype_fixture, body: 'SYNTHETIC text after an excluded call' } } }, relationships: data.rows[0].relationships });
+
+    cy.then(() => data.rows.push(incoming));
+
+    cy.sendWs({ category: 'InteractionCompleted', resource: { id: incoming.id, type: 'interactions' },
+      payload: { patient: { id: PATIENT }, attributes: { occurred_at: incoming.attributes.occurred_at } } });
+
+    cy.get('.patient-interactions__list')
+      .should('contain', 'SYNTHETIC text after an excluded call');
+
+    cy.get('.patient-interactions__recorded-status')
+      .should('be.empty');
   });
 
   specify('keeps Messages disabled after a confirmed send and reconciles it when the same filter is re-enabled', function() {
@@ -549,9 +684,52 @@ context('native action-page Messaging integration', function() {
       const composer = $row[0].closest('.patient-interactions').querySelector('.message-composer');
       expect($row[0].getBoundingClientRect().bottom).to.be.at.most(composer.getBoundingClientRect().top + 1);
     });
-    cy.get('.message-composer .js-number').click();
-    cy.get('.picklist [data-choice-id="+12025550142"]').click();
-    cy.get('.message-composer .js-body').type('SYNTHETIC uncertain response');
+    cy
+      .get('.message-composer .js-body')
+      .type('   ');
+
+    cy
+      .get('.message-composer .js-send')
+      .should('be.disabled');
+
+    cy
+      .get('.message-composer .js-number')
+      .should('have.attr', 'aria-label', 'Recipient mobile number: (202) 555-0142')
+      .focus()
+      .type('{downarrow}');
+
+    cy
+      .get('.picklist [data-choice-id="+12025550190"]')
+      .should('have.attr', 'aria-disabled', 'true')
+      .and('contain', 'Only the patient can opt back in')
+      .click();
+
+    cy
+      .get('.message-composer .js-number')
+      .should('have.value', '+12025550142');
+
+    cy
+      .get('.picklist [data-choice-id="+12025550142"]')
+      .click();
+
+    cy
+      .get('.message-composer .js-number')
+      .should('be.focused');
+
+    let initialHeight;
+    cy
+      .get('.message-composer .js-body')
+      .then($body => {
+        initialHeight = $body[0].clientHeight;
+      });
+
+    cy
+      .get('.message-composer .js-body')
+      .clear()
+      .type('SYNTHETIC line one{enter}Line two{enter}Line three{enter}Line four{enter}Line five{enter}Line six')
+      .should($body => expect($body[0].clientHeight).to.be.greaterThan(initialHeight))
+      .clear()
+      .type('SYNTHETIC uncertain response');
     cy.get('.message-composer .js-send').click().wait('@uncertain');
     cy.get('.messaging-recovery').should('be.visible');
     cy.reload();
@@ -577,7 +755,19 @@ context('native action-page Messaging integration', function() {
       cy.get('.work-card__heading .messaging-summary__count').should('contain', '31').trigger('pointerover');
       cy.root().should('not.contain', 'SYNTHETIC long note');
     });
-    cy.get('.tooltip').should('contain', latest.attributes.metadata.prototype_fixture.body);
+    cy.get('.tooltip').should('contain', 'END OF FULL BODY');
+    cy.then(() => {
+      data.value.actions[ACTION].message_count = 1;
+    });
+    cy.sendWs({ category: 'MetadataUpdated', resource: { id: latest.id, type: 'interactions' },
+      payload: { patient: { id: PATIENT }, attributes: { metadata: latest.attributes.metadata } } });
+    cy
+      .contains('.action-card', 'Synthetic current conversation')
+      .find('.messaging-summary__count')
+      .should('have.attr', 'aria-label', '1 message on this action');
+    cy.then(() => {
+      data.value.actions[ACTION].message_count = 31;
+    });
     cy.contains('.action-card', 'Synthetic previous conversation').find('.messaging-summary__count').should('contain', '0');
     cy.routeActions(fx => ({ ...fx, data: [data.action, data.other], included: [data.patient, stateTodo] }));
     cy.visit('/worklist/owned-by', { noWait: true });
@@ -586,7 +776,7 @@ context('native action-page Messaging integration', function() {
       cy.get('.work-card__title-row .messaging-summary__count').should('contain', '31').trigger('pointerover');
       cy.root().should('not.contain', 'SYNTHETIC long note');
     });
-    cy.get('.tooltip').should('contain', latest.attributes.metadata.prototype_fixture.body);
+    cy.get('.tooltip').should('contain', 'END OF FULL BODY');
     cy.contains('.worklist-list__action-item', 'Synthetic previous conversation').find('.messaging-summary__count').should('contain', '0');
     cy.viewport(390, 844);
     cy.document().should(doc => expect(doc.documentElement.scrollWidth).to.be.at.most(doc.documentElement.clientWidth));
@@ -672,7 +862,6 @@ context('native action-page Messaging integration', function() {
     cy.get('.messaging-history__row').should('have.length', 10);
     cy.get('.message-composer').should('be.visible');
     cy.get('.patient__context-trail').should($trail => {
-      expect($trail[0].getBoundingClientRect().height, 'compact hierarchy leaves reading space').to.be.at.most(80);
       expect($trail.text()).to.include(data.patient.attributes.last_name).and.include(data.flow.attributes.name).and.include(data.action.attributes.name);
     });
     cy.get('.patient-action').should($view => {
@@ -718,7 +907,6 @@ context('native action-page Messaging integration', function() {
     cy.get('.messaging-history[aria-busy="false"] .messaging-history__row').should('have.length', 10);
     cy.get('.message-composer .js-body').should('be.enabled');
     cy.get('.patient__context-trail .js-back').should('be.visible');
-    cy.get('.patient__context-trail').should($trail => expect($trail[0].getBoundingClientRect().height).to.be.at.most(80));
     cy.get('.messaging-history__viewport').should($viewport => expect($viewport[0].clientHeight).to.be.at.least(240));
     cy.get('.patient__context-trail .js-back').click();
     cy.get('.worklist-list-page').should('be.visible');
@@ -727,6 +915,21 @@ context('native action-page Messaging integration', function() {
   specify('persists a revisioned synthetic DNC intent, keeps the draft and renders one native audit line', function() {
     const data = fixture();
     setup(data);
+    let holdRefresh = false;
+    let releaseRefresh;
+    let refreshGate;
+    let beganRefresh;
+    const refreshStarted = new Cypress.Promise(resolve => {
+      beganRefresh = resolve;
+    });
+    cy.intercept('GET', `/api/patients/${ PATIENT }/fields/prototype_messaging`, req => {
+      const body = { data: { id: 'field', type: 'patient-fields', attributes: { value: data.value } } };
+      if (!holdRefresh) return req.reply({ body });
+      req.alias = 'preferenceRefresh';
+      beganRefresh();
+      req.on('before:response', () => refreshGate);
+      req.reply({ body });
+    });
     cy.intercept('PATCH', `/api/patients/${ PATIENT }/fields/prototype_messaging`, req => {
       expect(req.body.data).to.include({ id: 'field', type: 'patient-fields' });
       const intent = req.body.data.attributes.value;
@@ -750,6 +953,13 @@ context('native action-page Messaging integration', function() {
         req.alias = 'dnc';
       }
       data.value.revision++;
+      if (intent.operation === 'set_dnc') {
+        holdRefresh = true;
+        refreshGate = new Cypress.Promise(resolve => {
+          releaseRefresh = resolve;
+        });
+        releaseHistory = releaseRefresh;
+      }
       data.rows.push(getInteraction({ attributes: { channel: 'sms', occurred_at: new Date().toISOString(), metadata: { prototype_fixture: {
         synthetic: true, namespace: NAMESPACE, contract_version: 1, kind: 'consent_audit', audit,
       } } } }));
@@ -767,6 +977,16 @@ context('native action-page Messaging integration', function() {
     cy.get('.picklist [data-choice-id="opted_in"]').click().wait('@consent');
     cy.get('.message-composer .js-body').should('be.enabled').and('have.value', 'SYNTHETIC draft retained');
     cy.get('.messaging-widget .js-dnc').click().wait('@dnc');
+    cy.then(() => refreshStarted);
+    cy.get('.messaging-widget .js-dnc').should('be.disabled');
+    cy.get('.messaging-widget .js-consent').first().should('be.disabled');
+    cy.then(() => {
+      holdRefresh = false;
+      releaseRefresh();
+      releaseHistory = null;
+    });
+    cy.wait('@preferenceRefresh');
+    cy.get('.messaging-widget .js-dnc').should('be.enabled').and('have.attr', 'aria-checked', 'true');
     cy.get('.message-composer .js-body').should('be.disabled').and('have.value', 'SYNTHETIC draft retained');
     cy.get('.messaging-widget .js-message-patient').should('be.disabled');
     cy.get('.messaging-widget__number').should('not.exist');

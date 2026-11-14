@@ -107,6 +107,7 @@ export default View.extend({
     } catch {
       // The widget's independent composer eligibility remains fail-closed.
       if (!controller.signal.aborted && !this.isDestroyed()) {
+        this.stopListening(this.actions);
         this.actions = new Backbone.Collection();
         this.actionsError = true;
         this.render();
@@ -163,7 +164,9 @@ export default View.extend({
       await Radio.request('entities', 'update:messagingPrototype:context', {
         patientId: this.patient.id, revision: this.context.value.revision, ...intent,
       }, { signal: new AbortController().signal });
-      this.status = '';
+      if (this.isDestroyed()) return;
+      const refreshed = await this.context.refresh({ fresh: true });
+      this.status = refreshed ? '' : intl.patients.messaging.preferenceError;
     } catch {
       this.status = intl.patients.messaging.preferenceError;
     }

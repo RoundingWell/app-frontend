@@ -3,10 +3,8 @@ import hbs from 'handlebars-inline-precompile';
 import { Radio, View } from 'marionette';
 import { testScope } from '@mnjs/test/cypress';
 
-import { _Model as Interaction } from 'js/entities-service/entities/interactions';
 import service from 'js/entities-service/messaging-prototype';
 import { NAMESPACE, PATIENT_IDS, WORKSPACE_ID } from 'js/entities-service/messaging-prototype/contract';
-import Tooltip from 'js/components/tooltip';
 import { SummaryView } from './summary_view';
 
 context('action-owned latest text preview', function() {
@@ -50,49 +48,5 @@ context('action-owned latest text preview', function() {
     cy.get('[data-first] .messaging-summary__count').should('contain', '8');
     cy.get('[data-second] .messaging-summary__count').should('contain', '10');
     cy.then(() => expect(reads).to.equal(2));
-  });
-
-  specify('reads the linked native full body instead of treating the 280 character preview as complete', function() {
-    const scope = testScope();
-    const body = `${ 'SYNTHETIC complete latest conversation text. '.repeat(30) }END OF FULL BODY`;
-    const action = new Backbone.Model({ id: 'action', options: { embed: 'compose' }, _patient: { id: 'patient' }, _state: { id: 'state' } });
-    action.getPatient = () => new Backbone.Model({ id: 'patient' });
-    action.getState = () => new Backbone.Model({ id: 'state', status: 'queued' });
-    const full = new Interaction({ id: 'latest', channel: 'sms', direction: 'outbound', occurred_at: '2026-11-12T12:00:00Z', metadata: {
-      prototype_fixture: { synthetic: true, namespace: NAMESPACE, contract_version: 1, kind: 'message', body, auto_reply: 'none', delivery: { outcome: 'unconfirmed' } },
-    } });
-    let count = 7;
-    scope.reply(Radio, 'entities', 'fetch:messagingPrototype:context', async() => ({
-      synthetic: true, namespace: NAMESPACE, contract_version: 1, patient_id: 'patient', messaging_enabled: true,
-      recipients: [], actions: { action: { state_id: 'state', composer: { enabled: false }, message_count: count, latest_text: count ? body.slice(0, 280) : null, latest_interaction_id: 'latest' } },
-    }));
-    const read = cy.stub().callsFake(async query => {
-      expect(query).to.deep.equal({ patientId: 'patient', at: 'latest', limit: 1 });
-      return new Backbone.Collection([full]);
-    });
-    scope.reply(Radio, 'entities', 'fetch:interactions:collection:byPatient', read);
-    cy.viewport(390, 844);
-    cy.mount(root => {
-      Tooltip.setRegion(root.getRegion('tooltip'));
-      return new SummaryView({ action, showPreview: true });
-    });
-    cy.get('.messaging-summary__count').should('contain', '7').trigger('pointerover');
-    cy.get('.tooltip').should('contain', 'END OF FULL BODY');
-    cy.get('.messaging-summary__count').trigger('mouseout');
-    cy.get('.messaging-summary').should('not.contain', 'SYNTHETIC complete latest conversation text');
-    cy.get('.messaging-summary__count').focus();
-    cy.get('.tooltip').should('contain', 'END OF FULL BODY');
-    cy.then(() => expect(read).to.have.been.calledOnce);
-    cy.then(() => {
-      count = 1;
-      Radio.trigger('messaging-prototype', 'context:changed', { patientId: 'patient' });
-    });
-    cy.get('.messaging-summary__count').should('have.attr', 'aria-label', '1 message on this action');
-    cy.then(() => {
-      count = 0;
-      Radio.trigger('messaging-prototype', 'context:changed', { patientId: 'patient' });
-    });
-    cy.get('.messaging-summary__count').should('contain', '0');
-    cy.get('.messaging-summary-tooltip').should('not.exist');
   });
 });

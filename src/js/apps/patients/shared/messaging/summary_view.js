@@ -53,7 +53,8 @@ export const SummaryView = View.extend({
   },
   async readPreviewBody(id, signal) {
     if (this.latestBody?.id === id) return this.latestBody.body;
-    const collection = await Radio.request('entities', 'fetch:interactions:collection:byPatient', { patientId: this.getOption('action').getPatient().id, at: id, limit: 1 }, { signal });
+    // Reading a text body must not rehydrate its action and replace this tooltip.
+    const collection = await Radio.request('entities', 'fetch:interactions:collection:byPatient', { patientId: this.getOption('action').getPatient().id, at: id, limit: 1, include: '' }, { signal });
     signal.throwIfAborted();
     const body = presentInteraction(collection.get(id))?.body;
     if (!body) throw new Error('The full latest text was not available.');

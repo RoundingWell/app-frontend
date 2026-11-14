@@ -361,6 +361,9 @@ export default App.extend({
     if (input.kind === 'replace') {
       if (this.collection) this.stopListening(this.collection);
       this.collection = Radio.request('entities', 'interactions:collection', models, { comparator: this.nativeMessaging ? (left, right) => comparePositions(position(left), position(right)) : compareInteractions });
+      // Attribute-specific events precede the cards' generic change renders and
+      // the date regrouping below. Capture their geometry before either moves it.
+      this.listenTo(this.collection, 'change:metadata change:cancelled_at change:occurred_at change:expected_at', this.retainReadingPoint);
       this.listenTo(this.collection, 'change:occurred_at change:expected_at', () => this.collection.sort());
       view.showInteractions(this.collection);
       if (!input.at) view.scrollToLatest();
@@ -419,9 +422,13 @@ export default App.extend({
       signal.throwIfAborted();
       if (this.deletedInteractions.has(id)) continue;
       const model = collection.get(id);
-      if (!model?.getTimestamp()) throw new Error('The new interaction is not readable yet.');
-      if (!input.channels || contains(input.channels, model.get('channel'))) required.push(model);
-      else this.unloadedInteractions.delete(id);
+      if (!model) throw new Error('The new interaction is not readable yet.');
+      if (input.channels && !contains(input.channels, model.get('channel'))) {
+        this.unloadedInteractions.delete(id);
+        continue;
+      }
+      if (!model.getTimestamp()) throw new Error('The new interaction is not readable yet.');
+      required.push(model);
     }
     return required;
   },

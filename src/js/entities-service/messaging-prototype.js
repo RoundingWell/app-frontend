@@ -39,7 +39,6 @@ function unconfirmedSend(error, id) {
 }
 
 function confirmResponse(response, responseData, id) {
-  if (!response.ok) throw { response, responseData };
   if (response.status !== 201 || responseData.data?.id !== id) throw new Error('The API did not confirm this interaction.');
 }
 
@@ -210,15 +209,16 @@ const Entity = BaseEntity.extend({
         method: 'POST', data: JSON.stringify({ data }), signal,
       });
       if (!response) throw new Error('The request ended without a confirmation.');
+      if (!response.ok) throw { response };
       responseData = await getData(response, 'json');
       confirmResponse(response, responseData, data.id);
     } catch(error) {
       const failure = unconfirmedSend(error, data.id);
-      if (failure.outcome === 'rejected') clearAttempt(scope);
+      if (failure.outcome === 'rejected') clearAttempt(scope, data.id);
       else announce('send:uncertain', { patientId, interactionId: data.id });
       throw failure;
     }
-    clearAttempt(scope);
+    clearAttempt(scope, data.id);
     return this.acceptConfirmation(patientId, responseData, scope);
   },
   acceptConfirmation(patientId, responseData, scope) {
@@ -245,7 +245,7 @@ const Entity = BaseEntity.extend({
     const model = collection.get(attempt.id);
     if (!model) return { confirmed: false, interactionId: attempt.id };
     if (scope !== attemptScope(patientId)) return { confirmed: false, interactionId: attempt.id };
-    clearAttempt(scope);
+    clearAttempt(scope, attempt.id);
     rememberConfirmation(patientId, model);
     announce('interaction:recorded', { patientId, model });
     return { confirmed: true, model };

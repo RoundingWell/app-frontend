@@ -4,6 +4,7 @@ import { testScope } from '@mnjs/test/cypress';
 
 import service from '../messaging-prototype';
 import { NAMESPACE, WORKSPACE_ID, PATIENT_IDS } from './contract';
+import { attemptScope, attemptedSend, retainAttempt } from './send-attempts';
 import { acknowledgeConfirmations, pendingConfirmations, rememberConfirmation } from './confirmed-sends';
 
 function fixtureContext() {
@@ -237,6 +238,7 @@ context('record-only Messaging service', function() {
     cy.intercept('POST', `/api/patients/${ PATIENT_IDS[0] }/interactions`, req => {
       requests++;
       if (requests === 1) req.reply({ statusCode: 409, body: { errors: [{ detail: 'Rejected synthetic request' }] } });
+      else if (requests === 2) req.reply({ statusCode: 413, headers: { 'content-type': 'text/html' }, body: '<p>Rejected</p>' });
       else req.reply({ forceNetworkError: true });
     });
     cy.then(async() => {
@@ -245,13 +247,35 @@ context('record-only Messaging service', function() {
       expect(rejected).to.include({ outcome: 'rejected' });
       expect(rejected.interactionId).to.be.a('string');
       Date.now.returns(now += 2000);
+      const htmlRejection = await service.sendInteraction(params, { signal }).catch(error => error);
+      expect(htmlRejection).to.include({ outcome: 'rejected' });
+      expect(attemptedSend(params.patientId)).to.equal(undefined);
+      Date.now.returns(now += 2000);
       const uncertain = await service.sendInteraction(params, { signal }).catch(error => error);
       expect(uncertain).to.include({ outcome: 'uncertain' });
       expect(uncertain.interactionId).not.to.equal(rejected.interactionId);
       const repeated = await service.sendInteraction(params, { signal }).catch(error => error);
       expect(repeated).to.include({ outcome: 'uncertain', interactionId: uncertain.interactionId });
-      expect(requests).to.equal(2);
+      expect(requests).to.equal(3);
       expect(recorded).not.to.have.been.called;
+    });
+  });
+
+  specify('does not clear a newer uncertain send when an older recovery completes late', function() {
+    const patientId = PATIENT_IDS[0];
+    const first = new Backbone.Model({ id: 'first-attempt' });
+    let release;
+    testScope().reply(Radio, 'entities', 'fetch:interactions:collection:byPatient', () => new Cypress.Promise(resolve => {
+      release = () => resolve(new Backbone.Collection([first]));
+    }));
+    cy.then(async() => {
+      const scope = attemptScope(patientId);
+      retainAttempt(scope, first.id);
+      const recovery = service.reconcileSend({ patientId }, { signal });
+      retainAttempt(scope, 'newer-attempt');
+      release();
+      expect(await recovery).to.include({ confirmed: true, model: first });
+      expect(attemptedSend(patientId)).to.deep.equal({ id: 'newer-attempt' });
     });
   });
 
