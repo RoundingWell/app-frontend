@@ -1,0 +1,21 @@
+.messaging-consent-audit {
+  background: var(--color-page-bg);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+  list-style: none;
+  min-width: 0;
+  padding: 0 0 16px 20px;
+}
+
+.messaging-consent-audit__content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  overflow-wrap: anywhere;
+
+  strong {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,6 @@
+<div class="messaging-consent-audit__content">
+  <span>{{#each audit.segments}}{{#if strong}}<strong>{{ text }}</strong>{{else}}{{ text }}{{/if}}{{/each}}</span>
+  <span class="messaging-consent-audit__scope">{{ audit.scopeLabel }}{{#if audit.number}} · {{formatPhoneNumber audit.number}}{{/if}}</span>
+  {{#if audit.source}}<span class="messaging-consent-audit__source">{{ audit.source }}</span>{{/if}}
+  <time class="messaging-consent-audit__time" datetime="{{ audit.time.datetime }}">{{ audit.time.label }}</time>
+</div>

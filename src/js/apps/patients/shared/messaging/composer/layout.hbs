@@ -1,0 +1,11 @@
+<div class="message-composer__recipient">
+  {{#if sender}}<span class="message-composer__sender">{{ sender }}</span>{{/if}}
+  <label class="message-composer__recipient-name" for="{{ numberId }}">{{ recipient }}</label>
+  <div data-number-region></div>
+</div>
+<textarea class="message-composer__input js-body" id="{{ bodyId }}" aria-label="{{ placeholder }}" aria-describedby="{{ reasonId }} {{ statusId }}" placeholder="{{ placeholder }}" rows="2" {{#if disabled}}disabled{{/if}}></textarea>
+<p class="message-composer__reason js-reason" id="{{ reasonId }}" role="status">{{#unless hideSend}}{{ reason }}{{/unless}}</p>
+<div class="message-composer__footer">
+  <p class="message-composer__status js-status" id="{{ statusId }}" role="status" aria-live="polite"></p>
+  <button class="button button--positive message-composer__send js-send" type="submit" {{#if hideSend}}hidden{{/if}} disabled>{{far "paper-plane-top"}} <span class="js-send-label">{{ send }}</span></button>
+</div>
