@@ -260,3 +260,49 @@
 .patient__context-link .icon {
   margin-right: 8px;
 }
+
+@media (width <= 560px) {
+  .patient__frame:has(.messaging-history) .patient__context-trail {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-block: 8px;
+
+    .patient__context-link--back {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .patient__context-segment:first-of-type {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+
+    &:has(> .patient__context-link--back) .patient__context-segment:first-of-type {
+      grid-column: 2;
+    }
+
+    .patient__context-segment:nth-of-type(2) {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .patient__context-segment:nth-of-type(3) {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .patient__context-segment:nth-of-type(2):last-child {
+      grid-column: 1 / -1;
+    }
+
+    .patient__context-segment > :not(.icon) {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .patient__context-segment > .icon {
+      flex: none;
+    }
+  }
+}

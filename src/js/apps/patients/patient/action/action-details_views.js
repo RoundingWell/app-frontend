@@ -12,6 +12,7 @@ import InputWatcherBehavior from 'js/behaviors/input-watcher';
 import { StateComponent, OwnerComponent, DueView, TimeComponent, DurationComponent } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateTimeView, ReadOnlyDurationView } from 'js/apps/patients/shared/read-only_views';
 import { DialerView } from 'js/apps/patients/patient/action/action-dialer_views';
+import { showMessagingSummary, canShowMessagingSummary } from 'js/apps/patients/shared/messaging/summary_view';
 
 import ActionDetailsTemplate from './action-details.hbs';
 import ActionEditTemplate from './action-edit.hbs';
@@ -50,10 +51,17 @@ const NameView = View.extend({
       </span>
     {{/if}}
     <span class="patient-action__name" data-testid="patient-action-name">{{ name }}</span>
+    {{#if messaging}}<span data-message-summary-region></span>{{/if}}
   `,
+  regions: { messages: '[data-message-summary-region]' },
+  childViewTriggers: { 'click:messages': 'click:messages' },
+  onRender() {
+    showMessagingSummary(this, 'messages', { action: this.model, showPreview: true });
+  },
   templateContext() {
     return {
       icon: getActionIcon(this.model),
+      messaging: canShowMessagingSummary(this.model),
     };
   },
 });
@@ -148,6 +156,7 @@ const ReadOnlyActionView = View.extend({
     },
   },
   childViewTriggers: {
+    'click:messages': 'click:messages',
     'click:attachments': 'click:attachments',
     'click:comments': 'click:comments',
   },
@@ -199,6 +208,7 @@ const ActionView = View.extend({
     return getActionContentClassName(this.model);
   },
   childViewTriggers: {
+    'click:messages': 'click:messages',
     'save': 'save',
     'cancel': 'cancel',
     'click:attachments': 'click:attachments',

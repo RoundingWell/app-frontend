@@ -1,6 +1,68 @@
 ---
 careOptsFrontend:
   patients:
+    messaging:
+      heading: Messages
+      latest: Latest
+      earlier: Show earlier messages
+      beginning: Beginning of conversation
+      empty: No messages yet.
+      loading: Loading messages…
+      retry: Retry
+      refreshError: Messages could not be refreshed. Your recorded text will not be sent again.
+      prototype: Synthetic conversation. Texts are recorded without contacting an SMS provider.
+      sms: SMS
+      viaSms: via SMS
+      viaAutoReply: via SMS auto-reply
+      showMore: Show more
+      inbound: Inbound
+      outbound: Outbound
+      scheduled: Scheduled
+      cancelled: Cancelled
+      notSent: 'Not sent:'
+      notDelivered: Not delivered
+      unconfirmed: Recorded · delivery unconfirmed
+      sent: Sent · delivery unconfirmed
+      sending: Sending…
+      optedOut: This number is opted out of texts.
+      patientStopped: This number was opted out by texting STOP. Only the patient can opt back in by texting START.
+      cannotReceive: This number cannot receive texts.
+      doNotContact: Do Not Contact is enabled for this patient.
+      providerRejection: The provider could not deliver this text.
+      phoneNumber: Phone number
+      patientWide: Do Not Contact · All patient numbers
+      recordedThat: recorded that
+      auditTo: to
+      importedFrom: Imported from
+      unknownImport: an import
+      byTextingStop: by texting STOP
+      byTextingStart: by texting START
+      optedInAudit: opted in to texts
+      optedOutAudit: opted out of texts
+      dncEnabledAudit: enabled Do Not Contact
+      dncDisabledAudit: disabled Do Not Contact
+      optInStatus: Opt In Status
+      openActionsError: Open message actions could not be loaded.
+      openMessageActions: Open Message Actions
+      messagePatient: Message Patient
+      optedIn: Opted In
+      optedOutLabel: Opted Out
+      noMobile: No mobile number
+      contextError: Messaging availability could not be loaded.
+      recover: Check recorded text
+      uncertain: Recording is unconfirmed. Check before trying again.
+      stillUncertain: This request is still unconfirmed. It has not been retried.
+      messageCount: '{ count } messages on this action'
+      recordedInOtherWindow: Text recorded. Your timeline position and filters have been preserved.
+      timelineRefreshFailed: Timeline refresh is incomplete. Your position and filters have been preserved.
+      confirmedRefreshFailed: Text recorded. Timeline refresh is incomplete.
+      retryRefresh: Retry refresh
+      consentScenarios: Synthetic consent scenarios
+      dnc: Do Not Contact
+      updating: Updating synthetic preference…
+      preferenceError: Preference update was not confirmed. Current values have been refreshed; the change was not retried.
+      prototypePreferences: These controls change only the synthetic Messaging context, not native contact subscriptions.
+      previewOnly: Latest text preview
     patient:
       interactions:
         interactionsViews:

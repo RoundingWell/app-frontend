@@ -1,0 +1,13 @@
+<div class="messaging-history__toolbar">
+  <strong>{{ copy.heading }}</strong><span class="js-visible-date"></span>
+  <button class="button button--text js-latest" type="button">{{ copy.latest }}</button>
+</div>
+<p class="messaging-history__disclosure">{{ copy.prototype }}</p>
+<div class="messaging-history__status js-status" role="status"></div>
+<div class="messaging-history__viewport js-viewport" tabindex="0" role="region" aria-label="{{ copy.heading }}">
+<button class="button button--text messaging-history__earlier js-earlier" type="button">{{ copy.earlier }}</button>
+<p class="messaging-history__beginning js-beginning" hidden>{{ copy.beginning }}</p>
+<div data-history-region></div>
+</div>
+<section class="messaging-history__composer" data-composer-region></section>
+<div data-recovery-region></div>

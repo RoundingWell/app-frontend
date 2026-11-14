@@ -1,0 +1,102 @@
+.patient-action__messages {
+  flex: none;
+  margin-inline: auto;
+  width: var(--content-detail-width);
+}
+
+.messaging-history {
+  display: flex;
+  flex-direction: column;
+  height: var(--messaging-history-height, clamp(420px, calc(100dvh - 240px), 760px));
+  margin-top: 24px;
+  min-width: 0;
+}
+
+.messaging-history__viewport {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding-inline: 1px;
+}
+
+.messaging-history__toolbar {
+  align-items: center;
+  background: var(--color-page-bg);
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  .button {
+    margin-left: auto;
+  }
+}
+
+.messaging-history__disclosure,
+.messaging-history__status,
+.messaging-history__beginning {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.messaging-history__earlier {
+  display: block;
+  margin: 8px auto 16px;
+}
+
+.messaging-history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.messaging-history__row {
+  list-style: none;
+}
+
+.messaging-history__day {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.messaging-history__composer {
+  background: var(--color-page-bg);
+  flex: none;
+  scroll-margin-bottom: 16px;
+}
+
+.messaging-history__beginning {
+  text-align: center;
+}
+
+.messaging-history [hidden] {
+  display: none;
+}
+
+@media (width <= 900px) {
+  .patient-action__messages {
+    flex: none;
+    width: calc(100% - 32px);
+  }
+}
+
+.messaging-history__composer .message-composer__input {
+  max-height: min(24dvh, 160px);
+}
+
+@media (width <= 560px) {
+  .messaging-history__composer .message-composer__recipient {
+    gap: 4px 8px;
+    padding: 8px 12px;
+  }
+
+  .messaging-history__composer .message-composer__reason:empty {
+    display: none;
+  }
+}

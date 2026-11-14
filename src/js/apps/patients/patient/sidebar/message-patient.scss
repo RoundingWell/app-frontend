@@ -1,0 +1,55 @@
+.messaging-widget {
+  margin: 16px;
+  padding: 16px;
+
+  .button {
+    margin-top: 12px;
+    width: 100%;
+  }
+}
+
+.messaging-widget__number {
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 4px 12px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+}
+
+.messaging-widget__scenarios {
+  font-size: 12px;
+  line-height: 18px;
+  margin-top: 12px;
+}
+
+.messaging-widget__preference {
+  display: block;
+  margin-block: 8px;
+}
+
+.messaging-widget__opted-out {
+  color: color(red);
+}
+
+.messaging-widget__subheading {
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  margin-top: 16px;
+  text-transform: uppercase;
+}
+
+.messaging-widget__stop-reason {
+  color: var(--color-text-secondary);
+  margin: 0;
+  width: 100%;
+}
+
+.messaging-widget__action {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  white-space: normal;
+}

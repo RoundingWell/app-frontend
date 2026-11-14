@@ -14,6 +14,7 @@ import stopEventPropagation from 'js/utils/stop-event-propagation';
 import { StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
 
+import { showMessagingSummary } from 'js/apps/patients/shared/messaging/summary_view';
 import ActionItemTemplate from './action-item.hbs';
 import ClosedLayoutTemplate from './closed-layout.hbs';
 import FlowItemTemplate from './flow-item.hbs';
@@ -103,6 +104,7 @@ const ActionItemView = View.extend({
   },
   behaviors: [RowBehavior, StatusBehavior],
   regions: {
+    messaging: '[data-message-summary-region]',
     details: '[data-details-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
@@ -135,6 +137,8 @@ const ActionItemView = View.extend({
     this.navigateToAction();
   },
   onRender() {
+    const messaging = showMessagingSummary(this, 'messaging', { action: this.model, showPreview: true });
+    if (messaging) this.listenTo(messaging, 'click:messages', () => this.navigateToAction({ section: 'messages' }));
     this.canEdit = this.model.canEdit();
 
     this.showDetailsTooltip();
