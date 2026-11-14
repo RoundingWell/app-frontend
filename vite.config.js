@@ -20,6 +20,8 @@ import handlebars from './config/vite-plugin-handlebars-loader.js';
 import inlineHbsCompile from './config/vite-plugin-inline-handlebars.js';
 import fontawesome from './config/vite-plugin-fontawesome.js';
 import startupLogo from './config/vite-plugin-startup-logo.js';
+import { loadMessagingBindings } from './config/messaging-prototype-bindings.js';
+import messagingTestBindings from './test/support/messaging-bindings.js';
 
 dayjs.extend(utcPlugin);
 
@@ -136,6 +138,7 @@ babelPlugin.enforce = 'pre';
 
 export const cypressConfig = defineConfig({
   mode: 'test',
+  define: { _MESSAGING_BINDINGS_: JSON.stringify(messagingTestBindings) },
   plugins: [
     babelPlugin,
     inlineHbsCompile(),
@@ -217,6 +220,7 @@ export default defineConfig(({ mode }) => {
       '_PRODUCTION_': JSON.stringify(isProduction),
       '_DEVELOP_': JSON.stringify(mode === 'development'),
       '_TEST_': JSON.stringify(isTest),
+      '_MESSAGING_BINDINGS_': JSON.stringify(isTest ? messagingTestBindings : loadMessagingBindings(env.MESSAGING_PROTOTYPE_BINDINGS_FILE)),
       '_NOW_': JSON.stringify(Date.now()),
     },
     resolve,
