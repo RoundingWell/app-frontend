@@ -72,7 +72,7 @@ async function extendEdge(models, positions, required, newer, hasMore, read, sig
   let exhausted = false;
   // An exhausted edge must be re-proven. A middle window retains its unknown
   // outer interval once connected pages cover the required row.
-  while (wanted.size || (!hasMore && !exhausted)) {
+  while (wanted.size || !hasMore) {
     const page = await read({ [newer ? 'after' : 'before']: cursor.id, limit });
     signal.throwIfAborted();
     appendEdge(models, positions, page, cursor, newer);

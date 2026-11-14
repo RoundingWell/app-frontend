@@ -12,6 +12,7 @@ function model(id, timestamp, attributes = {}) {
 context('synthetic history coverage', function() {
   specify('scans raw hidden-only pages and requires a terminal verification read', async function() {
     const rows = Array.from({ length: 30 }, (value, index) => model(String(index).padStart(3, '0'), `2026-11-${ String(index + 1).padStart(2, '0') }T12:00:00Z`)).reverse();
+    rows.slice(0, 10).forEach(row => row.set({ occurred_at: null, expected_at: '2099-11-01T12:00:00Z' }));
     const reads = [];
     const result = await readSnapshot(async({ before, limit }) => {
       reads.push(before);
@@ -20,8 +21,8 @@ context('synthetic history coverage', function() {
     }, { signal: new AbortController().signal });
     expect(result).to.have.length(30);
     expect(reads).to.have.length(4);
-    const visible = visibleHistory(result, row => ({ kind: 'message', actionId: row.id === '029' ? 'current' : 'other' }), 'current', Date.parse('2026-11-01T00:00:00Z'));
-    expect(visible).to.have.length(30);
+    const visible = visibleHistory(result, () => ({ kind: 'message', actionId: 'other' }), 'current', Date.parse('2026-11-01T00:00:00Z'));
+    expect(visible.map(row => row.id)).to.deep.equal(Array.from({ length: 20 }, (value, index) => String(index).padStart(3, '0')));
     const future = model('future', null, { expected_at: '2099-11-01T12:00:00Z' });
     expect(visibleHistory([future], () => ({ kind: 'message', actionId: 'other' }), 'current')).to.have.length(0);
     expect(visibleHistory([future], () => ({ kind: 'message', actionId: 'current' }), 'current')).to.have.length(1);

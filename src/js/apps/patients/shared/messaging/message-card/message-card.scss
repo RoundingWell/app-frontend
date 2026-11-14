@@ -133,6 +133,7 @@
   margin: 8px 0 0;
 }
 
+.messaging-card--failed .messaging-card__status,
 .messaging-card--failed .messaging-card__reason,
 .messaging-card--not-sent .messaging-card__reason {
   color: color(red);

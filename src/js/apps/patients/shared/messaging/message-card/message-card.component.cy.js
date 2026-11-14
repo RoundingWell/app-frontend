@@ -87,7 +87,10 @@ context('isolated message card presentation contract', function() {
       .should('contain', 'Not delivered')
       .find('.messaging-card__reason')
       .should('contain', 'This number can\'t receive texts.')
-      .and('contain', '(615) 555-0190');
+      .and('contain', '(615) 555-0190')
+      .then($reason => {
+        cy.get('.messaging-card__status').should('have.css', 'color', $reason.css('color'));
+      });
 
     cy
       .then(() => {
@@ -167,10 +170,12 @@ context('isolated message card presentation contract', function() {
     cy.then(() => model.set({ status: 'failed', reason: 'This number cannot receive texts.' }));
     cy.get('.messaging-card').should('be.visible').and('contain', 'This number cannot receive texts.');
     cy.get('.messaging-card__bubble').should('not.exist');
+    cy.then(() => model.set({ body: null, reason: null }));
+    cy.get('.messaging-card').should('not.be.visible').and('be.empty');
   });
 
   specify('escapes text, preserves line breaks and only links HTTP(S) URLs', function() {
-    const body = '<img src=x onerror=alert(1)>\nVisit https://example.org/help?q=1&x=2. Then javascript:alert(1) and data:text/html,test';
+    const body = '<img src=x onerror=alert(1)>\nVisit https://example.org/help?q=1&x=2. Also (https://example.org/Foo_(bar)). Then javascript:alert(1) and data:text/html,test';
     mountMessage(message({ body }));
 
     cy
@@ -182,9 +187,11 @@ context('isolated message card presentation contract', function() {
     cy
       .get('.messaging-card__body')
       .find('a')
-      .should('have.length', 1)
+      .should('have.length', 2)
+      .first()
       .and('have.attr', 'href', 'https://example.org/help?q=1&x=2')
       .and('have.attr', 'rel', 'noopener noreferrer');
+    cy.get('.messaging-card__body a').last().should('have.attr', 'href', 'https://example.org/Foo_(bar)');
   });
 
   specify('measures overflow, expands with the keyboard, retains expansion and resets on replacement', function() {

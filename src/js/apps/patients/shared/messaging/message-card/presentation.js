@@ -21,15 +21,28 @@ export function presentMessage(interaction, currentActionId, adapter) {
 // Text is always escaped by Handlebars, including matched URLs. Limit clickable
 // schemes to HTTP(S); punctuation outside the URL stays in the message.
 export function messageSegments(body = '') {
+  const text = body ?? '';
   const segments = [];
   const pattern = /https?:\/\/[^\s<>"']+/gi;
   let cursor = 0;
-  for (const match of body.matchAll(pattern)) {
-    const url = match[0].replace(/[.,!?;:)\]}]+$/, '');
-    segments.push({ text: body.slice(cursor, match.index) });
+  for (const match of text.matchAll(pattern)) {
+    const url = trimUrlEnd(match[0]);
+    segments.push({ text: text.slice(cursor, match.index) });
     segments.push({ text: url, href: url });
     cursor = match.index + url.length;
   }
-  segments.push({ text: body.slice(cursor) });
+  segments.push({ text: text.slice(cursor) });
   return segments;
+}
+
+function trimUrlEnd(value) {
+  const pairs = { ')': '(', ']': '[', '}': '{' };
+  let url = value;
+  while (/[.,!?;:)\]}]$/.test(url)) {
+    const last = url.at(-1);
+    const opening = pairs[last];
+    if (opening && url.split(opening).length >= url.split(last).length) break;
+    url = url.slice(0, -1);
+  }
+  return url;
 }
