@@ -52,7 +52,8 @@ careOptsFrontend:
       recover: Check recorded text
       uncertain: Recording is unconfirmed. Check before trying again.
       stillUncertain: This request is still unconfirmed. It has not been retried.
-      messageCount: '{ count } messages on this action'
+      messageCount: '{count, plural, one {# message on this action} other {# messages on this action}}'
+      actionDone: This action is done.
       recordedInOtherWindow: Text recorded. Your timeline position and filters have been preserved.
       timelineRefreshFailed: Timeline refresh is incomplete. Your position and filters have been preserved.
       confirmedRefreshFailed: Text recorded. Timeline refresh is incomplete.
@@ -300,6 +301,24 @@ careOptsFrontend:
           label: Schedule for
           title: Schedule for { owner }
     shared:
+      messaging:
+        composer:
+          send: Send
+          sending: Sending…
+          sent: Text sent.
+          failed: Could not send this text. Your draft is saved. Try again.
+          unconfirmed: Recording is unconfirmed. Your draft is saved. Check the recorded text before trying again.
+          refreshFailed: Text sent. History could not refresh; reopen Interactions to see it.
+          unavailable: Texting is unavailable.
+          removed: This number is no longer available.
+          chooseNumber: Choose a mobile number
+          recipient: 'To {name}'
+          placeholder: 'Write a text to {name}…'
+          numberLabel: Recipient mobile number
+          sender: 'Send as {name}'
+          heading: New Message
+          scheduledAt: This message is scheduled for {time}.
+          scheduled: This message is scheduled.
       interactions:
         interactionItemView:
           showMore: Show more

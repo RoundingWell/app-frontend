@@ -1,6 +1,8 @@
 import Backbone from 'backbone';
 import { Radio } from 'marionette';
 
+import { getPatientFieldId } from 'support/api/patient-fields';
+
 import { NAMESPACE } from 'js/entities-service/messaging-prototype/contract';
 
 import ContextSession from './context-session';
@@ -79,6 +81,29 @@ context('Messaging host context lifetime', function() {
       expect(read).to.have.been.calledOnce;
       Radio.trigger('messaging-prototype', 'interaction:recorded', { patientId: 'patient' });
       expect(read).to.have.been.calledTwice;
+    });
+  });
+
+  specify('recognizes native field IDs without requiring a hydrated notification model', function() {
+    const read = cy.stub().resolves(fixtureContext());
+    session = new ContextSession({ patientId: 'patient', read });
+    cy.then(async() => {
+      await session.refresh();
+      const notify = (patientId, name) => {
+        const id = getPatientFieldId(patientId, name);
+        Radio.trigger('ws', 'message', { category: 'FieldUpdated', resource: { type: 'patient-fields', id } }, new Backbone.Model({ id }));
+      };
+      notify('other', 'phones');
+      notify('patient', 'unrelated');
+      expect(read).to.have.been.calledOnce;
+      for (const name of ['phones', 'prototype_messaging']) {
+        const updated = new Promise(resolve => session.once('context:updated', resolve));
+        notify('patient', name);
+        expect(session.state.get('enabled'), 'the affected field invalidates eligibility immediately').to.equal(false);
+        await updated;
+        expect(session.state.get('enabled')).to.equal(true);
+      }
+      expect(read).to.have.been.calledThrice;
     });
   });
 });

@@ -84,10 +84,15 @@ context('action-owned latest text preview', function() {
     cy.get('.tooltip').should('contain', 'END OF FULL BODY');
     cy.then(() => expect(read).to.have.been.calledOnce);
     cy.then(() => {
+      count = 1;
+      Radio.trigger('messaging-prototype', 'context:changed', { patientId: 'patient' });
+    });
+    cy.get('.messaging-summary__count').should('have.attr', 'aria-label', '1 message on this action');
+    cy.then(() => {
       count = 0;
       Radio.trigger('messaging-prototype', 'context:changed', { patientId: 'patient' });
     });
     cy.get('.messaging-summary__count').should('contain', '0');
-    cy.get('.messaging-summary__preview').should('not.exist');
+    cy.get('.messaging-summary-tooltip').should('not.exist');
   });
 });

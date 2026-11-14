@@ -146,8 +146,10 @@ context('native action-page Messaging integration', function() {
         });
       });
       cy.visit(path, { noWait: true });
-      if (surface === 'action') cy.get('.messaging-history .js-status').should('contain', 'Messages could not be refreshed');
-      else cy.get('.patient-interactions__status').should('contain', 'Interactions could not be loaded');
+      if (surface === 'action') {
+        cy.get('.messaging-history .js-status').should('contain', 'Messages could not be refreshed');
+        cy.get('.messaging-history').should('have.attr', 'aria-busy', 'false');
+      } else cy.get('.patient-interactions__status').should('contain', 'Interactions could not be loaded');
       cy.get('.messaging-widget .js-message-patient').should('be.enabled');
       if (surface === 'interactions') {
         cy.then(() => {
@@ -239,6 +241,7 @@ context('native action-page Messaging integration', function() {
         started = resolve;
       });
       data.rows.push(incoming);
+      data.value.recipients[1].disabled_reason = 'cannot_receive_sms';
     });
     cy.sendWs({ category: 'InteractionCompleted', resource: { id: incoming.id, type: 'interactions' }, payload: { patient: { id: PATIENT }, attributes: { occurred_at: incoming.attributes.occurred_at } } });
     cy.then(() => reading);
@@ -258,11 +261,59 @@ context('native action-page Messaging integration', function() {
     cy.get('.message-composer .js-number').click();
     cy.get('.picklist').should('be.visible');
     const next = getInteraction({ attributes: { ...incoming.attributes, metadata: { prototype_fixture: { ...incoming.attributes.metadata.prototype_fixture, body: 'SYNTHETIC picker incoming' } } }, relationships: incoming.relationships });
-    cy.then(() => data.rows.push(next));
+    cy.then(() => {
+      data.rows.push(next);
+      data.value.recipients[1].disabled_reason = 'opted_out';
+    });
     cy.sendWs({ category: 'InteractionCompleted', resource: { id: next.id, type: 'interactions' }, payload: { patient: { id: PATIENT }, attributes: { occurred_at: next.attributes.occurred_at } } });
     cy.get('.messaging-history__list').should('contain', 'SYNTHETIC picker incoming');
     cy.get('.picklist').should('be.visible');
     cy.get('body').type('{esc}');
+  });
+
+  specify('removes preference controls when a current context refresh fails', function() {
+    const data = fixture();
+    setup(data);
+    cy.visit(`/patient/${ PATIENT }/action/${ ACTION }`, { noWait: true });
+    cy.get('.messaging-widget .js-scenarios summary').click();
+    cy.get('.messaging-widget .js-consent').first().should('be.enabled');
+    cy.intercept('GET', `/api/patients/${ PATIENT }/fields/prototype_messaging`, {
+      statusCode: 422, body: { errors: [{ detail: 'SYNTHETIC context read unavailable' }] },
+    }).as('failedContext');
+    cy.sendWs({ category: 'FieldUpdated', resource: { type: 'patients', id: PATIENT }, payload: {} });
+    cy.wait('@failedContext');
+    cy.get('.messaging-widget .js-consent').should('not.exist');
+    cy.get('.messaging-widget .js-dnc').should('not.exist');
+    cy.get('.messaging-widget .js-message-patient').should('be.disabled');
+  });
+
+  specify('keeps non-SMS Activity when more than a page of newer texts exists', function() {
+    const data = fixture();
+    data.rows.push(...range(110).map(index => getInteraction({ attributes: {
+      channel: 'sms', direction: 'outbound', expected_at: null, occurred_at: new Date(Date.UTC(2026, 10, 12, 12, index)).toISOString(),
+      metadata: { prototype_fixture: { ...data.rows[0].attributes.metadata.prototype_fixture, body: `SYNTHETIC newer text ${ index }` } },
+    }, relationships: { action: getRelationship(data.action), flow: { data: null } } })));
+    data.value.actions[ACTION].message_count += 110;
+    data.rows.push(getInteraction({ attributes: {
+      channel: 'voice', direction: 'outbound', occurred_at: '2026-09-01T12:00:00Z', expected_at: null,
+      metadata: { note: 'SYNTHETIC older non-SMS Activity retained' },
+    }, relationships: { action: getRelationship(data.action), flow: { data: null } } }));
+    setup(data);
+    cy.visit(`/patient/${ PATIENT }/action/${ ACTION }`, { noWait: true });
+    cy.get('.patient-action__activity').should('contain', 'SYNTHETIC older non-SMS Activity retained');
+  });
+
+  specify('forwards the Messages entry target from a workflow action count', function() {
+    const data = fixture();
+    setup(data);
+    cy.routePatientFlows(fx => ({ ...fx, data: [] }));
+    cy.visit(`/patient/${ PATIENT }/workflow`, { noWait: true });
+    const navigation = cy.spy();
+    cy.getRadio(Radio => Radio.channel('event-router').once('patient:action', navigation));
+    cy.contains('.action-card', data.action.attributes.name).find('.messaging-summary__count').click();
+    cy.wrap(navigation).should('have.been.calledWith', PATIENT, ACTION, { section: 'messages' });
+    cy.location('pathname').should('equal', `/one/patient/${ PATIENT }/action/${ ACTION }`);
+    cy.get('.messaging-history__row').should('have.length', 10);
   });
 
   specify('renders the shared history, loads older by real upward scrolling and records an action-bound send without echo', function() {
@@ -372,7 +423,7 @@ context('native action-page Messaging integration', function() {
     cy.get('.messaging-timeline-row.is-selected').should($row => {
       expect(Math.abs($row[0].getBoundingClientRect().top - top)).to.be.lessThan(4);
     });
-    cy.location('pathname').should('include', selected.id);
+    cy.location('pathname').should('equal', `/one/patient/${ PATIENT }/interactions/${ selected.id }`);
     cy.get('.patient-interactions__list').should('contain', 'SYNTHETIC history 40');
     cy.get('.message-composer .js-body').should('have.value', '');
   });
@@ -405,7 +456,7 @@ context('native action-page Messaging integration', function() {
     send('InteractionCompleted');
     cy.get('.messaging-timeline-row').filter((index, row) => row.textContent.includes('SYNTHETIC external unloaded inbound')).should('have.length', 1);
     cy.get('.messaging-timeline-row.is-selected').should('contain', 'SYNTHETIC history 25');
-    cy.location('pathname').should('include', data.rows[25].id);
+    cy.location('pathname').should('equal', `/one/patient/${ PATIENT }/interactions/${ data.rows[25].id }`);
     cy.then(() => expect(reads).to.be.at.least(2));
     const inside = getInteraction({ attributes: { ...inbound.attributes, occurred_at: '2026-11-05T12:00:30Z',
       metadata: { prototype_fixture: { ...inbound.attributes.metadata.prototype_fixture, body: 'SYNTHETIC inserted inside coverage' } } } });
@@ -492,7 +543,7 @@ context('native action-page Messaging integration', function() {
     cy.get('.startup').should('not.exist');
     cy.get(`.messaging-widget .js-open-action[data-action-id="${ ACTION }"]`).should('be.visible');
     cy.get('.messaging-widget .js-message-patient').should('be.enabled').click();
-    cy.location('pathname').should('include', '/interactions');
+    cy.location('pathname').should('equal', `/one/patient/${ PATIENT }/interactions`);
     cy.focused().should('have.class', 'message-composer__input');
     cy.get('.messaging-timeline-row').last().should($row => {
       const composer = $row[0].closest('.patient-interactions').querySelector('.message-composer');
@@ -594,7 +645,7 @@ context('native action-page Messaging integration', function() {
     cy.contains('.messaging-card', 'SYNTHETIC delivery illustration').find('.messaging-card__status').should('not.exist');
     cy.contains('.messaging-card', 'SYNTHETIC delivery illustration').should('contain', 'Historical Example SYNTHETIC');
     cy.contains('.messaging-card', 'SYNTHETIC authenticated staff record').find('.messaging-card__headline').should('contain', actor.display_name).and('not.contain', 'Administrator').and('not.contain', 'Demo Persona');
-    cy.get('.messaging-consent-audit').should('contain', `${ actor.display_name } recorded that Demo Patient SYNTHETIC opted out`).and('not.contain', '[object Object]').and('not.contain', 'Administrator');
+    cy.get('.messaging-consent-audit').should('contain', `${ actor.display_name } recorded that Demo Patient SYNTHETIC opted out`).and('contain', 'Phone number').and('not.contain', '[object Object]').and('not.contain', 'Administrator');
     cy.contains('.messaging-card', 'SYNTHETIC delivery unconfirmed').find('.messaging-card__status').should('contain', 'Recorded · delivery unconfirmed');
     cy.contains('.messaging-card', 'SYNTHETIC permanent failure').within(() => {
       cy.get('.messaging-card__reason').should('contain', 'cannot receive texts').and('contain', '(202) 555-0190');

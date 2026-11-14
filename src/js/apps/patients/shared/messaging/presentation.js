@@ -83,7 +83,7 @@ export function auditPresentation(model, { patient } = {}) {
   }[audit.event] || audit.event;
   return {
     segments: auditSegments(audit, patient, event),
-    scopeLabel: audit.number ? null : copy.patientWide,
+    scopeLabel: audit.number ? copy.phoneNumber : copy.patientWide,
     number: audit.number, source: auditSource(audit), time: messageTime(row.timestamp, true),
   };
 }

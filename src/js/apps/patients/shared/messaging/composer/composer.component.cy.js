@@ -111,6 +111,7 @@ context('reusable messaging composer host contract', function() {
 
     cy
       .get('.message-composer__numbers')
+      .should('have.attr', 'aria-label', 'Recipient mobile number: (202) 555-0101')
       .focus()
       .type('{downarrow}');
 
@@ -340,7 +341,7 @@ context('reusable messaging composer host contract', function() {
 
     cy
       .get('.message-composer__reason')
-      .should('be.empty');
+      .should('contain', 'This message is scheduled for Nov 13 at 8:00 AM.');
 
     cy
       .get('.message-composer__input')

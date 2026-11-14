@@ -16,7 +16,7 @@ export function eligibilityReason(code, source) {
   if (code === 'opted_out' && source?.kind === 'patient_stop') return copy.patientStopped;
   return {
     opted_out: copy.optedOut, cannot_receive_sms: copy.cannotReceive, do_not_contact: copy.doNotContact,
-    no_eligible_mobile: copy.noMobile, action_done: 'This action is done.', scheduled: copy.scheduled,
+    no_eligible_mobile: copy.noMobile, action_done: copy.actionDone, scheduled: copy.scheduled,
     refresh_required: copy.loading, load_error: copy.contextError, loading: copy.loading,
     unavailable: copy.contextError, messaging_disabled: copy.contextError,
   }[code] || code || '';

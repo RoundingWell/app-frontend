@@ -14,7 +14,11 @@ const ChoiceItemView = View.extend({
   },
   template: hbs`<div class="picklist__item-content"><span>{{ text }}{{#if reason}} · {{ reason }}{{/if}}</span></div>`,
   triggers: { click: 'select' },
+  modelEvents: { change: 'render' },
   onRender() {
+    const disabled = !!this.model.get('isDisabled');
+    this.el.classList.toggle('is-disabled', disabled);
+    this.el.setAttribute('aria-disabled', String(disabled));
     this.searchText = this.el.textContent;
   },
 });
@@ -48,9 +52,18 @@ export default Droplist.extend({
   },
   onRender() {
     this.el.value = this.getState().get('selected')?.id || '';
-    this.el.setAttribute('aria-label', this.getOption('label'));
+    this.el.setAttribute('aria-label', `${ this.getOption('label') }: ${ this.el.textContent.trim() }`);
     const description = this.getOption('descriptionId');
     if (description) this.el.setAttribute('aria-describedby', description);
+  },
+  updateChoices({ choices, selectedId, disabled }) {
+    this.collection.set(choices);
+    const state = this.getState();
+    const selected = this.collection.get(selectedId);
+    const unchangedSelection = selected === state.get('selected');
+    state.set({ selected, isDisabled: !!disabled });
+    if (unchangedSelection) this.render();
+    if (disabled) this.popRegion.empty();
   },
   onPicklistSelect({ model }) {
     if (!model || model.get('isDisabled')) return;

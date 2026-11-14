@@ -161,6 +161,7 @@ export default App.extend({
   },
   handleStartFailure(options, error) {
     this.getView()?.showStatus(copy.refreshError);
+    this.getView()?.setBusy(false);
     addError(error);
   },
   onHostDestroyed() {

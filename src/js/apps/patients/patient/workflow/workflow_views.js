@@ -129,8 +129,8 @@ const ActionItemView = View.extend({
   onClick() {
     this.navigateToAction();
   },
-  navigateToAction() {
-    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
+  navigateToAction(entryTarget) {
+    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id, entryTarget);
   },
   onClickPrimary(event) {
     event.stopPropagation();

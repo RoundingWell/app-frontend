@@ -17,8 +17,8 @@ export default App.extend({
     return Promise.all([
       Radio.request('entities', 'fetch:actionEvents:collection', action.id, { signal }),
       Radio.request('entities', 'fetch:comments:collection:byAction', action.id, { signal }),
-      Radio.request('entities', 'fetch:interactions:models:forActivity', { patientId: patient.id, actionId: action.id }, { signal })
-        .then(models => ({ models: excludeSms ? models.filter(model => model.get('channel') !== 'sms') : models }), error => {
+      Radio.request('entities', 'fetch:interactions:models:forActivity', { patientId: patient.id, actionId: action.id, excludeSms }, { signal })
+        .then(models => ({ models }), error => {
           signal.throwIfAborted();
           return { models: [], error };
         }),

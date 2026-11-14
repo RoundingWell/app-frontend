@@ -1,5 +1,5 @@
 import Backbone from 'backbone';
-import { get } from 'underscore';
+import { get, some } from 'underscore';
 import { MnObject, Radio } from 'marionette';
 
 import { actionSummary, composerContext, FIELD_NAME } from 'js/entities-service/messaging-prototype/contract';
@@ -38,7 +38,8 @@ export default MnObject.extend({
       return true;
     } catch(error) {
       if (controller.signal.aborted) return false;
-      this.state.set({ enabled: false, disabledReason: 'load_error', loading: false, summary: null });
+      this.value = null;
+      this.state.set({ enabled: false, disabledReason: 'load_error', recipients: [], loading: false, summary: null });
       this.triggerMethod('context:failed', error);
       return false;
     }
@@ -47,17 +48,20 @@ export default MnObject.extend({
     if (message.payload?.patient?.id !== this.patientId) return;
     this.refresh({ readKey: message });
   },
-  onFieldMessage(message, model) {
+  onFieldMessage(message) {
     if (message.category !== 'FieldUpdated') return;
-    if (!this.isPatientFieldMessage(message, model)) return;
+    if (!this.isPatientFieldMessage(message)) return;
     this.invalidate();
     this.refresh({ readKey: message });
   },
-  isPatientFieldMessage(message, model) {
+  isPatientFieldMessage(message) {
     if (message.resource?.type === 'patients') return message.resource.id === this.patientId;
     if (message.resource?.type !== 'patient-fields') return false;
-    if (model?.get('_patient')?.id !== this.patientId) return false;
-    return ['phones', FIELD_NAME].includes(model.get('name'));
+    // Field IDs follow the native patient/name identity, even before the Store
+    // notification model has relationships or a field name.
+    return some(['phones', FIELD_NAME], name => Radio.request('entities', 'patientFields:model', {
+      name, _patient: { id: this.patientId, type: 'patients' },
+    }).createId() === message.resource.id);
   },
   onRecordedInteraction(data) {
     if (data.patientId === this.patientId) this.refresh({ readKey: data });

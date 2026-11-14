@@ -8,7 +8,7 @@
   gap: 4px;
 }
 
-.patient-action__title .messaging-summary {
+.patient-action__title .messaging-summary:not(:empty) {
   color: color(blue);
   display: inline-flex;
   font-size: 12px;
@@ -24,7 +24,8 @@
   flex: none;
 }
 
-.messaging-summary-slot:empty {
+.messaging-summary-slot:empty,
+.messaging-summary-slot:has(> .messaging-summary:empty) {
   display: none;
 }
 

@@ -26,6 +26,8 @@ The adapter supplies:
   reasons here; it refreshes this state while the composer is open. For scheduled
   mode it supplies the formatted send time in `disabledReason`; for done mode
   it supplies the done explanation. Scheduled mode hides Send entirely.
+  A saved draft keeps the scheduled explanation visible below the editor; an
+  empty editor shows it once in the placeholder.
 * `refreshEligibility(submission)`: asynchronously refresh authoritative
   eligibility into `state` before each submission. Rejection prevents submission.
   The component rechecks the originally selected number after this await.
