@@ -55,6 +55,38 @@ use the nearest current implementation as the pattern. Load references by task:
 - Internal fetch helpers require the options passed by their current callers. Do not restore hypothetical no-options consumers or removed configuration variants without finding an active caller.
 - Use i18n keys that match the repo's existing formatjs-style naming.
 
+## Change Reach
+
+Keep the reach of a change proportionate to the requested behavior. Follow
+behavior and state ownership, not file counts or directory boundaries. Shared
+changes are appropriate when the shared owner is responsible for the behavior;
+reuse existing contracts where they fit without hiding coupling in feature code
+or introducing a general framework just to accommodate one requirement.
+
+Before implementing a change that introduces or materially changes any of the
+following, write a short impact note and carry it into the PR description's
+Impact section:
+
+- State or coordination between owners, including shared events and subscriptions.
+- Lifecycle responsibilities that cross owners: one owner announcing its startup or teardown for another, or taking over another's startup, cancellation, or cleanup.
+- Behavior or persisted decisions derived from the current page, navigation, or browsing history.
+- Effects on other consumers, on users for whom the feature is not enabled, or on global UI.
+- Feature-specific policy placed in shared code, such as attribution, permissions, timing, or fallback behavior.
+
+Name the behavior/state owner, affected producers and consumers, changed
+contracts, and relevant lifecycle or failure handling. Explain why the reach is
+needed and how changed and unaffected paths will be checked. Keep the note
+proportionate: a few sentences usually suffice; ordinary local changes that
+preserve existing contracts need no architectural essay. These triggers call for
+inspection and explanation, not automatic rejection of shared changes.
+
+If implementation or review feedback expands the reach, update the note before
+continuing the expansion. For unresolved material scope, product, or ownership
+decisions, ask the requester when one is present; otherwise record the open
+decision in the PR's Impact section. Leave the affected change unimplemented
+until the decision is resolved, and continue independent work. Review feedback
+alone does not authorize broader behavior.
+
 ## Marionette Application Context
 
 Use the upstream Marionette plugin's `marionette` skill for framework work.
@@ -134,6 +166,8 @@ generated code, and do not flag them as issues, tech debt, or risks in review.
 
 - Review the requested diff at its current head and inspect relevant callers. Read-only review permits authorized non-mutating checks and reproduction; source edits and publication require separate authorization.
 - Put findings first, ordered by severity, with file/line evidence, triggering conditions, and impact. Report open questions and meaningful verification limits rather than unsupported defects.
+- Compare the current-head diff with the declared impact using [Change Reach](#change-reach). Trace relevant producers, consumers, and lifecycle owners; do not rely on the description or changed-path list alone. If a material change is undeclared or the note is stale, identify the missing behavior and consequence rather than treating missing prose as a correctness defect.
+- Distinguish demonstrated defects from unresolved decisions and verification gaps. Report material boundary problems with evidence and severity; shared edits, abstractions, or file counts alone are not findings. Do not manufacture an architectural finding or rank one above a more severe correctness issue. Passing tests do not settle whether the behavioral reach is appropriate.
 - Use the installed package's `node_modules/marionette/docs/api/application.md` for preparation, cancellation, restart, and teardown contracts, and `node_modules/marionette/docs/api/shared/events.md` for event ownership. Check the actual application callers against those contracts; the app-level reminders above also apply to reviewers without installed dependencies.
 - Put repo-specific risks first:
   - `scripts/**` release and deploy behavior
