@@ -9,6 +9,7 @@ import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
+import { showMessagingButton } from 'js/apps/patients/shared/messaging/action-button_view';
 import ActionItemTemplate from './action-item.hbs';
 
 import 'scss/domain/work-card.scss';
@@ -30,6 +31,7 @@ const ActionItemView = View.extend({
   },
   template: ActionItemTemplate,
   regions: {
+    messaging: '[data-message-button-region]',
     check: '[data-check-region]',
     state: '[data-state-region]',
     owner: '[data-owner-region]',
@@ -64,6 +66,9 @@ const ActionItemView = View.extend({
   },
   modelEvents: {
     'change': 'render',
+  },
+  childViewEvents: {
+    'click:messages': 'onClickMessages',
   },
   events: {
     'click .js-patient': 'onClickPatient',
@@ -104,6 +109,9 @@ const ActionItemView = View.extend({
     event.stopImmediatePropagation();
     this.navigateToActionSection('attachments');
   },
+  onClickMessages() {
+    this.navigateToAction({ section: 'messages' });
+  },
   onClickComments(event) {
     event.stopImmediatePropagation();
     this.navigateToActionSection('comments');
@@ -112,6 +120,7 @@ const ActionItemView = View.extend({
     this.navigateToAction({ section });
   },
   onRender() {
+    showMessagingButton(this, 'messaging', { action: this.model });
     this.setPatientSelected(this.selectedPatientId);
     this.showForm();
     this.showDetailsTooltip();

@@ -1,0 +1,7 @@
+.message-action .message-action__button {
+  color: color(blue);
+}
+
+.message-action-slot:empty {
+  display: none;
+}

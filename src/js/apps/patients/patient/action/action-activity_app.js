@@ -13,11 +13,11 @@ export default App.extend({
   onBeforeStart() {
     this.showView(new ActionActivityLoadingView());
   },
-  prepareStart({ action, patient }, { signal }) {
+  prepareStart({ action, patient, excludeMessages }, { signal }) {
     return Promise.all([
       Radio.request('entities', 'fetch:actionEvents:collection', action.id, { signal }),
       Radio.request('entities', 'fetch:comments:collection:byAction', action.id, { signal }),
-      Radio.request('entities', 'fetch:interactions:models:forActivity', { patientId: patient.id, actionId: action.id }, { signal })
+      Radio.request('entities', 'fetch:interactions:models:forActivity', { patientId: patient.id, actionId: action.id, excludeMessages }, { signal })
         .then(models => ({ models }), error => {
           signal.throwIfAborted();
           return { models: [], error };

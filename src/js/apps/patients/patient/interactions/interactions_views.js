@@ -14,6 +14,7 @@ import Tooltip from 'js/components/tooltip';
 
 import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
 import { hasInteractionCardContent } from 'js/apps/patients/shared/interactions/display';
+import { useMessagingRow, TimelineRowView } from 'js/apps/patients/shared/messaging/timeline-row_view';
 
 import ScrollEdgesBehavior from './scroll-edges_behavior';
 
@@ -48,7 +49,9 @@ function canGroupInteractions(left, right) {
 const InteractionsDayListView = CollectionView.extend({
   tagName: 'ol',
   className: 'patient-interactions__day-list',
-  childView: InteractionItemView,
+  childView(model) {
+    return useMessagingRow(model) ? TimelineRowView : InteractionItemView;
+  },
   collectionEvents: { change: 'updateGrouping' },
   childViewOptions() {
     return {

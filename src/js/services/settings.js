@@ -7,9 +7,13 @@ export default App.extend({
   channelName: 'settings',
   radioRequests: {
     'get': 'getSetting',
+    'get:organization': 'getOrganizationSetting',
   },
   initialize({ settings }) {
     this.settings = settings;
+  },
+  getOrganizationSetting(settingName) {
+    return this.settings.get(settingName)?.get('value');
   },
   getSetting(settingName) {
     const currentUser = Radio.request('bootstrap', 'currentUser');
