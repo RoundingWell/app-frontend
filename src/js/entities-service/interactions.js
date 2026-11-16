@@ -1,10 +1,11 @@
 import dayjs from 'dayjs';
-import { contains, flatten, isEmpty, uniq, values } from 'underscore';
+import { contains, flatten, isEmpty, uniq, values, without } from 'underscore';
 
 import { getUrl } from 'js/base/fetch';
 import BaseEntity from 'js/base/entity-service';
 
 import { _Model, Model, Collection, CHANNEL_GROUPS } from './entities/interactions';
+import { readMessageWindow } from './interaction-messages';
 
 function getFilter(actionId, flowId, channels) {
   const filter = {};
@@ -38,6 +39,7 @@ const Entity = BaseEntity.extend({
     'interactions:channelGroups': 'getChannelGroups',
     'interactions:collection': 'getCollection',
     'fetch:interactions:collection:byPatient': 'fetchByPatient',
+    'fetch:interactions:messages:window': 'fetchMessageWindow',
     'fetch:interactions:models:forActivity': 'fetchForActivity',
     'fetch:interactions:window:initial': 'fetchInitialWindow',
     'fetch:interactions:window:adjacent': 'fetchAdjacentWindow',
@@ -45,6 +47,22 @@ const Entity = BaseEntity.extend({
   },
   getChannelGroups() {
     return CHANNEL_GROUPS;
+  },
+  fetchMessageWindow({ patientId, ...query }, { signal, read }) {
+    return readMessageWindow(async page => {
+      let rawCount;
+      let cursor;
+      const pageRead = {
+        sequence: read.sequence,
+        apply(attributes, sequence) {
+          rawCount = attributes.length;
+          cursor = attributes.at(-1)?.id;
+          return read.apply(attributes, sequence);
+        },
+      };
+      const collection = await this.fetchByPatient({ patientId, channels: CHANNEL_GROUPS.messages, ...page }, { signal, read: pageRead });
+      return { models: collection.models, rawCount, cursor };
+    }, { ...query, signal, deletedIds: read.deleted });
   },
   async fetchInitialWindow(query, options) {
     const collection = await this.fetchByPatient(query, options);
@@ -87,13 +105,14 @@ const Entity = BaseEntity.extend({
     }
     return window;
   },
-  async fetchForActivity({ patientId, actionId, flowId }, { signal }) {
-    const channels = uniq(flatten(values(this.getChannelGroups())));
+  async fetchForActivity({ patientId, actionId, flowId, excludeMessages }, { signal }) {
+    const allChannels = uniq(flatten(values(this.getChannelGroups())));
+    const channels = excludeMessages ? without(allChannels, ...CHANNEL_GROUPS.messages) : allChannels;
     const collection = await this.fetchByPatient({ patientId, actionId, flowId, channels, limit: 100 }, { signal });
     return collection.models;
   },
-  fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit }, { read, ...options } = {}) {
-    const data = { include: 'action.flow,flow' };
+  fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit, include = 'action.flow,flow' }, { read, ...options }) {
+    const data = { include };
     addParams(data, 'filter', getFilter(actionId, flowId, channels));
     addParams(data, 'page', getPage(at, before, after, limit));
 

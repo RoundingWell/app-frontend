@@ -1,6 +1,23 @@
 ---
 careOptsFrontend:
   patients:
+    messaging:
+      heading: Messages
+      latest: Latest
+      earlier: Show earlier messages
+      beginning: Beginning of conversation
+      empty: No messages yet.
+      loading: Loading messages…
+      refreshError: Messages could not be loaded. Reload this action to try again.
+      readOnly: Sending messages is unavailable.
+      bodyUnavailable: Message content is unavailable.
+      sms: SMS
+      showMore: Show more
+      inbound: Inbound
+      outbound: Outbound
+      scheduled: Scheduled
+      cancelled: Cancelled
+      unconfirmed: Recorded · delivery unconfirmed
     patient:
       interactions:
         interactionsViews:
@@ -238,6 +255,24 @@ careOptsFrontend:
           label: Schedule for
           title: Schedule for { owner }
     shared:
+      messaging:
+        composer:
+          send: Send
+          sending: Sending…
+          sent: Text sent.
+          failed: Could not send this text. Your draft is saved. Try again.
+          unconfirmed: Recording is unconfirmed. Your draft is saved. Check the recorded text before trying again.
+          refreshFailed: Text sent. History could not refresh; reopen Interactions to see it.
+          unavailable: Texting is unavailable.
+          removed: This number is no longer available.
+          chooseNumber: Choose a mobile number
+          recipient: 'To {name}'
+          placeholder: 'Write a text to {name}…'
+          numberLabel: Recipient mobile number
+          sender: 'Send as {name}'
+          heading: New Message
+          scheduledAt: This message is scheduled for {time}.
+          scheduled: This message is scheduled.
       interactions:
         interactionItemView:
           showMore: Show more
