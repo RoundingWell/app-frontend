@@ -2726,7 +2726,9 @@ context('patient workflow page', function() {
     const responses = createTestScope();
     const fixtures = createTestScope();
     const requestCompletions = [];
+    let releaseFrames = () => Promise.resolve([]);
     cleanupNativeHistory = () => responses.cleanup()
+      .finally(() => releaseFrames())
       .finally(() => drainInteractionRequests(requestCompletions))
       .finally(() => fixtures.cleanup());
     cy.on('window:before:load', win => trackInteractionRequests(win, requestCompletions, fixtures));
@@ -3009,6 +3011,67 @@ context('patient workflow page', function() {
       .get('.workflow-page__list')
       .should('contain', 'Conversation history')
       .and(() => expect(reads, 'stopped history owns no frame listener').to.equal(readsBeforeStoppedFrame));
+
+    cy
+      .get('.messaging-history')
+      .should('not.exist');
+
+    // A background tab may defer painting until after the user leaves the page.
+    // Hold only the browser frame scheduler; navigation and requests remain real.
+    cy
+      .window()
+      .then(win => {
+        const frames = new Map();
+        const schedule = win.requestAnimationFrame.bind(win);
+        const cancelNative = win.cancelAnimationFrame.bind(win);
+        let nextFrame = 0;
+        const request = cy.stub(win, 'requestAnimationFrame').callsFake(callback => {
+          frames.set(--nextFrame, callback);
+          return nextFrame;
+        });
+        const cancel = cy.stub(win, 'cancelAnimationFrame').callsFake(id => {
+          if (!frames.delete(id)) cancelNative(id);
+        });
+        releaseFrames = _.once(() => {
+          request.restore();
+          cancel.restore();
+          return Promise.allSettled([...frames.values()].map(callback => new Promise((resolve, reject) => {
+            schedule(time => {
+              try {
+                callback(time);
+                resolve();
+              } catch(error) {
+                reject(error);
+              }
+            });
+          })));
+        });
+      });
+
+    cy
+      .contains('.action-card', 'Conversation history')
+      .find('.message-action__button')
+      .click();
+
+    cy
+      .get('.messaging-history[aria-busy="false"]')
+      .should('contain', 'Arrived during another refresh');
+
+    cy
+      .get('.patient__context-trail .js-patient')
+      .click();
+
+    cy
+      .get('.workflow-page__list')
+      .should('be.visible');
+
+    cy
+      .then(() => releaseFrames())
+      .then(results => expect(_.where(results, { status: 'rejected' }), 'deferred frames do not update a closed history').to.be.empty);
+
+    cy
+      .get('.workflow-page__list')
+      .should('contain', 'Conversation history');
 
     cy
       .get('.messaging-history')
