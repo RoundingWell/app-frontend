@@ -1,6 +1,8 @@
+import Backbone from 'backbone';
 import { View } from 'marionette';
 
 import intl from 'js/i18n';
+import { HistoryListView } from './history_views';
 import LayoutTemplate from './layout.hbs';
 
 import './messages.scss';
@@ -15,10 +17,22 @@ export const MessagesView = View.extend({
     latest: '.js-latest',
   },
   triggers: { 'click @ui.earlier': 'load:older', 'click @ui.latest': 'click:latest' },
+  childViewTriggers: { 'navigate:action': 'navigate:action', 'navigate:flow': 'navigate:flow' },
   templateContext() {
     return { copy: intl.patients.messaging };
   },
+  onRender() {
+    const copy = intl.patients.messaging;
+    this.showChildView('history', new HistoryListView({
+      collection: new Backbone.Collection(), patient: this.getOption('patient'), currentActionId: this.getOption('currentActionId'),
+      labels: { sms: copy.sms, showMore: copy.showMore },
+    }));
+  },
   onAttach() {
+    const viewport = this.getUI('viewport')[0];
+    this.lastScrollTop = viewport.scrollTop;
+    this.scrollListener = () => this.onViewportScroll();
+    viewport.addEventListener('scroll', this.scrollListener, { passive: true });
     this.resizeObserver = new ResizeObserver(() => {
       cancelAnimationFrame(this.resizeFrame);
       this.resizeFrame = requestAnimationFrame(() => {
@@ -31,8 +45,46 @@ export const MessagesView = View.extend({
     this.resizeObserver.observe(this.getOption('viewport'));
   },
   onBeforeDetach() {
+    this.getUI('viewport')[0].removeEventListener('scroll', this.scrollListener);
     this.resizeObserver.disconnect();
     cancelAnimationFrame(this.resizeFrame);
+    cancelAnimationFrame(this.startFrame);
+  },
+  onBeforeDestroy() {
+    cancelAnimationFrame(this.startFrame);
+  },
+  startHistory(focusOnLoad) {
+    this.startFrame = requestAnimationFrame(() => {
+      this.followingLatest = true;
+      this.scrollLatest();
+      if (focusOnLoad) this.focusLatest();
+      this.triggerMethod('ready:history');
+    });
+  },
+  renderHistory(models, hasOlder) {
+    const list = this.getChildView('history');
+    const viewport = this.getUI('viewport')[0];
+    const anchor = list.captureAnchor(viewport);
+    list.collection.set(models);
+    this.hasOlder = hasOlder;
+    this.showStatus(models.length ? '' : intl.patients.messaging.empty);
+    if (this.followingLatest) this.scrollLatest();
+    else {
+      list.restoreAnchor(anchor, viewport);
+      this.lastScrollTop = viewport.scrollTop;
+    }
+    this.updateWindow();
+  },
+  onViewportScroll() {
+    const viewport = this.getUI('viewport')[0];
+    const upward = viewport.scrollTop < this.lastScrollTop;
+    this.lastScrollTop = viewport.scrollTop;
+    if (upward && viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight > 5) this.stopFollowingLatest();
+    if (upward && !this.followingLatest && this.getChildView('history').nearBeginning(viewport)) this.triggerMethod('load:older');
+    this.updateWindow();
+  },
+  updateWindow() {
+    this.setWindow(this.hasOlder, this.getChildView('history').currentDay(this.getUI('viewport')[0]));
   },
   sizeHistory() {
     const outer = this.getOption('viewport');
@@ -52,6 +104,7 @@ export const MessagesView = View.extend({
   scrollLatest() {
     const viewport = this.getUI('viewport')[0];
     viewport.scrollTop = viewport.scrollHeight;
+    this.lastScrollTop = viewport.scrollTop;
   },
   showStatus(text) {
     this.getUI('status')[0].textContent = text;

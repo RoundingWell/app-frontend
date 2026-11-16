@@ -2967,6 +2967,7 @@ context('patient workflow page', function() {
       .should('have.length', 1);
 
     const leaving = holdHistory(() => JSON.parse(JSON.stringify({ data: getPage(rows, new URLSearchParams('page[limit]=10'), rows), included: [action] })));
+    let leavingRead;
 
     cy
       .sendWs({ category: 'MetadataUpdated', resource: { id: received.id, type: 'interactions' },
@@ -2974,7 +2975,14 @@ context('patient workflow page', function() {
 
     cy
       .get('.messaging-history[aria-busy="true"]')
-      .should(() => expect(leaving.started).to.equal(true));
+      .should(() => expect(leaving.started).to.equal(true))
+      .then(() => {
+        leavingRead = _.find([...requestCompletions].reverse(), request => {
+          const query = new URL(request.requestUrl, 'http://localhost').searchParams;
+          return query.get('filter[channel]') === 'sms,email,mail,fax,portal' && query.get('page[limit]') === '10';
+        });
+        expect(leavingRead.requestSignal.aborted, 'the visible history owns a pending native read').to.equal(false);
+      });
 
     cy
       .get('.patient__context-trail .js-patient')
@@ -2982,7 +2990,8 @@ context('patient workflow page', function() {
 
     cy
       .get('.workflow-page__list')
-      .should('be.visible');
+      .should('be.visible')
+      .then(() => expect(leavingRead.requestSignal.aborted, 'leaving history cancels its pending native read').to.equal(true));
 
     cy
       .then(() => {
