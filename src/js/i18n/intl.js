@@ -140,5 +140,6 @@ function assertIsDate(date, errorMessage) {
 }
 
 export {
+  formatMessage,
   registerWith,
 };

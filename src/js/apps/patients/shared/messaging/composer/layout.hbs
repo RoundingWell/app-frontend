@@ -1,0 +1,14 @@
+<div class="message-composer__recipient">
+  <span class="message-composer__sender js-sender"></span>
+  <label class="message-composer__recipient-name js-recipient" for="{{ numberId }}"></label>
+  <div data-number-region></div>
+</div>
+<div class="textarea-flex message-composer__editor">
+  <textarea class="textarea-flex__input message-composer__input js-body" id="{{ bodyId }}" aria-describedby="{{ reasonId }} {{ statusId }}" rows="2" disabled></textarea>
+  <div class="textarea-flex__mirror message-composer__mirror js-spacer" aria-hidden="true"></div>
+</div>
+<p class="message-composer__reason js-reason" id="{{ reasonId }}" role="status"></p>
+<div class="message-composer__footer">
+  <p class="message-composer__status js-status" id="{{ statusId }}" role="status" aria-live="polite"></p>
+  <button class="button button--positive message-composer__send js-send" type="submit" disabled>{{far "paper-plane-top"}} <span class="js-send-label">{{ @intl.patients.shared.messaging.composer.send }}</span></button>
+</div>
