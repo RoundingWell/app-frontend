@@ -21,7 +21,7 @@ function canSubmit(state, session) {
 }
 
 function submissionFailure(error) {
-  const uncertain = error?.outcome === 'uncertain';
+  const uncertain = error?.outcome !== 'rejected';
   return { pending: false, uncertain, error: message(uncertain ? 'unconfirmed' : 'failed') };
 }
 
@@ -40,6 +40,11 @@ export async function submitDraft(session, { state, context, refreshEligibility,
       session.set({ pending: false, error: reason });
       return false;
     }
+  } catch {
+    session.set({ pending: false, error: message('failed') });
+    return false;
+  }
+  try {
     confirmation = await submit(submission);
     if (!confirmation) throw new Error('A confirmed submission is required.');
   } catch(error) {

@@ -35,6 +35,13 @@ translate it to a confirmed native backend contract. The helper rechecks the
 original recipient after `refreshEligibility`, rejects duplicate pending or
 uncertain submissions, and accepts only a confirmed `submit` result.
 
+An eligibility-read failure occurs before `submit` and is retryable. Once
+`submit` has been called, a rejection or missing confirmation is uncertain by
+default and blocks resubmission. Only a host-confirmed rejection may use
+`error.outcome = 'rejected'` to permit retry. This is the helper's error contract,
+not a backend payload: the host must establish that no interaction was recorded
+before classifying an outcome as rejected. A timeout alone cannot establish that.
+
 A confirmation clears only the submitted revision. Edits or recipient changes
 made during the request survive. An uncertain rejection preserves the draft and
 blocks another send until the host authoritatively resolves that outcome.

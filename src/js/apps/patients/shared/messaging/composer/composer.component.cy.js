@@ -161,7 +161,7 @@ context('reusable messaging composer host contract', function() {
   });
 
   specify('keeps the draft on failure and reconciles after leaving the host', function() {
-    adapter.submit.rejects(new Error('Synthetic submission failure'));
+    adapter.submit.rejects({ outcome: 'rejected' });
     cy
       .mount(() => new HostView({ composerOptions: options }));
 
@@ -401,10 +401,22 @@ context('reusable messaging composer host contract', function() {
 
     cy
       .get('.message-composer__status')
-      .should('contain', 'Your draft is saved')
+      .should('contain', 'Recording is unconfirmed')
       .then(() => {
         expect(adapter.submit).to.have.been.calledOnce;
         expect(adapter.reconcile).not.to.have.been.called;
+      });
+
+    cy
+      .get('.message-composer__send')
+      .should('be.disabled');
+
+    cy
+      .get('.message-composer')
+      .submit()
+      .then(() => {
+        expect(adapter.submit).to.have.been.calledOnce;
+        session.set('uncertain', false);
         adapter.submit.resolves(null);
       });
 
@@ -418,10 +430,22 @@ context('reusable messaging composer host contract', function() {
 
     cy
       .get('.message-composer__status')
-      .should('contain', 'Your draft is saved')
+      .should('contain', 'Recording is unconfirmed')
       .then(() => {
         expect(adapter.submit).to.have.been.calledTwice;
         expect(adapter.reconcile).not.to.have.been.called;
+      });
+
+    cy
+      .get('.message-composer__send')
+      .should('be.disabled');
+
+    cy
+      .get('.message-composer')
+      .submit()
+      .then(() => {
+        expect(adapter.submit).to.have.been.calledTwice;
+        session.set('uncertain', false);
         adapter.submit.resolves({ id: 'confirmed-on-retry' });
       });
 
@@ -534,7 +558,7 @@ context('reusable messaging composer host contract', function() {
   });
 
   specify('keeps an uncertain request blocked across form recreation until its host resolves it', function() {
-    adapter.submit.callsFake(() => Promise.reject({ outcome: 'uncertain' }));
+    adapter.submit.rejects(new Error('The transport timed out after submission'));
 
     cy
       .mount(() => new HostView({ composerOptions: options }));
