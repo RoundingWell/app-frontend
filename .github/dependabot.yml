@@ -1,4 +1,11 @@
 version: 2
+registries:
+  github-workflows:
+    type: git
+    url: https://github.com
+    username: x-access-token
+    password: ${{ secrets.GH_PRIVATE_ACCESS }}
+
 updates:
   - package-ecosystem: npm
     directory: /
@@ -25,6 +32,21 @@ updates:
       development:
         applies-to: version-updates
         dependency-type: development
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    registries:
+      - github-workflows
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        applies-to: version-updates
         patterns:
           - "*"
         update-types:
