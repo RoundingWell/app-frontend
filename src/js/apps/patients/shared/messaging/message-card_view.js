@@ -19,6 +19,9 @@ const MessageCardView = View.extend({
     return `messaging-card messaging-card--${ this.model.get('direction') } messaging-card--${ getStatus(this.model) }`;
   },
   template: MessageCardTemplate,
+  modelEvents: {
+    'change:send_status': 'render',
+  },
   ui: { work: '.js-work', interaction: '.js-interaction' },
   triggers: { 'click @ui.work': 'click:work', 'click @ui.interaction': 'click:interaction' },
   templateContext() {
@@ -29,6 +32,7 @@ const MessageCardView = View.extend({
       senderName: inbound ? `${ patient.get('first_name') } ${ patient.get('last_name') }` : getSenderName(this.model, this.model.get('metadata')),
       viaLabel: getInteractionViaLabel(this.model),
       status: getStatus(this.model),
+      sendStatus: this.model.get('send_status'),
       timestamp: this.model.getTimestamp(),
       hasContent: hasInteractionCardContent(this.model),
       channelLabel: getInteractionChannelLabel(this.model),

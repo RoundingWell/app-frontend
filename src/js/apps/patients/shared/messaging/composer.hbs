@@ -1,0 +1,14 @@
+<span class="messaging-composer__marker" aria-hidden="true">{{far "paper-plane-top"}}</span>
+<div class="messaging-composer__box">
+  <div class="messaging-composer__header">
+    <strong>{{ @intl.patients.shared.messaging.composerView.heading }}</strong>
+    <span>{{ @intl.patients.shared.messaging.composerView.to }} <strong>{{ patientName }}</strong> {{formatPhoneNumber phone}}</span>
+  </div>
+  <div class="messaging-composer__field textarea-flex">
+    <textarea class="textarea-flex__input messaging-composer__input js-input" placeholder="{{formatMessage (intlGet "patients.shared.messaging.composerView.placeholder") name=firstName}}" aria-label="{{ @intl.patients.shared.messaging.composerView.heading }}"></textarea>
+    <div class="textarea-flex__mirror messaging-composer__input js-spacer" aria-hidden="true"> </div>
+  </div>
+  <div class="messaging-composer__footer">
+    <button class="button button--positive messaging-composer__send js-send" type="button" disabled>{{far "paper-plane-top"}}<span>{{ @intl.patients.shared.messaging.composerView.send }}</span></button>
+  </div>
+</div>
