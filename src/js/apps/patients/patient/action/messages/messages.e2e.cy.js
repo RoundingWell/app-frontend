@@ -7,6 +7,7 @@ import fxTestSettings from 'fixtures/test/settings';
 import { getAction } from 'support/api/actions';
 import { getFlow } from 'support/api/flows';
 import { getInteraction } from 'support/api/interactions';
+import { getPatientField } from 'support/api/patient-fields';
 import { getPatient } from 'support/api/patients';
 import { stateTodo } from 'support/api/states';
 
@@ -75,9 +76,19 @@ context('patient action messages', function() {
     relationships: { patient: getRelationship(testPatient), flow: getRelationship(testFlow) },
   });
 
-  function routeMessageAction(interactions, action = testAction) {
+  const testPhones = [
+    { label: 'home', number: '+16785552384', preferred: true },
+    { label: 'mobile', number: '+16155550190', preferred: false },
+  ];
+
+  function routeMessageAction(interactions, action = testAction, phones = testPhones) {
     cy
       .routesForPatientAction()
+      .routePatientField(fx => {
+        fx.data = getPatientField({ attributes: { name: 'phones', value: phones } });
+
+        return fx;
+      }, 'phones')
       .routeAction(fx => {
         fx.data = action;
         fx.included.push(testPatient);
@@ -381,6 +392,220 @@ context('patient action messages', function() {
       .and('contain', 'See you soon.');
   });
 
+  specify('send a message', function() {
+    const text = getText({ occurredAt: getDayTs(1, 9), metadata: { message: 'See you soon.' }, action: testAction });
+    let sendFails = true;
+    let releaseSend;
+    const send = new Cypress.Promise(resolve => {
+      releaseSend = resolve;
+    });
+
+    routeOrganizationMessaging(true);
+    routeMessageAction([text]);
+
+    cy
+      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
+        if (sendFails) {
+          return send.then(() => {
+            req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/metadata' } }] } });
+          });
+        }
+
+        req.reply({ statusCode: 201, body: { data: req.body.data } });
+      })
+      .as('routePostInteraction');
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .should('contain', 'New Message')
+      .and('contain', 'To Omar Porter (615) 555-0190')
+      .find('.js-input')
+      .should('have.attr', 'placeholder', 'Write a message to Omar…');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('Hi');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('not.be.disabled');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('Line one{enter}{enter}')
+      .should($input => {
+        expect($input[0].scrollHeight).to.be.at.most($input[0].clientHeight);
+      });
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .clear();
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('   ');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('Can you come in Tuesday?');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input', { timeout: 1000 })
+      .should('have.value', '')
+      .and('be.focused');
+
+    cy
+      .contains('.messaging-card', 'Can you come in Tuesday?')
+      .should('contain', 'Sending…')
+      .find('.js-interaction', { timeout: 1000 })
+      .should('not.exist')
+      .then(() => releaseSend());
+
+    cy
+      .wait('@routePostInteraction')
+      .its('request.body')
+      .then(({ data }) => {
+        expect(data.id).to.be.a('string');
+        expect(data.type).to.equal('interactions');
+        expect(data.attributes).to.have.all.keys('channel', 'direction', 'occurred_at', 'metadata');
+        expect(data.attributes.channel).to.equal('sms');
+        expect(data.attributes.direction).to.equal('outbound');
+        expect(data.attributes.occurred_at).to.be.a('string');
+        expect(data.attributes.metadata).to.deep.equal({ phone_number: '+16155550190', message: 'Can you come in Tuesday?' });
+        expect(data.relationships.action.data).to.deep.equal({ id: testAction.id, type: 'patient-actions' });
+      });
+
+    cy
+      .contains('.messaging-card', 'Can you come in Tuesday?')
+      .should('contain', 'Not sent')
+      .and('not.contain', 'Sending…')
+      .find('[role="alert"]')
+      .should('have.text', 'Message could not be sent.')
+      .then(() => {
+        sendFails = false;
+      });
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('Tuesday at 2 works.');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .wait('@routePostInteraction');
+
+    cy
+      .contains('.messaging-card', 'Tuesday at 2 works.')
+      .should('have.class', 'messaging-card--outbound')
+      .and('contain', 'Cypress Clinic')
+      .and('not.contain', 'Sending…')
+      .and('not.contain', 'Message could not be sent.')
+      .find('.js-interaction')
+      .should('exist');
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 3)
+      .last()
+      .should('contain', 'Tuesday at 2 works.');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
+  });
+
+  specify('leaving while a message sends', function() {
+    let releaseSend;
+    const send = new Cypress.Promise(resolve => {
+      releaseSend = resolve;
+    });
+
+    routeOrganizationMessaging(true);
+    routeMessageAction([]);
+
+    cy
+      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
+        return send.then(() => {
+          req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/metadata' } }] } });
+        });
+      })
+      .as('routePostInteraction');
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('On my way');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .click()
+      .should('be.disabled');
+
+    cy
+      .get('.patient__context-trail')
+      .contains('Omar Porter')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow`)
+      .then(() => releaseSend());
+
+    cy
+      .wait('@routePostInteraction');
+
+    cy
+      .go('back')
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-history')
+      .should('contain', 'No messages yet.')
+      .and('not.contain', 'On my way');
+  });
+
   specify('earlier messages', function() {
     const texts = _.times(30, index => getText({
       occurredAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
@@ -391,6 +616,10 @@ context('patient action messages', function() {
 
     routeOrganizationMessaging(true);
     routeMessageAction(texts);
+
+    cy
+      .intercept('GET', '/api/patients/*/fields/phones', { forceNetworkError: true })
+      .as('routePhonesError');
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -409,6 +638,10 @@ context('patient action messages', function() {
       .should('have.length', 25)
       .first()
       .should('contain', 'Text 6');
+
+    cy
+      .get('.messaging-composer')
+      .should('not.exist');
 
     cy
       .get('.messaging-history')
@@ -527,7 +760,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([call]);
+    routeMessageAction([call], testAction, [{ label: 'home', number: '+16785552384', preferred: true }]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -538,6 +771,10 @@ context('patient action messages', function() {
       .should('contain', 'No messages yet.')
       .find('.js-older')
       .should('not.be.visible');
+
+    cy
+      .get('.messaging-composer')
+      .should('not.exist');
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {

@@ -8,6 +8,7 @@ import 'scss/modules/buttons.scss';
 
 import i18n from 'js/i18n';
 
+import ComposerView from 'js/apps/patients/shared/messaging/composer_view';
 import MessageCardView from 'js/apps/patients/shared/messaging/message-card_view';
 
 import LayoutTemplate from './layout.hbs';
@@ -82,9 +83,11 @@ const MessagesView = View.extend({
       el: '[data-days-region]',
       replaceElement: true,
     },
+    composer: '[data-composer-region]',
   },
   ui: { older: '.js-older', status: '.js-status' },
   triggers: { 'click @ui.older': 'click:older' },
+  childViewTriggers: { 'send:message': 'send:message' },
   initialize() {
     this.days = new Backbone.Collection();
   },
@@ -95,6 +98,13 @@ const MessagesView = View.extend({
       currentActionId: this.getOption('currentActionId'),
     }));
     this.showWindow(this.getOption('window'));
+    this.showComposer();
+  },
+  showComposer() {
+    const phone = this.getOption('phone');
+    if (!phone) return;
+
+    this.showChildView('composer', new ComposerView({ patient: this.getOption('patient'), phone }));
   },
   showWindow({ models, hasOlder }) {
     const shown = filter(models, model => isShownInHistory(model, this.getOption('currentActionId')));
