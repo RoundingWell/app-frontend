@@ -37,6 +37,8 @@ careOptsFrontend:
             durationLabel: Duration
             ownerLabel: Owner
             stateLabel: State
+          nameView:
+            messagesLabel: Messages
           readOnlyActionView:
             dueDayLabel: Due
             durationLabel: Duration
@@ -316,6 +318,7 @@ careOptsFrontend:
         added: "Added"
         attachmentsLabel: "{itemCount, plural, one {# attachment} other {# attachments}}"
         commentsLabel: "{itemCount, plural, one {# comment} other {# comments}}"
+        messagesLabel: Messages
         newAction: New Action
         updated: "Updated"
       actionsViews:

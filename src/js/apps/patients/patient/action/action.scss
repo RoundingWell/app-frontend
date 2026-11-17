@@ -206,6 +206,28 @@
   display: none;
 }
 
+.patient-action__messages-button {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  margin-left: 8px;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.patient-action__messages-button:focus,
+.patient-action__messages-button:hover {
+  color: color(blue, dark);
+}
+
+.patient-action__messages-button .icon {
+  display: block;
+}
+
 .patient-action__count {
   align-items: center;
   background: transparent;

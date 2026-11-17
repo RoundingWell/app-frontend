@@ -13,6 +13,7 @@ import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
+import { canShowMessages } from 'js/apps/patients/shared/messaging/availability';
 
 import ActionItemTemplate from './action-item.hbs';
 import ClosedLayoutTemplate from './closed-layout.hbs';
@@ -115,6 +116,7 @@ const ActionItemView = View.extend({
     return {
       attachmentCount: this.model.getFiles().length,
       commentCount: this.model.commentCount(),
+      hasMessages: canShowMessages(this.model),
     };
   },
   triggers: {
@@ -123,16 +125,21 @@ const ActionItemView = View.extend({
   events: {
     'click .js-no-click': stopEventPropagation,
     'click .js-primary': 'onClickPrimary',
+    'click .js-messages': 'onClickMessages',
   },
   onClick() {
     this.navigateToAction();
   },
-  navigateToAction() {
-    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id);
+  navigateToAction(entryTarget) {
+    Radio.trigger('event-router', 'patient:action', this.model.getPatient().id, this.model.id, entryTarget);
   },
   onClickPrimary(event) {
     event.stopPropagation();
     this.navigateToAction();
+  },
+  onClickMessages(event) {
+    event.stopImmediatePropagation();
+    this.navigateToAction({ section: 'messages' });
   },
   onRender() {
     this.canEdit = this.model.canEdit();

@@ -7,6 +7,30 @@
   height: 24px;
 }
 
+.action-card__messages {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 16px;
+
+  &:focus,
+  &:hover {
+    color: color(blue, dark);
+  }
+
+  .icon {
+    font-size: 14px;
+    width: 14px;
+  }
+}
+
 .action-card__tool:empty,
 .action-card__tool:has(> :empty) {
   display: none;

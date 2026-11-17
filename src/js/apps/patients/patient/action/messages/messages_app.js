@@ -23,14 +23,19 @@ export default App.extend({
         return { error };
       });
   },
-  onStart(app, { patient, action }, window) {
+  onStart(app, { patient, action, focusOnLoad }, window) {
     if (window.error) {
       addError(window.error);
       this.showView(new MessagesErrorView());
-      return;
+    } else {
+      this.window = window;
+      this.showView(new MessagesView({ window, patient, currentActionId: action.id }));
     }
-    this.window = window;
-    this.showView(new MessagesView({ window, patient, currentActionId: action.id }));
+
+    if (focusOnLoad) this.focus();
+  },
+  focus() {
+    this.getRegion().focus();
   },
   async onClickOlder() {
     const controller = this.olderController = new AbortController();

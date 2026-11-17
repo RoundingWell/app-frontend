@@ -10,6 +10,7 @@
           <button class="work-card__title js-primary" type="button">{{ name }}&#8203;</button>
           <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-details-region></span></span>
           <span class="action-card__tool worklist-list__action-tool js-no-click"><span data-form-region></span></span>
+          {{#if hasMessages}}<button class="action-card__tool action-card__messages js-messages" type="button" aria-label="{{ @intl.patients.shared.actionCard.messagesLabel }}">{{far "paper-plane-top"}}</button>{{/if}}
         </div>
         {{#if flowName}}
         <div class="work-card__context">
