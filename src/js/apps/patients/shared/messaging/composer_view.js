@@ -45,6 +45,10 @@ const ComposerView = View.extend({
     this.getUI('input')[0].focus();
     this.triggerMethod('send:message', message);
   },
+  restore(message) {
+    this.getUI('input')[0].value = message;
+    this.onInput();
+  },
 });
 
 export default ComposerView;

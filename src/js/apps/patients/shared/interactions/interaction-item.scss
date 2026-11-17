@@ -237,3 +237,9 @@
   outline: 2px solid #{color(blue)};
   outline-offset: 2px;
 }
+
+.patient-interactions__send-error {
+  color: color(red);
+  font-size: 12px;
+  margin: 4px 0 0;
+}
