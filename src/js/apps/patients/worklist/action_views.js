@@ -9,6 +9,7 @@ import stopEventPropagation from 'js/utils/stop-event-propagation';
 
 import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeComponent, FormButton, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
+import { canShowMessages } from 'js/apps/patients/shared/messaging/availability';
 import ActionItemTemplate from './action-item.hbs';
 
 import 'scss/domain/work-card.scss';
@@ -50,6 +51,7 @@ const ActionItemView = View.extend({
       owner: this.model.getOwner().get('name'),
       attachmentCount: this.model.getFiles().length,
       commentCount: this.model.commentCount(),
+      hasMessages: canShowMessages(this.model),
     };
   },
   initialize({ state, selectedPatientId }) {
@@ -71,6 +73,7 @@ const ActionItemView = View.extend({
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-messages': 'onClickMessages',
     'click .js-no-click': stopEventPropagation,
     'click .js-action-surface': 'onClickSurface',
   },
@@ -107,6 +110,10 @@ const ActionItemView = View.extend({
   onClickComments(event) {
     event.stopImmediatePropagation();
     this.navigateToActionSection('comments');
+  },
+  onClickMessages(event) {
+    event.stopImmediatePropagation();
+    this.navigateToActionSection('messages');
   },
   navigateToActionSection(section) {
     this.navigateToAction({ section });

@@ -128,9 +128,10 @@ export default App.extend({
 
     this.showContent();
     this.showMenu();
-    this.startMessages();
-    this.activityApp = this.startActivity(entryTarget?.section);
-    this.attachmentsApp = this.startAttachments(entryTarget?.section);
+    const section = entryTarget?.section;
+    this.startMessages(section);
+    this.activityApp = this.startActivity(section);
+    this.attachmentsApp = this.startAttachments(section);
 
     this.updateContext();
 
@@ -192,6 +193,7 @@ export default App.extend({
     this.listenTo(actionView, {
       'click:attachments': () => this.attachmentsApp.focus(),
       'click:comments': () => this.activityApp.focus(),
+      'click:messages': () => this.getChildApp('messages').focus(),
     });
   },
   showMenu() {
@@ -285,13 +287,14 @@ export default App.extend({
 
     return activityApp;
   },
-  startMessages() {
+  startMessages(initialSection) {
     if (!canShowMessages(this.action)) return;
 
     this.getChildApp('messages').start({
       region: this.getView().getRegion('messages'),
       action: this.action,
       patient: this.patient,
+      focusOnLoad: initialSection === 'messages',
     }).catch(addError);
   },
   startAttachments(initialSection) {

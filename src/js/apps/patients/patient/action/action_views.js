@@ -89,7 +89,10 @@ const LayoutView = View.extend({
       el: '[data-activity-region]',
       regionClass: FocusablePreloadRegion,
     },
-    messages: '[data-messages-region]',
+    messages: {
+      el: '[data-messages-region]',
+      regionClass: FocusablePreloadRegion,
+    },
     attachments: {
       el: '[data-attachments-region]',
       regionClass: FocusablePreloadRegion,
