@@ -97,6 +97,7 @@ const InteractionItemView = View.extend({
       noteId: `interaction-note-${ this.cid }`,
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',
       workName: this.getWorkLink(),
+      sendStatus: this.model.get('send_status'),
     };
   },
   getAppointmentDate(timestamp, timezone) {
@@ -116,7 +117,7 @@ const InteractionItemView = View.extend({
     return { 'change:interactionId': 'updateSelection' };
   },
   isSelectedInteraction() {
-    if (!this.getOption('state')) return false;
+    if (!this.getOption('state') || this.model.isNew()) return false;
     return this.model.id === this.getState().get('interactionId');
   },
   onRender() {

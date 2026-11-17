@@ -252,6 +252,9 @@ careOptsFrontend:
         interactionItemView:
           showMore: Show more
           viewOnInteractions: View on Interactions
+          notSent: Not sent
+          sendError: Message could not be sent.
+          sending: Sending…
           message: Message
           call: Call
           voicemail: Voicemail
