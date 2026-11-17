@@ -102,6 +102,14 @@ careOptsFrontend:
             edited: (Edited)
         dialerView:
           label: Dialer
+        messages:
+          messagesViews:
+            empty: No messages yet.
+            error: Messages could not be loaded.
+            heading: Messages
+            loading: Loading messages…
+            older: Show earlier messages
+            olderError: Earlier messages could not be loaded. Try again.
       workflow:
         workflowViews:
           closedBtn: Closed
@@ -282,6 +290,13 @@ careOptsFrontend:
           retry: Retry
           loading: Loading interactions…
           loadError: Interactions could not be loaded.
+      messaging:
+        messageCardView:
+          cancelled: Cancelled
+          inbound: Inbound
+          outbound: Outbound
+          scheduled: Scheduled
+          viewOnInteractions: View on Interactions
       widgets:
         recentInteractionsViews:
           interactionsTab: Interactions
