@@ -14,13 +14,16 @@ import { ActionView, ReadOnlyActionView } from 'js/apps/patients/patient/action/
 import { FormLayoutView } from 'js/apps/patients/patient/action/action-forms_views';
 import ActivityApp from 'js/apps/patients/patient/action/action-activity_app';
 import AttachmentsApp from 'js/apps/patients/patient/action/action-attachments_app';
+import MessagesApp from 'js/apps/patients/patient/action/messages/messages_app';
 import FormApp from 'js/apps/patients/patient/form/form_app';
+import { canShowMessages } from 'js/apps/patients/shared/messaging/availability';
 
 export default App.extend({
   childApps: {
     activity: ActivityApp,
     attachments: AttachmentsApp,
     form: FormApp,
+    messages: MessagesApp,
   },
   initialize() {
     this.listenTo(this.getChildApp('form'), 'toggle:expanded', this.onToggleFormExpanded);
@@ -125,6 +128,7 @@ export default App.extend({
 
     this.showContent();
     this.showMenu();
+    this.startMessages();
     this.activityApp = this.startActivity(entryTarget?.section);
     this.attachmentsApp = this.startAttachments(entryTarget?.section);
 
@@ -276,9 +280,19 @@ export default App.extend({
       action: this.action,
       patient: this.patient,
       focusOnLoad: initialSection === 'comments',
+      excludeTexts: canShowMessages(this.action),
     }).catch(addError);
 
     return activityApp;
+  },
+  startMessages() {
+    if (!canShowMessages(this.action)) return;
+
+    this.getChildApp('messages').start({
+      region: this.getView().getRegion('messages'),
+      action: this.action,
+      patient: this.patient,
+    }).catch(addError);
   },
   startAttachments(initialSection) {
     const attachmentsApp = this.getChildApp('attachments');

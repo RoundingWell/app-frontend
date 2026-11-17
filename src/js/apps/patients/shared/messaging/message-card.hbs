@@ -1,0 +1,20 @@
+<span class="messaging-card__marker" aria-hidden="true">{{far "paper-plane-top"}}</span>
+<div class="messaging-card__content">
+  <div class="messaging-card__headline">
+    <div class="messaging-card__sender">
+      <strong>{{ senderName }}</strong> <span class="messaging-card__meta">{{ viaLabel }} •
+        {{#if (isValue status "cancelled")}}{{ @intl.patients.shared.messaging.messageCardView.cancelled }}
+        {{else if (isValue status "scheduled")}}{{ @intl.patients.shared.messaging.messageCardView.scheduled }} <time datetime="{{ timestamp }}">{{formatDateTime timestamp "AT_TIME"}}</time>
+        {{else}}<time datetime="{{ timestamp }}">{{formatDateTime timestamp "TIME"}}</time>{{/if}}
+      </span>
+    </div>
+    <div class="messaging-card__links">
+      {{#if workName}}<button class="messaging-card__link js-work" type="button">{{ workName }}</button> •{{/if}}
+      <button class="messaging-card__link js-interaction" type="button">{{ @intl.patients.shared.messaging.messageCardView.viewOnInteractions }} {{far "angle-right"}}</button>
+    </div>
+  </div>
+  {{#if hasContent}}<div class="messaging-card__bubble">
+    {{#if metadata.disposition}}<div class="messaging-card__heading">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.messaging.messageCardView.inbound }}{{else}}{{ @intl.patients.shared.messaging.messageCardView.outbound }}{{/if}} {{ channelLabel }} • {{ metadata.disposition }}</div>{{/if}}
+    {{#if summary}}<p class="messaging-card__body">{{ summary }}</p>{{/if}}
+  </div>{{/if}}
+</div>

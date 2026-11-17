@@ -1,0 +1,58 @@
+.messaging-history {
+  margin-top: 24px;
+}
+
+.messaging-history__heading {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.messaging-history__older {
+  display: block;
+  margin: 8px auto;
+}
+
+.messaging-history__status {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  margin: 0;
+  text-align: center;
+}
+
+.messaging-history__status:empty {
+  display: none;
+}
+
+.messaging-history__days,
+.messaging-history__messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.messaging-history__date {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin: 8px 0 16px;
+}
+
+.messaging-history__date::before,
+.messaging-history__date::after {
+  background: var(--color-divider);
+  content: '';
+  flex: 1;
+  height: 1px;
+}
+
+.messaging-history__date-label {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
