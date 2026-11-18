@@ -112,6 +112,7 @@ careOptsFrontend:
             loading: Loading messages…
             older: Show earlier messages
             olderError: Earlier messages could not be loaded. Try again.
+            today: Today
       workflow:
         workflowViews:
           closedBtn: Closed

@@ -29,7 +29,8 @@ function getDayTs(daysAgo, hour, minute = 0) {
 
 function getDateLabel(timestamp) {
   const date = dayjs(timestamp);
-  return `${ date.format('dddd') }, ${ date.format(date.isSame(dayjs(), 'year') ? 'MMM D' : 'll') }`;
+  const day = date.isSame(dayjs(), 'day') ? 'Today' : date.format('dddd');
+  return `${ day }, ${ date.format(date.isSame(dayjs(), 'year') ? 'MMM D' : 'll') }`;
 }
 
 function getQuery(req) {
@@ -131,6 +132,7 @@ context('patient action messages', function() {
 
   specify('message history', function() {
     const inbound = getText({ direction: 'inbound', occurredAt: getDayTs(1, 9), metadata: { body: 'Can someone call me about my foot?' }, action: testAction });
+    const todayText = getText({ occurredAt: getDayTs(0, 0, 1), metadata: { message: 'Sent first thing today.' }, action: testAction });
     const outbound = getText({ occurredAt: getDayTs(1, 9, 30), metadata: { message: 'A nurse will call you today.', clinician_name: 'Jessica Davenport' }, action: testAction });
     const organization = getText({ occurredAt: getDayTs(9, 9), metadata: { message: 'Checking in after your visit.' }, action: otherAction });
     const disposition = getText({ occurredAt: getDayTs(9, 10), metadata: { disposition: 'Text Sent' }, action: otherAction });
@@ -160,7 +162,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([inbound, outbound, organization, disposition, ...undelivered, inFlow, flowOnly, actionless, scheduled, cancelled, otherScheduled, email, call]);
+    routeMessageAction([inbound, outbound, todayText, organization, disposition, ...undelivered, inFlow, flowOnly, actionless, scheduled, cancelled, otherScheduled, email, call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -172,7 +174,7 @@ context('patient action messages', function() {
       .and('not.contain', 'Reminder for another action')
       .and('not.contain', 'Emailed discharge papers')
       .find('.messaging-card')
-      .should('have.length', 12);
+      .should('have.length', 13);
 
     cy
       .get('.messaging-history__date')
@@ -184,6 +186,7 @@ context('patient action messages', function() {
           actionless.attributes.occurred_at,
           cancelled.attributes.expected_at,
           inbound.attributes.occurred_at,
+          todayText.attributes.occurred_at,
           scheduled.attributes.expected_at,
         ], getDateLabel));
       });
