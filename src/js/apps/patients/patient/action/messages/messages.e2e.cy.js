@@ -5,6 +5,7 @@ import { getResource, getRelationship } from 'helpers/json-api';
 import fxTestSettings from 'fixtures/test/settings';
 
 import { getAction } from 'support/api/actions';
+import { testForm } from 'support/api/forms';
 import { getFlow } from 'support/api/flows';
 import { getInteraction } from 'support/api/interactions';
 import { getPatientField } from 'support/api/patient-fields';
@@ -604,6 +605,44 @@ context('patient action messages', function() {
       .get('.messaging-history')
       .should('contain', 'No messages yet.')
       .and('not.contain', 'On my way');
+  });
+
+  specify('expanding the form hides messages', function() {
+    const text = getText({ occurredAt: getDayTs(1, 9), metadata: { message: 'See you soon.' }, action: testAction });
+    const formAction = getAction({
+      attributes: { name: 'Message with form', options: { embed: 'compose' } },
+      relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship(), form: getRelationship(testForm) },
+    });
+
+    routeOrganizationMessaging(true);
+    routeMessageAction([text], formAction);
+
+    cy
+      .routeFormByAction()
+      .routeForm()
+      .routeFormDefinition()
+      .routeFormActionFields()
+      .routeFormFields()
+      .routeLatestFormResponse()
+      .visit(`/patient/${ testPatient.id }/action/${ formAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.patient-action__messages')
+      .should('be.visible')
+      .and('contain', 'See you soon.');
+
+    cy
+      .get('.patient-action .js-expand-button')
+      .click();
+
+    cy
+      .get('.patient-action')
+      .should('have.class', 'patient-action--form-expanded');
+
+    cy
+      .get('.patient-action__messages')
+      .should('not.be.visible');
   });
 
   specify('earlier messages', function() {

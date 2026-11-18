@@ -299,6 +299,7 @@
 
 .patient-action--form-expanded .patient-action__header,
 .patient-action--form-expanded .patient-action__form,
+.patient-action--form-expanded .patient-action__messages,
 .patient-action--form-expanded .patient-action__attachments,
 .patient-action--form-expanded .patient-action__activity {
   width: calc(100% - 48px);
@@ -312,6 +313,7 @@
 }
 
 .patient-action--form-expanded .patient-action__header,
+.patient-action--form-expanded .patient-action__messages,
 .patient-action--form-expanded .patient-action__attachments,
 .patient-action--form-expanded .patient-action__activity {
   display: none;
