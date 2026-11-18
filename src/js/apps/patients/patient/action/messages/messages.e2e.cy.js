@@ -410,6 +410,7 @@ context('patient action messages', function() {
     const text = getText({ occurredAt: getDayTs(1, 9), metadata: { message: 'See you soon.' }, action: testAction });
     let sendFails = true;
     let releaseSend;
+    let notSentCard;
     const send = new Cypress.Promise(resolve => {
       releaseSend = resolve;
     });
@@ -529,6 +530,12 @@ context('patient action messages', function() {
       });
 
     cy
+      .contains('.messaging-card', 'Can you come in Tuesday?')
+      .then($card => {
+        notSentCard = $card[0];
+      });
+
+    cy
       .get('.messaging-composer')
       .find('.js-input')
       .type('Tuesday at 2 works.');
@@ -554,6 +561,12 @@ context('patient action messages', function() {
       .should('have.length', 3)
       .last()
       .should('contain', 'Tuesday at 2 works.');
+
+    cy
+      .contains('.messaging-card', 'Can you come in Tuesday?')
+      .should($card => {
+        expect($card[0]).to.equal(notSentCard);
+      });
 
     cy
       .get('.messaging-composer')

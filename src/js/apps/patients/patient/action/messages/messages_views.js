@@ -46,7 +46,7 @@ const DayView = View.extend({
     this.showChildView('messages', new CollectionView({
       tagName: 'ol',
       className: 'messaging-history__messages',
-      collection: new Backbone.Collection(this.model.get('interactions')),
+      collection: this.model.get('interactions'),
       childView: MessageCardView,
       childViewOptions: {
         patient: this.getOption('patient'),
@@ -111,7 +111,12 @@ const MessagesView = View.extend({
   },
   showWindow({ models, hasOlder }) {
     const shown = filter(models, model => isShownInHistory(model, this.getOption('currentActionId')));
-    this.days.reset(map(groupBy(shown, getDate), (interactions, id) => ({ id, interactions })));
+    // Update the existing day and message lists in place so the cards already shown keep their views.
+    this.days.set(map(groupBy(shown, getDate), (dayModels, id) => {
+      const interactions = this.days.get(id)?.get('interactions') || new Backbone.Collection();
+      interactions.set(dayModels);
+      return { id, interactions };
+    }));
     this.getUI('older')[0].hidden = !hasOlder;
     this.getUI('older')[0].disabled = false;
     this.getUI('status')[0].textContent = shown.length ? '' : intl.empty;
