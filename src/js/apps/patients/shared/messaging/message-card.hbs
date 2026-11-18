@@ -11,10 +11,7 @@
         {{else}}<time datetime="{{ timestamp }}">{{formatDateTime timestamp "TIME"}}</time>{{/if}}
       </span>
     </div>
-    {{#unless sendStatus}}<div class="messaging-card__links">
-      {{#if workName}}<button class="messaging-card__link messaging-card__link--work js-work" type="button" title="{{ workName }}">{{ workName }}</button> •{{/if}}
-      <button class="messaging-card__link js-interaction" type="button">{{ @intl.patients.shared.messaging.messageCardView.viewOnInteractions }} {{far "angle-right"}}</button>
-    </div>{{/unless}}
+    {{#if workName}}<button class="messaging-card__link js-work" type="button" title="{{ workName }}"><span class="messaging-card__link-text">{{ workName }}</span> {{far "angle-right"}}</button>{{/if}}
   </div>
   {{#if hasContent}}<div class="messaging-card__bubble">
     {{#if metadata.disposition}}<div class="messaging-card__heading">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.messaging.messageCardView.inbound }}{{else}}{{ @intl.patients.shared.messaging.messageCardView.outbound }}{{/if}} {{ channelLabel }} • {{ metadata.disposition }}</div>{{/if}}

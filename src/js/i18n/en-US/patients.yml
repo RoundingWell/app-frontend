@@ -316,7 +316,6 @@ careOptsFrontend:
           scheduled: Scheduled
           sendError: Message could not be sent.
           sending: Sending…
-          viewOnInteractions: View on Interactions
       widgets:
         recentInteractionsViews:
           interactionsTab: Interactions
