@@ -4790,6 +4790,22 @@ context('patient interactions', function() {
     const rows = map(range(90), index => getInteraction({
       attributes: { channel: 'voice', direction: 'outbound', occurred_at: new Date(Date.UTC(2026, 7, index + 1, 12)).toISOString(), metadata: { note: `Call ${ index + 1 }` } },
     }));
+    rows.push(getInteraction({
+      attributes: {
+        channel: 'sms',
+        direction: 'outbound',
+        occurred_at: new Date(Date.UTC(2026, 9, 29, 13)).toISOString(),
+        metadata: { phone_number: '+16155550190', message: 'Reminder that bounced', delivery: { status: 'failed', reason: { code: 'RECIPIENT_NOT_REACHABLE', description: 'Failed' }, updated_at: '2026-10-29T13:00:05Z' } },
+      },
+    }));
+    rows.push(getInteraction({
+      attributes: {
+        channel: 'sms',
+        direction: 'outbound',
+        occurred_at: new Date(Date.UTC(2026, 9, 29, 14)).toISOString(),
+        metadata: { phone_number: '+16155550190', message: 'Reminder with an unknown failure', delivery: { status: 'failed', reason: { code: 'UNKNOWN_ERROR', description: 'Failed' }, updated_at: '2026-10-29T14:00:05Z' } },
+      },
+    }));
     let sendFails = true;
     let releaseSend;
     const send = new Cypress.Promise(resolve => {
@@ -4854,6 +4870,18 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Call 90')
       .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Reminder that bounced')
+      .should('contain', 'Not delivered')
+      .find('.patient-interactions__send-error')
+      .should('have.text', 'Not delivered to (615) 555-0190. This number can\'t receive texts.');
+
+    cy
+      .contains('.patient-interactions__item', 'Reminder with an unknown failure')
+      .should('contain', 'Not delivered')
+      .find('.patient-interactions__send-error')
+      .should('have.text', 'Not delivered to (615) 555-0190.');
 
     cy
       .get('.patient-interactions__item.is-selected')

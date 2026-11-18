@@ -1,6 +1,6 @@
 import { Radio, View } from 'marionette';
 
-import { getInteractionChannelLabel, getInteractionSummary, getInteractionViaLabel, getSenderName, hasInteractionCardContent } from 'js/apps/patients/shared/interactions/display';
+import { getDeliveryFailure, getInteractionChannelLabel, getInteractionSummary, getInteractionViaLabel, getSenderName, hasInteractionCardContent } from 'js/apps/patients/shared/interactions/display';
 
 import MessageCardTemplate from './message-card.hbs';
 
@@ -33,6 +33,7 @@ const MessageCardView = View.extend({
       viaLabel: getInteractionViaLabel(this.model),
       status: getStatus(this.model),
       sendStatus: this.model.get('send_status'),
+      deliveryFailure: getDeliveryFailure(this.model),
       timestamp: this.model.getTimestamp(),
       hasContent: hasInteractionCardContent(this.model),
       channelLabel: getInteractionChannelLabel(this.model),

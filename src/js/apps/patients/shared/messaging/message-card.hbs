@@ -5,6 +5,7 @@
       <strong>{{ senderName }}</strong> <span class="messaging-card__meta">{{ viaLabel }} •
         {{#if (isValue sendStatus "sending")}}{{ @intl.patients.shared.messaging.messageCardView.sending }}
         {{else if (isValue sendStatus "failed")}}{{ @intl.patients.shared.messaging.messageCardView.notSent }}
+        {{else if deliveryFailure}}{{ @intl.patients.shared.messaging.messageCardView.notDelivered }} <time datetime="{{ timestamp }}">{{formatDateTime timestamp "TIME"}}</time>
         {{else if (isValue status "cancelled")}}{{ @intl.patients.shared.messaging.messageCardView.cancelled }}
         {{else if (isValue status "scheduled")}}{{ @intl.patients.shared.messaging.messageCardView.scheduled }} <time datetime="{{ timestamp }}">{{formatDateTime timestamp "AT_TIME"}}</time>
         {{else}}<time datetime="{{ timestamp }}">{{formatDateTime timestamp "TIME"}}</time>{{/if}}
@@ -19,5 +20,6 @@
     {{#if metadata.disposition}}<div class="messaging-card__heading">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.messaging.messageCardView.inbound }}{{else}}{{ @intl.patients.shared.messaging.messageCardView.outbound }}{{/if}} {{ channelLabel }} • {{ metadata.disposition }}</div>{{/if}}
     {{#if summary}}<p class="messaging-card__body">{{ summary }}</p>{{/if}}
   </div>{{/if}}
+  {{#if deliveryFailure}}<p class="messaging-card__error">{{formatMessage (intlGet "patients.shared.messaging.messageCardView.notDeliveredTo") phone=(formatPhoneNumber metadata.phone_number)}}{{#if deliveryFailure.reason}} {{ deliveryFailure.reason }}{{/if}}</p>{{/if}}
   {{#if (isValue sendStatus "failed")}}<p class="messaging-card__error" role="alert">{{ @intl.patients.shared.messaging.messageCardView.sendError }}</p>{{/if}}
 </div>

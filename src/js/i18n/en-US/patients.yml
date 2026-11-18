@@ -255,6 +255,10 @@ careOptsFrontend:
           notSent: Not sent
           sendError: Message could not be sent.
           sending: Sending…
+          cantReceiveTexts: This number can't receive texts.
+          notDelivered: Not delivered
+          notDeliveredTo: Not delivered to {phone}.
+          optedOut: Patient opted out of texts.
           message: Message
           call: Call
           voicemail: Voicemail
@@ -304,6 +308,8 @@ careOptsFrontend:
         messageCardView:
           cancelled: Cancelled
           inbound: Inbound
+          notDelivered: Not delivered
+          notDeliveredTo: Not delivered to {phone}.
           notSent: Not sent
           outbound: Outbound
           scheduled: Scheduled
