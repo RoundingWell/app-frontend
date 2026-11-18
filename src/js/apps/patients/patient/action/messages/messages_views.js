@@ -17,6 +17,9 @@ import './messages.scss';
 
 const intl = i18n.patients.patient.action.messages.messagesViews;
 
+// How far below the header a day's divider counts as the day being read.
+const DATE_GAP = 16;
+
 function getDate(model) {
   return dayjs(model.getTimestamp()).format('YYYY-MM-DD');
 }
@@ -25,6 +28,23 @@ function isShownInHistory(model, actionId) {
   const upcoming = !model.get('occurred_at') && !model.get('cancelled_at') && dayjs(model.get('expected_at')).isAfter(dayjs());
   return !upcoming || model.get('_action')?.id === actionId;
 }
+
+const CurrentDateView = View.extend({
+  tagName: 'span',
+  className: 'messaging-history__date-label',
+  template: hbs`{{#if isToday}}{{ @intl.patients.patient.action.messages.messagesViews.today }}{{else}}{{formatDateTime id "dddd" nowrap=false}}{{/if}}, {{formatDateTime id "DATE" nowrap=false}}`,
+  modelEvents: { 'change:id': 'render' },
+  templateContext() {
+    return { isToday: this.isToday() };
+  },
+  isToday() {
+    return dayjs(this.model.id).isSame(dayjs(), 'day');
+  },
+  onRender() {
+    this.el.hidden = !this.model.id;
+    this.el.classList.toggle('messaging-history__date-label--today', !!this.model.id && this.isToday());
+  },
+});
 
 const DayView = View.extend({
   tagName: 'li',
@@ -60,6 +80,14 @@ const DayListView = CollectionView.extend({
   tagName: 'ol',
   className: 'messaging-history__days',
   childView: DayView,
+  // The last day whose top has scrolled up to `top`; the first day before any has.
+  getCurrentDate(top) {
+    let date = this.collection.first()?.id;
+    this.children.each(view => {
+      if (Math.round(view.el.getBoundingClientRect().top) <= Math.round(top)) date = view.model.id;
+    });
+    return date;
+  },
   childViewOptions() {
     return {
       patient: this.getOption('patient'),
@@ -87,14 +115,35 @@ const MessagesView = View.extend({
       replaceElement: true,
     },
     composer: '[data-composer-region]',
+    currentDate: '[data-current-date-region]',
   },
-  ui: { older: '.js-older', status: '.js-status' },
-  triggers: { 'click @ui.older': 'click:older' },
+  ui: { header: '.js-header', older: '.js-older', status: '.js-status', interactions: '.js-interactions' },
+  triggers: { 'click @ui.older': 'click:older', 'click @ui.interactions': 'click:interactions' },
   childViewTriggers: { 'send:message': 'send:message' },
   initialize() {
     this.days = new Backbone.Collection();
+    this.currentDate = new Backbone.Model();
+    this.onViewportScroll = this.updateCurrentDate.bind(this);
+  },
+  onAttach() {
+    this.getOption('viewport').addEventListener('scroll', this.onViewportScroll, { passive: true });
+    this.updateCurrentDate();
+  },
+  onBeforeDetach() {
+    this.getOption('viewport').removeEventListener('scroll', this.onViewportScroll);
+  },
+  updateCurrentDate() {
+    if (!this.isAttached()) return;
+
+    this.currentDate.set('id', this.getChildView('days').getCurrentDate(this.getUI('header')[0].getBoundingClientRect().bottom + DATE_GAP));
+  },
+  templateContext() {
+    const patient = this.getOption('patient');
+
+    return { patientName: `${ patient.get('first_name') } ${ patient.get('last_name') }` };
   },
   onRender() {
+    this.showChildView('currentDate', new CurrentDateView({ model: this.currentDate }));
     this.showChildView('days', new DayListView({
       collection: this.days,
       patient: this.getOption('patient'),
@@ -117,6 +166,7 @@ const MessagesView = View.extend({
       interactions.set(dayModels);
       return { id, interactions };
     }));
+    this.updateCurrentDate();
     this.getUI('older')[0].hidden = !hasOlder;
     this.getUI('older')[0].disabled = false;
     this.getUI('status')[0].textContent = shown.length ? '' : intl.empty;

@@ -112,7 +112,9 @@ careOptsFrontend:
             loading: Loading messages…
             older: Show earlier messages
             olderError: Earlier messages could not be loaded. Try again.
+            subheading: All messages with { name }
             today: Today
+            viewOnInteractions: View on Interactions
       workflow:
         workflowViews:
           closedBtn: Closed
