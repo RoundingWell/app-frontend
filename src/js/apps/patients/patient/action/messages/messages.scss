@@ -56,3 +56,13 @@
   padding: 4px 10px;
   text-transform: uppercase;
 }
+
+.messaging-history__date--today::before,
+.messaging-history__date--today::after {
+  background: color(blue);
+}
+
+.messaging-history__date--today .messaging-history__date-label {
+  border-color: color(blue);
+  color: color(blue);
+}

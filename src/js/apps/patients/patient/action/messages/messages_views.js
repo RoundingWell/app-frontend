@@ -30,7 +30,7 @@ const DayView = View.extend({
   tagName: 'li',
   className: 'messaging-history__day',
   template: hbs`
-    <div class="messaging-history__date"><span class="messaging-history__date-label">{{formatDateTime id "dddd" nowrap=false}}, {{formatDateTime id "DATE" nowrap=false}}</span></div>
+    <div class="messaging-history__date{{#if isToday}} messaging-history__date--today{{/if}}"><span class="messaging-history__date-label">{{#if isToday}}{{ @intl.patients.patient.action.messages.messagesViews.today }}{{else}}{{formatDateTime id "dddd" nowrap=false}}{{/if}}, {{formatDateTime id "DATE" nowrap=false}}</span></div>
     <ol class="messaging-history__messages" data-messages-region></ol>
   `,
   regions: {
@@ -38,6 +38,9 @@ const DayView = View.extend({
       el: '[data-messages-region]',
       replaceElement: true,
     },
+  },
+  templateContext() {
+    return { isToday: dayjs(this.model.id).isSame(dayjs(), 'day') };
   },
   onRender() {
     this.showChildView('messages', new CollectionView({
