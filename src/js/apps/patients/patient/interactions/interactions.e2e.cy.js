@@ -4957,7 +4957,8 @@ context('patient interactions', function() {
 
     cy
       .contains('.patient-interactions__item', 'See you then.')
-      .should('not.contain', 'Sending…');
+      .should('not.contain', 'Sending…')
+      .and('not.have.class', 'patient-interactions__item--new');
 
     cy
       .contains('.patient-interactions__item', 'Tuesday at 2 works.')

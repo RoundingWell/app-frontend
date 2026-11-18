@@ -623,7 +623,8 @@ context('patient action messages', function() {
 
     cy
       .contains('.messaging-card', 'Tuesday at 2 works.')
-      .should('have.class', 'messaging-card--outbound')
+      .should('not.have.class', 'messaging-card--new')
+      .and('have.class', 'messaging-card--outbound')
       .and('contain', 'Cypress Clinic')
       .and('not.contain', 'Sending…')
       .and('not.contain', 'Message could not be sent.');
