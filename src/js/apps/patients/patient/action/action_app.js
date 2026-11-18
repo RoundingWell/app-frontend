@@ -294,6 +294,7 @@ export default App.extend({
       region: this.getView().getRegion('messages'),
       action: this.action,
       patient: this.patient,
+      viewport: this.getView().getViewportElement(),
       focusOnLoad: initialSection === 'messages',
     }).catch(addError);
   },

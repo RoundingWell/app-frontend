@@ -177,6 +177,30 @@ context('patient action messages', function() {
       .should('have.length', 13);
 
     cy
+      .get('.messaging-history__header')
+      .should('contain', 'Messages')
+      .and('contain', 'All messages with Omar Porter')
+      .find('.messaging-history__header-date')
+      .should('have.text', getDateLabel(organization.attributes.occurred_at));
+
+    cy
+      .get('.messaging-history__header')
+      .then($header => {
+        cy
+          .contains('.messaging-history__day', getDateLabel(actionless.attributes.occurred_at))
+          .scrollIntoView({ offset: { top: -$header.outerHeight() } });
+      });
+
+    cy
+      .get('.messaging-history__header')
+      .should($header => {
+        const scrollerTop = $header.closest('.patient-action')[0].getBoundingClientRect().top;
+        expect($header[0].getBoundingClientRect().top).to.be.closeTo(scrollerTop, 1);
+      })
+      .find('.messaging-history__header-date')
+      .should('have.text', getDateLabel(actionless.attributes.occurred_at));
+
+    cy
       .get('.messaging-history__date')
       .should($dates => {
         expect(_.map($dates, date => date.textContent.trim())).to.deep.equal(_.map([
@@ -293,6 +317,19 @@ context('patient action messages', function() {
     cy
       .location('pathname')
       .should('equal', `/one/patient/${ testPatient.id }/action/${ otherAction.id }`);
+
+    cy
+      .go('back')
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-history__header')
+      .find('.js-interactions')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/interactions/${ todayText.id }`);
   });
 
   specify('messages buttons', function() {
@@ -836,6 +873,19 @@ context('patient action messages', function() {
     cy
       .get('.messaging-composer')
       .should('not.exist');
+
+    cy
+      .get('.messaging-history__header')
+      .find('.js-interactions')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/interactions`);
+
+    cy
+      .go('back')
+      .wait('@routeAction');
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {

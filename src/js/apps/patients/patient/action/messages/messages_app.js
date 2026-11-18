@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { find } from 'underscore';
+import { filter, find, last } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -13,6 +13,7 @@ const PAGE_LIMIT = 25;
 export default App.extend({
   viewEvents: {
     'click:older': 'onClickOlder',
+    'click:interactions': 'onClickInteractions',
     'send:message': 'onSendMessage',
   },
   onBeforeStart() {
@@ -36,7 +37,7 @@ export default App.extend({
         return { error };
       });
   },
-  onStart(app, { patient, action, focusOnLoad }, { window, phone, error }) {
+  onStart(app, { patient, action, viewport, focusOnLoad }, { window, phone, error }) {
     this.patient = patient;
     this.action = action;
     this.phone = phone;
@@ -46,13 +47,24 @@ export default App.extend({
       this.showView(new MessagesErrorView());
     } else {
       this.window = window;
-      this.showView(new MessagesView({ window, patient, phone, currentActionId: action.id }));
+      this.showView(new MessagesView({ window, patient, phone, viewport, currentActionId: action.id }));
     }
 
     if (focusOnLoad) this.focus();
   },
   focus() {
     this.getRegion().focus();
+  },
+  onClickInteractions() {
+    // The newest text sent or received on this action; scheduled, cancelled and unsaved texts are skipped.
+    const newest = last(filter(this.window.models, model => model.getAction()?.id === this.action.id && model.get('occurred_at') && !model.isNew()));
+
+    if (!newest) {
+      Radio.trigger('event-router', 'patient:interactions', this.patient.id);
+      return;
+    }
+
+    Radio.trigger('event-router', 'patient:interaction', this.patient.id, newest.id);
   },
   async onClickOlder() {
     const controller = this.olderController = new AbortController();
