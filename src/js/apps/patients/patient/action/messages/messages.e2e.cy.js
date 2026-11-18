@@ -134,6 +134,16 @@ context('patient action messages', function() {
     const outbound = getText({ occurredAt: getDayTs(1, 9, 30), metadata: { message: 'A nurse will call you today.', clinician_name: 'Jessica Davenport' }, action: testAction });
     const organization = getText({ occurredAt: getDayTs(9, 9), metadata: { message: 'Checking in after your visit.' }, action: otherAction });
     const disposition = getText({ occurredAt: getDayTs(9, 10), metadata: { disposition: 'Text Sent' }, action: otherAction });
+    const failures = [
+      ['RECIPIENT_NOT_OPTED_IN', 'Patient opted out of texts.'],
+      ['RECIPIENT_NOT_REACHABLE', 'This number can\'t receive texts.'],
+      ['UNKNOWN_ERROR', ''],
+    ];
+    const undelivered = _.map(failures, ([code], index) => getText({
+      occurredAt: getDayTs(9, 11, index),
+      metadata: { phone_number: '+16155550190', message: `Undelivered ${ code }`, delivery: { status: 'failed', reason: { code, description: 'Failed' }, updated_at: getDayTs(9, 12) } },
+      action: otherAction,
+    }));
     const inFlow = getText({ occurredAt: getDayTs(8, 9), metadata: { message: 'Welcome home!' }, action: flowAction });
     const flowOnly = getText({ occurredAt: getDayTs(7, 9), metadata: { message: 'Flow reminder' }, flow: testFlow });
     const actionless = getText({ occurredAt: getDayTs(6, 9), metadata: { message: 'Sent from Interactions' } });
@@ -150,7 +160,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([inbound, outbound, organization, disposition, inFlow, flowOnly, actionless, scheduled, cancelled, otherScheduled, email, call]);
+    routeMessageAction([inbound, outbound, organization, disposition, ...undelivered, inFlow, flowOnly, actionless, scheduled, cancelled, otherScheduled, email, call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -162,7 +172,7 @@ context('patient action messages', function() {
       .and('not.contain', 'Reminder for another action')
       .and('not.contain', 'Emailed discharge papers')
       .find('.messaging-card')
-      .should('have.length', 9);
+      .should('have.length', 12);
 
     cy
       .get('.messaging-history__date')
@@ -204,6 +214,20 @@ context('patient action messages', function() {
       .should('contain', 'Cypress Clinic')
       .find('.js-work')
       .should('have.text', 'Message Nov 1');
+
+    for (const [code, reason] of failures) {
+      cy
+        .contains('.messaging-card', `Undelivered ${ code }`)
+        .should('contain', 'Not delivered')
+        .find('.messaging-card__error')
+        .should('have.text', `Not delivered to (615) 555-0190.${ reason && ` ${ reason }` }`);
+    }
+
+    cy
+      .contains('.messaging-card', 'A nurse will call you today.')
+      .should('not.contain', 'Not delivered')
+      .find('.messaging-card__error')
+      .should('not.exist');
 
     cy
       .contains('.messaging-card', 'Outbound SMS • Text Sent')

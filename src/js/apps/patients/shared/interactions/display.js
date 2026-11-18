@@ -7,6 +7,13 @@ const intl = i18n.patients.shared.interactions.interactionItemView;
 const ICONS = { messages: 'paper-plane-top', appointments: 'calendar-day', visits: 'hospital' };
 const CHANNEL_LABELS = { voice: intl.call, voicemail: intl.voicemail, video: intl.videoCall, sms: intl.sms };
 const CHANNEL_VIA = { sms: intl.viaSms, email: intl.viaEmail, mail: intl.viaMail, fax: intl.viaFax, portal: intl.viaPortal };
+const DELIVERY_FAILURES = { RECIPIENT_NOT_OPTED_IN: intl.optedOut, RECIPIENT_NOT_REACHABLE: intl.cantReceiveTexts };
+
+export function getDeliveryFailure(model) {
+  const delivery = model.get('metadata')?.delivery;
+  if (delivery?.status !== 'failed') return;
+  return { reason: DELIVERY_FAILURES[delivery.reason.code] };
+}
 
 export function getInteractionIcon(model) {
   if (model.getChannelGroup() === 'calls') return model.get('direction') === 'inbound' ? 'phone-arrow-down-left' : 'phone-arrow-up-right';
