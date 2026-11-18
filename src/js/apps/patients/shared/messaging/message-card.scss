@@ -101,6 +101,30 @@
   white-space: pre-wrap;
 }
 
+.messaging-card__body--collapsed {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+.messaging-card__show-more {
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  font: inherit;
+  margin-top: 4px;
+  padding: 0;
+}
+
+.messaging-card__show-more:focus-visible,
+.messaging-card__body--collapsible:focus-visible {
+  outline: 2px solid #{color(blue)};
+  outline-offset: 2px;
+}
+
 .messaging-card__sender {
   min-width: 0;
 }

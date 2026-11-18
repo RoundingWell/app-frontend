@@ -24,11 +24,12 @@ const MessageCardView = View.extend({
   modelEvents: {
     'change:send_status': 'render',
   },
-  ui: { work: '.js-work' },
-  triggers: { 'click @ui.work': 'click:work' },
+  ui: { work: '.js-work', body: '.js-body', showMore: '.js-show-more' },
+  triggers: { 'click @ui.work': 'click:work', 'click @ui.showMore': 'click:show:more' },
   templateContext() {
     const patient = this.getOption('patient');
     const inbound = this.model.get('direction') === 'inbound';
+    const summary = getInteractionSummary(this.model);
 
     return {
       senderName: inbound ? `${ patient.get('first_name') } ${ patient.get('last_name') }` : getSenderName(this.model, this.model.get('metadata')),
@@ -39,7 +40,11 @@ const MessageCardView = View.extend({
       timestamp: this.model.getTimestamp(),
       hasContent: hasInteractionCardContent(this.model),
       channelLabel: getInteractionChannelLabel(this.model),
-      summary: getInteractionSummary(this.model),
+      summary,
+      // Same rule as long call notes on the Interactions page (FE-241).
+      collapsible: summary?.length > 900,
+      expanded: this.isExpanded,
+      bodyId: `message-body-${ this.cid }`,
       workName: this.getWorkName(),
     };
   },
@@ -49,6 +54,11 @@ const MessageCardView = View.extend({
     if (action.id === this.getOption('currentActionId')) return;
 
     return action.get('name');
+  },
+  onClickShowMore() {
+    this.isExpanded = true;
+    this.render();
+    this.getUI('body')[0].focus({ preventScroll: true });
   },
   onClickWork() {
     const patientId = this.getOption('patient').id;
