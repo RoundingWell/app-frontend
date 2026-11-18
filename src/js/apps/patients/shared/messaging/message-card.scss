@@ -28,6 +28,28 @@
   min-width: 0;
 }
 
+@keyframes messaging-card-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.messaging-card--new .messaging-card__content {
+  animation: messaging-card-arrive 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .messaging-card--new .messaging-card__content {
+    animation: none;
+  }
+}
+
 .messaging-card__headline {
   align-items: baseline;
   display: flex;

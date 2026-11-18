@@ -16,7 +16,9 @@ function getStatus(model) {
 const MessageCardView = View.extend({
   tagName: 'li',
   className() {
-    return `messaging-card messaging-card--${ this.model.get('direction') } messaging-card--${ getStatus(this.model) }`;
+    const newClass = this.model.get('send_status') === 'sending' ? ' messaging-card--new' : '';
+
+    return `messaging-card messaging-card--${ this.model.get('direction') } messaging-card--${ getStatus(this.model) }${ newClass }`;
   },
   template: MessageCardTemplate,
   modelEvents: {

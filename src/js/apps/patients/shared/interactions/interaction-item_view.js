@@ -25,7 +25,9 @@ function getWorkName(model) {
 const InteractionItemView = View.extend({
   tagName: 'li',
   className() {
-    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
+    const newClass = this.model.get('send_status') === 'sending' ? ' patient-interactions__item--new' : '';
+
+    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }${ newClass }`;
   },
   template: InteractionItemTemplate,
   ui: { action: '.js-action', interaction: '.js-interaction', noteText: '.js-note-text', showMore: '.js-show-more' },
