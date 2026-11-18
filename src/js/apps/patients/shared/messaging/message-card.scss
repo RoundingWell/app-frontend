@@ -31,8 +31,7 @@
 .messaging-card__headline {
   align-items: baseline;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 16px;
+  gap: 16px;
   justify-content: space-between;
   margin-bottom: 4px;
 
@@ -85,10 +84,16 @@
 }
 
 .messaging-card__links {
+  align-items: baseline;
   color: var(--color-text-secondary);
-  flex: none;
+  display: flex;
+  flex: 0 1 auto;
   font-size: 12px;
-  text-align: right;
+  gap: 4px;
+  margin-left: auto;
+  max-width: 55%;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .messaging-card__link {
@@ -96,8 +101,16 @@
   border: 0;
   color: var(--color-text-secondary);
   cursor: pointer;
+  flex: none;
   font: inherit;
   padding: 0;
+}
+
+.messaging-card__link--work {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .messaging-card__error {
