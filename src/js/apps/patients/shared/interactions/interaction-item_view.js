@@ -35,6 +35,7 @@ const InteractionItemView = View.extend({
     'click @ui.action': 'click:action',
     'click @ui.interaction': 'click:interaction',
     'click @ui.showMore': 'click:show:more',
+    'animationend': 'animation:end',
   },
   modelEvents: { change: 'render' },
   onClickShowMore() {
@@ -125,6 +126,10 @@ const InteractionItemView = View.extend({
   },
   onRender() {
     this.updateSelection();
+  },
+  // The fade-in runs once; later renders must not replay it.
+  onAnimationEnd() {
+    this.el.classList.remove('patient-interactions__item--new');
   },
   updateSelection() {
     const selected = this.isSelectedInteraction();

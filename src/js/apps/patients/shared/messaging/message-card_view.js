@@ -25,7 +25,7 @@ const MessageCardView = View.extend({
     'change:send_status': 'render',
   },
   ui: { work: '.js-work', body: '.js-body', showMore: '.js-show-more' },
-  triggers: { 'click @ui.work': 'click:work', 'click @ui.showMore': 'click:show:more' },
+  triggers: { 'click @ui.work': 'click:work', 'click @ui.showMore': 'click:show:more', 'animationend': 'animation:end' },
   templateContext() {
     const patient = this.getOption('patient');
     const inbound = this.model.get('direction') === 'inbound';
@@ -54,6 +54,10 @@ const MessageCardView = View.extend({
     if (action.id === this.getOption('currentActionId')) return;
 
     return action.get('name');
+  },
+  // The fade-in runs once; later renders must not replay it.
+  onAnimationEnd() {
+    this.el.classList.remove('messaging-card--new');
   },
   onClickShowMore() {
     this.isExpanded = true;
