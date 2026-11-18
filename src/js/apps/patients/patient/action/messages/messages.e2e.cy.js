@@ -672,8 +672,7 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
-      .get('.messaging-history')
-      .find('.messaging-card')
+      .get('.messaging-history .messaging-card')
       .should('have.length', 25)
       .first()
       .should('contain', 'Text 6');
@@ -753,8 +752,7 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
-      .get('.messaging-history')
-      .find('.js-older')
+      .get('.messaging-history .js-older')
       .click()
       .should('be.disabled');
 
@@ -780,10 +778,12 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
-      .get('.messaging-history')
-      .should('not.contain', 'Earlier messages could not be loaded.')
-      .find('.messaging-card')
+      .get('.messaging-history .messaging-card')
       .should('have.length', 25);
+
+    cy
+      .get('.messaging-history')
+      .should('not.contain', 'Earlier messages could not be loaded.');
 
     cy
       .get('.messaging-history')
