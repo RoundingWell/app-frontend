@@ -83,32 +83,25 @@
   min-width: 0;
 }
 
-.messaging-card__links {
-  align-items: baseline;
+.messaging-card__link {
+  align-items: center;
+  background: none;
+  border: 0;
   color: var(--color-text-secondary);
-  display: flex;
+  cursor: pointer;
+  display: inline-flex;
   flex: 0 1 auto;
+  font: inherit;
   font-size: 12px;
   gap: 4px;
   margin-left: auto;
   max-width: 55%;
   min-width: 0;
+  padding: 0;
   white-space: nowrap;
 }
 
-.messaging-card__link {
-  background: none;
-  border: 0;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  flex: none;
-  font: inherit;
-  padding: 0;
-}
-
-.messaging-card__link--work {
-  flex: 0 1 auto;
-  min-width: 0;
+.messaging-card__link-text {
   overflow: hidden;
   text-overflow: ellipsis;
 }

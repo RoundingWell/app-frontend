@@ -201,7 +201,6 @@ context('patient action messages', function() {
       .should('have.class', 'messaging-card--inbound')
       .and('contain', 'Omar Porter')
       .and('contain', 'via SMS')
-      .and('contain', 'View on Interactions')
       .find('.js-work')
       .should('not.exist');
 
@@ -215,7 +214,7 @@ context('patient action messages', function() {
     cy
       .contains('.messaging-card', 'Checking in after your visit.')
       .should('contain', 'Cypress Clinic')
-      .find('.js-work')
+      .find('.js-work .messaging-card__link-text')
       .should('have.text', 'Message Nov 1');
 
     for (const [code, reason] of failures) {
@@ -260,8 +259,8 @@ context('patient action messages', function() {
 
     cy
       .contains('.messaging-card', 'Welcome home!')
-      .find('.js-work')
-      .should('have.text', 'TCM Follow-up: Welcome Home Outreach')
+      .find('.js-work .messaging-card__link-text')
+      .should('have.text', 'Welcome Home Outreach')
       .click();
 
     cy
@@ -274,7 +273,7 @@ context('patient action messages', function() {
 
     cy
       .contains('.messaging-card', 'Flow reminder')
-      .find('.js-work')
+      .find('.js-work .messaging-card__link-text')
       .should('have.text', 'TCM Follow-up')
       .click();
 
@@ -294,19 +293,6 @@ context('patient action messages', function() {
     cy
       .location('pathname')
       .should('equal', `/one/patient/${ testPatient.id }/action/${ otherAction.id }`);
-
-    cy
-      .go('back')
-      .wait('@routeAction');
-
-    cy
-      .contains('.messaging-card', 'A nurse will call you today.')
-      .find('.js-interaction')
-      .click();
-
-    cy
-      .location('pathname')
-      .should('equal', `/one/patient/${ testPatient.id }/interactions/${ outbound.id }`);
   });
 
   specify('messages buttons', function() {
@@ -516,8 +502,6 @@ context('patient action messages', function() {
     cy
       .contains('.messaging-card', 'Can you come in Tuesday?')
       .should('contain', 'Sending…')
-      .find('.js-interaction', { timeout: 1000 })
-      .should('not.exist')
       .then(() => releaseSend());
 
     cy
@@ -562,9 +546,7 @@ context('patient action messages', function() {
       .should('have.class', 'messaging-card--outbound')
       .and('contain', 'Cypress Clinic')
       .and('not.contain', 'Sending…')
-      .and('not.contain', 'Message could not be sent.')
-      .find('.js-interaction')
-      .should('exist');
+      .and('not.contain', 'Message could not be sent.');
 
     cy
       .get('.messaging-history')

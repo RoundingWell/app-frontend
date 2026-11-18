@@ -22,8 +22,8 @@ const MessageCardView = View.extend({
   modelEvents: {
     'change:send_status': 'render',
   },
-  ui: { work: '.js-work', interaction: '.js-interaction' },
-  triggers: { 'click @ui.work': 'click:work', 'click @ui.interaction': 'click:interaction' },
+  ui: { work: '.js-work' },
+  triggers: { 'click @ui.work': 'click:work' },
   templateContext() {
     const patient = this.getOption('patient');
     const inbound = this.model.get('direction') === 'inbound';
@@ -46,11 +46,7 @@ const MessageCardView = View.extend({
     if (!action) return this.model.getFlow()?.get('name');
     if (action.id === this.getOption('currentActionId')) return;
 
-    const flow = action.getFlow();
-    return flow ? `${ flow.get('name') }: ${ action.get('name') }` : action.get('name');
-  },
-  onClickInteraction() {
-    Radio.trigger('event-router', 'patient:interaction', this.getOption('patient').id, this.model.id);
+    return action.get('name');
   },
   onClickWork() {
     const patientId = this.getOption('patient').id;
