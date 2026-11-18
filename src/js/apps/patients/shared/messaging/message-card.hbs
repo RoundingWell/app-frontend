@@ -11,7 +11,7 @@
       </span>
     </div>
     {{#unless sendStatus}}<div class="messaging-card__links">
-      {{#if workName}}<button class="messaging-card__link js-work" type="button">{{ workName }}</button> •{{/if}}
+      {{#if workName}}<button class="messaging-card__link messaging-card__link--work js-work" type="button" title="{{ workName }}">{{ workName }}</button> •{{/if}}
       <button class="messaging-card__link js-interaction" type="button">{{ @intl.patients.shared.messaging.messageCardView.viewOnInteractions }} {{far "angle-right"}}</button>
     </div>{{/unless}}
   </div>
