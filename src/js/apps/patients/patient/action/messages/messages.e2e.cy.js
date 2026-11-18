@@ -149,6 +149,8 @@ context('patient action messages', function() {
     const inFlow = getText({ occurredAt: getDayTs(8, 9), metadata: { message: 'Welcome home!' }, action: flowAction });
     const flowOnly = getText({ occurredAt: getDayTs(7, 9), metadata: { message: 'Flow reminder' }, flow: testFlow });
     const actionless = getText({ occurredAt: getDayTs(6, 9), metadata: { message: 'Sent from Interactions' } });
+    const longMessage = `Long text start. ${ _.times(60, () => 'Please remember to take your medication.').join(' ') } Long text end.`;
+    const long = getText({ occurredAt: getDayTs(9, 9, 30), metadata: { message: longMessage }, action: testAction });
     const scheduled = getText({ occurredAt: null, expectedAt: '2099-11-20T15:00:00Z', metadata: { message: 'Monthly check-in' }, action: testAction });
     const cancelled = getText({ occurredAt: null, expectedAt: getDayTs(5, 10), cancelledAt: getDayTs(6, 10), metadata: { message: 'Check-in reminder' }, action: testAction });
     const otherScheduled = getText({ occurredAt: null, expectedAt: '2099-11-21T15:00:00Z', metadata: { message: 'Reminder for another action' }, action: otherAction });
@@ -162,7 +164,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([inbound, outbound, todayText, organization, disposition, ...undelivered, inFlow, flowOnly, actionless, scheduled, cancelled, otherScheduled, email, call]);
+    routeMessageAction([inbound, outbound, todayText, organization, long, disposition, ...undelivered, inFlow, flowOnly, actionless, scheduled, cancelled, otherScheduled, email, call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -174,7 +176,7 @@ context('patient action messages', function() {
       .and('not.contain', 'Reminder for another action')
       .and('not.contain', 'Emailed discharge papers')
       .find('.messaging-card')
-      .should('have.length', 13);
+      .should('have.length', 14);
 
     cy
       .get('.messaging-history__header')
@@ -253,6 +255,40 @@ context('patient action messages', function() {
       .contains('.messaging-card', 'A nurse will call you today.')
       .should('not.contain', 'Not delivered')
       .find('.messaging-card__error')
+      .should('not.exist');
+
+    cy
+      .get('.messaging-history')
+      .find('.js-show-more')
+      .should('have.length', 1);
+
+    cy
+      .contains('.messaging-card', 'Long text start.')
+      .find('.messaging-card__body')
+      .should('have.class', 'messaging-card__body--collapsed')
+      .and($body => {
+        expect($body[0].scrollHeight).to.be.greaterThan($body[0].clientHeight);
+      });
+
+    cy
+      .contains('.messaging-card', 'Long text start.')
+      .find('.js-show-more')
+      .should('have.attr', 'aria-expanded', 'false')
+      .click();
+
+    cy
+      .contains('.messaging-card', 'Long text start.')
+      .find('.messaging-card__body')
+      .should('not.have.class', 'messaging-card__body--collapsed')
+      .and('have.text', longMessage)
+      .and('be.focused')
+      .and($body => {
+        expect($body[0].scrollHeight).to.be.at.most($body[0].clientHeight);
+      });
+
+    cy
+      .contains('.messaging-card', 'Long text start.')
+      .find('.js-show-more')
       .should('not.exist');
 
     cy

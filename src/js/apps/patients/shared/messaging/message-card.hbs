@@ -15,7 +15,10 @@
   </div>
   {{#if hasContent}}<div class="messaging-card__bubble">
     {{#if metadata.disposition}}<div class="messaging-card__heading">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.messaging.messageCardView.inbound }}{{else}}{{ @intl.patients.shared.messaging.messageCardView.outbound }}{{/if}} {{ channelLabel }} • {{ metadata.disposition }}</div>{{/if}}
-    {{#if summary}}<p class="messaging-card__body">{{ summary }}</p>{{/if}}
+    {{#if summary}}{{#if collapsible}}
+      <p class="messaging-card__body messaging-card__body--collapsible{{#unless expanded}} messaging-card__body--collapsed{{/unless}} js-body" id="{{ bodyId }}" tabindex="-1">{{ summary }}</p>
+      {{#unless expanded}}<button class="messaging-card__show-more js-show-more" type="button" aria-controls="{{ bodyId }}" aria-expanded="false">{{ @intl.patients.shared.messaging.messageCardView.showMore }}</button>{{/unless}}
+    {{else}}<p class="messaging-card__body">{{ summary }}</p>{{/if}}{{/if}}
   </div>{{/if}}
   {{#if deliveryFailure}}<p class="messaging-card__error">{{formatMessage (intlGet "patients.shared.messaging.messageCardView.notDeliveredTo") phone=(formatPhoneNumber metadata.phone_number)}}{{#if deliveryFailure.reason}} {{ deliveryFailure.reason }}{{/if}}</p>{{/if}}
   {{#if (isValue sendStatus "failed")}}<p class="messaging-card__error" role="alert">{{ @intl.patients.shared.messaging.messageCardView.sendError }}</p>{{/if}}
