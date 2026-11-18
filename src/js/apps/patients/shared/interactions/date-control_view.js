@@ -8,17 +8,17 @@ import i18n from 'js/i18n';
 import Datepicker from 'js/components/datepicker';
 import Optionlist from 'js/components/optionlist';
 
-import './interactions.scss';
+import './date-control.scss';
 
-const intl = i18n.patients.patient.interactions.dateControlView;
+const intl = i18n.patients.shared.interactions.dateControlView;
 
 const InteractionDateModalView = View.extend({
   className: 'modal patient-interactions__calendar-modal',
   attributes: { 'role': 'dialog', 'aria-modal': 'true', 'aria-label': intl.specificDate },
   template: hbs`
     <div class="patient-interactions__calendar-heading">
-      <h2 class="patient-interactions__calendar-title">{{ @intl.patients.patient.interactions.dateControlView.specificDate }}</h2>
-      <button class="patient-interactions__calendar-close js-close" type="button" aria-label="{{ @intl.patients.patient.interactions.dateControlView.closeDate }}">×</button>
+      <h2 class="patient-interactions__calendar-title">{{ @intl.patients.shared.interactions.dateControlView.specificDate }}</h2>
+      <button class="patient-interactions__calendar-close js-close" type="button" aria-label="{{ @intl.patients.shared.interactions.dateControlView.closeDate }}">×</button>
     </div>
     <div data-calendar-region></div>
   `,
@@ -68,7 +68,7 @@ const InteractionDateControlView = View.extend({
   },
   stateEvents: { 'change:isVisible': 'updateVisibility' },
   template: hbs`
-    <span class="js-date-label">{{#if isToday}}{{ @intl.patients.patient.interactions.dateControlView.today }}{{else}}{{formatDateTime date "dddd" nowrap=false}}{{/if}}, {{formatDateTime date "DATE" nowrap=false}}</span> {{far "angle-down"}}
+    <span class="js-date-label">{{#if isToday}}{{ @intl.patients.shared.interactions.dateControlView.today }}{{else}}{{formatDateTime date "dddd" nowrap=false}}{{/if}}, {{formatDateTime date "DATE" nowrap=false}}</span> {{far "angle-down"}}
   `,
   ui: { dateLabel: '.js-date-label' },
   triggers: { click: 'date:button:click' },

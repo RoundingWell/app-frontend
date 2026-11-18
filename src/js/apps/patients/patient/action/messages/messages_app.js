@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { filter, find, last } from 'underscore';
+import { difference, filter, find, last } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -14,6 +14,7 @@ export default App.extend({
   viewEvents: {
     'click:older': 'onClickOlder',
     'click:interactions': 'onClickInteractions',
+    'select:date': 'onSelectDate',
     'send:message': 'onSendMessage',
   },
   onBeforeStart() {
@@ -66,17 +67,32 @@ export default App.extend({
 
     Radio.trigger('event-router', 'patient:interaction', this.patient.id, newest.id);
   },
-  async onClickOlder() {
+  onClickOlder() {
+    return this.loadOlder(signal => Radio.request('entities', 'fetch:interactions:window:adjacent', this.query, this.window, 'older', { signal }));
+  },
+  async onSelectDate(date) {
+    if (await this.loadOlder(signal => Radio.request('entities', 'fetch:interactions:window:toDate', this.query, this.window, date, { signal }))) {
+      this.getView().scrollToDate(date);
+    }
+  },
+  // Loads older texts; a newer load replaces a pending one. Resolves true once shown.
+  async loadOlder(request) {
+    this.olderController?.abort();
     const controller = this.olderController = new AbortController();
+    const startModels = this.window.models;
+    this.getView().showOlderLoading();
     try {
-      const window = await Radio.request('entities', 'fetch:interactions:window:adjacent', this.query, this.window, 'older', { signal: controller.signal });
+      const window = await request(controller.signal);
       controller.signal.throwIfAborted();
-      this.window = window;
-      this.getView().showWindow(window);
+      // Keep texts sent while the older texts loaded.
+      this.window = { ...window, models: [...window.models, ...difference(this.window.models, startModels)] };
+      this.getView().showWindow(this.window);
+      return true;
     } catch(error) {
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted) return false;
       addError(error);
       this.getView().showOlderError();
+      return false;
     }
   },
   async onSendMessage(message) {

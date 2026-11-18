@@ -182,7 +182,7 @@ context('patient action messages', function() {
       .get('.messaging-history__header')
       .should('contain', 'Messages')
       .and('contain', 'All messages with Omar Porter')
-      .find('.messaging-history__header-date')
+      .find('.messaging-history__header-date .js-date-label')
       .should('have.text', getDateLabel(organization.attributes.occurred_at));
 
     cy
@@ -199,7 +199,7 @@ context('patient action messages', function() {
         const scrollerTop = $header.closest('.patient-action')[0].getBoundingClientRect().top;
         expect($header[0].getBoundingClientRect().top).to.be.closeTo(scrollerTop, 1);
       })
-      .find('.messaging-history__header-date')
+      .find('.messaging-history__header-date .js-date-label')
       .should('have.text', getDateLabel(actionless.attributes.occurred_at));
 
     cy
@@ -816,6 +816,146 @@ context('patient action messages', function() {
       .should('not.contain', 'Earlier messages could not be loaded.')
       .find('.js-older')
       .should('not.be.visible');
+  });
+
+  specify('jumping to a date', function() {
+    const texts = _.times(30, index => getText({
+      occurredAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
+      metadata: { message: `Text ${ index + 1 }` },
+      action: testAction,
+    }));
+
+    let olderFails = true;
+    let releaseOlder;
+    const olderMessages = new Cypress.Promise(resolve => {
+      releaseOlder = resolve;
+    });
+
+    routeOrganizationMessaging(true);
+    routeMessageAction(texts);
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (!isOlderMessagesRequest(req)) return;
+        req.alias = 'routeOlderMessages';
+        if (olderFails) {
+          req.reply({ forceNetworkError: true });
+          return;
+        }
+        return olderMessages;
+      })
+      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
+        req.reply({ statusCode: 201, body: { data: req.body.data } });
+      })
+      .as('routePostInteraction');
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-history .messaging-card')
+      .should('have.length', 25);
+
+    cy
+      .get('.messaging-history__day .js-date-button')
+      .last()
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'The very beginning')
+      .click();
+
+    cy
+      .wait('@routeOlderMessages');
+
+    cy
+      .get('.messaging-history')
+      .should('contain', 'Earlier messages could not be loaded. Try again.')
+      .find('.messaging-card')
+      .should('have.length', 25)
+      .then(() => {
+        olderFails = false;
+      });
+
+    cy
+      .get('.messaging-history__day .js-date-button')
+      .last()
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'The very beginning')
+      .click();
+
+    cy
+      .get('.messaging-history', { timeout: 1000 })
+      .should('not.contain', 'Earlier messages could not be loaded.')
+      .find('.js-older', { timeout: 1000 })
+      .should('be.disabled');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('Sent while jumping');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .wait('@routePostInteraction')
+      .then(() => releaseOlder());
+
+    cy
+      .wait('@routeOlderMessages');
+
+    cy
+      .get('.messaging-history .messaging-card')
+      .should('have.length', 31);
+
+    cy
+      .contains('.messaging-card', 'Sent while jumping')
+      .should('not.contain', 'Sending…');
+
+    cy
+      .contains('.messaging-history__day', getDateLabel(texts[0].attributes.occurred_at))
+      .should($day => {
+        const header = $day.closest('.messaging-history').find('.messaging-history__header')[0];
+        expect($day[0].getBoundingClientRect().top).to.be.closeTo(header.getBoundingClientRect().bottom, 1);
+      });
+
+    cy
+      .get('.messaging-history__header-date .js-date-label')
+      .should('have.text', getDateLabel(texts[0].attributes.occurred_at));
+
+    cy
+      .get('.messaging-history__header-date .js-date-button')
+      .click();
+
+    cy
+      .contains('.js-picklist-item', 'Jump to a specific date')
+      .click();
+
+    cy
+      .get('.patient-interactions__calendar-modal .datepicker__days a')
+      .contains(/^20$/)
+      .click();
+
+    cy
+      .contains('.messaging-history__day', getDateLabel(texts[19].attributes.occurred_at))
+      .should($day => {
+        const header = $day.closest('.messaging-history').find('.messaging-history__header')[0];
+        expect($day[0].getBoundingClientRect().top).to.be.closeTo(header.getBoundingClientRect().bottom, 1);
+      });
+
+    cy
+      .get('.messaging-history__header-date .js-date-label')
+      .should('have.text', getDateLabel(texts[19].attributes.occurred_at));
+
+    cy
+      .get('@routeOlderMessages.all')
+      .should('have.length', 2);
   });
 
   specify('leaving while earlier messages load', function() {
