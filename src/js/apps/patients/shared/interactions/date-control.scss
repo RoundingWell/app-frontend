@@ -1,0 +1,54 @@
+.patient-interactions__date-button {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 18px;
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  text-transform: uppercase;
+}
+
+.patient-interactions__calendar-modal {
+  padding: 20px;
+  width: 288px;
+}
+
+.patient-interactions__calendar-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  // Optical heading-to-calendar spacing from the approved design.
+  margin-bottom: 18px;
+}
+
+.patient-interactions__calendar-title {
+  font-size: 16px;
+  margin: 0;
+}
+
+.patient-interactions__calendar-close {
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.patient-interactions__date-button.is-today {
+  border-color: color(blue);
+  color: color(blue);
+}
+
+.patient-interactions__date-control.is-today .icon {
+  color: var(--color-text-secondary);
+}
+
+.patient-interactions__date-button:focus-visible,
+.patient-interactions__calendar-close:focus-visible {
+  outline: 2px solid #{color(blue)};
+  outline-offset: 2px;
+}

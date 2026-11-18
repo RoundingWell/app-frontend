@@ -15,16 +15,6 @@ careOptsFrontend:
           retry: Retry
           loading: Loading interactions…
           empty: No interactions yet.
-        dateControlView:
-          jumpToDate: Jump to date
-          jumpTo: Jump to...
-          today: Today
-          yesterday: Yesterday
-          lastWeek: Last week
-          lastMonth: Last month
-          beginning: The very beginning
-          specificDate: Jump to a specific date
-          closeDate: Close calendar
       action:
         actionApp:
           notFound: The Action you requested does not exist.
@@ -113,7 +103,6 @@ careOptsFrontend:
             older: Show earlier messages
             olderError: Earlier messages could not be loaded. Try again.
             subheading: All messages with { name }
-            today: Today
             viewOnInteractions: View on Interactions
       workflow:
         workflowViews:
@@ -252,6 +241,16 @@ careOptsFrontend:
           title: Schedule for { owner }
     shared:
       interactions:
+        dateControlView:
+          jumpToDate: Jump to date
+          jumpTo: Jump to...
+          today: Today
+          yesterday: Yesterday
+          lastWeek: Last week
+          lastMonth: Last month
+          beginning: The very beginning
+          specificDate: Jump to a specific date
+          closeDate: Close calendar
         interactionItemView:
           showMore: Show more
           viewOnInteractions: View on Interactions

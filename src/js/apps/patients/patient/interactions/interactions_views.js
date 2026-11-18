@@ -18,7 +18,7 @@ import ComposerView from 'js/apps/patients/shared/messaging/composer_view';
 
 import ScrollEdgesBehavior from './scroll-edges_behavior';
 
-import InteractionDateControlView from './date-control_view';
+import InteractionDateControlView from 'js/apps/patients/shared/interactions/date-control_view';
 import LayoutTemplate from './layout.hbs';
 import { InteractionsLoadingView, InteractionsErrorView } from 'js/apps/patients/shared/interactions/interactions-status_views';
 
