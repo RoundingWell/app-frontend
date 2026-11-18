@@ -60,7 +60,7 @@ export default App.extend({
     const selectedGroups = this.getState().get('selectedGroups');
     const showsMessages = contains(selectedGroups, 'messages');
 
-    if (!this.collection || this.getState().get('hasNewer') || !showsMessages) {
+    if (!showsMessages || !this.isShowingLatest()) {
       this.getState().set({ interactionId: undefined, selectedGroups: showsMessages ? selectedGroups : [...selectedGroups, 'messages'] });
 
       if (!await this.requestInteractions('replace')) {
@@ -86,6 +86,10 @@ export default App.extend({
     });
 
     text.set('send_status', isSent ? null : 'failed');
+  },
+  isShowingLatest() {
+    const { hasNewer, request } = this.getState().attributes;
+    return !!this.collection && !hasNewer && !request;
   },
   showSentText(text) {
     this.collection.add(text);

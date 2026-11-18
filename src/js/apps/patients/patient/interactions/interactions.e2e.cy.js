@@ -4795,6 +4795,11 @@ context('patient interactions', function() {
     const send = new Cypress.Promise(resolve => {
       releaseSend = resolve;
     });
+    let heldFilter = false;
+    let releaseFilter;
+    const filterResponse = new Cypress.Promise(resolve => {
+      releaseFilter = resolve;
+    });
 
     routeMessaging(true, testPhones);
 
@@ -4929,6 +4934,45 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Tuesday at 2 works.')
       .should('exist');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (heldFilter || !new URL(req.url).searchParams.has('filter[channel]')) return;
+        heldFilter = true;
+        return filterResponse.then(() => {
+          req.reply({ body: { data: [], included: [] } });
+        });
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should('exist');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .type('Running late');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .wait('@routePostInteraction')
+      .then(() => releaseFilter());
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Running late')
+      .should('not.contain', 'Sending…');
   });
 
   specify('shows the composer only for a texting patient and survives failed loads', function() {
