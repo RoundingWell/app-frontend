@@ -224,6 +224,11 @@
   color: color(blue, dark);
 }
 
+.patient-action__messages-button:focus-visible {
+  outline: 2px solid color(blue);
+  outline-offset: 2px;
+}
+
 .patient-action__messages-button .icon {
   display: block;
 }
