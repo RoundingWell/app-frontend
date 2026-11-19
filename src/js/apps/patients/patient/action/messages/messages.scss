@@ -88,11 +88,16 @@
   margin: 8px auto;
 }
 
+.messaging-history__beginning,
 .messaging-history__status {
   color: var(--color-text-secondary);
   font-size: 12px;
   margin: 0;
   text-align: center;
+}
+
+.messaging-history__beginning {
+  margin-bottom: 16px;
 }
 
 .messaging-history__status:empty {

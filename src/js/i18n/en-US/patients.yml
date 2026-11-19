@@ -96,6 +96,7 @@ careOptsFrontend:
           label: Dialer
         messages:
           messagesViews:
+            beginning: Beginning of messages with { name }
             empty: No messages yet.
             error: Messages could not be loaded.
             heading: Messages

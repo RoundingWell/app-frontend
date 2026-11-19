@@ -895,6 +895,11 @@ context('patient action messages', function() {
       .should('contain', 'Text 6');
 
     cy
+      .get('.messaging-history')
+      .find('.js-beginning')
+      .should('not.be.visible');
+
+    cy
       .get('.messaging-composer')
       .should('not.exist');
 
@@ -938,6 +943,12 @@ context('patient action messages', function() {
       .should('not.contain', 'Earlier messages could not be loaded.')
       .find('.js-older')
       .should('not.be.visible');
+
+    cy
+      .get('.messaging-history')
+      .find('.js-beginning')
+      .should('be.visible')
+      .and('have.text', 'Beginning of messages with Omar Porter');
   });
 
   specify('jumping to a date', function() {
@@ -1502,6 +1513,11 @@ context('patient action messages', function() {
       .get('.messaging-history')
       .should('contain', 'No messages yet.')
       .find('.js-older')
+      .should('not.be.visible');
+
+    cy
+      .get('.messaging-history')
+      .find('.js-beginning')
       .should('not.be.visible');
 
     cy
