@@ -8,6 +8,7 @@ import 'scss/modules/buttons.scss';
 
 import i18n from 'js/i18n';
 
+import { getDeliveryFailure, getSenderName } from 'js/apps/patients/shared/interactions/display';
 import InteractionDateControlView from 'js/apps/patients/shared/interactions/date-control_view';
 import ComposerView from 'js/apps/patients/shared/messaging/composer_view';
 import MessageCardView from 'js/apps/patients/shared/messaging/message-card_view';
@@ -30,6 +31,45 @@ function isShownInHistory(model, actionId) {
   return !upcoming || model.get('_action')?.id === actionId;
 }
 
+// The action, or the flow when there is no action. Replies usually have neither, and still group.
+function getWork(model) {
+  return model.get('_action')?.id || model.get('_flow')?.id;
+}
+
+function hasFailed(model) {
+  return model.get('send_status') === 'failed' || !!getDeliveryFailure(model);
+}
+
+// Scheduled and cancelled texts keep their own dashed card.
+function isOccurred(model) {
+  return !!model?.get('occurred_at') && !model.get('cancelled_at');
+}
+
+// Back-to-back texts from the same sender, direction and action (or flow) share one card; a failed text ends the group.
+function canGroupMessages(left, right) {
+  if (!isOccurred(left) || !isOccurred(right) || hasFailed(left)) return false;
+  return left.get('direction') === right.get('direction') && getSenderName(left, left.get('metadata')) === getSenderName(right, right.get('metadata')) && getWork(left) === getWork(right);
+}
+
+const DayMessagesView = CollectionView.extend({
+  tagName: 'ol',
+  className: 'messaging-history__messages',
+  childView: MessageCardView,
+  collectionEvents: { change: 'updateGrouping' },
+  onRenderChildren() {
+    this.updateGrouping();
+  },
+  updateGrouping() {
+    this.children.each(view => {
+      const index = this.collection.indexOf(view.model);
+      view.setGrouping(
+        index > 0 && canGroupMessages(this.collection.at(index - 1), view.model),
+        canGroupMessages(view.model, this.collection.at(index + 1)),
+      );
+    });
+  },
+});
+
 const DayView = View.extend({
   tagName: 'li',
   className: 'messaging-history__day',
@@ -50,11 +90,8 @@ const DayView = View.extend({
   },
   onRender() {
     this.showChildView('date', new InteractionDateControlView({ model: this.model }));
-    this.showChildView('messages', new CollectionView({
-      tagName: 'ol',
-      className: 'messaging-history__messages',
+    this.showChildView('messages', new DayMessagesView({
       collection: this.model.get('interactions'),
-      childView: MessageCardView,
       childViewOptions: {
         patient: this.getOption('patient'),
         currentActionId: this.getOption('currentActionId'),

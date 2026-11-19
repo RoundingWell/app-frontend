@@ -148,6 +148,9 @@ context('patient action messages', function() {
     const inbound = getText({ direction: 'inbound', occurredAt: getDayTs(1, 9), metadata: { body: 'Can someone call me about my foot?' }, action: testAction });
     const todayText = getText({ occurredAt: getDayTs(0, 0, 1), metadata: { message: 'Sent first thing today.' }, action: testAction });
     const outbound = getText({ occurredAt: getDayTs(1, 9, 30), metadata: { message: 'A nurse will call you today.', clinician_name: 'Jessica Davenport' }, action: testAction });
+    const followUp = getText({ occurredAt: getDayTs(1, 9, 45), metadata: { message: 'Around noon.', clinician_name: 'Jessica Davenport' }, action: testAction });
+    const fromOrganization = getText({ occurredAt: getDayTs(1, 10), metadata: { message: 'Reply STOP to opt out.' }, action: testAction });
+    const cancelledLater = getText({ occurredAt: null, expectedAt: getDayTs(1, 12), cancelledAt: getDayTs(1, 8), metadata: { message: 'Noon reminder' }, action: testAction });
     const organization = getText({ occurredAt: getDayTs(9, 9), metadata: { message: 'Checking in after your visit.' }, action: otherAction });
     const disposition = getText({ occurredAt: getDayTs(9, 10), metadata: { disposition: 'Text Sent' }, action: otherAction });
     const failures = [
@@ -162,6 +165,7 @@ context('patient action messages', function() {
     }));
     const inFlow = getText({ occurredAt: getDayTs(8, 9), metadata: { message: 'Welcome home!' }, action: flowAction });
     const flowOnly = getText({ occurredAt: getDayTs(7, 9), metadata: { message: 'Flow reminder' }, flow: testFlow });
+    const flowFollowUp = getText({ occurredAt: getDayTs(7, 9, 30), metadata: { message: 'Second flow reminder' }, flow: testFlow });
     const actionless = getText({ occurredAt: getDayTs(6, 9), metadata: { message: 'Sent from Interactions' } });
     const longMessage = `Long text start. ${ _.times(60, () => 'Please remember to take your medication.').join(' ') } Long text end.`;
     const long = getText({ occurredAt: getDayTs(9, 9, 30), metadata: { message: longMessage }, action: testAction });
@@ -178,7 +182,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([inbound, outbound, todayText, organization, long, disposition, ...undelivered, inFlow, flowOnly, actionless, scheduled, cancelled, otherScheduled, email, call]);
+    routeMessageAction([inbound, outbound, followUp, fromOrganization, cancelledLater, todayText, organization, long, disposition, ...undelivered, inFlow, flowOnly, flowFollowUp, actionless, scheduled, cancelled, otherScheduled, email, call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -190,7 +194,7 @@ context('patient action messages', function() {
       .and('not.contain', 'Reminder for another action')
       .and('not.contain', 'Emailed discharge papers')
       .find('.messaging-card')
-      .should('have.length', 14);
+      .should('have.length', 18);
 
     cy
       .get('.messaging-history__header')
@@ -234,7 +238,53 @@ context('patient action messages', function() {
     cy
       .contains('.messaging-history__day', getDateLabel(inbound.attributes.occurred_at))
       .find('.messaging-card')
-      .should('have.length', 2);
+      .should('have.length', 5);
+
+    cy
+      .contains('.messaging-card', 'Can someone call me about my foot?')
+      .should('not.have.class', 'messaging-card--continues');
+
+    cy
+      .contains('.messaging-card', 'A nurse will call you today.')
+      .should('not.have.class', 'messaging-card--continuation')
+      .and('have.class', 'messaging-card--continues');
+
+    cy
+      .contains('.messaging-card', 'Around noon.')
+      .should('have.class', 'messaging-card--continuation')
+      .and('contain', 'Jessica Davenport')
+      .and('not.have.class', 'messaging-card--continues');
+
+    cy
+      .contains('.messaging-card', 'Reply STOP to opt out.')
+      .should('not.have.class', 'messaging-card--continuation')
+      .and('not.have.class', 'messaging-card--continues');
+
+    cy
+      .contains('.messaging-card', 'Noon reminder')
+      .should('not.have.class', 'messaging-card--continuation');
+
+    cy
+      .contains('.messaging-card', 'Long text start.')
+      .should('not.have.class', 'messaging-card--continuation')
+      .and('not.have.class', 'messaging-card--continues');
+
+    cy
+      .contains('.messaging-card', 'Outbound SMS • Text Sent')
+      .should('have.class', 'messaging-card--continues');
+
+    cy
+      .contains('.messaging-card', 'Undelivered RECIPIENT_NOT_OPTED_IN')
+      .should('have.class', 'messaging-card--continuation')
+      .and('not.have.class', 'messaging-card--continues');
+
+    cy
+      .contains('.messaging-card', 'Undelivered RECIPIENT_NOT_REACHABLE')
+      .should('not.have.class', 'messaging-card--continuation');
+
+    cy
+      .contains('.messaging-card', 'Second flow reminder')
+      .should('have.class', 'messaging-card--continuation');
 
     cy
       .contains('.messaging-card', 'Can someone call me about my foot?')
@@ -494,7 +544,8 @@ context('patient action messages', function() {
   });
 
   specify('send a message', function() {
-    const text = getText({ occurredAt: getDayTs(1, 9), metadata: { message: 'See you soon.' }, action: testAction });
+    // Midnight today, so a text sent now always sorts after it.
+    const text = getText({ occurredAt: getDayTs(0, 0), metadata: { message: 'See you soon.' }, action: testAction });
     let sendFails = true;
     let releaseSend;
     let notSentCard;
@@ -609,6 +660,7 @@ context('patient action messages', function() {
     cy
       .contains('.messaging-card', 'Can you come in Tuesday?')
       .should('contain', 'Not sent')
+      .and('have.class', 'messaging-card--continuation')
       .and('not.contain', 'Sending…')
       .find('[role="alert"]')
       .should('have.text', 'Message could not be sent.')
@@ -638,6 +690,7 @@ context('patient action messages', function() {
     cy
       .contains('.messaging-card', 'Tuesday at 2 works.')
       .should('not.have.class', 'messaging-card--new')
+      .and('not.have.class', 'messaging-card--continuation')
       .and('have.class', 'messaging-card--outbound')
       .and('contain', 'Cypress Clinic')
       .and('not.contain', 'Sending…')
@@ -1176,6 +1229,10 @@ context('patient action messages', function() {
       .first()
       .should('contain', 'Oldest text');
 
+    cy
+      .contains('.messaging-card', 'Wrong patient, sorry.')
+      .should('have.class', 'messaging-card--continuation');
+
     // Each update is also saved on the server, so later loads return it.
     cy
       .then(() => {
@@ -1183,6 +1240,10 @@ context('patient action messages', function() {
       });
 
     sendTextWs('MetadataUpdated', sent, { metadata: failedMetadata });
+
+    cy
+      .contains('.messaging-card', 'Wrong patient, sorry.')
+      .should('not.have.class', 'messaging-card--continuation');
 
     cy
       .contains('.messaging-card', 'See you Tuesday.')
@@ -1298,7 +1359,12 @@ context('patient action messages', function() {
       .find('.messaging-card')
       .should('have.length', 26)
       .last()
-      .should('contain', 'Thursday works too.');
+      .should('contain', 'Thursday works too.')
+      .and('have.class', 'messaging-card--continuation');
+
+    cy
+      .contains('.messaging-card', 'Is Tuesday at 2 ok?')
+      .should('have.class', 'messaging-card--continues');
 
     cy
       .get('.messaging-history')
