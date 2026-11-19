@@ -6,9 +6,9 @@
   </div>
   <div class="messaging-composer__field textarea-flex">
     <textarea class="textarea-flex__input messaging-composer__input js-input" placeholder="{{formatMessage (intlGet "patients.shared.messaging.composerView.placeholder") name=firstName}}" aria-label="{{ @intl.patients.shared.messaging.composerView.heading }}"></textarea>
-    <div class="textarea-flex__mirror messaging-composer__input js-spacer" aria-hidden="true"> </div>
+    <div class="textarea-flex__mirror messaging-composer__input js-spacer" aria-hidden="true">{{ body }} </div>
   </div>
   <div class="messaging-composer__footer">
-    <button class="button button--positive messaging-composer__send js-send" type="button" disabled>{{far "paper-plane-top"}}<span>{{ @intl.patients.shared.messaging.composerView.send }}</span></button>
+    <button class="button button--positive messaging-composer__send js-send" type="button" {{#unless canSend}}disabled{{/unless}}>{{far "paper-plane-top"}}<span>{{ @intl.patients.shared.messaging.composerView.send }}</span></button>
   </div>
 </div>

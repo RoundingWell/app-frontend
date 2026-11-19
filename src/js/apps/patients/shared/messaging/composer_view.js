@@ -21,6 +21,9 @@ const ComposerView = View.extend({
     'input @ui.input': 'input',
     'click @ui.send': 'click:send',
   },
+  modelEvents: {
+    'change:body': 'onChangeBody',
+  },
   templateContext() {
     const patient = this.getOption('patient');
 
@@ -28,26 +31,31 @@ const ComposerView = View.extend({
       patientName: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
       firstName: patient.get('first_name'),
       phone: this.getOption('phone'),
+      canSend: !!trim(this.model.get('body')),
     };
   },
+  onRender() {
+    // Set in JS: the HTML parser drops a leading newline inside <textarea>.
+    this.getUI('input')[0].value = this.model.get('body');
+  },
   onInput() {
-    const text = this.getUI('input')[0].value;
-
-    this.getUI('spacer')[0].textContent = `${ text } `;
-    this.getUI('send')[0].disabled = !trim(text);
+    this.model.set('body', this.getUI('input')[0].value);
+  },
+  onChangeBody(model, body) {
+    // Skip when unchanged so typing doesn't move the cursor.
+    if (this.getUI('input')[0].value !== body) this.getUI('input')[0].value = body;
+    this.getUI('spacer')[0].textContent = `${ body } `;
+    this.getUI('send')[0].disabled = !trim(body);
   },
   onClickSend() {
-    const message = trim(this.getUI('input')[0].value);
+    const message = trim(this.model.get('body'));
 
-    this.getUI('input')[0].value = '';
-    this.getUI('spacer')[0].textContent = ' ';
-    this.getUI('send')[0].disabled = true;
+    this.model.set('body', '');
     this.getUI('input')[0].focus();
     this.triggerMethod('send:message', message);
   },
   restore(message) {
-    this.getUI('input')[0].value = message;
-    this.onInput();
+    this.model.set('body', message);
   },
 });
 

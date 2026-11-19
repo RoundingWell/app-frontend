@@ -6,6 +6,8 @@ import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
+import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
+
 import { MessagesLoadingView, MessagesErrorView, MessagesView } from './messages_views';
 
 const PAGE_LIMIT = 25;
@@ -48,7 +50,8 @@ export default App.extend({
       this.showView(new MessagesErrorView());
     } else {
       this.window = window;
-      this.showView(new MessagesView({ window, patient, phone, viewport, currentActionId: action.id }));
+      const draft = phone && createComposerDraft({ patientId: patient.id, actionId: action.id });
+      this.showView(new MessagesView({ window, patient, phone, viewport, currentActionId: action.id, draft }));
     }
 
     if (focusOnLoad) this.focus();

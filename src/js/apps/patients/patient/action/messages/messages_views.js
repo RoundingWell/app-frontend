@@ -154,7 +154,7 @@ const MessagesView = View.extend({
     const phone = this.getOption('phone');
     if (!phone) return;
 
-    this.showChildView('composer', new ComposerView({ patient: this.getOption('patient'), phone }));
+    this.showChildView('composer', new ComposerView({ model: this.getOption('draft'), patient: this.getOption('patient'), phone }));
   },
   showWindow({ models, hasOlder }) {
     const shown = filter(models, model => isShownInHistory(model, this.getOption('currentActionId')));
