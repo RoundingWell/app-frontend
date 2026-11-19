@@ -18,12 +18,10 @@ const MessageCardView = View.extend({
   className() {
     const newClass = this.model.get('send_status') === 'sending' ? ' messaging-card--new' : '';
 
-    return `messaging-card messaging-card--${ this.model.get('direction') } messaging-card--${ getStatus(this.model) }${ newClass }`;
+    return `messaging-card messaging-card--${ this.model.get('direction') }${ newClass }`;
   },
   template: MessageCardTemplate,
-  modelEvents: {
-    'change:send_status': 'render',
-  },
+  modelEvents: { change: 'render' },
   ui: { work: '.js-work', body: '.js-body', showMore: '.js-show-more' },
   triggers: { 'click @ui.work': 'click:work', 'click @ui.showMore': 'click:show:more', 'animationend': 'animation:end' },
   templateContext() {
@@ -54,6 +52,11 @@ const MessageCardView = View.extend({
     if (action.id === this.getOption('currentActionId')) return;
 
     return action.get('name');
+  },
+  onRender() {
+    const status = getStatus(this.model);
+    this.el.classList.toggle('messaging-card--scheduled', status === 'scheduled');
+    this.el.classList.toggle('messaging-card--cancelled', status === 'cancelled');
   },
   // The fade-in runs once; later renders must not replay it.
   onAnimationEnd() {
