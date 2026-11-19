@@ -1,10 +1,12 @@
 import dayjs from 'dayjs';
-import { difference, filter, find, last } from 'underscore';
+import { contains, difference, filter, find, last, reject, some, uniq } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
+
+import { compareInteractions } from 'js/entities-service/entities/interactions';
 
 import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
 
@@ -50,6 +52,8 @@ export default App.extend({
       this.showView(new MessagesErrorView());
     } else {
       this.window = window;
+      this.deletedIds = [];
+      this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
       const draft = phone && createComposerDraft({ patientId: patient.id, actionId: action.id });
       this.showView(new MessagesView({ window, patient, phone, viewport, currentActionId: action.id, draft }));
     }
@@ -87,9 +91,8 @@ export default App.extend({
     try {
       const window = await request(controller.signal);
       controller.signal.throwIfAborted();
-      // Keep texts sent while the older texts loaded.
-      this.window = { ...window, models: [...window.models, ...difference(this.window.models, startModels)] };
-      this.getView().showWindow(this.window);
+      // Only the older texts are new; keep everything shown since the load began.
+      this.showModels([...difference(window.models, startModels), ...this.window.models], window.hasOlder);
       return true;
     } catch(error) {
       if (controller.signal.aborted) return false;
@@ -109,8 +112,7 @@ export default App.extend({
       _action: this.action.getResource(),
     });
 
-    this.window = { ...this.window, models: [...this.window.models, text] };
-    this.getView().showWindow(this.window);
+    this.showModels([...this.window.models, text]);
 
     const isSent = await text.saveAll().then(() => true, error => {
       addError(error);
@@ -118,8 +120,51 @@ export default App.extend({
     });
 
     text.set('send_status', isSent ? null : 'failed');
+
+    if (this.hasNewerPending) this.loadNewer();
+  },
+  onInteractionMessage({ category, payload }, model) {
+    if (payload.patient?.id !== this.patient.id) return;
+
+    if (category === 'ResourceCreated') {
+      if (payload.attributes.channel === 'sms') this.loadNewer();
+      return;
+    }
+
+    // A text not shown yet can still be deleted before a load returns it.
+    if (category === 'ResourceDeleted') this.deletedIds.push(model.id);
+
+    if (!contains(this.window.models, model)) return;
+
+    this.showModels(this.window.models);
+  },
+  // Loads the newest texts and adds any not shown. One load at a time, and none while a text sends: the load could return that text before the send gives it an id, showing it twice.
+  async loadNewer() {
+    if (this.newerController || some(this.window.models, model => model.get('send_status') === 'sending')) {
+      this.hasNewerPending = true;
+      return;
+    }
+
+    this.hasNewerPending = false;
+    const controller = this.newerController = new AbortController();
+
+    const window = await Radio.request('entities', 'fetch:interactions:window:initial', this.query, { signal: controller.signal }).catch(addError);
+    if (controller.signal.aborted) return;
+
+    this.newerController = null;
+    if (window) this.showModels([...this.window.models, ...window.models]);
+    if (this.hasNewerPending) this.loadNewer();
+  },
+  showModels(models, hasOlder = this.window.hasOlder) {
+    const shown = reject(uniq(models), model => contains(this.deletedIds, model.id));
+    this.window = { ...this.window, hasOlder, models: shown.sort(compareInteractions) };
+    this.getView().showWindow(this.window);
   },
   onStop() {
     this.olderController?.abort();
+    this.newerController?.abort();
+    this.newerController = null;
+    this.hasNewerPending = false;
+    this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
   },
 });

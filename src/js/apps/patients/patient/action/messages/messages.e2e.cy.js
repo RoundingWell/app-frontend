@@ -7,7 +7,7 @@ import fxTestSettings from 'fixtures/test/settings';
 import { getAction } from 'support/api/actions';
 import { testForm } from 'support/api/forms';
 import { getFlow } from 'support/api/flows';
-import { getInteraction } from 'support/api/interactions';
+import { getInteraction, getPage } from 'support/api/interactions';
 import { getPatientField } from 'support/api/patient-fields';
 import { getPatient } from 'support/api/patients';
 import { stateTodo } from 'support/api/states';
@@ -43,6 +43,11 @@ function isMessagesRequest(req) {
 
 function isOlderMessagesRequest(req) {
   return isMessagesRequest(req) && getQuery(req).has('page[before]');
+}
+
+function isNewestMessagesRequest(req) {
+  const query = getQuery(req);
+  return isMessagesRequest(req) && !query.has('page[before]') && !query.has('page[after]') && !query.has('page[at]');
 }
 
 function getText({ direction = 'outbound', occurredAt = '2026-11-10T15:00:00Z', expectedAt = null, cancelledAt = null, metadata, action, flow }) {
@@ -128,6 +133,15 @@ context('patient action messages', function() {
         return fx;
       })
       .routeFlowActivity();
+  }
+
+  function sendTextWs(category, text, attributes = {}, patient = testPatient) {
+    cy
+      .sendWs({
+        category,
+        resource: { type: 'interactions', id: text.id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes },
+      });
   }
 
   specify('message history', function() {
@@ -649,6 +663,7 @@ context('patient action messages', function() {
   });
 
   specify('leaving while a message sends', function() {
+    let newestRequests = 0;
     let releaseSend;
     const send = new Cypress.Promise(resolve => {
       releaseSend = resolve;
@@ -666,6 +681,11 @@ context('patient action messages', function() {
       .as('routePostInteraction');
 
     cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (isNewestMessagesRequest(req)) newestRequests += 1;
+      });
+
+    cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
       .wait('@routeAction');
 
@@ -679,6 +699,8 @@ context('patient action messages', function() {
       .find('.js-send')
       .click()
       .should('be.disabled');
+
+    sendTextWs('ResourceCreated', getText({ direction: 'inbound' }), { channel: 'sms', direction: 'inbound' });
 
     cy
       .get('.patient__context-trail')
@@ -705,7 +727,11 @@ context('patient action messages', function() {
     cy
       .get('.messaging-history')
       .should('contain', 'No messages yet.')
-      .and('not.contain', 'On my way');
+      .and('not.contain', 'On my way')
+      .then(() => {
+        // The first visit and the return; the reply that waited for the send isn't loaded after leaving.
+        expect(newestRequests).to.equal(2);
+      });
   });
 
   specify('keeping an unsent text', function() {
@@ -1052,6 +1078,342 @@ context('patient action messages', function() {
     cy
       .get('@routeOlderMessages.all')
       .should('have.length', 2);
+  });
+
+  specify('live updates', function() {
+    const oldest = getText({ occurredAt: getDayTs(20, 9), metadata: { message: 'Oldest text' }, action: testAction });
+    const fillers = _.times(22, index => getText({ occurredAt: getDayTs(10, 8, index), metadata: { message: `Filler ${ index + 1 }` }, action: testAction }));
+    const sent = getText({ occurredAt: getDayTs(1, 9), metadata: { phone_number: '+16155550190', message: 'See you Tuesday.' }, action: testAction });
+    const failedMetadata = { ...sent.attributes.metadata, delivery: { status: 'failed', reason: { code: 'RECIPIENT_NOT_REACHABLE', description: 'Failed' } } };
+    const mistake = getText({ occurredAt: getDayTs(1, 10), metadata: { message: 'Wrong patient, sorry.' }, action: testAction });
+    const scheduled = getText({ occurredAt: null, expectedAt: '2099-11-20T15:00:00Z', metadata: { message: 'Monthly check-in' }, action: testAction });
+    const cancelledFiller = fillers[21];
+    const firstReply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 2), metadata: { body: 'Is Tuesday at 2 ok?' } });
+    const secondReply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 3), metadata: { body: 'Or Wednesday?' } });
+    const thirdReply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 4), metadata: { body: 'Thursday works too.' } });
+    const lastReply = getText({ direction: 'inbound', occurredAt: dayjs().add(1, 'minute').format(), metadata: { body: 'Great, thanks!' } });
+    const lostReply = getText({ direction: 'inbound', occurredAt: dayjs().add(2, 'minute').format(), metadata: { body: 'Are you there?' } });
+    const nextReply = getText({ direction: 'inbound', occurredAt: dayjs().add(3, 'minute').format(), metadata: { body: 'Hello?' } });
+    const otherPatient = getPatient();
+    const texts = [oldest, ...fillers, sent, mistake, scheduled];
+    const created = { channel: 'sms', direction: 'inbound' };
+    let newestRequests = 0;
+    let newestFails = false;
+    let holdNewest;
+    let releaseNewest;
+    let markHeld;
+    const held = new Cypress.Promise(resolve => {
+      markHeld = resolve;
+    });
+    let releaseSend;
+    const send = new Cypress.Promise(resolve => {
+      releaseSend = resolve;
+    });
+    let markSaved;
+    const saved = new Cypress.Promise(resolve => {
+      markSaved = resolve;
+    });
+
+    routeOrganizationMessaging(true);
+    routeMessageAction(texts);
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (!isNewestMessagesRequest(req)) return;
+        newestRequests += 1;
+
+        if (newestFails) {
+          req.alias = 'routeNewestMessagesError';
+          req.reply({ forceNetworkError: true });
+          return;
+        }
+
+        if (!holdNewest) return;
+
+        // The response holds the texts saved when the request arrived.
+        const data = getPage(texts, getQuery(req), texts);
+        markHeld();
+        return holdNewest.then(() => {
+          req.reply({ body: { data, included: [] } });
+        });
+      });
+
+    cy
+      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
+        // The server saves the text before it responds.
+        texts.push({ ...req.body.data, relationships: { ...req.body.data.relationships, flow: { data: null } } });
+        markSaved();
+        return send.then(() => {
+          req.reply({ statusCode: 201, body: { data: req.body.data } });
+        });
+      })
+      .as('routePostInteraction');
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-history')
+      .find('.js-older')
+      .click();
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 26)
+      .first()
+      .should('contain', 'Oldest text');
+
+    // Each update is also saved on the server, so later loads return it.
+    cy
+      .then(() => {
+        sent.attributes.metadata = failedMetadata;
+      });
+
+    sendTextWs('MetadataUpdated', sent, { metadata: failedMetadata });
+
+    cy
+      .contains('.messaging-card', 'See you Tuesday.')
+      .find('.messaging-card__error')
+      .should('have.text', 'Not delivered to (615) 555-0190. This number can\'t receive texts.');
+
+    cy
+      .contains('.messaging-card', 'Monthly check-in')
+      .should('have.class', 'messaging-card--scheduled');
+
+    cy
+      .then(() => {
+        scheduled.attributes.occurred_at = getDayTs(0, 0, 1);
+      });
+
+    sendTextWs('InteractionCompleted', scheduled, { occurred_at: getDayTs(0, 0, 1) });
+
+    cy
+      .contains('.messaging-card', 'Monthly check-in')
+      .should('not.have.class', 'messaging-card--scheduled')
+      .and('not.contain', 'Scheduled');
+
+    cy
+      .get('.messaging-history__day')
+      .last()
+      .should('contain', getDateLabel(getDayTs(0, 0, 1)))
+      .and('contain', 'Monthly check-in');
+
+    cy
+      .get('.messaging-history')
+      .should('not.contain', getDateLabel('2099-11-20T15:00:00Z'));
+
+    cy
+      .then(() => {
+        texts.splice(texts.indexOf(mistake), 1);
+      });
+
+    sendTextWs('ResourceDeleted', mistake);
+
+    cy
+      .get('.messaging-history')
+      .should('not.contain', 'Wrong patient, sorry.')
+      .find('.messaging-card')
+      .should('have.length', 25);
+
+    cy
+      .then(() => {
+        cancelledFiller.attributes.cancelled_at = getDayTs(0, 0, 5);
+      });
+
+    sendTextWs('InteractionCancelled', cancelledFiller, { cancelled_at: getDayTs(0, 0, 5) });
+
+    cy
+      .contains('.messaging-card', 'Filler 22')
+      .should('contain', 'Cancelled')
+      .then(() => {
+        texts.push(firstReply);
+      });
+
+    // Texts for another patient and calls don't load texts; the request count below checks it.
+    sendTextWs('ResourceCreated', getText({}), created, otherPatient);
+
+    sendTextWs('ResourceCreated', getText({}), { channel: 'voice', direction: 'inbound' });
+
+    sendTextWs('ResourceCreated', firstReply, created);
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 26)
+      .last()
+      .should('contain', 'Is Tuesday at 2 ok?')
+      .then(() => {
+        texts.push(secondReply);
+        holdNewest = new Cypress.Promise(resolve => {
+          releaseNewest = resolve;
+        });
+      });
+
+    sendTextWs('ResourceCreated', secondReply, created);
+
+    cy
+      .then(() => held)
+      .then(() => {
+        texts.push(thirdReply);
+      });
+
+    sendTextWs('InteractionCompleted', secondReply, { occurred_at: secondReply.attributes.occurred_at });
+
+    sendTextWs('ResourceCreated', thirdReply, created);
+
+    cy
+      .then(() => {
+        texts.splice(texts.indexOf(sent), 1);
+        texts.splice(texts.indexOf(secondReply), 1);
+      });
+
+    // The held response still has both texts: one shown, one not shown yet.
+    sendTextWs('ResourceDeleted', sent);
+
+    sendTextWs('ResourceDeleted', secondReply);
+
+    cy
+      .get('.messaging-history')
+      .should('not.contain', 'See you Tuesday.')
+      .then(() => {
+        holdNewest = null;
+        releaseNewest();
+      });
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 26)
+      .last()
+      .should('contain', 'Thursday works too.');
+
+    cy
+      .get('.messaging-history')
+      .should('not.contain', 'Or Wednesday?')
+      .and('contain', 'Oldest text')
+      .and('not.contain', 'Wrong patient, sorry.')
+      .and('not.contain', 'See you Tuesday.')
+      .then(() => {
+        // First visit, the first reply, the held load, and the load after it.
+        expect(newestRequests).to.equal(4);
+      });
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('Tuesday at 2 works.');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .then(() => saved)
+      .then(() => {
+        texts.push(lastReply);
+      });
+
+    sendTextWs('ResourceCreated', lastReply, created);
+
+    cy
+      .contains('.messaging-card', 'Tuesday at 2 works.')
+      .should('contain', 'Sending…')
+      .then(() => releaseSend());
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 28)
+      .last()
+      .should('contain', 'Great, thanks!');
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card:contains("Tuesday at 2 works.")')
+      .should('have.length', 1)
+      .and('not.contain', 'Sending…')
+      .then(() => {
+        newestFails = true;
+        texts.push(lostReply);
+      });
+
+    sendTextWs('ResourceCreated', lostReply, created);
+
+    cy
+      .wait('@routeNewestMessagesError')
+      .then(() => {
+        newestFails = false;
+        texts.push(nextReply);
+      });
+
+    sendTextWs('ResourceCreated', nextReply, created);
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 30)
+      .last()
+      .should('contain', 'Hello?');
+  });
+
+  specify('leaving while new messages load', function() {
+    const reply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 1), metadata: { body: 'Running late' } });
+    const texts = [];
+    let releaseNewest;
+    const newest = new Cypress.Promise(resolve => {
+      releaseNewest = resolve;
+    });
+
+    routeOrganizationMessaging(true);
+    routeMessageAction(texts);
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-history')
+      .should('contain', 'No messages yet.');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (!isNewestMessagesRequest(req)) return;
+        return newest.then(() => {
+          req.reply({ body: { data: [reply], included: [] } });
+        });
+      })
+      .as('routeNewestMessages');
+
+    sendTextWs('ResourceCreated', reply, { channel: 'sms', direction: 'inbound' });
+
+    cy
+      .get('.patient__context-trail')
+      .contains('Omar Porter')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow`)
+      .then(() => releaseNewest());
+
+    cy
+      .wait('@routeNewestMessages')
+      .then(() => {
+        texts.push(reply);
+      });
+
+    cy
+      .go('back')
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 1)
+      .and('contain', 'Running late');
   });
 
   specify('leaving while earlier messages load', function() {
