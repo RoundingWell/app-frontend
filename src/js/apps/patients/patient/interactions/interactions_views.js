@@ -295,8 +295,8 @@ const InteractionsPageView = View.extend({
     this.getChildView('content')?.scrollToDate(date, document.activeElement === this.getUI('today')[0]);
     this.updateCurrentDate();
   },
-  showComposer(phone) {
-    this.showChildView('composer', new ComposerView({ patient: this.model, phone }));
+  showComposer(phone, draft) {
+    this.showChildView('composer', new ComposerView({ model: draft, patient: this.model, phone }));
   },
   restoreComposer(message) {
     this.getChildView('composer').restore(message);

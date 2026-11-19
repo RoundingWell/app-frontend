@@ -11,6 +11,7 @@ import { compareInteractions } from 'js/entities-service/entities/interactions';
 import InteractionWindowRead from 'js/entities-service/interaction-window-read';
 
 import { isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
+import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
 
 import { InteractionsPageView } from './interactions_views';
 
@@ -54,7 +55,7 @@ export default App.extend({
 
     if (!this.phone || !this.getView()) return;
 
-    this.getView().showComposer(this.phone);
+    this.getView().showComposer(this.phone, createComposerDraft({ patientId: this.patient.id, actionId: null }));
   },
   async onSendMessage(message) {
     const selectedGroups = this.getState().get('selectedGroups');

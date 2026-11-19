@@ -5137,6 +5137,22 @@ context('patient interactions', function() {
     cy
       .get('.patient-interactions__item')
       .should('not.exist');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/workflow`);
+
+    cy
+      .go('back');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .should('have.value', 'Are you there?');
   });
 
   specify('leaving while a send waits for the latest texts', function() {

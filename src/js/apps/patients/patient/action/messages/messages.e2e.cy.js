@@ -698,9 +698,104 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .should('have.value', '');
+
+    cy
       .get('.messaging-history')
       .should('contain', 'No messages yet.')
       .and('not.contain', 'On my way');
+  });
+
+  specify('keeping an unsent text', function() {
+    const composeAction = getAction({
+      attributes: { name: 'Message Nov 12', options: { embed: 'compose' } },
+      relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship() },
+    });
+
+    routeOrganizationMessaging(true);
+    routeMessageAction([]);
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('{enter}Hi Omar,{enter}Call us back. ');
+
+    cy
+      .get('.patient__context-trail')
+      .contains('Omar Porter')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow`);
+
+    cy
+      .go('back')
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .should('have.value', '\nHi Omar,\nCall us back. ');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('not.be.disabled');
+
+    cy
+      .get('.messaging-history__header')
+      .find('.js-interactions')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/interactions`);
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .should('have.value', '')
+      .type('From Interactions');
+
+    cy
+      .go('back')
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .should('have.value', '\nHi Omar,\nCall us back. ');
+
+    cy
+      .go('forward');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .should('have.value', 'From Interactions');
+
+    routeMessageAction([], composeAction);
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ composeAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .should('have.value', '');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
   });
 
   specify('expanding the form hides messages', function() {
