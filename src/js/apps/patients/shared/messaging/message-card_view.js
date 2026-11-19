@@ -53,6 +53,10 @@ const MessageCardView = View.extend({
 
     return action.get('name');
   },
+  setGrouping(continuation, continues) {
+    this.el.classList.toggle('messaging-card--continuation', continuation);
+    this.el.classList.toggle('messaging-card--continues', continues);
+  },
   onRender() {
     const status = getStatus(this.model);
     this.el.classList.toggle('messaging-card--scheduled', status === 'scheduled');
