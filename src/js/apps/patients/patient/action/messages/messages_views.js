@@ -105,7 +105,7 @@ const MessagesView = View.extend({
     composer: '[data-composer-region]',
     currentDate: '[data-current-date-region]',
   },
-  ui: { header: '.js-header', older: '.js-older', status: '.js-status', interactions: '.js-interactions' },
+  ui: { header: '.js-header', older: '.js-older', beginning: '.js-beginning', status: '.js-status', interactions: '.js-interactions' },
   triggers: { 'click @ui.older': 'click:older', 'click @ui.interactions': 'click:interactions' },
   childViewTriggers: { 'send:message': 'send:message', 'select:date': 'select:date' },
   initialize() {
@@ -167,6 +167,7 @@ const MessagesView = View.extend({
     this.updateCurrentDate();
     this.getUI('older')[0].hidden = !hasOlder;
     this.getUI('older')[0].disabled = false;
+    this.getUI('beginning')[0].hidden = hasOlder || !shown.length;
     this.getUI('status')[0].textContent = shown.length ? '' : intl.empty;
   },
   showOlderError() {
