@@ -28,7 +28,7 @@ function getDate(model) {
 
 function isShownInHistory(model, actionId) {
   const upcoming = !model.get('occurred_at') && !model.get('cancelled_at') && dayjs(model.get('expected_at')).isAfter(dayjs());
-  return !upcoming || model.get('_action')?.id === actionId;
+  return !upcoming || model.getAction()?.id === actionId;
 }
 
 // The action, or the flow when there is no action. Replies usually have neither, and still group.

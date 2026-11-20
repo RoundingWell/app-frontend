@@ -298,9 +298,6 @@ const InteractionsPageView = View.extend({
   showComposer(phone, draft) {
     this.showChildView('composer', new ComposerView({ model: draft, patient: this.model, phone }));
   },
-  restoreComposer(message) {
-    this.getChildView('composer').restore(message);
-  },
   showError() {
     this.showChildView('content', new InteractionsErrorView({ canRetry: true }));
     this.getState().set('contentStatus', 'error');
