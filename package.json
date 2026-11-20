@@ -90,7 +90,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^10.14.0",
     "eslint-plugin-chai-friendly": "^1.2.1",
-    "eslint-plugin-cypress": "^6.1.0",
+    "eslint-plugin-cypress": "^7.0.5",
     "eslint-plugin-mocha": "^11.0.0",
     "fs-extra": "^11.4.1",
     "globals": "^17.14.0",
