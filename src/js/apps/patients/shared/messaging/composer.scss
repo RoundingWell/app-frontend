@@ -56,6 +56,19 @@
   padding: 0;
 }
 
+.messaging-composer--disabled .messaging-composer__box {
+  background: var(--color-surface-muted);
+}
+
+.messaging-composer--disabled .messaging-composer__header {
+  background: var(--color-control-background);
+}
+
+.messaging-composer__input:disabled {
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
 .messaging-composer__footer {
   align-items: center;
   display: flex;

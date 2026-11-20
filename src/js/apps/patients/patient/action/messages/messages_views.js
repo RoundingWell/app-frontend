@@ -188,10 +188,10 @@ const MessagesView = View.extend({
     this.showComposer();
   },
   showComposer() {
-    const phone = this.getOption('phone');
-    if (!phone) return;
+    const draft = this.getOption('draft');
+    if (!draft) return;
 
-    this.showChildView('composer', new ComposerView({ model: this.getOption('draft'), patient: this.getOption('patient'), phone }));
+    this.showChildView('composer', new ComposerView({ model: draft, patient: this.getOption('patient'), phone: this.getOption('phone') }));
   },
   showWindow({ models, hasOlder }) {
     const shown = filter(models, model => isShownInHistory(model, this.getOption('currentActionId')));

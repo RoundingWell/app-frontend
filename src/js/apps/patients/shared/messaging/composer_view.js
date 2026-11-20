@@ -10,7 +10,9 @@ import ComposerTemplate from './composer.hbs';
 import './composer.scss';
 
 const ComposerView = View.extend({
-  className: 'messaging-composer',
+  className() {
+    return this.getOption('phone') ? 'messaging-composer' : 'messaging-composer messaging-composer--disabled';
+  },
   template: ComposerTemplate,
   ui: {
     input: '.js-input',
@@ -24,6 +26,10 @@ const ComposerView = View.extend({
   modelEvents: {
     'change:body': 'onChangeBody',
   },
+  // Without a phone, the box stays empty so the reason shows; a saved draft is kept for later.
+  getBody() {
+    return this.getOption('phone') ? this.model.get('body') : '';
+  },
   templateContext() {
     const patient = this.getOption('patient');
 
@@ -31,12 +37,13 @@ const ComposerView = View.extend({
       patientName: `${ patient.get('first_name') } ${ patient.get('last_name') }`,
       firstName: patient.get('first_name'),
       phone: this.getOption('phone'),
-      canSend: !!trim(this.model.get('body')),
+      body: this.getBody(),
+      canSend: !!trim(this.getBody()),
     };
   },
   onRender() {
     // Set in JS: the HTML parser drops a leading newline inside <textarea>.
-    this.getUI('input')[0].value = this.model.get('body');
+    this.getUI('input')[0].value = this.getBody();
   },
   onInput() {
     this.model.set('body', this.getUI('input')[0].value);

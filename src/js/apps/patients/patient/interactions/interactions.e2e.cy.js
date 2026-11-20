@@ -5004,7 +5004,7 @@ context('patient interactions', function() {
       .should('not.contain', 'Sending…');
   });
 
-  specify('shows the composer only for a texting patient and survives failed loads', function() {
+  specify('shows the composer for messaging, disabled without a mobile phone, and survives failed loads', function() {
     const patient = getPatient({ attributes: { first_name: 'Omar', last_name: 'Porter' } });
     const row = getInteraction({ attributes: { channel: 'voice', direction: 'outbound', occurred_at: '2026-10-08T12:00:00Z', metadata: { note: 'Only call' } } });
     let releasePhones;
@@ -5047,8 +5047,19 @@ context('patient interactions', function() {
       .should('be.visible');
 
     cy
-      .get('.messaging-composer')
-      .should('not.exist');
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .should('be.disabled')
+      .and('have.attr', 'placeholder', 'Omar doesn\'t have a mobile number.');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .should('not.contain', 'To Omar Porter');
 
     cy
       .intercept('GET', '/api/patients/*/fields/phones', { forceNetworkError: true })
