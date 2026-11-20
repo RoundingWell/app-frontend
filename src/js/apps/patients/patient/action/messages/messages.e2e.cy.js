@@ -875,6 +875,29 @@ context('patient action messages', function() {
       .get('.messaging-composer')
       .find('.js-send')
       .should('be.disabled');
+
+    routeMessageAction([], testAction, [{ label: 'home', number: '+16785552384', preferred: true }]);
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .should('have.value', '')
+      .and('have.attr', 'placeholder', 'Omar doesn\'t have a mobile number.');
+
+    routeMessageAction([]);
+
+    cy
+      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .should('have.value', '\nHi Omar,\nCall us back. ');
   });
 
   specify('expanding the form hides messages', function() {
@@ -1588,7 +1611,18 @@ context('patient action messages', function() {
 
     cy
       .get('.messaging-composer')
-      .should('not.exist');
+      .find('.js-input')
+      .should('be.disabled')
+      .and('have.attr', 'placeholder', 'Omar doesn\'t have a mobile number.');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
+
+    cy
+      .get('.messaging-composer')
+      .should('not.contain', 'To Omar Porter');
 
     cy
       .get('.messaging-history__header')

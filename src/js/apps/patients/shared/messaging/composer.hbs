@@ -2,10 +2,10 @@
 <div class="messaging-composer__box">
   <div class="messaging-composer__header">
     <strong>{{ @intl.patients.shared.messaging.composerView.heading }}</strong>
-    <span>{{ @intl.patients.shared.messaging.composerView.to }} <strong>{{ patientName }}</strong> {{formatPhoneNumber phone}}</span>
+    {{#if phone}}<span>{{ @intl.patients.shared.messaging.composerView.to }} <strong>{{ patientName }}</strong> {{formatPhoneNumber phone}}</span>{{/if}}
   </div>
   <div class="messaging-composer__field textarea-flex">
-    <textarea class="textarea-flex__input messaging-composer__input js-input" placeholder="{{formatMessage (intlGet "patients.shared.messaging.composerView.placeholder") name=firstName}}" aria-label="{{ @intl.patients.shared.messaging.composerView.heading }}"></textarea>
+    <textarea class="textarea-flex__input messaging-composer__input js-input" placeholder="{{#if phone}}{{formatMessage (intlGet "patients.shared.messaging.composerView.placeholder") name=firstName}}{{else}}{{formatMessage (intlGet "patients.shared.messaging.composerView.noMobile") name=firstName}}{{/if}}" aria-label="{{ @intl.patients.shared.messaging.composerView.heading }}" {{#unless phone}}disabled{{/unless}}></textarea>
     <div class="textarea-flex__mirror messaging-composer__input js-spacer" aria-hidden="true">{{ body }} </div>
   </div>
   <div class="messaging-composer__footer">

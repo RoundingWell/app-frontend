@@ -27,27 +27,27 @@ export default App.extend({
   },
   prepareStart({ patient }, { signal }) {
     this.query = { patientId: patient.id, channels: ['sms'], limit: PAGE_LIMIT };
-    // Without messaging, the history shows and the composer does not.
-    const phone = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'phones' }, { signal })
-      .then(phones => find(phones.get('value'), { label: 'mobile' })?.number, error => {
+    // Without messaging, or when phones fail to load, the history shows and the composer does not.
+    const composerRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'phones' }, { signal })
+      .then(phones => ({ phone: find(phones.get('value'), { label: 'mobile' })?.number }), error => {
         signal.throwIfAborted();
         addError(error);
       });
 
     return Promise.all([
       Radio.request('entities', 'fetch:interactions:window:initial', this.query, { signal }),
-      phone,
+      composerRequest,
     ])
-      .then(([window, mobile]) => ({ window, phone: mobile }))
+      .then(([window, composer]) => ({ window, composer }))
       .catch(error => {
         signal.throwIfAborted();
         return { error };
       });
   },
-  onStart(app, { patient, action, viewport, focusOnLoad }, { window, phone, error }) {
+  onStart(app, { patient, action, viewport, focusOnLoad }, { window, composer, error }) {
     this.patient = patient;
     this.action = action;
-    this.phone = phone;
+    this.phone = composer?.phone;
 
     if (error) {
       addError(error);
@@ -56,8 +56,9 @@ export default App.extend({
       this.window = window;
       this.deletedIds = [];
       this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
-      const draft = phone && createComposerDraft({ patientId: patient.id, actionId: action.id });
-      this.showView(new MessagesView({ window, patient, phone, viewport, currentActionId: action.id, draft }));
+      // No mobile phone shows the composer disabled.
+      const draft = composer && createComposerDraft({ patientId: patient.id, actionId: action.id });
+      this.showView(new MessagesView({ window, patient, phone: this.phone, viewport, currentActionId: action.id, draft }));
     }
 
     if (focusOnLoad) this.focus();

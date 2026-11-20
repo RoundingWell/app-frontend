@@ -305,6 +305,7 @@ careOptsFrontend:
       messaging:
         composerView:
           heading: New Message
+          noMobile: '{name} doesn''t have a mobile number.'
           placeholder: Write a message to {name}…
           send: Send
           to: To

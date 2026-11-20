@@ -51,9 +51,11 @@ export default App.extend({
     if (!isMessagingEnabled()) return;
 
     const phones = await Radio.request('entities', 'fetch:patientFields:model', { _patient: this.patient.getResource(), name: 'phones' }).catch(addError);
-    this.phone = find(phones?.get('value'), { label: 'mobile' })?.number;
 
-    if (!this.phone || !this.getView()) return;
+    // No composer when phones fail to load; no mobile phone shows it disabled.
+    if (!phones || !this.getView()) return;
+
+    this.phone = find(phones.get('value'), { label: 'mobile' })?.number;
 
     this.getView().showComposer(this.phone, createComposerDraft({ patientId: this.patient.id, actionId: null }));
   },
