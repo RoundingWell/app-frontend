@@ -134,7 +134,7 @@
     "backbone.store": "^2.0.0",
     "dayjs": "^1.11.23",
     "handlebars": "^4.7.10",
-    "idb": "^7.1.1",
+    "idb": "^8.0.4",
     "libphonenumber-js": "^1.13.16",
     "marionette": "5.0.0",
     "morphdom": "2.7.8",
