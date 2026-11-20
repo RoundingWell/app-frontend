@@ -71,7 +71,7 @@ context('patient action messages', function() {
   const testPatient = getPatient({ attributes: { first_name: 'Omar', last_name: 'Porter' } });
   const testFlow = getFlow({ attributes: { name: 'TCM Follow-up' }, relationships: { patient: getRelationship(testPatient) } });
   const testAction = getAction({
-    attributes: { name: 'Message Nov 10', options: { embed: 'compose' } },
+    attributes: { name: 'Message Nov 10', tags: ['message'] },
     relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship() },
   });
   const otherAction = getAction({
@@ -439,7 +439,7 @@ context('patient action messages', function() {
       relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship() },
     });
     const flowMessageAction = getAction({
-      attributes: { name: 'Flow message', options: { embed: 'compose' } },
+      attributes: { name: 'Flow message', tags: ['message'] },
       relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship(testFlow) },
     });
 
@@ -789,7 +789,7 @@ context('patient action messages', function() {
 
   specify('keeping an unsent text', function() {
     const composeAction = getAction({
-      attributes: { name: 'Message Nov 12', options: { embed: 'compose' } },
+      attributes: { name: 'Message Nov 12', tags: ['message'] },
       relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship() },
     });
 
@@ -880,7 +880,7 @@ context('patient action messages', function() {
   specify('expanding the form hides messages', function() {
     const text = getText({ occurredAt: getDayTs(1, 9), metadata: { message: 'See you soon.' }, action: testAction });
     const formAction = getAction({
-      attributes: { name: 'Message with form', options: { embed: 'compose' } },
+      attributes: { name: 'Message with form', tags: ['message'] },
       relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship(), form: getRelationship(testForm) },
     });
 
@@ -1622,8 +1622,8 @@ context('patient action messages', function() {
       .should('contain', 'Called the patient');
   });
 
-  specify('messages unavailable', function() {
-    const text = getText({ metadata: { message: 'Texts stay in Activity' }, action: testAction });
+  specify('messaging off and untagged actions', function() {
+    const text = getText({ metadata: { message: 'Texts stay in history' }, action: testAction });
     const regularAction = getAction({
       attributes: { name: 'Call patient' },
       relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship() },
@@ -1637,11 +1637,20 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
-      .get('.patient-action__activity')
-      .should('contain', 'Texts stay in Activity');
+      .get('.messaging-history')
+      .should('contain', 'Texts stay in history');
 
     cy
-      .get('.messaging-history')
+      .get('.patient-action__activity')
+      .should('not.contain', 'Texts stay in history');
+
+    cy
+      .get('.patient-action__title')
+      .find('.js-messages')
+      .should('be.visible');
+
+    cy
+      .get('.messaging-composer')
       .should('not.exist');
 
     routeOrganizationMessaging(true);
@@ -1659,11 +1668,11 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
-      .get('.patient-action__activity')
-      .should('contain', 'Texts stay in Activity');
+      .get('.messaging-history')
+      .should('contain', 'Texts stay in history');
 
     cy
-      .get('.messaging-history')
+      .get('.messaging-composer')
       .should('not.exist');
 
     routeOrganizationMessaging(true);

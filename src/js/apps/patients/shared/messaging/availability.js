@@ -1,12 +1,13 @@
-import { get } from 'underscore';
 import { Radio } from 'marionette';
 
 export function isMessagingEnabled() {
   const organizationEnabled = Radio.request('settings', 'get:organization', 'messaging_enabled');
   const workspaceEnabled = Radio.request('workspace', 'current').get('settings').messaging_enabled;
+
   return organizationEnabled === true && workspaceEnabled !== false;
 }
 
+// Program actions tagged `message` can have texts. Their history shows even when messaging is off.
 export function canShowMessages(action) {
-  return isMessagingEnabled() && get(action.get('options'), 'embed') === 'compose';
+  return action.hasTag('message');
 }

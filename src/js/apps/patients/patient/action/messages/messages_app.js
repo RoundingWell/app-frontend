@@ -8,6 +8,7 @@ import App from 'js/base/app';
 
 import { compareInteractions } from 'js/entities-service/entities/interactions';
 
+import { isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
 import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
 
 import { MessagesLoadingView, MessagesErrorView, MessagesView } from './messages_views';
@@ -26,7 +27,8 @@ export default App.extend({
   },
   prepareStart({ patient }, { signal }) {
     this.query = { patientId: patient.id, channels: ['sms'], limit: PAGE_LIMIT };
-    const phone = Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'phones' }, { signal })
+    // Without messaging, the history shows and the composer does not.
+    const phone = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'phones' }, { signal })
       .then(phones => find(phones.get('value'), { label: 'mobile' })?.number, error => {
         signal.throwIfAborted();
         addError(error);
