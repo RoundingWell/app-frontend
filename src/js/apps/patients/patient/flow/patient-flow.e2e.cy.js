@@ -602,6 +602,9 @@ context('patient flow page', function() {
 
   specify('flow action attachment and comment links', function() {
     const linkedAction = getAction({
+      attributes: {
+        tags: ['message'],
+      },
       relationships: {
         flow: getRelationship(testFlow),
         state: getRelationship(stateTodo),
@@ -665,6 +668,24 @@ context('patient flow page', function() {
 
     cy
       .get('[data-activity-region]')
+      .should('be.focused');
+
+    cy
+      .go('back')
+      .wait('@routeFlow')
+      .wait('@routeFlowActions');
+
+    cy
+      .get('.patient-flow__action-item .js-messages')
+      .click()
+      .wait('@routeAction');
+
+    cy
+      .url()
+      .should('contain', `/flow/${ testFlow.id }/action/${ linkedAction.id }`);
+
+    cy
+      .get('[data-messages-region]')
       .should('be.focused');
   });
 
@@ -1055,6 +1076,7 @@ context('patient flow page', function() {
         expect($action.find('[data-owner-region]')).to.contain('OT');
         expect($action.find('.fa-paperclip')).to.not.exist;
         expect($action.find('.fa-comment')).to.not.exist;
+        expect($action.find('.js-messages')).to.not.exist;
       });
 
     cy

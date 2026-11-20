@@ -197,6 +197,15 @@ context('patient action messages', function() {
       .should('have.length', 18);
 
     cy
+      .get('.patient-action__title')
+      .find('.js-messages')
+      .click();
+
+    cy
+      .get('[data-messages-region]')
+      .should('be.focused');
+
+    cy
       .get('.messaging-history__header')
       .should('contain', 'Messages')
       .and('contain', 'All messages with Omar Porter')
@@ -430,117 +439,6 @@ context('patient action messages', function() {
     cy
       .location('pathname')
       .should('equal', `/one/patient/${ testPatient.id }/interactions/${ todayText.id }`);
-  });
-
-  specify('messages buttons', function() {
-    const text = getText({ occurredAt: getDayTs(1, 9), metadata: { message: 'See you soon.' }, action: testAction });
-    const regularAction = getAction({
-      attributes: { name: 'Call patient' },
-      relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship() },
-    });
-    const flowMessageAction = getAction({
-      attributes: { name: 'Flow message', tags: ['message'] },
-      relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship(testFlow) },
-    });
-
-    routeOrganizationMessaging(true);
-    routeMessageAction([text]);
-
-    cy
-      .routePatientActions(fx => {
-        fx.data = [testAction, regularAction];
-        fx.included = [testPatient];
-
-        return fx;
-      })
-      .routeFlowActions(fx => {
-        fx.data = [flowMessageAction];
-        fx.included = [testPatient, testFlow];
-
-        return fx;
-      })
-      .routeActions(fx => {
-        fx.data = [testAction];
-        fx.included = [testPatient];
-
-        return fx;
-      });
-
-    cy
-      .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
-      .wait('@routeAction');
-
-    cy
-      .get('.messaging-history')
-      .should('contain', 'See you soon.');
-
-    cy
-      .get('.patient-action__title')
-      .find('.js-messages')
-      .click();
-
-    cy
-      .get('[data-messages-region]')
-      .should('be.focused');
-
-    cy
-      .visit(`/patient/${ testPatient.id }/workflow`)
-      .wait('@routePatientActions');
-
-    cy
-      .contains('.work-card', 'Call patient')
-      .find('.js-messages')
-      .should('not.exist');
-
-    cy
-      .contains('.work-card', 'Message Nov 10')
-      .find('.js-messages')
-      .click();
-
-    cy
-      .location('pathname')
-      .should('equal', `/one/patient/${ testPatient.id }/action/${ testAction.id }`);
-
-    cy
-      .get('[data-messages-region]')
-      .should('be.focused')
-      .and('contain', 'See you soon.');
-
-    cy
-      .visit(`/patient/${ testPatient.id }/flow/${ testFlow.id }`)
-      .wait('@routeFlowActions');
-
-    cy
-      .contains('.work-card', 'Flow message')
-      .find('.js-messages')
-      .click();
-
-    cy
-      .location('pathname')
-      .should('equal', `/one/patient/${ testPatient.id }/flow/${ testFlow.id }/action/${ flowMessageAction.id }`);
-
-    cy
-      .get('[data-messages-region]')
-      .should('be.focused')
-      .and('contain', 'See you soon.');
-
-    cy
-      .visit('/worklist/owned-by')
-      .wait('@routeActions');
-
-    cy
-      .contains('.work-card', 'Message Nov 10')
-      .find('.js-messages')
-      .click();
-
-    cy
-      .location('pathname')
-      .should('equal', `/one/patient/${ testPatient.id }/action/${ testAction.id }`);
-
-    cy
-      .get('[data-messages-region]')
-      .should('be.focused')
-      .and('contain', 'See you soon.');
   });
 
   specify('send a message', function() {
@@ -1725,6 +1623,11 @@ context('patient action messages', function() {
 
     cy
       .get('.messaging-history')
+      .should('not.exist');
+
+    cy
+      .get('.patient-action__title')
+      .find('.js-messages')
       .should('not.exist');
   });
 });
