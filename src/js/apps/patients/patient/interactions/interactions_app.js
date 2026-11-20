@@ -57,7 +57,8 @@ export default App.extend({
 
     this.phone = find(phones.get('value'), { label: 'mobile' })?.number;
 
-    this.getView().showComposer(this.phone, createComposerDraft({ patientId: this.patient.id, actionId: null }));
+    this.draft = createComposerDraft({ patientId: this.patient.id, actionId: null });
+    this.getView().showComposer(this.phone, this.draft);
   },
   async onSendMessage(message) {
     const selectedGroups = this.getState().get('selectedGroups');
@@ -67,7 +68,7 @@ export default App.extend({
       this.getState().set({ interactionId: undefined, selectedGroups: showsMessages ? selectedGroups : [...selectedGroups, 'messages'] });
 
       if (!await this.requestInteractions('replace')) {
-        this.getView()?.restoreComposer(message);
+        if (this.getView()) this.draft.set('body', message);
         return;
       }
     }

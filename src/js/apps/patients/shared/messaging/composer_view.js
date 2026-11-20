@@ -61,9 +61,6 @@ const ComposerView = View.extend({
     this.getUI('input')[0].focus();
     this.triggerMethod('send:message', message);
   },
-  restore(message) {
-    this.model.set('body', message);
-  },
 });
 
 export default ComposerView;
