@@ -144,6 +144,6 @@
     "@roundingwell/icons": "git+https://github.com/RoundingWell/pkg-icons.git#86589b767454105b86568781dc1be7f55f83b91c"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.68.2"
+    "@rollup/rollup-linux-x64-gnu": "^4.68.4"
   }
 }
