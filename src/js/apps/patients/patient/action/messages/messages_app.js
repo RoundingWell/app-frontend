@@ -13,8 +13,6 @@ import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draf
 
 import { MessagesLoadingView, MessagesErrorView, MessagesView } from './messages_views';
 
-const PAGE_LIMIT = 25;
-
 export default App.extend({
   viewEvents: {
     'click:older': 'onClickOlder',
@@ -26,10 +24,21 @@ export default App.extend({
     this.showView(new MessagesLoadingView());
   },
   prepareStart({ patient }, { signal }) {
-    this.query = { patientId: patient.id, channels: ['sms'], limit: PAGE_LIMIT };
-    // Without messaging, or when phones fail to load, the history shows and the composer does not.
-    const composerRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'phones' }, { signal })
-      .then(phones => ({ phone: find(phones.get('value'), { label: 'mobile' })?.number }), error => {
+    this.query = {
+      patientId: patient.id,
+      channels: ['sms'],
+      limit: 25,
+    };
+
+    const composerRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', {
+      _patient: patient.getResource(),
+      name: 'phones',
+    }, { signal })
+      .then(phones => {
+        const mobile = find(phones.get('value'), { label: 'mobile' });
+
+        return { phone: mobile?.number };
+      }, error => {
         signal.throwIfAborted();
         addError(error);
       });
@@ -38,13 +47,13 @@ export default App.extend({
       Radio.request('entities', 'fetch:interactions:window:initial', this.query, { signal }),
       composerRequest,
     ])
-      .then(([window, composer]) => ({ window, composer }))
+      .then(([initial, composer]) => ({ initial, composer }))
       .catch(error => {
         signal.throwIfAborted();
         return { error };
       });
   },
-  onStart(app, { patient, action, viewport, focusOnLoad }, { window, composer, error }) {
+  onStart(app, { patient, action, viewport, focusOnLoad }, { initial, composer, error }) {
     this.patient = patient;
     this.action = action;
     this.phone = composer?.phone;
@@ -53,12 +62,24 @@ export default App.extend({
       addError(error);
       this.showView(new MessagesErrorView());
     } else {
-      this.window = window;
+      this.window = initial;
       this.deletedIds = [];
+
       this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
-      // No mobile phone shows the composer disabled.
-      const draft = composer && createComposerDraft({ patientId: patient.id, actionId: action.id });
-      this.showView(new MessagesView({ window, patient, phone: this.phone, viewport, currentActionId: action.id, draft }));
+
+      const draft = composer && createComposerDraft({
+        patientId: patient.id,
+        actionId: action.id,
+      });
+
+      this.showView(new MessagesView({
+        window: initial,
+        patient,
+        phone: this.phone,
+        viewport,
+        currentActionId: action.id,
+        draft,
+      }));
     }
 
     if (focusOnLoad) this.focus();
@@ -67,8 +88,11 @@ export default App.extend({
     this.getRegion().focus();
   },
   onClickInteractions() {
-    // The newest text sent or received on this action; scheduled, cancelled and unsaved texts are skipped.
-    const newest = last(filter(this.window.models, model => model.getAction()?.id === this.action.id && model.get('occurred_at') && !model.isNew()));
+    const newest = last(filter(this.window.models, model => {
+      const isOnAction = model.getAction()?.id === this.action.id;
+
+      return isOnAction && model.get('occurred_at') && !model.isNew();
+    }));
 
     if (!newest) {
       Radio.trigger('event-router', 'patient:interactions', this.patient.id);
@@ -78,29 +102,43 @@ export default App.extend({
     Radio.trigger('event-router', 'patient:interaction', this.patient.id, newest.id);
   },
   onClickOlder() {
-    return this.loadOlder(signal => Radio.request('entities', 'fetch:interactions:window:adjacent', this.query, this.window, 'older', { signal }));
+    this.loadOlder(signal => {
+      return Radio.request('entities', 'fetch:interactions:window:adjacent', this.query, this.window, 'older', { signal });
+    });
   },
   async onSelectDate(date) {
-    if (await this.loadOlder(signal => Radio.request('entities', 'fetch:interactions:window:toDate', this.query, this.window, date, { signal }))) {
-      this.getView().scrollToDate(date);
-    }
+    const isShown = await this.loadOlder(signal => {
+      return Radio.request('entities', 'fetch:interactions:window:toDate', this.query, this.window, date, { signal });
+    });
+
+    if (!isShown) return;
+
+    this.getView().scrollToDate(date);
   },
-  // Loads older texts; a newer load replaces a pending one. Resolves true once shown.
   async loadOlder(request) {
     this.olderController?.abort();
-    const controller = this.olderController = new AbortController();
+
+    const controller = new AbortController();
+    this.olderController = controller;
+
     const startModels = this.window.models;
     this.getView().showOlderLoading();
+
     try {
-      const window = await request(controller.signal);
+      const older = await request(controller.signal);
+
       controller.signal.throwIfAborted();
-      // Only the older texts are new; keep everything shown since the load began.
-      this.showModels([...difference(window.models, startModels), ...this.window.models], window.hasOlder);
+      const added = difference(older.models, startModels);
+
+      this.showModels([...added, ...this.window.models], older.hasOlder);
+
       return true;
     } catch(error) {
       if (controller.signal.aborted) return false;
+
       addError(error);
       this.getView().showOlderError();
+
       return false;
     }
   },
@@ -109,7 +147,10 @@ export default App.extend({
       channel: 'sms',
       direction: 'outbound',
       occurred_at: dayjs.utc().format(),
-      metadata: { phone_number: this.phone, message },
+      metadata: {
+        phone_number: this.phone,
+        message,
+      },
       send_status: 'sending',
       _patient: this.patient.getResource(),
       _action: this.action.getResource(),
@@ -134,40 +175,47 @@ export default App.extend({
       return;
     }
 
-    // A text not shown yet can still be deleted before a load returns it.
     if (category === 'ResourceDeleted') this.deletedIds.push(model.id);
 
     if (!contains(this.window.models, model)) return;
 
     this.showModels(this.window.models);
   },
-  // Loads the newest texts and adds any not shown. One load at a time, and none while a text sends: the load could return that text before the send gives it an id, showing it twice.
   async loadNewer() {
-    if (this.newerController || some(this.window.models, model => model.get('send_status') === 'sending')) {
+    const hasSendingText = some(this.window.models, model => model.get('send_status') === 'sending');
+
+    if (this.newerController || hasSendingText) {
       this.hasNewerPending = true;
       return;
     }
 
     this.hasNewerPending = false;
-    const controller = this.newerController = new AbortController();
 
-    const window = await Radio.request('entities', 'fetch:interactions:window:initial', this.query, { signal: controller.signal }).catch(addError);
+    const controller = new AbortController();
+    this.newerController = controller;
+
+    const newest = await Radio.request('entities', 'fetch:interactions:window:initial', this.query, {
+      signal: controller.signal,
+    }).catch(addError);
     if (controller.signal.aborted) return;
 
     this.newerController = null;
-    if (window) this.showModels([...this.window.models, ...window.models]);
+    if (newest) this.showModels([...this.window.models, ...newest.models]);
     if (this.hasNewerPending) this.loadNewer();
   },
   showModels(models, hasOlder = this.window.hasOlder) {
     const shown = reject(uniq(models), model => contains(this.deletedIds, model.id));
     this.window = { ...this.window, hasOlder, models: shown.sort(compareInteractions) };
+
     this.getView().showWindow(this.window);
   },
   onStop() {
     this.olderController?.abort();
     this.newerController?.abort();
+
     this.newerController = null;
     this.hasNewerPending = false;
+
     this.stopListening(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
   },
 });

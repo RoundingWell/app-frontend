@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
-import { filter, groupBy, map } from 'underscore';
+import { filter, groupBy, isEqual, map } from 'underscore';
 import hbs from 'handlebars-inline-precompile';
 import { View, CollectionView } from 'marionette';
 
@@ -19,53 +19,36 @@ import './messages.scss';
 
 const intl = i18n.patients.patient.action.messages.messagesViews;
 
-// How far below the header a day's divider counts as the day being read.
-const DATE_GAP = 16;
-
-function getDate(model) {
-  return dayjs(model.getTimestamp()).format('YYYY-MM-DD');
-}
-
-function isShownInHistory(model, actionId) {
-  const upcoming = !model.get('occurred_at') && !model.get('cancelled_at') && dayjs(model.get('expected_at')).isAfter(dayjs());
-  return !upcoming || model.getAction()?.id === actionId;
-}
-
-// The action, or the flow when there is no action. Replies usually have neither, and still group.
-function getWork(model) {
-  return model.get('_action')?.id || model.get('_flow')?.id;
-}
-
-function hasFailed(model) {
-  return model.get('send_status') === 'failed' || !!getDeliveryFailure(model);
-}
-
-// Scheduled and cancelled texts keep their own dashed card.
-function isOccurred(model) {
-  return !!model?.get('occurred_at') && !model.get('cancelled_at');
-}
-
-// Back-to-back texts from the same sender, direction and action (or flow) share one card; a failed text ends the group.
-function canGroupMessages(left, right) {
-  if (!isOccurred(left) || !isOccurred(right) || hasFailed(left)) return false;
-  return left.get('direction') === right.get('direction') && getSenderName(left, left.get('metadata')) === getSenderName(right, right.get('metadata')) && getWork(left) === getWork(right);
-}
-
 const DayMessagesView = CollectionView.extend({
   tagName: 'ol',
   className: 'messaging-history__messages',
   childView: MessageCardView,
-  collectionEvents: { change: 'updateGrouping' },
+  collectionEvents: {
+    change: 'updateGrouping',
+  },
   onRenderChildren() {
     this.updateGrouping();
   },
   updateGrouping() {
+    const keys = this.collection.map(model => {
+      if (!model.get('occurred_at') || model.get('cancelled_at')) return false;
+
+      const workId = model.get('_action')?.id || model.get('_flow')?.id;
+
+      return [model.get('direction'), getSenderName(model, model.get('metadata')), workId];
+    });
+
+    const canGroup = (left, right) => {
+      const model = this.collection.at(left);
+      const failed = model.get('send_status') === 'failed' || !!getDeliveryFailure(model);
+
+      return !!keys[left] && !!keys[right] && !failed && isEqual(keys[left], keys[right]);
+    };
+
     this.children.each(view => {
       const index = this.collection.indexOf(view.model);
-      view.setGrouping(
-        index > 0 && canGroupMessages(this.collection.at(index - 1), view.model),
-        canGroupMessages(view.model, this.collection.at(index + 1)),
-      );
+
+      view.setGrouping(index > 0 && canGroup(index - 1, index), canGroup(index, index + 1));
     });
   },
 });
@@ -84,7 +67,9 @@ const DayView = View.extend({
       replaceElement: true,
     },
   },
-  childViewTriggers: { 'select:date': 'select:date' },
+  childViewTriggers: {
+    'select:date': 'select:date',
+  },
   templateContext() {
     return { isToday: dayjs(this.model.id).isSame(dayjs(), 'day') };
   },
@@ -104,13 +89,16 @@ const DayListView = CollectionView.extend({
   tagName: 'ol',
   className: 'messaging-history__days',
   childView: DayView,
-  childViewTriggers: { 'select:date': 'select:date' },
-  // The last day whose top has scrolled up to `top`; the first day before any has.
+  childViewTriggers: {
+    'select:date': 'select:date',
+  },
   getCurrentDate(top) {
     let date = this.collection.first()?.id;
+
     this.children.each(view => {
       if (Math.round(view.el.getBoundingClientRect().top) <= Math.round(top)) date = view.model.id;
     });
+
     return date;
   },
   childViewOptions() {
@@ -142,9 +130,21 @@ const MessagesView = View.extend({
     composer: '[data-composer-region]',
     currentDate: '[data-current-date-region]',
   },
-  ui: { header: '.js-header', older: '.js-older', beginning: '.js-beginning', status: '.js-status', interactions: '.js-interactions' },
-  triggers: { 'click @ui.older': 'click:older', 'click @ui.interactions': 'click:interactions' },
-  childViewTriggers: { 'send:message': 'send:message', 'select:date': 'select:date' },
+  ui: {
+    header: '.js-header',
+    older: '.js-older',
+    beginning: '.js-beginning',
+    status: '.js-status',
+    interactions: '.js-interactions',
+  },
+  triggers: {
+    'click @ui.older': 'click:older',
+    'click @ui.interactions': 'click:interactions',
+  },
+  childViewTriggers: {
+    'send:message': 'send:message',
+    'select:date': 'select:date',
+  },
   initialize() {
     this.days = new Backbone.Collection();
     this.currentDate = new Backbone.Model();
@@ -160,14 +160,14 @@ const MessagesView = View.extend({
   updateCurrentDate() {
     if (!this.isAttached()) return;
 
-    const date = this.getChildView('days').getCurrentDate(this.getUI('header')[0].getBoundingClientRect().bottom + DATE_GAP);
+    const date = this.getChildView('days').getCurrentDate(this.getUI('header')[0].getBoundingClientRect().bottom + 16);
     this.getChildView('currentDate').getState().set('isVisible', !!date);
     if (date) this.currentDate.set('id', date);
   },
-  // Scrolls the first day on or after `date` (or the newest day) to just under the sticky header.
   scrollToDate(date) {
     const day = this.days.find(model => model.id >= date) || this.days.last();
     if (!day) return;
+
     const viewport = this.getOption('viewport');
     const dayTop = this.getChildView('days').children.findByModel(day).el.getBoundingClientRect().top;
     viewport.scrollTop += dayTop - viewport.getBoundingClientRect().top - this.getUI('header')[0].offsetHeight;
@@ -178,30 +178,48 @@ const MessagesView = View.extend({
     return { patientName: `${ patient.get('first_name') } ${ patient.get('last_name') }` };
   },
   onRender() {
-    this.showChildView('currentDate', new InteractionDateControlView({ model: this.currentDate, stateOptions: { isVisible: false } }));
+    this.showChildView('currentDate', new InteractionDateControlView({
+      model: this.currentDate,
+      stateOptions: { isVisible: false },
+    }));
+
     this.showChildView('days', new DayListView({
       collection: this.days,
       patient: this.getOption('patient'),
       currentActionId: this.getOption('currentActionId'),
     }));
+
     this.showWindow(this.getOption('window'));
+
     this.showComposer();
   },
   showComposer() {
     const draft = this.getOption('draft');
     if (!draft) return;
 
-    this.showChildView('composer', new ComposerView({ model: draft, patient: this.getOption('patient'), phone: this.getOption('phone') }));
+    this.showChildView('composer', new ComposerView({
+      model: draft,
+      patient: this.getOption('patient'),
+      phone: this.getOption('phone'),
+    }));
   },
   showWindow({ models, hasOlder }) {
-    const shown = filter(models, model => isShownInHistory(model, this.getOption('currentActionId')));
-    // Update the existing day and message lists in place so the cards already shown keep their views.
-    this.days.set(map(groupBy(shown, getDate), (dayModels, id) => {
+    const currentActionId = this.getOption('currentActionId');
+    const shown = filter(models, model => {
+      const upcoming = !model.get('occurred_at') && !model.get('cancelled_at') && dayjs(model.get('expected_at')).isAfter(dayjs());
+
+      return !upcoming || model.getAction()?.id === currentActionId;
+    });
+
+    this.days.set(map(groupBy(shown, model => dayjs(model.getTimestamp()).format('YYYY-MM-DD')), (dayModels, id) => {
       const interactions = this.days.get(id)?.get('interactions') || new Backbone.Collection();
       interactions.set(dayModels);
+
       return { id, interactions };
     }));
+
     this.updateCurrentDate();
+
     this.getUI('older')[0].hidden = !hasOlder;
     this.getUI('older')[0].disabled = false;
     this.getUI('beginning')[0].hidden = hasOlder || !shown.length;
