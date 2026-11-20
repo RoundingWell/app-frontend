@@ -2661,7 +2661,7 @@ context('patient interactions', function() {
           metadata: {
             message: `Follow-up message ${ index }`,
           },
-          occurred_at: new Date(Date.UTC(2026, 4, Math.max(4, 1 + index), index < 4 ? index : 0)).toISOString(),
+          occurred_at: new Date(Date.UTC(2026, 4, Math.max(4, 1 + index), 12 + (index < 4 ? index : 0))).toISOString(),
         },
       });
       // The oldest page boundary cuts through a day containing four entries.
