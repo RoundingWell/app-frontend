@@ -289,6 +289,7 @@ context('schedule page', function() {
         attributes: {
           name: 'Last Action',
           details: 'Last Action Details',
+          tags: ['message'],
           due_date: testDate(),
           due_time: null,
         },
@@ -768,6 +769,32 @@ context('schedule page', function() {
     cy
       .get('.patient-action')
       .should('have.class', 'patient-action--form-expanded');
+
+    restoreSchedule();
+
+    cy
+      .get('@actionList')
+      .contains(longActionName)
+      .parents('.schedule-list__day-list-row')
+      .find('.js-messages')
+      .should('not.exist');
+
+    cy
+      .get('@scheduleList')
+      .find('.schedule-list__list-row')
+      .first()
+      .contains('Last Action')
+      .parents('.schedule-list__day-list-row')
+      .find('.js-messages')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/action/${ testActions[0].id }`);
+
+    cy
+      .get('[data-messages-region]')
+      .should('be.focused');
 
     restoreSchedule();
 
