@@ -1,12 +1,14 @@
 import { contains, filter, find, map, range, some } from 'underscore';
 import { createTestScope } from '@mnjs/test/scope';
 
-import { getRelationship } from 'helpers/json-api';
+import { getRelationship, getResource } from 'helpers/json-api';
+import fxTestSettings from 'fixtures/test/settings';
 import formatDate from 'helpers/format-date';
 
 import { getAction } from 'support/api/actions';
 import { getInteraction, getPage } from 'support/api/interactions';
 import { getFlow } from 'support/api/flows';
+import { getPatientField } from 'support/api/patient-fields';
 import { getPatient } from 'support/api/patients';
 import { getActivity } from 'support/api/events';
 import { getComment } from 'support/api/comments';
@@ -113,6 +115,24 @@ function observeInteractionMessage(win, id, scope) {
     scope.defer(() => channel.off('message:interactions', received));
   });
 }
+
+function routeMessaging(enabled, phones) {
+  const settings = getResource(fxTestSettings, 'settings');
+  settings.push({ id: 'messaging_enabled', type: 'settings', attributes: { value: enabled } });
+
+  cy
+    .intercept('GET', '/api/settings', { body: { data: settings, included: [] } })
+    .routePatientField(fx => {
+      fx.data = getPatientField({ attributes: { name: 'phones', value: phones } });
+
+      return fx;
+    }, 'phones');
+}
+
+const testPhones = [
+  { label: 'home', number: '+16785552384', preferred: true },
+  { label: 'mobile', number: '+16155550190', preferred: false },
+];
 
 context('patient interactions', function() {
   let responses;
@@ -2641,7 +2661,7 @@ context('patient interactions', function() {
           metadata: {
             message: `Follow-up message ${ index }`,
           },
-          occurred_at: new Date(Date.UTC(2026, 4, Math.max(4, 1 + index), index < 4 ? index : 0)).toISOString(),
+          occurred_at: new Date(Date.UTC(2026, 4, Math.max(4, 1 + index), 12 + (index < 4 ? index : 0))).toISOString(),
         },
       });
       // The oldest page boundary cuts through a day containing four entries.
@@ -4762,6 +4782,461 @@ context('patient interactions', function() {
       .contains('.patient-interactions__item', 'Call summary <review> & next steps')
       .find('.js-show-more')
       .scrollIntoView()
+      .should('be.visible');
+  });
+
+  specify('sends a text from the composer', function() {
+    const patient = getPatient({ attributes: { first_name: 'Omar', last_name: 'Porter' } });
+    const rows = map(range(90), index => getInteraction({
+      attributes: { channel: 'voice', direction: 'outbound', occurred_at: new Date(Date.UTC(2026, 7, index + 1, 12)).toISOString(), metadata: { note: `Call ${ index + 1 }` } },
+    }));
+    rows.push(getInteraction({
+      attributes: {
+        channel: 'sms',
+        direction: 'outbound',
+        occurred_at: new Date(Date.UTC(2026, 9, 29, 13)).toISOString(),
+        metadata: { phone_number: '+16155550190', message: 'Reminder that bounced', delivery: { status: 'failed', reason: { code: 'RECIPIENT_NOT_REACHABLE', description: 'Failed' }, updated_at: '2026-10-29T13:00:05Z' } },
+      },
+    }));
+    rows.push(getInteraction({
+      attributes: {
+        channel: 'sms',
+        direction: 'outbound',
+        occurred_at: new Date(Date.UTC(2026, 9, 29, 14)).toISOString(),
+        metadata: { phone_number: '+16155550190', message: 'Reminder with an unknown failure', delivery: { status: 'failed', reason: { code: 'UNKNOWN_ERROR', description: 'Failed' }, updated_at: '2026-10-29T14:00:05Z' } },
+      },
+    }));
+    let sendFails = true;
+    let releaseSend;
+    const send = new Cypress.Promise(resolve => {
+      releaseSend = resolve;
+    });
+    let heldFilter = false;
+    let releaseFilter;
+    const filterResponse = new Cypress.Promise(resolve => {
+      releaseFilter = resolve;
+    });
+
+    routeMessaging(true, testPhones);
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = rows;
+        return fx;
+      })
+      .intercept('POST', `/api/patients/${ patient.id }/interactions`, req => {
+        if (sendFails) {
+          return send.then(() => {
+            req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/metadata' } }] } });
+          });
+        }
+
+        req.reply({ statusCode: 201, body: { data: req.body.data } });
+      })
+      .as('routePostInteraction')
+      .visit(`/patient/${ patient.id }/interactions/${ rows[0].id }`);
+
+    cy
+      .contains('.patient-interactions__item', 'Call 1')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item')
+      .should('not.contain', 'Call 90');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .should('contain', 'To Omar Porter (615) 555-0190')
+      .find('.js-input')
+      .type('Can you come in Tuesday?');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .contains('.patient-interactions__item', 'Can you come in Tuesday?', { timeout: 3000 })
+      .should('contain', 'Sending…')
+      .and('not.have.class', 'is-selected')
+      .then(() => releaseSend());
+
+    cy
+      .contains('.patient-interactions__item', 'Call 90')
+      .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Reminder that bounced')
+      .should('contain', 'Not delivered')
+      .find('.patient-interactions__send-error')
+      .should('have.text', 'Not delivered to (615) 555-0190. This number can\'t receive texts.');
+
+    cy
+      .contains('.patient-interactions__item', 'Reminder with an unknown failure')
+      .should('contain', 'Not delivered')
+      .find('.patient-interactions__send-error')
+      .should('have.text', 'Not delivered to (615) 555-0190.');
+
+    cy
+      .get('.patient-interactions__item.is-selected')
+      .should('not.exist');
+
+    cy
+      .wait('@routePostInteraction')
+      .its('request.body')
+      .then(({ data }) => {
+        expect(data.attributes).to.have.all.keys('channel', 'direction', 'occurred_at', 'metadata');
+        expect(data.attributes.metadata).to.deep.equal({ phone_number: '+16155550190', message: 'Can you come in Tuesday?' });
+        expect(data).not.to.have.nested.property('relationships.action');
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Can you come in Tuesday?')
+      .should('contain', 'Not sent')
+      .find('[role="alert"]')
+      .should('have.text', 'Message could not be sent.')
+      .then(() => {
+        sendFails = false;
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click({ scrollBehavior: false })
+      .should('have.attr', 'aria-pressed', 'false');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .find('.patient-interactions__item')
+      .should('not.contain', 'Can you come in Tuesday?');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .type('Tuesday at 2 works.');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .wait('@routePostInteraction');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .should('have.attr', 'aria-pressed', 'true');
+
+    cy
+      .contains('.patient-interactions__item', 'Tuesday at 2 works.')
+      .should('contain', 'Cypress Clinic')
+      .and('not.contain', 'Sending…')
+      .and('not.contain', 'Message could not be sent.');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('exist');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .type('See you then.');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .wait('@routePostInteraction');
+
+    cy
+      .contains('.patient-interactions__item', 'See you then.')
+      .should('not.contain', 'Sending…')
+      .and('not.have.class', 'patient-interactions__item--new');
+
+    cy
+      .contains('.patient-interactions__item', 'Tuesday at 2 works.')
+      .should('exist');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (heldFilter || !new URL(req.url).searchParams.has('filter[channel]')) return;
+        heldFilter = true;
+        return filterResponse.then(() => {
+          req.reply({ body: { data: [], included: [] } });
+        });
+      });
+
+    cy
+      .get('.patient-interactions__filters [data-filter="calls"]')
+      .click({ scrollBehavior: false });
+
+    cy
+      .get('.patient-interactions[aria-busy="true"]')
+      .should('exist');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .type('Running late');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .wait('@routePostInteraction')
+      .then(() => releaseFilter());
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('exist');
+
+    cy
+      .contains('.patient-interactions__item', 'Running late')
+      .should('not.contain', 'Sending…');
+  });
+
+  specify('shows the composer for messaging, disabled without a mobile phone, and survives failed loads', function() {
+    const patient = getPatient({ attributes: { first_name: 'Omar', last_name: 'Porter' } });
+    const row = getInteraction({ attributes: { channel: 'voice', direction: 'outbound', occurred_at: '2026-10-08T12:00:00Z', metadata: { note: 'Only call' } } });
+    let releasePhones;
+    const phonesResponse = new Cypress.Promise(resolve => {
+      releasePhones = resolve;
+    });
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [row];
+        return fx;
+      });
+
+    routeMessaging(false, testPhones);
+
+    cy
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
+      .should('be.visible');
+
+    cy
+      .get('.messaging-composer')
+      .should('not.exist');
+
+    routeMessaging(true, [{ label: 'home', number: '+16785552384', preferred: true }]);
+
+    cy
+      .reload()
+      .wait('@routePatientFieldphones');
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .should('be.disabled')
+      .and('have.attr', 'placeholder', 'Omar doesn\'t have a mobile number.');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .should('be.disabled');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .should('not.contain', 'To Omar Porter');
+
+    cy
+      .intercept('GET', '/api/patients/*/fields/phones', { forceNetworkError: true })
+      .as('routePhonesError')
+      .reload()
+      .wait('@routePhonesError');
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
+      .should('be.visible');
+
+    cy
+      .get('.messaging-composer')
+      .should('not.exist');
+
+    cy
+      .intercept('GET', '/api/patients/*/fields/phones', req => {
+        return phonesResponse.then(() => {
+          req.reply({ body: { data: getPatientField({ attributes: { name: 'phones', value: testPhones } }), included: [] } });
+        });
+      })
+      .as('routeHeldPhones')
+      .reload();
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
+      .should('be.visible');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/workflow`)
+      .then(() => releasePhones());
+
+    cy
+      .wait('@routeHeldPhones');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') === '3') return;
+        req.reply({ forceNetworkError: true });
+      })
+      .as('routeFailedInteractions')
+      .intercept('POST', `/api/patients/${ patient.id }/interactions`, req => {
+        req.reply({ statusCode: 201, body: { data: req.body.data } });
+      })
+      .as('routePostInteraction');
+
+    cy
+      .go('back');
+
+    cy
+      .get('.patient-interactions .patient-interactions__status[role="alert"]')
+      .should('exist');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .type('Are you there?');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .wait('@routeFailedInteractions');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .should('have.value', 'Are you there?');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .should('not.be.disabled');
+
+    cy
+      .get('@routePostInteraction.all')
+      .should('have.length', 0);
+
+    cy
+      .get('.patient-interactions__item')
+      .should('not.exist');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/workflow`);
+
+    cy
+      .go('back');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .should('have.value', 'Are you there?');
+  });
+
+  specify('leaving while a send waits for the latest texts', function() {
+    const patient = getPatient({ attributes: { first_name: 'Omar', last_name: 'Porter' } });
+    const row = getInteraction({ attributes: { channel: 'voice', direction: 'outbound', occurred_at: '2026-10-08T12:00:00Z', metadata: { note: 'Only call' } } });
+    let releaseLatest;
+    const latest = new Cypress.Promise(resolve => {
+      releaseLatest = resolve;
+    });
+
+    routeMessaging(true, testPhones);
+
+    cy
+      .routesForPatientWorkflow()
+      .routePatient(fx => {
+        fx.data = patient;
+        return fx;
+      })
+      .routePatientInteractions(fx => {
+        fx.data = [row];
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions__filters [data-filter="messages"]')
+      .click({ scrollBehavior: false })
+      .should('have.attr', 'aria-pressed', 'false');
+
+    cy
+      .get('.patient-interactions[aria-busy="false"]')
+      .should('exist');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        if (new URL(req.url).searchParams.get('page[limit]') === '3') return;
+        return latest.then(() => {
+          req.reply({ body: { data: [row], included: [] } });
+        });
+      })
+      .as('routeHeldLatest');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-input')
+      .type('On my way');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/workflow`)
+      .then(() => releaseLatest());
+
+    cy
+      .wait('@routeHeldLatest');
+
+    cy
+      .go('back');
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
       .should('be.visible');
   });
 });

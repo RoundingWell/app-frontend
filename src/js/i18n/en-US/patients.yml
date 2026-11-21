@@ -15,16 +15,6 @@ careOptsFrontend:
           retry: Retry
           loading: Loading interactions…
           empty: No interactions yet.
-        dateControlView:
-          jumpToDate: Jump to date
-          jumpTo: Jump to...
-          today: Today
-          yesterday: Yesterday
-          lastWeek: Last week
-          lastMonth: Last month
-          beginning: The very beginning
-          specificDate: Jump to a specific date
-          closeDate: Close calendar
       action:
         actionApp:
           notFound: The Action you requested does not exist.
@@ -37,6 +27,8 @@ careOptsFrontend:
             durationLabel: Duration
             ownerLabel: Owner
             stateLabel: State
+          nameView:
+            messagesLabel: Messages
           readOnlyActionView:
             dueDayLabel: Due
             durationLabel: Duration
@@ -102,6 +94,17 @@ careOptsFrontend:
             edited: (Edited)
         dialerView:
           label: Dialer
+        messages:
+          messagesViews:
+            beginning: Beginning of messages with { name }
+            empty: No messages yet.
+            error: Messages could not be loaded.
+            heading: Messages
+            loading: Loading messages…
+            older: Show earlier messages
+            olderError: Earlier messages could not be loaded. Try again.
+            subheading: All messages with { name }
+            viewOnInteractions: View on Interactions
       workflow:
         workflowViews:
           closedBtn: Closed
@@ -239,9 +242,26 @@ careOptsFrontend:
           title: Schedule for { owner }
     shared:
       interactions:
+        dateControlView:
+          jumpToDate: Jump to date
+          jumpTo: Jump to...
+          today: Today
+          yesterday: Yesterday
+          lastWeek: Last week
+          lastMonth: Last month
+          beginning: The very beginning
+          specificDate: Jump to a specific date
+          closeDate: Close calendar
         interactionItemView:
           showMore: Show more
           viewOnInteractions: View on Interactions
+          notSent: Not sent
+          sendError: Message could not be sent.
+          sending: Sending…
+          cantReceiveTexts: This number can't receive texts.
+          notDelivered: Not delivered
+          notDeliveredTo: Not delivered to {phone}.
+          optedOut: Patient opted out of texts.
           message: Message
           call: Call
           voicemail: Voicemail
@@ -282,6 +302,24 @@ careOptsFrontend:
           retry: Retry
           loading: Loading interactions…
           loadError: Interactions could not be loaded.
+      messaging:
+        composerView:
+          heading: New Message
+          noMobile: '{name} doesn''t have a mobile number.'
+          placeholder: Write a message to {name}…
+          send: Send
+          to: To
+        messageCardView:
+          cancelled: Cancelled
+          inbound: Inbound
+          notDelivered: Not delivered
+          notDeliveredTo: Not delivered to {phone}.
+          notSent: Not sent
+          outbound: Outbound
+          scheduled: Scheduled
+          sendError: Message could not be sent.
+          sending: Sending…
+          showMore: Show more
       widgets:
         recentInteractionsViews:
           interactionsTab: Interactions
@@ -301,6 +339,7 @@ careOptsFrontend:
         added: "Added"
         attachmentsLabel: "{itemCount, plural, one {# attachment} other {# attachments}}"
         commentsLabel: "{itemCount, plural, one {# comment} other {# comments}}"
+        messagesLabel: Messages
         newAction: New Action
         updated: "Updated"
       actionsViews:

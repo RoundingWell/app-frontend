@@ -13,6 +13,7 @@
     <button class="schedule-list__action-name js-action" type="button">{{ name }}&#8203;</button>
     <div class="schedule-list__details js-no-click" data-details-region></div>
     {{#if form}}<button class="button button--icon action-form-button schedule-list__action-form-button js-form" type="button" aria-label="{{ @intl.patients.schedule.scheduleViews.dayItemView.openForm }}">{{far "square-poll-horizontal"}}</button>{{/if}}
+    {{#if hasMessages}}<button class="action-card__messages schedule-list__messages-button js-messages" type="button" aria-label="{{ @intl.patients.shared.actionCard.messagesLabel }}">{{far "paper-plane-top"}}</button>{{/if}}
   </div>
   {{#if hasContext}}
   <div class="schedule-list__context">

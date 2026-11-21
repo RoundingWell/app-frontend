@@ -1,0 +1,132 @@
+.messaging-history {
+  margin-top: 24px;
+}
+
+.messaging-history__header {
+  align-items: center;
+  background: var(--color-page-bg);
+  border-bottom: 1px solid var(--color-divider);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  margin-bottom: 16px;
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.messaging-history__title {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.messaging-history__icon {
+  align-items: center;
+  background: color-mix(in srgb, #{color(blue)} 12%, var(--color-surface));
+  border: 0.5px solid color(blue);
+  border-radius: 50%;
+  color: color(blue);
+  display: inline-flex;
+  flex: 0 0 32px;
+  height: 32px;
+  justify-content: center;
+}
+
+.messaging-history__heading {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.messaging-history__subheading {
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messaging-history__header-date {
+  display: flex;
+  justify-content: center;
+}
+
+.messaging-history__interactions {
+  align-items: center;
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 16px;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  color: var(--color-text);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 5px;
+  justify-self: end;
+  line-height: 20px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.messaging-history__interactions:hover {
+  background: #{$black-95};
+}
+
+.messaging-history__interactions:focus-visible {
+  outline: 2px solid #{color(blue)};
+  outline-offset: 2px;
+}
+
+.messaging-history__interactions .icon {
+  font-size: 14px;
+}
+
+.messaging-history__older {
+  display: block;
+  margin: 8px auto;
+}
+
+.messaging-history__beginning,
+.messaging-history__status {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  margin: 0;
+  text-align: center;
+}
+
+.messaging-history__beginning {
+  margin-bottom: 16px;
+}
+
+.messaging-history__status:empty {
+  display: none;
+}
+
+.messaging-history__days,
+.messaging-history__messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.messaging-history__date {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin: 8px 0 16px;
+}
+
+.messaging-history__date::before,
+.messaging-history__date::after {
+  background: var(--color-divider);
+  content: '';
+  flex: 1;
+  height: 1px;
+}
+
+.messaging-history__date--today::before,
+.messaging-history__date--today::after {
+  background: color(blue);
+}

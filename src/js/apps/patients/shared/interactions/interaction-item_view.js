@@ -4,7 +4,7 @@ import { Radio, View } from 'marionette';
 
 import i18n from 'js/i18n';
 
-import { getInteractionIcon, getInteractionChannelLabel, hasInteractionChannelHeading, getInteractionSummary, getInteractionDescription, getInteractionViaLabel, hasInteractionCardContent } from './display';
+import { getDeliveryFailure, getInteractionIcon, getInteractionChannelLabel, hasInteractionChannelHeading, getInteractionSummary, getInteractionDescription, getInteractionViaLabel, hasInteractionCardContent } from './display';
 import InteractionItemTemplate from './interaction-item.hbs';
 
 import './interaction-item.scss';
@@ -25,7 +25,9 @@ function getWorkName(model) {
 const InteractionItemView = View.extend({
   tagName: 'li',
   className() {
-    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
+    const newClass = this.model.get('send_status') === 'sending' ? ' patient-interactions__item--new' : '';
+
+    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }${ newClass }`;
   },
   template: InteractionItemTemplate,
   ui: { action: '.js-action', interaction: '.js-interaction', noteText: '.js-note-text', showMore: '.js-show-more' },
@@ -33,6 +35,7 @@ const InteractionItemView = View.extend({
     'click @ui.action': 'click:action',
     'click @ui.interaction': 'click:interaction',
     'click @ui.showMore': 'click:show:more',
+    'animationend': 'animation:end',
   },
   modelEvents: { change: 'render' },
   onClickShowMore() {
@@ -97,6 +100,8 @@ const InteractionItemView = View.extend({
       noteId: `interaction-note-${ this.cid }`,
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',
       workName: this.getWorkLink(),
+      sendStatus: this.model.get('send_status'),
+      deliveryFailure: getDeliveryFailure(this.model),
     };
   },
   getAppointmentDate(timestamp, timezone) {
@@ -116,11 +121,15 @@ const InteractionItemView = View.extend({
     return { 'change:interactionId': 'updateSelection' };
   },
   isSelectedInteraction() {
-    if (!this.getOption('state')) return false;
+    if (!this.getOption('state') || this.model.isNew()) return false;
     return this.model.id === this.getState().get('interactionId');
   },
   onRender() {
     this.updateSelection();
+  },
+  // The fade-in runs once; later renders must not replay it.
+  onAnimationEnd() {
+    this.el.classList.remove('patient-interactions__item--new');
   },
   updateSelection() {
     const selected = this.isSelectedInteraction();

@@ -1,0 +1,195 @@
+.messaging-card {
+  display: flex;
+  font-size: 14px;
+  gap: 16px;
+  line-height: 20px;
+  min-width: 0;
+  padding-bottom: 16px;
+}
+
+.messaging-card__marker {
+  align-items: center;
+  background: color-mix(in srgb, #{color(blue)} 10%, var(--color-surface));
+  border-radius: 50%;
+  color: color(blue);
+  display: flex;
+  flex: 0 0 32px;
+  height: 32px;
+  justify-content: center;
+}
+
+.messaging-card--inbound .messaging-card__marker {
+  background: color(blue);
+  color: #{$white};
+}
+
+.messaging-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+@keyframes messaging-card-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.messaging-card--new .messaging-card__content {
+  animation: messaging-card-arrive 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .messaging-card--new .messaging-card__content {
+    animation: none;
+  }
+}
+
+.messaging-card__headline {
+  align-items: baseline;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 4px;
+
+  strong {
+    font-weight: 600;
+  }
+}
+
+.messaging-card__meta {
+  color: var(--color-text-secondary);
+}
+
+.messaging-card__bubble {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  padding: 12px 16px;
+}
+
+.messaging-card--continues {
+  padding-bottom: 0;
+
+  .messaging-card__bubble {
+    border-bottom: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.messaging-card--continuation {
+  .messaging-card__marker {
+    visibility: hidden;
+  }
+
+  .messaging-card__link {
+    display: none;
+  }
+
+  .messaging-card__headline {
+    background: var(--color-surface);
+    border: 0.5px solid var(--color-border-subtle);
+    border-bottom: 0;
+    border-top-color: var(--color-divider);
+    margin: 0;
+    padding: 12px 16px 0;
+  }
+
+  .messaging-card__bubble {
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.messaging-card--scheduled .messaging-card__bubble {
+  background: transparent;
+  border: 1px dashed color(blue);
+  box-shadow: none;
+}
+
+.messaging-card--cancelled {
+  color: var(--color-text-secondary);
+
+  .messaging-card__bubble {
+    background: transparent;
+    border: 1px dashed var(--color-text-secondary);
+    box-shadow: none;
+  }
+}
+
+.messaging-card__heading {
+  color: color(blue);
+  margin-bottom: 8px;
+}
+
+.messaging-card__body {
+  margin: 0;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.messaging-card__body--collapsed {
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+
+.messaging-card__show-more {
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  font: inherit;
+  margin-top: 4px;
+  padding: 0;
+}
+
+.messaging-card__show-more:focus-visible,
+.messaging-card__body--collapsible:focus-visible {
+  outline: 2px solid #{color(blue)};
+  outline-offset: 2px;
+}
+
+.messaging-card__sender {
+  min-width: 0;
+}
+
+.messaging-card__link {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 1 auto;
+  font: inherit;
+  font-size: 12px;
+  gap: 4px;
+  margin-left: auto;
+  max-width: 55%;
+  min-width: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.messaging-card__link-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messaging-card__error {
+  color: color(red);
+  font-size: 12px;
+  margin: 4px 0 0;
+}

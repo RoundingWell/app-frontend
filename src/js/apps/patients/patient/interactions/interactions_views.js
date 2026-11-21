@@ -14,10 +14,11 @@ import Tooltip from 'js/components/tooltip';
 
 import InteractionItemView from 'js/apps/patients/shared/interactions/interaction-item_view';
 import { hasInteractionCardContent } from 'js/apps/patients/shared/interactions/display';
+import ComposerView from 'js/apps/patients/shared/messaging/composer_view';
 
 import ScrollEdgesBehavior from './scroll-edges_behavior';
 
-import InteractionDateControlView from './date-control_view';
+import InteractionDateControlView from 'js/apps/patients/shared/interactions/date-control_view';
 import LayoutTemplate from './layout.hbs';
 import { InteractionsLoadingView, InteractionsErrorView } from 'js/apps/patients/shared/interactions/interactions-status_views';
 
@@ -157,9 +158,10 @@ const InteractionsPageView = View.extend({
   childViewTriggers: {
     'retry': 'retry:paging',
     'select:date': 'select:date',
+    'send:message': 'send:message',
   },
   template: LayoutTemplate,
-  regions: { date: '[data-date-region]', content: '[data-content-region]' },
+  regions: { date: '[data-date-region]', content: '[data-content-region]', composer: '[data-composer-region]' },
   ui: { today: '.js-today', controls: '.js-controls', filters: '.js-filter', workflow: '.js-workflow', pagingError: '.js-paging-error', pagingLoading: '.js-paging-loading', retry: '.js-retry' },
   triggers: {
     'click @ui.workflow': 'click:workflow',
@@ -292,6 +294,9 @@ const InteractionsPageView = View.extend({
   scrollToDate(date) {
     this.getChildView('content')?.scrollToDate(date, document.activeElement === this.getUI('today')[0]);
     this.updateCurrentDate();
+  },
+  showComposer(phone, draft) {
+    this.showChildView('composer', new ComposerView({ model: draft, patient: this.model, phone }));
   },
   showError() {
     this.showChildView('content', new InteractionsErrorView({ canRetry: true }));

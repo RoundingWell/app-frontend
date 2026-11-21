@@ -6,7 +6,11 @@ const Entity = BaseEntity.extend({
   radioRequests: {
     'patientFields:model': 'getModel',
     'patientFields:collection': 'getCollection',
+    'fetch:patientFields:model': 'fetchField',
     'fetch:patientFields:model:history': 'getModelHistory',
+  },
+  fetchField({ _patient, name }, options) {
+    return this.getModel({ _patient, name }).fetch(options);
   },
   getModelHistory({ _patient, name }, { limit, sort }) {
     const model = this.getModel({ _patient, name }).clone();

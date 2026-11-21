@@ -1,0 +1,14 @@
+<div class="messaging-history__header js-header">
+  <div class="messaging-history__title">
+    <span class="messaging-history__icon" aria-hidden="true">{{far "paper-plane-top"}}</span>
+    <h2 class="messaging-history__heading">{{ @intl.patients.patient.action.messages.messagesViews.heading }}</h2>
+    <span class="messaging-history__subheading">{{formatMessage (intlGet "patients.patient.action.messages.messagesViews.subheading") name=patientName}}</span>
+  </div>
+  <div class="messaging-history__header-date" data-current-date-region></div>
+  <button class="messaging-history__interactions js-interactions" type="button">{{far "right-left-large"}} {{ @intl.patients.patient.action.messages.messagesViews.viewOnInteractions }}</button>
+</div>
+<button class="button button--text messaging-history__older js-older" type="button" hidden>{{ @intl.patients.patient.action.messages.messagesViews.older }}</button>
+<p class="messaging-history__beginning js-beginning" hidden>{{formatMessage (intlGet "patients.patient.action.messages.messagesViews.beginning") name=patientName}}</p>
+<p class="messaging-history__status js-status" role="status"></p>
+<ol data-days-region></ol>
+<div data-composer-region></div>

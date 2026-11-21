@@ -1,0 +1,25 @@
+<span class="messaging-card__marker" aria-hidden="true">{{far "paper-plane-top"}}</span>
+<div class="messaging-card__content">
+  <div class="messaging-card__headline">
+    <div class="messaging-card__sender">
+      <strong>{{ senderName }}</strong> <span class="messaging-card__meta">{{ viaLabel }} •
+        {{#if (isValue sendStatus "sending")}}{{ @intl.patients.shared.messaging.messageCardView.sending }}
+        {{else if (isValue sendStatus "failed")}}{{ @intl.patients.shared.messaging.messageCardView.notSent }}
+        {{else if deliveryFailure}}{{ @intl.patients.shared.messaging.messageCardView.notDelivered }} <time datetime="{{ timestamp }}">{{formatDateTime timestamp "TIME"}}</time>
+        {{else if (isValue status "cancelled")}}{{ @intl.patients.shared.messaging.messageCardView.cancelled }}
+        {{else if (isValue status "scheduled")}}{{ @intl.patients.shared.messaging.messageCardView.scheduled }} <time datetime="{{ timestamp }}">{{formatDateTime timestamp "AT_TIME"}}</time>
+        {{else}}<time datetime="{{ timestamp }}">{{formatDateTime timestamp "TIME"}}</time>{{/if}}
+      </span>
+    </div>
+    {{#if workName}}<button class="messaging-card__link js-work" type="button" title="{{ workName }}"><span class="messaging-card__link-text">{{ workName }}</span> {{far "angle-right"}}</button>{{/if}}
+  </div>
+  {{#if hasContent}}<div class="messaging-card__bubble">
+    {{#if metadata.disposition}}<div class="messaging-card__heading">{{#if (isValue direction "inbound")}}{{ @intl.patients.shared.messaging.messageCardView.inbound }}{{else}}{{ @intl.patients.shared.messaging.messageCardView.outbound }}{{/if}} {{ channelLabel }} • {{ metadata.disposition }}</div>{{/if}}
+    {{#if summary}}{{#if collapsible}}
+      <p class="messaging-card__body messaging-card__body--collapsible{{#unless expanded}} messaging-card__body--collapsed{{/unless}} js-body" id="{{ bodyId }}" tabindex="-1">{{ summary }}</p>
+      {{#unless expanded}}<button class="messaging-card__show-more js-show-more" type="button" aria-controls="{{ bodyId }}" aria-expanded="false">{{ @intl.patients.shared.messaging.messageCardView.showMore }}</button>{{/unless}}
+    {{else}}<p class="messaging-card__body">{{ summary }}</p>{{/if}}{{/if}}
+  </div>{{/if}}
+  {{#if deliveryFailure}}<p class="messaging-card__error">{{formatMessage (intlGet "patients.shared.messaging.messageCardView.notDeliveredTo") phone=(formatPhoneNumber metadata.phone_number)}}{{#if deliveryFailure.reason}} {{ deliveryFailure.reason }}{{/if}}</p>{{/if}}
+  {{#if (isValue sendStatus "failed")}}<p class="messaging-card__error" role="alert">{{ @intl.patients.shared.messaging.messageCardView.sendError }}</p>{{/if}}
+</div>

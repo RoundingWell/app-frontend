@@ -17,6 +17,7 @@ import { CheckView, StateComponent, CardOwnerComponent, CardDueView, CardTimeCom
 import SharedSelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import { FlowStateComponent, OwnerComponent as FlowOwnerComponent } from 'js/apps/patients/shared/flows_views';
 import { ReadOnlyStateView, ReadOnlyOwnerView, ReadOnlyDueDateView, ReadOnlyDueTimeView } from 'js/apps/patients/shared/read-only_views';
+import { canShowMessages } from 'js/apps/patients/shared/messaging/availability';
 import ActionItemTemplate from './action-item.hbs';
 import HeaderTemplate from './header.hbs';
 import LayoutTemplate from './layout.hbs';
@@ -201,6 +202,7 @@ const ActionItemView = View.extend({
       hasForm: this.model.getForm(),
       attachmentCount: this.model.getFiles().length,
       commentCount: this.model.commentCount(),
+      hasMessages: canShowMessages(this.model),
     };
   },
   regions: {
@@ -216,6 +218,7 @@ const ActionItemView = View.extend({
     'click .js-primary': 'onClickPrimary',
     'click .js-attachments': 'onClickAttachments',
     'click .js-comments': 'onClickComments',
+    'click .js-messages': 'onClickMessages',
     'click .js-no-click': stopEventPropagation,
     'click .js-action-surface': 'onClickSurface',
   },
@@ -243,6 +246,10 @@ const ActionItemView = View.extend({
   onClickComments(event) {
     event.stopImmediatePropagation();
     this.navigateToAction({ section: 'comments' });
+  },
+  onClickMessages(event) {
+    event.stopImmediatePropagation();
+    this.navigateToAction({ section: 'messages' });
   },
   onRender() {
     const canEdit = this.canEdit;

@@ -105,6 +105,7 @@ context('patient workflow page', function() {
       attributes: {
         name: 'First In List',
         details: 'Action details content.',
+        tags: ['message'],
         duration: 0,
         due_date: null,
         due_time: null,
@@ -514,6 +515,12 @@ context('patient workflow page', function() {
       .find('.fa-comment')
       .should('not.exist');
 
+    cy
+      .get('.action-card')
+      .eq(1)
+      .find('.js-messages')
+      .should('not.exist');
+
     cy.routeAction(fx => {
       fx.data = mergeJsonApi(testAction, {
         relationships: {
@@ -547,6 +554,26 @@ context('patient workflow page', function() {
     cy
       .url()
       .should('contain', `/patient/${ testPatient.id }/action/${ testAction.id }`);
+
+    cy
+      .visit(`/patient/${ testPatient.id }/workflow`)
+      .wait('@routePatient')
+      .wait('@routePatientActions')
+      .wait('@routePatientFlows');
+
+    cy
+      .contains('.action-card', 'First In List')
+      .find('.js-messages')
+      .click()
+      .wait('@routeAction');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/action/${ testAction.id }`);
+
+    cy
+      .get('[data-messages-region]')
+      .should('be.focused');
 
     cy
       .visit(`/patient/${ testPatient.id }/workflow`)

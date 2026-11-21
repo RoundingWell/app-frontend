@@ -22,6 +22,28 @@
   --interaction-color: #{color(orange)};
 }
 
+@keyframes patient-interactions-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.patient-interactions__item--new .patient-interactions__activity-body {
+  animation: patient-interactions-arrive 0.45s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patient-interactions__item--new .patient-interactions__activity-body {
+    animation: none;
+  }
+}
+
 .patient-interactions__marker {
   align-items: center;
   background: color-mix(in srgb, var(--interaction-color) 10%, var(--color-surface));
@@ -236,4 +258,10 @@
 .patient-interactions__summary--collapsible:focus-visible {
   outline: 2px solid #{color(blue)};
   outline-offset: 2px;
+}
+
+.patient-interactions__send-error {
+  color: color(red);
+  font-size: 12px;
+  margin: 4px 0 0;
 }

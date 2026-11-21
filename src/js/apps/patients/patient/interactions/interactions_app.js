@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
-import { contains, flatten, has, keys, map, without } from 'underscore';
+import { contains, find, flatten, has, keys, map, without } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -9,6 +9,9 @@ import App from 'js/base/app';
 
 import { compareInteractions } from 'js/entities-service/entities/interactions';
 import InteractionWindowRead from 'js/entities-service/interaction-window-read';
+
+import { isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
+import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
 
 import { InteractionsPageView } from './interactions_views';
 
@@ -25,6 +28,7 @@ export default App.extend({
     'load:edge': 'requestInteractions',
     'retry:paging': 'retryRequest',
     'select:date': 'jumpToDate',
+    'send:message': 'onSendMessage',
   },
   onBeforeStart(app, { patient, interactionId, kind = 'replace', date, at }) {
     if (!this.getView()) this.showPage({ patient, interactionId });
@@ -41,6 +45,59 @@ export default App.extend({
       model: patient,
       state: this.getState(),
     }));
+    this.showComposer();
+  },
+  async showComposer() {
+    if (!isMessagingEnabled()) return;
+
+    const phones = await Radio.request('entities', 'fetch:patientFields:model', { _patient: this.patient.getResource(), name: 'phones' }).catch(addError);
+
+    // No composer when phones fail to load; no mobile phone shows it disabled.
+    if (!phones || !this.getView()) return;
+
+    this.phone = find(phones.get('value'), { label: 'mobile' })?.number;
+
+    this.draft = createComposerDraft({ patientId: this.patient.id, actionId: null });
+    this.getView().showComposer(this.phone, this.draft);
+  },
+  async onSendMessage(message) {
+    const selectedGroups = this.getState().get('selectedGroups');
+    const showsMessages = contains(selectedGroups, 'messages');
+
+    if (!showsMessages || !this.isShowingLatest()) {
+      this.getState().set({ interactionId: undefined, selectedGroups: showsMessages ? selectedGroups : [...selectedGroups, 'messages'] });
+
+      if (!await this.requestInteractions('replace')) {
+        if (this.getView()) this.draft.set('body', message);
+        return;
+      }
+    }
+
+    const text = Radio.request('entities', 'interactions:model', {
+      channel: 'sms',
+      direction: 'outbound',
+      occurred_at: dayjs.utc().format(),
+      metadata: { phone_number: this.phone, message },
+      send_status: 'sending',
+      _patient: this.patient.getResource(),
+    });
+
+    this.showSentText(text);
+
+    const isSent = await text.saveAll().then(() => true, error => {
+      addError(error);
+      return false;
+    });
+
+    text.set('send_status', isSent ? null : 'failed');
+  },
+  isShowingLatest() {
+    const { hasNewer, request } = this.getState().attributes;
+    return !!this.collection && !hasNewer && !request;
+  },
+  showSentText(text) {
+    this.collection.add(text);
+    this.getView().scrollToLatest();
   },
   async prepareStart({ kind = 'replace', date, at, reconcile }, { signal }) {
     const input = this.getRequest(kind, date, at);
