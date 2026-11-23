@@ -45,12 +45,16 @@ export default App.extend({
       model: patient,
       state: this.getState(),
     }));
-    this.showComposer();
+    this.phonesRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'phones' }).catch(addError);
   },
+  // Shows the composer once, after the first list load finishes or fails.
   async showComposer() {
-    if (!isMessagingEnabled()) return;
+    const phonesRequest = this.phonesRequest;
+    if (!phonesRequest) return;
 
-    const phones = await Radio.request('entities', 'fetch:patientFields:model', { _patient: this.patient.getResource(), name: 'phones' }).catch(addError);
+    this.phonesRequest = null;
+
+    const phones = await phonesRequest;
 
     // No composer when phones fail to load; no mobile phone shows it disabled.
     if (!phones || !this.getView()) return;
@@ -138,6 +142,7 @@ export default App.extend({
   },
   onStart(app, options, { result, input, read, repaired }) {
     this.pendingRead = null;
+    this.showComposer();
     // Restore the repaired viewport before prepending/appending its adjacent page.
     if (repaired) this.showInteractions(this.getLiveWindow(repaired.window, read), repaired.input);
     this.showInteractions(this.getLiveWindow(result, read), input);
@@ -148,6 +153,7 @@ export default App.extend({
     return { ...window, models, hasOlder: !!models.length && window.hasOlder, hasNewer: !!models.length && window.hasNewer };
   },
   handleStartFailure(options, error) {
+    this.showComposer();
     const refresh = this.pendingRead?.refresh;
     this.pendingRead = null;
     if (refresh) {
