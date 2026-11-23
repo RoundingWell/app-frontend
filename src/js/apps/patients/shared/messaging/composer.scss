@@ -1,6 +1,6 @@
 .messaging-composer {
   display: flex;
-  gap: 16px;
+  gap: var(--messaging-composer-gap, 16px);
   margin-top: 8px;
 }
 
