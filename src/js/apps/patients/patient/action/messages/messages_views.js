@@ -109,11 +109,6 @@ const DayListView = CollectionView.extend({
   },
 });
 
-const MessagesLoadingView = View.extend({
-  className: 'messaging-history',
-  template: hbs`<p class="messaging-history__status">{{ @intl.patients.patient.action.messages.messagesViews.loading }}</p>`,
-});
-
 const MessagesErrorView = View.extend({
   className: 'messaging-history',
   template: hbs`<p class="messaging-history__status messaging-history__status--error">{{ @intl.patients.patient.action.messages.messagesViews.error }}</p>`,
@@ -236,7 +231,6 @@ const MessagesView = View.extend({
 });
 
 export {
-  MessagesLoadingView,
   MessagesErrorView,
   MessagesView,
 };

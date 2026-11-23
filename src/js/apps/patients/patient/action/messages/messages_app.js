@@ -8,10 +8,11 @@ import App from 'js/base/app';
 
 import { compareInteractions } from 'js/entities-service/entities/interactions';
 
+import { InteractionsLoadingView } from 'js/apps/patients/shared/interactions/interactions-status_views';
 import { isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
 import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
 
-import { MessagesLoadingView, MessagesErrorView, MessagesView } from './messages_views';
+import { MessagesErrorView, MessagesView } from './messages_views';
 
 export default App.extend({
   viewEvents: {
@@ -21,7 +22,7 @@ export default App.extend({
     'send:message': 'onSendMessage',
   },
   onBeforeStart() {
-    this.showView(new MessagesLoadingView());
+    this.showView(new InteractionsLoadingView());
   },
   prepareStart({ patient }, { signal }) {
     this.query = {

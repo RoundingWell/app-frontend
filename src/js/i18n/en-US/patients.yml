@@ -100,7 +100,6 @@ careOptsFrontend:
             empty: No messages yet.
             error: Messages could not be loaded.
             heading: Messages
-            loading: Loading messages…
             older: Show earlier messages
             olderError: Earlier messages could not be loaded. Try again.
             subheading: All messages with { name }
