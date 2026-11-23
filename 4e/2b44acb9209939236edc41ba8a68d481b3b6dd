@@ -1,0 +1,14 @@
+package-lock.json
+  h_0f06c286dda36f 15490
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4e2b44acb9209939236edc41ba8a68d481b3b6dd",
+  "prompts": {},
+  "humans": {
+    "h_0f06c286dda36f": {
+      "author": "Paul Falgout <paul.falgout@roundingwell.com>"
+    }
+  }
+}
