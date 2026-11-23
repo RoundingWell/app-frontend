@@ -5011,6 +5011,15 @@ context('patient interactions', function() {
     const phonesResponse = new Cypress.Promise(resolve => {
       releasePhones = resolve;
     });
+    let releaseStalePhones;
+    const stalePhonesResponse = new Cypress.Promise(resolve => {
+      releaseStalePhones = resolve;
+    });
+    let releaseInteractions;
+    const interactionsResponse = new Cypress.Promise(resolve => {
+      releaseInteractions = resolve;
+    });
+    let stalePhonesRequests = 0;
 
     cy
       .routesForPatientWorkflow()
@@ -5164,6 +5173,65 @@ context('patient interactions', function() {
       .get('.patient-interactions .messaging-composer')
       .find('.js-input')
       .should('have.value', 'Are you there?');
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', { body: { data: [row], included: [] } })
+      .intercept('GET', '/api/patients/*/fields/phones', req => {
+        stalePhonesRequests += 1;
+
+        if (stalePhonesRequests > 1) {
+          req.reply({ forceNetworkError: true });
+          return;
+        }
+
+        return stalePhonesResponse.then(() => {
+          req.reply({ body: { data: getPatientField({ attributes: { name: 'phones', value: testPhones } }), included: [] } });
+        });
+      })
+      .as('routeStalePhones')
+      .reload();
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
+      .should('be.visible');
+
+    cy
+      .get('.patient-pages .js-workflow')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/workflow`);
+
+    cy
+      .intercept('GET', '/api/patients/*/interactions*', req => {
+        return interactionsResponse.then(() => {
+          req.reply({ body: { data: [row], included: [] } });
+        });
+      })
+      .as('routeHeldInteractions')
+      .go('back');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ patient.id }/interactions`)
+      .then(() => releaseStalePhones());
+
+    cy
+      .wait('@routeStalePhones')
+      .wait('@routeStalePhones')
+      .then(() => releaseInteractions());
+
+    cy
+      .wait('@routeHeldInteractions');
+
+    cy
+      .contains('.patient-interactions__item', 'Only call')
+      .should('be.visible');
+
+    cy
+      .get('.patient-interactions .messaging-composer')
+      .should('not.exist');
   });
 
   specify('leaving while a send waits for the latest texts', function() {

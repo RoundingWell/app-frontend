@@ -54,10 +54,11 @@ export default App.extend({
 
     this.phonesRequest = null;
 
+    const view = this.getView();
     const phones = await phonesRequest;
 
-    // No composer when phones fail to load; no mobile phone shows it disabled.
-    if (!phones || !this.getView()) return;
+    // No composer when phones fail to load or the page was left; no mobile phone shows it disabled.
+    if (!phones || this.getView() !== view) return;
 
     this.phone = find(phones.get('value'), { label: 'mobile' })?.number;
 
