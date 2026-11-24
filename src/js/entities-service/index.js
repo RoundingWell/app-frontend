@@ -24,6 +24,8 @@ import './form-responses';
 
 import './interactions';
 
+import './messages';
+
 import './panels';
 
 import './patient-fields';
