@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://cubic.dev/schema/cubic-repository-config.schema.json
+
+# cubic.yaml
+# This file configures AI review behavior, ignore patterns, PR descriptions, and custom rules.
+# Place this file in your repository root to version-control your AI review settings.
+# Settings defined here take precedence over UI-configured settings.
+# See https://docs.cubic.dev/configure/cubic-yaml for documentation.
+
+version: 1
+reviews:
+  senior_reviewers:
+    - paulfalgout
+    - nmajor25
+    - shadowhand
+  enabled: true
+  sensitivity: medium
+  incremental_commits: true
+  check_drafts: false
+  architecture_diagrams: false
+  external_contributors_require_manual_review: true
+  resolve_threads_when_addressed: true
+  merge_confidence_summary: false
+  auto_approve_behavior: live
+  auto_approve: low_risk_only
+  auto_approve_rules:
+    exclude_external_contributors: true
+    allow_open_issues: none
+  ultrareview: manual
+  auto_ultrareview: disabled
+  ignore:
+    files:
+      - 'packages/care-ops-five9/sdk/five9.crm.sdk.js'
+  custom_rules:
+    - name: Conventional Commit standards
+      description: |-
+        Pattern: A pull request title must use Conventional Commit format: "<type>: <subject>" or "<type>(<scope>): <subject>". The scope is optional. Examples: "ci: version review settings" and "ci(frontend): version review settings".
+        Impact: A consistent title makes the change easier to categorize in changelogs and release tooling.
+        Detection: Flag titles missing a type, colon, or subject, or with a malformed scope. Do not flag an omitted scope. A breaking-change "!" before the colon is valid in either form.
+        Remedy: Suggest a compliant title based on the diff; include a scope only when useful and preserve a valid breaking-change marker.
+pr_descriptions:
+  generate: true
+  cubic_review_link: true
+  skip_if_author_description: false
+  instructions: Focus on business impact.  Point out things that humans might need to review specifically. Be concise and use bullet points or visuals when useful.
