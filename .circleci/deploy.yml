@@ -45,12 +45,55 @@ commands:
           role_arn: ${AWS_ROLE_ARN}
           role_session_name: app-frontend-${CIRCLE_BUILD_NUM}
 
+  verify-production-checkout:
+    steps:
+      - run:
+          name: Verify the protected deploy checkout
+          environment:
+            CONFIG_SHA: << pipeline.config.sha >>
+          command: |
+            set -euo pipefail
+            if ! [[ "$CONFIG_SHA" =~ ^[0-9a-f]{40}$ ]] || [ "$(git rev-parse HEAD)" != "$CONFIG_SHA" ]; then
+              echo "Production deploy must use the checked-in config and code from the same develop commit."
+              exit 1
+            fi
+
 jobs:
-  deploy-from-artifact:
+  verify-production-approval:
     docker:
       - image: *node-image
     steps:
       - checkout
+      - verify-production-checkout
+      - setup-aws-oidc
+      - run:
+          name: Verify independent release approval
+          environment:
+            TARGET_ENV: << pipeline.deploy.environment_name >>
+            TARGET_VERSION: << pipeline.deploy.target_version >>
+          command: |
+            set -euo pipefail
+            mkdir -p /tmp/production-approval
+            node scripts/production-approval.js verify /tmp/production-approval/proof.json \
+              "$TARGET_ENV" "$TARGET_VERSION" "$CIRCLE_WORKFLOW_ID"
+      - persist_to_workspace:
+          root: /tmp/production-approval
+          paths:
+            - proof.json
+
+  deploy-from-artifact:
+    parameters:
+      production_approval:
+        type: boolean
+        default: false
+    docker:
+      - image: *node-image
+    steps:
+      - checkout
+      - when:
+          condition: << parameters.production_approval >>
+          steps:
+            - verify-production-checkout
       - restore-npm-cache
       - install-dependencies
       - save-npm-cache
@@ -110,6 +153,20 @@ jobs:
               echo "export DEPLOY_ORGANIZATION=$deploy_organization"
               echo "export DEPLOY_RUN_URL=$deploy_run_url"
             } >> "$BASH_ENV"
+      - when:
+          condition: << parameters.production_approval >>
+          steps:
+            - attach_workspace:
+                at: /tmp/production-approval
+      - run:
+          name: Require matching approval before assuming the production role
+          command: |
+            set -euo pipefail
+            if [ "$DEPLOY_STAGE" = prod ] && [ "$DEPLOY_ORGANIZATION" != demonstration ]; then
+              approved_sha256="$(node scripts/production-approval.js require /tmp/production-approval/proof.json \
+                "$DEPLOY_TARGET_ENV" "$DEPLOY_TARGET_VERSION" "$CIRCLE_WORKFLOW_ID")"
+              printf 'export APPROVED_ARTIFACT_SHA256=%q\n' "$approved_sha256" >> "$BASH_ENV"
+            fi
       - setup-aws-oidc
       - run:
           name: Resolve deploy marker environments
@@ -152,6 +209,13 @@ jobs:
               --prefix=app-frontend \
               --tag="$DEPLOY_TARGET_VERSION" \
               --artifact=/tmp/dist.tar.gz
+      - run:
+          name: Verify approved artifact digest
+          command: |
+            set -euo pipefail
+            if [ -n "${APPROVED_ARTIFACT_SHA256:-}" ]; then
+              printf '%s  /tmp/dist.tar.gz\n' "$APPROVED_ARTIFACT_SHA256" | sha256sum --check --status
+            fi
       - run:
           name: Unpack release artifact
           command: |
@@ -309,13 +373,45 @@ workflows:
             - slack-secrets
             - linear-secrets
 
-  deploy-prod:
+  deploy-sandbox-or-demo:
     when:
       matches:
-        pattern: '^(sandbox|prod):[a-z0-9*-]+$'
+        pattern: '^(sandbox:[a-z0-9*-]+|prod:demonstration)$'
         value: << pipeline.deploy.environment_name >>
     jobs:
       - deploy-from-artifact:
+          context:
+            - aws-prod
+            - slack-secrets
+            - linear-secrets
+
+  deploy-prod:
+    when:
+      and:
+        - matches:
+            pattern: '^prod:[a-z0-9*-]+$'
+            value: << pipeline.deploy.environment_name >>
+        - not:
+            equal: ["prod:demonstration", << pipeline.deploy.environment_name >>]
+        - equal: ["RoundingWell/app-frontend", << pipeline.config.repository.name >>]
+        - equal: [".circleci/deploy.yml", << pipeline.config.file_path >>]
+        - equal: ["refs/heads/develop", << pipeline.config.ref >>]
+        - equal: ["RoundingWell", << pipeline.git.repo_owner >>]
+        - equal: ["app-frontend", << pipeline.git.repo_name >>]
+        - equal: ["develop", << pipeline.git.branch >>]
+        - equal: [<< pipeline.config.sha >>, << pipeline.git.revision >>]
+    jobs:
+      - Approve production release:
+          type: approval
+      - verify-production-approval:
+          requires:
+            - Approve production release
+          context:
+            - app-frontend-production-approval-read
+      - deploy-from-artifact:
+          production_approval: true
+          requires:
+            - verify-production-approval
           context:
             - aws-prod
             - slack-secrets

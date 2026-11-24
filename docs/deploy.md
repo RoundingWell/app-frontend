@@ -199,6 +199,68 @@ For QA deploys that include `qa2`, [`.circleci/deploy.yml`](../.circleci/deploy.
 }
 ```
 
+## Production approval
+
+The existing CircleCI Deploy picker is unchanged. Actual `prod:<organization>`
+deploys, including `prod:*` and `prod:all`, pause at **Approve production
+release**. Dev, QA, sandbox, and exactly `prod:demonstration` do not pause.
+
+The release author for this purpose is the GitHub account that pushed the
+release tag, not the commit author, Git tagger string, or deploy requester.
+The tag pipeline records the numeric GitHub account ID, exact annotated tag
+object, source commit, and archive digest on the archive itself. The next job
+reads CircleCI's approval record for the exact workflow. It rejects the tag
+pusher and unrecognized approvers before the deploy job receives its production
+context. The deploy job verifies it downloads the exact approved archive.
+
+**Before merging:** provision and pilot the restricted
+`app-frontend-production-approval-read` context. It needs:
+
+- `AWS_ROLE_ARN` for a read-only artifact role that can read archive metadata
+  in `rw-frontend-artifacts-dev/app-frontend/`. Do not give it the production
+  deploy role.
+- `CIRCLECI_APPROVAL_READ_TOKEN` for a read-scoped CircleCI OAuth credential
+  that can list the exact workflow's jobs via API v2. A v1 project token will
+  not work. Arrange credential refresh/rotation before enabling the hold.
+- `PRODUCTION_APPROVER_IDENTITIES`, an administrator-maintained JSON map of
+  CircleCI user UUIDs (lowercase) to positive numeric GitHub user IDs. Verify
+  each mapping against the person's GitHub account and a real CircleCI
+  approval record before adding it. Do not use deploy parameters for this map.
+
+Production requires CircleCI to fetch `.circleci/deploy.yml` from
+`RoundingWell/app-frontend@refs/heads/develop` and check out that repository's
+`develop` at exactly the same commit. Both the verifier and deploy job check
+the actual Git checkout before executing repository scripts. The artifact
+version selected in the picker can still be a release tag; it does not select
+the pipeline config or its checkout.
+
+**CircleCI administrator prerequisite:** enforce this source rule outside the
+repository YAML for the app-frontend production deploy entry point. CircleCI's
+**Additional settings** and API can select different config and checkout refs;
+a modified copy of the YAML could remove its own checks. Use an administrator-
+managed trigger restriction or organization policy that denies an app-frontend
+deploy using the wrong repository, config path, config ref, or checkout ref,
+including attempts from alternate configurations that omit this verifier.
+Do not rely on picker defaults or on restricting only the verifier's read
+context. If implementing the restriction at the context boundary, keep it
+scoped to app-frontend, preserve the intended sandbox and demo paths from the
+protected deploy definition, and verify that the production context cannot be
+requested by alternate config. Confirm this with a no-deployment negative
+pilot through both the UI and API, followed by a positive protected-ref pilot.
+If your available CircleCI controls cannot enforce it, do not enable the hold.
+
+Also confirm production-release archive metadata can only be written by
+trusted tag-publish jobs. This is a guard on the normal CircleCI deploy
+workflow, not a new AWS boundary or a restriction on unrelated deploy tools.
+
+Previously published artifacts do not have tag-pusher provenance and cannot
+pass the new gate. Prepare a fresh release and an authorized rollback artifact
+with provenance before enabling production use. Do not backfill a guessed
+author. Pilot with a dry-run workflow that does not receive production
+credentials: self-approval, unknown approver, missing provenance, and a changed
+archive must stop; a mapped non-author must pass. Then verify explicit demo
+and sandbox-all still use the exempt path.
+
 ## Triggering A CircleCI Deploy
 
 1. Create and push a release tag:
