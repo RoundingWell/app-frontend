@@ -1,12 +1,12 @@
 import dayjs from 'dayjs';
-import { contains, difference, filter, find, last, reject, some, uniq } from 'underscore';
+import { contains, difference, filter, find, some, uniq } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
 
 import App from 'js/base/app';
 
-import { compareInteractions } from 'js/entities-service/entities/interactions';
+import { compareMessages } from 'js/entities-service/entities/messages';
 
 import { InteractionsLoadingView } from 'js/apps/patients/shared/interactions/interactions-status_views';
 import { isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
@@ -27,7 +27,6 @@ export default App.extend({
   prepareStart({ patient }, { signal }) {
     this.query = {
       patientId: patient.id,
-      channels: ['message'],
       limit: 25,
     };
 
@@ -45,7 +44,7 @@ export default App.extend({
       });
 
     return Promise.all([
-      Radio.request('entities', 'fetch:interactions:window:initial', this.query, { signal }),
+      Radio.request('entities', 'fetch:messages:window:initial', this.query, { signal }),
       composerRequest,
     ])
       .then(([initial, composer]) => ({ initial, composer }))
@@ -64,7 +63,6 @@ export default App.extend({
       this.showView(new MessagesErrorView());
     } else {
       this.window = initial;
-      this.deletedIds = [];
 
       this.listenTo(Radio.channel('ws'), 'message:interactions', this.onInteractionMessage);
 
@@ -89,27 +87,16 @@ export default App.extend({
     this.getRegion().focus();
   },
   onClickInteractions() {
-    const newest = last(filter(this.window.models, model => {
-      const isOnAction = model.getAction()?.id === this.action.id;
-
-      return isOnAction && model.get('occurred_at') && !model.isNew();
-    }));
-
-    if (!newest) {
-      Radio.trigger('event-router', 'patient:interactions', this.patient.id);
-      return;
-    }
-
-    Radio.trigger('event-router', 'patient:interaction', this.patient.id, newest.id);
+    Radio.trigger('event-router', 'patient:interactions', this.patient.id);
   },
   onClickOlder() {
     this.loadOlder(signal => {
-      return Radio.request('entities', 'fetch:interactions:window:adjacent', this.query, this.window, 'older', { signal });
+      return Radio.request('entities', 'fetch:messages:window:older', this.query, this.window, { signal });
     });
   },
   async onSelectDate(date) {
     const isShown = await this.loadOlder(signal => {
-      return Radio.request('entities', 'fetch:interactions:window:toDate', this.query, this.window, date, { signal });
+      return Radio.request('entities', 'fetch:messages:window:toDate', this.query, this.window, date, { signal });
     });
 
     if (!isShown) return;
@@ -131,6 +118,7 @@ export default App.extend({
       controller.signal.throwIfAborted();
       const added = difference(older.models, startModels);
 
+      this.window = { ...this.window, oldest: older.oldest };
       this.showModels([...added, ...this.window.models], older.hasOlder);
 
       return true;
@@ -143,44 +131,35 @@ export default App.extend({
       return false;
     }
   },
-  async onSendMessage(message) {
-    const text = Radio.request('entities', 'interactions:model', {
-      channel: 'message',
+  async onSendMessage(body) {
+    const message = Radio.request('entities', 'messages:model', {
+      body,
       direction: 'outbound',
-      occurred_at: dayjs.utc().format(),
-      metadata: {
-        phone_number: this.phone,
-        message,
-      },
+      phone: this.phone,
+      sort_at: dayjs.utc().format(),
       send_status: 'sending',
       _patient: this.patient.getResource(),
       _action: this.action.getResource(),
     });
 
-    this.showModels([...this.window.models, text]);
+    this.showModels([...this.window.models, message]);
 
-    const isSent = await text.saveAll().then(() => true, error => {
+    const isSent = await message.save().then(() => message.queue()).then(() => true, error => {
       addError(error);
       return false;
     });
 
-    text.set('send_status', isSent ? null : 'failed');
+    if (!this.isRunning()) return;
 
-    if (this.hasNewerPending) this.loadNewer();
+    message.set('send_status', isSent ? null : 'failed');
+
+    if (isSent || this.hasNewerPending) this.loadNewer();
   },
-  onInteractionMessage({ category, payload }, model) {
+  onInteractionMessage({ category, payload }) {
     if (payload.patient?.id !== this.patient.id) return;
+    if (category === 'ResourceCreated' && payload.attributes.channel !== 'message') return;
 
-    if (category === 'ResourceCreated') {
-      if (payload.attributes.channel === 'message') this.loadNewer();
-      return;
-    }
-
-    if (category === 'ResourceDeleted') this.deletedIds.push(model.id);
-
-    if (!contains(this.window.models, model)) return;
-
-    this.showModels(this.window.models);
+    this.loadNewer();
   },
   async loadNewer() {
     const hasSendingText = some(this.window.models, model => model.get('send_status') === 'sending');
@@ -195,18 +174,25 @@ export default App.extend({
     const controller = new AbortController();
     this.newerController = controller;
 
-    const newest = await Radio.request('entities', 'fetch:interactions:window:initial', this.query, {
+    const newest = await Radio.request('entities', 'fetch:messages:window:initial', this.query, {
       signal: controller.signal,
     }).catch(addError);
     if (controller.signal.aborted) return;
 
     this.newerController = null;
-    if (newest) this.showModels([...this.window.models, ...newest.models]);
+    if (newest) this.showNewest(newest);
     if (this.hasNewerPending) this.loadNewer();
   },
+  showNewest({ models, oldest, hasOlder }) {
+    const cutoff = hasOlder && oldest;
+    const kept = filter(this.window.models, model => {
+      return model.get('send_status') || contains(models, model) || (cutoff && compareMessages(model, cutoff) < 0);
+    });
+
+    this.showModels([...kept, ...models]);
+  },
   showModels(models, hasOlder = this.window.hasOlder) {
-    const shown = reject(uniq(models), model => contains(this.deletedIds, model.id));
-    this.window = { ...this.window, hasOlder, models: shown.sort(compareInteractions) };
+    this.window = { ...this.window, hasOlder, models: uniq(models).sort(compareMessages) };
 
     this.getView().showWindow(this.window);
   },

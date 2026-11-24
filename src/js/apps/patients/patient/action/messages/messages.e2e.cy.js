@@ -7,7 +7,9 @@ import fxTestSettings from 'fixtures/test/settings';
 import { getAction } from 'support/api/actions';
 import { testForm } from 'support/api/forms';
 import { getFlow } from 'support/api/flows';
-import { getInteraction, getPage } from 'support/api/interactions';
+import { getClinician } from 'support/api/clinicians';
+import { getInteraction } from 'support/api/interactions';
+import { getMessage, getMessagePage } from 'support/api/messages';
 import { getPatientField } from 'support/api/patient-fields';
 import { getPatient } from 'support/api/patients';
 import { stateTodo } from 'support/api/states';
@@ -38,7 +40,7 @@ function getQuery(req) {
 }
 
 function isMessagesRequest(req) {
-  return getQuery(req).get('filter[channel]') === 'message';
+  return new URL(req.url).pathname.endsWith('/messages');
 }
 
 function isOlderMessagesRequest(req) {
@@ -50,20 +52,29 @@ function isNewestMessagesRequest(req) {
   return isMessagesRequest(req) && !query.has('page[before]') && !query.has('page[after]') && !query.has('page[at]');
 }
 
-function getText({ direction = 'outbound', occurredAt = '2026-11-10T15:00:00Z', expectedAt = null, cancelledAt = null, metadata, action, flow }) {
-  return getInteraction({
+function getText({ direction = 'outbound', sortAt = '2026-11-10T15:00:00Z', status = direction === 'inbound' ? 'received' : 'sent', body = 'Text', failureReason = null, action, author }) {
+  return getMessage({
     attributes: {
-      channel: 'message',
       direction,
-      occurred_at: occurredAt,
-      expected_at: expectedAt,
-      cancelled_at: cancelledAt,
-      metadata,
+      status,
+      body,
+      phone: '+16155550190',
+      failure_reason: failureReason,
+      send_at: status === 'scheduled' ? sortAt : null,
+      sort_at: sortAt,
     },
     relationships: {
       action: getRelationship(action),
-      flow: getRelationship(flow),
+      author: getRelationship(author),
     },
+  });
+}
+
+function getSavedText(data, attributes, action) {
+  return getMessage({
+    id: data.id,
+    attributes: { ...data.attributes, direction: 'outbound', ...attributes },
+    relationships: { action: getRelationship(action) },
   });
 }
 
@@ -88,7 +99,9 @@ context('patient action messages', function() {
     { label: 'mobile', number: '+16155550190', preferred: false },
   ];
 
-  function routeMessageAction(interactions, action = testAction, phones = testPhones) {
+  const clinician = getClinician({ attributes: { name: 'Jessica Davenport' } });
+
+  function routeMessageAction(texts, action = testAction, phones = testPhones, interactions = []) {
     cy
       .routesForPatientAction()
       .routePatientField(fx => {
@@ -112,9 +125,14 @@ context('patient action messages', function() {
 
         return fx;
       })
+      .routePatientMessages(fx => {
+        fx.data = texts;
+        fx.included = [otherAction, flowAction, clinician];
+
+        return fx;
+      })
       .routePatientInteractions(fx => {
         fx.data = interactions;
-        fx.included = [otherAction, flowAction, testFlow];
 
         return fx;
       })
@@ -145,33 +163,31 @@ context('patient action messages', function() {
   }
 
   specify('message history', function() {
-    const inbound = getText({ direction: 'inbound', occurredAt: getDayTs(1, 9), metadata: { body: 'Can someone call me about my foot?' }, action: testAction });
-    const todayText = getText({ occurredAt: getDayTs(0, 0, 1), metadata: { message: 'Sent first thing today.' }, action: testAction });
-    const outbound = getText({ occurredAt: getDayTs(1, 9, 30), metadata: { message: 'A nurse will call you today.', clinician_name: 'Jessica Davenport' }, action: testAction });
-    const followUp = getText({ occurredAt: getDayTs(1, 9, 45), metadata: { message: 'Around noon.', clinician_name: 'Jessica Davenport' }, action: testAction });
-    const fromOrganization = getText({ occurredAt: getDayTs(1, 10), metadata: { message: 'Reply STOP to opt out.' }, action: testAction });
-    const cancelledLater = getText({ occurredAt: null, expectedAt: getDayTs(1, 12), cancelledAt: getDayTs(1, 8), metadata: { message: 'Noon reminder' }, action: testAction });
-    const organization = getText({ occurredAt: getDayTs(9, 9), metadata: { message: 'Checking in after your visit.' }, action: otherAction });
-    const disposition = getText({ occurredAt: getDayTs(9, 10), metadata: { disposition: 'Text Sent' }, action: otherAction });
+    const inbound = getText({ direction: 'inbound', sortAt: getDayTs(1, 9), body: 'Can someone call me about my foot?', action: testAction });
+    const todayText = getText({ sortAt: getDayTs(0, 0, 1), body: 'Sent first thing today.', action: testAction });
+    const outbound = getText({ sortAt: getDayTs(1, 9, 30), body: 'A nurse will call you today.', action: testAction, author: clinician });
+    const followUp = getText({ sortAt: getDayTs(1, 9, 45), body: 'Around noon.', action: testAction, author: clinician });
+    const fromOrganization = getText({ sortAt: getDayTs(1, 10), body: 'Reply STOP to opt out.', action: testAction });
+    const organization = getText({ sortAt: getDayTs(9, 9), body: 'Checking in after your visit.', action: otherAction });
     const failures = [
-      ['RECIPIENT_NOT_OPTED_IN', 'Patient opted out of texts.'],
+      ['not_opted_in', 'Patient opted out of texts.'],
       ['RECIPIENT_NOT_REACHABLE', 'This number can\'t receive texts.'],
       ['UNKNOWN_ERROR', ''],
     ];
     const undelivered = _.map(failures, ([code], index) => getText({
-      occurredAt: getDayTs(9, 11, index),
-      metadata: { phone_number: '+16155550190', message: `Undelivered ${ code }`, delivery: { status: 'failed', reason: { code, description: 'Failed' }, updated_at: getDayTs(9, 12) } },
+      sortAt: getDayTs(9, 11, index),
+      status: 'failed',
+      failureReason: { code },
+      body: `Undelivered ${ code }`,
       action: otherAction,
     }));
-    const inFlow = getText({ occurredAt: getDayTs(8, 9), metadata: { message: 'Welcome home!' }, action: flowAction });
-    const flowOnly = getText({ occurredAt: getDayTs(7, 9), metadata: { message: 'Flow reminder' }, flow: testFlow });
-    const flowFollowUp = getText({ occurredAt: getDayTs(7, 9, 30), metadata: { message: 'Second flow reminder' }, flow: testFlow });
-    const actionless = getText({ occurredAt: getDayTs(6, 9), metadata: { message: 'Sent from Interactions' } });
+    const inFlow = getText({ sortAt: getDayTs(8, 9), body: 'Welcome home!', action: flowAction });
+    const actionless = getText({ sortAt: getDayTs(6, 9), body: 'Sent from Interactions' });
     const longMessage = `Long text start. ${ _.times(60, () => 'Please remember to take your medication.').join(' ') } Long text end.`;
-    const long = getText({ occurredAt: getDayTs(9, 9, 30), metadata: { message: longMessage }, action: testAction });
-    const scheduled = getText({ occurredAt: null, expectedAt: '2099-11-20T15:00:00Z', metadata: { message: 'Monthly check-in' }, action: testAction });
-    const cancelled = getText({ occurredAt: null, expectedAt: getDayTs(5, 10), cancelledAt: getDayTs(6, 10), metadata: { message: 'Check-in reminder' }, action: testAction });
-    const otherScheduled = getText({ occurredAt: null, expectedAt: '2099-11-21T15:00:00Z', metadata: { message: 'Reminder for another action' }, action: otherAction });
+    const long = getText({ sortAt: getDayTs(9, 9, 30), body: longMessage, action: testAction });
+    const scheduled = getText({ status: 'scheduled', sortAt: '2099-11-20T15:00:00Z', body: 'Monthly check-in', action: testAction });
+    const otherScheduled = getText({ status: 'scheduled', sortAt: '2099-11-21T15:00:00Z', body: 'Reminder for another action', action: otherAction });
+    const draft = getText({ status: 'drafted', sortAt: getDayTs(0, 0, 2), body: 'Unsent draft' });
     const email = getInteraction({
       attributes: { channel: 'email', direction: 'outbound', occurred_at: getDayTs(1, 10, 30), expected_at: null, metadata: { note: 'Emailed discharge papers' } },
       relationships: { action: getRelationship(testAction), flow: getRelationship() },
@@ -182,19 +198,26 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([inbound, outbound, followUp, fromOrganization, cancelledLater, todayText, organization, long, disposition, ...undelivered, inFlow, flowOnly, flowFollowUp, actionless, scheduled, cancelled, otherScheduled, email, call]);
+    routeMessageAction([inbound, outbound, followUp, fromOrganization, todayText, organization, long, ...undelivered, inFlow, actionless, scheduled, otherScheduled, draft], testAction, testPhones, [email, call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
       .wait('@routeAction');
 
     cy
+      .wait('@routePatientMessages')
+      .itsUrl()
+      .its('search')
+      .should('equal', '?include=action,author&page[limit]=25');
+
+    cy
       .get('.messaging-history')
       .should('contain', 'Messages')
       .and('not.contain', 'Reminder for another action')
+      .and('not.contain', 'Unsent draft')
       .and('not.contain', 'Emailed discharge papers')
       .find('.messaging-card')
-      .should('have.length', 18);
+      .should('have.length', 13);
 
     cy
       .get('.patient-action__title')
@@ -210,13 +233,13 @@ context('patient action messages', function() {
       .should('contain', 'Messages')
       .and('contain', 'All messages with Omar Porter')
       .find('.messaging-history__header-date .js-date-label')
-      .should('have.text', getDateLabel(organization.attributes.occurred_at));
+      .should('have.text', getDateLabel(organization.attributes.sort_at));
 
     cy
       .get('.messaging-history__header')
       .then($header => {
         cy
-          .contains('.messaging-history__day', getDateLabel(actionless.attributes.occurred_at))
+          .contains('.messaging-history__day', getDateLabel(actionless.attributes.sort_at))
           .scrollIntoView({ offset: { top: -$header.outerHeight() } });
       });
 
@@ -227,27 +250,25 @@ context('patient action messages', function() {
         expect($header[0].getBoundingClientRect().top).to.be.closeTo(scrollerTop, 1);
       })
       .find('.messaging-history__header-date .js-date-label')
-      .should('have.text', getDateLabel(actionless.attributes.occurred_at));
+      .should('have.text', getDateLabel(actionless.attributes.sort_at));
 
     cy
       .get('.messaging-history__date')
       .should($dates => {
         expect(_.map($dates, date => date.textContent.trim())).to.deep.equal(_.map([
-          organization.attributes.occurred_at,
-          inFlow.attributes.occurred_at,
-          flowOnly.attributes.occurred_at,
-          actionless.attributes.occurred_at,
-          cancelled.attributes.expected_at,
-          inbound.attributes.occurred_at,
-          todayText.attributes.occurred_at,
-          scheduled.attributes.expected_at,
+          organization.attributes.sort_at,
+          inFlow.attributes.sort_at,
+          actionless.attributes.sort_at,
+          inbound.attributes.sort_at,
+          todayText.attributes.sort_at,
+          scheduled.attributes.sort_at,
         ], getDateLabel));
       });
 
     cy
-      .contains('.messaging-history__day', getDateLabel(inbound.attributes.occurred_at))
+      .contains('.messaging-history__day', getDateLabel(inbound.attributes.sort_at))
       .find('.messaging-card')
-      .should('have.length', 5);
+      .should('have.length', 4);
 
     cy
       .contains('.messaging-card', 'Can someone call me about my foot?')
@@ -270,30 +291,13 @@ context('patient action messages', function() {
       .and('not.have.class', 'messaging-card--continues');
 
     cy
-      .contains('.messaging-card', 'Noon reminder')
-      .should('not.have.class', 'messaging-card--continuation');
-
-    cy
       .contains('.messaging-card', 'Long text start.')
       .should('not.have.class', 'messaging-card--continuation')
       .and('not.have.class', 'messaging-card--continues');
 
     cy
-      .contains('.messaging-card', 'Outbound SMS • Text Sent')
-      .should('have.class', 'messaging-card--continues');
-
-    cy
-      .contains('.messaging-card', 'Undelivered RECIPIENT_NOT_OPTED_IN')
-      .should('have.class', 'messaging-card--continuation')
-      .and('not.have.class', 'messaging-card--continues');
-
-    cy
       .contains('.messaging-card', 'Undelivered RECIPIENT_NOT_REACHABLE')
       .should('not.have.class', 'messaging-card--continuation');
-
-    cy
-      .contains('.messaging-card', 'Second flow reminder')
-      .should('have.class', 'messaging-card--continuation');
 
     cy
       .contains('.messaging-card', 'Can someone call me about my foot?')
@@ -365,19 +369,9 @@ context('patient action messages', function() {
       .should('not.exist');
 
     cy
-      .contains('.messaging-card', 'Outbound SMS • Text Sent')
-      .find('.messaging-card__body')
-      .should('not.exist');
-
-    cy
       .contains('.messaging-card', 'Monthly check-in')
       .should('have.class', 'messaging-card--scheduled')
       .and('contain', 'Scheduled');
-
-    cy
-      .contains('.messaging-card', 'Check-in reminder')
-      .should('have.class', 'messaging-card--cancelled')
-      .and('contain', 'Cancelled');
 
     cy
       .contains('.messaging-card', 'Sent from Interactions')
@@ -405,20 +399,6 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
-      .contains('.messaging-card', 'Flow reminder')
-      .find('.js-work .messaging-card__link-text')
-      .should('have.text', 'TCM Follow-up')
-      .click();
-
-    cy
-      .location('pathname')
-      .should('equal', `/one/patient/${ testPatient.id }/flow/${ testFlow.id }`);
-
-    cy
-      .go('back')
-      .wait('@routeAction');
-
-    cy
       .contains('.messaging-card', 'Checking in after your visit.')
       .find('.js-work')
       .click();
@@ -438,12 +418,13 @@ context('patient action messages', function() {
 
     cy
       .location('pathname')
-      .should('equal', `/one/patient/${ testPatient.id }/interactions/${ todayText.id }`);
+      .should('equal', `/one/patient/${ testPatient.id }/interactions`);
   });
 
   specify('send a message', function() {
     // Midnight today, so a text sent now always sorts after it.
-    const text = getText({ occurredAt: getDayTs(0, 0), metadata: { message: 'See you soon.' }, action: testAction });
+    const text = getText({ sortAt: getDayTs(0, 0), body: 'See you soon.', action: testAction });
+    const texts = [text];
     let sendFails = true;
     let releaseSend;
     let notSentCard;
@@ -452,19 +433,26 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([text]);
+    routeMessageAction(texts);
 
     cy
-      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
+      .intercept('POST', `/api/actions/${ testAction.id }/messages`, req => {
         if (sendFails) {
           return send.then(() => {
-            req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/metadata' } }] } });
+            req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/body' } }] } });
           });
         }
 
-        req.reply({ statusCode: 201, body: { data: req.body.data } });
+        const saved = getSavedText(req.body.data, { status: 'drafted', sort_at: dayjs().format() }, testAction);
+        texts.push(saved);
+        req.reply({ statusCode: 201, body: { data: saved } });
       })
-      .as('routePostInteraction');
+      .as('routePostMessage')
+      .intercept('PATCH', '/api/messages/*', req => {
+        _.last(texts).attributes.status = 'queued';
+        req.reply({ statusCode: 204 });
+      })
+      .as('routePatchMessage');
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -542,17 +530,13 @@ context('patient action messages', function() {
       .then(() => releaseSend());
 
     cy
-      .wait('@routePostInteraction')
+      .wait('@routePostMessage')
       .its('request.body')
       .then(({ data }) => {
         expect(data.id).to.be.a('string');
-        expect(data.type).to.equal('interactions');
-        expect(data.attributes).to.have.all.keys('channel', 'direction', 'occurred_at', 'metadata');
-        expect(data.attributes.channel).to.equal('message');
-        expect(data.attributes.direction).to.equal('outbound');
-        expect(data.attributes.occurred_at).to.be.a('string');
-        expect(data.attributes.metadata).to.deep.equal({ phone_number: '+16155550190', message: 'Can you come in Tuesday?' });
-        expect(data.relationships.action.data).to.deep.equal({ id: testAction.id, type: 'patient-actions' });
+        expect(data.type).to.equal('messages');
+        expect(data.attributes).to.deep.equal({ body: 'Can you come in Tuesday?' });
+        expect(data.relationships).to.be.undefined;
       });
 
     cy
@@ -583,7 +567,24 @@ context('patient action messages', function() {
       .click();
 
     cy
-      .wait('@routePostInteraction');
+      .wait('@routePostMessage')
+      .then(({ response }) => {
+        cy
+          .wait('@routePatchMessage')
+          .then(({ request }) => {
+            expect(request.url).to.contain(`/api/messages/${ response.body.data.id }`);
+            expect(request.body.data.attributes).to.deep.equal({ status: 'queued' });
+          });
+      });
+
+    cy
+      .contains('.messaging-card', 'Tuesday at 2 works.')
+      .should('contain', 'Sending…')
+      .then(() => {
+        _.last(texts).attributes.status = 'sent';
+      });
+
+    sendTextWs('InteractionCompleted', getText({}), { occurred_at: dayjs().format() });
 
     cy
       .contains('.messaging-card', 'Tuesday at 2 works.')
@@ -614,25 +615,39 @@ context('patient action messages', function() {
   });
 
   specify('leaving while a message sends', function() {
+    const texts = [];
     let newestRequests = 0;
+    let sendFails = true;
     let releaseSend;
-    const send = new Cypress.Promise(resolve => {
+    let send = new Cypress.Promise(resolve => {
       releaseSend = resolve;
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([]);
+    routeMessageAction(texts);
 
     cy
-      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
+      .intercept('POST', `/api/actions/${ testAction.id }/messages`, req => {
         return send.then(() => {
-          req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/metadata' } }] } });
+          if (sendFails) {
+            req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/body' } }] } });
+            return;
+          }
+
+          const saved = getSavedText(req.body.data, { status: 'drafted', sort_at: dayjs().format() }, testAction);
+          texts.push(saved);
+          req.reply({ statusCode: 201, body: { data: saved } });
         });
       })
-      .as('routePostInteraction');
+      .as('routePostMessage')
+      .intercept('PATCH', '/api/messages/*', req => {
+        _.last(texts).attributes.status = 'queued';
+        req.reply({ statusCode: 204 });
+      })
+      .as('routePatchMessage');
 
     cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
+      .intercept('GET', '/api/patients/*/messages*', req => {
         if (isNewestMessagesRequest(req)) newestRequests += 1;
       });
 
@@ -664,7 +679,7 @@ context('patient action messages', function() {
       .then(() => releaseSend());
 
     cy
-      .wait('@routePostInteraction');
+      .wait('@routePostMessage');
 
     cy
       .go('back')
@@ -682,6 +697,49 @@ context('patient action messages', function() {
       .then(() => {
         // The first visit and the return; the reply that waited for the send isn't loaded after leaving.
         expect(newestRequests).to.equal(2);
+
+        sendFails = false;
+        send = new Cypress.Promise(resolve => {
+          releaseSend = resolve;
+        });
+      });
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .type('Running late');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-send')
+      .click();
+
+    cy
+      .get('.patient__context-trail')
+      .contains('Omar Porter')
+      .click();
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient.id }/workflow`)
+      .then(() => releaseSend());
+
+    cy
+      .wait('@routePatchMessage');
+
+    cy
+      .go('back')
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-history')
+      .find('.messaging-card')
+      .should('have.length', 1)
+      .and('contain', 'Running late')
+      .and('contain', 'Sending…')
+      .then(() => {
+        // The second return; the send that finished after leaving doesn't load texts.
+        expect(newestRequests).to.equal(3);
       });
   });
 
@@ -799,7 +857,7 @@ context('patient action messages', function() {
   });
 
   specify('expanding the form hides messages', function() {
-    const text = getText({ occurredAt: getDayTs(1, 9), metadata: { message: 'See you soon.' }, action: testAction });
+    const text = getText({ sortAt: getDayTs(1, 9), body: 'See you soon.', action: testAction });
     const formAction = getAction({
       attributes: { name: 'Message with form', tags: ['message'] },
       relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship(), form: getRelationship(testForm) },
@@ -838,8 +896,8 @@ context('patient action messages', function() {
 
   specify('earlier messages', function() {
     const texts = _.times(30, index => getText({
-      occurredAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
-      metadata: { message: `Text ${ index + 1 }` },
+      sortAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
+      body: `Text ${ index + 1 }`,
       action: testAction,
     }));
     let olderFails = true;
@@ -852,7 +910,7 @@ context('patient action messages', function() {
       .as('routePhonesError');
 
     cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
+      .intercept('GET', '/api/patients/*/messages*', req => {
         if (!isOlderMessagesRequest(req) || !olderFails) return;
         req.reply({ forceNetworkError: true });
       })
@@ -922,13 +980,43 @@ context('patient action messages', function() {
       .get('.messaging-history')
       .find('.js-beginning')
       .should('be.visible')
-      .and('have.text', 'Beginning of messages with Omar Porter');
+      .and('have.text', 'Beginning of messages with Omar Porter')
+      .then(() => {
+        texts.push(..._.times(25, index => getText({ status: 'drafted', sortAt: `2026-12-01T15:${ String(index).padStart(2, '0') }:00Z`, body: `Draft ${ index + 1 }` })));
+      });
+
+    cy
+      .intercept('GET', '/api/patients/*/messages*', req => {
+        if (isNewestMessagesRequest(req)) req.alias = 'routeRefresh';
+      });
+
+    sendTextWs('ResourceCreated', getText({}), { channel: 'message', direction: 'outbound' });
+
+    cy
+      .wait('@routeRefresh')
+      .then(() => {
+        texts.push(getText({ sortAt: '2026-12-02T15:00:00Z', body: 'After the drafts', action: testAction }));
+      });
+
+    // A second refresh shows its text only after the first one has been applied.
+    sendTextWs('ResourceCreated', getText({}), { channel: 'message', direction: 'outbound' });
+
+    cy
+      .get('.messaging-history .messaging-card')
+      .last()
+      .should('contain', 'After the drafts');
+
+    cy
+      .get('.messaging-history')
+      .should('not.contain', 'Draft 1')
+      .find('.messaging-card')
+      .should('have.length', 31);
   });
 
   specify('jumping to a date', function() {
     const texts = _.times(30, index => getText({
-      occurredAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
-      metadata: { message: `Text ${ index + 1 }` },
+      sortAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
+      body: `Text ${ index + 1 }`,
       action: testAction,
     }));
 
@@ -942,7 +1030,7 @@ context('patient action messages', function() {
     routeMessageAction(texts);
 
     cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
+      .intercept('GET', '/api/patients/*/messages*', req => {
         if (!isOlderMessagesRequest(req)) return;
         req.alias = 'routeOlderMessages';
         if (olderFails) {
@@ -951,10 +1039,13 @@ context('patient action messages', function() {
         }
         return olderMessages;
       })
-      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
-        req.reply({ statusCode: 201, body: { data: req.body.data } });
+      .intercept('POST', `/api/actions/${ testAction.id }/messages`, req => {
+        const saved = getSavedText(req.body.data, { status: 'queued', sort_at: dayjs().format() }, testAction);
+        texts.push(saved);
+        req.reply({ statusCode: 201, body: { data: saved } });
       })
-      .as('routePostInteraction');
+      .as('routePostMessage')
+      .intercept('PATCH', '/api/messages/*', { statusCode: 204 });
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -1011,7 +1102,7 @@ context('patient action messages', function() {
       .click();
 
     cy
-      .wait('@routePostInteraction')
+      .wait('@routePostMessage')
       .then(() => releaseOlder());
 
     cy
@@ -1023,10 +1114,19 @@ context('patient action messages', function() {
 
     cy
       .contains('.messaging-card', 'Sent while jumping')
+      .should('contain', 'Sending…')
+      .then(() => {
+        _.last(texts).attributes.status = 'sent';
+      });
+
+    sendTextWs('InteractionCompleted', getText({}), { occurred_at: dayjs().format() });
+
+    cy
+      .contains('.messaging-card', 'Sent while jumping')
       .should('not.contain', 'Sending…');
 
     cy
-      .contains('.messaging-history__day', getDateLabel(texts[0].attributes.occurred_at))
+      .contains('.messaging-history__day', getDateLabel(texts[0].attributes.sort_at))
       .should($day => {
         const header = $day.closest('.messaging-history').find('.messaging-history__header')[0];
         expect($day[0].getBoundingClientRect().top).to.be.closeTo(header.getBoundingClientRect().bottom, 1);
@@ -1034,7 +1134,7 @@ context('patient action messages', function() {
 
     cy
       .get('.messaging-history__header-date .js-date-label')
-      .should('have.text', getDateLabel(texts[0].attributes.occurred_at));
+      .should('have.text', getDateLabel(texts[0].attributes.sort_at));
 
     cy
       .get('.messaging-history__header-date .js-date-button')
@@ -1050,7 +1150,7 @@ context('patient action messages', function() {
       .click();
 
     cy
-      .contains('.messaging-history__day', getDateLabel(texts[19].attributes.occurred_at))
+      .contains('.messaging-history__day', getDateLabel(texts[19].attributes.sort_at))
       .should($day => {
         const header = $day.closest('.messaging-history').find('.messaging-history__header')[0];
         expect($day[0].getBoundingClientRect().top).to.be.closeTo(header.getBoundingClientRect().bottom, 1);
@@ -1058,7 +1158,7 @@ context('patient action messages', function() {
 
     cy
       .get('.messaging-history__header-date .js-date-label')
-      .should('have.text', getDateLabel(texts[19].attributes.occurred_at));
+      .should('have.text', getDateLabel(texts[19].attributes.sort_at));
 
     cy
       .get('@routeOlderMessages.all')
@@ -1066,19 +1166,17 @@ context('patient action messages', function() {
   });
 
   specify('live updates', function() {
-    const oldest = getText({ occurredAt: getDayTs(20, 9), metadata: { message: 'Oldest text' }, action: testAction });
-    const fillers = _.times(22, index => getText({ occurredAt: getDayTs(10, 8, index), metadata: { message: `Filler ${ index + 1 }` }, action: testAction }));
-    const sent = getText({ occurredAt: getDayTs(1, 9), metadata: { phone_number: '+16155550190', message: 'See you Tuesday.' }, action: testAction });
-    const failedMetadata = { ...sent.attributes.metadata, delivery: { status: 'failed', reason: { code: 'RECIPIENT_NOT_REACHABLE', description: 'Failed' } } };
-    const mistake = getText({ occurredAt: getDayTs(1, 10), metadata: { message: 'Wrong patient, sorry.' }, action: testAction });
-    const scheduled = getText({ occurredAt: null, expectedAt: '2099-11-20T15:00:00Z', metadata: { message: 'Monthly check-in' }, action: testAction });
-    const cancelledFiller = fillers[21];
-    const firstReply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 2), metadata: { body: 'Is Tuesday at 2 ok?' } });
-    const secondReply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 3), metadata: { body: 'Or Wednesday?' } });
-    const thirdReply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 4), metadata: { body: 'Thursday works too.' } });
-    const lastReply = getText({ direction: 'inbound', occurredAt: dayjs().add(1, 'minute').format(), metadata: { body: 'Great, thanks!' } });
-    const lostReply = getText({ direction: 'inbound', occurredAt: dayjs().add(2, 'minute').format(), metadata: { body: 'Are you there?' } });
-    const nextReply = getText({ direction: 'inbound', occurredAt: dayjs().add(3, 'minute').format(), metadata: { body: 'Hello?' } });
+    const oldest = getText({ sortAt: getDayTs(20, 9), body: 'Oldest text', action: testAction });
+    const fillers = _.times(22, index => getText({ sortAt: getDayTs(10, 8, index), body: `Filler ${ index + 1 }`, action: testAction }));
+    const sent = getText({ sortAt: getDayTs(1, 9), body: 'See you Tuesday.', action: testAction });
+    const mistake = getText({ sortAt: getDayTs(1, 10), body: 'Wrong patient, sorry.', action: testAction });
+    const scheduled = getText({ status: 'scheduled', sortAt: '2099-11-20T15:00:00Z', body: 'Monthly check-in', action: testAction });
+    const firstReply = getText({ direction: 'inbound', sortAt: getDayTs(0, 0, 2), body: 'Is Tuesday at 2 ok?' });
+    const secondReply = getText({ direction: 'inbound', sortAt: getDayTs(0, 0, 3), body: 'Or Wednesday?' });
+    const thirdReply = getText({ direction: 'inbound', sortAt: getDayTs(0, 0, 4), body: 'Thursday works too.' });
+    const lastReply = getText({ direction: 'inbound', sortAt: dayjs().add(1, 'minute').format(), body: 'Great, thanks!' });
+    const lostReply = getText({ direction: 'inbound', sortAt: dayjs().add(2, 'minute').format(), body: 'Are you there?' });
+    const nextReply = getText({ direction: 'inbound', sortAt: dayjs().add(3, 'minute').format(), body: 'Hello?' });
     const otherPatient = getPatient();
     const texts = [oldest, ...fillers, sent, mistake, scheduled];
     const created = { channel: 'message', direction: 'inbound' };
@@ -1103,7 +1201,7 @@ context('patient action messages', function() {
     routeMessageAction(texts);
 
     cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
+      .intercept('GET', '/api/patients/*/messages*', req => {
         if (!isNewestMessagesRequest(req)) return;
         newestRequests += 1;
 
@@ -1116,7 +1214,7 @@ context('patient action messages', function() {
         if (!holdNewest) return;
 
         // The response holds the texts saved when the request arrived.
-        const data = getPage(texts, getQuery(req), texts);
+        const data = getMessagePage(texts, getQuery(req));
         markHeld();
         return holdNewest.then(() => {
           req.reply({ body: { data, included: [] } });
@@ -1124,15 +1222,16 @@ context('patient action messages', function() {
       });
 
     cy
-      .intercept('POST', `/api/patients/${ testPatient.id }/interactions`, req => {
+      .intercept('POST', `/api/actions/${ testAction.id }/messages`, req => {
         // The server saves the text before it responds.
-        texts.push({ ...req.body.data, relationships: { ...req.body.data.relationships, flow: { data: null } } });
+        const text = getSavedText(req.body.data, { status: 'queued', sort_at: dayjs().format() }, testAction);
+        texts.push(text);
         markSaved();
         return send.then(() => {
-          req.reply({ statusCode: 201, body: { data: req.body.data } });
+          req.reply({ statusCode: 201, body: { data: text } });
         });
       })
-      .as('routePostInteraction');
+      .intercept('PATCH', '/api/messages/*', { statusCode: 204 });
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -1154,13 +1253,14 @@ context('patient action messages', function() {
       .contains('.messaging-card', 'Wrong patient, sorry.')
       .should('have.class', 'messaging-card--continuation');
 
-    // Each update is also saved on the server, so later loads return it.
+    // Each update is saved on the server first, so the load it starts returns it.
     cy
       .then(() => {
-        sent.attributes.metadata = failedMetadata;
+        sent.attributes.status = 'failed';
+        sent.attributes.failure_reason = { code: 'RECIPIENT_NOT_REACHABLE' };
       });
 
-    sendTextWs('MetadataUpdated', sent, { metadata: failedMetadata });
+    sendTextWs('MetadataUpdated', sent, { metadata: { failure_reason: { code: 'RECIPIENT_NOT_REACHABLE' } } });
 
     cy
       .contains('.messaging-card', 'Wrong patient, sorry.')
@@ -1177,7 +1277,8 @@ context('patient action messages', function() {
 
     cy
       .then(() => {
-        scheduled.attributes.occurred_at = getDayTs(0, 0, 1);
+        scheduled.attributes.status = 'sent';
+        scheduled.attributes.sort_at = getDayTs(0, 0, 1);
       });
 
     sendTextWs('InteractionCompleted', scheduled, { occurred_at: getDayTs(0, 0, 1) });
@@ -1207,19 +1308,9 @@ context('patient action messages', function() {
     cy
       .get('.messaging-history')
       .should('not.contain', 'Wrong patient, sorry.')
+      .and('contain', 'Oldest text')
       .find('.messaging-card')
-      .should('have.length', 25);
-
-    cy
-      .then(() => {
-        cancelledFiller.attributes.cancelled_at = getDayTs(0, 0, 5);
-      });
-
-    sendTextWs('InteractionCancelled', cancelledFiller, { cancelled_at: getDayTs(0, 0, 5) });
-
-    cy
-      .contains('.messaging-card', 'Filler 22')
-      .should('contain', 'Cancelled')
+      .should('have.length', 25)
       .then(() => {
         texts.push(firstReply);
       });
@@ -1250,38 +1341,32 @@ context('patient action messages', function() {
       .then(() => held)
       .then(() => {
         texts.push(thirdReply);
-      });
-
-    sendTextWs('InteractionCompleted', secondReply, { occurred_at: secondReply.attributes.occurred_at });
-
-    sendTextWs('ResourceCreated', thirdReply, created);
-
-    cy
-      .then(() => {
         texts.splice(texts.indexOf(sent), 1);
         texts.splice(texts.indexOf(secondReply), 1);
       });
 
-    // The held response still has both texts: one shown, one not shown yet.
+    // These arrive while the held load is open; one more load follows it.
+    sendTextWs('ResourceCreated', thirdReply, created);
+
     sendTextWs('ResourceDeleted', sent);
 
     sendTextWs('ResourceDeleted', secondReply);
 
     cy
-      .get('.messaging-history')
-      .should('not.contain', 'See you Tuesday.')
       .then(() => {
         holdNewest = null;
         releaseNewest();
       });
 
     cy
-      .get('.messaging-history')
-      .find('.messaging-card')
-      .should('have.length', 26)
+      .get('.messaging-history .messaging-card')
       .last()
       .should('contain', 'Thursday works too.')
       .and('have.class', 'messaging-card--continuation');
+
+    cy
+      .get('.messaging-history .messaging-card')
+      .should('have.length', 26);
 
     cy
       .contains('.messaging-card', 'Is Tuesday at 2 ok?')
@@ -1294,8 +1379,8 @@ context('patient action messages', function() {
       .and('not.contain', 'Wrong patient, sorry.')
       .and('not.contain', 'See you Tuesday.')
       .then(() => {
-        // First visit, the first reply, the held load, and the load after it.
-        expect(newestRequests).to.equal(4);
+        // The first visit, one per update above, the held load, and the load after it.
+        expect(newestRequests).to.equal(7);
       });
 
     cy
@@ -1332,7 +1417,15 @@ context('patient action messages', function() {
       .get('.messaging-history')
       .find('.messaging-card:contains("Tuesday at 2 works.")')
       .should('have.length', 1)
-      .and('not.contain', 'Sending…')
+      .then(() => {
+        _.find(texts, text => text.attributes.body === 'Tuesday at 2 works.').attributes.status = 'sent';
+      });
+
+    sendTextWs('InteractionCompleted', getText({}), { occurred_at: dayjs().format() });
+
+    cy
+      .contains('.messaging-card', 'Tuesday at 2 works.')
+      .should('not.contain', 'Sending…')
       .then(() => {
         newestFails = true;
         texts.push(lostReply);
@@ -1358,7 +1451,7 @@ context('patient action messages', function() {
   });
 
   specify('leaving while new messages load', function() {
-    const reply = getText({ direction: 'inbound', occurredAt: getDayTs(0, 0, 1), metadata: { body: 'Running late' } });
+    const reply = getText({ direction: 'inbound', sortAt: getDayTs(0, 0, 1), body: 'Running late' });
     const texts = [];
     let releaseNewest;
     const newest = new Cypress.Promise(resolve => {
@@ -1377,7 +1470,7 @@ context('patient action messages', function() {
       .should('contain', 'No messages yet.');
 
     cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
+      .intercept('GET', '/api/patients/*/messages*', req => {
         if (!isNewestMessagesRequest(req)) return;
         return newest.then(() => {
           req.reply({ body: { data: [reply], included: [] } });
@@ -1416,8 +1509,8 @@ context('patient action messages', function() {
 
   specify('leaving while earlier messages load', function() {
     const texts = _.times(30, index => getText({
-      occurredAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
-      metadata: { message: `Text ${ index + 1 }` },
+      sortAt: `2026-11-${ String(index + 1).padStart(2, '0') }T15:00:00Z`,
+      body: `Text ${ index + 1 }`,
       action: testAction,
     }));
 
@@ -1430,7 +1523,7 @@ context('patient action messages', function() {
     routeMessageAction(texts);
 
     cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
+      .intercept('GET', '/api/patients/*/messages*', req => {
         if (!isOlderMessagesRequest(req)) return;
         return olderMessages.then(() => {
           req.reply({ body: { data: [], included: [] } });
@@ -1490,7 +1583,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([call], testAction, [{ label: 'home', number: '+16785552384', preferred: true }]);
+    routeMessageAction([], testAction, [{ label: 'home', number: '+16785552384', preferred: true }], [call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -1536,10 +1629,7 @@ context('patient action messages', function() {
       .wait('@routeAction');
 
     cy
-      .intercept('GET', '/api/patients/*/interactions*', req => {
-        if (!isMessagesRequest(req)) return;
-        req.reply({ forceNetworkError: true });
-      });
+      .intercept('GET', '/api/patients/*/messages*', { forceNetworkError: true });
 
     cy
       .reload()
@@ -1555,12 +1645,15 @@ context('patient action messages', function() {
   });
 
   specify('messaging off and untagged actions', function() {
-    const text = getText({ metadata: { message: 'Texts stay in history' }, action: testAction });
+    const text = getText({ body: 'Texts stay in history', action: testAction });
     const regularAction = getAction({
       attributes: { name: 'Call patient' },
       relationships: { patient: getRelationship(testPatient), state: getRelationship(stateTodo), flow: getRelationship() },
     });
-    const regularText = getText({ metadata: { message: 'Regular action text' }, action: regularAction });
+    const regularText = getInteraction({
+      attributes: { channel: 'message', direction: 'outbound', occurred_at: '2026-11-10T15:00:00Z', expected_at: null, metadata: { message: 'Regular action text' } },
+      relationships: { action: getRelationship(regularAction), flow: getRelationship() },
+    });
 
     routeMessageAction([text]);
 
@@ -1608,7 +1701,7 @@ context('patient action messages', function() {
       .should('not.exist');
 
     routeOrganizationMessaging(true);
-    routeMessageAction([regularText], regularAction);
+    routeMessageAction([], regularAction, testPhones, [regularText]);
 
     cy
       .routeWorkspaces();

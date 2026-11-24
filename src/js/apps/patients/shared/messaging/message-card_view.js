@@ -1,17 +1,10 @@
 import { Radio, View } from 'marionette';
 
-import { getDeliveryFailure, getInteractionChannelLabel, getInteractionSummary, getInteractionViaLabel, getSenderName, hasInteractionCardContent } from 'js/apps/patients/shared/interactions/display';
+import { getMessageFailure, getMessageSender, getSendStatus } from './message-display';
 
 import MessageCardTemplate from './message-card.hbs';
 
 import './message-card.scss';
-
-function getStatus(model) {
-  if (model.get('cancelled_at')) return 'cancelled';
-  if (!model.get('occurred_at')) return 'scheduled';
-
-  return 'occurred';
-}
 
 const MessageCardView = View.extend({
   tagName: 'li',
@@ -25,22 +18,16 @@ const MessageCardView = View.extend({
   ui: { work: '.js-work', body: '.js-body', showMore: '.js-show-more' },
   triggers: { 'click @ui.work': 'click:work', 'click @ui.showMore': 'click:show:more', 'animationend': 'animation:end' },
   templateContext() {
-    const patient = this.getOption('patient');
-    const inbound = this.model.get('direction') === 'inbound';
-    const summary = getInteractionSummary(this.model);
+    const body = this.model.get('body');
 
     return {
-      senderName: inbound ? `${ patient.get('first_name') } ${ patient.get('last_name') }` : getSenderName(this.model, this.model.get('metadata')),
-      viaLabel: getInteractionViaLabel(this.model),
-      status: getStatus(this.model),
-      sendStatus: this.model.get('send_status'),
-      deliveryFailure: getDeliveryFailure(this.model),
-      timestamp: this.model.getTimestamp(),
-      hasContent: hasInteractionCardContent(this.model),
-      channelLabel: getInteractionChannelLabel(this.model),
-      summary,
+      senderName: getMessageSender(this.model, this.getOption('patient')),
+      isScheduled: this.model.get('status') === 'scheduled',
+      sendStatus: getSendStatus(this.model),
+      deliveryFailure: getMessageFailure(this.model),
+      timestamp: this.model.get('sort_at'),
       // Same rule as long call notes on the Interactions page (FE-241).
-      collapsible: summary?.length > 900,
+      collapsible: body?.length > 900,
       expanded: this.isExpanded,
       bodyId: `message-body-${ this.cid }`,
       workName: this.getWorkName(),
@@ -48,8 +35,7 @@ const MessageCardView = View.extend({
   },
   getWorkName() {
     const action = this.model.getAction();
-    if (!action) return this.model.getFlow()?.get('name');
-    if (action.id === this.getOption('currentActionId')) return;
+    if (!action || action.id === this.getOption('currentActionId')) return;
 
     return action.get('name');
   },
@@ -58,9 +44,7 @@ const MessageCardView = View.extend({
     this.el.classList.toggle('messaging-card--continues', continues);
   },
   onRender() {
-    const status = getStatus(this.model);
-    this.el.classList.toggle('messaging-card--scheduled', status === 'scheduled');
-    this.el.classList.toggle('messaging-card--cancelled', status === 'cancelled');
+    this.el.classList.toggle('messaging-card--scheduled', this.model.get('status') === 'scheduled');
   },
   // The fade-in runs once; later renders must not replay it.
   onAnimationEnd() {
@@ -74,12 +58,7 @@ const MessageCardView = View.extend({
   onClickWork() {
     const patientId = this.getOption('patient').id;
     const action = this.model.getAction();
-    const flow = action ? action.getFlow() : this.model.getFlow();
-
-    if (!action) {
-      Radio.trigger('event-router', 'patient:flow', patientId, flow.id);
-      return;
-    }
+    const flow = action.getFlow();
 
     if (!flow) {
       Radio.trigger('event-router', 'patient:action', patientId, action.id);

@@ -116,21 +116,6 @@
   box-shadow: none;
 }
 
-.messaging-card--cancelled {
-  color: var(--color-text-secondary);
-
-  .messaging-card__bubble {
-    background: transparent;
-    border: 1px dashed var(--color-text-secondary);
-    box-shadow: none;
-  }
-}
-
-.messaging-card__heading {
-  color: color(blue);
-  margin-bottom: 8px;
-}
-
 .messaging-card__body {
   margin: 0;
   overflow-wrap: anywhere;

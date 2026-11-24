@@ -8,10 +8,10 @@ import 'scss/modules/buttons.scss';
 
 import i18n from 'js/i18n';
 
-import { getDeliveryFailure, getSenderName } from 'js/apps/patients/shared/interactions/display';
 import InteractionDateControlView from 'js/apps/patients/shared/interactions/date-control_view';
 import ComposerView from 'js/apps/patients/shared/messaging/composer_view';
 import MessageCardView from 'js/apps/patients/shared/messaging/message-card_view';
+import { getMessageFailure, getMessageSender, getSendStatus } from 'js/apps/patients/shared/messaging/message-display';
 
 import LayoutTemplate from './layout.hbs';
 
@@ -30,17 +30,16 @@ const DayMessagesView = CollectionView.extend({
     this.updateGrouping();
   },
   updateGrouping() {
+    const patient = this.getOption('patient');
     const keys = this.collection.map(model => {
-      if (!model.get('occurred_at') || model.get('cancelled_at')) return false;
+      if (model.get('status') === 'scheduled') return false;
 
-      const workId = model.get('_action')?.id || model.get('_flow')?.id;
-
-      return [model.get('direction'), getSenderName(model, model.get('metadata')), workId];
+      return [model.get('direction'), getMessageSender(model, patient), model.get('_action')?.id];
     });
 
     const canGroup = (left, right) => {
       const model = this.collection.at(left);
-      const failed = model.get('send_status') === 'failed' || !!getDeliveryFailure(model);
+      const failed = getSendStatus(model) === 'failed' || !!getMessageFailure(model);
 
       return !!keys[left] && !!keys[right] && !failed && isEqual(keys[left], keys[right]);
     };
@@ -76,7 +75,8 @@ const DayView = View.extend({
   onRender() {
     this.showChildView('date', new InteractionDateControlView({ model: this.model }));
     this.showChildView('messages', new DayMessagesView({
-      collection: this.model.get('interactions'),
+      collection: this.model.get('messages'),
+      patient: this.getOption('patient'),
       childViewOptions: {
         patient: this.getOption('patient'),
         currentActionId: this.getOption('currentActionId'),
@@ -201,16 +201,14 @@ const MessagesView = View.extend({
   showWindow({ models, hasOlder }) {
     const currentActionId = this.getOption('currentActionId');
     const shown = filter(models, model => {
-      const upcoming = !model.get('occurred_at') && !model.get('cancelled_at') && dayjs(model.get('expected_at')).isAfter(dayjs());
-
-      return !upcoming || model.getAction()?.id === currentActionId;
+      return model.get('status') !== 'scheduled' || model.getAction()?.id === currentActionId;
     });
 
-    this.days.set(map(groupBy(shown, model => dayjs(model.getTimestamp()).format('YYYY-MM-DD')), (dayModels, id) => {
-      const interactions = this.days.get(id)?.get('interactions') || new Backbone.Collection();
-      interactions.set(dayModels);
+    this.days.set(map(groupBy(shown, model => dayjs(model.get('sort_at')).format('YYYY-MM-DD')), (dayModels, id) => {
+      const messages = this.days.get(id)?.get('messages') || new Backbone.Collection();
+      messages.set(dayModels);
 
-      return { id, interactions };
+      return { id, messages };
     }));
 
     this.updateCurrentDate();

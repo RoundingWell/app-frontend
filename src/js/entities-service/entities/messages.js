@@ -1,4 +1,5 @@
 import Store from 'backbone.store';
+import dayjs from 'dayjs';
 
 import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
@@ -8,6 +9,14 @@ const WRITABLE_ATTRIBUTES = [
   'body',
   'status',
 ];
+
+export function compareMessages(left, right) {
+  const diff = dayjs(left.get('sort_at')).diff(right.get('sort_at'));
+  if (diff) return diff;
+  if (left.isNew() !== right.isNew()) return left.isNew() ? -1 : 1;
+
+  return String(left.id).localeCompare(String(right.id));
+}
 
 const _Model = BaseModel.extend({
   writableAttributes: WRITABLE_ATTRIBUTES,
@@ -22,6 +31,9 @@ const _Model = BaseModel.extend({
   },
   getAuthor() {
     return this.getRelationship('_author');
+  },
+  getAction() {
+    return this.getRelationship('_action');
   },
   queue() {
     return this.save({ status: 'queued' }, {}, { wait: true });

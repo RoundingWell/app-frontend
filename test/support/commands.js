@@ -55,7 +55,8 @@ Cypress.Commands.add('routesForPatientAction', () => {
     .routeActionActivity()
     .routePatientByAction()
     .routeActionComments()
-    .routeActionFiles();
+    .routeActionFiles()
+    .routePatientMessages();
 });
 
 Cypress.Commands.overwrite('visit', (originalFn, url = '/', options = {}) => {

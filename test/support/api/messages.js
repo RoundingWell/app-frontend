@@ -29,15 +29,15 @@ export function getMessagePage(data, query) {
   return sorted.slice(index + 1, index + 1 + limit);
 }
 
-Cypress.Commands.add('routeActionMessages', (mutator = identity) => {
+Cypress.Commands.add('routePatientMessages', (mutator = identity) => {
   const body = mutator({ data: [], included: [] });
 
   cy
-    .intercept('GET', '/api/actions/*/messages*', request => {
-      const actionId = new URL(request.url).pathname.split('/')[3];
-      const data = filter(body.data, message => message.relationships.action.data?.id === actionId);
+    .intercept('GET', '/api/patients/*/messages*', request => {
+      const patientId = new URL(request.url).pathname.split('/')[3];
+      const data = filter(body.data, message => !message.relationships.patient.data || message.relationships.patient.data.id === patientId);
 
       request.reply({ body: { ...body, data: getMessagePage(data, new URL(request.url).searchParams) } });
     })
-    .as('routeActionMessages');
+    .as('routePatientMessages');
 });
