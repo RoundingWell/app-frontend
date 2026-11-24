@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 export default () => {
   return {
     id: faker.string.uuid({ version: 7 }),
-    channel: 'sms',
+    channel: 'message',
     direction: 'outbound',
     reference: null,
     metadata: {},

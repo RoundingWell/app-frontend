@@ -208,7 +208,7 @@ context('patient flow page', function() {
     const messages = _.times(100, index => {
       const interaction = getInteraction({
         attributes: {
-          channel: 'sms',
+          channel: 'message',
           direction: 'inbound',
           metadata: {
             body: `Flow reply ${ index }`,
@@ -280,7 +280,7 @@ context('patient flow page', function() {
         expect(query.has('page[before]')).to.equal(false);
         expect(query.has('page[after]')).to.equal(false);
         expect(query.get('filter[flow]')).to.equal(testPageFlow.id);
-        expect(query.get('filter[channel]').split(',')).to.have.members(['sms', 'email', 'mail', 'fax', 'portal', 'voice', 'voicemail', 'video', 'appointment', 'visit']);
+        expect(query.get('filter[channel]').split(',')).to.have.members(['message', 'email', 'mail', 'fax', 'portal', 'voice', 'voicemail', 'video', 'appointment', 'visit']);
       });
 
     cy

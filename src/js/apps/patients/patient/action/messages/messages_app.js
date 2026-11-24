@@ -27,7 +27,7 @@ export default App.extend({
   prepareStart({ patient }, { signal }) {
     this.query = {
       patientId: patient.id,
-      channels: ['sms'],
+      channels: ['message'],
       limit: 25,
     };
 
@@ -145,7 +145,7 @@ export default App.extend({
   },
   async onSendMessage(message) {
     const text = Radio.request('entities', 'interactions:model', {
-      channel: 'sms',
+      channel: 'message',
       direction: 'outbound',
       occurred_at: dayjs.utc().format(),
       metadata: {
@@ -172,7 +172,7 @@ export default App.extend({
     if (payload.patient?.id !== this.patient.id) return;
 
     if (category === 'ResourceCreated') {
-      if (payload.attributes.channel === 'sms') this.loadNewer();
+      if (payload.attributes.channel === 'message') this.loadNewer();
       return;
     }
 

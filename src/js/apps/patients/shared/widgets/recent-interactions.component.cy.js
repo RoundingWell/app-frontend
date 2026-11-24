@@ -9,7 +9,7 @@ context('recent interactions widget rendering', function() {
     const collection = new Backbone.Collection([
       new Interaction({ id: 'newest', channel: 'voice', occurred_at: '2026-09-24T10:00:00Z' }),
       new Interaction({ id: 'middle', channel: 'appointment', occurred_at: null, expected_at: '2026-09-24T09:59:00Z' }),
-      new Interaction({ id: 'oldest', channel: 'sms', occurred_at: '2026-09-23T10:00:00Z' }),
+      new Interaction({ id: 'oldest', channel: 'message', occurred_at: '2026-09-23T10:00:00Z' }),
     ]);
     const view = new RecentInteractionsView({ model: new Backbone.Model({ id: 'patient' }) });
 
@@ -34,9 +34,9 @@ context('recent interactions widget rendering', function() {
 
   specify('preserves API position for equal and missing timestamps', function() {
     const collection = new Backbone.Collection([
-      new Interaction({ id: 'undated', channel: 'sms', metadata: { clinician_name: 'Undated' } }),
-      new Interaction({ id: 'second', channel: 'sms', occurred_at: '2026-09-24T10:00:00Z', metadata: { clinician_name: 'Second' } }),
-      new Interaction({ id: 'first', channel: 'sms', occurred_at: '2026-09-24T10:00:00Z', metadata: { clinician_name: 'First' } }),
+      new Interaction({ id: 'undated', channel: 'message', metadata: { clinician_name: 'Undated' } }),
+      new Interaction({ id: 'second', channel: 'message', occurred_at: '2026-09-24T10:00:00Z', metadata: { clinician_name: 'Second' } }),
+      new Interaction({ id: 'first', channel: 'message', occurred_at: '2026-09-24T10:00:00Z', metadata: { clinician_name: 'First' } }),
     ]);
     const view = new RecentInteractionsView({ model: new Backbone.Model({ id: 'patient' }) });
 
@@ -70,7 +70,7 @@ context('recent interactions widget rendering', function() {
 
     cy
       .then(() => {
-        collection.add(new Interaction({ id: 'only', channel: 'sms', occurred_at: '2026-09-24T10:00:00Z' }));
+        collection.add(new Interaction({ id: 'only', channel: 'message', occurred_at: '2026-09-24T10:00:00Z' }));
       });
 
     cy

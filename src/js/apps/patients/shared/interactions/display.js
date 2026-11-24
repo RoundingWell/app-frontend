@@ -5,8 +5,8 @@ import i18n from 'js/i18n';
 
 const intl = i18n.patients.shared.interactions.interactionItemView;
 const ICONS = { messages: 'paper-plane-top', appointments: 'calendar-day', visits: 'hospital' };
-const CHANNEL_LABELS = { voice: intl.call, voicemail: intl.voicemail, video: intl.videoCall, sms: intl.sms };
-const CHANNEL_VIA = { sms: intl.viaSms, email: intl.viaEmail, mail: intl.viaMail, fax: intl.viaFax, portal: intl.viaPortal };
+const CHANNEL_LABELS = { voice: intl.call, voicemail: intl.voicemail, video: intl.videoCall, message: intl.sms };
+const CHANNEL_VIA = { message: intl.viaSms, email: intl.viaEmail, mail: intl.viaMail, fax: intl.viaFax, portal: intl.viaPortal };
 const DELIVERY_FAILURES = { RECIPIENT_NOT_OPTED_IN: intl.optedOut, RECIPIENT_NOT_REACHABLE: intl.cantReceiveTexts };
 
 export function getDeliveryFailure(model) {
@@ -25,7 +25,7 @@ export function getInteractionChannelLabel(model) {
 }
 
 export function hasInteractionChannelHeading(model) {
-  return model.getChannelGroup() === 'calls' || (model.get('channel') === 'sms' && !!model.get('metadata')?.disposition);
+  return model.getChannelGroup() === 'calls' || (model.get('channel') === 'message' && !!model.get('metadata')?.disposition);
 }
 
 export function getInteractionViaLabel(model) {
@@ -45,7 +45,7 @@ export function getAppointmentStatusLabel(model) {
 export function getInteractionSummary(model) {
   const metadata = model.get('metadata') || {};
   if (model.getChannelGroup() === 'appointments') return;
-  if (model.get('channel') !== 'sms') return metadata.note;
+  if (model.get('channel') !== 'message') return metadata.note;
   const message = model.get('direction') === 'inbound' ? metadata.body : metadata.message;
   return message || metadata.note;
 }

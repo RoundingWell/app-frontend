@@ -38,7 +38,7 @@ function getQuery(req) {
 }
 
 function isMessagesRequest(req) {
-  return String(getQuery(req).get('filter[channel]')).startsWith('sms');
+  return getQuery(req).get('filter[channel]') === 'message';
 }
 
 function isOlderMessagesRequest(req) {
@@ -53,7 +53,7 @@ function isNewestMessagesRequest(req) {
 function getText({ direction = 'outbound', occurredAt = '2026-11-10T15:00:00Z', expectedAt = null, cancelledAt = null, metadata, action, flow }) {
   return getInteraction({
     attributes: {
-      channel: 'sms',
+      channel: 'message',
       direction,
       occurred_at: occurredAt,
       expected_at: expectedAt,
@@ -548,7 +548,7 @@ context('patient action messages', function() {
         expect(data.id).to.be.a('string');
         expect(data.type).to.equal('interactions');
         expect(data.attributes).to.have.all.keys('channel', 'direction', 'occurred_at', 'metadata');
-        expect(data.attributes.channel).to.equal('sms');
+        expect(data.attributes.channel).to.equal('message');
         expect(data.attributes.direction).to.equal('outbound');
         expect(data.attributes.occurred_at).to.be.a('string');
         expect(data.attributes.metadata).to.deep.equal({ phone_number: '+16155550190', message: 'Can you come in Tuesday?' });
@@ -651,7 +651,7 @@ context('patient action messages', function() {
       .click()
       .should('be.disabled');
 
-    sendTextWs('ResourceCreated', getText({ direction: 'inbound' }), { channel: 'sms', direction: 'inbound' });
+    sendTextWs('ResourceCreated', getText({ direction: 'inbound' }), { channel: 'message', direction: 'inbound' });
 
     cy
       .get('.patient__context-trail')
@@ -1081,7 +1081,7 @@ context('patient action messages', function() {
     const nextReply = getText({ direction: 'inbound', occurredAt: dayjs().add(3, 'minute').format(), metadata: { body: 'Hello?' } });
     const otherPatient = getPatient();
     const texts = [oldest, ...fillers, sent, mistake, scheduled];
-    const created = { channel: 'sms', direction: 'inbound' };
+    const created = { channel: 'message', direction: 'inbound' };
     let newestRequests = 0;
     let newestFails = false;
     let holdNewest;
@@ -1385,7 +1385,7 @@ context('patient action messages', function() {
       })
       .as('routeNewestMessages');
 
-    sendTextWs('ResourceCreated', reply, { channel: 'sms', direction: 'inbound' });
+    sendTextWs('ResourceCreated', reply, { channel: 'message', direction: 'inbound' });
 
     cy
       .get('.patient__context-trail')

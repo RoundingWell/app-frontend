@@ -79,7 +79,7 @@ export default App.extend({
     }
 
     const text = Radio.request('entities', 'interactions:model', {
-      channel: 'sms',
+      channel: 'message',
       direction: 'outbound',
       occurred_at: dayjs.utc().format(),
       metadata: { phone_number: this.phone, message },

@@ -176,7 +176,7 @@ context('patient interactions', function() {
       ['outbound', { note: null, disposition: '' }],
     ];
     const messages = map(cases, ([direction, metadata], index) => getInteraction({
-      attributes: { channel: 'sms', direction, metadata, occurred_at: `2026-09-24T10:${ String(index).padStart(2, '0') }:00Z` },
+      attributes: { channel: 'message', direction, metadata, occurred_at: `2026-09-24T10:${ String(index).padStart(2, '0') }:00Z` },
     }));
     const voicemail = getInteraction({
       attributes: { channel: 'voicemail', direction: 'outbound', occurred_at: '2026-09-24T11:00:00Z', metadata: { disposition: 'Left VM', note: 'Requested a callback.' } },
@@ -723,7 +723,7 @@ context('patient interactions', function() {
       });
 
     cy.then(() => rows.push(added));
-    send('ResourceCreated', added, { channel: 'sms', direction: 'inbound', metadata: added.attributes.metadata });
+    send('ResourceCreated', added, { channel: 'message', direction: 'inbound', metadata: added.attributes.metadata });
 
     cy
       .get('.patient-interactions-preview__sender')
@@ -2283,7 +2283,7 @@ context('patient interactions', function() {
     }));
 
     const emptyMessage = getInteraction({
-      attributes: { channel: 'sms', occurred_at: '2026-09-24T10:59:00Z', metadata: { note: null } },
+      attributes: { channel: 'message', occurred_at: '2026-09-24T10:59:00Z', metadata: { note: null } },
       relationships: { action: getRelationship(action) },
     });
     const emptyVisit = getInteraction({
@@ -2524,7 +2524,7 @@ context('patient interactions', function() {
 
     const otherAction = getAction({ attributes: { name: 'SMS Outreach' }, relationships: { patient: getRelationship(patient), flow: getRelationship(flow) } });
     const groupedActions = { 6: action, 7: otherAction, 8: otherAction };
-    const grouped = map(['sms', 'sms', 'voice', 'sms', 'sms', 'sms', 'sms', 'sms', 'sms', 'sms', 'sms'], (channel, index) => {
+    const grouped = map(['message', 'message', 'voice', 'message', 'message', 'message', 'message', 'message', 'message', 'message', 'message'], (channel, index) => {
       const interaction = getInteraction({
         attributes: {
           channel,
@@ -2984,7 +2984,7 @@ context('patient interactions', function() {
       attributes: { channel: 'voicemail', direction: 'outbound', metadata: { clinician_name: null, note: 'Voicemail left by organization.' } },
     });
     const inboundMessage = getInteraction({
-      attributes: { channel: 'sms', direction: 'inbound', metadata: { from: '+16155550101', clinician_name: 'Ignored Clinician', note: 'Inbound message with sender.' } },
+      attributes: { channel: 'message', direction: 'inbound', metadata: { from: '+16155550101', clinician_name: 'Ignored Clinician', note: 'Inbound message with sender.' } },
     });
     const clinicianInboundVoicemail = getInteraction({
       attributes: { channel: 'voicemail', direction: 'inbound', metadata: { clinician_name: 'Mark Ott', note: 'Inbound voicemail with clinician.' } },
@@ -3300,7 +3300,7 @@ context('patient interactions', function() {
     });
     const sameDay = getInteraction({
       attributes: {
-        channel: 'sms',
+        channel: 'message',
         direction: 'inbound',
         metadata: {
           body: 'I can come in tomorrow morning.',
@@ -3466,7 +3466,7 @@ context('patient interactions', function() {
       });
 
     cy
-      .get('.patient-interactions-preview__item--sms .patient-interactions-preview__sender')
+      .get('.patient-interactions-preview__item--message .patient-interactions-preview__sender')
       .should('have.text', 'Cypress Clinic');
 
     cy
@@ -4031,7 +4031,7 @@ context('patient interactions', function() {
       .and('not.contain', 'SMS-only content');
 
     cy
-      .get('.patient-action__activity .patient-interactions__item--sms')
+      .get('.patient-action__activity .patient-interactions__item--message')
       .should('contain', 'Cypress Clinic')
       .find('.patient-interactions__activity-description strong')
       .should('have.text', 'Cypress Clinic');
@@ -4172,7 +4172,7 @@ context('patient interactions', function() {
 
     const carePlanMessage = getInteraction({
       attributes: {
-        channel: 'sms',
+        channel: 'message',
         metadata: {
           message: 'Your care plan is available in the patient portal.',
         },
@@ -4214,7 +4214,7 @@ context('patient interactions', function() {
       .wait('@carePlanMessages')
       .its('request.url')
       .then(url => {
-        expect(new URL(url).searchParams.get('filter[channel]').split(',')).to.have.members(['sms', 'email', 'mail', 'fax', 'portal']);
+        expect(new URL(url).searchParams.get('filter[channel]').split(',')).to.have.members(['message', 'email', 'mail', 'fax', 'portal']);
       });
 
     cy
@@ -4792,7 +4792,7 @@ context('patient interactions', function() {
     }));
     rows.push(getInteraction({
       attributes: {
-        channel: 'sms',
+        channel: 'message',
         direction: 'outbound',
         occurred_at: new Date(Date.UTC(2026, 9, 29, 13)).toISOString(),
         metadata: { phone_number: '+16155550190', message: 'Reminder that bounced', delivery: { status: 'failed', reason: { code: 'RECIPIENT_NOT_REACHABLE', description: 'Failed' }, updated_at: '2026-10-29T13:00:05Z' } },
@@ -4800,7 +4800,7 @@ context('patient interactions', function() {
     }));
     rows.push(getInteraction({
       attributes: {
-        channel: 'sms',
+        channel: 'message',
         direction: 'outbound',
         occurred_at: new Date(Date.UTC(2026, 9, 29, 14)).toISOString(),
         metadata: { phone_number: '+16155550190', message: 'Reminder with an unknown failure', delivery: { status: 'failed', reason: { code: 'UNKNOWN_ERROR', description: 'Failed' }, updated_at: '2026-10-29T14:00:05Z' } },

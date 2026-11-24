@@ -28,7 +28,7 @@ export function getInteractionAttributes(attributes) {
 }
 
 export const CHANNEL_GROUPS = {
-  messages: ['sms', 'email', 'mail', 'fax', 'portal'],
+  messages: ['message', 'email', 'mail', 'fax', 'portal'],
   calls: ['voice', 'voicemail', 'video'],
   appointments: ['appointment'],
   visits: ['visit'],

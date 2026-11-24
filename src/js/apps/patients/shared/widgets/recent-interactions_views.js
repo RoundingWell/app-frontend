@@ -43,7 +43,7 @@ const RecentInteractionsItemView = View.extend({
     const direction = this.model.get('direction') === 'inbound' ? intl.inbound : intl.outbound;
     if (group === 'messages') {
       const title = `${ direction } ${ intl.message }`;
-      return appendDetail(title, this.model.get('channel') === 'sms' ? metadata.disposition : undefined);
+      return appendDetail(title, this.model.get('channel') === 'message' ? metadata.disposition : undefined);
     }
     if (group === 'calls') {
       const title = `${ direction } ${ getInteractionChannelLabel(this.model) }`;

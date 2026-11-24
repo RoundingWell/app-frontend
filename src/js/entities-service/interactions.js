@@ -89,7 +89,7 @@ const Entity = BaseEntity.extend({
   },
   async fetchForActivity({ patientId, actionId, flowId, excludeTexts }, { signal }) {
     const allChannels = uniq(flatten(values(this.getChannelGroups())));
-    const channels = excludeTexts ? without(allChannels, 'sms') : allChannels;
+    const channels = excludeTexts ? without(allChannels, 'message') : allChannels;
     const collection = await this.fetchByPatient({ patientId, actionId, flowId, channels, limit: 100 }, { signal });
 
     return collection.models;
