@@ -443,16 +443,11 @@ context('patient action messages', function() {
           });
         }
 
-        const saved = getSavedText(req.body.data, { status: 'drafted', sort_at: dayjs().format() }, testAction);
+        const saved = getSavedText(req.body.data, { sort_at: dayjs().format() }, testAction);
         texts.push(saved);
         req.reply({ statusCode: 201, body: { data: saved } });
       })
-      .as('routePostMessage')
-      .intercept('PATCH', '/api/messages/*', req => {
-        _.last(texts).attributes.status = 'queued';
-        req.reply({ statusCode: 204 });
-      })
-      .as('routePatchMessage');
+      .as('routePostMessage');
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -535,7 +530,7 @@ context('patient action messages', function() {
       .then(({ data }) => {
         expect(data.id).to.be.a('string');
         expect(data.type).to.equal('messages');
-        expect(data.attributes).to.deep.equal({ body: 'Can you come in Tuesday?' });
+        expect(data.attributes).to.deep.equal({ body: 'Can you come in Tuesday?', status: 'queued' });
         expect(data.relationships).to.be.undefined;
       });
 
@@ -567,15 +562,7 @@ context('patient action messages', function() {
       .click();
 
     cy
-      .wait('@routePostMessage')
-      .then(({ response }) => {
-        cy
-          .wait('@routePatchMessage')
-          .then(({ request }) => {
-            expect(request.url).to.contain(`/api/messages/${ response.body.data.id }`);
-            expect(request.body.data.attributes).to.deep.equal({ status: 'queued' });
-          });
-      });
+      .wait('@routePostMessage');
 
     cy
       .contains('.messaging-card', 'Tuesday at 2 works.')
@@ -634,17 +621,12 @@ context('patient action messages', function() {
             return;
           }
 
-          const saved = getSavedText(req.body.data, { status: 'drafted', sort_at: dayjs().format() }, testAction);
+          const saved = getSavedText(req.body.data, { sort_at: dayjs().format() }, testAction);
           texts.push(saved);
           req.reply({ statusCode: 201, body: { data: saved } });
         });
       })
-      .as('routePostMessage')
-      .intercept('PATCH', '/api/messages/*', req => {
-        _.last(texts).attributes.status = 'queued';
-        req.reply({ statusCode: 204 });
-      })
-      .as('routePatchMessage');
+      .as('routePostMessage');
 
     cy
       .intercept('GET', '/api/patients/*/messages*', req => {
@@ -725,7 +707,7 @@ context('patient action messages', function() {
       .then(() => releaseSend());
 
     cy
-      .wait('@routePatchMessage');
+      .wait('@routePostMessage');
 
     cy
       .go('back')
@@ -1044,8 +1026,7 @@ context('patient action messages', function() {
         texts.push(saved);
         req.reply({ statusCode: 201, body: { data: saved } });
       })
-      .as('routePostMessage')
-      .intercept('PATCH', '/api/messages/*', { statusCode: 204 });
+      .as('routePostMessage');
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -1230,8 +1211,7 @@ context('patient action messages', function() {
         return send.then(() => {
           req.reply({ statusCode: 201, body: { data: text } });
         });
-      })
-      .intercept('PATCH', '/api/messages/*', { statusCode: 204 });
+      });
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)

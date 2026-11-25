@@ -35,9 +35,6 @@ const _Model = BaseModel.extend({
   getAction() {
     return this.getRelationship('_action');
   },
-  queue() {
-    return this.save({ status: 'queued' }, {}, { wait: true });
-  },
 });
 
 const Model = Store(_Model, TYPE);

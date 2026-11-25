@@ -1,6 +1,6 @@
 import Store from 'backbone.store';
 import dayjs from 'dayjs';
-import { contains, extend, findKey, has, map, omit } from 'underscore';
+import { contains, findKey, has, map, omit } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -9,12 +9,6 @@ import BaseCollection from 'js/base/collection';
 import BaseModel from 'js/base/model';
 
 const TYPE = 'interactions';
-const WRITABLE_ATTRIBUTES = [
-  'channel',
-  'direction',
-  'occurred_at',
-  'metadata',
-];
 
 export function compareInteractions(left, right) {
   return dayjs(left.getTimestamp()).diff(right.getTimestamp());
@@ -35,20 +29,7 @@ export const CHANNEL_GROUPS = {
 };
 
 const _Model = BaseModel.extend({
-  writableAttributes: WRITABLE_ATTRIBUTES,
   type: TYPE,
-  urlRoot() {
-    return `/api/patients/${ this.get('_patient').id }/interactions`;
-  },
-  saveAll(attrs) {
-    attrs = extend({}, this.attributes, attrs);
-
-    const relationships = {
-      action: this.toRelation(attrs._action),
-    };
-
-    return this.save(attrs, { relationships }, { wait: true });
-  },
   messages: {
     MetadataUpdated({ attributes }) {
       this.set(getInteractionAttributes(attributes));

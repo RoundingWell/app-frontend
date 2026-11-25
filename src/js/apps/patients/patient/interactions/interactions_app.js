@@ -89,12 +89,27 @@ export default App.extend({
 
     this.showSentText(text);
 
-    const isSent = await text.saveAll().then(() => true, error => {
+    const sent = Radio.request('entities', 'messages:model', {
+      body: message,
+      status: 'queued',
+      _patient: this.patient.getResource(),
+    });
+
+    const isSent = await sent.save().then(() => true, error => {
       addError(error);
       return false;
     });
 
-    text.set('send_status', isSent ? null : 'failed');
+    if (!isSent) {
+      text.set('send_status', 'failed');
+      return;
+    }
+
+    text.set({
+      id: sent.get('_interaction')?.id,
+      metadata: { ...text.get('metadata'), message_id: sent.id },
+      send_status: null,
+    });
   },
   isShowingLatest() {
     const { hasNewer, request } = this.getState().attributes;

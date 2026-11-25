@@ -7,6 +7,7 @@ import formatDate from 'helpers/format-date';
 
 import { getAction } from 'support/api/actions';
 import { getInteraction, getPage } from 'support/api/interactions';
+import { getMessage } from 'support/api/messages';
 import { getFlow } from 'support/api/flows';
 import { getPatientField } from 'support/api/patient-fields';
 import { getPatient } from 'support/api/patients';
@@ -4807,6 +4808,7 @@ context('patient interactions', function() {
       },
     }));
     let sendFails = true;
+    let sentInteraction;
     let releaseSend;
     const send = new Cypress.Promise(resolve => {
       releaseSend = resolve;
@@ -4829,16 +4831,25 @@ context('patient interactions', function() {
         fx.data = rows;
         return fx;
       })
-      .intercept('POST', `/api/patients/${ patient.id }/interactions`, req => {
+      .intercept('POST', `/api/patients/${ patient.id }/messages`, req => {
         if (sendFails) {
           return send.then(() => {
-            req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/metadata' } }] } });
+            req.reply({ statusCode: 400, body: { errors: [{ detail: 'Invalid', source: { pointer: '/data/attributes/body' } }] } });
           });
         }
 
-        req.reply({ statusCode: 201, body: { data: req.body.data } });
+        const { id, attributes } = req.body.data;
+        sentInteraction = getInteraction({
+          attributes: { channel: 'message', direction: 'outbound', occurred_at: new Date().toISOString(), metadata: { message_id: id, message: attributes.body } },
+        });
+        rows.push(sentInteraction);
+
+        req.reply({
+          statusCode: 201,
+          body: { data: getMessage({ id, attributes: { ...attributes, direction: 'outbound' }, relationships: { interaction: getRelationship(sentInteraction) } }) },
+        });
       })
-      .as('routePostInteraction')
+      .as('routePostMessage')
       .visit(`/patient/${ patient.id }/interactions/${ rows[0].id }`);
 
     cy
@@ -4888,12 +4899,12 @@ context('patient interactions', function() {
       .should('not.exist');
 
     cy
-      .wait('@routePostInteraction')
+      .wait('@routePostMessage')
       .its('request.body')
       .then(({ data }) => {
-        expect(data.attributes).to.have.all.keys('channel', 'direction', 'occurred_at', 'metadata');
-        expect(data.attributes.metadata).to.deep.equal({ phone_number: '+16155550190', message: 'Can you come in Tuesday?' });
-        expect(data).not.to.have.nested.property('relationships.action');
+        expect(data.type).to.equal('messages');
+        expect(data.attributes).to.deep.equal({ body: 'Can you come in Tuesday?', status: 'queued' });
+        expect(data).not.to.have.property('relationships');
       });
 
     cy
@@ -4926,7 +4937,7 @@ context('patient interactions', function() {
       .click();
 
     cy
-      .wait('@routePostInteraction');
+      .wait('@routePostMessage');
 
     cy
       .get('.patient-interactions__filters [data-filter="messages"]')
@@ -4953,7 +4964,7 @@ context('patient interactions', function() {
       .click();
 
     cy
-      .wait('@routePostInteraction');
+      .wait('@routePostMessage');
 
     cy
       .contains('.patient-interactions__item', 'See you then.')
@@ -4963,6 +4974,21 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Tuesday at 2 works.')
       .should('exist');
+
+    cy
+      .then(() => {
+        rows.splice(rows.indexOf(sentInteraction), 1);
+        cy.sendWs({
+          category: 'ResourceDeleted',
+          resource: { type: 'interactions', id: sentInteraction.id },
+          payload: { patient: { type: 'patients', id: patient.id } },
+        });
+      });
+
+    cy
+      .get('.patient-interactions')
+      .should('not.contain', 'See you then.')
+      .and('contain', 'Tuesday at 2 works.');
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -4992,7 +5018,7 @@ context('patient interactions', function() {
       .click();
 
     cy
-      .wait('@routePostInteraction')
+      .wait('@routePostMessage')
       .then(() => releaseFilter());
 
     cy
@@ -5115,10 +5141,8 @@ context('patient interactions', function() {
         req.reply({ forceNetworkError: true });
       })
       .as('routeFailedInteractions')
-      .intercept('POST', `/api/patients/${ patient.id }/interactions`, req => {
-        req.reply({ statusCode: 201, body: { data: req.body.data } });
-      })
-      .as('routePostInteraction');
+      .intercept('POST', `/api/patients/${ patient.id }/messages`, { statusCode: 201, body: {} })
+      .as('routePostMessage');
 
     cy
       .go('back');
@@ -5151,7 +5175,7 @@ context('patient interactions', function() {
       .should('not.be.disabled');
 
     cy
-      .get('@routePostInteraction.all')
+      .get('@routePostMessage.all')
       .should('have.length', 0);
 
     cy

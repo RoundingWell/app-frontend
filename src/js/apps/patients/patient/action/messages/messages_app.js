@@ -134,6 +134,7 @@ export default App.extend({
   async onSendMessage(body) {
     const message = Radio.request('entities', 'messages:model', {
       body,
+      status: 'queued',
       direction: 'outbound',
       phone: this.phone,
       sort_at: dayjs.utc().format(),
@@ -144,7 +145,7 @@ export default App.extend({
 
     this.showModels([...this.window.models, message]);
 
-    const isSent = await message.save().then(() => message.queue()).then(() => true, error => {
+    const isSent = await message.save().then(() => true, error => {
       addError(error);
       return false;
     });
