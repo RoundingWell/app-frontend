@@ -25,9 +25,7 @@ function getWorkName(model) {
 const InteractionItemView = View.extend({
   tagName: 'li',
   className() {
-    const newClass = this.model.get('send_status') === 'sending' ? ' patient-interactions__item--new' : '';
-
-    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }${ newClass }`;
+    return `patient-interactions__item patient-interactions__item--${ this.model.get('channel') }`;
   },
   template: InteractionItemTemplate,
   ui: { action: '.js-action', interaction: '.js-interaction', noteText: '.js-note-text', showMore: '.js-show-more' },
@@ -35,7 +33,6 @@ const InteractionItemView = View.extend({
     'click @ui.action': 'click:action',
     'click @ui.interaction': 'click:interaction',
     'click @ui.showMore': 'click:show:more',
-    'animationend': 'animation:end',
   },
   modelEvents: { change: 'render' },
   onClickShowMore() {
@@ -100,7 +97,6 @@ const InteractionItemView = View.extend({
       noteId: `interaction-note-${ this.cid }`,
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',
       workName: this.getWorkLink(),
-      sendStatus: this.model.get('send_status'),
       deliveryFailure: getDeliveryFailure(this.model),
     };
   },
@@ -121,15 +117,11 @@ const InteractionItemView = View.extend({
     return { 'change:interactionId': 'updateSelection' };
   },
   isSelectedInteraction() {
-    if (!this.getOption('state') || this.model.isNew()) return false;
+    if (!this.getOption('state')) return false;
     return this.model.id === this.getState().get('interactionId');
   },
   onRender() {
     this.updateSelection();
-  },
-  // The fade-in runs once; later renders must not replay it.
-  onAnimationEnd() {
-    this.el.classList.remove('patient-interactions__item--new');
   },
   updateSelection() {
     const selected = this.isSelectedInteraction();

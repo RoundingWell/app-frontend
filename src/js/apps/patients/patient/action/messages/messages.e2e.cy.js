@@ -774,12 +774,6 @@ context('patient action messages', function() {
       .should('equal', `/one/patient/${ testPatient.id }/interactions`);
 
     cy
-      .get('.patient-interactions .messaging-composer')
-      .find('.js-input')
-      .should('have.value', '')
-      .type('From Interactions');
-
-    cy
       .go('back')
       .wait('@routeAction');
 
@@ -787,14 +781,6 @@ context('patient action messages', function() {
       .get('.messaging-composer')
       .find('.js-input')
       .should('have.value', '\nHi Omar,\nCall us back. ');
-
-    cy
-      .go('forward');
-
-    cy
-      .get('.patient-interactions .messaging-composer')
-      .find('.js-input')
-      .should('have.value', 'From Interactions');
 
     routeMessageAction([], composeAction);
 

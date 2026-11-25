@@ -24,10 +24,7 @@ const _Model = BaseModel.extend({
   urlRoot() {
     if (!this.isNew()) return '/api/messages';
 
-    const action = this.get('_action');
-    if (action) return `/api/actions/${ action.id }/messages`;
-
-    return `/api/patients/${ this.get('_patient').id }/messages`;
+    return `/api/actions/${ this.get('_action').id }/messages`;
   },
   getAuthor() {
     return this.getRelationship('_author');

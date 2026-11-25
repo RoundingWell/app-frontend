@@ -254,9 +254,6 @@ careOptsFrontend:
         interactionItemView:
           showMore: Show more
           viewOnInteractions: View on Interactions
-          notSent: Not sent
-          sendError: Message could not be sent.
-          sending: Sending…
           cantReceiveTexts: This number can't receive texts.
           notDelivered: Not delivered
           notDeliveredTo: Not delivered to {phone}.

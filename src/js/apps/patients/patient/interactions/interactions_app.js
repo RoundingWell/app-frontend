@@ -10,9 +10,6 @@ import App from 'js/base/app';
 import { compareInteractions } from 'js/entities-service/entities/interactions';
 import InteractionWindowRead from 'js/entities-service/interaction-window-read';
 
-import { getMessagingPhone, isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
-import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
-
 import { InteractionsPageView } from './interactions_views';
 
 const PAGE_SIZE = 25;
@@ -28,7 +25,6 @@ export default App.extend({
     'load:edge': 'requestInteractions',
     'retry:paging': 'retryRequest',
     'select:date': 'jumpToDate',
-    'send:message': 'onSendMessage',
   },
   onBeforeStart(app, { patient, interactionId, kind = 'replace', date, at }) {
     if (!this.getView()) this.showPage({ patient, interactionId });
@@ -45,80 +41,6 @@ export default App.extend({
       model: patient,
       state: this.getState(),
     }));
-    this.messagingRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'messaging' }).catch(addError);
-  },
-  // Shows the composer once, after the first list load finishes or fails.
-  async showComposer() {
-    const messagingRequest = this.messagingRequest;
-    if (!messagingRequest) return;
-
-    this.messagingRequest = null;
-
-    const view = this.getView();
-    const messaging = await messagingRequest;
-
-    // No composer when consent fails to load or the page was left; no opt-in shows it disabled.
-    if (!messaging || this.getView() !== view) return;
-
-    this.phone = getMessagingPhone(messaging);
-
-    this.draft = createComposerDraft({ patientId: this.patient.id, actionId: null });
-    this.getView().showComposer(this.phone, this.draft);
-  },
-  async onSendMessage(message) {
-    const selectedGroups = this.getState().get('selectedGroups');
-    const showsMessages = contains(selectedGroups, 'messages');
-
-    if (!showsMessages || !this.isShowingLatest()) {
-      this.getState().set({ interactionId: undefined, selectedGroups: showsMessages ? selectedGroups : [...selectedGroups, 'messages'] });
-
-      if (!await this.requestInteractions('replace')) {
-        if (this.getView()) this.draft.set('body', message);
-        return;
-      }
-    }
-
-    const text = Radio.request('entities', 'interactions:model', {
-      channel: 'message',
-      direction: 'outbound',
-      occurred_at: dayjs.utc().format(),
-      metadata: { phone_number: this.phone, message },
-      send_status: 'sending',
-      _patient: this.patient.getResource(),
-    });
-
-    this.showSentText(text);
-
-    const sent = Radio.request('entities', 'messages:model', {
-      body: message,
-      status: 'queued',
-      _patient: this.patient.getResource(),
-    });
-
-    const isSent = await sent.save().then(() => true, error => {
-      addError(error);
-      return false;
-    });
-
-    if (!isSent) {
-      text.set('send_status', 'failed');
-      return;
-    }
-
-    text.set({
-      id: sent.get('_interaction')?.id,
-      metadata: { ...text.get('metadata'), message_id: sent.id },
-      _message: sent.getResource(),
-      send_status: null,
-    });
-  },
-  isShowingLatest() {
-    const { hasNewer, request } = this.getState().attributes;
-    return !!this.collection && !hasNewer && !request;
-  },
-  showSentText(text) {
-    this.collection.add(text);
-    this.getView().scrollToLatest();
   },
   async prepareStart({ kind = 'replace', date, at, reconcile }, { signal }) {
     const input = this.getRequest(kind, date, at);
@@ -159,7 +81,6 @@ export default App.extend({
   },
   onStart(app, options, { result, input, read, repaired }) {
     this.pendingRead = null;
-    this.showComposer();
     // Restore the repaired viewport before prepending/appending its adjacent page.
     if (repaired) this.showInteractions(this.getLiveWindow(repaired.window, read), repaired.input);
     this.showInteractions(this.getLiveWindow(result, read), input);
@@ -170,7 +91,6 @@ export default App.extend({
     return { ...window, models, hasOlder: !!models.length && window.hasOlder, hasNewer: !!models.length && window.hasNewer };
   },
   handleStartFailure(options, error) {
-    this.showComposer();
     const refresh = this.pendingRead?.refresh;
     this.pendingRead = null;
     if (refresh) {
