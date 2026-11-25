@@ -7,6 +7,12 @@ export function isMessagingEnabled() {
   return organizationEnabled === true && workspaceEnabled !== false;
 }
 
+export function getMessagingPhone(field) {
+  const { status, phone } = field.get('value') || {};
+
+  return status === 'opted_in' ? phone : undefined;
+}
+
 // Program actions tagged `message` can have texts. Their history shows even when messaging is off.
 export function canShowMessages(action) {
   return action.hasTag('message');

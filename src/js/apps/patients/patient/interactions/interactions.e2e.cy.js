@@ -117,23 +117,20 @@ function observeInteractionMessage(win, id, scope) {
   });
 }
 
-function routeMessaging(enabled, phones) {
+function routeMessaging(enabled, messaging) {
   const settings = getResource(fxTestSettings, 'settings');
   settings.push({ id: 'messaging_enabled', type: 'settings', attributes: { value: enabled } });
 
   cy
     .intercept('GET', '/api/settings', { body: { data: settings, included: [] } })
     .routePatientField(fx => {
-      fx.data = getPatientField({ attributes: { name: 'phones', value: phones } });
+      fx.data = getPatientField({ attributes: { name: 'messaging', value: messaging } });
 
       return fx;
-    }, 'phones');
+    }, 'messaging');
 }
 
-const testPhones = [
-  { label: 'home', number: '+16785552384', preferred: true },
-  { label: 'mobile', number: '+16155550190', preferred: false },
-];
+const testMessaging = { status: 'opted_in', phone: '+16155550190', source: 'form' };
 
 context('patient interactions', function() {
   let responses;
@@ -4819,7 +4816,7 @@ context('patient interactions', function() {
       releaseFilter = resolve;
     });
 
-    routeMessaging(true, testPhones);
+    routeMessaging(true, testMessaging);
 
     cy
       .routesForPatientWorkflow()
@@ -5030,22 +5027,22 @@ context('patient interactions', function() {
       .should('not.contain', 'Sending…');
   });
 
-  specify('shows the composer for messaging, disabled without a mobile phone, and survives failed loads', function() {
+  specify('shows the composer for messaging, disabled without an opt-in, and survives failed loads', function() {
     const patient = getPatient({ attributes: { first_name: 'Omar', last_name: 'Porter' } });
     const row = getInteraction({ attributes: { channel: 'voice', direction: 'outbound', occurred_at: '2026-10-08T12:00:00Z', metadata: { note: 'Only call' } } });
-    let releasePhones;
-    const phonesResponse = new Cypress.Promise(resolve => {
-      releasePhones = resolve;
+    let releaseMessaging;
+    const messagingResponse = new Cypress.Promise(resolve => {
+      releaseMessaging = resolve;
     });
-    let releaseStalePhones;
-    const stalePhonesResponse = new Cypress.Promise(resolve => {
-      releaseStalePhones = resolve;
+    let releaseStaleMessaging;
+    const staleMessagingResponse = new Cypress.Promise(resolve => {
+      releaseStaleMessaging = resolve;
     });
     let releaseInteractions;
     const interactionsResponse = new Cypress.Promise(resolve => {
       releaseInteractions = resolve;
     });
-    let stalePhonesRequests = 0;
+    let staleMessagingRequests = 0;
 
     cy
       .routesForPatientWorkflow()
@@ -5058,7 +5055,7 @@ context('patient interactions', function() {
         return fx;
       });
 
-    routeMessaging(false, testPhones);
+    routeMessaging(false, testMessaging);
 
     cy
       .visit(`/patient/${ patient.id }/interactions`);
@@ -5071,11 +5068,11 @@ context('patient interactions', function() {
       .get('.messaging-composer')
       .should('not.exist');
 
-    routeMessaging(true, [{ label: 'home', number: '+16785552384', preferred: true }]);
+    routeMessaging(true, { status: 'opted_out', phone: '+16155550190', source: 'form' });
 
     cy
       .reload()
-      .wait('@routePatientFieldphones');
+      .wait('@routePatientFieldmessaging');
 
     cy
       .contains('.patient-interactions__item', 'Only call')
@@ -5085,7 +5082,7 @@ context('patient interactions', function() {
       .get('.patient-interactions .messaging-composer')
       .find('.js-input')
       .should('be.disabled')
-      .and('have.attr', 'placeholder', 'Omar doesn\'t have a mobile number.');
+      .and('have.attr', 'placeholder', 'Omar hasn\'t opted in to texts.');
 
     cy
       .get('.patient-interactions .messaging-composer')
@@ -5097,10 +5094,10 @@ context('patient interactions', function() {
       .should('not.contain', 'To Omar Porter');
 
     cy
-      .intercept('GET', '/api/patients/*/fields/phones', { forceNetworkError: true })
-      .as('routePhonesError')
+      .intercept('GET', '/api/patients/*/fields/messaging', { forceNetworkError: true })
+      .as('routeMessagingError')
       .reload()
-      .wait('@routePhonesError');
+      .wait('@routeMessagingError');
 
     cy
       .contains('.patient-interactions__item', 'Only call')
@@ -5111,12 +5108,12 @@ context('patient interactions', function() {
       .should('not.exist');
 
     cy
-      .intercept('GET', '/api/patients/*/fields/phones', req => {
-        return phonesResponse.then(() => {
-          req.reply({ body: { data: getPatientField({ attributes: { name: 'phones', value: testPhones } }), included: [] } });
+      .intercept('GET', '/api/patients/*/fields/messaging', req => {
+        return messagingResponse.then(() => {
+          req.reply({ body: { data: getPatientField({ attributes: { name: 'messaging', value: testMessaging } }), included: [] } });
         });
       })
-      .as('routeHeldPhones')
+      .as('routeHeldMessaging')
       .reload();
 
     cy
@@ -5130,10 +5127,10 @@ context('patient interactions', function() {
     cy
       .location('pathname')
       .should('equal', `/one/patient/${ patient.id }/workflow`)
-      .then(() => releasePhones());
+      .then(() => releaseMessaging());
 
     cy
-      .wait('@routeHeldPhones');
+      .wait('@routeHeldMessaging');
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', req => {
@@ -5200,19 +5197,19 @@ context('patient interactions', function() {
 
     cy
       .intercept('GET', '/api/patients/*/interactions*', { body: { data: [row], included: [] } })
-      .intercept('GET', '/api/patients/*/fields/phones', req => {
-        stalePhonesRequests += 1;
+      .intercept('GET', '/api/patients/*/fields/messaging', req => {
+        staleMessagingRequests += 1;
 
-        if (stalePhonesRequests > 1) {
+        if (staleMessagingRequests > 1) {
           req.reply({ forceNetworkError: true });
           return;
         }
 
-        return stalePhonesResponse.then(() => {
-          req.reply({ body: { data: getPatientField({ attributes: { name: 'phones', value: testPhones } }), included: [] } });
+        return staleMessagingResponse.then(() => {
+          req.reply({ body: { data: getPatientField({ attributes: { name: 'messaging', value: testMessaging } }), included: [] } });
         });
       })
-      .as('routeStalePhones')
+      .as('routeStaleMessaging')
       .reload();
 
     cy
@@ -5239,11 +5236,11 @@ context('patient interactions', function() {
     cy
       .location('pathname')
       .should('equal', `/one/patient/${ patient.id }/interactions`)
-      .then(() => releaseStalePhones());
+      .then(() => releaseStaleMessaging());
 
     cy
-      .wait('@routeStalePhones')
-      .wait('@routeStalePhones')
+      .wait('@routeStaleMessaging')
+      .wait('@routeStaleMessaging')
       .then(() => releaseInteractions());
 
     cy
@@ -5266,7 +5263,7 @@ context('patient interactions', function() {
       releaseLatest = resolve;
     });
 
-    routeMessaging(true, testPhones);
+    routeMessaging(true, testMessaging);
 
     cy
       .routesForPatientWorkflow()

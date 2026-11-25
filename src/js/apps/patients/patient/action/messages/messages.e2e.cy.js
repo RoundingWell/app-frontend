@@ -94,21 +94,19 @@ context('patient action messages', function() {
     relationships: { patient: getRelationship(testPatient), flow: getRelationship(testFlow) },
   });
 
-  const testPhones = [
-    { label: 'home', number: '+16785552384', preferred: true },
-    { label: 'mobile', number: '+16155550190', preferred: false },
-  ];
+  const testMessaging = { status: 'opted_in', phone: '+16155550190', source: 'form' };
+  const optedOut = { status: 'opted_out', phone: '+16155550190', source: 'form' };
 
   const clinician = getClinician({ attributes: { name: 'Jessica Davenport' } });
 
-  function routeMessageAction(texts, action = testAction, phones = testPhones, interactions = []) {
+  function routeMessageAction(texts, action = testAction, messaging = testMessaging, interactions = []) {
     cy
       .routesForPatientAction()
       .routePatientField(fx => {
-        fx.data = getPatientField({ attributes: { name: 'phones', value: phones } });
+        fx.data = getPatientField({ attributes: { name: 'messaging', value: messaging } });
 
         return fx;
-      }, 'phones')
+      }, 'messaging')
       .routeAction(fx => {
         fx.data = action;
         fx.included.push(testPatient);
@@ -198,7 +196,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([inbound, outbound, followUp, fromOrganization, todayText, organization, long, ...undelivered, inFlow, actionless, scheduled, otherScheduled, draft], testAction, testPhones, [email, call]);
+    routeMessageAction([inbound, outbound, followUp, fromOrganization, todayText, organization, long, ...undelivered, inFlow, actionless, scheduled, otherScheduled, draft], testAction, testMessaging, [email, call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -814,7 +812,7 @@ context('patient action messages', function() {
       .find('.js-send')
       .should('be.disabled');
 
-    routeMessageAction([], testAction, [{ label: 'home', number: '+16785552384', preferred: true }]);
+    routeMessageAction([], testAction, optedOut);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -824,7 +822,7 @@ context('patient action messages', function() {
       .get('.messaging-composer')
       .find('.js-input')
       .should('have.value', '')
-      .and('have.attr', 'placeholder', 'Omar doesn\'t have a mobile number.');
+      .and('have.attr', 'placeholder', 'Omar hasn\'t opted in to texts.');
 
     routeMessageAction([]);
 
@@ -888,7 +886,7 @@ context('patient action messages', function() {
     routeMessageAction(texts);
 
     cy
-      .intercept('GET', '/api/patients/*/fields/phones', { forceNetworkError: true })
+      .intercept('GET', '/api/patients/*/fields/messaging', { forceNetworkError: true })
       .as('routePhonesError');
 
     cy
@@ -1563,7 +1561,7 @@ context('patient action messages', function() {
     });
 
     routeOrganizationMessaging(true);
-    routeMessageAction([], testAction, [{ label: 'home', number: '+16785552384', preferred: true }], [call]);
+    routeMessageAction([], testAction, optedOut, [call]);
 
     cy
       .visit(`/patient/${ testPatient.id }/action/${ testAction.id }`)
@@ -1584,7 +1582,7 @@ context('patient action messages', function() {
       .get('.messaging-composer')
       .find('.js-input')
       .should('be.disabled')
-      .and('have.attr', 'placeholder', 'Omar doesn\'t have a mobile number.');
+      .and('have.attr', 'placeholder', 'Omar hasn\'t opted in to texts.');
 
     cy
       .get('.messaging-composer')
@@ -1594,6 +1592,18 @@ context('patient action messages', function() {
     cy
       .get('.messaging-composer')
       .should('not.contain', 'To Omar Porter');
+
+    routeMessageAction([], testAction, null, [call]);
+
+    cy
+      .reload()
+      .wait('@routeAction');
+
+    cy
+      .get('.messaging-composer')
+      .find('.js-input')
+      .should('be.disabled')
+      .and('have.attr', 'placeholder', 'Omar hasn\'t opted in to texts.');
 
     cy
       .get('.messaging-history__header')
@@ -1681,7 +1691,7 @@ context('patient action messages', function() {
       .should('not.exist');
 
     routeOrganizationMessaging(true);
-    routeMessageAction([], regularAction, testPhones, [regularText]);
+    routeMessageAction([], regularAction, testMessaging, [regularText]);
 
     cy
       .routeWorkspaces();

@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 import dayjs from 'dayjs';
-import { contains, find, flatten, has, keys, map, without } from 'underscore';
+import { contains, flatten, has, keys, map, without } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -10,7 +10,7 @@ import App from 'js/base/app';
 import { compareInteractions } from 'js/entities-service/entities/interactions';
 import InteractionWindowRead from 'js/entities-service/interaction-window-read';
 
-import { isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
+import { getMessagingPhone, isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
 import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
 
 import { InteractionsPageView } from './interactions_views';
@@ -45,22 +45,22 @@ export default App.extend({
       model: patient,
       state: this.getState(),
     }));
-    this.phonesRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'phones' }).catch(addError);
+    this.messagingRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', { _patient: patient.getResource(), name: 'messaging' }).catch(addError);
   },
   // Shows the composer once, after the first list load finishes or fails.
   async showComposer() {
-    const phonesRequest = this.phonesRequest;
-    if (!phonesRequest) return;
+    const messagingRequest = this.messagingRequest;
+    if (!messagingRequest) return;
 
-    this.phonesRequest = null;
+    this.messagingRequest = null;
 
     const view = this.getView();
-    const phones = await phonesRequest;
+    const messaging = await messagingRequest;
 
-    // No composer when phones fail to load or the page was left; no mobile phone shows it disabled.
-    if (!phones || this.getView() !== view) return;
+    // No composer when consent fails to load or the page was left; no opt-in shows it disabled.
+    if (!messaging || this.getView() !== view) return;
 
-    this.phone = find(phones.get('value'), { label: 'mobile' })?.number;
+    this.phone = getMessagingPhone(messaging);
 
     this.draft = createComposerDraft({ patientId: this.patient.id, actionId: null });
     this.getView().showComposer(this.phone, this.draft);

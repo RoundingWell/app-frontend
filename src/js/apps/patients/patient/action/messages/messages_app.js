@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { contains, difference, filter, find, some, uniq } from 'underscore';
+import { contains, difference, filter, some, uniq } from 'underscore';
 import { Radio } from 'marionette';
 
 import { addError } from 'js/datadog';
@@ -9,7 +9,7 @@ import App from 'js/base/app';
 import { compareMessages } from 'js/entities-service/entities/messages';
 
 import { InteractionsLoadingView } from 'js/apps/patients/shared/interactions/interactions-status_views';
-import { isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
+import { getMessagingPhone, isMessagingEnabled } from 'js/apps/patients/shared/messaging/availability';
 import createComposerDraft from 'js/apps/patients/shared/messaging/composer_draft';
 
 import { MessagesErrorView, MessagesView } from './messages_views';
@@ -32,13 +32,9 @@ export default App.extend({
 
     const composerRequest = isMessagingEnabled() && Radio.request('entities', 'fetch:patientFields:model', {
       _patient: patient.getResource(),
-      name: 'phones',
+      name: 'messaging',
     }, { signal })
-      .then(phones => {
-        const mobile = find(phones.get('value'), { label: 'mobile' });
-
-        return { phone: mobile?.number };
-      }, error => {
+      .then(messaging => ({ phone: getMessagingPhone(messaging) }), error => {
         signal.throwIfAborted();
         addError(error);
       });
