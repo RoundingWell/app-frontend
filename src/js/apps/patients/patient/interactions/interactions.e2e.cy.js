@@ -4900,7 +4900,7 @@ context('patient interactions', function() {
 
         req.reply({
           statusCode: 201,
-          body: { data: getMessage({ id, attributes: { ...attributes, direction: 'outbound' }, relationships: { interaction: getRelationship(sentInteraction) } }) },
+          body: { data: getMessage({ id, attributes: { ...attributes, direction: 'outbound', phone: '+16155550190' }, relationships: { interaction: getRelationship(sentInteraction) } }) },
         });
       })
       .as('routePostMessage')
@@ -5028,6 +5028,20 @@ context('patient interactions', function() {
     cy
       .contains('.patient-interactions__item', 'Tuesday at 2 works.')
       .should('exist');
+
+    cy
+      .then(() => {
+        cy.sendWs({
+          category: 'MetadataUpdated',
+          resource: { type: 'interactions', id: sentInteraction.id },
+          payload: { patient: { type: 'patients', id: patient.id }, attributes: { metadata: { failed_at: new Date().toISOString(), failure_reason: { code: 'RECIPIENT_NOT_REACHABLE' } } } },
+        });
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'See you then.')
+      .find('.patient-interactions__send-error')
+      .should('have.text', 'Not delivered to (615) 555-0190. This number can\'t receive texts.');
 
     cy
       .then(() => {

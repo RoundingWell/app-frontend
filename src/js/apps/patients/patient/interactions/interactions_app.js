@@ -108,6 +108,7 @@ export default App.extend({
     text.set({
       id: sent.get('_interaction')?.id,
       metadata: { ...text.get('metadata'), message_id: sent.id },
+      _message: sent.getResource(),
       send_status: null,
     });
   },
