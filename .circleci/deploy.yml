@@ -65,6 +65,11 @@ jobs:
     steps:
       - checkout
       - verify-production-checkout
+      - run:
+          name: Install pinned GitHub App tooling
+          command: |
+            env -u GH_APP_PRIVATE_KEY -u CIRCLECI_APPROVAL_READ_TOKEN \
+              npm ci --prefix scripts/lib/github-app --ignore-scripts --prefer-offline --no-audit --no-fund
       - setup-aws-oidc
       - run:
           name: Verify independent release approval

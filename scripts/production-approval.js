@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { withReleaseGitHub } from './lib/github-app/release-read.js';
 
 const repository = 'RoundingWell/app-frontend';
 const bucket = 'rw-frontend-artifacts-dev';
@@ -21,7 +22,7 @@ async function json(url, headers = {}) {
   return response.json();
 }
 
-export async function getReleaseRef(tag, getJson = json) {
+export async function getReleaseRef(tag, getJson) {
   requireValue(tagPattern.test(tag), 'Expected a release tag vYYMMDD.N');
   const root = `https://api.github.com/repos/${ repository }/git`;
   const ref = await getJson(`${ root }/ref/tags/${ tag }`);
@@ -34,13 +35,15 @@ export async function getReleaseRef(tag, getJson = json) {
   return { tag, tagSha: ref.object.sha, commitSha: tagObject.object.sha };
 }
 
-export async function releaseMetadata(env, tag, sha256, getJson = json) {
+export async function releaseMetadata(env, tag, sha256, getJson) {
   // Manual re-publishes may still serve non-production workflows, but do not acquire provenance.
   if (env.RELEASE_EVENT !== 'push') return undefined;
 
   requireValue(env.RELEASE_REF === `refs/tags/${ tag }` && env.RELEASE_SENDER_TYPE === 'User'
     && loginPattern.test(env.RELEASE_SENDER ?? '')
     && env.RELEASE_REPOSITORY === repository && hashPattern.test(sha256), 'Missing trusted release tag push metadata');
+
+  if (!getJson) return withReleaseGitHub(read => releaseMetadata(env, tag, sha256, read), { env });
 
   const refs = await getReleaseRef(tag, getJson);
   requireValue(refs.commitSha === env.CIRCLE_SHA1
@@ -90,7 +93,7 @@ async function main() {
     && uuidPattern.test(workflow ?? ''), 'Missing or invalid production approval inputs');
   if (mode === 'verify') {
     const items = await approvalJobs(workflow, process.env.CIRCLECI_APPROVAL_READ_TOKEN);
-    const ref = await getReleaseRef(tag);
+    const ref = await withReleaseGitHub(read => getReleaseRef(tag, read));
     const response = JSON.parse(execFileSync('aws', [
       's3api', 'head-object', '--bucket', bucket, '--key', `app-frontend/${ tag }/dist.tar.gz`, '--output', 'json',
     ], { encoding: 'utf8', timeout: 15000 }));

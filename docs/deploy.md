@@ -213,6 +213,14 @@ reads CircleCI's approval record for the exact workflow. It rejects the tag
 pusher and unrecognized approvers before the deploy job receives its production
 context. The deploy job verifies it downloads the exact approved archive.
 
+The tag publisher and approval verifier reuse the existing RoundingWell E2E
+Status GitHub App credentials (`GH_APP_ID`, `GH_APP_INSTALLATION_ID`, and
+`GH_APP_PRIVATE_KEY`). Each mints its own short-lived installation token for
+`RoundingWell/app-frontend` with `Contents: read` only. Neither falls back to
+anonymous GitHub requests. Verify both jobs can access the existing variables
+in the no-deployment pilot; do not copy the key to a broader scope or use the
+org-wide RoundingWell App.
+
 **Before merging:** provision and pilot the restricted
 `app-frontend-production-approval-read` context. It needs:
 
