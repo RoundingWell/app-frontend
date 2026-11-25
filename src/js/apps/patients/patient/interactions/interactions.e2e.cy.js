@@ -13,7 +13,7 @@ import { getPatientField } from 'support/api/patient-fields';
 import { getPatient } from 'support/api/patients';
 import { getActivity } from 'support/api/events';
 import { getComment } from 'support/api/comments';
-import { getCurrentClinician } from 'support/api/clinicians';
+import { getClinician, getCurrentClinician } from 'support/api/clinicians';
 import { stateTodo } from 'support/api/states';
 import { teamCoordinator } from 'support/api/teams';
 
@@ -265,6 +265,63 @@ context('patient interactions', function() {
           'Inbound Message • Scheduling',
           'Outbound Message • Text Sent',
         ]);
+      });
+
+    const author = getClinician({ attributes: { name: 'Jessica Davenport' } });
+    const linked = [
+      getMessage({ attributes: { direction: 'outbound', status: 'sent', body: 'Linked outbound text.', phone: '+16155550190' }, relationships: { author: getRelationship(author) } }),
+      getMessage({ attributes: { direction: 'inbound', status: 'received', body: 'Linked patient reply.', phone: '+16155550190' } }),
+      getMessage({ attributes: { direction: 'outbound', status: 'failed', body: 'Linked failed text.', phone: '+16155550190', failure_reason: { code: 'not_opted_in' } } }),
+    ];
+    const linkedRows = map(linked, (message, index) => getInteraction({
+      attributes: { channel: 'message', direction: message.attributes.direction, metadata: { message_id: message.id }, occurred_at: `2026-09-25T10:0${ index }:00Z` },
+      relationships: { message: getRelationship(message) },
+    }));
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = linkedRows;
+        fx.included = [...linked, author];
+        return fx;
+      })
+      .visit(`/patient/${ patient.id }/interactions`);
+
+    cy
+      .wait('@routePatientInteractions')
+      .itsUrl()
+      .its('search')
+      .should('contain', 'include=action.flow,flow,message.author');
+
+    cy
+      .contains('.patient-interactions__item', 'Linked outbound text.')
+      .should('contain', 'Jessica Davenport');
+
+    cy
+      .contains('.patient-interactions__item', 'Linked patient reply.')
+      .should('contain', '+16155550190');
+
+    cy
+      .contains('.patient-interactions__item', 'Linked failed text.')
+      .should('contain', 'Not delivered')
+      .find('.patient-interactions__send-error')
+      .should('have.text', 'Not delivered to (615) 555-0190. Patient opted out of texts.');
+
+    cy
+      .sendWs({
+        category: 'MetadataUpdated',
+        resource: { type: 'interactions', id: linkedRows[0].id },
+        payload: { patient: { type: 'patients', id: patient.id }, attributes: { metadata: { message_id: linked[0].id, failed_at: '2026-09-25T10:05:00Z', failure_reason: { code: 'RECIPIENT_NOT_REACHABLE' } } } },
+      });
+
+    cy
+      .contains('.patient-interactions__item', 'Linked outbound text.')
+      .find('.patient-interactions__send-error')
+      .should('have.text', 'Not delivered to (615) 555-0190. This number can\'t receive texts.');
+
+    cy
+      .get('.patient-interactions-preview__sender')
+      .should($senders => {
+        expect($senders.toArray().map(sender => sender.textContent.trim())).to.include.members(['Jessica Davenport', '+16155550190']);
       });
   });
 

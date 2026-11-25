@@ -1691,7 +1691,21 @@ context('patient action messages', function() {
       .should('not.exist');
 
     routeOrganizationMessaging(true);
-    routeMessageAction([], regularAction, testMessaging, [regularText]);
+    const linkedMessage = getMessage({ attributes: { direction: 'outbound', status: 'sent', body: 'Linked activity text', phone: '+16155550190' } });
+    const linkedText = getInteraction({
+      attributes: { channel: 'message', direction: 'outbound', occurred_at: '2026-11-10T16:00:00Z', expected_at: null, metadata: { message_id: linkedMessage.id } },
+      relationships: { action: getRelationship(regularAction), flow: getRelationship(), message: getRelationship(linkedMessage) },
+    });
+
+    routeMessageAction([], regularAction, testMessaging, [regularText, linkedText]);
+
+    cy
+      .routePatientInteractions(fx => {
+        fx.data = [regularText, linkedText];
+        fx.included = [linkedMessage];
+
+        return fx;
+      });
 
     cy
       .routeWorkspaces();
@@ -1702,7 +1716,8 @@ context('patient action messages', function() {
 
     cy
       .get('.patient-action__activity')
-      .should('contain', 'Regular action text');
+      .should('contain', 'Regular action text')
+      .and('contain', 'Linked activity text');
 
     cy
       .get('.messaging-history')

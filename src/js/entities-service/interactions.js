@@ -95,7 +95,7 @@ const Entity = BaseEntity.extend({
     return collection.models;
   },
   fetchByPatient({ patientId, actionId, flowId, channels, at, before, after, limit }, { read, ...options } = {}) {
-    const data = { include: 'action.flow,flow' };
+    const data = { include: 'action.flow,flow,message.author' };
     addParams(data, 'filter', getFilter(actionId, flowId, channels));
     addParams(data, 'page', getPage(at, before, after, limit));
 

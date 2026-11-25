@@ -78,6 +78,9 @@ const _Model = BaseModel.extend({
   getFlow() {
     return this.getRelationship('_flow');
   },
+  getMessage() {
+    return this.getRelationship('_message');
+  },
 });
 
 const Model = Store(_Model, TYPE);

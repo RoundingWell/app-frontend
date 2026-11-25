@@ -45,6 +45,6 @@
       </div>
     {{else}}<p class="patient-interactions__summary">{{ summary }}</p>{{/if}}{{/if}}
   </div>{{/if}}
-  {{#if deliveryFailure}}<p class="patient-interactions__send-error">{{formatMessage (intlGet "patients.shared.interactions.interactionItemView.notDeliveredTo") phone=(formatPhoneNumber metadata.phone_number)}}{{#if deliveryFailure.reason}} {{ deliveryFailure.reason }}{{/if}}</p>{{/if}}
+  {{#if deliveryFailure}}<p class="patient-interactions__send-error">{{formatMessage (intlGet "patients.shared.interactions.interactionItemView.notDeliveredTo") phone=(formatPhoneNumber deliveryFailure.phone)}}{{#if deliveryFailure.reason}} {{ deliveryFailure.reason }}{{/if}}</p>{{/if}}
   {{#if (isValue sendStatus "failed")}}<p class="patient-interactions__send-error" role="alert">{{ @intl.patients.shared.interactions.interactionItemView.sendError }}</p>{{/if}}
 </div>
