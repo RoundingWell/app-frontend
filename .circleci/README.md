@@ -34,7 +34,7 @@ Chrome, Firefox, and Edge for both suites. All use the pinned `cypress/browsers`
 image in `workflows.yml`, which includes the browser executables and Firefox's
 geckodriver; a plain Node image cannot satisfy these browser selections.
 
-The current image provides Node 24.22.1, Chrome 156, Firefox 159, and Edge 156 on
+The current image provides Node 26.13.1, Chrome 157, Firefox 160, and Edge 157 on
 Linux amd64. Keep its Node minor aligned with `.nvmrc` and the `cimg/node` pins in
 both `workflows.yml` and `deploy.yml`: dependency installation checks that match.
 When updating the image, check the actual browser versions and Cypress's

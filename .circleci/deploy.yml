@@ -5,7 +5,7 @@ orbs:
   slack: circleci/slack@6.1.3
 
 aliases:
-  .node-image: &node-image cimg/node:24.22
+  .node-image: &node-image cimg/node:26.13
 
 commands:
   restore-npm-cache:
