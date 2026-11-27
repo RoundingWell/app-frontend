@@ -301,6 +301,13 @@ jobs:
       - setup-aws-oidc
       - run:
           name: Upload build artifact once per tag
+          environment:
+            RELEASE_EVENT: << pipeline.event.name >>
+            RELEASE_REF: << pipeline.event.github.ref >>
+            RELEASE_EVENT_SHA: << pipeline.event.github.after >>
+            RELEASE_SENDER: << pipeline.event.github.sender.login >>
+            RELEASE_SENDER_TYPE: << pipeline.event.github.sender.type >>
+            RELEASE_REPOSITORY: << pipeline.event.github.repository.owner.login >>/<< pipeline.event.github.repository.name >>
           command: |
             set -euo pipefail
             npm run artifact:publish -- \

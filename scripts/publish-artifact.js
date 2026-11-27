@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { getCredentials, getRegion } from './lib/aws.js';
+import { releaseMetadata } from './production-approval.js';
 
 function resolveInputs(values) {
   const bucket = values.bucket || process.env.ARTIFACT_BUCKET || 'rw-frontend-artifacts-dev';
@@ -56,12 +57,14 @@ async function assertReadable(filePath) {
   }
 }
 
-async function uploadFile(s3Client, bucket, key, filePath, contentType) {
+async function uploadFile(s3Client, bucket, key, filePath, contentType, metadata) {
   await s3Client.send(new PutObjectCommand({
     Bucket: bucket,
     Key: key,
     Body: createReadStream(filePath),
     ContentType: contentType,
+    IfNoneMatch: '*',
+    ...(metadata && { Metadata: metadata }),
   }));
 }
 
@@ -102,7 +105,9 @@ async function main() {
     throw new Error(`Artifact publish blocked for immutable tag ${ inputs.tag }; existing object(s): ${ existingKeys }`);
   }
 
-  await uploadFile(s3Client, inputs.bucket, artifactKey, inputs.artifactPath, 'application/gzip');
+  const sha256 = (await fs.readFile(inputs.checksumPath, 'utf8')).trim().split(/\s+/)[0];
+  const metadata = await releaseMetadata(process.env, inputs.tag, sha256);
+  await uploadFile(s3Client, inputs.bucket, artifactKey, inputs.artifactPath, 'application/gzip', metadata);
   await uploadFile(s3Client, inputs.bucket, checksumKey, inputs.checksumPath, 'text/plain');
 
   process.stdout.write(`Uploaded artifact: s3://${ inputs.bucket }/${ artifactKey }\n`);
