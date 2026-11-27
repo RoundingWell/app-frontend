@@ -5,7 +5,7 @@ import 'scss/modules/buttons.scss';
 
 import i18n from 'js/i18n';
 
-import { getInteractionChannelLabel, getInteractionIcon, getAppointmentStatusLabel, getSenderName } from 'js/apps/patients/shared/interactions/display';
+import { getInboundFrom, getInteractionChannelLabel, getInteractionIcon, getAppointmentStatusLabel, getSenderName } from 'js/apps/patients/shared/interactions/display';
 import { InteractionsLoadingView, InteractionsErrorView } from 'js/apps/patients/shared/interactions/interactions-status_views';
 
 import './widgets.scss';
@@ -43,7 +43,7 @@ const RecentInteractionsItemView = View.extend({
     const direction = this.model.get('direction') === 'inbound' ? intl.inbound : intl.outbound;
     if (group === 'messages') {
       const title = `${ direction } ${ intl.message }`;
-      return appendDetail(title, this.model.get('channel') === 'sms' ? metadata.disposition : undefined);
+      return appendDetail(title, this.model.get('channel') === 'message' ? metadata.disposition : undefined);
     }
     if (group === 'calls') {
       const title = `${ direction } ${ getInteractionChannelLabel(this.model) }`;
@@ -61,7 +61,7 @@ const RecentInteractionsItemView = View.extend({
       title: this.getTitle(),
       icon: getInteractionIcon(this.model),
       timestamp: this.model.getTimestamp(),
-      sender: this.model.get('direction') === 'inbound' ? metadata.from : getSenderName(this.model, metadata),
+      sender: this.model.get('direction') === 'inbound' ? getInboundFrom(this.model, metadata) : getSenderName(this.model, metadata),
     };
   },
 });

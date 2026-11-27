@@ -8,6 +8,7 @@
       </button>
       <span class="action-card__tool js-no-click" data-details-region></span>
       <span class="action-card__tool js-no-click" data-form-region></span>
+      {{#if hasMessages}}<button class="action-card__tool action-card__messages js-messages" type="button" aria-label="{{ @intl.patients.shared.actionCard.messagesLabel }}">{{far "paper-plane-top"}}</button>{{/if}}
     </div>
   </div>
   <div class="work-card__aside">

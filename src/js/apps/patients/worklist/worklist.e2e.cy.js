@@ -1424,6 +1424,7 @@ context('worklist page', function() {
         attributes: {
           name: 'First In List',
           details: 'Like the legend of the phoenix All ends with beginnings What keeps the planet spinning The force from the beginning Look We\'ve come too far To give up who we are So let\'s raise the bar And our cups to the stars',
+          tags: ['message'],
           due_date: testDate(),
           due_time: '06:01:00',
           updated_at: testTs(),
@@ -1809,6 +1810,11 @@ context('worklist page', function() {
       .as('secondRow');
 
     cy
+      .get('@secondRow')
+      .find('.js-messages')
+      .should('not.exist');
+
+    cy
       .intercept('PATCH', `/api/actions/${ testActions[0].id }`, {
         statusCode: 204,
         body: {},
@@ -2133,6 +2139,25 @@ context('worklist page', function() {
       })
       .wait('@routeDelayedActionFiles')
       .wait('@routeDelayedFormByAction');
+
+    cy
+      .go('back')
+      .wait('@routeActions');
+
+    cy
+      .get('.worklist-list__action-item')
+      .first()
+      .find('.js-messages')
+      .click()
+      .wait('@routeAction');
+
+    cy
+      .location('pathname')
+      .should('equal', `/one/patient/${ testPatient1.id }/flow/${ testFlow.id }/action/${ testActions[0].id }`);
+
+    cy
+      .get('[data-messages-region]')
+      .should('be.focused');
   });
 
   specify('action list - socket notifications', function() {

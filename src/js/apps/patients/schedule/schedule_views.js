@@ -16,12 +16,14 @@ import stopEventPropagation from 'js/utils/stop-event-propagation';
 import { ListPageFiltersButtonView, ListPageView } from 'js/apps/patients/shared/list-page';
 import { TitleOwnerDroplist } from 'js/apps/patients/shared/list_views';
 import { CheckView, DetailsTooltip } from 'js/apps/patients/shared/actions_views';
+import { canShowMessages } from 'js/apps/patients/shared/messaging/availability';
 import SelectAllView from 'js/apps/patients/shared/components/select-all_view';
 import DayItemTemplate from './day-item.hbs';
 import DayListTemplate from './day-list.hbs';
 import LayoutTemplate from './layout.hbs';
 import ListLoadingTemplate from './list-loading.hbs';
 
+import 'scss/domain/action-card.scss';
 import 'scss/domain/action-icons.scss';
 import 'scss/domain/patient-list.scss';
 import './schedule-list.scss';
@@ -195,6 +197,7 @@ const DayItemView = View.extend({
       flowName,
       commentCount,
       hasContext: !!(flowName || commentCount),
+      hasMessages: canShowMessages(this.model),
     };
   },
   events: {
@@ -203,6 +206,7 @@ const DayItemView = View.extend({
     'click .js-patient': 'onClickPatient',
     'click .js-form': 'onClickForm',
     'click .js-flow': 'onClickFlow',
+    'click .js-messages': 'onClickMessages',
     'click .js-action-surface': 'onClickSurface',
   },
   ui: {
@@ -282,6 +286,10 @@ const DayItemView = View.extend({
   onClickForm(event) {
     event.stopImmediatePropagation();
     this.navigateToAction({ formExpanded: true });
+  },
+  onClickMessages(event) {
+    event.stopImmediatePropagation();
+    this.navigateToAction({ section: 'messages' });
   },
   onClickSurface() {
     this.navigateToAction();

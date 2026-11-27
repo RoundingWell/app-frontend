@@ -4,7 +4,7 @@ import { Radio, View } from 'marionette';
 
 import i18n from 'js/i18n';
 
-import { getInteractionIcon, getInteractionChannelLabel, hasInteractionChannelHeading, getInteractionSummary, getInteractionDescription, getInteractionViaLabel, hasInteractionCardContent } from './display';
+import { getDeliveryFailure, getInteractionIcon, getInteractionChannelLabel, hasInteractionChannelHeading, getInteractionSummary, getInteractionDescription, getInteractionViaLabel, hasInteractionCardContent } from './display';
 import InteractionItemTemplate from './interaction-item.hbs';
 
 import './interaction-item.scss';
@@ -97,6 +97,7 @@ const InteractionItemView = View.extend({
       noteId: `interaction-note-${ this.cid }`,
       timeFormat: this.getOption('activity') ? 'AT_TIME' : 'TIME',
       workName: this.getWorkLink(),
+      deliveryFailure: getDeliveryFailure(this.model),
     };
   },
   getAppointmentDate(timestamp, timezone) {

@@ -1,5 +1,6 @@
 .patient-action__header,
 .patient-action__form,
+.patient-action__messages,
 .patient-action__attachments,
 .patient-action__activity {
   margin-inline: auto;
@@ -205,6 +206,33 @@
   display: none;
 }
 
+.patient-action__messages-button {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: color(blue);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 16px;
+  margin-left: 8px;
+  padding: 0;
+  vertical-align: middle;
+}
+
+.patient-action__messages-button:focus,
+.patient-action__messages-button:hover {
+  color: color(blue, dark);
+}
+
+.patient-action__messages-button:focus-visible {
+  outline: 2px solid color(blue);
+  outline-offset: 2px;
+}
+
+.patient-action__messages-button .icon {
+  display: block;
+}
+
 .patient-action__count {
   align-items: center;
   background: transparent;
@@ -271,6 +299,7 @@
 
 .patient-action--form-expanded .patient-action__header,
 .patient-action--form-expanded .patient-action__form,
+.patient-action--form-expanded .patient-action__messages,
 .patient-action--form-expanded .patient-action__attachments,
 .patient-action--form-expanded .patient-action__activity {
   width: calc(100% - 48px);
@@ -284,6 +313,7 @@
 }
 
 .patient-action--form-expanded .patient-action__header,
+.patient-action--form-expanded .patient-action__messages,
 .patient-action--form-expanded .patient-action__attachments,
 .patient-action--form-expanded .patient-action__activity {
   display: none;
