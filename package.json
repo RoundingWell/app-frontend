@@ -135,7 +135,7 @@
     "dayjs": "^1.11.23",
     "handlebars": "^4.7.10",
     "idb": "^8.0.4",
-    "libphonenumber-js": "^1.13.16",
+    "libphonenumber-js": "^1.13.17",
     "marionette": "5.2.0",
     "morphdom": "2.7.8",
     "sortablejs": "^1.14.0",
@@ -144,6 +144,6 @@
     "@roundingwell/icons": "git+https://github.com/RoundingWell/pkg-icons.git#86589b767454105b86568781dc1be7f55f83b91c"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.68.4"
+    "@rollup/rollup-linux-x64-gnu": "^4.68.8"
   }
 }
